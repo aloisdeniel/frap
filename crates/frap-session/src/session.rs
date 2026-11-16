@@ -314,6 +314,9 @@ pub struct Session {
     services: SessionServices,
     opts: SessionOptions,
     seq: u64,
+    /// Nesting depth of [`Session::transact`] (an operator called with nested calls in its
+    /// arguments runs its own transaction inside the statement's).
+    txn_depth: u32,
 }
 
 /// A statement failure before it becomes a response: kind, operator, error, reports.
@@ -393,6 +396,7 @@ impl Session {
             },
             opts,
             seq: 0,
+            txn_depth: 0,
         })
     }
 
@@ -597,13 +601,21 @@ impl Session {
             "selected_objects": ctx.selected_objects().into_iter().map(name).collect::<Vec<_>>(),
             "frame_current": ctx.scene().frame_current,
         });
-        if mode != frap_scene::ContextMode::Object
-            && let J::Object(m) = &mut j
-        {
+        // `bpy.context.edit_object` is set in the edit modes only (not in Pose Mode); the
+        // mesh select mode only matters in mesh Edit Mode.
+        let edit = matches!(
+            mode,
+            frap_scene::ContextMode::EditMesh | frap_scene::ContextMode::EditArmature
+        );
+        if edit && let J::Object(m) = &mut j {
             m.insert(
                 "edit_object".into(),
                 ctx.active_object().map(name).unwrap_or(J::Null),
             );
+        }
+        if mode == frap_scene::ContextMode::EditMesh
+            && let J::Object(m) = &mut j
+        {
             let sm = ctx.tool_settings().mesh_select_mode;
             m.insert(
                 "select_mode".into(),
@@ -662,13 +674,21 @@ impl Session {
 
     /// Runs `f` as one transaction (§12): snapshot, run (panics caught), and restore the
     /// snapshot on error, on CANCELLED (`Ok((_, true))`) or when a limit is exceeded.
+    ///
+    /// Re-entrant: a nested transaction keeps the change log and reports gathered so far by
+    /// the enclosing one (nested calls in an operator's arguments), so its limits, `changes`
+    /// and reports cover the whole statement; the enclosing transaction still restores its
+    /// own snapshot when the statement fails.
     pub(crate) fn transact<R>(
         &mut self,
         f: impl FnOnce(&mut Self) -> Result<(R, bool), FrapError>,
     ) -> Txn<R> {
         let snapshot = self.host.state.clone();
-        self.host.log = ChangeLog::default();
-        self.host.reports.clear();
+        if self.txn_depth == 0 {
+            self.host.log = ChangeLog::default();
+            self.host.reports.clear();
+        }
+        self.txn_depth += 1;
         let r = catch_unwind(AssertUnwindSafe(|| f(self)))
             .unwrap_or_else(|p| Err(FrapError::internal_panic(p)))
             .and_then(|(v, cancelled)| {
@@ -677,6 +697,7 @@ impl Session {
                 }
                 Ok((v, cancelled))
             });
+        self.txn_depth -= 1;
         let log = std::mem::take(&mut self.host.log);
         let reports = std::mem::take(&mut self.host.reports);
         let (result, cancelled) = match r {
@@ -721,5 +742,48 @@ impl Session {
             .with_hint("raise --max-elements, or build less geometry per statement"));
         }
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use frap_scene::ObjectMode;
+
+    fn with_mode(mode: ObjectMode) -> Session {
+        let mut s = Session::new(SessionOptions::default()).expect("factory session");
+        let ob = s.host.state.ctx().active_object().expect("active Cube");
+        let (main, log) = (&mut s.host.state.main, &mut s.host.log);
+        main.objects.get_mut(ob, log).expect("Cube").mode = mode;
+        s
+    }
+
+    #[test]
+    fn edit_object_and_select_mode_only_in_edit_modes() {
+        let s = with_mode(ObjectMode::Edit);
+        let c = s.context_json();
+        assert_eq!(c["mode"], "EDIT_MESH");
+        assert_eq!(c["edit_object"], "Cube");
+        assert_eq!(c["select_mode"], json!(["VERT"]));
+        let mut s = s;
+        assert_eq!(
+            s.get("bpy.context.edit_object").value,
+            Some(json!({"$ref": "bpy.data.objects['Cube']"}))
+        );
+        assert_eq!(
+            s.get("bpy.context.objects_in_mode").value,
+            Some(json!([{"$ref": "bpy.data.objects['Cube']"}]))
+        );
+
+        let mut s = with_mode(ObjectMode::Pose);
+        let c = s.context_json();
+        assert_eq!(c["mode"], "POSE");
+        assert!(c.get("edit_object").is_none(), "{c}");
+        assert!(c.get("select_mode").is_none(), "{c}");
+        assert_eq!(s.get("bpy.context.edit_object").value, Some(J::Null));
+
+        let s = with_mode(ObjectMode::Object);
+        let c = s.context_json();
+        assert!(c.get("edit_object").is_none(), "{c}");
     }
 }

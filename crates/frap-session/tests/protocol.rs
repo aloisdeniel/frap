@@ -297,6 +297,79 @@ fn array_elements_components_and_slices() {
 }
 
 #[test]
+fn matrix_slices_are_rows_and_strings_and_tuples_index() {
+    let mut s = session();
+    // mathutils slices a Matrix by rows (Blender 5.2.4, verified; a non-identity matrix is
+    // covered by the unit tests of `resolve::element`, the cursor is not writable here).
+    assert_eq!(
+        val(&mut s, "bpy.context.scene.cursor.matrix[0:2]"),
+        json!([[1, 0, 0, 0], [0, 1, 0, 0]])
+    );
+    assert_eq!(
+        val(&mut s, "bpy.context.scene.cursor.matrix[-1:]"),
+        json!([[0, 0, 0, 1]])
+    );
+    assert_eq!(
+        val(&mut s, "bpy.context.scene.cursor.matrix[5:9]"),
+        json!([])
+    );
+    assert_eq!(
+        val(&mut s, "bpy.context.scene.cursor.matrix[1:3][0][1]"),
+        json!(1)
+    );
+    assert_eq!(
+        val(&mut s, "bpy.context.scene.cursor.matrix[3].w"),
+        json!(1)
+    );
+    assert_eq!(
+        val(&mut s, "bpy.context.scene.cursor.matrix[2].w"),
+        json!(0)
+    );
+    // A call result keeps its mathutils type.
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.context.scene.cursor.path_resolve('matrix')[2:][0][2]"
+        ),
+        json!(1)
+    );
+    assert_eq!(
+        err(&mut s, "bpy.context.scene.cursor.matrix[0:2].x").2,
+        "'tuple' object has no attribute 'x'"
+    );
+    // Python str and tuple indexing.
+    let n = "bpy.data.objects['Cube'].name";
+    assert_eq!(val(&mut s, &format!("{n}[0]")), json!("C"));
+    assert_eq!(val(&mut s, &format!("{n}[-1]")), json!("e"));
+    assert_eq!(val(&mut s, &format!("{n}[1:3]")), json!("ub"));
+    let l = "bpy.data.objects['Cube'].location";
+    val(&mut s, &format!("{l} = (4, 5, 6)"));
+    assert_eq!(val(&mut s, &format!("{l}[0:2][1]")), json!(5));
+    let cases = [
+        (format!("{n}[9]"), "IndexError", "string index out of range"),
+        (
+            format!("{n}['a']"),
+            "TypeError",
+            "string indices must be integers, not 'str'",
+        ),
+        (
+            format!("{l}[0:2][5]"),
+            "IndexError",
+            "tuple index out of range",
+        ),
+        (
+            format!("{l}[0:2]['a']"),
+            "TypeError",
+            "tuple indices must be integers or slices, not str",
+        ),
+    ];
+    for (src, exc, msg) in cases {
+        let (e, _, m) = err(&mut s, &src);
+        assert_eq!((e.as_str(), m.as_str()), (exc, msg), "{src}");
+    }
+}
+
+#[test]
 fn context_members_re_root_at_their_data() {
     let mut s = session();
     assert_eq!(
@@ -325,9 +398,27 @@ fn context_members_re_root_at_their_data() {
         val(&mut s, "bpy.context.collection"),
         json!({"$ref": "bpy.data.collections['Collection']"})
     );
+    // Buttons-context members do not exist in the VIEW_3D context (Blender 5.2.4, verified).
+    for m in [
+        "mesh",
+        "camera",
+        "light",
+        "world",
+        "material",
+        "material_slot",
+    ] {
+        assert_eq!(
+            err(&mut s, &format!("bpy.context.{m}")),
+            (
+                "AttributeError".to_owned(),
+                "RNA_NO_ATTRIBUTE".to_owned(),
+                format!("'Context' object has no attribute '{m}'")
+            )
+        );
+    }
     assert_eq!(
-        val(&mut s, "bpy.context.mesh"),
-        json!({"$ref": "bpy.data.meshes['Cube']"})
+        err(&mut s, "bpy.context.mesh = None").2,
+        "'Context' object has no attribute 'mesh'"
     );
     assert_eq!(
         val(&mut s, "bpy.context.blend_data"),
@@ -418,7 +509,7 @@ fn named_and_nameless_collections() {
         json!(7)
     );
     assert_eq!(
-        val(&mut s, "bpy.context.mesh.vertices[0].co"),
+        val(&mut s, "bpy.data.meshes['Cube'].vertices[0].co"),
         json!([1, 1, 1])
     );
     // Slices are Python lists of items.
@@ -516,9 +607,24 @@ fn bulk_reads_slices_and_truncation() {
         let (e, _, m) = err(&mut s, src);
         assert_eq!((e.as_str(), m.as_str()), (exc, msg), "{src}");
     }
+    // An empty buffer short-circuits before the attribute lookup (Blender 5.2.4, verified).
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].vertices.foreach_get('foo', [])"
+        ),
+        J::Null
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].vertices.foreach_set('co', [])"
+        ),
+        J::Null
+    );
     let (_, _, m) = err(
         &mut s,
-        "bpy.data.meshes['Cube'].vertices.foreach_get('foo', [])",
+        "bpy.data.meshes['Cube'].vertices.foreach_get('foo', [0]*24)",
     );
     assert_eq!(
         m,
@@ -589,6 +695,22 @@ fn special_floats_and_strings() {
         json!([0.1, -3.4028235e38, 1000])
     );
     assert_eq!(val(&mut s, "bpy.data.objects['Cube'].name"), json!("Cube"));
+    // A clamping component write reports like a whole-array write.
+    let r = one(&mut s, "bpy.data.objects['Cube'].location.y = float('inf')");
+    assert_eq!(r["reports"][0]["type"], "INFO", "{r}");
+    assert_eq!(r["value"], json!(3.4028235e38));
+    // -0.0 keeps its sign (as Python prints it).
+    let r = one(&mut s, "bpy.data.objects['Cube'].location.z = -0.0");
+    assert_eq!(r["value"].to_string(), "-0.0");
+    let loc = val(&mut s, "bpy.data.objects['Cube'].location");
+    assert_eq!(loc[2].to_string(), "-0.0");
+    assert_eq!(val(&mut s, "print(-0.0, 0.0)").to_string(), "[-0.0,0]");
+    // A non-finite double (`Vector.length`) is tagged, not `null`.
+    val(&mut s, "bpy.data.objects['Cube'].location.x = float('nan')");
+    assert_eq!(
+        val(&mut s, "bpy.data.objects['Cube'].location.length"),
+        json!({"$float": "nan"})
+    );
 }
 
 // ------------------------------------------------------------------ set
@@ -828,7 +950,50 @@ fn assignment_errors_use_blender_wording() {
             "bpy.context.scene.cursor.matrix[4] = (1, 1, 1, 1)",
             "IndexError",
             "RNA_INDEX_RANGE",
-            "matrix[attribute]: array index out of range",
+            "matrix[attribute] = x: bad row",
+        ),
+        (
+            "bpy.context.scene.cursor.matrix[-5] = (1, 1, 1, 1)",
+            "IndexError",
+            "RNA_INDEX_RANGE",
+            "matrix[attribute] = x: bad row",
+        ),
+        (
+            "bpy.context.scene.cursor.matrix[0] = (1, 2, 3)",
+            "ValueError",
+            "RNA_LENGTH",
+            "matrix[i] = value assignment: sequence length is 3, expected 4",
+        ),
+        (
+            "bpy.context.scene.cursor.matrix[0] = 3",
+            "TypeError",
+            "RNA_TYPE",
+            "matrix[i] = value assignment",
+        ),
+        (
+            "bpy.context.scene.cursor.matrix[0:2] = ((0, 1, 0, 0),)",
+            "ValueError",
+            "RNA_LENGTH",
+            "matrix[slice] = value: sequence size is 1, expected 2",
+        ),
+        (
+            "bpy.context.scene.cursor.matrix[0:2] = (1, 2)",
+            "TypeError",
+            "RNA_TYPE",
+            "matrix[slice] = value",
+        ),
+        (
+            "bpy.context.scene.cursor.matrix[0:2] = ((0, 1, 0), (1, 0, 0, 0))",
+            "ValueError",
+            "RNA_LENGTH",
+            "matrix[slice] = value: sequence length is 3, expected 4",
+        ),
+        (
+            // Python's setattr wording on `None` (no object is in Edit Mode).
+            "bpy.context.edit_object.foo = 1",
+            "AttributeError",
+            "RNA_NO_ATTRIBUTE",
+            "'NoneType' object has no attribute 'foo' and no __dict__ for setting new attributes",
         ),
     ];
     for (src, exc, code, msg) in cases {
@@ -952,6 +1117,35 @@ fn struct_methods() {
         val(&mut s, "bpy.data.objects['Cube'].path_resolve('location')"),
         json!([0, 0, 0])
     );
+    // The result keeps its mathutils type, so the path continues after the call.
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.objects['Cube'].path_resolve('location').x"
+        ),
+        json!(0)
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.context.scene.cursor.path_resolve('rotation_euler').order"
+        ),
+        json!("XYZ")
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.context.scene.cursor.path_resolve('rotation_quaternion').w"
+        ),
+        json!(1)
+    );
+    assert_eq!(
+        val(
+            &mut s,
+            "bpy.data.meshes['Cube'].vertices[0].path_resolve('co')[0]"
+        ),
+        json!(1)
+    );
     let cases = [
         (
             "bpy.data.objects['Cube'].path_from_id()",
@@ -967,6 +1161,16 @@ fn struct_methods() {
             "bpy.data.objects['Cube'].path_resolve('foo')",
             "ValueError",
             "Object.path_resolve(\"foo\") could not be resolved",
+        ),
+        (
+            "bpy.data.objects['Cube'].path_resolve('location[9]')",
+            "ValueError",
+            "Object.path_resolve(\"location[9]\") could not be resolved",
+        ),
+        (
+            "bpy.data.objects['Cube'].path_resolve('data.vertices[100]')",
+            "ValueError",
+            "Object.path_resolve(\"data.vertices[100]\") could not be resolved",
         ),
     ];
     for (src, exc, msg) in cases {

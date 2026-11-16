@@ -7,10 +7,10 @@
 use frap_lang::{BinOp, Builtin};
 use frap_math::glam::{Mat3, Mat4};
 use frap_math::{EulerOrder, euler, quat};
-use frap_rna::{ArrayShape, FrapError, Input, MathTag, MathValue, PropDef, PyExc, Value};
+use frap_rna::{FrapError, Input, MathTag, MathValue, PropDef, PyExc, Value};
 use frap_scene::HostRead;
 use indexmap::IndexMap;
-use serde_json::{Value as J, json};
+use serde_json::Value as J;
 use smol_str::SmolStr;
 
 use crate::errors::*;
@@ -284,19 +284,7 @@ fn value_input(v: &Value) -> Input {
     }
 }
 
-/// Shortest round-trip JSON of an `f64` (integral values as integers); non-finite tagged.
-pub fn f64_json(x: f64) -> J {
-    if x.is_nan() {
-        return json!({"$float": "nan"});
-    }
-    if x.is_infinite() {
-        return json!({"$float": if x > 0.0 { "inf" } else { "-inf" }});
-    }
-    if x.fract() == 0.0 && x.abs() < 9.0e15 {
-        return J::from(x as i64);
-    }
-    serde_json::Number::from_f64(x).map_or(J::Null, J::Number)
-}
+pub use crate::response::f64_json;
 
 /// A property value as Python sees it (`mathutils` wrappers, `bpy_prop_array`, `set`).
 pub fn value_py(prop: Option<&PropDef>, v: Value) -> Py {
@@ -314,16 +302,7 @@ pub fn value_py(prop: Option<&PropDef>, v: Value) -> Py {
         Value::FloatArray { data, shape, tag } => {
             let kind = match prop {
                 Some(p) => ArrayKind::of(p),
-                None => match (tag, shape) {
-                    (MathTag::Vector, _) => ArrayKind::Vector(data.len()),
-                    (MathTag::Euler(_), _) => ArrayKind::Euler,
-                    (MathTag::Quaternion, _) => ArrayKind::Quaternion,
-                    (MathTag::Matrix, ArrayShape::Matrix(r, c)) => {
-                        ArrayKind::Matrix(r as usize, c as usize)
-                    }
-                    (MathTag::Color, _) if data.len() == 3 => ArrayKind::Color,
-                    _ => ArrayKind::PropArray,
-                },
+                None => ArrayKind::of_value(data.len(), shape, tag),
             };
             let d = data.to_vec();
             match kind {

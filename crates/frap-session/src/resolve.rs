@@ -298,6 +298,19 @@ impl ArrayKind {
             _ => ArrayKind::PropArray,
         }
     }
+    /// The wrapper of a free-standing float array value (a call result, a matrix row).
+    pub fn of_value(data_len: usize, shape: ArrayShape, tag: MathTag) -> ArrayKind {
+        match (tag, shape) {
+            (MathTag::Matrix, ArrayShape::Matrix(r, c)) => {
+                ArrayKind::Matrix(r as usize, c as usize)
+            }
+            (MathTag::Vector, _) => ArrayKind::Vector(data_len),
+            (MathTag::Euler(_), _) => ArrayKind::Euler,
+            (MathTag::Quaternion, _) => ArrayKind::Quaternion,
+            (MathTag::Color, _) if data_len == 3 => ArrayKind::Color,
+            _ => ArrayKind::PropArray,
+        }
+    }
     /// Python type name.
     pub fn py_name(self) -> &'static str {
         match self {
@@ -430,6 +443,9 @@ fn value_py_name(v: &Value) -> &'static str {
         Value::Str(_) | Value::Enum(_) => "str",
         Value::EnumSet(_) => "set",
         Value::Tuple(_) => "tuple",
+        Value::FloatArray { data, shape, tag } => {
+            ArrayKind::of_value(data.len(), *shape, *tag).py_name()
+        }
         _ => "list",
     }
 }
@@ -471,7 +487,108 @@ pub fn step(host: &dyn HostRead, cur: Target, seg: &PathSeg) -> Result<Target, F
         Target::Prop(p) => step_prop(host, p, seg),
         Target::Coll(c) => step_coll(host, c, seg),
         Target::List { what, items } => step_list(what, items, seg),
-        t @ (Target::Func(_) | Target::Value(_)) => step_python(t, seg),
+        Target::Value(v) => step_value(v, seg),
+        t @ Target::Func(_) => step_python(t, seg),
+    }
+}
+
+/// Segments on a plain Python value: `tuple` and `str` indexing and slicing, `mathutils`
+/// components (`path_resolve('location').x`, `matrix[0:2][1]`).
+fn step_value(v: Value, seg: &PathSeg) -> Result<Target, FrapError> {
+    match (v, seg) {
+        (Value::Tuple(items), PathSeg::Index(i)) => {
+            let j = norm_index(*i, items.len())
+                .ok_or_else(|| index_error("tuple index out of range"))?;
+            Ok(Target::Value(
+                items.into_iter().nth(j).expect("invariant: index checked"),
+            ))
+        }
+        (Value::Tuple(items), PathSeg::Slice(a, b)) => {
+            let (s, e) = norm_slice(*a, *b, items.len());
+            Ok(Target::Value(Value::Tuple(
+                items.into_iter().skip(s).take(e - s).collect(),
+            )))
+        }
+        (Value::Tuple(_), PathSeg::Key(_) | PathSeg::KeyLib(..)) => Err(type_error(
+            "tuple indices must be integers or slices, not str",
+        )),
+        (Value::Str(s) | Value::Enum(s), PathSeg::Index(i)) => {
+            let chars: Vec<char> = s.chars().collect();
+            let j = norm_index(*i, chars.len())
+                .ok_or_else(|| index_error("string index out of range"))?;
+            Ok(Target::Value(Value::Str(chars[j].to_string().into())))
+        }
+        (Value::Str(s) | Value::Enum(s), PathSeg::Slice(a, b)) => {
+            let chars: Vec<char> = s.chars().collect();
+            let (st, e) = norm_slice(*a, *b, chars.len());
+            Ok(Target::Value(Value::Str(
+                chars[st..e].iter().collect::<String>().into(),
+            )))
+        }
+        (Value::Str(_) | Value::Enum(_), PathSeg::Key(_) | PathSeg::KeyLib(..)) => {
+            Err(type_error("string indices must be integers, not 'str'"))
+        }
+        (Value::FloatArray { data, shape, tag }, seg) => {
+            let kind = ArrayKind::of_value(data.len(), shape, tag);
+            let row = |r: usize, c: usize| Value::FloatArray {
+                data: data[r * c..(r + 1) * c].iter().copied().collect(),
+                shape: ArrayShape::Fixed(c as u16),
+                tag: MathTag::Vector,
+            };
+            match (kind, seg) {
+                (ArrayKind::Matrix(r, c), PathSeg::Index(i)) => {
+                    let j = norm_index(*i, r).ok_or_else(|| kind.read_index_error(*i, r))?;
+                    Ok(Target::Value(row(j, c)))
+                }
+                (ArrayKind::Matrix(r, c), PathSeg::Slice(a, b)) => {
+                    let (s, e) = norm_slice(*a, *b, r);
+                    Ok(Target::Value(Value::Tuple(
+                        (s..e).map(|j| row(j, c)).collect(),
+                    )))
+                }
+                (_, PathSeg::Index(i)) => {
+                    let j = norm_index(*i, data.len())
+                        .ok_or_else(|| kind.read_index_error(*i, data.len()))?;
+                    Ok(Target::Value(Value::Float(data[j])))
+                }
+                (_, PathSeg::Slice(a, b)) => {
+                    let (s, e) = norm_slice(*a, *b, data.len());
+                    Ok(Target::Value(Value::Tuple(
+                        data[s..e].iter().map(|x| Value::Float(*x)).collect(),
+                    )))
+                }
+                (_, PathSeg::Attr(a)) => {
+                    if let Some(i) = kind.component(a)? {
+                        return Ok(Target::Value(Value::Float(data[i])));
+                    }
+                    let sq = || data.iter().map(|x| (*x as f64) * (*x as f64)).sum::<f64>();
+                    match (kind, a.as_str()) {
+                        (ArrayKind::Euler, "order") => {
+                            Ok(Target::Value(Value::Enum(SmolStr::new(match tag {
+                                MathTag::Euler(o) => o.as_str(),
+                                _ => EulerOrder::XYZ.as_str(),
+                            }))))
+                        }
+                        (ArrayKind::Vector(_), "length" | "magnitude") => {
+                            Ok(Target::Value(Value::Double(sq().sqrt())))
+                        }
+                        (ArrayKind::Vector(_), "length_squared") => {
+                            Ok(Target::Value(Value::Double(sq())))
+                        }
+                        _ => Err(attr_error(format!(
+                            "'{}' object has no attribute '{a}'",
+                            kind.py_name()
+                        ))),
+                    }
+                }
+                (k, PathSeg::Key(_) | PathSeg::KeyLib(..)) => Err(type_error(format!(
+                    "{} indices must be integers, not str",
+                    k.lower()
+                ))),
+                _ => step_python(Target::Value(Value::FloatArray { data, shape, tag }), seg),
+            }
+        }
+        (v, seg) => step_python(Target::Value(v), seg),
     }
 }
 
@@ -489,10 +606,15 @@ fn step_struct(_host: &dyn HostRead, ptr: RnaPtr, seg: &PathSeg) -> Result<Targe
     let srna = ptr.srna;
     match seg {
         PathSeg::Attr(a) => {
+            let context = ptr.root == Root::Context && ptr.path.is_empty();
+            if context && context::ABSENT.contains(&a.as_str()) {
+                return Err(attr_error(format!(
+                    "'Context' object has no attribute '{a}'"
+                )));
+            }
             if let Some(prop) = srna.find_prop(a) {
                 // `bpy.context` members are computed (lists, re-rooted pointers), never RNA
                 // collections.
-                let context = ptr.root == Root::Context && ptr.path.is_empty();
                 return Ok(match prop.kind {
                     PropKind::Collection { .. } if !context => Target::Coll(CollPlace {
                         ptr,
@@ -579,18 +701,22 @@ fn step_prop(host: &dyn HostRead, p: PropPlace, seg: &PathSeg) -> Result<Target,
             let t = deref(host, &p)?;
             return step(host, t, seg);
         }
-        return step_python(Target::Prop(p), seg);
+        // A plain value (`name[0]` indexes the `str`).
+        return step_value(read_value(host, &p)?, seg);
     }
     let kind = ArrayKind::of(prop);
     match (p.elem, seg) {
         (Elem::Whole, PathSeg::Index(i)) => {
-            if let ArrayKind::Matrix(r, _) = kind {
-                let row = norm_index(*i, r).ok_or_else(|| kind.read_index_error(*i, r))?;
+            if let ArrayKind::Matrix(r, _) = kind
+                && let Some(row) = norm_index(*i, r)
+            {
                 return Ok(Target::Prop(PropPlace {
                     elem: Elem::Row(row),
                     ..p
                 }));
             }
+            // An out-of-range matrix row stays an `Index`: reading it raises the read message,
+            // assigning it the write message (`matrix[attribute] = x: bad row`).
             Ok(Target::Prop(PropPlace {
                 elem: Elem::Index(*i),
                 ..p
@@ -629,16 +755,26 @@ fn step_prop(host: &dyn HostRead, p: PropPlace, seg: &PathSeg) -> Result<Target,
             elem: Elem::RowCol(r, *j),
             ..p
         })),
-        (Elem::Row(_), PathSeg::Attr(a)) => Err(not_impl(format!("Matrix row attribute .{a}"))),
-        (Elem::Row(_), _) => Err(not_impl("this access on a matrix row")),
-        (Elem::Slice(..), _) => {
-            // A slice of an array is a tuple of numbers.
-            let v = read_value(host, &p)?;
-            step_python(Target::Value(v), seg)
+        (Elem::Row(r), PathSeg::Attr(a)) => {
+            let ArrayKind::Matrix(_, c) = kind else {
+                return Err(stale("row of a non-matrix"));
+            };
+            match ArrayKind::Vector(c).component(a)? {
+                // `matrix[r].x` stays a place, so it can be assigned.
+                Some(i) => Ok(Target::Prop(PropPlace {
+                    elem: Elem::RowCol(r, i as i64),
+                    ..p
+                })),
+                None => step_value(read_value(host, &p)?, seg),
+            }
+        }
+        (Elem::Row(_) | Elem::Slice(..), _) => {
+            // A row is a `Vector`; a slice is a tuple of numbers (of row vectors for a matrix).
+            step_value(read_value(host, &p)?, seg)
         }
         (Elem::Index(_) | Elem::Component(..) | Elem::RowCol(..), _) => {
             let v = read_value(host, &p)?; // checks the index (Blender's read message)
-            step_python(Target::Value(v), seg)
+            step_value(v, seg)
         }
         (Elem::Whole, PathSeg::Call(_)) => Err(type_error(format!(
             "'{}' object is not callable",
@@ -1067,10 +1203,22 @@ pub fn element(prop: &PropDef, whole: Value, elem: Elem) -> Result<Value, FrapEr
     match elem {
         Elem::Whole => Ok(whole),
         Elem::Index(i) => {
+            if let ArrayKind::Matrix(r, _) = kind {
+                // In-range rows resolve to `Elem::Row`.
+                return Err(kind.read_index_error(i, r));
+            }
             let j = norm_index(i, len).ok_or_else(|| kind.read_index_error(i, len))?;
             Ok(float_at(&whole, j))
         }
         Elem::Component(_, j) => Ok(float_at(&whole, j)),
+        Elem::Slice(a, b) if let ArrayKind::Matrix(r, _) = kind => {
+            // `mathutils.Matrix` slices rows: a tuple of row vectors (verified on 5.2.4).
+            let (s, e) = norm_slice(a, b, r);
+            (s..e)
+                .map(|row| element(prop, whole.clone(), Elem::Row(row)))
+                .collect::<Result<Vec<_>, _>>()
+                .map(Value::Tuple)
+        }
         Elem::Slice(a, b) => {
             let (s, e) = norm_slice(a, b, len);
             Ok(Value::Tuple((s..e).map(|j| float_at(&whole, j)).collect()))
@@ -1263,7 +1411,9 @@ fn coll_json(host: &dyn HostRead, c: &CollPlace, caps: Caps) -> Result<J, FrapEr
 pub fn bulk_json(bulk: &Bulk, prop: &PropDef, start: usize, max_array: usize) -> J {
     let k = prop.array_len().max(1);
     let total_items = bulk.len() / k;
-    let kept = total_items.min(max_array / k);
+    // At least one whole item, so a page always advances (even with `--max-array` below the
+    // item width).
+    let kept = total_items.min((max_array / k).max(1));
     let scalars = kept * k;
     let (data, dtype): (Vec<J>, &str) = match bulk {
         Bulk::F32(v) => (
@@ -1290,5 +1440,81 @@ pub fn id_repr(names: &dyn IdNames, id: IdAny) -> String {
     match names.id_name(id) {
         Some((n, lib)) => frap_rna::ptr::id_repr(id.code, &n, lib.as_deref()),
         None => frap_rna::ptr::id_repr(id.code, "<removed>", None),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn matrix() -> Value {
+        Value::FloatArray {
+            data: (1..=16).map(|x| x as f32).collect(),
+            shape: ArrayShape::Matrix(4, 4),
+            tag: MathTag::Matrix,
+        }
+    }
+
+    fn rows(v: &Value) -> Vec<Vec<f32>> {
+        let Value::Tuple(items) = v else {
+            panic!("not a tuple: {v:?}")
+        };
+        items
+            .iter()
+            .map(|r| match r {
+                Value::FloatArray {
+                    data,
+                    tag: MathTag::Vector,
+                    ..
+                } => data.to_vec(),
+                other => panic!("not a row vector: {other:?}"),
+            })
+            .collect()
+    }
+
+    #[test]
+    fn matrix_slices_are_tuples_of_row_vectors() {
+        let prop = frap_spec_rna::VIEW3_D_CURSOR
+            .find_prop("matrix")
+            .expect("cursor matrix");
+        let m = matrix();
+        let v = element(prop, m.clone(), Elem::Slice(Some(0), Some(2))).unwrap();
+        assert_eq!(
+            rows(&v),
+            vec![vec![1.0, 2.0, 3.0, 4.0], vec![5.0, 6.0, 7.0, 8.0]]
+        );
+        let v = element(prop, m.clone(), Elem::Slice(Some(-1), None)).unwrap();
+        assert_eq!(rows(&v), vec![vec![13.0, 14.0, 15.0, 16.0]]);
+        let v = element(prop, m.clone(), Elem::Slice(Some(5), Some(9))).unwrap();
+        assert!(rows(&v).is_empty());
+        // An out-of-range row index is Blender's read error.
+        let e = element(prop, m.clone(), Elem::Index(4)).unwrap_err();
+        assert_eq!(e.message, "matrix[attribute]: array index out of range");
+        // A free-standing matrix value (a call result) indexes and slices the same way.
+        let Target::Value(row) = step_value(m.clone(), &PathSeg::Index(1)).unwrap() else {
+            panic!("row")
+        };
+        let Target::Value(Value::Float(y)) = step_value(row, &PathSeg::Attr("y".into())).unwrap()
+        else {
+            panic!("component")
+        };
+        assert_eq!(y, 6.0);
+        let Target::Value(v) = step_value(m, &PathSeg::Slice(Some(2), None)).unwrap() else {
+            panic!("slice")
+        };
+        assert_eq!(
+            rows(&v),
+            vec![vec![9.0, 10.0, 11.0, 12.0], vec![13.0, 14.0, 15.0, 16.0]]
+        );
+    }
+
+    #[test]
+    fn bulk_pages_hold_at_least_one_item() {
+        let prop = frap_spec_rna::MESH_VERTEX.find_prop("co").expect("co");
+        let j = bulk_json(&Bulk::F32(vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]), prop, 0, 2);
+        assert_eq!(j["len"], 1);
+        assert_eq!(j["$array"], json!([1, 2, 3]));
+        assert_eq!(j["truncated"], true);
+        assert_eq!(j["range"], json!([0, 1]));
     }
 }

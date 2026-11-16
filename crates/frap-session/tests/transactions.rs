@@ -177,6 +177,30 @@ static FUNC_PANIC: RnaFuncReg = RnaFuncReg {
     imp: func_panic,
 };
 
+/// `Object.indirect_only_get()` stand-in: mutates and reports, then returns `False` (a value
+/// an operator argument accepts).
+fn func_mutate_report(
+    host: &mut dyn Host,
+    this: &RnaPtr,
+    _: &mut FuncArgs,
+) -> Result<frap_rna::Value, RnaError> {
+    move_cube(host, this)?;
+    host.report(frap_rna::Report::new(
+        ReportType::Warning,
+        "nested call report",
+    ));
+    Ok(frap_rna::Value::Bool(false))
+}
+
+#[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
+#[frap_rna::linkme::distributed_slice(frap_scene::RNA_FUNCS)]
+#[linkme(crate = frap_rna::linkme)]
+static FUNC_MUTATE_REPORT: RnaFuncReg = RnaFuncReg {
+    srna: "Object",
+    func: "indirect_only_get",
+    imp: func_mutate_report,
+};
+
 fn quiet_panics() {
     static ONCE: std::sync::Once = std::sync::Once::new();
     ONCE.call_once(|| std::panic::set_hook(Box::new(|_| {})));
@@ -246,6 +270,46 @@ fn error_cancel_and_panic_restore_the_snapshot() {
         val(&mut s, "bpy.data.objects['Cube'].location"),
         json!([5, 6, 7])
     );
+}
+
+#[test]
+fn nested_calls_in_operator_arguments_share_the_statement_transaction() {
+    let mut s = session();
+    // The nested call's mutation and report belong to the operator's response.
+    let r = one(
+        &mut s,
+        "bpy.ops.mesh.primitive_cube_add(enter_editmode=bpy.data.objects['Cube'].indirect_only_get())",
+    );
+    assert_eq!(r["status"], "FINISHED", "{r}");
+    assert!(
+        r["reports"]
+            .as_array()
+            .unwrap()
+            .contains(&json!({"type": "WARNING", "message": "nested call report"})),
+        "{r}"
+    );
+    assert!(
+        r["changes"]["modified"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("bpy.data.objects['Cube']")),
+        "{r}"
+    );
+    assert_eq!(r["changes"]["added"].as_array().unwrap().len(), 2, "{r}");
+    // An argument error after the nested call: rolled back, the nested report kept.
+    let mut s = session();
+    let before = s.state_dump();
+    let r = one(
+        &mut s,
+        "bpy.ops.mesh.primitive_cube_add(size='x', enter_editmode=bpy.data.objects['Cube'].indirect_only_get())",
+    );
+    assert_eq!(r["status"], "ERROR", "{r}");
+    assert_eq!(r["state"], "unchanged");
+    assert_eq!(
+        r["reports"],
+        json!([{"type": "WARNING", "message": "nested call report"}])
+    );
+    assert_eq!(s.state_dump(), before);
 }
 
 #[test]

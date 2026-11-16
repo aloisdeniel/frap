@@ -44,13 +44,12 @@ pub fn member(host: &dyn HostRead, prop: &'static PropDef) -> Result<Member, Fra
     let scene_ptr =
         || -> Result<RnaPtr, FrapError> { Ok(RnaPtr::id(scene, id_srna(host, scene)?)) };
     let in_mode = ctx.mode() != ContextMode::Object;
+    // `edit_object` is set in the edit modes only (not in Pose Mode).
+    let in_edit = matches!(
+        ctx.mode(),
+        ContextMode::EditMesh | ContextMode::EditArmature
+    );
     let active = ctx.active_object();
-    let active_data_of = |code: frap_rna::IdCode| {
-        active
-            .and_then(|o| main.objects.get(o))
-            .and_then(|o| o.data)
-            .filter(|d| d.code == code)
-    };
     let t = match prop.identifier {
         "scene" => id_target(host, Some(scene))?,
         "blend_data" => Target::Data,
@@ -76,7 +75,7 @@ pub fn member(host: &dyn HostRead, prop: &'static PropDef) -> Result<Member, Fra
             )),
         },
         "active_object" | "object" => id_target(host, active.map(|o| o.any()))?,
-        "edit_object" => id_target(host, active.filter(|_| in_mode).map(|o| o.any()))?,
+        "edit_object" => id_target(host, active.filter(|_| in_edit).map(|o| o.any()))?,
         "selected_objects" => id_list(
             host,
             ctx.selected_objects().iter().map(|o| o.any()).collect(),
@@ -104,16 +103,6 @@ pub fn member(host: &dyn HostRead, prop: &'static PropDef) -> Result<Member, Fra
                     .collect(),
             )?
         }
-        "mesh" => id_target(host, active_data_of(frap_rna::IdCode::ME))?,
-        "camera" => id_target(host, active_data_of(frap_rna::IdCode::CA))?,
-        "light" => id_target(host, active_data_of(frap_rna::IdCode::LA))?,
-        "world" => id_target(
-            host,
-            main.scenes
-                .get(ctx.win.scene)
-                .and_then(|s| s.world)
-                .map(|w| w.any()),
-        )?,
         "mode" => {
             return Ok(Member::Value(Value::Enum(SmolStr::new(
                 ctx.mode().as_str(),
@@ -126,6 +115,19 @@ pub fn member(host: &dyn HostRead, prop: &'static PropDef) -> Result<Member, Fra
     };
     Ok(Member::Target(t))
 }
+
+/// Members of the spec's `Context` that only exist in the Properties editor's buttons
+/// context: inside the VIEW_3D override every statement runs in (D-10), Blender 5.2.4 raises
+/// `'Context' object has no attribute 'mesh'` for each of them (verified, also in plain `-b`).
+pub const ABSENT: &[&str] = &[
+    "camera",
+    "light",
+    "material",
+    "material_slot",
+    "mesh",
+    "world",
+    "depsgraph",
+];
 
 /// A context member.
 pub enum Member {

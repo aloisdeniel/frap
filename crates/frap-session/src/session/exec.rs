@@ -8,8 +8,8 @@ use frap_lang::{
 use frap_op::{OpCtx, OpStatus};
 use frap_rna::value::coerce_element;
 use frap_rna::{
-    CoerceCx, FrapError, PropDef, PropFlags, PropKind, PyExc, Report, ReportType, RnaErrorKind,
-    Root, Span, Unit, Value, coerce,
+    ArrayShape, CoerceCx, FrapError, MathTag, PropDef, PropFlags, PropKind, PyExc, Report,
+    ReportType, RnaErrorKind, Root, Span, Unit, Value, coerce,
 };
 use frap_scene::HostRead;
 use serde_json::{Map, Value as J, json};
@@ -394,8 +394,11 @@ impl Session {
                 err: e,
                 reports: txn.reports.clone(),
             })?;
-            let changes = (!log.added.is_empty() || !log.modified.is_empty())
-                .then(|| self.changes_json(&log));
+            let changes = (!log.added.is_empty()
+                || !log.modified.is_empty()
+                || !log.removed.is_empty()
+                || !log.renamed.is_empty())
+            .then(|| self.changes_json(&log));
             (vals, txn.reports, changes)
         } else {
             (body(self).map_err(|e| Fail::new("print", e))?, vec![], None)
@@ -491,10 +494,11 @@ impl Session {
         let t = match resolve::step(&self.host, parent, last) {
             Ok(t) => t,
             Err(mut e) => {
-                if parent_is_python
+                // Python's setattr wording, also on `None` (`scene.camera.lens = 1` with no
+                // camera, verified on 5.2.4).
+                if (parent_is_python || e.message.starts_with("'NoneType'"))
                     && e.exception == PyExc::AttributeError
                     && e.message.contains("object has no attribute")
-                    && !e.message.starts_with("'NoneType'")
                 {
                     e.message
                         .push_str(" and no __dict__ for setting new attributes");
@@ -606,17 +610,30 @@ impl Session {
             Value::BoolArray(a) => a.len(),
             _ => return Err(resolve::stale("element write on a non-array")),
         };
+        // One element, coerced and clamped like a whole-array write (same INFO report).
+        let element = |v: &Py, reports: &mut Vec<Report>| -> Result<Value, FrapError> {
+            let input = v.to_input()?;
+            let c = coerce_element(prop, input.clone()).map_err(FrapError::from)?;
+            if c.clamped {
+                reports.push(info(frap_rna::clamp_report(prop, &input)));
+            }
+            Ok(c.value)
+        };
         let echo = match p.elem {
+            // A matrix row out of range (in-range rows resolve to `Elem::Row`).
+            Elem::Index(_) if matches!(kind, ArrayKind::Matrix(..)) => {
+                return Err(kind.write_index_error());
+            }
             Elem::Index(i) => {
                 let j = resolve::norm_index(i, len).ok_or_else(|| kind.write_index_error())?;
-                let c = coerce_element(prop, v.to_input()?).map_err(frap_rna::FrapError::from)?;
-                put(&mut cur, j, &c.value);
-                c.value
+                let c = element(&v, &mut reports)?;
+                put(&mut cur, j, &c);
+                c
             }
             Elem::Component(_, j) => {
-                let c = coerce_element(prop, v.to_input()?).map_err(frap_rna::FrapError::from)?;
-                put(&mut cur, j, &c.value);
-                c.value
+                let c = element(&v, &mut reports)?;
+                put(&mut cur, j, &c);
+                c
             }
             Elem::RowCol(r, col) => {
                 let ArrayKind::Matrix(_, cols) = kind else {
@@ -634,6 +651,69 @@ impl Session {
                 put(&mut cur, r * cols + k, &Value::Float(x as f32));
                 Value::Float(x as f32)
             }
+            Elem::Row(_) | Elem::Slice(..) if let ArrayKind::Matrix(rows, cols) = kind => {
+                // `mathutils` row assignment: `matrix[i] = row`, `matrix[a:b] = rows`
+                // (messages verified on 5.2.4).
+                let (r0, r1, what) = match p.elem {
+                    Elem::Row(r) => (r, r + 1, "matrix[i] = value assignment"),
+                    Elem::Slice(a, b) => {
+                        let (s, e) = resolve::norm_slice(a, b, rows);
+                        (s, e, "matrix[slice] = value")
+                    }
+                    _ => return Err(resolve::stale("matrix element")),
+                };
+                let type_err = || FrapError::new(PyExc::TypeError, RNA_TYPE, what);
+                let row_vals = |row: &Py| -> Result<Vec<f32>, FrapError> {
+                    let items = row.items().ok_or_else(type_err)?;
+                    if items.len() != cols {
+                        return Err(FrapError::new(
+                            PyExc::ValueError,
+                            RNA_LENGTH,
+                            format!(
+                                "{what}: sequence length is {}, expected {cols}",
+                                items.len()
+                            ),
+                        ));
+                    }
+                    items
+                        .iter()
+                        .map(|x| x.number().map(|f| f as f32).ok_or_else(type_err))
+                        .collect()
+                };
+                let new_rows: Vec<Vec<f32>> = if matches!(p.elem, Elem::Row(_)) {
+                    vec![row_vals(&v)?]
+                } else {
+                    let items = v.items().ok_or_else(type_err)?;
+                    if items.len() != r1 - r0 {
+                        return Err(FrapError::new(
+                            PyExc::ValueError,
+                            RNA_LENGTH,
+                            format!(
+                                "{what}: sequence size is {}, expected {}",
+                                items.len(),
+                                r1 - r0
+                            ),
+                        ));
+                    }
+                    items.iter().map(row_vals).collect::<Result<_, _>>()?
+                };
+                let mut echo = Vec::with_capacity(new_rows.len());
+                for (k, row) in new_rows.into_iter().enumerate() {
+                    for (j, x) in row.iter().enumerate() {
+                        put(&mut cur, (r0 + k) * cols + j, &Value::Float(*x));
+                    }
+                    echo.push(Value::FloatArray {
+                        data: row.into_iter().collect(),
+                        shape: ArrayShape::Fixed(cols as u16),
+                        tag: MathTag::Vector,
+                    });
+                }
+                if matches!(p.elem, Elem::Row(_)) {
+                    echo.pop().expect("invariant: one row")
+                } else {
+                    Value::Tuple(echo)
+                }
+            }
             Elem::Row(_) | Elem::Slice(..) => {
                 let (s, e) = match (p.elem, kind) {
                     (Elem::Row(r), ArrayKind::Matrix(_, cols)) => (r * cols, (r + 1) * cols),
@@ -641,7 +721,6 @@ impl Session {
                     _ => return Err(resolve::stale("row of a non-matrix")),
                 };
                 let lower = match kind {
-                    ArrayKind::Matrix(..) if matches!(p.elem, Elem::Row(_)) => "matrix[attribute]",
                     ArrayKind::PropArray => "bpy_prop_array[slice]",
                     ArrayKind::Euler => "euler[slice]",
                     ArrayKind::Quaternion => "quaternion[slice]",
@@ -672,16 +751,7 @@ impl Session {
                 }
                 let mut vals = Vec::with_capacity(items.len());
                 for (k, it) in items.iter().enumerate() {
-                    let c = if matches!(kind, ArrayKind::Matrix(..)) {
-                        let x = it.number().ok_or_else(|| {
-                            FrapError::new(PyExc::TypeError, RNA_TYPE, "expected a number")
-                        })?;
-                        Value::Float(x as f32)
-                    } else {
-                        coerce_element(prop, it.to_input()?)
-                            .map_err(FrapError::from)?
-                            .value
-                    };
+                    let c = element(it, &mut reports)?;
                     put(&mut cur, s + k, &c);
                     vals.push(c);
                 }
@@ -774,55 +844,36 @@ impl Session {
                     f
                 });
         }
-        let snapshot = self.host.state.clone();
-        self.host.log = frap_scene::ChangeLog::default();
-        let evaluated =
-            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| -> Result<_, FrapError> {
-                let pos = positional
-                    .iter()
-                    .map(|e| self.eval_expr(e))
-                    .collect::<Result<Vec<_>, _>>()?;
-                let mut kw = Vec::with_capacity(args.len());
-                for a in args {
-                    let v = self.eval_expr(&a.value)?;
-                    kw.push((a.name.as_deref().unwrap_or("").to_owned(), v, a.span));
-                }
-                Ok((pos, kw))
-            }))
-            .unwrap_or_else(|p| Err(FrapError::internal_panic(p)));
-        let nested_log = std::mem::take(&mut self.host.log);
-        let (pos, kw) = match evaluated {
-            Ok(x) => x,
-            Err(e) => {
-                self.host.state = snapshot;
-                return Err(fail(e));
+        // One outer transaction covers argument evaluation and the operator: the operator's
+        // own (nested) transaction then sees the nested calls' changes and reports, and any
+        // failure or panic restores the statement's snapshot.
+        let txn = self.transact(|s| {
+            let pos = positional
+                .iter()
+                .map(|e| s.eval_expr(e))
+                .collect::<Result<Vec<_>, _>>()?;
+            let mut kw = Vec::with_capacity(args.len());
+            for a in args {
+                let v = s.eval_expr(&a.value)?;
+                kw.push((a.name.as_deref().unwrap_or("").to_owned(), v, a.span));
             }
-        };
-        match self.invoke_values(stmt.line, idname, pos, kw) {
-            Ok(mut r) if r.status == Status::Finished => {
-                if let Some(J::Object(c)) = &mut r.changes {
-                    let extra = self.changes_json(&nested_log);
-                    for key in ["added", "modified", "removed"] {
-                        if let (Some(J::Array(dst)), Some(J::Array(src))) =
-                            (c.get_mut(key), extra.get(key))
-                        {
-                            for x in src {
-                                if !dst.contains(x) {
-                                    dst.push(x.clone());
-                                }
-                            }
-                        }
-                    }
-                }
-                Ok(r)
-            }
-            Ok(r) => {
-                self.host.state = snapshot;
-                Ok(r)
-            }
-            Err(mut f) => {
-                self.host.state = snapshot;
+            let r = s.invoke_values(stmt.line, idname, pos, kw);
+            // Anything but FINISHED rolls the whole statement back.
+            let rollback = !matches!(&r, Ok(r) if r.status == Status::Finished);
+            Ok((r, rollback))
+        });
+        let mut leftover = txn.reports;
+        match txn.result {
+            Ok(Ok(r)) => Ok(r),
+            Ok(Err(mut f)) => {
                 f.err = f.err.with_span(stmt.span);
+                leftover.append(&mut f.reports);
+                f.reports = leftover;
+                Err(f)
+            }
+            Err(e) => {
+                let mut f = fail(e.with_span(stmt.span));
+                f.reports = leftover;
                 Err(f)
             }
         }

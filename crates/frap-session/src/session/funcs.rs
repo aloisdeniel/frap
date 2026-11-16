@@ -7,8 +7,8 @@
 
 use frap_lang::{Command, PathSeg};
 use frap_rna::{
-    BitSet, Bulk, CoerceCx, FrapError, FuncDef, FuncFlags, PropDef, PropFlags, PropKind, PyExc,
-    Report, RnaErrorKind, RnaPtr, Root, Span, Value, coerce,
+    ArrayShape, BitSet, Bulk, CoerceCx, FrapError, FuncDef, FuncFlags, MathTag, PropDef, PropFlags,
+    PropKind, PyExc, Report, RnaErrorKind, RnaPtr, Root, Span, Value, coerce,
 };
 use frap_scene::{FuncArgs, RNA_FUNCS, find_func};
 use indexmap::IndexMap;
@@ -49,7 +49,16 @@ pub(crate) fn py_target(v: Py) -> Target {
                 items: items.into_iter().map(py_target).collect(),
             }
         }
-        // mathutils values: their components (indexable like Python sequences).
+        // mathutils values keep their type, so a path continues with `.x`, `.order`, `[i]`.
+        Py::Vector(d) => math_target(d, MathTag::Vector, None),
+        Py::Euler(d, o) => math_target(d.to_vec(), MathTag::Euler(o), None),
+        Py::Quaternion(d) => math_target(d.to_vec(), MathTag::Quaternion, None),
+        Py::Color(d) => math_target(d.to_vec(), MathTag::Color, None),
+        Py::Matrix(rows) => {
+            let r = rows.len();
+            let c = rows.first().map_or(0, Vec::len);
+            math_target(rows.concat(), MathTag::Matrix, Some((r, c)))
+        }
         other => match other.items() {
             Some(items) => Target::List {
                 what: "tuple",
@@ -58,6 +67,18 @@ pub(crate) fn py_target(v: Py) -> Target {
             None => Target::Value(Value::Str(other.type_name().into())),
         },
     }
+}
+
+fn math_target(data: Vec<f32>, tag: MathTag, matrix: Option<(usize, usize)>) -> Target {
+    let shape = match matrix {
+        Some((r, c)) => ArrayShape::Matrix(r as u16, c as u16),
+        None => ArrayShape::Fixed(data.len() as u16),
+    };
+    Target::Value(Value::FloatArray {
+        data: data.into_iter().collect(),
+        shape,
+        tag,
+    })
 }
 
 fn type_err(msg: impl Into<String>) -> FrapError {
@@ -468,6 +489,11 @@ impl Session {
                 )));
             }
         };
+        // An empty buffer returns None before the attribute is looked up (verified on 5.2.4:
+        // `vertices.foreach_get('foo', [])` and `foreach_set('co', [])` are no-ops).
+        if positional.len() == 2 && positional[1].items().is_some_and(|v| v.is_empty()) {
+            return Ok(Py::None);
+        }
         let host = &self.host;
         let item_type = with_coll(host, &c.ptr, c.prop, &mut |v| Ok(v.item_type()))?;
         let owner = match (c.ptr.root, c.ptr.path.is_empty()) {
@@ -677,8 +703,10 @@ impl Session {
                 if crate::session::exec::path_has_call(target) {
                     return Err(not_found());
                 }
+                // Every resolution failure, also an element index checked on read
+                // (`location[9]`), is Blender's ValueError (verified on 5.2.4).
                 let t = resolve::resolve(&self.host, target).map_err(|_| not_found())?;
-                super::eval::target_py(&self.host, t)
+                super::eval::target_py(&self.host, t).map_err(|_| not_found())
             }
         }
     }
