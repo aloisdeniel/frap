@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `Object.children` (Python-only, `bpy_types.py`): the objects whose parent is this one, in
-//! `bpy.data.objects` order (verified: `('A_empty', 'b_empty', 'Light')`, a tuple).
+//! `bpy.data.objects` order (verified: `('A_empty', 'b_empty', 'Light')`, a `tuple`; frap returns
+//! a tuple value too, like `users_collection`).
 
-use frap_rna::{CollRef, Field, IdRef, ObjectId, PropDef, RnaError, RnaPtr, rna_hook};
+use frap_rna::{Field, IdRef, ObjectId, PropDef, RnaError, RnaPtr, Value, rna_hook};
 
 use crate::HostRead;
 use crate::data::IdMap;
 use crate::id::Object;
-use crate::id::idlist::IdList;
 use crate::id::paths::object_of;
 
 /// Children of `ob` in `bpy.data.objects` order.
@@ -26,7 +26,10 @@ fn get<'h>(
     _prop: &'static PropDef,
 ) -> Result<Field<'h>, RnaError> {
     let ob = object_of(this)?;
-    Ok(Field::Coll(CollRef::Owned(Box::new(IdList::objects(
-        children(&h.main().objects, ob),
-    )))))
+    Ok(Field::Value(Value::Tuple(
+        children(&h.main().objects, ob)
+            .into_iter()
+            .map(Value::from)
+            .collect(),
+    )))
 }

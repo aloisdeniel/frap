@@ -516,6 +516,16 @@ fn selection_functions_follow_blender() {
         e.message,
         "Error: Object 'Orphan' cannot be hidden because it is not in View Layer 'ViewLayer'!\n"
     );
+    // Deselecting or unhiding an object without a base is a silent no-op (verified on 5.2.4:
+    // `for ob in bpy.data.objects: ob.select_set(False)` works with orphans).
+    assert_eq!(
+        call(&mut h, &op, "select_set", &[("state", f.clone())]).unwrap(),
+        Value::None
+    );
+    assert_eq!(
+        call(&mut h, &op, "hide_set", &[("state", f.clone())]).unwrap(),
+        Value::None
+    );
     for fun in ["select_get", "hide_get", "visible_get"] {
         assert_eq!(call(&mut h, &op, fun, &[]).unwrap(), f, "{fun}");
     }
@@ -615,6 +625,29 @@ fn layer_collection_visibility_and_exclusion() {
     assert!(ctx_names(&h, |c: &frap_scene::Context<'_>| c.visible_objects()).is_empty());
     assert!(ctx_names(&h, |c: &frap_scene::Context<'_>| c.selected_objects()).is_empty());
     assert_eq!(read(&h, &lc, "is_visible").unwrap(), Value::Bool(false));
+    // Selecting under a hidden layer collection works (only BASE_SELECTABLE gates it), and
+    // `view_layer.objects.selected` still lists the selection (verified on 5.2.4).
+    call(&mut h, &cube, "select_set", &[("state", Value::Bool(true))]).unwrap();
+    assert_eq!(
+        call(&mut h, &cube, "select_get", &[]).unwrap(),
+        Value::Bool(true)
+    );
+    let objs = RnaPtr::id(h.win.scene.any(), &frap_spec_rna::SCENE)
+        .child(Seg::Prop("view_layers"), &frap_spec_rna::VIEW_LAYER)
+        .child(Seg::Key("ViewLayer".into()), &frap_spec_rna::VIEW_LAYER)
+        .child(Seg::Prop("objects"), &frap_spec_rna::LAYER_OBJECTS);
+    assert_eq!(
+        names(&h, &read(&h, &objs, "selected").unwrap()),
+        ["Cube", "Light", "Camera"]
+    );
+    assert!(ctx_names(&h, |c: &frap_scene::Context<'_>| c.selectable_objects()).is_empty());
+    call(
+        &mut h,
+        &cube,
+        "select_set",
+        &[("state", Value::Bool(false))],
+    )
+    .unwrap();
     write(&mut h, &lc, "hide_viewport", Input::Bool(false)).unwrap();
     write(&mut h, &lc, "exclude", Input::Bool(true)).unwrap();
     assert!(h.ctx().view_layer().bases.is_empty());

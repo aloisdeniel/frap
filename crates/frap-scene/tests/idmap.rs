@@ -250,11 +250,51 @@ fn tuple_key_rule() {
         .find_in("Smooth by Angle", Some(lib))
         .unwrap();
     assert_eq!(main.node_groups.find("Smooth by Angle"), Some(linked));
-    // repr names the library (D-15).
+    // Unshadowed, the linked group's repr is Blender's plain key (5.2.4:
+    // `bpy.data.node_groups['Smooth by Angle']`), which resolves back to it (D-15).
     let p = frap_rna::RnaPtr::id(linked.any(), &frap_spec_rna::NODE_TREE);
+    assert_eq!(p.repr(&main), "bpy.data.node_groups['Smooth by Angle']");
+    // Shadowed by a local group, the repr names the library; for this archive library the
+    // tuple key does not resolve back (the first library with the filepath is used).
+    let mut log = ChangeLog::default();
+    let local = main.node_groups.insert(
+        "Smooth by Angle",
+        NodeTree::new("", NodeTreeType::Geometry, false),
+        &mut log,
+    );
     assert_eq!(
         p.repr(&main),
         format!("bpy.data.node_groups['Smooth by Angle', '{path}']")
+    );
+    let lp = frap_rna::RnaPtr::id(local.any(), &frap_spec_rna::NODE_TREE);
+    assert_eq!(lp.repr(&main), "bpy.data.node_groups['Smooth by Angle']");
+}
+
+/// A shadowed group linked from the first library with its filepath gets a tuple-key repr
+/// that resolves back to it.
+#[test]
+fn shadowed_linked_repr_resolves() {
+    let (mut main, _) = startup::factory();
+    const PATH: &str = "/lib/other.blend";
+    let mut log = ChangeLog::default();
+    let lib = main
+        .libraries
+        .insert("other.blend", Library::new("", PATH), &mut log);
+    linked_group(&mut main, "G", lib);
+    let linked = main.node_groups.find_in("G", Some(lib)).unwrap();
+    main.node_groups.insert(
+        "G",
+        NodeTree::new("", NodeTreeType::Geometry, false),
+        &mut log,
+    );
+    let p = frap_rna::RnaPtr::id(linked.any(), &frap_spec_rna::NODE_TREE);
+    assert_eq!(
+        p.repr(&main),
+        format!("bpy.data.node_groups['G', '{PATH}']")
+    );
+    assert_eq!(
+        main.find_key_lib("node_groups", "G", Some(PATH)).unwrap(),
+        Some(linked.any())
     );
 }
 

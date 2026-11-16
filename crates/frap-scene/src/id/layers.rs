@@ -15,7 +15,8 @@
 //!   is reached through a collection path without `hide_viewport`/`hide_select`, and it has
 //!   neither `hide_select` nor `hide_viewport` itself (verified: `hide_viewport`,
 //!   `hide_select` and a collection's `hide_viewport`/`hide_select` deselect; a layer
-//!   collection's `hide_viewport` does not).
+//!   collection's `hide_viewport` does not). A base hidden with `hide_set` is not selectable
+//!   either.
 //! - The active object is dropped when it has no base any more (verified with `exclude`).
 //!
 //! Blender syncs lazily (`view_layer.objects` is stale until the next depsgraph update after a
@@ -37,7 +38,8 @@ const MAX_DEPTH: usize = 256;
 pub struct BaseVisibility {
     /// Visible in the (virtual) viewport: `visible_get()`.
     pub visible: bool,
-    /// Selectable: `select_set(True)` has an effect.
+    /// Selectable (`BASE_SELECTABLE`): `select_set(True)` has an effect. A layer collection's
+    /// `hide_viewport` does not clear it (verified on 5.2.4); `hide_set(True)` does.
     pub selectable: bool,
     /// Rendered (`hide_render` of the object and its collections).
     pub renderable: bool,
@@ -168,7 +170,7 @@ pub fn visibility(
             .find(|b| b.object == *ob)
             .is_some_and(|b| b.flag.contains(BaseFlag::HIDDEN));
         v.visible &= !o.hide_viewport && !hidden;
-        v.selectable &= !o.hide_viewport && !o.hide_select;
+        v.selectable &= !o.hide_viewport && !o.hide_select && !hidden;
         v.renderable &= !o.hide_render;
     }
     out
@@ -292,10 +294,11 @@ fn not_in_layer(
 }
 
 /// `Object.select_set(state, view_layer)` (`rna_Object_select_set` → `ED_object_base_select`,
-/// verified on 5.2.4): selecting needs a visible, selectable base (a hidden or unselectable
-/// object stays unselected, silently); deselecting always works; an object without a base
-/// raises `RuntimeError: Error: Object 'X' cannot be selected because it is not in View Layer
-/// 'ViewLayer'!`.
+/// verified on 5.2.4): selecting needs a selectable base (`BASE_SELECTABLE`: an object hidden
+/// with `hide_set` or unselectable stays unselected, silently; one under a layer collection
+/// with `hide_viewport` is selected); deselecting always works; selecting an object without a
+/// base raises `RuntimeError: Error: Object 'X' cannot be selected because it is not in View
+/// Layer 'ViewLayer'!`, deselecting it is a no-op.
 pub fn select_set(
     main: &mut Main,
     log: &mut ChangeLog,
@@ -309,12 +312,16 @@ pub fn select_set(
     };
     let layer = &s.view_layers[vl];
     let Some(base) = layer.base(ob) else {
-        return Err(not_in_layer(main, ob, layer, "selected"));
+        return if state {
+            Err(not_in_layer(main, ob, layer, "selected"))
+        } else {
+            Ok(())
+        };
     };
     let can = !state
         || visibility(s, layer, &main.collections, &main.objects)
             .get(&ob)
-            .is_some_and(|v| v.visible && v.selectable);
+            .is_some_and(|v| v.selectable);
     if !can || base.selected() == state {
         return Ok(());
     }
@@ -328,9 +335,9 @@ pub fn select_set(
 }
 
 /// `Object.hide_set(state, view_layer)` (verified on 5.2.4): hiding sets the base's hidden
-/// flag and deselects it; unhiding clears the flag (the selection is not restored); an object
-/// without a base raises `RuntimeError: Error: Object 'X' cannot be hidden because it is not
-/// in View Layer 'ViewLayer'!`.
+/// flag and deselects it; unhiding clears the flag (the selection is not restored); hiding an
+/// object without a base raises `RuntimeError: Error: Object 'X' cannot be hidden because it
+/// is not in View Layer 'ViewLayer'!`, unhiding it is a no-op.
 pub fn hide_set(
     main: &mut Main,
     log: &mut ChangeLog,
@@ -344,7 +351,11 @@ pub fn hide_set(
     };
     let layer = &s.view_layers[vl];
     let Some(base) = layer.base(ob) else {
-        return Err(not_in_layer(main, ob, layer, "hidden"));
+        return if state {
+            Err(not_in_layer(main, ob, layer, "hidden"))
+        } else {
+            Ok(())
+        };
     };
     let mut flag = base.flag;
     flag.set(BaseFlag::HIDDEN, state);

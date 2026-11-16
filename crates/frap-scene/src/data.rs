@@ -550,13 +550,23 @@ fn id_ref<T: IdType>(m: &IdMap<T>, a: IdAny) -> Option<&T> {
     m.get(a.typed::<T::Kind>()?)
 }
 
+/// Names for `repr` (D-15). A linked ID gets Blender's plain `['Name']` key whenever that key
+/// resolves to it (no local ID of the same name shadows it, the common case and Blender's own
+/// repr); only a shadowed linked ID gets the `['Name', '<library filepath>']` tuple key. The
+/// tuple key follows Blender's lookup (the first library with that filepath, see
+/// [`IdMap::find_in`]), so it does not resolve back for an ID of a second library with the same
+/// filepath (the packed archive library `object.shade_auto_smooth` creates) when it is also
+/// shadowed by a local ID.
 impl IdNames for Main {
     fn id_name(&self, id: IdAny) -> Option<(SmolStr, Option<SmolStr>)> {
         let h = self.header(id)?;
-        let lib = h
-            .library
-            .and_then(|l| self.libraries.get(l))
-            .map(|l| SmolStr::new(&l.filepath));
+        let lib = h.library.and_then(|l| {
+            let plain = with_map!(self, id.code, |m| m.find(&h.name).map(|r| r.any()));
+            if plain == Some(id) {
+                return None;
+            }
+            self.libraries.get(l).map(|l| SmolStr::new(&l.filepath))
+        });
         Some((h.name.clone(), lib))
     }
 }

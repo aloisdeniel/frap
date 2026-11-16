@@ -1,12 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `view_layer.objects.selected` (`LayerObjects.selected`): the selected, visible objects of
-//! the view layer in base order (verified: equal to `context.selected_objects`).
+//! `view_layer.objects.selected` (`LayerObjects.selected`): the selected bases of the view
+//! layer in base order (`rna_ViewLayer_objects_selected_skip` tests only `BASE_SELECTED`).
+//! Verified on 5.2.4: it differs from `context.selected_objects` for an object under a layer
+//! collection with `hide_viewport`, which stays listed here.
 
 use frap_rna::{CollRef, Field, PropDef, RnaError, RnaPtr, rna_hook};
 
 use crate::HostRead;
 use crate::id::idlist::IdList;
-use crate::id::layers::visibility;
 use crate::id::paths::view_layer;
 
 #[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
@@ -25,15 +26,11 @@ fn get<'h>(
     _prop: &'static PropDef,
 ) -> Result<Field<'h>, RnaError> {
     let main = h.main();
-    let (scene, _, vl) = view_layer(main, this)?;
-    let Some(s) = main.scenes.get(scene) else {
-        return Ok(Field::Coll(CollRef::Owned(Box::new(IdList::objects(Vec::new())))));
-    };
-    let vis = visibility(s, vl, &main.collections, &main.objects);
+    let (_, _, vl) = view_layer(main, this)?;
     let sel = vl
         .bases
         .iter()
-        .filter(|b| b.selected() && vis.get(&b.object).is_some_and(|v| v.visible))
+        .filter(|b| b.selected())
         .map(|b| b.object)
         .collect();
     Ok(Field::Coll(CollRef::Owned(Box::new(IdList::objects(sel)))))

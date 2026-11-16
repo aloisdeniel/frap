@@ -319,3 +319,42 @@ fn tuple_keys_case() {
         .unwrap_err();
     assert_eq!(e.message, outcome(&fx, 8).unwrap());
 }
+
+#[test]
+fn select_hidden_case() {
+    let fx = fixture("select_hidden");
+    let mut h = TestHost::factory();
+    let (cube, light) = (ob(&h, "Cube"), ob(&h, "Light"));
+    let lc = frap_scene::id::paths::view_layer_ptr(h.win.scene, "ViewLayer")
+        .child(
+            Seg::Prop("layer_collection"),
+            &frap_spec_rna::LAYER_COLLECTION,
+        )
+        .child(Seg::Prop("children"), &frap_spec_rna::LAYER_COLLECTION)
+        .child(
+            Seg::Key("Collection".into()),
+            &frap_spec_rna::LAYER_COLLECTION,
+        );
+    let t = || vec![("state", Value::Bool(true))];
+    let f = || vec![("state", Value::Bool(false))];
+    write(&mut h, &lc, "hide_viewport", Input::Bool(true)).unwrap();
+    call(&mut h, &cube, "select_set", &f()).unwrap();
+    call(&mut h, &light, "select_set", &t()).unwrap();
+    write(&mut h, &lc, "hide_viewport", Input::Bool(false)).unwrap();
+    let mut log = frap_scene::ChangeLog::default();
+    let orphan = h
+        .main
+        .objects
+        .insert("Orphan", frap_scene::id::Object::new("", None), &mut log);
+    let op = RnaPtr::id(orphan.any(), &frap_spec_rna::OBJECT);
+    for line in [11, 12] {
+        assert!(outcome(&fx, line).is_none());
+    }
+    call(&mut h, &op, "select_set", &f()).unwrap();
+    call(&mut h, &op, "hide_set", &f()).unwrap();
+    let e = call(&mut h, &op, "select_set", &t()).unwrap_err();
+    assert_eq!(e.message, outcome(&fx, 13).unwrap());
+    let e = call(&mut h, &op, "hide_set", &t()).unwrap_err();
+    assert_eq!(e.message, outcome(&fx, 14).unwrap());
+    compare_context(&h, &fx);
+}
