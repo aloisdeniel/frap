@@ -64,6 +64,12 @@ NORMALISE = {
     "D-12": ("cases", "render goldens never use CYCLES"),
     "D-13": ("dumper", "print lines are recorded by outcome only"),
     "D-14": ("dumper", "non-finite floats are written as {'$float': 'nan' | 'inf' | '-inf'}"),
+    "D-15": ("cases", "cases do not compare reprs of linked IDs"),
+    "D-16": None,
+    "D-17": None,
+    "D-18": None,
+    "D-19": ("cases", "UV-sphere topology, UVs and normals are compared at T2 (mesh_canonical)"),
+    "D-20": ("cases", "meshes with 1000+ faces compare edges with mesh_canonical"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

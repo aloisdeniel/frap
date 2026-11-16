@@ -84,8 +84,7 @@ jobs:
         run: cargo fmt --all --check
       - name: dependency rules (layers, no dev-dependency cycles)
         run: cargo xtask check-deps
-      # Vacuous until WP 1.1 implements codegen (it then gates; a ::warning annotation says so).
-      - name: generated code is up to date (non-gating until WP 1.1)
+      - name: generated code is up to date
         run: cargo xtask codegen --check
       - name: cargo deny
         uses: EmbarkStudios/cargo-deny-action@v2
@@ -126,9 +125,10 @@ jobs:
         with:
           toolchain: "1.97"
       - uses: Swatinem/rust-cache@v2
-      # Baselines are recorded by WP 1.1 (`cargo xtask budgets --record`); until then every crate
-      # reports "no baseline recorded" with a ::warning annotation and nothing is enforced.
-      - name: budgets (fails above 2x the recorded baseline; non-gating until WP 1.1)
+      # The committed baselines are provisional (recorded on an M1 Max by WP 1.1, decision log
+      # W1-2). Non-gating until they are re-recorded here with `cargo xtask budgets --record`.
+      - name: budgets (fails above 2x the recorded baseline; non-gating until re-recorded on CI)
+        continue-on-error: true
         run: cargo xtask budgets
 
   blender-live:

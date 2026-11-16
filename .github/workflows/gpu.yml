@@ -90,7 +90,17 @@ jobs:
         env:
           FRAP_WGPU_BACKEND: ${{ matrix.backend }}
           FRAP_EXPECT_ADAPTER: ${{ matrix.expect_adapter }}
+          # Cold first-render time per adapter (WP 1.7 acceptance), one JSON line per run.
+          FRAP_RENDER_TIMINGS: ${{ github.workspace }}/render-timings.jsonl
         run: cargo test --locked -p frap-render -- --nocapture
+
+      - name: Upload render timings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: render-timings-${{ matrix.name }}
+          path: render-timings.jsonl
+          if-no-files-found: warn
 
       - name: (Windows) Default backend order (Vulkan first, then DX12)
         if: runner.os == 'Windows'
