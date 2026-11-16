@@ -1,0 +1,96 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:frap:op:mesh.primitive_cube_add",
+  "title": "bpy.ops.mesh.primitive_cube_add",
+  "description": "Add Cube: Construct a cube mesh that consists of six square faces",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "size": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1000000000000,
+      "title": "Size",
+      "description": "Size",
+      "default": 2
+    },
+    "calc_uvs": {
+      "type": "boolean",
+      "title": "Generate UVs",
+      "description": "Generate a default UV map",
+      "default": true
+    },
+    "enter_editmode": {
+      "type": "boolean",
+      "title": "Enter Edit Mode",
+      "description": "Enter edit mode when adding this object",
+      "default": false
+    },
+    "align": {
+      "type": "string",
+      "enum": [
+        "WORLD",
+        "VIEW",
+        "CURSOR"
+      ],
+      "title": "Align",
+      "description": "The alignment of the new object",
+      "default": "WORLD"
+    },
+    "location": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": -1000000000000,
+        "maximum": 1000000000000
+      },
+      "minItems": 3,
+      "maxItems": 3,
+      "title": "Location",
+      "description": "Location for the newly added object. If unset: the 3D cursor location (scene.cursor.location).",
+      "default": [
+        0,
+        0,
+        0
+      ]
+    },
+    "rotation": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": -1000000000000,
+        "maximum": 1000000000000
+      },
+      "minItems": 3,
+      "maxItems": 3,
+      "title": "Rotation",
+      "description": "Rotation for the newly added object (radians) If unset: from align (WORLD: no rotation, VIEW: the 3D view rotation, CURSOR: the 3D cursor rotation); an explicit rotation always wins.",
+      "default": [
+        0,
+        0,
+        0
+      ]
+    },
+    "scale": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": -1000000000000,
+        "maximum": 1000000000000
+      },
+      "minItems": 3,
+      "maxItems": 3,
+      "title": "Scale",
+      "description": "Scale for the newly added object. If unset: (1, 1, 1); the scale is applied to the new mesh data, the object's scale stays (1, 1, 1).",
+      "default": [
+        0,
+        0,
+        0
+      ]
+    }
+  },
+  "required": []
+}

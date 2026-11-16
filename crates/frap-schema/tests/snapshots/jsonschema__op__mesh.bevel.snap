@@ -1,0 +1,175 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:frap:op:mesh.bevel",
+  "title": "bpy.ops.mesh.bevel",
+  "description": "Bevel: Cut into selected items at an angle to create bevel or chamfer",
+  "$comment": "not implemented by frap yet (planned: M2); calling it gives OP_NOT_IMPLEMENTED",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "offset_type": {
+      "type": "string",
+      "enum": [
+        "OFFSET",
+        "WIDTH",
+        "DEPTH",
+        "PERCENT",
+        "ABSOLUTE"
+      ],
+      "title": "Width Type",
+      "description": "The method for determining the size of the bevel",
+      "default": "OFFSET"
+    },
+    "offset": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1000000,
+      "title": "Width",
+      "description": "Bevel amount",
+      "default": 0
+    },
+    "profile_type": {
+      "type": "string",
+      "enum": [
+        "SUPERELLIPSE",
+        "CUSTOM"
+      ],
+      "title": "Profile Type",
+      "description": "The type of shape used to rebuild a beveled section",
+      "default": "SUPERELLIPSE"
+    },
+    "offset_pct": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "title": "Width Percent",
+      "description": "Bevel amount for percentage method",
+      "default": 0
+    },
+    "segments": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1000,
+      "title": "Segments",
+      "description": "Segments for curved edge",
+      "default": 1
+    },
+    "profile": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "title": "Profile",
+      "description": "Controls profile shape (0.5 = round)",
+      "default": 0.5
+    },
+    "affect": {
+      "type": "string",
+      "enum": [
+        "VERTICES",
+        "EDGES"
+      ],
+      "title": "Affect",
+      "description": "Affect edges or vertices",
+      "default": "EDGES"
+    },
+    "clamp_overlap": {
+      "type": "boolean",
+      "title": "Clamp Overlap",
+      "description": "Do not allow beveled edges/vertices to overlap each other",
+      "default": false
+    },
+    "loop_slide": {
+      "type": "boolean",
+      "title": "Loop Slide",
+      "description": "Prefer sliding along edges to even widths",
+      "default": true
+    },
+    "mark_seam": {
+      "type": "boolean",
+      "title": "Mark Seams",
+      "description": "Preserve seams along beveled edges",
+      "default": false
+    },
+    "mark_sharp": {
+      "type": "boolean",
+      "title": "Mark Sharp",
+      "description": "Preserve sharp edges along beveled edges",
+      "default": false
+    },
+    "material": {
+      "type": "integer",
+      "minimum": -1,
+      "maximum": 2147483647,
+      "title": "Material Index",
+      "description": "Material for bevel faces (-1 means use adjacent faces)",
+      "default": -1
+    },
+    "harden_normals": {
+      "type": "boolean",
+      "title": "Harden Normals",
+      "description": "Match normals of new faces to adjacent faces",
+      "default": false
+    },
+    "face_strength_mode": {
+      "type": "string",
+      "enum": [
+        "NONE",
+        "NEW",
+        "AFFECTED",
+        "ALL"
+      ],
+      "title": "Face Strength Mode",
+      "description": "Whether to set face strength, and which faces to set face strength on",
+      "default": "NONE"
+    },
+    "miter_outer": {
+      "type": "string",
+      "enum": [
+        "SHARP",
+        "PATCH",
+        "ARC"
+      ],
+      "title": "Outer Miter",
+      "description": "Pattern to use for outside of miters",
+      "default": "SHARP"
+    },
+    "miter_inner": {
+      "type": "string",
+      "enum": [
+        "SHARP",
+        "ARC"
+      ],
+      "title": "Inner Miter",
+      "description": "Pattern to use for inside of miters",
+      "default": "SHARP"
+    },
+    "spread": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1000000,
+      "title": "Spread",
+      "description": "Amount to spread arcs for arc inner miters",
+      "default": 0.1
+    },
+    "vmesh_method": {
+      "type": "string",
+      "enum": [
+        "ADJ",
+        "CUTOFF"
+      ],
+      "title": "Vertex Mesh Method",
+      "description": "The method to use to create meshes at intersections",
+      "default": "ADJ"
+    },
+    "release_confirm": {
+      "type": "boolean",
+      "title": "Confirm on Release",
+      "description": "Confirm on Release",
+      "default": false
+    }
+  },
+  "required": []
+}

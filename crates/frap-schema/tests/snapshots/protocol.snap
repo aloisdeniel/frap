@@ -1,0 +1,760 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "protocol": 1,
+  "request": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "anyOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "number",
+            "format": "double"
+          }
+        ],
+        "description": "Echoed on every response of the request and on its done record."
+      },
+      "src": {
+        "type": "string",
+        "description": "One or more statements (bpy-line or short form), separated by newlines or `;`."
+      },
+      "on_error": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "type": "string",
+                "const": "skip_rest",
+                "description": "Answer every remaining statement with status SKIPPED (default)."
+              },
+              {
+                "type": "string",
+                "const": "continue",
+                "description": "Run the remaining statements."
+              }
+            ],
+            "description": "What happens to the rest of a request after a failing statement."
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "Batch error policy (default `skip_rest`)."
+      }
+    },
+    "required": [
+      "id",
+      "src"
+    ],
+    "title": "frap serve request",
+    "description": "`frap serve --jsonl`: one request per input line. `src` is parsed as one complete unit, so frap never waits for more input.",
+    "$schema": "https://json-schema.org/draft/2020-12/schema"
+  },
+  "response": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "id": {
+        "anyOf": [
+          {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number",
+                "format": "double"
+              }
+            ],
+            "description": "A serve/MCP request id: string or number, echoed verbatim."
+          },
+          {
+            "type": "null"
+          }
+        ],
+        "description": "serve/MCP: the request's id."
+      },
+      "seq": {
+        "type": "integer",
+        "format": "uint64",
+        "minimum": 0,
+        "description": "1-based statement counter (per session)."
+      },
+      "line": {
+        "type": "integer",
+        "format": "uint32",
+        "minimum": 0,
+        "description": "Source line of the statement's first token."
+      },
+      "kind": {
+        "oneOf": [
+          {
+            "type": "string",
+            "const": "op",
+            "description": "`bpy.ops.ns.op(...)`"
+          },
+          {
+            "type": "string",
+            "const": "op_meta",
+            "description": "`bpy.ops.ns.op.poll()`, `.idname()`, `.get_rna_type()`"
+          },
+          {
+            "type": "string",
+            "const": "get",
+            "description": "A path read."
+          },
+          {
+            "type": "string",
+            "const": "set",
+            "description": "An assignment."
+          },
+          {
+            "type": "string",
+            "const": "call",
+            "description": "An RNA function call."
+          },
+          {
+            "type": "string",
+            "const": "print",
+            "description": "`print(...)`"
+          },
+          {
+            "type": "string",
+            "const": "noop",
+            "description": "An empty statement or comment."
+          },
+          {
+            "type": "string",
+            "const": "invalid",
+            "description": "Input that never became a statement (syntax error, invalid UTF-8)."
+          }
+        ],
+        "description": "Statement kind."
+      },
+      "op": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Operator idname (kind `op`/`op_meta`).",
+        "default": null
+      },
+      "ok": {
+        "type": "boolean",
+        "description": "True iff status is FINISHED."
+      },
+      "status": {
+        "oneOf": [
+          {
+            "type": "string",
+            "const": "FINISHED",
+            "description": "Committed."
+          },
+          {
+            "type": "string",
+            "const": "CANCELLED",
+            "description": "Rolled back by the operator (Blender's WARNING reports say why)."
+          },
+          {
+            "type": "string",
+            "const": "ERROR",
+            "description": "Rolled back on error (`error` says why)."
+          },
+          {
+            "type": "string",
+            "const": "SKIPPED",
+            "description": "Not run: an earlier statement of the same serve/MCP request failed (`on_error: skip_rest`)."
+          }
+        ],
+        "description": "Statement outcome."
+      },
+      "path": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Resolved repr path (get/set).",
+        "default": null
+      },
+      "func": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "Function path (call).",
+        "default": null
+      },
+      "value": {
+        "description": "get/call/print value; set: the assigned value after coercion (§13.3 encoding).",
+        "default": null
+      },
+      "rna": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "subtype": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "default": null
+          },
+          "array": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            },
+            "description": "`[n]` or `[rows, cols]`.",
+            "default": null
+          },
+          "math": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "`Vector`, `Euler`, `Quaternion`, `AxisAngle`, `Matrix`, `Color`, `Array`.",
+            "default": null
+          },
+          "order": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Euler order.",
+            "default": null
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "description": "RNA type tag of a value."
+      },
+      "reports": {
+        "type": "array",
+        "items": {
+          "description": "A Blender-style report, wording copied from Blender.",
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "Report level (Blender's `ReportType`).",
+              "type": "string",
+              "enum": [
+                "INFO",
+                "WARNING",
+                "ERROR",
+                "OPERATOR",
+                "PROPERTY"
+              ]
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "message"
+          ]
+        }
+      },
+      "result": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "additionalProperties": true,
+        "description": "Operator results (`object`, `objects`, `removed`, `filepath`, …).",
+        "default": null
+      },
+      "changes": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "added": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "removed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "modified": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "renamed": {
+            "type": "array",
+            "items": {
+              "description": "`{from, to}` repr paths of a renamed datablock.",
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string"
+                },
+                "to": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "from",
+                "to"
+              ]
+            }
+          }
+        },
+        "required": [
+          "added",
+          "removed",
+          "modified",
+          "renamed"
+        ],
+        "description": "Datablocks touched by a committed mutation, as repr paths (`bpy.data.objects['Cube']`)."
+      },
+      "state": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "enum": [
+          "unchanged",
+          null
+        ],
+        "description": "CANCELLED, ERROR, SKIPPED."
+      },
+      "error": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "exception": {
+            "type": "string",
+            "enum": [
+              "SyntaxError",
+              "NameError",
+              "TypeError",
+              "ValueError",
+              "KeyError",
+              "IndexError",
+              "AttributeError",
+              "RuntimeError",
+              "NotImplementedError"
+            ],
+            "description": "Python exception class the error corresponds to."
+          },
+          "code": {
+            "type": "string",
+            "description": "Stable error code (`frap --describe=errors`)."
+          },
+          "message": {
+            "type": "string"
+          },
+          "span": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "line": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0
+              },
+              "col": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0
+              },
+              "col_chars": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0
+              },
+              "len": {
+                "type": "integer",
+                "format": "uint32",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "line",
+              "col",
+              "col_chars",
+              "len"
+            ],
+            "description": "Source span of an error. `col` and `len` count UTF-8 bytes, `col_chars` code points."
+          },
+          "detail": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "hint": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The exact fix, when frap knows it (`bpy.ops.object.mode_set(mode='EDIT')`)."
+          }
+        },
+        "required": [
+          "exception",
+          "code",
+          "message",
+          "detail"
+        ],
+        "description": "The error of an `ERROR` response (§13.4). `message` is Blender's wording where Blender has one; `detail` carries `did_you_mean`, `valid`, `operator`, `argument`, `requires`, `unmet`."
+      },
+      "context": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "mode": {
+            "type": "string",
+            "description": "`OBJECT`, `EDIT_MESH`, …"
+          },
+          "active_object": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Active object name."
+          },
+          "selected_objects": {
+            "type": "array",
+            "items": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "description": "Selected object names, in base order."
+          },
+          "frame_current": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "edit_object": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Edit mode only.",
+            "default": null
+          },
+          "select_mode": {
+            "description": "Edit mode only: `[vertex, edge, face]` flags.",
+            "default": null
+          }
+        },
+        "required": [
+          "mode",
+          "selected_objects",
+          "frame_current"
+        ],
+        "description": "Context after the statement (absent with `--verbosity minimal`)."
+      },
+      "edit_mesh": {
+        "description": "Per object in Edit Mode: counts, selection, active element.",
+        "default": null
+      },
+      "hints": {
+        "type": "array",
+        "items": {
+          "description": "frap help attached to a response (`NO_OP_DEFAULT`, `ANGLE_LIKELY_DEGREES`, …).",
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ]
+        }
+      }
+    },
+    "required": [
+      "seq",
+      "line",
+      "kind",
+      "ok",
+      "status",
+      "reports",
+      "hints"
+    ],
+    "title": "frap response",
+    "description": "One response per statement (§13.2). Keys appear in this order; optional keys are omitted when they do not apply.",
+    "$schema": "https://json-schema.org/draft/2020-12/schema"
+  },
+  "error": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "exception": {
+        "type": "string",
+        "enum": [
+          "SyntaxError",
+          "NameError",
+          "TypeError",
+          "ValueError",
+          "KeyError",
+          "IndexError",
+          "AttributeError",
+          "RuntimeError",
+          "NotImplementedError"
+        ],
+        "description": "Python exception class the error corresponds to."
+      },
+      "code": {
+        "type": "string",
+        "description": "Stable error code (`frap --describe=errors`)."
+      },
+      "message": {
+        "type": "string"
+      },
+      "span": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "line": {
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0
+          },
+          "col": {
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0
+          },
+          "col_chars": {
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0
+          },
+          "len": {
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "line",
+          "col",
+          "col_chars",
+          "len"
+        ],
+        "description": "Source span of an error. `col` and `len` count UTF-8 bytes, `col_chars` code points."
+      },
+      "detail": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "hint": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "description": "The exact fix, when frap knows it (`bpy.ops.object.mode_set(mode='EDIT')`)."
+      }
+    },
+    "required": [
+      "exception",
+      "code",
+      "message",
+      "detail"
+    ],
+    "description": "The error of an `ERROR` response (§13.4). `message` is Blender's wording where Blender has one; `detail` carries `did_you_mean`, `valid`, `operator`, `argument`, `requires`, `unmet`.",
+    "title": "Error",
+    "$schema": "https://json-schema.org/draft/2020-12/schema"
+  },
+  "events": {
+    "ready": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "enum": [
+            "ready"
+          ]
+        },
+        "frap": {
+          "type": "string"
+        },
+        "protocol": {
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "blender_api": {
+          "type": "string"
+        },
+        "startup": {
+          "type": "string",
+          "description": "`factory`, `empty` or a file path."
+        }
+      },
+      "required": [
+        "event",
+        "frap",
+        "protocol",
+        "blender_api",
+        "startup"
+      ],
+      "title": "frap ready event",
+      "description": "`{\"event\": \"ready\", …}`: the first line of raw mode (disable with `--no-ready`).",
+      "$schema": "https://json-schema.org/draft/2020-12/schema"
+    },
+    "end": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "type": "string",
+          "enum": [
+            "end"
+          ]
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "statements": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            },
+            "errors": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            },
+            "cancelled": {
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "statements",
+            "errors",
+            "cancelled"
+          ]
+        }
+      },
+      "required": [
+        "event",
+        "ok",
+        "stats"
+      ],
+      "title": "frap end event",
+      "description": "`{\"event\": \"end\", …}` at EOF (disable with `--no-end-event`).",
+      "$schema": "https://json-schema.org/draft/2020-12/schema"
+    },
+    "done": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "number",
+              "format": "double"
+            }
+          ],
+          "description": "A serve/MCP request id: string or number, echoed verbatim."
+        },
+        "event": {
+          "type": "string",
+          "enum": [
+            "done"
+          ]
+        },
+        "ok": {
+          "type": "boolean",
+          "description": "True iff every statement finished."
+        },
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "finished": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            },
+            "error": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            },
+            "cancelled": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            },
+            "skipped": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "finished",
+            "error",
+            "cancelled",
+            "skipped"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "event",
+        "ok",
+        "counts"
+      ],
+      "title": "frap done record",
+      "description": "The last line of every serve/MCP request.",
+      "$schema": "https://json-schema.org/draft/2020-12/schema"
+    }
+  }
+}

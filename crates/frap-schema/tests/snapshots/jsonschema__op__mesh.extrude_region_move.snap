@@ -1,0 +1,368 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:frap:op:mesh.extrude_region_move",
+  "title": "bpy.ops.mesh.extrude_region_move",
+  "description": "Extrude Region and Move: Extrude region and move result",
+  "$comment": "not implemented by frap yet (planned: M2); calling it gives OP_NOT_IMPLEMENTED",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "MESH_OT_extrude_region": {
+      "type": "object",
+      "title": "Extrude Region",
+      "properties": {
+        "use_normal_flip": {
+          "type": "boolean",
+          "title": "Flip Normals",
+          "description": "Flip Normals",
+          "default": false
+        },
+        "use_dissolve_ortho_edges": {
+          "type": "boolean",
+          "title": "Dissolve Orthogonal Edges",
+          "description": "Dissolve Orthogonal Edges",
+          "default": false
+        },
+        "mirror": {
+          "type": "boolean",
+          "title": "Mirror Editing",
+          "description": "Mirror Editing",
+          "default": false
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "description": "Extrude region of faces"
+    },
+    "TRANSFORM_OT_translate": {
+      "type": "object",
+      "title": "Move",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -340282350000000000000000000000000000000.0,
+            "maximum": 340282350000000000000000000000000000000.0
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "title": "Move",
+          "description": "Move",
+          "default": [
+            0,
+            0,
+            0
+          ]
+        },
+        "orient_type": {
+          "type": "string",
+          "enum": [
+            "GLOBAL",
+            "LOCAL",
+            "NORMAL",
+            "GIMBAL",
+            "VIEW",
+            "CURSOR",
+            "PARENT"
+          ],
+          "title": "Orientation",
+          "description": "Transformation orientation",
+          "default": "GLOBAL"
+        },
+        "orient_matrix": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": -340282350000000000000000000000000000000.0,
+              "maximum": 340282350000000000000000000000000000000.0
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "title": "Matrix",
+          "description": "Matrix",
+          "default": [
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0
+            ],
+            [
+              0,
+              0,
+              0
+            ]
+          ]
+        },
+        "orient_matrix_type": {
+          "type": "string",
+          "enum": [
+            "GLOBAL",
+            "LOCAL",
+            "NORMAL",
+            "GIMBAL",
+            "VIEW",
+            "CURSOR",
+            "PARENT"
+          ],
+          "title": "Matrix Orientation",
+          "description": "Matrix Orientation",
+          "default": "GLOBAL"
+        },
+        "constraint_axis": {
+          "type": "array",
+          "items": {
+            "type": "boolean"
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "title": "Constraint Axis",
+          "description": "Constraint Axis",
+          "default": [
+            false,
+            false,
+            false
+          ]
+        },
+        "mirror": {
+          "type": "boolean",
+          "title": "Mirror Editing",
+          "description": "Mirror Editing",
+          "default": false
+        },
+        "use_proportional_edit": {
+          "type": "boolean",
+          "title": "Proportional Editing",
+          "description": "Proportional Editing",
+          "default": false
+        },
+        "proportional_edit_falloff": {
+          "type": "string",
+          "enum": [
+            "SMOOTH",
+            "SPHERE",
+            "ROOT",
+            "INVERSE_SQUARE",
+            "SHARP",
+            "LINEAR",
+            "CONSTANT",
+            "RANDOM"
+          ],
+          "title": "Proportional Falloff",
+          "description": "Falloff type for proportional editing mode",
+          "default": "SMOOTH"
+        },
+        "proportional_size": {
+          "type": "number",
+          "minimum": 0.000001,
+          "maximum": 1000000000000,
+          "title": "Proportional Size",
+          "description": "Proportional Size",
+          "default": 1
+        },
+        "use_proportional_connected": {
+          "type": "boolean",
+          "title": "Connected",
+          "description": "Connected",
+          "default": false
+        },
+        "use_proportional_projected": {
+          "type": "boolean",
+          "title": "Projected (2D)",
+          "description": "Projected (2D)",
+          "default": false
+        },
+        "snap": {
+          "type": "boolean",
+          "title": "Use Snapping Options",
+          "description": "Use Snapping Options",
+          "default": false
+        },
+        "snap_elements": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "INCREMENT",
+              "GRID",
+              "VERTEX",
+              "EDGE",
+              "FACE",
+              "VOLUME",
+              "EDGE_MIDPOINT",
+              "EDGE_PERPENDICULAR",
+              "FACE_MIDPOINT",
+              "FACE_PROJECT",
+              "FACE_NEAREST"
+            ]
+          },
+          "uniqueItems": true,
+          "title": "Snap to Elements",
+          "description": "Snap to Elements",
+          "default": [
+            "INCREMENT"
+          ]
+        },
+        "use_snap_project": {
+          "type": "boolean",
+          "title": "Project Individual Elements",
+          "description": "Project Individual Elements",
+          "default": false
+        },
+        "snap_target": {
+          "type": "string",
+          "enum": [
+            "CLOSEST",
+            "CENTER",
+            "MEDIAN",
+            "ACTIVE"
+          ],
+          "title": "Snap Base",
+          "description": "Point on source that will snap to target",
+          "default": "CLOSEST"
+        },
+        "use_snap_self": {
+          "type": "boolean",
+          "title": "Target: Include Active",
+          "description": "Target: Include Active",
+          "default": true
+        },
+        "use_snap_edit": {
+          "type": "boolean",
+          "title": "Target: Include Edit",
+          "description": "Target: Include Edit",
+          "default": true
+        },
+        "use_snap_nonedit": {
+          "type": "boolean",
+          "title": "Target: Include Non-Edited",
+          "description": "Target: Include Non-Edited",
+          "default": true
+        },
+        "use_snap_selectable": {
+          "type": "boolean",
+          "title": "Target: Exclude Non-Selectable",
+          "description": "Target: Exclude Non-Selectable",
+          "default": false
+        },
+        "snap_point": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -340282350000000000000000000000000000000.0,
+            "maximum": 340282350000000000000000000000000000000.0
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "title": "Point",
+          "description": "Point",
+          "default": [
+            0,
+            0,
+            0
+          ]
+        },
+        "snap_align": {
+          "type": "boolean",
+          "title": "Align with Point Normal",
+          "description": "Align with Point Normal",
+          "default": false
+        },
+        "snap_normal": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": -340282350000000000000000000000000000000.0,
+            "maximum": 340282350000000000000000000000000000000.0
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "title": "Normal",
+          "description": "Normal",
+          "default": [
+            0,
+            0,
+            0
+          ]
+        },
+        "gpencil_strokes": {
+          "type": "boolean",
+          "title": "Edit Grease Pencil",
+          "description": "Edit selected Grease Pencil strokes",
+          "default": false
+        },
+        "cursor_transform": {
+          "type": "boolean",
+          "title": "Transform Cursor",
+          "description": "Transform Cursor",
+          "default": false
+        },
+        "texture_space": {
+          "type": "boolean",
+          "title": "Edit Texture Space",
+          "description": "Edit object data texture space",
+          "default": false
+        },
+        "remove_on_cancel": {
+          "type": "boolean",
+          "title": "Remove on Cancel",
+          "description": "Remove elements on cancel",
+          "default": false
+        },
+        "use_duplicated_keyframes": {
+          "type": "boolean",
+          "title": "Duplicated Keyframes",
+          "description": "Transform duplicated keyframes",
+          "default": false
+        },
+        "view2d_edge_pan": {
+          "type": "boolean",
+          "title": "Edge Pan",
+          "description": "Enable edge panning in 2D view",
+          "default": false
+        },
+        "release_confirm": {
+          "type": "boolean",
+          "title": "Confirm on Release",
+          "description": "Always confirm operation when releasing button",
+          "default": false
+        },
+        "use_accurate": {
+          "type": "boolean",
+          "title": "Accurate",
+          "description": "Use accurate transformation",
+          "default": false
+        },
+        "use_automerge_and_split": {
+          "type": "boolean",
+          "title": "Auto Merge & Split",
+          "description": "Forces the use of Auto Merge and Split",
+          "default": false
+        },
+        "translate_origin": {
+          "type": "boolean",
+          "title": "Translate Origin",
+          "description": "Translate origin instead of selection",
+          "default": false
+        }
+      },
+      "required": [],
+      "additionalProperties": false,
+      "description": "Move selected items"
+    }
+  },
+  "required": []
+}

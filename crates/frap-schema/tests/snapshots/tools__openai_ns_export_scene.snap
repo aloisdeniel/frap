@@ -1,0 +1,1662 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "frap_exec",
+      "description": "Run statements against the persistent frap scene (headless Blender 5.2 bpy API; the scene stays alive between calls). Call this to create or edit 3D models, read scene data, or export/render. One statement per line (or separated by ';'), bpy-style Python one-liners:\n- operator: bpy.ops.mesh.primitive_cube_add(size=2, location=(0, 0, 1))\n- read: bpy.data.objects['Cube'].location\n- write: bpy.data.objects['Cube'].location = (1, 2, 3)\n- RNA function: bpy.data.objects['Cube'].select_set(True)\n- check before calling: bpy.ops.mesh.bevel.poll()\n- bulk read: bpy.data.meshes['Cube'].vertices.foreach_get('co') (slices page: vertices[0:1000])\nThe short form also works: mesh.primitive_cube_add size=2 location=0,0,1 ; data.objects['Cube'].location = 1,2,3. D and C are bpy.data and bpy.context. No variables, loops or imports: use full paths. Angles are radians. Returns one JSON response per statement (status FINISHED, CANCELLED, ERROR or SKIPPED; value, changes, context; on ERROR an error with Blender's message, code, detail.did_you_mean and a hint naming the fix) and a final done record. A failing statement leaves the scene unchanged.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "statements": {
+            "type": "string",
+            "description": "One or more frap statements, newline- or ';'-separated."
+          },
+          "on_error": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "skip_rest",
+              "continue",
+              null
+            ],
+            "description": "What happens to the remaining statements of this call after one fails: 'skip_rest' (default) answers them with status SKIPPED without running them, so a batch cannot cascade into misleading errors; 'continue' runs them."
+          }
+        },
+        "required": [
+          "statements",
+          "on_error"
+        ],
+        "additionalProperties": false
+      },
+      "strict": true
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "frap_describe",
+      "description": "Describe the frap/Blender 5.2 API before using it: operator properties with types, defaults, ranges, enum items, units (angles are radians), poll requirements and whether frap implements it. Call this when unsure of an operator's or property's exact name, arguments or preconditions.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "What to describe: an operator ('op:mesh.bevel' or 'mesh.bevel'), an RNA struct ('struct:Object' or 'Object'), a struct member ('Object.location', 'Object.select_set'), or 'errors' for every error code."
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "strict": true
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "frap_ops_export_scene",
+      "description": "Call one bpy.ops.export_scene.* operator with typed arguments (the same as frap_exec with bpy.ops.export_scene.<op>(...); the scene persists between calls). Operators: fbx, gltf. Angles are radians.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "call": {
+            "description": "The bpy.ops.export_scene operator to run and its arguments.",
+            "anyOf": [
+              {
+                "type": "object",
+                "description": "Export FBX: Write a FBX file (not implemented by frap yet: OP_NOT_IMPLEMENTED)",
+                "properties": {
+                  "op": {
+                    "type": "string",
+                    "const": "fbx"
+                  },
+                  "args": {
+                    "type": "object",
+                    "description": "Keyword arguments of bpy.ops.export_scene.fbx; omit a property (or pass null) to leave it unset.",
+                    "properties": {
+                      "filepath": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "Filepath used for exporting the file. At most 1024 characters. Default: \"\".",
+                        "title": "File Path"
+                      },
+                      "check_existing": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Check Existing",
+                        "description": "Check and warn on overwriting existing files. Default: true."
+                      },
+                      "filter_glob": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "title": "filter_glob",
+                        "description": "filter_glob. Default: \"*.fbx\"."
+                      },
+                      "use_selection": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Selected Objects",
+                        "description": "Export selected and visible objects only. Default: false."
+                      },
+                      "use_visible": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Visible Objects",
+                        "description": "Export visible objects only. Default: false."
+                      },
+                      "use_active_collection": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Active Collection",
+                        "description": "Export only objects from the active collection (and its children) Default: false."
+                      },
+                      "collection": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "title": "Source Collection",
+                        "description": "Export only objects from this collection (and its children) Default: \"\"."
+                      },
+                      "global_scale": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "title": "Scale",
+                        "description": "Scale all data (Some importers do not support scaled armatures!) Range [0.001, 1000]. Default: 1."
+                      },
+                      "apply_unit_scale": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Apply Unit",
+                        "description": "Take into account current Blender units settings (if unset, raw Blender Units values are used as-is) Default: true."
+                      },
+                      "apply_scale_options": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "FBX_SCALE_NONE",
+                          "FBX_SCALE_UNITS",
+                          "FBX_SCALE_CUSTOM",
+                          "FBX_SCALE_ALL",
+                          null
+                        ],
+                        "title": "Apply Scalings",
+                        "description": "How to apply custom and units scalings in generated FBX file (Blender uses FBX scale to detect units on import, but many other applications do not handle the same way) Default: \"FBX_SCALE_NONE\"."
+                      },
+                      "use_space_transform": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Use Space Transform",
+                        "description": "Apply global space transform to the object rotations. When disabled only the axis space is written to the file and all object transforms are left as-is. Default: true."
+                      },
+                      "bake_space_transform": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Apply Transform",
+                        "description": "Bake space transform into object data, avoids getting unwanted rotations to objects when target space is not aligned with Blender's space (WARNING! experimental option, use at own risk, known to be broken with armatures/animations) Default: false."
+                      },
+                      "object_types": {
+                        "type": [
+                          "array",
+                          "null"
+                        ],
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "EMPTY",
+                            "CAMERA",
+                            "LIGHT",
+                            "ARMATURE",
+                            "MESH",
+                            "OTHER"
+                          ]
+                        },
+                        "description": "Which kind of object to export. No duplicates. Default: [\"ARMATURE\",\"CAMERA\",\"EMPTY\",\"LIGHT\",\"MESH\",\"OTHER\"].",
+                        "title": "Object Types"
+                      },
+                      "use_mesh_modifiers": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Apply Modifiers",
+                        "description": "Apply modifiers to mesh objects (except Armature ones) - WARNING: prevents exporting shape keys. Default: true."
+                      },
+                      "use_mesh_modifiers_render": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Use Modifiers Render Setting",
+                        "description": "Use render settings when applying modifiers to mesh objects (DISABLED in Blender 2.8) Default: true."
+                      },
+                      "mesh_smooth_type": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "OFF",
+                          "FACE",
+                          "EDGE",
+                          "SMOOTH_GROUP",
+                          null
+                        ],
+                        "title": "Smoothing",
+                        "description": "Export smoothing information (prefer 'Normals Only' option if your target importer understands custom normals) Default: \"OFF\"."
+                      },
+                      "colors_type": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "NONE",
+                          "SRGB",
+                          "LINEAR",
+                          null
+                        ],
+                        "title": "Vertex Colors",
+                        "description": "Export vertex color attributes. Default: \"SRGB\"."
+                      },
+                      "prioritize_active_color": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Prioritize Active Color",
+                        "description": "Make sure active color will be exported first. Could be important since some other software can discard other color attributes besides the first one. Default: false."
+                      },
+                      "use_subsurf": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Export Subdivision Surface",
+                        "description": "Export the last Catmull-Rom subdivision modifier as FBX subdivision (does not apply the modifier even if 'Apply Modifiers' is enabled) Default: false."
+                      },
+                      "use_mesh_edges": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Loose Edges",
+                        "description": "Export loose edges (as two-vertices polygons) Default: false."
+                      },
+                      "use_tspace": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Tangent Space",
+                        "description": "Add binormal and tangent vectors, together with normal they form the tangent space (will only work correctly with tris/quads only meshes!) Default: false."
+                      },
+                      "use_triangles": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Triangulate Faces",
+                        "description": "Convert all faces to triangles. Default: false."
+                      },
+                      "use_custom_props": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Custom Properties",
+                        "description": "Export custom properties. Default: false."
+                      },
+                      "add_leaf_bones": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Add Leaf Bones",
+                        "description": "Append a final bone to the end of each chain to specify last bone length (use this when you intend to edit the armature from exported data) Default: true."
+                      },
+                      "primary_bone_axis": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "X",
+                          "Y",
+                          "Z",
+                          "-X",
+                          "-Y",
+                          "-Z",
+                          null
+                        ],
+                        "title": "Primary Bone Axis",
+                        "description": "Primary Bone Axis. Default: \"Y\"."
+                      },
+                      "secondary_bone_axis": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "X",
+                          "Y",
+                          "Z",
+                          "-X",
+                          "-Y",
+                          "-Z",
+                          null
+                        ],
+                        "title": "Secondary Bone Axis",
+                        "description": "Secondary Bone Axis. Default: \"X\"."
+                      },
+                      "use_armature_deform_only": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Only Deform Bones",
+                        "description": "Only write deforming bones (and non-deforming ones when they have deforming children) Default: false."
+                      },
+                      "armature_nodetype": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "NULL",
+                          "ROOT",
+                          "LIMBNODE",
+                          null
+                        ],
+                        "title": "Armature FBXNode Type",
+                        "description": "FBX type of node (object) used to represent Blender's armatures (use the Null type unless you experience issues with the other app, as other choices may not import back perfectly into Blender...) Default: \"NULL\"."
+                      },
+                      "bake_anim": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Baked Animation",
+                        "description": "Export baked keyframe animation. Default: true."
+                      },
+                      "bake_anim_use_all_bones": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Key All Bones",
+                        "description": "Force exporting at least one key of animation for all bones (needed with some target applications, like UE4) Default: true."
+                      },
+                      "bake_anim_use_nla_strips": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "NLA Strips",
+                        "description": "Export each non-muted NLA strip as a separated FBX's AnimStack, if any, instead of global scene animation. Default: true."
+                      },
+                      "bake_anim_use_all_actions": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "All Actions",
+                        "description": "Export each action as a separated FBX's AnimStack, instead of global scene animation (note that animated objects will get all actions compatible with them, others will get no animation at all) Default: true."
+                      },
+                      "bake_anim_force_startend_keying": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Force Start/End Keying",
+                        "description": "Always add a keyframe at start and end of actions for animated channels. Default: true."
+                      },
+                      "bake_anim_step": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "title": "Sampling Rate",
+                        "description": "How often to evaluate animated values (in frames) Range [0.01, 100]. Default: 1."
+                      },
+                      "bake_anim_simplify_factor": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "title": "Simplify",
+                        "description": "How much to simplify baked values (0.0 to disable, the higher the more simplified) Range [0, 100]. Default: 1."
+                      },
+                      "path_mode": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "AUTO",
+                          "ABSOLUTE",
+                          "RELATIVE",
+                          "MATCH",
+                          "STRIP",
+                          "COPY",
+                          null
+                        ],
+                        "title": "Path Mode",
+                        "description": "Method used to reference paths. Default: \"AUTO\"."
+                      },
+                      "embed_textures": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Embed Textures",
+                        "description": "Embed textures in FBX binary file (only for \"Copy\" path mode!) Default: false."
+                      },
+                      "batch_mode": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "OFF",
+                          "SCENE",
+                          "COLLECTION",
+                          "SCENE_COLLECTION",
+                          "ACTIVE_SCENE_COLLECTION",
+                          null
+                        ],
+                        "title": "Batch Mode",
+                        "description": "Batch Mode. Default: \"OFF\"."
+                      },
+                      "use_batch_own_dir": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Batch Own Dir",
+                        "description": "Create a dir for each exported file. Default: true."
+                      },
+                      "use_metadata": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Use Metadata",
+                        "description": "Use Metadata. Default: true."
+                      },
+                      "axis_forward": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "X",
+                          "Y",
+                          "Z",
+                          "-X",
+                          "-Y",
+                          "-Z",
+                          null
+                        ],
+                        "title": "Forward",
+                        "description": "Forward. Default: \"-Z\"."
+                      },
+                      "axis_up": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "X",
+                          "Y",
+                          "Z",
+                          "-X",
+                          "-Y",
+                          "-Z",
+                          null
+                        ],
+                        "title": "Up",
+                        "description": "Up. Default: \"Y\"."
+                      }
+                    },
+                    "required": [
+                      "filepath",
+                      "check_existing",
+                      "filter_glob",
+                      "use_selection",
+                      "use_visible",
+                      "use_active_collection",
+                      "collection",
+                      "global_scale",
+                      "apply_unit_scale",
+                      "apply_scale_options",
+                      "use_space_transform",
+                      "bake_space_transform",
+                      "object_types",
+                      "use_mesh_modifiers",
+                      "use_mesh_modifiers_render",
+                      "mesh_smooth_type",
+                      "colors_type",
+                      "prioritize_active_color",
+                      "use_subsurf",
+                      "use_mesh_edges",
+                      "use_tspace",
+                      "use_triangles",
+                      "use_custom_props",
+                      "add_leaf_bones",
+                      "primary_bone_axis",
+                      "secondary_bone_axis",
+                      "use_armature_deform_only",
+                      "armature_nodetype",
+                      "bake_anim",
+                      "bake_anim_use_all_bones",
+                      "bake_anim_use_nla_strips",
+                      "bake_anim_use_all_actions",
+                      "bake_anim_force_startend_keying",
+                      "bake_anim_step",
+                      "bake_anim_simplify_factor",
+                      "path_mode",
+                      "embed_textures",
+                      "batch_mode",
+                      "use_batch_own_dir",
+                      "use_metadata",
+                      "axis_forward",
+                      "axis_up"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "op",
+                  "args"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "description": "Export glTF 2.0: Export scene as glTF 2.0 file",
+                "properties": {
+                  "op": {
+                    "type": "string",
+                    "const": "gltf"
+                  },
+                  "args": {
+                    "type": "object",
+                    "description": "Keyword arguments of bpy.ops.export_scene.gltf; omit a property (or pass null) to leave it unset.",
+                    "properties": {
+                      "filepath": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "description": "Filepath used for exporting the file. At most 1024 characters. Default: \"\".",
+                        "title": "File Path"
+                      },
+                      "check_existing": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Check Existing",
+                        "description": "Check and warn on overwriting existing files. Default: true."
+                      },
+                      "export_import_convert_lighting_mode": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "SPEC",
+                          "COMPAT",
+                          "RAW",
+                          null
+                        ],
+                        "title": "Lighting Mode",
+                        "description": "Optional backwards compatibility for non-standard render engines. Applies to lights. Default: \"SPEC\"."
+                      },
+                      "gltf_export_id": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "title": "Identifier",
+                        "description": "Identifier of caller (in case of add-on calling this exporter). Can be useful in case of Extension added by other add-ons. Default: \"\"."
+                      },
+                      "export_use_gltfpack": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Use Gltfpack",
+                        "description": "Use gltfpack to simplify the mesh and/or compress its textures. Default: false."
+                      },
+                      "export_gltfpack_tc": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "KTX2 Compression",
+                        "description": "Convert all textures to KTX2 with BasisU supercompression. Default: true."
+                      },
+                      "export_gltfpack_tq": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Texture Encoding Quality",
+                        "description": "Texture encoding quality. Range [1, 10]. Default: 8."
+                      },
+                      "export_gltfpack_si": {
+                        "type": [
+                          "number",
+                          "null"
+                        ],
+                        "title": "Mesh Simplification Ratio",
+                        "description": "Simplify meshes targeting triangle count ratio. Range [0, 1]. Default: 1."
+                      },
+                      "export_gltfpack_sa": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Aggressive Mesh Simplification",
+                        "description": "Aggressively simplify to the target ratio disregarding quality. Default: false."
+                      },
+                      "export_gltfpack_slb": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Lock Mesh Border Vertices",
+                        "description": "Lock border vertices during simplification to avoid gaps on connected meshes. Default: false."
+                      },
+                      "export_gltfpack_vp": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Position Quantization",
+                        "description": "Use N-bit quantization for positions. Range [1, 16]. Default: 14."
+                      },
+                      "export_gltfpack_vt": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Texture Coordinate Quantization",
+                        "description": "Use N-bit quantization for texture coordinates. Range [1, 16]. Default: 12."
+                      },
+                      "export_gltfpack_vn": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Normal/Tangent Quantization",
+                        "description": "Use N-bit quantization for normals and tangents. Range [1, 16]. Default: 8."
+                      },
+                      "export_gltfpack_vc": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Vertex Color Quantization",
+                        "description": "Use N-bit quantization for colors. Range [1, 16]. Default: 8."
+                      },
+                      "export_gltfpack_vpi": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "Integer",
+                          "Normalized",
+                          "Floating-point",
+                          null
+                        ],
+                        "title": "Vertex Position Attributes",
+                        "description": "Type to use for vertex position attributes. Default: \"Integer\"."
+                      },
+                      "export_gltfpack_noq": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Disable Quantization",
+                        "description": "Disable quantization; produces much larger glTF files with no extensions. Default: true."
+                      },
+                      "export_gltfpack_kn": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Keep Named Nodes",
+                        "description": "Restrict some optimization to keep named nodes and meshes attached to named nodes so that named nodes can be transformed externally. Default: false."
+                      },
+                      "export_format": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "GLB",
+                          "GLTF_SEPARATE",
+                          null
+                        ],
+                        "title": "Format",
+                        "description": "Output format. Binary is most efficient, but JSON may be easier to edit later. Default: \"GLB\"."
+                      },
+                      "ui_tab": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "GENERAL",
+                          "MESHES",
+                          "OBJECTS",
+                          "ANIMATION",
+                          null
+                        ],
+                        "title": "ui_tab",
+                        "description": "Export setting categories. Default: \"GENERAL\"."
+                      },
+                      "export_copyright": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "title": "Copyright",
+                        "description": "Legal rights and conditions for the model. Default: \"\"."
+                      },
+                      "export_image_format": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "AUTO",
+                          "JPEG",
+                          "WEBP",
+                          "NONE",
+                          null
+                        ],
+                        "title": "Images",
+                        "description": "Output format for images. PNG is lossless and generally preferred, but JPEG might be preferable for web applications due to the smaller file size. Alternatively they can be omitted if they are not needed. Default: \"AUTO\"."
+                      },
+                      "export_image_add_webp": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Create WebP",
+                        "description": "Creates WebP textures for every texture. For already WebP textures, nothing happens. Default: false."
+                      },
+                      "export_image_webp_fallback": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "WebP Fallback",
+                        "description": "For all WebP textures, create a PNG fallback texture. Default: false."
+                      },
+                      "export_texture_dir": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "title": "Textures",
+                        "description": "Folder to place texture files in. Relative to the .gltf file. Default: \"\"."
+                      },
+                      "export_jpeg_quality": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "JPEG Quality",
+                        "description": "Quality of JPEG export. Range [0, 100]. Default: 75."
+                      },
+                      "export_image_quality": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Image Quality",
+                        "description": "Quality of image export. Range [0, 100]. Default: 75."
+                      },
+                      "export_keep_originals": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Keep Original",
+                        "description": "Keep original textures files if possible. WARNING: if you use more than one texture, where pbr standard requires only one, only one texture will be used. This can lead to unexpected results. Default: false."
+                      },
+                      "export_texcoords": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "UVs",
+                        "description": "Export UVs (texture coordinates) with meshes. Default: true."
+                      },
+                      "export_normals": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Normals",
+                        "description": "Export vertex normals with meshes. Default: true."
+                      },
+                      "export_gn_mesh": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Geometry Nodes Instances (Experimental)",
+                        "description": "Export Geometry nodes instance meshes. Default: false."
+                      },
+                      "export_meshopt_compression_enable": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Meshopt Compression",
+                        "description": "Compress mesh using Meshopt. Default: false."
+                      },
+                      "export_meshopt_extension": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "EXT_meshopt_compression",
+                          "KHR_meshopt_compression",
+                          null
+                        ],
+                        "title": "Meshopt Extension",
+                        "description": "Extension to use for meshopt compression. Default: \"EXT_meshopt_compression\"."
+                      },
+                      "export_draco_mesh_compression_enable": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Draco Mesh Compression",
+                        "description": "Compress mesh using Draco. Default: false."
+                      },
+                      "export_draco_mesh_compression_level": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Compression Level",
+                        "description": "Compression level (0 = most speed, 6 = most compression, higher values currently not supported) Range [0, 10]. Default: 6."
+                      },
+                      "export_draco_position_quantization": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Position Quantization Bits",
+                        "description": "Quantization bits for position values (0 = no quantization) Range [0, 30]. Default: 14."
+                      },
+                      "export_draco_normal_quantization": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Normal Quantization Bits",
+                        "description": "Quantization bits for normal values (0 = no quantization) Range [0, 30]. Default: 10."
+                      },
+                      "export_draco_texcoord_quantization": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Texcoord Quantization Bits",
+                        "description": "Quantization bits for texture coordinate values (0 = no quantization) Range [0, 30]. Default: 12."
+                      },
+                      "export_draco_color_quantization": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Color Quantization Bits",
+                        "description": "Quantization bits for color values (0 = no quantization) Range [0, 30]. Default: 10."
+                      },
+                      "export_draco_generic_quantization": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Generic Quantization Bits",
+                        "description": "Quantization bits for generic values like weights or joints (0 = no quantization) Range [0, 30]. Default: 12."
+                      },
+                      "export_tangents": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Tangents",
+                        "description": "Export vertex tangents with meshes. Default: false."
+                      },
+                      "export_materials": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "EXPORT",
+                          "PLACEHOLDER",
+                          "VIEWPORT",
+                          "NONE",
+                          null
+                        ],
+                        "title": "Materials",
+                        "description": "Export materials. Default: \"EXPORT\"."
+                      },
+                      "export_unused_images": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Unused Images",
+                        "description": "Export images not assigned to any material. Default: false."
+                      },
+                      "export_unused_textures": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Prepare Unused Textures",
+                        "description": "Export image texture nodes not assigned to any material. This feature is not standard and needs an external extension to be included in the glTF file. Default: false."
+                      },
+                      "export_vertex_color": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "MATERIAL",
+                          "ACTIVE",
+                          "NAME",
+                          "NONE",
+                          null
+                        ],
+                        "title": "Use Vertex Color",
+                        "description": "How to export vertex color. Default: \"MATERIAL\"."
+                      },
+                      "export_vertex_color_name": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "title": "Vertex Color Name",
+                        "description": "Name of vertex color to export. Default: \"Color\"."
+                      },
+                      "export_all_vertex_colors": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Export All Vertex Colors",
+                        "description": "Export all vertex colors, even if not used by any material. If no Vertex Color is used in the mesh materials, a fake COLOR_0 will be created, in order to keep material unchanged. Default: true."
+                      },
+                      "export_active_vertex_color_when_no_material": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Export Active Vertex Color When No Material",
+                        "description": "When there is no material on object, export active vertex color. Default: true."
+                      },
+                      "export_attributes": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Attributes",
+                        "description": "Export Attributes (when starting with underscore) Default: false."
+                      },
+                      "use_mesh_edges": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Loose Edges",
+                        "description": "Export loose edges as lines, using the material from the first material slot. Default: false."
+                      },
+                      "use_mesh_vertices": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Loose Points",
+                        "description": "Export loose points as glTF points, using the material from the first material slot. Default: false."
+                      },
+                      "export_cameras": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Cameras",
+                        "description": "Export cameras. Default: false."
+                      },
+                      "use_selection": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Selected Objects",
+                        "description": "Export selected objects only. Default: false."
+                      },
+                      "use_visible": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Visible Objects",
+                        "description": "Export visible objects only. Default: false."
+                      },
+                      "use_renderable": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Renderable Objects",
+                        "description": "Export renderable objects only. Default: false."
+                      },
+                      "use_active_collection_with_nested": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Include Nested Collections",
+                        "description": "Include active collection and nested collections. Default: true."
+                      },
+                      "use_active_collection": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Active Collection",
+                        "description": "Export objects in the active collection only. Default: false."
+                      },
+                      "use_active_scene": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Active Scene",
+                        "description": "Export active scene only. Default: false."
+                      },
+                      "collection": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "title": "Source Collection",
+                        "description": "Export only objects from this collection (and its children) Default: \"\"."
+                      },
+                      "at_collection_center": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Export at Collection Center",
+                        "description": "Export at Collection center of mass of root objects of the collection. Default: false."
+                      },
+                      "export_extras": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Custom Properties",
+                        "description": "Export custom properties as glTF extras. Default: false."
+                      },
+                      "export_yup": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "+Y Up",
+                        "description": "Export using glTF convention, +Y up. Default: true."
+                      },
+                      "export_apply": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Apply Modifiers",
+                        "description": "Apply modifiers (excluding Armatures) to mesh objects -WARNING: prevents exporting shape keys. Default: false."
+                      },
+                      "export_shared_accessors": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Shared Accessors",
+                        "description": "Export Primitives using shared accessors for attributes. Default: false."
+                      },
+                      "export_animations": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Animations",
+                        "description": "Exports active actions and NLA tracks as glTF animations. Default: true."
+                      },
+                      "export_frame_range": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Limit to Playback Range",
+                        "description": "Clips animations to selected playback range. Default: false."
+                      },
+                      "export_frame_step": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Sampling Rate",
+                        "description": "How often to evaluate animated values (in frames) Range [1, 120]. Default: 1."
+                      },
+                      "export_force_sampling": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Always Sample Animations",
+                        "description": "Apply sampling to all animations. Default: true."
+                      },
+                      "export_sampling_interpolation_fallback": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "LINEAR",
+                          "STEP",
+                          null
+                        ],
+                        "title": "Sampling Interpolation Fallback",
+                        "description": "Interpolation fallback for sampled animations, when the property is not keyed. Default: \"LINEAR\"."
+                      },
+                      "export_pointer_animation": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Export Animation Pointer (Experimental)",
+                        "description": "Export material, Light & Camera animation as Animation Pointer. Available only for baked animation mode 'NLA Tracks' and 'Scene'. Default: false."
+                      },
+                      "export_animation_mode": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "ACTIONS",
+                          "ACTIVE_ACTIONS",
+                          "BROADCAST",
+                          "NLA_TRACKS",
+                          "SCENE",
+                          null
+                        ],
+                        "title": "Animation Mode",
+                        "description": "Export Animation mode. Default: \"ACTIONS\"."
+                      },
+                      "export_nla_strips_merged_animation_name": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "title": "Merged Animation Name",
+                        "description": "Name of single glTF animation to be exported. Default: \"Animation\"."
+                      },
+                      "export_def_bones": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Export Deformation Bones Only",
+                        "description": "Export Deformation bones only. Default: false."
+                      },
+                      "export_hierarchy_flatten_bones": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Flatten Bone Hierarchy",
+                        "description": "Flatten Bone Hierarchy. Useful in case of non decomposable transformation matrix. Default: false."
+                      },
+                      "export_hierarchy_flatten_objs": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Flatten Object Hierarchy",
+                        "description": "Flatten Object Hierarchy. Useful in case of non decomposable transformation matrix. Default: false."
+                      },
+                      "export_armature_object_remove": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Remove Armature Object",
+                        "description": "Remove Armature object if possible. If Armature has multiple root bones, object will not be removed. Default: false."
+                      },
+                      "export_leaf_bone": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Add Leaf Bones",
+                        "description": "Append a final bone to the end of each chain to specify last bone length (use this when you intend to edit the armature from exported data) Default: false."
+                      },
+                      "export_optimize_animation_size": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Optimize Animation Size",
+                        "description": "Reduce exported file size by removing duplicate keyframes. Default: true."
+                      },
+                      "export_optimize_animation_keep_anim_armature": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Force Keeping Channels for Bones",
+                        "description": "If all keyframes are identical in a rig, force keeping the minimal animation. When off, all possible channels for the bones will be exported, even if empty (minimal animation, 2 keyframes) Default: true."
+                      },
+                      "export_optimize_animation_keep_anim_object": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Force Keeping Channel for Objects",
+                        "description": "If all keyframes are identical for object transformations, force keeping the minimal animation. Default: false."
+                      },
+                      "export_optimize_disable_viewport": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Disable Viewport for Other Objects",
+                        "description": "When exporting animations, disable viewport for other objects, for performance. Default: false."
+                      },
+                      "export_negative_frame": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "SLIDE",
+                          "CROP",
+                          null
+                        ],
+                        "title": "Negative Frames",
+                        "description": "Negative Frames are slid or cropped. Default: \"SLIDE\"."
+                      },
+                      "export_anim_slide_to_zero": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Set All glTF Animation Starting at 0",
+                        "description": "Set all glTF animation starting at 0.0s. Can be useful for looping animations. Default: false."
+                      },
+                      "export_bake_animation": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Bake All Objects Animations",
+                        "description": "Force exporting animation on every object. Can be useful when using constraints or driver. Also useful when exporting only selection. Default: false."
+                      },
+                      "export_merge_animation": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "enum": [
+                          "NLA_TRACK",
+                          "ACTION",
+                          "NONE",
+                          null
+                        ],
+                        "title": "Merge Animation",
+                        "description": "Merge Animations. Default: \"ACTION\"."
+                      },
+                      "export_anim_single_armature": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Export all Armature Actions",
+                        "description": "Export all actions, bound to a single armature. WARNING: Option does not support exports including multiple armatures. Default: true."
+                      },
+                      "export_reset_pose_bones": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Reset Pose Bones Between Actions",
+                        "description": "Reset pose bones between each action exported. This is needed when some bones are not keyed on some animations. Default: true."
+                      },
+                      "export_current_frame": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Use Current Frame as Object Rest Transformations",
+                        "description": "Export the scene in the current animation frame. When off, frame 0 is used as rest transformations for objects. Default: false."
+                      },
+                      "export_rest_position_armature": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Use Rest Position Armature",
+                        "description": "Export armatures using rest position as joints' rest pose. When off, current frame pose is used as rest pose. Default: true."
+                      },
+                      "export_anim_scene_split_object": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Split Animation by Object",
+                        "description": "Export Scene as seen in Viewport, But split animation by Object. Default: true."
+                      },
+                      "export_skins": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Skinning",
+                        "description": "Export skinning (armature) data. Default: true."
+                      },
+                      "export_influence_nb": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Bone Influences",
+                        "description": "Choose how many Bone influences to export. Minimum 1. Default: 4."
+                      },
+                      "export_all_influences": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Include All Bone Influences",
+                        "description": "Allow export of all joint vertex influences. Models may appear incorrectly in many viewers. Default: false."
+                      },
+                      "export_morph": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Shape Keys",
+                        "description": "Export shape keys (morph targets) Default: true."
+                      },
+                      "export_morph_normal": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Shape Key Normals",
+                        "description": "Export vertex normals with shape keys (morph targets) Default: true."
+                      },
+                      "export_morph_tangent": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Shape Key Tangents",
+                        "description": "Export vertex tangents with shape keys (morph targets) Default: false."
+                      },
+                      "export_morph_animation": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Shape Key Animations",
+                        "description": "Export shape keys animations (morph targets) Default: true."
+                      },
+                      "export_morph_reset_sk_data": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Reset Shape Keys Between Actions",
+                        "description": "Reset shape keys between each action exported. This is needed when some SK channels are not keyed on some animations. Default: true."
+                      },
+                      "export_lights": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Punctual Lights",
+                        "description": "Export directional, point, and spot lights. Uses \"KHR_lights_punctual\" glTF extension. Default: false."
+                      },
+                      "export_try_sparse_sk": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Use Sparse Accessor if Better",
+                        "description": "Try using Sparse Accessor if it saves space. Default: true."
+                      },
+                      "export_try_omit_sparse_sk": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Omitting Sparse Accessor if Data is Empty",
+                        "description": "Omitting Sparse Accessor if data is empty. Default: false."
+                      },
+                      "export_gpu_instances": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "GPU Instances",
+                        "description": "Export using EXT_mesh_gpu_instancing. Limited to children of a given Empty. Multiple materials might be omitted. Default: false."
+                      },
+                      "export_action_filter": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Filter Actions",
+                        "description": "Filter Actions to be exported. Default: false."
+                      },
+                      "export_convert_animation_pointer": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Convert TRS/Weights to Animation Pointer",
+                        "description": "Export TRS and weights as Animation Pointer. Using KHR_animation_pointer extension. Default: false."
+                      },
+                      "export_nla_strips": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Group by NLA Track",
+                        "description": "When on, multiple actions become part of the same glTF animation if they're pushed onto NLA tracks with the same name. When off, all the currently assigned actions become one glTF animation. Default: true."
+                      },
+                      "export_original_specular": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Export Original PBR Specular",
+                        "description": "Export original glTF PBR Specular, instead of Blender Principled Shader Specular. Default: false."
+                      },
+                      "will_save_settings": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Remember Export Settings",
+                        "description": "Store glTF export settings in the Blender project. Default: false."
+                      },
+                      "export_hierarchy_full_collections": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Full Collection Hierarchy",
+                        "description": "Export full hierarchy, including intermediate collections. Default: false."
+                      },
+                      "export_extra_animations": {
+                        "type": [
+                          "boolean",
+                          "null"
+                        ],
+                        "title": "Prepare Extra Animations",
+                        "description": "Export additional animations.\nThis feature is not standard and needs an external extension to be included in the glTF file. Default: false."
+                      },
+                      "export_loglevel": {
+                        "type": [
+                          "integer",
+                          "null"
+                        ],
+                        "title": "Log Level",
+                        "description": "Log Level. Default: -1."
+                      },
+                      "filter_glob": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "title": "filter_glob",
+                        "description": "filter_glob. Default: \"*.glb\"."
+                      }
+                    },
+                    "required": [
+                      "filepath",
+                      "check_existing",
+                      "export_import_convert_lighting_mode",
+                      "gltf_export_id",
+                      "export_use_gltfpack",
+                      "export_gltfpack_tc",
+                      "export_gltfpack_tq",
+                      "export_gltfpack_si",
+                      "export_gltfpack_sa",
+                      "export_gltfpack_slb",
+                      "export_gltfpack_vp",
+                      "export_gltfpack_vt",
+                      "export_gltfpack_vn",
+                      "export_gltfpack_vc",
+                      "export_gltfpack_vpi",
+                      "export_gltfpack_noq",
+                      "export_gltfpack_kn",
+                      "export_format",
+                      "ui_tab",
+                      "export_copyright",
+                      "export_image_format",
+                      "export_image_add_webp",
+                      "export_image_webp_fallback",
+                      "export_texture_dir",
+                      "export_jpeg_quality",
+                      "export_image_quality",
+                      "export_keep_originals",
+                      "export_texcoords",
+                      "export_normals",
+                      "export_gn_mesh",
+                      "export_meshopt_compression_enable",
+                      "export_meshopt_extension",
+                      "export_draco_mesh_compression_enable",
+                      "export_draco_mesh_compression_level",
+                      "export_draco_position_quantization",
+                      "export_draco_normal_quantization",
+                      "export_draco_texcoord_quantization",
+                      "export_draco_color_quantization",
+                      "export_draco_generic_quantization",
+                      "export_tangents",
+                      "export_materials",
+                      "export_unused_images",
+                      "export_unused_textures",
+                      "export_vertex_color",
+                      "export_vertex_color_name",
+                      "export_all_vertex_colors",
+                      "export_active_vertex_color_when_no_material",
+                      "export_attributes",
+                      "use_mesh_edges",
+                      "use_mesh_vertices",
+                      "export_cameras",
+                      "use_selection",
+                      "use_visible",
+                      "use_renderable",
+                      "use_active_collection_with_nested",
+                      "use_active_collection",
+                      "use_active_scene",
+                      "collection",
+                      "at_collection_center",
+                      "export_extras",
+                      "export_yup",
+                      "export_apply",
+                      "export_shared_accessors",
+                      "export_animations",
+                      "export_frame_range",
+                      "export_frame_step",
+                      "export_force_sampling",
+                      "export_sampling_interpolation_fallback",
+                      "export_pointer_animation",
+                      "export_animation_mode",
+                      "export_nla_strips_merged_animation_name",
+                      "export_def_bones",
+                      "export_hierarchy_flatten_bones",
+                      "export_hierarchy_flatten_objs",
+                      "export_armature_object_remove",
+                      "export_leaf_bone",
+                      "export_optimize_animation_size",
+                      "export_optimize_animation_keep_anim_armature",
+                      "export_optimize_animation_keep_anim_object",
+                      "export_optimize_disable_viewport",
+                      "export_negative_frame",
+                      "export_anim_slide_to_zero",
+                      "export_bake_animation",
+                      "export_merge_animation",
+                      "export_anim_single_armature",
+                      "export_reset_pose_bones",
+                      "export_current_frame",
+                      "export_rest_position_armature",
+                      "export_anim_scene_split_object",
+                      "export_skins",
+                      "export_influence_nb",
+                      "export_all_influences",
+                      "export_morph",
+                      "export_morph_normal",
+                      "export_morph_tangent",
+                      "export_morph_animation",
+                      "export_morph_reset_sk_data",
+                      "export_lights",
+                      "export_try_sparse_sk",
+                      "export_try_omit_sparse_sk",
+                      "export_gpu_instances",
+                      "export_action_filter",
+                      "export_convert_animation_pointer",
+                      "export_nla_strips",
+                      "export_original_specular",
+                      "will_save_settings",
+                      "export_hierarchy_full_collections",
+                      "export_extra_animations",
+                      "export_loglevel",
+                      "filter_glob"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": [
+                  "op",
+                  "args"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        },
+        "required": [
+          "call"
+        ],
+        "additionalProperties": false
+      },
+      "strict": true
+    }
+  }
+]

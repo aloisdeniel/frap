@@ -1,0 +1,17 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  "collection.create | planned M8 | poll YYNNN/YYNNN | name",
+  "collection.export_all | planned OUT | poll YYYYY/YYYYY | ",
+  "collection.exporter_add | planned OUT | poll YYYYY/YYYYY | name",
+  "collection.exporter_export | planned OUT | poll YYYYY/YYYYY | index",
+  "collection.exporter_move | planned OUT | poll YYYYY/YYYYY | direction",
+  "collection.exporter_remove | planned OUT | poll NNNNN/NNNNN | index",
+  "collection.importer_add | planned OUT | poll NNNNN/NNNNN | name",
+  "collection.importer_remove | planned OUT | poll NNNNN/NNNNN | ",
+  "collection.objects_add_active | planned M8 | poll YYNNN/YYNNN | collection",
+  "collection.objects_remove | planned M8 | poll YYNNN/YYNNN | collection",
+  "collection.objects_remove_active | planned M8 | poll YYNNN/YYNNN | collection",
+  "collection.objects_remove_all | planned M8 | poll YYNNN/YYNNN | "
+]

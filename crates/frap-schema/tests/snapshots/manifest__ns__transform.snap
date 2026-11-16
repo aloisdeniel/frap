@@ -1,0 +1,32 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  "transform.bbone_resize | planned OUT | poll YNYYY/YNYYY | value,orient_type,orient_matrix,orient_matrix_type,constraint_axis,mirror,release_confirm,use_accurate",
+  "transform.bend | planned M8 | poll NNNNN/YYYYY | value,mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,snap,gpencil_strokes,center_override,release_confirm,use_accurate",
+  "transform.create_orientation | planned M8 | poll NNNNN/YYYYY | name,use_view,use,overwrite",
+  "transform.delete_orientation | planned M8 | poll NNNNN/NNNNN | ",
+  "transform.edge_bevelweight | planned M2 | poll NNYNN/NNYNN | value,snap,release_confirm,use_accurate",
+  "transform.edge_crease | planned M2 | poll NNYNN/NNYNN | value,snap,release_confirm,use_accurate",
+  "transform.edge_slide | planned M2 | poll NNYNN/NNYNN | value,single_side,use_even,flipped,use_clamp,mirror,snap,snap_elements,use_snap_project,snap_target,use_snap_self,use_snap_edit,use_snap_nonedit,use_snap_selectable,snap_point,correct_uv,release_confirm,use_accurate",
+  "transform.from_gizmo | planned OUT | poll NNNNN/YYYYY | ",
+  "transform.mirror | planned M2 | poll YYYYY/YYYYY | orient_type,orient_matrix,orient_matrix_type,constraint_axis,gpencil_strokes,center_override,release_confirm,use_accurate",
+  "transform.push_pull | planned M2 | poll YYYYY/YYYYY | value,mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,snap,center_override,release_confirm,use_accurate",
+  "transform.resize | planned M1 | poll YYYYY/YYYYY | value,mouse_dir_constraint,orient_type,orient_matrix,orient_matrix_type,constraint_axis,mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,snap,snap_elements,use_snap_project,snap_target,use_snap_self,use_snap_edit,use_snap_nonedit,use_snap_selectable,snap_point,gpencil_strokes,texture_space,remove_on_cancel,use_duplicated_keyframes,center_override,release_confirm,use_accurate",
+  "transform.rotate | planned M1 | poll YYYYY/YYYYY | value,orient_axis,orient_type,orient_matrix,orient_matrix_type,constraint_axis,mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,snap,snap_elements,use_snap_project,snap_target,use_snap_self,use_snap_edit,use_snap_nonedit,use_snap_selectable,snap_point,gpencil_strokes,center_override,release_confirm,use_accurate",
+  "transform.rotate_normal | planned M8 | poll NNYNN/NNYNN | value,orient_axis,orient_type,orient_matrix,orient_matrix_type,constraint_axis,mirror,release_confirm,use_accurate",
+  "transform.select_orientation | planned M8 | poll NNNNN/YYYYY | orientation",
+  "transform.seq_slide | planned OUT | poll NNNNN/NNNNN | value,use_restore_handle_selection,snap,texture_space,remove_on_cancel,use_duplicated_keyframes,view2d_edge_pan,release_confirm,use_accurate",
+  "transform.shear | planned M8 | poll NNNNN/YYYYY | angle,orient_axis,orient_axis_ortho,orient_type,orient_matrix,orient_matrix_type,mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,snap,gpencil_strokes,release_confirm,use_accurate",
+  "transform.shrink_fatten | planned M2 | poll NNYNN/NNYNN | value,use_even_offset,mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,snap,release_confirm,use_accurate",
+  "transform.skin_resize | planned OUT | poll NNYNN/NNYNN | value,orient_type,orient_matrix,orient_matrix_type,constraint_axis,mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,snap,snap_elements,use_snap_project,snap_target,use_snap_self,use_snap_edit,use_snap_nonedit,use_snap_selectable,snap_point,release_confirm,use_accurate",
+  "transform.tilt | planned OUT | poll NNYNY/NNYNY | value,mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,snap,release_confirm,use_accurate",
+  "transform.tosphere | planned M2 | poll YYYYY/YYYYY | value,mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,snap,gpencil_strokes,center_override,release_confirm,use_accurate",
+  "transform.trackball | planned OUT | poll YYYYY/YYYYY | value,mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,snap,gpencil_strokes,center_override,release_confirm,use_accurate",
+  "transform.transform | planned M2 | poll YYYYY/YYYYY | mode,value,orient_axis,orient_type,orient_matrix,orient_matrix_type,constraint_axis,mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,snap,snap_elements,use_snap_project,snap_target,use_snap_self,use_snap_edit,use_snap_nonedit,use_snap_selectable,snap_point,snap_align,snap_normal,gpencil_strokes,texture_space,remove_on_cancel,use_duplicated_keyframes,center_override,release_confirm,use_accurate,use_automerge_and_split",
+  "transform.translate | planned M1 | poll YYYYY/YYYYY | value,orient_type,orient_matrix,orient_matrix_type,constraint_axis,mirror,use_proportional_edit,proportional_edit_falloff,proportional_size,use_proportional_connected,use_proportional_projected,snap,snap_elements,use_snap_project,snap_target,use_snap_self,use_snap_edit,use_snap_nonedit,use_snap_selectable,snap_point,snap_align,snap_normal,gpencil_strokes,cursor_transform,texture_space,remove_on_cancel,use_duplicated_keyframes,view2d_edge_pan,release_confirm,use_accurate,use_automerge_and_split,translate_origin",
+  "transform.vert_crease | planned M2 | poll NNYNN/NNYNN | value,snap,release_confirm,use_accurate",
+  "transform.vert_slide | planned M2 | poll NNYNN/NNYNN | value,use_even,flipped,use_clamp,direction,mirror,snap,snap_elements,use_snap_project,snap_target,use_snap_self,use_snap_edit,use_snap_nonedit,use_snap_selectable,snap_point,correct_uv,release_confirm,use_accurate",
+  "transform.vertex_random | planned M2 | poll NNYNY/NNYNY | offset,uniform,normal,seed,wait_for_input",
+  "transform.vertex_warp | planned OUT | poll NNYNY/NNYNY | warp_angle,offset_angle,min,max,viewmat,center"
+]

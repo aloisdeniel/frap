@@ -1,0 +1,6 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  "frap.describe | planned M1 | poll -/- | target"
+]

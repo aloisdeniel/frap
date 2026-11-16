@@ -1256,11 +1256,23 @@ dependencies = [
 name = "frap-schema"
 version = "0.1.0"
 dependencies = [
+ "frap-math",
+ "frap-nodes",
  "frap-op",
  "frap-ops-all",
  "frap-rna",
  "frap-scene",
+ "frap-session",
  "frap-spec-catalog",
+ "frap-spec-ops-anim",
+ "frap-spec-ops-data",
+ "frap-spec-ops-frap",
+ "frap-spec-ops-io",
+ "frap-spec-ops-mesh",
+ "frap-spec-ops-object",
+ "frap-spec-ops-render",
+ "frap-spec-ops-transform",
+ "frap-spec-ops-uv",
  "frap-spec-rna",
  "indexmap",
  "insta",

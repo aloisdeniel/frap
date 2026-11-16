@@ -6,47 +6,234 @@ source: crates/frap-schema/tests/describe_ops.rs
   "bl_idname": "MESH_OT_primitive_cube_add",
   "label": "Add Cube",
   "description": "Construct a cube mesh that consists of six square faces",
-  "props": [
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
     {
       "identifier": "size",
+      "name": "Size",
+      "description": "",
       "type": "FLOAT",
-      "array_length": 1
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 2,
+      "hard_min": 0,
+      "hard_max": 1000000000000,
+      "soft_min": 0.001,
+      "soft_max": 100,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "calc_uvs",
+      "name": "Generate UVs",
+      "description": "Generate a default UV map",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "enter_editmode",
+      "name": "Enter Edit Mode",
+      "description": "Enter edit mode when adding this object",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "align",
+      "name": "Align",
+      "description": "The alignment of the new object",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "WORLD",
+      "enum_items": [
+        {
+          "identifier": "WORLD",
+          "name": "World",
+          "description": "Align the new object to the world",
+          "value": 0
+        },
+        {
+          "identifier": "VIEW",
+          "name": "View",
+          "description": "Align the new object to the view",
+          "value": 1
+        },
+        {
+          "identifier": "CURSOR",
+          "name": "3D Cursor",
+          "description": "Use the 3D cursor orientation for the new object",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "location",
+      "name": "Location",
+      "description": "Location for the newly added object",
       "type": "FLOAT",
-      "array_length": 3
+      "subtype": "XYZ_LENGTH",
+      "unit": "LENGTH",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -1000000000000,
+      "hard_max": 1000000000000,
+      "soft_min": -1000,
+      "soft_max": 1000,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": "unset: the 3D cursor location (scene.cursor.location)",
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "rotation",
+      "name": "Rotation",
+      "description": "Rotation for the newly added object",
       "type": "FLOAT",
-      "array_length": 3
+      "subtype": "EULER",
+      "unit": "ROTATION (radians)",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -1000000000000,
+      "hard_max": 1000000000000,
+      "soft_min": -6.2831855,
+      "soft_max": 6.2831855,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": "unset: from align (WORLD: no rotation, VIEW: the 3D view rotation, CURSOR: the 3D cursor rotation); an explicit rotation always wins",
+      "frap_note": "radians; a whole number above 2π gets the ANGLE_LIKELY_DEGREES hint (use radians(90))",
+      "frap_extension": false
     },
     {
       "identifier": "scale",
+      "name": "Scale",
+      "description": "Scale for the newly added object",
       "type": "FLOAT",
-      "array_length": 3
+      "subtype": "XYZ_LENGTH",
+      "unit": "LENGTH",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -1000000000000,
+      "hard_max": 1000000000000,
+      "soft_min": -1000,
+      "soft_max": 1000,
+      "precision": 3,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": "unset: (1, 1, 1); the scale is applied to the new mesh data, the object's scale stays (1, 1, 1)",
+      "frap_note": "the (0, 0, 0) default is a placeholder: unset means (1, 1, 1); scale is applied to the mesh data and the new object's scale stays 1 (same for every mesh.primitive_*_add)",
+      "frap_extension": false
     }
   ],
   "frap": {
     "status": "implemented",
     "tier": "T1",
-    "requires": [],
+    "support": "partial",
+    "support_note": "align='VIEW'/'CURSOR' and enter_editmode=True arrive in M1/M2",
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
     "notes": [
       "unset location => 3D cursor; unset rotation => from align; scale (0,0,0) => 1"
     ]

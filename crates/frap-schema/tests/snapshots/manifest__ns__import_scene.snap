@@ -1,0 +1,7 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  "import_scene.fbx | planned OUT | poll YYYYY/YYYYY | filepath,directory,filter_glob,files,ui_tab,use_manual_orientation,global_scale,bake_space_transform,use_custom_normals,colors_type,use_image_search,use_alpha_decals,decal_offset,use_anim,anim_offset,use_subsurf,use_custom_props,use_custom_props_enum_as_string,ignore_leaf_bones,force_connect_children,automatic_bone_orientation,primary_bone_axis,secondary_bone_axis,use_prepost_rot,mtl_name_collision_mode,axis_forward,axis_up",
+  "import_scene.gltf | planned M1 | poll YYYYY/YYYYY | filepath,export_import_convert_lighting_mode,filter_glob,directory,files,loglevel,import_pack_images,merge_vertices,import_shading,bone_heuristic,disable_bone_shape,bone_shape_scale_factor,guess_original_bind_pose,import_webp_texture,import_unused_materials,import_select_created_objects,import_scene_extras,import_scene_as_collection,import_merge_material_slots,import_point_as_pointcloud"
+]
