@@ -37,7 +37,12 @@ impl World {
     }
 }
 
-crate::id::name_only_rna!(World, frap_spec_rna::WORLD, WorldId);
+crate::id::id_rna! { World as frap_spec_rna::WORLD, "WORLD" {
+    color => color,
+    node_tree => embedded(node_tree, NodeTree),
+    // Deprecated in 5.x: always True, writes are ignored (as `Material.use_nodes`).
+    use_nodes => get(|w| w.use_nodes) set(|_w, _v: bool| ()),
+}}
 
 impl IdType for World {
     type Kind = WorldId;
@@ -55,6 +60,7 @@ impl IdType for World {
     }
     fn remap_ref(&mut self, from: IdAny, to: Option<IdAny>) {
         self.node_tree.remap_ref(from, to);
+        crate::id::remap_action(&mut self.animation_data, from, to);
     }
     fn embedded(&self) -> &'static [EmbeddedSlot] {
         &[EmbeddedSlot::NodeTree]

@@ -16,5 +16,39 @@ pub struct Library {
     pub is_archive: bool,
 }
 
-crate::id::name_only_rna!(Library, frap_spec_rna::LIBRARY, LibraryId);
-crate::id::id_type!(Library, LibraryId);
+crate::id::id_rna! { Library as frap_spec_rna::LIBRARY, "LIBRARY" {
+    filepath => filepath,
+    parent => id(parent),
+    is_archive => readonly(|l| l.is_archive),
+}}
+impl frap_rna::IdType for Library {
+    type Kind = frap_rna::LibraryId;
+    fn header(&self) -> &frap_rna::IdHeader {
+        &self.header
+    }
+    fn header_mut(&mut self) -> &mut frap_rna::IdHeader {
+        &mut self.header
+    }
+    fn for_each_ref(&self, f: &mut dyn FnMut(frap_rna::IdAny)) {
+        if let Some(p) = self.parent {
+            f(p.any());
+        }
+    }
+    fn remap_ref(&mut self, from: frap_rna::IdAny, to: Option<frap_rna::IdAny>) {
+        if self.parent.map(|p| p.any()) == Some(from) {
+            self.parent = to.and_then(frap_rna::IdRef::from_any);
+        }
+    }
+}
+
+impl Library {
+    /// A library (`bpy.data.libraries` entry) with the given file path.
+    pub fn new(name: &str, filepath: &str) -> Library {
+        Library {
+            header: frap_rna::IdHeader::new(name),
+            filepath: filepath.into(),
+            parent: None,
+            is_archive: false,
+        }
+    }
+}

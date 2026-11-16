@@ -6,7 +6,6 @@
 
 use frap_anim::AnimData;
 use frap_rna::*;
-use frap_spec_rna::{OBJECT, id, object};
 use glam::Mat4;
 use smol_str::SmolStr;
 
@@ -188,49 +187,54 @@ impl Object {
     }
 }
 
-impl Rna for Object {
-    fn srna(&self) -> &'static StructDef {
-        &OBJECT
-    }
-    fn get(&self, prop: &'static PropDef) -> Result<Field<'_>, RnaError> {
-        if std::ptr::eq(prop, id::NAME) {
-            return Ok(Field::Value(Value::Str(self.header.name.clone())));
-        }
-        if std::ptr::eq(prop, object::LOCATION) {
-            return Ok(Field::Value(Value::FloatArray {
-                data: self.location.iter().copied().collect(),
-                shape: prop.array,
-                tag: MathTag::Vector,
-            }));
-        }
-        Err(super::no_attr(&OBJECT, prop))
-    }
-}
-
-impl RnaMut for Object {
-    fn set(&mut self, prop: &'static PropDef, v: Value) -> Result<SetOutcome, RnaError> {
-        if std::ptr::eq(prop, id::NAME) {
-            return Ok(SetOutcome::NeedsHook);
-        }
-        if std::ptr::eq(prop, object::LOCATION) {
-            self.location = v.as_vec3().ok_or_else(|| {
-                RnaError::new(
-                    RnaErrorKind::Type,
-                    PyExc::TypeError,
-                    "invariant: location expects float[3]",
-                )
-            })?;
-            return Ok(SetOutcome::Done);
-        }
-        Err(super::no_attr(&OBJECT, prop))
-    }
-    fn struct_mut(&mut self, prop: &'static PropDef) -> Result<RnaMutGuard<'_>, RnaError> {
-        Err(super::no_attr(&OBJECT, prop))
-    }
-    fn coll_mut(&mut self, prop: &'static PropDef) -> Result<RnaCollMutGuard<'_>, RnaError> {
-        Err(super::no_attr(&OBJECT, prop))
-    }
-}
+crate::id::id_rna! { Object as frap_spec_rna::OBJECT, "OBJECT" {
+    data => hook,
+    type => readonly(|o| o.object_type()),
+    mode => readonly(|o| o.mode.as_str()),
+    parent => hook,
+    parent_type => parent_type,
+    parent_vertices => parent_vertices,
+    parent_bone => parent_bone,
+    material_slots => hook_coll,
+    active_material => hook,
+    active_material_index => active_material_index (set = hook),
+    location => location,
+    rotation_quaternion => rotation_quaternion,
+    rotation_axis_angle => rotation_axis_angle,
+    rotation_euler => rotation_euler (tag = Euler(rotation_mode)),
+    rotation_mode => rotation_mode (set = hook),
+    scale => scale,
+    delta_location => delta_location,
+    delta_rotation_euler => delta_rotation_euler (tag = Euler(rotation_mode)),
+    delta_rotation_quaternion => delta_rotation_quaternion,
+    delta_scale => delta_scale,
+    matrix_world => hook,
+    matrix_local => get(|o| o.matrix_local()) set(|o, m: Mat4| o.set_matrix_local(&m)),
+    matrix_basis => get(|o| o.matrix_basis()) set(|o, m: Mat4| o.set_matrix_basis(&m)),
+    matrix_parent_inverse => matrix_parent_inverse,
+    modifiers => coll(modifiers, item = frap_spec_rna::MODIFIER, api = "ObjectModifiers"),
+    empty_display_type => empty_display_type,
+    empty_display_size => empty_display_size,
+    color => color,
+    hide_viewport => hide_viewport (set = hook),
+    hide_select => hide_select (set = hook),
+    hide_render => hide_render,
+    display_type => display_type,
+    show_bounds => show_bounds,
+    display_bounds_type => display_bounds_type,
+    show_name => show_name,
+    show_axis => show_axis,
+    show_texture_space => show_texture_space,
+    show_wire => show_wire,
+    show_all_edges => show_all_edges,
+    show_in_front => show_in_front,
+    show_only_shape_key => show_only_shape_key,
+    active_shape_key_index => active_shape_key_index,
+    children => python_only hook_coll,
+    children_recursive => python_only hook_coll,
+    users_collection => python_only hook_coll,
+    users_scene => python_only hook_coll,
+}}
 
 impl IdType for Object {
     type Kind = ObjectId;
@@ -269,6 +273,11 @@ impl IdType for Object {
                 o.material = to.and_then(IdRef::from_any);
             }
         }
-        // WP 1.10: animation_data.action, modifier settings.
+        if let Some(ad) = self.animation_data.as_mut()
+            && ad.action.map(|a| a.any()) == Some(from)
+        {
+            ad.action = to.and_then(IdRef::from_any);
+        }
+        // M4 / M6: modifier settings (objects, node groups, textures), pose.
     }
 }

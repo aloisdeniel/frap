@@ -11,10 +11,10 @@ use frap_anim::Action;
 use frap_mesh::Mesh;
 use frap_nodes::NodeTree;
 use frap_rna::id::next_generation;
-use frap_rna::naming::unique_name;
+use frap_rna::naming::{split_suffix, truncate_utf8, unique_name};
 use frap_rna::{
-    IdAny, IdCode, IdHeader, IdKey, IdKind, IdNames, IdRef, IdType, LibraryId, Rna, RnaMut,
-    StructDef,
+    EmbeddedSlot, IdAny, IdCode, IdHeader, IdKey, IdKind, IdNames, IdRef, IdType, LibraryId, PyExc,
+    Rna, RnaError, RnaErrorKind, RnaMut, StructDef,
 };
 use indexmap::{IndexMap, IndexSet};
 use smol_str::SmolStr;
@@ -102,6 +102,17 @@ fn lib_key(h: &IdHeader) -> Option<IdKey> {
     h.library.map(|l| l.key())
 }
 
+/// Sort key of an ID in its ListBase (§5.4): local IDs first, then linked IDs grouped by
+/// library (in library creation order), each group sorted by `BLI_strcasecmp`, equal keys in
+/// insertion order (verified: a linked `Smooth by Angle` sorts after the local `Zzz`).
+fn list_cmp(a: (&str, Option<IdKey>), b: (&str, Option<IdKey>)) -> Ordering {
+    match (a.1, b.1) {
+        (None, Some(_)) => Ordering::Less,
+        (Some(_), None) => Ordering::Greater,
+        (la, lb) => la.cmp(&lb).then_with(|| strcasecmp(a.0, b.0)),
+    }
+}
+
 impl<T: IdType> IdMap<T> {
     /// Read access.
     pub fn get(&self, r: IdRef<T::Kind>) -> Option<&T> {
@@ -112,7 +123,8 @@ impl<T: IdType> IdMap<T> {
         self.items.get(&r.key()).cloned()
     }
     /// The only mutable access path: `Arc::make_mut` (clones only if a snapshot shares it),
-    /// `header.generation` bump, logged as modified.
+    /// `header.generation` bump, logged as modified. Embedded IDs (`Material.node_tree`,
+    /// `Scene.collection`) are reached through their owner, so the owner is bumped (§5.1).
     pub fn get_mut(&mut self, r: IdRef<T::Kind>, log: &mut ChangeLog) -> Option<&mut T> {
         let arc = self.items.get_mut(&r.key())?;
         let t = Arc::make_mut(arc);
@@ -120,7 +132,13 @@ impl<T: IdType> IdMap<T> {
         log.modified.insert(r.any());
         Some(t)
     }
-    /// `coll['Name']`, `coll.get()`: the local ID first, then linked IDs in library order.
+    /// True when `r` is in this map.
+    pub fn contains(&self, r: IdRef<T::Kind>) -> bool {
+        self.items.contains_key(&r.key())
+    }
+    /// `coll['Name']`, `coll.get()`: the local ID first, then linked IDs in library order
+    /// (Blender scans its ListBase, where local IDs sort first; verified with a local and a
+    /// linked `Smooth by Angle`).
     pub fn find(&self, name: &str) -> Option<IdRef<T::Kind>> {
         if let Some(k) = self.by_name.get(&(SmolStr::new(name), None)) {
             return Some(IdRef::from_key(*k));
@@ -130,8 +148,12 @@ impl<T: IdType> IdMap<T> {
             .find(|(_, v)| v.header().name == name)
             .map(|(k, _)| IdRef::from_key(*k))
     }
-    /// `coll['Name', <lib>]`: one library explicitly. The exact Blender rule is pinned by
-    /// T0 goldens in WP 1.10 before the tuple form is exposed (§5.2).
+    /// `coll['Name', lib]`: exactly the ID named `name` in `library` (`None` = local only).
+    ///
+    /// Pinned on Blender 5.2.4 (`pyrna_prop_collection_subscript_str_lib_pair`): `None` finds
+    /// local IDs only (`objects['Cube', None]` works; a linked group is not found by `None`);
+    /// a string names a library by **filepath**, and the first library with that filepath is
+    /// used ([`Main::library_by_filepath`]). See [`Main::find_key_lib`] for the errors.
     pub fn find_in(&self, name: &str, library: Option<IdRef<LibraryId>>) -> Option<IdRef<T::Kind>> {
         self.by_name
             .get(&(SmolStr::new(name), library.map(|l| l.key())))
@@ -160,31 +182,86 @@ impl<T: IdType> IdMap<T> {
     pub fn is_empty(&self) -> bool {
         self.items.is_empty()
     }
-    /// Inserts a local ID with a unique name (lowest free `.NNN`) at its sorted position.
-    pub fn insert(&mut self, requested: &str, mut value: T, log: &mut ChangeLog) -> IdRef<T::Kind> {
-        let lib = lib_key(value.header());
-        let name = unique_name(
+    /// Sorted ListBase position for a new entry `(name, lib)`: after every ID that sorts
+    /// before or equal to it (stable).
+    fn sorted_pos(&self, name: &str, lib: Option<IdKey>, skip: Option<IdKey>) -> usize {
+        self.items
+            .iter()
+            .filter(|(k, _)| Some(**k) != skip)
+            .position(|(_, v)| {
+                list_cmp((&v.header().name, lib_key(v.header())), (name, lib)) == Ordering::Greater
+            })
+            .unwrap_or(self.items.len() - usize::from(skip.is_some()))
+    }
+    fn unique(&self, requested: &str, lib: Option<IdKey>) -> SmolStr {
+        unique_name(
             &|n| self.by_name.contains_key(&(SmolStr::new(n), lib)),
             requested,
             255,
             T::Kind::DEFAULT_NAME,
-        );
-        value.header_mut().name = name.clone();
-        value.header_mut().generation = next_generation();
+        )
+    }
+    /// Inserts an ID (local, or linked when its header names a library) with a unique name
+    /// among the IDs of the same library (lowest free `.NNN`), at its sorted position.
+    pub fn insert(&mut self, requested: &str, mut value: T, log: &mut ChangeLog) -> IdRef<T::Kind> {
+        let lib = lib_key(value.header());
+        let name = self.unique(requested, lib);
         let key = IdKey::next();
-        // Sorted ListBase insert: after every ID whose name is <= the new one (stable).
-        let pos = self
-            .items
-            .values()
-            .position(|v| strcasecmp(&v.header().name, &name) == Ordering::Greater)
-            .unwrap_or(self.items.len());
+        {
+            let h = value.header_mut();
+            h.name = name.clone();
+            h.generation = next_generation();
+            h.session_uid = key.get() as u32;
+        }
+        let pos = if self.items.is_empty() {
+            0
+        } else {
+            self.sorted_pos(&name, lib, None)
+        };
         self.items.shift_insert(pos, key, Arc::new(value));
         self.by_name.insert((name, lib), key);
         let r = IdRef::from_key(key);
         log.added.push(r.any());
         r
     }
-    /// Renames with Blender's collision rules and re-sorts (§5.4).
+    /// Moves `key` to its sorted position after a name change.
+    fn resort(&mut self, key: IdKey) {
+        let Some(from) = self.items.get_index_of(&key) else {
+            return;
+        };
+        let (name, lib) = {
+            let h = self.items[from].header();
+            (h.name.clone(), lib_key(h))
+        };
+        let to = self.sorted_pos(&name, lib, Some(key));
+        self.items.move_index(from, to);
+    }
+    /// Sets the name of `key` (already unique), re-indexes and re-sorts, logging the rename.
+    fn set_name(&mut self, key: IdKey, name: SmolStr, log: &mut ChangeLog) {
+        let Some(arc) = self.items.get_mut(&key) else {
+            return;
+        };
+        let t = Arc::make_mut(arc);
+        let lib = lib_key(t.header());
+        let old = std::mem::replace(&mut t.header_mut().name, name.clone());
+        t.header_mut().generation = next_generation();
+        if self.by_name.get(&(old.clone(), lib)) == Some(&key) {
+            self.by_name.remove(&(old.clone(), lib));
+        }
+        self.by_name.insert((name, lib), key);
+        let r: IdRef<T::Kind> = IdRef::from_key(key);
+        log.modified.insert(r.any());
+        log.renamed.push((r.any(), old));
+        self.resort(key);
+    }
+    /// `ID.rename(name, mode=…)` and `ID.name = …` (mode `Never`), with Blender's collision
+    /// rules (`BKE_id_rename`, verified on 5.2.4): the requested name is truncated to 255 bytes
+    /// on a UTF-8 boundary (empty → the type's default name); a free name is taken as is;
+    /// on a collision `Never` takes the lowest free `.NNN` (`UnchangedCollision` when that is
+    /// the current name), `Always` takes the name and renames the other ID to its own lowest
+    /// free name, `SameRoot` does the same only when the current and requested names share
+    /// their root (`Foo.002` → `Foo`), otherwise behaves as `Never`. The renamed ID moves to
+    /// its sorted ListBase position (§5.4).
     pub fn rename(
         &mut self,
         r: IdRef<T::Kind>,
@@ -192,14 +269,59 @@ impl<T: IdType> IdMap<T> {
         mode: RenameMode,
         log: &mut ChangeLog,
     ) -> RenameResult {
-        let _ = (r, requested, mode, log);
-        todo!("WP 1.10: ID rename with RenameMode and re-sort")
+        let key = r.key();
+        let Some(cur) = self.items.get(&key) else {
+            return RenameResult::Unchanged;
+        };
+        let lib = lib_key(cur.header());
+        let old = cur.header().name.clone();
+        let requested = if requested.is_empty() {
+            T::Kind::DEFAULT_NAME
+        } else {
+            requested
+        };
+        let wanted = SmolStr::new(truncate_utf8(requested, 255));
+        if wanted == old {
+            return RenameResult::Unchanged;
+        }
+        // Take the ID out of the namespace while deciding (its old name is free again).
+        self.by_name.remove(&(old.clone(), lib));
+        let conflict = self.by_name.get(&(wanted.clone(), lib)).copied();
+        let Some(other) = conflict else {
+            self.by_name.insert((old, lib), key);
+            self.set_name(key, wanted, log);
+            return RenameResult::RenamedNoCollision;
+        };
+        let force = match mode {
+            RenameMode::Never => false,
+            RenameMode::Always => true,
+            RenameMode::SameRoot => split_suffix(&old).0 == split_suffix(&wanted).0,
+        };
+        if force {
+            // The renamed ID takes the name; the other gets the lowest free one (the renamed
+            // ID's old name is free again).
+            self.by_name.insert((wanted.clone(), lib), key);
+            let other_name = self.unique(&wanted, lib);
+            self.by_name.insert((other_name.clone(), lib), other);
+            self.set_name(other, other_name, log);
+            self.set_name(key, wanted, log);
+            return RenameResult::RenamedCollisionForced;
+        }
+        let adjusted = self.unique(&wanted, lib);
+        self.by_name.insert((old.clone(), lib), key);
+        if adjusted == old {
+            return RenameResult::UnchangedCollision;
+        }
+        self.set_name(key, adjusted, log);
+        RenameResult::RenamedCollisionAdjusted
     }
-    /// Removes an ID.
+    /// Removes an ID (references to it are not touched: see [`Main::remove`]).
     pub fn remove(&mut self, r: IdRef<T::Kind>, log: &mut ChangeLog) -> Option<Arc<T>> {
         let v = self.items.shift_remove(&r.key())?;
-        self.by_name
-            .remove(&(v.header().name.clone(), lib_key(v.header())));
+        let k = (v.header().name.clone(), lib_key(v.header()));
+        if self.by_name.get(&k) == Some(&r.key()) {
+            self.by_name.remove(&k);
+        }
         log.removed.push((r.any(), v.header().name.clone()));
         Some(v)
     }
@@ -212,6 +334,25 @@ impl<T: IdType> IdMap<T> {
     /// Name of an ID.
     pub fn name_of(&self, r: IdRef<T::Kind>) -> Option<&str> {
         self.get(r).map(|t| t.header().name.as_str())
+    }
+    /// Mutable access to every ID that `pred` selects (each one bumped and logged).
+    pub(crate) fn update_where(
+        &mut self,
+        mut pred: impl FnMut(&T) -> bool,
+        mut f: impl FnMut(&mut T),
+        log: &mut ChangeLog,
+    ) {
+        let keys: Vec<IdKey> = self
+            .items
+            .iter()
+            .filter(|(_, v)| pred(v))
+            .map(|(k, _)| *k)
+            .collect();
+        for k in keys {
+            if let Some(t) = self.get_mut(IdRef::from_key(k), log) {
+                f(t);
+            }
+        }
     }
 }
 
@@ -514,5 +655,401 @@ impl Main {
     pub fn at(&self, collection: &str, i: isize) -> Option<IdAny> {
         let code = Main::code_of(collection)?;
         with_map!(self, code, |m| m.at(i).map(|r| r.any()))
+    }
+}
+
+/// Runs `$body` with `$m` bound to every `IdMap` of `Main`.
+macro_rules! for_each_map {
+    ($main:expr, |$m:ident| $body:expr) => {{
+        {
+            let $m = &$main.objects;
+            $body
+        }
+        {
+            let $m = &$main.meshes;
+            $body
+        }
+        {
+            let $m = &$main.materials;
+            $body
+        }
+        {
+            let $m = &$main.cameras;
+            $body
+        }
+        {
+            let $m = &$main.lights;
+            $body
+        }
+        {
+            let $m = &$main.worlds;
+            $body
+        }
+        {
+            let $m = &$main.images;
+            $body
+        }
+        {
+            let $m = &$main.armatures;
+            $body
+        }
+        {
+            let $m = &$main.actions;
+            $body
+        }
+        {
+            let $m = &$main.scenes;
+            $body
+        }
+        {
+            let $m = &$main.collections;
+            $body
+        }
+        {
+            let $m = &$main.shape_keys;
+            $body
+        }
+        {
+            let $m = &$main.node_groups;
+            $body
+        }
+        {
+            let $m = &$main.textures;
+            $body
+        }
+        {
+            let $m = &$main.libraries;
+            $body
+        }
+        {
+            let $m = &$main.pointclouds;
+            $body
+        }
+    }};
+}
+
+/// Mutable variant of [`for_each_map!`].
+macro_rules! for_each_map_mut {
+    ($main:expr, |$m:ident| $body:expr) => {{
+        {
+            let $m = &mut $main.objects;
+            $body
+        }
+        {
+            let $m = &mut $main.meshes;
+            $body
+        }
+        {
+            let $m = &mut $main.materials;
+            $body
+        }
+        {
+            let $m = &mut $main.cameras;
+            $body
+        }
+        {
+            let $m = &mut $main.lights;
+            $body
+        }
+        {
+            let $m = &mut $main.worlds;
+            $body
+        }
+        {
+            let $m = &mut $main.images;
+            $body
+        }
+        {
+            let $m = &mut $main.armatures;
+            $body
+        }
+        {
+            let $m = &mut $main.actions;
+            $body
+        }
+        {
+            let $m = &mut $main.scenes;
+            $body
+        }
+        {
+            let $m = &mut $main.collections;
+            $body
+        }
+        {
+            let $m = &mut $main.shape_keys;
+            $body
+        }
+        {
+            let $m = &mut $main.node_groups;
+            $body
+        }
+        {
+            let $m = &mut $main.textures;
+            $body
+        }
+        {
+            let $m = &mut $main.libraries;
+            $body
+        }
+        {
+            let $m = &mut $main.pointclouds;
+            $body
+        }
+    }};
+}
+
+fn key_lib_err(msg: String) -> RnaError {
+    RnaError::new(RnaErrorKind::KeyNotFound, PyExc::KeyError, msg)
+}
+
+impl Main {
+    /// The first library (in `bpy.data.libraries` order) whose `filepath` is `path`, as
+    /// Blender's `BLI_findstring(&bmain->libraries, path, offsetof(Library, filepath))`.
+    pub fn library_by_filepath(&self, path: &str) -> Option<IdRef<LibraryId>> {
+        self.libraries
+            .iter()
+            .find(|(_, l)| l.filepath == path)
+            .map(|(r, _)| r)
+    }
+
+    /// `bpy.data.<collection>[name, lib]` (the tuple key; `PathSeg::KeyLib`), pinned on Blender
+    /// 5.2.4:
+    ///
+    /// - `lib = None` finds the **local** ID `name` only;
+    /// - `lib = Some(path)` uses the first library whose `filepath` is `path`
+    ///   ([`Main::library_by_filepath`]); no such library raises `KeyError:
+    ///   "bpy_prop_collection[id, lib]: lib filepath '<path>' does not reference a valid library"`;
+    /// - a missing ID raises `KeyError: 'bpy_prop_collection[key, lib]: not found'`.
+    ///
+    /// `coll.get((name, lib))` maps both errors to its default. An unknown collection attribute
+    /// gives `Ok(None)`.
+    pub fn find_key_lib(
+        &self,
+        collection: &str,
+        name: &str,
+        lib: Option<&str>,
+    ) -> Result<Option<IdAny>, RnaError> {
+        let Some(code) = Main::code_of(collection) else {
+            return Ok(None);
+        };
+        let lib = match lib {
+            None => None,
+            Some(path) => Some(self.library_by_filepath(path).ok_or_else(|| {
+                key_lib_err(format!(
+                    "bpy_prop_collection[id, lib]: lib filepath '{path}' does not reference a valid library"
+                ))
+            })?),
+        };
+        with_map!(self, code, |m| m.find_in(name, lib).map(|r| r.any()))
+            .map(Some)
+            .ok_or_else(|| key_lib_err("bpy_prop_collection[key, lib]: not found".into()))
+    }
+
+    /// `ID.rename(name, mode)` on any ID (see [`IdMap::rename`]).
+    pub fn rename(
+        &mut self,
+        a: IdAny,
+        requested: &str,
+        mode: RenameMode,
+        log: &mut ChangeLog,
+    ) -> RenameResult {
+        fn go<T: IdType>(
+            m: &mut IdMap<T>,
+            a: IdAny,
+            requested: &str,
+            mode: RenameMode,
+            log: &mut ChangeLog,
+        ) -> RenameResult {
+            match a.typed::<T::Kind>() {
+                Some(r) => m.rename(r, requested, mode, log),
+                None => RenameResult::Unchanged,
+            }
+        }
+        with_map_mut!(self, a.code, |m| go(m, a, requested, mode, log))
+    }
+
+    /// Every ID of `bpy.data`, map by map in `IdCode::ALL` order, each in Blender order.
+    pub fn all_ids(&self) -> Vec<IdAny> {
+        let mut out = Vec::new();
+        for code in IdCode::ALL {
+            with_map!(self, code, |m| out.extend(m.iter().map(|(r, _)| r.any())));
+        }
+        out
+    }
+
+    /// Calls `f(user, used)` for every **user-counting** reference (`IDWALK_CB_USER`):
+    /// `Object.parent` and `Scene.camera` are references but not users (verified on 5.2.4:
+    /// parenting the Cube to the Camera leaves `Camera.users == 1`).
+    pub fn for_each_user_ref(&self, f: &mut dyn FnMut(IdAny, IdAny)) {
+        for (r, ob) in self.objects.iter() {
+            let me = r.any();
+            if let Some(d) = ob.data {
+                f(me, d);
+            }
+            for o in &ob.material_slot_overrides {
+                if let Some(m) = o.material {
+                    f(me, m.any());
+                }
+            }
+            if let Some(a) = ob.animation_data.as_ref().and_then(|a| a.action) {
+                f(me, a.any());
+            }
+        }
+        for (r, sc) in self.scenes.iter() {
+            let me = r.any();
+            sc.collection.for_each_ref(&mut |x| f(me, x));
+            if let Some(w) = sc.world {
+                f(me, w.any());
+            }
+            if let Some(a) = sc.animation_data.as_ref().and_then(|a| a.action) {
+                f(me, a.any());
+            }
+        }
+        fn generic<T: IdType>(m: &IdMap<T>, f: &mut dyn FnMut(IdAny, IdAny)) {
+            for (r, t) in m.iter() {
+                let me = r.any();
+                t.for_each_ref(&mut |x| f(me, x));
+            }
+        }
+        generic(&self.meshes, f);
+        generic(&self.materials, f);
+        generic(&self.cameras, f);
+        generic(&self.lights, f);
+        generic(&self.worlds, f);
+        generic(&self.images, f);
+        generic(&self.armatures, f);
+        generic(&self.actions, f);
+        generic(&self.collections, f);
+        generic(&self.shape_keys, f);
+        generic(&self.node_groups, f);
+        generic(&self.textures, f);
+        generic(&self.pointclouds, f);
+    }
+
+    /// `ID.users` of every ID with at least one user (§5.5): user-counting references
+    /// ([`Main::for_each_user_ref`]) plus one for `use_fake_user`. Libraries always have one
+    /// user (verified). The window's user of its scene is added by the `ID.users` hook.
+    pub fn user_counts(&self) -> BTreeMap<IdAny, u32> {
+        let mut out: BTreeMap<IdAny, u32> = BTreeMap::new();
+        self.for_each_user_ref(&mut |_, used| *out.entry(used).or_default() += 1);
+        for_each_map!(self, |m| for (r, t) in m.iter() {
+            if t.header().use_fake_user {
+                *out.entry(r.any()).or_default() += 1;
+            }
+        });
+        for (r, _) in self.libraries.iter() {
+            out.insert(r.any(), 1);
+        }
+        out
+    }
+
+    /// `ID.users` of one ID (without the window's scene user, see [`Main::user_counts`]).
+    pub fn users(&self, a: IdAny) -> u32 {
+        self.user_counts().get(&a).copied().unwrap_or(0)
+    }
+
+    /// IDs with no user and no fake user, in [`Main::all_ids`] order: what a save drops (§5.5,
+    /// §15). Scenes and libraries are never orphans.
+    pub fn orphans(&self) -> Vec<IdAny> {
+        let counts = self.user_counts();
+        self.all_ids()
+            .into_iter()
+            .filter(|a| !matches!(a.code, IdCode::SC | IdCode::LI) && !counts.contains_key(a))
+            .collect()
+    }
+
+    /// Clears every reference to `a` (`bpy.data.<coll>.remove(id, do_unlink=True)`), or
+    /// retargets it to `to` (`ID.user_remap`). Only the IDs that reference `a` are touched
+    /// (bumped and logged). View layers are resynced afterwards (§8).
+    pub fn remap(&mut self, a: IdAny, to: Option<IdAny>, log: &mut ChangeLog) {
+        fn refs<T: IdType>(t: &T, a: IdAny) -> bool {
+            let mut hit = false;
+            t.for_each_ref(&mut |x| hit |= x == a);
+            hit
+        }
+        for_each_map_mut!(self, |m| m.update_where(
+            |t| refs(t, a),
+            |t| t.remap_ref(a, to),
+            log
+        ));
+        crate::id::layers::sync_all(self, log);
+    }
+
+    /// Unlinks and removes an ID (`bpy.data.<coll>.remove(id)`, `do_unlink=True`).
+    pub fn remove(&mut self, a: IdAny, log: &mut ChangeLog) -> bool {
+        fn go<T: IdType>(m: &mut IdMap<T>, a: IdAny, log: &mut ChangeLog) -> bool {
+            a.typed::<T::Kind>()
+                .and_then(|r| m.remove(r, log))
+                .is_some()
+        }
+        if self.header(a).is_none() {
+            return false;
+        }
+        self.remap(a, None, log);
+        let removed = with_map_mut!(self, a.code, |m| go(m, a, log));
+        crate::id::layers::sync_all(self, log);
+        removed
+    }
+
+    /// An embedded ID as an RNA struct (`Root::Embedded { owner, slot }`, §5.1).
+    pub fn embedded(&self, owner: IdAny, slot: EmbeddedSlot) -> Option<&dyn Rna> {
+        match (owner.code, slot) {
+            (IdCode::MA, EmbeddedSlot::NodeTree) => self
+                .materials
+                .get(owner.typed()?)
+                .map(|m| &m.node_tree as &dyn Rna),
+            (IdCode::WO, EmbeddedSlot::NodeTree) => self
+                .worlds
+                .get(owner.typed()?)
+                .map(|w| &w.node_tree as &dyn Rna),
+            (IdCode::SC, EmbeddedSlot::MasterCollection) => self
+                .scenes
+                .get(owner.typed()?)
+                .map(|s| &s.collection as &dyn Rna),
+            _ => None,
+        }
+    }
+
+    /// The header of an embedded ID.
+    pub fn embedded_header(&self, owner: IdAny, slot: EmbeddedSlot) -> Option<&IdHeader> {
+        match (owner.code, slot) {
+            (IdCode::MA, EmbeddedSlot::NodeTree) => self
+                .materials
+                .get(owner.typed()?)
+                .map(|m| &m.node_tree.header),
+            (IdCode::WO, EmbeddedSlot::NodeTree) => {
+                self.worlds.get(owner.typed()?).map(|w| &w.node_tree.header)
+            }
+            (IdCode::SC, EmbeddedSlot::MasterCollection) => self
+                .scenes
+                .get(owner.typed()?)
+                .map(|s| &s.collection.header),
+            _ => None,
+        }
+    }
+
+    /// An embedded ID, mutably: through the **owner's** `IdMap::get_mut`, so the owner's
+    /// `generation` bumps and the owner is logged as modified (§5.1).
+    pub fn embedded_mut(
+        &mut self,
+        owner: IdAny,
+        slot: EmbeddedSlot,
+        log: &mut ChangeLog,
+    ) -> Option<&mut dyn RnaMut> {
+        match (owner.code, slot) {
+            (IdCode::MA, EmbeddedSlot::NodeTree) => self
+                .materials
+                .get_mut(owner.typed()?, log)
+                .map(|m| &mut m.node_tree as &mut dyn RnaMut),
+            (IdCode::WO, EmbeddedSlot::NodeTree) => self
+                .worlds
+                .get_mut(owner.typed()?, log)
+                .map(|w| &mut w.node_tree as &mut dyn RnaMut),
+            (IdCode::SC, EmbeddedSlot::MasterCollection) => self
+                .scenes
+                .get_mut(owner.typed()?, log)
+                .map(|s| &mut s.collection as &mut dyn RnaMut),
+            _ => None,
+        }
     }
 }

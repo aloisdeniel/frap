@@ -65,7 +65,20 @@ impl Material {
     }
 }
 
-crate::id::name_only_rna!(Material, frap_spec_rna::MATERIAL, MaterialId);
+crate::id::id_rna! { Material as frap_spec_rna::MATERIAL, "MATERIAL" {
+    node_tree => embedded(node_tree, NodeTree),
+    surface_render_method => surface_render_method,
+    blend_method => blend_method,
+    use_backface_culling => use_backface_culling,
+    diffuse_color => diffuse_color,
+    metallic => metallic,
+    roughness => roughness,
+    alpha_threshold => alpha_threshold,
+    pass_index => pass_index,
+    // Deprecated and ignored in 5.x: setting False leaves it True (verified; the
+    // DeprecationWarning comes from the `PropDef`).
+    use_nodes => get(|m| m.use_nodes) set(|_m, _v: bool| ()),
+}}
 
 impl IdType for Material {
     type Kind = MaterialId;
@@ -84,6 +97,7 @@ impl IdType for Material {
     }
     fn remap_ref(&mut self, from: IdAny, to: Option<IdAny>) {
         self.node_tree.remap_ref(from, to);
+        crate::id::remap_action(&mut self.animation_data, from, to);
     }
     fn embedded(&self) -> &'static [EmbeddedSlot] {
         &[EmbeddedSlot::NodeTree]
