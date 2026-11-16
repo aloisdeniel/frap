@@ -14,6 +14,7 @@ frap-scene.workspace = true
 frap-mesh.workspace = true
 frap-math.workspace = true
 glam.workspace = true
+libm.workspace = true
 rustc-hash.workspace = true
 smol_str.workspace = true
 
