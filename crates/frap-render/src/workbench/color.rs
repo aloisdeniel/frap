@@ -6,9 +6,10 @@
 //!   `hsv_to_rgb(BLI_hash_int_01(hash), 0.5, 0.8)`, where `hash` is
 //!   `BLI_ghashutil_strhash_p_murmur(ob->id.name)`: MurmurHash2 (`BLI_hash_mm2`, seed 0) of the
 //!   `OB`-prefixed name **including its terminating NUL** (`strlen + 1` bytes), mixed with the
-//!   library path for linked objects (verified against Blender renders). `RObject::random_hash` carries that `hash`; the
-//!   renderer applies `BLI_hash_int_01` and the HSV conversion. Non-material colour types use
-//!   metallic 0 and roughness 0.4; so does a slot without a material
+//!   library path for linked objects (verified against Blender renders). `RObject::random_hash`
+//!   carries that `hash`; the renderer applies `BLI_hash_int_01` and the HSV conversion.
+//!   Non-material colour types use metallic 0 and roughness 0.4; so does a slot without a
+//!   material
 //!   (`BKE_material_default_empty`, DNA default `roughness = 0.4`).
 //! - `Material::pack_data`: roughness is remapped to `sqrt(roughness)` ("Disney roughness"),
 //!   then alpha, roughness and metallic are packed in 8 bits each, and the opaque G-buffer

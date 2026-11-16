@@ -148,6 +148,11 @@ pub fn surface(scene: &RenderScene, obj: &RObject, slot: u32, shading: &Shading)
                 .copied()
                 .flatten()
                 .and_then(|k| scene.materials.get(&k));
+            // KNOWN DEVIATION (contract gap, integrator + WP 1.15): Blender's Workbench reads
+            // `Material.diffuse_color` / `.metallic` / `.roughness` (viewport display values,
+            // fresh-material roughness 0.4), not the Principled node. The frozen render-scene
+            // contract carries only the lowered Principled factors, so those are used until an
+            // additive field carries the viewport values.
             match mat {
                 Some(m) => {
                     let c = m.base_color.factor;
@@ -184,6 +189,9 @@ pub fn background(scene: &RenderScene) -> [f32; 4] {
     if scene.settings.film_transparent {
         return [0.0; 4];
     }
+    // KNOWN DEVIATION (contract gap, as for `surface`): Blender's Workbench clears to
+    // `World.color` (viewport display), not the Background node colour that `RWorld::Color`
+    // carries; an HDRI world falls back to the factory grey.
     let rgb = match &scene.world {
         RWorld::Color { rgb, .. } => *rgb,
         _ => FACTORY_WORLD_COLOR,

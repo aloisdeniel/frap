@@ -41,6 +41,16 @@ fn backend_order(opts: &GpuOptions) -> Result<Vec<wgpu::Backends>, RenderError> 
     })
 }
 
+/// Device limits: wgpu's downlevel defaults raised to the adapter's texture dimensions
+/// (renders up to `max_texture_dimension_2d` per side, as Blender does) and buffer size (large
+/// meshes; readback itself is band-split, see [`Gpu::read_texture`]).
+fn required_limits(adapter: &wgpu::Limits) -> wgpu::Limits {
+    wgpu::Limits {
+        max_buffer_size: adapter.max_buffer_size,
+        ..wgpu::Limits::downlevel_defaults().using_resolution(adapter.clone())
+    }
+}
+
 impl Gpu {
     /// Creates the device (first render only; the service keeps it).
     pub fn new(opts: &GpuOptions) -> Result<Gpu, RenderError> {
@@ -74,8 +84,7 @@ impl Gpu {
                 pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
                     label: Some("frap"),
                     required_features: wgpu::Features::empty(),
-                    required_limits:
-                        wgpu::Limits::downlevel_defaults().using_resolution(adapter.limits()),
+                    required_limits: required_limits(&adapter.limits()),
                     ..Default::default()
                 }))
                 .map_err(|e| RenderError::Device(e.to_string()))?;

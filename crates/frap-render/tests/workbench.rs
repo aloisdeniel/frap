@@ -148,6 +148,26 @@ fn background_and_film_transparent() {
 }
 
 #[test]
+fn renders_above_256_mib_of_rgba32float() {
+    // 4097 × 4096 × 16 bytes = 268.5 MB: more than wgpu's default 256 MiB max_buffer_size, which
+    // a single-buffer readback used to hit (4K at 200% is 7680 × 4320). Readback is band-split.
+    let (w, h) = (4097, 4096);
+    let mut scene = cube_scene(w, h);
+    scene.settings.shading_light = "FLAT".into();
+    scene.settings.shading_color_type = "SINGLE".into();
+    scene.settings.shading_single_color = [0.25, 0.5, 0.75];
+    let Some(r) = render_with(1, &scene) else {
+        return;
+    };
+    let f = r.expect("render above 16.7 Mpx");
+    assert_eq!((f.width, f.height, f.rgba.len()), (w, h, (w * h) as usize));
+    for (x, y) in [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)] {
+        assert!(close(&px(&f, x, y), &[BG[0], BG[1], BG[2], 1.0], 1e-6));
+    }
+    assert!(close(&centre(&f), &[0.25, 0.5, 0.75, 1.0], 1e-6));
+}
+
+#[test]
 fn rgba32float_accumulation_keeps_full_precision() {
     // 64 samples of a colour that is not representable in f16: an Rgba16Float accumulator
     // drifts by > 1e-4 here, Rgba32Float stays within float rounding.
