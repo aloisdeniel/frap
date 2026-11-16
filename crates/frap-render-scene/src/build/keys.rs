@@ -2,8 +2,10 @@
 //! Cache keys of the render scene: a streaming 64-bit hash (MurmurHash64A mixing, fixed seed,
 //! little-endian words) so keys are identical on every OS and every run.
 //!
-//! - [`MeshKey`]: the content of the extracted [`RMesh`] (an evaluated fingerprint: equal keys
-//!   always carry equal data, which is what `GpuCache` relies on).
+//! - [`MeshKey`]: a 64-bit content hash of the extracted [`RMesh`] (an evaluated fingerprint:
+//!   equal data always gives equal keys; different data gives different keys except for a
+//!   hash collision, which is improbable (about 2^-64 per pair) but not impossible, so a
+//!   `GpuCache` hit is "very likely the same mesh", not a proof of it).
 //! - [`MatKey`] / [`ImageKey`]: `(IdKey, generation)` of the datablock (every mutation, including
 //!   one of an embedded node tree, bumps the owner's generation, §5.3).
 

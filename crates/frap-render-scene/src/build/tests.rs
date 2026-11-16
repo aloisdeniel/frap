@@ -344,10 +344,24 @@ fn lower_available() -> bool {
     *AVAILABLE.get_or_init(|| {
         let m = Material::new("probe");
         let main = Main::default();
-        catch_unwind(AssertUnwindSafe(|| {
+        match catch_unwind(AssertUnwindSafe(|| {
             frap_material::lower(&m.node_tree, &m, &main);
-        }))
-        .is_ok()
+        })) {
+            Ok(()) => true,
+            // Only the W0 `todo!()` stub skips; any other panic of the real lowering fails.
+            Err(payload) => {
+                let msg = payload
+                    .downcast_ref::<String>()
+                    .map(String::as_str)
+                    .or_else(|| payload.downcast_ref::<&str>().copied())
+                    .unwrap_or("");
+                if msg.starts_with("not yet implemented") {
+                    false
+                } else {
+                    std::panic::resume_unwind(payload)
+                }
+            }
+        }
     })
 }
 
@@ -872,7 +886,13 @@ fn loose_geometry_and_colours() {
     m.attributes_mut().insert(Attribute {
         name: "Col".into(),
         domain: Domain::Point,
-        data: AttrData::ByteColor(Arc::new(vec![[255, 128, 0, 255]; 5])),
+        data: AttrData::ByteColor(Arc::new(vec![
+            [255, 128, 0, 255],
+            [255, 128, 0, 255],
+            [255, 128, 0, 255],
+            [0, 255, 0, 255],
+            [0, 0, 255, 128],
+        ])),
     });
     m.attributes_mut().insert(Attribute {
         name: "Lin".into(),
@@ -895,6 +915,11 @@ fn loose_geometry_and_colours() {
     assert_eq!(rm.colors[0][0], [1.0, srgb, 0.0, 1.0]);
     assert_eq!(rm.colors[1][2], [0.7, 0.8, 0.9, 0.5]);
     assert!(rm.colors.iter().all(|c| c.len() == 5));
+    // Loose vertices keep their POINT colour; corner colours have no value there.
+    assert_eq!(rm.colors[0][3], [0.0, 1.0, 0.0, 1.0]);
+    assert_eq!(rm.colors[0][4], [0.0, 0.0, 1.0, 128.0 / 255.0]);
+    assert_eq!(rm.colors[1][3], [0.0, 0.0, 0.0, 1.0]);
+    assert_eq!(rm.colors[1][4], [0.0, 0.0, 0.0, 1.0]);
     assert_extraction_equals_corner_split(&m, 0);
 }
 

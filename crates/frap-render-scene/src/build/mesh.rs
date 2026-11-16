@@ -7,7 +7,8 @@
 //! - vertex `i < split.len()` is split vertex `i` of `corner_split` (position of
 //!   `vert_source[i]`, corner normal of `vert_corner[i]`, UVs / colours of that corner);
 //! - vertices after them are the loose vertices (used by no face) that edges need, in vertex
-//!   order, with their vertex normal;
+//!   order, with their vertex normal and their POINT-domain colours (corner-domain colours and
+//!   UVs have no value on a loose vertex: `[0, 0, 0, 1]` / `[0, 0]`);
 //! - `uvs[n]` is the n-th UV map in `Mesh.uv_layers` order; `colors[n]` the n-th colour
 //!   attribute (FLOAT_COLOR / BYTE_COLOR on POINT or CORNER, attribute order, BYTE_COLOR
 //!   decoded from sRGB to linear as Blender does);
@@ -87,6 +88,8 @@ pub fn extract(mesh: &Mesh, slot_count: usize) -> RMesh {
         .map(|(_, uv)| split.vert_corner.iter().map(|&c| uv[c as usize]).collect())
         .collect();
 
+    // Per colour layer: its POINT-domain values (decoded), so loose vertices can take theirs.
+    let mut point_colors: Vec<Option<Vec<[f32; 4]>>> = Vec::new();
     for a in mesh.attributes().iter() {
         if a.name.starts_with('.') || !matches!(a.domain, Domain::Point | Domain::Corner) {
             continue;
@@ -96,19 +99,25 @@ pub fn extract(mesh: &Mesh, slot_count: usize) -> RMesh {
             AttrData::ByteColor(v) => ColorCol::Byte(v.as_slice()),
             _ => continue,
         };
-        let src: &[u32] = if a.domain == Domain::Corner {
-            &split.vert_corner
-        } else {
-            &split.vert_source
+        let value = |i: u32| match &col {
+            ColorCol::Float(v) => v[i as usize],
+            ColorCol::Byte(v) => byte_to_linear(v[i as usize]),
         };
-        out.colors.push(
-            src.iter()
-                .map(|&i| match &col {
-                    ColorCol::Float(v) => v[i as usize],
-                    ColorCol::Byte(v) => byte_to_linear(v[i as usize]),
-                })
-                .collect(),
-        );
+        if a.domain == Domain::Corner {
+            out.colors
+                .push(split.vert_corner.iter().map(|&c| value(c)).collect());
+            point_colors.push(None);
+        } else {
+            let per_vert: Vec<[f32; 4]> = (0..mesh.verts_num() as u32).map(value).collect();
+            out.colors.push(
+                split
+                    .vert_source
+                    .iter()
+                    .map(|&v| per_vert[v as usize])
+                    .collect(),
+            );
+            point_colors.push(Some(per_vert));
+        }
     }
 
     // Triangles, bucketed by slot.
@@ -163,8 +172,11 @@ pub fn extract(mesh: &Mesh, slot_count: usize) -> RMesh {
                 for uv in &mut out.uvs {
                     uv.push([0.0, 0.0]);
                 }
-                for c in &mut out.colors {
-                    c.push([0.0, 0.0, 0.0, 1.0]);
+                for (c, point) in out.colors.iter_mut().zip(&point_colors) {
+                    c.push(match point {
+                        Some(per_vert) => per_vert[v],
+                        None => [0.0, 0.0, 0.0, 1.0],
+                    });
                 }
             }
         }
