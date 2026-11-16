@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Offscreen clear / WGSL draw and padded readback (§19.2: `RENDER_ATTACHMENT | COPY_SRC`
-//! targets, rows padded to 256 bytes). Moved from the WP 0.2 contract probe
-//! (`crates/frap-probe/render`), where it passed on Metal; WP 1.7 builds the engines on it.
+//! Padded texture readback (§19.2: `RENDER_ATTACHMENT | COPY_SRC` targets, rows padded to 256
+//! bytes) used by every engine, plus the WP 0.2 contract probe's clear / WGSL-draw self-test
+//! (moved from `crates/frap-probe/render`, kept as the smallest end-to-end GPU check).
 
 use frap_render_scene::RenderError;
 
@@ -65,13 +65,6 @@ impl Gpu {
             view_formats: &[],
         });
         let view = tex.create_view(&wgpu::TextureViewDescriptor::default());
-        let bpr = padded_bytes_per_row(width, format);
-        let buf = dev.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("frap readback"),
-            size: u64::from(bpr) * u64::from(height),
-            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
-            mapped_at_creation: false,
-        });
         let pipeline = draw_triangle.then(|| {
             let module = dev.create_shader_module(wgpu::ShaderModuleDescriptor {
                 label: Some("frap triangle"),
@@ -133,9 +126,42 @@ impl Gpu {
                 pass.draw(0..3, 0..1);
             }
         }
+        self.queue.submit([enc.finish()]);
+        self.read_texture(&tex, width, height, format)
+    }
+
+    /// Copies a whole `width × height` 2D texture (`COPY_SRC`, format `Rgba32Float` or
+    /// `Rgba8Unorm`) into a buffer whose rows are padded to 256 bytes, waits, and returns
+    /// tightly packed RGBA rows (top row first) as f32.
+    pub fn read_texture(
+        &self,
+        tex: &wgpu::Texture,
+        width: u32,
+        height: u32,
+        format: wgpu::TextureFormat,
+    ) -> Result<Vec<[f32; 4]>, RenderError> {
+        if !matches!(
+            format,
+            wgpu::TextureFormat::Rgba32Float | wgpu::TextureFormat::Rgba8Unorm
+        ) {
+            return Err(RenderError::Unsupported(format!(
+                "readback of {format:?} textures"
+            )));
+        }
+        let dev = &self.device;
+        let bpr = padded_bytes_per_row(width, format);
+        let buf = dev.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("frap readback"),
+            size: u64::from(bpr) * u64::from(height),
+            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+            mapped_at_creation: false,
+        });
+        let mut enc = dev.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("frap readback"),
+        });
         enc.copy_texture_to_buffer(
             wgpu::TexelCopyTextureInfo {
-                texture: &tex,
+                texture: tex,
                 mip_level: 0,
                 origin: wgpu::Origin3d::ZERO,
                 aspect: wgpu::TextureAspect::All,
