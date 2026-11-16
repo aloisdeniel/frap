@@ -7,7 +7,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value as Json;
 
-use crate::response::Response;
+use crate::response::{Response, Status};
 use crate::session::Session;
 
 /// What happens to the rest of a request after a failing statement.
@@ -60,19 +60,65 @@ pub struct DoneRecord {
 }
 
 impl DoneRecord {
-    /// The done record of a request's responses.
+    /// The done record of a request's responses: `ok` is true iff every statement finished
+    /// (an empty request is ok).
     pub fn from_responses(id: Json, responses: &[Response]) -> DoneRecord {
-        let _ = (id, responses);
-        todo!("WP 1.14")
+        let mut counts = DoneCounts::default();
+        for r in responses {
+            match r.status {
+                Status::Finished => counts.finished += 1,
+                Status::Error => counts.error += 1,
+                Status::Cancelled => counts.cancelled += 1,
+                Status::Skipped => counts.skipped += 1,
+            }
+        }
+        DoneRecord {
+            id,
+            event: "done".to_owned(),
+            ok: responses.iter().all(Response::ok),
+            counts,
+        }
+    }
+
+    /// The JSON line of the record.
+    pub fn to_json(&self) -> Json {
+        serde_json::to_value(self).expect("invariant: DoneRecord serializes")
     }
 }
 
 impl Session {
-    /// Runs one serve/MCP request (§11.6, §13.1): one response per statement, each carrying
-    /// the request's `id`; with `on_error: skip_rest` the statements after a failure answer
-    /// `SKIPPED`. The caller writes `DoneRecord::from_responses` after them.
+    /// Runs one serve/MCP request (§11.6, §13.1): `src` is parsed as one complete unit (an
+    /// unclosed bracket is an immediate `SyntaxError`, frap never waits for more input); one
+    /// response per statement, each carrying the request's `id`, with line numbers relative to
+    /// the request. With `on_error: skip_rest` (the default) every statement after a failing
+    /// one (`ERROR` or `CANCELLED`) answers `SKIPPED` without running; with `continue` they
+    /// run. The caller writes [`DoneRecord::from_responses`] after them.
     pub fn exec_request(&mut self, req: Request) -> Vec<Response> {
-        let _ = req;
-        todo!("WP 1.14: on_error, SKIPPED, id echo")
+        let mut out = Vec::new();
+        let mut failed = false;
+        for parsed in frap_lang::parse_complete(&req.src) {
+            let mut r = if failed && req.on_error == OnError::SkipRest {
+                match &parsed {
+                    Ok(stmt) => self.skipped(
+                        crate::session::stmt_kind(&stmt.cmd),
+                        crate::session::stmt_op(&stmt.cmd),
+                        stmt.line,
+                    ),
+                    Err(e) => self.skipped("invalid", None, e.span.map_or(1, |s| s.line)),
+                }
+            } else {
+                match parsed {
+                    Ok(stmt) => self.exec(&stmt),
+                    Err(e) => {
+                        let line = e.span.map_or(1, |s| s.line);
+                        self.reject(line, e)
+                    }
+                }
+            };
+            failed |= matches!(r.status, Status::Error | Status::Cancelled);
+            r.id = Some(req.id.clone());
+            out.push(r);
+        }
+        out
     }
 }
