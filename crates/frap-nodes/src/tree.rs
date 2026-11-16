@@ -11,6 +11,15 @@ use frap_rna::*;
 use indexmap::IndexMap;
 use smol_str::SmolStr;
 
+// WP 1.11: node creation and default graphs, editing (sockets, links), socket availability.
+mod avail;
+mod build;
+mod edit;
+
+pub use avail::*;
+pub use build::*;
+pub use edit::*;
+
 /// `NodeTree.bl_idname` family.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 #[non_exhaustive]
@@ -220,31 +229,6 @@ pub struct InterfaceSocket {
     pub default_value: SocketValue,
 }
 
-impl Rna for NodeTree {
-    fn srna(&self) -> &'static StructDef {
-        &frap_spec_rna::NODE_TREE // WP 1.11 refines to ShaderNodeTree / GeometryNodeTree
-    }
-    fn get(&self, prop: &'static PropDef) -> Result<Field<'_>, RnaError> {
-        let _ = prop;
-        todo!("WP 1.11: NodeTree bindings")
-    }
-}
-
-impl RnaMut for NodeTree {
-    fn set(&mut self, prop: &'static PropDef, v: Value) -> Result<SetOutcome, RnaError> {
-        let _ = (prop, v);
-        todo!("WP 1.11: NodeTree bindings")
-    }
-    fn struct_mut(&mut self, prop: &'static PropDef) -> Result<RnaMutGuard<'_>, RnaError> {
-        let _ = prop;
-        todo!("WP 1.11: NodeTree bindings")
-    }
-    fn coll_mut(&mut self, prop: &'static PropDef) -> Result<RnaCollMutGuard<'_>, RnaError> {
-        let _ = prop;
-        todo!("WP 1.11: NodeTree bindings")
-    }
-}
-
 impl IdType for NodeTree {
     type Kind = NodeTreeId;
     fn header(&self) -> &IdHeader {
@@ -260,6 +244,11 @@ impl IdType for NodeTree {
                     f(*id);
                 }
             }
+            for s in n.inputs.iter().chain(&n.outputs) {
+                if let SocketValue::Id(Some(id)) = s.default_value {
+                    f(id);
+                }
+            }
         }
         if let Some(a) = self.animation_data.as_ref().and_then(|a| a.action) {
             f(a.any());
@@ -272,6 +261,16 @@ impl IdType for NodeTree {
                     *v = Value::Id(to);
                 }
             }
+            for s in n.inputs.iter_mut().chain(&mut n.outputs) {
+                if s.default_value == SocketValue::Id(Some(from)) {
+                    s.default_value = SocketValue::Id(to);
+                }
+            }
+        }
+        if let Some(a) = self.animation_data.as_mut()
+            && a.action.map(|r| r.any()) == Some(from)
+        {
+            a.action = to.and_then(IdRef::from_any);
         }
     }
 }

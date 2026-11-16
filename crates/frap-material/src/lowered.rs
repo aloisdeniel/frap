@@ -1,12 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `LoweredMaterial` (ARCHITECTURE §16.2, CONTRACT frozen at M1 W0, extended additively in M3).
 
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 use frap_nodes::NodeTree;
 use frap_rna::{IdRef, ImageId, Report};
 use frap_scene::id::{Image, Material};
 use smol_str::SmolStr;
+
+// WP 1.11: helpers shared by the pattern recognisers (graph navigation for `lower`, graph
+// building for `raise`). They name no pattern; the patterns live in `patterns/`.
+pub mod build;
+pub mod graph;
 
 /// A factor and an optional texture multiplying it.
 #[derive(Clone, Debug, PartialEq)]
@@ -179,6 +184,42 @@ pub struct LoweredMaterial {
     pub diagnostics: Vec<Report>,
 }
 
+impl LoweredMaterial {
+    /// The glTF default material (every factor at its glTF default: white base colour,
+    /// metallic 1, roughness 1, no emission, OPAQUE, single-sided). `lower` starts from it;
+    /// each pattern overwrites what it recognises, so an unrecognised graph exports what the
+    /// Blender exporter writes for it (no factors).
+    pub fn gltf_default() -> LoweredMaterial {
+        LoweredMaterial {
+            base_color: Channel {
+                factor: [1.0; 4],
+                texture: None,
+            },
+            metallic: Channel {
+                factor: 1.0,
+                texture: None,
+            },
+            roughness: Channel {
+                factor: 1.0,
+                texture: None,
+            },
+            normal: None,
+            occlusion: None,
+            emissive: Channel {
+                factor: [0.0; 3],
+                texture: None,
+            },
+            emissive_strength: 1.0,
+            alpha_mode: AlphaMode::Opaque,
+            double_sided: false,
+            unlit: false,
+            ext: MaterialExts::default(),
+            vertex_color: None,
+            diagnostics: Vec::new(),
+        }
+    }
+}
+
 /// Image metadata lookup for lowering (colorspace, packed/external), implemented by `Main`.
 pub trait ImageLookup {
     /// The image datablock.
@@ -217,7 +258,7 @@ impl<'a> LowerCx<'a> {
 }
 
 /// What a pattern's `raise` writes into while the importer builds a node graph. Fields that
-/// the patterns share (e.g. the Principled BSDF node they link into) are added by WP 1.11
+/// the patterns share (the Principled BSDF node they link into, …) were added by WP 1.11
 /// (`#[non_exhaustive]`, additive).
 #[non_exhaustive]
 pub struct RaiseCx<'a> {
@@ -225,12 +266,33 @@ pub struct RaiseCx<'a> {
     pub into: &'a mut Material,
     /// Node names taken so far.
     pub names: &'a mut NameAlloc,
+    /// Uid of the Principled BSDF the patterns link into.
+    pub bsdf: Option<u32>,
+    /// Uid of the Material Output.
+    pub output: Option<u32>,
+    /// The input the base-colour texture's `Alpha` output links into (the end of the alpha
+    /// clip/factor chain), set by the alpha pattern before the base-colour pattern creates
+    /// the texture, as the importer's `base_color()` does.
+    pub base_alpha_socket: Option<frap_nodes::SocketAddr>,
+    /// Upper-right corner of each layout block (`build::calc_locations`).
+    pub locations: BTreeMap<&'static str, [f32; 2]>,
 }
 
 impl<'a> RaiseCx<'a> {
-    /// Context for raising into `into`.
+    /// Context for raising into `into`: `bsdf` / `output` are the first Principled BSDF and
+    /// Material Output already in its tree, if any (`raise` rebuilds the graph first).
     pub fn new(into: &'a mut Material, names: &'a mut NameAlloc) -> Self {
-        RaiseCx { into, names }
+        let first = |ty: &str| into.node_tree.first_of_type(ty).map(|n| n.uid);
+        let bsdf = first("ShaderNodeBsdfPrincipled");
+        let output = first("ShaderNodeOutputMaterial");
+        RaiseCx {
+            into,
+            names,
+            bsdf,
+            output,
+            base_alpha_socket: None,
+            locations: BTreeMap::new(),
+        }
     }
 }
 
@@ -256,16 +318,39 @@ pub struct MaterialPattern {
 #[linkme::distributed_slice]
 pub static MATERIAL_PATTERNS: [MaterialPattern];
 
-/// Lowers a material's node tree by running [`MATERIAL_PATTERNS`] in `order`.
+/// Every registered pattern in run order (`order`, then `name` for a stable tie-break).
+pub fn patterns_in_order() -> Vec<&'static MaterialPattern> {
+    let mut v: Vec<&'static MaterialPattern> = MATERIAL_PATTERNS.iter().collect();
+    v.sort_by(|a, b| a.order.cmp(&b.order).then(a.name.cmp(b.name)));
+    v
+}
+
+/// Lowers a material's node tree by running [`MATERIAL_PATTERNS`] in `order`, starting from
+/// [`LoweredMaterial::gltf_default`].
 pub fn lower(tree: &NodeTree, mat: &Material, images: &dyn ImageLookup) -> LoweredMaterial {
-    let _ = (tree, mat, images);
-    todo!("WP 1.11: pattern recognisers")
+    let cx = LowerCx::new(tree, mat, images);
+    let mut out = LoweredMaterial::gltf_default();
+    for p in patterns_in_order() {
+        (p.lower)(&cx, &mut out);
+    }
+    out
 }
 
 /// Builds a Blender-style node graph from a lowered material (glTF importer), running every
-/// [`MATERIAL_PATTERNS`] entry's `raise` in `order`.
+/// [`MATERIAL_PATTERNS`] entry's `raise` in `order`. The embedded tree is rebuilt from
+/// scratch (`Principled BSDF` → `Material Output`, as the importer does after
+/// `node_tree.nodes.clear()`); `names` ends up holding every node name of the tree.
 /// Law: `lower(raise(lower(x))) == lower(x)`.
 pub fn raise(lm: &LoweredMaterial, into: &mut Material, names: &mut NameAlloc) {
-    let _ = (lm, into, names);
-    todo!("WP 1.11: raise")
+    let mut cx = RaiseCx::new(into, names);
+    cx.reset_graph();
+    cx.locations = build::calc_locations(lm);
+    for p in patterns_in_order() {
+        if let Some(r) = p.raise {
+            r(lm, &mut cx);
+        }
+    }
 }
+
+#[cfg(test)]
+mod tests;
