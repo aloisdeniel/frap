@@ -63,15 +63,23 @@ impl Default for Torus {
     }
 }
 
+/// Hard minimum of `major_radius` / `minor_radius` (`FloatProperty(min=0.0)`).
+const RADIUS_MIN: f32 = 0.0;
+/// Hard maximum of `major_radius` / `minor_radius` (`FloatProperty(max=10000.0)`).
+const RADIUS_MAX: f32 = 10000.0;
+
 impl Torus {
-    /// The radii `execute` uses: in EXT_INT mode it writes `major_radius`/`minor_radius`
-    /// (float properties, so the values are rounded to f32).
+    /// The radii `execute` uses: in EXT_INT mode it writes `major_radius`/`minor_radius`,
+    /// float properties, so the values are rounded to f32 and then clamped to the properties'
+    /// hard range `[0, 10000]` (`abso_minor_rad > abso_major_rad` gives `minor_radius = 0`, every
+    /// minor ring collapsing onto one point, as in Blender 5.2.4).
     pub fn radii(&self) -> (f32, f32) {
         match self.mode {
             TorusMode::MajorMinor => (self.major_radius, self.minor_radius),
             TorusMode::ExtInt => {
                 let extra = (self.abso_major_rad as f64 - self.abso_minor_rad as f64) * 0.5;
-                ((self.abso_minor_rad as f64 + extra) as f32, extra as f32)
+                let clamp = |v: f64| (v as f32).clamp(RADIUS_MIN, RADIUS_MAX);
+                (clamp(self.abso_minor_rad as f64 + extra), clamp(extra))
             }
         }
     }

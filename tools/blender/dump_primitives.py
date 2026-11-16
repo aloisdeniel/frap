@@ -4,8 +4,13 @@ reference cases (normals, loop triangles, `from_pydata`), to JSON (ARCHITECTURE 
 
 Runs INSIDE Blender:
 
-    $BLENDER_BIN -b --factory-startup --python tools/blender/dump_primitives.py -- \
+    $BLENDER_BIN -b --factory-startup -t 8 --python tools/blender/dump_primitives.py -- \
         --out spec/blender-5.2/primitives [--filter <substring>]
+
+Always pass `-t 8`: for meshes with 1000 faces or more, `mesh_calc_edges` partitions edges over
+`min(8, threads)` (rounded down to a power of two) hash maps, so `pydata__big_grid`'s edge order
+depends on the thread count (verified with -t 1/2/4/8 on 5.2.4). frap reproduces the 8-thread
+order, the one every machine with 8+ hardware threads gets by default.
 
 Writes one `<case>.json` per case and `_meta.json` (Blender version and build hash). Each file
 holds the operator idname and keyword arguments (primitive cases), the construction recipe
@@ -97,6 +102,11 @@ PRIMITIVE_CASES = [
     ("torus__ext_int_nouv", "primitive_torus_add",
      {"mode": "EXT_INT", "abso_major_rad": 1.5, "abso_minor_rad": 0.75, "generate_uvs": False}),
     ("torus__maj3_min3", "primitive_torus_add", {"major_segments": 3, "minor_segments": 3}),
+    # EXT_INT with abso_minor_rad > abso_major_rad: execute assigns minor_radius = -0.5, which
+    # the property clamps to its hard minimum 0.
+    ("torus__ext_int_clamped", "primitive_torus_add",
+     {"mode": "EXT_INT", "abso_major_rad": 0.5, "abso_minor_rad": 1.5,
+      "major_segments": 6, "minor_segments": 4}),
 ]
 
 # --------------------------------------------------------------------------- normals cases

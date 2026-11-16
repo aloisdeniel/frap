@@ -9,7 +9,9 @@
 //! position.
 
 mod calc_edges;
+mod lookup;
 
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::ops::Range;
 use std::sync::{Arc, OnceLock};
@@ -392,9 +394,15 @@ pub const UV_SELECT_EDGE: &str = ".uv_select_edge";
 /// See [`UV_SELECT_VERT`].
 pub const UV_SELECT_FACE: &str = ".uv_select_face";
 
-/// Boolean attributes Blender stores only while some element is `true`: writing all-false
-/// values removes them (`bm_to_me`, `shade_smooth`, the RNA proxies `use_smooth`,
-/// `use_seam`, `use_edge_sharp`).
+/// Flag attributes that `BM_mesh_bm_to_me` (leaving edit mode, and every BMesh round trip)
+/// drops when every value is false; see [`Mesh::remove_all_false_flags`].
+///
+/// Only that conversion trims them (plus `Mesh.shade_smooth()`, which removes `sharp_face`
+/// outright). Everything else writes with a plain insert and keeps an all-false attribute, as
+/// Blender 5.2.4 does: the RNA proxies `MeshPolygon.use_smooth`, `MeshEdge.use_seam` and
+/// `MeshEdge.use_edge_sharp` (setting every polygon smooth, or clearing the last sharp edge or
+/// seam, keeps the attribute), `attributes[...].data.foreach_set`, and attribute value
+/// assignments. Use [`Mesh::set_bool_attribute`] for those.
 pub const REMOVED_WHEN_ALL_FALSE: [&str; 3] = [SHARP_FACE, SHARP_EDGE, UV_SEAM];
 
 impl Mesh {
@@ -648,20 +656,18 @@ impl Mesh {
         self.attributes_mut().remove(SHARP_FACE);
     }
 
-    /// Writes a boolean attribute the way Blender stores flags: when every value is false and
-    /// the name is one of [`REMOVED_WHEN_ALL_FALSE`], the attribute is removed instead; an
-    /// existing attribute keeps its position, a new one is appended.
+    /// Writes a boolean attribute with a plain insert (the RNA proxies `use_smooth`,
+    /// `use_seam`, `use_edge_sharp` and attribute data writes): an existing attribute keeps its
+    /// position, a new one is appended, and all-false values are kept, flags included (Blender
+    /// 5.2.4 never trims on these paths; see [`REMOVED_WHEN_ALL_FALSE`]).
     pub fn set_bool_attribute(&mut self, name: &str, domain: Domain, values: Vec<bool>) {
-        let attrs = self.attributes_mut();
-        if REMOVED_WHEN_ALL_FALSE.contains(&name) && values.iter().all(|v| !v) {
-            attrs.remove(name);
-            return;
-        }
-        attrs.insert(bool_attr(name, domain, values));
+        self.attributes_mut()
+            .insert(bool_attr(name, domain, values));
     }
 
-    /// Removes every [`REMOVED_WHEN_ALL_FALSE`] attribute whose values are all false (the
-    /// clean-up `bm_to_me` performs); returns the removed names.
+    /// Removes every [`REMOVED_WHEN_ALL_FALSE`] attribute whose values are all false: the
+    /// clean-up `BM_mesh_bm_to_me` performs, and only that (callers: the BMesh-to-mesh
+    /// conversion). Returns the removed names.
     pub fn remove_all_false_flags(&mut self) -> Vec<&'static str> {
         let mut removed = Vec::new();
         for name in REMOVED_WHEN_ALL_FALSE {
@@ -738,13 +744,26 @@ impl Mesh {
     pub fn face(&self, i: usize) -> Range<usize> {
         self.face_offsets[i] as usize..self.face_offsets[i + 1] as usize
     }
-    /// `sharp_face` values, if the attribute exists.
+    /// The stored `sharp_face` values when the attribute is BOOLEAN on FACE (the shape Blender
+    /// itself writes). For the values Blender *reads* (any type or domain, converted), use
+    /// [`Mesh::sharp_face_flags`].
     pub fn sharp_faces(&self) -> Option<&[bool]> {
         self.bool_attribute(SHARP_FACE, Domain::Face)
     }
-    /// `sharp_edge` values, if the attribute exists.
+    /// The stored `sharp_edge` values when the attribute is BOOLEAN on EDGE; see
+    /// [`Mesh::sharp_edge_flags`].
     pub fn sharp_edges(&self) -> Option<&[bool]> {
         self.bool_attribute(SHARP_EDGE, Domain::Edge)
+    }
+    /// `sharp_face` as Blender reads it (`lookup_or_default<bool>("sharp_face", FACE)`):
+    /// converted from any type and domain ([`Mesh::lookup_bool`]); `None` means all false.
+    pub fn sharp_face_flags(&self) -> Option<Cow<'_, [bool]>> {
+        self.lookup_bool(SHARP_FACE, Domain::Face)
+    }
+    /// `sharp_edge` as Blender reads it (`lookup_or_default<bool>("sharp_edge", EDGE)`); see
+    /// [`Mesh::sharp_face_flags`].
+    pub fn sharp_edge_flags(&self) -> Option<Cow<'_, [bool]>> {
+        self.lookup_bool(SHARP_EDGE, Domain::Edge)
     }
     /// UV maps (FLOAT2 corner attributes without a leading `.`), in attribute order.
     pub fn uv_maps(&self) -> Vec<(&str, &[[f32; 2]])> {
@@ -761,7 +780,8 @@ impl Mesh {
     // Ported from blender/source/blender/blenkernel/intern/mesh_normals.cc (Mesh::normals_domain).
     /// `Mesh.normals_domain`: POINT without faces; the custom normals' domain when present
     /// (`custom_normal`); FACE when every face or every edge is sharp; POINT when nothing is
-    /// sharp; CORNER otherwise.
+    /// sharp; CORNER otherwise. The flags are read like Blender reads them
+    /// ([`Mesh::sharp_face_flags`], [`Mesh::sharp_edge_flags`]: any type and domain).
     pub fn normals_domain(&self) -> NormalsDomain {
         if self.faces_num() == 0 {
             return NormalsDomain::Point;
@@ -781,11 +801,11 @@ impl Mesh {
                 Some(v) => (v.iter().all(|b| *b), v.iter().all(|b| !b)),
             }
         };
-        let (face_all_true, face_all_false) = mix(self.sharp_faces());
+        let (face_all_true, face_all_false) = mix(self.sharp_face_flags().as_deref());
         if face_all_true {
             return NormalsDomain::Face;
         }
-        let (edge_all_true, edge_all_false) = mix(self.sharp_edges());
+        let (edge_all_true, edge_all_false) = mix(self.sharp_edge_flags().as_deref());
         if edge_all_true {
             return NormalsDomain::Face;
         }

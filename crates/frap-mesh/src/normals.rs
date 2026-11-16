@@ -148,6 +148,7 @@ pub(crate) fn corner_normals(m: &Mesh) -> Vec<V3> {
             }
             let map = vert_map(m);
             let fnor = true_face_normals_shared(m);
+            let (sharp_edges, sharp_faces) = (m.sharp_edge_flags(), m.sharp_face_flags());
             gn::normals_calc_corners(&CornerNormalsInput {
                 positions: m.positions(),
                 face_offsets: m.face_offsets(),
@@ -155,8 +156,8 @@ pub(crate) fn corner_normals(m: &Mesh) -> Vec<V3> {
                 corner_edges: m.corner_edges(),
                 vert_to_face: &map,
                 face_normals: &fnor,
-                sharp_edges: m.sharp_edges(),
-                sharp_faces: m.sharp_faces(),
+                sharp_edges: sharp_edges.as_deref(),
+                sharp_faces: sharp_faces.as_deref(),
                 custom_normals: custom_short2(m),
             })
         }

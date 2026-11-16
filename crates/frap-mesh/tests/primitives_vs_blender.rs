@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! T1: every `frap_mesh::primitives` generator against Blender 5.2.4's `mesh.primitive_*_add`
 //! (defaults and >= 2 variants each, `spec/blender-5.2/primitives/<primitive>__*.json`, written by
-//! `tools/blender/dump_primitives.py`): vertex/edge/face/corner order, positions within 1e-5,
-//! every attribute (order, domain, type, values: `UVMap`, `.select_*`, `sharp_face`,
-//! `.uv_select_*`), UV-map flags, `normals_domain`, face/corner/vertex normals and loop
-//! triangles. The UV sphere's edge and face order is not stable in Blender itself (see
-//! `primitives/uv_sphere.rs`), so its topology is compared canonically.
+//! `tools/blender/dump_primitives.py`): vertex/edge/face/corner order, positions, every
+//! attribute (order, domain, type, values: `UVMap`, `.select_*`, `sharp_face`, `.uv_select_*`),
+//! UV-map flags, `normals_domain`, face/corner/vertex normals and loop triangles. Positions,
+//! UVs and normals must be **bit-identical** to the committed dumps (`f32::to_bits`), so CI on
+//! every OS enforces "bit-identical across OSes". The UV sphere's edge and face order is not
+//! stable in Blender itself (see `primitives/uv_sphere.rs`), so its topology is compared
+//! canonically (T2) and its order-dependent UVs and vertex normals within 1e-5; its positions
+//! stay bitwise.
 
 mod common;
 
@@ -139,10 +142,15 @@ fn generate(op: &str, kw: &J) -> Mesh {
 
 /// Compares one primitive case; `canonical_topology` for the UV sphere.
 fn check_case(name: &str) {
-    check_json(name, &load(name));
+    check_json(name, &load(name), true);
 }
 
-fn check_json(name: &str, j: &J) {
+/// Compares one dumped case. With `exact` (the committed dumps) positions, normals and UVs must
+/// be bit-identical to Blender's (`f32::to_bits`), so a CI run on any OS fails on the slightest
+/// drift; without it (the live sweep) they are compared within [`TOL`]. The UV sphere's face and
+/// corner order (and so its face-order-dependent vertex normal sums) varies between Blender runs,
+/// so only its positions are compared bitwise.
+fn check_json(name: &str, j: &J, exact: bool) {
     let op = j["op"].as_str().unwrap();
     let m = generate(op, &j["kwargs"]);
     let jm = &j["mesh"];
@@ -152,21 +160,24 @@ fn check_json(name: &str, j: &J) {
         jm["name"].as_str().unwrap(),
         "{what}: mesh name"
     );
-    let want_pos = f3(&jm["positions"]);
-    close3(&format!("{what}: positions"), m.positions(), &want_pos, TOL);
-    let exact = m
-        .positions()
-        .iter()
-        .zip(&want_pos)
-        .filter(|(a, b)| a == b)
-        .count();
-    eprintln!(
-        "{what}: {exact}/{} positions bit-identical to Blender",
-        want_pos.len()
-    );
+    let cmp3 = |label: &str, mine: &[[f32; 3]], want: &[[f32; 3]]| {
+        let label = format!("{what}: {label}");
+        if exact {
+            bits3(&label, mine, want);
+        } else {
+            close3(&label, mine, want, TOL);
+        }
+    };
+    cmp3("positions", m.positions(), &f3(&jm["positions"]));
     let canonical = op == "mesh.primitive_uv_sphere_add";
     if canonical {
         check_canonical(what, &m, jm);
+        close3(
+            &format!("{what}: vertex normals"),
+            &m.vert_normals(),
+            &f3(&jm["vertex_normals"]),
+            TOL,
+        );
     } else {
         assert_eq!(m.edges(), i2(&jm["edges"]).as_slice(), "{what}: edges");
         assert_eq!(mesh_faces(&m), faces(&jm["faces"]), "{what}: faces");
@@ -175,18 +186,17 @@ fn check_json(name: &str, j: &J) {
             ilist(&jm["corner_edges"]).as_slice(),
             "{what}: corner edges"
         );
-        check_attributes(what, &m, jm);
-        close3(
-            &format!("{what}: face normals"),
-            &m.face_normals(),
-            &f3(&jm["face_normals"]),
-            TOL,
-        );
-        close3(
-            &format!("{what}: corner normals"),
+        check_attributes(what, &m, jm, exact);
+        cmp3("face normals", &m.face_normals(), &f3(&jm["face_normals"]));
+        cmp3(
+            "corner normals",
             &m.corner_normals(),
             &f3(&jm["corner_normals"]),
-            TOL,
+        );
+        cmp3(
+            "vertex normals",
+            &m.vert_normals(),
+            &f3(&jm["vertex_normals"]),
         );
         let lt: Vec<[i32; 3]> = m.looptris().iter().map(|t| t.map(|c| c as i32)).collect();
         let want_lt: Vec<[i32; 3]> = faces(&jm["loop_triangles"])
@@ -195,12 +205,6 @@ fn check_json(name: &str, j: &J) {
             .collect();
         assert_eq!(lt, want_lt, "{what}: loop triangles");
     }
-    close3(
-        &format!("{what}: vertex normals"),
-        &m.vert_normals(),
-        &f3(&jm["vertex_normals"]),
-        TOL,
-    );
     assert_eq!(
         m.normals_domain().identifier(),
         jm["normals_domain"].as_str().unwrap(),
@@ -278,6 +282,8 @@ fn check_canonical(what: &str, m: &Mesh, jm: &J) {
     assert_eq!(a.len(), b.len(), "{what}: face count");
     for ((fa, ua), (fb, ub)) in a.iter().zip(b.iter()) {
         assert_eq!(fa, fb, "{what}: face set");
+        // Pole-triangle UVs average the corners in face-corner order, which (like the face
+        // order) varies between Blender runs, so these are compared within TOL.
         close2(&format!("{what}: UVs of face {fa:?}"), ua, ub, TOL);
     }
     assert_eq!(
@@ -358,7 +364,7 @@ fn sweep_matches_live_blender() {
     let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     let out = std::env::temp_dir().join(format!("frap-primitives-sweep-{}", std::process::id()));
     let status = std::process::Command::new(bin)
-        .args(["-b", "--factory-startup", "--python"])
+        .args(["-b", "--factory-startup", "-t", "8", "--python"])
         .arg(root.join("tools/blender/dump_primitives.py"))
         .args(["--", "--sweep", "--out"])
         .arg(&out)
@@ -373,7 +379,7 @@ fn sweep_matches_live_blender() {
             continue;
         }
         let j: J = serde_json::from_str(&std::fs::read_to_string(&path).unwrap()).unwrap();
-        check_json(&name, &j);
+        check_json(&name, &j, false);
         n += 1;
     }
     let _ = std::fs::remove_dir_all(&out);
@@ -382,7 +388,8 @@ fn sweep_matches_live_blender() {
 
 #[test]
 fn generators_are_deterministic() {
-    // Bit-identical output for identical input (CI compares across OSes through the fixtures).
+    // Bit-identical output for identical input within a process; the committed-dump tests above
+    // assert bit-identity with Blender, so every OS in CI is checked against the same bits.
     let a = uv_sphere(&UvSphere::default());
     let b = uv_sphere(&UvSphere::default());
     assert_eq!(a.positions(), b.positions());

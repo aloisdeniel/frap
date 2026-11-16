@@ -113,6 +113,28 @@ pub fn close2(what: &str, mine: &[[f32; 2]], want: &[[f32; 2]], tol: f32) {
     }
 }
 
+/// Bitwise equality (`f32::to_bits`), for values frap must reproduce exactly on every OS.
+pub fn bits3(what: &str, mine: &[[f32; 3]], want: &[[f32; 3]]) {
+    assert_eq!(mine.len(), want.len(), "{what}: count");
+    for (i, (a, b)) in mine.iter().zip(want).enumerate() {
+        assert!(
+            a.iter().zip(b).all(|(x, y)| x.to_bits() == y.to_bits()),
+            "{what}[{i}]: frap {a:?} vs blender {b:?} (not bit-identical)"
+        );
+    }
+}
+
+/// See [`bits3`].
+pub fn bits2(what: &str, mine: &[[f32; 2]], want: &[[f32; 2]]) {
+    assert_eq!(mine.len(), want.len(), "{what}: count");
+    for (i, (a, b)) in mine.iter().zip(want).enumerate() {
+        assert!(
+            a.iter().zip(b).all(|(x, y)| x.to_bits() == y.to_bits()),
+            "{what}[{i}]: frap {a:?} vs blender {b:?} (not bit-identical)"
+        );
+    }
+}
+
 pub fn mesh_faces(m: &Mesh) -> Vec<Vec<i32>> {
     (0..m.faces_num())
         .map(|f| m.corner_verts()[m.face(f)].to_vec())
@@ -152,8 +174,9 @@ pub fn dump_attrs(jm: &J) -> BTreeMap<String, (String, String, J)> {
         .collect()
 }
 
-/// Compares every non-topology attribute (domain, type, values; floats within `TOL`).
-pub fn check_attributes(what: &str, m: &Mesh, jm: &J) {
+/// Compares every non-topology attribute (domain, type, values; floats bit-identical with
+/// `exact`, within `TOL` otherwise).
+pub fn check_attributes(what: &str, m: &Mesh, jm: &J, exact: bool) {
     assert_eq!(
         attr_names(m),
         dump_attr_names(jm),
@@ -171,7 +194,9 @@ pub fn check_attributes(what: &str, m: &Mesh, jm: &J) {
             AttrData::Bool(v) => {
                 assert_eq!(v.as_slice(), bools(data).as_slice(), "{what}: {}", a.name)
             }
+            AttrData::Float2(v) if exact => bits2(&format!("{what}: {}", a.name), v, &f2(data)),
             AttrData::Float2(v) => close2(&format!("{what}: {}", a.name), v, &f2(data), TOL),
+            AttrData::Float3(v) if exact => bits3(&format!("{what}: {}", a.name), v, &f3(data)),
             AttrData::Float3(v) => {
                 close3(&format!("{what}: {}", a.name), v, &f3(data), TOL);
             }

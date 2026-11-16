@@ -62,30 +62,22 @@ fn rebuild(jm: &J) -> Mesh {
     m
 }
 
+/// Normals are compared bit for bit (`f32::to_bits`) so CI on every OS fails on any drift.
 fn check_derived(what: &str, m: &Mesh, jm: &J) {
     assert_eq!(
         m.normals_domain().identifier(),
         jm["normals_domain"].as_str().unwrap(),
         "{what}: normals_domain"
     );
-    close3(
-        &format!("{what}: face normals"),
-        &m.face_normals(),
-        &f3(&jm["face_normals"]),
-        TOL,
-    );
-    close3(
-        &format!("{what}: vertex normals"),
-        &m.vert_normals(),
-        &f3(&jm["vertex_normals"]),
-        TOL,
-    );
-    close3(
-        &format!("{what}: corner normals"),
-        &m.corner_normals(),
-        &f3(&jm["corner_normals"]),
-        TOL,
-    );
+    for (label, mine, key) in [
+        ("face normals", m.face_normals(), "face_normals"),
+        ("vertex normals", m.vert_normals(), "vertex_normals"),
+        ("corner normals", m.corner_normals(), "corner_normals"),
+    ] {
+        let want = f3(&jm[key]);
+        let label = format!("{what}: {label}");
+        bits3(&label, &mine, &want);
+    }
     let lt: Vec<Vec<i32>> = m
         .looptris()
         .iter()
@@ -140,11 +132,10 @@ fn from_pydata_matches_blender() {
         let j = load(&name);
         let jm = &j["mesh"];
         let m = from_pydata(&j["input"]);
-        close3(
+        bits3(
             &format!("{name}: positions"),
             m.positions(),
             &f3(&jm["positions"]),
-            0.0,
         );
         assert_eq!(m.edges(), i2(&jm["edges"]).as_slice(), "{name}: edges");
         assert_eq!(mesh_faces(&m), faces(&jm["faces"]), "{name}: faces");
@@ -153,7 +144,7 @@ fn from_pydata_matches_blender() {
             ilist(&jm["corner_edges"]).as_slice(),
             "{name}: corner edges"
         );
-        check_attributes(&name, &m, jm);
+        check_attributes(&name, &m, jm, true);
         check_derived(&name, &m, jm);
     }
 }
@@ -168,9 +159,10 @@ fn normals_domain_rules() {
     assert_eq!(m.normals_domain().identifier(), "POINT");
     m.set_bool_attribute(frap_mesh::SHARP_EDGE, Domain::Edge, vec![false; 12]);
     assert!(
-        m.attributes().get(frap_mesh::SHARP_EDGE).is_none(),
-        "all-false sharp_edge is removed"
+        m.attributes().get(frap_mesh::SHARP_EDGE).is_some(),
+        "a plain write keeps an all-false sharp_edge"
     );
+    assert_eq!(m.normals_domain().identifier(), "POINT");
     let mut one = vec![false; 12];
     one[3] = true;
     m.set_bool_attribute(frap_mesh::SHARP_EDGE, Domain::Edge, one);
@@ -200,16 +192,15 @@ fn normals_domain_rules() {
 }
 
 #[test]
-fn all_false_flags_are_removed() {
+fn all_false_flags_are_removed_only_by_bm_to_me() {
+    // Blender 5.2.4: RNA proxies and attribute writes keep all-false flags; only
+    // BM_mesh_bm_to_me trims them, and shade_smooth removes sharp_face.
     let mut m = frap_mesh::primitives::cube(2.0, true, [1.0; 3]);
     m.set_bool_attribute(frap_mesh::SHARP_FACE, Domain::Face, vec![false; 6]);
-    assert!(m.sharp_faces().is_none());
+    assert_eq!(m.sharp_faces().unwrap(), &[false; 6]);
     m.set_bool_attribute(frap_mesh::UV_SEAM, Domain::Edge, vec![false; 12]);
-    assert!(m.attributes().get(frap_mesh::UV_SEAM).is_none());
-    // Non-flag booleans are kept even when all false.
+    assert!(m.attributes().get(frap_mesh::UV_SEAM).is_some());
     m.set_bool_attribute("my_flag", Domain::Point, vec![false; 8]);
-    assert!(m.attributes().get("my_flag").is_some());
-    // Sweeping: an all-false flag written directly is removed, a mixed one is kept.
     m.attributes_mut().insert(Attribute {
         name: frap_mesh::SHARP_EDGE.into(),
         domain: Domain::Edge,
@@ -217,13 +208,14 @@ fn all_false_flags_are_removed() {
     });
     let mut mixed = vec![false; 12];
     mixed[0] = true;
-    m.attributes_mut().insert(Attribute {
-        name: frap_mesh::UV_SEAM.into(),
-        domain: Domain::Edge,
-        data: AttrData::Bool(Arc::new(mixed)),
-    });
-    assert_eq!(m.remove_all_false_flags(), vec![frap_mesh::SHARP_EDGE]);
+    m.set_bool_attribute(frap_mesh::UV_SEAM, Domain::Edge, mixed);
+    // bm_to_me: all-false flags go, a mixed flag and non-flag booleans stay.
+    assert_eq!(
+        m.remove_all_false_flags(),
+        vec![frap_mesh::SHARP_FACE, frap_mesh::SHARP_EDGE]
+    );
     assert!(m.attributes().get(frap_mesh::UV_SEAM).is_some());
+    assert!(m.attributes().get("my_flag").is_some());
     // shade_flat / shade_smooth (Python API).
     m.shade_flat();
     assert_eq!(m.sharp_faces().unwrap(), &[true; 6]);

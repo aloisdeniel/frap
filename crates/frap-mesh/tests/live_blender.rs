@@ -3,7 +3,9 @@
 //! (`$BLENDER_BIN`, then `blender` on `PATH`, then `~/Applications/Blender-5.2.app`), re-runs
 //! `tools/blender/dump_primitives.py` and checks the committed fixtures have not drifted. The UV
 //! sphere's edge/face order varies between Blender runs (see `primitives/uv_sphere.rs`), so only
-//! its order-stable fields are compared. Skipped with a notice otherwise.
+//! its order-stable fields are compared. Blender runs with `-t 8` (the thread count the committed
+//! dumps were written with; `pydata__big_grid`'s edge order depends on it). Skipped with a notice
+//! otherwise.
 
 use std::path::PathBuf;
 use std::process::Command;
@@ -40,7 +42,9 @@ fn dump_matches_live_blender() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
     let out = std::env::temp_dir().join(format!("frap-primitives-live-{}", std::process::id()));
     let status = Command::new(&bin)
-        .args(["-b", "--factory-startup", "--python"])
+        // `-t 8`: `mesh_calc_edges` orders the edges of meshes with >= 1000 faces by a
+        // thread-count-dependent partition (`mesh/calc_edges.rs`); the dumps use 8 threads.
+        .args(["-b", "--factory-startup", "-t", "8", "--python"])
         .arg(root.join("tools/blender/dump_primitives.py"))
         .arg("--")
         .arg("--out")
