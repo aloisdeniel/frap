@@ -20,6 +20,8 @@ import sys
 
 import bpy
 
+# No __pycache__/ next to the scripts (it would end up untracked in the repo).
+sys.dont_write_bytecode = True
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import dump_rna  # noqa: E402  (shared JSON helpers)
 

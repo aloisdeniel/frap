@@ -10,6 +10,16 @@
 
 factor = 2.0
 
+# PROVISIONAL baselines, WP 1.1, 2026-11-16: NOT recorded on the CI runner class. They come from a
+# local Apple M1 Max (10 cores, 32 GiB, macOS 26.6, Rust 1.97, debug profile, dependencies
+# cached), measured by hand as one clean rebuild per crate (fresh artifact hash). `budgets
+# --record` was not run there because its `cargo clean -p` would have deleted other worktrees'
+# artifacts in the shared target dir. The CI `budgets` job runs on ubuntu-24.04, a slower machine
+# class, and the sub-second crates are mostly cargo startup and fingerprinting, so these values
+# can trip the 2x factor there. Before the job becomes gating, the integrator re-records them on
+# ubuntu-24.04 with `cargo xtask budgets --record` (for example in a one-off workflow_dispatch
+# run) and commits the output. `--record` keeps only the leading comment block, so this note goes
+# away then.
 [baseline_secs]
 frap-spec-rna = 3.11
 frap-spec-ops-object = 1.3

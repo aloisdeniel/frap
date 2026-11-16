@@ -21,6 +21,11 @@
 # invalid value on a live instance / calling the operator in the factory scene with a VIEW_3D
 # override (the TypeError lists the items the callback returns) and reading names with
 # `UILayout.enum_item_name/enum_item_description`. Values are the item index unless known.
+# UNVERIFIED: Blender does not expose `EnumPropertyItem.value` of callback enums in `-b`, so the
+# numeric values of runtime-built items (render engines, OCIO view/look/display/colorspace
+# names, studio lights) are assumed, not dumped. Do not rely on `EnumItem.value` for these enums;
+# a consumer that needs it must first check the C item builder
+# (`RE_engines`, `colormanagement_*_items_add`, `BKE_studiolight_*`) and add a provenance note.
 
 # ---------------------------------------------------------------- RNA struct properties
 
