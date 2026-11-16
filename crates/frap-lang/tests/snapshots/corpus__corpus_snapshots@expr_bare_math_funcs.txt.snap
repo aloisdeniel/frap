@@ -1,0 +1,18 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_bare_math_funcs.txt
+---
+> print(sqrt(2), radians(180), degrees(pi))
+---
+stmt 1 Bpy line 1 @1:1/1+41
+  Print
+    Builtin Sqrt @1:7/7+7
+      arg (positional) @1:12/12+1
+        Int 2 @1:12/12+1
+    Builtin Radians @1:16/16+12
+      arg (positional) @1:24/24+3
+        Int 180 @1:24/24+3
+    Builtin Degrees @1:30/30+11
+      arg (positional) @1:38/38+2
+        Builtin Pi @1:38/38+2

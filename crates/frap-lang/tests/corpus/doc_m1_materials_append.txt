@@ -1,0 +1,1 @@
+bpy.context.object.data.materials.append(bpy.data.materials['Steel'])

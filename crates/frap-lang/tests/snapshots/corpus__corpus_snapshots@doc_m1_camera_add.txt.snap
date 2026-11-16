@@ -1,0 +1,20 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_m1_camera_add.txt
+---
+> bpy.ops.object.camera_add(location=(4, -4, 3), rotation=(1.1, 0, 0.785))
+---
+stmt 1 Bpy line 1 @1:1/1+72
+  Invoke object.camera_add
+    arg location @1:27/27+19
+      Tuple @1:36/36+10
+        Int 4 @1:37/37+1
+        Neg @1:40/40+2
+          Int 4 @1:41/41+1
+        Int 3 @1:44/44+1
+    arg rotation @1:48/48+24
+      Tuple @1:57/57+15
+        Float 1.1 @1:58/58+3
+        Int 0 @1:63/63+1
+        Float 0.785 @1:66/66+5

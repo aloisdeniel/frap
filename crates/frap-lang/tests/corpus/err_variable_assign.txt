@@ -1,0 +1,1 @@
+cube = bpy.data.objects['Cube']

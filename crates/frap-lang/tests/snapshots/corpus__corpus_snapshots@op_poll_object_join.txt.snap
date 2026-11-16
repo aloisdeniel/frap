@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_poll_object_join.txt
+---
+> bpy.ops.object.join.poll()
+---
+stmt 1 Bpy line 1 @1:1/1+26
+  OpMeta object.join Poll

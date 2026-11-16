@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_delete_use_global.txt
+---
+> object.delete use_global=false
+---
+stmt 1 Short line 1 @1:1/1+30
+  Invoke object.delete
+    arg use_global @1:15/15+16
+      Bool false @1:26/26+5

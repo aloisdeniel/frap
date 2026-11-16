@@ -1,0 +1,20 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_quaternion.txt
+---
+> bpy.data.objects['Cube'].rotation_quaternion = Quaternion((1, 0, 0, 0))
+---
+stmt 1 Bpy line 1 @1:1/1+71
+  Set Assign
+    Path bpy.data @1:1/1+44
+      .objects
+      ["Cube"]
+      .rotation_quaternion
+    Builtin Quaternion @1:48/48+24
+      arg (positional) @1:59/59+12
+        Tuple @1:59/59+12
+          Int 1 @1:60/60+1
+          Int 0 @1:63/63+1
+          Int 0 @1:66/66+1
+          Int 0 @1:69/69+1

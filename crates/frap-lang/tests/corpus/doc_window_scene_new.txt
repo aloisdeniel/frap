@@ -1,0 +1,1 @@
+bpy.context.window.scene = bpy.data.scenes.new('S2')

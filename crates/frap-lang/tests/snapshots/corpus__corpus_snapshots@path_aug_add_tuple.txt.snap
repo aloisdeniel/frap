@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_aug_add_tuple.txt
+---
+> bpy.data.objects['Cube'].location += 0, 0, 1
+---
+stmt 1 Bpy line 1 @1:1/1+44
+  Set Add
+    Path bpy.data @1:1/1+33
+      .objects
+      ["Cube"]
+      .location
+    Tuple @1:38/38+7
+      Int 0 @1:38/38+1
+      Int 0 @1:41/41+1
+      Int 1 @1:44/44+1

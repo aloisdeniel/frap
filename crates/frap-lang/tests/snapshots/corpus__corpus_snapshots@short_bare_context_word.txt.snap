@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_bare_context_word.txt
+---
+> object.select_pattern pattern=context
+---
+stmt 1 Short line 1 @1:1/1+37
+  Invoke object.select_pattern
+    arg pattern @1:23/23+15
+      Bare context @1:31/31+7

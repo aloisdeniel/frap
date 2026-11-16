@@ -1,0 +1,1 @@
+bpy.ops.view3d.snap_cursor_to_center()

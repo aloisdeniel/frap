@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_complex_literal.txt
+---
+> print(1j)
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:7/7+2
+  message: frap: complex numbers are not supported

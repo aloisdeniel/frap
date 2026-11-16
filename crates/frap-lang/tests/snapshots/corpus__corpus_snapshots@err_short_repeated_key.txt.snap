@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_repeated_key.txt
+---
+> mesh.primitive_cube_add size=1 size=2
+---
+error 1 SyntaxError SYNTAX @1:32/32+4
+  message: keyword argument repeated: size

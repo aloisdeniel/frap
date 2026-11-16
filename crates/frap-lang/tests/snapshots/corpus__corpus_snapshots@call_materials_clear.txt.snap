@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_materials_clear.txt
+---
+> bpy.data.meshes['Cube'].materials.clear()
+---
+stmt 1 Bpy line 1 @1:1/1+41
+  Call
+    Path bpy.data @1:1/1+39
+      .meshes
+      ["Cube"]
+      .materials
+      .clear

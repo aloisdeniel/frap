@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_matrix_ctor_unsupported.txt
+---
+> print(Matrix.LocRotScale(None, None, None))
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:14/14+11
+  message: frap: Matrix.LocRotScale is not supported (supported: Translation, Rotation, Scale, Identity)

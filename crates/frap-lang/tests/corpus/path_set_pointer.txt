@@ -1,0 +1,1 @@
+bpy.data.objects['Cube'].parent = bpy.data.objects['Empty']

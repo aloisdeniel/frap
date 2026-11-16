@@ -1,0 +1,18 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_m1_materials_append.txt
+---
+> bpy.context.object.data.materials.append(bpy.data.materials['Steel'])
+---
+stmt 1 Bpy line 1 @1:1/1+69
+  Call
+    Path bpy.context @1:1/1+40
+      .object
+      .data
+      .materials
+      .append
+    arg (positional) @1:42/42+27
+            Path bpy.data @1:42/42+27
+        .materials
+        ["Steel"]

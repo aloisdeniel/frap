@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_matrix_scale.txt
+---
+> print(Matrix.Scale(2, 4))
+---
+stmt 1 Bpy line 1 @1:1/1+25
+  Print
+    Builtin MatrixScale @1:7/7+18
+      arg (positional) @1:20/20+1
+        Int 2 @1:20/20+1
+      arg (positional) @1:23/23+1
+        Int 4 @1:23/23+1

@@ -1,0 +1,15 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_grid.txt
+---
+> bpy.ops.mesh.primitive_grid_add(x_subdivisions=10, y_subdivisions=10, size=2)
+---
+stmt 1 Bpy line 1 @1:1/1+77
+  Invoke mesh.primitive_grid_add
+    arg x_subdivisions @1:33/33+17
+      Int 10 @1:48/48+2
+    arg y_subdivisions @1:52/52+17
+      Int 10 @1:67/67+2
+    arg size @1:71/71+6
+      Int 2 @1:76/76+1

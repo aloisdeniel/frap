@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_variable_tuple_unpack.txt
+---
+> a, b = 1, 2
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:1/1+1
+  message: frap: variables are not supported; use a full path such as bpy.data.objects['Cube']
+  hint: use a full path such as bpy.data.objects['Cube']
+  detail: name="a"

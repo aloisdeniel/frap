@@ -1,0 +1,18 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_objects_new_mesh.txt
+---
+> bpy.data.objects.new(name='Thing', object_data=bpy.data.meshes['Cube'])
+---
+stmt 1 Bpy line 1 @1:1/1+71
+  Call
+    Path bpy.data @1:1/1+20
+      .objects
+      .new
+    arg name @1:22/22+12
+      Str "Thing" @1:27/27+7
+    arg object_data @1:36/36+35
+            Path bpy.data @1:48/48+23
+        .meshes
+        ["Cube"]

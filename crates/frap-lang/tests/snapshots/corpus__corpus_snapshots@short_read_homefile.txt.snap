@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_read_homefile.txt
+---
+> wm.read_homefile use_empty=true
+---
+stmt 1 Short line 1 @1:1/1+31
+  Invoke wm.read_homefile
+    arg use_empty @1:18/18+14
+      Bool true @1:28/28+4

@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_unknown_op_is_still_op.txt
+---
+> foo.bar baz=1
+---
+stmt 1 Short line 1 @1:1/1+13
+  Invoke foo.bar
+    arg baz @1:9/9+5
+      Int 1 @1:13/13+1

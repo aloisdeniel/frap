@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_cube_align_quoted.txt
+---
+> mesh.primitive_cube_add align='WORLD'
+---
+stmt 1 Short line 1 @1:1/1+37
+  Invoke mesh.primitive_cube_add
+    arg align @1:25/25+13
+      Str "WORLD" @1:31/31+7

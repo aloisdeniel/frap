@@ -1,0 +1,29 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_matrix_product.txt
+---
+> bpy.data.objects['Cube'].matrix_world = Matrix.Translation((0, 0, 1)) @ Matrix.Rotation(radians(45), 4, 'Z')
+---
+stmt 1 Bpy line 1 @1:1/1+108
+  Set Assign
+    Path bpy.data @1:1/1+37
+      .objects
+      ["Cube"]
+      .matrix_world
+    MatMul @1:41/41+68
+      Builtin MatrixTranslation @1:41/41+29
+        arg (positional) @1:60/60+9
+          Tuple @1:60/60+9
+            Int 0 @1:61/61+1
+            Int 0 @1:64/64+1
+            Int 1 @1:67/67+1
+      Builtin MatrixRotation @1:73/73+36
+        arg (positional) @1:89/89+11
+          Builtin Radians @1:89/89+11
+            arg (positional) @1:97/97+2
+              Int 45 @1:97/97+2
+        arg (positional) @1:102/102+1
+          Int 4 @1:102/102+1
+        arg (positional) @1:105/105+3
+          Str "Z" @1:105/105+3

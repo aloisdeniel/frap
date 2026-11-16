@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_get_uv_data.txt
+---
+> bpy.data.meshes['Cube'].uv_layers['UVMap'].data[0].uv
+---
+stmt 1 Bpy line 1 @1:1/1+53
+  Get
+    Path bpy.data @1:1/1+53
+      .meshes
+      ["Cube"]
+      .uv_layers
+      ["UVMap"]
+      .data
+      [0]
+      .uv

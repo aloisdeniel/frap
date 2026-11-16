@@ -1,0 +1,18 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_objects_remove_generic.txt
+---
+> bpy.data.objects.remove(bpy.data.objects['Cube'], do_unlink=True)
+---
+stmt 1 Bpy line 1 @1:1/1+65
+  Call
+    Path bpy.data @1:1/1+23
+      .objects
+      .remove
+    arg (positional) @1:25/25+24
+            Path bpy.data @1:25/25+24
+        .objects
+        ["Cube"]
+    arg do_unlink @1:51/51+14
+      Bool true @1:61/61+4

@@ -1,0 +1,18 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_dict_literal.txt
+---
+> print({'a': 1, 'b': (2, 3)})
+---
+stmt 1 Bpy line 1 @1:1/1+28
+  Print
+    Dict @1:7/7+21
+      entry
+        Str "a" @1:8/8+3
+        Int 1 @1:13/13+1
+      entry
+        Str "b" @1:16/16+3
+        Tuple @1:21/21+6
+          Int 2 @1:22/22+1
+          Int 3 @1:25/25+1

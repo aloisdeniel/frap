@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_join.txt
+---
+> bpy.ops.object.join()
+---
+stmt 1 Bpy line 1 @1:1/1+21
+  Invoke object.join

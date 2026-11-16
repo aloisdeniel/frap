@@ -1,0 +1,19 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_m1_metallic_set.txt
+---
+> bpy.data.materials['Steel'].node_tree.nodes['Principled BSDF'].inputs['Metallic'].default_value = 1.0
+---
+stmt 1 Bpy line 1 @1:1/1+101
+  Set Assign
+    Path bpy.data @1:1/1+95
+      .materials
+      ["Steel"]
+      .node_tree
+      .nodes
+      ["Principled BSDF"]
+      .inputs
+      ["Metallic"]
+      .default_value
+    Float 1.0 @1:99/99+3

@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_enum.txt
+---
+> bpy.data.objects['Cube'].rotation_mode = 'QUATERNION'
+---
+stmt 1 Bpy line 1 @1:1/1+53
+  Set Assign
+    Path bpy.data @1:1/1+38
+      .objects
+      ["Cube"]
+      .rotation_mode
+    Str "QUATERNION" @1:42/42+12

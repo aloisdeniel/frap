@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_knife_project.txt
+---
+> bpy.ops.mesh.knife_project()
+---
+stmt 1 Bpy line 1 @1:1/1+28
+  Invoke mesh.knife_project

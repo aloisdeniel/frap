@@ -1,0 +1,28 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/stmt_unicode_lines_spans.txt
+---
+> bpy.data.objects['Würfel'].location = (1, 2, 3)
+> data.objects['Würfel'].scale = 2,2,2
+---
+stmt 1 Bpy line 1 @1:1/1+48
+  Set Assign
+    Path bpy.data @1:1/1+36
+      .objects
+      ["Würfel"]
+      .location
+    Tuple @1:40/39+9
+      Int 1 @1:41/40+1
+      Int 2 @1:44/43+1
+      Int 3 @1:47/46+1
+stmt 2 Short line 2 @2:1/1+37
+  Set Assign
+    Path bpy.data @2:1/1+29
+      .objects
+      ["Würfel"]
+      .scale
+    Tuple @2:33/32+5
+      Int 2 @2:33/32+1
+      Int 2 @2:35/34+1
+      Int 2 @2:37/36+1

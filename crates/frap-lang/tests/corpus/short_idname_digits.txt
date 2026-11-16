@@ -1,0 +1,1 @@
+mesh.primitive_cube_add2 size=1

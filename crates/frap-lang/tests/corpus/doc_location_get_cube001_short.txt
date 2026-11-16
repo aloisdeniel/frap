@@ -1,0 +1,1 @@
+data.objects['Cube.001'].location

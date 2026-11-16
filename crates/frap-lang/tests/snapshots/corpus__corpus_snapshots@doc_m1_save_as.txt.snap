@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_m1_save_as.txt
+---
+> bpy.ops.wm.save_as_mainfile(filepath='out/part.frap')
+---
+stmt 1 Bpy line 1 @1:1/1+53
+  Invoke wm.save_as_mainfile
+    arg filepath @1:29/29+24
+      Str "out/part.frap" @1:38/38+15

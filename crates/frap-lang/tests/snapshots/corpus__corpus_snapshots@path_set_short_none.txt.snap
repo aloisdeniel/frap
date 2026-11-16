@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_short_none.txt
+---
+> data.objects['Cube'].parent = none
+---
+stmt 1 Short line 1 @1:1/1+34
+  Set Assign
+    Path bpy.data @1:1/1+27
+      .objects
+      ["Cube"]
+      .parent
+    None @1:31/31+4

@@ -1,0 +1,1 @@
+bpy.ops.mesh.primitive_torus_add(major_radius=1, minor_radius=0.25)

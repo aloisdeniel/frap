@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_cube_extra_spaces.txt
+---
+> mesh.primitive_cube_add   size=2    location=0,0,1   
+---
+stmt 1 Short line 1 @1:1/1+50
+  Invoke mesh.primitive_cube_add
+    arg size @1:27/27+6
+      Int 2 @1:32/32+1
+    arg location @1:37/37+14
+      Tuple @1:46/46+5
+        Int 0 @1:46/46+1
+        Int 0 @1:48/48+1
+        Int 1 @1:50/50+1

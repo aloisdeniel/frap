@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_empty_subscript.txt
+---
+> bpy.data.objects[]
+---
+error 1 SyntaxError SYNTAX @1:18/18+1
+  message: invalid syntax

@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_monkey.txt
+---
+> bpy.ops.mesh.primitive_monkey_add()
+---
+stmt 1 Bpy line 1 @1:1/1+35
+  Invoke mesh.primitive_monkey_add

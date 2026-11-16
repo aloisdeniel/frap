@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_unicode_error_span.txt
+---
+> data.objects['Würfel'].location = 1,,2
+---
+error 1 SyntaxError SYNTAX @1:38/37+1
+  message: invalid syntax

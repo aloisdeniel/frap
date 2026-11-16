@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_pow_assign.txt
+---
+> bpy.context.scene.frame_current **= 2
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:33/33+3
+  message: frap: augmented assignment '**=' is not supported (use = += -= *= /=)

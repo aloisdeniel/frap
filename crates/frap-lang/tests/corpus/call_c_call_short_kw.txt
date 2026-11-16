@@ -1,0 +1,1 @@
+C.object.modifiers.new name=Bevel type=BEVEL

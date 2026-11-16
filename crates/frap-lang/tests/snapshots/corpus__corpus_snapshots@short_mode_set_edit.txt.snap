@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_mode_set_edit.txt
+---
+> object.mode_set mode=EDIT
+---
+stmt 1 Short line 1 @1:1/1+25
+  Invoke object.mode_set
+    arg mode @1:17/17+9
+      Bare EDIT @1:22/22+4

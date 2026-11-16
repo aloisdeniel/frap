@@ -1,0 +1,18 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_euler_to_quaternion.txt
+---
+> print(Euler((0, 0, math.pi), 'XYZ').to_quaternion())
+---
+stmt 1 Bpy line 1 @1:1/1+52
+  Print
+    Method to_quaternion @1:7/7+45
+      Builtin Euler @1:7/7+29
+        arg (positional) @1:13/13+15
+          Tuple @1:13/13+15
+            Int 0 @1:14/14+1
+            Int 0 @1:17/17+1
+            Builtin Pi @1:20/20+7
+        arg (positional) @1:30/30+5
+          Str "XYZ" @1:30/30+5

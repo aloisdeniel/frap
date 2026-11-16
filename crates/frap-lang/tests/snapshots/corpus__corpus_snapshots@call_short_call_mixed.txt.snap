@@ -1,0 +1,18 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_short_call_mixed.txt
+---
+> data.images.new Tex width=64 height=64
+---
+stmt 1 Short line 1 @1:1/1+38
+  Call
+    Path bpy.data @1:1/1+15
+      .images
+      .new
+    arg (positional) @1:17/17+3
+      Bare Tex @1:17/17+3
+    arg width @1:21/21+8
+      Int 64 @1:27/27+2
+    arg height @1:30/30+9
+      Int 64 @1:37/37+2

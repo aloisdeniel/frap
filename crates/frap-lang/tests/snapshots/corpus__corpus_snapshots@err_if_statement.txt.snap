@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_if_statement.txt
+---
+> if bpy.context.object: pass
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:1/1+2
+  message: frap: 'if' statements are not supported
+  hint: frap runs single statements: no loops, conditionals, definitions or variables; repeat the statement instead of looping

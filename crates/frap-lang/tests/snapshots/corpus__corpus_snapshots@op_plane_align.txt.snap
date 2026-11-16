@@ -1,0 +1,18 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_plane_align.txt
+---
+> bpy.ops.mesh.primitive_plane_add(size=4, align='WORLD', location=(0, 0, 0))
+---
+stmt 1 Bpy line 1 @1:1/1+75
+  Invoke mesh.primitive_plane_add
+    arg size @1:34/34+6
+      Int 4 @1:39/39+1
+    arg align @1:42/42+13
+      Str "WORLD" @1:48/48+7
+    arg location @1:57/57+18
+      Tuple @1:66/66+9
+        Int 0 @1:67/67+1
+        Int 0 @1:70/70+1
+        Int 0 @1:73/73+1

@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_trailing_operator.txt
+---
+> bpy.context.scene.frame_current = 1 +
+---
+error 1 SyntaxError SYNTAX @1:38/38+0
+  message: invalid syntax

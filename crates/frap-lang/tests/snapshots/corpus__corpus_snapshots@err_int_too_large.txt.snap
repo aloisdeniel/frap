@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_int_too_large.txt
+---
+> print(99999999999999999999)
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:7/7+20
+  message: frap: integer literals must fit in a signed 64-bit integer

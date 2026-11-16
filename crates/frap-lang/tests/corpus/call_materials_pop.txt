@@ -1,0 +1,1 @@
+bpy.data.meshes['Cube'].materials.pop(index=0)

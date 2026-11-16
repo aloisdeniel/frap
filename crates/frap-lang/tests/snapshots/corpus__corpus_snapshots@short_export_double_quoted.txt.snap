@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_export_double_quoted.txt
+---
+> export_scene.gltf filepath="out/part.glb" export_format=GLB
+---
+stmt 1 Short line 1 @1:1/1+59
+  Invoke export_scene.gltf
+    arg filepath @1:19/19+23
+      Str "out/part.glb" @1:28/28+14
+    arg export_format @1:43/43+17
+      Bare GLB @1:57/57+3

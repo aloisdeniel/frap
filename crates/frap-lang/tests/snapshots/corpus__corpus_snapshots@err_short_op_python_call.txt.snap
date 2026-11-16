@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_op_python_call.txt
+---
+> mesh.primitive_cube_add(size=2)
+---
+error 1 SyntaxError SYNTAX @1:24/24+1
+  message: invalid syntax
+  hint: call an operator as bpy.ops.mesh.primitive_cube_add(key=value, ...) or, in the short form, mesh.primitive_cube_add key=value ...; an RNA function needs a full path such as bpy.data.objects['Cube'].select_set(True)

@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/stmt_import_dotted.txt
+---
+> import bpy.ops
+---
+stmt 1 Bpy line 1 @1:1/1+14
+  Noop Import

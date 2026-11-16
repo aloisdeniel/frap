@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_set_empty.txt
+---
+> frap.render_contact_sheet views={}
+---
+stmt 1 Short line 1 @1:1/1+34
+  Invoke frap.render_contact_sheet
+    arg views @1:27/27+8
+      Set @1:33/33+2

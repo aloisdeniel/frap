@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_scene_frame_current_var.txt
+---
+> scene.frame_current = 6
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:1/1+5
+  message: frap: variables are not supported; use a full path such as bpy.data.objects['Cube']
+  hint: use a full path such as bpy.data.objects['Cube']
+  detail: name="scene"

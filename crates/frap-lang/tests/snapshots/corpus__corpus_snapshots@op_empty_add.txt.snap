@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_empty_add.txt
+---
+> bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD')
+---
+stmt 1 Bpy line 1 @1:1/1+58
+  Invoke object.empty_add
+    arg type @1:26/26+17
+      Str "PLAIN_AXES" @1:31/31+12
+    arg align @1:45/45+13
+      Str "WORLD" @1:51/51+7

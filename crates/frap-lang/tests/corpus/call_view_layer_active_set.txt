@@ -1,0 +1,1 @@
+bpy.context.view_layer.objects.active = bpy.data.objects['Cube']

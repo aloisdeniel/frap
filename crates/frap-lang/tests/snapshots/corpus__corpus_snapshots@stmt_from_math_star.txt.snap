@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/stmt_from_math_star.txt
+---
+> from math import *
+---
+stmt 1 Bpy line 1 @1:1/1+18
+  Noop Import

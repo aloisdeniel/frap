@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_name_error.txt
+---
+> print(cube)
+---
+error 1 NameError NAME @1:7/7+4
+  message: name 'cube' is not defined
+  hint: frap has no variables: quote strings ('Cube') and use full paths such as bpy.data.objects['Cube']
+  detail: name="cube"

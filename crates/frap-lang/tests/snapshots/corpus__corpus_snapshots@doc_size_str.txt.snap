@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_size_str.txt
+---
+> bpy.ops.mesh.primitive_cube_add(size="x")
+---
+stmt 1 Bpy line 1 @1:1/1+41
+  Invoke mesh.primitive_cube_add
+    arg size @1:33/33+8
+      Str "x" @1:38/38+3

@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_socket_path.txt
+---
+> bpy.data.materials['X'].node_tree.nodes["Principled BSDF"].inputs[0]
+---
+stmt 1 Bpy line 1 @1:1/1+68
+  Get
+    Path bpy.data @1:1/1+68
+      .materials
+      ["X"]
+      .node_tree
+      .nodes
+      ["Principled BSDF"]
+      .inputs
+      [0]

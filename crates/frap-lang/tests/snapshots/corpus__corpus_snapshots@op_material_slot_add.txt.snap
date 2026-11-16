@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_material_slot_add.txt
+---
+> bpy.ops.object.material_slot_add()
+---
+stmt 1 Bpy line 1 @1:1/1+34
+  Invoke object.material_slot_add

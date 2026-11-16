@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_circle_fill.txt
+---
+> bpy.ops.mesh.primitive_circle_add(vertices=32, fill_type='NGON')
+---
+stmt 1 Bpy line 1 @1:1/1+64
+  Invoke mesh.primitive_circle_add
+    arg vertices @1:35/35+11
+      Int 32 @1:44/44+2
+    arg fill_type @1:48/48+16
+      Str "NGON" @1:58/58+6

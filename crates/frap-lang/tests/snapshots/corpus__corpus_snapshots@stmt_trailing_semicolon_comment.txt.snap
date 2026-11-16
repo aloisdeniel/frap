@@ -1,0 +1,12 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/stmt_trailing_semicolon_comment.txt
+---
+> bpy.ops.object.shade_smooth(); # done
+> bpy.ops.object.shade_smooth();
+---
+stmt 1 Bpy line 1 @1:1/1+29
+  Invoke object.shade_smooth
+stmt 2 Bpy line 2 @2:1/1+29
+  Invoke object.shade_smooth

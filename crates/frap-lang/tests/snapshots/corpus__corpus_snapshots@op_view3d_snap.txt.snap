@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_view3d_snap.txt
+---
+> bpy.ops.view3d.snap_cursor_to_center()
+---
+stmt 1 Bpy line 1 @1:1/1+38
+  Invoke view3d.snap_cursor_to_center

@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_assign_to_call.txt
+---
+> data.objects['Cube'].select_get() = 1
+---
+error 1 SyntaxError SYNTAX @1:1/1+33
+  message: cannot assign to function call here. Maybe you meant '==' instead of '='?

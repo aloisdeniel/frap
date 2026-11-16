@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_value_length.txt
+---
+> print(Vector(bpy.data.objects['Cube'].location).length)
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:49/49+6
+  message: frap: reading the attribute 'length' of a computed value is not supported (only method calls such as .normalized())

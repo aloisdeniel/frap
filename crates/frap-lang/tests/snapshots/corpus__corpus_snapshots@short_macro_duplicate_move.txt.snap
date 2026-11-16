@@ -1,0 +1,22 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_macro_duplicate_move.txt
+---
+> object.duplicate_move OBJECT_OT_duplicate.linked=false TRANSFORM_OT_translate.value=2,0,0
+---
+stmt 1 Short line 1 @1:1/1+89
+  Invoke object.duplicate_move
+    arg OBJECT_OT_duplicate @1:23/23+32
+      Dict @1:23/23+32
+        entry
+          Str "linked" @1:43/43+6
+          Bool false @1:50/50+5
+    arg TRANSFORM_OT_translate @1:56/56+34
+      Dict @1:56/56+34
+        entry
+          Str "value" @1:79/79+5
+          Tuple @1:85/85+5
+            Int 2 @1:85/85+1
+            Int 0 @1:87/87+1
+            Int 0 @1:89/89+1

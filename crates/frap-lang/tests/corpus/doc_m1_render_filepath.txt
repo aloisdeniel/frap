@@ -1,0 +1,1 @@
+bpy.context.scene.render.filepath = 'out/part.png'

@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_import_alias.txt
+---
+> import mathutils as mu
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:18/18+2
+  message: frap: import aliases are not supported (they bind a variable)

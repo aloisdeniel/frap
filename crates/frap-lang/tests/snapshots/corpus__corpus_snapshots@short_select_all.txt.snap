@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_select_all.txt
+---
+> object.select_all action=SELECT
+---
+stmt 1 Short line 1 @1:1/1+31
+  Invoke object.select_all
+    arg action @1:19/19+13
+      Bare SELECT @1:26/26+6

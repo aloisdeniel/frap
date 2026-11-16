@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_render_animation_false.txt
+---
+> bpy.ops.render.render(animation=False, write_still=True)
+---
+stmt 1 Bpy line 1 @1:1/1+56
+  Invoke render.render
+    arg animation @1:23/23+15
+      Bool false @1:33/33+5
+    arg write_still @1:40/40+16
+      Bool true @1:52/52+4

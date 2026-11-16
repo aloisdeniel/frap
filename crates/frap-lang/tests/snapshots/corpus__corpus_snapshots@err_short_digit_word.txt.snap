@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_digit_word.txt
+---
+> object.select_pattern pattern=3D_text
+---
+error 1 SyntaxError SYNTAX @1:31/31+7
+  message: invalid decimal literal

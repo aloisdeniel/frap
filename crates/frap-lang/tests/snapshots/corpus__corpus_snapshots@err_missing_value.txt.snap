@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_missing_value.txt
+---
+> bpy.ops.mesh.primitive_cube_add(size=)
+---
+error 1 SyntaxError SYNTAX @1:33/33+5
+  message: expected argument value expression

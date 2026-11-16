@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_unclosed_paren.txt
+---
+> bpy.ops.mesh.primitive_cube_add(size=2
+---
+error 1 SyntaxError SYNTAX @1:32/32+1
+  message: '(' was never closed

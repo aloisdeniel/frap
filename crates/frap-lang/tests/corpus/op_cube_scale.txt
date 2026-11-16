@@ -1,0 +1,1 @@
+bpy.ops.mesh.primitive_cube_add(scale=(1, 2, 0.5))

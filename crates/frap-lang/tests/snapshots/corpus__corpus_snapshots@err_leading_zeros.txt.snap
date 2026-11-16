@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_leading_zeros.txt
+---
+> bpy.context.scene.frame_current = 01
+---
+error 1 SyntaxError SYNTAX @1:35/35+2
+  message: leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers

@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_vector_from_path.txt
+---
+> print(Vector(bpy.data.objects['Cube'].location).normalized())
+---
+stmt 1 Bpy line 1 @1:1/1+61
+  Print
+    Method normalized @1:7/7+54
+      Builtin Vector @1:7/7+41
+        arg (positional) @1:14/14+33
+                    Path bpy.data @1:14/14+33
+            .objects
+            ["Cube"]
+            .location

@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_two_dots_key.txt
+---
+> mesh.extrude_region_move A.b.c=1
+---
+error 1 SyntaxError SYNTAX @1:29/29+1
+  message: invalid syntax
+  hint: a short-form key has at most one dot: SUBOP_OT_name.prop=value

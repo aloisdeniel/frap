@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_ellipsis_value.txt
+---
+> bpy.data.objects['Cube'].location = ...
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:37/37+3
+  message: frap: Ellipsis (...) is not supported

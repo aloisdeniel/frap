@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Semantic IR (ARCHITECTURE §11.2, CONTRACT frozen at M1 W0; M1 W0 added the variants the M0
-//! parser did not produce yet). Knows nothing about operators or RNA.
+//! parser did not produce yet; WP 1.3 added `PathSeg::KeyLib`). Knows nothing about operators or
+//! RNA.
 
 use frap_rna::Span;
 use smol_str::SmolStr;
@@ -219,7 +220,7 @@ pub enum UnOp {
     Pos,
 }
 
-/// Expressions (M0 subset of §11.2: literals, bare words, paths, tuples, lists, unary sign).
+/// Expressions (§11.2).
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub enum Expr {
@@ -291,6 +292,9 @@ pub enum PathSeg {
     Attr(SmolStr),
     /// `['Name']`
     Key(String),
+    /// `['Name', 'lib.blend']` / `['Name', None]`: a `(name, library filepath)` tuple key
+    /// (§5.2; added by WP 1.3, additive on a `#[non_exhaustive]` enum, rule 2.2.4).
+    KeyLib(String, Option<String>),
     /// `[3]`
     Index(i64),
     /// `[a:b]`
@@ -313,6 +317,13 @@ impl PathExpr {
                     s.push_str(a);
                 }
                 PathSeg::Key(k) => s.push_str(&format!("[{}]", frap_rna::ptr::py_str_repr(k))),
+                PathSeg::KeyLib(k, lib) => s.push_str(&format!(
+                    "[{}, {}]",
+                    frap_rna::ptr::py_str_repr(k),
+                    lib.as_deref()
+                        .map(frap_rna::ptr::py_str_repr)
+                        .unwrap_or_else(|| "None".to_owned())
+                )),
                 PathSeg::Index(i) => s.push_str(&format!("[{i}]")),
                 PathSeg::Slice(a, b) => s.push_str(&format!(
                     "[{}:{}]",

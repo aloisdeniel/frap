@@ -1,0 +1,22 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_macro_two_subops.txt
+---
+> mesh.extrude_region_move MESH_OT_extrude_region.use_normal_flip=false TRANSFORM_OT_translate.value=0,0,1
+---
+stmt 1 Short line 1 @1:1/1+104
+  Invoke mesh.extrude_region_move
+    arg MESH_OT_extrude_region @1:26/26+44
+      Dict @1:26/26+44
+        entry
+          Str "use_normal_flip" @1:49/49+15
+          Bool false @1:65/65+5
+    arg TRANSFORM_OT_translate @1:71/71+34
+      Dict @1:71/71+34
+        entry
+          Str "value" @1:94/94+5
+          Tuple @1:100/100+5
+            Int 0 @1:100/100+1
+            Int 0 @1:102/102+1
+            Int 1 @1:104/104+1

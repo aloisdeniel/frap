@@ -1,0 +1,1 @@
+D.objects['Cube'].location = 1,2,3

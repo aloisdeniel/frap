@@ -1,0 +1,1 @@
+object.select_pattern pattern=3D_text

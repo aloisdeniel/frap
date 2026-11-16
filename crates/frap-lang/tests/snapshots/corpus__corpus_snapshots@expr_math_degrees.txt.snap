@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_math_degrees.txt
+---
+> print(math.degrees(math.pi / 2))
+---
+stmt 1 Bpy line 1 @1:1/1+32
+  Print
+    Builtin Degrees @1:7/7+25
+      arg (positional) @1:20/20+11
+        Div @1:20/20+11
+          Builtin Pi @1:20/20+7
+          Int 2 @1:30/30+1

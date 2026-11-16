@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_boolean_op.txt
+---
+> print(True and False)
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:12/12+3
+  message: frap: boolean operators and membership tests are not supported

@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_double_quoted.txt
+---
+> bpy.ops.object.mode_set(mode="EDIT")
+---
+stmt 1 Bpy line 1 @1:1/1+36
+  Invoke object.mode_set
+    arg mode @1:25/25+11
+      Str "EDIT" @1:30/30+6

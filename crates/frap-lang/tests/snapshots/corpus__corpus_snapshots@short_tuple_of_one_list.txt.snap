@@ -1,0 +1,12 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_tuple_of_one_list.txt
+---
+> frap.select_elements indices=[5]
+---
+stmt 1 Short line 1 @1:1/1+32
+  Invoke frap.select_elements
+    arg indices @1:22/22+11
+      List @1:30/30+3
+        Int 5 @1:31/31+1

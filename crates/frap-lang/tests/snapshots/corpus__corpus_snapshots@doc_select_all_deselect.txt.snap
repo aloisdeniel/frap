@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_select_all_deselect.txt
+---
+> bpy.ops.mesh.select_all(action='DESELECT')
+---
+stmt 1 Bpy line 1 @1:1/1+42
+  Invoke mesh.select_all
+    arg action @1:25/25+17
+      Str "DESELECT" @1:32/32+10

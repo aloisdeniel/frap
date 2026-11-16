@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_for_loop.txt
+---
+> for o in bpy.data.objects: o.select_set(True)
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:1/1+3
+  message: frap: 'for' statements are not supported
+  hint: frap runs single statements: no loops, conditionals, definitions or variables; repeat the statement instead of looping

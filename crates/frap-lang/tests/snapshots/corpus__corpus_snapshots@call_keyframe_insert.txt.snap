@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_keyframe_insert.txt
+---
+> bpy.data.objects['Cube'].keyframe_insert(data_path='location', frame=1)
+---
+stmt 1 Bpy line 1 @1:1/1+71
+  Call
+    Path bpy.data @1:1/1+40
+      .objects
+      ["Cube"]
+      .keyframe_insert
+    arg data_path @1:42/42+20
+      Str "location" @1:52/52+10
+    arg frame @1:64/64+7
+      Int 1 @1:70/70+1

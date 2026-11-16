@@ -1,0 +1,1 @@
+bpy.data.materials['Steel'].node_tree.nodes.new(type='ShaderNodeTexImage')

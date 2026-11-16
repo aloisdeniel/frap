@@ -1,0 +1,18 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_window_scene_new.txt
+---
+> bpy.context.window.scene = bpy.data.scenes.new('S2')
+---
+stmt 1 Bpy line 1 @1:1/1+52
+  Set Assign
+    Path bpy.context @1:1/1+24
+      .window
+      .scene
+        Path bpy.data @1:28/28+25
+      .scenes
+      .new
+      (call)
+        arg (positional) @1:48/48+4
+          Str "S2" @1:48/48+4

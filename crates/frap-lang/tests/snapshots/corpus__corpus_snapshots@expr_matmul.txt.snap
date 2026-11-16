@@ -1,0 +1,20 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_matmul.txt
+---
+> print(Matrix.Identity(4) @ Vector((1, 2, 3, 1)))
+---
+stmt 1 Bpy line 1 @1:1/1+48
+  Print
+    MatMul @1:7/7+41
+      Builtin MatrixIdentity @1:7/7+18
+        arg (positional) @1:23/23+1
+          Int 4 @1:23/23+1
+      Builtin Vector @1:28/28+20
+        arg (positional) @1:35/35+12
+          Tuple @1:35/35+12
+            Int 1 @1:36/36+1
+            Int 2 @1:39/39+1
+            Int 3 @1:42/42+1
+            Int 1 @1:45/45+1

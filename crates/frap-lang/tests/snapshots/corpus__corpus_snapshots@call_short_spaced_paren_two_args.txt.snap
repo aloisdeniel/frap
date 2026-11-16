@@ -1,0 +1,18 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_short_spaced_paren_two_args.txt
+---
+> data.objects['Cube'].hide_set (True, view_layer=context.view_layer)
+---
+stmt 1 Short line 1 @1:1/1+67
+  Call
+    Path bpy.data @1:1/1+29
+      .objects
+      ["Cube"]
+      .hide_set
+    arg (positional) @1:32/32+4
+      Bool true @1:32/32+4
+    arg view_layer @1:38/38+29
+            Path bpy.context @1:49/49+18
+        .view_layer

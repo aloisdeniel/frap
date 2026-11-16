@@ -1,0 +1,1 @@
+bpy.data.objects['Cube'].pass_index <<= 1

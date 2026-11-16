@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_positional_op_arg.txt
+---
+> mesh.primitive_cube_add 2
+---
+error 1 SyntaxError SYNTAX @1:25/25+1
+  message: invalid syntax
+  hint: short-form operator arguments are key=value, e.g. size=2

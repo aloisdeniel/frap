@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_underscore_int.txt
+---
+> mesh.primitive_grid_add x_subdivisions=1_000
+---
+stmt 1 Short line 1 @1:1/1+44
+  Invoke mesh.primitive_grid_add
+    arg x_subdivisions @1:25/25+20
+      Int 1000 @1:40/40+5

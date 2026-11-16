@@ -1,0 +1,15 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_mathutils_matrix_prefix.txt
+---
+> print(mathutils.Matrix.Translation((1, 0, 0)))
+---
+stmt 1 Bpy line 1 @1:1/1+46
+  Print
+    Builtin MatrixTranslation @1:7/7+39
+      arg (positional) @1:36/36+9
+        Tuple @1:36/36+9
+          Int 1 @1:37/37+1
+          Int 0 @1:40/40+1
+          Int 0 @1:43/43+1

@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_set_builtin.txt
+---
+> print(set())
+---
+stmt 1 Bpy line 1 @1:1/1+12
+  Print
+    Builtin Set @1:7/7+5

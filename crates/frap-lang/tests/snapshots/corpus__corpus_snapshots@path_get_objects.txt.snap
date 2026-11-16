@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_get_objects.txt
+---
+> bpy.data.objects
+---
+stmt 1 Bpy line 1 @1:1/1+16
+  Get
+    Path bpy.data @1:1/1+16
+      .objects

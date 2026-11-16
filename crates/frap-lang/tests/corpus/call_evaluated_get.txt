@@ -1,0 +1,1 @@
+bpy.data.objects['Cube'].evaluated_get(bpy.context.evaluated_depsgraph_get())

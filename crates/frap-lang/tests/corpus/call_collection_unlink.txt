@@ -1,0 +1,1 @@
+bpy.data.collections['Collection'].objects.unlink(bpy.data.objects['Cube'])

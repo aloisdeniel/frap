@@ -1,0 +1,35 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_from_pydata.txt
+---
+> bpy.data.meshes['Mesh'].from_pydata([(0, 0, 0), (1, 0, 0), (0, 1, 0)], [], [(0, 1, 2)])
+---
+stmt 1 Bpy line 1 @1:1/1+87
+  Call
+    Path bpy.data @1:1/1+35
+      .meshes
+      ["Mesh"]
+      .from_pydata
+    arg (positional) @1:37/37+33
+      List @1:37/37+33
+        Tuple @1:38/38+9
+          Int 0 @1:39/39+1
+          Int 0 @1:42/42+1
+          Int 0 @1:45/45+1
+        Tuple @1:49/49+9
+          Int 1 @1:50/50+1
+          Int 0 @1:53/53+1
+          Int 0 @1:56/56+1
+        Tuple @1:60/60+9
+          Int 0 @1:61/61+1
+          Int 1 @1:64/64+1
+          Int 0 @1:67/67+1
+    arg (positional) @1:72/72+2
+      List @1:72/72+2
+    arg (positional) @1:76/76+11
+      List @1:76/76+11
+        Tuple @1:77/77+9
+          Int 0 @1:78/78+1
+          Int 1 @1:81/81+1
+          Int 2 @1:84/84+1

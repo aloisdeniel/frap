@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_bevel_offset_zero_short.txt
+---
+> mesh.bevel offset=0
+---
+stmt 1 Short line 1 @1:1/1+19
+  Invoke mesh.bevel
+    arg offset @1:12/12+8
+      Int 0 @1:19/19+1

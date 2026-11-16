@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_shift_augmented.txt
+---
+> bpy.data.objects['Cube'].pass_index <<= 1
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:37/37+3
+  message: frap: augmented assignment '<<=' is not supported (use = += -= *= /=)

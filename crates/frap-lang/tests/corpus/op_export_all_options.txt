@@ -1,0 +1,1 @@
+bpy.ops.export_scene.gltf(filepath='out/a.glb', export_format='GLB', use_selection=True, export_apply=False)

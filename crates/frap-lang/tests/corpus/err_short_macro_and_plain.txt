@@ -1,0 +1,1 @@
+mesh.extrude_region_move TRANSFORM_OT_translate.value=0,0,1 TRANSFORM_OT_translate=1

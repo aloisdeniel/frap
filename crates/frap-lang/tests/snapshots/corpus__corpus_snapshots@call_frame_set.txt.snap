@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_frame_set.txt
+---
+> bpy.context.scene.frame_set(5)
+---
+stmt 1 Bpy line 1 @1:1/1+30
+  Call
+    Path bpy.context @1:1/1+27
+      .scene
+      .frame_set
+    arg (positional) @1:29/29+1
+      Int 5 @1:29/29+1
