@@ -1,0 +1,6 @@
+{
+ "blender_version": "5.2.4 LTS",
+ "build_hash": "cd5dc428cce1",
+ "factory_startup": true,
+ "script": "tools/blender/dump_primitives.py"
+}

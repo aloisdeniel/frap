@@ -1,0 +1,105 @@
+{
+ "op": "mesh.primitive_cone_add",
+ "kwargs": {
+  "vertices": 4,
+  "radius1": 0.0,
+  "radius2": 0.0
+ },
+ "object": {
+  "name": "Cone",
+  "data": "Cone",
+  "location": [0.0,0.0,0.0],
+  "rotation_euler": [0.0,0.0,0.0],
+  "scale": [1.0,1.0,1.0]
+ },
+ "mesh": {
+  "name": "Cone",
+  "positions": [
+   [0.0,0.0,-1.0],
+   [0.0,0.0,1.0]
+  ],
+  "edges": [
+   [1,0]
+  ],
+  "faces": [],
+  "corner_edges": [],
+  "attributes": [
+   {
+    "name": "UVMap",
+    "domain": "CORNER",
+    "data_type": "FLOAT2",
+    "data": []
+   },
+   {
+    "name": ".select_vert",
+    "domain": "POINT",
+    "data_type": "BOOLEAN",
+    "data": [true,true]
+   },
+   {
+    "name": ".select_edge",
+    "domain": "EDGE",
+    "data_type": "BOOLEAN",
+    "data": [true]
+   },
+   {
+    "name": ".uv_select_vert",
+    "domain": "CORNER",
+    "data_type": "BOOLEAN",
+    "data": []
+   },
+   {
+    "name": ".uv_select_edge",
+    "domain": "CORNER",
+    "data_type": "BOOLEAN",
+    "data": []
+   },
+   {
+    "name": ".uv_select_face",
+    "domain": "FACE",
+    "data_type": "BOOLEAN",
+    "data": []
+   },
+   {
+    "name": "position",
+    "domain": "POINT",
+    "data_type": "FLOAT_VECTOR",
+    "data": null
+   },
+   {
+    "name": ".edge_verts",
+    "domain": "EDGE",
+    "data_type": "INT32_2D",
+    "data": null
+   },
+   {
+    "name": ".corner_vert",
+    "domain": "CORNER",
+    "data_type": "INT",
+    "data": null
+   },
+   {
+    "name": ".corner_edge",
+    "domain": "CORNER",
+    "data_type": "INT",
+    "data": null
+   }
+  ],
+  "uv_layers": [
+   {
+    "name": "UVMap",
+    "active": true,
+    "active_render": true
+   }
+  ],
+  "normals_domain": "POINT",
+  "vertex_normals": [
+   [0.0,0.0,-1.0],
+   [0.0,0.0,1.0]
+  ],
+  "face_normals": [],
+  "corner_normals": [],
+  "loop_triangles": [],
+  "loop_triangle_polygons": []
+ }
+}

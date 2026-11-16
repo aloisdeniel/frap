@@ -1,126 +1,199 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Face/corner normals and loop triangles (ARCHITECTURE §6.1). `sqrt` is IEEE-exact, so no
-//! `libm` is needed here (rule 2.2.12 concerns transcendentals).
+//! Mesh-level normals and loop triangles (ARCHITECTURE §6.1): the dispatch of Blender's
+//! `Mesh::face_normals()`, `vert_normals()`, `corner_normals()` and `corner_tris()`
+//! (`mesh_normals.cc`, `mesh_tessellate.cc`) over the slice algorithms in `frap-geom`.
 
-use crate::mesh::Mesh;
+use frap_geom::normals::{self as gn, CornerNormalsInput, V3, VertToFaceMap};
+use frap_geom::polyfill;
 
-fn sub(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
-    [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
-}
-fn cross(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
-    [
-        a[1] * b[2] - a[2] * b[1],
-        a[2] * b[0] - a[0] * b[2],
-        a[0] * b[1] - a[1] * b[0],
-    ]
+use crate::mesh::{AttrData, Attribute, CUSTOM_NORMAL, Domain, Mesh, NormalsDomain};
+
+fn custom(m: &Mesh) -> Option<&Attribute> {
+    m.attributes().get(CUSTOM_NORMAL)
 }
 
-// Ported from blender/source/blender/blenlib/intern/math_vector_inline.c (normalize_v3_v3_length).
-fn normalize(n: [f32; 3]) -> [f32; 3] {
-    let d = n[0] * n[0] + n[1] * n[1] + n[2] * n[2];
-    if d > 1.0e-35 {
-        let inv = 1.0 / d.sqrt();
-        [n[0] * inv, n[1] * inv, n[2] * inv]
-    } else {
-        [0.0, 0.0, 0.0]
+fn custom_float3(m: &Mesh) -> Option<(Domain, &[V3])> {
+    match custom(m) {
+        Some(Attribute {
+            domain,
+            data: AttrData::Float3(v),
+            ..
+        }) => Some((*domain, v.as_slice())),
+        _ => None,
     }
 }
 
-// Ported from blender/source/blender/blenlib/intern/math_geom.cc (normal_tri_v3, normal_quad_v3,
-// normal_poly_v3) as dispatched by blender/source/blender/blenkernel/intern/mesh_normals.cc
-// (face_normal_calc).
-fn face_normal(p: &[[f32; 3]], verts: &[i32]) -> [f32; 3] {
-    let v = |i: usize| p[verts[i] as usize];
-    match verts.len() {
-        3 => normalize(cross(sub(v(0), v(1)), sub(v(1), v(2)))),
-        4 => normalize(cross(sub(v(0), v(2)), sub(v(1), v(3)))),
-        n => {
-            let mut acc = [0.0f32; 3];
-            let mut prev = v(n - 1);
-            for i in 0..n {
-                let cur = v(i);
-                acc[0] += (prev[1] - cur[1]) * (prev[2] + cur[2]);
-                acc[1] += (prev[2] - cur[2]) * (prev[0] + cur[0]);
-                acc[2] += (prev[0] - cur[0]) * (prev[1] + cur[1]);
-                prev = cur;
+fn custom_short2(m: &Mesh) -> Option<&[[i16; 2]]> {
+    match custom(m) {
+        Some(Attribute {
+            domain: Domain::Corner,
+            data: AttrData::Int16x2(v),
+            ..
+        }) => Some(v.as_slice()),
+        _ => None,
+    }
+}
+
+/// `Mesh::face_normals_true()`: Newell normal of every face.
+pub(crate) fn face_normals_true(m: &Mesh) -> Vec<V3> {
+    gn::normals_calc_faces(m.positions(), m.face_offsets(), m.corner_verts())
+}
+
+fn vert_map(m: &Mesh) -> VertToFaceMap {
+    VertToFaceMap::new(m.verts_num(), m.face_offsets(), m.corner_verts())
+}
+
+/// `Mesh::face_normals()`.
+pub(crate) fn face_normals(m: &Mesh) -> Vec<V3> {
+    if m.faces_num() == 0 {
+        return Vec::new();
+    }
+    if let Some((domain, data)) = custom_float3(m) {
+        match domain {
+            Domain::Face => return data.to_vec(),
+            Domain::Point => {
+                return gn::mix_normals_vert_to_face(m.face_offsets(), m.corner_verts(), data);
             }
-            normalize(acc)
+            Domain::Corner => return gn::mix_normals_corner_to_face(m.face_offsets(), data),
+            Domain::Edge => {}
         }
+    } else if custom_short2(m).is_some() {
+        return gn::mix_normals_corner_to_face(m.face_offsets(), &m.corner_normals());
+    }
+    face_normals_true(m)
+}
+
+/// The "true" face normals: the cached [`Mesh::face_normals`] when no custom normals change
+/// them, else a fresh computation.
+fn true_face_normals_shared(m: &Mesh) -> std::sync::Arc<Vec<V3>> {
+    if custom(m).is_none() {
+        m.face_normals()
+    } else {
+        std::sync::Arc::new(face_normals_true(m))
     }
 }
 
-pub(crate) fn face_normals(m: &Mesh) -> Vec<[f32; 3]> {
-    let p = m.positions();
-    let cv = m.corner_verts();
-    (0..m.faces_num())
-        .map(|f| face_normal(p, &cv[m.face(f)]))
-        .collect()
+/// `Mesh::vert_normals()`.
+pub(crate) fn vert_normals(m: &Mesh) -> Vec<V3> {
+    let map = vert_map(m);
+    if let Some((domain, data)) = custom_float3(m) {
+        match domain {
+            Domain::Point => return data.to_vec(),
+            Domain::Face => {
+                return gn::normals_calc_verts(
+                    m.positions(),
+                    m.face_offsets(),
+                    m.corner_verts(),
+                    &map,
+                    data,
+                );
+            }
+            Domain::Corner => {
+                return gn::mix_normals_corner_to_vert(
+                    m.positions(),
+                    m.face_offsets(),
+                    m.corner_verts(),
+                    &map,
+                    data,
+                );
+            }
+            Domain::Edge => {}
+        }
+    } else if custom_short2(m).is_some() {
+        return gn::mix_normals_corner_to_vert(
+            m.positions(),
+            m.face_offsets(),
+            m.corner_verts(),
+            &map,
+            &m.corner_normals(),
+        );
+    }
+    let fnor = true_face_normals_shared(m);
+    gn::normals_calc_verts(
+        m.positions(),
+        m.face_offsets(),
+        m.corner_verts(),
+        &map,
+        &fnor,
+    )
 }
 
-/// Corner normals. Sharp faces (`sharp_face`) use the face normal, as Blender does. Smooth
-/// faces use angle-weighted vertex normals over all faces (M0 limit: no fan splitting at
-/// sharp edges or non-manifold edges and no custom normals yet; M1 ports
-/// `mesh_normals.cc::normals_calc_corners`).
-pub(crate) fn corner_normals(m: &Mesh, fnor: &[[f32; 3]]) -> Vec<[f32; 3]> {
-    let cv = m.corner_verts();
-    let p = m.positions();
-    let sharp = m.sharp_faces();
-    let all_sharp = sharp.is_some_and(|s| s.iter().all(|b| *b));
-    let mut vnor: Vec<[f32; 3]> = Vec::new();
-    if !all_sharp {
-        vnor = vec![[0.0; 3]; m.verts_num()];
-        for (f, fn_) in fnor.iter().enumerate().take(m.faces_num()) {
-            let r = m.face(f);
-            let n = r.len();
-            for (k, c) in r.clone().enumerate() {
-                let prev = p[cv[r.start + (k + n - 1) % n] as usize];
-                let cur = p[cv[c] as usize];
-                let next = p[cv[r.start + (k + 1) % n] as usize];
-                let a = normalize(sub(prev, cur));
-                let b = normalize(sub(next, cur));
-                let dot = (a[0] * b[0] + a[1] * b[1] + a[2] * b[2]).clamp(-1.0, 1.0);
-                // Ported from blender/source/blender/blenlib/intern/math_base_inline.c (saacos).
-                let w = libm::acosf(dot);
-                let vn = &mut vnor[cv[c] as usize];
-                for (acc, c) in vn.iter_mut().zip(fn_) {
-                    *acc += c * w;
+/// `Mesh::corner_normals()`.
+pub(crate) fn corner_normals(m: &Mesh) -> Vec<V3> {
+    if m.faces_num() == 0 {
+        return Vec::new();
+    }
+    match m.normals_domain() {
+        NormalsDomain::Point => {
+            let vn = m.vert_normals();
+            m.corner_verts().iter().map(|&v| vn[v as usize]).collect()
+        }
+        NormalsDomain::Face => {
+            let fnor = m.face_normals();
+            let mut out = vec![[0.0; 3]; m.corners_num()];
+            for f in 0..m.faces_num() {
+                for c in m.face(f) {
+                    out[c] = fnor[f];
                 }
             }
+            out
         }
-        for v in &mut vnor {
-            *v = normalize(*v);
+        NormalsDomain::Corner => {
+            if let Some((domain, data)) = custom_float3(m) {
+                return if domain == Domain::Corner {
+                    data.to_vec()
+                } else {
+                    vec![[0.0; 3]; m.corners_num()]
+                };
+            }
+            let map = vert_map(m);
+            let fnor = true_face_normals_shared(m);
+            let (sharp_edges, sharp_faces) = (m.sharp_edge_flags(), m.sharp_face_flags());
+            gn::normals_calc_corners(&CornerNormalsInput {
+                positions: m.positions(),
+                face_offsets: m.face_offsets(),
+                corner_verts: m.corner_verts(),
+                corner_edges: m.corner_edges(),
+                vert_to_face: &map,
+                face_normals: &fnor,
+                sharp_edges: sharp_edges.as_deref(),
+                sharp_faces: sharp_faces.as_deref(),
+                custom_normals: custom_short2(m),
+            })
         }
     }
-    let mut out = vec![[0.0f32; 3]; m.corners_num()];
-    for f in 0..m.faces_num() {
-        let face_sharp = sharp.map(|s| s[f]).unwrap_or(false);
-        for c in m.face(f) {
-            out[c] = if face_sharp {
-                fnor[f]
-            } else {
-                vnor[cv[c] as usize]
-            };
-        }
-    }
-    out
 }
 
-/// Loop triangles: quads → `(0,1,2),(0,2,3)` (verified in Blender), triangles as is.
-/// M0 limit: n-gons are fanned; M1 ports `BLI_polyfill_2d` (no beautify).
-/// Vertex normals: angle-weighted face normals, zero-length → normalised position
-/// (`mesh_normals.cc`, `normals_calc_verts`). M1 W0 stub: WP 1.4 ports it bit-exactly.
-pub(crate) fn vert_normals(m: &Mesh, fnor: &[[f32; 3]]) -> Vec<[f32; 3]> {
-    let _ = (m, fnor);
-    todo!("WP 1.4: port normals_calc_verts (angle weighting as in Blender 5.2)")
-}
-
+// Ported from blender/source/blender/blenkernel/intern/mesh_tessellate.cc
+// (mesh_calc_tessellation_for_face_impl).
+/// Loop triangles: triangles as is; quads `(0,1,2),(0,2,3)`, or `(0,1,3),(1,2,3)` when the
+/// 0–2 split is degenerate (`is_quad_flip_v3_first_third_fast`); n-gons by `BLI_polyfill_2d`
+/// without beautify.
 pub(crate) fn looptris(m: &Mesh) -> Vec<[u32; 3]> {
-    let mut out = Vec::new();
+    let p = m.positions();
+    let cv = m.corner_verts();
+    let mut out = Vec::with_capacity(m.corners_num());
     for f in 0..m.faces_num() {
         let r = m.face(f);
         let s = r.start as u32;
-        for k in 1..(r.len() as u32).saturating_sub(1) {
-            out.push([s, s + k, s + k + 1]);
+        match r.len() {
+            0..=2 => {}
+            3 => out.push([s, s + 1, s + 2]),
+            4 => {
+                let v = |i: usize| p[cv[r.start + i] as usize];
+                if polyfill::is_quad_flip_v3_first_third_fast(v(0), v(1), v(2), v(3)) {
+                    out.push([s, s + 1, s + 3]);
+                    out.push([s + 1, s + 2, s + 3]);
+                } else {
+                    out.push([s, s + 1, s + 2]);
+                    out.push([s, s + 2, s + 3]);
+                }
+            }
+            _ => {
+                for t in polyfill::polyfill_mesh_face(p, &cv[r.clone()]) {
+                    out.push([s + t[0], s + t[1], s + t[2]]);
+                }
+            }
         }
     }
     out

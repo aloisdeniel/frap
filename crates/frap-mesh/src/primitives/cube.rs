@@ -3,14 +3,15 @@
 //!
 //! Ported from blender/source/blender/bmesh/operators/bmo_primitive.cc
 //! (`bmo_create_cube_exec`, `BM_mesh_calc_uvs_cube`). Verified index by index against
-//! Blender 5.2.4 in `tests/cube_vs_blender.rs` (fixtures: spec/m0/primitives/*.json).
+//! Blender 5.2.4 in `tests/primitives_vs_blender.rs`.
 
-use std::sync::Arc;
-
-use crate::mesh::{AttrData, Attribute, Domain, Mesh, SHARP_FACE};
+use super::bm::Bm;
+use super::bm::math::mul_m4_v3;
+use super::{Matrix4, scale_matrix};
+use crate::mesh::Mesh;
 
 /// Face table of `bmo_create_cube_exec` ("rotation order set to match BM_mesh_elem_table_ensure").
-const FACES: [[i32; 4]; 6] = [
+const FACES: [[u32; 4]; 6] = [
     [0, 1, 3, 2],
     [2, 3, 7, 6],
     [6, 7, 5, 4],
@@ -19,32 +20,62 @@ const FACES: [[i32; 4]; 6] = [
     [7, 3, 1, 5],
 ];
 
-/// Default UV map name (`DATA_("UVMap")`).
-pub const UV_MAP_NAME: &str = "UVMap";
+/// Operator properties of `mesh.primitive_cube_add` that shape the mesh.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct Cube {
+    /// `size` (edge length; 0 gives a 1 m cube).
+    pub size: f32,
+    /// `calc_uvs`.
+    pub calc_uvs: bool,
+    /// Creation matrix, operator `scale` included.
+    pub matrix: Matrix4,
+}
 
-/// The cube of `mesh.primitive_cube_add(size=…, calc_uvs=…)`, in object space with the
-/// placement scale already baked in (`scale` = (1,1,1) for the operator's default).
+impl Default for Cube {
+    fn default() -> Self {
+        Cube {
+            size: 2.0,
+            calc_uvs: true,
+            matrix: super::IDENTITY,
+        }
+    }
+}
+
+/// The cube of `mesh.primitive_cube_add(size=…, calc_uvs=…)` with the placement scale baked in
+/// (`scale` = (1,1,1) for the operator's default). M0 signature kept for its call sites.
 pub fn cube(size: f32, calc_uvs: bool, scale: [f32; 3]) -> Mesh {
+    cube_mesh(&Cube {
+        size,
+        calc_uvs,
+        matrix: scale_matrix(scale),
+    })
+}
+
+/// The mesh of `mesh.primitive_cube_add(…)`.
+pub fn cube_mesh(p: &Cube) -> Mesh {
     // `size` is clamped to its hard range [0, 1e12] by argument conversion; a zero half-size
     // falls back to 0.5 (`if (!off) off = 0.5f;`), so size=0 and size=-1 give a 1 m cube
-    // (verified in Blender 5.2.4, fixtures primitive_cube_add__size0 / __size_negative).
-    let off = if size / 2.0 == 0.0 { 0.5 } else { size / 2.0 };
-    let mut positions = Vec::with_capacity(8);
-    for x in [-1.0f32, 1.0] {
-        for y in [-1.0f32, 1.0] {
-            for z in [-1.0f32, 1.0] {
-                positions.push([off * x * scale[0], off * y * scale[1], off * z * scale[2]]);
+    // (verified in Blender 5.2.4).
+    let mut off = p.size / 2.0;
+    if off == 0.0 {
+        off = 0.5;
+    }
+    let mut bm = Bm::new();
+    let mut verts = [0u32; 8];
+    let mut i = 0;
+    for x in [-1i32, 1] {
+        for y in [-1i32, 1] {
+            for z in [-1i32, 1] {
+                let v = [x as f32 * off, y as f32 * off, z as f32 * off];
+                verts[i] = bm.vert_create(mul_m4_v3(&p.matrix, v));
+                i += 1;
             }
         }
     }
-    let faces: Vec<&[i32]> = FACES.iter().map(|f| f.as_slice()).collect();
-    let mut mesh = Mesh::from_faces_bmesh_order("Cube", positions, &faces);
-    mesh.attributes_mut().insert(Attribute {
-        name: SHARP_FACE.into(),
-        domain: Domain::Face,
-        data: AttrData::Bool(Arc::new(vec![true; 6])),
-    });
-    if calc_uvs {
+    for f in FACES {
+        bm.face_create(&f.map(|k| verts[k as usize]));
+    }
+    if p.calc_uvs {
         // BM_mesh_calc_uvs_cube: a vertical strip of four 0.25 squares at x = 0.375 for
         // faces 0..3, then faces 4 and 5 left and right of the third square.
         const W: f32 = 0.25;
@@ -56,17 +87,10 @@ pub fn cube(size: f32, calc_uvs: bool, scale: [f32; 3]) -> Mesh {
             (0.125, 0.5),
             (0.625, 0.5),
         ];
-        let mut uvs = Vec::with_capacity(24);
-        for (x, y) in starts {
-            uvs.extend_from_slice(&[[x, y], [x + W, y], [x + W, y + W], [x, y + W]]);
+        for (slot, (x, y)) in bm.faces.slots.iter_mut().zip(starts) {
+            let f = slot.as_mut().expect("no kills");
+            f.uvs = vec![[x, y], [x + W, y], [x + W, y + W], [x, y + W]];
         }
-        mesh.attributes_mut().insert(Attribute {
-            name: UV_MAP_NAME.into(),
-            domain: Domain::Corner,
-            data: AttrData::Float2(Arc::new(uvs)),
-        });
-        mesh.uv_active = Some(UV_MAP_NAME.into());
-        mesh.uv_active_render = Some(UV_MAP_NAME.into());
     }
-    mesh
+    bm.to_mesh("Cube", p.calc_uvs)
 }
