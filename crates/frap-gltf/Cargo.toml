@@ -18,6 +18,7 @@ bytemuck.workspace = true
 half.workspace = true
 libm.workspace = true
 automod.workspace = true
+linkme.workspace = true
 
 [dev-dependencies]
 gltf.workspace = true
