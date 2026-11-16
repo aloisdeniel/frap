@@ -206,6 +206,27 @@ pub struct RSettings {
     pub gamma: f32,
     /// Frame being rendered.
     pub frame: i32,
+    /// Workbench MATERIAL colour source of each material: its viewport display values, which
+    /// Blender's Workbench reads instead of the node tree (decision log W1-15). A key missing
+    /// here (synthetic scenes) falls back to the lowered material's factors.
+    pub workbench_materials: IndexMap<MatKey, RWorkbenchMaterial>,
+    /// Workbench render background (straight RGBA) as Blender clears to it when
+    /// `film_transparent` is off: `World.color` with alpha 1, `display.shading.background_color`
+    /// for `background_type = 'VIEWPORT'`, transparent black without a world (verified on
+    /// 5.2.4). `None` (synthetic scenes): the colour of [`RenderScene::world`].
+    pub workbench_background: Option<[f32; 4]>,
+}
+
+/// A material's viewport display values (`Material.diffuse_color`, `.metallic`, `.roughness`),
+/// the Workbench MATERIAL colour source.
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct RWorkbenchMaterial {
+    /// `Material.diffuse_color` (linear RGBA)
+    pub diffuse_color: [f32; 4],
+    /// `Material.metallic`
+    pub metallic: f32,
+    /// `Material.roughness`
+    pub roughness: f32,
 }
 
 impl Default for RSettings {
@@ -223,6 +244,8 @@ impl Default for RSettings {
             exposure: 0.0,
             gamma: 1.0,
             frame: 1,
+            workbench_materials: IndexMap::new(),
+            workbench_background: None,
         }
     }
 }
