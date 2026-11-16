@@ -1,0 +1,118 @@
+{
+ "input": {
+  "vertices": [
+   [0.0,0.0,0.0],
+   [1.0,0.0,0.0],
+   [1.0,1.0,0.0],
+   [0.0,1.0,0.0],
+   [2.0,0.0,0.3],
+   [2.0,1.0,0.3]
+  ],
+  "edges": [],
+  "faces": [
+   [0,1,2,3],
+   [1,2,5,4]
+  ],
+  "shade_flat": false
+ },
+ "mesh": {
+  "name": "mesh__flipped_neighbour_smooth",
+  "positions": [
+   [0.0,0.0,0.0],
+   [1.0,0.0,0.0],
+   [1.0,1.0,0.0],
+   [0.0,1.0,0.0],
+   [2.0,0.0,0.30000001192092896],
+   [2.0,1.0,0.30000001192092896]
+  ],
+  "edges": [
+   [0,3],
+   [0,1],
+   [1,2],
+   [2,3],
+   [1,4],
+   [2,5],
+   [4,5]
+  ],
+  "faces": [
+   [0,1,2,3],
+   [1,2,5,4]
+  ],
+  "corner_edges": [1,2,3,0,2,5,6,4],
+  "attributes": [
+   {
+    "name": ".select_vert",
+    "domain": "POINT",
+    "data_type": "BOOLEAN",
+    "data": [true,true,true,true,true,true]
+   },
+   {
+    "name": "position",
+    "domain": "POINT",
+    "data_type": "FLOAT_VECTOR",
+    "data": null
+   },
+   {
+    "name": ".corner_vert",
+    "domain": "CORNER",
+    "data_type": "INT",
+    "data": null
+   },
+   {
+    "name": ".corner_edge",
+    "domain": "CORNER",
+    "data_type": "INT",
+    "data": null
+   },
+   {
+    "name": ".select_poly",
+    "domain": "FACE",
+    "data_type": "BOOLEAN",
+    "data": [true,true]
+   },
+   {
+    "name": ".edge_verts",
+    "domain": "EDGE",
+    "data_type": "INT32_2D",
+    "data": null
+   },
+   {
+    "name": ".select_edge",
+    "domain": "EDGE",
+    "data_type": "BOOLEAN",
+    "data": [true,true,true,true,true,true,true]
+   }
+  ],
+  "uv_layers": [],
+  "normals_domain": "POINT",
+  "vertex_normals": [
+   [0.0,0.0,1.0],
+   [0.989400327205658,0.0,0.1452132910490036],
+   [0.989400327205658,0.0,0.1452132910490036],
+   [0.0,0.0,1.0],
+   [0.2873479127883911,0.0,-0.9578263163566589],
+   [0.2873479127883911,0.0,-0.9578263163566589]
+  ],
+  "face_normals": [
+   [0.0,0.0,1.0],
+   [0.2873478829860687,0.0,-0.9578262567520142]
+  ],
+  "corner_normals": [
+   [0.0,0.0,1.0],
+   [0.989400327205658,0.0,0.1452132910490036],
+   [0.989400327205658,0.0,0.1452132910490036],
+   [0.0,0.0,1.0],
+   [0.989400327205658,0.0,0.1452132910490036],
+   [0.989400327205658,0.0,0.1452132910490036],
+   [0.2873479127883911,0.0,-0.9578263163566589],
+   [0.2873479127883911,0.0,-0.9578263163566589]
+  ],
+  "loop_triangles": [
+   [0,1,2],
+   [0,2,3],
+   [4,5,6],
+   [4,6,7]
+  ],
+  "loop_triangle_polygons": [0,0,1,1]
+ }
+}

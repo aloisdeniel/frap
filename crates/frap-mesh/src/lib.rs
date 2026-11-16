@@ -14,3 +14,8 @@ mod rna;
 pub mod split;
 
 pub use mesh::{AttrData, Attribute, AttributeSet, DeformVert, Domain, Mesh, SHARP_FACE, TexSpace};
+// WP 1.4 additions (Mesh API: normals domain, flag attributes, internal attribute names).
+pub use mesh::{
+    CUSTOM_NORMAL, NormalsDomain, REMOVED_WHEN_ALL_FALSE, SELECT_EDGE, SELECT_POLY, SELECT_VERT,
+    SHARP_EDGE, UV_SEAM, UV_SELECT_EDGE, UV_SELECT_FACE, UV_SELECT_VERT,
+};
