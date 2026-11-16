@@ -15,11 +15,12 @@
 //! gets a WARNING (unlit/emission shaders arrive with M3).
 //!
 //! Raising ports the colour half of `base_color()` (`imp/pbrMetallicRoughness.py`): constant
-//! factor (and `Material.diffuse_color`, `set_viewport_color`), or Image Texture labelled
-//! "BASE COLOR" behind a "Color Factor" Mix when the factor is not white, its `Alpha` output
-//! linked into the alpha chain that `alpha.rs` built.
+//! factor (and `Material.diffuse_color`, `set_viewport_color`), or, after the alpha clip
+//! frame that `alpha.rs` built, a "Color Factor" Mix when the factor is not white, an
+//! "Alpha Factor" Math MULTIPLY when the texture alpha is used and the alpha factor is not
+//! 1, and the Image Texture labelled "BASE COLOR", in the importer's creation order.
 
-use frap_nodes::Node;
+use frap_nodes::{Node, SocketAddr, SocketValue};
 
 use super::alpha::{alpha_info, texture_alpha_plan};
 use crate::graph::{Src, unrecognised};
@@ -137,18 +138,26 @@ fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
         cx.set_enum(mix, "blend_type", "MULTIPLY");
         let o = cx.output(mix, "Result");
         cx.link(color_socket, o);
-        cx.set_input(mix, "Factor", frap_nodes::SocketValue::Float(1.0));
+        cx.set_input(mix, "Factor", SocketValue::Float(1.0));
         color_socket = cx.input(mix, "A");
         cx.set_input(
             mix,
             "B",
-            frap_nodes::SocketValue::Color([rgb[0], rgb[1], rgb[2], 1.0]),
+            SocketValue::Color([rgb[0], rgb[1], rgb[2], 1.0]),
         );
+    }
+    let mut alpha_to = if tex_alpha { cx.base_alpha_socket } else { None };
+    if needs_alpha_factor && let Some(socket) = alpha_to {
+        let m = cx.add_node("ShaderNodeMath", [x - 140.0, y - 230.0]);
+        cx.set_label(m, "Alpha Factor");
+        cx.link(socket, SocketAddr::output(m, 0));
+        cx.set_enum(m, "operation", "MULTIPLY");
+        alpha_to = Some(SocketAddr::input(m, 0));
+        cx.set_input_at(m, 1, SocketValue::Float(f[3]));
     }
     if needs_color_factor || needs_alpha_factor {
         x -= 200.0;
     }
-    let alpha_to = if tex_alpha { cx.base_alpha_socket } else { None };
     cx.texture(tex, [x, y], "BASE COLOR", Some(color_socket), alpha_to);
 }
 
@@ -159,4 +168,12 @@ static PATTERN: MaterialPattern = MaterialPattern {
     order: 20,
     lower,
     raise: Some(raise),
+};
+
+#[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
+#[linkme::distributed_slice(crate::build::LAYOUT_BLOCKS)]
+static LAYOUT: crate::build::LayoutBlock = crate::build::LayoutBlock {
+    order: 10,
+    key: "base_color",
+    takes_space: |lm| lm.base_color.texture.is_some() || lm.vertex_color.is_some(),
 };

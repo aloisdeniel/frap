@@ -163,3 +163,11 @@ static PATTERN: MaterialPattern = MaterialPattern {
     lower,
     raise: Some(raise),
 };
+
+#[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
+#[linkme::distributed_slice(crate::build::LAYOUT_BLOCKS)]
+static LAYOUT: crate::build::LayoutBlock = crate::build::LayoutBlock {
+    order: 20,
+    key: "metallic_roughness",
+    takes_space: |lm| lm.metallic.texture.is_some() || lm.roughness.texture.is_some(),
+};

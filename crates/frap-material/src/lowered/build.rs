@@ -17,28 +17,41 @@ use crate::{Filter, LoweredMaterial, RaiseCx, TexRef, UvSource, Wrap};
 /// Height of one block of the importer's layout (`calc_locations`).
 const BLOCK_HEIGHT: f32 = 460.0;
 
-/// `calc_locations`: the upper-right corner of each block of the imported graph, laid out
-/// top to bottom (a block with a texture takes 460 units) and centred vertically.
+/// One block of the importer's layout (`calc_locations`), registered by the pattern file that
+/// raises the block's nodes (one `LAYOUT_BLOCKS` entry next to its `MATERIAL_PATTERNS` entry),
+/// so later patterns add their block without editing [`calc_locations`] (§16.2, §22.1).
+#[derive(Debug)]
+pub struct LayoutBlock {
+    /// Position in the importer's top-to-bottom list. The importer's keys, in order:
+    /// `base_color` 10, `metallic_roughness` 20, `transmission` 30, `normal` 40,
+    /// `specularTexture` 50, `specularColorTexture` 60, `anisotropy` 70,
+    /// `sheenRoughnessTexture` 80, `sheenColorTexture` 90, `clearcoat` 100,
+    /// `clearcoat_roughness` 110, `clearcoat_normal` 120, `emission` 130, `iridescence` 140,
+    /// `occlusion` 150, `volume_thickness` 160.
+    pub order: u16,
+    /// The block's key ([`RaiseCx::location`]).
+    pub key: &'static str,
+    /// Whether the block holds a texture and so takes `BLOCK_HEIGHT` (460) units.
+    pub takes_space: fn(&LoweredMaterial) -> bool,
+}
+
+/// Every layout block, one per pattern that lays out nodes.
+#[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
+#[linkme::distributed_slice]
+pub static LAYOUT_BLOCKS: [LayoutBlock];
+
+/// `calc_locations`: the upper-right corner of each registered [`LAYOUT_BLOCKS`] block of the
+/// imported graph, laid out top to bottom in `order` (a block with a texture takes 460 units)
+/// and centred vertically.
 pub fn calc_locations(lm: &LoweredMaterial) -> BTreeMap<&'static str, [f32; 2]> {
     let x = -200.0;
     let mut y = 0.0;
     let mut locs = BTreeMap::new();
-    let blocks: [(&'static str, bool); 5] = [
-        (
-            "base_color",
-            lm.base_color.texture.is_some() || lm.vertex_color.is_some(),
-        ),
-        (
-            "metallic_roughness",
-            lm.metallic.texture.is_some() || lm.roughness.texture.is_some(),
-        ),
-        ("normal", lm.normal.is_some()),
-        ("emission", lm.emissive.texture.is_some()),
-        ("occlusion", lm.occlusion.is_some()),
-    ];
-    for (key, takes_space) in blocks {
-        locs.insert(key, [x, y]);
-        if takes_space {
+    let mut blocks: Vec<&LayoutBlock> = LAYOUT_BLOCKS.iter().collect();
+    blocks.sort_by(|a, b| a.order.cmp(&b.order).then(a.key.cmp(b.key)));
+    for b in blocks {
+        locs.insert(b.key, [x, y]);
+        if (b.takes_space)(lm) {
             y -= BLOCK_HEIGHT;
         }
     }

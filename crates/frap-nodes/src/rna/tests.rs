@@ -275,7 +275,38 @@ fn nodes_new_names_locations_and_errors() {
         assert_eq!(e.exception, PyExc::RuntimeError);
         assert_eq!(e.message, format!("Error: Node type {bad} undefined"));
     }
+    // Registered types of another tree type fail the poll (verified wording; Blender adds a
+    // trailing newline, which frap's reports drop).
+    for (bad, why) in [
+        ("GeometryNodeMeshCube", "Not a geometry node tree"),
+        ("FunctionNodeCompare", "Not a geometry node tree"),
+        ("CompositorNodeBlur", "Not a compositor node tree"),
+        ("TextureNodeChecker", "Not a texture node tree"),
+        (
+            "FunctionNodeAlignRotationToVector",
+            "Not a geometry or compositor node tree",
+        ),
+        ("NodeGetBundleItem", "Not a geometry node tree"),
+    ] {
+        let e = t.new_node(bad).unwrap_err();
+        assert_eq!(e.exception, PyExc::RuntimeError);
+        assert_eq!(
+            e.message,
+            format!("Error: Cannot add node of type {bad} to node tree 'Shader Nodetree'\n  {why}")
+        );
+    }
+    // Unregistered names with those prefixes stay undefined.
+    let e = t.new_node("GeometryNodeFoo").unwrap_err();
+    assert_eq!(e.message, "Error: Node type GeometryNodeFoo undefined");
     assert_eq!(t.nodes.len(), 6, "a failed nodes.new adds nothing");
+    // A geometry tree rejects shader-only nodes and accepts shared ones (Math).
+    let mut g = NodeTree::new("G", NodeTreeType::Geometry, false);
+    let e = g.new_node("ShaderNodeTexImage").unwrap_err();
+    assert_eq!(
+        e.message,
+        "Error: Cannot add node of type ShaderNodeTexImage to node tree 'G'\n  Not a shader node tree"
+    );
+    assert!(g.new_node("ShaderNodeMath").is_ok());
 }
 
 #[test]
@@ -720,6 +751,113 @@ fn math_and_principled_availability() {
     assert!(!t.nodes[0].set_prop("not_a_prop", Value::Bool(true)));
 }
 
+/// `enabled` flags as a bit string ("1" = enabled), in socket order.
+fn bits(s: &[crate::Socket]) -> String {
+    s.iter()
+        .map(|s| if s.enabled { '1' } else { '0' })
+        .collect()
+}
+
+#[test]
+fn vector_math_availability_matches_blender() {
+    // Dumped on 5.2.4 (`--factory-startup`): for every `operation` of a fresh
+    // `ShaderNodeVectorMath`, `[s.enabled for s in node.inputs]` (Vector, Vector_001,
+    // Vector_002, Scale) and `[s.enabled for s in node.outputs]` (Vector, Value).
+    const DUMP: [(&str, &str, &str); 30] = [
+        ("ADD", "1100", "10"),
+        ("SUBTRACT", "1100", "10"),
+        ("MULTIPLY", "1100", "10"),
+        ("DIVIDE", "1100", "10"),
+        ("MULTIPLY_ADD", "1110", "10"),
+        ("CROSS_PRODUCT", "1100", "10"),
+        ("PROJECT", "1100", "10"),
+        ("REFLECT", "1100", "10"),
+        ("REFRACT", "1101", "10"),
+        ("FACEFORWARD", "1110", "10"),
+        ("DOT_PRODUCT", "1100", "01"),
+        ("DISTANCE", "1100", "01"),
+        ("LENGTH", "1000", "01"),
+        ("SCALE", "1001", "10"),
+        ("NORMALIZE", "1000", "10"),
+        ("ABSOLUTE", "1000", "10"),
+        ("POWER", "1100", "10"),
+        ("SIGN", "1000", "10"),
+        ("MINIMUM", "1100", "10"),
+        ("MAXIMUM", "1100", "10"),
+        ("ROUND", "1000", "10"),
+        ("FLOOR", "1000", "10"),
+        ("CEIL", "1000", "10"),
+        ("FRACTION", "1000", "10"),
+        ("MODULO", "1100", "10"),
+        ("WRAP", "1110", "10"),
+        ("SNAP", "1100", "10"),
+        ("SINE", "1000", "10"),
+        ("COSINE", "1000", "10"),
+        ("TANGENT", "1000", "10"),
+    ];
+    let mut t = NodeTree::default_material();
+    let i = t.new_node("ShaderNodeVectorMath").unwrap();
+    assert_eq!(
+        (bits(&t.nodes[i].inputs), bits(&t.nodes[i].outputs)),
+        ("1100".into(), "10".into()),
+        "fresh node (ADD)"
+    );
+    for (op, ins, outs) in DUMP {
+        set(
+            &mut t,
+            &[P("nodes"), K("Vector Math"), P("operation")],
+            enum_v(op),
+        );
+        let n = &t.nodes[i];
+        assert_eq!(
+            (bits(&n.inputs), bits(&n.outputs)),
+            (ins.into(), outs.into()),
+            "{op}"
+        );
+    }
+    // outputs['Value'] is outputs[1] once DOT_PRODUCT enables it; outputs['Vector'] is gone.
+    set(
+        &mut t,
+        &[P("nodes"), K("Vector Math"), P("operation")],
+        enum_v("DOT_PRODUCT"),
+    );
+    let outs = super::SocketsColl {
+        tree: &t,
+        node: i,
+        is_output: true,
+    };
+    assert_eq!(outs.find("Value"), Some(1));
+    assert_eq!(outs.find("Vector"), None);
+}
+
+#[test]
+fn mapping_availability_matches_blender() {
+    // Dumped on 5.2.4: `[s.enabled for s in node.inputs]` (Vector, Location, Rotation, Scale)
+    // per `vector_type`; inputs['Location'] raises KeyError for VECTOR and NORMAL.
+    let mut t = NodeTree::default_material();
+    let i = t.new_node("ShaderNodeMapping").unwrap();
+    assert_eq!(bits(&t.nodes[i].inputs), "1111");
+    for (vt, want) in [
+        ("POINT", "1111"),
+        ("TEXTURE", "1111"),
+        ("VECTOR", "1011"),
+        ("NORMAL", "1011"),
+    ] {
+        set(
+            &mut t,
+            &[P("nodes"), K("Mapping"), P("vector_type")],
+            enum_v(vt),
+        );
+        assert_eq!(bits(&t.nodes[i].inputs), want, "{vt}");
+        let ins = super::SocketsColl {
+            tree: &t,
+            node: i,
+            is_output: false,
+        };
+        assert_eq!(ins.find("Location").is_some(), want == "1111", "{vt}");
+    }
+}
+
 // ---------------------------------------------------------------------------- links.new
 
 #[test]
@@ -792,10 +930,176 @@ fn links_new_replaces_the_link_into_an_input() {
         "shader output into a float input"
     );
     let k = t.link_new(out(bsdf, 0), inp(bsdf, 0), true).unwrap();
-    assert!(!t.link_is_valid(&t.links[k]), "self link");
+    assert!(
+        !t.link_is_valid(&t.links[k]),
+        "self link from a shader output into a colour input"
+    );
     // links.new by names (first enabled sockets).
     t.link_by_name((rgb, "Color"), (mix, "A")).unwrap();
     assert_eq!(t.links.last().unwrap().to_socket, "A_Float");
+}
+
+/// `(from node, from socket, to node, to socket, is_valid)` of every link.
+fn validity(t: &NodeTree) -> Vec<(String, String, String, String, bool)> {
+    link_tuples(t)
+        .into_iter()
+        .zip(t.links_valid())
+        .map(|((a, b, c, d), v)| (a, b, c, d, v))
+        .collect()
+}
+
+fn vtup(a: &str, b: &str, c: &str, d: &str, v: bool) -> (String, String, String, String, bool) {
+    (a.into(), b.into(), c.into(), d.into(), v)
+}
+
+#[test]
+fn link_validity_matches_blender() {
+    // Every expectation below is Blender 5.2.4's `[l.is_valid for l in tree.links]` for the
+    // same calls on a fresh `materials.new()` tree.
+    let inp = |n: u32, i| SocketAddr::input(n, i);
+    let out = |n: u32, i| SocketAddr::output(n, i);
+    let uid = |t: &NodeTree, i: usize| t.nodes[i].uid;
+    let surface = vtup(
+        "Principled BSDF",
+        "BSDF",
+        "Material Output",
+        "Surface",
+        true,
+    );
+
+    // Links into or out of disabled sockets are invalid until the sockets are enabled.
+    let mut t = NodeTree::default_material();
+    let (mx, rgb) = (
+        t.new_node("ShaderNodeMix").unwrap(),
+        t.new_node("ShaderNodeRGB").unwrap(),
+    );
+    let (mx, rgb) = (uid(&t, mx), uid(&t, rgb));
+    t.link_new(out(rgb, 0), inp(mx, 6), true).unwrap();
+    t.link_new(out(mx, 2), inp(0, 0), true).unwrap();
+    assert_eq!(
+        validity(&t),
+        [
+            surface.clone(),
+            vtup("Color", "Color", "Mix", "A_Color", false),
+            vtup(
+                "Mix",
+                "Result_Color",
+                "Principled BSDF",
+                "Base Color",
+                false
+            ),
+        ]
+    );
+    set(
+        &mut t,
+        &[P("nodes"), K("Mix"), P("data_type")],
+        enum_v("RGBA"),
+    );
+    assert!(t.links_valid().iter().all(|v| *v));
+    // Vector Math `Scale` is disabled for ADD.
+    let vm = t.new_node("ShaderNodeVectorMath").unwrap();
+    let vm = uid(&t, vm);
+    let k = t.link_new(out(rgb, 0), inp(vm, 3), true).unwrap();
+    assert!(!t.link_is_valid(&t.links[k]));
+
+    // Extra links into one input (verify_limits=False) stay valid.
+    let mut t = NodeTree::default_material();
+    let (a, b) = (
+        t.new_node("ShaderNodeRGB").unwrap(),
+        t.new_node("ShaderNodeRGB").unwrap(),
+    );
+    let (a, b) = (uid(&t, a), uid(&t, b));
+    t.link_new(out(a, 0), inp(0, 0), true).unwrap();
+    t.link_new(out(b, 0), inp(0, 0), false).unwrap();
+    assert_eq!(t.links_valid(), [true, true, true]);
+
+    // A data self link is valid.
+    let mut t = NodeTree::default_material();
+    let m = t.new_node("ShaderNodeMath").unwrap();
+    let m = uid(&t, m);
+    t.link_new(out(m, 0), inp(m, 0), true).unwrap();
+    assert_eq!(t.links_valid(), [true, true]);
+
+    // A cycle: the back edge and the links into the node where the walk entered it are
+    // invalid.
+    let mut t = NodeTree::default_material();
+    let ids: Vec<u32> = ["ShaderNodeMath", "ShaderNodeMath", "ShaderNodeValue"]
+        .into_iter()
+        .map(|ty| {
+            let i = t.new_node(ty).unwrap();
+            uid(&t, i)
+        })
+        .collect();
+    let (m1, m2, v) = (ids[0], ids[1], ids[2]);
+    t.link_new(out(m1, 0), inp(m2, 0), true).unwrap();
+    t.link_new(out(m2, 0), inp(m1, 0), true).unwrap();
+    t.link_by_name((m2, "Value"), (0, "Metallic")).unwrap();
+    t.link_by_name((v, "Value"), (0, "Roughness")).unwrap();
+    t.link_new(out(v, 0), inp(m1, 1), true).unwrap();
+    assert_eq!(
+        validity(&t),
+        [
+            surface.clone(),
+            vtup("Math", "Value", "Math.001", "Value", true),
+            vtup("Math.001", "Value", "Math", "Value", false),
+            vtup("Math.001", "Value", "Principled BSDF", "Metallic", true),
+            vtup("Value", "Value", "Principled BSDF", "Roughness", true),
+            vtup("Value", "Value", "Math", "Value_001", false),
+        ]
+    );
+
+    // A self link into the Principled BSDF's Metallic cuts its walk short: Alpha (after
+    // Metallic) becomes invalid, Base Color (before it) stays valid.
+    let mut t = NodeTree::default_material();
+    let (rgb, v) = (
+        t.new_node("ShaderNodeRGB").unwrap(),
+        t.new_node("ShaderNodeValue").unwrap(),
+    );
+    let (rgb, v) = (uid(&t, rgb), uid(&t, v));
+    t.link_by_name((rgb, "Color"), (0, "Base Color")).unwrap();
+    t.link_by_name((v, "Value"), (0, "Alpha")).unwrap();
+    t.link_by_name((0, "BSDF"), (0, "Metallic")).unwrap();
+    assert_eq!(
+        validity(&t),
+        [
+            surface.clone(),
+            vtup("Color", "Color", "Principled BSDF", "Base Color", true),
+            vtup("Value", "Value", "Principled BSDF", "Alpha", false),
+            vtup(
+                "Principled BSDF",
+                "BSDF",
+                "Principled BSDF",
+                "Metallic",
+                false
+            ),
+        ]
+    );
+
+    // A shader output into a colour input.
+    let mut t = NodeTree::default_material();
+    let e = t.new_node("ShaderNodeEmission").unwrap();
+    let e = uid(&t, e);
+    t.link_new(out(e, 0), inp(0, 0), true).unwrap();
+    assert_eq!(t.links_valid(), [true, false]);
+}
+
+#[test]
+fn first_output_node_is_active() {
+    // Verified on 5.2.4: the first Material Output is active whatever its target; removing
+    // it makes the next one active.
+    let mut t = NodeTree::default_material();
+    t.new_node("ShaderNodeOutputMaterial").unwrap();
+    set(
+        &mut t,
+        &[P("nodes"), K("Material Output"), P("target")],
+        enum_v("CYCLES"),
+    );
+    let active =
+        |t: &NodeTree, name: &'static str| get(t, &[P("nodes"), K(name), P("is_active_output")]);
+    assert_eq!(active(&t, "Material Output"), Value::Bool(true));
+    assert_eq!(active(&t, "Material Output.001"), Value::Bool(false));
+    t.remove_node(1).unwrap();
+    assert_eq!(active(&t, "Material Output.001"), Value::Bool(true));
 }
 
 #[test]
@@ -813,6 +1117,11 @@ fn nodes_remove_drops_links_and_parents() {
     assert_eq!(t.links.len(), 2);
     t.remove_node(frame).unwrap();
     assert_eq!(t.node(tex_uid).unwrap().parent, None);
+    assert_eq!(
+        t.node(tex_uid).unwrap().location,
+        [11.0, 22.0],
+        "made absolute"
+    );
     let tex = t.node_index(tex_uid).unwrap();
     t.remove_node(tex).unwrap();
     assert_eq!(

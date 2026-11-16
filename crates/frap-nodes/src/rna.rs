@@ -309,6 +309,12 @@ fn node_get<'a>(t: &'a NodeTree, i: usize, prop: &'static PropDef) -> Result<Fie
             node: i,
             is_output: prop.identifier == "outputs",
         })))),
+        // `ntreeSetOutput`: the first output node of each type is flagged active, and the
+        // next one when it is removed (verified on 5.2.4, whatever the `target`). frap does
+        // not store the flag, so it cannot be written yet (deviations.md §2).
+        "is_active_output" => val(Value::Bool(
+            t.nodes.iter().position(|x| x.bl_idname == n.bl_idname) == Some(i),
+        )),
         id => Err(unbound(srna, id)),
     }
 }

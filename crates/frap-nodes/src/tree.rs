@@ -15,6 +15,8 @@ use smol_str::SmolStr;
 mod avail;
 mod build;
 mod edit;
+mod poll;
+mod toposort;
 
 pub use avail::*;
 pub use build::*;

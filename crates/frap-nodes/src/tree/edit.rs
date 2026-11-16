@@ -11,13 +11,13 @@
 //!   (input `link_limit` is 1) and the new link is appended last, even when the same link
 //!   existed already. With `verify_limits=False` the link is just appended.
 //! - `nodes.remove(n)` removes every link touching `n`; children of a removed frame lose
-//!   their parent.
-//! - A link from a SHADER output into a non-shader input, or from a node into itself, has
-//!   `is_valid == False`.
+//!   their parent and keep their place: a child at (1, 2) in a frame at (10, 20) ends at
+//!   (11, 22).
+//! - `link.is_valid`: see `toposort.rs`.
 
 use frap_rna::{PyExc, RnaError, RnaErrorKind, Value};
 
-use crate::{Link, Node, NodeTree, Socket, SocketType};
+use crate::{Link, Node, NodeTree, Socket};
 
 /// `link_limit` of an input socket (shader and data inputs are single-input).
 pub const INPUT_LINK_LIMIT: u32 = 1;
@@ -192,24 +192,6 @@ impl NodeTree {
         })
     }
 
-    /// `link.is_valid`: false for a SHADER output into a non-shader input and for a link from
-    /// a node into itself.
-    pub fn link_is_valid(&self, l: &Link) -> bool {
-        if l.from_node == l.to_node {
-            return false;
-        }
-        let from = self
-            .node(l.from_node)
-            .and_then(|n| n.outputs.iter().find(|s| s.identifier == l.from_socket));
-        let to = self
-            .node(l.to_node)
-            .and_then(|n| n.inputs.iter().find(|s| s.identifier == l.to_socket));
-        match (from, to) {
-            (Some(f), Some(t)) => !(f.ty == SocketType::Shader && t.ty != SocketType::Shader),
-            _ => false,
-        }
-    }
-
     /// `node_tree.links.new(a, b, verify_limits)`: returns the index of the new link in
     /// `links` (always the last one).
     pub fn link_new(
@@ -279,19 +261,23 @@ impl NodeTree {
     }
 
     /// `node_tree.nodes.remove(node)` by index: drops the links touching it and un-parents its
-    /// children.
+    /// children, whose locations become absolute.
     pub fn remove_node(&mut self, index: usize) -> Option<Node> {
         if index >= self.nodes.len() {
             return None;
         }
+        // `node_unlink_attached` → `node_detach_node`: each child keeps its place on the
+        // canvas (location made absolute) and loses its parent.
+        let uid = self.nodes[index].uid;
+        for i in 0..self.nodes.len() {
+            if self.nodes[i].parent == Some(uid) {
+                self.nodes[i].location = self.location_absolute(i);
+                self.nodes[i].parent = None;
+            }
+        }
         let n = self.nodes.remove(index);
         self.links
             .retain(|l| l.from_node != n.uid && l.to_node != n.uid);
-        for c in &mut self.nodes {
-            if c.parent == Some(n.uid) {
-                c.parent = None;
-            }
-        }
         Some(n)
     }
 

@@ -13,12 +13,13 @@
 //!
 //! Raising ports the alpha half of `base_color()` (`imp/pbrMetallicRoughness.py`) and
 //! `set_eevee_surface_render_method` (`imp/material.py`): without a base-colour texture
-//! alpha, a constant (OPAQUE → 1, MASK → `factor >= cutoff`, BLEND → factor); with one, an
-//! "Alpha Clip" frame (`1 − (alpha < cutoff)`) and an "Alpha Factor" Math MULTIPLY whose
-//! free input [`RaiseCx::base_alpha_socket`] the base-colour texture's `Alpha` output links
-//! into. The pattern runs before `base_color` so that, as in the importer, its Math nodes are
-//! created (and named) before the texture's. BLEND gives `surface_render_method = 'BLENDED'`
-//! (`blend_method` mirror `'BLEND'`), else `'DITHERED'` (`'HASHED'`), verified on 5.2.4.
+//! alpha, a constant (OPAQUE → 1, MASK → `factor >= cutoff`, BLEND → factor); with one, the
+//! "Alpha Clip" frame (`1 − (alpha < cutoff)`) for MASK, whose free input is left in
+//! [`RaiseCx::base_alpha_socket`]. The pattern runs before `base_color`, which then creates
+//! the "Color Factor" Mix, the "Alpha Factor" Math MULTIPLY and the texture in that order,
+//! as the importer's `base_color()` does (node names and `tree.nodes`/`tree.links` order
+//! match). BLEND gives `surface_render_method = 'BLENDED'` (`blend_method` mirror `'BLEND'`),
+//! else `'DITHERED'` (`'HASHED'`), verified on 5.2.4.
 
 use frap_nodes::{SocketAddr, SocketValue};
 
@@ -137,7 +138,7 @@ fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
     let Some(bsdf) = cx.bsdf else { return };
     let a = lm.base_color.factor[3];
     let alpha = cx.input(bsdf, "Alpha");
-    let (tex_alpha, clip, factor_node) = texture_alpha_plan(lm);
+    let (tex_alpha, clip, _) = texture_alpha_plan(lm);
     if !tex_alpha {
         let v = match lm.alpha_mode {
             AlphaMode::Opaque => 1.0,
@@ -150,6 +151,8 @@ fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
         return;
     }
     let [mut x, y] = cx.location("base_color");
+    // `base_color()` up to its factor nodes: the clip frame; `base_color.rs` goes on from
+    // the free input left in `base_alpha_socket`.
     let mut socket: SocketAddr = alpha;
     if let Some(cutoff) = clip {
         // 1 - (alpha < cutoff), since there is no >= node.
@@ -168,15 +171,6 @@ fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
         cx.set_enum(lt, "operation", "LESS_THAN");
         socket = SocketAddr::input(lt, 0);
         cx.set_input_at(lt, 1, SocketValue::Float(cutoff));
-        x -= 200.0;
-    }
-    if factor_node {
-        let m = cx.add_node("ShaderNodeMath", [x - 140.0, y - 230.0]);
-        cx.set_label(m, "Alpha Factor");
-        cx.link(socket, SocketAddr::output(m, 0));
-        cx.set_enum(m, "operation", "MULTIPLY");
-        socket = SocketAddr::input(m, 0);
-        cx.set_input_at(m, 1, SocketValue::Float(a));
     }
     cx.base_alpha_socket = Some(socket);
 }

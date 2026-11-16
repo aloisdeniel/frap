@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Graph navigation shared by the pattern recognisers (`lower` side). Port of the parts of
 //! `io_scene_gltf2/blender/exp/material/search_node_tree.py` (glTF-Blender-IO 5.2.41,
-//! Apache-2.0) that M1 needs: the active Material Output, `NodeNav.move_back` through
+//! Apache-2.0) that M1 needs: the active Material Output and `get_node_socket` (the first
+//! non-muted Principled BSDF linked to it), `NodeNav.move_back` through
 //! reroutes, `get_constant` (unlinked sockets, RGB and Value nodes),
 //! `detect_multiply_by_constant` (Mix MULTIPLY with Factor 1, Math MULTIPLY), the Image
 //! Texture search behind a socket and the texture's UV source, Mapping transform and sampler.
@@ -28,21 +29,18 @@ pub fn unrecognised(out: &mut Vec<Report>, what: impl Into<String>) {
 }
 
 impl<'a> LowerCx<'a> {
-    /// The active Material Output: the first `ShaderNodeOutputMaterial` whose target is
-    /// `ALL` or `EEVEE` (Blender makes the first one active), else the first one.
+    /// The active Material Output (`is_active_output`): the first `ShaderNodeOutputMaterial`
+    /// in `tree.nodes`, whatever its `target` (verified on 5.2.4: Blender flags the first
+    /// output node of the tree, and the next one when it is removed; frap does not store the
+    /// flag, so a script cannot move it yet).
     pub fn material_output(&self) -> Option<&'a Node> {
-        let outs = || {
-            self.tree
-                .nodes
-                .iter()
-                .filter(|n| n.bl_idname == "ShaderNodeOutputMaterial")
-        };
-        outs()
-            .find(|n| matches!(n.prop_str("target"), "ALL" | "EEVEE"))
-            .or_else(|| outs().next())
+        self.tree
+            .nodes
+            .iter()
+            .find(|n| n.bl_idname == "ShaderNodeOutputMaterial")
     }
 
-    /// The node feeding the active output's `Surface` (reroutes skipped).
+    /// The node feeding the active output's `Surface` (reroutes skipped), for diagnostics.
     pub fn surface_shader(&self) -> Option<&'a Node> {
         let out = self.material_output()?;
         match self.src(out, "Surface") {
@@ -51,10 +49,44 @@ impl<'a> LowerCx<'a> {
         }
     }
 
-    /// The Principled BSDF on the surface (the node every M1 pattern reads).
+    /// The Principled BSDF every M1 pattern reads: `get_node_socket` — the first non-muted
+    /// Principled BSDF in `tree.nodes` whose first output reaches the active Material Output
+    /// (`check_if_is_linked_to_active_output`: directly, or through the first output of every
+    /// node on the way, such as a Mix Shader or a reroute). Node groups arrive with M3.
     pub fn principled(&self) -> Option<&'a Node> {
-        self.surface_shader()
-            .filter(|n| n.bl_idname == "ShaderNodeBsdfPrincipled")
+        let active = self.material_output()?.uid;
+        self.tree.nodes.iter().find(|n| {
+            n.bl_idname == "ShaderNodeBsdfPrincipled" && !n.mute && self.reaches_output(n, active)
+        })
+    }
+
+    /// `check_if_is_linked_to_active_output(node.outputs[0])`, iteratively, each node visited
+    /// once (a cycle cannot reach the output any other way).
+    fn reaches_output(&self, from: &'a Node, active: u32) -> bool {
+        let mut seen = std::collections::BTreeSet::new();
+        let mut stack = vec![from];
+        while let Some(n) = stack.pop() {
+            if !seen.insert(n.uid) {
+                continue;
+            }
+            let Some(out) = n.outputs.first() else {
+                continue;
+            };
+            for l in &self.tree.links {
+                if l.from_node != n.uid || l.from_socket != out.identifier {
+                    continue;
+                }
+                if l.to_node == active {
+                    return true;
+                }
+                if let Some(to) = self.tree.node(l.to_node)
+                    && to.bl_idname != "ShaderNodeOutputMaterial"
+                {
+                    stack.push(to);
+                }
+            }
+        }
+        false
     }
 
     /// The source of input `name` (first enabled socket with that name) of `node`.

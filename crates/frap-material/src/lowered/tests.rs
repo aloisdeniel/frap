@@ -512,6 +512,42 @@ fn unrecognised_setups_fall_back_with_a_warning() {
     assert_eq!(x.diagnostics.len(), 1);
 }
 
+#[test]
+fn principled_is_found_like_the_exporter() {
+    let images = Images::default();
+    let out = 1;
+    // Principled BSDF → Mix Shader → Material Output: the exporter still reads the BSDF.
+    let mut m = mat("Mixed");
+    set_in(&mut m, BSDF, "Base Color", color(0.1, 0.2, 0.3));
+    let mix = add(&mut m, "ShaderNodeMixShader");
+    let tr = add(&mut m, "ShaderNodeBsdfTransparent");
+    link(&mut m, (BSDF, "BSDF"), (mix, "Shader"));
+    link_at(&mut m, (tr, 0), (mix, 2));
+    link(&mut m, (mix, "Shader"), (out, "Surface"));
+    let x = lower_m(&m, &images);
+    assert_eq!(x.base_color.factor, [0.1, 0.2, 0.3, 1.0]);
+    assert!(x.diagnostics.is_empty(), "{:?}", x.diagnostics);
+
+    // A muted Principled BSDF is skipped for the next one that reaches the output.
+    let p2 = add(&mut m, "ShaderNodeBsdfPrincipled");
+    set_in(&mut m, p2, "Base Color", color(0.4, 0.5, 0.6));
+    link_at(&mut m, (p2, 0), (mix, 2));
+    m.node_tree.node_mut(BSDF).unwrap().mute = true;
+    assert_eq!(lower_m(&m, &images).base_color.factor, [0.4, 0.5, 0.6, 1.0]);
+
+    // The active output is the first one, whatever its target; a BSDF linked only to
+    // another output is not exported.
+    let mut m = mat("Outputs");
+    set_in(&mut m, BSDF, "Base Color", color(0.1, 0.2, 0.3));
+    set_enum(&mut m, out, "target", "CYCLES");
+    let out2 = add(&mut m, "ShaderNodeOutputMaterial");
+    let p2 = add(&mut m, "ShaderNodeBsdfPrincipled");
+    set_in(&mut m, p2, "Base Color", color(0.4, 0.5, 0.6));
+    link(&mut m, (p2, "BSDF"), (out2, "Surface"));
+    let x = lower_m(&m, &images);
+    assert_eq!(x.base_color.factor, [0.1, 0.2, 0.3, 1.0]);
+}
+
 // --------------------------------------------------------------------------------- raise
 
 fn node_summary(m: &Material) -> Vec<(String, &'static str, String)> {
@@ -670,6 +706,17 @@ fn every_pattern_file_registers_exactly_one_entry() {
     let orders: std::collections::BTreeSet<u16> =
         MATERIAL_PATTERNS.iter().map(|p| p.order).collect();
     assert_eq!(orders.len(), MATERIAL_PATTERNS.len(), "orders are distinct");
+    // Layout blocks: registered by the pattern files, distinct keys and orders.
+    let blocks = &crate::build::LAYOUT_BLOCKS;
+    let keys: std::collections::BTreeSet<&str> = blocks.iter().map(|b| b.key).collect();
+    let block_orders: std::collections::BTreeSet<u16> = blocks.iter().map(|b| b.order).collect();
+    assert_eq!(
+        (keys.len(), block_orders.len()),
+        (blocks.len(), blocks.len())
+    );
+    for k in ["base_color", "metallic_roughness", "emission"] {
+        assert!(keys.contains(k), "layout block {k}");
+    }
     for p in ["base_color", "metallic_roughness", "alpha", "emission"] {
         assert!(names.contains(&p), "M1 pattern {p}");
     }
@@ -677,16 +724,18 @@ fn every_pattern_file_registers_exactly_one_entry() {
 
 #[test]
 fn lower_and_raise_name_no_pattern() {
-    let src = include_str!("../lowered.rs");
-    let body = |sig: &str| {
+    let body = |src: &'static str, sig: &str| -> &'static str {
         let start = src.find(sig).unwrap_or_else(|| panic!("{sig}"));
         let end = start + src[start..].find("\n}\n").unwrap();
         &src[start..end]
     };
+    let lowered = include_str!("../lowered.rs");
+    let build = include_str!("build.rs");
     for f in [
-        body("pub fn lower("),
-        body("pub fn raise("),
-        body("pub fn patterns_in_order("),
+        body(lowered, "pub fn lower("),
+        body(lowered, "pub fn raise("),
+        body(lowered, "pub fn patterns_in_order("),
+        body(build, "pub fn calc_locations("),
     ] {
         assert!(!f.contains("patterns::"), "{f}");
         for p in pattern_files() {
@@ -912,15 +961,13 @@ fn raise_matches_blenders_gltf_importer() {
             )
         })
         .collect();
-    let mut want: Vec<_> = IMPORTED_NODES
+    let want: Vec<_> = IMPORTED_NODES
         .iter()
         .map(|(a, b, c, d, e)| (a.to_string(), *b, c.to_string(), *d, e.map(str::to_owned)))
         .collect();
-    let mut got_sorted = got.clone();
-    got_sorted.sort_by(|a, b| a.0.cmp(&b.0));
-    want.sort_by(|a, b| a.0.cmp(&b.0));
-    assert_eq!(got_sorted, want);
-    let mut links: Vec<_> = t
+    // Same nodes in the same `tree.nodes` order (creation order, as Python sees it).
+    assert_eq!(got, want);
+    let links: Vec<_> = t
         .links
         .iter()
         .map(|l| {
@@ -932,12 +979,11 @@ fn raise_matches_blenders_gltf_importer() {
             )
         })
         .collect();
-    let mut want_links: Vec<_> = IMPORTED_LINKS
+    let want_links: Vec<_> = IMPORTED_LINKS
         .iter()
         .map(|(a, b, c, d)| (a.to_string(), b.to_string(), c.to_string(), d.to_string()))
         .collect();
-    links.sort();
-    want_links.sort();
+    // Same links in the same `tree.links` order.
     assert_eq!(links, want_links);
     let n = |name: &str| t.node_by_name(name).unwrap();
     assert_eq!(

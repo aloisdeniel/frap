@@ -270,9 +270,9 @@ pub struct RaiseCx<'a> {
     pub bsdf: Option<u32>,
     /// Uid of the Material Output.
     pub output: Option<u32>,
-    /// The input the base-colour texture's `Alpha` output links into (the end of the alpha
-    /// clip/factor chain), set by the alpha pattern before the base-colour pattern creates
-    /// the texture, as the importer's `base_color()` does.
+    /// The end of the alpha chain built so far (the Principled BSDF's `Alpha`, or the free
+    /// input of the alpha clip nodes), set by the alpha pattern before the base-colour pattern
+    /// adds the factor nodes and the texture, as the importer's `base_color()` does.
     pub base_alpha_socket: Option<frap_nodes::SocketAddr>,
     /// Upper-right corner of each layout block (`build::calc_locations`).
     pub locations: BTreeMap<&'static str, [f32; 2]>,

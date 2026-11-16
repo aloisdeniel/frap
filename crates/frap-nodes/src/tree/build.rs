@@ -6,7 +6,8 @@
 //! - `nodes.new(type=…)`: name = the type's default name made unique with `.001`
 //!   (`BLI_uniquename`), `label` empty, `location` (0, 0), `width` from the type.
 //! - An unknown or removed type (`ShaderNodeSeparateRGB`) raises
-//!   `RuntimeError: Error: Node type ShaderNodeSeparateRGB undefined`.
+//!   `RuntimeError: Error: Node type ShaderNodeSeparateRGB undefined`; a registered type of
+//!   another tree type raises the poll error of `poll.rs`.
 //! - `materials.new()`: nodes `Principled BSDF` at (−200, 100), then `Material Output` at
 //!   (200, 100), linked BSDF → Surface; the tree is named "Shader Nodetree".
 //! - `worlds.new()`: `Background` (Color 0.05 grey, Strength 1) at (−200, 100), then
@@ -185,8 +186,12 @@ impl NodeTree {
     }
 
     /// `node_tree.nodes.new(type=bl_idname)`: index of the new node, or Blender's
-    /// `Node type … undefined` error for unknown and removed types.
+    /// `Node type … undefined` error for unknown and removed types, or its `Cannot add node
+    /// of type … to node tree …` poll error for a type of another tree type (`poll.rs`).
     pub fn new_node(&mut self, bl_idname: &str) -> Result<usize, RnaError> {
+        if let Some(p) = super::poll::poll_failure(self.ty, bl_idname) {
+            return Err(super::poll::poll_error(self, bl_idname, p));
+        }
         let def = node_type(bl_idname).ok_or_else(|| node_type_undefined(bl_idname))?;
         Ok(self.add_node(def))
     }
