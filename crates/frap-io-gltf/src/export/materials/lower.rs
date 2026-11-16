@@ -1,0 +1,199 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//! Where the exporter gets a [`LoweredMaterial`] (ARCHITECTURE §16.2: "the exporter consumes
+//! `LoweredMaterial`").
+//!
+//! [`lowered`] calls `frap_material::lower` as soon as any `MATERIAL_PATTERNS` entry is linked
+//! in (WP 1.11). Until then (WP 1.16 landed in the same wave, decision log M1 W2) it uses
+//! [`bootstrap`], a minimal recogniser for the M1 vocabulary: the unlinked inputs of the
+//! "Principled BSDF" feeding the material output (Base Color, Metallic, Roughness, Alpha,
+//! Emission Color × Emission Strength) and an Image Texture whose Color (and optionally Alpha)
+//! output feeds Base Color directly. Delete `bootstrap` once `frap-material` patterns are
+//! merged; nothing else in the exporter depends on it.
+
+use frap_material::{
+    AlphaMode, Channel, ChannelSel, Filter, LoweredMaterial, MATERIAL_PATTERNS, MaterialExts,
+    Sampler, TexRef, UvSource, Wrap,
+};
+use frap_nodes::{Node, NodeTree, SocketValue};
+use frap_rna::{ImageId, Value};
+use frap_scene::Main;
+use frap_scene::id::Material;
+
+/// The lowered material: `frap_material::lower` when patterns are registered, else
+/// [`bootstrap`].
+pub fn lowered(main: &Main, mat: &Material) -> LoweredMaterial {
+    if MATERIAL_PATTERNS.is_empty() {
+        bootstrap(main, mat)
+    } else {
+        frap_material::lower(&mat.node_tree, mat, main)
+    }
+}
+
+/// A lowered material with glTF's defaults (white, metallic 1, roughness 1, opaque).
+pub fn defaults(mat: &Material) -> LoweredMaterial {
+    LoweredMaterial {
+        base_color: Channel {
+            factor: [1.0; 4],
+            texture: None,
+        },
+        metallic: Channel {
+            factor: 1.0,
+            texture: None,
+        },
+        roughness: Channel {
+            factor: 1.0,
+            texture: None,
+        },
+        normal: None,
+        occlusion: None,
+        emissive: Channel {
+            factor: [0.0; 3],
+            texture: None,
+        },
+        emissive_strength: 1.0,
+        alpha_mode: AlphaMode::Opaque,
+        double_sided: !mat.use_backface_culling,
+        unlit: false,
+        ext: MaterialExts::default(),
+        vertex_color: None,
+        diagnostics: Vec::new(),
+    }
+}
+
+fn node(tree: &NodeTree, uid: u32) -> Option<&Node> {
+    tree.nodes.iter().find(|n| n.uid == uid)
+}
+
+/// The node and output socket identifier linked into `input` of node `to`.
+fn link_into<'t>(tree: &'t NodeTree, to: &Node, input: &str) -> Option<(&'t Node, &'t str)> {
+    let sock = to.inputs.iter().find(|s| s.enabled && s.name == input)?;
+    let l = tree
+        .links
+        .iter()
+        .find(|l| l.to_node == to.uid && l.to_socket == sock.identifier)?;
+    Some((node(tree, l.from_node)?, l.from_socket.as_str()))
+}
+
+fn input<'n>(n: &'n Node, name: &str) -> Option<&'n SocketValue> {
+    n.inputs
+        .iter()
+        .find(|s| s.enabled && s.name == name)
+        .map(|s| &s.default_value)
+}
+
+fn float(n: &Node, name: &str, default: f32) -> f32 {
+    match input(n, name) {
+        Some(SocketValue::Float(f)) => *f,
+        _ => default,
+    }
+}
+
+fn color(n: &Node, name: &str, default: [f32; 4]) -> [f32; 4] {
+    match input(n, name) {
+        Some(SocketValue::Color(c)) => *c,
+        _ => default,
+    }
+}
+
+fn prop_str<'n>(n: &'n Node, name: &str) -> Option<&'n str> {
+    match n.props.values.get(name) {
+        Some(Value::Enum(s) | Value::Str(s)) => Some(s.as_str()),
+        _ => None,
+    }
+}
+
+/// An Image Texture node as a texture reference (active-render UV map, its sampler).
+fn tex_ref(main: &Main, n: &Node, channel: ChannelSel) -> Option<TexRef> {
+    let image = match n.props.values.get("image") {
+        Some(Value::Id(Some(id))) => id.typed::<ImageId>()?,
+        _ => return None,
+    };
+    let filter = match prop_str(n, "interpolation") {
+        Some("Closest") => Filter::Closest,
+        Some("Cubic") => Filter::Cubic,
+        _ => Filter::Linear,
+    };
+    let wrap = match prop_str(n, "extension") {
+        Some("EXTEND" | "CLIP") => Wrap::Clamp,
+        Some("MIRROR") => Wrap::Mirror,
+        _ => Wrap::Repeat,
+    };
+    let colorspace_is_data = main.images.get(image).is_some_and(|im| {
+        im.colorspace_settings.is_data || im.colorspace_settings.name == "Non-Color"
+    });
+    Some(TexRef {
+        image,
+        uv: UvSource::ActiveRender,
+        channel,
+        transform: None,
+        sampler: Sampler {
+            filter,
+            wrap_s: wrap,
+            wrap_t: wrap,
+        },
+        colorspace_is_data,
+    })
+}
+
+/// The M1 bootstrap recogniser (see the module docs).
+pub fn bootstrap(main: &Main, mat: &Material) -> LoweredMaterial {
+    let mut lm = defaults(mat);
+    let tree = &mat.node_tree;
+    // The Principled BSDF feeding the (first) Material Output's Surface, else the first one.
+    let out = tree
+        .nodes
+        .iter()
+        .find(|n| n.bl_idname == "ShaderNodeOutputMaterial");
+    let bsdf = out
+        .and_then(|o| link_into(tree, o, "Surface"))
+        .map(|(n, _)| n)
+        .filter(|n| n.bl_idname == "ShaderNodeBsdfPrincipled")
+        .or_else(|| {
+            tree.nodes
+                .iter()
+                .find(|n| n.bl_idname == "ShaderNodeBsdfPrincipled")
+        });
+    let Some(bsdf) = bsdf else {
+        return lm;
+    };
+    let mut base = color(bsdf, "Base Color", [0.8, 0.8, 0.8, 1.0]);
+    let alpha = float(bsdf, "Alpha", 1.0);
+    let base_tex = link_into(tree, bsdf, "Base Color")
+        .filter(|(n, s)| n.bl_idname == "ShaderNodeTexImage" && *s == "Color")
+        .map(|(n, _)| n);
+    let alpha_tex = link_into(tree, bsdf, "Alpha")
+        .filter(|(n, s)| n.bl_idname == "ShaderNodeTexImage" && *s == "Alpha")
+        .map(|(n, _)| n);
+    if let Some(t) = base_tex {
+        let with_alpha = alpha_tex.is_some_and(|a| a.uid == t.uid);
+        lm.base_color.texture = tex_ref(
+            main,
+            t,
+            if with_alpha {
+                ChannelSel::Rgba
+            } else {
+                ChannelSel::Rgb
+            },
+        );
+        base = [1.0, 1.0, 1.0, base[3]];
+        if with_alpha {
+            lm.alpha_mode = AlphaMode::Blend;
+        }
+    }
+    lm.base_color.factor = [base[0], base[1], base[2], alpha];
+    if base_tex.is_none() || alpha_tex.is_none() {
+        lm.alpha_mode = if alpha >= 1.0 {
+            AlphaMode::Opaque
+        } else if alpha == 0.0 {
+            AlphaMode::Mask { cutoff: 0.5 }
+        } else {
+            AlphaMode::Blend
+        };
+    }
+    lm.metallic.factor = float(bsdf, "Metallic", 0.0);
+    lm.roughness.factor = float(bsdf, "Roughness", 0.5);
+    let e = color(bsdf, "Emission Color", [1.0; 4]);
+    lm.emissive.factor = [e[0], e[1], e[2]];
+    lm.emissive_strength = float(bsdf, "Emission Strength", 0.0);
+    lm
+}

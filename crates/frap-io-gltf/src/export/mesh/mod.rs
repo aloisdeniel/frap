@@ -2,8 +2,12 @@
 //! Mesh → glTF primitives (§17.2). `primitives.rs` is the driver; extractors, attribute writers
 //! and post-processors are one file each in `extract/`, `writers/`, `post/` (automod) and
 //! register into the `ext.rs` slices. Later milestones add files, never edit `primitives.rs`.
+//! `gather.rs` turns the drafts into accessors and glTF meshes; `convert.rs` holds the value
+//! conversions the add-on applies (Y-up, split-key floats, record order, colour encodings).
 
+pub mod convert;
 pub mod ext;
+pub mod gather;
 pub mod primitives;
 
 /// `PRIMITIVE_EXTRACTORS` entries (`triangles.rs` M1; `loose_edges.rs`, `loose_points.rs`,
