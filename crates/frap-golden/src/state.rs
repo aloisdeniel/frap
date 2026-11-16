@@ -159,26 +159,17 @@ pub struct GoldenState {
 }
 
 /// `$BLENDER_BIN`, then `blender` on `PATH`, then `~/Applications/Blender-5.2.app` (macOS).
+/// The search order is implemented (and tested) by [`crate::blender::locate_from`].
 pub fn locate_blender() -> Option<PathBuf> {
-    if let Some(p) = std::env::var_os("BLENDER_BIN").map(PathBuf::from)
-        && p.is_file()
-    {
-        return Some(p);
-    }
     let exe = if cfg!(windows) {
         "blender.exe"
     } else {
         "blender"
     };
-    if let Some(path) = std::env::var_os("PATH") {
-        for dir in std::env::split_paths(&path) {
-            let p = dir.join(exe);
-            if p.is_file() {
-                return Some(p);
-            }
-        }
-    }
-    let home = std::env::var_os("HOME").map(PathBuf::from)?;
-    let p = home.join("Applications/Blender-5.2.app/Contents/MacOS/Blender");
-    p.is_file().then_some(p)
+    crate::blender::locate_from(
+        std::env::var_os("BLENDER_BIN"),
+        std::env::var_os("PATH"),
+        std::env::var_os("HOME").or_else(|| std::env::var_os("USERPROFILE")),
+        exe,
+    )
 }
