@@ -13,13 +13,14 @@
 //! - `shading.type`: SOLID only (wireframe and x-ray are WP 2.3).
 //! - `shading.light`: STUDIO (the "Default" rig, view-space lights, specular highlights on, as
 //!   in factory settings) and FLAT. MATCAP renders as STUDIO until WP 2.3 adds matcaps.
-//! - `shading.color_type`: MATERIAL (factors of the lowered material: base colour, metallic,
-//!   roughness), OBJECT (`Object.color`), SINGLE (`single_color`), RANDOM
-//!   ([`color::random_color`] of `RObject::random_hash`). VERTEX / TEXTURE / ATTRIBUTE render
-//!   as MATERIAL until M2/M3.
-//! - Background: `render.film_transparent` gives alpha 0; otherwise the world colour
-//!   (`RWorld::Color::rgb`; Workbench ignores the strength; an HDRI world uses the factory
-//!   world colour).
+//! - `shading.color_type`: MATERIAL (`RSettings::workbench_materials`: the material's viewport
+//!   `diffuse_color`/`metallic`/`roughness`; synthetic scenes: the lowered factors), OBJECT
+//!   (`Object.color`), SINGLE (`single_color`), RANDOM ([`color::random_color`] of
+//!   `RObject::random_hash`). VERTEX / TEXTURE / ATTRIBUTE render as MATERIAL until M2/M3.
+//! - Background: `render.film_transparent` gives alpha 0; otherwise
+//!   `RSettings::workbench_background` (Blender's rule, resolved by the builder), else the world
+//!   colour (`RWorld::Color::rgb`; Workbench ignores the strength; an HDRI world uses the
+//!   factory world colour).
 //! - At one sample per pixel the result matches Blender 5.2.4's Workbench (`render_aa = 'OFF'`)
 //!   per pixel within 1e-3 for these modes (`tests/workbench_ref.rs`).
 //! - Anti-aliasing: [`DEFAULT_SAMPLES`] = 8 (factory `scene.display.render_aa = '8'`), box
@@ -142,19 +143,19 @@ pub struct Surface {
 pub fn surface(scene: &RenderScene, obj: &RObject, slot: u32, shading: &Shading) -> Surface {
     let (rgb, alpha, metallic, roughness) = match shading.color_type {
         ColorType::Material => {
-            let mat = obj
-                .materials
-                .get(slot as usize)
-                .copied()
-                .flatten()
-                .and_then(|k| scene.materials.get(&k));
-            // KNOWN DEVIATION (contract gap, integrator + WP 1.15): Blender's Workbench reads
-            // `Material.diffuse_color` / `.metallic` / `.roughness` (viewport display values,
-            // fresh-material roughness 0.4), not the Principled node. The frozen render-scene
-            // contract carries only the lowered Principled factors, so those are used until an
-            // additive field carries the viewport values.
-            match mat {
-                Some(m) => {
+            let key = obj.materials.get(slot as usize).copied().flatten();
+            // Blender's Workbench reads `Material.diffuse_color` / `.metallic` / `.roughness`
+            // (viewport display values, fresh-material roughness 0.4), not the Principled node:
+            // the render-scene builder fills `RSettings::workbench_materials` (decision log
+            // W1-15). Synthetic scenes without that entry use the lowered factors.
+            let viewport = key.and_then(|k| scene.settings.workbench_materials.get(&k));
+            let mat = key.and_then(|k| scene.materials.get(&k));
+            match (viewport, mat) {
+                (Some(v), _) => {
+                    let c = v.diffuse_color;
+                    ([c[0], c[1], c[2]], c[3], v.metallic, v.roughness)
+                }
+                (None, Some(m)) => {
                     let c = m.base_color.factor;
                     (
                         [c[0], c[1], c[2]],
@@ -164,7 +165,7 @@ pub fn surface(scene: &RenderScene, obj: &RObject, slot: u32, shading: &Shading)
                     )
                 }
                 // `BKE_material_default_empty()`: 0.8 grey, metallic 0, roughness 0.4.
-                None => ([0.8; 3], 1.0, 0.0, 0.4),
+                (None, None) => ([0.8; 3], 1.0, 0.0, 0.4),
             }
         }
         ColorType::Object => (
@@ -189,9 +190,12 @@ pub fn background(scene: &RenderScene) -> [f32; 4] {
     if scene.settings.film_transparent {
         return [0.0; 4];
     }
-    // KNOWN DEVIATION (contract gap, as for `surface`): Blender's Workbench clears to
-    // `World.color` (viewport display), not the Background node colour that `RWorld::Color`
-    // carries; an HDRI world falls back to the factory grey.
+    // The render-scene builder resolves Blender's rule (`World.color`, the VIEWPORT background
+    // colour, or transparent without a world) into `workbench_background`. Synthetic scenes
+    // without it use the `RWorld::Color` colour; an HDRI world falls back to the factory grey.
+    if let Some(bg) = scene.settings.workbench_background {
+        return bg;
+    }
     let rgb = match &scene.world {
         RWorld::Color { rgb, .. } => *rgb,
         _ => FACTORY_WORLD_COLOR,
@@ -871,5 +875,47 @@ mod tests {
         assert_eq!(background(&sc), [0.1, 0.2, 0.3, 1.0]);
         sc.settings.film_transparent = true;
         assert_eq!(background(&sc), [0.0; 4]);
+        // The builder's resolved Workbench background wins over the world colour.
+        sc.settings.workbench_background = Some([0.0; 4]);
+        sc.settings.film_transparent = false;
+        assert_eq!(background(&sc), [0.0; 4]);
+        sc.settings.workbench_background = Some([0.9, 0.1, 0.1, 1.0]);
+        assert_eq!(background(&sc), [0.9, 0.1, 0.1, 1.0]);
+        sc.settings.film_transparent = true;
+        assert_eq!(background(&sc), [0.0; 4]);
+    }
+
+    #[test]
+    fn material_colour_prefers_viewport_values() {
+        use frap_render_scene::{MatKey, RWorkbenchMaterial};
+        let mut sc = RenderScene::default();
+        let obj = RObject {
+            name: "Cube".into(),
+            matrix_world: Mat4::IDENTITY,
+            mesh: None,
+            materials: vec![Some(MatKey(7)), None],
+            color: [1.0; 4],
+            random_hash: 0,
+        };
+        let shading = Shading::from_settings(&sc.settings);
+        let gb = |r: f32, m: f32| color::gbuffer_roughness_metallic(r, m);
+        // No entry anywhere: Blender's default material.
+        let s = surface(&sc, &obj, 0, &shading);
+        assert_eq!(s.base_color, [0.8, 0.8, 0.8, 1.0]);
+        assert_eq!((s.roughness, s.metallic), gb(0.4, 0.0));
+        sc.settings.workbench_materials.insert(
+            MatKey(7),
+            RWorkbenchMaterial {
+                diffuse_color: [0.6, 0.6, 0.7, 1.0],
+                metallic: 0.25,
+                roughness: 0.75,
+            },
+        );
+        let s = surface(&sc, &obj, 0, &shading);
+        assert_eq!(s.base_color, [0.6, 0.6, 0.7, 1.0]);
+        assert_eq!((s.roughness, s.metallic), gb(0.75, 0.25));
+        // An empty slot keeps the default material.
+        let s = surface(&sc, &obj, 1, &shading);
+        assert_eq!(s.base_color, [0.8, 0.8, 0.8, 1.0]);
     }
 }
