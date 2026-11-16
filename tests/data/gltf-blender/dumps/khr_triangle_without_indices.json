@@ -1,0 +1,14 @@
+{
+"blender":{"version":"5.2.4 LTS","build_hash":"cd5dc428cce1"},
+"window_scene":"Scene",
+"scenes":[{"name":"Scene","collection":{"objects":["Mesh_0"],"children":[]},"view_layers":[{"name":"ViewLayer","objects":["Mesh_0"],"selected":["Mesh_0"],"active":"Mesh_0","layer_collection":{"collection":"Scene Collection","exclude":false,"children":[]}}]}],
+"collections":[],
+"objects":[{"name":"Mesh_0","type":"MESH","data":"Mesh_0","parent":null,"parent_type":"OBJECT","location":[0.0,0.0,0.0],"rotation_mode":"QUATERNION","rotation_quaternion":[1.0,0.0,0.0,0.0],"scale":[1.0,1.0,1.0],"empty_display_size":1.0,"material_slots":[],"users_collection":["Scene Collection"]}],
+"meshes":[{"name":"Mesh_0","positions":[[0.0,-0.0,0.0],[1.0,-0.0,0.0],[0.0,-0.0,1.0]],"edges":[[0,2],[0,1],[1,2]],"faces":[[0,1,2]],"corner_normals":[[0.0,-1.0,0.0],[0.0,-1.0,0.0],[0.0,-1.0,0.0]],"normals_domain":"FACE","uv_layers":[],"attribute_names":[".select_vert","position",".corner_vert",".corner_edge",".select_poly","sharp_face",".edge_verts",".select_edge"],"attributes":[{"name":"sharp_face","domain":"FACE","data_type":"BOOLEAN","data":[true]}],"materials":[]}],
+"materials":[],
+"images":[],
+"cameras":[],
+"lights":[],
+"source":"tests/data/gltf-samples/TriangleWithoutIndices/glTF-Embedded/TriangleWithoutIndices.gltf",
+"settings":{}
+}

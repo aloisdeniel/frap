@@ -1,0 +1,14 @@
+{
+"blender":{"version":"5.2.4 LTS","build_hash":"cd5dc428cce1"},
+"window_scene":"Scene",
+"scenes":[{"name":"Scene","collection":{"objects":[],"children":["Scene 0","Scene 1"]},"view_layers":[{"name":"ViewLayer","objects":["Mesh_1"],"selected":["Mesh_1"],"active":"Mesh_1","layer_collection":{"collection":"Scene Collection","exclude":false,"children":[{"collection":"Scene 0","exclude":true,"children":[]},{"collection":"Scene 1","exclude":false,"children":[]}]}}]},{"name":"Scene 0","collection":{"objects":[],"children":[]},"view_layers":[{"name":"ViewLayer","objects":[],"selected":[],"active":null,"layer_collection":{"collection":"Scene Collection","exclude":false,"children":[]}}]}],
+"collections":[{"name":"Scene 0","objects":["Mesh_0"],"children":[]},{"name":"Scene 1","objects":["Mesh_1"],"children":[]}],
+"objects":[{"name":"Mesh_0","type":"MESH","data":"Mesh_0","parent":null,"parent_type":"OBJECT","location":[0.0,0.0,0.0],"rotation_mode":"QUATERNION","rotation_quaternion":[1.0,0.0,0.0,0.0],"scale":[1.0,1.0,1.0],"empty_display_size":1.0,"material_slots":[],"users_collection":["Scene 0"]},{"name":"Mesh_1","type":"MESH","data":"Mesh_1","parent":null,"parent_type":"OBJECT","location":[0.0,0.0,0.0],"rotation_mode":"QUATERNION","rotation_quaternion":[1.0,0.0,0.0,0.0],"scale":[1.0,1.0,1.0],"empty_display_size":1.0,"material_slots":[],"users_collection":["Scene 1"]}],
+"meshes":[{"name":"Mesh_0","positions":[[0.0,-0.0,0.0],[1.0,-0.0,0.0],[0.0,-0.0,1.0]],"edges":[[0,2],[0,1],[1,2]],"faces":[[0,1,2]],"corner_normals":[[0.0,-1.0,0.0],[0.0,-1.0,0.0],[0.0,-1.0,0.0]],"normals_domain":"FACE","uv_layers":[],"attribute_names":[".select_vert","position",".corner_vert",".corner_edge",".select_poly","sharp_face",".edge_verts",".select_edge"],"attributes":[{"name":"sharp_face","domain":"FACE","data_type":"BOOLEAN","data":[true]}],"materials":[]},{"name":"Mesh_1","positions":[[0.0,-0.0,0.0],[1.0,-0.0,0.0],[0.0,-0.0,1.0],[1.0,-0.0,1.0]],"edges":[[0,2],[0,1],[1,2],[1,3],[2,3]],"faces":[[0,1,2],[1,3,2]],"corner_normals":[[0.0,-1.0,0.0],[0.0,-1.0,0.0],[0.0,-1.0,0.0],[0.0,-1.0,0.0],[0.0,-1.0,0.0],[0.0,-1.0,0.0]],"normals_domain":"FACE","uv_layers":[],"attribute_names":[".select_vert","position",".corner_vert",".corner_edge",".select_poly","sharp_face",".edge_verts",".select_edge"],"attributes":[{"name":"sharp_face","domain":"FACE","data_type":"BOOLEAN","data":[true,true]}],"materials":[]}],
+"materials":[],
+"images":[],
+"cameras":[],
+"lights":[],
+"source":"tests/data/gltf-samples/MultipleScenes/glTF-Embedded/MultipleScenes.gltf",
+"settings":{}
+}
