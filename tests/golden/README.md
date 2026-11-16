@@ -60,14 +60,16 @@ Rules:
 cargo test -p frap-golden                    # frap vs committed fixtures (no Blender needed)
 FRAP_GOLDEN_FILTER='primitives/**' cargo test -p frap-golden --test golden
 cargo xtask golden bless --filter 'area/*'   # run Blender, (re)write fixtures; commit them
-cargo xtask golden live                      # FRAP_GOLDEN_LIVE=1: Blender re-runs, fails on drift
+cargo xtask golden live                      # FRAP_GOLDEN_LIVE=1 --include-ignored: Blender re-runs, fails on drift
 cargo xtask golden check | report            # pass/fail per case | operator x tier matrix
 cargo xtask golden diff tests/golden/cases/harness/cube_add.py   # both tools live, every mismatch
 ```
 
 Blender is found at `$BLENDER_BIN`, then `blender` on `PATH`, then
-`~/Applications/Blender-5.2.app/Contents/MacOS/Blender`. Without Blender, live tests print a
-`NOTICE: SKIPPED …` line and pass; fixture comparisons still run.
+`~/Applications/Blender-5.2.app/Contents/MacOS/Blender`. The live test is `#[ignore]`d, so a
+plain `cargo test` lists it as `ignored, live: needs Blender 5.2 …`; fixture comparisons still
+run. `cargo xtask golden live` (or `FRAP_GOLDEN_LIVE=1 cargo test -p frap-golden --test golden
+-- --include-ignored`) runs it, and fails when Blender cannot be found.
 
 A fixture is stamped with Blender's version and build hash; a live run with another build fails
 (drift alarm). Bless only with Blender 5.2.4 LTS (`cd5dc428cce1`).
@@ -83,9 +85,15 @@ Both dumpers read the properties listed in `props.toml`:
   before mesh reads in Edit Mode (D-05); `Dots Stroke` skipped (D-11).
 - frap: the same paths as statements executed by the session (`….matrix_world`,
   `….vertices.foreach_get('co')`), so goldens also test RNA and hooks. A datablock whose RNA
-  read fails because its binding has not landed yet is dumped natively from `Main` and counted
-  as an *RNA fallback* (printed by the test; `FRAP_GOLDEN_STRICT_RNA=1` makes fallbacks
-  failures).
+  read fails because its binding has not landed yet (`RNA_NO_ATTRIBUTE`, `NOT_IMPLEMENTED`,
+  `RNA_NOT_IMPLEMENTED`) is dumped natively from `Main` and counted as an *RNA fallback*. Any
+  other read failure (another error code, a wrong value shape, a panic) fails the case. Expected
+  fallbacks are listed in `crates/frap-golden/rna_fallbacks.txt` (`<case id> <datablock key>`):
+  an unlisted fallback fails its case, and the fixtures test prints entries that became stale
+  (delete them when a binding lands). `FRAP_GOLDEN_STRICT_RNA=1` makes every fallback a failure.
+- Edit-mode selection, active element and select history of `mesh:` dumps are `null` on the frap
+  side until the M2 edit-mode WP binds them (deviations.md §2): do not end a `mesh:` case in
+  Edit Mode yet; the frap run rejects a `mesh:` compare whose case ends in `EDIT_MESH`.
 
 ## Comparators (`crates/frap-golden/src/compare/`)
 
@@ -94,9 +102,9 @@ Both dumpers read the properties listed in `props.toml`:
 | `lines.rs` | always | same ok / exception class; message equal after normalising quotes, whitespace, paths |
 | `rna_values.rs` | `objects`, `context`, `materials`, `anim:` | every field, floats within `tol` |
 | `mesh_exact.rs` | `mesh:`/`evaluated:` at T0–T1 | index by index |
-| `mesh_canonical.rs` | `mesh:`/`evaluated:` from T2 | vertices matched on a 1e-4 grid, faces as rotation-normalised cycles, corner data per (face, corner) |
+| `mesh_canonical.rs` | `mesh:`/`evaluated:` from T2 | vertices matched on a 1e-4 grid, edges and faces matched one to one (rotation-normalised cycles), corner data per (face, corner) |
 | `invariants.rs` | `check=` (T3) | on both meshes |
-| `gltf_canonical.rs` | `glb:` | canonical glTF (decoded accessors, triangle multisets, names, defaults); `asset.generator` ignored |
+| `gltf_canonical.rs` | `glb:` | canonical glTF (decoded accessors, triangle multisets matched within `tol`, strips/fans as triangles, node transforms as matrices, names, defaults); animations by sampled values; `asset.generator` ignored |
 | `gltf_roundtrip.rs` | WP 1.23 | the §17.2 round-trip law on `tests/data/gltf-roundtrip/allow.toml` (`[[file]] path = …`) |
 | `image_ssim.rs` | `image:` (T4) | SSIM ≥ `ssim` and mean ΔE ≤ 2 in the centre crop |
 

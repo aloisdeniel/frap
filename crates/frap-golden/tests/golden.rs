@@ -3,16 +3,19 @@
 //!
 //! - `fixtures`: frap runs every case of `tests/golden/cases/**` and is compared with the
 //!   committed Blender fixtures. Runs everywhere (no Blender needed). `FRAP_GOLDEN_FILTER`
-//!   narrows the cases (glob over `<area>/<name>`); `FRAP_GOLDEN_STRICT_RNA=1` turns native
-//!   fallbacks of the frap dumper into failures.
-//! - `live`: with `FRAP_GOLDEN_LIVE=1`, Blender re-runs every case and must reproduce its
-//!   fixture (drift alarm). Without Blender it is skipped with a visible notice.
+//!   narrows the cases (glob over `<area>/<name>`). A native fallback of the frap dumper that
+//!   is not in `crates/frap-golden/rna_fallbacks.txt` fails its case; `FRAP_GOLDEN_STRICT_RNA=1`
+//!   turns every fallback into a failure.
+//! - `live` (`#[ignore]`d, so `cargo test` lists it as ignored with the reason): `cargo xtask
+//!   golden live` runs it with `FRAP_GOLDEN_LIVE=1 … --include-ignored`; Blender re-runs every
+//!   case and must reproduce its fixture (drift alarm). `FRAP_GOLDEN_LIVE=1` without Blender
+//!   fails instead of passing silently.
 
 use std::collections::BTreeSet;
 
 use frap_golden::blender::{self, Live, Repo, ScratchDir};
 use frap_golden::case::Case;
-use frap_golden::runner::{self, Props, RunOptions};
+use frap_golden::runner::{self, FallbackAllowList, Props, RunOptions};
 use frap_golden::{GObject, LineOutcome};
 
 fn filter() -> Option<String> {
@@ -37,11 +40,24 @@ fn fixtures() {
         reports.len(),
         reports.iter().filter(|r| r.passed()).count()
     );
+    if filter().is_none() {
+        let stale = FallbackAllowList::load(&repo)
+            .expect("rna_fallbacks.txt")
+            .stale(&reports);
+        if !stale.is_empty() {
+            eprintln!(
+                "NOTICE: stale entries in {} (their binding landed; delete them):\n  {}",
+                runner::ALLOW_LIST_NAME,
+                stale.join("\n  ")
+            );
+        }
+    }
     let failed = runner::format_reports(&reports, 30);
     assert!(failed.is_empty(), "golden cases failed:{failed}");
 }
 
 #[test]
+#[ignore = "live: needs Blender 5.2; run `cargo xtask golden live` (FRAP_GOLDEN_LIVE=1, --include-ignored)"]
 fn live() {
     let b = match blender::live() {
         Live::Off => {
@@ -52,10 +68,8 @@ fn live() {
             );
             return;
         }
-        Live::Skip(why) => {
-            eprintln!("NOTICE: SKIPPED live golden tests: {why}");
-            return;
-        }
+        // Asked for explicitly: a missing Blender is a failure, never a silent pass.
+        Live::Skip(why) => panic!("live golden tests cannot run: {why}"),
         Live::Run(b) => b,
     };
     let repo = Repo::locate();
@@ -278,6 +292,94 @@ fn runner_has_no_time_normalisation() {
             "view_layer.update() not guarded by the time-dirty flag: {}",
             code[i]
         );
+    }
+}
+
+/// The Blender-free unit tests of `golden_runner.py`'s time tracking
+/// (`tools/blender/test_golden_runner.py`: `+=`, `frame_float`, `frame_subframe`, `setattr`,
+/// value-based detection). Needs `python3` (3.8+) on PATH; without it the test fails, unless
+/// `FRAP_GOLDEN_NO_PYTHON=1` says the machine has none.
+#[test]
+fn golden_runner_python_unit_tests() {
+    let repo = Repo::locate();
+    let script = repo.root.join("tools/blender/test_golden_runner.py");
+    let out = match std::process::Command::new("python3")
+        .arg("-I")
+        .arg("-B")
+        .arg(&script)
+        .output()
+    {
+        Ok(o) => o,
+        Err(e) if std::env::var_os("FRAP_GOLDEN_NO_PYTHON").is_some_and(|v| v == "1") => {
+            eprintln!("NOTICE: python3 unavailable ({e}); golden_runner.py unit tests skipped");
+            return;
+        }
+        Err(e) => panic!("cannot run python3 {}: {e}", script.display()),
+    };
+    assert!(
+        out.status.success(),
+        "{}\n{}",
+        String::from_utf8_lossy(&out.stdout),
+        String::from_utf8_lossy(&out.stderr)
+    );
+}
+
+/// Live probe of the time-dirty tracking (§20.3, verified on Blender 5.2.4): after a pending
+/// frame change (`+=`, `frame_float`, `setattr`, …) a derived read must not make the runner
+/// apply the animation, so the manual `location` survives (the old runner recorded the
+/// animated `[0, 0, 5]` after `+= 5`).
+#[test]
+#[ignore = "live: needs Blender 5.2; run `cargo xtask golden live` (FRAP_GOLDEN_LIVE=1, --include-ignored)"]
+fn live_runner_keeps_pending_frame_changes() {
+    let b = match blender::live() {
+        Live::Off => {
+            eprintln!(
+                "NOTICE: live golden tests off (set {}=1)",
+                blender::LIVE_ENV
+            );
+            return;
+        }
+        Live::Skip(why) => panic!("live golden tests cannot run: {why}"),
+        Live::Run(b) => b,
+    };
+    let repo = Repo::locate();
+    let work = ScratchDir::new("time-probe").unwrap();
+    let cases = [
+        ("bpy.context.scene.frame_current += 5", [7.0, 7.0, 7.0]),
+        ("bpy.context.scene.frame_current = 6", [7.0, 7.0, 7.0]),
+        ("bpy.context.scene.frame_float = 6.0", [7.0, 7.0, 7.0]),
+        (
+            "setattr(bpy.context.scene, 'frame_current', 6)",
+            [7.0, 7.0, 7.0],
+        ),
+        // A frame change through an operator is applied by the operator itself.
+        ("bpy.ops.screen.frame_offset(delta=5)", [7.0, 7.0, 7.0]),
+    ];
+    for (i, (step, expected)) in cases.iter().enumerate() {
+        let src = format!(
+            "# golden: compare=objects\n\
+             ob = bpy.data.objects['Cube']\n\
+             ob.location = (0, 0, 0)\n\
+             ob.keyframe_insert('location', frame=1)\n\
+             ob.location = (0, 0, 10)\n\
+             ob.keyframe_insert('location', frame=11)\n\
+             bpy.context.scene.frame_current = 1\n\
+             bpy.context.view_layer.update()\n\
+             {step}\n\
+             ob.location = (7, 7, 7)\n\
+             m = ob.matrix_world\n"
+        );
+        let file = work.path().join(format!("probe{i}.py"));
+        std::fs::write(&file, src).unwrap();
+        let state =
+            blender::run_blender(&b, &repo, &file, &work.path().join(format!("w{i}"))).unwrap();
+        assert!(
+            state.lines.iter().all(|l| l.ok),
+            "{step}: {:?}",
+            state.lines
+        );
+        let ob = &state.objects["Cube"];
+        assert_eq!(ob.location, *expected, "{step}: location");
     }
 }
 

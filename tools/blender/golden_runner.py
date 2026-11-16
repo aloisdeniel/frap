@@ -23,16 +23,19 @@ import os
 import re
 import sys
 
-import bpy
-
 sys.dont_write_bytecode = True  # no __pycache__ next to the repository's tools
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
-import dump_state  # noqa: E402
-import emulations  # noqa: E402
+try:
+    import bpy
+except ImportError:  # imported by the Blender-free unit tests (test_golden_runner.py)
+    bpy = None
+else:
+    import dump_state  # noqa: E402
+    import emulations  # noqa: E402
 
 # Deviation id -> (who handles it, what is done) or None when nothing is needed.
 #   runner:     this file changes how Blender runs the case;
@@ -63,8 +66,15 @@ NORMALISE = {
     "D-14": ("dumper", "non-finite floats are written as {'$float': 'nan' | 'inf' | '-inf'}"),
 }
 
+# Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),
+# evaluated_depsgraph_get() apply pending time.
 _ORDER = re.compile(r"\b(view_layer\.update|frame_set|evaluated_depsgraph_get)\s*\(|\bbpy\.ops\.")
-_TIME_WRITE = re.compile(r"\bframe_current\s*=(?!=)")
+# Writes of the scene time: plain and augmented assignments of frame_current / frame_float /
+# frame_subframe, and setattr(…, 'frame_…', …).
+_TIME_WRITE = re.compile(
+    r"\bframe_(?:current|float|subframe)\s*(?:[-+*/%@&|^]|//|\*\*|<<|>>)?=(?!=)"
+    r"|\bsetattr\s*\([^,]*,\s*[rRbBuU]?['\"]frame_(?:current|float|subframe)['\"]"
+)
 _MESH_READ = re.compile(
     r"\b(vertices|edges|polygons|loops|loop_triangles|corner_normals|vertex_normals|"
     r"polygon_normals|attributes|uv_layers|foreach_get|meshes)\b"
@@ -181,6 +191,41 @@ def exception_record(line, e):
     return {"line": line, "ok": False, "exception": type(e).__name__, "message": msg}
 
 
+def time_dirty_after(dirty, text, frame_changed):
+    """Time-dirty flag after running statement `text` (no Blender needed).
+
+    The last time-related token of the statement decides: a write of frame_current /
+    frame_float / frame_subframe (plain, augmented or through setattr) makes time dirty; an
+    operator call, view_layer.update(), frame_set or evaluated_depsgraph_get() evaluates it.
+    `frame_changed` (the scene frame differs before and after the statement) is the backstop for
+    writes no pattern sees (a helper function, a computed attribute name): the time is then
+    dirty unless the statement also crossed an evaluation boundary. frame_set and the frame
+    operators (screen.frame_offset, verified on Blender 5.2.4: the new frame's animation is
+    applied before the operator returns) change the frame and evaluate it.
+    """
+    writes = [(m.start(), True) for m in _TIME_WRITE.finditer(text)]
+    events = writes + [(m.start(), False) for m in _ORDER.finditer(text)]
+    if events:
+        dirty = max(events)[1]
+    if frame_changed and not writes:
+        dirty = not _ORDER.search(text)
+    return dirty
+
+
+def frame_state():
+    """Scene name -> (frame_current, frame_subframe), compared before/after each statement."""
+    try:
+        return {s.name: (s.frame_current, s.frame_subframe) for s in bpy.data.scenes}
+    except Exception:  # noqa: BLE001 - a statement may leave bpy.data unreadable
+        return None
+
+
+def frames_differ(before, after):
+    if before is None or after is None:
+        return False
+    return any(k in after and after[k] != v for k, v in before.items())
+
+
 class Runner:
     def __init__(self, props):
         self.time_dirty = False
@@ -198,14 +243,8 @@ class Runner:
             for ob in self.edit_objects():
                 ob.update_from_editmode()
 
-    def track_time(self, text):
-        # The last time-related token of the statement decides: `frame_current = …` makes time
-        # dirty; an operator call, view_layer.update(), frame_set() or
-        # evaluated_depsgraph_get() evaluates it.
-        events = [(m.start(), True) for m in _TIME_WRITE.finditer(text)]
-        events += [(m.start(), False) for m in _ORDER.finditer(text)]
-        if events:
-            self.time_dirty = max(events)[1]
+    def track_time(self, text, before=None, after=None):
+        self.time_dirty = time_dirty_after(self.time_dirty, text, frames_differ(before, after))
 
     def run_group(self, ns, line, text, err):
         if err is not None:
@@ -215,6 +254,7 @@ class Runner:
         except SyntaxError as e:
             return exception_record(line, e)
         self.normalise_before(text)
+        before = frame_state()
         try:
             with bpy.context.temp_override(**view3d_override()):
                 result = None
@@ -226,9 +266,9 @@ class Runner:
         except BaseException as e:  # noqa: BLE001 - every outcome is recorded
             if isinstance(e, (KeyboardInterrupt, SystemExit)):
                 raise
-            self.track_time(text)
+            self.track_time(text, before, frame_state())
             return exception_record(line, e)
-        self.track_time(text)
+        self.track_time(text, before, frame_state())
         cancelled = isinstance(result, set) and result == {"CANCELLED"}
         return {"line": line, "ok": not cancelled}
 

@@ -5,16 +5,23 @@
 //! The canonical form is independent of everything an exporter may legitimately reorder:
 //! - buffers, buffer views and accessors disappear: accessor data is decoded (normalised
 //!   integers become floats, sparse accessors are applied) and inlined;
-//! - nodes are compared by name and hierarchy (children sorted by name), scenes by name;
+//! - nodes are compared by name and hierarchy (children sorted by name), scenes by name; a
+//!   node's local transform is always its column-major `matrix` (TRS composed);
 //! - meshes are inlined into their nodes; each primitive becomes a **multiset** of triangles
-//!   (lines, points) whose corners are full attribute tuples (morph target deltas included),
-//!   each triangle rotated so its smallest corner comes first (winding kept), the multiset
-//!   sorted; the primitives of a mesh are sorted too;
+//!   (lines, points) whose corners are full attribute tuples (morph target deltas included);
+//!   strips and fans become `TRIANGLES`, loops and strips of lines `LINES`. The canonical order
+//!   (each triangle rotated so its smallest corner comes first, winding kept; the multiset and
+//!   the primitives sorted) is only a first guess: [`compare`] matches elements and primitives
+//!   **within `tol`** (any rotation that keeps the winding), so a difference that straddles a
+//!   rounding boundary of the sort never reorders anything;
 //! - materials are inlined with glTF defaults filled in, texture references resolved to
 //!   sampler (defaults filled) + image (PNG: size and a hash of the decoded RGBA8 pixels;
 //!   other formats: a hash of the bytes);
 //! - animations by name, channels sorted by (target node name, path), sampler input/output
-//!   decoded;
+//!   decoded; [`compare`] compares each pair of channels **by sampled values** (LINEAR, STEP,
+//!   CUBICSPLINE per the glTF spec, slerp for rotations, quaternion sign ignored) on the union
+//!   of both key-time sets plus the midpoints between them, so baked and sparse keys, or
+//!   different interpolations of the same curve, compare equal;
 //! - `extensionsUsed` / `extensionsRequired` as sorted sets; `asset.generator` is ignored
 //!   (GLTF §7.2); `extras` and unknown extensions are kept verbatim.
 //!
@@ -26,7 +33,7 @@ use std::path::Path;
 
 use serde_json::{Map, Value as Json, json};
 
-use super::rna_values::json_close;
+use super::rna_values::{close, json_close};
 use crate::case::Mismatch;
 
 /// Comparator name.
@@ -338,6 +345,48 @@ fn qkey(v: &[f64]) -> Vec<i64> {
     v.iter().map(|x| (x * ORDER_Q).round() as i64).collect()
 }
 
+fn floats_of(v: Option<&Json>, default: &[f64]) -> Result<Vec<f64>, String> {
+    match v {
+        None => Ok(default.to_vec()),
+        Some(Json::Array(a)) if a.len() == default.len() => a
+            .iter()
+            .map(|x| x.as_f64().ok_or_else(|| format!("not a number: {x}")))
+            .collect(),
+        Some(x) => Err(format!("expected {} numbers: {x}", default.len())),
+    }
+}
+
+/// A node's local transform as a column-major 4x4 `matrix` (glTF `T * R * S` when the node
+/// uses TRS), so `matrix` and equivalent TRS nodes compare equal.
+fn local_matrix(n: &Json) -> Result<Json, String> {
+    let mut identity = [0.0; 16];
+    for k in 0..4 {
+        identity[k * 5] = 1.0;
+    }
+    if n.get("matrix").is_some() {
+        let m = floats_of(n.get("matrix"), &identity)?;
+        return Ok(Json::Array(m.into_iter().map(num).collect()));
+    }
+    let t = floats_of(n.get("translation"), &[0.0; 3])?;
+    let q = floats_of(n.get("rotation"), &[0.0, 0.0, 0.0, 1.0])?;
+    let s = floats_of(n.get("scale"), &[1.0; 3])?;
+    let (x, y, z, w) = (q[0], q[1], q[2], q[3]);
+    let r = [
+        [1.0 - 2.0 * (y * y + z * z), 2.0 * (x * y - z * w), 2.0 * (x * z + y * w)],
+        [2.0 * (x * y + z * w), 1.0 - 2.0 * (x * x + z * z), 2.0 * (y * z - x * w)],
+        [2.0 * (x * z - y * w), 2.0 * (y * z + x * w), 1.0 - 2.0 * (x * x + y * y)],
+    ];
+    let mut m = [0.0; 16];
+    for col in 0..3 {
+        for row in 0..3 {
+            m[col * 4 + row] = r[row][col] * s[col];
+        }
+    }
+    m[12..15].copy_from_slice(&t);
+    m[15] = 1.0;
+    Ok(Json::Array(m.into_iter().map(num).collect()))
+}
+
 struct Canon<'a> {
     doc: &'a GltfDoc,
 }
@@ -559,12 +608,14 @@ impl Canon<'_> {
             None => Json::Null,
         };
         let mut o = Map::new();
+        // Strips, loops and fans were expanded above: only the element kind is left.
         o.insert(
             "mode".into(),
-            json!(["POINTS", "LINES", "LINE_LOOP", "LINE_STRIP", "TRIANGLES", "TRIANGLE_STRIP", "TRIANGLE_FAN"]
-                .get(mode as usize)
-                .copied()
-                .unwrap_or("?")),
+            json!(match mode {
+                0 => "POINTS",
+                1..=3 => "LINES",
+                _ => "TRIANGLES",
+            }),
         );
         o.insert("layout".into(), Json::Array(layout));
         o.insert("material".into(), material);
@@ -591,6 +642,7 @@ impl Canon<'_> {
                 p["mode"].to_string(),
                 p["layout"].to_string(),
                 p["elements"].as_array().map_or(0, Vec::len),
+                p["elements"].to_string(),
             )
         });
         let mut o = Map::new();
@@ -621,22 +673,7 @@ impl Canon<'_> {
             .ok_or_else(|| format!("node {i} missing"))?;
         let mut o = Map::new();
         o.insert("name".into(), self.node_name(i));
-        if let Some(m) = n.get("matrix") {
-            o.insert("matrix".into(), m.clone());
-        } else {
-            o.insert(
-                "translation".into(),
-                n.get("translation").cloned().unwrap_or(json!([0.0, 0.0, 0.0])),
-            );
-            o.insert(
-                "rotation".into(),
-                n.get("rotation").cloned().unwrap_or(json!([0.0, 0.0, 0.0, 1.0])),
-            );
-            o.insert(
-                "scale".into(),
-                n.get("scale").cloned().unwrap_or(json!([1.0, 1.0, 1.0])),
-            );
-        }
+        o.insert("matrix".into(), local_matrix(n)?);
         if let Some(m) = idx(n, "mesh") {
             o.insert("mesh".into(), self.mesh(m)?);
         }
@@ -834,11 +871,392 @@ pub fn canonicalize_file(path: &Path) -> Result<Json, String> {
     canonicalize(&load(&bytes, path.parent())?)
 }
 
-/// Compares two canonical forms (floats within `tol`).
+/// Compares two canonical forms (floats within `tol`): elements and primitives are matched
+/// within `tol`, animation channels compared by sampled values, then every leaf is compared.
 pub fn compare(what: &str, frap: &Json, blender: &Json, tol: f32) -> Vec<Mismatch> {
+    let (mut f, mut b) = (frap.clone(), blender.clone());
+    align(&mut f, &mut b, tol as f64);
     let mut out = Vec::new();
-    json_close(NAME, what, frap, blender, tol as f64, &mut out);
+    json_close(NAME, what, &f, &b, tol as f64, &mut out);
     out
+}
+
+// ------------------------------------------------------------------ tolerant matching
+
+/// Walks both canonical trees in parallel: reorders frap's `primitives` and `elements` to
+/// blender's order where they match within `tol`, and replaces animation channels by samples.
+fn align(f: &mut Json, b: &mut Json, tol: f64) {
+    match (f, b) {
+        (Json::Object(fo), Json::Object(bo)) => {
+            for (k, fv) in fo.iter_mut() {
+                let Some(bv) = bo.get_mut(k) else { continue };
+                match (k.as_str(), fv, bv) {
+                    ("primitives", Json::Array(fa), Json::Array(ba)) => align_prims(fa, ba, tol),
+                    ("elements", Json::Array(fa), Json::Array(ba)) => align_elements(fa, ba, tol),
+                    ("channels", Json::Array(fa), Json::Array(ba)) if fa.len() == ba.len() => {
+                        for (fc, bc) in fa.iter_mut().zip(ba.iter_mut()) {
+                            if fc.get("target") == bc.get("target") {
+                                resample(fc, bc);
+                            }
+                        }
+                    }
+                    (_, fv, bv) => align(fv, bv, tol),
+                }
+            }
+        }
+        (Json::Array(fa), Json::Array(ba)) if fa.len() == ba.len() => {
+            for (x, y) in fa.iter_mut().zip(ba.iter_mut()) {
+                align(x, y, tol);
+            }
+        }
+        _ => {}
+    }
+}
+
+fn number(x: &Json) -> Option<f64> {
+    match x {
+        Json::Number(n) => n.as_f64(),
+        Json::Object(o) => match o.get("$float")?.as_str()? {
+            "nan" => Some(f64::NAN),
+            "inf" => Some(f64::INFINITY),
+            "-inf" => Some(f64::NEG_INFINITY),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+fn vector(x: &Json) -> Option<Vec<f64>> {
+    x.as_array()?.iter().map(number).collect()
+}
+
+/// An element's corners.
+fn corners(x: &Json) -> Option<Corners> {
+    x.as_array()?.iter().map(vector).collect()
+}
+
+fn corners_close(a: &[Vec<f64>], b: &[Vec<f64>], tol: f64) -> bool {
+    a.len() == b.len()
+        && a.iter().zip(b).all(|(x, y)| {
+            x.len() == y.len() && x.iter().zip(y).all(|(p, q)| close(*p, *q, tol))
+        })
+}
+
+/// `a` rotated (cyclically: winding kept; a line's ends may swap) to match `b` within `tol`.
+fn matching_rotation(a: &[Vec<f64>], b: &[Vec<f64>], tol: f64) -> Option<Corners> {
+    if a.len() != b.len() {
+        return None;
+    }
+    let mut r = a.to_vec();
+    for _ in 0..a.len().max(1) {
+        if corners_close(&r, b, tol) {
+            return Some(r);
+        }
+        r.rotate_left(1);
+    }
+    None
+}
+
+fn corners_json(c: Corners) -> Json {
+    Json::Array(
+        c.into_iter()
+            .map(|v| Json::Array(v.into_iter().map(num).collect()))
+            .collect(),
+    )
+}
+
+/// Puts `items[i]` at `slot[i]` (`None`: the first free slots, in order).
+fn place(items: Vec<Json>, slot: &[Option<usize>]) -> Vec<Json> {
+    let n = items.len();
+    let mut out: Vec<Option<Json>> = vec![None; n];
+    let mut rest = Vec::new();
+    for (item, s) in items.into_iter().zip(slot) {
+        match s {
+            Some(j) => out[*j] = Some(item),
+            None => rest.push(item),
+        }
+    }
+    let mut rest = rest.into_iter();
+    out.into_iter()
+        .map(|x| x.or_else(|| rest.next()).unwrap_or(Json::Null))
+        .collect()
+}
+
+/// Matches frap's elements to blender's within `tol` (3x3x3 neighbour cells of the element
+/// centroid, any winding-preserving rotation) and reorders them to blender's order.
+fn align_elements(f: &mut Vec<Json>, b: &[Json], tol: f64) {
+    if f.len() != b.len() {
+        return;
+    }
+    let (Some(fc), Some(bc)) = (
+        f.iter().map(corners).collect::<Option<Vec<_>>>(),
+        b.iter().map(corners).collect::<Option<Vec<_>>>(),
+    ) else {
+        return;
+    };
+    let centroid = |c: &Corners| -> [f64; 3] {
+        let mut m = [0.0; 3];
+        for v in c {
+            for (k, x) in v.iter().take(3).enumerate() {
+                m[k] += x / c.len().max(1) as f64;
+            }
+        }
+        m
+    };
+    let scale = bc
+        .iter()
+        .chain(&fc)
+        .flat_map(|c| c.iter().flat_map(|v| v.iter().take(3)))
+        .filter(|x| x.is_finite())
+        .fold(1.0f64, |m, x| m.max(x.abs()));
+    let cell = (tol * scale).max(1e-4) * 2.0;
+    let key = |c: &Corners| -> Option<[i64; 3]> {
+        let m = centroid(c);
+        m.iter()
+            .all(|x| x.is_finite())
+            .then(|| m.map(|x| (x / cell).floor() as i64))
+    };
+    let mut grid: BTreeMap<[i64; 3], Vec<usize>> = BTreeMap::new();
+    let mut unkeyed = Vec::new();
+    for (j, c) in bc.iter().enumerate() {
+        match key(c) {
+            Some(k) => grid.entry(k).or_default().push(j),
+            None => unkeyed.push(j),
+        }
+    }
+    let mut used = vec![false; b.len()];
+    let mut slot = vec![None; f.len()];
+    let mut placed: Vec<Json> = Vec::with_capacity(f.len());
+    for (i, c) in fc.into_iter().enumerate() {
+        let mut cands: Vec<usize> = match key(&c) {
+            Some(k) => {
+                let mut v = Vec::new();
+                for dx in -1..=1 {
+                    for dy in -1..=1 {
+                        for dz in -1..=1 {
+                            if let Some(js) = grid.get(&[k[0] + dx, k[1] + dy, k[2] + dz]) {
+                                v.extend(js.iter().copied());
+                            }
+                        }
+                    }
+                }
+                v
+            }
+            None => unkeyed.clone(),
+        };
+        cands.sort_unstable();
+        let hit = cands
+            .into_iter()
+            .filter(|&j| !used[j])
+            .find_map(|j| matching_rotation(&c, &bc[j], tol).map(|r| (j, r)));
+        match hit {
+            Some((j, r)) => {
+                used[j] = true;
+                slot[i] = Some(j);
+                placed.push(corners_json(r));
+            }
+            None => placed.push(f[i].clone()),
+        }
+    }
+    *f = place(placed, &slot);
+}
+
+/// Matches frap's primitives to blender's: same mode, layout, material and element count, and
+/// equal within `tol` once their elements are aligned (else the first such candidate).
+fn align_prims(f: &mut Vec<Json>, b: &[Json], tol: f64) {
+    let shape = |p: &Json| {
+        (
+            p.get("mode").cloned(),
+            p.get("layout").cloned(),
+            p.get("material").cloned().map(|m| m["name"].clone()),
+            p.get("elements").and_then(|e| e.as_array()).map(Vec::len),
+        )
+    };
+    let mut used = vec![false; b.len()];
+    let mut slot = vec![None; f.len()];
+    let mut placed = Vec::with_capacity(f.len());
+    for (i, p) in f.iter().enumerate() {
+        let mut fallback = None;
+        let mut hit = None;
+        for (j, q) in b.iter().enumerate() {
+            if used[j] || shape(p) != shape(q) {
+                continue;
+            }
+            let (mut p2, mut q2) = (p.clone(), q.clone());
+            align(&mut p2, &mut q2, tol);
+            let mut m = Vec::new();
+            json_close(NAME, "", &p2, &q2, tol, &mut m);
+            if m.is_empty() {
+                hit = Some((j, p2));
+                break;
+            }
+            if fallback.is_none() {
+                fallback = Some((j, p2));
+            }
+        }
+        let hit = hit.or(fallback);
+        match hit {
+            Some((j, p2)) => {
+                used[j] = true;
+                slot[i] = Some(j);
+                placed.push(p2);
+            }
+            None => placed.push(p.clone()),
+        }
+    }
+    if f.len() == b.len() {
+        *f = place(placed, &slot);
+    }
+}
+
+// ------------------------------------------------------------------ animation sampling
+
+/// One decoded animation sampler.
+struct Sampler {
+    times: Vec<f64>,
+    /// Per key: (in-tangent, value, out-tangent); tangents empty unless CUBICSPLINE.
+    keys: Vec<[Vec<f64>; 3]>,
+    interpolation: String,
+    rotation: bool,
+}
+
+impl Sampler {
+    fn parse(c: &Json) -> Option<Sampler> {
+        let times: Vec<f64> = c
+            .get("input")?
+            .as_array()?
+            .iter()
+            .map(|t| vector(t).and_then(|v| v.first().copied()))
+            .collect::<Option<_>>()?;
+        let out: Vec<Vec<f64>> = c.get("output")?.as_array()?.iter().map(vector).collect::<Option<_>>()?;
+        let interpolation = c.get("interpolation")?.as_str()?.to_owned();
+        let cubic = interpolation == "CUBICSPLINE";
+        let groups = times.len() * if cubic { 3 } else { 1 };
+        if times.is_empty() || groups == 0 || !out.len().is_multiple_of(groups) {
+            return None;
+        }
+        let per = out.len() / groups;
+        let group = |g: usize| -> Vec<f64> { out[g * per..(g + 1) * per].concat() };
+        let keys = (0..times.len())
+            .map(|k| {
+                if cubic {
+                    [group(3 * k), group(3 * k + 1), group(3 * k + 2)]
+                } else {
+                    [Vec::new(), group(k), Vec::new()]
+                }
+            })
+            .collect();
+        let rotation = c.pointer("/target/path").and_then(|p| p.as_str()) == Some("rotation");
+        Some(Sampler {
+            times,
+            keys,
+            interpolation,
+            rotation,
+        })
+    }
+
+    /// The value at time `t` (glTF 2.0 §3.11 / Appendix C).
+    fn sample(&self, t: f64) -> Vec<f64> {
+        let n = self.times.len();
+        if t <= self.times[0] {
+            return self.keys[0][1].clone();
+        }
+        if t >= self.times[n - 1] {
+            return self.keys[n - 1][1].clone();
+        }
+        let k = self.times.partition_point(|&x| x <= t).saturating_sub(1).min(n - 2);
+        let (t0, t1) = (self.times[k], self.times[k + 1]);
+        let td = t1 - t0;
+        if td <= 0.0 {
+            return self.keys[k][1].clone();
+        }
+        let s = (t - t0) / td;
+        let (v0, v1) = (&self.keys[k][1], &self.keys[k + 1][1]);
+        let v = match self.interpolation.as_str() {
+            "STEP" => v0.clone(),
+            "CUBICSPLINE" => {
+                let (b0, a1) = (&self.keys[k][2], &self.keys[k + 1][0]);
+                let (s2, s3) = (s * s, s * s * s);
+                (0..v0.len())
+                    .map(|i| {
+                        (2.0 * s3 - 3.0 * s2 + 1.0) * v0[i]
+                            + td * (s3 - 2.0 * s2 + s) * b0.get(i).copied().unwrap_or(0.0)
+                            + (-2.0 * s3 + 3.0 * s2) * v1.get(i).copied().unwrap_or(0.0)
+                            + td * (s3 - s2) * a1.get(i).copied().unwrap_or(0.0)
+                    })
+                    .collect()
+            }
+            _ if self.rotation && v0.len() == 4 && v1.len() == 4 => slerp(v0, v1, s),
+            _ => v0
+                .iter()
+                .zip(v1)
+                .map(|(a, b)| a + (b - a) * s)
+                .collect(),
+        };
+        if self.rotation { normalized(v) } else { v }
+    }
+}
+
+fn normalized(v: Vec<f64>) -> Vec<f64> {
+    let l = v.iter().map(|x| x * x).sum::<f64>().sqrt();
+    if l > 0.0 { v.into_iter().map(|x| x / l).collect() } else { v }
+}
+
+/// Spherical linear interpolation along the shorter arc (glTF 2.0 Appendix C).
+fn slerp(a: &[f64], b: &[f64], s: f64) -> Vec<f64> {
+    let mut d: f64 = a.iter().zip(b).map(|(x, y)| x * y).sum();
+    let sign = if d < 0.0 {
+        d = -d;
+        -1.0
+    } else {
+        1.0
+    };
+    let (wa, wb) = if d > 0.9995 {
+        (1.0 - s, s)
+    } else {
+        let th = d.acos();
+        (((1.0 - s) * th).sin() / th.sin(), (s * th).sin() / th.sin())
+    };
+    normalized(a.iter().zip(b).map(|(x, y)| wa * x + wb * sign * y).collect())
+}
+
+/// Replaces both channels' `interpolation`/`input`/`output` by `times` and `samples` on the
+/// union of their key times plus midpoints. Rotations are compared up to the quaternion sign.
+fn resample(f: &mut Json, b: &mut Json) {
+    let (Some(fs), Some(bs)) = (Sampler::parse(f), Sampler::parse(b)) else {
+        return;
+    };
+    let mut keys: Vec<f64> = fs.times.iter().chain(&bs.times).copied().collect();
+    keys.sort_by(f64::total_cmp);
+    keys.dedup();
+    let mut times = Vec::with_capacity(keys.len() * 2);
+    for (i, &t) in keys.iter().enumerate() {
+        times.push(t);
+        if let Some(&u) = keys.get(i + 1) {
+            times.push((t + u) / 2.0);
+        }
+    }
+    let mut fsamp = Vec::with_capacity(times.len());
+    let mut bsamp = Vec::with_capacity(times.len());
+    for &t in &times {
+        let mut x = fs.sample(t);
+        let y = bs.sample(t);
+        if fs.rotation && x.iter().zip(&y).map(|(p, q)| p * q).sum::<f64>() < 0.0 {
+            x.iter_mut().for_each(|v| *v = -*v);
+        }
+        fsamp.push(Json::Array(x.into_iter().map(num).collect()));
+        bsamp.push(Json::Array(y.into_iter().map(num).collect()));
+    }
+    let times = Json::Array(times.into_iter().map(num).collect());
+    for (c, samples) in [(f, fsamp), (b, bsamp)] {
+        if let Some(o) = c.as_object_mut() {
+            for k in ["interpolation", "input", "output"] {
+                o.remove(k);
+            }
+            o.insert("times".into(), times.clone());
+            o.insert("samples".into(), Json::Array(samples));
+        }
+    }
 }
 
 /// Test fixtures: a tiny glTF builder (shared with `gltf_roundtrip`'s tests).
@@ -997,16 +1415,145 @@ pub(crate) mod tests {
             b.json["meshes"] = json!([{"primitives": [{"attributes": {"POSITION": p}, "indices": ix, "mode": mode}]}]);
             b.json["nodes"] = json!([{"name": "N", "mesh": 0}]);
             b.json["scenes"] = json!([{"nodes": [0]}]);
-            let mut c = canon(&b.glb());
-            // The mode itself differs; compare the triangle multisets.
-            c["scenes"][0]["nodes"][0]["mesh"]["primitives"][0]["elements"].take()
+            canon(&b.glb())
         };
         let list = tri(4, &[0, 1, 2, 2, 1, 3]);
         let strip = tri(5, &[0, 1, 2, 3]);
         assert_eq!(list, strip);
+        assert_eq!(compare("glb", &strip, &list, 1e-5), vec![]);
         let fan_list = tri(4, &[0, 1, 3, 0, 3, 2]);
         let fan = tri(6, &[0, 1, 3, 2]);
         assert_eq!(fan_list, fan);
+        assert_eq!(
+            fan["scenes"][0]["nodes"][0]["mesh"]["primitives"][0]["mode"],
+            json!("TRIANGLES")
+        );
+        assert!(!compare("glb", &fan, &list, 1e-5).is_empty());
+    }
+
+    #[test]
+    fn matrix_and_trs_nodes_are_equal() {
+        let node = |n: Json| {
+            let mut b = Builder::new();
+            b.json["nodes"] = json!([n]);
+            b.json["scenes"] = json!([{"nodes": [0]}]);
+            canon(&b.glb())
+        };
+        // 90° about Z, translation (1, 2, 3), scale (2, 1, 1).
+        let h = std::f64::consts::FRAC_1_SQRT_2;
+        let trs = node(json!({"name": "N", "translation": [1.0, 2.0, 3.0],
+                              "rotation": [0.0, 0.0, h, h], "scale": [2.0, 1.0, 1.0]}));
+        let mat = node(json!({"name": "N", "matrix": [
+            0.0, 2.0, 0.0, 0.0,  -1.0, 0.0, 0.0, 0.0,  0.0, 0.0, 1.0, 0.0,  1.0, 2.0, 3.0, 1.0]}));
+        assert_eq!(compare("glb", &trs, &mat, 1e-6), vec![]);
+        let identity = node(json!({"name": "N"}));
+        let explicit = node(json!({"name": "N", "matrix": [
+            1.0, 0.0, 0.0, 0.0,  0.0, 1.0, 0.0, 0.0,  0.0, 0.0, 1.0, 0.0,  0.0, 0.0, 0.0, 1.0]}));
+        assert_eq!(compare("glb", &identity, &explicit, 0.0), vec![]);
+        let moved = node(json!({"name": "N", "translation": [1.0, 2.0, 3.5],
+                                "rotation": [0.0, 0.0, h, h], "scale": [2.0, 1.0, 1.0]}));
+        assert_eq!(compare("glb", &moved, &mat, 1e-6).len(), 1);
+    }
+
+    fn prims(p: Vec<Json>) -> Json {
+        json!({"scenes": [{"nodes": [{"name": "N", "mesh": {"primitives": p}}]}]})
+    }
+
+    fn prim(elements: Json) -> Json {
+        json!({"mode": "TRIANGLES", "layout": ["POSITION:3"], "material": null,
+               "elements": elements})
+    }
+
+    /// Matching is within `tol`: a tiny difference straddling the 1e-4 sort grid neither
+    /// reorders triangles nor rotates them differently.
+    #[test]
+    fn matching_is_within_tolerance_not_by_sort_order() {
+        let t1 = |x: f64| json!([[x, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]);
+        let t2 = json!([[0.0, 0.0, 1.0], [1.0, 0.0, 1.0], [0.0, 1.0, 1.0]]);
+        // 4.9999e-5 and 5.0001e-5 round to different 1e-4 cells.
+        let a = prims(vec![prim(json!([t1(4.9999e-5), t2]))]);
+        let mut rotated = t1(5.0001e-5);
+        rotated.as_array_mut().unwrap().rotate_left(1);
+        let b = prims(vec![prim(json!([t2, rotated]))]);
+        assert_eq!(compare("glb", &a, &b, 1e-6), vec![]);
+        // Winding is still checked, and a real change is still seen.
+        let mut flipped = t1(5.0e-5);
+        flipped.as_array_mut().unwrap().swap(1, 2);
+        let c = prims(vec![prim(json!([t2, flipped]))]);
+        assert!(!compare("glb", &a, &c, 1e-6).is_empty());
+        let d = prims(vec![prim(json!([t2, t1(0.25)]))]);
+        assert!(!compare("glb", &a, &d, 1e-6).is_empty());
+    }
+
+    /// Primitives that tie on (material, mode, layout, count) are matched by content.
+    #[test]
+    fn tied_primitives_are_permutation_invariant() {
+        let p1 = prim(json!([[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]]));
+        let p2 = prim(json!([[[0.0, 0.0, 5.0], [1.0, 0.0, 5.0], [0.0, 1.0, 5.0]]]));
+        let a = prims(vec![p1.clone(), p2.clone()]);
+        let b = prims(vec![p2.clone(), p1.clone()]);
+        assert_eq!(compare("glb", &a, &b, 1e-6), vec![]);
+        let p3 = prim(json!([[[0.0, 0.0, 6.0], [1.0, 0.0, 6.0], [0.0, 1.0, 6.0]]]));
+        let c = prims(vec![p3, p1]);
+        assert!(!compare("glb", &a, &c, 1e-6).is_empty());
+    }
+
+    fn anim(path: &str, interpolation: &str, input: &[f64], output: Json) -> Json {
+        json!({"animations": [{"name": "A", "channels": [{
+            "target": {"node": "N", "path": path},
+            "interpolation": interpolation,
+            "input": input.iter().map(|t| json!([t])).collect::<Vec<_>>(),
+            "output": output,
+        }]}]})
+    }
+
+    /// Animations compare by sampled values (§20.4).
+    #[test]
+    fn animations_compare_by_samples() {
+        let sparse = anim("translation", "LINEAR", &[0.0, 1.0], json!([[0, 0, 0], [10, 0, 0]]));
+        let baked = anim(
+            "translation",
+            "LINEAR",
+            &[0.0, 0.25, 0.5, 1.0],
+            json!([[0, 0, 0], [2.5, 0, 0], [5, 0, 0], [10, 0, 0]]),
+        );
+        assert_eq!(compare("glb", &sparse, &baked, 1e-6), vec![]);
+        // CUBICSPLINE whose tangents make the segment linear: (in, value, out) per key.
+        let cubic = anim(
+            "translation",
+            "CUBICSPLINE",
+            &[0.0, 1.0],
+            json!([[10, 0, 0], [0, 0, 0], [10, 0, 0], [10, 0, 0], [10, 0, 0], [10, 0, 0]]),
+        );
+        assert_eq!(compare("glb", &cubic, &sparse, 1e-6), vec![]);
+        // STEP holds the value: different between the keys.
+        let step = anim("translation", "STEP", &[0.0, 1.0], json!([[0, 0, 0], [10, 0, 0]]));
+        assert!(!compare("glb", &step, &sparse, 1e-6).is_empty());
+        // One key value changed.
+        let changed = anim(
+            "translation",
+            "LINEAR",
+            &[0.0, 0.25, 0.5, 1.0],
+            json!([[0, 0, 0], [2.5, 0, 0], [5.5, 0, 0], [10, 0, 0]]),
+        );
+        assert!(!compare("glb", &changed, &sparse, 1e-6).is_empty());
+        // Rotations: slerp, and q / -q are the same rotation.
+        let h = std::f64::consts::FRAC_1_SQRT_2;
+        let rot = anim("rotation", "LINEAR", &[0.0, 1.0], json!([[0, 0, 0, 1], [0, 0, 1, 0]]));
+        let rot_baked = anim(
+            "rotation",
+            "LINEAR",
+            &[0.0, 0.5, 1.0],
+            json!([[0, 0, 0, -1], [0, 0, -h, -h], [0, 0, 1, 0]]),
+        );
+        assert_eq!(compare("glb", &rot, &rot_baked, 1e-6), vec![]);
+        let rot_off = anim(
+            "rotation",
+            "LINEAR",
+            &[0.0, 0.5, 1.0],
+            json!([[0, 0, 0, 1], [0, 0, 0.5, 0.866_025_4], [0, 0, 1, 0]]),
+        );
+        assert!(!compare("glb", &rot, &rot_off, 1e-6).is_empty());
     }
 
     #[test]

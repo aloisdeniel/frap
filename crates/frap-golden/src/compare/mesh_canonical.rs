@@ -238,29 +238,51 @@ pub fn compare(what: &str, frap: &GMesh, blender: &GMesh, tol: f32) -> Vec<Misma
     }
     floats(NAME, &format!("{what}.positions"), &pos, &blender.positions, tol, &mut out);
 
-    // Edges.
-    let bedge: HashMap<[u32; 2], usize> = blender
-        .edges
-        .iter()
-        .enumerate()
-        .map(|(i, e)| ([e[0].min(e[1]), e[0].max(e[1])], i))
-        .collect();
+    // Edges: an injective matching (a duplicated frap edge standing in for a missing one is
+    // reported both as the duplicate and as the blender edge left unmatched).
+    let mut bedge: HashMap<[u32; 2], Vec<usize>> = HashMap::new();
+    for (i, e) in blender.edges.iter().enumerate().rev() {
+        bedge
+            .entry([e[0].min(e[1]), e[0].max(e[1])])
+            .or_default()
+            .push(i);
+    }
     let mut emap = vec![usize::MAX; frap.edges.len()];
     let mut bad_edges = 0;
     for (i, e) in frap.edges.iter().enumerate() {
-        let (a, b) = (vmap[e[0] as usize] as u32, vmap[e[1] as usize] as u32);
-        match bedge.get(&[a.min(b), a.max(b)]) {
-            Some(&j) => emap[i] = j,
-            None => {
-                bad_edges += 1;
-                if bad_edges <= MAX_LISTED {
-                    out.push(Mismatch::new(
-                        NAME,
-                        format!("{what}.edges[{i}]"),
-                        format!("frap edge {:?} has no blender counterpart", e),
-                    ));
+        let (a, b) = (
+            vmap.get(e[0] as usize).map_or(u32::MAX, |j| *j as u32),
+            vmap.get(e[1] as usize).map_or(u32::MAX, |j| *j as u32),
+        );
+        let key = [a.min(b), a.max(b)];
+        let msg = match bedge.get_mut(&key) {
+            Some(free) => match free.pop() {
+                Some(j) => {
+                    emap[i] = j;
+                    continue;
                 }
-            }
+                None => format!("frap edge {e:?} duplicates an edge already matched"),
+            },
+            None => format!("frap edge {e:?} has no blender counterpart"),
+        };
+        bad_edges += 1;
+        if bad_edges <= MAX_LISTED {
+            out.push(Mismatch::new(NAME, format!("{what}.edges[{i}]"), msg));
+        }
+    }
+    let mut left: Vec<usize> = bedge.into_values().flatten().collect();
+    left.sort_unstable();
+    for j in left {
+        bad_edges += 1;
+        if bad_edges <= MAX_LISTED {
+            out.push(Mismatch::new(
+                NAME,
+                format!("{what}.edges"),
+                format!(
+                    "blender edge {j} {:?} has no frap counterpart",
+                    blender.edges[j]
+                ),
+            ));
         }
     }
 
@@ -563,6 +585,9 @@ pub(crate) mod tests {
             Box::new(|m| m.positions[5][2] = 0.5),
             Box::new(|m| m.positions[5][2] += 5e-5),
             Box::new(|m| m.faces[0].reverse()),
+            // A duplicated edge in place of another (counts unchanged).
+            Box::new(|m| m.edges[3] = m.edges[7]),
+            Box::new(|m| m.edges[3] = [m.edges[7][1], m.edges[7][0]]),
             Box::new(|m| m.corner_normals[7][1] = 0.3),
             Box::new(|m| m.uv_layers.get_mut("UVMap").unwrap()[3][0] = 0.9),
             Box::new(|m| {

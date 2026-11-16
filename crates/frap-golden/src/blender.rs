@@ -102,6 +102,10 @@ impl Repo {
     pub fn roundtrip_allow_list(&self) -> PathBuf {
         self.root.join("tests/data/gltf-roundtrip/allow.toml")
     }
+    /// `crates/frap-golden/rna_fallbacks.txt` ([`crate::runner::FallbackAllowList`]).
+    pub fn rna_fallback_allow_list(&self) -> PathBuf {
+        self.root.join(crate::runner::ALLOW_LIST_NAME)
+    }
     /// Every case (sorted), optionally filtered by a glob over the case id.
     pub fn cases(&self, filter: Option<&str>) -> Result<Vec<Case>, HarnessError> {
         let root = self.cases_dir();
@@ -178,7 +182,7 @@ pub enum Live {
     Off,
     /// Re-run Blender with this binary.
     Run(PathBuf),
-    /// Live mode was asked for but cannot run (the reason is printed as a visible notice).
+    /// Live mode was asked for but cannot run (the live test fails with this reason).
     Skip(String),
 }
 
@@ -190,8 +194,8 @@ pub fn live_decision(env_live: Option<&OsStr>, blender: Option<PathBuf>) -> Live
             Some(b) => Live::Run(b),
             None => Live::Skip(format!(
                 "{LIVE_ENV} is set but Blender 5.2 was not found (set {BLENDER_ENV}, put \
-                 `blender` on PATH, or install ~/{MACOS_DEFAULT}); live golden tests skipped, \
-                 fixture comparisons still run"
+                 `blender` on PATH, or install ~/{MACOS_DEFAULT}); live golden tests cannot run \
+                 (fixture comparisons are unaffected)"
             )),
         },
     }

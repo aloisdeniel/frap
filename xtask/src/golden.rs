@@ -77,6 +77,7 @@ fn plan(args: &[String]) -> Result<Plan, String> {
                     "--test",
                     "golden",
                     "--",
+                    "--include-ignored",
                     "--nocapture",
                 ]
                 .iter()
@@ -134,6 +135,7 @@ mod tests {
         );
         let p = plan(&s(&["live", "--filter", "x/**"])).unwrap();
         assert_eq!(p.cargo_args[0], "test");
+        assert!(p.cargo_args.contains(&"--include-ignored".to_owned()));
         assert!(p.env.contains(&("FRAP_GOLDEN_LIVE".into(), "1".into())));
         assert!(
             p.env

@@ -4,9 +4,14 @@
 //! The dump reads every property of `props.toml` with ordinary statements executed by the
 //! session (`bpy.data.objects['Cube'].matrix_world`, `….vertices.foreach_get('co')`), exactly
 //! as an agent would, so the golden suite tests the RNA layer and its hooks too. A datablock
-//! whose RNA read fails (a binding that has not landed yet) is dumped natively from `Main`
-//! instead, and the fallback is recorded in [`FrapRun::rna_fallbacks`]; with
-//! [`RunOptions::strict_rna`] (env `FRAP_GOLDEN_STRICT_RNA=1`) a fallback is an error.
+//! whose RNA read fails *because the binding has not landed yet* (`RNA_NO_ATTRIBUTE`,
+//! `NOT_IMPLEMENTED`, `RNA_NOT_IMPLEMENTED`) is dumped natively from `Main` instead, and the
+//! fallback is recorded in [`FrapRun::rna_fallbacks`]. Any other read failure (another error
+//! code, a value of the wrong shape, a panic) is an RNA defect and fails the case: the native
+//! dump never hides it. [`check_against_fixture`] also fails a case whose fallbacks are not in
+//! the committed allow-list (`crates/frap-golden/rna_fallbacks.txt`, a ratchet: entries are
+//! only ever removed); with [`RunOptions::strict_rna`] (env `FRAP_GOLDEN_STRICT_RNA=1`) every
+//! fallback is an error.
 //!
 //! [`compare`] dispatches a case's `compare=` items to the comparators, and
 //! [`check_against_fixture`] is the whole fixture test of one case.
@@ -154,6 +159,124 @@ pub struct FrapRun {
     pub state: GoldenState,
     /// Datablocks read natively because an RNA read failed, with the first failing read.
     pub rna_fallbacks: Vec<String>,
+}
+
+/// Error codes meaning "this property is not bound in frap yet": the only read failures the
+/// dumper answers with a native fallback.
+pub const UNBOUND_CODES: [&str; 3] = ["RNA_NO_ATTRIBUTE", "NOT_IMPLEMENTED", "RNA_NOT_IMPLEMENTED"];
+
+/// The committed allow-list of expected RNA fallbacks (`crates/frap-golden/rna_fallbacks.txt`):
+/// one `<case id> <datablock key>` per line (`harness/factory objects["Cube"]`), `#` comments.
+/// A fallback that is not listed fails its case, so new fallbacks cannot creep in; entries
+/// whose binding has landed are stale and should be deleted (the fixture test lists them).
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct FallbackAllowList {
+    /// `(case id, datablock key)`.
+    pub entries: std::collections::BTreeSet<(String, String)>,
+}
+
+impl FallbackAllowList {
+    /// Parses the allow-list text.
+    pub fn parse(text: &str) -> Result<FallbackAllowList, String> {
+        let mut entries = std::collections::BTreeSet::new();
+        for (i, raw) in text.lines().enumerate() {
+            let l = raw.trim();
+            if l.is_empty() || l.starts_with('#') {
+                continue;
+            }
+            let (case, key) = l
+                .split_once(char::is_whitespace)
+                .ok_or_else(|| format!("line {}: expected `<case id> <key>`", i + 1))?;
+            entries.insert((case.to_owned(), key.trim().to_owned()));
+        }
+        Ok(FallbackAllowList { entries })
+    }
+
+    /// Loads `repo`'s allow-list (missing file: empty list).
+    pub fn load(repo: &Repo) -> Result<FallbackAllowList, HarnessError> {
+        let p = repo.rna_fallback_allow_list();
+        match std::fs::read_to_string(&p) {
+            Ok(t) => FallbackAllowList::parse(&t.replace("\r\n", "\n"))
+                .map_err(|e| HarnessError::Io(format!("{}: {e}", p.display()))),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(FallbackAllowList::default()),
+            Err(e) => Err(HarnessError::Io(format!("{}: {e}", p.display()))),
+        }
+    }
+
+    /// True when `fallback` (as recorded in [`FrapRun::rna_fallbacks`]) is allowed for `case`.
+    pub fn allows(&self, case: &str, fallback: &str) -> bool {
+        self.entries
+            .contains(&(case.to_owned(), fallback_key(fallback).to_owned()))
+    }
+
+    /// The error of a case whose `fallbacks` are not all listed, `None` when they are.
+    pub fn check(&self, case: &str, fallbacks: &[String]) -> Option<String> {
+        let new: Vec<&str> = fallbacks
+            .iter()
+            .filter(|f| !self.allows(case, f))
+            .map(String::as_str)
+            .collect();
+        (!new.is_empty()).then(|| {
+            format!(
+                "RNA fallbacks not in {ALLOW_LIST_NAME} (bind the property; only if it really \
+                 is not bound yet, add `{case} <key>`):\n    {}",
+                new.join("\n    ")
+            )
+        })
+    }
+
+    /// Entries no report used (their binding landed: delete them). Only meaningful when
+    /// `reports` covers every case.
+    pub fn stale(&self, reports: &[CaseReport]) -> Vec<String> {
+        self.entries
+            .iter()
+            .filter(|(case, key)| {
+                !reports.iter().any(|r| {
+                    &r.case == case && r.rna_fallbacks.iter().any(|f| fallback_key(f) == key)
+                })
+            })
+            .map(|(c, k)| format!("{c} {k}"))
+            .collect()
+    }
+}
+
+/// The datablock key of a recorded fallback (`objects["Cube"]: why` -> `objects["Cube"]`).
+pub fn fallback_key(fallback: &str) -> &str {
+    fallback.split_once(": ").map_or(fallback, |(k, _)| k)
+}
+
+/// Why an RNA read of the dumper failed.
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum ReadErr {
+    /// The property is not bound in frap yet: native fallback.
+    Unbound(String),
+    /// Anything else: the case fails.
+    Defect(String),
+    /// The read panicked (the session is not trusted afterwards): the case fails.
+    Panicked(String),
+}
+
+impl From<String> for ReadErr {
+    fn from(s: String) -> ReadErr {
+        ReadErr::Defect(s)
+    }
+}
+
+impl From<&str> for ReadErr {
+    fn from(s: &str) -> ReadErr {
+        ReadErr::Defect(s.to_owned())
+    }
+}
+
+/// The reason of an `Unbound` failure; a `Defect` fails the case with `key`.
+fn unbound(case: &Case, key: &str, e: ReadErr) -> Result<String, HarnessError> {
+    match e {
+        ReadErr::Unbound(why) => Ok(why),
+        ReadErr::Defect(why) | ReadErr::Panicked(why) => Err(HarnessError::Frap(format!(
+            "{}: {key}: RNA read failed with an RNA defect (no native fallback for this): {why}",
+            case.id()
+        ))),
+    }
 }
 
 /// Python string literal.
@@ -660,10 +783,10 @@ struct Dumper<'a> {
 
 impl Dumper<'_> {
     /// Runs one read statement; the value of a FINISHED response.
-    fn read(&mut self, expr: &str) -> Result<J, String> {
+    fn read(&mut self, expr: &str) -> Result<J, ReadErr> {
         let session = &mut self.session;
         let out = catch_unwind(AssertUnwindSafe(|| session.exec_source(expr)))
-            .map_err(|_| format!("{expr}: panicked"))?;
+            .map_err(|_| ReadErr::Panicked(format!("{expr}: panicked")))?;
         let [r]: [Response; 1] = out
             .try_into()
             .map_err(|v: Vec<Response>| format!("{expr}: {} responses", v.len()))?;
@@ -671,30 +794,42 @@ impl Dumper<'_> {
             self.context = Some(c.clone());
         }
         if r.ok() {
-            r.value.ok_or_else(|| format!("{expr}: no value"))
+            Ok(r.value.ok_or_else(|| format!("{expr}: no value"))?)
         } else {
             let e = r.error.as_ref();
-            Err(format!(
-                "{expr}: {} {}",
-                e.map_or("CANCELLED", |e| e.code.0),
-                e.map_or("", |e| e.message.as_str())
-            ))
+            let code = e.map_or("CANCELLED", |e| e.code.0);
+            let msg = format!("{expr}: {code} {}", e.map_or("", |e| e.message.as_str()));
+            Err(if UNBOUND_CODES.contains(&code) {
+                ReadErr::Unbound(msg)
+            } else {
+                ReadErr::Defect(msg)
+            })
         }
     }
 
     /// `coll/prop` relative to `base`: one value per item (bulk `foreach_get` first, item by
     /// item otherwise).
-    fn read_items(&mut self, base: &str, path: &str) -> Result<Vec<J>, String> {
+    fn read_items(&mut self, base: &str, path: &str) -> Result<Vec<J>, ReadErr> {
         let (coll, prop) = path.split_once('/').ok_or("not a coll/prop path")?;
         let prop = prop.replace('/', ".");
         let coll_path = format!("{base}.{}", coll.replace('/', "."));
         let n = coll_len(&self.read(&coll_path)?)?;
-        if !prop.contains('.')
-            && let Ok(v) = self.read(&format!("{coll_path}.foreach_get({})", py_str(&prop)))
-            && let Ok(items) = bulk_items(&v)
-            && items.len() == n
-        {
-            return Ok(items);
+        if !prop.contains('.') {
+            let expr = format!("{coll_path}.foreach_get({})", py_str(&prop));
+            // Bulk access is only a shortcut: when it is refused (not bound, or a
+            // variable-length property such as `polygons/vertices`) or gives another shape, the
+            // items are still read through RNA one by one. A panic is never a shortcut miss.
+            match self.read(&expr) {
+                Ok(v) => {
+                    if let Ok(items) = bulk_items(&v)
+                        && items.len() == n
+                    {
+                        return Ok(items);
+                    }
+                }
+                Err(e @ ReadErr::Panicked(_)) => return Err(e),
+                Err(_) => {}
+            }
         }
         (0..n)
             .map(|i| self.read(&format!("{coll_path}[{i}].{prop}")))
@@ -705,7 +840,7 @@ impl Dumper<'_> {
         self.fallbacks.push(what);
     }
 
-    fn rna_object(&mut self, name: &str) -> Result<GObject, String> {
+    fn rna_object(&mut self, name: &str) -> Result<GObject, ReadErr> {
         let p = &self.props.object;
         let (ty, parent, mw, loc, rm, scale, mode, mods, mats, rot) = (
             p.r#type.clone(),
@@ -766,7 +901,7 @@ impl Dumper<'_> {
         })
     }
 
-    fn rna_mesh(&mut self, base: &str) -> Result<GMesh, String> {
+    fn rna_mesh(&mut self, base: &str) -> Result<GMesh, ReadErr> {
         let p = self.props.mesh.clone();
         let to = |v: Vec<J>, n: usize| -> Result<Vec<Vec<f32>>, String> {
             v.iter()
@@ -845,7 +980,7 @@ impl Dumper<'_> {
         })
     }
 
-    fn rna_context(&mut self) -> Result<GContext, String> {
+    fn rna_context(&mut self) -> Result<GContext, ReadErr> {
         let p = self.props.context.clone();
         let active = ref_name(&self.read(&format!("bpy.context.{}", p.active))?)?;
         let sel = self.read(&format!("bpy.context.{}", p.selected))?;
@@ -904,7 +1039,7 @@ impl Dumper<'_> {
         }
     }
 
-    fn rna_material(&mut self, name: &str) -> Result<GMaterial, String> {
+    fn rna_material(&mut self, name: &str) -> Result<GMaterial, ReadErr> {
         let p = self.props.material.clone();
         let base = data_path("materials", name);
         let nodes_path = format!("{base}.{}", p.nodes);
@@ -930,7 +1065,7 @@ impl Dumper<'_> {
                         inputs.insert(id, v);
                     }
                     // Sockets without a value (shader, geometry) have no attribute.
-                    Err(e) if e.contains("NO_ATTRIBUTE") => {}
+                    Err(ReadErr::Unbound(e)) if e.contains("NO_ATTRIBUTE") => {}
                     Err(e) => return Err(e),
                 }
             }
@@ -1007,8 +1142,10 @@ pub fn run_frap(case: &Case, props: &Props, opts: &RunOptions) -> Result<FrapRun
     for name in object_names {
         let o = match d.rna_object(&name) {
             Ok(o) => o,
-            Err(why) => {
-                d.fallback(format!("objects[{name:?}]: {why}"));
+            Err(e) => {
+                let key = format!("objects[{name:?}]");
+                let why = unbound(case, &key, e)?;
+                d.fallback(format!("{key}: {why}"));
                 let main = d.session.main();
                 let r = main.objects.find(&name).expect("invariant: listed object");
                 native_object(
@@ -1039,8 +1176,10 @@ pub fn run_frap(case: &Case, props: &Props, opts: &RunOptions) -> Result<FrapRun
                 };
                 let m = match d.rna_mesh(&data_path("meshes", name)) {
                     Ok(m) => m,
-                    Err(why) => {
-                        d.fallback(format!("meshes[{name:?}]: {why}"));
+                    Err(e) => {
+                        let key = format!("meshes[{name:?}]");
+                        let why = unbound(case, &key, e)?;
+                        d.fallback(format!("{key}: {why}"));
                         native_mesh(d.session.main().meshes.get(r).expect("invariant: found"))
                     }
                 };
@@ -1056,7 +1195,8 @@ pub fn run_frap(case: &Case, props: &Props, opts: &RunOptions) -> Result<FrapRun
                 );
                 let m = match d.rna_mesh(&base) {
                     Ok(m) => m,
-                    Err(why) => {
+                    Err(e) => {
+                        let why = unbound(case, &format!("evaluated[{name:?}]"), e)?;
                         let main = d.session.main();
                         let ob = main.objects.get(r).expect("invariant: found");
                         if !ob.modifiers.is_empty() {
@@ -1091,8 +1231,10 @@ pub fn run_frap(case: &Case, props: &Props, opts: &RunOptions) -> Result<FrapRun
                 for name in names {
                     let m = match d.rna_material(&name) {
                         Ok(m) => m,
-                        Err(why) => {
-                            d.fallback(format!("materials[{name:?}]: {why}"));
+                        Err(e) => {
+                            let key = format!("materials[{name:?}]");
+                            let why = unbound(case, &key, e)?;
+                            d.fallback(format!("{key}: {why}"));
                             native_material(d.session.main(), &name)
                                 .expect("invariant: listed material")
                         }
@@ -1134,11 +1276,26 @@ pub fn run_frap(case: &Case, props: &Props, opts: &RunOptions) -> Result<FrapRun
     }
     state.context = match d.rna_context() {
         Ok(c) => c,
-        Err(why) => {
+        Err(e) => {
+            let why = unbound(case, "context", e)?;
             d.fallback(format!("context: {why}"));
             d.native_context()
         }
     };
+    // The frap side does not dump edit-mode selection / active / select history yet (M2
+    // edit-mode WP): such a comparison could only fail, so the case is rejected up front.
+    if state.context.mode == "EDIT_MESH"
+        && case
+            .compare
+            .iter()
+            .any(|c| matches!(c, CompareSpec::Mesh(_)))
+    {
+        return Err(HarnessError::Frap(format!(
+            "{}: `mesh:` compare of a case that ends in Edit Mode: the frap dump of edit-mode \
+             selection arrives with M2 (end the case in Object Mode)",
+            case.id()
+        )));
+    }
     if opts.strict_rna && !d.fallbacks.is_empty() {
         return Err(HarnessError::Frap(format!(
             "{}: RNA fallbacks with {STRICT_RNA_ENV}=1:\n  {}",
@@ -1315,6 +1472,9 @@ pub fn compare(case: &Case, frap: &GoldenState, blender: &GoldenState) -> Vec<Mi
     out
 }
 
+/// Repository-relative path of [`FallbackAllowList`].
+pub const ALLOW_LIST_NAME: &str = "crates/frap-golden/rna_fallbacks.txt";
+
 /// Outcome of checking one case against its fixture.
 #[derive(Clone, Debug)]
 pub struct CaseReport {
@@ -1385,6 +1545,10 @@ pub fn check_against_fixture(
     match run {
         Ok(run) => {
             rep.rna_fallbacks = run.rna_fallbacks;
+            match FallbackAllowList::load(repo) {
+                Ok(allow) => rep.error = allow.check(&rep.case, &rep.rna_fallbacks),
+                Err(e) => rep.error = Some(e.to_string()),
+            }
             if let Some(b) = fixture {
                 rep.mismatches = compare(case, &run.state, &b);
             }
@@ -1457,6 +1621,91 @@ mod tests {
             coll_items(&json!({"$coll": "x", "len": 2, "items": ["A", "B"]})).unwrap(),
             vec!["A", "B"]
         );
+    }
+
+    #[test]
+    fn fallback_allow_list() {
+        let a = FallbackAllowList::parse(
+            "# comment\n\nharness/factory objects[\"Cube\"]\nharness/factory context\n",
+        )
+        .unwrap();
+        assert_eq!(a.entries.len(), 2);
+        assert!(FallbackAllowList::parse("lonely").is_err());
+        let f = |s: &str| s.to_owned();
+        assert_eq!(fallback_key("objects[\"Cube\"]: x: y"), "objects[\"Cube\"]");
+        assert!(a.allows("harness/factory", "context: NOT_IMPLEMENTED …"));
+        assert!(!a.allows("harness/errors", "context: NOT_IMPLEMENTED …"));
+        assert_eq!(
+            a.check(
+                "harness/factory",
+                &[f("objects[\"Cube\"]: RNA_NO_ATTRIBUTE …")]
+            ),
+            None
+        );
+        // A new fallback fails the case, naming it.
+        let e = a
+            .check(
+                "harness/factory",
+                &[
+                    f("objects[\"Cube\"]: …"),
+                    f("meshes[\"Cube\"]: RNA_NO_ATTRIBUTE …"),
+                ],
+            )
+            .unwrap();
+        assert!(
+            e.contains("meshes[\"Cube\"]") && !e.contains("objects"),
+            "{e}"
+        );
+        // Stale entries: listed, but no report fell back on them.
+        let rep = CaseReport {
+            case: "harness/factory".into(),
+            mismatches: vec![],
+            rna_fallbacks: vec![f("context: …")],
+            error: None,
+            unblessed: false,
+        };
+        assert_eq!(a.stale(&[rep]), vec!["harness/factory objects[\"Cube\"]"]);
+        // The committed list parses and only names existing cases.
+        let repo = Repo::locate();
+        let committed = FallbackAllowList::load(&repo).unwrap();
+        let ids: Vec<String> = repo.cases(None).unwrap().iter().map(Case::id).collect();
+        for (case, _) in &committed.entries {
+            assert!(ids.contains(case), "{ALLOW_LIST_NAME}: unknown case {case}");
+        }
+    }
+
+    /// Only "not bound yet" read failures fall back to the native dump; any other error, a
+    /// value of the wrong shape or a panic fails the case.
+    #[test]
+    fn only_unbound_reads_fall_back() {
+        let props = Props::load(&Repo::locate().props_path()).unwrap();
+        let mut so = SessionOptions::default();
+        so.startup = frap_session::Startup::Factory;
+        let mut d = Dumper {
+            session: Session::new(so).unwrap(),
+            props: &props,
+            fallbacks: Vec::new(),
+            context: None,
+        };
+        let case = Case::parse(Path::new("y.py"), "# golden: tier=T0\nbpy.data\n").unwrap();
+        // Not bound: fallback.
+        let e = d
+            .read("bpy.data.objects['Cube'].no_such_property")
+            .unwrap_err();
+        assert!(matches!(e, ReadErr::Unbound(_)), "{e:?}");
+        assert!(unbound(&case, "objects[\"Cube\"]", e).is_ok());
+        // Another error: a defect.
+        let e = d.read("bpy.data.objects['No such object']").unwrap_err();
+        assert!(matches!(e, ReadErr::Defect(_)), "{e:?}");
+        let err = unbound(&case, "objects[\"Cube\"]", e)
+            .unwrap_err()
+            .to_string();
+        assert!(err.contains("RNA defect"), "{err}");
+        // A wrong value shape is a defect too.
+        let e: ReadErr = fixed::<3>(&json!([1, 2])).unwrap_err().into();
+        assert!(unbound(&case, "objects[\"Cube\"]", e).is_err());
+        assert!(unbound(&case, "context", ReadErr::Panicked("p".into())).is_err());
+        assert!(UNBOUND_CODES.contains(&"RNA_NOT_IMPLEMENTED"));
     }
 
     #[test]
