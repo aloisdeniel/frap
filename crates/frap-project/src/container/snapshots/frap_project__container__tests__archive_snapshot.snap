@@ -1,0 +1,64 @@
+---
+source: crates/frap-project/src/container/tests.rs
+expression: "format!(\"{out}\\n--- manifest.json\\n{manifest}--- scene.json\\n{scene}\")"
+---
+size 1438
+sha256 f3301ff0b626fbbdb643448b2b020b47a361a01881ab353820b08d1536373148
+mimetype Stored size=24 compressed=24 crc32=a4b825c6
+manifest.json Deflated size=321 compressed=199 crc32=ddf27f36
+scene.json Deflated size=593 compressed=316 crc32=0ba5a8d7
+buffers/f24cd5d0884e7c08bb6f74ae75aa874b.bin Deflated size=1200 compressed=237 crc32=b2852f99
+images/2b8a69045db9b9857e3ad84188129f31.png Stored size=24 compressed=24 crc32=43358a3b
+
+--- manifest.json
+{
+  "format": "frap",
+  "schema_version": 1,
+  "blender_api": "5.2",
+  "generator": "frap <pinned>",
+  "buffers": [
+    {
+      "hash": "f24cd5d0884e7c08bb6f74ae75aa874b",
+      "size": 1200
+    }
+  ],
+  "images": [
+    {
+      "hash": "2b8a69045db9b9857e3ad84188129f31",
+      "ext": "png",
+      "size": 24
+    }
+  ]
+}
+--- scene.json
+{
+  "window": {
+    "scene": "Scene",
+    "view_layer": "ViewLayer"
+  },
+  "images": {
+    "Tex": {
+      "packed_file": {
+        "$img": "2b8a69045db9b9857e3ad84188129f31",
+        "ext": "png"
+      }
+    }
+  },
+  "meshes": {
+    "Cube": {
+      "face_offsets": [0, 4, 8, 12, 16, 20, 24],
+      "attributes": [
+        {
+          "name": "position",
+          "domain": "POINT",
+          "data_type": "FLOAT_VECTOR",
+          "data": {
+            "$buf": "f24cd5d0884e7c08bb6f74ae75aa874b",
+            "dtype": "f32x3",
+            "len": 100
+          }
+        }
+      ]
+    }
+  }
+}
