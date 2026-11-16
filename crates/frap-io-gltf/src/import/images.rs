@@ -147,7 +147,8 @@ fn create_from_file(
         .file_name()
         .map(|n| n.to_string_lossy().into_owned())
         .unwrap_or_default();
-    let img_name = pyimg.name.clone().unwrap_or(basename);
+    // `img.name or basename(path)`
+    let img_name = super::truthy_name(&pyimg.name).unwrap_or(basename);
     let declared_mime = pyimg.mime_type.clone();
     match std::fs::read(&abs) {
         Ok(bytes) => {
@@ -212,7 +213,8 @@ fn create_from_data(
     } else {
         return Ok(None);
     };
-    let name = pyimg.name.clone().unwrap_or_else(|| format!("Image_{idx}"));
+    // `gltf.data.images[img_idx].name or 'Image_%d'`
+    let name = super::truthy_name(&pyimg.name).unwrap_or_else(|| format!("Image_{idx}"));
     let mut img = Image::new("", 8, 8);
     img.source = "FILE".into();
     set_file_metadata(&mut img, &bytes);

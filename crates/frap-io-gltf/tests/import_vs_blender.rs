@@ -13,19 +13,21 @@
 //!
 //! Compared: scenes (collection tree, view layers, base order, selection, active object,
 //! layer-collection exclusion), `bpy.data` order and names of every collection, objects
-//! (type, data, parent, transform, empty size, material slots, collections), meshes
-//! (positions, edges, faces, corner normals, normals domain, UV maps, every non-internal
-//! attribute with its values, material slots), materials (non-node properties), images,
-//! cameras and lights. Material node graphs are compared by `material_graphs_match_blender`,
+//! (type, data, parent, transform incl. `rotation_euler` and `matrix_parent_inverse`, empty
+//! size, material slot links and materials, collections), meshes (positions, edges, faces,
+//! corner normals, normals domain, UV maps, every non-internal attribute with its values,
+//! material slots), materials (non-node properties), images (incl. `filepath` relative to the
+//! source), cameras (incl. sensor and shift) and lights (incl. shadow), plus the custom
+//! properties (glTF extras) of every one of these IDs. Material node graphs are compared by `material_graphs_match_blender`,
 //! which needs WP 1.11's `raise`.
 
 use std::path::{Path, PathBuf};
 
 use frap_io_gltf::import::{ImportSettings, import_file};
 use frap_mesh::{AttrData, Mesh};
-use frap_rna::{IdAny, IdCode, IdRef, ObjectId};
+use frap_rna::{IdAny, IdCode, IdHeader, IdProp, IdRef, ObjectId};
 use frap_scene::generated::plain::View3DShading;
-use frap_scene::id::{Collection, Scene};
+use frap_scene::id::{Collection, Scene, SlotLink};
 use frap_scene::{
     ChangeLog, LayerCollection, LayerCollectionPath, Main, ViewLayer, VirtualView3D, WindowState,
 };
@@ -78,6 +80,53 @@ fn f(x: f32) -> J {
 }
 fn fv(v: &[f32]) -> J {
     J::Array(v.iter().map(|&x| f(x)).collect())
+}
+
+/// An ID property as `make_gltf_fixtures.py`'s `idprop` writes it.
+fn idprop(p: &IdProp) -> J {
+    match p {
+        IdProp::Int(i) => json!(i),
+        IdProp::Float(x) => json!(x),
+        IdProp::Bool(b) => json!(b),
+        IdProp::Str(s) => json!(s.as_str()),
+        IdProp::IntArray(v) => json!(v),
+        IdProp::FloatArray(v) => json!(v),
+        IdProp::Group(g) => J::Object(g.iter().map(|(k, v)| (k.to_string(), idprop(v))).collect()),
+        IdProp::List(v) => J::Array(v.iter().map(idprop).collect()),
+        other => panic!("unexpected ID property {other:?}"),
+    }
+}
+
+/// `ID.keys()` with their values.
+fn custom(h: &IdHeader) -> J {
+    J::Object(
+        h.custom
+            .iter()
+            .map(|(k, v)| (k.to_string(), idprop(v)))
+            .collect(),
+    )
+}
+
+/// Matrix rows, as `[list(row) for row in matrix]` reads them (glam is column-major).
+fn matrix_rows(m: &frap_math::glam::Mat4) -> J {
+    J::Array((0..4).map(|r| fv(&m.row(r).to_array())).collect())
+}
+
+/// `Image.filepath` relative to the imported file's directory ("" when unset).
+fn image_path(filepath: &str, source: &Path) -> String {
+    if filepath.is_empty() {
+        return String::new();
+    }
+    let base = source
+        .parent()
+        .and_then(|d| d.canonicalize().ok())
+        .unwrap_or_default();
+    let abs = Path::new(filepath)
+        .canonicalize()
+        .unwrap_or_else(|_| PathBuf::from(filepath));
+    abs.strip_prefix(&base)
+        .map(|r| r.to_string_lossy().replace('\\', "/"))
+        .unwrap_or_else(|_| filepath.to_owned())
 }
 
 fn name_of(main: &Main, id: Option<IdAny>) -> J {
@@ -183,10 +232,11 @@ fn mesh_json(main: &Main, me: &Mesh) -> J {
         "attribute_names": me.attributes().iter().map(|a| json!(a.name.as_str())).collect::<Vec<_>>(),
         "attributes": attributes,
         "materials": me.materials.iter().map(|m| name_of(main, m.map(|m| m.any()))).collect::<Vec<_>>(),
+        "custom": custom(&me.header),
     })
 }
 
-fn frap_state(main: &Main, win: &WindowState) -> J {
+fn frap_state(main: &Main, win: &WindowState, source: &Path) -> J {
     let scenes: Vec<J> = main
         .scenes
         .iter()
@@ -194,6 +244,7 @@ fn frap_state(main: &Main, win: &WindowState) -> J {
             let (objects, children) = collection_json(main, &sc.collection);
             json!({
                 "name": sc.header.name.as_str(),
+                "custom": custom(&sc.header),
                 "collection": {"objects": objects, "children": children},
                 "view_layers": sc.view_layers.iter().map(|vl| json!({
                     "name": vl.name.as_str(),
@@ -217,6 +268,8 @@ fn frap_state(main: &Main, win: &WindowState) -> J {
         .objects
         .iter()
         .map(|(r, ob)| {
+            // `MaterialSlot.link` / `.material`: the data's list unless the slot's override
+            // links the object's own material.
             let slots: Vec<J> = match ob.data {
                 Some(d) if d.code == IdCode::ME => main
                     .meshes
@@ -224,7 +277,13 @@ fn frap_state(main: &Main, win: &WindowState) -> J {
                     .map(|me| {
                         me.materials
                             .iter()
-                            .map(|m| json!(["DATA", name_of(main, m.map(|m| m.any()))]))
+                            .enumerate()
+                            .map(|(i, m)| match ob.material_slot_overrides.get(i) {
+                                Some(o) if o.link == SlotLink::Object => {
+                                    json!(["OBJECT", name_of(main, o.material.map(|m| m.any()))])
+                                }
+                                _ => json!(["DATA", name_of(main, m.map(|m| m.any()))]),
+                            })
                             .collect()
                     })
                     .unwrap_or_default(),
@@ -250,10 +309,13 @@ fn frap_state(main: &Main, win: &WindowState) -> J {
                 "location": fv(&ob.location),
                 "rotation_mode": ob.rotation_mode.as_str(),
                 "rotation_quaternion": fv(&ob.rotation_quaternion),
+                "rotation_euler": fv(&ob.rotation_euler),
                 "scale": fv(&ob.scale),
+                "matrix_parent_inverse": matrix_rows(&ob.matrix_parent_inverse),
                 "empty_display_size": f(ob.empty_display_size),
                 "material_slots": slots,
                 "users_collection": users,
+                "custom": custom(&ob.header),
             })
         })
         .collect();
@@ -302,6 +364,7 @@ fn frap_state(main: &Main, win: &WindowState) -> J {
                 "diffuse_color": fv(&m.diffuse_color),
                 "metallic": f(m.metallic),
                 "roughness": f(m.roughness),
+                "custom": custom(&m.header),
                 "nodes": nodes,
                 "links": links,
             })
@@ -313,6 +376,8 @@ fn frap_state(main: &Main, win: &WindowState) -> J {
         .map(|(_, im)| {
             json!({
                 "name": im.header.name.as_str(),
+                "filepath": image_path(&im.filepath, source),
+                "custom": custom(&im.header),
                 "source": im.source.as_str(),
                 "alpha_mode": im.alpha_mode.as_str(),
                 "packed": im.packed_file.is_some(),
@@ -335,6 +400,11 @@ fn frap_state(main: &Main, win: &WindowState) -> J {
                 "ortho_scale": f(fl.ortho_scale),
                 "clip_start": f(fl.clip_start),
                 "clip_end": f(fl.clip_end),
+                "sensor_width": f(fl.sensor_width),
+                "sensor_height": f(fl.sensor_height),
+                "shift_x": f(fl.shift_x),
+                "shift_y": f(fl.shift_y),
+                "custom": custom(&c.header),
             })
         })
         .collect();
@@ -347,6 +417,9 @@ fn frap_state(main: &Main, win: &WindowState) -> J {
                 "type": l.r#type.as_str(),
                 "energy": f(l.fields.energy),
                 "color": fv(&l.fields.color),
+                "use_shadow": l.fields.use_shadow,
+                "shadow_soft_size": f(l.fields.shadow_soft_size),
+                "custom": custom(&l.header),
             });
             if l.r#type == "SPOT" {
                 j["spot_size"] = f(l.fields.spot_size);
@@ -455,8 +528,12 @@ fn short(v: &J) -> String {
 }
 
 /// Imports the dump's source with its settings into an empty state.
+fn source_of(dump: &J) -> PathBuf {
+    repo().join(dump["source"].as_str().unwrap())
+}
+
 fn run_case(dump: &J) -> (Main, WindowState, frap_io_gltf::import::ImportReport) {
-    let src = repo().join(dump["source"].as_str().unwrap());
+    let src = source_of(dump);
     let mut settings = ImportSettings::default();
     for (k, v) in dump["settings"].as_object().unwrap() {
         assert!(settings.set(k, v), "unknown setting {k}={v}");
@@ -478,7 +555,7 @@ fn import_matches_blender_dumps() {
     for p in &all {
         let dump: J = serde_json::from_str(&std::fs::read_to_string(p).unwrap()).unwrap();
         let (main, win, _report) = run_case(&dump);
-        let mut state = frap_state(&main, &win);
+        let mut state = frap_state(&main, &win, &source_of(&dump));
         // Only non-internal attribute names are compared (internal `.select_*` order is an
         // implementation detail of the RNA calls the add-on makes).
         for m in state["meshes"].as_array_mut().unwrap() {
@@ -574,7 +651,7 @@ fn material_graphs_match_blender() {
     for p in dumps() {
         let dump: J = serde_json::from_str(&std::fs::read_to_string(&p).unwrap()).unwrap();
         let (main, win, _) = run_case(&dump);
-        let state = frap_state(&main, &win);
+        let state = frap_state(&main, &win, &source_of(&dump));
         let mut out = Vec::new();
         let names = |v: &J| -> Vec<(String, J, J)> {
             v["materials"]

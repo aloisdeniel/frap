@@ -201,6 +201,13 @@ pub fn import_bytes(
     })
 }
 
+/// A glTF `name` as the add-on's falsy fallbacks see it (`name or default`, `if not name`):
+/// an empty string counts as no name. Lights (`'name' not in pylight`) and materials
+/// (`name is None`) test presence instead and keep `Some("")`.
+pub(crate) fn truthy_name(name: &Option<String>) -> Option<String> {
+    name.clone().filter(|n| !n.is_empty())
+}
+
 /// `glTFImporter.check_version`.
 fn check_version(doc: &Document) -> Result<(), ImportError> {
     let v = doc.asset.version.as_str();

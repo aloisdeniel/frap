@@ -38,11 +38,8 @@ pub(crate) fn create(
         .cameras
         .get(idx)
         .ok_or_else(|| ImportError::Data(format!("camera {idx} does not exist")))?;
-    let name = pycam
-        .name
-        .clone()
-        .filter(|n| !n.is_empty())
-        .unwrap_or_else(|| "Camera".into());
+    // `if not pycamera.name: pycamera.name = "Camera"`
+    let name = super::truthy_name(&pycam.name).unwrap_or_else(|| "Camera".into());
     let mut cam = Camera::new("");
     extras::set_extras(&mut cam.header, pycam.extras.as_ref(), &[]);
     let f = &mut cam.fields;

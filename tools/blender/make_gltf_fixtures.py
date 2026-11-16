@@ -32,11 +32,13 @@ Always pass `-t 8` (see `dump_primitives.py`: `mesh_calc_edges` partitions large
 thread count). Floats are the shortest decimal that round-trips the stored f32.
 """
 
+import base64
 import json
 import math
 import os
 import struct
 import sys
+import zlib
 
 import bpy
 
@@ -161,6 +163,65 @@ def fx_loose():
     link(bpy.data.objects.new("Loose", me))
 
 
+def png_1x1(rgba):
+    """A 1x1 RGBA PNG."""
+    def chunk(kind, data):
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+    ihdr = struct.pack(">IIBBBBB", 1, 1, 8, 6, 0, 0, 0)
+    return (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", ihdr) + chunk(b"IDAT", zlib.compress(b"\x00" + bytes(rgba)))
+            + chunk(b"IEND", b""))
+
+
+def gltf_empty_names():
+    """Hand-written glTF where every named element has `"name": ""` (valid glTF that some
+    third-party exporters write). The add-on's falsy fallbacks (`vnode.name or 'Node_%d'`,
+    `pymesh.name or 'Mesh_%d'`, `if not pycamera.name`, `scene.name or 'Scene %d'`, `img.name or
+    'Image_%d'`) treat "" as missing; lights (`'name' not in pylight`) and materials
+    (`name is None`) test presence instead."""
+    tri = struct.pack("<9f", 0, 0, 0, 1, 0, 0, 0, 1, 0)
+    b64 = "data:application/octet-stream;base64," + base64.b64encode(tri).decode("ascii")
+    png = "data:image/png;base64," + base64.b64encode(png_1x1((200, 30, 30, 255))).decode("ascii")
+    return {
+        "asset": {"version": "2.0", "generator": "frap tools/blender/make_gltf_fixtures.py"},
+        "extensionsUsed": ["KHR_lights_punctual"],
+        "extensions": {"KHR_lights_punctual": {"lights": [{"name": "", "type": "point", "intensity": 2.0,
+                                                               "extras": {"light_tag": [1.0, 2.0]}}]}},
+        "scene": 0,
+        "scenes": [{"name": "", "nodes": [0, 1, 2, 4], "extras": {"scene_tag": "default"}},
+                   {"name": "", "nodes": [5]}],
+        "nodes": [
+            {"name": "", "mesh": 0, "extras": {"text": "it's", "count": 3, "ratio": 0.25, "ints": [1, 2, 3],
+                                                "floats": [0.5, 1.5], "nested": {"flag": True, "list": [{"a": 1}]},
+                                                "huge": 12345678901234}},
+            {"name": "", "camera": 0, "translation": [0.0, 0.0, 5.0]},
+            {"name": "Named", "children": [3]},
+            {"name": "", "translation": [1.0, 0.0, 0.0]},
+            {"name": "", "extensions": {"KHR_lights_punctual": {"light": 0}}},
+            {"name": "", "mesh": 1, "translation": [0.0, 2.0, 0.0]},
+        ],
+        "meshes": [
+            {"name": "", "primitives": [{"attributes": {"POSITION": 0}, "material": 0}],
+             "extras": {"mesh_tag": "m", "targetNames": ["kept out"]}},
+            {"name": "", "primitives": [{"attributes": {"POSITION": 0}}]},
+        ],
+        "materials": [{"name": "", "pbrMetallicRoughness": {"baseColorTexture": {"index": 0}},
+                       "extras": {"mat_tag": 2.5}}],
+        "textures": [{"source": 0}],
+        "images": [{"name": "", "uri": png, "extras": {"img_tag": 1}}],
+        "cameras": [{"name": "", "type": "perspective", "extras": {"cam_tag": "c"},
+                     "perspective": {"yfov": 0.8, "znear": 0.1, "zfar": 100.0}}],
+        "buffers": [{"byteLength": len(tri), "uri": b64}],
+        "bufferViews": [{"buffer": 0, "byteLength": len(tri)}],
+        "accessors": [{"bufferView": 0, "componentType": 5126, "count": 3, "type": "VEC3",
+                       "min": [0.0, 0.0, 0.0], "max": [1.0, 1.0, 0.0]}],
+    }
+
+
+# Hand-written glTF fixtures: (name, builder returning the JSON document).
+GLTF_FIXTURES = [
+    ("empty_names", gltf_empty_names),
+]
+
 FIXTURES = [
     ("cube", fx_cube, {}),
     ("sphere_smooth", fx_sphere_smooth, {}),
@@ -178,8 +239,8 @@ FIXTURES = [
 FIXTURES_DIR = "tests/data/gltf-blender/fixtures"
 
 
-def fixture(name):
-    return "%s/%s.glb" % (FIXTURES_DIR, name)
+def fixture(name, ext="glb"):
+    return "%s/%s.%s" % (FIXTURES_DIR, name, ext)
 
 
 def sample(path):
@@ -204,8 +265,12 @@ CASES = [
     ("shared_mesh", fixture("shared_mesh"), {}),
     ("loose", fixture("loose"), {}),
     ("loose__merge", fixture("loose"), {"merge_vertices": True}),
+    ("empty_names", fixture("empty_names", "gltf"), {}),
     # Khronos subset (static content only: skins, morph targets and animations arrive in M6,
-    # instancing in M7).
+    # instancing in M7). Shape keys and actions are not dumped, so the animated/morph samples
+    # below compare their static content (rest pose, base mesh, quantized accessors). Deferred:
+    # SimpleSkin and RiggedSimple (skins, M6), SimpleInstancing (EXT_mesh_gpu_instancing, M7),
+    # AnimatedTriangle (Blender's object rotation is the evaluated animation at frame 1, M6).
     ("khr_box", sample("Box/glTF-Binary/Box.glb"), {}),
     ("khr_box_interleaved", sample("BoxInterleaved/glTF-Binary/BoxInterleaved.glb"), {}),
     ("khr_box_vertex_colors", sample("BoxVertexColors/glTF-Binary/BoxVertexColors.glb"), {}),
@@ -223,6 +288,10 @@ CASES = [
     ("khr_emissive_strength", sample("EmissiveStrengthTest/glTF-Binary/EmissiveStrengthTest.glb"), {}),
     ("khr_cameras", sample("Cameras/glTF-Embedded/Cameras.gltf"), {}),
     ("khr_point_light", sample("PointLightIntensityTest/glTF-Binary/PointLightIntensityTest.glb"), {}),
+    ("khr_interpolation_test", sample("InterpolationTest/glTF-Binary/InterpolationTest.glb"), {}),
+    ("khr_simple_morph", sample("SimpleMorph/glTF-Embedded/SimpleMorph.gltf"), {}),
+    ("khr_animated_morph_cube", sample("AnimatedMorphCube/glTF-Binary/AnimatedMorphCube.glb"), {}),
+    ("khr_animated_morph_cube_quantized", sample("AnimatedMorphCube/glTF-Quantized/AnimatedMorphCube.gltf"), {}),
 ]
 
 # --------------------------------------------------------------------------- dump
@@ -267,6 +336,26 @@ def attribute_data(a):
     return out
 
 
+def idprop(v):
+    """An ID property as JSON (doubles as Python floats: frap stores them as f64)."""
+    if hasattr(v, "to_dict"):
+        return {k: idprop(x) for k, x in v.items()}
+    if hasattr(v, "to_list"):
+        return [idprop(x) for x in v.to_list()]
+    if isinstance(v, (list, tuple)):
+        return [idprop(x) for x in v]
+    return v
+
+
+def custom(idblock):
+    """`ID.keys()` (the glTF extras `set_extras` stored)."""
+    return {k: idprop(idblock[k]) for k in idblock.keys()}
+
+
+def matrix_rows(m):
+    return [fvec(row) for row in m]
+
+
 def dump_layer_collection(lc):
     return {
         "collection": lc.collection.name,
@@ -278,6 +367,7 @@ def dump_layer_collection(lc):
 def dump_scene(sc):
     return {
         "name": sc.name,
+        "custom": custom(sc),
         "collection": {
             "objects": [o.name for o in sc.collection.objects],
             "children": [c.name for c in sc.collection.children],
@@ -305,10 +395,13 @@ def dump_object(ob):
         "location": fvec(ob.location),
         "rotation_mode": ob.rotation_mode,
         "rotation_quaternion": fvec(ob.rotation_quaternion),
+        "rotation_euler": fvec(ob.rotation_euler),
         "scale": fvec(ob.scale),
+        "matrix_parent_inverse": matrix_rows(ob.matrix_parent_inverse),
         "empty_display_size": f32(ob.empty_display_size),
         "material_slots": [[s.link, name_of(s.material)] for s in ob.material_slots],
         "users_collection": [c.name for c in ob.users_collection],
+        "custom": custom(ob),
     }
 
 
@@ -330,6 +423,7 @@ def dump_mesh(me):
         "attribute_names": [a.name for a in me.attributes],
         "attributes": attributes,
         "materials": [name_of(m) for m in me.materials],
+        "custom": custom(me),
     }
 
 
@@ -362,14 +456,25 @@ def dump_material(mat):
         "diffuse_color": fvec(mat.diffuse_color),
         "metallic": f32(mat.metallic),
         "roughness": f32(mat.roughness),
+        "custom": custom(mat),
         "nodes": nodes,
         "links": links,
     }
 
 
-def dump_image(img):
+def image_path(img, source):
+    """`Image.filepath` relative to the imported file's directory ("" when unset)."""
+    if not img.filepath:
+        return ""
+    base = os.path.dirname(os.path.realpath(source))
+    return os.path.relpath(os.path.realpath(bpy.path.abspath(img.filepath)), base).replace(os.sep, "/")
+
+
+def dump_image(img, source):
     return {
         "name": img.name,
+        "filepath": image_path(img, source),
+        "custom": custom(img),
         "source": img.source,
         "alpha_mode": img.alpha_mode,
         "packed": img.packed_file is not None,
@@ -388,18 +493,24 @@ def dump_camera(cam):
         "ortho_scale": f32(cam.ortho_scale),
         "clip_start": f32(cam.clip_start),
         "clip_end": f32(cam.clip_end),
+        "sensor_width": f32(cam.sensor_width),
+        "sensor_height": f32(cam.sensor_height),
+        "shift_x": f32(cam.shift_x),
+        "shift_y": f32(cam.shift_y),
+        "custom": custom(cam),
     }
 
 
 def dump_light(la):
-    d = {"name": la.name, "type": la.type, "energy": f32(la.energy), "color": fvec(la.color)}
+    d = {"name": la.name, "type": la.type, "energy": f32(la.energy), "color": fvec(la.color),
+         "use_shadow": la.use_shadow, "shadow_soft_size": f32(la.shadow_soft_size), "custom": custom(la)}
     if la.type == "SPOT":
         d["spot_size"] = f32(la.spot_size)
         d["spot_blend"] = f32(la.spot_blend)
     return d
 
 
-def dump():
+def dump(source):
     return {
         "blender": {
             "version": bpy.app.version_string,
@@ -414,7 +525,7 @@ def dump():
         "objects": [dump_object(ob) for ob in bpy.data.objects],
         "meshes": [dump_mesh(me) for me in bpy.data.meshes],
         "materials": [dump_material(m) for m in bpy.data.materials],
-        "images": [dump_image(i) for i in bpy.data.images],
+        "images": [dump_image(i, source) for i in bpy.data.images],
         "cameras": [dump_camera(c) for c in bpy.data.cameras],
         "lights": [dump_light(l) for l in bpy.data.lights],
     }
@@ -453,6 +564,13 @@ def main():
             path = os.path.join(out, "fixtures", name + ".glb")
             bpy.ops.export_scene.gltf(filepath=path, **kwargs)
             print("fixture", name)
+        for name, build in GLTF_FIXTURES:
+            if flt and flt not in name:
+                continue
+            with open(os.path.join(out, "fixtures", name + ".gltf"), "w", encoding="utf-8") as f:
+                json.dump(build(), f, indent=1)
+                f.write("\n")
+            print("fixture", name)
 
     for case, src, settings in CASES:
         if flt and flt not in case:
@@ -466,7 +584,7 @@ def main():
         else:
             path = os.path.join(REPO, src)
         bpy.ops.import_scene.gltf(filepath=path, **settings)
-        state = dump()
+        state = dump(path)
         state["source"] = src
         state["settings"] = settings
         with open(os.path.join(out, "dumps", case + ".json"), "w", encoding="utf-8") as f:

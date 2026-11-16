@@ -129,7 +129,8 @@ impl VTree {
         let mut nodes: Vec<VNode> = Vec::with_capacity(doc.nodes.len() + 1);
         for (i, n) in doc.nodes.iter().enumerate() {
             let mut v = VNode::new(format!("Node_{i}"));
-            v.name = n.name.clone();
+            // `vnode.name or …` everywhere it is read: "" falls back like a missing name.
+            v.name = super::truthy_name(&n.name);
             v.children = n.children.iter().map(|&c| c as usize).collect();
             v.base_trs = node_trs(units, n);
             v.gltf_node = Some(i);

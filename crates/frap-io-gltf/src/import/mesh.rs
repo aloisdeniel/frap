@@ -140,10 +140,8 @@ pub(crate) fn create_mesh(
     mesh_idx: usize,
 ) -> Result<IdRef<MeshId>, ImportError> {
     let pymesh = cx.doc.meshes[mesh_idx].clone();
-    let name = pymesh
-        .name
-        .clone()
-        .unwrap_or_else(|| format!("Mesh_{mesh_idx}"));
+    // `pymesh.name or 'Mesh_%d'`
+    let name = super::truthy_name(&pymesh.name).unwrap_or_else(|| format!("Mesh_{mesh_idx}"));
     let mut mesh = do_primitives(cx, main, log, &pymesh)?;
     extras::set_extras(&mut mesh.header, pymesh.extras.as_ref(), &["targetNames"]);
     Ok(main.meshes.insert(&name, mesh, log))

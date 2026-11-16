@@ -221,7 +221,8 @@ pub(crate) fn create(
     // Scenes: the default glTF scene is the context scene, the others are new scenes.
     for (idx, sc) in cx.doc.scenes.iter().enumerate() {
         if idx != default_scene.unwrap_or(0) {
-            let name = sc.name.clone().unwrap_or_else(|| format!("Scene {idx}"));
+            // `scene.name or "Scene %d"`
+            let name = super::truthy_name(&sc.name).unwrap_or_else(|| format!("Scene {idx}"));
             cx.blender_scenes.push(new_scene(main, &name, log));
         } else {
             cx.blender_scenes.push(scene);
@@ -235,9 +236,8 @@ pub(crate) fn create(
     } else if n_scenes > 1 {
         for idx in 0..n_scenes {
             if cx.settings.import_scene_as_collection {
-                let name = cx.doc.scenes[idx]
-                    .name
-                    .clone()
+                // `gltf.data.scenes[idx_scene].name or "Scene %d"`
+                let name = super::truthy_name(&cx.doc.scenes[idx].name)
                     .unwrap_or_else(|| format!("Scene {idx}"));
                 let c = new_collection(main, &name, cx.active_collection, log);
                 cx.collections.insert(Some(idx), CollTarget::Coll(c));
