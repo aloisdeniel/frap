@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_hex_col.txt
+---
+> bpy.data.objects['Cube'].location = 0x1G
+---
+error 1 SyntaxError SYNTAX @1:39/39+2
+  message: invalid hexadecimal literal

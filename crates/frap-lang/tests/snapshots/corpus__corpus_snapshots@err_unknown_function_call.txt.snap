@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_unknown_function_call.txt
+---
+> cube_add(size=2)
+---
+error 1 NameError NAME @1:1/1+8
+  message: name 'cube_add' is not defined
+  hint: write either the bpy form, e.g. bpy.ops.mesh.primitive_cube_add(size=2) or bpy.data.objects['Cube'].location = (1, 2, 3), or the short form, e.g. mesh.primitive_cube_add size=2 or data.objects['Cube'].location = 1,2,3
+  detail: name="cube_add"

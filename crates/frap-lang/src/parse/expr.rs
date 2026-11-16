@@ -338,6 +338,7 @@ impl<'a> P<'a> {
             Tok::Op("//") | Tok::Punct('%') => {
                 "frap: the '//' and '%' operators are not supported (use /)"
             }
+            Tok::Op("<<" | ">>") => "frap: shift operators are not supported",
             Tok::Punct('&' | '|' | '^' | '~') => "frap: bitwise operators are not supported",
             Tok::Op(":=") => {
                 return Some(super::variables_error(":="));
@@ -417,7 +418,16 @@ impl<'a> P<'a> {
         }
     }
 
+    /// Every recursive cycle of the expression grammar (brackets, calls, unary signs, `**`)
+    /// goes through here, so this is where nesting is bounded.
     fn factor(&mut self) -> R<Expr> {
+        self.nest()?;
+        let r = self.factor_inner();
+        self.leave();
+        r
+    }
+
+    fn factor_inner(&mut self) -> R<Expr> {
         let start = self.pos();
         let op = match self.peek() {
             Some(Tok::Punct('-')) => UnOp::Neg,
@@ -524,6 +534,7 @@ impl<'a> P<'a> {
             Tok::Punct('*') => {
                 Err(self.err_here(unsupported("frap: unpacking (*value) is not supported")))
             }
+            Tok::Op("...") => Err(self.err_here(super::ellipsis_error())),
             _ => Err(self.bad()),
         }
     }
@@ -709,6 +720,10 @@ impl<'a> P<'a> {
             name if PY_BUILTINS.contains(&name) => Err(self.err_here(unsupported(format!(
                 "frap: the built-in '{name}' is not supported"
             )))),
+            // `(y := 1)`: an assignment expression binds a variable.
+            name if matches!(self.peek_at(1).map(|t| &t.tok), Some(Tok::Op(":="))) => {
+                Err(super::variables_error(name).with_span(self.tok_span(at)))
+            }
             name => {
                 // `[o.name for o in ...]`: the comprehension, not the name, is the problem.
                 if let Some(k) = self.t[self.i..]

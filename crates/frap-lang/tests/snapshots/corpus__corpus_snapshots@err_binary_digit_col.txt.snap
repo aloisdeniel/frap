@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_binary_digit_col.txt
+---
+> bpy.data.objects['Cube'].location = 0b102
+---
+error 1 SyntaxError SYNTAX @1:41/41+1
+  message: invalid digit '2' in binary literal

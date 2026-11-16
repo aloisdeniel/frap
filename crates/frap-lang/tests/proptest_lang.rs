@@ -172,7 +172,50 @@ proptest! {
     fn token_soup_never_panics(src in soup()) {
         exercise(&src);
     }
+
+    /// Deep nesting (brackets, signs, `**`, calls, displays) in both forms: an error or a
+    /// statement, never a stack overflow. Test threads have 2 MiB stacks.
+    #[test]
+    fn deep_nesting_never_overflows(
+        head in prop::sample::select(DEEP_HEADS),
+        open in prop::collection::vec(prop::sample::select(DEEP_OPENERS), 1..4),
+        n in 0usize..1200,
+        mid in prop::sample::select(&["1", "True", "'a'", "", "-1", "Cube"][..]),
+        close in prop::sample::select(&[")", "]", "}", ")]", ""][..]),
+        m in 0usize..1200,
+    ) {
+        let src = format!("{head}{}{mid}{}", open.concat().repeat(n), close.repeat(m));
+        exercise(&src);
+    }
 }
+
+const DEEP_HEADS: &[&str] = &[
+    "bpy.data.objects['Cube'].location = ",
+    "bpy.data.objects['Cube'].location.x = ",
+    "print(",
+    "bpy.ops.mesh.primitive_cube_add(location=",
+    "data.objects['Cube'].location=",
+    "data.objects['Cube'].hide_set ",
+    "mesh.primitive_cube_add location=",
+    "D.objects['Cube'].location = ",
+];
+
+const DEEP_OPENERS: &[&str] = &[
+    "(",
+    "[",
+    "{",
+    "-",
+    "+",
+    "~",
+    "2**",
+    "float(",
+    "Vector(",
+    "f(",
+    "bpy.data.objects.get(",
+    "-(",
+    "{1:",
+    "not ",
+];
 
 // ---------------------------------------------------------------------- two-syntax round trip
 

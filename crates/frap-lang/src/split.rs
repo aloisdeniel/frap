@@ -41,7 +41,17 @@ pub struct Piece {
     pub open: Option<Open>,
     /// The first mismatched or unmatched closing bracket in this piece.
     pub bad_close: Option<BadClose>,
+    /// Byte offset of the first opening bracket nested deeper than [`MAX_BRACKET_DEPTH`]
+    /// (CPython: `too many nested parentheses`).
+    pub too_deep: Option<usize>,
+    /// The piece is an empty statement ended by the `;` at `start` (`;;`, `;x`): CPython
+    /// reports `invalid syntax` there.
+    pub empty: bool,
 }
+
+/// CPython's tokenizer limit (`MAXLEVEL`): the 201st nested open bracket is a `SyntaxError:
+/// too many nested parentheses`. It also bounds the parsers' recursion (§11.3).
+pub const MAX_BRACKET_DEPTH: usize = 200;
 
 fn closer_of(open: char) -> char {
     match open {
@@ -57,6 +67,7 @@ pub fn split(src: &str) -> Vec<Piece> {
     let mut out = Vec::new();
     let mut stack: Vec<(char, usize)> = Vec::new();
     let mut bad_close = None;
+    let mut too_deep = None;
     let mut start = 0usize;
     let mut i = 0usize;
     let mut open_at_end = None;
@@ -92,7 +103,12 @@ pub fn split(src: &str) -> Vec<Piece> {
                     continue;
                 }
             }
-            b'(' | b'[' | b'{' => stack.push((c as char, i)),
+            b'(' | b'[' | b'{' => {
+                if stack.len() >= MAX_BRACKET_DEPTH {
+                    too_deep.get_or_insert(i);
+                }
+                stack.push((c as char, i));
+            }
             b')' | b']' | b'}' => match stack.last() {
                 Some(&(o, _)) if closer_of(o) == c as char => {
                     stack.pop();
@@ -107,7 +123,26 @@ pub fn split(src: &str) -> Vec<Piece> {
                 }
             },
             b'\n' | b';' if stack.is_empty() => {
-                push_piece(src, &mut out, start, i, None, bad_close.take());
+                let pushed = push_piece(
+                    src,
+                    &mut out,
+                    start,
+                    i,
+                    None,
+                    bad_close.take(),
+                    too_deep.take(),
+                );
+                if c == b';' && !pushed {
+                    // `;;` / `;x`: an empty statement before a `;` (`x;` alone is fine).
+                    out.push(Piece {
+                        start: i,
+                        end: i + 1,
+                        open: None,
+                        bad_close: None,
+                        too_deep: None,
+                        empty: true,
+                    });
+                }
                 start = i + 1;
             }
             _ => {}
@@ -115,7 +150,15 @@ pub fn split(src: &str) -> Vec<Piece> {
         i += 1;
     }
     let open = open_at_end.or_else(|| stack.last().map(|&(c, at)| Open::Bracket(c, at)));
-    push_piece(src, &mut out, start, b.len(), open, bad_close.take());
+    push_piece(
+        src,
+        &mut out,
+        start,
+        b.len(),
+        open,
+        bad_close.take(),
+        too_deep.take(),
+    );
     out
 }
 
@@ -146,6 +189,7 @@ fn skip_string(b: &[u8], q_at: usize) -> Result<usize, usize> {
     if triple { Err(q_at) } else { Ok(b.len()) }
 }
 
+/// Pushes a statement piece unless it is blank or comment-only; returns whether it did.
 fn push_piece(
     src: &str,
     out: &mut Vec<Piece>,
@@ -153,7 +197,8 @@ fn push_piece(
     end: usize,
     open: Option<Open>,
     bad_close: Option<BadClose>,
-) {
+    too_deep: Option<usize>,
+) -> bool {
     let text = &src[start..end];
     let meaningful = text.lines().any(|l| {
         let t = l.trim();
@@ -165,8 +210,11 @@ fn push_piece(
             end,
             open,
             bad_close,
+            too_deep,
+            empty: false,
         });
     }
+    meaningful
 }
 
 /// True when `src` has nothing open at its end (bracket, triple-quoted string, `\` line

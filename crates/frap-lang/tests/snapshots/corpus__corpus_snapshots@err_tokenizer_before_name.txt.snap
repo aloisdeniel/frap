@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_tokenizer_before_name.txt
+---
+> bpy.data.objects['Cube'].location = (cube, 1a)
+---
+error 1 SyntaxError SYNTAX @1:44/44+2
+  message: invalid decimal literal

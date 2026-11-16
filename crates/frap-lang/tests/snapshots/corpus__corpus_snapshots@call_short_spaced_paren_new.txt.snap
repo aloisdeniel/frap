@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_short_spaced_paren_new.txt
+---
+> data.materials.new ("Red")
+---
+stmt 1 Short line 1 @1:1/1+26
+  Call
+    Path bpy.data @1:1/1+18
+      .materials
+      .new
+    arg (positional) @1:21/21+5
+      Str "Red" @1:21/21+5

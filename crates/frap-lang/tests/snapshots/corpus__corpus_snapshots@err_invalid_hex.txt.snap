@@ -5,5 +5,5 @@ input_file: crates/frap-lang/tests/corpus/err_invalid_hex.txt
 ---
 > print(0x)
 ---
-error 1 SyntaxError SYNTAX @1:7/7+2
+error 1 SyntaxError SYNTAX @1:8/8+1
   message: invalid hexadecimal literal

@@ -5,6 +5,6 @@ input_file: crates/frap-lang/tests/corpus/err_paren_statement.txt
 ---
 > (bpy.data.objects)
 ---
-error 1 SyntaxError SYNTAX @1:1/1+1
-  message: invalid syntax
-  hint: write either the bpy form, e.g. bpy.ops.mesh.primitive_cube_add(size=2) or bpy.data.objects['Cube'].location = (1, 2, 3), or the short form, e.g. mesh.primitive_cube_add size=2 or data.objects['Cube'].location = 1,2,3
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:1/1+1
+  message: frap: an expression is not a statement; read or assign a path, call an operator or function, or print(...) the value
+  hint: print((bpy.data.objects))

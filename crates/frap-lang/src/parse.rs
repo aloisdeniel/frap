@@ -13,7 +13,7 @@
 use frap_rna::{FrapError, PyExc, Span};
 use smol_str::SmolStr;
 
-use crate::errors::{SYNTAX, UNSUPPORTED_SYNTAX};
+use crate::errors::{NAME, SYNTAX, UNSUPPORTED_SYNTAX};
 use crate::ir::*;
 use crate::lexer::{Tok, Token, lex};
 use crate::split::{BadClose, Open, Piece, split};
@@ -21,21 +21,45 @@ use crate::split::{BadClose, Open, Piece, split};
 mod expr;
 mod short;
 
-/// Maps byte offsets to line/column.
+/// Maps byte offsets to line/column in O(log n) per span, whatever the line length (agents
+/// send one-line `foreach_set` tuples of megabytes).
 pub(crate) struct LineIndex<'a> {
     src: &'a str,
     starts: Vec<usize>,
     first_line: u32,
+    /// Empty for ASCII sources (code points = bytes). Otherwise `chunk_chars[k]` is the
+    /// number of code points in `src[..k * CHUNK]`.
+    chunk_chars: Vec<u32>,
+}
+
+/// Granularity of [`LineIndex::chunk_chars`].
+const CHUNK: usize = 64;
+
+/// True for a byte that starts a UTF-8 code point.
+fn starts_char(b: u8) -> bool {
+    (b & 0xC0) != 0x80
 }
 
 impl<'a> LineIndex<'a> {
     fn new(src: &'a str, first_line: u32) -> Self {
         let mut starts = vec![0];
         starts.extend(src.match_indices('\n').map(|(i, _)| i + 1));
+        let chunk_chars = if src.is_ascii() {
+            Vec::new()
+        } else {
+            let mut acc = 0u32;
+            let mut v = vec![0];
+            for chunk in src.as_bytes().chunks(CHUNK) {
+                acc += chunk.iter().filter(|b| starts_char(**b)).count() as u32;
+                v.push(acc);
+            }
+            v
+        };
         LineIndex {
             src,
             starts,
             first_line,
+            chunk_chars,
         }
     }
     fn line_idx(&self, pos: usize) -> usize {
@@ -44,6 +68,15 @@ impl<'a> LineIndex<'a> {
     /// 1-based line of a byte offset (offset by `first_line`).
     fn line_of(&self, pos: usize) -> u32 {
         self.first_line + self.line_idx(pos) as u32
+    }
+    /// Code points in `src[..pos]`.
+    fn chars_before(&self, pos: usize) -> usize {
+        if self.chunk_chars.is_empty() {
+            return pos;
+        }
+        let k = pos / CHUNK;
+        let rest = &self.src.as_bytes()[k * CHUNK..pos];
+        self.chunk_chars[k] as usize + rest.iter().filter(|b| starts_char(**b)).count()
     }
     /// Span of `start..end` (byte offsets; `start` must be a char boundary).
     fn span(&self, start: usize, end: usize) -> Span {
@@ -55,7 +88,7 @@ impl<'a> LineIndex<'a> {
             len: end.saturating_sub(start) as u32,
             line: self.first_line + li as u32,
             col: (start - ls + 1) as u32,
-            col_chars: (self.src[ls..start].chars().count() + 1) as u32,
+            col_chars: (self.chars_before(start) - self.chars_before(ls) + 1) as u32,
         }
     }
 }
@@ -91,6 +124,11 @@ pub(super) fn variables_error(name: &str) -> FrapError {
     .with_hint("use a full path such as bpy.data.objects['Cube']");
     e.detail.insert("name".into(), name.into());
     e
+}
+
+/// `...` (valid Python: the `Ellipsis` constant).
+pub(super) fn ellipsis_error() -> FrapError {
+    unsupported("frap: Ellipsis (...) is not supported")
 }
 
 /// Rule 5 of §11.4: neither form.
@@ -163,29 +201,43 @@ pub(super) const PY_BUILTINS: &[&str] = &[
 ];
 
 fn parse_piece(src: &str, li: &LineIndex<'_>, piece: &Piece) -> R<Stmt> {
+    if piece.empty {
+        return Err(syntax("invalid syntax").with_span(li.span(piece.start, piece.end)));
+    }
     let toks = lex(src, piece.start, piece.end);
     let eof = toks.last().map(|t| t.end as usize).unwrap_or(piece.start);
-    let mut p = P {
+    let p = P {
         src,
         t: toks,
         i: 0,
         li,
         start: piece.start,
         eof,
+        depth: 0,
+        short: false,
     };
     // Bracket problems are tokenizer errors: the first problem in source order wins, and an
     // unclosed bracket (found at the end of input) comes after any earlier tokenizer error.
-    if piece.bad_close.is_some() || piece.open.is_some() {
-        let first_err = p.t.iter().position(|t| matches!(t.tok, Tok::Error(_)));
-        if let Some(k) = first_err
-            && piece
-                .bad_close
-                .is_none_or(|bc| (p.t[k].start as usize) < bc.at)
-        {
-            return Err(p.lex_error(k));
-        }
-        if let Some(bc) = piece.bad_close {
-            return Err(bad_close_error(li, bc));
+    if piece.bad_close.is_some() || piece.open.is_some() || piece.too_deep.is_some() {
+        let first_err =
+            p.t.iter()
+                .position(|t| matches!(t.tok, Tok::Error(_)))
+                .map(|k| (p.t[k].start as usize, k));
+        let bad_close_at = piece.bad_close.map(|bc| bc.at);
+        let first = [first_err.map(|e| e.0), bad_close_at, piece.too_deep]
+            .into_iter()
+            .flatten()
+            .min();
+        if let Some(at) = first {
+            if let Some((_, k)) = first_err.filter(|e| e.0 == at) {
+                return Err(p.lex_error(k));
+            }
+            if piece.too_deep == Some(at) {
+                return Err(syntax("too many nested parentheses").with_span(li.span(at, at + 1)));
+            }
+            if let Some(bc) = piece.bad_close {
+                return Err(bad_close_error(li, bc));
+            }
         }
         match piece.open {
             Some(Open::Bracket(c, at)) => {
@@ -204,9 +256,77 @@ fn parse_piece(src: &str, li: &LineIndex<'_>, piece: &Piece) -> R<Stmt> {
             None => {}
         }
     }
-    let first = p.pos();
-    p.statement()
-        .map_err(|e| e.with_span(li.span(first, piece.end.max(first))))
+    let end = piece.end;
+    let run = move |mut p: P<'_>| {
+        let first = p.pos();
+        p.statement()
+            .map_err(|e| p.prefer_tokenizer_error(e))
+            .map_err(|e| e.with_span(p.li.span(first, end.max(first))))
+    };
+    if nesting_estimate(&p.t) <= INLINE_NESTING {
+        return run(p);
+    }
+    // Deeply nested input: recurse on a dedicated stack so that the caller's stack size (and
+    // the build profile's frame sizes) never matter. MAX_NESTING bounds what is used.
+    let fallback = p.li.span(p.pos(), end.max(p.pos()));
+    std::thread::scope(|s| {
+        let handle = std::thread::Builder::new()
+            .name("frap-lang-parse".into())
+            .stack_size(DEEP_PARSE_STACK)
+            .spawn_scoped(s, move || run(p));
+        match handle {
+            Ok(h) => h
+                .join()
+                .unwrap_or_else(|payload| std::panic::resume_unwind(payload)),
+            Err(_) => Err(unsupported("frap: expression too complex to parse")
+                .with_hint("split the value into simpler statements")
+                .with_span(fallback)),
+        }
+    })
+}
+
+/// Parsing runs on the caller's stack while [`nesting_estimate`] stays at or below this.
+/// The worst debug-build cost of one estimate unit is about 20 KiB (a `float(` level is
+/// two units), so the caller needs well under 1 MiB.
+const INLINE_NESTING: usize = 24;
+
+/// Stack of the dedicated parse thread for deeper input: [`MAX_NESTING`] levels at the
+/// worst debug-build frame cost (about 40 KiB per level) need about 10 MiB.
+const DEEP_PARSE_STACK: usize = 64 * 1024 * 1024;
+
+/// An upper bound on the parsers' nesting (calls to [`P::nest`] on one recursion path) for
+/// a token list with balanced brackets: each bracket level costs at most two (`(` in a
+/// short-form value enters `sitem` and `factor`), each unary sign and each `**` at most one,
+/// plus the statement's top-level value.
+fn nesting_estimate(t: &[Token]) -> usize {
+    let (mut depth, mut max_depth, mut chain) = (0usize, 0usize, 0usize);
+    let mut after_operand = false;
+    for tok in t {
+        after_operand = match &tok.tok {
+            Tok::Punct('(' | '[' | '{') => {
+                depth += 1;
+                max_depth = max_depth.max(depth);
+                false
+            }
+            Tok::Punct(')' | ']' | '}') => {
+                depth = depth.saturating_sub(1);
+                true
+            }
+            Tok::Op("**") => {
+                chain += 1;
+                false
+            }
+            Tok::Punct('+' | '-' | '~') => {
+                if !after_operand {
+                    chain += 1;
+                }
+                false
+            }
+            Tok::Ident(_) | Tok::Int(_) | Tok::Float(_) | Tok::Str(_) => true,
+            _ => false,
+        };
+    }
+    2 * max_depth + chain + 2
 }
 
 fn bad_close_error(li: &LineIndex<'_>, bc: BadClose) -> FrapError {
@@ -260,7 +380,18 @@ pub(super) struct P<'a> {
     pub(super) start: usize,
     /// End of the last token.
     pub(super) eof: usize,
+    /// Current expression nesting (see [`P::nest`]).
+    pub(super) depth: u32,
+    /// Set once the statement is known to be in the short form, whose `BARE` words may cover
+    /// bytes that are not valid Python tokens (`Cube.001a`).
+    pub(super) short: bool,
 }
+
+/// Maximum expression nesting the parsers recurse into (unary and `**` chains, brackets,
+/// calls, displays). Brackets alone stop at [`crate::split::MAX_BRACKET_DEPTH`] with
+/// CPython's error; this bounds the remaining recursion so that no input can overflow the
+/// stack (a 2 MiB thread in a debug build included).
+pub(super) const MAX_NESTING: u32 = 250;
 
 impl<'a> P<'a> {
     // ------------------------------------------------------------------ token access
@@ -351,7 +482,8 @@ impl<'a> P<'a> {
         } else {
             syntax(msg)
         };
-        e.with_span(self.tok_span(k))
+        let at = (t.err_at as usize).clamp(t.start as usize, t.end as usize);
+        e.with_span(self.li.span(at, t.end as usize))
     }
 
     /// `invalid syntax` at the current token (or its lexer error, or end of input).
@@ -367,6 +499,48 @@ impl<'a> P<'a> {
             return self.lex_error(self.i);
         }
         e.with_span(self.here_span())
+    }
+
+    /// Enters one level of expression nesting; fails past [`MAX_NESTING`] instead of
+    /// recursing further. Pair with [`P::leave`].
+    pub(super) fn nest(&mut self) -> R<()> {
+        if self.depth >= MAX_NESTING {
+            return Err(self.too_complex());
+        }
+        self.depth += 1;
+        Ok(())
+    }
+
+    pub(super) fn leave(&mut self) {
+        self.depth -= 1;
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn too_complex(&self) -> FrapError {
+        unsupported(format!(
+            "frap: expression too complex to parse (more than {MAX_NESTING} nested levels)"
+        ))
+        .with_hint("split the value into simpler statements")
+        .with_span(self.here_span())
+    }
+
+    /// CPython reports tokenizer errors before parser errors: when a bpy-form statement fails
+    /// with frap's own error (`variables are not supported`, `invalid syntax`, ...), a real
+    /// tokenizer error anywhere in it wins (`x.a = €`). Short-form statements are exempt
+    /// because their `BARE` words may cover bytes that are not Python tokens.
+    fn prefer_tokenizer_error(&self, e: FrapError) -> FrapError {
+        if self.short {
+            return e;
+        }
+        let tok_err = self
+            .t
+            .iter()
+            .position(|t| matches!(&t.tok, Tok::Error(le) if !le.is_unsupported()));
+        match tok_err {
+            Some(k) => self.lex_error(k),
+            None => e,
+        }
     }
 
     pub(super) fn expect_punct(&mut self, c: char) -> R<()> {
@@ -400,6 +574,27 @@ impl<'a> P<'a> {
         Err(self.bad())
     }
 
+    /// True when the next token is an arithmetic binary operator (`path * 2`).
+    fn continues_arithmetic(&self) -> bool {
+        matches!(
+            self.peek(),
+            Some(Tok::Punct('+' | '-' | '*' | '/' | '@')) | Some(Tok::Op("**"))
+        )
+    }
+
+    /// A bare expression statement (`bpy.data.objects['Cube'].location * 2`, `1 + 2`): valid
+    /// Python, but frap only evaluates values inside a statement.
+    #[cold]
+    #[inline(never)]
+    fn bare_expression_error(&self) -> FrapError {
+        let text = self.src[self.start..self.eof].trim();
+        unsupported(
+            "frap: an expression is not a statement; read or assign a path, call an \
+             operator or function, or print(...) the value",
+        )
+        .with_hint(format!("print({text})"))
+    }
+
     // ------------------------------------------------------------------ statements
 
     fn statement(&mut self) -> R<Stmt> {
@@ -418,6 +613,13 @@ impl<'a> P<'a> {
         let first = match self.peek() {
             Some(Tok::Ident(s)) => s.clone(),
             Some(Tok::Error(_)) => return Err(self.bad()),
+            Some(Tok::Op("...")) => return Err(self.err_here(ellipsis_error())),
+            Some(
+                Tok::Int(_)
+                | Tok::Float(_)
+                | Tok::Str(_)
+                | Tok::Punct('(' | '[' | '{' | '-' | '+' | '~'),
+            ) => return Err(self.err_here(self.bare_expression_error())),
             _ => return Err(self.err_here(form_error())),
         };
         let next_tight_dot_or_bracket = self.tight_at(1)
@@ -453,13 +655,27 @@ impl<'a> P<'a> {
             {
                 self.short_op().map(|c| (c, Form::Short))
             }
+            "True" | "False" | "None" => Err(self.err_here(self.bare_expression_error())),
+            "and" | "or" | "not" | "in" | "is" | "as" => Err(self.err_here(form_error())),
             name => {
                 let next = self.peek_at(1).map(|t| t.tok.clone());
                 match next {
                     Some(Tok::Punct('=' | ',' | ':' | '[' | '.'))
                     | Some(Tok::Op(
-                        "+=" | "-=" | "*=" | "/=" | "**=" | "//=" | "@=" | "%=" | ":=",
+                        "+=" | "-=" | "*=" | "/=" | "**=" | "//=" | "@=" | "%=" | ":=" | "<<="
+                        | ">>=" | "&=" | "|=" | "^=",
                     )) => Err(self.err_here(variables_error(name))),
+                    // Valid Python that fails at run time in CPython: `x`, `cube_add()`.
+                    None | Some(Tok::Punct('(')) if !PY_BUILTINS.contains(&name) => {
+                        let mut e = FrapError::new(
+                            PyExc::NameError,
+                            NAME,
+                            format!("name '{name}' is not defined"),
+                        );
+                        e.hint = form_error().hint;
+                        e.detail.insert("name".into(), name.into());
+                        Err(self.err_here(e))
+                    }
                     Some(Tok::Punct('(')) if PY_BUILTINS.contains(&name) => Err(self.err_here(
                         unsupported(format!("frap: the built-in '{name}' is not supported"))
                             .with_hint(
@@ -680,7 +896,9 @@ impl<'a> P<'a> {
             Some(Tok::Op("-=")) => Some(AssignOp::Sub),
             Some(Tok::Op("*=")) => Some(AssignOp::Mul),
             Some(Tok::Op("/=")) => Some(AssignOp::Div),
-            Some(Tok::Op(o @ ("**=" | "//=" | "@=" | "%="))) => {
+            Some(Tok::Op(
+                o @ ("**=" | "//=" | "@=" | "%=" | "<<=" | ">>=" | "&=" | "|=" | "^="),
+            )) => {
                 return Err(self.err_here(unsupported(format!(
                     "frap: augmented assignment '{o}' is not supported (use = += -= *= /=)"
                 ))));
@@ -693,6 +911,9 @@ impl<'a> P<'a> {
             _ => None,
         };
         let Some(op) = op else {
+            if self.continues_arithmetic() {
+                return Err(self.err_here(self.bare_expression_error()));
+            }
             return Err(self.expect_end().err().unwrap_or_else(|| self.bad()));
         };
         self.check_target(&path, op)?;
@@ -761,5 +982,42 @@ impl<'a> P<'a> {
         // the bpy form (`D.objects['Cube'].select_set (True)`, `= ...`, `+= ...`).
         self.path_continue(&mut path, Ws::Free)?;
         self.bpy_tail(path).map(|c| (c, Form::Bpy))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// The chunked code-point index agrees with counting from the line start, across chunk
+    /// boundaries and multi-byte characters of every length.
+    #[test]
+    fn line_index_col_chars_matches_naive_count() {
+        let mut src = String::new();
+        for k in 0..400 {
+            src.push_str(["a", "é", "€", "𝔘", "\n", "bc", "Würfel "][k % 7]);
+        }
+        let li = LineIndex::new(&src, 3);
+        for (pos, _) in src.char_indices() {
+            let ls = src[..pos].rfind('\n').map_or(0, |i| i + 1);
+            let span = li.span(pos, pos);
+            assert_eq!(span.col as usize, pos - ls + 1);
+            assert_eq!(span.col_chars as usize, src[ls..pos].chars().count() + 1);
+            assert_eq!(span.line as usize, 3 + src[..pos].matches('\n').count());
+        }
+        let ascii = "x = 1\ny = 2";
+        let li = LineIndex::new(ascii, 1);
+        assert!(li.chunk_chars.is_empty());
+        assert_eq!(li.span(8, 9).col_chars, 3);
+    }
+
+    #[test]
+    fn nesting_estimate_counts_brackets_signs_and_powers() {
+        let est = |s: &str| nesting_estimate(&lex(s, 0, s.len()));
+        assert_eq!(est("x = 1 - 2 - 3"), 2);
+        assert_eq!(est("x = -1"), 3);
+        assert_eq!(est("x = ((1))"), 6);
+        assert_eq!(est("x = 2 ** -2 ** 2"), 5);
+        assert_eq!(est("f(a)[0] - (b)"), 4);
     }
 }

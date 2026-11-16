@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_decimal_suffix_col.txt
+---
+> bpy.data.objects['Cube'].location = 12abc
+---
+error 1 SyntaxError SYNTAX @1:38/38+4
+  message: invalid decimal literal

@@ -5,7 +5,8 @@
 //! op_call  := NS '.' OPNAME (WS kwarg)*
 //! kwarg    := key '=' svalue                 # no spaces around '='
 //! key      := IDENT ('.' IDENT)?             # TRANSFORM_OT_translate.value=0,0,1 (macro sub-op)
-//! path_stmt:= spath | spath WS? ASSIGN WS? svalue | spath (WS (kwarg | svalue))+ | spath '(' args ')'
+//! path_stmt:= spath | spath WS? ASSIGN WS? svalue | spath (WS (kwarg | svalue))+
+//!           | spath WS? '(' args ')'             # a call, also with a space before '('
 //! svalue   := item (',' item)*               # no spaces: 0,0,1
 //! item     := NUMBER | true|false|True|False|none|None | QUOTED | '{' item (',' item)* '}'
 //!           | spath | BARE | '(' bpy-expr ')' | '[' bpy-expr ']'
@@ -92,12 +93,18 @@ impl<'a> P<'a> {
                 return Err(variables_error(&ns).with_span(self.tok_span(ns_at)));
             }
             Some(
-                Tok::Punct('=') | Tok::Op("+=" | "-=" | "*=" | "/=" | "**=" | "//=" | "@=" | "%="),
+                Tok::Punct('=')
+                | Tok::Op(
+                    "+=" | "-=" | "*=" | "/=" | "**=" | "//=" | "@=" | "%=" | "<<=" | ">>=" | "&="
+                    | "|=" | "^=",
+                ),
             ) => {
                 return Err(variables_error(&ns).with_span(self.tok_span(ns_at)));
             }
             _ => {}
         }
+        // From here on `BARE` values may cover bytes that are not Python tokens.
+        self.short = true;
         let mut args: Vec<Arg> = Vec::new();
         // Indices of arguments built from dotted keys (merged into one Dict).
         let mut dotted: Vec<usize> = Vec::new();
@@ -219,7 +226,8 @@ impl<'a> P<'a> {
 
     /// `data.…` / `context.…` statements.
     pub(in crate::parse) fn short_path_stmt(&mut self) -> R<Command> {
-        let path = self.path(Ws::Tight)?;
+        self.short = true;
+        let mut path = self.path(Ws::Tight)?;
         if self.at_end() {
             return Ok(self.get_or_call(path));
         }
@@ -253,6 +261,12 @@ impl<'a> P<'a> {
         if self.starts_short_value() {
             return self.short_call_tail(path);
         }
+        if self.is_punct('(') {
+            // `data.objects['Cube'].select_set (True)`: a call with whitespace before its
+            // parentheses, as `D.…` / `C.…` and Python accept.
+            self.path_continue(&mut path, Ws::Free)?;
+            return self.bpy_tail(path);
+        }
         Err(self.bad())
     }
 
@@ -282,6 +296,7 @@ impl<'a> P<'a> {
     /// `spath (WS (kwarg | svalue))+`: an RNA function call with whitespace-separated
     /// arguments (`data.objects['Cube'].select_set True`).
     pub(in crate::parse) fn short_call_tail(&mut self, path: PathOut) -> R<Command> {
+        self.short = true;
         if path.ends_in_call() {
             return Err(self.bad());
         }
@@ -359,7 +374,15 @@ impl<'a> P<'a> {
         Ok(Expr::Tuple(items, self.span_from(start)))
     }
 
+    /// Short-form item; its recursion (signs, `{…}`, `(…)`) is bounded like the bpy form's.
     fn sitem(&mut self) -> R<Expr> {
+        self.nest()?;
+        let r = self.sitem_inner();
+        self.leave();
+        r
+    }
+
+    fn sitem_inner(&mut self) -> R<Expr> {
         let start = self.pos();
         let Some(tok) = self.peek().cloned() else {
             return Err(self.bad());

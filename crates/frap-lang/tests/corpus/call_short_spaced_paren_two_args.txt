@@ -1,0 +1,1 @@
+data.objects['Cube'].hide_set (True, view_layer=context.view_layer)

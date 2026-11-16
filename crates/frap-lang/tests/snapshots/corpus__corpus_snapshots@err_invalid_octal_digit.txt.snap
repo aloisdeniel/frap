@@ -5,5 +5,5 @@ input_file: crates/frap-lang/tests/corpus/err_invalid_octal_digit.txt
 ---
 > print(0o9)
 ---
-error 1 SyntaxError SYNTAX @1:7/7+3
+error 1 SyntaxError SYNTAX @1:9/9+1
   message: invalid digit '9' in octal literal

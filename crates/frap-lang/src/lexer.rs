@@ -24,7 +24,8 @@ pub enum Tok {
     Str(String),
     /// Single punctuation character: `( ) [ ] { } , . = : ; + - * / @ % < > & | ^ ~ ! $ ? \``.
     Punct(char),
-    /// Multi-character operator: `+= -= *= /= //= **= @= %= ** // == != <= >= -> :=`.
+    /// Multi-character operator: `... **= //= <<= >>= += -= *= /= @= %= &= |= ^= ** // << >>
+    /// == != <= >= -> :=`.
     Op(&'static str),
     /// A malformed token, reported by the parser if it is reached.
     Error(LexError),
@@ -124,6 +125,9 @@ pub struct Token {
     /// Whether whitespace (or a comment) precedes the token (the short form is
     /// whitespace-sensitive).
     pub space_before: bool,
+    /// Where CPython's caret points for an error token (`0b102` points at the `2`, `1a` at
+    /// the `1`); `start` for every other token.
+    pub err_at: u32,
 }
 
 /// Python identifier start (ASCII letters, `_`, Unicode letters).
@@ -136,10 +140,50 @@ pub fn is_ident_continue(c: char) -> bool {
     c == '_' || c.is_alphanumeric()
 }
 
-const OPS3: [&str; 2] = ["**=", "//="];
-const OPS2: [&str; 14] = [
-    "+=", "-=", "*=", "/=", "@=", "%=", "**", "//", "==", "!=", "<=", ">=", "->", ":=",
+const OPS3: [&str; 5] = ["...", "**=", "//=", "<<=", ">>="];
+const OPS2: [&str; 19] = [
+    "+=", "-=", "*=", "/=", "@=", "%=", "&=", "|=", "^=", "**", "//", "<<", ">>", "==", "!=", "<=",
+    ">=", "->", ":=",
 ];
+
+/// Characters CPython calls non-printable (`invalid non-printable character U+FEFF`): Unicode
+/// categories Zs (but space), Zl, Zp, Cc, Cf, Cs, Co and the noncharacters
+/// (`Py_UNICODE_ISPRINTABLE`). Unassigned code points (Cn) other than noncharacters are not
+/// tracked; they get `invalid character`.
+fn is_non_printable(c: char) -> bool {
+    let u = c as u32;
+    c.is_whitespace()
+        || c.is_control()
+        || matches!(
+            u,
+            0x00AD
+                | 0x0600..=0x0605
+                | 0x061C
+                | 0x06DD
+                | 0x070F
+                | 0x0890..=0x0891
+                | 0x08E2
+                | 0x180E
+                | 0x200B..=0x200F
+                | 0x202A..=0x202E
+                | 0x2060..=0x2064
+                | 0x2066..=0x206F
+                | 0xFEFF
+                | 0xFFF9..=0xFFFB
+                | 0x110BD
+                | 0x110CD
+                | 0x13430..=0x1343F
+                | 0x1BCA0..=0x1BCA3
+                | 0x1D173..=0x1D17A
+                | 0xE0001
+                | 0xE0020..=0xE007F
+                | 0xE000..=0xF8FF
+                | 0xF0000..=0xFFFFD
+                | 0x100000..=0x10FFFD
+        )
+        || (u & 0xFFFE) == 0xFFFE
+        || (0xFDD0..=0xFDEF).contains(&u)
+}
 const PUNCT: &str = "()[]{},.=:;+-*/@%<>&|^~!$?`";
 
 /// Lexes `src[start..end]` (one statement); offsets in tokens are absolute. Never fails.
@@ -155,8 +199,21 @@ pub fn lex(src: &str, start: usize, end: usize) -> Vec<Token> {
             start: s as u32,
             end: e as u32,
             space_before: *space,
+            err_at: s as u32,
         });
         *space = false;
+    };
+    let push_number = |out: &mut Vec<Token>, s: usize, space: &mut bool| {
+        let (tok, n, err_at) = lex_number(src, s, end);
+        out.push(Token {
+            tok,
+            start: s as u32,
+            end: n as u32,
+            space_before: *space,
+            err_at: err_at as u32,
+        });
+        *space = false;
+        n
     };
     while i < end {
         let c = b[i];
@@ -205,15 +262,9 @@ pub fn lex(src: &str, start: usize, end: usize) -> Vec<Token> {
                 push(&mut out, tok, i, n, &mut space);
                 i = n;
             }
-            b'0'..=b'9' => {
-                let (tok, n) = lex_number(src, i, end);
-                push(&mut out, tok, i, n, &mut space);
-                i = n;
-            }
+            b'0'..=b'9' => i = push_number(&mut out, i, &mut space),
             b'.' if i + 1 < end && b[i + 1].is_ascii_digit() => {
-                let (tok, n) = lex_number(src, i, end);
-                push(&mut out, tok, i, n, &mut space);
-                i = n;
+                i = push_number(&mut out, i, &mut space);
             }
             _ => {
                 let ch = src[i..end].chars().next().unwrap_or('\u{fffd}');
@@ -260,7 +311,7 @@ pub fn lex(src: &str, start: usize, end: usize) -> Vec<Token> {
                     push(&mut out, Tok::Punct(c as char), i, i + 1, &mut space);
                     i += 1;
                 } else {
-                    let err = if ch.is_whitespace() || ch.is_control() || c < 0x20 {
+                    let err = if is_non_printable(ch) {
                         LexError::NonPrintable(ch)
                     } else {
                         LexError::InvalidCharacter(ch)
@@ -380,6 +431,12 @@ fn lex_string(src: &str, q_at: usize, end: usize, kind: StrKind) -> (Tok, usize)
                     let v = u32::from_str_radix(&src[i + 2..j], 16).unwrap_or(0xfffd);
                     match char::from_u32(v) {
                         Some(ch) => out.push(ch),
+                        // Valid Python (a lone surrogate), but not representable in UTF-8.
+                        None if (0xD800..=0xDFFF).contains(&v) => {
+                            err.get_or_insert(LexError::Unsupported(
+                                "lone surrogate escapes (\\ud800-\\udfff)",
+                            ));
+                        }
                         None => {
                             err.get_or_insert(LexError::UnicodeEscape(
                                 at,
@@ -416,8 +473,11 @@ fn lex_string(src: &str, q_at: usize, end: usize, kind: StrKind) -> (Tok, usize)
     }
 }
 
-/// Lexes a number starting at `start` (a digit, or `.` followed by a digit).
-fn lex_number(src: &str, start: usize, end: usize) -> (Tok, usize) {
+/// Lexes a number starting at `start` (a digit, or `.` followed by a digit). Returns the
+/// token, its end and where CPython's caret points for an error: at the bad digit for
+/// `invalid digit '2' in binary literal`, otherwise at the last character it accepted before
+/// the offending one (`0x1G` → `1`, `1__0` → the first `_`, `1e+` → `+`).
+fn lex_number(src: &str, start: usize, end: usize) -> (Tok, usize, usize) {
     let b = src.as_bytes();
     let at = |k: usize| if k < end { b[k] } else { 0 };
     let ident_follows =
@@ -459,17 +519,15 @@ fn lex_number(src: &str, start: usize, end: usize) -> (Tok, usize) {
             return (
                 Tok::Error(LexError::InvalidDigit(at(i) as char, base_name)),
                 bad_end(i),
+                i,
             );
         }
-        if digits.is_empty() || at(i - 1) == b'_' {
-            return (Tok::Error(err), bad_end(i));
-        }
-        if ident_follows(i) {
-            return (Tok::Error(err), bad_end(i));
+        if digits.is_empty() || at(i - 1) == b'_' || ident_follows(i) {
+            return (Tok::Error(err), bad_end(i), i - 1);
         }
         return match i64::from_str_radix(&digits, radix) {
-            Ok(v) => (Tok::Int(v), i),
-            Err(_) => (Tok::Error(LexError::IntTooLarge), i),
+            Ok(v) => (Tok::Int(v), i, start),
+            Err(_) => (Tok::Error(LexError::IntTooLarge), i, start),
         };
     }
 
@@ -496,7 +554,7 @@ fn lex_number(src: &str, start: usize, end: usize) -> (Tok, usize) {
         true
     };
     if !digit_run(&mut i, &mut text) {
-        return (Tok::Error(LexError::InvalidDecimal), bad_end(i));
+        return (Tok::Error(LexError::InvalidDecimal), bad_end(i), i);
     }
     let int_part = text.clone();
     let mut is_float = false;
@@ -505,7 +563,7 @@ fn lex_number(src: &str, start: usize, end: usize) -> (Tok, usize) {
         text.push('.');
         i += 1;
         if at(i).is_ascii_digit() && !digit_run(&mut i, &mut text) {
-            return (Tok::Error(LexError::InvalidDecimal), bad_end(i));
+            return (Tok::Error(LexError::InvalidDecimal), bad_end(i), i);
         }
     }
     if matches!(at(i), b'e' | b'E') {
@@ -514,24 +572,25 @@ fn lex_number(src: &str, start: usize, end: usize) -> (Tok, usize) {
             j += 1;
         }
         if !at(j).is_ascii_digit() {
-            return (Tok::Error(LexError::InvalidDecimal), bad_end(j));
+            return (Tok::Error(LexError::InvalidDecimal), bad_end(j), j - 1);
         }
         is_float = true;
         text.push('e');
         text.push_str(&src[i + 1..j]);
         i = j;
         if !digit_run(&mut i, &mut text) {
-            return (Tok::Error(LexError::InvalidDecimal), bad_end(i));
+            return (Tok::Error(LexError::InvalidDecimal), bad_end(i), i);
         }
     }
     if matches!(at(i), b'j' | b'J') {
         return (
             Tok::Error(LexError::Unsupported("complex numbers")),
             bad_end(i + 1),
+            start,
         );
     }
     if ident_follows(i) {
-        return (Tok::Error(LexError::InvalidDecimal), bad_end(i));
+        return (Tok::Error(LexError::InvalidDecimal), bad_end(i), i - 1);
     }
     if is_float {
         // Rust does not accept "1." / ".5" / "1.e5" in every form: normalise.
@@ -543,16 +602,16 @@ fn lex_number(src: &str, start: usize, end: usize) -> (Tok, usize) {
             t.insert(0, '0');
         }
         return match t.parse::<f64>() {
-            Ok(v) => (Tok::Float(v), i),
-            Err(_) => (Tok::Error(LexError::InvalidDecimal), i),
+            Ok(v) => (Tok::Float(v), i, start),
+            Err(_) => (Tok::Error(LexError::InvalidDecimal), i, start),
         };
     }
     if int_part.len() > 1 && int_part.starts_with('0') && int_part.bytes().any(|c| c != b'0') {
-        return (Tok::Error(LexError::LeadingZeros), i);
+        return (Tok::Error(LexError::LeadingZeros), i, start);
     }
     match int_part.parse::<i64>() {
-        Ok(v) => (Tok::Int(v), i),
-        Err(_) => (Tok::Error(LexError::IntTooLarge), i),
+        Ok(v) => (Tok::Int(v), i, start),
+        Err(_) => (Tok::Error(LexError::IntTooLarge), i, start),
     }
 }
 
