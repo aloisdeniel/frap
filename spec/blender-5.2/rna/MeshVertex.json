@@ -138,7 +138,7 @@
   }
  ],
  "funcs": [],
- "requested": true,
+ "root": true,
  "fresh": {
   "recipe": "me = bpy.data.meshes.new('Mesh'); me.vertices.add(1); me.vertices[0]",
   "differs_from_default": {

@@ -178,9 +178,7 @@
    "unit": "NONE",
    "fixed_type": "Mesh",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "uv_layers",
@@ -476,9 +474,7 @@
    "unit": "NONE",
    "fixed_type": "Mesh",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "shape_keys",
@@ -490,8 +486,7 @@
    "fixed_type": "Key",
    "is_id": true,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -623,8 +618,7 @@
    "fixed_type": "AnimData",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -700,8 +694,7 @@
    "is_id": true,
    "api": "IDMaterials",
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -1295,7 +1288,7 @@
    ]
   }
  ],
- "requested": true,
+ "root": true,
  "fresh": {
   "recipe": "bpy.data.meshes.new('Mesh')",
   "differs_from_default": {

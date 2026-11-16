@@ -1,0 +1,45 @@
+{
+ "identifier": "PackedFile",
+ "name": "Packed File",
+ "description": "External file packed into the .blend file",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "size",
+   "name": "Size",
+   "description": "Size of packed file in bytes",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "data",
+   "name": "Data",
+   "description": "Raw data (bytes, exact content of the embedded file)",
+   "type": "STRING",
+   "subtype": "BYTE_STRING",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

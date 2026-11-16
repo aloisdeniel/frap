@@ -1,0 +1,29 @@
+{
+ "type": "SOFT_BODY",
+ "ui_name": "Soft Body",
+ "srna": "SoftBodyModifier",
+ "values": {
+  "name": "M",
+  "type": "SOFT_BODY",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": false,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 228953295,
+  "settings": {
+   "$ptr": "bpy.data.objects['Cube'].modifiers[\"M\"].settings",
+   "type": "SoftBodySettings"
+  },
+  "point_cache": {
+   "$ptr": "bpy.data.objects['Cube'].modifiers[\"M\"].point_cache",
+   "type": "PointCache"
+  }
+ },
+ "default_name": "Softbody"
+}

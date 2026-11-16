@@ -1,0 +1,12 @@
+{
+ "identifier": "NodesModifierBakes",
+ "name": "Bakes",
+ "description": "Bake data for every bake node",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [],
+ "root": false
+}

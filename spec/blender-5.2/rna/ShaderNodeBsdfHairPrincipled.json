@@ -1,0 +1,165 @@
+{
+ "identifier": "ShaderNodeBsdfHairPrincipled",
+ "name": "Principled Hair BSDF",
+ "description": "Physically-based, easy-to-use shader for rendering hair and fur",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "model",
+   "name": "Scattering model",
+   "description": "Select from Chiang or Huang model",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "CHIANG",
+     "name": "Chiang",
+     "description": "Near-field hair scattering model by Chiang et al. 2016, suitable for close-up looks, but is more noisy when viewing from a distance.",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "HUANG",
+     "name": "Huang",
+     "description": "Multi-scale hair scattering model by Huang et al. 2022, suitable for viewing both up close and from a distance, supports elliptical cross-sections and has more precise highlight in forward scattering directions.",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "HUANG",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "parametrization",
+   "name": "Color Parametrization",
+   "description": "Select the shader's color parametrization",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ABSORPTION",
+     "name": "Absorption Coefficient",
+     "description": "Directly set the absorption coefficient \"sigma_a\" (this is not the most intuitive way to color hair)",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "MELANIN",
+     "name": "Melanin Concentration",
+     "description": "Define the melanin concentrations below to get the most realistic-looking hair (you can get the concentrations for different types of hair online)",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "COLOR",
+     "name": "Direct Coloring",
+     "description": "Choose the color of your preference, and the shader will approximate the absorption coefficient to render lookalike hair",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "COLOR",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

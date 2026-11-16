@@ -1,0 +1,32 @@
+{
+ "type": "DISPLACE",
+ "ui_name": "Displace",
+ "srna": "DisplaceModifier",
+ "values": {
+  "name": "M",
+  "type": "DISPLACE",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": false,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 44964863,
+  "vertex_group": "",
+  "mid_level": 0.5,
+  "strength": 1.0,
+  "direction": "NORMAL",
+  "space": "LOCAL",
+  "invert_vertex_group": false,
+  "texture": null,
+  "texture_coords": "LOCAL",
+  "uv_layer": "",
+  "texture_coords_object": null,
+  "texture_coords_bone": ""
+ },
+ "default_name": "Displace"
+}

@@ -1,0 +1,92 @@
+{
+ "identifier": "FluidModifier",
+ "name": "Fluid Modifier",
+ "description": "Fluid simulation modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "domain_settings",
+   "name": "Domain Settings",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FluidDomainSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "flow_settings",
+   "name": "Flow Settings",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FluidFlowSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "effector_settings",
+   "name": "Effector Settings",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FluidEffectorSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "fluid_type",
+   "name": "Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "DOMAIN",
+     "name": "Domain",
+     "description": "Container of the fluid simulation",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FLOW",
+     "name": "Flow",
+     "description": "Add or remove fluid to a domain object",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "EFFECTOR",
+     "name": "Effector",
+     "description": "Deflect fluids and influence the fluid flow",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "NONE",
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

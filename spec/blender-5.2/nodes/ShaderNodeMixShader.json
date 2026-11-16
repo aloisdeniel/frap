@@ -1,0 +1,55 @@
+{
+ "bl_idname": "ShaderNodeMixShader",
+ "srna": "ShaderNodeMixShader",
+ "name": "Mix Shader",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Factor",
+   "identifier": "Fac",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Shader",
+   "identifier": "Shader",
+   "bl_idname": "NodeSocketShader",
+   "type": "SHADER",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  },
+  {
+   "name": "Shader",
+   "identifier": "Shader_001",
+   "bl_idname": "NodeSocketShader",
+   "type": "SHADER",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Shader",
+   "identifier": "Shader",
+   "bl_idname": "NodeSocketShader",
+   "type": "SHADER",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  }
+ ],
+ "props": {}
+}

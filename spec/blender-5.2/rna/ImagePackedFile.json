@@ -1,0 +1,87 @@
+{
+ "identifier": "ImagePackedFile",
+ "name": "ImagePackedFile",
+ "description": "",
+ "base": null,
+ "name_property": "filepath",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "packed_file",
+   "name": "Packed File",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PackedFile",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "filepath",
+   "name": "filepath",
+   "description": "",
+   "type": "STRING",
+   "subtype": "FILE_PATH",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 1024,
+   "flags": [
+    "NEVER_NULL",
+    "PATH_SUPPORTS_BLEND_RELATIVE"
+   ]
+  },
+  {
+   "identifier": "view",
+   "name": "View Index",
+   "description": "",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "tile_number",
+   "name": "Tile Number",
+   "description": "",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "save",
+   "description": "Save the packed file to its filepath",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  }
+ ],
+ "root": true
+}

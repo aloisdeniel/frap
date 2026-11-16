@@ -1,0 +1,233 @@
+{
+ "identifier": "RepeatItem",
+ "name": "Repeat Item",
+ "description": "",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "socket_type",
+   "name": "Socket Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FLOAT",
+     "name": "Float",
+     "description": "",
+     "icon": "NODE_SOCKET_FLOAT",
+     "value": 0
+    },
+    {
+     "identifier": "INT",
+     "name": "Integer",
+     "description": "",
+     "icon": "NODE_SOCKET_INT",
+     "value": 6
+    },
+    {
+     "identifier": "BOOLEAN",
+     "name": "Boolean",
+     "description": "",
+     "icon": "NODE_SOCKET_BOOLEAN",
+     "value": 4
+    },
+    {
+     "identifier": "VECTOR",
+     "name": "Vector",
+     "description": "",
+     "icon": "NODE_SOCKET_VECTOR",
+     "value": 1
+    },
+    {
+     "identifier": "RGBA",
+     "name": "Color",
+     "description": "",
+     "icon": "NODE_SOCKET_RGBA",
+     "value": 2
+    },
+    {
+     "identifier": "ROTATION",
+     "name": "Rotation",
+     "description": "",
+     "icon": "NODE_SOCKET_ROTATION",
+     "value": 14
+    },
+    {
+     "identifier": "MATRIX",
+     "name": "Matrix",
+     "description": "",
+     "icon": "NODE_SOCKET_MATRIX",
+     "value": 16
+    },
+    {
+     "identifier": "STRING",
+     "name": "String",
+     "description": "",
+     "icon": "NODE_SOCKET_STRING",
+     "value": 7
+    },
+    {
+     "identifier": "MENU",
+     "name": "Menu",
+     "description": "",
+     "icon": "NODE_SOCKET_MENU",
+     "value": 15
+    },
+    {
+     "identifier": "SHADER",
+     "name": "Shader",
+     "description": "",
+     "icon": "NODE_SOCKET_SHADER",
+     "value": 3
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "",
+     "icon": "NODE_SOCKET_OBJECT",
+     "value": 8
+    },
+    {
+     "identifier": "IMAGE",
+     "name": "Image",
+     "description": "",
+     "icon": "NODE_SOCKET_IMAGE",
+     "value": 9
+    },
+    {
+     "identifier": "GEOMETRY",
+     "name": "Geometry",
+     "description": "",
+     "icon": "NODE_SOCKET_GEOMETRY",
+     "value": 10
+    },
+    {
+     "identifier": "COLLECTION",
+     "name": "Collection",
+     "description": "",
+     "icon": "NODE_SOCKET_COLLECTION",
+     "value": 11
+    },
+    {
+     "identifier": "TEXTURE",
+     "name": "Texture",
+     "description": "",
+     "icon": "NODE_SOCKET_TEXTURE",
+     "value": 12
+    },
+    {
+     "identifier": "MATERIAL",
+     "name": "Material",
+     "description": "",
+     "icon": "NODE_SOCKET_MATERIAL",
+     "value": 13
+    },
+    {
+     "identifier": "BUNDLE",
+     "name": "Bundle",
+     "description": "",
+     "icon": "NODE_SOCKET_BUNDLE",
+     "value": 17
+    },
+    {
+     "identifier": "CLOSURE",
+     "name": "Closure",
+     "description": "",
+     "icon": "NODE_SOCKET_CLOSURE",
+     "value": 18
+    },
+    {
+     "identifier": "FONT",
+     "name": "Font",
+     "description": "",
+     "icon": "NODE_SOCKET_FONT",
+     "value": 19
+    },
+    {
+     "identifier": "SCENE",
+     "name": "Scene",
+     "description": "",
+     "icon": "NODE_SOCKET_SCENE",
+     "value": 20
+    },
+    {
+     "identifier": "TEXT",
+     "name": "Text",
+     "description": "",
+     "icon": "NODE_SOCKET_TEXT",
+     "value": 21
+    },
+    {
+     "identifier": "MASK",
+     "name": "Mask",
+     "description": "",
+     "icon": "NODE_SOCKET_MASK",
+     "value": 22
+    },
+    {
+     "identifier": "SOUND",
+     "name": "Sound",
+     "description": "",
+     "icon": "NODE_SOCKET_SOUND",
+     "value": 23
+    },
+    {
+     "identifier": "INT_VECTOR",
+     "name": "Integer Vector",
+     "description": "",
+     "icon": "NODE_SOCKET_INT_VECTOR",
+     "value": 24
+    }
+   ],
+   "default": "FLOAT",
+   "flags": []
+  },
+  {
+   "identifier": "color",
+   "name": "Color",
+   "description": "Color of the corresponding socket type in the node editor",
+   "type": "FLOAT",
+   "subtype": "COLOR_GAMMA",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

@@ -2,6 +2,11 @@
  "blender_version": "5.2.4 LTS",
  "build_hash": "cd5dc428cce1",
  "factory_startup": true,
+ "addon_prefs": {
+  "io_scene_gltf2": {
+   "KHR_materials_variants_ui": true
+  }
+ },
  "property_types": [
   "BOOLEAN",
   "INT",
@@ -70,8 +75,26 @@
   "FREQUENCY"
  ],
  "namespaces": [
+  "object",
   "mesh",
-  "object"
+  "uv",
+  "transform",
+  "view3d",
+  "anim",
+  "screen",
+  "render",
+  "wm",
+  "material",
+  "image",
+  "world",
+  "collection",
+  "scene",
+  "geometry",
+  "armature",
+  "pose",
+  "nla",
+  "export_scene",
+  "import_scene"
  ],
  "poll_contexts": {
   "A": "object mode, factory scene (Cube active and selected)",

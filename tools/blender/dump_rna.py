@@ -4,21 +4,32 @@
 Runs INSIDE Blender (ARCHITECTURE.md §4.1):
 
     $BLENDER_BIN -b --factory-startup --python tools/blender/dump_rna.py -- \
-        --out spec/blender-5.2/ [--structs Object,Mesh,...] [--extra MaterialSlot,...] [--no-bases]
+        --out spec/blender-5.2/ [--structs Object,Mesh,...]
 
 Writes <out>/rna/<Struct>.json and <out>/rna/_meta.json.
 
-For every struct: identifier, name, description, base, name_property, nested,
+Struct set ("every struct reachable from bpy.types that frap may implement"): the ROOTS below
+(OPERATORS.md §D, every Modifier subclass, every ShaderNode*/NodeSocket* type, the glTF add-on
+preferences), closed over (a) base structs, (b) the fixed types and collection API structs of
+their POINTER/COLLECTION properties, never entering an ID type that is not itself a root.
+
+For every struct: identifier, name, description, base, name_property, nested, is_id,
 own properties (base-chain properties are NOT repeated; lookup walks `base`),
 functions (params / returns), and `fresh`: values read from a newly created
-instance wherever they differ from the RNA default (ARCHITECTURE.md §2.1, §5.6).
+instance wherever they differ from the RNA default (ARCHITECTURE.md §2.1, §5.6, RFC 0001
+F-DEF-7), with the creation recipe.
 
 The struct `Context` additionally gets `context_members`: members reachable via
 `bpy.context.<name>` that are NOT RNA properties of `bpy.types.Context` (they come
 from C context callbacks: object, active_object, selected_objects, ...). Their types
-are inferred from live values inside a VIEW_3D override and from a few scene states.
+are inferred from live values inside a VIEW_3D override and from a few scene states;
+`spec/overlay/context_members.toml` completes the ones never seen non-None (F-DEF-5).
 
-First version written for WP 0.2 (contract probes). WP 1.1 extends it.
+The glTF add-on preference `KHR_materials_variants_ui` is switched on first (§4.1), so the
+variant RNA (`Scene.gltf2_KHR_materials_variants_variants`, ...) is registered and dumped;
+`_meta.json` records it under `addon_prefs`.
+
+First version written for WP 0.2 (contract probes); extended to the full struct set by WP 1.1.
 """
 
 import json
@@ -28,12 +39,30 @@ import sys
 
 import bpy
 
-# The WP 0.2 subset. WP 1.1 replaces this by "every struct reachable from bpy.types
-# that frap may implement".
-DEFAULT_STRUCTS = ["Object", "Mesh", "MeshVertex", "Material", "ShaderNodeTree", "NodeSocket"]
-# Structs the M0 prototypes additionally need (refined socket type, derived slot, Context).
-DEFAULT_EXTRA = ["MaterialSlot", "Node", "NodeSocketColor", "ShaderNodeBsdfPrincipled", "Context",
-                 "Scene", "ViewLayer", "ToolSettings"]
+# OPERATORS.md §D plus what the bindings and generated plain structs need.
+ROOTS = """
+ID Library Window AddonPreferences BlendData Context Preferences PreferencesEdit
+Object ObjectModifiers Modifier
+Mesh MeshVertex MeshEdge MeshPolygon MeshLoop MeshLoopTriangle
+AttributeGroupMesh Attribute FloatAttribute FloatVectorAttribute FloatColorAttribute
+ByteColorAttribute BoolAttribute IntAttribute Float2Attribute ByteIntAttribute
+StringAttribute QuaternionAttribute Float4x4Attribute Short2Attribute Int2Attribute
+MeshUVLoopLayer MeshUVLoop UVLoopLayers
+Material MaterialSlot IDMaterials PointCloud
+NodeTree ShaderNodeTree GeometryNodeTree Node NodeSocket NodeLink Nodes NodeLinks
+NodeGroupInput NodeGroupOutput NodeFrame NodeReroute NodeTreeInterface
+Camera CameraDOFSettings Light PointLight SunLight SpotLight AreaLight World
+Scene RenderSettings ImageFormatSettings ColorManagedViewSettings ColorManagedDisplaySettings
+ColorManagedInputColorspaceSettings SceneDisplay View3DShading SceneEEVEE ToolSettings
+View3DCursor UnitSettings ViewLayer LayerObjects LayerCollection
+Collection CollectionObjects CollectionChildren Depsgraph DepsgraphObjectInstance
+Image ImagePackedFile Texture ImageTexture
+VertexGroup VertexGroups VertexGroupElement Key ShapeKey
+Armature Bone EditBone ArmatureEditBones Pose PoseBone BoneCollection
+Action ActionSlot ActionLayer ActionStrip ActionKeyframeStrip ActionChannelbag FCurve Keyframe
+FCurveKeyframePoints ActionGroup AnimData NlaTrack NlaTracks NlaStrip NlaStrips
+Constraint
+""".split()
 
 FLAG_ATTRS = [
     # (bpy attribute, flag name in the dump)
@@ -46,8 +75,8 @@ FLAG_ATTRS = [
     ("is_animatable", "ANIMATABLE"),
     ("is_never_none", "NEVER_NULL"),
     ("is_argument_optional", "ARGUMENT_OPTIONAL"),
-    ("is_library_editable", "LIBRARY_EDITABLE"),
-    ("is_overridable", "OVERRIDABLE"),
+    # `is_overridable` / `is_library_editable` are evaluated on a NULL instance and crash
+    # Blender for some dynamic arrays (ImagePreview.image_pixels); frap needs neither.
     ("is_skip_preset", "SKIP_PRESET"),
     ("is_path_output", "PATH_OUTPUT"),
     ("is_path_supports_blend_relative", "PATH_SUPPORTS_BLEND_RELATIVE"),
@@ -224,6 +253,131 @@ def struct_to_json(srna):
     }
 
 
+# ------------------------------------------------------------------------- struct set
+
+# Structs not exposed in bpy.types (the glTF add-on preferences class): identifier -> getter.
+# A getter, not the struct: `read_factory_settings` re-registers add-ons and frees the old one.
+_EXTRA_RNA = {}
+
+
+def _gltf_prefs_rna():
+    return type(bpy.context.preferences.addons["io_scene_gltf2"].preferences).bl_rna
+
+
+def bl_rna_of(name):
+    if name in _EXTRA_RNA:
+        return _EXTRA_RNA[name]()
+    t = getattr(bpy.types, name, None)
+    return getattr(t, "bl_rna", None) if t is not None else None
+
+
+def subclasses_of(base_name):
+    """Every bpy.types struct whose base chain contains `base_name` (C types have no
+    Python __subclasses__)."""
+    out = []
+    for n in dir(bpy.types):
+        s = bl_rna_of(n)
+        if s is None or s.identifier != n:
+            continue
+        b = s.base
+        while b is not None:
+            if b.identifier == base_name:
+                out.append(n)
+                break
+            b = b.base
+    return sorted(out)
+
+
+def gltf_addon_prefs_struct():
+    try:
+        srna = _gltf_prefs_rna()
+    except Exception:  # noqa: BLE001
+        return None
+    _EXTRA_RNA[srna.identifier] = _gltf_prefs_rna
+    return srna.identifier
+
+
+def root_set():
+    roots = list(ROOTS)
+    roots += subclasses_of("Modifier")
+    roots += [n for n in subclasses_of("ShaderNode")]
+    roots += [n for n in dir(bpy.types) if n.startswith("NodeSocket") and bl_rna_of(n) is not None]
+    roots += subclasses_of("Light")
+    p = gltf_addon_prefs_struct()
+    if p:
+        roots.append(p)
+    out = []
+    for n in roots:
+        s = bl_rna_of(n)
+        if s is None:
+            print(f"dump_rna.py: warning: no struct {n}", file=sys.stderr)
+            continue
+        if s.identifier not in out:
+            out.append(s.identifier)
+    return out
+
+
+# The closure does not enter UI, editor, tool, physics and other out-of-scope structs (their
+# POINTER/COLLECTION props stay in the dump with the target identifier). Roots are kept.
+PRUNE_PREFIXES = (
+    "Theme", "UI", "Gizmo", "KeyMap", "KeyConfig", "Macro", "Event", "NDOF", "Xr", "Area",
+    "Region", "Space", "View2D", "View3DOverlay", "Preferences", "Strip", "Sequence", "Freestyle",
+    "Lineset", "FileSelect", "Walk", "Textbox", "ScriptDirectory", "UserExtension",
+    "UserAssetLibrary", "UserSolidLight", "AssetLibrary", "StudioLight", "Operator", "Particle",
+    "ChildParticle", "Fluid", "DynamicPaint", "Cloth", "SoftBody", "PointCache", "RigidBody",
+    "Movie", "GPencil", "Gp", "GreasePencil", "Sculpt", "Paint", "VertexPaint", "ImagePaint",
+    "UvSculpt", "CurvesSculpt", "UnifiedPaint", "MeshAutomasking", "IDOverrideLibrary",
+    "KeyingSet", "Driver", "ChannelDriver", "AnimDataDrivers", "MotionPath", "AnimViz",
+    "Lightgroup", "AOV", "Stereo3d", "BakeSettings", "FFmpeg", "RenderView", "SceneRenderView",
+    "SceneHydra", "Struct", "Property", "Function", "EnumPropertyItem", "StringProperty",
+    "CollisionSettings", "EffectorWeights", "FieldSettings", "CurvePaintSettings",
+    "MeshStatVis", "TransformOrientation", "CurveProfile", "SequencerToolSettings",
+    "MaterialGPencilStyle", "MaterialLineArt", "ObjectLineArt", "ObjectShaderFx", "ShaderFx",
+    "DisplaySafeAreas", "TimelineMarker", "ActionPoseMarkers", "LibraryWeakReference",
+    "PathCompare", "SceneGpencil", "RaytraceEEVEE", "WorldMistSettings", "WorldLighting",
+    "BlendFileColorspace", "TexPaintSlot", "NodeInternalSocketTemplate", "Asset",
+    "IKParam", "StripModifier",
+)
+# Exceptions to PRUNE_PREFIXES that frap needs (the virtual 3D View of §8).
+PRUNE_KEEP = {"RegionView3D", "Addon", "Addons", "AddonPreferences"}
+
+
+def pruned(name):
+    return name not in PRUNE_KEEP and name.startswith(PRUNE_PREFIXES)
+
+
+def closure(roots):
+    """Roots + bases + POINTER/COLLECTION targets and collection API structs, never entering an
+    ID type that is not a root nor a pruned struct. Sorted for determinism."""
+    root_set_ = set(roots)
+    seen = set(roots)
+    frontier = list(roots)
+    while frontier:
+        nxt = []
+        for n in frontier:
+            s = bl_rna_of(n)
+            b = s.base
+            while b is not None:
+                if b.identifier not in seen:
+                    seen.add(b.identifier)
+                    nxt.append(b.identifier)
+                b = b.base
+            for p in list(s.properties) + [q for f in s.functions for q in f.parameters]:
+                if p.type not in ("POINTER", "COLLECTION") or p.identifier == "rna_type":
+                    continue
+                for t in (p.fixed_type, getattr(p, "srna", None)):
+                    if t is None or t.identifier in seen or t.identifier in root_set_:
+                        continue
+                    if is_id_struct(t) or pruned(t.identifier):
+                        continue
+                    if bl_rna_of(t.identifier) is None:
+                        continue
+                    seen.add(t.identifier)
+                    nxt.append(t.identifier)
+        frontier = nxt
+    return sorted(seen)
+
+
 # ----------------------------------------------------------------- fresh-instance values
 
 def _principled(mat):
@@ -234,35 +388,111 @@ def fresh_instances():
     """Recipes creating a fresh instance per struct (the creation path is recorded).
     Each returns (recipe_text, instance)."""
     D = bpy.data
+
+    def new_scene():
+        return D.scenes.new("FreshScene")
+
+    def scene_attr(path):
+        def f():
+            sc = new_scene()
+            v = sc
+            for a in path.split("."):
+                v = getattr(v, a)
+            return f"bpy.data.scenes.new('Scene').{path}", v
+        return f
+
+    def light(t, cls):
+        def f():
+            return f"bpy.data.lights.new('Light', '{t}')", D.lights.new("Fresh" + cls, t)
+        return f
+
     def obj():
         return "bpy.data.objects.new('Object', None)", D.objects.new("Object", None)
+
     def mesh():
         return "bpy.data.meshes.new('Mesh')", D.meshes.new("Mesh")
+
     def mat():
         return "bpy.data.materials.new('Material')", D.materials.new("Material")
+
     def ntree():
         m = D.materials.new("FreshNT")
         return "bpy.data.materials.new('Material').node_tree", m.node_tree
+
     def vert():
         me = D.meshes.new("FreshVert")
         me.vertices.add(1)
         return "me = bpy.data.meshes.new('Mesh'); me.vertices.add(1); me.vertices[0]", me.vertices[0]
+
     def node():
         m = D.materials.new("FreshNode")
         return "bpy.data.materials.new('Material').node_tree.nodes['Principled BSDF']", _principled(m)
+
     def sock():
         m = D.materials.new("FreshSock")
-        return "bpy.data.materials.new('Material').node_tree.nodes['Principled BSDF'].inputs[0]", _principled(m).inputs[0]
+        return ("bpy.data.materials.new('Material').node_tree.nodes['Principled BSDF'].inputs[0]",
+                _principled(m).inputs[0])
+
     def slot():
         me = D.meshes.new("FreshSlot")
         me.materials.append(D.materials.new("FreshSlotMat"))
         ob = D.objects.new("FreshSlot", me)
-        return ("me = bpy.data.meshes.new('Mesh'); me.materials.append(bpy.data.materials.new('M')); "
+        return ("me = bpy.data.meshes.new('Mesh'); me.materials.append(bpy.data.materials.new('FreshSlotMat')); "
                 "bpy.data.objects.new('O', me).material_slots[0]"), ob.material_slots[0]
+
+    def camera():
+        return "bpy.data.cameras.new('Camera')", D.cameras.new("FreshCamera")
+
+    def dof():
+        return "bpy.data.cameras.new('Camera').dof", D.cameras.new("FreshDof").dof
+
+    def world():
+        return "bpy.data.worlds.new('World')", D.worlds.new("FreshWorld")
+
+    def coll():
+        return "bpy.data.collections.new('Collection')", D.collections.new("FreshCollection")
+
+    def image():
+        return "bpy.data.images.new('Image', 4, 4)", D.images.new("FreshImage", 4, 4)
+
+    def image_cs():
+        im = D.images.new("FreshImageCS", 4, 4)
+        return "bpy.data.images.new('Image', 4, 4).colorspace_settings", im.colorspace_settings
+
+    def scene():
+        return "bpy.data.scenes.new('Scene')", new_scene()
+
+    def pointcloud():
+        return "bpy.data.pointclouds.new('PointCloud')", D.pointclouds.new("FreshPointCloud")
+
+    def armature():
+        return "bpy.data.armatures.new('Armature')", D.armatures.new("FreshArmature")
+
+    def action():
+        return "bpy.data.actions.new('Action')", D.actions.new("FreshAction")
+
     return {
         "Object": obj, "Mesh": mesh, "Material": mat, "ShaderNodeTree": ntree,
         "MeshVertex": vert, "Node": node, "ShaderNodeBsdfPrincipled": node,
         "NodeSocket": sock, "NodeSocketColor": sock, "MaterialSlot": slot,
+        "Camera": camera, "CameraDOFSettings": dof,
+        "Light": light("POINT", "Light"), "PointLight": light("POINT", "Point"),
+        "SunLight": light("SUN", "Sun"), "SpotLight": light("SPOT", "Spot"),
+        "AreaLight": light("AREA", "Area"),
+        "World": world, "Collection": coll, "Image": image,
+        "ColorManagedInputColorspaceSettings": image_cs,
+        "Scene": scene,
+        "RenderSettings": scene_attr("render"),
+        "ImageFormatSettings": scene_attr("render.image_settings"),
+        "ColorManagedViewSettings": scene_attr("view_settings"),
+        "ColorManagedDisplaySettings": scene_attr("display_settings"),
+        "SceneDisplay": scene_attr("display"),
+        "View3DShading": scene_attr("display.shading"),
+        "SceneEEVEE": scene_attr("eevee"),
+        "ToolSettings": scene_attr("tool_settings"),
+        "UnitSettings": scene_attr("unit_settings"),
+        "View3DCursor": scene_attr("cursor"),
+        "PointCloud": pointcloud, "Armature": armature, "Action": action,
     }
 
 
@@ -288,7 +518,12 @@ def flatten(v):
 
 
 # Per-instance identity, not a "fresh value" (would make every dump differ run to run).
-IDENTITY_PROPS = {"rna_type", "name", "name_full", "session_uid"}
+IDENTITY_PROPS = {"rna_type", "session_uid", "bindcode"}
+# ID names are given by the recipe; a non-ID struct's `name` is a value (colour space name).
+ID_IDENTITY_PROPS = {"name", "name_full"}
+# Machine-dependent fresh values (frap is deterministic and keeps the RNA default):
+# `RenderSettings.threads` is the CPU thread count of the dumping machine.
+MACHINE_PROPS = {("RenderSettings", "threads")}
 
 
 def fresh_diff(srna, inst):
@@ -296,6 +531,10 @@ def fresh_diff(srna, inst):
     diff = {}
     for p in srna.properties:
         if p.identifier in IDENTITY_PROPS or p.type in ("POINTER", "COLLECTION"):
+            continue
+        if p.identifier in ID_IDENTITY_PROPS and is_id_struct(srna):
+            continue
+        if (srna.identifier, p.identifier) in MACHINE_PROPS:
             continue
         try:
             live = jvalue(getattr(inst, p.identifier))
@@ -375,7 +614,7 @@ def context_members():
 
 def parse_args():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
-    args = {"out": None, "structs": DEFAULT_STRUCTS, "extra": DEFAULT_EXTRA, "bases": True}
+    args = {"out": None, "structs": None}
     i = 0
     while i < len(argv):
         a = argv[i]
@@ -383,10 +622,6 @@ def parse_args():
             args["out"] = argv[i + 1]; i += 2
         elif a == "--structs":
             args["structs"] = [s for s in argv[i + 1].split(",") if s]; i += 2
-        elif a == "--extra":
-            args["extra"] = [s for s in argv[i + 1].split(",") if s]; i += 2
-        elif a == "--no-bases":
-            args["bases"] = False; i += 1
         else:
             raise SystemExit(f"dump_rna.py: unknown argument {a!r}")
     if not args["out"]:
@@ -394,12 +629,25 @@ def parse_args():
     return args
 
 
+ADDON_PREFS = {"io_scene_gltf2": {"KHR_materials_variants_ui": True}}
+
+
 def enable_addon_prefs():
     # §4.1: without this, glTF variant RNA is not registered.
-    try:
-        bpy.context.preferences.addons["io_scene_gltf2"].preferences.KHR_materials_variants_ui = True
-    except Exception as e:  # noqa: BLE001
-        print(f"dump_rna.py: warning: cannot enable KHR_materials_variants_ui: {e}", file=sys.stderr)
+    for addon, values in ADDON_PREFS.items():
+        for k, v in values.items():
+            try:
+                setattr(bpy.context.preferences.addons[addon].preferences, k, v)
+            except Exception as e:  # noqa: BLE001
+                raise SystemExit(f"dump_rna.py: cannot set {addon}.{k}: {e}")
+
+
+def addon_prefs_state():
+    out = {}
+    for addon, values in ADDON_PREFS.items():
+        prefs = bpy.context.preferences.addons[addon].preferences
+        out[addon] = {k: getattr(prefs, k) for k in values}
+    return out
 
 
 def blender_meta():
@@ -407,6 +655,7 @@ def blender_meta():
         "blender_version": bpy.app.version_string,
         "build_hash": bpy.app.build_hash.decode() if isinstance(bpy.app.build_hash, bytes) else bpy.app.build_hash,
         "factory_startup": True,
+        "addon_prefs": addon_prefs_state(),
         "property_types": [i.identifier for i in bpy.types.Property.bl_rna.properties["type"].enum_items],
         "subtypes": [i.identifier for i in bpy.types.Property.bl_rna.properties["subtype"].enum_items],
         "units": [i.identifier for i in bpy.types.Property.bl_rna.properties["unit"].enum_items],
@@ -423,37 +672,34 @@ def write_json(path, data):
 def main():
     args = parse_args()
     enable_addon_prefs()
-    names = list(dict.fromkeys(args["structs"] + args["extra"]))
-    if args["bases"]:
-        closure = []
-        for n in names:
-            s = getattr(bpy.types, n).bl_rna
-            chain = []
-            while s is not None:
-                chain.append(s.identifier)
-                s = s.base
-            for c in reversed(chain):
-                if c not in closure:
-                    closure.append(c)
-        names = closure
+    roots = args["structs"] or root_set()
+    names = closure(roots)
+
+    # Context members first (it reloads factory settings, which would free fresh instances).
+    ctx_members = context_members()
+    enable_addon_prefs()
 
     recipes = fresh_instances()
     out_dir = os.path.join(args["out"], "rna")
+    os.makedirs(out_dir, exist_ok=True)
+    for f in os.listdir(out_dir):
+        if f.endswith(".json"):
+            os.remove(os.path.join(out_dir, f))
     for n in names:
-        srna = getattr(bpy.types, n).bl_rna
+        srna = bl_rna_of(n)
         data = struct_to_json(srna)
-        data["requested"] = n in args["structs"]
+        data["root"] = n in roots
         if n in recipes:
             recipe, inst = recipes[n]()
             data["fresh"] = {"recipe": recipe, "differs_from_default": fresh_diff(srna, inst)}
         if n == "Context":
-            data["context_members"] = context_members()
-            enable_addon_prefs()
+            data["context_members"] = ctx_members
         write_json(os.path.join(out_dir, n + ".json"), data)
-        print(f"dump_rna.py: {n}: {len(data['props'])} props, {len(data['funcs'])} funcs")
     meta = blender_meta()
+    meta["roots"] = sorted(roots)
     meta["structs"] = names
     write_json(os.path.join(out_dir, "_meta.json"), meta)
+    print(f"dump_rna.py: {len(names)} structs ({len(roots)} roots)")
 
 
 if __name__ == "__main__":

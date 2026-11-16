@@ -1,0 +1,49 @@
+{
+ "type": "MIRROR",
+ "ui_name": "Mirror",
+ "srna": "MirrorModifier",
+ "values": {
+  "name": "M",
+  "type": "MIRROR",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": true,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 1723713518,
+  "use_axis": [
+   true,
+   false,
+   false
+  ],
+  "use_bisect_axis": [
+   false,
+   false,
+   false
+  ],
+  "use_bisect_flip_axis": [
+   false,
+   false,
+   false
+  ],
+  "use_clip": false,
+  "use_mirror_vertex_groups": true,
+  "use_mirror_merge": true,
+  "use_mirror_u": false,
+  "use_mirror_v": false,
+  "use_mirror_udim": false,
+  "mirror_offset_u": 0.0,
+  "mirror_offset_v": 0.0,
+  "offset_u": 0.0,
+  "offset_v": 0.0,
+  "merge_threshold": 0.0010000000474974513,
+  "bisect_threshold": 0.0010000000474974513,
+  "mirror_object": null
+ },
+ "default_name": "Mirror"
+}

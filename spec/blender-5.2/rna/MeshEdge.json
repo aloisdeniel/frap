@@ -1,0 +1,109 @@
+{
+ "identifier": "MeshEdge",
+ "name": "Mesh Edge",
+ "description": "Edge in a Mesh data-block",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "vertices",
+   "name": "Vertices",
+   "description": "Vertex indices",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0,
+    0
+   ],
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "select",
+   "name": "Select",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "hide",
+   "name": "Hide",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_seam",
+   "name": "Seam",
+   "description": "Seam edge for UV unwrapping",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_edge_sharp",
+   "name": "Sharp",
+   "description": "Sharp edge for shading",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_loose",
+   "name": "Loose",
+   "description": "Edge is not connected to any faces",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "index",
+   "name": "Index",
+   "description": "Index of this edge",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

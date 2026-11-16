@@ -1,0 +1,705 @@
+{
+ "identifier": "BlendData",
+ "name": "Blend-File Data",
+ "description": "Main data structure representing a .blend file and all its data-blocks",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "filepath",
+   "name": "Filename",
+   "description": "Path to the .blend file",
+   "type": "STRING",
+   "subtype": "FILE_PATH",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 1024,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "is_dirty",
+   "name": "File Has Unsaved Changes",
+   "description": "Have recent edits been saved to disk",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_saved",
+   "name": "File is Saved",
+   "description": "Has the current session been saved to disk as a .blend file",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_autopack",
+   "name": "Use Auto-Pack",
+   "description": "Automatically pack all external data into .blend file",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "version",
+   "name": "Version",
+   "description": "File format version the .blend file was saved with",
+   "type": "INT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0,
+    0,
+    0
+   ],
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "cameras",
+   "name": "Cameras",
+   "description": "Camera data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Camera",
+   "is_id": true,
+   "api": "BlendDataCameras",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "scenes",
+   "name": "Scenes",
+   "description": "Scene data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Scene",
+   "is_id": true,
+   "api": "BlendDataScenes",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "objects",
+   "name": "Objects",
+   "description": "Object data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "api": "BlendDataObjects",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "materials",
+   "name": "Materials",
+   "description": "Material data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "api": "BlendDataMaterials",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "node_groups",
+   "name": "Node Groups",
+   "description": "Node group data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeTree",
+   "is_id": true,
+   "api": "BlendDataNodeTrees",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "meshes",
+   "name": "Meshes",
+   "description": "Mesh data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Mesh",
+   "is_id": true,
+   "api": "BlendDataMeshes",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "lights",
+   "name": "Lights",
+   "description": "Light data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Light",
+   "is_id": true,
+   "api": "BlendDataLights",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "libraries",
+   "name": "Libraries",
+   "description": "Library data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Library",
+   "is_id": true,
+   "api": "BlendDataLibraries",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "screens",
+   "name": "Screens",
+   "description": "Screen data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Screen",
+   "is_id": true,
+   "api": "BlendDataScreens",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "window_managers",
+   "name": "Window Managers",
+   "description": "Window manager data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "WindowManager",
+   "is_id": true,
+   "api": "BlendDataWindowManagers",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "images",
+   "name": "Images",
+   "description": "Image data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Image",
+   "is_id": true,
+   "api": "BlendDataImages",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "lattices",
+   "name": "Lattices",
+   "description": "Lattice data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Lattice",
+   "is_id": true,
+   "api": "BlendDataLattices",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "curves",
+   "name": "Curves",
+   "description": "Curve data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Curve",
+   "is_id": true,
+   "api": "BlendDataCurves",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "metaballs",
+   "name": "Metaballs",
+   "description": "Metaball data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MetaBall",
+   "is_id": true,
+   "api": "BlendDataMetaBalls",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "fonts",
+   "name": "Vector Fonts",
+   "description": "Vector font data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "VectorFont",
+   "is_id": true,
+   "api": "BlendDataFonts",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "textures",
+   "name": "Textures",
+   "description": "Texture data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Texture",
+   "is_id": true,
+   "api": "BlendDataTextures",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "brushes",
+   "name": "Brushes",
+   "description": "Brush data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Brush",
+   "is_id": true,
+   "api": "BlendDataBrushes",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "worlds",
+   "name": "Worlds",
+   "description": "World data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "World",
+   "is_id": true,
+   "api": "BlendDataWorlds",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "collections",
+   "name": "Collections",
+   "description": "Collection data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Collection",
+   "is_id": true,
+   "api": "BlendDataCollections",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "shape_keys",
+   "name": "Shape Keys",
+   "description": "Shape Key data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Key",
+   "is_id": true,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "texts",
+   "name": "Texts",
+   "description": "Text data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Text",
+   "is_id": true,
+   "api": "BlendDataTexts",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "speakers",
+   "name": "Speakers",
+   "description": "Speaker data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Speaker",
+   "is_id": true,
+   "api": "BlendDataSpeakers",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "sounds",
+   "name": "Sounds",
+   "description": "Sound data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Sound",
+   "is_id": true,
+   "api": "BlendDataSounds",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "armatures",
+   "name": "Armatures",
+   "description": "Armature data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Armature",
+   "is_id": true,
+   "api": "BlendDataArmatures",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "actions",
+   "name": "Actions",
+   "description": "Action data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Action",
+   "is_id": true,
+   "api": "BlendDataActions",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "particles",
+   "name": "Particles",
+   "description": "Particle data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ParticleSettings",
+   "is_id": true,
+   "api": "BlendDataParticles",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "palettes",
+   "name": "Palettes",
+   "description": "Palette data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Palette",
+   "is_id": true,
+   "api": "BlendDataPalettes",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "annotations",
+   "name": "Annotation",
+   "description": "Annotation data-blocks (legacy Grease Pencil)",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Annotation",
+   "is_id": true,
+   "api": "BlendDataAnnotations",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "grease_pencils",
+   "name": "Grease Pencil",
+   "description": "Grease Pencil data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "GreasePencil",
+   "is_id": true,
+   "api": "BlendDataGreasePencilsV3",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "movieclips",
+   "name": "Movie Clips",
+   "description": "Movie Clip data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MovieClip",
+   "is_id": true,
+   "api": "BlendDataMovieClips",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "masks",
+   "name": "Masks",
+   "description": "Masks data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Mask",
+   "is_id": true,
+   "api": "BlendDataMasks",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "linestyles",
+   "name": "Line Styles",
+   "description": "Line Style data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FreestyleLineStyle",
+   "is_id": true,
+   "api": "BlendDataLineStyles",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "cache_files",
+   "name": "Cache Files",
+   "description": "Cache Files data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CacheFile",
+   "is_id": true,
+   "api": "BlendDataCacheFiles",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "paint_curves",
+   "name": "Paint Curves",
+   "description": "Paint Curves data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PaintCurve",
+   "is_id": true,
+   "api": "BlendDataPaintCurves",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "workspaces",
+   "name": "Workspaces",
+   "description": "Workspace data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "WorkSpace",
+   "is_id": true,
+   "api": "BlendDataWorkSpaces",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "lightprobes",
+   "name": "Light Probes",
+   "description": "Light Probe data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "LightProbe",
+   "is_id": true,
+   "api": "BlendDataProbes",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "hair_curves",
+   "name": "Hair Curves",
+   "description": "Hair curve data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Curves",
+   "is_id": true,
+   "api": "BlendDataHairCurves",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "pointclouds",
+   "name": "Point Clouds",
+   "description": "Point cloud data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PointCloud",
+   "is_id": true,
+   "api": "BlendDataPointClouds",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "volumes",
+   "name": "Volumes",
+   "description": "Volume data-blocks",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Volume",
+   "is_id": true,
+   "api": "BlendDataVolumes",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "colorspace",
+   "name": "Color Space",
+   "description": "Information about the color space used for data-blocks in a blend file",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "BlendFileColorspace",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "all_ids",
+   "name": "All Data-Blocks",
+   "description": "Read-only list of all IDs listed in Blender data-base",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ID",
+   "is_id": true,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "pack_linked_ids_hierarchy",
+   "description": "Pack the given linked ID and its dependencies into current blendfile",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "root_id",
+     "name": "",
+     "description": "Root linked ID to pack",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ID",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "packed_id",
+     "name": "",
+     "description": "The packed ID matching the given root ID",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ID",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

@@ -1,0 +1,155 @@
+{
+ "identifier": "FCurveModifiers",
+ "name": "F-Curve Modifiers",
+ "description": "Collection of F-Curve Modifiers",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "active",
+   "name": "Active F-Curve Modifier",
+   "description": "Active F-Curve Modifier",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FModifier",
+   "is_id": false,
+   "flags": []
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add a constraint to this object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "type",
+     "name": "",
+     "description": "Constraint type to add",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NULL",
+       "name": "Invalid",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "GENERATOR",
+       "name": "Generator",
+       "description": "Generate a curve using a factorized or expanded polynomial",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "FNGENERATOR",
+       "name": "Built-In Function",
+       "description": "Generate a curve using standard math functions such as sin and cos",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ENVELOPE",
+       "name": "Envelope",
+       "description": "Reshape F-Curve values, e.g. change amplitude of movements",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "CYCLES",
+       "name": "Cycles",
+       "description": "Cyclic extend/repeat keyframe sequence",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "NOISE",
+       "name": "Noise",
+       "description": "Add pseudo-random noise on top of F-Curves",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "LIMITS",
+       "name": "Limits",
+       "description": "Restrict maximum and minimum values of F-Curve",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "STEPPED",
+       "name": "Stepped Interpolation",
+       "description": "Snap values to nearest grid step, e.g. for a stop-motion look",
+       "icon": "NONE",
+       "value": 9
+      },
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth (Gaussian)",
+       "description": "Smooth curve using Gaussian smoothing",
+       "icon": "NONE",
+       "value": 10
+      }
+     ],
+     "default": "GENERATOR",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "fmodifier",
+     "name": "",
+     "description": "New fmodifier",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "FModifier",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove a modifier from this F-Curve",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "modifier",
+     "name": "",
+     "description": "Removed modifier",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "FModifier",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

@@ -1,0 +1,143 @@
+{
+ "bl_idname": "ShaderNodeVectorTransform",
+ "srna": "ShaderNodeVectorTransform",
+ "name": "Vector Transform",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.5,
+    0.5,
+    0.5
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "vector_type": "VECTOR",
+  "convert_from": "WORLD",
+  "convert_to": "OBJECT"
+ },
+ "availability": {
+  "vector_type": {
+   "default": "VECTOR",
+   "by_value": {
+    "POINT": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "VECTOR": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "NORMAL": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    }
+   }
+  },
+  "convert_from": {
+   "default": "WORLD",
+   "by_value": {
+    "WORLD": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "OBJECT": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "CAMERA": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    }
+   }
+  },
+  "convert_to": {
+   "default": "OBJECT",
+   "by_value": {
+    "WORLD": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "OBJECT": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "CAMERA": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    }
+   }
+  }
+ }
+}

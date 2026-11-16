@@ -1,0 +1,448 @@
+{
+ "identifier": "HookModifier",
+ "name": "Hook Modifier",
+ "description": "Hook modifier to modify the location of vertices",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "strength",
+   "name": "Strength",
+   "description": "Relative force of the hook",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "falloff_type",
+   "name": "Falloff Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "No Falloff",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CURVE",
+     "name": "Curve",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "SMOOTH",
+     "name": "Smooth",
+     "description": "",
+     "icon": "SMOOTHCURVE",
+     "value": 3
+    },
+    {
+     "identifier": "SPHERE",
+     "name": "Sphere",
+     "description": "",
+     "icon": "SPHERECURVE",
+     "value": 7
+    },
+    {
+     "identifier": "ROOT",
+     "name": "Root",
+     "description": "",
+     "icon": "ROOTCURVE",
+     "value": 4
+    },
+    {
+     "identifier": "INVERSE_SQUARE",
+     "name": "Inverse Square",
+     "description": "",
+     "icon": "INVERSESQUARECURVE",
+     "value": 8
+    },
+    {
+     "identifier": "SHARP",
+     "name": "Sharp",
+     "description": "",
+     "icon": "SHARPCURVE",
+     "value": 2
+    },
+    {
+     "identifier": "LINEAR",
+     "name": "Linear",
+     "description": "",
+     "icon": "LINCURVE",
+     "value": 5
+    },
+    {
+     "identifier": "CONSTANT",
+     "name": "Constant",
+     "description": "",
+     "icon": "NOCURVE",
+     "value": 6
+    }
+   ],
+   "default": "SMOOTH",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "falloff_radius",
+   "name": "Radius",
+   "description": "If not zero, the distance from the hook where influence ends",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 100.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "falloff_curve",
+   "name": "Falloff Curve",
+   "description": "Custom falloff curve",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CurveMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "center",
+   "name": "Hook Center",
+   "description": "Center of the hook, used for falloff and display",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "matrix_inverse",
+   "name": "Matrix",
+   "description": "Reverse the transformation between this object and its target",
+   "type": "FLOAT",
+   "subtype": "MATRIX",
+   "unit": "NONE",
+   "array": [
+    4,
+    4
+   ],
+   "default": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "object",
+   "name": "Object",
+   "description": "Parent Object for hook, also recalculates and clears offset",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "subtarget",
+   "name": "Sub-Target",
+   "description": "Name of Parent Bone for hook (if applicable), also recalculates and clears offset",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "use_falloff_uniform",
+   "name": "Uniform Falloff",
+   "description": "Compensate for non-uniform object scale",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Name of Vertex Group which determines influence of modifier per point",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "vertex_indices",
+   "name": "Vertex Indices",
+   "description": "Indices of vertices bound to the modifier. For Bézier curves, handles count as additional vertices.",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "array": [
+    64
+   ],
+   "default": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "vertex_indices_set",
+   "description": "Validates and assigns the array of vertex indices bound to the modifier",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "indices",
+     "name": "",
+     "description": "Vertex Indices",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      64
+     ],
+     "default": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": true
+}

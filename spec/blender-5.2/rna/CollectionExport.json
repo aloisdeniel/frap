@@ -1,0 +1,65 @@
+{
+ "identifier": "CollectionExport",
+ "name": "Name",
+ "description": "",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "name",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "is_open",
+   "name": "Is Open",
+   "description": "Whether the panel is expanded or closed",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "export_properties",
+   "name": "Export Properties",
+   "description": "Properties associated with the configured exporter",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PropertyGroup",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "filepath",
+   "name": "File Path",
+   "description": "The file path used for exporting",
+   "type": "STRING",
+   "subtype": "FILE_PATH",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 1024,
+   "flags": [
+    "NEVER_NULL",
+    "PATH_SUPPORTS_BLEND_RELATIVE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

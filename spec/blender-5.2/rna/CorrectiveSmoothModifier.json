@@ -1,0 +1,184 @@
+{
+ "identifier": "CorrectiveSmoothModifier",
+ "name": "Corrective Smooth Modifier",
+ "description": "Correct distortion caused by deformation",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "factor",
+   "name": "Lambda Factor",
+   "description": "Smooth effect factor",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 5.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "iterations",
+   "name": "Repeat",
+   "description": "",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 5,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 200,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "scale",
+   "name": "Scale",
+   "description": "Compensate for scale applied by other modifiers",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 10.0,
+   "step": 5.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "rest_source",
+   "name": "Rest Source",
+   "description": "Select the source of rest positions",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ORCO",
+     "name": "Original Coords",
+     "description": "Use base mesh vertex coordinates as the rest position",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "BIND",
+     "name": "Bind Coords",
+     "description": "Use bind vertex coordinates for rest position",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "ORCO",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "smooth_type",
+   "name": "Smooth Type",
+   "description": "Method used for smoothing",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SIMPLE",
+     "name": "Simple",
+     "description": "Use the average of adjacent edge-vertices",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "LENGTH_WEIGHTED",
+     "name": "Length Weight",
+     "description": "Use the average of adjacent edge-vertices weighted by their length",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "SIMPLE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Name of Vertex Group which determines influence of modifier per point",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "is_bind",
+   "name": "Bind current shape",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_only_smooth",
+   "name": "Only Smooth",
+   "description": "Apply smoothing without reconstructing the surface",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pin_boundary",
+   "name": "Pin Boundaries",
+   "description": "Excludes boundary vertices from being smoothed",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

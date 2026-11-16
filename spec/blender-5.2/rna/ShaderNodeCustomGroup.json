@@ -1,0 +1,24 @@
+{
+ "identifier": "ShaderNodeCustomGroup",
+ "name": "Shader Custom Group",
+ "description": "Custom Shader Group Node for Python nodes",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "node_tree",
+   "name": "Node Tree",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeTree",
+   "is_id": true,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

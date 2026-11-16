@@ -1,0 +1,226 @@
+{
+ "bl_idname": "ShaderNodeVolumeCoefficients",
+ "srna": "ShaderNodeVolumeCoefficients",
+ "name": "Volume Coefficients",
+ "label": "",
+ "width": 240.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Weight",
+   "identifier": "Weight",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Absorption Coefficients",
+   "identifier": "Absorption Coefficients",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Scatter Coefficients",
+   "identifier": "Scatter Coefficients",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Anisotropy",
+   "identifier": "Anisotropy",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "IOR",
+   "identifier": "IOR",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.3300000429153442,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Backscatter",
+   "identifier": "Backscatter",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.10000000149011612,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Alpha",
+   "identifier": "Alpha",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Diameter",
+   "identifier": "Diameter",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 20.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Emission Coefficients",
+   "identifier": "Emission Coefficients",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Volume",
+   "identifier": "Volume",
+   "bl_idname": "NodeSocketShader",
+   "type": "SHADER",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  }
+ ],
+ "props": {
+  "phase": "HENYEY_GREENSTEIN"
+ },
+ "availability": {
+  "phase": {
+   "default": "HENYEY_GREENSTEIN",
+   "by_value": {
+    "HENYEY_GREENSTEIN": {
+     "inputs": [
+      "Absorption Coefficients",
+      "Scatter Coefficients",
+      "Anisotropy",
+      "Emission Coefficients"
+     ],
+     "outputs": [
+      "Volume"
+     ]
+    },
+    "FOURNIER_FORAND": {
+     "inputs": [
+      "Absorption Coefficients",
+      "Scatter Coefficients",
+      "IOR",
+      "Backscatter",
+      "Emission Coefficients"
+     ],
+     "outputs": [
+      "Volume"
+     ]
+    },
+    "DRAINE": {
+     "inputs": [
+      "Absorption Coefficients",
+      "Scatter Coefficients",
+      "Anisotropy",
+      "Alpha",
+      "Emission Coefficients"
+     ],
+     "outputs": [
+      "Volume"
+     ]
+    },
+    "RAYLEIGH": {
+     "inputs": [
+      "Absorption Coefficients",
+      "Scatter Coefficients",
+      "Emission Coefficients"
+     ],
+     "outputs": [
+      "Volume"
+     ]
+    },
+    "MIE": {
+     "inputs": [
+      "Absorption Coefficients",
+      "Scatter Coefficients",
+      "Diameter",
+      "Emission Coefficients"
+     ],
+     "outputs": [
+      "Volume"
+     ]
+    }
+   }
+  }
+ }
+}

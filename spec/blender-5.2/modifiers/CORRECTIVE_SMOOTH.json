@@ -1,0 +1,31 @@
+{
+ "type": "CORRECTIVE_SMOOTH",
+ "ui_name": "Smooth Corrective",
+ "srna": "CorrectiveSmoothModifier",
+ "values": {
+  "name": "M",
+  "type": "CORRECTIVE_SMOOTH",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": false,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 697597798,
+  "factor": 0.5,
+  "iterations": 5,
+  "scale": 1.0,
+  "rest_source": "ORCO",
+  "smooth_type": "SIMPLE",
+  "invert_vertex_group": false,
+  "vertex_group": "",
+  "is_bind": false,
+  "use_only_smooth": false,
+  "use_pin_boundary": false
+ },
+ "default_name": "CorrectiveSmooth"
+}

@@ -1,0 +1,59 @@
+{
+ "identifier": "ViewLayerEEVEE",
+ "name": "EEVEE Settings",
+ "description": "View Layer settings for EEVEE",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "use_pass_volume_direct",
+   "name": "Volume Light",
+   "description": "Deliver volume direct light pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_pass_bloom",
+   "name": "Bloom",
+   "description": "Deliver bloom pass (deprecated)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_pass_transparent",
+   "name": "Transparent",
+   "description": "Deliver alpha blended surfaces in a separate pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "ambient_occlusion_distance",
+   "name": "Distance",
+   "description": "Distance of object that contribute to the ambient occlusion effect",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 10.0,
+   "hard_min": 0.0,
+   "hard_max": 100000.0,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

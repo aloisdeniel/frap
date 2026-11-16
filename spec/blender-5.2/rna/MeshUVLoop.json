@@ -1,0 +1,47 @@
+{
+ "identifier": "MeshUVLoop",
+ "name": "Mesh UV Layer",
+ "description": "(Deprecated) Layer of UV coordinates in a Mesh data-block",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "uv",
+   "name": "uv",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "pin_uv",
+   "name": "UV Pinned",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

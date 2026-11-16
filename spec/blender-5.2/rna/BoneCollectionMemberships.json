@@ -1,0 +1,23 @@
+{
+ "identifier": "BoneCollectionMemberships",
+ "name": "Bone Collection Memberships",
+ "description": "The Bone Collections that contain this Bone",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "clear",
+   "description": "Remove this bone from all bone collections",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  }
+ ],
+ "root": false
+}

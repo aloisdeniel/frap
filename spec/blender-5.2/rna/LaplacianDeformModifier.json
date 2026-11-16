@@ -1,0 +1,68 @@
+{
+ "identifier": "LaplacianDeformModifier",
+ "name": "Laplacian Deform Modifier",
+ "description": "Mesh deform modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "vertex_group",
+   "name": "Anchor Weights",
+   "description": "Name of Vertex Group which determines Anchors",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "iterations",
+   "name": "Repeat",
+   "description": "",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 1,
+   "soft_max": 50,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_bind",
+   "name": "Bound",
+   "description": "Whether geometry has been bound to anchors",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

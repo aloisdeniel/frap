@@ -1,0 +1,25 @@
+{
+ "type": "FLUID",
+ "ui_name": "Fluid",
+ "srna": "FluidModifier",
+ "values": {
+  "name": "M",
+  "type": "FLUID",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": false,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 874629360,
+  "domain_settings": null,
+  "flow_settings": null,
+  "effector_settings": null,
+  "fluid_type": "NONE"
+ },
+ "default_name": "Fluid"
+}

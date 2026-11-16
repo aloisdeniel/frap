@@ -1,0 +1,107 @@
+{
+ "identifier": "MaskModifier",
+ "name": "Mask Modifier",
+ "description": "Mask modifier to hide parts of the mesh",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "mode",
+   "name": "Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "VERTEX_GROUP",
+     "name": "Vertex Group",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "ARMATURE",
+     "name": "Armature",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "VERTEX_GROUP",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "armature",
+   "name": "Armature",
+   "description": "Armature to use as source of bones to mask",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Use vertices that are not part of region defined",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_smooth",
+   "name": "Smooth",
+   "description": "Use vertex group weights to cut faces at the weight contour",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "threshold",
+   "name": "Threshold",
+   "description": "Weights over this threshold remain",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

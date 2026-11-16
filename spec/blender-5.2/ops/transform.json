@@ -1,0 +1,8508 @@
+{
+ "namespace": "transform",
+ "count": 27,
+ "operators": [
+  {
+   "idname": "transform.bbone_resize",
+   "bl_idname": "TRANSFORM_OT_bbone_resize",
+   "label": "Scale B-Bone",
+   "description": "Scale selected bendy bones display size",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Display Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "TRANSLATION",
+     "unit": "LENGTH",
+     "array": [
+      3
+     ],
+     "default": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 5,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_type",
+     "name": "Orientation",
+     "description": "Transformation orientation",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix",
+     "name": "Matrix",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      3,
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix_type",
+     "name": "Matrix Orientation",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "constraint_axis",
+     "name": "Constraint Axis",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      false,
+      false,
+      false
+     ],
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.bend",
+   "bl_idname": "TRANSFORM_OT_bend",
+   "label": "Bend",
+   "description": "Bend selected items between the 3D cursor and the mouse",
+   "options": [
+    "BLOCKING",
+    "DEPENDS_ON_CURSOR",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Angle",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "ANGLE",
+     "unit": "ROTATION",
+     "array": [
+      1
+     ],
+     "default": [
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -6.2831854820251465,
+     "soft_max": 6.2831854820251465,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_edit",
+     "name": "Proportional Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_edit_falloff",
+     "name": "Proportional Falloff",
+     "description": "Falloff type for proportional editing mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth falloff",
+       "icon": "SMOOTHCURVE",
+       "value": 0
+      },
+      {
+       "identifier": "SPHERE",
+       "name": "Sphere",
+       "description": "Spherical falloff",
+       "icon": "SPHERECURVE",
+       "value": 1
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "Root falloff",
+       "icon": "ROOTCURVE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERSE_SQUARE",
+       "name": "Inverse Square",
+       "description": "Inverse Square falloff",
+       "icon": "INVERSESQUARECURVE",
+       "value": 7
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Sharp falloff",
+       "icon": "SHARPCURVE",
+       "value": 3
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear falloff",
+       "icon": "LINCURVE",
+       "value": 4
+      },
+      {
+       "identifier": "CONSTANT",
+       "name": "Constant",
+       "description": "Constant falloff",
+       "icon": "NOCURVE",
+       "value": 5
+      },
+      {
+       "identifier": "RANDOM",
+       "name": "Random",
+       "description": "Random falloff",
+       "icon": "RNDCURVE",
+       "value": 6
+      }
+     ],
+     "default": "SMOOTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_size",
+     "name": "Proportional Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 999999995904.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_connected",
+     "name": "Connected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_projected",
+     "name": "Projected (2D)",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "gpencil_strokes",
+     "name": "Edit Grease Pencil",
+     "description": "Edit selected Grease Pencil strokes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "center_override",
+     "name": "Center Override",
+     "description": "Force using this center value (when set)",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.create_orientation",
+   "bl_idname": "TRANSFORM_OT_create_orientation",
+   "label": "Create Orientation",
+   "description": "Create transformation orientation from selection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of the new custom orientation",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_view",
+     "name": "Use View",
+     "description": "Use the current view instead of the active object to create the new orientation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use",
+     "name": "Use After Creation",
+     "description": "Select orientation after its creation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "overwrite",
+     "name": "Overwrite Previous",
+     "description": "Overwrite previously created orientation with same name",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.delete_orientation",
+   "bl_idname": "TRANSFORM_OT_delete_orientation",
+   "label": "Delete Orientation",
+   "description": "Delete transformation orientation",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "transform.edge_bevelweight",
+   "bl_idname": "TRANSFORM_OT_edge_bevelweight",
+   "label": "Edge Bevel Weight",
+   "description": "Change the bevel weight of edges",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Factor",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -1.0,
+     "hard_max": 1.0,
+     "soft_min": -1.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "transform.edge_crease",
+   "bl_idname": "TRANSFORM_OT_edge_crease",
+   "label": "Edge Crease",
+   "description": "Change the crease of edges",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Factor",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -1.0,
+     "hard_max": 1.0,
+     "soft_min": -1.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "transform.edge_slide",
+   "bl_idname": "TRANSFORM_OT_edge_slide",
+   "label": "Edge Slide",
+   "description": "Slide an edge loop along a mesh",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Factor",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -10.0,
+     "hard_max": 10.0,
+     "soft_min": -1.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "single_side",
+     "name": "Single Side",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_even",
+     "name": "Even",
+     "description": "Make the edge loop match the shape of the adjacent edge loop",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "flipped",
+     "name": "Flipped",
+     "description": "When Even mode is active, flips between the two adjacent edge loops",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_clamp",
+     "name": "Clamp",
+     "description": "Clamp within the edge extents",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_elements",
+     "name": "Snap to Elements",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "INCREMENT",
+       "name": "Increment",
+       "description": "Snap to increments",
+       "icon": "SNAP_INCREMENT",
+       "value": 256
+      },
+      {
+       "identifier": "GRID",
+       "name": "Grid",
+       "description": "Snap to grid",
+       "icon": "SNAP_GRID",
+       "value": 128
+      },
+      {
+       "identifier": "VERTEX",
+       "name": "Vertex",
+       "description": "Snap to vertices",
+       "icon": "SNAP_VERTEX",
+       "value": 5
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Snap to edges",
+       "icon": "SNAP_EDGE",
+       "value": 16
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 32
+      },
+      {
+       "identifier": "VOLUME",
+       "name": "Volume",
+       "description": "Snap to volume",
+       "icon": "SNAP_VOLUME",
+       "value": 64
+      },
+      {
+       "identifier": "EDGE_MIDPOINT",
+       "name": "Edge Center",
+       "description": "Snap to the middle of edges",
+       "icon": "SNAP_MIDPOINT",
+       "value": 2
+      },
+      {
+       "identifier": "EDGE_PERPENDICULAR",
+       "name": "Edge Perpendicular",
+       "description": "Snap to the nearest point on an edge",
+       "icon": "SNAP_PERPENDICULAR",
+       "value": 8
+      },
+      {
+       "identifier": "FACE_MIDPOINT",
+       "name": "Face Center",
+       "description": "Snap to the middle of faces",
+       "icon": "SNAP_FACE_CENTER",
+       "value": 2048
+      },
+      {
+       "identifier": "FACE_PROJECT",
+       "name": "Face Project",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 1024
+      },
+      {
+       "identifier": "FACE_NEAREST",
+       "name": "Face Nearest",
+       "description": "Snap to nearest point on faces",
+       "icon": "SNAP_FACE_NEAREST",
+       "value": 512
+      }
+     ],
+     "default": [
+      "INCREMENT"
+     ],
+     "flags": [
+      "HIDDEN",
+      "ENUM_FLAG",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_project",
+     "name": "Project Individual Elements",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_target",
+     "name": "Snap Base",
+     "description": "Point on source that will snap to target",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CLOSEST",
+       "name": "Closest",
+       "description": "Snap closest point onto target",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CENTER",
+       "name": "Center",
+       "description": "Snap transformation center onto target",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MEDIAN",
+       "name": "Median",
+       "description": "Snap median onto target",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ACTIVE",
+       "name": "Active",
+       "description": "Snap active onto target",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "CLOSEST",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_self",
+     "name": "Target: Include Active",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_edit",
+     "name": "Target: Include Edit",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_nonedit",
+     "name": "Target: Include Non-Edited",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_selectable",
+     "name": "Target: Exclude Non-Selectable",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_point",
+     "name": "Point",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "correct_uv",
+     "name": "Correct UVs",
+     "description": "Correct UV coordinates when transforming",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "transform.from_gizmo",
+   "bl_idname": "TRANSFORM_OT_from_gizmo",
+   "label": "Transform from Gizmo",
+   "description": "Transform selected items by mode type",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.mirror",
+   "bl_idname": "TRANSFORM_OT_mirror",
+   "label": "Mirror",
+   "description": "Mirror selected items around one or more axes",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "orient_type",
+     "name": "Orientation",
+     "description": "Transformation orientation",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix",
+     "name": "Matrix",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      3,
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix_type",
+     "name": "Matrix Orientation",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "constraint_axis",
+     "name": "Constraint Axis",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      false,
+      false,
+      false
+     ],
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "gpencil_strokes",
+     "name": "Edit Grease Pencil",
+     "description": "Edit selected Grease Pencil strokes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "center_override",
+     "name": "Center Override",
+     "description": "Force using this center value (when set)",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.push_pull",
+   "bl_idname": "TRANSFORM_OT_push_pull",
+   "label": "Push/Pull",
+   "description": "Push/Pull selected items",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Distance",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_edit",
+     "name": "Proportional Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_edit_falloff",
+     "name": "Proportional Falloff",
+     "description": "Falloff type for proportional editing mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth falloff",
+       "icon": "SMOOTHCURVE",
+       "value": 0
+      },
+      {
+       "identifier": "SPHERE",
+       "name": "Sphere",
+       "description": "Spherical falloff",
+       "icon": "SPHERECURVE",
+       "value": 1
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "Root falloff",
+       "icon": "ROOTCURVE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERSE_SQUARE",
+       "name": "Inverse Square",
+       "description": "Inverse Square falloff",
+       "icon": "INVERSESQUARECURVE",
+       "value": 7
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Sharp falloff",
+       "icon": "SHARPCURVE",
+       "value": 3
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear falloff",
+       "icon": "LINCURVE",
+       "value": 4
+      },
+      {
+       "identifier": "CONSTANT",
+       "name": "Constant",
+       "description": "Constant falloff",
+       "icon": "NOCURVE",
+       "value": 5
+      },
+      {
+       "identifier": "RANDOM",
+       "name": "Random",
+       "description": "Random falloff",
+       "icon": "RNDCURVE",
+       "value": 6
+      }
+     ],
+     "default": "SMOOTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_size",
+     "name": "Proportional Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 999999995904.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_connected",
+     "name": "Connected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_projected",
+     "name": "Projected (2D)",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "center_override",
+     "name": "Center Override",
+     "description": "Force using this center value (when set)",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.resize",
+   "bl_idname": "TRANSFORM_OT_resize",
+   "label": "Resize",
+   "description": "Scale (resize) selected items",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Scale",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mouse_dir_constraint",
+     "name": "Mouse Directional Constraint",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_type",
+     "name": "Orientation",
+     "description": "Transformation orientation",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix",
+     "name": "Matrix",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      3,
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix_type",
+     "name": "Matrix Orientation",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "constraint_axis",
+     "name": "Constraint Axis",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      false,
+      false,
+      false
+     ],
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_edit",
+     "name": "Proportional Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_edit_falloff",
+     "name": "Proportional Falloff",
+     "description": "Falloff type for proportional editing mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth falloff",
+       "icon": "SMOOTHCURVE",
+       "value": 0
+      },
+      {
+       "identifier": "SPHERE",
+       "name": "Sphere",
+       "description": "Spherical falloff",
+       "icon": "SPHERECURVE",
+       "value": 1
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "Root falloff",
+       "icon": "ROOTCURVE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERSE_SQUARE",
+       "name": "Inverse Square",
+       "description": "Inverse Square falloff",
+       "icon": "INVERSESQUARECURVE",
+       "value": 7
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Sharp falloff",
+       "icon": "SHARPCURVE",
+       "value": 3
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear falloff",
+       "icon": "LINCURVE",
+       "value": 4
+      },
+      {
+       "identifier": "CONSTANT",
+       "name": "Constant",
+       "description": "Constant falloff",
+       "icon": "NOCURVE",
+       "value": 5
+      },
+      {
+       "identifier": "RANDOM",
+       "name": "Random",
+       "description": "Random falloff",
+       "icon": "RNDCURVE",
+       "value": 6
+      }
+     ],
+     "default": "SMOOTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_size",
+     "name": "Proportional Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 999999995904.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_connected",
+     "name": "Connected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_projected",
+     "name": "Projected (2D)",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_elements",
+     "name": "Snap to Elements",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "INCREMENT",
+       "name": "Increment",
+       "description": "Snap to increments",
+       "icon": "SNAP_INCREMENT",
+       "value": 256
+      },
+      {
+       "identifier": "GRID",
+       "name": "Grid",
+       "description": "Snap to grid",
+       "icon": "SNAP_GRID",
+       "value": 128
+      },
+      {
+       "identifier": "VERTEX",
+       "name": "Vertex",
+       "description": "Snap to vertices",
+       "icon": "SNAP_VERTEX",
+       "value": 5
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Snap to edges",
+       "icon": "SNAP_EDGE",
+       "value": 16
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 32
+      },
+      {
+       "identifier": "VOLUME",
+       "name": "Volume",
+       "description": "Snap to volume",
+       "icon": "SNAP_VOLUME",
+       "value": 64
+      },
+      {
+       "identifier": "EDGE_MIDPOINT",
+       "name": "Edge Center",
+       "description": "Snap to the middle of edges",
+       "icon": "SNAP_MIDPOINT",
+       "value": 2
+      },
+      {
+       "identifier": "EDGE_PERPENDICULAR",
+       "name": "Edge Perpendicular",
+       "description": "Snap to the nearest point on an edge",
+       "icon": "SNAP_PERPENDICULAR",
+       "value": 8
+      },
+      {
+       "identifier": "FACE_MIDPOINT",
+       "name": "Face Center",
+       "description": "Snap to the middle of faces",
+       "icon": "SNAP_FACE_CENTER",
+       "value": 2048
+      },
+      {
+       "identifier": "FACE_PROJECT",
+       "name": "Face Project",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 1024
+      },
+      {
+       "identifier": "FACE_NEAREST",
+       "name": "Face Nearest",
+       "description": "Snap to nearest point on faces",
+       "icon": "SNAP_FACE_NEAREST",
+       "value": 512
+      }
+     ],
+     "default": [
+      "INCREMENT"
+     ],
+     "flags": [
+      "HIDDEN",
+      "ENUM_FLAG",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_project",
+     "name": "Project Individual Elements",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_target",
+     "name": "Snap Base",
+     "description": "Point on source that will snap to target",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CLOSEST",
+       "name": "Closest",
+       "description": "Snap closest point onto target",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CENTER",
+       "name": "Center",
+       "description": "Snap transformation center onto target",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MEDIAN",
+       "name": "Median",
+       "description": "Snap median onto target",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ACTIVE",
+       "name": "Active",
+       "description": "Snap active onto target",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "CLOSEST",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_self",
+     "name": "Target: Include Active",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_edit",
+     "name": "Target: Include Edit",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_nonedit",
+     "name": "Target: Include Non-Edited",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_selectable",
+     "name": "Target: Exclude Non-Selectable",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_point",
+     "name": "Point",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "gpencil_strokes",
+     "name": "Edit Grease Pencil",
+     "description": "Edit selected Grease Pencil strokes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "texture_space",
+     "name": "Edit Texture Space",
+     "description": "Edit object data texture space",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "remove_on_cancel",
+     "name": "Remove on Cancel",
+     "description": "Remove elements on cancel",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_duplicated_keyframes",
+     "name": "Duplicated Keyframes",
+     "description": "Transform duplicated keyframes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "center_override",
+     "name": "Center Override",
+     "description": "Force using this center value (when set)",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.rotate",
+   "bl_idname": "TRANSFORM_OT_rotate",
+   "label": "Rotate",
+   "description": "Rotate selected items",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Angle",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "ANGLE",
+     "unit": "ROTATION",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -6.2831854820251465,
+     "soft_max": 6.2831854820251465,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_axis",
+     "name": "Axis",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "Z",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_type",
+     "name": "Orientation",
+     "description": "Transformation orientation",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix",
+     "name": "Matrix",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      3,
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix_type",
+     "name": "Matrix Orientation",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "constraint_axis",
+     "name": "Constraint Axis",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      false,
+      false,
+      false
+     ],
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_edit",
+     "name": "Proportional Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_edit_falloff",
+     "name": "Proportional Falloff",
+     "description": "Falloff type for proportional editing mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth falloff",
+       "icon": "SMOOTHCURVE",
+       "value": 0
+      },
+      {
+       "identifier": "SPHERE",
+       "name": "Sphere",
+       "description": "Spherical falloff",
+       "icon": "SPHERECURVE",
+       "value": 1
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "Root falloff",
+       "icon": "ROOTCURVE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERSE_SQUARE",
+       "name": "Inverse Square",
+       "description": "Inverse Square falloff",
+       "icon": "INVERSESQUARECURVE",
+       "value": 7
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Sharp falloff",
+       "icon": "SHARPCURVE",
+       "value": 3
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear falloff",
+       "icon": "LINCURVE",
+       "value": 4
+      },
+      {
+       "identifier": "CONSTANT",
+       "name": "Constant",
+       "description": "Constant falloff",
+       "icon": "NOCURVE",
+       "value": 5
+      },
+      {
+       "identifier": "RANDOM",
+       "name": "Random",
+       "description": "Random falloff",
+       "icon": "RNDCURVE",
+       "value": 6
+      }
+     ],
+     "default": "SMOOTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_size",
+     "name": "Proportional Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 999999995904.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_connected",
+     "name": "Connected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_projected",
+     "name": "Projected (2D)",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_elements",
+     "name": "Snap to Elements",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "INCREMENT",
+       "name": "Increment",
+       "description": "Snap to increments",
+       "icon": "SNAP_INCREMENT",
+       "value": 256
+      },
+      {
+       "identifier": "GRID",
+       "name": "Grid",
+       "description": "Snap to grid",
+       "icon": "SNAP_GRID",
+       "value": 128
+      },
+      {
+       "identifier": "VERTEX",
+       "name": "Vertex",
+       "description": "Snap to vertices",
+       "icon": "SNAP_VERTEX",
+       "value": 5
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Snap to edges",
+       "icon": "SNAP_EDGE",
+       "value": 16
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 32
+      },
+      {
+       "identifier": "VOLUME",
+       "name": "Volume",
+       "description": "Snap to volume",
+       "icon": "SNAP_VOLUME",
+       "value": 64
+      },
+      {
+       "identifier": "EDGE_MIDPOINT",
+       "name": "Edge Center",
+       "description": "Snap to the middle of edges",
+       "icon": "SNAP_MIDPOINT",
+       "value": 2
+      },
+      {
+       "identifier": "EDGE_PERPENDICULAR",
+       "name": "Edge Perpendicular",
+       "description": "Snap to the nearest point on an edge",
+       "icon": "SNAP_PERPENDICULAR",
+       "value": 8
+      },
+      {
+       "identifier": "FACE_MIDPOINT",
+       "name": "Face Center",
+       "description": "Snap to the middle of faces",
+       "icon": "SNAP_FACE_CENTER",
+       "value": 2048
+      },
+      {
+       "identifier": "FACE_PROJECT",
+       "name": "Face Project",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 1024
+      },
+      {
+       "identifier": "FACE_NEAREST",
+       "name": "Face Nearest",
+       "description": "Snap to nearest point on faces",
+       "icon": "SNAP_FACE_NEAREST",
+       "value": 512
+      }
+     ],
+     "default": [
+      "INCREMENT"
+     ],
+     "flags": [
+      "HIDDEN",
+      "ENUM_FLAG",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_project",
+     "name": "Project Individual Elements",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_target",
+     "name": "Snap Base",
+     "description": "Point on source that will snap to target",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CLOSEST",
+       "name": "Closest",
+       "description": "Snap closest point onto target",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CENTER",
+       "name": "Center",
+       "description": "Snap transformation center onto target",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MEDIAN",
+       "name": "Median",
+       "description": "Snap median onto target",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ACTIVE",
+       "name": "Active",
+       "description": "Snap active onto target",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "CLOSEST",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_self",
+     "name": "Target: Include Active",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_edit",
+     "name": "Target: Include Edit",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_nonedit",
+     "name": "Target: Include Non-Edited",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_selectable",
+     "name": "Target: Exclude Non-Selectable",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_point",
+     "name": "Point",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "gpencil_strokes",
+     "name": "Edit Grease Pencil",
+     "description": "Edit selected Grease Pencil strokes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "center_override",
+     "name": "Center Override",
+     "description": "Force using this center value (when set)",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.rotate_normal",
+   "bl_idname": "TRANSFORM_OT_rotate_normal",
+   "label": "Rotate Normals",
+   "description": "Rotate custom normal of selected items",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Angle",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "ANGLE",
+     "unit": "ROTATION",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -6.2831854820251465,
+     "soft_max": 6.2831854820251465,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_axis",
+     "name": "Axis",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "Z",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_type",
+     "name": "Orientation",
+     "description": "Transformation orientation",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix",
+     "name": "Matrix",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      3,
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix_type",
+     "name": "Matrix Orientation",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "constraint_axis",
+     "name": "Constraint Axis",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      false,
+      false,
+      false
+     ],
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "transform.select_orientation",
+   "bl_idname": "TRANSFORM_OT_select_orientation",
+   "label": "Select Orientation",
+   "description": "Select transformation orientation",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "orientation",
+     "name": "Orientation",
+     "description": "Transformation orientation",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.seq_slide",
+   "bl_idname": "TRANSFORM_OT_seq_slide",
+   "label": "Sequence Slide",
+   "description": "Slide a sequence strip in time",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Offset",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 100.0,
+     "precision": 0,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_restore_handle_selection",
+     "name": "Restore Handle Selection",
+     "description": "Restore handle selection after tweaking",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "texture_space",
+     "name": "Edit Texture Space",
+     "description": "Edit object data texture space",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "remove_on_cancel",
+     "name": "Remove on Cancel",
+     "description": "Remove elements on cancel",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_duplicated_keyframes",
+     "name": "Duplicated Keyframes",
+     "description": "Transform duplicated keyframes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "view2d_edge_pan",
+     "name": "Edge Pan",
+     "description": "Enable edge panning in 2D view",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "transform.shear",
+   "bl_idname": "TRANSFORM_OT_shear",
+   "label": "Shear",
+   "description": "Shear selected items along the given axis",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "angle",
+     "name": "Angle",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "ANGLE",
+     "unit": "ROTATION",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -6.2831854820251465,
+     "soft_max": 6.2831854820251465,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_axis",
+     "name": "Axis",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "Z",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_axis_ortho",
+     "name": "Axis Ortho",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "X",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_type",
+     "name": "Orientation",
+     "description": "Transformation orientation",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix",
+     "name": "Matrix",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      3,
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix_type",
+     "name": "Matrix Orientation",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_edit",
+     "name": "Proportional Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_edit_falloff",
+     "name": "Proportional Falloff",
+     "description": "Falloff type for proportional editing mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth falloff",
+       "icon": "SMOOTHCURVE",
+       "value": 0
+      },
+      {
+       "identifier": "SPHERE",
+       "name": "Sphere",
+       "description": "Spherical falloff",
+       "icon": "SPHERECURVE",
+       "value": 1
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "Root falloff",
+       "icon": "ROOTCURVE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERSE_SQUARE",
+       "name": "Inverse Square",
+       "description": "Inverse Square falloff",
+       "icon": "INVERSESQUARECURVE",
+       "value": 7
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Sharp falloff",
+       "icon": "SHARPCURVE",
+       "value": 3
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear falloff",
+       "icon": "LINCURVE",
+       "value": 4
+      },
+      {
+       "identifier": "CONSTANT",
+       "name": "Constant",
+       "description": "Constant falloff",
+       "icon": "NOCURVE",
+       "value": 5
+      },
+      {
+       "identifier": "RANDOM",
+       "name": "Random",
+       "description": "Random falloff",
+       "icon": "RNDCURVE",
+       "value": 6
+      }
+     ],
+     "default": "SMOOTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_size",
+     "name": "Proportional Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 999999995904.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_connected",
+     "name": "Connected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_projected",
+     "name": "Projected (2D)",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "gpencil_strokes",
+     "name": "Edit Grease Pencil",
+     "description": "Edit selected Grease Pencil strokes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.shrink_fatten",
+   "bl_idname": "TRANSFORM_OT_shrink_fatten",
+   "label": "Shrink/Fatten",
+   "description": "Shrink/fatten selected vertices along normals",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Offset",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "DISTANCE",
+     "unit": "LENGTH",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_even_offset",
+     "name": "Offset Even",
+     "description": "Scale the offset to give more even thickness",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_edit",
+     "name": "Proportional Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_edit_falloff",
+     "name": "Proportional Falloff",
+     "description": "Falloff type for proportional editing mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth falloff",
+       "icon": "SMOOTHCURVE",
+       "value": 0
+      },
+      {
+       "identifier": "SPHERE",
+       "name": "Sphere",
+       "description": "Spherical falloff",
+       "icon": "SPHERECURVE",
+       "value": 1
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "Root falloff",
+       "icon": "ROOTCURVE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERSE_SQUARE",
+       "name": "Inverse Square",
+       "description": "Inverse Square falloff",
+       "icon": "INVERSESQUARECURVE",
+       "value": 7
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Sharp falloff",
+       "icon": "SHARPCURVE",
+       "value": 3
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear falloff",
+       "icon": "LINCURVE",
+       "value": 4
+      },
+      {
+       "identifier": "CONSTANT",
+       "name": "Constant",
+       "description": "Constant falloff",
+       "icon": "NOCURVE",
+       "value": 5
+      },
+      {
+       "identifier": "RANDOM",
+       "name": "Random",
+       "description": "Random falloff",
+       "icon": "RNDCURVE",
+       "value": 6
+      }
+     ],
+     "default": "SMOOTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_size",
+     "name": "Proportional Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 999999995904.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_connected",
+     "name": "Connected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_projected",
+     "name": "Projected (2D)",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "transform.skin_resize",
+   "bl_idname": "TRANSFORM_OT_skin_resize",
+   "label": "Skin Resize",
+   "description": "Scale selected vertices' skin radii",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Scale",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      1.0,
+      1.0,
+      1.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_type",
+     "name": "Orientation",
+     "description": "Transformation orientation",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix",
+     "name": "Matrix",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      3,
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix_type",
+     "name": "Matrix Orientation",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "GLOBAL",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "constraint_axis",
+     "name": "Constraint Axis",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      false,
+      false,
+      false
+     ],
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_edit",
+     "name": "Proportional Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_edit_falloff",
+     "name": "Proportional Falloff",
+     "description": "Falloff type for proportional editing mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth falloff",
+       "icon": "SMOOTHCURVE",
+       "value": 0
+      },
+      {
+       "identifier": "SPHERE",
+       "name": "Sphere",
+       "description": "Spherical falloff",
+       "icon": "SPHERECURVE",
+       "value": 1
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "Root falloff",
+       "icon": "ROOTCURVE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERSE_SQUARE",
+       "name": "Inverse Square",
+       "description": "Inverse Square falloff",
+       "icon": "INVERSESQUARECURVE",
+       "value": 7
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Sharp falloff",
+       "icon": "SHARPCURVE",
+       "value": 3
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear falloff",
+       "icon": "LINCURVE",
+       "value": 4
+      },
+      {
+       "identifier": "CONSTANT",
+       "name": "Constant",
+       "description": "Constant falloff",
+       "icon": "NOCURVE",
+       "value": 5
+      },
+      {
+       "identifier": "RANDOM",
+       "name": "Random",
+       "description": "Random falloff",
+       "icon": "RNDCURVE",
+       "value": 6
+      }
+     ],
+     "default": "SMOOTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_size",
+     "name": "Proportional Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 999999995904.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_connected",
+     "name": "Connected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_projected",
+     "name": "Projected (2D)",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_elements",
+     "name": "Snap to Elements",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "INCREMENT",
+       "name": "Increment",
+       "description": "Snap to increments",
+       "icon": "SNAP_INCREMENT",
+       "value": 256
+      },
+      {
+       "identifier": "GRID",
+       "name": "Grid",
+       "description": "Snap to grid",
+       "icon": "SNAP_GRID",
+       "value": 128
+      },
+      {
+       "identifier": "VERTEX",
+       "name": "Vertex",
+       "description": "Snap to vertices",
+       "icon": "SNAP_VERTEX",
+       "value": 5
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Snap to edges",
+       "icon": "SNAP_EDGE",
+       "value": 16
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 32
+      },
+      {
+       "identifier": "VOLUME",
+       "name": "Volume",
+       "description": "Snap to volume",
+       "icon": "SNAP_VOLUME",
+       "value": 64
+      },
+      {
+       "identifier": "EDGE_MIDPOINT",
+       "name": "Edge Center",
+       "description": "Snap to the middle of edges",
+       "icon": "SNAP_MIDPOINT",
+       "value": 2
+      },
+      {
+       "identifier": "EDGE_PERPENDICULAR",
+       "name": "Edge Perpendicular",
+       "description": "Snap to the nearest point on an edge",
+       "icon": "SNAP_PERPENDICULAR",
+       "value": 8
+      },
+      {
+       "identifier": "FACE_MIDPOINT",
+       "name": "Face Center",
+       "description": "Snap to the middle of faces",
+       "icon": "SNAP_FACE_CENTER",
+       "value": 2048
+      },
+      {
+       "identifier": "FACE_PROJECT",
+       "name": "Face Project",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 1024
+      },
+      {
+       "identifier": "FACE_NEAREST",
+       "name": "Face Nearest",
+       "description": "Snap to nearest point on faces",
+       "icon": "SNAP_FACE_NEAREST",
+       "value": 512
+      }
+     ],
+     "default": [
+      "INCREMENT"
+     ],
+     "flags": [
+      "HIDDEN",
+      "ENUM_FLAG",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_project",
+     "name": "Project Individual Elements",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_target",
+     "name": "Snap Base",
+     "description": "Point on source that will snap to target",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CLOSEST",
+       "name": "Closest",
+       "description": "Snap closest point onto target",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CENTER",
+       "name": "Center",
+       "description": "Snap transformation center onto target",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MEDIAN",
+       "name": "Median",
+       "description": "Snap median onto target",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ACTIVE",
+       "name": "Active",
+       "description": "Snap active onto target",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "CLOSEST",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_self",
+     "name": "Target: Include Active",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_edit",
+     "name": "Target: Include Edit",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_nonedit",
+     "name": "Target: Include Non-Edited",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_selectable",
+     "name": "Target: Exclude Non-Selectable",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_point",
+     "name": "Point",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "transform.tilt",
+   "bl_idname": "TRANSFORM_OT_tilt",
+   "label": "Tilt",
+   "description": "Tilt selected control vertices of 3D curve",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Angle",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "ANGLE",
+     "unit": "ROTATION",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -6.2831854820251465,
+     "soft_max": 6.2831854820251465,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_edit",
+     "name": "Proportional Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_edit_falloff",
+     "name": "Proportional Falloff",
+     "description": "Falloff type for proportional editing mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth falloff",
+       "icon": "SMOOTHCURVE",
+       "value": 0
+      },
+      {
+       "identifier": "SPHERE",
+       "name": "Sphere",
+       "description": "Spherical falloff",
+       "icon": "SPHERECURVE",
+       "value": 1
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "Root falloff",
+       "icon": "ROOTCURVE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERSE_SQUARE",
+       "name": "Inverse Square",
+       "description": "Inverse Square falloff",
+       "icon": "INVERSESQUARECURVE",
+       "value": 7
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Sharp falloff",
+       "icon": "SHARPCURVE",
+       "value": 3
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear falloff",
+       "icon": "LINCURVE",
+       "value": 4
+      },
+      {
+       "identifier": "CONSTANT",
+       "name": "Constant",
+       "description": "Constant falloff",
+       "icon": "NOCURVE",
+       "value": 5
+      },
+      {
+       "identifier": "RANDOM",
+       "name": "Random",
+       "description": "Random falloff",
+       "icon": "RNDCURVE",
+       "value": 6
+      }
+     ],
+     "default": "SMOOTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_size",
+     "name": "Proportional Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 999999995904.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_connected",
+     "name": "Connected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_projected",
+     "name": "Projected (2D)",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.tosphere",
+   "bl_idname": "TRANSFORM_OT_tosphere",
+   "label": "To Sphere",
+   "description": "Move selected items outward in a spherical shape around geometric center",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Factor",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_edit",
+     "name": "Proportional Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_edit_falloff",
+     "name": "Proportional Falloff",
+     "description": "Falloff type for proportional editing mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth falloff",
+       "icon": "SMOOTHCURVE",
+       "value": 0
+      },
+      {
+       "identifier": "SPHERE",
+       "name": "Sphere",
+       "description": "Spherical falloff",
+       "icon": "SPHERECURVE",
+       "value": 1
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "Root falloff",
+       "icon": "ROOTCURVE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERSE_SQUARE",
+       "name": "Inverse Square",
+       "description": "Inverse Square falloff",
+       "icon": "INVERSESQUARECURVE",
+       "value": 7
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Sharp falloff",
+       "icon": "SHARPCURVE",
+       "value": 3
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear falloff",
+       "icon": "LINCURVE",
+       "value": 4
+      },
+      {
+       "identifier": "CONSTANT",
+       "name": "Constant",
+       "description": "Constant falloff",
+       "icon": "NOCURVE",
+       "value": 5
+      },
+      {
+       "identifier": "RANDOM",
+       "name": "Random",
+       "description": "Random falloff",
+       "icon": "RNDCURVE",
+       "value": 6
+      }
+     ],
+     "default": "SMOOTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_size",
+     "name": "Proportional Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 999999995904.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_connected",
+     "name": "Connected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_projected",
+     "name": "Projected (2D)",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "gpencil_strokes",
+     "name": "Edit Grease Pencil",
+     "description": "Edit selected Grease Pencil strokes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "center_override",
+     "name": "Center Override",
+     "description": "Force using this center value (when set)",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.trackball",
+   "bl_idname": "TRANSFORM_OT_trackball",
+   "label": "Trackball",
+   "description": "Trackball style rotation of selected items",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Angle",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "ANGLE",
+     "unit": "ROTATION",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_edit",
+     "name": "Proportional Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_edit_falloff",
+     "name": "Proportional Falloff",
+     "description": "Falloff type for proportional editing mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth falloff",
+       "icon": "SMOOTHCURVE",
+       "value": 0
+      },
+      {
+       "identifier": "SPHERE",
+       "name": "Sphere",
+       "description": "Spherical falloff",
+       "icon": "SPHERECURVE",
+       "value": 1
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "Root falloff",
+       "icon": "ROOTCURVE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERSE_SQUARE",
+       "name": "Inverse Square",
+       "description": "Inverse Square falloff",
+       "icon": "INVERSESQUARECURVE",
+       "value": 7
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Sharp falloff",
+       "icon": "SHARPCURVE",
+       "value": 3
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear falloff",
+       "icon": "LINCURVE",
+       "value": 4
+      },
+      {
+       "identifier": "CONSTANT",
+       "name": "Constant",
+       "description": "Constant falloff",
+       "icon": "NOCURVE",
+       "value": 5
+      },
+      {
+       "identifier": "RANDOM",
+       "name": "Random",
+       "description": "Random falloff",
+       "icon": "RNDCURVE",
+       "value": 6
+      }
+     ],
+     "default": "SMOOTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_size",
+     "name": "Proportional Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 999999995904.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_connected",
+     "name": "Connected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_projected",
+     "name": "Projected (2D)",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "gpencil_strokes",
+     "name": "Edit Grease Pencil",
+     "description": "Edit selected Grease Pencil strokes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "center_override",
+     "name": "Center Override",
+     "description": "Force using this center value (when set)",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.transform",
+   "bl_idname": "TRANSFORM_OT_transform",
+   "label": "Transform",
+   "description": "Transform selected items by mode type",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "INIT",
+       "name": "Init",
+       "description": "",
+       "icon": "NONE",
+       "value": -1
+      },
+      {
+       "identifier": "DUMMY",
+       "name": "Dummy",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "TRANSLATION",
+       "name": "Translation",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ROTATION",
+       "name": "Rotation",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "RESIZE",
+       "name": "Resize",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "SKIN_RESIZE",
+       "name": "Skin Resize",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "TOSPHERE",
+       "name": "To Sphere",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "SHEAR",
+       "name": "Shear",
+       "description": "",
+       "icon": "NONE",
+       "value": 6
+      },
+      {
+       "identifier": "BEND",
+       "name": "Bend",
+       "description": "",
+       "icon": "NONE",
+       "value": 7
+      },
+      {
+       "identifier": "SHRINKFATTEN",
+       "name": "Shrink/Fatten",
+       "description": "",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "TILT",
+       "name": "Tilt",
+       "description": "",
+       "icon": "NONE",
+       "value": 9
+      },
+      {
+       "identifier": "TRACKBALL",
+       "name": "Trackball",
+       "description": "",
+       "icon": "NONE",
+       "value": 10
+      },
+      {
+       "identifier": "PUSHPULL",
+       "name": "Push/Pull",
+       "description": "",
+       "icon": "NONE",
+       "value": 11
+      },
+      {
+       "identifier": "CREASE",
+       "name": "Crease",
+       "description": "",
+       "icon": "NONE",
+       "value": 12
+      },
+      {
+       "identifier": "VERTEX_CREASE",
+       "name": "Vertex Crease",
+       "description": "",
+       "icon": "NONE",
+       "value": 13
+      },
+      {
+       "identifier": "MIRROR",
+       "name": "Mirror",
+       "description": "",
+       "icon": "NONE",
+       "value": 14
+      },
+      {
+       "identifier": "BONE_SIZE",
+       "name": "Bone Size",
+       "description": "",
+       "icon": "NONE",
+       "value": 15
+      },
+      {
+       "identifier": "BONE_ENVELOPE",
+       "name": "Bone Envelope",
+       "description": "",
+       "icon": "NONE",
+       "value": 16
+      },
+      {
+       "identifier": "BONE_ENVELOPE_DIST",
+       "name": "Bone Envelope Distance",
+       "description": "",
+       "icon": "NONE",
+       "value": 33
+      },
+      {
+       "identifier": "CURVE_SHRINKFATTEN",
+       "name": "Curve Shrink/Fatten",
+       "description": "",
+       "icon": "NONE",
+       "value": 17
+      },
+      {
+       "identifier": "MASK_SHRINKFATTEN",
+       "name": "Mask Shrink/Fatten",
+       "description": "",
+       "icon": "NONE",
+       "value": 18
+      },
+      {
+       "identifier": "BONE_ROLL",
+       "name": "Bone Roll",
+       "description": "",
+       "icon": "NONE",
+       "value": 19
+      },
+      {
+       "identifier": "TIME_TRANSLATE",
+       "name": "Time Translate",
+       "description": "",
+       "icon": "NONE",
+       "value": 20
+      },
+      {
+       "identifier": "TIME_SLIDE",
+       "name": "Time Slide",
+       "description": "",
+       "icon": "NONE",
+       "value": 21
+      },
+      {
+       "identifier": "TIME_SCALE",
+       "name": "Time Scale",
+       "description": "",
+       "icon": "NONE",
+       "value": 22
+      },
+      {
+       "identifier": "TIME_EXTEND",
+       "name": "Time Extend",
+       "description": "",
+       "icon": "NONE",
+       "value": 23
+      },
+      {
+       "identifier": "BAKE_TIME",
+       "name": "Bake Time",
+       "description": "",
+       "icon": "NONE",
+       "value": 26
+      },
+      {
+       "identifier": "BWEIGHT",
+       "name": "Bevel Weight",
+       "description": "",
+       "icon": "NONE",
+       "value": 28
+      },
+      {
+       "identifier": "ALIGN",
+       "name": "Align",
+       "description": "",
+       "icon": "NONE",
+       "value": 29
+      },
+      {
+       "identifier": "EDGESLIDE",
+       "name": "Edge Slide",
+       "description": "",
+       "icon": "NONE",
+       "value": 30
+      },
+      {
+       "identifier": "SEQSLIDE",
+       "name": "Sequence Slide",
+       "description": "",
+       "icon": "NONE",
+       "value": 32
+      },
+      {
+       "identifier": "GPENCIL_OPACITY",
+       "name": "Grease Pencil Opacity",
+       "description": "",
+       "icon": "NONE",
+       "value": 35
+      }
+     ],
+     "default": "TRANSLATION",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "value",
+     "name": "Values",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_axis",
+     "name": "Axis",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "Z",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_type",
+     "name": "Orientation",
+     "description": "Transformation orientation",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "GLOBAL",
+       "name": "Global",
+       "description": "Align the transformation axes to world space",
+       "icon": "ORIENTATION_GLOBAL",
+       "value": 0
+      },
+      {
+       "identifier": "LOCAL",
+       "name": "Local",
+       "description": "Align the transformation axes to the selected objects' local space",
+       "icon": "ORIENTATION_LOCAL",
+       "value": 1
+      },
+      {
+       "identifier": "NORMAL",
+       "name": "Normal",
+       "description": "Align the transformation axes to average normal of selected elements (bone Y axis for pose mode)",
+       "icon": "ORIENTATION_NORMAL",
+       "value": 2
+      },
+      {
+       "identifier": "GIMBAL",
+       "name": "Gimbal",
+       "description": "Align each axis to the Euler rotation axis as used for input",
+       "icon": "ORIENTATION_GIMBAL",
+       "value": 4
+      },
+      {
+       "identifier": "VIEW",
+       "name": "View",
+       "description": "Align the transformation axes to the window",
+       "icon": "ORIENTATION_VIEW",
+       "value": 3
+      },
+      {
+       "identifier": "CURSOR",
+       "name": "Cursor",
+       "description": "Align the transformation axes to the 3D cursor",
+       "icon": "ORIENTATION_CURSOR",
+       "value": 5
+      },
+      {
+       "identifier": "PARENT",
+       "name": "Parent",
+       "description": "Align the transformation axes to the object's parent space",
+       "icon": "ORIENTATION_PARENT",
+       "value": 6
+      }
+     ],
+     "items_static": [],
+     "default": "GLOBAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ],
+     "dynamic_hint": true,
+     "items_by_context": {
+      "A": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "AV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "B": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "BV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "C": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "CV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "D": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "DV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "E": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "EV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ]
+     }
+    },
+    {
+     "identifier": "orient_matrix",
+     "name": "Matrix",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      3,
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix_type",
+     "name": "Matrix Orientation",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "GLOBAL",
+       "name": "Global",
+       "description": "Align the transformation axes to world space",
+       "icon": "ORIENTATION_GLOBAL",
+       "value": 0
+      },
+      {
+       "identifier": "LOCAL",
+       "name": "Local",
+       "description": "Align the transformation axes to the selected objects' local space",
+       "icon": "ORIENTATION_LOCAL",
+       "value": 1
+      },
+      {
+       "identifier": "NORMAL",
+       "name": "Normal",
+       "description": "Align the transformation axes to average normal of selected elements (bone Y axis for pose mode)",
+       "icon": "ORIENTATION_NORMAL",
+       "value": 2
+      },
+      {
+       "identifier": "GIMBAL",
+       "name": "Gimbal",
+       "description": "Align each axis to the Euler rotation axis as used for input",
+       "icon": "ORIENTATION_GIMBAL",
+       "value": 4
+      },
+      {
+       "identifier": "VIEW",
+       "name": "View",
+       "description": "Align the transformation axes to the window",
+       "icon": "ORIENTATION_VIEW",
+       "value": 3
+      },
+      {
+       "identifier": "CURSOR",
+       "name": "Cursor",
+       "description": "Align the transformation axes to the 3D cursor",
+       "icon": "ORIENTATION_CURSOR",
+       "value": 5
+      },
+      {
+       "identifier": "PARENT",
+       "name": "Parent",
+       "description": "Align the transformation axes to the object's parent space",
+       "icon": "ORIENTATION_PARENT",
+       "value": 6
+      }
+     ],
+     "items_static": [],
+     "default": "GLOBAL",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ],
+     "dynamic_hint": true,
+     "items_by_context": {
+      "A": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "AV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "B": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "BV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "C": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "CV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "D": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "DV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "E": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "EV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ]
+     }
+    },
+    {
+     "identifier": "constraint_axis",
+     "name": "Constraint Axis",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      false,
+      false,
+      false
+     ],
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_edit",
+     "name": "Proportional Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_edit_falloff",
+     "name": "Proportional Falloff",
+     "description": "Falloff type for proportional editing mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth falloff",
+       "icon": "SMOOTHCURVE",
+       "value": 0
+      },
+      {
+       "identifier": "SPHERE",
+       "name": "Sphere",
+       "description": "Spherical falloff",
+       "icon": "SPHERECURVE",
+       "value": 1
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "Root falloff",
+       "icon": "ROOTCURVE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERSE_SQUARE",
+       "name": "Inverse Square",
+       "description": "Inverse Square falloff",
+       "icon": "INVERSESQUARECURVE",
+       "value": 7
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Sharp falloff",
+       "icon": "SHARPCURVE",
+       "value": 3
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear falloff",
+       "icon": "LINCURVE",
+       "value": 4
+      },
+      {
+       "identifier": "CONSTANT",
+       "name": "Constant",
+       "description": "Constant falloff",
+       "icon": "NOCURVE",
+       "value": 5
+      },
+      {
+       "identifier": "RANDOM",
+       "name": "Random",
+       "description": "Random falloff",
+       "icon": "RNDCURVE",
+       "value": 6
+      }
+     ],
+     "default": "SMOOTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_size",
+     "name": "Proportional Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 999999995904.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_connected",
+     "name": "Connected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_projected",
+     "name": "Projected (2D)",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_elements",
+     "name": "Snap to Elements",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "INCREMENT",
+       "name": "Increment",
+       "description": "Snap to increments",
+       "icon": "SNAP_INCREMENT",
+       "value": 256
+      },
+      {
+       "identifier": "GRID",
+       "name": "Grid",
+       "description": "Snap to grid",
+       "icon": "SNAP_GRID",
+       "value": 128
+      },
+      {
+       "identifier": "VERTEX",
+       "name": "Vertex",
+       "description": "Snap to vertices",
+       "icon": "SNAP_VERTEX",
+       "value": 5
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Snap to edges",
+       "icon": "SNAP_EDGE",
+       "value": 16
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 32
+      },
+      {
+       "identifier": "VOLUME",
+       "name": "Volume",
+       "description": "Snap to volume",
+       "icon": "SNAP_VOLUME",
+       "value": 64
+      },
+      {
+       "identifier": "EDGE_MIDPOINT",
+       "name": "Edge Center",
+       "description": "Snap to the middle of edges",
+       "icon": "SNAP_MIDPOINT",
+       "value": 2
+      },
+      {
+       "identifier": "EDGE_PERPENDICULAR",
+       "name": "Edge Perpendicular",
+       "description": "Snap to the nearest point on an edge",
+       "icon": "SNAP_PERPENDICULAR",
+       "value": 8
+      },
+      {
+       "identifier": "FACE_MIDPOINT",
+       "name": "Face Center",
+       "description": "Snap to the middle of faces",
+       "icon": "SNAP_FACE_CENTER",
+       "value": 2048
+      },
+      {
+       "identifier": "FACE_PROJECT",
+       "name": "Face Project",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 1024
+      },
+      {
+       "identifier": "FACE_NEAREST",
+       "name": "Face Nearest",
+       "description": "Snap to nearest point on faces",
+       "icon": "SNAP_FACE_NEAREST",
+       "value": 512
+      }
+     ],
+     "default": [
+      "INCREMENT"
+     ],
+     "flags": [
+      "HIDDEN",
+      "ENUM_FLAG",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_project",
+     "name": "Project Individual Elements",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_target",
+     "name": "Snap Base",
+     "description": "Point on source that will snap to target",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CLOSEST",
+       "name": "Closest",
+       "description": "Snap closest point onto target",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CENTER",
+       "name": "Center",
+       "description": "Snap transformation center onto target",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MEDIAN",
+       "name": "Median",
+       "description": "Snap median onto target",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ACTIVE",
+       "name": "Active",
+       "description": "Snap active onto target",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "CLOSEST",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_self",
+     "name": "Target: Include Active",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_edit",
+     "name": "Target: Include Edit",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_nonedit",
+     "name": "Target: Include Non-Edited",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_selectable",
+     "name": "Target: Exclude Non-Selectable",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_point",
+     "name": "Point",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_align",
+     "name": "Align with Point Normal",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_normal",
+     "name": "Normal",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "gpencil_strokes",
+     "name": "Edit Grease Pencil",
+     "description": "Edit selected Grease Pencil strokes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "texture_space",
+     "name": "Edit Texture Space",
+     "description": "Edit object data texture space",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "remove_on_cancel",
+     "name": "Remove on Cancel",
+     "description": "Remove elements on cancel",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_duplicated_keyframes",
+     "name": "Duplicated Keyframes",
+     "description": "Transform duplicated keyframes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "center_override",
+     "name": "Center Override",
+     "description": "Force using this center value (when set)",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_automerge_and_split",
+     "name": "Auto Merge & Split",
+     "description": "Forces the use of Auto Merge and Split",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.translate",
+   "bl_idname": "TRANSFORM_OT_translate",
+   "label": "Move",
+   "description": "Move selected items",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Move",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "TRANSLATION",
+     "unit": "LENGTH",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 5,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_type",
+     "name": "Orientation",
+     "description": "Transformation orientation",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "GLOBAL",
+       "name": "Global",
+       "description": "Align the transformation axes to world space",
+       "icon": "ORIENTATION_GLOBAL",
+       "value": 0
+      },
+      {
+       "identifier": "LOCAL",
+       "name": "Local",
+       "description": "Align the transformation axes to the selected objects' local space",
+       "icon": "ORIENTATION_LOCAL",
+       "value": 1
+      },
+      {
+       "identifier": "NORMAL",
+       "name": "Normal",
+       "description": "Align the transformation axes to average normal of selected elements (bone Y axis for pose mode)",
+       "icon": "ORIENTATION_NORMAL",
+       "value": 2
+      },
+      {
+       "identifier": "GIMBAL",
+       "name": "Gimbal",
+       "description": "Align each axis to the Euler rotation axis as used for input",
+       "icon": "ORIENTATION_GIMBAL",
+       "value": 4
+      },
+      {
+       "identifier": "VIEW",
+       "name": "View",
+       "description": "Align the transformation axes to the window",
+       "icon": "ORIENTATION_VIEW",
+       "value": 3
+      },
+      {
+       "identifier": "CURSOR",
+       "name": "Cursor",
+       "description": "Align the transformation axes to the 3D cursor",
+       "icon": "ORIENTATION_CURSOR",
+       "value": 5
+      },
+      {
+       "identifier": "PARENT",
+       "name": "Parent",
+       "description": "Align the transformation axes to the object's parent space",
+       "icon": "ORIENTATION_PARENT",
+       "value": 6
+      }
+     ],
+     "items_static": [],
+     "default": "GLOBAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ],
+     "dynamic_hint": true,
+     "items_by_context": {
+      "A": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "AV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "B": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "BV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "C": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "CV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "D": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "DV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "E": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "EV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ]
+     }
+    },
+    {
+     "identifier": "orient_matrix",
+     "name": "Matrix",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      3,
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orient_matrix_type",
+     "name": "Matrix Orientation",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "GLOBAL",
+       "name": "Global",
+       "description": "Align the transformation axes to world space",
+       "icon": "ORIENTATION_GLOBAL",
+       "value": 0
+      },
+      {
+       "identifier": "LOCAL",
+       "name": "Local",
+       "description": "Align the transformation axes to the selected objects' local space",
+       "icon": "ORIENTATION_LOCAL",
+       "value": 1
+      },
+      {
+       "identifier": "NORMAL",
+       "name": "Normal",
+       "description": "Align the transformation axes to average normal of selected elements (bone Y axis for pose mode)",
+       "icon": "ORIENTATION_NORMAL",
+       "value": 2
+      },
+      {
+       "identifier": "GIMBAL",
+       "name": "Gimbal",
+       "description": "Align each axis to the Euler rotation axis as used for input",
+       "icon": "ORIENTATION_GIMBAL",
+       "value": 4
+      },
+      {
+       "identifier": "VIEW",
+       "name": "View",
+       "description": "Align the transformation axes to the window",
+       "icon": "ORIENTATION_VIEW",
+       "value": 3
+      },
+      {
+       "identifier": "CURSOR",
+       "name": "Cursor",
+       "description": "Align the transformation axes to the 3D cursor",
+       "icon": "ORIENTATION_CURSOR",
+       "value": 5
+      },
+      {
+       "identifier": "PARENT",
+       "name": "Parent",
+       "description": "Align the transformation axes to the object's parent space",
+       "icon": "ORIENTATION_PARENT",
+       "value": 6
+      }
+     ],
+     "items_static": [],
+     "default": "GLOBAL",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ],
+     "dynamic_hint": true,
+     "items_by_context": {
+      "A": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "AV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "B": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "BV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "C": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "CV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "D": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "DV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "E": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ],
+      "EV": [
+       "GLOBAL",
+       "LOCAL",
+       "NORMAL",
+       "GIMBAL",
+       "VIEW",
+       "CURSOR",
+       "PARENT"
+      ]
+     }
+    },
+    {
+     "identifier": "constraint_axis",
+     "name": "Constraint Axis",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      false,
+      false,
+      false
+     ],
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_edit",
+     "name": "Proportional Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_edit_falloff",
+     "name": "Proportional Falloff",
+     "description": "Falloff type for proportional editing mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth falloff",
+       "icon": "SMOOTHCURVE",
+       "value": 0
+      },
+      {
+       "identifier": "SPHERE",
+       "name": "Sphere",
+       "description": "Spherical falloff",
+       "icon": "SPHERECURVE",
+       "value": 1
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "Root falloff",
+       "icon": "ROOTCURVE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERSE_SQUARE",
+       "name": "Inverse Square",
+       "description": "Inverse Square falloff",
+       "icon": "INVERSESQUARECURVE",
+       "value": 7
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Sharp falloff",
+       "icon": "SHARPCURVE",
+       "value": 3
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear falloff",
+       "icon": "LINCURVE",
+       "value": 4
+      },
+      {
+       "identifier": "CONSTANT",
+       "name": "Constant",
+       "description": "Constant falloff",
+       "icon": "NOCURVE",
+       "value": 5
+      },
+      {
+       "identifier": "RANDOM",
+       "name": "Random",
+       "description": "Random falloff",
+       "icon": "RNDCURVE",
+       "value": 6
+      }
+     ],
+     "default": "SMOOTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "proportional_size",
+     "name": "Proportional Size",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 999999995904.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_connected",
+     "name": "Connected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_proportional_projected",
+     "name": "Projected (2D)",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_elements",
+     "name": "Snap to Elements",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "INCREMENT",
+       "name": "Increment",
+       "description": "Snap to increments",
+       "icon": "SNAP_INCREMENT",
+       "value": 256
+      },
+      {
+       "identifier": "GRID",
+       "name": "Grid",
+       "description": "Snap to grid",
+       "icon": "SNAP_GRID",
+       "value": 128
+      },
+      {
+       "identifier": "VERTEX",
+       "name": "Vertex",
+       "description": "Snap to vertices",
+       "icon": "SNAP_VERTEX",
+       "value": 5
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Snap to edges",
+       "icon": "SNAP_EDGE",
+       "value": 16
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 32
+      },
+      {
+       "identifier": "VOLUME",
+       "name": "Volume",
+       "description": "Snap to volume",
+       "icon": "SNAP_VOLUME",
+       "value": 64
+      },
+      {
+       "identifier": "EDGE_MIDPOINT",
+       "name": "Edge Center",
+       "description": "Snap to the middle of edges",
+       "icon": "SNAP_MIDPOINT",
+       "value": 2
+      },
+      {
+       "identifier": "EDGE_PERPENDICULAR",
+       "name": "Edge Perpendicular",
+       "description": "Snap to the nearest point on an edge",
+       "icon": "SNAP_PERPENDICULAR",
+       "value": 8
+      },
+      {
+       "identifier": "FACE_MIDPOINT",
+       "name": "Face Center",
+       "description": "Snap to the middle of faces",
+       "icon": "SNAP_FACE_CENTER",
+       "value": 2048
+      },
+      {
+       "identifier": "FACE_PROJECT",
+       "name": "Face Project",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 1024
+      },
+      {
+       "identifier": "FACE_NEAREST",
+       "name": "Face Nearest",
+       "description": "Snap to nearest point on faces",
+       "icon": "SNAP_FACE_NEAREST",
+       "value": 512
+      }
+     ],
+     "default": [
+      "INCREMENT"
+     ],
+     "flags": [
+      "HIDDEN",
+      "ENUM_FLAG",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_project",
+     "name": "Project Individual Elements",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_target",
+     "name": "Snap Base",
+     "description": "Point on source that will snap to target",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CLOSEST",
+       "name": "Closest",
+       "description": "Snap closest point onto target",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CENTER",
+       "name": "Center",
+       "description": "Snap transformation center onto target",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MEDIAN",
+       "name": "Median",
+       "description": "Snap median onto target",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ACTIVE",
+       "name": "Active",
+       "description": "Snap active onto target",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "CLOSEST",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_self",
+     "name": "Target: Include Active",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_edit",
+     "name": "Target: Include Edit",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_nonedit",
+     "name": "Target: Include Non-Edited",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_selectable",
+     "name": "Target: Exclude Non-Selectable",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_point",
+     "name": "Point",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_align",
+     "name": "Align with Point Normal",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_normal",
+     "name": "Normal",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "gpencil_strokes",
+     "name": "Edit Grease Pencil",
+     "description": "Edit selected Grease Pencil strokes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "cursor_transform",
+     "name": "Transform Cursor",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "texture_space",
+     "name": "Edit Texture Space",
+     "description": "Edit object data texture space",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "remove_on_cancel",
+     "name": "Remove on Cancel",
+     "description": "Remove elements on cancel",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_duplicated_keyframes",
+     "name": "Duplicated Keyframes",
+     "description": "Transform duplicated keyframes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "view2d_edge_pan",
+     "name": "Edge Pan",
+     "description": "Enable edge panning in 2D view",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_automerge_and_split",
+     "name": "Auto Merge & Split",
+     "description": "Forces the use of Auto Merge and Split",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "translate_origin",
+     "name": "Translate Origin",
+     "description": "Translate origin instead of selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.vert_crease",
+   "bl_idname": "TRANSFORM_OT_vert_crease",
+   "label": "Vertex Crease",
+   "description": "Change the crease of vertices",
+   "options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Factor",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -1.0,
+     "hard_max": 1.0,
+     "soft_min": -1.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "transform.vert_slide",
+   "bl_idname": "TRANSFORM_OT_vert_slide",
+   "label": "Vertex Slide",
+   "description": "Slide a vertex along a mesh",
+   "options": [
+    "BLOCKING",
+    "DEPENDS_ON_CURSOR",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Factor",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -10.0,
+     "hard_max": 10.0,
+     "soft_min": -1.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_even",
+     "name": "Even",
+     "description": "Make the edge loop match the shape of the adjacent edge loop",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "flipped",
+     "name": "Flipped",
+     "description": "When Even mode is active, flips between the two adjacent edge loops",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_clamp",
+     "name": "Clamp",
+     "description": "Clamp within the edge extents",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "direction",
+     "name": "Slide Direction",
+     "description": "World-space direction",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Use Snapping Options",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_elements",
+     "name": "Snap to Elements",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "INCREMENT",
+       "name": "Increment",
+       "description": "Snap to increments",
+       "icon": "SNAP_INCREMENT",
+       "value": 256
+      },
+      {
+       "identifier": "GRID",
+       "name": "Grid",
+       "description": "Snap to grid",
+       "icon": "SNAP_GRID",
+       "value": 128
+      },
+      {
+       "identifier": "VERTEX",
+       "name": "Vertex",
+       "description": "Snap to vertices",
+       "icon": "SNAP_VERTEX",
+       "value": 5
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Snap to edges",
+       "icon": "SNAP_EDGE",
+       "value": 16
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 32
+      },
+      {
+       "identifier": "VOLUME",
+       "name": "Volume",
+       "description": "Snap to volume",
+       "icon": "SNAP_VOLUME",
+       "value": 64
+      },
+      {
+       "identifier": "EDGE_MIDPOINT",
+       "name": "Edge Center",
+       "description": "Snap to the middle of edges",
+       "icon": "SNAP_MIDPOINT",
+       "value": 2
+      },
+      {
+       "identifier": "EDGE_PERPENDICULAR",
+       "name": "Edge Perpendicular",
+       "description": "Snap to the nearest point on an edge",
+       "icon": "SNAP_PERPENDICULAR",
+       "value": 8
+      },
+      {
+       "identifier": "FACE_MIDPOINT",
+       "name": "Face Center",
+       "description": "Snap to the middle of faces",
+       "icon": "SNAP_FACE_CENTER",
+       "value": 2048
+      },
+      {
+       "identifier": "FACE_PROJECT",
+       "name": "Face Project",
+       "description": "Snap by projecting onto faces",
+       "icon": "SNAP_FACE",
+       "value": 1024
+      },
+      {
+       "identifier": "FACE_NEAREST",
+       "name": "Face Nearest",
+       "description": "Snap to nearest point on faces",
+       "icon": "SNAP_FACE_NEAREST",
+       "value": 512
+      }
+     ],
+     "default": [
+      "INCREMENT"
+     ],
+     "flags": [
+      "HIDDEN",
+      "ENUM_FLAG",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_project",
+     "name": "Project Individual Elements",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_target",
+     "name": "Snap Base",
+     "description": "Point on source that will snap to target",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CLOSEST",
+       "name": "Closest",
+       "description": "Snap closest point onto target",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CENTER",
+       "name": "Center",
+       "description": "Snap transformation center onto target",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MEDIAN",
+       "name": "Median",
+       "description": "Snap median onto target",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ACTIVE",
+       "name": "Active",
+       "description": "Snap active onto target",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "CLOSEST",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_self",
+     "name": "Target: Include Active",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_edit",
+     "name": "Target: Include Edit",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_nonedit",
+     "name": "Target: Include Non-Edited",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_snap_selectable",
+     "name": "Target: Exclude Non-Selectable",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_point",
+     "name": "Point",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "correct_uv",
+     "name": "Correct UVs",
+     "description": "Correct UV coordinates when transforming",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "transform.vertex_random",
+   "bl_idname": "TRANSFORM_OT_vertex_random",
+   "label": "Randomize",
+   "description": "Randomize vertices",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "offset",
+     "name": "Amount",
+     "description": "Distance to offset",
+     "type": "FLOAT",
+     "subtype": "DISTANCE",
+     "unit": "LENGTH",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10.0,
+     "soft_max": 10.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "uniform",
+     "name": "Uniform",
+     "description": "Increase for uniform offset distance",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "normal",
+     "name": "Normal",
+     "description": "Align offset direction to normals",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "seed",
+     "name": "Random Seed",
+     "description": "Seed for the random number generator",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 10000,
+     "soft_min": 0,
+     "soft_max": 50,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "transform.vertex_warp",
+   "bl_idname": "TRANSFORM_OT_vertex_warp",
+   "label": "Warp",
+   "description": "Warp vertices around the cursor",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "warp_angle",
+     "name": "Warp Angle",
+     "description": "Amount to warp about the cursor",
+     "type": "FLOAT",
+     "subtype": "ANGLE",
+     "unit": "ROTATION",
+     "default": 6.2831854820251465,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -6.2831854820251465,
+     "soft_max": 6.2831854820251465,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "offset_angle",
+     "name": "Offset Angle",
+     "description": "Angle to use as the basis for warping",
+     "type": "FLOAT",
+     "subtype": "ANGLE",
+     "unit": "ROTATION",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -6.2831854820251465,
+     "soft_max": 6.2831854820251465,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "min",
+     "name": "Min",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -100.0,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "max",
+     "name": "Max",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -100.0,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "viewmat",
+     "name": "Matrix",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      4,
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "center",
+     "name": "Center",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ_LENGTH",
+     "unit": "LENGTH",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  }
+ ]
+}

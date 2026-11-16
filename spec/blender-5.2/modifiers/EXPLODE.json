@@ -1,0 +1,30 @@
+{
+ "type": "EXPLODE",
+ "ui_name": "Explode",
+ "srna": "ExplodeModifier",
+ "values": {
+  "name": "M",
+  "type": "EXPLODE",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": false,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 1886000045,
+  "vertex_group": "",
+  "protect": 0.0,
+  "use_edge_cut": false,
+  "show_unborn": true,
+  "show_alive": true,
+  "show_dead": true,
+  "use_size": false,
+  "particle_uv": "",
+  "invert_vertex_group": false
+ },
+ "default_name": "Explode"
+}

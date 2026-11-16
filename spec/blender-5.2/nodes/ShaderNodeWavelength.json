@@ -1,0 +1,47 @@
+{
+ "bl_idname": "ShaderNodeWavelength",
+ "srna": "ShaderNodeWavelength",
+ "name": "Wavelength",
+ "label": "",
+ "width": 160.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Wavelength",
+   "identifier": "Wavelength",
+   "bl_idname": "NodeSocketFloatWavelength",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 500.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "WAVELENGTH",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {}
+}

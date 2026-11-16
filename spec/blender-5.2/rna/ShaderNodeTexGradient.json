@@ -1,0 +1,193 @@
+{
+ "identifier": "ShaderNodeTexGradient",
+ "name": "Gradient Texture",
+ "description": "Generate interpolated color and intensity values based on the input vector",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "texture_mapping",
+   "name": "Texture Mapping",
+   "description": "Texture coordinate mapping settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "TexMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "color_mapping",
+   "name": "Color Mapping",
+   "description": "Color mapping settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "gradient_type",
+   "name": "Gradient Type",
+   "description": "Style of the color blending",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LINEAR",
+     "name": "Linear",
+     "description": "Create a linear progression",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "QUADRATIC",
+     "name": "Quadratic",
+     "description": "Create a quadratic progression",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "EASING",
+     "name": "Easing",
+     "description": "Create a progression easing from one step to the next",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "DIAGONAL",
+     "name": "Diagonal",
+     "description": "Create a diagonal progression",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "SPHERICAL",
+     "name": "Spherical",
+     "description": "Create a spherical progression",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "QUADRATIC_SPHERE",
+     "name": "Quadratic Sphere",
+     "description": "Create a quadratic progression in the shape of a sphere",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "RADIAL",
+     "name": "Radial",
+     "description": "Create a radial progression",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "LINEAR",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

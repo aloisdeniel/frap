@@ -1,0 +1,267 @@
+{
+ "identifier": "FModifier",
+ "name": "F-Modifier",
+ "description": "Modifier for values of F-Curve",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "F-Curve Modifier name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "type",
+   "name": "Type",
+   "description": "F-Curve Modifier Type",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NULL",
+     "name": "Invalid",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "GENERATOR",
+     "name": "Generator",
+     "description": "Generate a curve using a factorized or expanded polynomial",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FNGENERATOR",
+     "name": "Built-In Function",
+     "description": "Generate a curve using standard math functions such as sin and cos",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "ENVELOPE",
+     "name": "Envelope",
+     "description": "Reshape F-Curve values, e.g. change amplitude of movements",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "CYCLES",
+     "name": "Cycles",
+     "description": "Cyclic extend/repeat keyframe sequence",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "NOISE",
+     "name": "Noise",
+     "description": "Add pseudo-random noise on top of F-Curves",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "LIMITS",
+     "name": "Limits",
+     "description": "Restrict maximum and minimum values of F-Curve",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "STEPPED",
+     "name": "Stepped Interpolation",
+     "description": "Snap values to nearest grid step, e.g. for a stop-motion look",
+     "icon": "NONE",
+     "value": 9
+    },
+    {
+     "identifier": "SMOOTH",
+     "name": "Smooth (Gaussian)",
+     "description": "Smooth curve using Gaussian smoothing",
+     "icon": "NONE",
+     "value": 10
+    }
+   ],
+   "default": "NULL",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_expanded",
+   "name": "Expanded",
+   "description": "F-Curve Modifier's panel is expanded in UI",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mute",
+   "name": "Enabled",
+   "description": "Enable F-Curve modifier evaluation",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_valid",
+   "name": "Disabled",
+   "description": "F-Curve Modifier has invalid settings and will not be evaluated",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "active",
+   "name": "Active",
+   "description": "F-Curve modifier will show settings in the editor",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_restricted_range",
+   "name": "Restrict Frame Range",
+   "description": "F-Curve Modifier is only applied for the specified frame range to help mask off effects in order to chain them",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_start",
+   "name": "Start Frame",
+   "description": "Frame that modifier's influence starts (if Restrict Frame Range is in use)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_end",
+   "name": "End Frame",
+   "description": "Frame that modifier's influence ends (if Restrict Frame Range is in use)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "blend_in",
+   "name": "Blend In",
+   "description": "Number of frames from start frame for influence to take effect",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "blend_out",
+   "name": "Blend Out",
+   "description": "Number of frames from end frame for influence to fade out",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_influence",
+   "name": "Use Influence",
+   "description": "F-Curve Modifier's effects will be tempered by a default factor",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "influence",
+   "name": "Influence",
+   "description": "Amount of influence F-Curve Modifier will have when not fading in/out",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

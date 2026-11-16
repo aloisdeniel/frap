@@ -1,0 +1,41 @@
+{
+ "identifier": "SoftBodyModifier",
+ "name": "Soft Body Modifier",
+ "description": "Soft body simulation modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "settings",
+   "name": "Soft Body Settings",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "SoftBodySettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "point_cache",
+   "name": "Soft Body Point Cache",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PointCache",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

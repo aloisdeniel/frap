@@ -1,0 +1,55 @@
+{
+ "identifier": "EdgeSplitModifier",
+ "name": "EdgeSplit Modifier",
+ "description": "Edge splitting modifier to create sharp edges",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "split_angle",
+   "name": "Split Angle",
+   "description": "Angle above which to split edges",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.5235987901687622,
+   "hard_min": 0.0,
+   "hard_max": 3.1415927410125732,
+   "soft_min": 0.0,
+   "soft_max": 3.1415927410125732,
+   "step": 10.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_edge_angle",
+   "name": "Use Edge Angle",
+   "description": "Split edges with high angle between faces",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_edge_sharp",
+   "name": "Use Sharp Edges",
+   "description": "Split edges that are marked as sharp",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

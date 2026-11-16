@@ -16,9 +16,7 @@
    "unit": "NONE",
    "fixed_type": "Object",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "background_set",
@@ -29,9 +27,7 @@
    "unit": "NONE",
    "fixed_type": "Scene",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "world",
@@ -42,9 +38,7 @@
    "unit": "NONE",
    "fixed_type": "World",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "objects",
@@ -317,8 +311,7 @@
    "fixed_type": "AnimData",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -467,9 +460,7 @@
    "unit": "NONE",
    "fixed_type": "NodeTree",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "use_nodes",
@@ -830,9 +821,7 @@
    "unit": "NONE",
    "fixed_type": "Annotation",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "active_clip",
@@ -909,8 +898,7 @@
    "is_id": true,
    "flags": [
     "READONLY",
-    "NEVER_NULL",
-    "OVERRIDABLE"
+    "NEVER_NULL"
    ]
   },
   {
@@ -1448,5 +1436,18 @@
    "returns": []
   }
  ],
- "requested": false
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.scenes.new('Scene')",
+  "differs_from_default": {
+   "id_type": "SCENE",
+   "users": 1,
+   "use_extra_user": true,
+   "is_editable": true,
+   "frame_float": 1.0,
+   "frame_current_final": 1.0,
+   "use_nodes": true,
+   "use_audio": true
+  }
+ }
 }

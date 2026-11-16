@@ -1,0 +1,35 @@
+{
+ "identifier": "ObjectLightLinking",
+ "name": "Object Light Linking",
+ "description": "",
+ "base": null,
+ "name_property": null,
+ "nested": "Object",
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "receiver_collection",
+   "name": "Receiver Collection",
+   "description": "Collection which defines light linking relation of this emitter",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Collection",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "blocker_collection",
+   "name": "Blocker Collection",
+   "description": "Collection which defines objects which block light from this emitter",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Collection",
+   "is_id": true,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

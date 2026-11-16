@@ -35,10 +35,11 @@
   }
  ],
  "funcs": [],
- "requested": false,
+ "root": true,
  "fresh": {
   "recipe": "bpy.data.materials.new('Material').node_tree.nodes['Principled BSDF'].inputs[0]",
   "differs_from_default": {
+   "name": "Base Color",
    "label": "Base Color",
    "identifier": "Base Color",
    "link_limit": 1,

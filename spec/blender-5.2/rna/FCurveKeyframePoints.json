@@ -1,0 +1,276 @@
+{
+ "identifier": "FCurveKeyframePoints",
+ "name": "Keyframe Points",
+ "description": "Collection of keyframe points",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "insert",
+   "description": "Add a keyframe point to a F-Curve",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "frame",
+     "name": "",
+     "description": "X Value of this keyframe point",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "value",
+     "name": "",
+     "description": "Y Value of this keyframe point",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "options",
+     "name": "",
+     "description": "Keyframe options",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "REPLACE",
+       "name": "Replace",
+       "description": "Don't add any new keyframes, but just replace existing ones",
+       "icon": "NONE",
+       "value": 16
+      },
+      {
+       "identifier": "NEEDED",
+       "name": "Needed",
+       "description": "Only adds keyframes that are needed",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "FAST",
+       "name": "Fast",
+       "description": "Fast keyframe insertion to avoid recalculating the curve each time",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": [],
+     "flags": [
+      "ENUM_FLAG",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "keyframe_type",
+     "name": "",
+     "description": "Type of keyframe to insert",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "KEYFRAME",
+       "name": "Keyframe",
+       "description": "Normal keyframe, e.g. for key poses",
+       "icon": "KEYTYPE_KEYFRAME_VEC",
+       "value": 0
+      },
+      {
+       "identifier": "BREAKDOWN",
+       "name": "Breakdown",
+       "description": "A breakdown pose, e.g. for transitions between key poses",
+       "icon": "KEYTYPE_BREAKDOWN_VEC",
+       "value": 2
+      },
+      {
+       "identifier": "MOVING_HOLD",
+       "name": "Moving Hold",
+       "description": "A keyframe that is part of a moving hold",
+       "icon": "KEYTYPE_MOVING_HOLD_VEC",
+       "value": 4
+      },
+      {
+       "identifier": "EXTREME",
+       "name": "Extreme",
+       "description": "An \"extreme\" pose, or some other purpose as needed",
+       "icon": "KEYTYPE_EXTREME_VEC",
+       "value": 1
+      },
+      {
+       "identifier": "JITTER",
+       "name": "Jitter",
+       "description": "A filler or baked keyframe for keying on ones, or some other purpose as needed",
+       "icon": "KEYTYPE_JITTER_VEC",
+       "value": 3
+      },
+      {
+       "identifier": "GENERATED",
+       "name": "Generated",
+       "description": "A key generated automatically by a tool, not manually created",
+       "icon": "KEYTYPE_GENERATED_VEC",
+       "value": 5
+      }
+     ],
+     "default": "KEYFRAME",
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "keyframe",
+     "name": "",
+     "description": "Newly created keyframe",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Keyframe",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "add",
+   "description": "Add a keyframe point to a F-Curve",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "count",
+     "name": "Number",
+     "description": "Number of points to add to the spline",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove keyframe from an F-Curve",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "keyframe",
+     "name": "",
+     "description": "Keyframe to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Keyframe",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "fast",
+     "name": "Fast",
+     "description": "Fast keyframe removal to avoid recalculating the curve each time",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "clear",
+   "description": "Remove all keyframes from an F-Curve",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "sort",
+   "description": "Ensure all keyframe points are chronologically sorted",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "deduplicate",
+   "description": "Ensure there are no duplicate keys. Assumes that the points have already been sorted",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "handles_recalc",
+   "description": "Update handles after modifications to the keyframe points, to update things like auto-clamping",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  }
+ ],
+ "root": true
+}

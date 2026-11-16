@@ -1,0 +1,373 @@
+{
+ "identifier": "Collection",
+ "name": "Collection",
+ "description": "Collection of Object data-blocks",
+ "base": "ID",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "instance_offset",
+   "name": "Instance Offset",
+   "description": "Offset from the origin to use when instancing",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "objects",
+   "name": "Objects",
+   "description": "Objects that are directly in this collection",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "api": "CollectionObjects",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "all_objects",
+   "name": "All Objects",
+   "description": "Objects that are in this collection and its child collections",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "children",
+   "name": "Children",
+   "description": "Collections that are immediate children of this collection",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Collection",
+   "is_id": true,
+   "api": "CollectionChildren",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "collection_objects",
+   "name": "Collection Objects",
+   "description": "Objects of the collection with their parent-collection-specific settings",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CollectionObject",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "collection_children",
+   "name": "Collection Children",
+   "description": "Children collections with their parent-collection-specific settings",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CollectionChild",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "exporters",
+   "name": "Collection Export Handlers",
+   "description": "Export Handlers configured for the collection",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CollectionExport",
+   "is_id": false,
+   "api": "CollectionExports",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "active_exporter_index",
+   "name": "Active Collection Exporter Index",
+   "description": "Active index in the exporters list",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "hide_select",
+   "name": "Disable Selection",
+   "description": "Disable selection in viewport",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "hide_viewport",
+   "name": "Disable in Viewports",
+   "description": "Globally disable in viewports",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "hide_render",
+   "name": "Disable in Renders",
+   "description": "Globally disable in renders",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "lineart_usage",
+   "name": "Usage",
+   "description": "How to use this collection in Line Art calculation",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "INCLUDE",
+     "name": "Include",
+     "description": "Generate feature lines for this collection",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "OCCLUSION_ONLY",
+     "name": "Occlusion Only",
+     "description": "Only use the collection to produce occlusion",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "EXCLUDE",
+     "name": "Exclude",
+     "description": "Don't use this collection in Line Art",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "INTERSECTION_ONLY",
+     "name": "Intersection Only",
+     "description": "Only generate intersection lines for this collection",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "NO_INTERSECTION",
+     "name": "No Intersection",
+     "description": "Include this collection but do not generate intersection lines",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "FORCE_INTERSECTION",
+     "name": "Force Intersection",
+     "description": "Generate intersection lines even with objects that disabled intersection",
+     "icon": "NONE",
+     "value": 16
+    }
+   ],
+   "default": "INCLUDE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lineart_use_intersection_mask",
+   "name": "Use Intersection Masks",
+   "description": "Use custom intersection mask for faces in this collection",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lineart_intersection_mask",
+   "name": "Masks",
+   "description": "Intersection generated by this collection will have this mask value",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    8
+   ],
+   "default": [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lineart_intersection_priority",
+   "name": "Intersection Priority",
+   "description": "The intersection line will be included into the object with the higher intersection priority value",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 255,
+   "soft_min": 0,
+   "soft_max": 255,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_lineart_intersection_priority",
+   "name": "Use Intersection Priority",
+   "description": "Assign intersection priority value for this collection",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "color_tag",
+   "name": "Collection Color",
+   "description": "Color tag for a collection",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "Assign no color tag to the collection",
+     "icon": "X",
+     "value": -1
+    },
+    {
+     "identifier": "COLOR_01",
+     "name": "Color 01",
+     "description": "",
+     "icon": "COLLECTION_COLOR_01",
+     "value": 0
+    },
+    {
+     "identifier": "COLOR_02",
+     "name": "Color 02",
+     "description": "",
+     "icon": "COLLECTION_COLOR_02",
+     "value": 1
+    },
+    {
+     "identifier": "COLOR_03",
+     "name": "Color 03",
+     "description": "",
+     "icon": "COLLECTION_COLOR_03",
+     "value": 2
+    },
+    {
+     "identifier": "COLOR_04",
+     "name": "Color 04",
+     "description": "",
+     "icon": "COLLECTION_COLOR_04",
+     "value": 3
+    },
+    {
+     "identifier": "COLOR_05",
+     "name": "Color 05",
+     "description": "",
+     "icon": "COLLECTION_COLOR_05",
+     "value": 4
+    },
+    {
+     "identifier": "COLOR_06",
+     "name": "Color 06",
+     "description": "",
+     "icon": "COLLECTION_COLOR_06",
+     "value": 5
+    },
+    {
+     "identifier": "COLOR_07",
+     "name": "Color 07",
+     "description": "",
+     "icon": "COLLECTION_COLOR_07",
+     "value": 6
+    },
+    {
+     "identifier": "COLOR_08",
+     "name": "Color 08",
+     "description": "",
+     "icon": "COLLECTION_COLOR_08",
+     "value": 7
+    }
+   ],
+   "default": "COLOR_01",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.collections.new('Collection')",
+  "differs_from_default": {
+   "id_type": "COLLECTION",
+   "is_editable": true,
+   "color_tag": "NONE"
+  }
+ }
+}

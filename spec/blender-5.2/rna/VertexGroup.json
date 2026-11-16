@@ -1,0 +1,220 @@
+{
+ "identifier": "VertexGroup",
+ "name": "Vertex Group",
+ "description": "Group of vertices, used for armature deform and other purposes",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "Vertex group name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "lock_weight",
+   "name": "",
+   "description": "Maintain the relative weights for the group",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "index",
+   "name": "Index",
+   "description": "Index number of the vertex group",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "add",
+   "description": "Add vertices to the group",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "",
+     "description": "List of indices",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      1
+     ],
+     "default": [
+      0
+     ],
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 0,
+     "step": 1,
+     "flags": [
+      "REQUIRED"
+     ]
+    },
+    {
+     "identifier": "weight",
+     "name": "",
+     "description": "Vertex weight",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED"
+     ]
+    },
+    {
+     "identifier": "type",
+     "name": "",
+     "description": "Vertex assign mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "REPLACE",
+       "name": "Replace",
+       "description": "Replace",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ADD",
+       "name": "Add",
+       "description": "Add",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "SUBTRACT",
+       "name": "Subtract",
+       "description": "Subtract",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "REPLACE",
+     "flags": [
+      "REQUIRED"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove vertices from the group",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "",
+     "description": "List of indices",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      1
+     ],
+     "default": [
+      0
+     ],
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 0,
+     "step": 1,
+     "flags": [
+      "REQUIRED"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "weight",
+   "description": "Get a vertex weight from the group",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "The index of the vertex",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "REQUIRED"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "weight",
+     "name": "",
+     "description": "Vertex weight",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

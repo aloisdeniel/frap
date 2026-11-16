@@ -1,0 +1,24 @@
+{
+ "identifier": "UVProjector",
+ "name": "UVProjector",
+ "description": "UV projector used by the UV project modifier",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "object",
+   "name": "Object",
+   "description": "Object to use as projector transform",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

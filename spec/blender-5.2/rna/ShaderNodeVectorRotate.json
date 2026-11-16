@@ -1,0 +1,163 @@
+{
+ "identifier": "ShaderNodeVectorRotate",
+ "name": "Vector Rotate",
+ "description": "Rotate a vector around a pivot point (center)",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "rotation_type",
+   "name": "Type",
+   "description": "Type of angle input",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "AXIS_ANGLE",
+     "name": "Axis Angle",
+     "description": "Rotate a point using axis angle",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "X_AXIS",
+     "name": "X Axis",
+     "description": "Rotate a point using X axis",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Y_AXIS",
+     "name": "Y Axis",
+     "description": "Rotate a point using Y axis",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "Z_AXIS",
+     "name": "Z Axis",
+     "description": "Rotate a point using Z axis",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "EULER_XYZ",
+     "name": "Euler",
+     "description": "Rotate a point using XYZ order",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "AXIS_ANGLE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert",
+   "name": "Invert",
+   "description": "Invert the rotation angle",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

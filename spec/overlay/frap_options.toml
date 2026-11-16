@@ -1,0 +1,123 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# frap-only operator options (ARCHITECTURE §4.2 "frap-option audit", §17.2). A `frap_*` option
+# exists only for a feature the Blender operator has no property for. `cargo test -p xtask`
+# (codegen::tests::frap_option_audit) fails when
+#   * an option's `feature` is covered by a Blender property of that operator, i.e. the feature
+#     is listed under [covered] and its property exists in the dump (how `frap_instancing` was
+#     found to duplicate `export_gpu_instances`), or
+#   * an option name does not start with `frap_`, or it collides with a dumped property, or
+#   * an option's feature is unknown (not in [features]).
+# Options are appended to the operator's generated props (after the Blender ones) once their
+# milestone is <= spec/current_milestone; until then they are audited but not generated.
+#
+# [features]: every feature a frap option may provide, with a one-line description.
+# [covered]:  feature -> Blender property that already provides it (per operator idname).
+# [[option]]: op, identifier, feature, milestone, type, default, items (ENUM), description.
+
+[features]
+compat = "drop io_scene_gltf2 quirks for strict spec output (BLENDER default | SPEC)"
+texture_format = "texture container choice beyond PNG/JPEG/WebP (KTX2 via Basis Universal)"
+basisu_mode = "Basis Universal codec mode (ETC1S | UASTC)"
+mesh_quantization = "KHR_mesh_quantization of positions/normals/texcoords"
+interleave = "interleaved vertex buffers"
+node_visibility = "KHR_node_visibility from hide_render/hide_viewport"
+diffuse_transmission = "KHR_materials_diffuse_transmission from the Principled BSDF"
+draco_backend = "choice of the Draco encoder implementation (draco-core | draco-sys)"
+gpu_instancing = "EXT_mesh_gpu_instancing for objects sharing a mesh"
+draco_compression = "KHR_draco_mesh_compression"
+image_format = "PNG/JPEG/WebP image choice"
+
+[covered."export_scene.gltf"]
+gpu_instancing = "export_gpu_instances"
+draco_compression = "export_draco_mesh_compression_enable"
+image_format = "export_image_format"
+
+[[option]]
+op = "export_scene.gltf"
+identifier = "frap_compat"
+feature = "compat"
+milestone = 7
+type = "ENUM"
+default = "BLENDER"
+items = [
+  ["BLENDER", "Blender", "Byte-compatible with io_scene_gltf2 5.2.41, quirks included"],
+  ["SPEC", "Spec", "Strict glTF 2.0: drop add-on quirks (e.g. KHR_texture_transform marked required)"],
+]
+description = "Output compatibility (frap extension)"
+
+[[option]]
+op = "export_scene.gltf"
+identifier = "frap_texture_format"
+feature = "texture_format"
+milestone = 7
+type = "ENUM"
+default = "AUTO"
+items = [
+  ["AUTO", "Automatic", "Use export_image_format"],
+  ["KTX2", "KTX2", "KTX2 + Basis Universal (KHR_texture_basisu), needs feature basisu-encode"],
+]
+description = "Texture container (frap extension)"
+
+[[option]]
+op = "export_scene.gltf"
+identifier = "frap_basisu_mode"
+feature = "basisu_mode"
+milestone = 7
+type = "ENUM"
+default = "ETC1S"
+items = [
+  ["ETC1S", "ETC1S", "Smaller files, lower quality"],
+  ["UASTC", "UASTC", "Larger files, higher quality"],
+]
+description = "Basis Universal mode for frap_texture_format='KTX2' (frap extension)"
+
+[[option]]
+op = "export_scene.gltf"
+identifier = "frap_mesh_quantization"
+feature = "mesh_quantization"
+milestone = 7
+type = "BOOLEAN"
+default = false
+description = "Quantize vertex attributes (KHR_mesh_quantization, frap extension)"
+
+[[option]]
+op = "export_scene.gltf"
+identifier = "frap_interleave"
+feature = "interleave"
+milestone = 7
+type = "BOOLEAN"
+default = false
+description = "Interleave vertex buffers (frap extension)"
+
+[[option]]
+op = "export_scene.gltf"
+identifier = "frap_node_visibility"
+feature = "node_visibility"
+milestone = 7
+type = "BOOLEAN"
+default = false
+description = "Export KHR_node_visibility (frap extension)"
+
+[[option]]
+op = "export_scene.gltf"
+identifier = "frap_diffuse_transmission"
+feature = "diffuse_transmission"
+milestone = 7
+type = "BOOLEAN"
+default = false
+description = "Export KHR_materials_diffuse_transmission (frap extension)"
+
+[[option]]
+op = "export_scene.gltf"
+identifier = "frap_draco_backend"
+feature = "draco_backend"
+milestone = 7
+type = "ENUM"
+default = "AUTO"
+items = [
+  ["AUTO", "Automatic", "draco-core, or draco-sys when built with that feature"],
+  ["CORE", "draco-core", "Pure-Rust encoder"],
+  ["SYS", "draco-sys", "Google Draco (feature draco-sys)"],
+]
+description = "Draco encoder implementation (frap extension)"

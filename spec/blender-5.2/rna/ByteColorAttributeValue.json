@@ -1,0 +1,65 @@
+{
+ "identifier": "ByteColorAttributeValue",
+ "name": "Byte Color Attribute Value",
+ "description": "Color value in geometry attribute",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "color",
+   "name": "Color",
+   "description": "RGBA color in scene linear color space",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "color_srgb",
+   "name": "Color",
+   "description": "RGBA color in sRGB color space",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

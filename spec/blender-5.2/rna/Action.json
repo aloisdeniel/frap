@@ -1,0 +1,326 @@
+{
+ "identifier": "Action",
+ "name": "Action",
+ "description": "A collection of F-Curves for animation",
+ "base": "ID",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "is_empty",
+   "name": "Is Empty",
+   "description": "False when there is any Layer, Slot, or legacy F-Curve",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_action_legacy",
+   "name": "Is Legacy Action",
+   "description": "Return whether this is a legacy Action. Legacy Actions have no layers or slots. Since Blender 4.4 actions are automatically updated to layered actions. This will only return true on empty actions",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_action_layered",
+   "name": "Is Layered Action",
+   "description": "Return whether this is a layered Action. At this point all actions are layered through versioning and this function will always return true",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "slots",
+   "name": "Slots",
+   "description": "The list of slots in this Action",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ActionSlot",
+   "is_id": false,
+   "api": "ActionSlots",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "layers",
+   "name": "Layers",
+   "description": "The list of layers that make up this Action",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ActionLayer",
+   "is_id": false,
+   "api": "ActionLayers",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "pose_markers",
+   "name": "Pose Markers",
+   "description": "Markers specific to this action, for labeling poses",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "TimelineMarker",
+   "is_id": false,
+   "api": "ActionPoseMarkers",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_frame_range",
+   "name": "Manual Frame Range",
+   "description": "Manually specify the intended playback frame range for the action (this range is used by some tools, but does not affect animation evaluation)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_cyclic",
+   "name": "Cyclic Animation",
+   "description": "The action is intended to be used as a cycle looping over its manually set playback frame range (enabling this does not automatically make it loop)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "frame_start",
+   "name": "Start Frame",
+   "description": "The start frame of the manually set intended playback range",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -1048574.0,
+   "hard_max": 1048574.0,
+   "soft_min": -1048574.0,
+   "soft_max": 1048574.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "frame_end",
+   "name": "End Frame",
+   "description": "The end frame of the manually set intended playback range",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -1048574.0,
+   "hard_max": 1048574.0,
+   "soft_min": -1048574.0,
+   "soft_max": 1048574.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "frame_range",
+   "name": "Frame Range",
+   "description": "The intended playback frame range of this action, using the manually set range if available, or the combined frame range of all F-Curves within this action if not (assigning sets the manual frame range)",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 0.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "curve_frame_range",
+   "name": "Curve Frame Range",
+   "description": "The combined frame range of all F-Curves within this action",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 0.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "deselect_keys",
+   "description": "Deselects all keys of the Action. The selection status of F-Curves is unchanged.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "fcurve_ensure_for_datablock",
+   "description": "Ensure that an F-Curve exists, with the given data path and array index, for the given data-block. This action must already be assigned to the data-block. This function will also create the layer, keyframe strip, and action slot if necessary, and take care of assigning the action slot too",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "datablock",
+     "name": "",
+     "description": "The data-block animated by this action, for which to ensure the F-Curve exists. This action must already be assigned to the data-block",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ID",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "data_path",
+     "name": "Data Path",
+     "description": "F-Curve data path",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "Array index",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "group_name",
+     "name": "Group Name",
+     "description": "Name of the group for this F-Curve, if any. If the F-Curve already exists, this parameter is ignored",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "fcurve",
+     "name": "",
+     "description": "The found or created F-Curve",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "FCurve",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "flip_with_pose",
+   "description": "Flip the action around the X axis using a pose",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "object",
+     "name": "",
+     "description": "The reference armature object to use when flipping",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Object",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.actions.new('Action')",
+  "differs_from_default": {
+   "is_editable": true,
+   "is_empty": true,
+   "is_action_legacy": true,
+   "is_action_layered": true
+  }
+ }
+}

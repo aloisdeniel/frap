@@ -1,0 +1,5495 @@
+{
+ "namespace": "image",
+ "count": 49,
+ "operators": [
+  {
+   "idname": "image.add_render_slot",
+   "bl_idname": "IMAGE_OT_add_render_slot",
+   "label": "Add Render Slot",
+   "description": "Add a new render slot",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.change_frame",
+   "bl_idname": "IMAGE_OT_change_frame",
+   "label": "Change Frame",
+   "description": "Interactively change the current frame number",
+   "options": [
+    "BLOCKING",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "frame",
+     "name": "Frame",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": -1048574,
+     "soft_max": 1048574,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.clear_render_border",
+   "bl_idname": "IMAGE_OT_clear_render_border",
+   "label": "Clear Render Region",
+   "description": "Clear the boundaries of the render region and disable render region",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.clear_render_slot",
+   "bl_idname": "IMAGE_OT_clear_render_slot",
+   "label": "Clear Render Slot",
+   "description": "Clear the currently selected render slot",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.clipboard_copy",
+   "bl_idname": "IMAGE_OT_clipboard_copy",
+   "label": "Copy Image",
+   "description": "Copy the image to the clipboard",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.clipboard_paste",
+   "bl_idname": "IMAGE_OT_clipboard_paste",
+   "label": "Paste Image",
+   "description": "Paste new image from the clipboard",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.convert_to_mesh_plane",
+   "bl_idname": "IMAGE_OT_convert_to_mesh_plane",
+   "label": "Convert Image Empty to Mesh Plane",
+   "description": "Convert selected reference images to textured mesh plane",
+   "options": [
+    "PRESET",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "interpolation",
+     "name": "Interpolation",
+     "description": "Texture interpolation",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "Linear",
+       "name": "Linear",
+       "description": "Linear interpolation",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Closest",
+       "name": "Closest",
+       "description": "No interpolation (sample closest texel)",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Cubic",
+       "name": "Cubic",
+       "description": "Cubic interpolation",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "Smart",
+       "name": "Smart",
+       "description": "Bicubic when magnifying, else bilinear (OSL only)",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "Linear",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extension",
+     "name": "Extension",
+     "description": "How the image is extrapolated past its original bounds",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CLIP",
+       "name": "Clip",
+       "description": "Clip to image size and set exterior pixels as transparent",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "EXTEND",
+       "name": "Extend",
+       "description": "Extend by repeating edge pixels of the image",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "REPEAT",
+       "name": "Repeat",
+       "description": "Cause the image to repeat horizontally and vertically",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "CLIP",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_auto_refresh",
+     "name": "Auto Refresh",
+     "description": "Always refresh image on frame changes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "relative",
+     "name": "Relative Paths",
+     "description": "Use relative file paths",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "shader",
+     "name": "Shader",
+     "description": "Node shader to use",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PRINCIPLED",
+       "name": "Principled",
+       "description": "Principled shader",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SHADELESS",
+       "name": "Shadeless",
+       "description": "Only visible to camera and reflections",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "EMISSION",
+       "name": "Emission",
+       "description": "Emission shader",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "PRINCIPLED",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "emit_strength",
+     "name": "Emission Strength",
+     "description": "Strength of emission",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 10.0,
+     "step": 100.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_transparency",
+     "name": "Use Alpha",
+     "description": "Use alpha channel for transparency",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "render_method",
+     "name": "Render Method",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DITHERED",
+       "name": "Dithered",
+       "description": "Allows for grayscale hashed transparency, and compatible with render passes and ray-tracing. Also known as deferred rendering.",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "BLENDED",
+       "name": "Blended",
+       "description": "Allows for colored transparency, but incompatible with render passes and ray-tracing. Also known as forward rendering.",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "DITHERED",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_backface_culling",
+     "name": "Backface Culling",
+     "description": "Use backface culling to hide the back side of faces",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "show_transparent_back",
+     "name": "Show Backface",
+     "description": "Render multiple transparent layers (may introduce transparency sorting problems)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "overwrite_material",
+     "name": "Overwrite Material",
+     "description": "Overwrite existing material with the same name",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "name_from",
+     "name": "Name After",
+     "description": "Name for new mesh object and material",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "OBJECT",
+       "name": "Source Object",
+       "description": "Name after object source with a suffix",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "IMAGE",
+       "name": "Source Image",
+       "description": "Name from loaded image",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "OBJECT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "delete_ref",
+     "name": "Delete Reference Object",
+     "description": "Delete empty image object once mesh plane is created",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.curves_point_set",
+   "bl_idname": "IMAGE_OT_curves_point_set",
+   "label": "Set Curves Point",
+   "description": "Set black point or white point for curves",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "point",
+     "name": "Point",
+     "description": "Set black point or white point for curves",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "BLACK_POINT",
+       "name": "Black Point",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "WHITE_POINT",
+       "name": "White Point",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "BLACK_POINT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "size",
+     "name": "Sample Size",
+     "description": "",
+     "type": "INT",
+     "subtype": "PIXEL",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 1,
+     "hard_max": 128,
+     "soft_min": 1,
+     "soft_max": 64,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.cycle_render_slot",
+   "bl_idname": "IMAGE_OT_cycle_render_slot",
+   "label": "Cycle Render Slot",
+   "description": "Cycle through all non-void render slots",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "reverse",
+     "name": "Cycle in Reverse",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.external_edit",
+   "bl_idname": "IMAGE_OT_external_edit",
+   "label": "Image Edit Externally",
+   "description": "Edit image in an external application",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "filepath",
+     "name": "filepath",
+     "description": "",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "image.file_browse",
+   "bl_idname": "IMAGE_OT_file_browse",
+   "label": "Browse Image",
+   "description": "Open an image file browser, hold Shift to open the file, Alt to browse containing directory",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "filepath",
+     "name": "File Path",
+     "description": "Path to file",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1024,
+     "flags": [
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "hide_props_region",
+     "name": "Hide Operator Properties",
+     "description": "Collapse the region displaying the operator settings",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "check_existing",
+     "name": "Check Existing",
+     "description": "Check and warn on overwriting existing files",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_blender",
+     "name": "Filter .blend files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_backup",
+     "name": "Filter backup .blend files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_image",
+     "name": "Filter image files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_movie",
+     "name": "Filter movie files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_python",
+     "name": "Filter Python files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_font",
+     "name": "Filter font files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_sound",
+     "name": "Filter sound files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_text",
+     "name": "Filter text files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_archive",
+     "name": "Filter archive files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_btx",
+     "name": "Filter btx files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_alembic",
+     "name": "Filter Alembic files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_usd",
+     "name": "Filter USD files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_obj",
+     "name": "Filter OBJ files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_volume",
+     "name": "Filter OpenVDB volume files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_folder",
+     "name": "Filter folders",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_blenlib",
+     "name": "Filter Blender IDs",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filemode",
+     "name": "File Browser Mode",
+     "description": "The setting for the file browser mode to load a .blend file, a library or a special file",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 9,
+     "hard_min": 1,
+     "hard_max": 9,
+     "soft_min": 1,
+     "soft_max": 9,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "relative_path",
+     "name": "Relative Path",
+     "description": "Select the file relative to the blend file",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "show_multiview",
+     "name": "Enable Multi-View",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_multiview",
+     "name": "Use Multi-View",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "display_type",
+     "name": "Display Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DEFAULT",
+       "name": "Default",
+       "description": "Automatically determine display type for files",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LIST_VERTICAL",
+       "name": "Short List",
+       "description": "Display files as short list",
+       "icon": "SHORTDISPLAY",
+       "value": 1
+      },
+      {
+       "identifier": "LIST_HORIZONTAL",
+       "name": "Long List",
+       "description": "Display files as a detailed list",
+       "icon": "LONGDISPLAY",
+       "value": 2
+      },
+      {
+       "identifier": "THUMBNAIL",
+       "name": "Thumbnails",
+       "description": "Display files as thumbnails",
+       "icon": "IMGDISPLAY",
+       "value": 3
+      }
+     ],
+     "default": "DEFAULT",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "sort_method",
+     "name": "File sorting mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.flip",
+   "bl_idname": "IMAGE_OT_flip",
+   "label": "Flip Image",
+   "description": "Flip the image",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "use_flip_x",
+     "name": "Horizontal",
+     "description": "Flip the image horizontally",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_flip_y",
+     "name": "Vertical",
+     "description": "Flip the image vertically",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.import_as_mesh_planes",
+   "bl_idname": "IMAGE_OT_import_as_mesh_planes",
+   "label": "Import Images as Planes",
+   "description": "Create mesh plane(s) from image files with the appropriate aspect ratio",
+   "options": [
+    "PRESET",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "interpolation",
+     "name": "Interpolation",
+     "description": "Texture interpolation",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "Linear",
+       "name": "Linear",
+       "description": "Linear interpolation",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Closest",
+       "name": "Closest",
+       "description": "No interpolation (sample closest texel)",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Cubic",
+       "name": "Cubic",
+       "description": "Cubic interpolation",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "Smart",
+       "name": "Smart",
+       "description": "Bicubic when magnifying, else bilinear (OSL only)",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "Linear",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extension",
+     "name": "Extension",
+     "description": "How the image is extrapolated past its original bounds",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CLIP",
+       "name": "Clip",
+       "description": "Clip to image size and set exterior pixels as transparent",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "EXTEND",
+       "name": "Extend",
+       "description": "Extend by repeating edge pixels of the image",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "REPEAT",
+       "name": "Repeat",
+       "description": "Cause the image to repeat horizontally and vertically",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "CLIP",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_auto_refresh",
+     "name": "Auto Refresh",
+     "description": "Always refresh image on frame changes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "relative",
+     "name": "Relative Paths",
+     "description": "Use relative file paths",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "shader",
+     "name": "Shader",
+     "description": "Node shader to use",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PRINCIPLED",
+       "name": "Principled",
+       "description": "Principled shader",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SHADELESS",
+       "name": "Shadeless",
+       "description": "Only visible to camera and reflections",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "EMISSION",
+       "name": "Emission",
+       "description": "Emission shader",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "PRINCIPLED",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "emit_strength",
+     "name": "Emission Strength",
+     "description": "Strength of emission",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 10.0,
+     "step": 100.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_transparency",
+     "name": "Use Alpha",
+     "description": "Use alpha channel for transparency",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "render_method",
+     "name": "Render Method",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DITHERED",
+       "name": "Dithered",
+       "description": "Allows for grayscale hashed transparency, and compatible with render passes and ray-tracing. Also known as deferred rendering.",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "BLENDED",
+       "name": "Blended",
+       "description": "Allows for colored transparency, but incompatible with render passes and ray-tracing. Also known as forward rendering.",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "DITHERED",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_backface_culling",
+     "name": "Backface Culling",
+     "description": "Use backface culling to hide the back side of faces",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "show_transparent_back",
+     "name": "Show Backface",
+     "description": "Render multiple transparent layers (may introduce transparency sorting problems)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "overwrite_material",
+     "name": "Overwrite Material",
+     "description": "Overwrite existing material with the same name",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filepath",
+     "name": "File Path",
+     "description": "Filepath used for importing the file",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1025,
+     "flags": [
+      "HIDDEN",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "align",
+     "name": "Align",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "WORLD",
+       "name": "World",
+       "description": "Align the new object to the world",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "VIEW",
+       "name": "View",
+       "description": "Align the new object to the view",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "CURSOR",
+       "name": "3D Cursor",
+       "description": "Use the 3D cursor orientation for the new object",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "WORLD",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "TRANSLATION",
+     "unit": "LENGTH",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "rotation",
+     "name": "Rotation",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "EULER",
+     "unit": "ROTATION",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "files",
+     "name": "files",
+     "description": "",
+     "type": "COLLECTION",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "OperatorFileListElement",
+     "is_id": false,
+     "api": null,
+     "flags": [
+      "READONLY",
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "directory",
+     "name": "directory",
+     "description": "",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1025,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_image",
+     "name": "filter_image",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_movie",
+     "name": "filter_movie",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_folder",
+     "name": "filter_folder",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "force_reload",
+     "name": "Force Reload",
+     "description": "Force reload the image if it is already opened elsewhere in Blender",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "image_sequence",
+     "name": "Detect Image Sequences",
+     "description": "Import sequentially numbered images as an animated image sequence instead of separate planes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "offset",
+     "name": "Offset Planes",
+     "description": "Offset planes from each other. If disabled, multiple planes will be created at the same location",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "offset_axis",
+     "name": "Offset Direction",
+     "description": "How planes are oriented relative to each others' local axis",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "+X",
+       "name": "+X",
+       "description": "Side by Side to the Left",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "+Y",
+       "name": "+Y",
+       "description": "Side by Side, Downward",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "+Z",
+       "name": "+Z",
+       "description": "Stacked Above",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "-X",
+       "name": "-X",
+       "description": "Side by Side to the Right",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "-Y",
+       "name": "-Y",
+       "description": "Side by Side, Upward",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "-Z",
+       "name": "-Z",
+       "description": "Stacked Below",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "+X",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "offset_amount",
+     "name": "Offset Distance",
+     "description": "Set distance between each plane",
+     "type": "FLOAT",
+     "subtype": "DISTANCE",
+     "unit": "LENGTH",
+     "default": 0.10000000149011612,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "align_axis",
+     "name": "Align",
+     "description": "How to align the planes",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "+X",
+       "name": "+X",
+       "description": "Facing positive X",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "+Y",
+       "name": "+Y",
+       "description": "Facing positive Y",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "+Z",
+       "name": "+Z",
+       "description": "Facing positive Z",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "-X",
+       "name": "-X",
+       "description": "Facing negative X",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "-Y",
+       "name": "-Y",
+       "description": "Facing negative Y",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "-Z",
+       "name": "-Z",
+       "description": "Facing negative Z",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "CAM",
+       "name": "Face Camera",
+       "description": "Facing camera",
+       "icon": "NONE",
+       "value": 6
+      },
+      {
+       "identifier": "CAM_AX",
+       "name": "Camera's Main Axis",
+       "description": "Facing the camera's dominant axis",
+       "icon": "NONE",
+       "value": 7
+      }
+     ],
+     "default": "CAM_AX",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "prev_align_axis",
+     "name": "prev_align_axis",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "+X",
+       "name": "+X",
+       "description": "Facing positive X",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "+Y",
+       "name": "+Y",
+       "description": "Facing positive Y",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "+Z",
+       "name": "+Z",
+       "description": "Facing positive Z",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "-X",
+       "name": "-X",
+       "description": "Facing negative X",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "-Y",
+       "name": "-Y",
+       "description": "Facing negative Y",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "-Z",
+       "name": "-Z",
+       "description": "Facing negative Z",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "CAM",
+       "name": "Face Camera",
+       "description": "Facing camera",
+       "icon": "NONE",
+       "value": 6
+      },
+      {
+       "identifier": "CAM_AX",
+       "name": "Camera's Main Axis",
+       "description": "Facing the camera's dominant axis",
+       "icon": "NONE",
+       "value": 7
+      },
+      {
+       "identifier": "NONE",
+       "name": "",
+       "description": "",
+       "icon": "NONE",
+       "value": 8
+      }
+     ],
+     "default": "NONE",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "align_track",
+     "name": "Track Camera",
+     "description": "Add a constraint to make the planes track the camera",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "size_mode",
+     "name": "Size Mode",
+     "description": "Method for computing the plane size",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ABSOLUTE",
+       "name": "Absolute",
+       "description": "Use absolute size",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CAMERA",
+       "name": "Scale to Camera Frame",
+       "description": "Scale to fit or fill the camera frame",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "DPI",
+       "name": "Pixels per Inch",
+       "description": "Scale based on pixels per inch",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "DPBU",
+       "name": "Pixels per Blender Unit",
+       "description": "Scale based on pixels per Blender Unit",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "ABSOLUTE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "fill_mode",
+     "name": "Scale",
+     "description": "Method to scale the plane with the camera frame",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FILL",
+       "name": "Fill",
+       "description": "Fill camera frame, spilling outside the frame",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "FIT",
+       "name": "Fit",
+       "description": "Fit entire image within the camera frame",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "FILL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "height",
+     "name": "Height",
+     "description": "Height of the created plane",
+     "type": "FLOAT",
+     "subtype": "DISTANCE",
+     "unit": "LENGTH",
+     "default": 1.0,
+     "hard_min": 0.0010000000474974513,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "factor",
+     "name": "Definition",
+     "description": "Number of pixels per inch or Blender Unit",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 600.0,
+     "hard_min": 1.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 1.0,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "image.invert",
+   "bl_idname": "IMAGE_OT_invert",
+   "label": "Invert Channels",
+   "description": "Invert image's channels",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "invert_r",
+     "name": "Red",
+     "description": "Invert red channel",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "invert_g",
+     "name": "Green",
+     "description": "Invert green channel",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "invert_b",
+     "name": "Blue",
+     "description": "Invert blue channel",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "invert_a",
+     "name": "Alpha",
+     "description": "Invert alpha channel",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.match_movie_length",
+   "bl_idname": "IMAGE_OT_match_movie_length",
+   "label": "Match Movie Length",
+   "description": "Set the image's frame range to match the video's duration",
+   "options": [
+    "INTERNAL",
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "image.new",
+   "bl_idname": "IMAGE_OT_new",
+   "label": "New Image",
+   "description": "Create a new image",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Image data-block name",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Untitled",
+     "length_max": 256,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "width",
+     "name": "Width",
+     "description": "Image width",
+     "type": "INT",
+     "subtype": "PIXEL",
+     "unit": "NONE",
+     "default": 1024,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 16384,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "height",
+     "name": "Height",
+     "description": "Image height",
+     "type": "INT",
+     "subtype": "PIXEL",
+     "unit": "NONE",
+     "default": 1024,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 16384,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "color",
+     "name": "Color",
+     "description": "Default fill color",
+     "type": "FLOAT",
+     "subtype": "COLOR_GAMMA",
+     "unit": "NONE",
+     "array": [
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "hard_min": 0.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "alpha",
+     "name": "Alpha",
+     "description": "Create an image with an alpha channel",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "generated_type",
+     "name": "Generated Type",
+     "description": "Fill the image with a grid for UV map testing",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "BLANK",
+       "name": "Blank",
+       "description": "Generate a blank image",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "UV_GRID",
+       "name": "UV Grid",
+       "description": "Generated grid to test UV mappings",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "COLOR_GRID",
+       "name": "Color Grid",
+       "description": "Generated improved UV grid to test UV mappings",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "BLANK",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "float",
+     "name": "32-bit Float",
+     "description": "Create image with 32-bit floating-point bit depth",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_stereo_3d",
+     "name": "Stereo 3D",
+     "description": "Create an image with left and right views",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "tiled",
+     "name": "Tiled",
+     "description": "Create a tiled image",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "image.open",
+   "bl_idname": "IMAGE_OT_open",
+   "label": "Open Image",
+   "description": "Open image",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "allow_path_tokens",
+     "name": "",
+     "description": "Allow the path to contain substitution tokens",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filepath",
+     "name": "File Path",
+     "description": "Path to file",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1024,
+     "flags": [
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "directory",
+     "name": "Directory",
+     "description": "Directory of the file",
+     "type": "STRING",
+     "subtype": "DIR_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1024,
+     "flags": [
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "files",
+     "name": "Files",
+     "description": "",
+     "type": "COLLECTION",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "OperatorFileListElement",
+     "is_id": false,
+     "api": null,
+     "flags": [
+      "READONLY",
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "hide_props_region",
+     "name": "Hide Operator Properties",
+     "description": "Collapse the region displaying the operator settings",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "check_existing",
+     "name": "Check Existing",
+     "description": "Check and warn on overwriting existing files",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_blender",
+     "name": "Filter .blend files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_backup",
+     "name": "Filter backup .blend files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_image",
+     "name": "Filter image files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_movie",
+     "name": "Filter movie files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_python",
+     "name": "Filter Python files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_font",
+     "name": "Filter font files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_sound",
+     "name": "Filter sound files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_text",
+     "name": "Filter text files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_archive",
+     "name": "Filter archive files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_btx",
+     "name": "Filter btx files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_alembic",
+     "name": "Filter Alembic files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_usd",
+     "name": "Filter USD files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_obj",
+     "name": "Filter OBJ files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_volume",
+     "name": "Filter OpenVDB volume files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_folder",
+     "name": "Filter folders",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_blenlib",
+     "name": "Filter Blender IDs",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filemode",
+     "name": "File Browser Mode",
+     "description": "The setting for the file browser mode to load a .blend file, a library or a special file",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 9,
+     "hard_min": 1,
+     "hard_max": 9,
+     "soft_min": 1,
+     "soft_max": 9,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "relative_path",
+     "name": "Relative Path",
+     "description": "Select the file relative to the blend file",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "show_multiview",
+     "name": "Enable Multi-View",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_multiview",
+     "name": "Use Multi-View",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "display_type",
+     "name": "Display Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DEFAULT",
+       "name": "Default",
+       "description": "Automatically determine display type for files",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LIST_VERTICAL",
+       "name": "Short List",
+       "description": "Display files as short list",
+       "icon": "SHORTDISPLAY",
+       "value": 1
+      },
+      {
+       "identifier": "LIST_HORIZONTAL",
+       "name": "Long List",
+       "description": "Display files as a detailed list",
+       "icon": "LONGDISPLAY",
+       "value": 2
+      },
+      {
+       "identifier": "THUMBNAIL",
+       "name": "Thumbnails",
+       "description": "Display files as thumbnails",
+       "icon": "IMGDISPLAY",
+       "value": 3
+      }
+     ],
+     "default": "DEFAULT",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "sort_method",
+     "name": "File sorting mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_sequence_detection",
+     "name": "Detect Sequences",
+     "description": "Automatically detect animated sequences in selected images (based on file names)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_udim_detecting",
+     "name": "Detect UDIMs",
+     "description": "Detect selected UDIM files and load all matching tiles",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "image.open_images",
+   "bl_idname": "IMAGE_OT_open_images",
+   "label": "Open Images",
+   "description": "(undocumented operator)",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "directory",
+     "name": "directory",
+     "description": "",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "files",
+     "name": "files",
+     "description": "",
+     "type": "COLLECTION",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "OperatorFileListElement",
+     "is_id": false,
+     "api": null,
+     "flags": [
+      "READONLY",
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "relative_path",
+     "name": "Relative Path",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_sequence_detection",
+     "name": "Detect Sequence",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_udim_detection",
+     "name": "Detect UDIM",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.pack",
+   "bl_idname": "IMAGE_OT_pack",
+   "label": "Pack Image",
+   "description": "Pack an image as embedded data into the .blend file",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.project_apply",
+   "bl_idname": "IMAGE_OT_project_apply",
+   "label": "Project Apply",
+   "description": "Project edited image back onto the object",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "image.project_edit",
+   "bl_idname": "IMAGE_OT_project_edit",
+   "label": "Project Edit",
+   "description": "Edit a snapshot of the 3D Viewport in an external image editor",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "image.read_viewlayers",
+   "bl_idname": "IMAGE_OT_read_viewlayers",
+   "label": "Open Cached Render",
+   "description": "Read all the current scene's view layers from cache, as needed",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.reload",
+   "bl_idname": "IMAGE_OT_reload",
+   "label": "Reload Image",
+   "description": "Reload current image from disk",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "image.remove_render_slot",
+   "bl_idname": "IMAGE_OT_remove_render_slot",
+   "label": "Remove Render Slot",
+   "description": "Remove the current render slot",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.render_border",
+   "bl_idname": "IMAGE_OT_render_border",
+   "label": "Render Region",
+   "description": "Set the boundaries of the render region and enable render region",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "xmin",
+     "name": "X Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmax",
+     "name": "X Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymin",
+     "name": "Y Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymax",
+     "name": "Y Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.replace",
+   "bl_idname": "IMAGE_OT_replace",
+   "label": "Replace Image",
+   "description": "Replace current image by another one from disk",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "filepath",
+     "name": "File Path",
+     "description": "Path to file",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1024,
+     "flags": [
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "hide_props_region",
+     "name": "Hide Operator Properties",
+     "description": "Collapse the region displaying the operator settings",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "check_existing",
+     "name": "Check Existing",
+     "description": "Check and warn on overwriting existing files",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_blender",
+     "name": "Filter .blend files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_backup",
+     "name": "Filter backup .blend files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_image",
+     "name": "Filter image files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_movie",
+     "name": "Filter movie files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_python",
+     "name": "Filter Python files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_font",
+     "name": "Filter font files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_sound",
+     "name": "Filter sound files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_text",
+     "name": "Filter text files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_archive",
+     "name": "Filter archive files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_btx",
+     "name": "Filter btx files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_alembic",
+     "name": "Filter Alembic files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_usd",
+     "name": "Filter USD files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_obj",
+     "name": "Filter OBJ files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_volume",
+     "name": "Filter OpenVDB volume files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_folder",
+     "name": "Filter folders",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_blenlib",
+     "name": "Filter Blender IDs",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filemode",
+     "name": "File Browser Mode",
+     "description": "The setting for the file browser mode to load a .blend file, a library or a special file",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 9,
+     "hard_min": 1,
+     "hard_max": 9,
+     "soft_min": 1,
+     "soft_max": 9,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "relative_path",
+     "name": "Relative Path",
+     "description": "Select the file relative to the blend file",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "show_multiview",
+     "name": "Enable Multi-View",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_multiview",
+     "name": "Use Multi-View",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "display_type",
+     "name": "Display Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DEFAULT",
+       "name": "Default",
+       "description": "Automatically determine display type for files",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LIST_VERTICAL",
+       "name": "Short List",
+       "description": "Display files as short list",
+       "icon": "SHORTDISPLAY",
+       "value": 1
+      },
+      {
+       "identifier": "LIST_HORIZONTAL",
+       "name": "Long List",
+       "description": "Display files as a detailed list",
+       "icon": "LONGDISPLAY",
+       "value": 2
+      },
+      {
+       "identifier": "THUMBNAIL",
+       "name": "Thumbnails",
+       "description": "Display files as thumbnails",
+       "icon": "IMGDISPLAY",
+       "value": 3
+      }
+     ],
+     "default": "DEFAULT",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "sort_method",
+     "name": "File sorting mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.resize",
+   "bl_idname": "IMAGE_OT_resize",
+   "label": "Resize Image",
+   "description": "Resize the image",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "size",
+     "name": "Size",
+     "description": "",
+     "type": "INT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0,
+      0
+     ],
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 32767,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "all_udims",
+     "name": "All UDIM Tiles",
+     "description": "Scale all the image's UDIM tiles",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.rotate_orthogonal",
+   "bl_idname": "IMAGE_OT_rotate_orthogonal",
+   "label": "Rotate Image Orthogonal",
+   "description": "Rotate the image",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "degrees",
+     "name": "Degrees",
+     "description": "Amount of rotation in degrees (90, 180, 270)",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "90",
+       "name": "90 Degrees",
+       "description": "Rotate 90 degrees clockwise",
+       "icon": "NONE",
+       "value": 90
+      },
+      {
+       "identifier": "180",
+       "name": "180 Degrees",
+       "description": "Rotate 180 degrees clockwise",
+       "icon": "NONE",
+       "value": 180
+      },
+      {
+       "identifier": "270",
+       "name": "270 Degrees",
+       "description": "Rotate 270 degrees clockwise",
+       "icon": "NONE",
+       "value": 270
+      }
+     ],
+     "default": "90",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.sample",
+   "bl_idname": "IMAGE_OT_sample",
+   "label": "Sample Color",
+   "description": "Use mouse to sample a color in current image",
+   "options": [
+    "BLOCKING"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "size",
+     "name": "Sample Size",
+     "description": "",
+     "type": "INT",
+     "subtype": "PIXEL",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 1,
+     "hard_max": 128,
+     "soft_min": 1,
+     "soft_max": 64,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.sample_line",
+   "bl_idname": "IMAGE_OT_sample_line",
+   "label": "Sample Line",
+   "description": "Sample a line and show it in Scope panels",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "xstart",
+     "name": "X Start",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xend",
+     "name": "X End",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ystart",
+     "name": "Y Start",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "yend",
+     "name": "Y End",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "flip",
+     "name": "Flip",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "cursor",
+     "name": "Cursor",
+     "description": "Mouse cursor style to use during the modal operator",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 5,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.save",
+   "bl_idname": "IMAGE_OT_save",
+   "label": "Save Image",
+   "description": "Save the image with current name and settings",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.save_all_modified",
+   "bl_idname": "IMAGE_OT_save_all_modified",
+   "label": "Save All Modified",
+   "description": "Save all modified images",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.save_as",
+   "bl_idname": "IMAGE_OT_save_as",
+   "label": "Save As Image",
+   "description": "Save the image with another name and/or settings",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "save_as_render",
+     "name": "Save As Render",
+     "description": "Save image with render color management.\nFor display image formats like PNG, apply view and display transform.\nFor intermediate image formats like OpenEXR, use the default render output color space",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "copy",
+     "name": "Copy",
+     "description": "Create a new image file without modifying the current image in Blender",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "allow_path_tokens",
+     "name": "",
+     "description": "Allow the path to contain substitution tokens",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filepath",
+     "name": "File Path",
+     "description": "Path to file",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1024,
+     "flags": [
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "check_existing",
+     "name": "Check Existing",
+     "description": "Check and warn on overwriting existing files",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_blender",
+     "name": "Filter .blend files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_backup",
+     "name": "Filter backup .blend files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_image",
+     "name": "Filter image files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_movie",
+     "name": "Filter movie files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_python",
+     "name": "Filter Python files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_font",
+     "name": "Filter font files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_sound",
+     "name": "Filter sound files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_text",
+     "name": "Filter text files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_archive",
+     "name": "Filter archive files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_btx",
+     "name": "Filter btx files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_alembic",
+     "name": "Filter Alembic files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_usd",
+     "name": "Filter USD files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_obj",
+     "name": "Filter OBJ files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_volume",
+     "name": "Filter OpenVDB volume files",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_folder",
+     "name": "Filter folders",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_blenlib",
+     "name": "Filter Blender IDs",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filemode",
+     "name": "File Browser Mode",
+     "description": "The setting for the file browser mode to load a .blend file, a library or a special file",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 9,
+     "hard_min": 1,
+     "hard_max": 9,
+     "soft_min": 1,
+     "soft_max": 9,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "relative_path",
+     "name": "Relative Path",
+     "description": "Select the file relative to the blend file",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "show_multiview",
+     "name": "Enable Multi-View",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_multiview",
+     "name": "Use Multi-View",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "display_type",
+     "name": "Display Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DEFAULT",
+       "name": "Default",
+       "description": "Automatically determine display type for files",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LIST_VERTICAL",
+       "name": "Short List",
+       "description": "Display files as short list",
+       "icon": "SHORTDISPLAY",
+       "value": 1
+      },
+      {
+       "identifier": "LIST_HORIZONTAL",
+       "name": "Long List",
+       "description": "Display files as a detailed list",
+       "icon": "LONGDISPLAY",
+       "value": 2
+      },
+      {
+       "identifier": "THUMBNAIL",
+       "name": "Thumbnails",
+       "description": "Display files as thumbnails",
+       "icon": "IMGDISPLAY",
+       "value": 3
+      }
+     ],
+     "default": "DEFAULT",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "sort_method",
+     "name": "File sorting mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.save_sequence",
+   "bl_idname": "IMAGE_OT_save_sequence",
+   "label": "Save Sequence",
+   "description": "Save a sequence of images",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.tile_add",
+   "bl_idname": "IMAGE_OT_tile_add",
+   "label": "Add Tile",
+   "description": "Adds a tile to the image",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "number",
+     "name": "Number",
+     "description": "UDIM number of the tile",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1002,
+     "hard_min": 1001,
+     "hard_max": 2000,
+     "soft_min": 1001,
+     "soft_max": 1099,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "count",
+     "name": "Count",
+     "description": "How many tiles to add",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 1000,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "label",
+     "name": "Label",
+     "description": "Optional tile label",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "fill",
+     "name": "Fill",
+     "description": "Fill new tile with a generated image",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "color",
+     "name": "Color",
+     "description": "Default fill color",
+     "type": "FLOAT",
+     "subtype": "COLOR_GAMMA",
+     "unit": "NONE",
+     "array": [
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "hard_min": 0.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "generated_type",
+     "name": "Generated Type",
+     "description": "Fill the image with a grid for UV map testing",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "BLANK",
+       "name": "Blank",
+       "description": "Generate a blank image",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "UV_GRID",
+       "name": "UV Grid",
+       "description": "Generated grid to test UV mappings",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "COLOR_GRID",
+       "name": "Color Grid",
+       "description": "Generated improved UV grid to test UV mappings",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "BLANK",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "width",
+     "name": "Width",
+     "description": "Image width",
+     "type": "INT",
+     "subtype": "PIXEL",
+     "unit": "NONE",
+     "default": 1024,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 16384,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "height",
+     "name": "Height",
+     "description": "Image height",
+     "type": "INT",
+     "subtype": "PIXEL",
+     "unit": "NONE",
+     "default": 1024,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 16384,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "float",
+     "name": "32-bit Float",
+     "description": "Create image with 32-bit floating-point bit depth",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "alpha",
+     "name": "Alpha",
+     "description": "Create an image with an alpha channel",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.tile_fill",
+   "bl_idname": "IMAGE_OT_tile_fill",
+   "label": "Fill Tile",
+   "description": "Fill the current tile with a generated image",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "color",
+     "name": "Color",
+     "description": "Default fill color",
+     "type": "FLOAT",
+     "subtype": "COLOR_GAMMA",
+     "unit": "NONE",
+     "array": [
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "hard_min": 0.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "generated_type",
+     "name": "Generated Type",
+     "description": "Fill the image with a grid for UV map testing",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "BLANK",
+       "name": "Blank",
+       "description": "Generate a blank image",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "UV_GRID",
+       "name": "UV Grid",
+       "description": "Generated grid to test UV mappings",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "COLOR_GRID",
+       "name": "Color Grid",
+       "description": "Generated improved UV grid to test UV mappings",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "BLANK",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "width",
+     "name": "Width",
+     "description": "Image width",
+     "type": "INT",
+     "subtype": "PIXEL",
+     "unit": "NONE",
+     "default": 1024,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 16384,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "height",
+     "name": "Height",
+     "description": "Image height",
+     "type": "INT",
+     "subtype": "PIXEL",
+     "unit": "NONE",
+     "default": 1024,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 16384,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "float",
+     "name": "32-bit Float",
+     "description": "Create image with 32-bit floating-point bit depth",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "alpha",
+     "name": "Alpha",
+     "description": "Create an image with an alpha channel",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.tile_remove",
+   "bl_idname": "IMAGE_OT_tile_remove",
+   "label": "Remove Tile",
+   "description": "Removes a tile from the image",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.unpack",
+   "bl_idname": "IMAGE_OT_unpack",
+   "label": "Unpack Image",
+   "description": "Save an image packed in the .blend file to disk",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "method",
+     "name": "Method",
+     "description": "How to unpack",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "REMOVE",
+       "name": "Remove Pack",
+       "description": "",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "USE_LOCAL",
+       "name": "Use Local File",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "WRITE_LOCAL",
+       "name": "Write Local File (overwrite existing)",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "USE_ORIGINAL",
+       "name": "Use Original File",
+       "description": "",
+       "icon": "NONE",
+       "value": 6
+      },
+      {
+       "identifier": "WRITE_ORIGINAL",
+       "name": "Write Original File (overwrite existing)",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "USE_LOCAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "id",
+     "name": "Image Name",
+     "description": "Image data-block name to unpack",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 256,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.view_all",
+   "bl_idname": "IMAGE_OT_view_all",
+   "label": "Frame All",
+   "description": "View the entire image",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "fit_view",
+     "name": "Fit View",
+     "description": "Fit frame to the viewport",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.view_center_cursor",
+   "bl_idname": "IMAGE_OT_view_center_cursor",
+   "label": "Center View to Cursor",
+   "description": "Center the view so that the cursor is in the middle of the view",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.view_cursor_center",
+   "bl_idname": "IMAGE_OT_view_cursor_center",
+   "label": "Cursor To Center View",
+   "description": "Set 2D cursor to center view location",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "fit_view",
+     "name": "Fit View",
+     "description": "Fit frame to the viewport",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.view_ndof",
+   "bl_idname": "IMAGE_OT_view_ndof",
+   "label": "NDOF Pan/Zoom",
+   "description": "Use a 3D mouse device to pan/zoom the view",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.view_pan",
+   "bl_idname": "IMAGE_OT_view_pan",
+   "label": "Pan View",
+   "description": "Pan the view",
+   "options": [
+    "BLOCKING",
+    "GRAB_CURSOR"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "offset",
+     "name": "Offset",
+     "description": "Offset in floating-point units, 1.0 is the width and height of the image",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.view_selected",
+   "bl_idname": "IMAGE_OT_view_selected",
+   "label": "View Center",
+   "description": "View all selected UVs",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.view_zoom",
+   "bl_idname": "IMAGE_OT_view_zoom",
+   "label": "Zoom View",
+   "description": "Zoom in/out the image",
+   "options": [
+    "BLOCKING",
+    "GRAB_CURSOR"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "factor",
+     "name": "Factor",
+     "description": "Zoom factor, values higher than 1.0 zoom in, lower values zoom out",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_cursor_init",
+     "name": "Use Mouse Position",
+     "description": "Allow the initial mouse position to be used",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.view_zoom_border",
+   "bl_idname": "IMAGE_OT_view_zoom_border",
+   "label": "Zoom to Border",
+   "description": "Zoom in the view to the nearest item contained in the border",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "xmin",
+     "name": "X Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmax",
+     "name": "X Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymin",
+     "name": "Y Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymax",
+     "name": "Y Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "zoom_out",
+     "name": "Zoom Out",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.view_zoom_in",
+   "bl_idname": "IMAGE_OT_view_zoom_in",
+   "label": "Zoom In",
+   "description": "Zoom in the image (centered around 2D cursor)",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "Cursor location in screen coordinates",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10.0,
+     "soft_max": 10.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.view_zoom_out",
+   "bl_idname": "IMAGE_OT_view_zoom_out",
+   "label": "Zoom Out",
+   "description": "Zoom out the image (centered around 2D cursor)",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "Cursor location in screen coordinates",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10.0,
+     "soft_max": 10.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "image.view_zoom_ratio",
+   "bl_idname": "IMAGE_OT_view_zoom_ratio",
+   "label": "View Zoom Ratio",
+   "description": "Set zoom ratio of the view",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "ratio",
+     "name": "Ratio",
+     "description": "Zoom ratio, 1.0 is 1:1, higher is zoomed in, lower is zoomed out",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  }
+ ]
+}

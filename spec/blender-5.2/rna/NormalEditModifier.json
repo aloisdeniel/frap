@@ -1,0 +1,204 @@
+{
+ "identifier": "NormalEditModifier",
+ "name": "Normal Edit Modifier",
+ "description": "Modifier affecting/generating custom normals",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "mode",
+   "name": "Mode",
+   "description": "How to affect (generate) normals",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "RADIAL",
+     "name": "Radial",
+     "description": "From an ellipsoid (shape defined by the boundbox's dimensions, target is optional)",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "DIRECTIONAL",
+     "name": "Directional",
+     "description": "Normals 'track' (point to) the target object",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "RADIAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "offset",
+   "name": "Offset",
+   "description": "Offset from object's center",
+   "type": "FLOAT",
+   "subtype": "COORDINATES",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -100.0,
+   "soft_max": 100.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mix_mode",
+   "name": "Mix Mode",
+   "description": "How to mix generated normals with existing ones",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "COPY",
+     "name": "Copy",
+     "description": "Copy new normals (overwrite existing)",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "ADD",
+     "name": "Add",
+     "description": "Copy sum of new and old normals",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "SUB",
+     "name": "Subtract",
+     "description": "Copy new normals minus old normals",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "MUL",
+     "name": "Multiply",
+     "description": "Copy product of old and new normals (not cross product)",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "COPY",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mix_factor",
+   "name": "Mix Factor",
+   "description": "How much of generated normals to mix with existing ones",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mix_limit",
+   "name": "Max Angle",
+   "description": "Maximum angle between old and new normals",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 3.1415927410125732,
+   "hard_min": 0.0,
+   "hard_max": 3.1415927410125732,
+   "soft_min": 0.0,
+   "soft_max": 3.1415927410125732,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "no_polynors_fix",
+   "name": "Lock Polygon Normals",
+   "description": "Do not flip polygons when their normals are not consistent with their newly computed custom vertex normals",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name for selecting/weighting the affected areas",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "target",
+   "name": "Target",
+   "description": "Target object used to affect normals",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_direction_parallel",
+   "name": "Parallel Normals",
+   "description": "Use same direction for all normals, from origin to target's center (Directional mode only)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

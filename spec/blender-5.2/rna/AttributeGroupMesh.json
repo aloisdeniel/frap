@@ -1,0 +1,444 @@
+{
+ "identifier": "AttributeGroupMesh",
+ "name": "Attribute Group",
+ "description": "Group of geometry attributes",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "active",
+   "name": "Active Attribute",
+   "description": "Active attribute",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Attribute",
+   "is_id": false,
+   "flags": []
+  },
+  {
+   "identifier": "active_index",
+   "name": "Active Attribute Index",
+   "description": "Active attribute index or -1 when none are active",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -1,
+   "hard_max": 2147483647,
+   "soft_min": -1,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "active_color",
+   "name": "Active Color",
+   "description": "Active color attribute for display and editing",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Attribute",
+   "is_id": false,
+   "flags": []
+  },
+  {
+   "identifier": "active_color_index",
+   "name": "Active Color Index",
+   "description": "Active color attribute index",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "render_color_index",
+   "name": "Active Render Color Index",
+   "description": "The index of the color attribute used as a fallback for rendering",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "default_color_name",
+   "name": "Default Color Attribute",
+   "description": "The name of the default color attribute used as a fallback for rendering",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "active_color_name",
+   "name": "Active Color Attribute",
+   "description": "The name of the active color attribute for display and editing",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add attribute to geometry",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of geometry attribute",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Attribute",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "Attribute type",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FLOAT",
+       "name": "Float",
+       "description": "Floating-point value",
+       "icon": "NONE",
+       "value": 10
+      },
+      {
+       "identifier": "INT",
+       "name": "Integer",
+       "description": "32-bit integer",
+       "icon": "NONE",
+       "value": 11
+      },
+      {
+       "identifier": "BOOLEAN",
+       "name": "Boolean",
+       "description": "True or false",
+       "icon": "NONE",
+       "value": 50
+      },
+      {
+       "identifier": "FLOAT_VECTOR",
+       "name": "Vector",
+       "description": "3D vector with floating-point values",
+       "icon": "NONE",
+       "value": 48
+      },
+      {
+       "identifier": "FLOAT_COLOR",
+       "name": "Color",
+       "description": "RGBA color with 32-bit floating-point values",
+       "icon": "NONE",
+       "value": 47
+      },
+      {
+       "identifier": "QUATERNION",
+       "name": "Quaternion",
+       "description": "Floating point quaternion rotation",
+       "icon": "NONE",
+       "value": 52
+      },
+      {
+       "identifier": "FLOAT4X4",
+       "name": "4x4 Matrix",
+       "description": "Floating point matrix",
+       "icon": "NONE",
+       "value": 20
+      },
+      {
+       "identifier": "STRING",
+       "name": "String",
+       "description": "Text string",
+       "icon": "NONE",
+       "value": 12
+      },
+      {
+       "identifier": "INT8",
+       "name": "8-Bit Integer",
+       "description": "Smaller integer with a range from -128 to 127",
+       "icon": "NONE",
+       "value": 45
+      },
+      {
+       "identifier": "INT16_2D",
+       "name": "2D 16-Bit Integer Vector",
+       "description": "16-bit signed integer vector",
+       "icon": "NONE",
+       "value": 22
+      },
+      {
+       "identifier": "INT32_2D",
+       "name": "2D Integer Vector",
+       "description": "32-bit signed integer vector",
+       "icon": "NONE",
+       "value": 46
+      },
+      {
+       "identifier": "FLOAT2",
+       "name": "2D Vector",
+       "description": "2D vector with floating-point values",
+       "icon": "NONE",
+       "value": 49
+      },
+      {
+       "identifier": "FLOAT4",
+       "name": "4D Vector",
+       "description": "4D vector with floating-point values",
+       "icon": "NONE",
+       "value": 24
+      },
+      {
+       "identifier": "BYTE_COLOR",
+       "name": "Byte Color",
+       "description": "RGBA color with 8-bit positive integer values",
+       "icon": "NONE",
+       "value": 17
+      }
+     ],
+     "default": "FLOAT",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "domain",
+     "name": "Domain",
+     "description": "Type of element that attribute is stored on",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "POINT",
+       "name": "Point",
+       "description": "Attribute on point",
+       "icon": "VERTEXSEL",
+       "value": 0
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Attribute on mesh edge",
+       "icon": "EDGESEL",
+       "value": 1
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Attribute on mesh faces",
+       "icon": "FACESEL",
+       "value": 2
+      },
+      {
+       "identifier": "CORNER",
+       "name": "Face Corner",
+       "description": "Attribute on mesh face corner",
+       "icon": "FACE_CORNER",
+       "value": 3
+      },
+      {
+       "identifier": "CURVE",
+       "name": "Spline",
+       "description": "Attribute on spline",
+       "icon": "CURVE_DATA",
+       "value": 4
+      },
+      {
+       "identifier": "INSTANCE",
+       "name": "Instance",
+       "description": "Attribute on instance",
+       "icon": "EMPTY_AXIS",
+       "value": 5
+      },
+      {
+       "identifier": "LAYER",
+       "name": "Layer",
+       "description": "Attribute on Grease Pencil layer",
+       "icon": "OUTLINER_DATA_GP_LAYER",
+       "value": 6
+      }
+     ],
+     "default": "POINT",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "attribute",
+     "name": "",
+     "description": "New geometry attribute",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Attribute",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove attribute from geometry",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "attribute",
+     "name": "",
+     "description": "Geometry Attribute",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Attribute",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "domain_size",
+   "description": "Get the size of a given domain",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "domain",
+     "name": "Domain",
+     "description": "Type of element that attribute is stored on",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "POINT",
+       "name": "Point",
+       "description": "Attribute on point",
+       "icon": "VERTEXSEL",
+       "value": 0
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Attribute on mesh edge",
+       "icon": "EDGESEL",
+       "value": 1
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Attribute on mesh faces",
+       "icon": "FACESEL",
+       "value": 2
+      },
+      {
+       "identifier": "CORNER",
+       "name": "Face Corner",
+       "description": "Attribute on mesh face corner",
+       "icon": "FACE_CORNER",
+       "value": 3
+      },
+      {
+       "identifier": "CURVE",
+       "name": "Spline",
+       "description": "Attribute on spline",
+       "icon": "CURVE_DATA",
+       "value": 4
+      },
+      {
+       "identifier": "INSTANCE",
+       "name": "Instance",
+       "description": "Attribute on instance",
+       "icon": "EMPTY_AXIS",
+       "value": 5
+      },
+      {
+       "identifier": "LAYER",
+       "name": "Layer",
+       "description": "Attribute on Grease Pencil layer",
+       "icon": "OUTLINER_DATA_GP_LAYER",
+       "value": 6
+      }
+     ],
+     "default": "POINT",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "size",
+     "name": "Size",
+     "description": "Size of the domain",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

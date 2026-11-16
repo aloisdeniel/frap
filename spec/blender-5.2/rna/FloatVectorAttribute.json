@@ -1,0 +1,27 @@
+{
+ "identifier": "FloatVectorAttribute",
+ "name": "Float Vector Attribute",
+ "description": "Geometry attribute that stores floating-point 3D vectors",
+ "base": "Attribute",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "data",
+   "name": "data",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FloatVectorAttributeValue",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

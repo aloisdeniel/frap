@@ -1,0 +1,79 @@
+{
+ "identifier": "SkinModifier",
+ "name": "Skin Modifier",
+ "description": "Generate Skin",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "branch_smoothing",
+   "name": "Branch Smoothing",
+   "description": "Smooth complex geometry around branches",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": -1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_smooth_shade",
+   "name": "Smooth Shading",
+   "description": "Output faces with smooth shading rather than flat shaded",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_x_symmetry",
+   "name": "X",
+   "description": "Avoid making unsymmetrical quads across the X axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_y_symmetry",
+   "name": "Y",
+   "description": "Avoid making unsymmetrical quads across the Y axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_z_symmetry",
+   "name": "Z",
+   "description": "Avoid making unsymmetrical quads across the Z axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

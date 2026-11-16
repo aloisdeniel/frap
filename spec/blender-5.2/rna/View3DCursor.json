@@ -1,0 +1,243 @@
+{
+ "identifier": "View3DCursor",
+ "name": "3D Cursor",
+ "description": "",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "location",
+   "name": "Location",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "XYZ_LENGTH",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 4,
+   "flags": []
+  },
+  {
+   "identifier": "rotation_quaternion",
+   "name": "Quaternion Rotation",
+   "description": "Rotation in quaternions (keep normalized)",
+   "type": "FLOAT",
+   "subtype": "QUATERNION",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "rotation_axis_angle",
+   "name": "Axis-Angle Rotation",
+   "description": "Angle of Rotation for Axis-Angle rotation representation",
+   "type": "FLOAT",
+   "subtype": "AXISANGLE",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "rotation_euler",
+   "name": "Euler Rotation",
+   "description": "3D rotation",
+   "type": "FLOAT",
+   "subtype": "EULER",
+   "unit": "ROTATION",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 100.0,
+   "precision": 5,
+   "flags": []
+  },
+  {
+   "identifier": "rotation_mode",
+   "name": "Rotation Mode",
+   "description": "The kind of rotation to apply, values from other rotation modes are not used",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "QUATERNION",
+     "name": "Quaternion (WXYZ)",
+     "description": "No Gimbal Lock",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "XYZ",
+     "name": "XYZ Euler",
+     "description": "XYZ Rotation Order - prone to Gimbal Lock (default)",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "XZY",
+     "name": "XZY Euler",
+     "description": "XZY Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "YXZ",
+     "name": "YXZ Euler",
+     "description": "YXZ Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "YZX",
+     "name": "YZX Euler",
+     "description": "YZX Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "ZXY",
+     "name": "ZXY Euler",
+     "description": "ZXY Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "ZYX",
+     "name": "ZYX Euler",
+     "description": "ZYX Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "AXIS_ANGLE",
+     "name": "Axis Angle",
+     "description": "Axis Angle (W+XYZ), defines a rotation around some axis defined by 3D-Vector",
+     "icon": "NONE",
+     "value": -1
+    }
+   ],
+   "default": "XYZ",
+   "flags": []
+  },
+  {
+   "identifier": "matrix",
+   "name": "Transform Matrix",
+   "description": "Matrix combining location and rotation of the cursor",
+   "type": "FLOAT",
+   "subtype": "MATRIX",
+   "unit": "NONE",
+   "array": [
+    4,
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.scenes.new('Scene').cursor",
+  "differs_from_default": {
+   "matrix": [
+    [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     1.0,
+     0.0,
+     0.0
+    ],
+    [
+     -0.0,
+     0.0,
+     1.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ]
+  }
+ }
+}

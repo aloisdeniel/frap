@@ -1,0 +1,503 @@
+{
+ "identifier": "Constraint",
+ "name": "Constraint",
+ "description": "Constraint modifying the transformation of objects and bones",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "Constraint name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "type",
+   "name": "Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "CAMERA_SOLVER",
+     "name": "Camera Solver",
+     "description": "",
+     "icon": "CON_CAMERASOLVER",
+     "value": 27
+    },
+    {
+     "identifier": "FOLLOW_TRACK",
+     "name": "Follow Track",
+     "description": "",
+     "icon": "CON_FOLLOWTRACK",
+     "value": 26
+    },
+    {
+     "identifier": "OBJECT_SOLVER",
+     "name": "Object Solver",
+     "description": "",
+     "icon": "CON_OBJECTSOLVER",
+     "value": 28
+    },
+    {
+     "identifier": "COPY_LOCATION",
+     "name": "Copy Location",
+     "description": "Copy the location of a target (with an optional offset), so that they move together",
+     "icon": "CON_LOCLIKE",
+     "value": 9
+    },
+    {
+     "identifier": "COPY_ROTATION",
+     "name": "Copy Rotation",
+     "description": "Copy the rotation of a target (with an optional offset), so that they rotate together",
+     "icon": "CON_ROTLIKE",
+     "value": 8
+    },
+    {
+     "identifier": "COPY_SCALE",
+     "name": "Copy Scale",
+     "description": "Copy the scale factors of a target (with an optional offset), so that they are scaled by the same amount",
+     "icon": "CON_SIZELIKE",
+     "value": 10
+    },
+    {
+     "identifier": "COPY_TRANSFORMS",
+     "name": "Copy Transforms",
+     "description": "Copy all the transformations of a target, so that they move together",
+     "icon": "CON_TRANSLIKE",
+     "value": 23
+    },
+    {
+     "identifier": "LIMIT_DISTANCE",
+     "name": "Limit Distance",
+     "description": "Restrict movements to within a certain distance of a target (at the time of constraint evaluation only)",
+     "icon": "CON_DISTLIMIT",
+     "value": 14
+    },
+    {
+     "identifier": "LIMIT_LOCATION",
+     "name": "Limit Location",
+     "description": "Restrict movement along each axis within given ranges",
+     "icon": "CON_LOCLIMIT",
+     "value": 6
+    },
+    {
+     "identifier": "LIMIT_ROTATION",
+     "name": "Limit Rotation",
+     "description": "Restrict rotation along each axis within given ranges",
+     "icon": "CON_ROTLIMIT",
+     "value": 5
+    },
+    {
+     "identifier": "LIMIT_SCALE",
+     "name": "Limit Scale",
+     "description": "Restrict scaling along each axis with given ranges",
+     "icon": "CON_SIZELIMIT",
+     "value": 7
+    },
+    {
+     "identifier": "MAINTAIN_VOLUME",
+     "name": "Maintain Volume",
+     "description": "Compensate for scaling one axis by applying suitable scaling to the other two axes",
+     "icon": "CON_SAMEVOL",
+     "value": 24
+    },
+    {
+     "identifier": "TRANSFORM",
+     "name": "Transformation",
+     "description": "Use one transform property from target to control another (or same) property on owner",
+     "icon": "CON_TRANSFORM",
+     "value": 19
+    },
+    {
+     "identifier": "TRANSFORM_CACHE",
+     "name": "Transform Cache",
+     "description": "Look up the transformation matrix from an external file",
+     "icon": "CON_TRANSFORM_CACHE",
+     "value": 29
+    },
+    {
+     "identifier": "CLAMP_TO",
+     "name": "Clamp To",
+     "description": "Restrict movements to lie along a curve by remapping location along curve's longest axis",
+     "icon": "CON_CLAMPTO",
+     "value": 18
+    },
+    {
+     "identifier": "DAMPED_TRACK",
+     "name": "Damped Track",
+     "description": "Point towards a target by performing the smallest rotation necessary",
+     "icon": "CON_TRACKTO",
+     "value": 21
+    },
+    {
+     "identifier": "IK",
+     "name": "Inverse Kinematics",
+     "description": "Control a chain of bones by specifying the endpoint target (Bones only)",
+     "icon": "CON_KINEMATIC",
+     "value": 3
+    },
+    {
+     "identifier": "LOCKED_TRACK",
+     "name": "Locked Track",
+     "description": "Rotate around the specified ('locked') axis to point towards a target",
+     "icon": "CON_LOCKTRACK",
+     "value": 13
+    },
+    {
+     "identifier": "SPLINE_IK",
+     "name": "Spline IK",
+     "description": "Align chain of bones along a curve (Bones only)",
+     "icon": "CON_SPLINEIK",
+     "value": 22
+    },
+    {
+     "identifier": "STRETCH_TO",
+     "name": "Stretch To",
+     "description": "Stretch along Y-Axis to point towards a target",
+     "icon": "CON_STRETCHTO",
+     "value": 15
+    },
+    {
+     "identifier": "TRACK_TO",
+     "name": "Track To",
+     "description": "Legacy tracking constraint prone to twisting artifacts",
+     "icon": "CON_TRACKTO",
+     "value": 2
+    },
+    {
+     "identifier": "ACTION",
+     "name": "Action",
+     "description": "Use transform property of target to look up pose for owner from an Action",
+     "icon": "ACTION",
+     "value": 12
+    },
+    {
+     "identifier": "ARMATURE",
+     "name": "Armature",
+     "description": "Apply weight-blended transformation from multiple bones like the Armature modifier",
+     "icon": "CON_ARMATURE",
+     "value": 30
+    },
+    {
+     "identifier": "CHILD_OF",
+     "name": "Child Of",
+     "description": "Make target the 'detachable' parent of owner",
+     "icon": "CON_CHILDOF",
+     "value": 1
+    },
+    {
+     "identifier": "FLOOR",
+     "name": "Floor",
+     "description": "Use position (and optionally rotation) of target to define a 'wall' or 'floor' that the owner cannot cross",
+     "icon": "CON_FLOOR",
+     "value": 16
+    },
+    {
+     "identifier": "FOLLOW_PATH",
+     "name": "Follow Path",
+     "description": "Use to animate an object/bone following a path",
+     "icon": "CON_FOLLOWPATH",
+     "value": 4
+    },
+    {
+     "identifier": "GEOMETRY_ATTRIBUTE",
+     "name": "Geometry Attribute",
+     "description": "Retrieve transform from target geometry attribute data",
+     "icon": "CON_GEOMETRYATTRIBUTE",
+     "value": 31
+    },
+    {
+     "identifier": "PIVOT",
+     "name": "Pivot",
+     "description": "Change pivot point for transforms (buggy)",
+     "icon": "CON_PIVOT",
+     "value": 25
+    },
+    {
+     "identifier": "SHRINKWRAP",
+     "name": "Shrinkwrap",
+     "description": "Restrict movements to surface of target mesh",
+     "icon": "CON_SHRINKWRAP",
+     "value": 20
+    }
+   ],
+   "default": "CAMERA_SOLVER",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_override_data",
+   "name": "Override Constraint",
+   "description": "In a local override object, whether this constraint comes from the linked reference object, or is local to the override",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "owner_space",
+   "name": "Owner Space",
+   "description": "Space that owner is evaluated in",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "WORLD",
+     "name": "World Space",
+     "description": "The constraint is applied relative to the world coordinate system",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CUSTOM",
+     "name": "Custom Space",
+     "description": "The constraint is applied in local space of a custom object/bone/vertex group",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "POSE",
+     "name": "Pose Space",
+     "description": "The constraint is applied in Pose Space, the object transformation is ignored",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "LOCAL_WITH_PARENT",
+     "name": "Local With Parent",
+     "description": "The constraint is applied relative to the rest pose local coordinate system of the bone, thus including the parent-induced transformation",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "LOCAL",
+     "name": "Local Space",
+     "description": "The constraint is applied relative to the local coordinate system of the object",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "WORLD",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "target_space",
+   "name": "Target Space",
+   "description": "Space that target is evaluated in",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "WORLD",
+     "name": "World Space",
+     "description": "The transformation of the target is evaluated relative to the world coordinate system",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CUSTOM",
+     "name": "Custom Space",
+     "description": "The transformation of the target is evaluated relative to a custom object/bone/vertex group",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "POSE",
+     "name": "Pose Space",
+     "description": "The transformation of the target is only evaluated in the Pose Space, the target armature object transformation is ignored",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "LOCAL_WITH_PARENT",
+     "name": "Local With Parent",
+     "description": "The transformation of the target bone is evaluated relative to its rest pose local coordinate system, thus including the parent-induced transformation",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "LOCAL",
+     "name": "Local Space",
+     "description": "The transformation of the target is evaluated relative to its local coordinate system",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "LOCAL_OWNER_ORIENT",
+     "name": "Local Space (Owner Orientation)",
+     "description": "The transformation of the target bone is evaluated relative to its local coordinate system, followed by a correction for the difference in target and owner rest pose orientations. When applied as local transform to the owner produces the same global motion as the target if the parents are still in rest pose.",
+     "icon": "NONE",
+     "value": 6
+    }
+   ],
+   "default": "WORLD",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "space_object",
+   "name": "Object",
+   "description": "Object for Custom Space",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "space_subtarget",
+   "name": "Sub-Target",
+   "description": "Armature bone, mesh or lattice vertex group, ...",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "mute",
+   "name": "Disable",
+   "description": "Enable/Disable Constraint",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "enabled",
+   "name": "Enabled",
+   "description": "Use the results of this constraint",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_expanded",
+   "name": "Expanded",
+   "description": "Constraint's panel is expanded in UI",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_valid",
+   "name": "Valid",
+   "description": "Constraint has valid settings and can be evaluated",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "active",
+   "name": "Active",
+   "description": "Constraint is the one being edited",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "influence",
+   "name": "Influence",
+   "description": "Amount of influence constraint will have on the final solution",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "error_location",
+   "name": "Lin error",
+   "description": "Amount of residual error in Blender space unit for constraints that work on position",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "error_rotation",
+   "name": "Rotation error",
+   "description": "Amount of residual error in radians for constraints that work on orientation",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

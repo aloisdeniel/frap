@@ -1,0 +1,389 @@
+{
+ "identifier": "ShaderNodeTexSky",
+ "name": "Sky Texture",
+ "description": "Generate a procedural sky texture",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "texture_mapping",
+   "name": "Texture Mapping",
+   "description": "Texture coordinate mapping settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "TexMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "color_mapping",
+   "name": "Color Mapping",
+   "description": "Color mapping settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "sky_type",
+   "name": "Sky Type",
+   "description": "Which sky model should be used",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SINGLE_SCATTERING",
+     "name": "Single Scattering",
+     "description": "Single scattering sky model",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "MULTIPLE_SCATTERING",
+     "name": "Multiple Scattering",
+     "description": "Multiple scattering sky model (more accurate)",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "PREETHAM",
+     "name": "Preetham",
+     "description": "Preetham 1999 (Legacy)",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "HOSEK_WILKIE",
+     "name": "Hosek / Wilkie",
+     "description": "Hosek / Wilkie 2012 (Legacy)",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "PREETHAM",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sun_disc",
+   "name": "Sun Disc",
+   "description": "Include the sun itself in the output",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sun_size",
+   "name": "Sun Size",
+   "description": "Size of sun disc",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.009512044489383698,
+   "hard_min": 0.0,
+   "hard_max": 1.5707963705062866,
+   "soft_min": 0.0,
+   "soft_max": 1.5707963705062866,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sun_intensity",
+   "name": "Sun Intensity",
+   "description": "Strength of Sun",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1000.0,
+   "soft_min": 0.0,
+   "soft_max": 1000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sun_elevation",
+   "name": "Sun Elevation",
+   "description": "Sun angle from horizon",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.2617993950843811,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sun_rotation",
+   "name": "Sun Rotation",
+   "description": "Rotation of sun around zenith",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "altitude",
+   "name": "Altitude",
+   "description": "Height from sea level",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 100.0,
+   "hard_min": 0.0,
+   "hard_max": 100000.0,
+   "soft_min": 0.0,
+   "soft_max": 100000.0,
+   "step": 10.0,
+   "precision": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "air_density",
+   "name": "Air",
+   "description": "Density of air molecules.\n0 means no air, 1 means urban city air",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1000.0,
+   "soft_min": 0.0,
+   "soft_max": 1000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "aerosol_density",
+   "name": "Aerosols",
+   "description": "Density of dust, pollution and water droplets.\n0 means no aerosols, 1 means urban city aerosols",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1000.0,
+   "soft_min": 0.0,
+   "soft_max": 1000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ozone_density",
+   "name": "Ozone",
+   "description": "Density of ozone layer.\n0 means no ozone, 1 means urban city ozone",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1000.0,
+   "soft_min": 0.0,
+   "soft_max": 1000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sun_direction",
+   "name": "Sun Direction",
+   "description": "Direction from where the sun is shining",
+   "type": "FLOAT",
+   "subtype": "DIRECTION",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "turbidity",
+   "name": "Turbidity",
+   "description": "Atmospheric turbidity",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 1.0,
+   "hard_max": 10.0,
+   "soft_min": 1.0,
+   "soft_max": 10.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ground_albedo",
+   "name": "Ground Albedo",
+   "description": "Ground color that is subtly reflected in the sky",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

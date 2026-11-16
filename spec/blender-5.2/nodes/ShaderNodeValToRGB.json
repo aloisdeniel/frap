@@ -1,0 +1,66 @@
+{
+ "bl_idname": "ShaderNodeValToRGB",
+ "srna": "ShaderNodeValToRGB",
+ "name": "Color Ramp",
+ "label": "",
+ "width": 240.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Factor",
+   "identifier": "Fac",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Alpha",
+   "identifier": "Alpha",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "color_ramp": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree.nodes[\"Color Ramp\"].color_ramp",
+   "type": "ColorRamp"
+  }
+ }
+}

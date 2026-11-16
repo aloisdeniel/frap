@@ -1,0 +1,277 @@
+{
+ "identifier": "BlendDataBrushes",
+ "name": "Main Brushes",
+ "description": "Collection of brushes",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add a new brush to the main database",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "",
+     "description": "New name for the data-block",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Brush",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "mode",
+     "name": "",
+     "description": "Paint Mode for the new brush",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "OBJECT",
+       "name": "Object Mode",
+       "description": "",
+       "icon": "OBJECT_DATAMODE",
+       "value": 0
+      },
+      {
+       "identifier": "EDIT",
+       "name": "Edit Mode",
+       "description": "",
+       "icon": "EDITMODE_HLT",
+       "value": 1
+      },
+      {
+       "identifier": "POSE",
+       "name": "Pose Mode",
+       "description": "",
+       "icon": "POSE_HLT",
+       "value": 64
+      },
+      {
+       "identifier": "SCULPT",
+       "name": "Sculpt Mode",
+       "description": "",
+       "icon": "SCULPTMODE_HLT",
+       "value": 2
+      },
+      {
+       "identifier": "VERTEX_PAINT",
+       "name": "Vertex Paint",
+       "description": "",
+       "icon": "VPAINT_HLT",
+       "value": 4
+      },
+      {
+       "identifier": "WEIGHT_PAINT",
+       "name": "Weight Paint",
+       "description": "",
+       "icon": "WPAINT_HLT",
+       "value": 8
+      },
+      {
+       "identifier": "TEXTURE_PAINT",
+       "name": "Texture Paint",
+       "description": "",
+       "icon": "TPAINT_HLT",
+       "value": 16
+      },
+      {
+       "identifier": "PARTICLE_EDIT",
+       "name": "Particle Edit",
+       "description": "",
+       "icon": "PARTICLEMODE",
+       "value": 32
+      },
+      {
+       "identifier": "EDIT_GPENCIL",
+       "name": "Edit Mode",
+       "description": "Edit Grease Pencil Strokes",
+       "icon": "EDITMODE_HLT",
+       "value": 128
+      },
+      {
+       "identifier": "SCULPT_GREASE_PENCIL",
+       "name": "Sculpt Mode",
+       "description": "Sculpt Grease Pencil Strokes",
+       "icon": "SCULPTMODE_HLT",
+       "value": 512
+      },
+      {
+       "identifier": "PAINT_GREASE_PENCIL",
+       "name": "Draw Mode",
+       "description": "Paint Grease Pencil Strokes",
+       "icon": "GREASEPENCIL",
+       "value": 256
+      },
+      {
+       "identifier": "WEIGHT_GREASE_PENCIL",
+       "name": "Weight Paint",
+       "description": "Grease Pencil Weight Paint Strokes",
+       "icon": "WPAINT_HLT",
+       "value": 1024
+      },
+      {
+       "identifier": "VERTEX_GREASE_PENCIL",
+       "name": "Vertex Paint",
+       "description": "Grease Pencil Vertex Paint Strokes",
+       "icon": "VPAINT_HLT",
+       "value": 2048
+      },
+      {
+       "identifier": "SCULPT_CURVES",
+       "name": "Sculpt Mode",
+       "description": "",
+       "icon": "SCULPTMODE_HLT",
+       "value": 4096
+      }
+     ],
+     "default": "TEXTURE_PAINT",
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "brush",
+     "name": "",
+     "description": "New brush data-block",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Brush",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove a brush from the current blendfile",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "brush",
+     "name": "",
+     "description": "Brush to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Brush",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "do_unlink",
+     "name": "",
+     "description": "Unlink all usages of this brush before deleting it",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "do_id_user",
+     "name": "",
+     "description": "Decrement user counter of all data-blocks used by this brush",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "do_ui_user",
+     "name": "",
+     "description": "Make sure interface does not reference this brush",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "tag",
+   "description": "tag",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "value",
+     "name": "Value",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "create_gpencil_data",
+   "description": "Add Grease Pencil brush settings",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "brush",
+     "name": "",
+     "description": "Brush",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Brush",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

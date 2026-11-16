@@ -1,0 +1,391 @@
+{
+ "identifier": "AnimData",
+ "name": "Animation Data",
+ "description": "Animation data for data-block",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "nla_tracks",
+   "name": "NLA Tracks",
+   "description": "NLA Tracks (i.e. Animation Layers)",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NlaTrack",
+   "is_id": false,
+   "api": "NlaTracks",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "action",
+   "name": "Action",
+   "description": "Active Action for this data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Action",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "action_extrapolation",
+   "name": "Action Extrapolation",
+   "description": "Action to take for gaps past the Active Action's range (when evaluating with NLA)",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NOTHING",
+     "name": "Nothing",
+     "description": "Strip has no influence past its extents",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "HOLD",
+     "name": "Hold",
+     "description": "Hold the first frame if no previous strips in track, and always hold last frame",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "HOLD_FORWARD",
+     "name": "Hold Forward",
+     "description": "Only hold last frame",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "HOLD",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "action_blend_type",
+   "name": "Action Blending",
+   "description": "Method used for combining Active Action's result with result of NLA stack",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "REPLACE",
+     "name": "Replace",
+     "description": "The strip values replace the accumulated results by amount specified by influence",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "COMBINE",
+     "name": "Combine",
+     "description": "The strip values are combined with accumulated results by appropriately using addition, multiplication, or quaternion math, based on channel type",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "ADD",
+     "name": "Add",
+     "description": "Weighted result of strip is added to the accumulated results",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "SUBTRACT",
+     "name": "Subtract",
+     "description": "Weighted result of strip is removed from the accumulated results",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "MULTIPLY",
+     "name": "Multiply",
+     "description": "Weighted result of strip is multiplied with the accumulated results",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "REPLACE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "action_influence",
+   "name": "Action Influence",
+   "description": "Amount the Active Action contributes to the result of the NLA stack",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "action_tweak_storage",
+   "name": "Tweak Mode Action Storage",
+   "description": "Storage to temporarily hold the main action while in tweak mode",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Action",
+   "is_id": true,
+   "flags": [
+    "HIDDEN",
+    "SKIP_PRESET"
+   ]
+  },
+  {
+   "identifier": "action_slot_handle_tweak_storage",
+   "name": "Tweak Mode Action Slot Storage",
+   "description": "Storage to temporarily hold the main action slot while in tweak mode",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "HIDDEN",
+    "ANIMATABLE",
+    "SKIP_PRESET"
+   ]
+  },
+  {
+   "identifier": "drivers",
+   "name": "Drivers",
+   "description": "The Drivers/Expressions for this data-block",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FCurve",
+   "is_id": false,
+   "api": "AnimDataDrivers",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_nla",
+   "name": "NLA Evaluation Enabled",
+   "description": "NLA stack is evaluated when evaluating this block",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_tweak_mode",
+   "name": "Use NLA Tweak Mode",
+   "description": "Whether to enable or disable tweak mode in NLA",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pin",
+   "name": "Pin in Graph Editor",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "action_slot_handle",
+   "name": "Action Slot Handle",
+   "description": "A number that identifies which sub-set of the Action is considered to be for this data-block",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "last_slot_identifier",
+   "name": "Last Action Slot Identifier",
+   "description": "The identifier of the most recently assigned action slot. The slot identifies which sub-set of the Action is considered to be for this data-block, and its identifier is used to find the right slot when assigning an Action.",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 258,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "action_slot",
+   "name": "Action Slot",
+   "description": "The slot identifies which sub-set of the Action is considered to be for this data-block, and its name is used to find the right slot when assigning an Action",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ActionSlot",
+   "is_id": false,
+   "flags": []
+  },
+  {
+   "identifier": "action_suitable_slots",
+   "name": "Slots",
+   "description": "The list of slots in this animation data-block",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ActionSlot",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "nla_tweak_strip_time_to_scene",
+   "description": "Convert a time value from the local time of the tweaked strip to scene time, exactly as done by built-in key editing tools. Returns the input time unchanged if not tweaking.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "frame",
+     "name": "",
+     "description": "Input time",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -1048574.0,
+     "hard_max": 1048574.0,
+     "soft_min": -1048574.0,
+     "soft_max": 1048574.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "invert",
+     "name": "Invert",
+     "description": "Convert scene time to action time",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Converted time",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -1048574.0,
+     "hard_max": 1048574.0,
+     "soft_min": -1048574.0,
+     "soft_max": 1048574.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "fix_paths_rename_all",
+   "description": "Rename the property paths in the animation system, since properties are animated via string paths, it's needed to keep them valid after properties has been renamed",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "prefix",
+     "name": "Prefix",
+     "description": "Name prefix",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "old_name",
+     "name": "Old Name",
+     "description": "Old name",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "new_name",
+     "name": "New Name",
+     "description": "New name",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": true
+}

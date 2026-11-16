@@ -1,0 +1,205 @@
+{
+ "identifier": "BlendDataMeshes",
+ "name": "Main Meshes",
+ "description": "Collection of meshes",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add a new mesh to the main database",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "",
+     "description": "New name for the data-block",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Mesh",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "mesh",
+     "name": "",
+     "description": "New mesh data-block",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Mesh",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "new_from_object",
+   "description": "Add a new mesh created from given object (undeformed geometry if object is original, and final evaluated geometry, with all modifiers etc., if object is evaluated)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "object",
+     "name": "",
+     "description": "Object to create mesh from",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Object",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "preserve_all_data_layers",
+     "name": "",
+     "description": "Preserve all data layers in the mesh, like UV maps and vertex groups. By default Blender only computes the subset of data layers needed for viewport display and rendering, for better performance.",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "depsgraph",
+     "name": "Dependency Graph",
+     "description": "Evaluated dependency graph which is required when preserve_all_data_layers is true",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Depsgraph",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "mesh",
+     "name": "",
+     "description": "Mesh created from object, remove it if it is only used for export",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Mesh",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove a mesh from the current blendfile",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "mesh",
+     "name": "",
+     "description": "Mesh to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Mesh",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "do_unlink",
+     "name": "",
+     "description": "Unlink all usages of this mesh before deleting it (WARNING: will also delete objects instancing that mesh data)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "do_id_user",
+     "name": "",
+     "description": "Decrement user counter of all data-blocks used by this mesh data",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "do_ui_user",
+     "name": "",
+     "description": "Make sure interface does not reference this mesh data",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "tag",
+   "description": "tag",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "value",
+     "name": "Value",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

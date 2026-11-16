@@ -444,8 +444,7 @@
    "fixed_type": "NodeTree",
    "is_id": true,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -483,8 +482,7 @@
    "fixed_type": "AnimData",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -572,8 +570,7 @@
    "step": 10.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -598,8 +595,7 @@
    "step": 10.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -617,8 +613,7 @@
    "step": 10.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -636,8 +631,7 @@
    "step": 10.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -655,8 +649,7 @@
    "step": 10.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -757,7 +750,7 @@
   }
  ],
  "funcs": [],
- "requested": true,
+ "root": true,
  "fresh": {
   "recipe": "bpy.data.materials.new('Material')",
   "differs_from_default": {

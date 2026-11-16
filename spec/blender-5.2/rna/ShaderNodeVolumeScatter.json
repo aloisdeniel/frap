@@ -1,0 +1,151 @@
+{
+ "identifier": "ShaderNodeVolumeScatter",
+ "name": "Volume Scatter",
+ "description": "Scatter light as it passes through the volume, often used to add fog to a scene",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "phase",
+   "name": "Phase",
+   "description": "Phase function for the scattered light",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "HENYEY_GREENSTEIN",
+     "name": "Henyey-Greenstein",
+     "description": "Henyey-Greenstein, default phase function for the scattering of light",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FOURNIER_FORAND",
+     "name": "Fournier-Forand",
+     "description": "Fournier-Forand phase function, used for the scattering of light in underwater environments",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "DRAINE",
+     "name": "Draine",
+     "description": "Draine phase functions, mostly used for the scattering of light in interstellar dust",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "RAYLEIGH",
+     "name": "Rayleigh",
+     "description": "Rayleigh phase function, mostly used for particles smaller than the wavelength of light, such as scattering of sunlight in earth's atmosphere",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "MIE",
+     "name": "Mie",
+     "description": "Approximation of Mie scattering in water droplets, used for scattering in clouds and fog",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "HENYEY_GREENSTEIN",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

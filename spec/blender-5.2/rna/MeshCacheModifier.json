@@ -1,0 +1,438 @@
+{
+ "identifier": "MeshCacheModifier",
+ "name": "Cache Modifier",
+ "description": "Cache Mesh",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "cache_format",
+   "name": "Format",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "MDD",
+     "name": "MDD",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "PC2",
+     "name": "PC2",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "MDD",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "interpolation",
+   "name": "Interpolation",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "LINEAR",
+     "name": "Linear",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "LINEAR",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "time_mode",
+   "name": "Time Mode",
+   "description": "Method to control playback time",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FRAME",
+     "name": "Frame",
+     "description": "Control playback using a frame-number (ignoring time FPS and start frame from the file)",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "TIME",
+     "name": "Time",
+     "description": "Control playback using time in seconds",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FACTOR",
+     "name": "Factor",
+     "description": "Control playback using a value between 0 and 1",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "FRAME",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "play_mode",
+   "name": "Play Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SCENE",
+     "name": "Scene",
+     "description": "Use the time from the scene",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CUSTOM",
+     "name": "Custom",
+     "description": "Use the modifier's own time evaluation",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "SCENE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "deform_mode",
+   "name": "Deform Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OVERWRITE",
+     "name": "Overwrite",
+     "description": "Replace vertex coordinates with cached values",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "INTEGRATE",
+     "name": "Integrate",
+     "description": "Integrate deformation from this modifier's input with the mesh-cache coordinates (useful for shape keys)",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "OVERWRITE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "filepath",
+   "name": "File Path",
+   "description": "Path to external displacements file",
+   "type": "STRING",
+   "subtype": "FILE_PATH",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 1024,
+   "flags": [
+    "NEVER_NULL",
+    "PATH_SUPPORTS_BLEND_RELATIVE"
+   ]
+  },
+  {
+   "identifier": "factor",
+   "name": "Influence",
+   "description": "Influence of the deformation",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Name of the Vertex Group which determines the influence of the modifier per point",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "forward_axis",
+   "name": "Forward",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "POS_X",
+     "name": "+X",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "POS_Y",
+     "name": "+Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "POS_Z",
+     "name": "+Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "NEG_X",
+     "name": "-X",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "NEG_Y",
+     "name": "-Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "NEG_Z",
+     "name": "-Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    }
+   ],
+   "default": "POS_Y",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "up_axis",
+   "name": "Up",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "POS_X",
+     "name": "+X",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "POS_Y",
+     "name": "+Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "POS_Z",
+     "name": "+Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "NEG_X",
+     "name": "-X",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "NEG_Y",
+     "name": "-Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "NEG_Z",
+     "name": "-Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    }
+   ],
+   "default": "POS_Z",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "flip_axis",
+   "name": "Flip Axis",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    false,
+    false,
+    false
+   ],
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_start",
+   "name": "Frame Start",
+   "description": "Add this to the start frame",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -1048574.0,
+   "hard_max": 1048574.0,
+   "soft_min": -1048574.0,
+   "soft_max": 1048574.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_scale",
+   "name": "Frame Scale",
+   "description": "Evaluation time in seconds",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 100.0,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "eval_frame",
+   "name": "Evaluation Frame",
+   "description": "The frame to evaluate (starting at 0)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1048574.0,
+   "soft_min": 0.0,
+   "soft_max": 1048574.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "eval_time",
+   "name": "Evaluation Time",
+   "description": "Evaluation time in seconds",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "eval_factor",
+   "name": "Evaluation Factor",
+   "description": "Evaluation time in seconds",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

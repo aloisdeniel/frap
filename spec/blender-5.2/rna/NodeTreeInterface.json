@@ -1,0 +1,425 @@
+{
+ "identifier": "NodeTreeInterface",
+ "name": "Node Tree Interface",
+ "description": "Declaration of sockets and ui panels of a node group",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "items_tree",
+   "name": "Items",
+   "description": "Items in the node interface",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeTreeInterfaceItem",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "active_index",
+   "name": "Active Index",
+   "description": "Index of the active item",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "active",
+   "name": "Active",
+   "description": "Active item",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeTreeInterfaceItem",
+   "is_id": false,
+   "flags": []
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "new_socket",
+   "description": "Add a new socket to the interface",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of the socket",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "description",
+     "name": "Description",
+     "description": "Description of the socket",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "in_out",
+     "name": "Input/Output Type",
+     "description": "Create an input or output socket",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "INPUT",
+       "name": "Input",
+       "description": "Generate a input node socket",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "OUTPUT",
+       "name": "Output",
+       "description": "Generate a output node socket",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "INPUT",
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "socket_type",
+     "name": "Socket Type",
+     "description": "Type of socket generated on nodes",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DEFAULT",
+       "name": "Default",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      }
+     ],
+     "default": "DEFAULT",
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "parent",
+     "name": "Parent",
+     "description": "Panel to add the socket in",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeTreeInterfacePanel",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "item",
+     "name": "Socket",
+     "description": "New socket",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeTreeInterfaceSocket",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "new_panel",
+   "description": "Add a new panel to the interface",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of the new panel",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "description",
+     "name": "Description",
+     "description": "Description of the panel",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "default_closed",
+     "name": "Default Closed",
+     "description": "Panel is closed by default on new nodes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "item",
+     "name": "Panel",
+     "description": "New panel",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeTreeInterfacePanel",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "copy",
+   "description": "Add a copy of an item to the interface",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "item",
+     "name": "Item",
+     "description": "Item to copy",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeTreeInterfaceItem",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "item_copy",
+     "name": "Item Copy",
+     "description": "Copy of the item",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeTreeInterfaceItem",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove an item from the interface",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "item",
+     "name": "Item",
+     "description": "The item to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeTreeInterfaceItem",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "move_content_to_parent",
+     "name": "Move Content",
+     "description": "If the item is a panel, move the contents to the parent instead of deleting it",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "clear",
+   "description": "Remove all items from the interface",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "move",
+   "description": "Move an item to another position",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "item",
+     "name": "Item",
+     "description": "The item to move",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeTreeInterfaceItem",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "to_position",
+     "name": "To Position",
+     "description": "Target position for the item in its current panel",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "move_to_parent",
+   "description": "Move an item to a new panel and/or position.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "item",
+     "name": "Item",
+     "description": "The item to move",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeTreeInterfaceItem",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "parent",
+     "name": "Parent",
+     "description": "New parent of the item",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeTreeInterfacePanel",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    },
+    {
+     "identifier": "to_position",
+     "name": "To Position",
+     "description": "Target position for the item in the new parent panel",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": true
+}

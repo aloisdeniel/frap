@@ -1,0 +1,46 @@
+{
+ "type": "ARRAY",
+ "ui_name": "Array",
+ "srna": "ArrayModifier",
+ "values": {
+  "name": "M",
+  "type": "ARRAY",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": true,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 650905928,
+  "fit_type": "FIXED_COUNT",
+  "count": 2,
+  "fit_length": 0.0,
+  "curve": null,
+  "use_constant_offset": false,
+  "constant_offset_displace": [
+   1.0,
+   0.0,
+   0.0
+  ],
+  "use_relative_offset": true,
+  "relative_offset_displace": [
+   1.0,
+   0.0,
+   0.0
+  ],
+  "use_merge_vertices": false,
+  "use_merge_vertices_cap": false,
+  "merge_threshold": 0.009999999776482582,
+  "use_object_offset": false,
+  "offset_object": null,
+  "start_cap": null,
+  "end_cap": null,
+  "offset_u": 0.0,
+  "offset_v": 0.0
+ },
+ "default_name": "Array"
+}

@@ -1,0 +1,60 @@
+{
+ "identifier": "MeshLoopColorLayer",
+ "name": "Mesh Vertex Color Layer",
+ "description": "Layer of vertex colors in a Mesh data-block",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "Name of Vertex color layer",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "active",
+   "name": "Active",
+   "description": "Sets the layer as active for display and editing",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "active_render",
+   "name": "Active Render",
+   "description": "Sets the layer as active for rendering",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "data",
+   "name": "Data",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshLoopColor",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

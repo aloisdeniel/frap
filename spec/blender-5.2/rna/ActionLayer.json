@@ -1,0 +1,40 @@
+{
+ "identifier": "ActionLayer",
+ "name": "Action Layer",
+ "description": "",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "name",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "strips",
+   "name": "Strips",
+   "description": "The list of strips that are on this animation layer",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ActionStrip",
+   "is_id": false,
+   "api": "ActionStrips",
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

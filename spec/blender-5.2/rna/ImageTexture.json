@@ -1,0 +1,348 @@
+{
+ "identifier": "ImageTexture",
+ "name": "Image Texture",
+ "description": "",
+ "base": "Texture",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "use_interpolation",
+   "name": "Interpolation",
+   "description": "Interpolate pixels using selected filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_flip_axis",
+   "name": "Flip Axis",
+   "description": "Flip the texture's X and Y axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_alpha",
+   "name": "Use Alpha",
+   "description": "Use the alpha channel information in the image",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_calculate_alpha",
+   "name": "Calculate Alpha",
+   "description": "Calculate an alpha channel based on RGB values in the image",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_alpha",
+   "name": "Invert Alpha",
+   "description": "Invert all the alpha values in the image",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "filter_size",
+   "name": "Filter Size",
+   "description": "Multiply the filter size used by interpolation",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.10000000149011612,
+   "hard_max": 50.0,
+   "soft_min": 0.10000000149011612,
+   "soft_max": 50.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "extension",
+   "name": "Extension",
+   "description": "How the image is extrapolated past its original bounds",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "EXTEND",
+     "name": "Extend",
+     "description": "Extend by repeating edge pixels of the image",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "CLIP",
+     "name": "Clip",
+     "description": "Clip to image size and set exterior pixels as transparent",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "CLIP_CUBE",
+     "name": "Clip Cube",
+     "description": "Clip to cubic-shaped area around the image and set exterior pixels as transparent",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "REPEAT",
+     "name": "Repeat",
+     "description": "Cause the image to repeat horizontally and vertically",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "CHECKER",
+     "name": "Checker",
+     "description": "Cause the image to repeat in checker board pattern",
+     "icon": "NONE",
+     "value": 5
+    }
+   ],
+   "default": "REPEAT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "repeat_x",
+   "name": "Repeat X",
+   "description": "Repetition multiplier in the X direction",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 1,
+   "hard_max": 512,
+   "soft_min": 1,
+   "soft_max": 512,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "repeat_y",
+   "name": "Repeat Y",
+   "description": "Repetition multiplier in the Y direction",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 1,
+   "hard_max": 512,
+   "soft_min": 1,
+   "soft_max": 512,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_mirror_x",
+   "name": "Mirror X",
+   "description": "Mirror the image repetition on the X direction",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_mirror_y",
+   "name": "Mirror Y",
+   "description": "Mirror the image repetition on the Y direction",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_checker_odd",
+   "name": "Checker Odd",
+   "description": "Odd checker tiles",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_checker_even",
+   "name": "Checker Even",
+   "description": "Even checker tiles",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "checker_distance",
+   "name": "Checker Distance",
+   "description": "Distance between checker tiles",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 0.9900000095367432,
+   "soft_min": 0.0,
+   "soft_max": 0.9900000095367432,
+   "step": 0.10000000149011612,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "crop_min_x",
+   "name": "Crop Minimum X",
+   "description": "Minimum X value to crop the image",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -10.0,
+   "hard_max": 10.0,
+   "soft_min": -10.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "crop_min_y",
+   "name": "Crop Minimum Y",
+   "description": "Minimum Y value to crop the image",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -10.0,
+   "hard_max": 10.0,
+   "soft_min": -10.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "crop_max_x",
+   "name": "Crop Maximum X",
+   "description": "Maximum X value to crop the image",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": -10.0,
+   "hard_max": 10.0,
+   "soft_min": -10.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "crop_max_y",
+   "name": "Crop Maximum Y",
+   "description": "Maximum Y value to crop the image",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": -10.0,
+   "hard_max": 10.0,
+   "soft_min": -10.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "image",
+   "name": "Image",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Image",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "image_user",
+   "name": "Image User",
+   "description": "Parameters defining which layer, pass and frame of the image is displayed",
+   "type": "POINTER",
+   "subtype": "",
+   "unit": "MASS",
+   "fixed_type": "ImageUser",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_normal_map",
+   "name": "Normal Map",
+   "description": "Use image RGB values for normal mapping",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

@@ -1,0 +1,99 @@
+{
+ "bl_idname": "ShaderNodeClamp",
+ "srna": "ShaderNodeClamp",
+ "name": "Clamp",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Value",
+   "identifier": "Value",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Min",
+   "identifier": "Min",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Max",
+   "identifier": "Max",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Result",
+   "identifier": "Result",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "clamp_type": "MINMAX"
+ },
+ "availability": {
+  "clamp_type": {
+   "default": "MINMAX",
+   "by_value": {
+    "MINMAX": {
+     "inputs": [
+      "Value",
+      "Min",
+      "Max"
+     ],
+     "outputs": [
+      "Result"
+     ]
+    },
+    "RANGE": {
+     "inputs": [
+      "Value",
+      "Min",
+      "Max"
+     ],
+     "outputs": [
+      "Result"
+     ]
+    }
+   }
+  }
+ }
+}

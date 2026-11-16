@@ -1,0 +1,259 @@
+{
+ "identifier": "UVWarpModifier",
+ "name": "UVWarp Modifier",
+ "description": "Add target position to UV coordinates",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "axis_u",
+   "name": "U-Axis",
+   "description": "Pole axis for rotation",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "X",
+     "name": "X",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "Y",
+     "name": "Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Z",
+     "name": "Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "X",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "axis_v",
+   "name": "V-Axis",
+   "description": "Pole axis for rotation",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "X",
+     "name": "X",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "Y",
+     "name": "Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Z",
+     "name": "Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "Y",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "center",
+   "name": "UV Center",
+   "description": "Center point for rotate/scale",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.5,
+    0.5
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "offset",
+   "name": "Offset",
+   "description": "2D Offset for the warp",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "scale",
+   "name": "Scale",
+   "description": "2D Scale for the warp",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    1.0,
+    1.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "rotation",
+   "name": "Rotation",
+   "description": "2D Rotation for the warp",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "object_from",
+   "name": "Object From",
+   "description": "Object defining offset",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "bone_from",
+   "name": "Bone From",
+   "description": "Bone defining offset",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "object_to",
+   "name": "Object To",
+   "description": "Object defining offset",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "bone_to",
+   "name": "Bone To",
+   "description": "Bone defining offset",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "uv_layer",
+   "name": "UV Map",
+   "description": "UV map name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 68,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

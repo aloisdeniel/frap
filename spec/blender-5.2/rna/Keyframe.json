@@ -1,0 +1,500 @@
+{
+ "identifier": "Keyframe",
+ "name": "Keyframe",
+ "description": "Bézier curve point with two handles defining a Keyframe on an F-Curve",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "select_left_handle",
+   "name": "Handle 1 selected",
+   "description": "Left handle selection status",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "select_right_handle",
+   "name": "Handle 2 selected",
+   "description": "Right handle selection status",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "select_control_point",
+   "name": "Select",
+   "description": "Control point selection status",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "handle_left_type",
+   "name": "Left Handle Type",
+   "description": "Handle types",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FREE",
+     "name": "Free",
+     "description": "Completely independent manually set handle",
+     "icon": "HANDLE_FREE",
+     "value": 0
+    },
+    {
+     "identifier": "ALIGNED",
+     "name": "Aligned",
+     "description": "Manually set handle with rotation locked together with its pair",
+     "icon": "HANDLE_ALIGNED",
+     "value": 3
+    },
+    {
+     "identifier": "VECTOR",
+     "name": "Vector",
+     "description": "Automatic handles that create straight lines",
+     "icon": "HANDLE_VECTOR",
+     "value": 2
+    },
+    {
+     "identifier": "AUTO",
+     "name": "Automatic",
+     "description": "Automatic handles that create smooth curves",
+     "icon": "HANDLE_AUTO",
+     "value": 1
+    },
+    {
+     "identifier": "AUTO_CLAMPED",
+     "name": "Auto Clamped",
+     "description": "Automatic handles that create smooth curves which only change direction at keyframes",
+     "icon": "HANDLE_AUTOCLAMPED",
+     "value": 4
+    }
+   ],
+   "default": "FREE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "handle_right_type",
+   "name": "Right Handle Type",
+   "description": "Handle types",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FREE",
+     "name": "Free",
+     "description": "Completely independent manually set handle",
+     "icon": "HANDLE_FREE",
+     "value": 0
+    },
+    {
+     "identifier": "ALIGNED",
+     "name": "Aligned",
+     "description": "Manually set handle with rotation locked together with its pair",
+     "icon": "HANDLE_ALIGNED",
+     "value": 3
+    },
+    {
+     "identifier": "VECTOR",
+     "name": "Vector",
+     "description": "Automatic handles that create straight lines",
+     "icon": "HANDLE_VECTOR",
+     "value": 2
+    },
+    {
+     "identifier": "AUTO",
+     "name": "Automatic",
+     "description": "Automatic handles that create smooth curves",
+     "icon": "HANDLE_AUTO",
+     "value": 1
+    },
+    {
+     "identifier": "AUTO_CLAMPED",
+     "name": "Auto Clamped",
+     "description": "Automatic handles that create smooth curves which only change direction at keyframes",
+     "icon": "HANDLE_AUTOCLAMPED",
+     "value": 4
+    }
+   ],
+   "default": "FREE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "interpolation",
+   "name": "Interpolation",
+   "description": "Interpolation method to use for segment of the F-Curve from this Keyframe until the next Keyframe",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "CONSTANT",
+     "name": "Constant",
+     "description": "No interpolation, value of A gets held until B is encountered",
+     "icon": "IPO_CONSTANT",
+     "value": 0
+    },
+    {
+     "identifier": "LINEAR",
+     "name": "Linear",
+     "description": "Straight-line interpolation between A and B (i.e. no ease in/out)",
+     "icon": "IPO_LINEAR",
+     "value": 1
+    },
+    {
+     "identifier": "BEZIER",
+     "name": "Bézier",
+     "description": "Smooth interpolation between A and B, with some control over curve shape",
+     "icon": "IPO_BEZIER",
+     "value": 2
+    },
+    {
+     "identifier": "SINE",
+     "name": "Sinusoidal",
+     "description": "Sinusoidal easing (weakest, almost linear but with a slight curvature)",
+     "icon": "IPO_SINE",
+     "value": 12
+    },
+    {
+     "identifier": "QUAD",
+     "name": "Quadratic",
+     "description": "Quadratic easing",
+     "icon": "IPO_QUAD",
+     "value": 9
+    },
+    {
+     "identifier": "CUBIC",
+     "name": "Cubic",
+     "description": "Cubic easing",
+     "icon": "IPO_CUBIC",
+     "value": 6
+    },
+    {
+     "identifier": "QUART",
+     "name": "Quartic",
+     "description": "Quartic easing",
+     "icon": "IPO_QUART",
+     "value": 10
+    },
+    {
+     "identifier": "QUINT",
+     "name": "Quintic",
+     "description": "Quintic easing",
+     "icon": "IPO_QUINT",
+     "value": 11
+    },
+    {
+     "identifier": "EXPO",
+     "name": "Exponential",
+     "description": "Exponential easing (dramatic)",
+     "icon": "IPO_EXPO",
+     "value": 8
+    },
+    {
+     "identifier": "CIRC",
+     "name": "Circular",
+     "description": "Circular easing (strongest and most dynamic)",
+     "icon": "IPO_CIRC",
+     "value": 5
+    },
+    {
+     "identifier": "BACK",
+     "name": "Back",
+     "description": "Cubic easing with overshoot and settle",
+     "icon": "IPO_BACK",
+     "value": 3
+    },
+    {
+     "identifier": "BOUNCE",
+     "name": "Bounce",
+     "description": "Exponentially decaying parabolic bounce, like when objects collide",
+     "icon": "IPO_BOUNCE",
+     "value": 4
+    },
+    {
+     "identifier": "ELASTIC",
+     "name": "Elastic",
+     "description": "Exponentially decaying sine wave, like an elastic band",
+     "icon": "IPO_ELASTIC",
+     "value": 7
+    }
+   ],
+   "default": "CONSTANT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "type",
+   "name": "Type",
+   "description": "Type of keyframe (for visual purposes only)",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "KEYFRAME",
+     "name": "Keyframe",
+     "description": "Normal keyframe, e.g. for key poses",
+     "icon": "KEYTYPE_KEYFRAME_VEC",
+     "value": 0
+    },
+    {
+     "identifier": "BREAKDOWN",
+     "name": "Breakdown",
+     "description": "A breakdown pose, e.g. for transitions between key poses",
+     "icon": "KEYTYPE_BREAKDOWN_VEC",
+     "value": 2
+    },
+    {
+     "identifier": "MOVING_HOLD",
+     "name": "Moving Hold",
+     "description": "A keyframe that is part of a moving hold",
+     "icon": "KEYTYPE_MOVING_HOLD_VEC",
+     "value": 4
+    },
+    {
+     "identifier": "EXTREME",
+     "name": "Extreme",
+     "description": "An \"extreme\" pose, or some other purpose as needed",
+     "icon": "KEYTYPE_EXTREME_VEC",
+     "value": 1
+    },
+    {
+     "identifier": "JITTER",
+     "name": "Jitter",
+     "description": "A filler or baked keyframe for keying on ones, or some other purpose as needed",
+     "icon": "KEYTYPE_JITTER_VEC",
+     "value": 3
+    },
+    {
+     "identifier": "GENERATED",
+     "name": "Generated",
+     "description": "A key generated automatically by a tool, not manually created",
+     "icon": "KEYTYPE_GENERATED_VEC",
+     "value": 5
+    }
+   ],
+   "default": "KEYFRAME",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "easing",
+   "name": "Easing",
+   "description": "Which ends of the segment between this and the next keyframe easing interpolation is applied to",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "AUTO",
+     "name": "Automatic Easing",
+     "description": "Easing type is chosen automatically based on what the type of interpolation used (e.g. Ease In for transitional types, and Ease Out for dynamic effects)",
+     "icon": "IPO_EASE_IN_OUT",
+     "value": 0
+    },
+    {
+     "identifier": "EASE_IN",
+     "name": "Ease In",
+     "description": "Only on the end closest to the next keyframe",
+     "icon": "IPO_EASE_IN",
+     "value": 1
+    },
+    {
+     "identifier": "EASE_OUT",
+     "name": "Ease Out",
+     "description": "Only on the end closest to the first keyframe",
+     "icon": "IPO_EASE_OUT",
+     "value": 2
+    },
+    {
+     "identifier": "EASE_IN_OUT",
+     "name": "Ease In and Out",
+     "description": "Segment between both keyframes",
+     "icon": "IPO_EASE_IN_OUT",
+     "value": 3
+    }
+   ],
+   "default": "AUTO",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "back",
+   "name": "Back",
+   "description": "Amount of overshoot for 'back' easing",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "amplitude",
+   "name": "Amplitude",
+   "description": "Amount to boost elastic bounces for 'elastic' easing",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "period",
+   "name": "Period",
+   "description": "Time between bounces for elastic easing",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "handle_left",
+   "name": "Left Handle",
+   "description": "Coordinates of the left handle (before the control point)",
+   "type": "FLOAT",
+   "subtype": "COORDINATES",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "co",
+   "name": "Control Point",
+   "description": "Coordinates of the control point",
+   "type": "FLOAT",
+   "subtype": "COORDINATES",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "co_ui",
+   "name": "Control Point",
+   "description": "Coordinates of the control point. Note: Changing this value also updates the handles similar to using the graph editor transform operator",
+   "type": "FLOAT",
+   "subtype": "COORDINATES",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "handle_right",
+   "name": "Right Handle",
+   "description": "Coordinates of the right handle (after the control point)",
+   "type": "FLOAT",
+   "subtype": "COORDINATES",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

@@ -1,0 +1,248 @@
+{
+ "identifier": "ScrewModifier",
+ "name": "Screw Modifier",
+ "description": "Revolve edges",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "object",
+   "name": "Object",
+   "description": "Object to define the screw axis",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "steps",
+   "name": "Steps",
+   "description": "Number of steps in the revolution",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 16,
+   "hard_min": 1,
+   "hard_max": 10000,
+   "soft_min": 1,
+   "soft_max": 512,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "render_steps",
+   "name": "Render Steps",
+   "description": "Number of steps in the revolution",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 16,
+   "hard_min": 1,
+   "hard_max": 10000,
+   "soft_min": 1,
+   "soft_max": 512,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "iterations",
+   "name": "Iterations",
+   "description": "Number of times to apply the screw operation",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 1,
+   "hard_max": 10000,
+   "soft_min": 1,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "axis",
+   "name": "Axis",
+   "description": "Screw axis",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "X",
+     "name": "X",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "Y",
+     "name": "Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Z",
+     "name": "Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "Z",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "angle",
+   "name": "Angle",
+   "description": "Angle of revolution",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 6.2831854820251465,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": -1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "screw_offset",
+   "name": "Screw",
+   "description": "Offset the revolution along its axis",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "merge_threshold",
+   "name": "Merge Distance",
+   "description": "Limit below which to merge vertices",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.009999999776482582,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_normal_flip",
+   "name": "Flip",
+   "description": "Flip normals of lathed faces",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_normal_calculate",
+   "name": "Calculate Order",
+   "description": "Calculate the order of edges (needed for meshes, but not curves)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_object_screw_offset",
+   "name": "Object Screw",
+   "description": "Use the distance between the objects to make a screw",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_merge_vertices",
+   "name": "Merge Vertices",
+   "description": "Merge adjacent vertices (screw offset must be zero)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_smooth_shade",
+   "name": "Smooth Shading",
+   "description": "Output faces with smooth shading rather than flat shaded",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stretch_u",
+   "name": "Stretch U",
+   "description": "Stretch the U coordinates between 0 and 1 when UVs are present",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stretch_v",
+   "name": "Stretch V",
+   "description": "Stretch the V coordinates between 0 and 1 when UVs are present",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

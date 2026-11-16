@@ -1,0 +1,629 @@
+{
+ "identifier": "FCurve",
+ "name": "F-Curve",
+ "description": "F-Curve defining values of a period of time",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "extrapolation",
+   "name": "Extrapolation",
+   "description": "Method used for evaluating value of F-Curve outside first and last keyframes",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "CONSTANT",
+     "name": "Constant",
+     "description": "Hold values of endpoint keyframes",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "LINEAR",
+     "name": "Linear",
+     "description": "Use slope of curve leading in/out of endpoint keyframes",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "CONSTANT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "driver",
+   "name": "Driver",
+   "description": "Channel Driver (only set for Driver F-Curves)",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Driver",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "group",
+   "name": "Group",
+   "description": "Action Group that this F-Curve belongs to",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ActionGroup",
+   "is_id": false,
+   "flags": []
+  },
+  {
+   "identifier": "data_path",
+   "name": "Data Path",
+   "description": "RNA Path to property affected by F-Curve",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "array_index",
+   "name": "RNA Array Index",
+   "description": "Index to the specific property affected by F-Curve if applicable",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "color_mode",
+   "name": "Color Mode",
+   "description": "Method used to determine color of F-Curve in Graph Editor",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "AUTO_RAINBOW",
+     "name": "Auto Rainbow",
+     "description": "Cycle through the rainbow, trying to give each curve a unique color",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "AUTO_RGB",
+     "name": "Auto XYZ to RGB",
+     "description": "Use axis colors for transform and color properties, and auto-rainbow for the rest",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "AUTO_YRGB",
+     "name": "Auto WXYZ to YRGB",
+     "description": "Use WXYZ axis colors for quaternion/axis-angle rotations, XYZ axis colors for other transform and color properties, and auto-rainbow for the rest",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "CUSTOM",
+     "name": "User Defined",
+     "description": "Use custom hand-picked color for F-Curve",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "AUTO_RAINBOW",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "color",
+   "name": "Color",
+   "description": "Color of the F-Curve in the Graph Editor",
+   "type": "FLOAT",
+   "subtype": "COLOR_GAMMA",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "select",
+   "name": "Select",
+   "description": "F-Curve is selected for editing",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock",
+   "name": "Lock",
+   "description": "F-Curve's settings cannot be edited",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mute",
+   "name": "Muted",
+   "description": "Disable F-Curve evaluation",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "hide",
+   "name": "Hide",
+   "description": "F-Curve and its keyframes are hidden in the Graph Editor graphs",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "auto_smoothing",
+   "name": "Auto Handle Smoothing",
+   "description": "Algorithm used to compute automatic handles",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "Automatic handles only take immediately adjacent keys into account",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CONT_ACCEL",
+     "name": "Continuous Acceleration",
+     "description": "Automatic handles are adjusted to avoid jumps in acceleration, resulting in smoother curves. However, key changes may affect interpolation over a larger stretch of the curve.",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "NONE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_valid",
+   "name": "Valid",
+   "description": "False when F-Curve could not be evaluated in past, so should be skipped when evaluating",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_empty",
+   "name": "Empty",
+   "description": "True if the curve contributes no animation due to lack of keyframes or useful modifiers, and should be deleted",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sampled_points",
+   "name": "Sampled Points",
+   "description": "Sampled animation data",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FCurveSample",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "keyframe_points",
+   "name": "Keyframes",
+   "description": "User-editable keyframes",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Keyframe",
+   "is_id": false,
+   "api": "FCurveKeyframePoints",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "modifiers",
+   "name": "Modifiers",
+   "description": "Modifiers affecting the shape of the F-Curve",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FModifier",
+   "is_id": false,
+   "api": "FCurveModifiers",
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "evaluate",
+   "description": "Evaluate F-Curve",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "frame",
+     "name": "Frame",
+     "description": "Evaluate F-Curve at given frame",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "value",
+     "name": "Value",
+     "description": "Value of F-Curve specific frame",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "update",
+   "description": "Ensure keyframes are sorted in chronological order and handles are set correctly",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "range",
+   "description": "Get the time extents for F-Curve",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "range",
+     "name": "Range",
+     "description": "Min/Max values",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "update_autoflags",
+   "description": "Update FCurve flags set automatically from affected property (currently, integer/discrete flags set when the property is not a float)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "data",
+     "name": "Data",
+     "description": "Data containing the property controlled by given FCurve",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "AnyType",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "convert_to_samples",
+   "description": "Convert current FCurve from keyframes to sample points, if necessary",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "start",
+     "name": "Start Frame",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": -1048574,
+     "soft_max": 1048574,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "end",
+     "name": "End Frame",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": -1048574,
+     "soft_max": 1048574,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "convert_to_keyframes",
+   "description": "Convert current FCurve from sample points to keyframes (linear interpolation), if necessary",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "start",
+     "name": "Start Frame",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": -1048574,
+     "soft_max": 1048574,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "end",
+     "name": "End Frame",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": -1048574,
+     "soft_max": 1048574,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "bake",
+   "description": "Place keys at even intervals on the existing curve.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "start",
+     "name": "Start Frame",
+     "description": "Frame at which to start baking",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": -1048574,
+     "soft_max": 1048574,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "end",
+     "name": "End Frame",
+     "description": "Frame at which to end baking (inclusive)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": -1048574,
+     "soft_max": 1048574,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "step",
+     "name": "Step",
+     "description": "At which interval to add keys",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.009999999776482582,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 1.0,
+     "soft_max": 16.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "remove",
+     "name": "Remove Options",
+     "description": "Choose which keys should be automatically removed by the bake",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NONE",
+       "name": "None",
+       "description": "Keep all keys",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "IN_RANGE",
+       "name": "In Range",
+       "description": "Remove all keys within the defined range",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "OUT_RANGE",
+       "name": "Outside Range",
+       "description": "Remove all keys outside the defined range",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ALL",
+       "name": "All",
+       "description": "Remove all existing keys",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "IN_RANGE",
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": true
+}

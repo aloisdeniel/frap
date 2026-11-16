@@ -1,0 +1,2285 @@
+{
+ "identifier": "Window",
+ "name": "Window",
+ "description": "Open window",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "parent",
+   "name": "Parent Window",
+   "description": "Active workspace and scene follow this window",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Window",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "scene",
+   "name": "Scene",
+   "description": "Active scene to be edited in the window",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Scene",
+   "is_id": true,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "workspace",
+   "name": "Workspace",
+   "description": "Active workspace showing in the window",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "WorkSpace",
+   "is_id": true,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "screen",
+   "name": "Screen",
+   "description": "Active workspace screen showing in the window",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Screen",
+   "is_id": true,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "view_layer",
+   "name": "Active View Layer",
+   "description": "The active workspace view layer showing in the window",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ViewLayer",
+   "is_id": false,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "x",
+   "name": "X Position",
+   "description": "Horizontal location of the window",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -32768,
+   "hard_max": 32767,
+   "soft_min": -32768,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "y",
+   "name": "Y Position",
+   "description": "Vertical location of the window",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -32768,
+   "hard_max": 32767,
+   "soft_min": -32768,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "width",
+   "name": "Width",
+   "description": "Window width",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "height",
+   "name": "Height",
+   "description": "Window height",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "stereo_3d_display",
+   "name": "Stereo 3D Display",
+   "description": "Settings for stereo 3D display",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Stereo3dDisplay",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "support_hdr_color",
+   "name": "Support HDR Color",
+   "description": "The window has a HDR graphics buffer that wide gamut and high dynamic range colors can be written to, in extended sRGB color space.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "modal_operators",
+   "name": "Modal Operators",
+   "description": "A list of currently running modal operators",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Operator",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "cursor_warp",
+   "description": "Set the cursor position",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "x",
+     "name": "",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "y",
+     "name": "",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "cursor_set",
+   "description": "Set the cursor",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "cursor",
+     "name": "cursor",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DEFAULT",
+       "name": "Default",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "NONE",
+       "name": "None",
+       "description": "",
+       "icon": "NONE",
+       "value": 38
+      },
+      {
+       "identifier": "WAIT",
+       "name": "Wait",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "CROSSHAIR",
+       "name": "Crosshair",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "MOVE_X",
+       "name": "Move-X",
+       "description": "",
+       "icon": "NONE",
+       "value": 22
+      },
+      {
+       "identifier": "MOVE_Y",
+       "name": "Move-Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 23
+      },
+      {
+       "identifier": "KNIFE",
+       "name": "Knife",
+       "description": "",
+       "icon": "NONE",
+       "value": 15
+      },
+      {
+       "identifier": "TEXT",
+       "name": "Text",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "PAINT_BRUSH",
+       "name": "Paint Brush",
+       "description": "",
+       "icon": "NONE",
+       "value": 18
+      },
+      {
+       "identifier": "PAINT_CROSS",
+       "name": "Paint Cross",
+       "description": "",
+       "icon": "NONE",
+       "value": 12
+      },
+      {
+       "identifier": "DOT",
+       "name": "Dot Cursor",
+       "description": "",
+       "icon": "NONE",
+       "value": 13
+      },
+      {
+       "identifier": "ERASER",
+       "name": "Eraser",
+       "description": "",
+       "icon": "NONE",
+       "value": 19
+      },
+      {
+       "identifier": "HAND",
+       "name": "Open Hand",
+       "description": "",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "HAND_POINT",
+       "name": "Pointing Hand",
+       "description": "",
+       "icon": "NONE",
+       "value": 10
+      },
+      {
+       "identifier": "HAND_CLOSED",
+       "name": "Closed Hand",
+       "description": "",
+       "icon": "NONE",
+       "value": 9
+      },
+      {
+       "identifier": "SCROLL_X",
+       "name": "Scroll-X",
+       "description": "",
+       "icon": "NONE",
+       "value": 35
+      },
+      {
+       "identifier": "SCROLL_Y",
+       "name": "Scroll-Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 34
+      },
+      {
+       "identifier": "SCROLL_XY",
+       "name": "Scroll-XY",
+       "description": "",
+       "icon": "NONE",
+       "value": 33
+      },
+      {
+       "identifier": "EYEDROPPER",
+       "name": "Eyedropper",
+       "description": "",
+       "icon": "NONE",
+       "value": 20
+      },
+      {
+       "identifier": "PICK_AREA",
+       "name": "Pick Area",
+       "description": "",
+       "icon": "NONE",
+       "value": 40
+      },
+      {
+       "identifier": "STOP",
+       "name": "Stop",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "COPY",
+       "name": "Copy",
+       "description": "",
+       "icon": "NONE",
+       "value": 6
+      },
+      {
+       "identifier": "CROSS",
+       "name": "Cross",
+       "description": "",
+       "icon": "NONE",
+       "value": 11
+      },
+      {
+       "identifier": "MUTE",
+       "name": "Mute",
+       "description": "",
+       "icon": "NONE",
+       "value": 39
+      },
+      {
+       "identifier": "ZOOM_IN",
+       "name": "Zoom In",
+       "description": "",
+       "icon": "NONE",
+       "value": 36
+      },
+      {
+       "identifier": "ZOOM_OUT",
+       "name": "Zoom Out",
+       "description": "",
+       "icon": "NONE",
+       "value": 37
+      }
+     ],
+     "default": "DEFAULT",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "cursor_modal_set",
+   "description": "Set the cursor, so the previous cursor can be restored",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "cursor",
+     "name": "cursor",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DEFAULT",
+       "name": "Default",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "NONE",
+       "name": "None",
+       "description": "",
+       "icon": "NONE",
+       "value": 38
+      },
+      {
+       "identifier": "WAIT",
+       "name": "Wait",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "CROSSHAIR",
+       "name": "Crosshair",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "MOVE_X",
+       "name": "Move-X",
+       "description": "",
+       "icon": "NONE",
+       "value": 22
+      },
+      {
+       "identifier": "MOVE_Y",
+       "name": "Move-Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 23
+      },
+      {
+       "identifier": "KNIFE",
+       "name": "Knife",
+       "description": "",
+       "icon": "NONE",
+       "value": 15
+      },
+      {
+       "identifier": "TEXT",
+       "name": "Text",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "PAINT_BRUSH",
+       "name": "Paint Brush",
+       "description": "",
+       "icon": "NONE",
+       "value": 18
+      },
+      {
+       "identifier": "PAINT_CROSS",
+       "name": "Paint Cross",
+       "description": "",
+       "icon": "NONE",
+       "value": 12
+      },
+      {
+       "identifier": "DOT",
+       "name": "Dot Cursor",
+       "description": "",
+       "icon": "NONE",
+       "value": 13
+      },
+      {
+       "identifier": "ERASER",
+       "name": "Eraser",
+       "description": "",
+       "icon": "NONE",
+       "value": 19
+      },
+      {
+       "identifier": "HAND",
+       "name": "Open Hand",
+       "description": "",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "HAND_POINT",
+       "name": "Pointing Hand",
+       "description": "",
+       "icon": "NONE",
+       "value": 10
+      },
+      {
+       "identifier": "HAND_CLOSED",
+       "name": "Closed Hand",
+       "description": "",
+       "icon": "NONE",
+       "value": 9
+      },
+      {
+       "identifier": "SCROLL_X",
+       "name": "Scroll-X",
+       "description": "",
+       "icon": "NONE",
+       "value": 35
+      },
+      {
+       "identifier": "SCROLL_Y",
+       "name": "Scroll-Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 34
+      },
+      {
+       "identifier": "SCROLL_XY",
+       "name": "Scroll-XY",
+       "description": "",
+       "icon": "NONE",
+       "value": 33
+      },
+      {
+       "identifier": "EYEDROPPER",
+       "name": "Eyedropper",
+       "description": "",
+       "icon": "NONE",
+       "value": 20
+      },
+      {
+       "identifier": "PICK_AREA",
+       "name": "Pick Area",
+       "description": "",
+       "icon": "NONE",
+       "value": 40
+      },
+      {
+       "identifier": "STOP",
+       "name": "Stop",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "COPY",
+       "name": "Copy",
+       "description": "",
+       "icon": "NONE",
+       "value": 6
+      },
+      {
+       "identifier": "CROSS",
+       "name": "Cross",
+       "description": "",
+       "icon": "NONE",
+       "value": 11
+      },
+      {
+       "identifier": "MUTE",
+       "name": "Mute",
+       "description": "",
+       "icon": "NONE",
+       "value": 39
+      },
+      {
+       "identifier": "ZOOM_IN",
+       "name": "Zoom In",
+       "description": "",
+       "icon": "NONE",
+       "value": 36
+      },
+      {
+       "identifier": "ZOOM_OUT",
+       "name": "Zoom Out",
+       "description": "",
+       "icon": "NONE",
+       "value": 37
+      }
+     ],
+     "default": "DEFAULT",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "cursor_modal_restore",
+   "description": "Restore the previous cursor after calling ``cursor_modal_set``",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "event_simulate",
+   "description": "event_simulate",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NONE",
+       "name": "",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LEFTMOUSE",
+       "name": "Left Mouse",
+       "description": "LMB",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MIDDLEMOUSE",
+       "name": "Middle Mouse",
+       "description": "MMB",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "RIGHTMOUSE",
+       "name": "Right Mouse",
+       "description": "RMB",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "BUTTON4MOUSE",
+       "name": "Button4 Mouse",
+       "description": "MB4",
+       "icon": "NONE",
+       "value": 7
+      },
+      {
+       "identifier": "BUTTON5MOUSE",
+       "name": "Button5 Mouse",
+       "description": "MB5",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "BUTTON6MOUSE",
+       "name": "Button6 Mouse",
+       "description": "MB6",
+       "icon": "NONE",
+       "value": 18
+      },
+      {
+       "identifier": "BUTTON7MOUSE",
+       "name": "Button7 Mouse",
+       "description": "MB7",
+       "icon": "NONE",
+       "value": 19
+      },
+      {
+       "identifier": "PEN",
+       "name": "Pen",
+       "description": "",
+       "icon": "NONE",
+       "value": 26
+      },
+      {
+       "identifier": "ERASER",
+       "name": "Eraser",
+       "description": "",
+       "icon": "NONE",
+       "value": 27
+      },
+      {
+       "identifier": "MOUSEMOVE",
+       "name": "Mouse Move",
+       "description": "MsMov",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "INBETWEEN_MOUSEMOVE",
+       "name": "In-between Move",
+       "description": "MsSubMov",
+       "icon": "NONE",
+       "value": 17
+      },
+      {
+       "identifier": "TRACKPADPAN",
+       "name": "Mouse/Trackpad Pan",
+       "description": "MsPan",
+       "icon": "NONE",
+       "value": 14
+      },
+      {
+       "identifier": "TRACKPADZOOM",
+       "name": "Mouse/Trackpad Zoom",
+       "description": "MsZoom",
+       "icon": "NONE",
+       "value": 15
+      },
+      {
+       "identifier": "MOUSEROTATE",
+       "name": "Mouse/Trackpad Rotate",
+       "description": "MsRot",
+       "icon": "NONE",
+       "value": 16
+      },
+      {
+       "identifier": "MOUSESMARTZOOM",
+       "name": "Mouse/Trackpad Smart Zoom",
+       "description": "MsSmartZoom",
+       "icon": "NONE",
+       "value": 23
+      },
+      {
+       "identifier": "WHEELUPMOUSE",
+       "name": "Wheel Up",
+       "description": "WhUp",
+       "icon": "NONE",
+       "value": 10
+      },
+      {
+       "identifier": "WHEELDOWNMOUSE",
+       "name": "Wheel Down",
+       "description": "WhDown",
+       "icon": "NONE",
+       "value": 11
+      },
+      {
+       "identifier": "WHEELINMOUSE",
+       "name": "Wheel In",
+       "description": "WhIn",
+       "icon": "NONE",
+       "value": 12
+      },
+      {
+       "identifier": "WHEELOUTMOUSE",
+       "name": "Wheel Out",
+       "description": "WhOut",
+       "icon": "NONE",
+       "value": 13
+      },
+      {
+       "identifier": "WHEELLEFTMOUSE",
+       "name": "Wheel Left",
+       "description": "WhLeft",
+       "icon": "NONE",
+       "value": 20
+      },
+      {
+       "identifier": "WHEELRIGHTMOUSE",
+       "name": "Wheel Right",
+       "description": "WhRight",
+       "icon": "NONE",
+       "value": 21
+      },
+      {
+       "identifier": "A",
+       "name": "A",
+       "description": "",
+       "icon": "NONE",
+       "value": 97
+      },
+      {
+       "identifier": "B",
+       "name": "B",
+       "description": "",
+       "icon": "NONE",
+       "value": 98
+      },
+      {
+       "identifier": "C",
+       "name": "C",
+       "description": "",
+       "icon": "NONE",
+       "value": 99
+      },
+      {
+       "identifier": "D",
+       "name": "D",
+       "description": "",
+       "icon": "NONE",
+       "value": 100
+      },
+      {
+       "identifier": "E",
+       "name": "E",
+       "description": "",
+       "icon": "NONE",
+       "value": 101
+      },
+      {
+       "identifier": "F",
+       "name": "F",
+       "description": "",
+       "icon": "NONE",
+       "value": 102
+      },
+      {
+       "identifier": "G",
+       "name": "G",
+       "description": "",
+       "icon": "NONE",
+       "value": 103
+      },
+      {
+       "identifier": "H",
+       "name": "H",
+       "description": "",
+       "icon": "NONE",
+       "value": 104
+      },
+      {
+       "identifier": "I",
+       "name": "I",
+       "description": "",
+       "icon": "NONE",
+       "value": 105
+      },
+      {
+       "identifier": "J",
+       "name": "J",
+       "description": "",
+       "icon": "NONE",
+       "value": 106
+      },
+      {
+       "identifier": "K",
+       "name": "K",
+       "description": "",
+       "icon": "NONE",
+       "value": 107
+      },
+      {
+       "identifier": "L",
+       "name": "L",
+       "description": "",
+       "icon": "NONE",
+       "value": 108
+      },
+      {
+       "identifier": "M",
+       "name": "M",
+       "description": "",
+       "icon": "NONE",
+       "value": 109
+      },
+      {
+       "identifier": "N",
+       "name": "N",
+       "description": "",
+       "icon": "NONE",
+       "value": 110
+      },
+      {
+       "identifier": "O",
+       "name": "O",
+       "description": "",
+       "icon": "NONE",
+       "value": 111
+      },
+      {
+       "identifier": "P",
+       "name": "P",
+       "description": "",
+       "icon": "NONE",
+       "value": 112
+      },
+      {
+       "identifier": "Q",
+       "name": "Q",
+       "description": "",
+       "icon": "NONE",
+       "value": 113
+      },
+      {
+       "identifier": "R",
+       "name": "R",
+       "description": "",
+       "icon": "NONE",
+       "value": 114
+      },
+      {
+       "identifier": "S",
+       "name": "S",
+       "description": "",
+       "icon": "NONE",
+       "value": 115
+      },
+      {
+       "identifier": "T",
+       "name": "T",
+       "description": "",
+       "icon": "NONE",
+       "value": 116
+      },
+      {
+       "identifier": "U",
+       "name": "U",
+       "description": "",
+       "icon": "NONE",
+       "value": 117
+      },
+      {
+       "identifier": "V",
+       "name": "V",
+       "description": "",
+       "icon": "NONE",
+       "value": 118
+      },
+      {
+       "identifier": "W",
+       "name": "W",
+       "description": "",
+       "icon": "NONE",
+       "value": 119
+      },
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "",
+       "icon": "NONE",
+       "value": 120
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 121
+      },
+      {
+       "identifier": "Z",
+       "name": "Z",
+       "description": "",
+       "icon": "NONE",
+       "value": 122
+      },
+      {
+       "identifier": "ZERO",
+       "name": "0",
+       "description": "",
+       "icon": "NONE",
+       "value": 48
+      },
+      {
+       "identifier": "ONE",
+       "name": "1",
+       "description": "",
+       "icon": "NONE",
+       "value": 49
+      },
+      {
+       "identifier": "TWO",
+       "name": "2",
+       "description": "",
+       "icon": "NONE",
+       "value": 50
+      },
+      {
+       "identifier": "THREE",
+       "name": "3",
+       "description": "",
+       "icon": "NONE",
+       "value": 51
+      },
+      {
+       "identifier": "FOUR",
+       "name": "4",
+       "description": "",
+       "icon": "NONE",
+       "value": 52
+      },
+      {
+       "identifier": "FIVE",
+       "name": "5",
+       "description": "",
+       "icon": "NONE",
+       "value": 53
+      },
+      {
+       "identifier": "SIX",
+       "name": "6",
+       "description": "",
+       "icon": "NONE",
+       "value": 54
+      },
+      {
+       "identifier": "SEVEN",
+       "name": "7",
+       "description": "",
+       "icon": "NONE",
+       "value": 55
+      },
+      {
+       "identifier": "EIGHT",
+       "name": "8",
+       "description": "",
+       "icon": "NONE",
+       "value": 56
+      },
+      {
+       "identifier": "NINE",
+       "name": "9",
+       "description": "",
+       "icon": "NONE",
+       "value": 57
+      },
+      {
+       "identifier": "LEFT_CTRL",
+       "name": "Left Ctrl",
+       "description": "CtrlL",
+       "icon": "NONE",
+       "value": 212
+      },
+      {
+       "identifier": "LEFT_ALT",
+       "name": "Left Alt",
+       "description": "AltL",
+       "icon": "NONE",
+       "value": 213
+      },
+      {
+       "identifier": "LEFT_SHIFT",
+       "name": "Left Shift",
+       "description": "ShiftL",
+       "icon": "NONE",
+       "value": 217
+      },
+      {
+       "identifier": "RIGHT_ALT",
+       "name": "Right Alt",
+       "description": "AltR",
+       "icon": "NONE",
+       "value": 214
+      },
+      {
+       "identifier": "RIGHT_CTRL",
+       "name": "Right Ctrl",
+       "description": "CtrlR",
+       "icon": "NONE",
+       "value": 215
+      },
+      {
+       "identifier": "RIGHT_SHIFT",
+       "name": "Right Shift",
+       "description": "ShiftR",
+       "icon": "NONE",
+       "value": 216
+      },
+      {
+       "identifier": "OSKEY",
+       "name": "OS Key",
+       "description": "Cmd",
+       "icon": "NONE",
+       "value": 172
+      },
+      {
+       "identifier": "HYPER",
+       "name": "Hyper",
+       "description": "Hyp",
+       "icon": "NONE",
+       "value": 179
+      },
+      {
+       "identifier": "APP",
+       "name": "Application",
+       "description": "App",
+       "icon": "NONE",
+       "value": 178
+      },
+      {
+       "identifier": "GRLESS",
+       "name": "Grless",
+       "description": "",
+       "icon": "NONE",
+       "value": 173
+      },
+      {
+       "identifier": "ESC",
+       "name": "Esc",
+       "description": "",
+       "icon": "NONE",
+       "value": 218
+      },
+      {
+       "identifier": "TAB",
+       "name": "Tab",
+       "description": "",
+       "icon": "NONE",
+       "value": 219
+      },
+      {
+       "identifier": "RET",
+       "name": "Return",
+       "description": "Enter",
+       "icon": "NONE",
+       "value": 220
+      },
+      {
+       "identifier": "SPACE",
+       "name": "Space Bar",
+       "description": "Spacebar",
+       "icon": "NONE",
+       "value": 221
+      },
+      {
+       "identifier": "LINE_FEED",
+       "name": "Line Feed",
+       "description": "",
+       "icon": "NONE",
+       "value": 222
+      },
+      {
+       "identifier": "BACK_SPACE",
+       "name": "Backspace",
+       "description": "BkSpace",
+       "icon": "NONE",
+       "value": 223
+      },
+      {
+       "identifier": "DEL",
+       "name": "Delete",
+       "description": "Del",
+       "icon": "NONE",
+       "value": 224
+      },
+      {
+       "identifier": "SEMI_COLON",
+       "name": ";",
+       "description": "",
+       "icon": "NONE",
+       "value": 225
+      },
+      {
+       "identifier": "PERIOD",
+       "name": ".",
+       "description": "",
+       "icon": "NONE",
+       "value": 226
+      },
+      {
+       "identifier": "COMMA",
+       "name": ",",
+       "description": "",
+       "icon": "NONE",
+       "value": 227
+      },
+      {
+       "identifier": "QUOTE",
+       "name": "\"",
+       "description": "",
+       "icon": "NONE",
+       "value": 228
+      },
+      {
+       "identifier": "ACCENT_GRAVE",
+       "name": "`",
+       "description": "",
+       "icon": "NONE",
+       "value": 229
+      },
+      {
+       "identifier": "MINUS",
+       "name": "-",
+       "description": "",
+       "icon": "NONE",
+       "value": 230
+      },
+      {
+       "identifier": "PLUS",
+       "name": "+",
+       "description": "",
+       "icon": "NONE",
+       "value": 231
+      },
+      {
+       "identifier": "SLASH",
+       "name": "/",
+       "description": "",
+       "icon": "NONE",
+       "value": 232
+      },
+      {
+       "identifier": "BACK_SLASH",
+       "name": "\\",
+       "description": "",
+       "icon": "NONE",
+       "value": 233
+      },
+      {
+       "identifier": "EQUAL",
+       "name": "=",
+       "description": "",
+       "icon": "NONE",
+       "value": 234
+      },
+      {
+       "identifier": "LEFT_BRACKET",
+       "name": "[",
+       "description": "",
+       "icon": "NONE",
+       "value": 235
+      },
+      {
+       "identifier": "RIGHT_BRACKET",
+       "name": "]",
+       "description": "",
+       "icon": "NONE",
+       "value": 236
+      },
+      {
+       "identifier": "LEFT_ARROW",
+       "name": "Left Arrow",
+       "description": "←",
+       "icon": "NONE",
+       "value": 137
+      },
+      {
+       "identifier": "DOWN_ARROW",
+       "name": "Down Arrow",
+       "description": "↓",
+       "icon": "NONE",
+       "value": 138
+      },
+      {
+       "identifier": "RIGHT_ARROW",
+       "name": "Right Arrow",
+       "description": "→",
+       "icon": "NONE",
+       "value": 139
+      },
+      {
+       "identifier": "UP_ARROW",
+       "name": "Up Arrow",
+       "description": "↑",
+       "icon": "NONE",
+       "value": 140
+      },
+      {
+       "identifier": "NUMPAD_2",
+       "name": "Numpad 2",
+       "description": "Pad2",
+       "icon": "NONE",
+       "value": 152
+      },
+      {
+       "identifier": "NUMPAD_4",
+       "name": "Numpad 4",
+       "description": "Pad4",
+       "icon": "NONE",
+       "value": 154
+      },
+      {
+       "identifier": "NUMPAD_6",
+       "name": "Numpad 6",
+       "description": "Pad6",
+       "icon": "NONE",
+       "value": 156
+      },
+      {
+       "identifier": "NUMPAD_8",
+       "name": "Numpad 8",
+       "description": "Pad8",
+       "icon": "NONE",
+       "value": 158
+      },
+      {
+       "identifier": "NUMPAD_1",
+       "name": "Numpad 1",
+       "description": "Pad1",
+       "icon": "NONE",
+       "value": 151
+      },
+      {
+       "identifier": "NUMPAD_3",
+       "name": "Numpad 3",
+       "description": "Pad3",
+       "icon": "NONE",
+       "value": 153
+      },
+      {
+       "identifier": "NUMPAD_5",
+       "name": "Numpad 5",
+       "description": "Pad5",
+       "icon": "NONE",
+       "value": 155
+      },
+      {
+       "identifier": "NUMPAD_7",
+       "name": "Numpad 7",
+       "description": "Pad7",
+       "icon": "NONE",
+       "value": 157
+      },
+      {
+       "identifier": "NUMPAD_9",
+       "name": "Numpad 9",
+       "description": "Pad9",
+       "icon": "NONE",
+       "value": 159
+      },
+      {
+       "identifier": "NUMPAD_PERIOD",
+       "name": "Numpad .",
+       "description": "Pad.",
+       "icon": "NONE",
+       "value": 199
+      },
+      {
+       "identifier": "NUMPAD_SLASH",
+       "name": "Numpad /",
+       "description": "Pad/",
+       "icon": "NONE",
+       "value": 161
+      },
+      {
+       "identifier": "NUMPAD_ASTERIX",
+       "name": "Numpad *",
+       "description": "Pad*",
+       "icon": "NONE",
+       "value": 160
+      },
+      {
+       "identifier": "NUMPAD_0",
+       "name": "Numpad 0",
+       "description": "Pad0",
+       "icon": "NONE",
+       "value": 150
+      },
+      {
+       "identifier": "NUMPAD_MINUS",
+       "name": "Numpad -",
+       "description": "Pad-",
+       "icon": "NONE",
+       "value": 162
+      },
+      {
+       "identifier": "NUMPAD_ENTER",
+       "name": "Numpad Enter",
+       "description": "PadEnter",
+       "icon": "NONE",
+       "value": 163
+      },
+      {
+       "identifier": "NUMPAD_PLUS",
+       "name": "Numpad +",
+       "description": "Pad+",
+       "icon": "NONE",
+       "value": 164
+      },
+      {
+       "identifier": "F1",
+       "name": "F1",
+       "description": "",
+       "icon": "NONE",
+       "value": 300
+      },
+      {
+       "identifier": "F2",
+       "name": "F2",
+       "description": "",
+       "icon": "NONE",
+       "value": 301
+      },
+      {
+       "identifier": "F3",
+       "name": "F3",
+       "description": "",
+       "icon": "NONE",
+       "value": 302
+      },
+      {
+       "identifier": "F4",
+       "name": "F4",
+       "description": "",
+       "icon": "NONE",
+       "value": 303
+      },
+      {
+       "identifier": "F5",
+       "name": "F5",
+       "description": "",
+       "icon": "NONE",
+       "value": 304
+      },
+      {
+       "identifier": "F6",
+       "name": "F6",
+       "description": "",
+       "icon": "NONE",
+       "value": 305
+      },
+      {
+       "identifier": "F7",
+       "name": "F7",
+       "description": "",
+       "icon": "NONE",
+       "value": 306
+      },
+      {
+       "identifier": "F8",
+       "name": "F8",
+       "description": "",
+       "icon": "NONE",
+       "value": 307
+      },
+      {
+       "identifier": "F9",
+       "name": "F9",
+       "description": "",
+       "icon": "NONE",
+       "value": 308
+      },
+      {
+       "identifier": "F10",
+       "name": "F10",
+       "description": "",
+       "icon": "NONE",
+       "value": 309
+      },
+      {
+       "identifier": "F11",
+       "name": "F11",
+       "description": "",
+       "icon": "NONE",
+       "value": 310
+      },
+      {
+       "identifier": "F12",
+       "name": "F12",
+       "description": "",
+       "icon": "NONE",
+       "value": 311
+      },
+      {
+       "identifier": "F13",
+       "name": "F13",
+       "description": "",
+       "icon": "NONE",
+       "value": 312
+      },
+      {
+       "identifier": "F14",
+       "name": "F14",
+       "description": "",
+       "icon": "NONE",
+       "value": 313
+      },
+      {
+       "identifier": "F15",
+       "name": "F15",
+       "description": "",
+       "icon": "NONE",
+       "value": 314
+      },
+      {
+       "identifier": "F16",
+       "name": "F16",
+       "description": "",
+       "icon": "NONE",
+       "value": 315
+      },
+      {
+       "identifier": "F17",
+       "name": "F17",
+       "description": "",
+       "icon": "NONE",
+       "value": 316
+      },
+      {
+       "identifier": "F18",
+       "name": "F18",
+       "description": "",
+       "icon": "NONE",
+       "value": 317
+      },
+      {
+       "identifier": "F19",
+       "name": "F19",
+       "description": "",
+       "icon": "NONE",
+       "value": 318
+      },
+      {
+       "identifier": "F20",
+       "name": "F20",
+       "description": "",
+       "icon": "NONE",
+       "value": 319
+      },
+      {
+       "identifier": "F21",
+       "name": "F21",
+       "description": "",
+       "icon": "NONE",
+       "value": 320
+      },
+      {
+       "identifier": "F22",
+       "name": "F22",
+       "description": "",
+       "icon": "NONE",
+       "value": 321
+      },
+      {
+       "identifier": "F23",
+       "name": "F23",
+       "description": "",
+       "icon": "NONE",
+       "value": 322
+      },
+      {
+       "identifier": "F24",
+       "name": "F24",
+       "description": "",
+       "icon": "NONE",
+       "value": 323
+      },
+      {
+       "identifier": "PAUSE",
+       "name": "Pause",
+       "description": "",
+       "icon": "NONE",
+       "value": 165
+      },
+      {
+       "identifier": "INSERT",
+       "name": "Insert",
+       "description": "Ins",
+       "icon": "NONE",
+       "value": 166
+      },
+      {
+       "identifier": "HOME",
+       "name": "Home",
+       "description": "",
+       "icon": "NONE",
+       "value": 167
+      },
+      {
+       "identifier": "PAGE_UP",
+       "name": "Page Up",
+       "description": "PgUp",
+       "icon": "NONE",
+       "value": 168
+      },
+      {
+       "identifier": "PAGE_DOWN",
+       "name": "Page Down",
+       "description": "PgDown",
+       "icon": "NONE",
+       "value": 169
+      },
+      {
+       "identifier": "END",
+       "name": "End",
+       "description": "",
+       "icon": "NONE",
+       "value": 170
+      },
+      {
+       "identifier": "MEDIA_PLAY",
+       "name": "Media Play/Pause",
+       "description": "⏯",
+       "icon": "NONE",
+       "value": 174
+      },
+      {
+       "identifier": "MEDIA_STOP",
+       "name": "Media Stop",
+       "description": "⏹",
+       "icon": "NONE",
+       "value": 175
+      },
+      {
+       "identifier": "MEDIA_FIRST",
+       "name": "Media First",
+       "description": "⏮",
+       "icon": "NONE",
+       "value": 176
+      },
+      {
+       "identifier": "MEDIA_LAST",
+       "name": "Media Last",
+       "description": "⏭",
+       "icon": "NONE",
+       "value": 177
+      },
+      {
+       "identifier": "TEXTINPUT",
+       "name": "Text Input",
+       "description": "TxtIn",
+       "icon": "NONE",
+       "value": -2
+      },
+      {
+       "identifier": "WINDOW_DEACTIVATE",
+       "name": "Window Deactivate",
+       "description": "",
+       "icon": "NONE",
+       "value": 260
+      },
+      {
+       "identifier": "TIMER",
+       "name": "Timer",
+       "description": "Tmr",
+       "icon": "NONE",
+       "value": 272
+      },
+      {
+       "identifier": "TIMER0",
+       "name": "Timer 0",
+       "description": "Tmr0",
+       "icon": "NONE",
+       "value": 273
+      },
+      {
+       "identifier": "TIMER1",
+       "name": "Timer 1",
+       "description": "Tmr1",
+       "icon": "NONE",
+       "value": 274
+      },
+      {
+       "identifier": "TIMER2",
+       "name": "Timer 2",
+       "description": "Tmr2",
+       "icon": "NONE",
+       "value": 275
+      },
+      {
+       "identifier": "TIMER_JOBS",
+       "name": "Timer Jobs",
+       "description": "TmrJob",
+       "icon": "NONE",
+       "value": 276
+      },
+      {
+       "identifier": "TIMER_AUTOSAVE",
+       "name": "Timer Autosave",
+       "description": "TmrSave",
+       "icon": "NONE",
+       "value": 277
+      },
+      {
+       "identifier": "TIMER_REPORT",
+       "name": "Timer Report",
+       "description": "TmrReport",
+       "icon": "NONE",
+       "value": 278
+      },
+      {
+       "identifier": "TIMERREGION",
+       "name": "Timer Region",
+       "description": "TmrReg",
+       "icon": "NONE",
+       "value": 279
+      },
+      {
+       "identifier": "NDOF_MOTION",
+       "name": "NDOF Motion",
+       "description": "NdofMov",
+       "icon": "NONE",
+       "value": 400
+      },
+      {
+       "identifier": "NDOF_BUTTON_MENU",
+       "name": "NDOF Menu",
+       "description": "NdofMenu",
+       "icon": "NONE",
+       "value": 401
+      },
+      {
+       "identifier": "NDOF_BUTTON_FIT",
+       "name": "NDOF Fit",
+       "description": "NdofFit",
+       "icon": "NONE",
+       "value": 402
+      },
+      {
+       "identifier": "NDOF_BUTTON_TOP",
+       "name": "NDOF Top",
+       "description": "Ndof↑",
+       "icon": "NONE",
+       "value": 403
+      },
+      {
+       "identifier": "NDOF_BUTTON_BOTTOM",
+       "name": "NDOF Bottom",
+       "description": "Ndof↓",
+       "icon": "NONE",
+       "value": 404
+      },
+      {
+       "identifier": "NDOF_BUTTON_LEFT",
+       "name": "NDOF Left",
+       "description": "Ndof←",
+       "icon": "NONE",
+       "value": 405
+      },
+      {
+       "identifier": "NDOF_BUTTON_RIGHT",
+       "name": "NDOF Right",
+       "description": "Ndof→",
+       "icon": "NONE",
+       "value": 406
+      },
+      {
+       "identifier": "NDOF_BUTTON_FRONT",
+       "name": "NDOF Front",
+       "description": "NdofFront",
+       "icon": "NONE",
+       "value": 407
+      },
+      {
+       "identifier": "NDOF_BUTTON_BACK",
+       "name": "NDOF Back",
+       "description": "NdofBack",
+       "icon": "NONE",
+       "value": 408
+      },
+      {
+       "identifier": "NDOF_BUTTON_ISO1",
+       "name": "NDOF Isometric 1",
+       "description": "NdofIso1",
+       "icon": "NONE",
+       "value": 409
+      },
+      {
+       "identifier": "NDOF_BUTTON_ISO2",
+       "name": "NDOF Isometric 2",
+       "description": "NdofIso2",
+       "icon": "NONE",
+       "value": 410
+      },
+      {
+       "identifier": "NDOF_BUTTON_ROLL_CW",
+       "name": "NDOF Roll CW",
+       "description": "NdofRCW",
+       "icon": "NONE",
+       "value": 411
+      },
+      {
+       "identifier": "NDOF_BUTTON_ROLL_CCW",
+       "name": "NDOF Roll CCW",
+       "description": "NdofRCCW",
+       "icon": "NONE",
+       "value": 412
+      },
+      {
+       "identifier": "NDOF_BUTTON_SPIN_CW",
+       "name": "NDOF Spin CW",
+       "description": "NdofSCW",
+       "icon": "NONE",
+       "value": 413
+      },
+      {
+       "identifier": "NDOF_BUTTON_SPIN_CCW",
+       "name": "NDOF Spin CCW",
+       "description": "NdofSCCW",
+       "icon": "NONE",
+       "value": 414
+      },
+      {
+       "identifier": "NDOF_BUTTON_TILT_CW",
+       "name": "NDOF Tilt CW",
+       "description": "NdofTCW",
+       "icon": "NONE",
+       "value": 415
+      },
+      {
+       "identifier": "NDOF_BUTTON_TILT_CCW",
+       "name": "NDOF Tilt CCW",
+       "description": "NdofTCCW",
+       "icon": "NONE",
+       "value": 416
+      },
+      {
+       "identifier": "NDOF_BUTTON_ROTATE",
+       "name": "NDOF Rotate",
+       "description": "NdofRot",
+       "icon": "NONE",
+       "value": 417
+      },
+      {
+       "identifier": "NDOF_BUTTON_PANZOOM",
+       "name": "NDOF Pan/Zoom",
+       "description": "NdofPanZoom",
+       "icon": "NONE",
+       "value": 418
+      },
+      {
+       "identifier": "NDOF_BUTTON_DOMINANT",
+       "name": "NDOF Dominant",
+       "description": "NdofDom",
+       "icon": "NONE",
+       "value": 419
+      },
+      {
+       "identifier": "NDOF_BUTTON_PLUS",
+       "name": "NDOF Plus",
+       "description": "Ndof+",
+       "icon": "NONE",
+       "value": 420
+      },
+      {
+       "identifier": "NDOF_BUTTON_MINUS",
+       "name": "NDOF Minus",
+       "description": "Ndof-",
+       "icon": "NONE",
+       "value": 421
+      },
+      {
+       "identifier": "NDOF_BUTTON_V1",
+       "name": "NDOF View 1",
+       "description": "NdofView1",
+       "icon": "NONE",
+       "value": 422
+      },
+      {
+       "identifier": "NDOF_BUTTON_V2",
+       "name": "NDOF View 2",
+       "description": "NdofView2",
+       "icon": "NONE",
+       "value": 423
+      },
+      {
+       "identifier": "NDOF_BUTTON_V3",
+       "name": "NDOF View 3",
+       "description": "NdofView3",
+       "icon": "NONE",
+       "value": 424
+      },
+      {
+       "identifier": "NDOF_BUTTON_SAVE_V1",
+       "name": "NDOF Save View 1",
+       "description": "NdofSaveView1",
+       "icon": "NONE",
+       "value": 446
+      },
+      {
+       "identifier": "NDOF_BUTTON_SAVE_V2",
+       "name": "NDOF Save View 2",
+       "description": "NdofSaveView2",
+       "icon": "NONE",
+       "value": 447
+      },
+      {
+       "identifier": "NDOF_BUTTON_SAVE_V3",
+       "name": "NDOF Save View 3",
+       "description": "NdofSaveView3",
+       "icon": "NONE",
+       "value": 448
+      },
+      {
+       "identifier": "NDOF_BUTTON_1",
+       "name": "NDOF Button 1",
+       "description": "NdofB1",
+       "icon": "NONE",
+       "value": 426
+      },
+      {
+       "identifier": "NDOF_BUTTON_2",
+       "name": "NDOF Button 2",
+       "description": "NdofB2",
+       "icon": "NONE",
+       "value": 427
+      },
+      {
+       "identifier": "NDOF_BUTTON_3",
+       "name": "NDOF Button 3",
+       "description": "NdofB3",
+       "icon": "NONE",
+       "value": 428
+      },
+      {
+       "identifier": "NDOF_BUTTON_4",
+       "name": "NDOF Button 4",
+       "description": "NdofB4",
+       "icon": "NONE",
+       "value": 429
+      },
+      {
+       "identifier": "NDOF_BUTTON_5",
+       "name": "NDOF Button 5",
+       "description": "NdofB5",
+       "icon": "NONE",
+       "value": 430
+      },
+      {
+       "identifier": "NDOF_BUTTON_6",
+       "name": "NDOF Button 6",
+       "description": "NdofB6",
+       "icon": "NONE",
+       "value": 431
+      },
+      {
+       "identifier": "NDOF_BUTTON_7",
+       "name": "NDOF Button 7",
+       "description": "NdofB7",
+       "icon": "NONE",
+       "value": 432
+      },
+      {
+       "identifier": "NDOF_BUTTON_8",
+       "name": "NDOF Button 8",
+       "description": "NdofB8",
+       "icon": "NONE",
+       "value": 433
+      },
+      {
+       "identifier": "NDOF_BUTTON_9",
+       "name": "NDOF Button 9",
+       "description": "NdofB9",
+       "icon": "NONE",
+       "value": 434
+      },
+      {
+       "identifier": "NDOF_BUTTON_10",
+       "name": "NDOF Button 10",
+       "description": "NdofB10",
+       "icon": "NONE",
+       "value": 435
+      },
+      {
+       "identifier": "NDOF_BUTTON_11",
+       "name": "NDOF Button 11",
+       "description": "NdofB11",
+       "icon": "NONE",
+       "value": 436
+      },
+      {
+       "identifier": "NDOF_BUTTON_12",
+       "name": "NDOF Button 12",
+       "description": "NdofB12",
+       "icon": "NONE",
+       "value": 437
+      },
+      {
+       "identifier": "ACTIONZONE_AREA",
+       "name": "ActionZone Area",
+       "description": "AZone Area",
+       "icon": "NONE",
+       "value": 20480
+      },
+      {
+       "identifier": "ACTIONZONE_REGION",
+       "name": "ActionZone Region",
+       "description": "AZone Region",
+       "icon": "NONE",
+       "value": 20481
+      },
+      {
+       "identifier": "ACTIONZONE_REGION_QUAD",
+       "name": "ActionZone Quad",
+       "description": "AZone Quad",
+       "icon": "NONE",
+       "value": 20482
+      },
+      {
+       "identifier": "ACTIONZONE_FULLSCREEN",
+       "name": "ActionZone Fullscreen",
+       "description": "AZone FullScr",
+       "icon": "NONE",
+       "value": 20497
+      },
+      {
+       "identifier": "XR_ACTION",
+       "name": "XR Action",
+       "description": "",
+       "icon": "NONE",
+       "value": 20528
+      }
+     ],
+     "default": "NONE",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "value",
+     "name": "Value",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ANY",
+       "name": "Any",
+       "description": "",
+       "icon": "NONE",
+       "value": -1
+      },
+      {
+       "identifier": "PRESS",
+       "name": "Press",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "RELEASE",
+       "name": "Release",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "CLICK",
+       "name": "Click",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "DOUBLE_CLICK",
+       "name": "Double Click",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "CLICK_DRAG",
+       "name": "Drag",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "NOTHING",
+       "name": "Nothing",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      }
+     ],
+     "default": "NOTHING",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "unicode",
+     "name": "",
+     "description": "",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": []
+    },
+    {
+     "identifier": "x",
+     "name": "",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "y",
+     "name": "",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "shift",
+     "name": "Shift",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "ctrl",
+     "name": "Ctrl",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "alt",
+     "name": "Alt",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "oskey",
+     "name": "OS Key",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "hyper",
+     "name": "Hyper",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "event",
+     "name": "Item",
+     "description": "Added key map item",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Event",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "find_playing_scene",
+   "description": "find_playing_scene",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "scrub",
+     "name": "Scrubbing",
+     "description": "Check if time in the scene is being scrubbed",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "scene",
+     "name": "Scene",
+     "description": "Scene that is currently playing",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Scene",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

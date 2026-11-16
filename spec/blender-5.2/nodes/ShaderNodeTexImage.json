@@ -1,0 +1,208 @@
+{
+ "bl_idname": "ShaderNodeTexImage",
+ "srna": "ShaderNodeTexImage",
+ "name": "Image Texture",
+ "label": "",
+ "width": 240.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": true,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Alpha",
+   "identifier": "Alpha",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "image": null,
+  "texture_mapping": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree",
+   "type": "TexMapping"
+  },
+  "color_mapping": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree",
+   "type": "ColorMapping"
+  },
+  "projection": "FLAT",
+  "interpolation": "Linear",
+  "projection_blend": 0.0,
+  "extension": "REPEAT",
+  "image_user": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree.nodes[\"Image Texture\"].image_user",
+   "type": "ImageUser"
+  }
+ },
+ "availability": {
+  "projection": {
+   "default": "FLAT",
+   "by_value": {
+    "FLAT": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color",
+      "Alpha"
+     ]
+    },
+    "BOX": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color",
+      "Alpha"
+     ]
+    },
+    "SPHERE": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color",
+      "Alpha"
+     ]
+    },
+    "TUBE": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color",
+      "Alpha"
+     ]
+    }
+   }
+  },
+  "interpolation": {
+   "default": "Linear",
+   "by_value": {
+    "Linear": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color",
+      "Alpha"
+     ]
+    },
+    "Closest": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color",
+      "Alpha"
+     ]
+    },
+    "Cubic": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color",
+      "Alpha"
+     ]
+    },
+    "Smart": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color",
+      "Alpha"
+     ]
+    }
+   }
+  },
+  "extension": {
+   "default": "REPEAT",
+   "by_value": {
+    "REPEAT": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color",
+      "Alpha"
+     ]
+    },
+    "EXTEND": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color",
+      "Alpha"
+     ]
+    },
+    "CLIP": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color",
+      "Alpha"
+     ]
+    },
+    "MIRROR": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color",
+      "Alpha"
+     ]
+    }
+   }
+  }
+ }
+}

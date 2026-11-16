@@ -1,0 +1,114 @@
+{
+ "bl_idname": "ShaderNodeCombineColor",
+ "srna": "ShaderNodeCombineColor",
+ "name": "Combine Color",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Red",
+   "identifier": "Red",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Green",
+   "identifier": "Green",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Blue",
+   "identifier": "Blue",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "mode": "RGB"
+ },
+ "availability": {
+  "mode": {
+   "default": "RGB",
+   "by_value": {
+    "RGB": {
+     "inputs": [
+      "Red",
+      "Green",
+      "Blue"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "HSV": {
+     "inputs": [
+      "Red",
+      "Green",
+      "Blue"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "HSL": {
+     "inputs": [
+      "Red",
+      "Green",
+      "Blue"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    }
+   }
+  }
+ }
+}

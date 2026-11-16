@@ -1,0 +1,236 @@
+{
+ "identifier": "SunLight",
+ "name": "Sun Light",
+ "description": "Constant direction parallel ray Light",
+ "base": "Light",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "angle",
+   "name": "Angle",
+   "description": "Angular diameter of the Sun as seen from the Earth",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.009180432185530663,
+   "hard_min": 0.0,
+   "hard_max": 3.1415927410125732,
+   "soft_min": 0.0,
+   "soft_max": 3.1415927410125732,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "energy",
+   "name": "Strength",
+   "description": "Sunlight strength in watts per meter squared (W/m²)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 10.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_buffer_clip_start",
+   "name": "Shadow Buffer Clip Start",
+   "description": "Shadow map clip start, below which objects will not generate shadows",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.05000000074505806,
+   "hard_min": 9.999999974752427e-07,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_soft_size",
+   "name": "Shadow Soft Size",
+   "description": "Light size for ray shadow sampling (Raytraced shadows)",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_filter_radius",
+   "name": "Shadow Filter Radius",
+   "description": "Blur shadow aliasing using Percentage Closer Filtering",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 5.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_maximum_resolution",
+   "name": "Shadows Resolution Limit",
+   "description": "Minimum size of a shadow map pixel. Higher values use less memory at the cost of shadow quality.",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0010000000474974513,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 9.999999747378752e-05,
+   "soft_max": 0.019999999552965164,
+   "step": 0.05000000074505806,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_shadow_jitter",
+   "name": "Shadow Jitter",
+   "description": "Enable jittered soft shadows to increase shadow precision (disabled in viewport unless enabled in the render settings). Has a high performance impact.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_jitter_overblur",
+   "name": "Shadow Jitter Overblur",
+   "description": "Apply shadow tracing to each jittered sample to reduce under-sampling artifacts",
+   "type": "FLOAT",
+   "subtype": "PERCENTAGE",
+   "unit": "NONE",
+   "default": 10.0,
+   "hard_min": 0.0,
+   "hard_max": 100.0,
+   "soft_min": 0.0,
+   "soft_max": 20.0,
+   "step": 10.0,
+   "precision": 0,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_cascade_max_distance",
+   "name": "Cascade Max Distance",
+   "description": "End distance of the cascaded shadow map (only in perspective view)",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 200.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_cascade_count",
+   "name": "Cascade Count",
+   "description": "Number of texture used by the cascaded shadow map",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 4,
+   "hard_min": 1,
+   "hard_max": 4,
+   "soft_min": 1,
+   "soft_max": 4,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_cascade_exponent",
+   "name": "Exponential Distribution",
+   "description": "Higher value increase resolution towards the viewpoint",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.800000011920929,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_cascade_fade",
+   "name": "Cascade Fade",
+   "description": "How smooth is the transition between each cascade",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.10000000149011612,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.lights.new('Light', 'SUN')",
+  "differs_from_default": {
+   "id_type": "LIGHT",
+   "is_editable": true,
+   "type": "SUN",
+   "temperature_color": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "use_nodes": true
+  }
+ }
+}

@@ -1,0 +1,123 @@
+{
+ "identifier": "MeshToVolumeModifier",
+ "name": "Mesh to Volume Modifier",
+ "description": "",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "object",
+   "name": "Object",
+   "description": "Object",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "resolution_mode",
+   "name": "Resolution Mode",
+   "description": "Mode for how the desired voxel size is specified",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "VOXEL_AMOUNT",
+     "name": "Voxel Amount",
+     "description": "Desired number of voxels along one axis",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "VOXEL_SIZE",
+     "name": "Voxel Size",
+     "description": "Desired voxel side length",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "VOXEL_AMOUNT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "voxel_size",
+   "name": "Voxel Size",
+   "description": "Smaller values result in a higher resolution output",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 0.009999999776482582,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "voxel_amount",
+   "name": "Voxel Amount",
+   "description": "Approximate number of voxels along one axis",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "interior_band_width",
+   "name": "Interior Band Width",
+   "description": "Width of the gradient inside of the mesh",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "density",
+   "name": "Density",
+   "description": "Density of the new volume",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

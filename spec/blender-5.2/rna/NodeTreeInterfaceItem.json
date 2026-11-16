@@ -1,0 +1,91 @@
+{
+ "identifier": "NodeTreeInterfaceItem",
+ "name": "Node Tree Interface Item",
+ "description": "Item in a node tree interface",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "item_type",
+   "name": "Item Type",
+   "description": "Type of interface item",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SOCKET",
+     "name": "Socket",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "PANEL",
+     "name": "Panel",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "PANEL",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "parent",
+   "name": "Parent",
+   "description": "Panel that contains the item",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeTreeInterfacePanel",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "position",
+   "name": "Position",
+   "description": "Position of the item in its parent panel",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -1,
+   "hard_max": 2147483647,
+   "soft_min": -1,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "index",
+   "name": "Index",
+   "description": "Global index of the item among all items in the interface",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -1,
+   "hard_max": 2147483647,
+   "soft_min": -1,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

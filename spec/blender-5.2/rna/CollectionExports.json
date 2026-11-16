@@ -1,0 +1,197 @@
+{
+ "identifier": "CollectionExports",
+ "name": "Export Handlers",
+ "description": "Collection of export handlers",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add an export handler to the collection",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "The type of export handler to add",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "IO_FH_alembic",
+       "name": "Alembic",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "IO_FH_usd",
+       "name": "Universal Scene Description",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "IO_FH_obj",
+       "name": "Wavefront OBJ",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "IO_FH_ply",
+       "name": "Stanford PLY",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "IO_FH_stl",
+       "name": "STL",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "IO_FH_fbx",
+       "name": "FBX",
+       "description": "",
+       "icon": "NONE",
+       "value": 6
+      },
+      {
+       "identifier": "IO_FH_gltf2",
+       "name": "glTF 2.0",
+       "description": "",
+       "icon": "NONE",
+       "value": 16
+      }
+     ],
+     "items_static": [
+      {
+       "identifier": "DEFAULT",
+       "name": "Default",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      }
+     ],
+     "default": "DEFAULT",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of the new export handler",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "exporter",
+     "name": "",
+     "description": "Newly created export handler",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "CollectionExport",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove an export handler from the collection",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "exporter",
+     "name": "",
+     "description": "Export Handler to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "CollectionExport",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "move",
+   "description": "Move an export handler",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "from_index",
+     "name": "From Index",
+     "description": "Index to move",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "to_index",
+     "name": "To Index",
+     "description": "Target index",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

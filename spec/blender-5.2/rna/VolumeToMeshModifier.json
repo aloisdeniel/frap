@@ -1,0 +1,155 @@
+{
+ "identifier": "VolumeToMeshModifier",
+ "name": "Volume to Mesh Modifier",
+ "description": "",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "object",
+   "name": "Object",
+   "description": "Object",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "threshold",
+   "name": "Threshold",
+   "description": "Voxels with a larger value are inside the generated mesh",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "adaptivity",
+   "name": "Adaptivity",
+   "description": "Reduces the final face count by simplifying geometry where detail is not needed",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_smooth_shade",
+   "name": "Smooth Shading",
+   "description": "Output faces with smooth shading rather than flat shaded",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "grid_name",
+   "name": "Grid Name",
+   "description": "Grid in the volume object that is converted to a mesh",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "resolution_mode",
+   "name": "Resolution Mode",
+   "description": "Mode for how the desired voxel size is specified",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "GRID",
+     "name": "Grid",
+     "description": "Use resolution of the volume grid",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "VOXEL_AMOUNT",
+     "name": "Voxel Amount",
+     "description": "Desired number of voxels along one axis",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "VOXEL_SIZE",
+     "name": "Voxel Size",
+     "description": "Desired voxel side length",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "GRID",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "voxel_size",
+   "name": "Voxel Size",
+   "description": "Smaller values result in a higher resolution output",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 0.009999999776482582,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "voxel_amount",
+   "name": "Voxel Amount",
+   "description": "Approximate number of voxels along one axis",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

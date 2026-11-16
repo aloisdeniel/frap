@@ -205,8 +205,7 @@
    "fixed_type": "AnimData",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -220,8 +219,7 @@
    "is_id": false,
    "api": "Nodes",
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -247,9 +245,7 @@
    "unit": "NONE",
    "fixed_type": "Annotation",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "type",
@@ -7878,5 +7874,5 @@
    ]
   }
  ],
- "requested": false
+ "root": true
 }

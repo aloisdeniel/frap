@@ -29,9 +29,7 @@
    "unit": "NONE",
    "fixed_type": "Material",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "world_override",
@@ -42,9 +40,7 @@
    "unit": "NONE",
    "fixed_type": "World",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "samples",
@@ -826,5 +822,5 @@
    "returns": []
   }
  ],
- "requested": false
+ "root": true
 }

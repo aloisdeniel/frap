@@ -1,0 +1,403 @@
+{
+ "identifier": "WaveModifier",
+ "name": "Wave Modifier",
+ "description": "Wave effect modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "use_x",
+   "name": "X",
+   "description": "X axis motion",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_y",
+   "name": "Y",
+   "description": "Y axis motion",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_cyclic",
+   "name": "Cyclic",
+   "description": "Cyclic wave effect",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_normal",
+   "name": "Normals",
+   "description": "Displace along normals",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_normal_x",
+   "name": "X Normal",
+   "description": "Enable displacement along the X normal",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_normal_y",
+   "name": "Y Normal",
+   "description": "Enable displacement along the Y normal",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_normal_z",
+   "name": "Z Normal",
+   "description": "Enable displacement along the Z normal",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "time_offset",
+   "name": "Time Offset",
+   "description": "Either the starting frame (for positive speed) or ending frame (for negative speed)",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -1048574.0,
+   "hard_max": 1048574.0,
+   "soft_min": -1048574.0,
+   "soft_max": 1048574.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lifetime",
+   "name": "Lifetime",
+   "description": "Lifetime of the wave in frames, zero means infinite",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -1048574.0,
+   "hard_max": 1048574.0,
+   "soft_min": -1048574.0,
+   "soft_max": 1048574.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "damping_time",
+   "name": "Damping Time",
+   "description": "Number of frames in which the wave damps out after it dies",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 10.0,
+   "hard_min": -1048574.0,
+   "hard_max": 1048574.0,
+   "soft_min": -1048574.0,
+   "soft_max": 1048574.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "falloff_radius",
+   "name": "Falloff Radius",
+   "description": "Distance after which it fades out",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 100.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "start_position_x",
+   "name": "Start Position X",
+   "description": "X coordinate of the start position",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -100.0,
+   "soft_max": 100.0,
+   "step": 100.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "start_position_y",
+   "name": "Start Position Y",
+   "description": "Y coordinate of the start position",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -100.0,
+   "soft_max": 100.0,
+   "step": 100.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "start_position_object",
+   "name": "Start Position Object",
+   "description": "Object which defines the wave center",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name for modulating the wave",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "speed",
+   "name": "Speed",
+   "description": "Speed of the wave, towards the starting point when negative",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.25,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "height",
+   "name": "Height",
+   "description": "Height of the wave",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.5,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -2.0,
+   "soft_max": 2.0,
+   "step": 10.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "width",
+   "name": "Width",
+   "description": "Distance between the waves",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 1.5,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 5.0,
+   "step": 10.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "narrowness",
+   "name": "Narrowness",
+   "description": "Distance between the top and the base of a wave, the higher the value, the more narrow the wave",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 1.5,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 10.0,
+   "step": 10.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "texture",
+   "name": "Texture",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Texture",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "texture_coords",
+   "name": "Texture Coordinates",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LOCAL",
+     "name": "Local",
+     "description": "Use the local coordinate system for the texture coordinates",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "GLOBAL",
+     "name": "Global",
+     "description": "Use the global coordinate system for the texture coordinates",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "Use the linked object's local coordinate system for the texture coordinates",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "UV",
+     "name": "UV",
+     "description": "Use UV coordinates for the texture coordinates",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "LOCAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "uv_layer",
+   "name": "UV Map",
+   "description": "UV map name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 68,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "texture_coords_object",
+   "name": "Texture Coordinate Object",
+   "description": "Object to set the texture coordinates",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "texture_coords_bone",
+   "name": "Texture Coordinate Bone",
+   "description": "Bone to set the texture coordinates",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

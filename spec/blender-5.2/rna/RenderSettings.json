@@ -1,0 +1,1762 @@
+{
+ "identifier": "RenderSettings",
+ "name": "Render Data",
+ "description": "Rendering settings for a Scene data-block",
+ "base": null,
+ "name_property": null,
+ "nested": "Scene",
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "image_settings",
+   "name": "Image Format",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ImageFormatSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "resolution_x",
+   "name": "Resolution X",
+   "description": "Number of horizontal pixels in the rendered image",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 1920,
+   "hard_min": 4,
+   "hard_max": 65536,
+   "soft_min": 4,
+   "soft_max": 65536,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "resolution_y",
+   "name": "Resolution Y",
+   "description": "Number of vertical pixels in the rendered image",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 1080,
+   "hard_min": 4,
+   "hard_max": 65536,
+   "soft_min": 4,
+   "soft_max": 65536,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "resolution_percentage",
+   "name": "Resolution Scale",
+   "description": "Percentage scale for render resolution",
+   "type": "INT",
+   "subtype": "PERCENTAGE",
+   "unit": "NONE",
+   "default": 100,
+   "hard_min": 1,
+   "hard_max": 32767,
+   "soft_min": 1,
+   "soft_max": 100,
+   "step": 10,
+   "flags": []
+  },
+  {
+   "identifier": "preview_pixel_size",
+   "name": "Pixel Size",
+   "description": "Pixel size for viewport rendering",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "AUTO",
+     "name": "Automatic",
+     "description": "Automatic pixel size, depends on the user interface scale",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "1",
+     "name": "1×",
+     "description": "Render at full resolution",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "2",
+     "name": "2×",
+     "description": "Render at 50% resolution",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "4",
+     "name": "4×",
+     "description": "Render at 25% resolution",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "8",
+     "name": "8×",
+     "description": "Render at 12.5% resolution",
+     "icon": "NONE",
+     "value": 8
+    }
+   ],
+   "default": "AUTO",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "pixel_aspect_x",
+   "name": "Pixel Aspect X",
+   "description": "Horizontal aspect ratio - for anamorphic or non-square pixel output",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 1.0,
+   "hard_max": 200.0,
+   "soft_min": 1.0,
+   "soft_max": 200.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "pixel_aspect_y",
+   "name": "Pixel Aspect Y",
+   "description": "Vertical aspect ratio - for anamorphic or non-square pixel output",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 1.0,
+   "hard_max": 200.0,
+   "soft_min": 1.0,
+   "soft_max": 200.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "ppm_factor",
+   "name": "PPM Factor",
+   "description": "The pixel density meta-data written to supported image formats. This value is multiplied by the PPM-base which defines the unit (typically inches or meters)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 72.0,
+   "hard_min": 9.999999747378752e-06,
+   "hard_max": 1000000.0,
+   "soft_min": 9.999999747378752e-05,
+   "soft_max": 10000.0,
+   "step": 2.0,
+   "precision": 2,
+   "flags": []
+  },
+  {
+   "identifier": "ppm_base",
+   "name": "PPM Base",
+   "description": "The base unit for pixels per meter.",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.02539999969303608,
+   "hard_min": 9.999999747378752e-06,
+   "hard_max": 1000000.0,
+   "soft_min": 9.999999747378752e-05,
+   "soft_max": 10000.0,
+   "step": 2.0,
+   "precision": 4,
+   "flags": []
+  },
+  {
+   "identifier": "ffmpeg",
+   "name": "FFmpeg Settings",
+   "description": "FFmpeg related settings for the scene",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FFmpegSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "fps",
+   "name": "FPS",
+   "description": "Framerate, expressed in frames per second",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 24,
+   "hard_min": 1,
+   "hard_max": 32767,
+   "soft_min": 1,
+   "soft_max": 240,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "fps_base",
+   "name": "FPS Base",
+   "description": "Framerate base",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 9.999999747378752e-06,
+   "hard_max": 1000000.0,
+   "soft_min": 0.10000000149011612,
+   "soft_max": 120.0,
+   "step": 2.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "frame_map_old",
+   "name": "Frame Map Old",
+   "description": "Old mapping value in frames",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 100,
+   "hard_min": 1,
+   "hard_max": 900,
+   "soft_min": 1,
+   "soft_max": 900,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "frame_map_new",
+   "name": "Frame Map New",
+   "description": "How many frames the Map Old will last",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 100,
+   "hard_min": 1,
+   "hard_max": 900,
+   "soft_min": 1,
+   "soft_max": 900,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "dither_intensity",
+   "name": "Dither Intensity",
+   "description": "Amount of dithering noise added to the rendered image to break up banding",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 0.10000000149011612,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "filter_size",
+   "name": "Filter Size",
+   "description": "Width over which the reconstruction filter combines samples",
+   "type": "FLOAT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 1.5,
+   "hard_min": 0.0,
+   "hard_max": 500.0,
+   "soft_min": 0.009999999776482582,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "film_transparent",
+   "name": "Transparent",
+   "description": "World background is transparent, for compositing the render over another background",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_freestyle",
+   "name": "Use Freestyle",
+   "description": "Draw stylized strokes using Freestyle",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "threads",
+   "name": "Threads",
+   "description": "Maximum number of CPU cores to use simultaneously while rendering (for multi-core/CPU systems)",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 1,
+   "hard_max": 1024,
+   "soft_min": 1,
+   "soft_max": 1024,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "threads_mode",
+   "name": "Threads Mode",
+   "description": "Determine the amount of render threads used",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "AUTO",
+     "name": "Auto-Detect",
+     "description": "Automatically determine the number of threads, based on CPUs",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FIXED",
+     "name": "Fixed",
+     "description": "Manually determine the number of threads",
+     "icon": "NONE",
+     "value": 524288
+    }
+   ],
+   "default": "AUTO",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_motion_blur",
+   "name": "Motion Blur",
+   "description": "Use multi-sampled 3D scene motion blur",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "motion_blur_shutter",
+   "name": "Shutter",
+   "description": "Time taken in frames between shutter open and close",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.009999999776482582,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "motion_blur_position",
+   "name": "Motion Blur Position",
+   "description": "Offset for the shutter's time interval, allows to change the motion blur trails",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "START",
+     "name": "Start on Frame",
+     "description": "The shutter opens at the current frame",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "CENTER",
+     "name": "Center on Frame",
+     "description": "The shutter is open during the current frame",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "END",
+     "name": "End on Frame",
+     "description": "The shutter closes at the current frame",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "CENTER",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "motion_blur_shutter_curve",
+   "name": "Shutter Curve",
+   "description": "Curve defining the shutter's openness over time",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CurveMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "hair_type",
+   "name": "Curves Shape Type",
+   "description": "Curves shape type",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "STRAND",
+     "name": "Strand",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "STRIP",
+     "name": "Strip",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "CYLINDER",
+     "name": "Cylinder",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "STRAND",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "hair_subdiv",
+   "name": "Additional Subdivision",
+   "description": "Additional subdivision along the curves",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 3,
+   "soft_min": 0,
+   "soft_max": 3,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_high_quality_normals",
+   "name": "High Quality Normals",
+   "description": "Use high quality tangent space at the cost of lower performance",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "anisotropic_filter",
+   "name": "Anisotropic Filtering",
+   "description": "Quality of anisotropic filtering in materials",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FILTER_0",
+     "name": "Off",
+     "description": "Turn off anisotropic filtering",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FILTER_2",
+     "name": "2×",
+     "description": "Use 2 samples for anisotropic filtering",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "FILTER_4",
+     "name": "4×",
+     "description": "Use 4 samples for anisotropic filtering",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "FILTER_8",
+     "name": "8×",
+     "description": "Use 8 samples for anisotropic filtering",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "FILTER_16",
+     "name": "16×",
+     "description": "Use 16 samples for anisotropic filtering",
+     "icon": "NONE",
+     "value": 16
+    }
+   ],
+   "default": "FILTER_2",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_border",
+   "name": "Render Region",
+   "description": "Render a user-defined render region, within the frame size",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "border_min_x",
+   "name": "Region Minimum X",
+   "description": "Minimum X value for the render region",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "border_min_y",
+   "name": "Region Minimum Y",
+   "description": "Minimum Y value for the render region",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "border_max_x",
+   "name": "Region Maximum X",
+   "description": "Maximum X value for the render region",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "border_max_y",
+   "name": "Region Maximum Y",
+   "description": "Maximum Y value for the render region",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "use_crop_to_border",
+   "name": "Crop to Render Region",
+   "description": "Crop the rendered frame to the defined render region size",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_placeholder",
+   "name": "Placeholders",
+   "description": "Create empty placeholder files while rendering frames (similar to Unix 'touch')",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_overwrite",
+   "name": "Overwrite",
+   "description": "Overwrite existing files while rendering",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "save_output",
+   "name": "Save Output",
+   "description": "Write frames to disk for animation renders",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_compositing",
+   "name": "Compositing",
+   "description": "Process the render result through the compositing pipeline, if a compositing node group is assigned to the scene",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_sequencer",
+   "name": "Sequencer",
+   "description": "Process the render (and composited) result through the video sequence editor pipeline, if sequencer strips exist",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_file_extension",
+   "name": "File Extensions",
+   "description": "Add the file format extensions to the rendered file name (eg: filename + .jpg)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "file_extension",
+   "name": "Extension",
+   "description": "The file extension used for saving renders",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "is_movie_format",
+   "name": "Movie Format",
+   "description": "When true the format is a movie",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_lock_interface",
+   "name": "Lock Interface",
+   "description": "Lock interface during rendering in favor of giving more memory to the renderer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "filepath",
+   "name": "Output Path",
+   "description": "Directory/name to save animations, # characters define the position and padding of frame numbers",
+   "type": "STRING",
+   "subtype": "FILE_PATH",
+   "unit": "NONE",
+   "default": "//",
+   "length_max": 1024,
+   "flags": [
+    "NEVER_NULL",
+    "PATH_OUTPUT",
+    "PATH_SUPPORTS_BLEND_RELATIVE",
+    "PATH_SUPPORTS_TEMPLATES"
+   ]
+  },
+  {
+   "identifier": "use_render_cache",
+   "name": "Cache Result",
+   "description": "Save render cache to EXR files (useful for heavy compositing, Note: affects indirectly rendered scenes)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_stamp_time",
+   "name": "Stamp Time",
+   "description": "Include the rendered frame timecode as HH:MM:SS.FF in image metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_date",
+   "name": "Stamp Date",
+   "description": "Include the current date in image/video metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_frame",
+   "name": "Stamp Frame",
+   "description": "Include the frame number in image metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_frame_range",
+   "name": "Stamp Frame",
+   "description": "Include the rendered frame range in image/video metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_camera",
+   "name": "Stamp Camera",
+   "description": "Include the name of the active camera in image metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_lens",
+   "name": "Stamp Lens",
+   "description": "Include the active camera's lens in image metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_scene",
+   "name": "Stamp Scene",
+   "description": "Include the name of the active scene in image/video metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_note",
+   "name": "Stamp Note",
+   "description": "Include a custom note in image/video metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_marker",
+   "name": "Stamp Marker",
+   "description": "Include the name of the last marker in image metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_filename",
+   "name": "Stamp Filename",
+   "description": "Include the .blend filename in image/video metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_sequencer_strip",
+   "name": "Stamp Sequence Strip",
+   "description": "Include the name of the foreground sequence strip in image metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_render_time",
+   "name": "Stamp Render Time",
+   "description": "Include the render time in image metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "stamp_note_text",
+   "name": "Stamp Note Text",
+   "description": "Custom text to appear in the stamp note",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 768,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "use_stamp",
+   "name": "Stamp Output",
+   "description": "Render the stamp info text in the rendered image",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_labels",
+   "name": "Stamp Labels",
+   "description": "Display stamp labels (\"Camera\" in front of camera name, etc.)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "metadata_input",
+   "name": "Metadata Input",
+   "description": "Where to take the metadata from",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SCENE",
+     "name": "Scene",
+     "description": "Use metadata from the current scene",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "STRIPS",
+     "name": "Sequencer Strips",
+     "description": "Use metadata from the strips in the sequencer",
+     "icon": "NONE",
+     "value": 4096
+    }
+   ],
+   "default": "SCENE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_memory",
+   "name": "Stamp Peak Memory",
+   "description": "Include the peak memory usage in image metadata",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_hostname",
+   "name": "Stamp Hostname",
+   "description": "Include the hostname of the machine that rendered the frame",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "stamp_font_size",
+   "name": "Font Size",
+   "description": "Size of the font used when rendering stamp text",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 12,
+   "hard_min": 8,
+   "hard_max": 64,
+   "soft_min": 8,
+   "soft_max": 64,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "stamp_foreground",
+   "name": "Text Color",
+   "description": "Color to use for stamp text",
+   "type": "FLOAT",
+   "subtype": "COLOR_GAMMA",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "stamp_background",
+   "name": "Background",
+   "description": "Color to use behind stamp text",
+   "type": "FLOAT",
+   "subtype": "COLOR_GAMMA",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.25
+   ],
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sequencer_gl_preview",
+   "name": "Sequencer Preview Shading",
+   "description": "Display method used in the sequencer view",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "WIREFRAME",
+     "name": "Wireframe",
+     "description": "Display only edges of geometry without surface shading",
+     "icon": "SHADING_WIRE",
+     "value": 2
+    },
+    {
+     "identifier": "SOLID",
+     "name": "Solid",
+     "description": "Display objects with flat lighting and basic surface shading",
+     "icon": "SHADING_SOLID",
+     "value": 3
+    },
+    {
+     "identifier": "MATERIAL",
+     "name": "Material Preview",
+     "description": "Preview materials using predefined environment lights",
+     "icon": "SHADING_TEXTURE",
+     "value": 4
+    },
+    {
+     "identifier": "RENDERED",
+     "name": "Rendered",
+     "description": "Preview the final scene using the active render engine",
+     "icon": "SHADING_RENDERED",
+     "value": 6
+    }
+   ],
+   "default": "SOLID",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_sequencer_override_scene_strip",
+   "name": "Override Scene Settings",
+   "description": "Use Workbench render and world settings from the sequencer scene, instead of each strip's scene",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_single_layer",
+   "name": "Render Single Layer",
+   "description": "Only render the active layer. Only affects rendering from the interface, ignored for rendering from command line.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "views",
+   "name": "Render Views",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "SceneRenderView",
+   "is_id": false,
+   "api": "RenderViews",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "stereo_views",
+   "name": "Render Views",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "SceneRenderView",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_multiview",
+   "name": "Multiple Views",
+   "description": "Use multiple views in the scene",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "views_format",
+   "name": "Setup Stereo Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "STEREO_3D",
+     "name": "Stereo 3D",
+     "description": "Single stereo camera system, adjust the stereo settings in the camera panel",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "MULTIVIEW",
+     "name": "Multi-View",
+     "description": "Multi camera system, adjust the cameras individually",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "STEREO_3D",
+   "flags": []
+  },
+  {
+   "identifier": "engine",
+   "name": "Engine",
+   "description": "Engine to use for rendering",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BLENDER_EEVEE",
+     "name": "EEVEE",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "BLENDER_EEVEE",
+   "flags": []
+  },
+  {
+   "identifier": "has_multiple_engines",
+   "name": "Multiple Engines",
+   "description": "More than one rendering engine is available",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_spherical_stereo",
+   "name": "Use Spherical Stereo",
+   "description": "Active render engine supports spherical stereo rendering",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_simplify",
+   "name": "Use Simplify",
+   "description": "Enable simplification of scene for quicker preview renders",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "simplify_subdivision",
+   "name": "Simplify Subdivision",
+   "description": "Global maximum subdivision level",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 6,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 6,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "simplify_child_particles",
+   "name": "Simplify Child Particles",
+   "description": "Global child particles percentage",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "simplify_subdivision_render",
+   "name": "Simplify Subdivision",
+   "description": "Global maximum subdivision level during rendering",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 6,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "simplify_child_particles_render",
+   "name": "Simplify Child Particles",
+   "description": "Global child particles percentage during rendering",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "simplify_volumes",
+   "name": "Simplify Volumes",
+   "description": "Resolution percentage of volume objects in viewport",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_simplify_normals",
+   "name": "Mesh Normals",
+   "description": "Skip computing custom normals and face corner normals for displaying meshes in the viewport",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_texture_cache",
+   "name": "Texture Cache",
+   "description": "Load texture tiles at appropriate resolution on demand to reduce memory usage. This avoids loading all textures into memory, at the cost of extra disk space and some performance",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_auto_generate_texture_cache",
+   "name": "Auto Generate Texture Cache",
+   "description": "Automatically create tx files from image files when rendering, if the files do not exist or are outdated. The path to store the texture cache files is configured in the preferences",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "simplify_gpencil",
+   "name": "Simplify",
+   "description": "Simplify Grease Pencil drawing",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "simplify_gpencil_onplay",
+   "name": "Playback Only",
+   "description": "Simplify Grease Pencil only during animation playback",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "simplify_gpencil_antialiasing",
+   "name": "Antialiasing",
+   "description": "Use Antialiasing to smooth stroke edges",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "simplify_gpencil_view_fill",
+   "name": "Fill",
+   "description": "Display fill strokes in the viewport",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "simplify_gpencil_modifier",
+   "name": "Modifiers",
+   "description": "Display modifiers",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "simplify_gpencil_shader_fx",
+   "name": "Shader Effects",
+   "description": "Display Shader Effects",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "simplify_gpencil_tint",
+   "name": "Layers Tinting",
+   "description": "Display layer tint",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_persistent_data",
+   "name": "Persistent Data",
+   "description": "Keep render data around for faster re-renders and animation renders, at the cost of increased memory usage",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "line_thickness_mode",
+   "name": "Line Thickness Mode",
+   "description": "Line thickness mode for Freestyle line drawing",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ABSOLUTE",
+     "name": "Absolute",
+     "description": "Specify unit line thickness in pixels",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "RELATIVE",
+     "name": "Relative",
+     "description": "Unit line thickness is scaled by the proportion of the present vertical image resolution to 480 pixels",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "ABSOLUTE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "line_thickness",
+   "name": "Line Thickness",
+   "description": "Line thickness in pixels",
+   "type": "FLOAT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 10000.0,
+   "soft_min": 0.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bake",
+   "name": "Bake Data",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "BakeSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "compositor_device",
+   "name": "Compositor Device",
+   "description": "Set how compositing is executed",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "CPU",
+     "name": "CPU",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "GPU",
+     "name": "GPU",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "GPU",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "compositor_precision",
+   "name": "Compositor Precision",
+   "description": "The precision of compositor intermediate result",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "AUTO",
+     "name": "Auto",
+     "description": "Full precision for final renders, half precision otherwise",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FULL",
+     "name": "Full",
+     "description": "Full precision",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "AUTO",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "compositor_denoise_device",
+   "name": "Compositor Denoise Node Device",
+   "description": "The device to use to process the denoise nodes in the compositor",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "AUTO",
+     "name": "Auto",
+     "description": "Use the same device used by the compositor to process the denoise node",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CPU",
+     "name": "CPU",
+     "description": "Use the CPU to process the denoise node",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "GPU",
+     "name": "GPU",
+     "description": "Use the GPU to process the denoise node if available, otherwise fallback to CPU",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "AUTO",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "compositor_denoise_preview_quality",
+   "name": "Compositor Preview Denoise Quality",
+   "description": "The quality used by denoise nodes during viewport and interactive compositing if the nodes' quality option is set to Follow Scene",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "HIGH",
+     "name": "High",
+     "description": "High quality",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "BALANCED",
+     "name": "Balanced",
+     "description": "Balanced between performance and quality",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FAST",
+     "name": "Fast",
+     "description": "High performance",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "BALANCED",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "compositor_denoise_final_quality",
+   "name": "Compositor Final Denoise Quality",
+   "description": "The quality used by denoise nodes during the compositing of final renders if the nodes' quality option is set to Follow Scene",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "HIGH",
+     "name": "High",
+     "description": "High quality",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "BALANCED",
+     "name": "Balanced",
+     "description": "Balanced between performance and quality",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FAST",
+     "name": "Fast",
+     "description": "High performance",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "HIGH",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "frame_path",
+   "description": "Return the absolute path to the filename to be written for a given frame",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "frame",
+     "name": "",
+     "description": "Frame number to use, if unset the current frame will be used",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -2147483648,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -1048574,
+     "soft_max": 1048574,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "preview",
+     "name": "Preview",
+     "description": "Use preview range",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "view",
+     "name": "View",
+     "description": "The name of the view to use to replace the \"%\" chars",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1024,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "filepath",
+     "name": "File Path",
+     "description": "The resulting filepath from the scenes render settings",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1024,
+     "flags": [
+      "OUTPUT",
+      "NEVER_NULL"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.scenes.new('Scene').render",
+  "differs_from_default": {
+   "file_extension": ".png",
+   "has_multiple_engines": true
+  }
+ }
+}

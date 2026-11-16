@@ -1,0 +1,25 @@
+{
+ "identifier": "BoolAttributeValue",
+ "name": "Bool Attribute Value",
+ "description": "Bool value in geometry attribute",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "value",
+   "name": "value",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

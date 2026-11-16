@@ -1,0 +1,1054 @@
+{
+ "identifier": "SceneEEVEE",
+ "name": "Scene Display",
+ "description": "Scene display settings for 3D viewport",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "gi_diffuse_bounces",
+   "name": "Diffuse Bounces",
+   "description": "Number of times the light is reinjected inside light grids, 0 disable indirect diffuse light",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 3,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "gi_cubemap_resolution",
+   "name": "Cubemap Size",
+   "description": "Size of every cubemaps",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "128",
+     "name": "128 px",
+     "description": "",
+     "icon": "NONE",
+     "value": 128
+    },
+    {
+     "identifier": "256",
+     "name": "256 px",
+     "description": "",
+     "icon": "NONE",
+     "value": 256
+    },
+    {
+     "identifier": "512",
+     "name": "512 px",
+     "description": "",
+     "icon": "NONE",
+     "value": 512
+    },
+    {
+     "identifier": "1024",
+     "name": "1024 px",
+     "description": "",
+     "icon": "NONE",
+     "value": 1024
+    },
+    {
+     "identifier": "2048",
+     "name": "2048 px",
+     "description": "",
+     "icon": "NONE",
+     "value": 2048
+    },
+    {
+     "identifier": "4096",
+     "name": "4096 px",
+     "description": "",
+     "icon": "NONE",
+     "value": 4096
+    }
+   ],
+   "default": "512",
+   "flags": []
+  },
+  {
+   "identifier": "gi_visibility_resolution",
+   "name": "Irradiance Visibility Size",
+   "description": "Size of the shadow map applied to each irradiance sample",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "8",
+     "name": "8 px",
+     "description": "",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "16",
+     "name": "16 px",
+     "description": "",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "32",
+     "name": "32 px",
+     "description": "",
+     "icon": "NONE",
+     "value": 32
+    },
+    {
+     "identifier": "64",
+     "name": "64 px",
+     "description": "",
+     "icon": "NONE",
+     "value": 64
+    }
+   ],
+   "default": "32",
+   "flags": []
+  },
+  {
+   "identifier": "gi_glossy_clamp",
+   "name": "Clamp Glossy",
+   "description": "Clamp pixel intensity to reduce noise inside glossy reflections from reflection cubemaps (0 to disable)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "gi_irradiance_pool_size",
+   "name": "Irradiance Pool Size",
+   "description": "Size of the irradiance pool, a bigger pool size allows for more irradiance grid in the scene but might not fit into GPU memory and decrease performance",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "16",
+     "name": "16 MB",
+     "description": "",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "32",
+     "name": "32 MB",
+     "description": "",
+     "icon": "NONE",
+     "value": 32
+    },
+    {
+     "identifier": "64",
+     "name": "64 MB",
+     "description": "",
+     "icon": "NONE",
+     "value": 64
+    },
+    {
+     "identifier": "128",
+     "name": "128 MB",
+     "description": "",
+     "icon": "NONE",
+     "value": 128
+    },
+    {
+     "identifier": "256",
+     "name": "256 MB",
+     "description": "",
+     "icon": "NONE",
+     "value": 256
+    },
+    {
+     "identifier": "512",
+     "name": "512 MB",
+     "description": "",
+     "icon": "NONE",
+     "value": 512
+    },
+    {
+     "identifier": "1024",
+     "name": "1 GB",
+     "description": "",
+     "icon": "NONE",
+     "value": 1024
+    }
+   ],
+   "default": "16",
+   "flags": []
+  },
+  {
+   "identifier": "taa_samples",
+   "name": "Viewport Samples",
+   "description": "Number of samples, unlimited if 0",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 16,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "taa_render_samples",
+   "name": "Render Samples",
+   "description": "Number of samples per pixel for rendering",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 64,
+   "hard_min": 1,
+   "hard_max": 2147483647,
+   "soft_min": 1,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_taa_reprojection",
+   "name": "Viewport Denoising",
+   "description": "Denoise image using temporal reprojection (can leave some ghosting)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ray_tracing_method",
+   "name": "Tracing Method",
+   "description": "Select the tracing method used to find scene-ray intersections",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "PROBE",
+     "name": "Light Probe",
+     "description": "Use light probes to find scene intersection",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "SCREEN",
+     "name": "Screen-Trace",
+     "description": "Raytrace against the depth buffer. Fallback to light probes for invalid rays.",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "SCREEN",
+   "flags": []
+  },
+  {
+   "identifier": "use_shadow_jitter_viewport",
+   "name": "Jittered Shadows (Viewport)",
+   "description": "Enable jittered shadows on the viewport. (Jittered shadows are always enabled for final renders).",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "clamp_surface_direct",
+   "name": "Clamp Surface Direct",
+   "description": "If non-zero, the maximum value for lights contribution on a surface. Higher values will be scaled down to avoid too much noise and slow convergence at the cost of accuracy. Used by light objects.",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "clamp_surface_indirect",
+   "name": "Clamp Surface Indirect",
+   "description": "If non-zero, the maximum value for indirect lighting on surface. Higher values will be scaled down to avoid too much noise and slow convergence at the cost of accuracy. Used by ray-tracing and light-probes.",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 10.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "clamp_volume_direct",
+   "name": "Clamp Volume Direct",
+   "description": "If non-zero, the maximum value for lights contribution in volumes. Higher values will be scaled down to avoid too much noise and slow convergence at the cost of accuracy. Used by light objects.",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "clamp_volume_indirect",
+   "name": "Clamp Volume Indirect",
+   "description": "If non-zero, the maximum value for indirect lighting in volumes. Higher values will be scaled down to avoid too much noise and slow convergence at the cost of accuracy. Used by light-probes.",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "direct_light_intensity",
+   "name": "Direct Light Strength",
+   "description": "Scale the contribution of direct lighting",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "indirect_light_intensity",
+   "name": "Indirect Light Strength",
+   "description": "Scale the contribution of indirect lighting",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "volumetric_start",
+   "name": "Start",
+   "description": "Start distance of the volumetric effect",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.10000000149011612,
+   "hard_min": 9.999999974752427e-07,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "volumetric_end",
+   "name": "End",
+   "description": "End distance of the volumetric effect",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 100.0,
+   "hard_min": 9.999999974752427e-07,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "volumetric_tile_size",
+   "name": "Resolution",
+   "description": "Control the quality of the volumetric effects. Higher resolution uses more memory.",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "1",
+     "name": "1:1",
+     "description": "Full resolution",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "2",
+     "name": "1:2",
+     "description": "Render this effect at 50% render resolution",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "4",
+     "name": "1:4",
+     "description": "Render this effect at 25% render resolution",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "8",
+     "name": "1:8",
+     "description": "Render this effect at 12.5% render resolution",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "16",
+     "name": "1:16",
+     "description": "Render this effect at 6.25% render resolution",
+     "icon": "NONE",
+     "value": 16
+    }
+   ],
+   "default": "8",
+   "flags": []
+  },
+  {
+   "identifier": "volumetric_samples",
+   "name": "Steps",
+   "description": "Number of steps to compute volumetric effects. Higher step count increase VRAM usage and quality.",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 64,
+   "hard_min": 1,
+   "hard_max": 256,
+   "soft_min": 1,
+   "soft_max": 256,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "volumetric_sample_distribution",
+   "name": "Exponential Sampling",
+   "description": "Distribute more samples closer to the camera",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.800000011920929,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "volumetric_ray_depth",
+   "name": "Volume Max Ray Depth",
+   "description": "Maximum surface intersection count used by the accurate volume intersection method. Will create artifact if it is exceeded. Higher count increases VRAM usage.",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 16,
+   "hard_min": 1,
+   "hard_max": 16,
+   "soft_min": 1,
+   "soft_max": 16,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "volumetric_light_clamp",
+   "name": "Clamp",
+   "description": "Maximum light contribution, reducing noise",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "use_volumetric_shadows",
+   "name": "Volumetric Shadows",
+   "description": "Cast shadows from volumetric materials onto volumetric materials (Very expensive)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "volumetric_shadow_samples",
+   "name": "Volumetric Shadow Samples",
+   "description": "Number of samples to compute volumetric shadowing",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 16,
+   "hard_min": 1,
+   "hard_max": 128,
+   "soft_min": 1,
+   "soft_max": 128,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "use_volume_custom_range",
+   "name": "Volume Custom Range",
+   "description": "Enable custom start and end clip distances for volume computation",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_fast_gi",
+   "name": "Fast GI Approximation",
+   "description": "Use faster global illumination technique for high roughness surfaces",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "fast_gi_thickness_near",
+   "name": "Thickness",
+   "description": "Geometric thickness of the surfaces when computing fast GI and ambient occlusion. Reduces light leaking and missing contact occlusion.",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.10000000149011612,
+   "hard_min": 0.0,
+   "hard_max": 100000.0,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "fast_gi_quality",
+   "name": "Trace Precision",
+   "description": "Precision of the fast GI ray marching",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.25,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "fast_gi_step_count",
+   "name": "Step Count",
+   "description": "Amount of screen sample per GI ray",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 8,
+   "hard_min": 1,
+   "hard_max": 64,
+   "soft_min": 1,
+   "soft_max": 64,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "fast_gi_ray_count",
+   "name": "Ray Count",
+   "description": "Amount of GI ray to trace for each pixel",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 2,
+   "hard_min": 1,
+   "hard_max": 16,
+   "soft_min": 1,
+   "soft_max": 16,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "fast_gi_method",
+   "name": "Method",
+   "description": "Fast GI approximation method",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "AMBIENT_OCCLUSION_ONLY",
+     "name": "Ambient Occlusion",
+     "description": "Use ambient occlusion instead of full global illumination",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "GLOBAL_ILLUMINATION",
+     "name": "Global Illumination",
+     "description": "Compute global illumination taking into account light bouncing off surrounding objects",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "GLOBAL_ILLUMINATION",
+   "flags": []
+  },
+  {
+   "identifier": "fast_gi_distance",
+   "name": "Distance",
+   "description": "If non-zero, the maximum distance at which other surfaces will contribute to the fast GI approximation",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 100000.0,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "fast_gi_bias",
+   "name": "Bias",
+   "description": "Bias the shading normal to reduce self intersection artifacts",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.05000000074505806,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 0.5,
+   "step": 1.0,
+   "precision": 2,
+   "flags": []
+  },
+  {
+   "identifier": "fast_gi_resolution",
+   "name": "Resolution",
+   "description": "Control the quality of the fast GI lighting. Higher resolution uses more memory.",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "1",
+     "name": "1:1",
+     "description": "Full resolution",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "2",
+     "name": "1:2",
+     "description": "Render this effect at 50% render resolution",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "4",
+     "name": "1:4",
+     "description": "Render this effect at 25% render resolution",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "8",
+     "name": "1:8",
+     "description": "Render this effect at 12.5% render resolution",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "16",
+     "name": "1:16",
+     "description": "Render this effect at 6.25% render resolution",
+     "icon": "NONE",
+     "value": 16
+    }
+   ],
+   "default": "2",
+   "flags": []
+  },
+  {
+   "identifier": "bokeh_max_size",
+   "name": "Max Size",
+   "description": "Max size of the bokeh shape for the depth of field (lower is faster)",
+   "type": "FLOAT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 100.0,
+   "hard_min": 0.0,
+   "hard_max": 2000.0,
+   "soft_min": 0.0,
+   "soft_max": 200.0,
+   "step": 100.0,
+   "precision": 1,
+   "flags": []
+  },
+  {
+   "identifier": "bokeh_threshold",
+   "name": "Sprite Threshold",
+   "description": "Brightness threshold for using sprite base depth of field",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 100000.0,
+   "soft_min": 0.0,
+   "soft_max": 10.0,
+   "step": 10.0,
+   "precision": 2,
+   "flags": []
+  },
+  {
+   "identifier": "bokeh_neighbor_max",
+   "name": "Neighbor Rejection",
+   "description": "Maximum brightness to consider when rejecting bokeh sprites based on neighborhood (lower is faster)",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 10.0,
+   "hard_min": 0.0,
+   "hard_max": 100000.0,
+   "soft_min": 0.0,
+   "soft_max": 40.0,
+   "step": 10.0,
+   "precision": 2,
+   "flags": []
+  },
+  {
+   "identifier": "use_bokeh_jittered",
+   "name": "Jitter Camera",
+   "description": "Jitter camera position to create accurate blurring using render samples (only for final render)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "bokeh_overblur",
+   "name": "Over-blur",
+   "description": "Apply blur to each jittered sample to reduce under-sampling artifacts",
+   "type": "FLOAT",
+   "subtype": "PERCENTAGE",
+   "unit": "NONE",
+   "default": 5.0,
+   "hard_min": 0.0,
+   "hard_max": 100.0,
+   "soft_min": 0.0,
+   "soft_max": 20.0,
+   "step": 1.0,
+   "precision": 1,
+   "flags": []
+  },
+  {
+   "identifier": "motion_blur_depth_scale",
+   "name": "Bleeding Bias",
+   "description": "Lower values will reduce background bleeding onto foreground elements",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 100.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.009999999776482582,
+   "soft_max": 1000.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": []
+  },
+  {
+   "identifier": "motion_blur_max",
+   "name": "Max Blur",
+   "description": "Maximum blur distance a pixel can spread over",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 32,
+   "hard_min": 0,
+   "hard_max": 2048,
+   "soft_min": 0,
+   "soft_max": 512,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "motion_blur_steps",
+   "name": "Motion steps",
+   "description": "Controls accuracy of motion blur, more steps means longer render time",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 1,
+   "hard_max": 2147483647,
+   "soft_min": 1,
+   "soft_max": 64,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "use_shadows",
+   "name": "Shadows",
+   "description": "Enable shadow casting from lights",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "shadow_pool_size",
+   "name": "Shadow Pool Size",
+   "description": "Size of the shadow pool, a bigger pool size allows for more shadows in the scene but might not fit into GPU memory",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "16",
+     "name": "16 MB",
+     "description": "",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "32",
+     "name": "32 MB",
+     "description": "",
+     "icon": "NONE",
+     "value": 32
+    },
+    {
+     "identifier": "64",
+     "name": "64 MB",
+     "description": "",
+     "icon": "NONE",
+     "value": 64
+    },
+    {
+     "identifier": "128",
+     "name": "128 MB",
+     "description": "",
+     "icon": "NONE",
+     "value": 128
+    },
+    {
+     "identifier": "256",
+     "name": "256 MB",
+     "description": "",
+     "icon": "NONE",
+     "value": 256
+    },
+    {
+     "identifier": "512",
+     "name": "512 MB",
+     "description": "",
+     "icon": "NONE",
+     "value": 512
+    },
+    {
+     "identifier": "1024",
+     "name": "1 GB",
+     "description": "",
+     "icon": "NONE",
+     "value": 1024
+    },
+    {
+     "identifier": "1536",
+     "name": "1.5 GB",
+     "description": "",
+     "icon": "NONE",
+     "value": 1536
+    },
+    {
+     "identifier": "2048",
+     "name": "2 GB",
+     "description": "",
+     "icon": "NONE",
+     "value": 2048
+    }
+   ],
+   "default": "512",
+   "flags": []
+  },
+  {
+   "identifier": "shadow_ray_count",
+   "name": "Shadow Ray Count",
+   "description": "Amount of shadow ray to trace for each light",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 1,
+   "hard_max": 4,
+   "soft_min": 1,
+   "soft_max": 4,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "shadow_step_count",
+   "name": "Shadow Step Count",
+   "description": "Amount of shadow map sample per shadow ray",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 6,
+   "hard_min": 1,
+   "hard_max": 16,
+   "soft_min": 1,
+   "soft_max": 16,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "light_threshold",
+   "name": "Light Threshold",
+   "description": "Minimum light intensity for a light to contribute to the lighting",
+   "type": "FLOAT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0.009999999776482582,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "use_overscan",
+   "name": "Overscan",
+   "description": "Internally render past the image border to avoid screen-space effects disappearing",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "overscan_size",
+   "name": "Overscan Size",
+   "description": "Percentage of render size to add as overscan to the internal render buffers",
+   "type": "FLOAT",
+   "subtype": "PERCENTAGE",
+   "unit": "NONE",
+   "default": 3.0,
+   "hard_min": 0.0,
+   "hard_max": 50.0,
+   "soft_min": 0.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": []
+  },
+  {
+   "identifier": "ray_tracing_options",
+   "name": "Reflection Trace Options",
+   "description": "EEVEE settings for tracing reflections",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "RaytraceEEVEE",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_raytracing",
+   "name": "Use Ray-Tracing",
+   "description": "Enable the ray-tracing module",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "shadow_resolution_scale",
+   "name": "Shadows Resolution Scale",
+   "description": "Resolution percentage of shadow maps",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.scenes.new('Scene').eevee",
+  "differs_from_default": {}
+ }
+}

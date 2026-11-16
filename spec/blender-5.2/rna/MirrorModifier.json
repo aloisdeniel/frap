@@ -1,0 +1,261 @@
+{
+ "identifier": "MirrorModifier",
+ "name": "Mirror Modifier",
+ "description": "Mirroring modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "use_axis",
+   "name": "Mirror Axis",
+   "description": "Enable axis mirror",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    false,
+    false,
+    false
+   ],
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_bisect_axis",
+   "name": "Bisect Axis",
+   "description": "Cuts the mesh across the mirror plane",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    false,
+    false,
+    false
+   ],
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_bisect_flip_axis",
+   "name": "Bisect Flip Axis",
+   "description": "Flips the direction of the slice",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    false,
+    false,
+    false
+   ],
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_clip",
+   "name": "Clip",
+   "description": "Prevent vertices from going through the mirror during transform",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_mirror_vertex_groups",
+   "name": "Mirror Vertex Groups",
+   "description": "Mirror vertex groups (e.g. .R->.L)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_mirror_merge",
+   "name": "Merge Vertices",
+   "description": "Merge vertices within the merge threshold",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_mirror_u",
+   "name": "Mirror U",
+   "description": "Mirror the U texture coordinate around the flip offset point",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_mirror_v",
+   "name": "Mirror V",
+   "description": "Mirror the V texture coordinate around the flip offset point",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_mirror_udim",
+   "name": "Mirror UDIM",
+   "description": "Mirror the texture coordinate around each tile center",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mirror_offset_u",
+   "name": "Flip U Offset",
+   "description": "Amount to offset mirrored UVs flipping point from the 0.5 on the U axis",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -1.0,
+   "hard_max": 1.0,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 2.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mirror_offset_v",
+   "name": "Flip V Offset",
+   "description": "Amount to offset mirrored UVs flipping point from the 0.5 point on the V axis",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -1.0,
+   "hard_max": 1.0,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 2.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "offset_u",
+   "name": "U Offset",
+   "description": "Mirrored UV offset on the U axis",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -10000.0,
+   "hard_max": 10000.0,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 2.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "offset_v",
+   "name": "V Offset",
+   "description": "Mirrored UV offset on the V axis",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -10000.0,
+   "hard_max": 10000.0,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 2.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "merge_threshold",
+   "name": "Merge Distance",
+   "description": "Distance within which mirrored vertices are merged",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0010000000474974513,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 6,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bisect_threshold",
+   "name": "Bisect Distance",
+   "description": "Distance from the bisect plane within which vertices are removed",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0010000000474974513,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 6,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mirror_object",
+   "name": "Mirror Object",
+   "description": "Object to use as mirror",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

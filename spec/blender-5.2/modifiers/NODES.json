@@ -1,0 +1,42 @@
+{
+ "type": "NODES",
+ "ui_name": "Geometry Nodes",
+ "srna": "NodesModifier",
+ "values": {
+  "name": "M",
+  "type": "NODES",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": true,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 668223759,
+  "node_group": null,
+  "bake_directory": "",
+  "bake_target": "PACKED",
+  "bakes": {
+   "$len": 0
+  },
+  "panels": {
+   "$len": 0
+  },
+  "show_group_selector": true,
+  "show_manage_panel": true,
+  "node_warnings": {
+   "$len": 0
+  },
+  "open_output_attributes_panel": false,
+  "open_manage_panel": false,
+  "open_bake_panel": false,
+  "open_named_attributes_panel": false,
+  "open_bake_data_blocks_panel": false,
+  "open_warnings_panel": true,
+  "properties": null
+ },
+ "default_name": "GeometryNodes"
+}

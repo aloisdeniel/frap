@@ -1,0 +1,41 @@
+{
+ "bl_idname": "ShaderNodeAddShader",
+ "srna": "ShaderNodeAddShader",
+ "name": "Add Shader",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Shader",
+   "identifier": "Shader",
+   "bl_idname": "NodeSocketShader",
+   "type": "SHADER",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  },
+  {
+   "name": "Shader",
+   "identifier": "Shader_001",
+   "bl_idname": "NodeSocketShader",
+   "type": "SHADER",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Shader",
+   "identifier": "Shader",
+   "bl_idname": "NodeSocketShader",
+   "type": "SHADER",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  }
+ ],
+ "props": {}
+}
