@@ -1,0 +1,17 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "frap": {
+    "version": "0.1.0",
+    "blender_api": "5.2",
+    "protocol": 1
+  },
+  "poll_contexts": {
+    "A": "Object Mode, the factory 'Cube' (a mesh) active and selected",
+    "B": "Object Mode, nothing selected and no active object",
+    "C": "Edit Mode on a mesh",
+    "D": "Pose Mode on an armature",
+    "E": "Edit Mode on an armature"
+  }
+}

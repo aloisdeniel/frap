@@ -1,0 +1,586 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  {
+    "identifier": "GREASE_PENCIL_VERTEX_WEIGHT_PROXIMITY",
+    "name": "Vertex Weight Proximity",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "DATA_TRANSFER",
+    "name": "Data Transfer",
+    "struct": "DataTransferModifier",
+    "evaluator": false,
+    "planned": "M8"
+  },
+  {
+    "identifier": "MESH_CACHE",
+    "name": "Mesh Cache",
+    "struct": "MeshCacheModifier",
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "MESH_SEQUENCE_CACHE",
+    "name": "Mesh Sequence Cache",
+    "struct": "MeshSequenceCacheModifier",
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "NORMAL_EDIT",
+    "name": "Normal Edit",
+    "struct": "NormalEditModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "WEIGHTED_NORMAL",
+    "name": "Weighted Normal",
+    "struct": "WeightedNormalModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "UV_PROJECT",
+    "name": "UV Project",
+    "struct": "UVProjectModifier",
+    "evaluator": false,
+    "planned": "M8"
+  },
+  {
+    "identifier": "UV_WARP",
+    "name": "UV Warp",
+    "struct": "UVWarpModifier",
+    "evaluator": false,
+    "planned": "M8"
+  },
+  {
+    "identifier": "VERTEX_WEIGHT_EDIT",
+    "name": "Vertex Weight Edit",
+    "struct": "VertexWeightEditModifier",
+    "evaluator": false,
+    "planned": "M8"
+  },
+  {
+    "identifier": "VERTEX_WEIGHT_MIX",
+    "name": "Vertex Weight Mix",
+    "struct": "VertexWeightMixModifier",
+    "evaluator": false,
+    "planned": "M8"
+  },
+  {
+    "identifier": "VERTEX_WEIGHT_PROXIMITY",
+    "name": "Vertex Weight Proximity",
+    "struct": "VertexWeightProximityModifier",
+    "evaluator": false,
+    "planned": "M8"
+  },
+  {
+    "identifier": "GREASE_PENCIL_COLOR",
+    "name": "Hue/Saturation",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_TINT",
+    "name": "Tint",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_OPACITY",
+    "name": "Opacity",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_VERTEX_WEIGHT_ANGLE",
+    "name": "Vertex Weight Angle",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_TIME",
+    "name": "Time Offset",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_TEXTURE",
+    "name": "Texture Mapping",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "ARRAY",
+    "name": "Array",
+    "struct": "ArrayModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "BEVEL",
+    "name": "Bevel",
+    "struct": "BevelModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "BOOLEAN",
+    "name": "Boolean",
+    "struct": "BooleanModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "BUILD",
+    "name": "Build",
+    "struct": "BuildModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "DECIMATE",
+    "name": "Decimate",
+    "struct": "DecimateModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "EDGE_SPLIT",
+    "name": "Edge Split",
+    "struct": "EdgeSplitModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "NODES",
+    "name": "Geometry Nodes",
+    "struct": "NodesModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "MASK",
+    "name": "Mask",
+    "struct": "MaskModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "MIRROR",
+    "name": "Mirror",
+    "struct": "MirrorModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "MESH_TO_VOLUME",
+    "name": "Mesh to Volume",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "MULTIRES",
+    "name": "Multiresolution",
+    "struct": "MultiresModifier",
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "REMESH",
+    "name": "Remesh",
+    "struct": "RemeshModifier",
+    "evaluator": false,
+    "planned": "M8"
+  },
+  {
+    "identifier": "SCREW",
+    "name": "Screw",
+    "struct": "ScrewModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "SKIN",
+    "name": "Skin",
+    "struct": "SkinModifier",
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "SOLIDIFY",
+    "name": "Solidify",
+    "struct": "SolidifyModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "SUBSURF",
+    "name": "Subdivision Surface",
+    "struct": "SubsurfModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "TRIANGULATE",
+    "name": "Triangulate",
+    "struct": "TriangulateModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "VOLUME_TO_MESH",
+    "name": "Volume to Mesh",
+    "struct": "VolumeToMeshModifier",
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "WELD",
+    "name": "Weld",
+    "struct": "WeldModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "WIREFRAME",
+    "name": "Wireframe",
+    "struct": "WireframeModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "GREASE_PENCIL_ARRAY",
+    "name": "Array",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_BUILD",
+    "name": "Build",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_LENGTH",
+    "name": "Length",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "LINEART",
+    "name": "Line Art",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_MIRROR",
+    "name": "Mirror",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_MULTIPLY",
+    "name": "Multiple Strokes",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_SIMPLIFY",
+    "name": "Simplify",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_SUBDIV",
+    "name": "Subdivide",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_ENVELOPE",
+    "name": "Envelope",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_OUTLINE",
+    "name": "Outline",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "ARMATURE",
+    "name": "Armature",
+    "struct": "ArmatureModifier",
+    "evaluator": false,
+    "planned": "M6"
+  },
+  {
+    "identifier": "CAST",
+    "name": "Cast",
+    "struct": "CastModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "CURVE",
+    "name": "Curve",
+    "struct": "CurveModifier",
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "DISPLACE",
+    "name": "Displace",
+    "struct": "DisplaceModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "HOOK",
+    "name": "Hook",
+    "struct": "HookModifier",
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "LAPLACIANDEFORM",
+    "name": "Laplacian Deform",
+    "struct": "LaplacianDeformModifier",
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "LATTICE",
+    "name": "Lattice",
+    "struct": "LatticeModifier",
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "MESH_DEFORM",
+    "name": "Mesh Deform",
+    "struct": "MeshDeformModifier",
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "SHRINKWRAP",
+    "name": "Shrinkwrap",
+    "struct": "ShrinkwrapModifier",
+    "evaluator": false,
+    "planned": "M8"
+  },
+  {
+    "identifier": "SIMPLE_DEFORM",
+    "name": "Simple Deform",
+    "struct": "SimpleDeformModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "SMOOTH",
+    "name": "Smooth",
+    "struct": "SmoothModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "CORRECTIVE_SMOOTH",
+    "name": "Smooth Corrective",
+    "struct": "CorrectiveSmoothModifier",
+    "evaluator": false,
+    "planned": "M8"
+  },
+  {
+    "identifier": "LAPLACIANSMOOTH",
+    "name": "Smooth Laplacian",
+    "struct": "LaplacianSmoothModifier",
+    "evaluator": false,
+    "planned": "M4"
+  },
+  {
+    "identifier": "SURFACE_DEFORM",
+    "name": "Surface Deform",
+    "struct": "SurfaceDeformModifier",
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "WARP",
+    "name": "Warp",
+    "struct": "WarpModifier",
+    "evaluator": false,
+    "planned": "M8"
+  },
+  {
+    "identifier": "WAVE",
+    "name": "Wave",
+    "struct": "WaveModifier",
+    "evaluator": false,
+    "planned": "M8"
+  },
+  {
+    "identifier": "VOLUME_DISPLACE",
+    "name": "Volume Displace",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_HOOK",
+    "name": "Hook",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_NOISE",
+    "name": "Noise",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_OFFSET",
+    "name": "Offset",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_SMOOTH",
+    "name": "Smooth",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_THICKNESS",
+    "name": "Thickness",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_LATTICE",
+    "name": "Lattice",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_DASH",
+    "name": "Dot Dash",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_ARMATURE",
+    "name": "Armature",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "GREASE_PENCIL_SHRINKWRAP",
+    "name": "Shrinkwrap",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "CLOTH",
+    "name": "Cloth",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "COLLISION",
+    "name": "Collision",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "DYNAMIC_PAINT",
+    "name": "Dynamic Paint",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "EXPLODE",
+    "name": "Explode",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "FLUID",
+    "name": "Fluid",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "OCEAN",
+    "name": "Ocean",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "PARTICLE_INSTANCE",
+    "name": "Particle Instance",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "PARTICLE_SYSTEM",
+    "name": "Particle System",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "SOFT_BODY",
+    "name": "Soft Body",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  },
+  {
+    "identifier": "SURFACE",
+    "name": "Surface",
+    "struct": null,
+    "evaluator": false,
+    "planned": "OUT"
+  }
+]

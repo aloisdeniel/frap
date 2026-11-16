@@ -6,562 +6,2488 @@ source: crates/frap-schema/tests/describe_ops.rs
   "bl_idname": "EXPORT_SCENE_OT_gltf",
   "label": "Export glTF 2.0",
   "description": "Export scene as glTF 2.0 file",
-  "props": [
+  "bl_options": [
+    "PRESET"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
     {
       "identifier": "filepath",
+      "name": "File Path",
+      "description": "Filepath used for exporting the file",
       "type": "STRING",
-      "array_length": 1
+      "subtype": "FILE_PATH",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 1025,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "check_existing",
+      "name": "Check Existing",
+      "description": "Check and warn on overwriting existing files",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_import_convert_lighting_mode",
+      "name": "Lighting Mode",
+      "description": "Optional backwards compatibility for non-standard render engines. Applies to lights",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SPEC",
+      "enum_items": [
+        {
+          "identifier": "SPEC",
+          "name": "Standard",
+          "description": "Physically-based glTF lighting units (cd, lx, nt)",
+          "value": 0
+        },
+        {
+          "identifier": "COMPAT",
+          "name": "Unitless",
+          "description": "Non-physical, unitless lighting. Useful when exposure controls are not available",
+          "value": 1
+        },
+        {
+          "identifier": "RAW",
+          "name": "Raw (Deprecated)",
+          "description": "Blender lighting strengths with no conversion",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "gltf_export_id",
+      "name": "Identifier",
+      "description": "Identifier of caller (in case of add-on calling this exporter). Can be useful in case of Extension added by other add-ons",
       "type": "STRING",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 0,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_use_gltfpack",
+      "name": "Use Gltfpack",
+      "description": "Use gltfpack to simplify the mesh and/or compress its textures",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gltfpack_tc",
+      "name": "KTX2 Compression",
+      "description": "Convert all textures to KTX2 with BasisU supercompression",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gltfpack_tq",
+      "name": "Texture Encoding Quality",
+      "description": "Texture encoding quality",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 8,
+      "hard_min": 1,
+      "hard_max": 10,
+      "soft_min": 1,
+      "soft_max": 10,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gltfpack_si",
+      "name": "Mesh Simplification Ratio",
+      "description": "Simplify meshes targeting triangle count ratio",
       "type": "FLOAT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": 0,
+      "hard_max": 1,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gltfpack_sa",
+      "name": "Aggressive Mesh Simplification",
+      "description": "Aggressively simplify to the target ratio disregarding quality",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gltfpack_slb",
+      "name": "Lock Mesh Border Vertices",
+      "description": "Lock border vertices during simplification to avoid gaps on connected meshes",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gltfpack_vp",
+      "name": "Position Quantization",
+      "description": "Use N-bit quantization for positions",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 14,
+      "hard_min": 1,
+      "hard_max": 16,
+      "soft_min": 1,
+      "soft_max": 16,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gltfpack_vt",
+      "name": "Texture Coordinate Quantization",
+      "description": "Use N-bit quantization for texture coordinates",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 12,
+      "hard_min": 1,
+      "hard_max": 16,
+      "soft_min": 1,
+      "soft_max": 16,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gltfpack_vn",
+      "name": "Normal/Tangent Quantization",
+      "description": "Use N-bit quantization for normals and tangents",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 8,
+      "hard_min": 1,
+      "hard_max": 16,
+      "soft_min": 1,
+      "soft_max": 16,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gltfpack_vc",
+      "name": "Vertex Color Quantization",
+      "description": "Use N-bit quantization for colors",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 8,
+      "hard_min": 1,
+      "hard_max": 16,
+      "soft_min": 1,
+      "soft_max": 16,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gltfpack_vpi",
+      "name": "Vertex Position Attributes",
+      "description": "Type to use for vertex position attributes",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "Integer",
+      "enum_items": [
+        {
+          "identifier": "Integer",
+          "name": "Integer",
+          "description": "Use integer attributes for positions",
+          "value": 0
+        },
+        {
+          "identifier": "Normalized",
+          "name": "Normalized",
+          "description": "Use normalized attributes for positions",
+          "value": 1
+        },
+        {
+          "identifier": "Floating-point",
+          "name": "Floating-point",
+          "description": "Use floating-point attributes for positions",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gltfpack_noq",
+      "name": "Disable Quantization",
+      "description": "Disable quantization; produces much larger glTF files with no extensions",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gltfpack_kn",
+      "name": "Keep Named Nodes",
+      "description": "Restrict some optimization to keep named nodes and meshes attached to named nodes so that named nodes can be transformed externally",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_format",
+      "name": "Format",
+      "description": "Output format. Binary is most efficient, but JSON may be easier to edit later",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "GLB",
+      "enum_items": [
+        {
+          "identifier": "GLB",
+          "name": "glTF Binary (.glb)",
+          "description": "Exports a single file, with all data packed in binary form. Most efficient and portable, but more difficult to edit later",
+          "value": 0
+        },
+        {
+          "identifier": "GLTF_SEPARATE",
+          "name": "glTF Separate (.gltf + .bin + textures)",
+          "description": "Exports multiple files, with separate JSON, binary and texture data. Easiest to edit later",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": "EXPORT_SCENE_OT_gltf.export_format",
+      "context_rule": "items come from a Blender callback that depends on the context (EXPORT_SCENE_OT_gltf.export_format); enum_items is frap's verified superset (spec/overlay/dynamic_enums.toml)",
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE",
+        "DYNAMIC_ENUM"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "ui_tab",
+      "name": "ui_tab",
+      "description": "Export setting categories",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "GENERAL",
+      "enum_items": [
+        {
+          "identifier": "GENERAL",
+          "name": "General",
+          "description": "General settings",
+          "value": 0
+        },
+        {
+          "identifier": "MESHES",
+          "name": "Meshes",
+          "description": "Mesh settings",
+          "value": 1
+        },
+        {
+          "identifier": "OBJECTS",
+          "name": "Objects",
+          "description": "Object settings",
+          "value": 2
+        },
+        {
+          "identifier": "ANIMATION",
+          "name": "Animation",
+          "description": "Animation settings",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_copyright",
+      "name": "Copyright",
+      "description": "Legal rights and conditions for the model",
       "type": "STRING",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 0,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_image_format",
+      "name": "Images",
+      "description": "Output format for images. PNG is lossless and generally preferred, but JPEG might be preferable for web applications due to the smaller file size. Alternatively they can be omitted if they are not needed",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "AUTO",
+      "enum_items": [
+        {
+          "identifier": "AUTO",
+          "name": "Automatic",
+          "description": "Save PNGs as PNGs, JPEGs as JPEGs, WebPs as WebPs. For other formats, use PNG",
+          "value": 0
+        },
+        {
+          "identifier": "JPEG",
+          "name": "JPEG Format (.jpg)",
+          "description": "Save images as JPEGs. (Images that need alpha are saved as PNGs though.) Be aware of a possible loss in quality",
+          "value": 1
+        },
+        {
+          "identifier": "WEBP",
+          "name": "WebP Format",
+          "description": "Save images as WebPs as main image (no fallback)",
+          "value": 2
+        },
+        {
+          "identifier": "NONE",
+          "name": "None",
+          "description": "Don't export images",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_image_add_webp",
+      "name": "Create WebP",
+      "description": "Creates WebP textures for every texture. For already WebP textures, nothing happens",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_image_webp_fallback",
+      "name": "WebP Fallback",
+      "description": "For all WebP textures, create a PNG fallback texture",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_texture_dir",
+      "name": "Textures",
+      "description": "Folder to place texture files in. Relative to the .gltf file",
       "type": "STRING",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 0,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_jpeg_quality",
+      "name": "JPEG Quality",
+      "description": "Quality of JPEG export",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 75,
+      "hard_min": 0,
+      "hard_max": 100,
+      "soft_min": 0,
+      "soft_max": 100,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_image_quality",
+      "name": "Image Quality",
+      "description": "Quality of image export",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 75,
+      "hard_min": 0,
+      "hard_max": 100,
+      "soft_min": 0,
+      "soft_max": 100,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_keep_originals",
+      "name": "Keep Original",
+      "description": "Keep original textures files if possible. WARNING: if you use more than one texture, where pbr standard requires only one, only one texture will be used. This can lead to unexpected results",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_texcoords",
+      "name": "UVs",
+      "description": "Export UVs (texture coordinates) with meshes",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_normals",
+      "name": "Normals",
+      "description": "Export vertex normals with meshes",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gn_mesh",
+      "name": "Geometry Nodes Instances (Experimental)",
+      "description": "Export Geometry nodes instance meshes",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_meshopt_compression_enable",
+      "name": "Meshopt Compression",
+      "description": "Compress mesh using Meshopt",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_meshopt_extension",
+      "name": "Meshopt Extension",
+      "description": "Extension to use for meshopt compression",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "EXT_meshopt_compression",
+      "enum_items": [
+        {
+          "identifier": "EXT_meshopt_compression",
+          "name": "EXT_meshopt_compression",
+          "description": "Use EXT_meshopt_compression extension for mesh compression",
+          "value": 0
+        },
+        {
+          "identifier": "KHR_meshopt_compression",
+          "name": "KHR_meshopt_compression",
+          "description": "Use KHR_meshopt_compression extension for mesh compression",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_draco_mesh_compression_enable",
+      "name": "Draco Mesh Compression",
+      "description": "Compress mesh using Draco",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_draco_mesh_compression_level",
+      "name": "Compression Level",
+      "description": "Compression level (0 = most speed, 6 = most compression, higher values currently not supported)",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 6,
+      "hard_min": 0,
+      "hard_max": 10,
+      "soft_min": 0,
+      "soft_max": 10,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_draco_position_quantization",
+      "name": "Position Quantization Bits",
+      "description": "Quantization bits for position values (0 = no quantization)",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 14,
+      "hard_min": 0,
+      "hard_max": 30,
+      "soft_min": 0,
+      "soft_max": 30,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_draco_normal_quantization",
+      "name": "Normal Quantization Bits",
+      "description": "Quantization bits for normal values (0 = no quantization)",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 10,
+      "hard_min": 0,
+      "hard_max": 30,
+      "soft_min": 0,
+      "soft_max": 30,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_draco_texcoord_quantization",
+      "name": "Texcoord Quantization Bits",
+      "description": "Quantization bits for texture coordinate values (0 = no quantization)",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 12,
+      "hard_min": 0,
+      "hard_max": 30,
+      "soft_min": 0,
+      "soft_max": 30,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_draco_color_quantization",
+      "name": "Color Quantization Bits",
+      "description": "Quantization bits for color values (0 = no quantization)",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 10,
+      "hard_min": 0,
+      "hard_max": 30,
+      "soft_min": 0,
+      "soft_max": 30,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_draco_generic_quantization",
+      "name": "Generic Quantization Bits",
+      "description": "Quantization bits for generic values like weights or joints (0 = no quantization)",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 12,
+      "hard_min": 0,
+      "hard_max": 30,
+      "soft_min": 0,
+      "soft_max": 30,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_tangents",
+      "name": "Tangents",
+      "description": "Export vertex tangents with meshes",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_materials",
+      "name": "Materials",
+      "description": "Export materials",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "EXPORT",
+      "enum_items": [
+        {
+          "identifier": "EXPORT",
+          "name": "Export",
+          "description": "Export all materials used by included objects",
+          "value": 0
+        },
+        {
+          "identifier": "PLACEHOLDER",
+          "name": "Placeholder",
+          "description": "Do not export materials, but write multiple primitive groups per mesh, keeping material slot information",
+          "value": 1
+        },
+        {
+          "identifier": "VIEWPORT",
+          "name": "Viewport",
+          "description": "Export minimal materials as defined in Viewport display properties",
+          "value": 2
+        },
+        {
+          "identifier": "NONE",
+          "name": "No export",
+          "description": "Do not export materials, and combine mesh primitive groups, losing material slot information",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_unused_images",
+      "name": "Unused Images",
+      "description": "Export images not assigned to any material",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_unused_textures",
+      "name": "Prepare Unused Textures",
+      "description": "Export image texture nodes not assigned to any material. This feature is not standard and needs an external extension to be included in the glTF file",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_vertex_color",
+      "name": "Use Vertex Color",
+      "description": "How to export vertex color",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "MATERIAL",
+      "enum_items": [
+        {
+          "identifier": "MATERIAL",
+          "name": "Material",
+          "description": "Export vertex color when used by material",
+          "value": 0
+        },
+        {
+          "identifier": "ACTIVE",
+          "name": "Active",
+          "description": "Export active vertex color",
+          "value": 1
+        },
+        {
+          "identifier": "NAME",
+          "name": "Name",
+          "description": "Export vertex color with this name",
+          "value": 2
+        },
+        {
+          "identifier": "NONE",
+          "name": "None",
+          "description": "Do not export vertex color",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_vertex_color_name",
+      "name": "Vertex Color Name",
+      "description": "Name of vertex color to export",
       "type": "STRING",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "Color",
+      "length_max": 0,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_all_vertex_colors",
+      "name": "Export All Vertex Colors",
+      "description": "Export all vertex colors, even if not used by any material. If no Vertex Color is used in the mesh materials, a fake COLOR_0 will be created, in order to keep material unchanged",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_active_vertex_color_when_no_material",
+      "name": "Export Active Vertex Color When No Material",
+      "description": "When there is no material on object, export active vertex color",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_attributes",
+      "name": "Attributes",
+      "description": "Export Attributes (when starting with underscore)",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "use_mesh_edges",
+      "name": "Loose Edges",
+      "description": "Export loose edges as lines, using the material from the first material slot",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "use_mesh_vertices",
+      "name": "Loose Points",
+      "description": "Export loose points as glTF points, using the material from the first material slot",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_cameras",
+      "name": "Cameras",
+      "description": "Export cameras",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": "cameras are not exported unless export_cameras=True",
+      "frap_extension": false
     },
     {
       "identifier": "use_selection",
+      "name": "Selected Objects",
+      "description": "Export selected objects only",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": "the whole scene is exported, not only the selection; pass use_selection=True to limit it",
+      "frap_extension": false
     },
     {
       "identifier": "use_visible",
+      "name": "Visible Objects",
+      "description": "Export visible objects only",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "use_renderable",
+      "name": "Renderable Objects",
+      "description": "Export renderable objects only",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "use_active_collection_with_nested",
+      "name": "Include Nested Collections",
+      "description": "Include active collection and nested collections",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "use_active_collection",
+      "name": "Active Collection",
+      "description": "Export objects in the active collection only",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "use_active_scene",
+      "name": "Active Scene",
+      "description": "Export active scene only",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "collection",
+      "name": "Source Collection",
+      "description": "Export only objects from this collection (and its children)",
       "type": "STRING",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 0,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "at_collection_center",
+      "name": "Export at Collection Center",
+      "description": "Export at Collection center of mass of root objects of the collection",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_extras",
+      "name": "Custom Properties",
+      "description": "Export custom properties as glTF extras",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_yup",
+      "name": "+Y Up",
+      "description": "Export using glTF convention, +Y up",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_apply",
+      "name": "Apply Modifiers",
+      "description": "Apply modifiers (excluding Armatures) to mesh objects -WARNING: prevents exporting shape keys",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": "modifiers are NOT applied on export; pass export_apply=True to export the evaluated mesh",
+      "frap_extension": false
     },
     {
       "identifier": "export_shared_accessors",
+      "name": "Shared Accessors",
+      "description": "Export Primitives using shared accessors for attributes",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_animations",
+      "name": "Animations",
+      "description": "Exports active actions and NLA tracks as glTF animations",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_frame_range",
+      "name": "Limit to Playback Range",
+      "description": "Clips animations to selected playback range",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_frame_step",
+      "name": "Sampling Rate",
+      "description": "How often to evaluate animated values (in frames)",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": 1,
+      "hard_max": 120,
+      "soft_min": 1,
+      "soft_max": 120,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_force_sampling",
+      "name": "Always Sample Animations",
+      "description": "Apply sampling to all animations",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_sampling_interpolation_fallback",
+      "name": "Sampling Interpolation Fallback",
+      "description": "Interpolation fallback for sampled animations, when the property is not keyed",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "LINEAR",
+      "enum_items": [
+        {
+          "identifier": "LINEAR",
+          "name": "Linear",
+          "description": "Linear interpolation between keyframes",
+          "value": 0
+        },
+        {
+          "identifier": "STEP",
+          "name": "Step",
+          "description": "No interpolation between keyframes",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_pointer_animation",
+      "name": "Export Animation Pointer (Experimental)",
+      "description": "Export material, Light & Camera animation as Animation Pointer. Available only for baked animation mode 'NLA Tracks' and 'Scene'",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_animation_mode",
+      "name": "Animation Mode",
+      "description": "Export Animation mode",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "ACTIONS",
+      "enum_items": [
+        {
+          "identifier": "ACTIONS",
+          "name": "Actions",
+          "description": "Export actions (actives and on NLA tracks) as separate animations",
+          "value": 0
+        },
+        {
+          "identifier": "ACTIVE_ACTIONS",
+          "name": "Active actions merged",
+          "description": "All the currently assigned actions become one glTF animation",
+          "value": 1
+        },
+        {
+          "identifier": "BROADCAST",
+          "name": "Broadcast actions",
+          "description": "Broadcast all compatible actions to all objects. Animated objects will get all actions compatible with them, others will get no animation at all",
+          "value": 2
+        },
+        {
+          "identifier": "NLA_TRACKS",
+          "name": "NLA Tracks",
+          "description": "Export individual NLA Tracks as separate animation",
+          "value": 3
+        },
+        {
+          "identifier": "SCENE",
+          "name": "Scene",
+          "description": "Export baked scene as a single animation",
+          "value": 4
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_nla_strips_merged_animation_name",
+      "name": "Merged Animation Name",
+      "description": "Name of single glTF animation to be exported",
       "type": "STRING",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "Animation",
+      "length_max": 0,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_def_bones",
+      "name": "Export Deformation Bones Only",
+      "description": "Export Deformation bones only",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_hierarchy_flatten_bones",
+      "name": "Flatten Bone Hierarchy",
+      "description": "Flatten Bone Hierarchy. Useful in case of non decomposable transformation matrix",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_hierarchy_flatten_objs",
+      "name": "Flatten Object Hierarchy",
+      "description": "Flatten Object Hierarchy. Useful in case of non decomposable transformation matrix",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_armature_object_remove",
+      "name": "Remove Armature Object",
+      "description": "Remove Armature object if possible. If Armature has multiple root bones, object will not be removed",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_leaf_bone",
+      "name": "Add Leaf Bones",
+      "description": "Append a final bone to the end of each chain to specify last bone length (use this when you intend to edit the armature from exported data)",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_optimize_animation_size",
+      "name": "Optimize Animation Size",
+      "description": "Reduce exported file size by removing duplicate keyframes",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_optimize_animation_keep_anim_armature",
+      "name": "Force Keeping Channels for Bones",
+      "description": "If all keyframes are identical in a rig, force keeping the minimal animation. When off, all possible channels for the bones will be exported, even if empty (minimal animation, 2 keyframes)",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_optimize_animation_keep_anim_object",
+      "name": "Force Keeping Channel for Objects",
+      "description": "If all keyframes are identical for object transformations, force keeping the minimal animation",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_optimize_disable_viewport",
+      "name": "Disable Viewport for Other Objects",
+      "description": "When exporting animations, disable viewport for other objects, for performance",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_negative_frame",
+      "name": "Negative Frames",
+      "description": "Negative Frames are slid or cropped",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SLIDE",
+      "enum_items": [
+        {
+          "identifier": "SLIDE",
+          "name": "Slide",
+          "description": "Slide animation to start at frame 0",
+          "value": 0
+        },
+        {
+          "identifier": "CROP",
+          "name": "Crop",
+          "description": "Keep only frames above frame 0",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_anim_slide_to_zero",
+      "name": "Set All glTF Animation Starting at 0",
+      "description": "Set all glTF animation starting at 0.0s. Can be useful for looping animations",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_bake_animation",
+      "name": "Bake All Objects Animations",
+      "description": "Force exporting animation on every object. Can be useful when using constraints or driver. Also useful when exporting only selection",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_merge_animation",
+      "name": "Merge Animation",
+      "description": "Merge Animations",
       "type": "ENUM",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "ACTION",
+      "enum_items": [
+        {
+          "identifier": "NLA_TRACK",
+          "name": "NLA Track Names",
+          "description": "Merge by NLA Track Names",
+          "value": 0
+        },
+        {
+          "identifier": "ACTION",
+          "name": "Actions",
+          "description": "Merge by Actions",
+          "value": 1
+        },
+        {
+          "identifier": "NONE",
+          "name": "No Merge",
+          "description": "Do Not Merge Animations",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_anim_single_armature",
+      "name": "Export all Armature Actions",
+      "description": "Export all actions, bound to a single armature. WARNING: Option does not support exports including multiple armatures",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_reset_pose_bones",
+      "name": "Reset Pose Bones Between Actions",
+      "description": "Reset pose bones between each action exported. This is needed when some bones are not keyed on some animations",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_current_frame",
+      "name": "Use Current Frame as Object Rest Transformations",
+      "description": "Export the scene in the current animation frame. When off, frame 0 is used as rest transformations for objects",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": "objects are exported at their frame-0 rest transforms, not at scene.frame_current; pass export_current_frame=True to export the pose of the current frame",
+      "frap_extension": false
     },
     {
       "identifier": "export_rest_position_armature",
+      "name": "Use Rest Position Armature",
+      "description": "Export armatures using rest position as joints' rest pose. When off, current frame pose is used as rest pose",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_anim_scene_split_object",
+      "name": "Split Animation by Object",
+      "description": "Export Scene as seen in Viewport, But split animation by Object",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_skins",
+      "name": "Skinning",
+      "description": "Export skinning (armature) data",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_influence_nb",
+      "name": "Bone Influences",
+      "description": "Choose how many Bone influences to export",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 4,
+      "hard_min": 1,
+      "hard_max": 2147483647,
+      "soft_min": 1,
+      "soft_max": 2147483647,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_all_influences",
+      "name": "Include All Bone Influences",
+      "description": "Allow export of all joint vertex influences. Models may appear incorrectly in many viewers",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_morph",
+      "name": "Shape Keys",
+      "description": "Export shape keys (morph targets)",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_morph_normal",
+      "name": "Shape Key Normals",
+      "description": "Export vertex normals with shape keys (morph targets)",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_morph_tangent",
+      "name": "Shape Key Tangents",
+      "description": "Export vertex tangents with shape keys (morph targets)",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_morph_animation",
+      "name": "Shape Key Animations",
+      "description": "Export shape keys animations (morph targets)",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_morph_reset_sk_data",
+      "name": "Reset Shape Keys Between Actions",
+      "description": "Reset shape keys between each action exported. This is needed when some SK channels are not keyed on some animations",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_lights",
+      "name": "Punctual Lights",
+      "description": "Export directional, point, and spot lights. Uses \"KHR_lights_punctual\" glTF extension",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": "lights are not exported unless export_lights=True (KHR_lights_punctual)",
+      "frap_extension": false
     },
     {
       "identifier": "export_try_sparse_sk",
+      "name": "Use Sparse Accessor if Better",
+      "description": "Try using Sparse Accessor if it saves space",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_try_omit_sparse_sk",
+      "name": "Omitting Sparse Accessor if Data is Empty",
+      "description": "Omitting Sparse Accessor if data is empty",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_gpu_instances",
+      "name": "GPU Instances",
+      "description": "Export using EXT_mesh_gpu_instancing. Limited to children of a given Empty. Multiple materials might be omitted",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_action_filter",
+      "name": "Filter Actions",
+      "description": "Filter Actions to be exported",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_convert_animation_pointer",
+      "name": "Convert TRS/Weights to Animation Pointer",
+      "description": "Export TRS and weights as Animation Pointer. Using KHR_animation_pointer extension",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_nla_strips",
+      "name": "Group by NLA Track",
+      "description": "When on, multiple actions become part of the same glTF animation if they're pushed onto NLA tracks with the same name. When off, all the currently assigned actions become one glTF animation",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_original_specular",
+      "name": "Export Original PBR Specular",
+      "description": "Export original glTF PBR Specular, instead of Blender Principled Shader Specular",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "will_save_settings",
+      "name": "Remember Export Settings",
+      "description": "Store glTF export settings in the Blender project",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_hierarchy_full_collections",
+      "name": "Full Collection Hierarchy",
+      "description": "Export full hierarchy, including intermediate collections",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_extra_animations",
+      "name": "Prepare Extra Animations",
+      "description": "Export additional animations.\nThis feature is not standard and needs an external extension to be included in the glTF file",
       "type": "BOOLEAN",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "export_loglevel",
+      "name": "Log Level",
+      "description": "Log Level",
       "type": "INT",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": -1,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     },
     {
       "identifier": "filter_glob",
+      "name": "filter_glob",
+      "description": "",
       "type": "STRING",
-      "array_length": 1
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "*.glb",
+      "length_max": 0,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "NEVER_NULL",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
     }
   ],
   "frap": {
     "status": "implemented",
     "tier": "T2",
-    "requires": [],
+    "support": "partial",
+    "support_note": "M0 subset: filepath and export_format='GLB'",
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
     "notes": [
       "M0: static meshes, Principled base factors; other export props arrive in M1/M3",
       "missing parent directories are created, as Blender's add-on does"

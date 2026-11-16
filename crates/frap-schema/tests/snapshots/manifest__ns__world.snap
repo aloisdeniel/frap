@@ -1,0 +1,7 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  "world.convert_volume_to_mesh | planned OUT | poll NNNNN/NNNNN | ",
+  "world.new | planned M3 | poll YYYYY/YYYYY | "
+]
