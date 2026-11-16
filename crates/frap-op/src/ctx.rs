@@ -190,13 +190,33 @@ impl<'h> OpCtx<'h> {
     pub fn result(&mut self, key: &str, v: impl Into<Value>) {
         self.result.insert(key.into(), v.into());
     }
-    /// Runs another operator with already-converted arguments (macros, ops calling ops).
+    /// Runs another operator with already-converted arguments (ops calling ops), without its
+    /// poll, as Blender's C operators call each other. Its reports join this operator's; its
+    /// `result` does not. An unknown or unimplemented idname is an error of this operator.
     pub fn run_op(&mut self, idname: &str, args: OpArgs) -> OpResult {
-        let def = crate::registry::lookup(idname).map_err(|e| OpError::Runtime(e.message))?;
+        let def = crate::registry::lookup(idname).map_err(|e| match e.code {
+            c if c == crate::errors::OP_NOT_IMPLEMENTED => OpError::NotImplemented(e.message),
+            _ => OpError::Runtime(e.message),
+        })?;
+        self.run_def(def, &args, false)
+    }
+
+    /// Runs `def` in a sub-context sharing this host and services (macro steps, `run_op`).
+    /// Reports are appended; with `merge_result` the sub-operator's `result` entries are too
+    /// (later steps of a macro overwrite earlier keys).
+    pub(crate) fn run_def(
+        &mut self,
+        def: &'static crate::def::OperatorDef,
+        args: &OpArgs,
+        merge_result: bool,
+    ) -> OpResult {
         let mut sub = OpCtx::new(&mut *self.host, &mut *self.services, def.spec);
-        let r = (def.exec)(&mut sub, &args);
+        let r = crate::def::pipeline::execute(def, &mut sub, args);
         let out = sub.finish();
         self.reports.extend(out.reports);
+        if merge_result {
+            self.result.extend(out.result);
+        }
         r
     }
 }

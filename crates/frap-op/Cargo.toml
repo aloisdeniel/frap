@@ -23,14 +23,24 @@ indexmap.workspace = true
 smallvec.workspace = true
 smol_str.workspace = true
 serde_json.workspace = true
+# Registry (§10.1): dumped operators without an implementation are `KnownNotImplemented`, from
+# the catalog and from the typed specs of the current milestone (WP 1.12).
+frap-spec-catalog.workspace = true
+frap-spec-ops-object.workspace = true
+frap-spec-ops-transform.workspace = true
+frap-spec-ops-mesh.workspace = true
+frap-spec-ops-uv.workspace = true
+frap-spec-ops-anim.workspace = true
+frap-spec-ops-data.workspace = true
+frap-spec-ops-io.workspace = true
+frap-spec-ops-render.workspace = true
+frap-spec-ops-frap.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true
 insta.workspace = true
 approx.workspace = true
 frap-spec-rna.workspace = true
-frap-spec-ops-mesh.workspace = true
-frap-spec-ops-object.workspace = true
 
 [lints]
 workspace = true

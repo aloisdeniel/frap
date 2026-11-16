@@ -12,6 +12,11 @@ use crate::ctx::OpCtx;
 use crate::errors::{GPU_UNAVAILABLE, IO_ERROR, LIMIT_EXCEEDED, OP_EXEC_ERROR, OP_NOT_IMPLEMENTED};
 pub use frap_rna::{OpArgs, Report, ReportType};
 
+/// The invocation pipeline (§10.2): argument conversion with Blender's messages, frap hints,
+/// macro execution and the operator metadata queries (`poll()`, `get_rna_type()`, …). Declared
+/// here (WP 1.12) so that it is re-exported as `frap_op::pipeline` by `lib.rs`'s `pub use def::*`.
+pub mod pipeline;
+
 /// Fidelity tier (§2.1).
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Tier {
@@ -72,6 +77,50 @@ pub enum PollReq {
     SceneHasCamera,
     /// The scene is editable.
     SceneEditable,
+}
+
+impl PollReq {
+    /// Stable code published in `error.detail.requires`/`unmet` and `--describe`
+    /// (`MODE_EDIT_MESH`, `ACTIVE_TYPE_MESH`, …; §13.5).
+    pub fn code(&self) -> String {
+        match self {
+            PollReq::ModeObject => "MODE_OBJECT".into(),
+            PollReq::ModeEditMesh => "MODE_EDIT_MESH".into(),
+            PollReq::ModeEditArmature => "MODE_EDIT_ARMATURE".into(),
+            PollReq::ModePose => "MODE_POSE".into(),
+            PollReq::ActiveObject => "ACTIVE_OBJECT".into(),
+            PollReq::ActiveType(t) => format!("ACTIVE_TYPE_{t}"),
+            PollReq::ActiveEditable => "ACTIVE_EDITABLE".into(),
+            PollReq::HasSelectedObjects => "HAS_SELECTED_OBJECTS".into(),
+            PollReq::SceneHasCamera => "SCENE_HAS_CAMERA".into(),
+            PollReq::SceneEditable => "SCENE_EDITABLE".into(),
+        }
+    }
+    /// Human-readable condition, in Python terms (`--describe` poll text).
+    pub fn text(&self) -> String {
+        match self {
+            PollReq::ModeObject => "bpy.context.mode == 'OBJECT'".into(),
+            PollReq::ModeEditMesh => "bpy.context.mode == 'EDIT_MESH'".into(),
+            PollReq::ModeEditArmature => "bpy.context.mode == 'EDIT_ARMATURE'".into(),
+            PollReq::ModePose => "bpy.context.mode == 'POSE'".into(),
+            PollReq::ActiveObject => {
+                "bpy.context.active_object is not None and not hidden (hide_viewport)".into()
+            }
+            PollReq::ActiveType(t) => format!("bpy.context.active_object.type == '{t}'"),
+            PollReq::ActiveEditable => {
+                "the active object and its data are local (not linked from a library)".into()
+            }
+            PollReq::HasSelectedObjects => "bpy.context.selected_objects is not empty".into(),
+            PollReq::SceneHasCamera => "bpy.context.scene.camera is not None".into(),
+            PollReq::SceneEditable => "bpy.context.scene is local (not linked)".into(),
+        }
+    }
+}
+
+impl std::fmt::Display for PollReq {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.code())
+    }
 }
 
 /// Why a poll failed.
@@ -184,6 +233,16 @@ pub struct OperatorDef {
     pub support: Support,
     /// `frap_note`s for `--describe`.
     pub notes: &'static [&'static str],
+}
+
+impl std::fmt::Debug for OperatorDef {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("OperatorDef")
+            .field("idname", &self.spec.idname)
+            .field("kind", &self.kind)
+            .field("tier", &self.tier)
+            .finish_non_exhaustive()
+    }
 }
 
 /// Every operator implementation registers here, one file each (§2.2 rule 1).

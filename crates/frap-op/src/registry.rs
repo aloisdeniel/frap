@@ -1,17 +1,25 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Runtime registry and the framework part of the invocation pipeline (ARCHITECTURE §10.1,
 //! §10.2 steps 1–3 and 5). The session owns transactions and responses (steps 4, 6–9).
+//!
+//! The registry indexes three sources:
+//! - the `OPERATORS` slice (implemented operators, one `OperatorDef` per file);
+//! - the typed specs of the current milestone (`frap-spec-ops-<group>::ALL_OPS`);
+//! - every other dumped Blender 5.2 operator (`frap_spec_catalog::catalog()`).
+//!
+//! A dumped operator without an `OperatorDef` is `KnownNotImplemented` (`OP_NOT_IMPLEMENTED`);
+//! a name in none of them is `Unknown` (`OP_UNKNOWN`). Building the registry fails if two
+//! `OperatorDef`s share an idname, or if an implemented operator has no typed spec (it is still
+//! served by the catalog, or it carries a hand-written copy of its generated spec).
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::sync::OnceLock;
 
-use frap_rna::{
-    CoerceCx, FrapError, Input, OpArgs, OperatorSpec, PyExc, RnaErrorKind, Value, coerce,
-};
+use frap_rna::{FrapError, Input, OpArgs, OperatorSpec, PyExc};
 use frap_scene::Context;
 use serde_json::Value as J;
 
-use frap_rna::{Report, ReportType};
+use frap_rna::Report;
 
 use crate::def::{OPERATORS, OperatorDef};
 use crate::errors::*;
@@ -20,45 +28,184 @@ use crate::errors::*;
 pub enum Lookup {
     /// Implemented by frap.
     Implemented(&'static OperatorDef),
-    /// Dumped from Blender 5.2 (`frap-spec-catalog`) but not implemented: `OP_NOT_IMPLEMENTED`.
+    /// Dumped from Blender 5.2 (`frap-spec-catalog` or a typed spec) but not implemented:
+    /// `OP_NOT_IMPLEMENTED`.
     KnownNotImplemented(&'static OperatorSpec),
     /// Unknown to Blender 5.2 and frap.
     Unknown {
-        /// Close idnames.
+        /// Close idnames (implemented or known), closest first.
         suggestions: Vec<&'static str>,
     },
 }
 
-/// Index over the `OPERATORS` slice, built once per process.
+/// Index over the `OPERATORS` slice and the dumped specs, built once per process.
 pub struct Registry {
     by_idname: BTreeMap<&'static str, &'static OperatorDef>,
+    /// Dumped operators without an implementation.
+    known: BTreeMap<&'static str, &'static OperatorSpec>,
+    /// Every spec (implemented or not) by `bl_idname` (macro steps name their sub-operators so).
+    by_bl_idname: HashMap<&'static str, &'static OperatorSpec>,
+    /// Implemented operators by `bl_idname`.
+    defs_by_bl_idname: HashMap<&'static str, &'static OperatorDef>,
 }
 
 impl Registry {
-    /// The process-wide registry. Panics if two operators share an idname (caught by tests).
-    pub fn global() -> &'static Registry {
-        static R: OnceLock<Registry> = OnceLock::new();
-        R.get_or_init(|| {
-            let mut by_idname = BTreeMap::new();
-            for def in OPERATORS.iter() {
-                if by_idname.insert(def.spec.idname, def).is_some() {
-                    panic!("duplicate operator registration: {}", def.spec.idname);
+    /// Every typed `OperatorSpec` of the current milestone (§4.2), across the ops groups.
+    pub fn typed_specs() -> impl Iterator<Item = &'static OperatorSpec> {
+        let groups: [&'static [&'static OperatorSpec]; 9] = [
+            &frap_spec_ops_object::ALL_OPS,
+            &frap_spec_ops_transform::ALL_OPS,
+            &frap_spec_ops_mesh::ALL_OPS,
+            &frap_spec_ops_uv::ALL_OPS,
+            &frap_spec_ops_anim::ALL_OPS,
+            &frap_spec_ops_data::ALL_OPS,
+            &frap_spec_ops_io::ALL_OPS,
+            &frap_spec_ops_render::ALL_OPS,
+            &frap_spec_ops_frap::ALL_OPS,
+        ];
+        groups.into_iter().flatten().copied()
+    }
+
+    /// Builds a registry from implemented operators, the typed specs and the catalog.
+    ///
+    /// Fails (every problem listed, one per line) when two definitions share an idname, when an
+    /// implemented operator is still served by the catalog (no typed spec: raise its
+    /// OPERATORS.md milestone and run `cargo xtask codegen`), or when an implemented operator
+    /// uses another spec than the generated static of its idname.
+    pub fn build(
+        defs: impl IntoIterator<Item = &'static OperatorDef>,
+        typed: impl IntoIterator<Item = &'static OperatorSpec>,
+        catalog: impl IntoIterator<Item = &'static OperatorSpec>,
+    ) -> Result<Registry, String> {
+        let mut problems: Vec<String> = Vec::new();
+        let mut by_idname: BTreeMap<&'static str, &'static OperatorDef> = BTreeMap::new();
+        let mut dup: BTreeMap<&'static str, usize> = BTreeMap::new();
+        for def in defs {
+            if by_idname.insert(def.spec.idname, def).is_some() {
+                *dup.entry(def.spec.idname).or_insert(1) += 1;
+            }
+        }
+        for (idname, n) in &dup {
+            problems.push(format!(
+                "duplicate operator registration: {idname} ({n} OperatorDefs share this idname)"
+            ));
+        }
+        let typed: BTreeMap<&'static str, &'static OperatorSpec> =
+            typed.into_iter().map(|s| (s.idname, s)).collect();
+        let catalog: BTreeMap<&'static str, &'static OperatorSpec> =
+            catalog.into_iter().map(|s| (s.idname, s)).collect();
+        let mut known = BTreeMap::new();
+        for (idname, spec) in typed.iter().chain(catalog.iter()) {
+            match by_idname.get(idname) {
+                None => {
+                    known.insert(*idname, *spec);
+                }
+                Some(def) => {
+                    if catalog.contains_key(idname) && !typed.contains_key(idname) {
+                        problems.push(format!(
+                            "operator {idname} is implemented but has no typed spec (it is \
+                             served by frap-spec-catalog): raise its OPERATORS.md milestone \
+                             and run `cargo xtask codegen`"
+                        ));
+                    } else if !std::ptr::eq(def.spec, *spec) {
+                        problems.push(format!(
+                            "operator {idname} does not use its generated spec static \
+                             ({} of frap-spec-ops-*)",
+                            spec.bl_idname
+                        ));
+                    }
                 }
             }
-            Registry { by_idname }
+        }
+        if !problems.is_empty() {
+            problems.sort();
+            return Err(problems.join("\n"));
+        }
+        let mut by_bl_idname = HashMap::new();
+        let mut defs_by_bl_idname = HashMap::new();
+        for spec in known.values() {
+            by_bl_idname.insert(spec.bl_idname, *spec);
+        }
+        for def in by_idname.values() {
+            by_bl_idname.insert(def.spec.bl_idname, def.spec);
+            defs_by_bl_idname.insert(def.spec.bl_idname, *def);
+        }
+        Ok(Registry {
+            by_idname,
+            known,
+            by_bl_idname,
+            defs_by_bl_idname,
         })
     }
-    /// Every registered idname, sorted.
+
+    /// The process-wide registry, or why it cannot be built.
+    pub fn try_global() -> Result<&'static Registry, &'static str> {
+        static R: OnceLock<Result<Registry, String>> = OnceLock::new();
+        R.get_or_init(|| {
+            Registry::build(
+                OPERATORS.iter(),
+                Registry::typed_specs(),
+                frap_spec_catalog::catalog().iter().copied(),
+            )
+        })
+        .as_ref()
+        .map_err(String::as_str)
+    }
+
+    /// The process-wide registry. Panics if it cannot be built (duplicate idnames, implemented
+    /// operator without a typed spec); the registry tests catch this in CI.
+    pub fn global() -> &'static Registry {
+        match Registry::try_global() {
+            Ok(r) => r,
+            Err(e) => panic!("frap operator registry: {e}"),
+        }
+    }
+
+    /// Every implemented idname, sorted.
     pub fn idnames(&self) -> Vec<&'static str> {
         self.by_idname.keys().copied().collect()
     }
+
+    /// Every dumped idname without an implementation, sorted.
+    pub fn known_idnames(&self) -> Vec<&'static str> {
+        self.known.keys().copied().collect()
+    }
+
+    /// The implemented operator `ns.op`.
+    pub fn get(&self, idname: &str) -> Option<&'static OperatorDef> {
+        self.by_idname.get(idname).copied()
+    }
+
+    /// The spec of `ns.op`, implemented or not.
+    pub fn spec(&self, idname: &str) -> Option<&'static OperatorSpec> {
+        self.get(idname)
+            .map(|d| d.spec)
+            .or_else(|| self.known.get(idname).copied())
+    }
+
+    /// The spec of `NS_OT_op`, implemented or not.
+    pub fn spec_by_bl_idname(&self, bl_idname: &str) -> Option<&'static OperatorSpec> {
+        self.by_bl_idname.get(bl_idname).copied()
+    }
+
+    /// The implemented operator `NS_OT_op` (macro steps).
+    pub fn get_by_bl_idname(&self, bl_idname: &str) -> Option<&'static OperatorDef> {
+        self.defs_by_bl_idname.get(bl_idname).copied()
+    }
+
     /// Lookup by `ns.op`.
     pub fn lookup(&self, idname: &str) -> Lookup {
-        match self.by_idname.get(idname) {
-            Some(d) => Lookup::Implemented(d),
-            None => Lookup::Unknown {
-                suggestions: suggest(idname, self.by_idname.keys().copied()),
-            },
+        if let Some(d) = self.by_idname.get(idname) {
+            return Lookup::Implemented(d);
+        }
+        if let Some(s) = self.known.get(idname) {
+            return Lookup::KnownNotImplemented(s);
+        }
+        Lookup::Unknown {
+            suggestions: suggest(
+                idname,
+                self.by_idname.keys().chain(self.known.keys()).copied(),
+            ),
         }
     }
 }
@@ -80,7 +227,7 @@ fn levenshtein(a: &str, b: &str) -> usize {
     prev[b.len()]
 }
 
-/// Up to three candidates within a small edit distance, closest first.
+/// Up to three candidates within a small edit distance, closest first (ties by name).
 pub fn suggest<'a>(word: &str, candidates: impl Iterator<Item = &'a str>) -> Vec<&'a str> {
     let max = (word.chars().count() / 3).max(2);
     let mut v: Vec<(usize, &str)> = candidates
@@ -88,156 +235,75 @@ pub fn suggest<'a>(word: &str, candidates: impl Iterator<Item = &'a str>) -> Vec
         .filter(|(d, _)| *d <= max)
         .collect();
     v.sort();
+    v.dedup();
     v.into_iter().take(3).map(|(_, c)| c).collect()
 }
 
-const PREFIX: &str = "Converting py args to operator properties: ";
-const EXEC_CONTEXTS: &[&str] = &[
-    "INVOKE_DEFAULT",
-    "INVOKE_REGION_WIN",
-    "INVOKE_REGION_CHANNELS",
-    "INVOKE_REGION_PREVIEW",
-    "INVOKE_AREA",
-    "INVOKE_SCREEN",
-    "EXEC_DEFAULT",
-    "EXEC_REGION_WIN",
-    "EXEC_REGION_CHANNELS",
-    "EXEC_REGION_PREVIEW",
-    "EXEC_AREA",
-    "EXEC_SCREEN",
-];
-
-/// §10.2 step 1: lookup, with Blender's error for unknown operators.
-pub fn lookup(idname: &str) -> Result<&'static OperatorDef, FrapError> {
-    match Registry::global().lookup(idname) {
-        Lookup::Implemented(d) => Ok(d),
-        Lookup::KnownNotImplemented(spec) => Err(FrapError::new(
-            PyExc::NotImplementedError,
-            OP_NOT_IMPLEMENTED,
-            format!(
-                "{} exists in Blender 5.2 but is not implemented by frap",
-                spec.idname
-            ),
-        )
-        .with_detail("operator", spec.idname)),
-        Lookup::Unknown { suggestions } => {
-            let mut e = FrapError::new(
-                PyExc::AttributeError,
-                OP_UNKNOWN,
-                format!("Calling operator \"bpy.ops.{idname}\" error, could not be found"),
-            );
-            e = e.with_detail(
-                "did_you_mean",
-                suggestions.iter().map(|s| J::from(*s)).collect::<Vec<_>>(),
-            );
-            Err(e.with_hint(
-                "M0 implements only mesh.primitive_cube_add and export_scene.gltf; see frap --describe (M1)",
-            ))
-        }
+/// The unknown-operator error (`Calling …` for calls, `Polling …` for `poll()`; verified on
+/// 5.2.4), with `did_you_mean`.
+pub(crate) fn unknown_error(verb: &str, idname: &str, suggestions: &[&str]) -> FrapError {
+    let e = FrapError::new(
+        PyExc::AttributeError,
+        OP_UNKNOWN,
+        format!("{verb} operator \"bpy.ops.{idname}\" error, could not be found"),
+    )
+    .with_detail("operator", idname)
+    .with_detail(
+        "did_you_mean",
+        suggestions.iter().map(|s| J::from(*s)).collect::<Vec<_>>(),
+    );
+    match suggestions.first() {
+        Some(s) => e.with_hint(format!("did you mean bpy.ops.{s}?")),
+        None => e.with_hint("frap --describe lists every Blender 5.2 operator"),
     }
 }
 
-/// §10.2 steps 2–3: positional arguments and keyword conversion (before poll, as in Blender).
-/// Returns the converted arguments plus INFO reports for clamped values.
+/// The known-but-unimplemented error (`NotImplementedError`, `OP_NOT_IMPLEMENTED`) with the
+/// Blender signature in `detail.signature`.
+pub(crate) fn not_implemented_error(spec: &OperatorSpec) -> FrapError {
+    FrapError::new(
+        PyExc::NotImplementedError,
+        OP_NOT_IMPLEMENTED,
+        format!(
+            "{} exists in Blender 5.2 but is not implemented by frap",
+            spec.idname
+        ),
+    )
+    .with_detail("operator", spec.idname)
+    .with_detail("signature", crate::def::pipeline::signature(spec))
+    .with_hint(format!(
+        "frap --describe op:{} shows its status; OPERATORS.md lists the milestone it lands in",
+        spec.idname
+    ))
+}
+
+/// §10.2 step 1: lookup, with Blender's error for unknown operators and `OP_NOT_IMPLEMENTED`
+/// for dumped operators frap does not implement.
+pub fn lookup(idname: &str) -> Result<&'static OperatorDef, FrapError> {
+    match Registry::global().lookup(idname) {
+        Lookup::Implemented(d) => Ok(d),
+        Lookup::KnownNotImplemented(spec) => Err(not_implemented_error(spec)),
+        Lookup::Unknown { suggestions } => Err(unknown_error("Calling", idname, &suggestions)),
+    }
+}
+
+/// §10.2 steps 2–3 without a context: positional arguments and keyword conversion. Dynamic
+/// enums are checked against their static superset (use [`crate::def::pipeline::prepare`] or
+/// [`crate::def::pipeline::convert`] to validate them against the context). Returns the converted
+/// arguments plus INFO reports for clamped values.
 pub fn convert_args(
     spec: &'static OperatorSpec,
     positional: Vec<Input>,
     kwargs: Vec<(String, Input)>,
 ) -> Result<(OpArgs, Vec<Report>), FrapError> {
-    let mut reports = Vec::new();
-    for p in positional {
-        match &p {
-            Input::Str(s) if EXEC_CONTEXTS.contains(&s.as_str()) => {
-                if s.starts_with("INVOKE") {
-                    reports.push(Report::new(
-                        ReportType::Info,
-                        format!("frap: {s} runs as EXEC_DEFAULT (headless)"),
-                    ));
-                }
-            }
-            other => {
-                return Err(FrapError::new(
-                    PyExc::TypeError,
-                    OP_ARG_POSITIONAL,
-                    format!(
-                        "frap: positional argument {} is not accepted; operator properties are keyword-only",
-                        other.py_type_name()
-                    ),
-                )
-                .with_detail("operator", spec.idname)
-                .with_hint("pass properties by keyword, e.g. size=2"));
-            }
-        }
-    }
-    // Duplicate keywords are a Python SyntaxError before the call happens.
-    for (i, (k, _)) in kwargs.iter().enumerate() {
-        if kwargs[..i].iter().any(|(k2, _)| k2 == k) {
-            return Err(FrapError::new(
-                PyExc::SyntaxError,
-                frap_rna::ErrorCode("SYNTAX"),
-                format!("keyword argument repeated: {k}"),
-            ));
-        }
-    }
-    let mut kw: Vec<Option<(String, Input)>> = kwargs.into_iter().map(Some).collect();
-    let mut args = OpArgs::default();
-    let cx = CoerceCx::OpArgs {
-        owner: spec.bl_idname,
-    };
-    // Blender (pyrna_pydict_to_props) walks the RNA props in order, then complains about leftovers.
-    for (index, def) in spec.props.iter().enumerate() {
-        let found = kw
-            .iter_mut()
-            .find(|e| e.as_ref().is_some_and(|(k, _)| k == def.identifier))
-            .and_then(Option::take);
-        match found {
-            Some((_, input)) => {
-                let written = input.clone();
-                let c = coerce(def, input, &cx).map_err(|e| {
-                    e.into_frap(PREFIX, |k| match k {
-                        RnaErrorKind::Enum => OP_ARG_ENUM,
-                        RnaErrorKind::Length => OP_ARG_LENGTH,
-                        _ => OP_ARG_TYPE,
-                    })
-                    .with_detail("operator", spec.idname)
-                    .with_detail("argument", def.identifier)
-                })?;
-                if c.clamped {
-                    reports.push(Report::new(
-                        ReportType::Info,
-                        frap_rna::clamp_report(def, &written),
-                    ));
-                }
-                args.values.insert(def.identifier, c.value);
-                args.is_set.insert(index);
-            }
-            None => {
-                args.values.insert(def.identifier, Value::default_for(def));
-            }
-        }
-    }
-    if let Some((k, _)) = kw.into_iter().flatten().next() {
-        let valid: Vec<&str> = spec.props.iter().map(|p| p.identifier).collect();
-        return Err(FrapError::new(
-            PyExc::TypeError,
-            OP_ARG_UNKNOWN,
-            format!("Converting py args to operator properties:: keyword \"{k}\" unrecognized"),
-        )
-        .with_detail("operator", spec.idname)
-        .with_detail("argument", k.as_str())
-        .with_detail(
-            "did_you_mean",
-            suggest(&k, valid.iter().copied())
-                .into_iter()
-                .map(J::from)
-                .collect::<Vec<_>>(),
-        )
-        .with_detail("valid", valid.into_iter().map(J::from).collect::<Vec<_>>()));
-    }
-    Ok((args, reports))
+    let mut reports = crate::def::pipeline::check_positional(spec, &positional)?;
+    let c = crate::def::pipeline::convert_kwargs(spec, &[], None, kwargs)?;
+    reports.extend(c.reports);
+    Ok((c.args, reports))
 }
 
-/// §10.2 step 5: poll, with Blender's message and frap's structured help.
+/// §10.2 step 5: poll, with Blender's message and frap's structured help
+/// (`detail.requires`, `detail.unmet` as [`crate::PollReq::code`]s, and `hint`).
 pub fn check_poll(def: &OperatorDef, ctx: &Context) -> Result<(), FrapError> {
     (def.poll.check)(ctx).map_err(|f| {
         let msg = f.message.unwrap_or_else(|| {
@@ -247,22 +313,46 @@ pub fn check_poll(def: &OperatorDef, ctx: &Context) -> Result<(), FrapError> {
             )
         });
         let mut e = FrapError::new(PyExc::RuntimeError, OP_POLL_FAILED, msg)
+            .with_detail("operator", def.spec.idname)
             .with_detail(
                 "requires",
                 def.poll
                     .requires
                     .iter()
-                    .map(|r| J::from(format!("{r:?}")))
+                    .map(|r| J::from(r.code()))
                     .collect::<Vec<_>>(),
             )
             .with_detail(
                 "unmet",
                 f.unmet
                     .iter()
-                    .map(|r| J::from(format!("{r:?}")))
+                    .map(|r| J::from(r.code()))
                     .collect::<Vec<_>>(),
             );
         e.hint = f.hint;
         e
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn suggest_closest_first() {
+        let c = ["size", "calc_uvs", "scale", "align"];
+        assert_eq!(suggest("sizee", c.iter().copied()), vec!["size"]);
+        assert_eq!(suggest("scal", c.iter().copied()), vec!["scale"]);
+        assert!(suggest("zzzzzzzz", c.iter().copied()).is_empty());
+    }
+
+    #[test]
+    fn catalog_has_unimplemented_blender_ops() {
+        let r = Registry::global();
+        assert!(matches!(
+            r.lookup("mesh.bevel"),
+            Lookup::KnownNotImplemented(s) if s.bl_idname == "MESH_OT_bevel"
+        ));
+        assert!(r.spec_by_bl_idname("TRANSFORM_OT_translate").is_some());
+    }
 }
