@@ -1,0 +1,187 @@
+{
+ "identifier": "WireframeModifier",
+ "name": "Wireframe Modifier",
+ "description": "Wireframe effect modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "thickness",
+   "name": "Thickness",
+   "description": "Thickness factor",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.019999999552965164,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "thickness_vertex_group",
+   "name": "Vertex Group Factor",
+   "description": "Thickness factor to use for zero vertex group influence",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "offset",
+   "name": "Offset",
+   "description": "Offset the thickness from the center",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_replace",
+   "name": "Replace",
+   "description": "Remove original geometry",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_boundary",
+   "name": "Boundary",
+   "description": "Support face boundaries",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_even_offset",
+   "name": "Offset Even",
+   "description": "Scale the offset to give more even thickness",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_relative_offset",
+   "name": "Offset Relative",
+   "description": "Scale the offset by surrounding geometry",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_crease",
+   "name": "Offset Relative",
+   "description": "Crease hub edges for improved subdivision surface",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "crease_weight",
+   "name": "Weight",
+   "description": "Crease weight (if active)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_offset",
+   "name": "Material Offset",
+   "description": "Offset material index of generated faces",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -32768,
+   "hard_max": 32767,
+   "soft_min": -32768,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name for selecting the affected areas",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

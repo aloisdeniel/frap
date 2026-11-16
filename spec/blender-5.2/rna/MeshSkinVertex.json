@@ -1,0 +1,61 @@
+{
+ "identifier": "MeshSkinVertex",
+ "name": "Skin Vertex",
+ "description": "Per-vertex skin data for use with the Skin modifier",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "radius",
+   "name": "Radius",
+   "description": "Radius of the skin",
+   "type": "FLOAT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 100.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_root",
+   "name": "Root",
+   "description": "Vertex is a root for rotation calculations and armature generation, setting this flag does not clear other roots in the same mesh island",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_loose",
+   "name": "Loose",
+   "description": "If vertex has multiple adjacent edges, it is hulled to them directly",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

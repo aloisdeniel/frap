@@ -1,0 +1,131 @@
+{
+ "identifier": "VolumeDisplaceModifier",
+ "name": "Volume Displace Modifier",
+ "description": "",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "strength",
+   "name": "Strength",
+   "description": "Strength of the displacement",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 0.10000000149011612,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "texture",
+   "name": "Texture",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Texture",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "texture_map_mode",
+   "name": "Texture Mapping Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LOCAL",
+     "name": "Local",
+     "description": "Use the local coordinate system for the texture coordinates",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "GLOBAL",
+     "name": "Global",
+     "description": "Use the global coordinate system for the texture coordinates",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "Use the linked object's local coordinate system for the texture coordinates",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "LOCAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "texture_map_object",
+   "name": "Object",
+   "description": "Object to use for texture mapping",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "texture_mid_level",
+   "name": "Texture Mid Level",
+   "description": "Subtracted from the texture color to get a displacement vector",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "texture_sample_radius",
+   "name": "Texture Sample Radius",
+   "description": "Smaller values result in better performance but might cut off the volume",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

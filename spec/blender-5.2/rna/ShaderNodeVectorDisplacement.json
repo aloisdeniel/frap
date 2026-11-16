@@ -1,0 +1,137 @@
+{
+ "identifier": "ShaderNodeVectorDisplacement",
+ "name": "Vector Displacement",
+ "description": "Displace the surface along an arbitrary direction",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "space",
+   "name": "Space",
+   "description": "Space of the input height",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "TANGENT",
+     "name": "Tangent Space",
+     "description": "Tangent space vector displacement mapping",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object Space",
+     "description": "Object space vector displacement mapping",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "WORLD",
+     "name": "World Space",
+     "description": "World space vector displacement mapping",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "TANGENT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

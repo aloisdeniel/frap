@@ -1,0 +1,254 @@
+{
+ "identifier": "SceneDisplay",
+ "name": "Scene Display",
+ "description": "Scene display settings for 3D viewport",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "light_direction",
+   "name": "Light Direction",
+   "description": "Direction of the light for shadows and highlights",
+   "type": "FLOAT",
+   "subtype": "DIRECTION",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.5773502588272095,
+    0.5773502588272095,
+    0.5773502588272095
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "shadow_shift",
+   "name": "Shadow Shift",
+   "description": "Shadow termination angle",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.10000000149011612,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": []
+  },
+  {
+   "identifier": "shadow_focus",
+   "name": "Shadow Focus",
+   "description": "Shadow factor hardness",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": []
+  },
+  {
+   "identifier": "matcap_ssao_distance",
+   "name": "Distance",
+   "description": "Distance of object that contribute to the cavity/edge effect",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.20000000298023224,
+   "hard_min": 0.0,
+   "hard_max": 100000.0,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "matcap_ssao_attenuation",
+   "name": "Attenuation",
+   "description": "Attenuation constant",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 100000.0,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "matcap_ssao_samples",
+   "name": "Samples",
+   "description": "Number of samples",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 16,
+   "hard_min": 1,
+   "hard_max": 500,
+   "soft_min": 1,
+   "soft_max": 500,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "render_aa",
+   "name": "Render Anti-Aliasing",
+   "description": "Method of anti-aliasing when rendering final image",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OFF",
+     "name": "No Anti-Aliasing",
+     "description": "Scene will be rendering without any anti-aliasing",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FXAA",
+     "name": "Single Pass Anti-Aliasing",
+     "description": "Scene will be rendered using a single pass anti-aliasing method (FXAA)",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "5",
+     "name": "5 Samples",
+     "description": "Scene will be rendered using 5 anti-aliasing samples",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "8",
+     "name": "8 Samples",
+     "description": "Scene will be rendered using 8 anti-aliasing samples",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "11",
+     "name": "11 Samples",
+     "description": "Scene will be rendered using 11 anti-aliasing samples",
+     "icon": "NONE",
+     "value": 11
+    },
+    {
+     "identifier": "16",
+     "name": "16 Samples",
+     "description": "Scene will be rendered using 16 anti-aliasing samples",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "32",
+     "name": "32 Samples",
+     "description": "Scene will be rendered using 32 anti-aliasing samples",
+     "icon": "NONE",
+     "value": 32
+    }
+   ],
+   "default": "8",
+   "flags": []
+  },
+  {
+   "identifier": "viewport_aa",
+   "name": "Viewport Anti-Aliasing",
+   "description": "Method of anti-aliasing when rendering 3d viewport",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OFF",
+     "name": "No Anti-Aliasing",
+     "description": "Scene will be rendering without any anti-aliasing",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FXAA",
+     "name": "Single Pass Anti-Aliasing",
+     "description": "Scene will be rendered using a single pass anti-aliasing method (FXAA)",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "5",
+     "name": "5 Samples",
+     "description": "Scene will be rendered using 5 anti-aliasing samples",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "8",
+     "name": "8 Samples",
+     "description": "Scene will be rendered using 8 anti-aliasing samples",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "11",
+     "name": "11 Samples",
+     "description": "Scene will be rendered using 11 anti-aliasing samples",
+     "icon": "NONE",
+     "value": 11
+    },
+    {
+     "identifier": "16",
+     "name": "16 Samples",
+     "description": "Scene will be rendered using 16 anti-aliasing samples",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "32",
+     "name": "32 Samples",
+     "description": "Scene will be rendered using 32 anti-aliasing samples",
+     "icon": "NONE",
+     "value": 32
+    }
+   ],
+   "default": "FXAA",
+   "flags": []
+  },
+  {
+   "identifier": "shading",
+   "name": "Shading Settings",
+   "description": "Shading settings for OpenGL render engine",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "View3DShading",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.scenes.new('Scene').display",
+  "differs_from_default": {}
+ }
+}

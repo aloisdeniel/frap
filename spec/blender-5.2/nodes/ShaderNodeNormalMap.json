@@ -1,0 +1,168 @@
+{
+ "bl_idname": "ShaderNodeNormalMap",
+ "srna": "ShaderNodeNormalMap",
+ "name": "Normal Map",
+ "label": "",
+ "width": 160.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Strength",
+   "identifier": "Strength",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.5,
+    0.5,
+    1.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Normal",
+   "identifier": "Normal",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "space": "TANGENT",
+  "uv_map": "",
+  "convention": "OPENGL",
+  "base": "DISPLACED"
+ },
+ "availability": {
+  "space": {
+   "default": "TANGENT",
+   "by_value": {
+    "TANGENT": {
+     "inputs": [
+      "Strength",
+      "Color"
+     ],
+     "outputs": [
+      "Normal"
+     ]
+    },
+    "OBJECT": {
+     "inputs": [
+      "Strength",
+      "Color"
+     ],
+     "outputs": [
+      "Normal"
+     ]
+    },
+    "WORLD": {
+     "inputs": [
+      "Strength",
+      "Color"
+     ],
+     "outputs": [
+      "Normal"
+     ]
+    },
+    "BLENDER_OBJECT": {
+     "inputs": [
+      "Strength",
+      "Color"
+     ],
+     "outputs": [
+      "Normal"
+     ]
+    },
+    "BLENDER_WORLD": {
+     "inputs": [
+      "Strength",
+      "Color"
+     ],
+     "outputs": [
+      "Normal"
+     ]
+    }
+   }
+  },
+  "convention": {
+   "default": "OPENGL",
+   "by_value": {
+    "OPENGL": {
+     "inputs": [
+      "Strength",
+      "Color"
+     ],
+     "outputs": [
+      "Normal"
+     ]
+    },
+    "DIRECTX": {
+     "inputs": [
+      "Strength",
+      "Color"
+     ],
+     "outputs": [
+      "Normal"
+     ]
+    }
+   }
+  },
+  "base": {
+   "default": "DISPLACED",
+   "by_value": {
+    "ORIGINAL": {
+     "inputs": [
+      "Strength",
+      "Color"
+     ],
+     "outputs": [
+      "Normal"
+     ]
+    },
+    "DISPLACED": {
+     "inputs": [
+      "Strength",
+      "Color"
+     ],
+     "outputs": [
+      "Normal"
+     ]
+    }
+   }
+  }
+ }
+}

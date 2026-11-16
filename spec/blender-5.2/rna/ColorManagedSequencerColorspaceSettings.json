@@ -1,0 +1,477 @@
+{
+ "identifier": "ColorManagedSequencerColorspaceSettings",
+ "name": "ColorManagedSequencerColorspaceSettings",
+ "description": "Input color space settings",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Color Space",
+   "description": "Color space that the sequencer operates in",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ACES 1.3 sRGB",
+     "name": "ACES 1.3 sRGB",
+     "description": "ACES 1.3 view transform for sRGB. May be used to convert backplates or matte paintings to the working space.",
+     "icon": "NONE",
+     "value": 9
+    },
+    {
+     "identifier": "ACES 2.0 sRGB",
+     "name": "ACES 2.0 sRGB",
+     "description": "ACES 2.0 view transform for sRGB. May be used to convert backplates or matte paintings to the working space.",
+     "icon": "NONE",
+     "value": 10
+    },
+    {
+     "identifier": "ACES2065-1",
+     "name": "ACES2065-1",
+     "description": "Linear AP0 with ACES white point",
+     "icon": "NONE",
+     "value": 17
+    },
+    {
+     "identifier": "ACEScc",
+     "name": "ACEScc",
+     "description": "ACES color correction space, using AP1 primaries.",
+     "icon": "NONE",
+     "value": 60
+    },
+    {
+     "identifier": "ACEScct",
+     "name": "ACEScct",
+     "description": "ACES color correction space with toe, using AP1 primaries.",
+     "icon": "NONE",
+     "value": 61
+    },
+    {
+     "identifier": "ACEScg",
+     "name": "ACEScg",
+     "description": "Linear AP1 with ACES white point",
+     "icon": "NONE",
+     "value": 18
+    },
+    {
+     "identifier": "ADX10",
+     "name": "ADX10",
+     "description": "Film scan input space using ADX10 encoding.",
+     "icon": "NONE",
+     "value": 48
+    },
+    {
+     "identifier": "ADX16",
+     "name": "ADX16",
+     "description": "Film scan input space using ADX16 encoding.",
+     "icon": "NONE",
+     "value": 49
+    },
+    {
+     "identifier": "ARRI LogC3 (EI800)",
+     "name": "ARRI LogC3 (EI800)",
+     "description": "ARRI camera input space using LogC3 (EI800) transfer function and ARRI Wide Gamut primaries.",
+     "icon": "NONE",
+     "value": 23
+    },
+    {
+     "identifier": "ARRI LogC4",
+     "name": "ARRI LogC4",
+     "description": "ARRI camera input space using LogC4 transfer function and ARRI Wide Gamut 4 primaries.",
+     "icon": "NONE",
+     "value": 25
+    },
+    {
+     "identifier": "AgX Base sRGB",
+     "name": "AgX Base sRGB",
+     "description": "AgX view transform for sRGB. May be used to convert backplates or matte paintings to the working space.",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "AgX Log",
+     "name": "AgX Log",
+     "description": "Log Encoding with Chroma inset and rotation of primaries, and with 25 Stops of Dynamic Range",
+     "icon": "NONE",
+     "value": 59
+    },
+    {
+     "identifier": "Apple Log",
+     "name": "Apple Log",
+     "description": "Apple camera input space using Apple Log transfer function and Rec.2020 primaries.",
+     "icon": "NONE",
+     "value": 20
+    },
+    {
+     "identifier": "Apple Log 2",
+     "name": "Apple Log 2",
+     "description": "Apple camera input space using Apple Log transfer function and Apple Wide Gamut primaries.",
+     "icon": "NONE",
+     "value": 21
+    },
+    {
+     "identifier": "BMDFilm WideGamut Gen5",
+     "name": "BMDFilm WideGamut Gen5",
+     "description": "Blackmagic camera input space using BMDFilm Gen5 transfer function and Blackmagic Wide Gamut Gen5 primaries.",
+     "icon": "NONE",
+     "value": 27
+    },
+    {
+     "identifier": "CanonLog2 CinemaGamut D55",
+     "name": "CanonLog2 CinemaGamut D55",
+     "description": "Canon camera input space using Canon-Log2 transfer function and Cinema Gamut primaries.",
+     "icon": "NONE",
+     "value": 31
+    },
+    {
+     "identifier": "CanonLog3 CinemaGamut D55",
+     "name": "CanonLog3 CinemaGamut D55",
+     "description": "Canon camera input space using Canon-Log3 transfer function and Cinema Gamut primaries.",
+     "icon": "NONE",
+     "value": 32
+    },
+    {
+     "identifier": "D-Log D-Gamut",
+     "name": "D-Log D-Gamut",
+     "description": "DJI camera input space using D-Log transfer function and D-Gamut primaries.",
+     "icon": "NONE",
+     "value": 34
+    },
+    {
+     "identifier": "DaVinci Intermediate WideGamut",
+     "name": "DaVinci Intermediate WideGamut",
+     "description": "Blackmagic camera input space using DaVinci Intermediate transfer function and DaVinci Wide Gamut primaries.",
+     "icon": "NONE",
+     "value": 29
+    },
+    {
+     "identifier": "Display P3",
+     "name": "Display P3",
+     "description": "Apple's Display P3 with sRGB compound (piece-wise) encoding transfer function, common on Mac devices",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "Filmic Log",
+     "name": "Filmic Log",
+     "description": "Log based filmic shaper with 16.5 stops of latitude, and 25 stops of dynamic range",
+     "icon": "NONE",
+     "value": 51
+    },
+    {
+     "identifier": "Filmic sRGB",
+     "name": "Filmic sRGB",
+     "description": "Filmic view transform for sRGB. May be used to convert backplates or matte paintings to the working space.",
+     "icon": "NONE",
+     "value": 7
+    },
+    {
+     "identifier": "Gamma 1.8 Encoded Rec.709",
+     "name": "Gamma 1.8 Encoded Rec.709",
+     "description": "1.8 gamma-encoded Rec.709 with illuminant D65 white point. For use with scene-referred textures.",
+     "icon": "NONE",
+     "value": 52
+    },
+    {
+     "identifier": "Gamma 2.2 Encoded AP1",
+     "name": "Gamma 2.2 Encoded AP1",
+     "description": "2.2 gamma-encoded AP1 with ACES white point. For use with scene-referred textures.",
+     "icon": "NONE",
+     "value": 58
+    },
+    {
+     "identifier": "Gamma 2.2 Encoded AdobeRGB",
+     "name": "Gamma 2.2 Encoded AdobeRGB",
+     "description": "2.2 gamma-encoded Adobe RGB (1998) with illuminant D65 white point. For use with scene-referred textures.",
+     "icon": "NONE",
+     "value": 56
+    },
+    {
+     "identifier": "Gamma 2.2 Encoded Rec.709",
+     "name": "Gamma 2.2 Encoded Rec.709",
+     "description": "2.2 gamma-encoded Rec.709 with illuminant D65 white point. For use with scene-referred textures.",
+     "icon": "NONE",
+     "value": 53
+    },
+    {
+     "identifier": "Gamma 2.4 Encoded Rec.709",
+     "name": "Gamma 2.4 Encoded Rec.709",
+     "description": "2.4 gamma-encoded Rec.709 with illuminant D65 white point. For use with scene-referred textures.",
+     "icon": "NONE",
+     "value": 54
+    },
+    {
+     "identifier": "Khronos PBR Neutral sRGB",
+     "name": "Khronos PBR Neutral sRGB",
+     "description": "Khronos PBR Neutral view transform for sRGB. May be used to convert backplates or matte paintings to the working space.",
+     "icon": "NONE",
+     "value": 11
+    },
+    {
+     "identifier": "Linear ARRI Wide Gamut 3",
+     "name": "Linear ARRI Wide Gamut 3",
+     "description": "ARRI camera input space using linear ARRI Wide Gamut primaries.",
+     "icon": "NONE",
+     "value": 24
+    },
+    {
+     "identifier": "Linear ARRI Wide Gamut 4",
+     "name": "Linear ARRI Wide Gamut 4",
+     "description": "ARRI camera input space using linear ARRI Wide Gamut 4 primaries.",
+     "icon": "NONE",
+     "value": 26
+    },
+    {
+     "identifier": "Linear Adobe RGB",
+     "name": "Linear Adobe RGB",
+     "description": "Linear Adobe RGB (1998) with illuminant D65 white point. For use with scene-referred textures.",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "Linear Apple Wide Gamut",
+     "name": "Linear Apple Wide Gamut",
+     "description": "Apple camera input space using linear Apple Wide Gamut primaries.",
+     "icon": "NONE",
+     "value": 22
+    },
+    {
+     "identifier": "Linear BMD WideGamut Gen5",
+     "name": "Linear BMD WideGamut Gen5",
+     "description": "Blackmagic camera input space using linear Blackmagic Wide Gamut Gen5 primaries.",
+     "icon": "NONE",
+     "value": 28
+    },
+    {
+     "identifier": "Linear CIE-XYZ D65",
+     "name": "Linear CIE-XYZ D65",
+     "description": "1931 CIE XYZ with adapted illuminant D65 white point",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "Linear CIE-XYZ E",
+     "name": "Linear CIE-XYZ E",
+     "description": "1931 CIE XYZ standard with assumed illuminant E white point",
+     "icon": "NONE",
+     "value": 12
+    },
+    {
+     "identifier": "Linear CinemaGamut D55",
+     "name": "Linear CinemaGamut D55",
+     "description": "Canon camera input space using linear Cinema Gamut primaries.",
+     "icon": "NONE",
+     "value": 33
+    },
+    {
+     "identifier": "Linear D-Gamut",
+     "name": "Linear D-Gamut",
+     "description": "DJI camera input space using linear D-Gamut primaries.",
+     "icon": "NONE",
+     "value": 35
+    },
+    {
+     "identifier": "Linear DCI-P3 D65",
+     "name": "Linear DCI-P3 D65",
+     "description": "Linear DCI-P3 with illuminant D65 white point",
+     "icon": "NONE",
+     "value": 14
+    },
+    {
+     "identifier": "Linear DaVinci WideGamut",
+     "name": "Linear DaVinci WideGamut",
+     "description": "Blackmagic camera input space using linear DaVinci Wide Gamut primaries.",
+     "icon": "NONE",
+     "value": 30
+    },
+    {
+     "identifier": "Linear FilmLight E-Gamut",
+     "name": "Linear FilmLight E-Gamut",
+     "description": "Linear E-Gamut with illuminant D65 white point",
+     "icon": "NONE",
+     "value": 19
+    },
+    {
+     "identifier": "Linear REDWideGamutRGB",
+     "name": "Linear REDWideGamutRGB",
+     "description": "RED camera input space using linear REDWideGamutRGB primaries.",
+     "icon": "NONE",
+     "value": 39
+    },
+    {
+     "identifier": "Linear Rec.2020",
+     "name": "Linear Rec.2020",
+     "description": "Linear BT.2020 with illuminant D65 white point",
+     "icon": "NONE",
+     "value": 15
+    },
+    {
+     "identifier": "Linear Rec.709",
+     "name": "Linear Rec.709",
+     "description": "Linear BT.709 with illuminant D65 white point",
+     "icon": "NONE",
+     "value": 13
+    },
+    {
+     "identifier": "Linear S-Gamut3",
+     "name": "Linear S-Gamut3",
+     "description": "Sony camera input space using linear S-Gamut3 primaries.",
+     "icon": "NONE",
+     "value": 44
+    },
+    {
+     "identifier": "Linear S-Gamut3.Cine",
+     "name": "Linear S-Gamut3.Cine",
+     "description": "Sony camera input space using linear S-Gamut3.Cine primaries.",
+     "icon": "NONE",
+     "value": 45
+    },
+    {
+     "identifier": "Linear V-Gamut",
+     "name": "Linear V-Gamut",
+     "description": "Panasonic camera input space using linear V-Gamut primaries.",
+     "icon": "NONE",
+     "value": 37
+    },
+    {
+     "identifier": "Linear Venice S-Gamut3",
+     "name": "Linear Venice S-Gamut3",
+     "description": "Sony camera input space using linear Venice S-Gamut3 primaries.",
+     "icon": "NONE",
+     "value": 46
+    },
+    {
+     "identifier": "Linear Venice S-Gamut3.Cine",
+     "name": "Linear Venice S-Gamut3.Cine",
+     "description": "Sony camera input space using linear Venice S-Gamut3.Cine primaries.",
+     "icon": "NONE",
+     "value": 47
+    },
+    {
+     "identifier": "Log3G10 REDWideGamutRGB",
+     "name": "Log3G10 REDWideGamutRGB",
+     "description": "RED camera input space using REDLog3G10 transfer function and REDWideGamutRGB primaries.",
+     "icon": "NONE",
+     "value": 38
+    },
+    {
+     "identifier": "Non-Color",
+     "name": "Non-Color",
+     "description": "Generic data that is not color, will not apply any color transform (e.g. normal maps)",
+     "icon": "NONE",
+     "value": 50
+    },
+    {
+     "identifier": "Rec.1886",
+     "name": "Rec.1886",
+     "description": "BT.1886 2.4 Exponent EOTF Display, commonly used for TVs",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "Rec.2020",
+     "name": "Rec.2020",
+     "description": "BT.2020 2.4 Exponent EOTF Display",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "Rec.2100-HLG",
+     "name": "Rec.2100-HLG",
+     "description": "Rec.2100-HLG 1000 nits peak display with reference white at 100 nits",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "Rec.2100-PQ",
+     "name": "Rec.2100-PQ",
+     "description": "Rec.2100-PQ 10000 nits peak display with reference white at 100 nits",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "S-Log3 S-Gamut3",
+     "name": "S-Log3 S-Gamut3",
+     "description": "Sony camera input space using S-Log3 transfer function and S-Gamut3 primaries.",
+     "icon": "NONE",
+     "value": 40
+    },
+    {
+     "identifier": "S-Log3 S-Gamut3.Cine",
+     "name": "S-Log3 S-Gamut3.Cine",
+     "description": "Sony camera input space using S-Log3 transfer function and S-Gamut3.Cine primaries.",
+     "icon": "NONE",
+     "value": 41
+    },
+    {
+     "identifier": "S-Log3 Venice S-Gamut3",
+     "name": "S-Log3 Venice S-Gamut3",
+     "description": "Sony camera input space using S-Log3 transfer function and Venice S-Gamut3 primaries.",
+     "icon": "NONE",
+     "value": 42
+    },
+    {
+     "identifier": "S-Log3 Venice S-Gamut3.Cine",
+     "name": "S-Log3 Venice S-Gamut3.Cine",
+     "description": "Sony camera input space using S-Log3 transfer function and Venice S-Gamut3.Cine primaries.",
+     "icon": "NONE",
+     "value": 43
+    },
+    {
+     "identifier": "V-Log V-Gamut",
+     "name": "V-Log V-Gamut",
+     "description": "Panasonic camera input space using V-Log transfer function and V-Gamut primaries.",
+     "icon": "NONE",
+     "value": 36
+    },
+    {
+     "identifier": "sRGB",
+     "name": "sRGB",
+     "description": "sRGB IEC 61966-2-1 compound (piece-wise) encoding",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "sRGB Encoded AP1",
+     "name": "sRGB Encoded AP1",
+     "description": "sRGB-encoded AP1 with ACES white point. For use with scene-referred textures.",
+     "icon": "NONE",
+     "value": 57
+    },
+    {
+     "identifier": "sRGB Encoded P3-D65",
+     "name": "sRGB Encoded P3-D65",
+     "description": "sRGB-encoded P3-D65 with illuminant D65 white point. For use with scene-referred textures.",
+     "icon": "NONE",
+     "value": 55
+    },
+    {
+     "identifier": "scene_linear",
+     "name": "Working Space",
+     "description": "Working color space of the current file",
+     "icon": "NONE",
+     "value": 62
+    }
+   ],
+   "items_static": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "Do not perform any color transform on load, treat colors as in scene linear space already",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "NONE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

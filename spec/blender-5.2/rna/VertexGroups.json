@@ -1,0 +1,115 @@
+{
+ "identifier": "VertexGroups",
+ "name": "Vertex Groups",
+ "description": "Collection of vertex groups",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "active",
+   "name": "Active Vertex Group",
+   "description": "Vertex groups of the object",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "VertexGroup",
+   "is_id": false,
+   "flags": []
+  },
+  {
+   "identifier": "active_index",
+   "name": "Active Vertex Group Index",
+   "description": "Active index in vertex group array",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add vertex group to object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "",
+     "description": "Vertex group name",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Group",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "group",
+     "name": "",
+     "description": "New vertex group",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "VertexGroup",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Delete vertex group from object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "group",
+     "name": "",
+     "description": "Vertex group to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "VertexGroup",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "clear",
+   "description": "Delete all vertex groups from object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  }
+ ],
+ "root": true
+}

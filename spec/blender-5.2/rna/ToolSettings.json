@@ -2241,5 +2241,22 @@
   }
  ],
  "funcs": [],
- "requested": false
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.scenes.new('Scene').tool_settings",
+  "differs_from_default": {
+   "plane_axis_auto": false,
+   "gpencil_surface_offset": 0.0,
+   "annotation_stroke_placement_view2d": "",
+   "use_keyframe_insert_auto": false,
+   "anim_fix_to_cam_use_loc": true,
+   "anim_fix_to_cam_use_rot": true,
+   "anim_fix_to_cam_use_scale": true,
+   "mesh_select_mode": [
+    true,
+    false,
+    false
+   ]
+  }
+ }
 }

@@ -1,0 +1,79 @@
+{
+ "identifier": "ActionChannelbagGroups",
+ "name": "F-Curve Groups",
+ "description": "Collection of f-curve groups",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Create a new action group and add it to the action",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "",
+     "description": "New name for the action group",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Group",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "action_group",
+     "name": "",
+     "description": "Newly created action group",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ActionGroup",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove action group",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "action_group",
+     "name": "",
+     "description": "Action group to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ActionGroup",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

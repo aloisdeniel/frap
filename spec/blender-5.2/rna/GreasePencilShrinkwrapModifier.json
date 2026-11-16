@@ -1,0 +1,500 @@
+{
+ "identifier": "GreasePencilShrinkwrapModifier",
+ "name": "Shrinkwrap Modifier",
+ "description": "Shrink wrapping modifier to shrink wrap an object to a target",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "tree_node_filter",
+   "name": "Layer",
+   "description": "Layer name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "use_layer_pass_filter",
+   "name": "Use Layer Pass",
+   "description": "Use layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layer_pass_filter",
+   "name": "Layer Pass",
+   "description": "Layer pass filter",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_filter",
+   "name": "Invert Layer",
+   "description": "Invert layer filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_pass_filter",
+   "name": "Invert Layer Pass",
+   "description": "Invert layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_layer_group_filter",
+   "name": "Layer Group",
+   "description": "Filter by layer group name",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_filter",
+   "name": "Material",
+   "description": "Material used for filtering",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_material_pass_filter",
+   "name": "Use Material Pass",
+   "description": "Use material pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_pass_filter",
+   "name": "Material Pass",
+   "description": "Material pass",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_material_filter",
+   "name": "Invert Material",
+   "description": "Invert material filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_material_pass_filter",
+   "name": "Invert Material Pass",
+   "description": "Invert material pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group_name",
+   "name": "Vertex Group",
+   "description": "Vertex group name for modulating the deform",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert Vertex Group",
+   "description": "Invert vertex group weights",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_influence_panel",
+   "name": "open_influence_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "wrap_method",
+   "name": "Wrap Method",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NEAREST_SURFACEPOINT",
+     "name": "Nearest Surface Point",
+     "description": "Shrink the mesh to the nearest target surface",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "PROJECT",
+     "name": "Project",
+     "description": "Shrink the mesh to the nearest target surface along a given axis",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "NEAREST_VERTEX",
+     "name": "Nearest Vertex",
+     "description": "Shrink the mesh to the nearest target vertex",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "TARGET_PROJECT",
+     "name": "Target Normal Project",
+     "description": "Shrink the mesh to the nearest target surface along the interpolated vertex normals of the target",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "NEAREST_SURFACEPOINT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "wrap_mode",
+   "name": "Snap Mode",
+   "description": "Select how vertices are constrained to the target surface",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ON_SURFACE",
+     "name": "On Surface",
+     "description": "The point is constrained to the surface of the target object, with distance offset towards the original point location",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "INSIDE",
+     "name": "Inside",
+     "description": "The point is constrained to be inside the target object",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "OUTSIDE",
+     "name": "Outside",
+     "description": "The point is constrained to be outside the target object",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "OUTSIDE_SURFACE",
+     "name": "Outside Surface",
+     "description": "The point is constrained to the surface of the target object, with distance offset always to the outside, towards or away from the original location",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "ABOVE_SURFACE",
+     "name": "Above Surface",
+     "description": "The point is constrained to the surface of the target object, with distance offset applied exactly along the target normal",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "ON_SURFACE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "cull_face",
+   "name": "Face Cull",
+   "description": "Stop vertices from projecting to a face on the target when facing towards/away",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OFF",
+     "name": "Off",
+     "description": "No culling",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FRONT",
+     "name": "Front",
+     "description": "No projection when in front of the face",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "BACK",
+     "name": "Back",
+     "description": "No projection when behind the face",
+     "icon": "NONE",
+     "value": 16
+    }
+   ],
+   "default": "OFF",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "target",
+   "name": "Target",
+   "description": "Mesh target to shrink to",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "auxiliary_target",
+   "name": "Auxiliary Target",
+   "description": "Additional mesh target to shrink to",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "offset",
+   "name": "Offset",
+   "description": "Distance to keep from the target",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.05000000074505806,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -100.0,
+   "soft_max": 100.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "project_limit",
+   "name": "Project Limit",
+   "description": "Limit the distance used for projection (zero disables)",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_project_x",
+   "name": "X",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_project_y",
+   "name": "Y",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_project_z",
+   "name": "Z",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "subsurf_levels",
+   "name": "Subdivision Levels",
+   "description": "Number of subdivisions that must be performed before extracting vertices' positions and normals",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 6,
+   "soft_min": 0,
+   "soft_max": 6,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_negative_direction",
+   "name": "Negative",
+   "description": "Allow vertices to move in the negative direction of axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_positive_direction",
+   "name": "Positive",
+   "description": "Allow vertices to move in the positive direction of axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_invert_cull",
+   "name": "Invert Cull",
+   "description": "When projecting in the negative direction invert the face cull mode",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "smooth_factor",
+   "name": "Smooth Factor",
+   "description": "Amount of smoothing to apply",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.05000000074505806,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "smooth_step",
+   "name": "Steps",
+   "description": "Number of times to apply smooth (high numbers can reduce FPS)",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 1,
+   "hard_max": 10,
+   "soft_min": 1,
+   "soft_max": 10,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

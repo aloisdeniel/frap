@@ -1,0 +1,408 @@
+{
+ "identifier": "RegionView3D",
+ "name": "3D View Region",
+ "description": "3D View region data",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "lock_rotation",
+   "name": "Lock Rotation",
+   "description": "Lock view rotation of side views to Top/Front/Right",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_sync_view",
+   "name": "Sync Zoom/Pan",
+   "description": "Sync view position between side views",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_box_clip",
+   "name": "Clip Contents",
+   "description": "Clip view contents based on what is visible in other side views",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "perspective_matrix",
+   "name": "Perspective Matrix",
+   "description": "Current perspective matrix (``window_matrix * view_matrix``)",
+   "type": "FLOAT",
+   "subtype": "MATRIX",
+   "unit": "NONE",
+   "array": [
+    4,
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "window_matrix",
+   "name": "Window Matrix",
+   "description": "Current window matrix",
+   "type": "FLOAT",
+   "subtype": "MATRIX",
+   "unit": "NONE",
+   "array": [
+    4,
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "view_matrix",
+   "name": "View Matrix",
+   "description": "Current view matrix",
+   "type": "FLOAT",
+   "subtype": "MATRIX",
+   "unit": "NONE",
+   "array": [
+    4,
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "view_perspective",
+   "name": "Perspective",
+   "description": "View Perspective",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "PERSP",
+     "name": "Perspective",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "ORTHO",
+     "name": "Orthographic",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CAMERA",
+     "name": "Camera",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "ORTHO",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_perspective",
+   "name": "Is Perspective",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_orthographic_side_view",
+   "name": "Is Axis Aligned",
+   "description": "Whether the current view is aligned to an axis (does not check whether the view is orthographic, use \"is_perspective\" for that). Setting this will rotate the view to the closest axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_clip_planes",
+   "name": "Use Clip Planes",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "clip_planes",
+   "name": "Clip Planes",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    6,
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "view_location",
+   "name": "View Location",
+   "description": "View pivot location",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "view_rotation",
+   "name": "View Rotation",
+   "description": "Rotation in quaternions (keep normalized)",
+   "type": "FLOAT",
+   "subtype": "QUATERNION",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "view_distance",
+   "name": "Distance",
+   "description": "Distance to the view location",
+   "type": "FLOAT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "view_camera_zoom",
+   "name": "Camera Zoom",
+   "description": "Zoom factor in camera view",
+   "type": "FLOAT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -30.0,
+   "hard_max": 600.0,
+   "soft_min": -30.0,
+   "soft_max": 600.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "view_camera_offset",
+   "name": "Camera Offset",
+   "description": "View shift in camera view",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "update",
+   "description": "Recalculate the view matrices",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  }
+ ],
+ "root": false
+}

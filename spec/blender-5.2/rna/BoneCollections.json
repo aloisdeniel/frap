@@ -1,0 +1,193 @@
+{
+ "identifier": "BoneCollections",
+ "name": "Armature Bone Collections",
+ "description": "The Bone Collections of this Armature",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "active",
+   "name": "Active Collection",
+   "description": "Armature's active bone collection",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "BoneCollection",
+   "is_id": false,
+   "flags": []
+  },
+  {
+   "identifier": "active_index",
+   "name": "Active Collection Index",
+   "description": "The index of the Armature's active bone collection; -1 when there is no active collection. Note that this is indexing the underlying array of bone collections, which may not be in the order you expect. Root collections are listed first, and siblings are always sequential. Apart from that, bone collections can be in any order, and thus incrementing or decrementing this index can make the active bone collection jump around in unexpected ways. For a more predictable interface, use ``active`` or ``active_name``.",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "active_name",
+   "name": "Active Collection Name",
+   "description": "The name of the Armature's active bone collection; empty when there is no active collection",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "is_solo_active",
+   "name": "Solo Active",
+   "description": "Read-only flag that indicates there is at least one bone collection marked as 'solo'",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add a new empty bone collection to the armature",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of the new collection. Blender will ensure it is unique within the collections of the Armature.",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "parent",
+     "name": "Parent Collection",
+     "description": "If not None, the new bone collection becomes a child of this collection",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "BoneCollection",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "bonecollection",
+     "name": "",
+     "description": "Newly created bone collection",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "BoneCollection",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove the bone collection from the armature. If this bone collection has any children, they will be reassigned to their grandparent; in other words, the children will take the place of the removed bone collection.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "bone_collection",
+     "name": "Bone Collection",
+     "description": "The bone collection to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "BoneCollection",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "move",
+   "description": "Move a bone collection to a different position in the collection list. This can only be used to reorder siblings, and not to change parent-child relationships.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "from_index",
+     "name": "From Index",
+     "description": "Index to move",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "to_index",
+     "name": "To Index",
+     "description": "Target index",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

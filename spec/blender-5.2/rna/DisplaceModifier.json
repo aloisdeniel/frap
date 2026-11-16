@@ -1,0 +1,248 @@
+{
+ "identifier": "DisplaceModifier",
+ "name": "Displace Modifier",
+ "description": "Displacement modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Name of Vertex Group which determines influence of modifier per point",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "mid_level",
+   "name": "Midlevel",
+   "description": "Material value that gives no displacement",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "strength",
+   "name": "Strength",
+   "description": "Amount to displace geometry",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -100.0,
+   "soft_max": 100.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "direction",
+   "name": "Direction",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "X",
+     "name": "X",
+     "description": "Use the texture's intensity value to displace in the X direction",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "Y",
+     "name": "Y",
+     "description": "Use the texture's intensity value to displace in the Y direction",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Z",
+     "name": "Z",
+     "description": "Use the texture's intensity value to displace in the Z direction",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "NORMAL",
+     "name": "Normal",
+     "description": "Use the texture's intensity value to displace along the vertex normal",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "CUSTOM_NORMAL",
+     "name": "Custom Normal",
+     "description": "Use the texture's intensity value to displace along the (averaged) custom normal (falls back to vertex)",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "RGB_TO_XYZ",
+     "name": "RGB to XYZ",
+     "description": "Use the texture's RGB values to displace the mesh in the XYZ direction",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "NORMAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "space",
+   "name": "Space",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LOCAL",
+     "name": "Local",
+     "description": "Direction is defined in local coordinates",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "GLOBAL",
+     "name": "Global",
+     "description": "Direction is defined in global coordinates",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "LOCAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "texture",
+   "name": "Texture",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Texture",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "texture_coords",
+   "name": "Texture Coordinates",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LOCAL",
+     "name": "Local",
+     "description": "Use the local coordinate system for the texture coordinates",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "GLOBAL",
+     "name": "Global",
+     "description": "Use the global coordinate system for the texture coordinates",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "Use the linked object's local coordinate system for the texture coordinates",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "UV",
+     "name": "UV",
+     "description": "Use UV coordinates for the texture coordinates",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "LOCAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "uv_layer",
+   "name": "UV Map",
+   "description": "UV map name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 68,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "texture_coords_object",
+   "name": "Texture Coordinate Object",
+   "description": "Object to set the texture coordinates",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "texture_coords_bone",
+   "name": "Texture Coordinate Bone",
+   "description": "Bone to set the texture coordinates",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

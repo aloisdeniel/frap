@@ -1,0 +1,2312 @@
+{
+ "namespace": "armature",
+ "count": 49,
+ "operators": [
+  {
+   "idname": "armature.align",
+   "bl_idname": "ARMATURE_OT_align",
+   "label": "Align Bones",
+   "description": "Align selected bones to the active bone (or to their parent)",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.assign_to_collection",
+   "bl_idname": "ARMATURE_OT_assign_to_collection",
+   "label": "Assign to Collection",
+   "description": "Assign all selected bones to a collection, or unassign them, depending on whether the active bone is already assigned or not",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "collection_index",
+     "name": "Collection Index",
+     "description": "Index of the collection to assign selected bones to. When the operator should create a new bone collection, use new_collection_name to define the collection name, and set this parameter to the parent index of the new bone collection",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -1,
+     "hard_max": 2147483647,
+     "soft_min": -1,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "new_collection_name",
+     "name": "Name",
+     "description": "Name of a to-be-added bone collection. Only pass this if you want to create a new bone collection and assign the selected bones to it. To assign to an existing collection, do not include this parameter and use collection_index",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "SKIP_SAVE",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.autoside_names",
+   "bl_idname": "ARMATURE_OT_autoside_names",
+   "label": "Auto-Name by Axis",
+   "description": "Automatically renames the selected bones according to which side of the target axis they fall on",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Axis",
+     "description": "Axis to tag names with",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "XAXIS",
+       "name": "X-Axis",
+       "description": "Left/Right",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "YAXIS",
+       "name": "Y-Axis",
+       "description": "Front/Back",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ZAXIS",
+       "name": "Z-Axis",
+       "description": "Top/Bottom",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "XAXIS",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.bone_primitive_add",
+   "bl_idname": "ARMATURE_OT_bone_primitive_add",
+   "label": "Add Bone",
+   "description": "Add a new bone located at the 3D cursor",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of the newly created bone",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Bone",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "space",
+     "name": "Space",
+     "description": "Co-ordinate system the new bone will be created in",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "OBJECT",
+       "name": "Object",
+       "description": "The newly created bone will use Object Space co-ordinate system",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "WORLD",
+       "name": "World",
+       "description": "The newly created bone will use World Space co-ordinate system",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "OBJECT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "align",
+     "name": "Align",
+     "description": "Initial orientation of the new bone",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "UP",
+       "name": "Up",
+       "description": "Make the bone visually point upwards so the long axis is aligned with the World/Object positive Z axis (depending on the choice above)",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "AXES",
+       "name": "Axes",
+       "description": "Align the new bone to match the axes of the World/Object (depending on the choice above)",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "3D_CURSOR",
+       "name": "3D Cursor",
+       "description": "Align new bone to match the axes of the 3D cursor",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "3D_VIEW",
+       "name": "Viewport",
+       "description": "Align new bone to match the axes of the 3D viewport",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "UP",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "length",
+     "name": "Length",
+     "description": "Length of the new bone",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.0010000000474974513,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_deform",
+     "name": "Deform",
+     "description": "Enable bone to deform geometry",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.calculate_roll",
+   "bl_idname": "ARMATURE_OT_calculate_roll",
+   "label": "Recalculate Roll",
+   "description": "Automatically fix alignment of select bones' axes",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "POS_X",
+       "name": "Local +X Tangent",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "POS_Z",
+       "name": "Local +Z Tangent",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "GLOBAL_POS_X",
+       "name": "Global +X Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "GLOBAL_POS_Y",
+       "name": "Global +Y Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "GLOBAL_POS_Z",
+       "name": "Global +Z Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "NEG_X",
+       "name": "Local -X Tangent",
+       "description": "",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "NEG_Z",
+       "name": "Local -Z Tangent",
+       "description": "",
+       "icon": "NONE",
+       "value": 9
+      },
+      {
+       "identifier": "GLOBAL_NEG_X",
+       "name": "Global -X Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "GLOBAL_NEG_Y",
+       "name": "Global -Y Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 6
+      },
+      {
+       "identifier": "GLOBAL_NEG_Z",
+       "name": "Global -Z Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 7
+      },
+      {
+       "identifier": "ACTIVE",
+       "name": "Active Bone",
+       "description": "",
+       "icon": "NONE",
+       "value": 10
+      },
+      {
+       "identifier": "VIEW",
+       "name": "View Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 11
+      },
+      {
+       "identifier": "CURSOR",
+       "name": "Cursor",
+       "description": "",
+       "icon": "NONE",
+       "value": 12
+      }
+     ],
+     "default": "POS_X",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis_flip",
+     "name": "Flip Axis",
+     "description": "Negate the alignment axis",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis_only",
+     "name": "Shortest Rotation",
+     "description": "Ignore the axis direction, use the shortest rotation to align",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.click_extrude",
+   "bl_idname": "ARMATURE_OT_click_extrude",
+   "label": "Extrude to Cursor",
+   "description": "Create a new bone going from the last selected joint to the mouse position",
+   "options": [
+    "DEPENDS_ON_CURSOR",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.collection_add",
+   "bl_idname": "ARMATURE_OT_collection_add",
+   "label": "Add Bone Collection",
+   "description": "Add a new bone collection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.collection_assign",
+   "bl_idname": "ARMATURE_OT_collection_assign",
+   "label": "Add Selected Bones to Collection",
+   "description": "Add selected bones to the chosen bone collection",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Bone Collection",
+     "description": "Name of the bone collection to assign this bone to; empty to assign to the active bone collection",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.collection_create_and_assign",
+   "bl_idname": "ARMATURE_OT_collection_create_and_assign",
+   "label": "Add Selected Bones to New Collection",
+   "description": "Create a new bone collection and assign all selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Bone Collection",
+     "description": "Name of the bone collection to create",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.collection_deselect",
+   "bl_idname": "ARMATURE_OT_collection_deselect",
+   "label": "Deselect Bone Collection",
+   "description": "Deselect bones of active Bone Collection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.collection_move",
+   "bl_idname": "ARMATURE_OT_collection_move",
+   "label": "Move Bone Collection",
+   "description": "Change position of active Bone Collection in list of Bone collections",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "direction",
+     "name": "Direction",
+     "description": "Direction to move the active Bone Collection towards",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "UP",
+       "name": "Up",
+       "description": "",
+       "icon": "NONE",
+       "value": -1
+      },
+      {
+       "identifier": "DOWN",
+       "name": "Down",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "UP",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.collection_remove",
+   "bl_idname": "ARMATURE_OT_collection_remove",
+   "label": "Remove Bone Collection",
+   "description": "Remove the active bone collection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.collection_remove_unused",
+   "bl_idname": "ARMATURE_OT_collection_remove_unused",
+   "label": "Remove Unused Bone Collections",
+   "description": "Remove all bone collections that have neither bones nor children. This is done recursively, so bone collections that only have unused children are also removed",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.collection_select",
+   "bl_idname": "ARMATURE_OT_collection_select",
+   "label": "Select Bones of Bone Collection",
+   "description": "Select bones in active Bone Collection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.collection_show_all",
+   "bl_idname": "ARMATURE_OT_collection_show_all",
+   "label": "Show All",
+   "description": "Show all bone collections",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.collection_unassign",
+   "bl_idname": "ARMATURE_OT_collection_unassign",
+   "label": "Remove Selected from Bone collections",
+   "description": "Remove selected bones from the active bone collection",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Bone Collection",
+     "description": "Name of the bone collection to unassign this bone from; empty to unassign from the active bone collection",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.collection_unassign_named",
+   "bl_idname": "ARMATURE_OT_collection_unassign_named",
+   "label": "Remove Bone from Bone Collection",
+   "description": "Unassign the named bone from this bone collection",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Bone Collection",
+     "description": "Name of the bone collection to unassign this bone from; empty to unassign from the active bone collection",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bone_name",
+     "name": "Bone Name",
+     "description": "Name of the bone to unassign from the collection; empty to use the active bone",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.collection_unsolo_all",
+   "bl_idname": "ARMATURE_OT_collection_unsolo_all",
+   "label": "Un-solo All",
+   "description": "Clear the 'solo' setting on all bone collections",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "armature.copy_bone_color_to_selected",
+   "bl_idname": "ARMATURE_OT_copy_bone_color_to_selected",
+   "label": "Copy Colors to Selected",
+   "description": "Copy the bone color of the active bone to all selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "bone_type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "EDIT",
+       "name": "Bone",
+       "description": "Copy Bone colors from the active bone to all selected bones",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "POSE",
+       "name": "Pose Bone",
+       "description": "Copy Pose Bone colors from the active pose bone to all selected pose bones",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "EDIT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.delete",
+   "bl_idname": "ARMATURE_OT_delete",
+   "label": "Delete Selected Bone(s)",
+   "description": "Remove selected bones from the armature",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "confirm",
+     "name": "Confirm",
+     "description": "Prompt for confirmation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.dissolve",
+   "bl_idname": "ARMATURE_OT_dissolve",
+   "label": "Dissolve Selected Bone(s)",
+   "description": "Dissolve selected bones from the armature",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.duplicate",
+   "bl_idname": "ARMATURE_OT_duplicate",
+   "label": "Duplicate Selected Bone(s)",
+   "description": "Make copies of the selected bones within the same armature",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "do_flip_names",
+     "name": "Flip Names",
+     "description": "Try to flip names of the bones, if possible, instead of adding a number extension",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.duplicate_move",
+   "bl_idname": "ARMATURE_OT_duplicate_move",
+   "label": "Duplicate",
+   "description": "Make copies of the selected bones within the same armature and move them",
+   "options": [
+    "MACRO",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [
+    "ARMATURE_OT_duplicate",
+    "TRANSFORM_OT_translate"
+   ],
+   "props": [
+    {
+     "identifier": "ARMATURE_OT_duplicate",
+     "name": "Duplicate Selected Bone(s)",
+     "description": "Make copies of the selected bones within the same armature",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ARMATURE_OT_duplicate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "TRANSFORM_OT_translate",
+     "name": "Move",
+     "description": "Move selected items",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "TRANSFORM_OT_translate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.duplicate_rename",
+   "bl_idname": "ARMATURE_OT_duplicate_rename",
+   "label": "Duplicate and Rename",
+   "description": "Make copies of the selected bones within the same armature and replace a part of their name",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "do_flip_names",
+     "name": "Flip Names",
+     "description": "Try to flip names of the bones, if possible, instead of adding a number extension",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "search",
+     "name": "Search",
+     "description": "A part of the current bone name that will be replaced",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "replace",
+     "name": "Replace",
+     "description": "The substitute to be inserted into the place of the given search term. If left empty the search term will be removed",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.extrude",
+   "bl_idname": "ARMATURE_OT_extrude",
+   "label": "Extrude",
+   "description": "Create new bones from the selected joints",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "forked",
+     "name": "Forked",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.extrude_forked",
+   "bl_idname": "ARMATURE_OT_extrude_forked",
+   "label": "Extrude Forked",
+   "description": "Create new bones from the selected joints and move them",
+   "options": [
+    "MACRO",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [
+    "ARMATURE_OT_extrude",
+    "TRANSFORM_OT_translate"
+   ],
+   "props": [
+    {
+     "identifier": "ARMATURE_OT_extrude",
+     "name": "Extrude",
+     "description": "Create new bones from the selected joints",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ARMATURE_OT_extrude",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "TRANSFORM_OT_translate",
+     "name": "Move",
+     "description": "Move selected items",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "TRANSFORM_OT_translate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.extrude_move",
+   "bl_idname": "ARMATURE_OT_extrude_move",
+   "label": "Extrude",
+   "description": "Create new bones from the selected joints and move them",
+   "options": [
+    "MACRO",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [
+    "ARMATURE_OT_extrude",
+    "TRANSFORM_OT_translate"
+   ],
+   "props": [
+    {
+     "identifier": "ARMATURE_OT_extrude",
+     "name": "Extrude",
+     "description": "Create new bones from the selected joints",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ARMATURE_OT_extrude",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "TRANSFORM_OT_translate",
+     "name": "Move",
+     "description": "Move selected items",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "TRANSFORM_OT_translate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.fill",
+   "bl_idname": "ARMATURE_OT_fill",
+   "label": "Fill Between Joints",
+   "description": "Add bone between selected joint(s) and/or 3D cursor",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.flip_names",
+   "bl_idname": "ARMATURE_OT_flip_names",
+   "label": "Flip Names",
+   "description": "Flips (and corrects) the axis suffixes of the names of selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "do_strip_numbers",
+     "name": "Strip Numbers",
+     "description": "Try to remove right-most dot-number from flipped names.\nWarning: May result in incoherent naming in some cases",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.hide",
+   "bl_idname": "ARMATURE_OT_hide",
+   "label": "Hide Selected",
+   "description": "Tag selected bones to not be visible in Edit Mode",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "unselected",
+     "name": "Unselected",
+     "description": "Hide unselected rather than selected",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.move_to_collection",
+   "bl_idname": "ARMATURE_OT_move_to_collection",
+   "label": "Move to Collection",
+   "description": "Move bones to a collection",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "collection_index",
+     "name": "Collection Index",
+     "description": "Index of the collection to move selected bones to. When the operator should create a new bone collection, do not include this parameter and pass new_collection_name",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -1,
+     "hard_max": 2147483647,
+     "soft_min": -1,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "new_collection_name",
+     "name": "Name",
+     "description": "Name of a to-be-added bone collection. Only pass this if you want to create a new bone collection and move the selected bones to it. To move to an existing collection, do not include this parameter and use collection_index",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "SKIP_SAVE",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.parent_clear",
+   "bl_idname": "ARMATURE_OT_parent_clear",
+   "label": "Clear Parent",
+   "description": "Remove the parent-child relationship between selected bones and their parents",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Clear Type",
+     "description": "What way to clear parenting",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CLEAR",
+       "name": "Clear Parent",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "DISCONNECT",
+       "name": "Disconnect Bone",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "CLEAR",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.parent_set",
+   "bl_idname": "ARMATURE_OT_parent_set",
+   "label": "Make Parent",
+   "description": "Set the active bone as the parent of the selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Parent Type",
+     "description": "Type of parenting",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CONNECTED",
+       "name": "Connected",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "OFFSET",
+       "name": "Keep Offset",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "CONNECTED",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.reveal",
+   "bl_idname": "ARMATURE_OT_reveal",
+   "label": "Reveal Hidden",
+   "description": "Reveal all bones hidden in Edit Mode",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "select",
+     "name": "Select",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.roll_clear",
+   "bl_idname": "ARMATURE_OT_roll_clear",
+   "label": "Clear Roll",
+   "description": "Clear roll for selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "roll",
+     "name": "Roll",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "ANGLE",
+     "unit": "ROTATION",
+     "default": 0.0,
+     "hard_min": -6.2831854820251465,
+     "hard_max": 6.2831854820251465,
+     "soft_min": -6.2831854820251465,
+     "soft_max": 6.2831854820251465,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.select_all",
+   "bl_idname": "ARMATURE_OT_select_all",
+   "label": "(De)select All",
+   "description": "Toggle selection status of all bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "action",
+     "name": "Action",
+     "description": "Selection action to execute",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "TOGGLE",
+       "name": "Toggle",
+       "description": "Toggle selection for all elements",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SELECT",
+       "name": "Select",
+       "description": "Select all elements",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "DESELECT",
+       "name": "Deselect",
+       "description": "Deselect all elements",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERT",
+       "name": "Invert",
+       "description": "Invert selection of all elements",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "TOGGLE",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.select_hierarchy",
+   "bl_idname": "ARMATURE_OT_select_hierarchy",
+   "label": "Select Hierarchy",
+   "description": "Select immediate parent/children of selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "direction",
+     "name": "Direction",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PARENT",
+       "name": "Select Parent",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CHILD",
+       "name": "Select Child",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "PARENT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend the selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.select_less",
+   "bl_idname": "ARMATURE_OT_select_less",
+   "label": "Select Less",
+   "description": "Deselect those bones at the boundary of each selection region",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.select_linked",
+   "bl_idname": "ARMATURE_OT_select_linked",
+   "label": "Select Linked All",
+   "description": "Select all bones linked by parent/child connections to the current selection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "all_forks",
+     "name": "All Forks",
+     "description": "Follow forks in the parents chain",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.select_linked_pick",
+   "bl_idname": "ARMATURE_OT_select_linked_pick",
+   "label": "Select Linked",
+   "description": "(De)select bones linked by parent/child connections under the mouse cursor",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "deselect",
+     "name": "Deselect",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "all_forks",
+     "name": "All Forks",
+     "description": "Follow forks in the parents chain",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.select_mirror",
+   "bl_idname": "ARMATURE_OT_select_mirror",
+   "label": "Select Mirror",
+   "description": "Mirror the bone selection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "only_active",
+     "name": "Active Only",
+     "description": "Only operate on the active bone",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend the selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.select_more",
+   "bl_idname": "ARMATURE_OT_select_more",
+   "label": "Select More",
+   "description": "Select those bones connected to the initial selection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.select_similar",
+   "bl_idname": "ARMATURE_OT_select_similar",
+   "label": "Select Similar",
+   "description": "Select similar bones by property types",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CHILDREN",
+       "name": "Children",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "CHILDREN_IMMEDIATE",
+       "name": "Immediate Children",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "SIBLINGS",
+       "name": "Siblings",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "LENGTH",
+       "name": "Length",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "DIRECTION",
+       "name": "Direction (Y Axis)",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "PREFIX",
+       "name": "Prefix",
+       "description": "",
+       "icon": "NONE",
+       "value": 6
+      },
+      {
+       "identifier": "SUFFIX",
+       "name": "Suffix",
+       "description": "",
+       "icon": "NONE",
+       "value": 7
+      },
+      {
+       "identifier": "BONE_COLLECTION",
+       "name": "Bone Collection",
+       "description": "",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "COLOR",
+       "name": "Color",
+       "description": "",
+       "icon": "NONE",
+       "value": 9
+      },
+      {
+       "identifier": "SHAPE",
+       "name": "Shape",
+       "description": "",
+       "icon": "NONE",
+       "value": 10
+      }
+     ],
+     "default": "LENGTH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "threshold",
+     "name": "Threshold",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.10000000149011612,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.separate",
+   "bl_idname": "ARMATURE_OT_separate",
+   "label": "Separate Bones",
+   "description": "Isolate selected bones into a separate armature",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.shortest_path_pick",
+   "bl_idname": "ARMATURE_OT_shortest_path_pick",
+   "label": "Pick Shortest Path",
+   "description": "Select shortest path between two bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.split",
+   "bl_idname": "ARMATURE_OT_split",
+   "label": "Split",
+   "description": "Split off selected bones from connected unselected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.subdivide",
+   "bl_idname": "ARMATURE_OT_subdivide",
+   "label": "Subdivide",
+   "description": "Break selected bones into chains of smaller bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "number_cuts",
+     "name": "Number of Cuts",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 1,
+     "hard_max": 1000,
+     "soft_min": 1,
+     "soft_max": 10,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.switch_direction",
+   "bl_idname": "ARMATURE_OT_switch_direction",
+   "label": "Switch Direction",
+   "description": "Change the direction that a chain of bones points in (head and tail swap)",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "armature.symmetrize",
+   "bl_idname": "ARMATURE_OT_symmetrize",
+   "label": "Symmetrize",
+   "description": "Enforce symmetry, make copies of the selection or use existing",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "direction",
+     "name": "Direction",
+     "description": "Which sides to copy from and to (when both are selected)",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NEGATIVE_X",
+       "name": "-X to +X",
+       "description": "",
+       "icon": "NONE",
+       "value": -1
+      },
+      {
+       "identifier": "POSITIVE_X",
+       "name": "+X to -X",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "NEGATIVE_X",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "copy_bone_colors",
+     "name": "Bone Colors",
+     "description": "Copy colors to existing bones",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "Y",
+    "EV": "Y"
+   }
+  }
+ ]
+}

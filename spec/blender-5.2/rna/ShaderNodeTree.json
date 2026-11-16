@@ -71,7 +71,7 @@
    ]
   }
  ],
- "requested": true,
+ "root": true,
  "fresh": {
   "recipe": "bpy.data.materials.new('Material').node_tree",
   "differs_from_default": {

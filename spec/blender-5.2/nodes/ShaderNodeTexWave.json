@@ -1,0 +1,379 @@
+{
+ "bl_idname": "ShaderNodeTexWave",
+ "srna": "ShaderNodeTexWave",
+ "name": "Wave Texture",
+ "label": "",
+ "width": 160.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": true,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Scale",
+   "identifier": "Scale",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 5.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Distortion",
+   "identifier": "Distortion",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Detail",
+   "identifier": "Detail",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 2.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Detail Scale",
+   "identifier": "Detail Scale",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Detail Roughness",
+   "identifier": "Detail Roughness",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Phase Offset",
+   "identifier": "Phase Offset",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Factor",
+   "identifier": "Fac",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "texture_mapping": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree",
+   "type": "TexMapping"
+  },
+  "color_mapping": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree",
+   "type": "ColorMapping"
+  },
+  "wave_type": "BANDS",
+  "bands_direction": "X",
+  "rings_direction": "X",
+  "wave_profile": "SIN"
+ },
+ "availability": {
+  "wave_type": {
+   "default": "BANDS",
+   "by_value": {
+    "BANDS": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    },
+    "RINGS": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    }
+   }
+  },
+  "bands_direction": {
+   "default": "X",
+   "by_value": {
+    "X": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    },
+    "Y": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    },
+    "Z": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    },
+    "DIAGONAL": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    }
+   }
+  },
+  "rings_direction": {
+   "default": "X",
+   "by_value": {
+    "X": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    },
+    "Y": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    },
+    "Z": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    },
+    "SPHERICAL": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    }
+   }
+  },
+  "wave_profile": {
+   "default": "SIN",
+   "by_value": {
+    "SIN": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    },
+    "SAW": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    },
+    "TRI": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Distortion",
+      "Detail",
+      "Detail Scale",
+      "Detail Roughness",
+      "Phase Offset"
+     ],
+     "outputs": [
+      "Color",
+      "Fac"
+     ]
+    }
+   }
+  }
+ }
+}

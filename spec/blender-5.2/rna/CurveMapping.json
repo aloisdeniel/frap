@@ -1,0 +1,313 @@
+{
+ "identifier": "CurveMapping",
+ "name": "CurveMapping",
+ "description": "Curve mapping to map color, vector and scalar values to other values using a user defined curve",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "tone",
+   "name": "Tone",
+   "description": "Tone of the curve",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "STANDARD",
+     "name": "Standard",
+     "description": "Combined curve is applied to each channel individually, which may result in a change of hue",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FILMLIKE",
+     "name": "Filmlike",
+     "description": "Keeps the hue constant",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "STANDARD",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_clip",
+   "name": "Clip",
+   "description": "Force the curve view to fit a defined boundary",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "clip_min_x",
+   "name": "Clip Min X",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -100.0,
+   "hard_max": 100.0,
+   "soft_min": -100.0,
+   "soft_max": 100.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "clip_min_y",
+   "name": "Clip Min Y",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -100.0,
+   "hard_max": 100.0,
+   "soft_min": -100.0,
+   "soft_max": 100.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "clip_max_x",
+   "name": "Clip Max X",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -100.0,
+   "hard_max": 100.0,
+   "soft_min": -100.0,
+   "soft_max": 100.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "clip_max_y",
+   "name": "Clip Max Y",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -100.0,
+   "hard_max": 100.0,
+   "soft_min": -100.0,
+   "soft_max": 100.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "extend",
+   "name": "Extend",
+   "description": "Extrapolate the curve or extend it horizontally",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "HORIZONTAL",
+     "name": "Horizontal",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "EXTRAPOLATED",
+     "name": "Extrapolated",
+     "description": "",
+     "icon": "NONE",
+     "value": 16
+    }
+   ],
+   "default": "HORIZONTAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "curves",
+   "name": "Curves",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CurveMap",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "black_level",
+   "name": "Black Level",
+   "description": "For RGB curves, the color that black is mapped to",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -1000.0,
+   "soft_max": 1000.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "white_level",
+   "name": "White Level",
+   "description": "For RGB curves, the color that white is mapped to",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -1000.0,
+   "soft_max": 1000.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "update",
+   "description": "Update curve mapping after making changes",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "reset_view",
+   "description": "Reset the curve mapping grid to its clipping size",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "initialize",
+   "description": "Initialize curve",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "evaluate",
+   "description": "Evaluate curve at given location",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "curve",
+     "name": "curve",
+     "description": "Curve to evaluate",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "CurveMap",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "position",
+     "name": "Position",
+     "description": "Position to evaluate curve at",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "value",
+     "name": "Value",
+     "description": "Value of curve at given location",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": false
+}

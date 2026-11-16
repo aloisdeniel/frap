@@ -1,0 +1,105 @@
+{
+ "identifier": "CurveModifier",
+ "name": "Curve Modifier",
+ "description": "Curve deformation modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "object",
+   "name": "Object",
+   "description": "Curve object to deform with",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Name of Vertex Group which determines influence of modifier per point",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "deform_axis",
+   "name": "Deform Axis",
+   "description": "The axis that the curve deforms along",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "POS_X",
+     "name": "X",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "POS_Y",
+     "name": "Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "POS_Z",
+     "name": "Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "NEG_X",
+     "name": "-X",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "NEG_Y",
+     "name": "-Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "NEG_Z",
+     "name": "-Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 6
+    }
+   ],
+   "default": "POS_X",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

@@ -1,0 +1,323 @@
+{
+ "identifier": "GreasePencilSimplifyModifier",
+ "name": "Simplify Modifier",
+ "description": "Simplify Stroke modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "tree_node_filter",
+   "name": "Layer",
+   "description": "Layer name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "use_layer_pass_filter",
+   "name": "Use Layer Pass",
+   "description": "Use layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layer_pass_filter",
+   "name": "Layer Pass",
+   "description": "Layer pass filter",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_filter",
+   "name": "Invert Layer",
+   "description": "Invert layer filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_pass_filter",
+   "name": "Invert Layer Pass",
+   "description": "Invert layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_layer_group_filter",
+   "name": "Layer Group",
+   "description": "Filter by layer group name",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_filter",
+   "name": "Material",
+   "description": "Material used for filtering",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_material_pass_filter",
+   "name": "Use Material Pass",
+   "description": "Use material pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_pass_filter",
+   "name": "Material Pass",
+   "description": "Material pass",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_material_filter",
+   "name": "Invert Material",
+   "description": "Invert material filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_material_pass_filter",
+   "name": "Invert Material Pass",
+   "description": "Invert material pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group_name",
+   "name": "Vertex Group",
+   "description": "Vertex group name for modulating the deform",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert Vertex Group",
+   "description": "Invert vertex group weights",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_influence_panel",
+   "name": "open_influence_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "factor",
+   "name": "Factor",
+   "description": "Factor of Simplify",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 100.0,
+   "soft_min": 0.0,
+   "soft_max": 5.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mode",
+   "name": "Mode",
+   "description": "How to simplify the stroke",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FIXED",
+     "name": "Fixed",
+     "description": "Delete alternating vertices in the stroke, except extremes",
+     "icon": "IPO_CONSTANT",
+     "value": 0
+    },
+    {
+     "identifier": "ADAPTIVE",
+     "name": "Adaptive",
+     "description": "Use a Ramer-Douglas-Peucker algorithm to simplify the stroke preserving main shape",
+     "icon": "IPO_EASE_IN_OUT",
+     "value": 1
+    },
+    {
+     "identifier": "SAMPLE",
+     "name": "Sample",
+     "description": "Re-sample the stroke with segments of the specified length",
+     "icon": "IPO_EASE_IN_OUT",
+     "value": 2
+    },
+    {
+     "identifier": "MERGE",
+     "name": "Merge",
+     "description": "Simplify the stroke by merging vertices closer than a given distance",
+     "icon": "IPO_EASE_IN_OUT",
+     "value": 3
+    }
+   ],
+   "default": "FIXED",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "step",
+   "name": "Iterations",
+   "description": "Number of times to apply simplify",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 1,
+   "hard_max": 50,
+   "soft_min": 1,
+   "soft_max": 50,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "length",
+   "name": "Length",
+   "description": "Length of each segment",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.10000000149011612,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.004999999888241291,
+   "soft_max": 1.0,
+   "step": 0.05000000074505806,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sharp_threshold",
+   "name": "Sharp Threshold",
+   "description": "Preserve corners that have sharper angle than this threshold",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.1415927410125732,
+   "soft_min": 0.0,
+   "soft_max": 3.1415927410125732,
+   "step": 1.0,
+   "precision": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "distance",
+   "name": "Distance",
+   "description": "Distance between points",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.10000000149011612,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

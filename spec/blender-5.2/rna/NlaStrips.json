@@ -1,0 +1,112 @@
+{
+ "identifier": "NlaStrips",
+ "name": "NLA Strips",
+ "description": "Collection of NLA Strips",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add a new Action-Clip strip to the track",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "",
+     "description": "Name for the NLA Strip",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "NlaStrip",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "start",
+     "name": "Start Frame",
+     "description": "Start frame for this strip",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "action",
+     "name": "",
+     "description": "Action to assign to this strip",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Action",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "strip",
+     "name": "",
+     "description": "New NLA Strip",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NlaStrip",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove a NLA Strip",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "strip",
+     "name": "",
+     "description": "NLA Strip to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NlaStrip",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": true
+}

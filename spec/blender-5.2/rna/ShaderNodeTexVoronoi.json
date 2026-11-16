@@ -1,0 +1,275 @@
+{
+ "identifier": "ShaderNodeTexVoronoi",
+ "name": "Voronoi Texture",
+ "description": "Generate Worley noise based on the distance to random points. Typically used to generate textures such as stones, water, or biological cells",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "texture_mapping",
+   "name": "Texture Mapping",
+   "description": "Texture coordinate mapping settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "TexMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "color_mapping",
+   "name": "Color Mapping",
+   "description": "Color mapping settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "voronoi_dimensions",
+   "name": "Dimensions",
+   "description": "Number of dimensions to output noise for",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "1D",
+     "name": "1D",
+     "description": "Use the scalar value W as input",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "2D",
+     "name": "2D",
+     "description": "Use the 2D vector (X, Y) as input. The Z component is ignored.",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "3D",
+     "name": "3D",
+     "description": "Use the 3D vector (X, Y, Z) as input",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "4D",
+     "name": "4D",
+     "description": "Use the 4D vector (X, Y, Z, W) as input",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "1D",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "distance",
+   "name": "Distance Metric",
+   "description": "The distance metric used to compute the texture",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "EUCLIDEAN",
+     "name": "Euclidean",
+     "description": "Euclidean distance",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "MANHATTAN",
+     "name": "Manhattan",
+     "description": "Manhattan distance",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "CHEBYCHEV",
+     "name": "Chebychev",
+     "description": "Chebychev distance",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "MINKOWSKI",
+     "name": "Minkowski",
+     "description": "Minkowski distance",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "EUCLIDEAN",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "feature",
+   "name": "Feature Output",
+   "description": "The Voronoi feature that the node will compute",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "F1",
+     "name": "F1",
+     "description": "Computes the distance to the closest point as well as its position and color",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "F2",
+     "name": "F2",
+     "description": "Computes the distance to the second closest point as well as its position and color",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "SMOOTH_F1",
+     "name": "Smooth F1",
+     "description": "Smoothed version of F1. Weighted sum of neighbor voronoi cells.",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "DISTANCE_TO_EDGE",
+     "name": "Distance to Edge",
+     "description": "Computes the distance to the edge of the voronoi cell",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "N_SPHERE_RADIUS",
+     "name": "N-Sphere Radius",
+     "description": "Computes the radius of the n-sphere inscribed in the voronoi cell",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "F1",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "normalize",
+   "name": "Normalize",
+   "description": "Normalize output Distance to 0.0 to 1.0 range",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

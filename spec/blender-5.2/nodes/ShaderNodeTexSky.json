@@ -1,0 +1,112 @@
+{
+ "bl_idname": "ShaderNodeTexSky",
+ "srna": "ShaderNodeTexSky",
+ "name": "Sky Texture",
+ "label": "",
+ "width": 160.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": true,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "texture_mapping": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree",
+   "type": "TexMapping"
+  },
+  "color_mapping": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree",
+   "type": "ColorMapping"
+  },
+  "sky_type": "MULTIPLE_SCATTERING",
+  "sun_disc": true,
+  "sun_size": 0.009512044489383698,
+  "sun_intensity": 1.0,
+  "sun_elevation": 0.2617993950843811,
+  "sun_rotation": 0.0,
+  "altitude": 100.0,
+  "air_density": 1.0,
+  "aerosol_density": 1.0,
+  "ozone_density": 1.0,
+  "sun_direction": [
+   0.0,
+   0.0,
+   1.0
+  ],
+  "turbidity": 2.200000047683716,
+  "ground_albedo": 0.30000001192092896
+ },
+ "availability": {
+  "sky_type": {
+   "default": "MULTIPLE_SCATTERING",
+   "by_value": {
+    "SINGLE_SCATTERING": {
+     "inputs": [],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "MULTIPLE_SCATTERING": {
+     "inputs": [],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "PREETHAM": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "HOSEK_WILKIE": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    }
+   }
+  }
+ }
+}

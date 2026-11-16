@@ -1,0 +1,281 @@
+{
+ "identifier": "GreasePencilColorModifier",
+ "name": "Grease Pencil Color Modifier",
+ "description": "",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "tree_node_filter",
+   "name": "Layer",
+   "description": "Layer name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "use_layer_pass_filter",
+   "name": "Use Layer Pass",
+   "description": "Use layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layer_pass_filter",
+   "name": "Layer Pass",
+   "description": "Layer pass filter",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_filter",
+   "name": "Invert Layer",
+   "description": "Invert layer filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_pass_filter",
+   "name": "Invert Layer Pass",
+   "description": "Invert layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_layer_group_filter",
+   "name": "Layer Group",
+   "description": "Filter by layer group name",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_filter",
+   "name": "Material",
+   "description": "Material used for filtering",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_material_pass_filter",
+   "name": "Use Material Pass",
+   "description": "Use material pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_pass_filter",
+   "name": "Material Pass",
+   "description": "Material pass",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_material_filter",
+   "name": "Invert Material",
+   "description": "Invert material filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_material_pass_filter",
+   "name": "Invert Material Pass",
+   "description": "Invert material pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_custom_curve",
+   "name": "Use Custom Curve",
+   "description": "Use a custom curve to define a factor along the strokes",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "custom_curve",
+   "name": "Curve",
+   "description": "Custom curve to apply effect",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CurveMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "open_influence_panel",
+   "name": "open_influence_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "color_mode",
+   "name": "Mode",
+   "description": "Attributes to modify",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BOTH",
+     "name": "Stroke & Fill",
+     "description": "Modify fill and stroke colors",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "STROKE",
+     "name": "Stroke",
+     "description": "Modify stroke color only",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FILL",
+     "name": "Fill",
+     "description": "Modify fill color only",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "BOTH",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "hue",
+   "name": "Hue",
+   "description": "Color hue offset",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "saturation",
+   "name": "Saturation",
+   "description": "Color saturation factor",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "value",
+   "name": "Value",
+   "description": "Color value factor",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

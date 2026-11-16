@@ -1,0 +1,299 @@
+{
+ "identifier": "ShaderNodeTexImage",
+ "name": "Image Texture",
+ "description": "Sample an image file as a texture",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "image",
+   "name": "Image",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Image",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "texture_mapping",
+   "name": "Texture Mapping",
+   "description": "Texture coordinate mapping settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "TexMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "color_mapping",
+   "name": "Color Mapping",
+   "description": "Color mapping settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "projection",
+   "name": "Projection",
+   "description": "Method to project 2D image on object with a 3D texture vector",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FLAT",
+     "name": "Flat",
+     "description": "Image is projected flat using the X and Y coordinates of the texture vector",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "BOX",
+     "name": "Box",
+     "description": "Image is projected using different components for each side of the object space bounding box",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "SPHERE",
+     "name": "Sphere",
+     "description": "Image is projected spherically using the Z axis as central",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "TUBE",
+     "name": "Tube",
+     "description": "Image is projected from the tube using the Z axis as central",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "FLAT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "interpolation",
+   "name": "Interpolation",
+   "description": "Texture interpolation",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "Linear",
+     "name": "Linear",
+     "description": "Linear interpolation",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "Closest",
+     "name": "Closest",
+     "description": "No interpolation (sample closest texel)",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Cubic",
+     "name": "Cubic",
+     "description": "Cubic interpolation",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "Smart",
+     "name": "Smart",
+     "description": "Bicubic when magnifying, else bilinear (OSL only)",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "Linear",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "projection_blend",
+   "name": "Projection Blend",
+   "description": "For box projection, amount of blend to use between sides",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "extension",
+   "name": "Extension",
+   "description": "How the image is extrapolated past its original bounds",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "REPEAT",
+     "name": "Repeat",
+     "description": "Cause the image to repeat horizontally and vertically",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "EXTEND",
+     "name": "Extend",
+     "description": "Extend by repeating edge pixels of the image",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "CLIP",
+     "name": "Clip",
+     "description": "Clip to image size and set exterior pixels as transparent",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "MIRROR",
+     "name": "Mirror",
+     "description": "Repeatedly flip the image horizontally and vertically",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "REPEAT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "image_user",
+   "name": "Image User",
+   "description": "Parameters defining which layer, pass and frame of the image is displayed",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ImageUser",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

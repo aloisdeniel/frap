@@ -1,0 +1,84 @@
+{
+ "bl_idname": "ShaderNodeLightFalloff",
+ "srna": "ShaderNodeLightFalloff",
+ "name": "Light Falloff",
+ "label": "",
+ "width": 160.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Strength",
+   "identifier": "Strength",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 100.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Smooth",
+   "identifier": "Smooth",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Quadratic",
+   "identifier": "Quadratic",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Linear",
+   "identifier": "Linear",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Constant",
+   "identifier": "Constant",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {}
+}

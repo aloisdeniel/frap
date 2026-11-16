@@ -1,0 +1,327 @@
+{
+ "bl_idname": "ShaderNodeMapRange",
+ "srna": "ShaderNodeMapRange",
+ "name": "Map Range",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Value",
+   "identifier": "Value",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "From Min",
+   "identifier": "From Min",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "From Max",
+   "identifier": "From Max",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "To Min",
+   "identifier": "To Min",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "To Max",
+   "identifier": "To Max",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Steps",
+   "identifier": "Steps",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 4.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": true,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "From Min",
+   "identifier": "From_Min_FLOAT3",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "From Max",
+   "identifier": "From_Max_FLOAT3",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "To Min",
+   "identifier": "To_Min_FLOAT3",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "To Max",
+   "identifier": "To_Max_FLOAT3",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Steps",
+   "identifier": "Steps_FLOAT3",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    4.0,
+    4.0,
+    4.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Result",
+   "identifier": "Result",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "clamp": true,
+  "interpolation_type": "LINEAR",
+  "data_type": "FLOAT"
+ },
+ "availability": {
+  "interpolation_type": {
+   "default": "LINEAR",
+   "by_value": {
+    "LINEAR": {
+     "inputs": [
+      "Value",
+      "From Min",
+      "From Max",
+      "To Min",
+      "To Max"
+     ],
+     "outputs": [
+      "Result"
+     ]
+    },
+    "STEPPED": {
+     "inputs": [
+      "Value",
+      "From Min",
+      "From Max",
+      "To Min",
+      "To Max",
+      "Steps"
+     ],
+     "outputs": [
+      "Result"
+     ]
+    },
+    "SMOOTHSTEP": {
+     "inputs": [
+      "Value",
+      "From Min",
+      "From Max",
+      "To Min",
+      "To Max"
+     ],
+     "outputs": [
+      "Result"
+     ]
+    },
+    "SMOOTHERSTEP": {
+     "inputs": [
+      "Value",
+      "From Min",
+      "From Max",
+      "To Min",
+      "To Max"
+     ],
+     "outputs": [
+      "Result"
+     ]
+    }
+   }
+  },
+  "data_type": {
+   "default": "FLOAT",
+   "by_value": {
+    "FLOAT": {
+     "inputs": [
+      "Value",
+      "From Min",
+      "From Max",
+      "To Min",
+      "To Max"
+     ],
+     "outputs": [
+      "Result"
+     ]
+    },
+    "FLOAT_VECTOR": {
+     "inputs": [
+      "Vector",
+      "From_Min_FLOAT3",
+      "From_Max_FLOAT3",
+      "To_Min_FLOAT3",
+      "To_Max_FLOAT3"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    }
+   }
+  }
+ }
+}

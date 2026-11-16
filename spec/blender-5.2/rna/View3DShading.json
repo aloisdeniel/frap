@@ -1,0 +1,924 @@
+{
+ "identifier": "View3DShading",
+ "name": "3D View Shading Settings",
+ "description": "Settings for shading in the 3D viewport",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "type",
+   "name": "Viewport Shading",
+   "description": "Method to display/shade objects in the 3D View",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "WIREFRAME",
+     "name": "Wireframe",
+     "description": "Display only edges of geometry without surface shading",
+     "icon": "SHADING_WIRE",
+     "value": 2
+    },
+    {
+     "identifier": "SOLID",
+     "name": "Solid",
+     "description": "Display objects with flat lighting and basic surface shading",
+     "icon": "SHADING_SOLID",
+     "value": 3
+    },
+    {
+     "identifier": "MATERIAL",
+     "name": "Material Preview",
+     "description": "Preview materials using predefined environment lights",
+     "icon": "SHADING_TEXTURE",
+     "value": 4
+    },
+    {
+     "identifier": "RENDERED",
+     "name": "Rendered",
+     "description": "Preview the final scene using the active render engine",
+     "icon": "SHADING_RENDERED",
+     "value": 6
+    }
+   ],
+   "default": "SOLID",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "light",
+   "name": "Lighting",
+   "description": "Lighting Method for Solid/Texture Viewport Shading",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "STUDIO",
+     "name": "Studio",
+     "description": "Display using studio lighting",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "MATCAP",
+     "name": "MatCap",
+     "description": "Display using matcap material and lighting",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "FLAT",
+     "name": "Flat",
+     "description": "Display using flat lighting",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "STUDIO",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_object_outline",
+   "name": "Outline",
+   "description": "Show Object Outline",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "studio_light",
+   "name": "Studiolight",
+   "description": "Studio lighting setup",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "DEFAULT",
+     "name": "Default",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "DEFAULT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_world_space_lighting",
+   "name": "World Space Lighting",
+   "description": "Make the lighting fixed and not follow the camera",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "show_backface_culling",
+   "name": "Backface Culling",
+   "description": "Use back face culling to hide the back side of faces",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_cavity",
+   "name": "Cavity",
+   "description": "Show Cavity",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "cavity_type",
+   "name": "Cavity Type",
+   "description": "Way to display the cavity shading",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "WORLD",
+     "name": "World",
+     "description": "Cavity shading computed in world space, useful for larger-scale occlusion",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "SCREEN",
+     "name": "Screen",
+     "description": "Curvature-based shading, useful for making fine details more visible",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "BOTH",
+     "name": "Both",
+     "description": "Use both effects simultaneously",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "SCREEN",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "curvature_ridge_factor",
+   "name": "Curvature Ridge",
+   "description": "Factor for the curvature ridges",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 2.0,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "curvature_valley_factor",
+   "name": "Curvature Valley",
+   "description": "Factor for the curvature valleys",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 2.0,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "cavity_ridge_factor",
+   "name": "Cavity Ridge",
+   "description": "Factor for the cavity ridges",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 250.0,
+   "soft_min": 0.0,
+   "soft_max": 2.5,
+   "step": 1.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "cavity_valley_factor",
+   "name": "Cavity Valley",
+   "description": "Factor for the cavity valleys",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 250.0,
+   "soft_min": 0.0,
+   "soft_max": 2.5,
+   "step": 1.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "selected_studio_light",
+   "name": "Studio Light",
+   "description": "Selected StudioLight",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "StudioLight",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "studiolight_rotate_z",
+   "name": "Studiolight Rotation",
+   "description": "Rotation of the studiolight around the Z-Axis",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": -3.1415927410125732,
+   "hard_max": 3.1415927410125732,
+   "soft_min": -3.1415927410125732,
+   "soft_max": 3.1415927410125732,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "studiolight_intensity",
+   "name": "Strength",
+   "description": "Strength of the studiolight",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "studiolight_background_alpha",
+   "name": "World Opacity",
+   "description": "Show the studiolight in the background",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "studiolight_background_blur",
+   "name": "Blur",
+   "description": "Blur the studiolight in the background",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": []
+  },
+  {
+   "identifier": "use_studiolight_view_rotation",
+   "name": "World Space Lighting",
+   "description": "Make the HDR rotation fixed and not follow the camera",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "color_type",
+   "name": "Color",
+   "description": "Color Type",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "MATERIAL",
+     "name": "Material",
+     "description": "Show material color",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "Show object color",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "RANDOM",
+     "name": "Random",
+     "description": "Show random object color",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "VERTEX",
+     "name": "Attribute",
+     "description": "Show active color attribute",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "TEXTURE",
+     "name": "Texture",
+     "description": "Show the texture from the active image texture node using the active UV map coordinates",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "SINGLE",
+     "name": "Custom",
+     "description": "Show scene in a single custom color",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "MATERIAL",
+   "flags": []
+  },
+  {
+   "identifier": "wireframe_color_type",
+   "name": "Wire Color",
+   "description": "Wire Color Type",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "THEME",
+     "name": "Theme",
+     "description": "Show scene wireframes with the theme's wire color",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "Show object color on wireframe",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "RANDOM",
+     "name": "Random",
+     "description": "Show random object color on wireframe",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "THEME",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "single_color",
+   "name": "Color",
+   "description": "Color for single color mode",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929
+   ],
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "background_type",
+   "name": "Background",
+   "description": "Way to display the background",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "THEME",
+     "name": "Theme",
+     "description": "Use the theme for background color",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "WORLD",
+     "name": "World",
+     "description": "Use the world for background color",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "VIEWPORT",
+     "name": "Custom",
+     "description": "Use a custom color limited to this viewport only",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "THEME",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "background_color",
+   "name": "Background Color",
+   "description": "Color for custom background color",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.05000000074505806,
+    0.05000000074505806,
+    0.05000000074505806
+   ],
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_shadows",
+   "name": "Shadow",
+   "description": "Show Shadow",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "show_xray",
+   "name": "Show X-Ray",
+   "description": "Show whole scene transparent",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "show_xray_wireframe",
+   "name": "Show X-Ray",
+   "description": "Show whole scene transparent",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "xray_alpha",
+   "name": "X-Ray Opacity",
+   "description": "Amount of opacity to use",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "xray_alpha_wireframe",
+   "name": "X-Ray Opacity",
+   "description": "Amount of opacity to use",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "use_dof",
+   "name": "Depth Of Field",
+   "description": "Use depth of field on viewport using the values from the active camera",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_scene_lights",
+   "name": "Scene Lights",
+   "description": "Render lights and light probes of the scene",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_scene_world",
+   "name": "Scene World",
+   "description": "Use scene world for lighting",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_scene_lights_render",
+   "name": "Scene Lights",
+   "description": "Render lights and light probes of the scene",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_scene_world_render",
+   "name": "Scene World",
+   "description": "Use scene world for lighting",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "show_specular_highlight",
+   "name": "Specular Highlights",
+   "description": "Render specular highlights",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "object_outline_color",
+   "name": "Outline Color",
+   "description": "Color for object outline",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_intensity",
+   "name": "Shadow Intensity",
+   "description": "Darkness of shadows",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "render_pass",
+   "name": "Render Pass",
+   "description": "Render Pass to show in the viewport",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "COMBINED",
+     "name": "Combined",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "EMISSION",
+     "name": "Emission",
+     "description": "",
+     "icon": "NONE",
+     "value": 1024
+    },
+    {
+     "identifier": "ENVIRONMENT",
+     "name": "Environment",
+     "description": "",
+     "icon": "NONE",
+     "value": 2048
+    },
+    {
+     "identifier": "AO",
+     "name": "Ambient Occlusion",
+     "description": "",
+     "icon": "NONE",
+     "value": 8192
+    },
+    {
+     "identifier": "SHADOW",
+     "name": "Shadow",
+     "description": "",
+     "icon": "NONE",
+     "value": 4096
+    },
+    {
+     "identifier": "TRANSPARENT",
+     "name": "Transparent",
+     "description": "",
+     "icon": "NONE",
+     "value": 1048576
+    },
+    {
+     "identifier": "DIFFUSE_LIGHT",
+     "name": "Diffuse Light",
+     "description": "",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "DIFFUSE_COLOR",
+     "name": "Diffuse Color",
+     "description": "",
+     "icon": "NONE",
+     "value": 32
+    },
+    {
+     "identifier": "SPECULAR_LIGHT",
+     "name": "Specular Light",
+     "description": "",
+     "icon": "NONE",
+     "value": 64
+    },
+    {
+     "identifier": "SPECULAR_COLOR",
+     "name": "Specular Color",
+     "description": "",
+     "icon": "NONE",
+     "value": 128
+    },
+    {
+     "identifier": "VOLUME_LIGHT",
+     "name": "Volume Light",
+     "description": "",
+     "icon": "NONE",
+     "value": 512
+    },
+    {
+     "identifier": "POSITION",
+     "name": "Position",
+     "description": "",
+     "icon": "NONE",
+     "value": 2097152
+    },
+    {
+     "identifier": "NORMAL",
+     "name": "Normal",
+     "description": "",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "MIST",
+     "name": "Mist",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "CryptoObject",
+     "name": "CryptoObject",
+     "description": "",
+     "icon": "NONE",
+     "value": 65536
+    },
+    {
+     "identifier": "CryptoAsset",
+     "name": "CryptoAsset",
+     "description": "",
+     "icon": "NONE",
+     "value": 131072
+    },
+    {
+     "identifier": "CryptoMaterial",
+     "name": "CryptoMaterial",
+     "description": "",
+     "icon": "NONE",
+     "value": 262144
+    },
+    {
+     "identifier": "AOV",
+     "name": "AOV",
+     "description": "",
+     "icon": "NONE",
+     "value": 32768
+    }
+   ],
+   "default": "COMBINED",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "aov_name",
+   "name": "Shader AOV Name",
+   "description": "Name of the active Shader AOV",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "HIDDEN",
+    "NEVER_NULL",
+    "SKIP_PRESET"
+   ]
+  },
+  {
+   "identifier": "use_compositor",
+   "name": "Compositor",
+   "description": "When to preview the compositor output inside the viewport",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "DISABLED",
+     "name": "Disabled",
+     "description": "The compositor is disabled",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CAMERA",
+     "name": "Camera",
+     "description": "The compositor is enabled only in camera view",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "ALWAYS",
+     "name": "Always",
+     "description": "The compositor is always enabled regardless of the view",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "DISABLED",
+   "flags": []
+  },
+  {
+   "identifier": "cycles",
+   "name": "Cycles Settings",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CyclesView3DShadingSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "bl_system_properties_get",
+   "description": "DEBUG ONLY. Internal access to runtime-defined RNA data storage, intended solely for testing and debugging purposes. Do not access it in regular scripting work, and in particular, do not assume that it contains writable data",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "do_create",
+     "name": "",
+     "description": "Ensure that system properties are created if they do not exist yet",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "system_properties",
+     "name": "",
+     "description": "The system properties root container, or None if there are no system properties stored in this data yet, and its creation was not requested",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "PropertyGroup",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.scenes.new('Scene').display.shading",
+  "differs_from_default": {
+   "studio_light": "Default",
+   "studiolight_background_blur": 0.0
+  }
+ }
+}

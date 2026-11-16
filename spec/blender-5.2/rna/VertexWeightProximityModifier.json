@@ -1,0 +1,449 @@
+{
+ "identifier": "VertexWeightProximityModifier",
+ "name": "WeightVG Proximity Modifier",
+ "description": "Set the weights of vertices in a group from a target object's distance",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "proximity_mode",
+   "name": "Proximity Mode",
+   "description": "Which distances to target object to use",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "Use distance between affected and target objects",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "GEOMETRY",
+     "name": "Geometry",
+     "description": "Use distance between affected object's vertices and target object, or target object's geometry",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "GEOMETRY",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "proximity_geometry",
+   "name": "Proximity Geometry",
+   "description": "Use the shortest computed distance to target object's geometry as weight",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "VERTEX",
+     "name": "Vertex",
+     "description": "Compute distance to nearest vertex",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "EDGE",
+     "name": "Edge",
+     "description": "Compute distance to nearest edge",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "FACE",
+     "name": "Face",
+     "description": "Compute distance to nearest face",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": [
+    "FACE"
+   ],
+   "flags": [
+    "ENUM_FLAG",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "target",
+   "name": "Target Object",
+   "description": "Object to calculate vertices distances from",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "min_dist",
+   "name": "Lowest",
+   "description": "Distance mapping to weight 0.0",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1000.0,
+   "step": 10.0,
+   "precision": -1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "max_dist",
+   "name": "Highest",
+   "description": "Distance mapping to weight 1.0",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1000.0,
+   "step": 10.0,
+   "precision": -1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "falloff_type",
+   "name": "Falloff Type",
+   "description": "How weights are mapped to their new values",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LINEAR",
+     "name": "Linear",
+     "description": "Null action",
+     "icon": "LINCURVE",
+     "value": 0
+    },
+    {
+     "identifier": "CURVE",
+     "name": "Custom Curve",
+     "description": "",
+     "icon": "RNDCURVE",
+     "value": 1
+    },
+    {
+     "identifier": "SHARP",
+     "name": "Sharp",
+     "description": "",
+     "icon": "SHARPCURVE",
+     "value": 2
+    },
+    {
+     "identifier": "SMOOTH",
+     "name": "Smooth",
+     "description": "",
+     "icon": "SMOOTHCURVE",
+     "value": 3
+    },
+    {
+     "identifier": "ROOT",
+     "name": "Root",
+     "description": "",
+     "icon": "ROOTCURVE",
+     "value": 4
+    },
+    {
+     "identifier": "ICON_SPHERECURVE",
+     "name": "Sphere",
+     "description": "",
+     "icon": "SPHERECURVE",
+     "value": 7
+    },
+    {
+     "identifier": "RANDOM",
+     "name": "Random",
+     "description": "",
+     "icon": "RNDCURVE",
+     "value": 8
+    },
+    {
+     "identifier": "STEP",
+     "name": "Median Step",
+     "description": "Map all values below 0.5 to 0.0, and all others to 1.0",
+     "icon": "IPO_CONSTANT",
+     "value": 9
+    }
+   ],
+   "default": "LINEAR",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_falloff",
+   "name": "Invert Falloff",
+   "description": "Invert the resulting falloff weight",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "normalize",
+   "name": "Normalize Weights",
+   "description": "Normalize the resulting weights (otherwise they are only clamped within 0.0 to 1.0 range)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "map_curve",
+   "name": "Mapping Curve",
+   "description": "Custom mapping curve",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CurveMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "mask_constant",
+   "name": "Influence",
+   "description": "Global influence of current modifications on vgroup",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": -1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mask_vertex_group",
+   "name": "Mask Vertex Group",
+   "description": "Masking vertex group name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_mask_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group mask influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mask_texture",
+   "name": "Masking Tex",
+   "description": "Masking texture",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Texture",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "mask_tex_use_channel",
+   "name": "Use Channel",
+   "description": "Which texture channel to use for masking",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "INT",
+     "name": "Intensity",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "RED",
+     "name": "Red",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "GREEN",
+     "name": "Green",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "BLUE",
+     "name": "Blue",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "HUE",
+     "name": "Hue",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "SAT",
+     "name": "Saturation",
+     "description": "",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "VAL",
+     "name": "Value",
+     "description": "",
+     "icon": "NONE",
+     "value": 7
+    },
+    {
+     "identifier": "ALPHA",
+     "name": "Alpha",
+     "description": "",
+     "icon": "NONE",
+     "value": 8
+    }
+   ],
+   "default": "INT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mask_tex_mapping",
+   "name": "Texture Coordinates",
+   "description": "Which texture coordinates to use for mapping",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LOCAL",
+     "name": "Local",
+     "description": "Use local generated coordinates",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "GLOBAL",
+     "name": "Global",
+     "description": "Use global coordinates",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "Use local generated coordinates of another object",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "UV",
+     "name": "UV",
+     "description": "Use coordinates from a UV layer",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "LOCAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mask_tex_uv_layer",
+   "name": "UV Map",
+   "description": "UV map name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 68,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "mask_tex_map_object",
+   "name": "Texture Coordinate Object",
+   "description": "Which object to take texture coordinates from",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "mask_tex_map_bone",
+   "name": "Texture Coordinate Bone",
+   "description": "Which bone to take texture coordinates from",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

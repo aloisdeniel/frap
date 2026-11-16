@@ -31,9 +31,7 @@
     }
    ],
    "default": "DATA",
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "material",
@@ -44,9 +42,7 @@
    "unit": "NONE",
    "fixed_type": "Material",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "slot_index",
@@ -62,8 +58,7 @@
    "soft_max": 10000,
    "step": 1,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -82,9 +77,11 @@
   }
  ],
  "funcs": [],
- "requested": false,
+ "root": true,
  "fresh": {
-  "recipe": "me = bpy.data.meshes.new('Mesh'); me.materials.append(bpy.data.materials.new('M')); bpy.data.objects.new('O', me).material_slots[0]",
-  "differs_from_default": {}
+  "recipe": "me = bpy.data.meshes.new('Mesh'); me.materials.append(bpy.data.materials.new('FreshSlotMat')); bpy.data.objects.new('O', me).material_slots[0]",
+  "differs_from_default": {
+   "name": "FreshSlotMat"
+  }
  }
 }

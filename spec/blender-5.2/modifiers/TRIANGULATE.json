@@ -1,0 +1,25 @@
+{
+ "type": "TRIANGULATE",
+ "ui_name": "Triangulate",
+ "srna": "TriangulateModifier",
+ "values": {
+  "name": "M",
+  "type": "TRIANGULATE",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": true,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 1222815822,
+  "quad_method": "SHORTEST_DIAGONAL",
+  "ngon_method": "BEAUTY",
+  "min_vertices": 4,
+  "keep_custom_normals": false
+ },
+ "default_name": "Triangulate"
+}

@@ -23,7 +23,10 @@ Cell values: "Y" poll() True, "N" poll() False, "X:<exception>" poll() raised.
 Enum items that differ between contexts are recorded under "items_by_context" and the
 property gets "dynamic_hint": true (a heuristic: Blender does not expose a dynamic flag).
 
-First version written for WP 0.2 (contract probes). WP 1.1 extends it to the curated
+The glTF add-on preference `KHR_materials_variants_ui` is switched on before dumping (§4.1,
+shared with dump_rna.py) and recorded in `_meta.json` under `addon_prefs`.
+
+First version written for WP 0.2 (contract probes); WP 1.1 extended it to the curated
 namespace list of §4.1.
 """
 
@@ -36,7 +39,12 @@ import bpy
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import dump_rna  # noqa: E402  (shared property serialiser; same JSON schema)
 
-DEFAULT_NAMESPACES = ["mesh", "object"]
+# The curated namespace list of ARCHITECTURE §4.1: every operator in these is dumped.
+DEFAULT_NAMESPACES = [
+    "object", "mesh", "uv", "transform", "view3d", "anim", "screen", "render", "wm", "material",
+    "image", "world", "collection", "scene", "geometry", "armature", "pose", "nla", "export_scene",
+    "import_scene",
+]
 CONTEXTS = ["A", "B", "C", "D", "E"]
 
 

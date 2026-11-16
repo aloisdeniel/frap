@@ -1,0 +1,2842 @@
+{
+ "namespace": "export_scene",
+ "count": 2,
+ "operators": [
+  {
+   "idname": "export_scene.fbx",
+   "bl_idname": "EXPORT_SCENE_OT_fbx",
+   "label": "Export FBX",
+   "description": "Write a FBX file",
+   "options": [
+    "PRESET",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "filepath",
+     "name": "File Path",
+     "description": "Filepath used for exporting the file",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1025,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "check_existing",
+     "name": "Check Existing",
+     "description": "Check and warn on overwriting existing files",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_glob",
+     "name": "filter_glob",
+     "description": "",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "*.fbx",
+     "length_max": 0,
+     "flags": [
+      "HIDDEN",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_selection",
+     "name": "Selected Objects",
+     "description": "Export selected and visible objects only",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_visible",
+     "name": "Visible Objects",
+     "description": "Export visible objects only",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_active_collection",
+     "name": "Active Collection",
+     "description": "Export only objects from the active collection (and its children)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "collection",
+     "name": "Source Collection",
+     "description": "Export only objects from this collection (and its children)",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "global_scale",
+     "name": "Scale",
+     "description": "Scale all data (Some importers do not support scaled armatures!)",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.0010000000474974513,
+     "hard_max": 1000.0,
+     "soft_min": 0.009999999776482582,
+     "soft_max": 1000.0,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "apply_unit_scale",
+     "name": "Apply Unit",
+     "description": "Take into account current Blender units settings (if unset, raw Blender Units values are used as-is)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "apply_scale_options",
+     "name": "Apply Scalings",
+     "description": "How to apply custom and units scalings in generated FBX file (Blender uses FBX scale to detect units on import, but many other applications do not handle the same way)",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FBX_SCALE_NONE",
+       "name": "All Local",
+       "description": "Apply custom scaling and units scaling to each object transformation, FBX scale remains at 1.0",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "FBX_SCALE_UNITS",
+       "name": "FBX Units Scale",
+       "description": "Apply custom scaling to each object transformation, and units scaling to FBX scale",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "FBX_SCALE_CUSTOM",
+       "name": "FBX Custom Scale",
+       "description": "Apply custom scaling to FBX scale, and units scaling to each object transformation",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "FBX_SCALE_ALL",
+       "name": "FBX All",
+       "description": "Apply custom scaling and units scaling to FBX scale",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "FBX_SCALE_NONE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_space_transform",
+     "name": "Use Space Transform",
+     "description": "Apply global space transform to the object rotations. When disabled only the axis space is written to the file and all object transforms are left as-is",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bake_space_transform",
+     "name": "Apply Transform",
+     "description": "Bake space transform into object data, avoids getting unwanted rotations to objects when target space is not aligned with Blender's space (WARNING! experimental option, use at own risk, known to be broken with armatures/animations)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "object_types",
+     "name": "Object Types",
+     "description": "Which kind of object to export",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "EMPTY",
+       "name": "Empty",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "CAMERA",
+       "name": "Camera",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "LIGHT",
+       "name": "Lamp",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "ARMATURE",
+       "name": "Armature",
+       "description": "WARNING: not supported in dupli/group instances",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "MESH",
+       "name": "Mesh",
+       "description": "",
+       "icon": "NONE",
+       "value": 16
+      },
+      {
+       "identifier": "OTHER",
+       "name": "Other",
+       "description": "Other geometry types, like curve, meta-ball, etc. (converted to meshes)",
+       "icon": "NONE",
+       "value": 32
+      }
+     ],
+     "default": [
+      "ARMATURE",
+      "CAMERA",
+      "EMPTY",
+      "LIGHT",
+      "MESH",
+      "OTHER"
+     ],
+     "flags": [
+      "ENUM_FLAG",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_mesh_modifiers",
+     "name": "Apply Modifiers",
+     "description": "Apply modifiers to mesh objects (except Armature ones) - WARNING: prevents exporting shape keys",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_mesh_modifiers_render",
+     "name": "Use Modifiers Render Setting",
+     "description": "Use render settings when applying modifiers to mesh objects (DISABLED in Blender 2.8)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mesh_smooth_type",
+     "name": "Smoothing",
+     "description": "Export smoothing information (prefer 'Normals Only' option if your target importer understands custom normals)",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "OFF",
+       "name": "Normals Only",
+       "description": "Export only normals instead of writing edge or face smoothing data",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Write face smoothing",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Write edge smoothing",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "SMOOTH_GROUP",
+       "name": "Smoothing Groups",
+       "description": "Write face smoothing groups",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "OFF",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "colors_type",
+     "name": "Vertex Colors",
+     "description": "Export vertex color attributes",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NONE",
+       "name": "None",
+       "description": "Do not export color attributes",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SRGB",
+       "name": "sRGB",
+       "description": "Export colors in sRGB color space",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Export colors in linear color space",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "SRGB",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "prioritize_active_color",
+     "name": "Prioritize Active Color",
+     "description": "Make sure active color will be exported first. Could be important since some other software can discard other color attributes besides the first one",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_subsurf",
+     "name": "Export Subdivision Surface",
+     "description": "Export the last Catmull-Rom subdivision modifier as FBX subdivision (does not apply the modifier even if 'Apply Modifiers' is enabled)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_mesh_edges",
+     "name": "Loose Edges",
+     "description": "Export loose edges (as two-vertices polygons)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_tspace",
+     "name": "Tangent Space",
+     "description": "Add binormal and tangent vectors, together with normal they form the tangent space (will only work correctly with tris/quads only meshes!)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_triangles",
+     "name": "Triangulate Faces",
+     "description": "Convert all faces to triangles",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_custom_props",
+     "name": "Custom Properties",
+     "description": "Export custom properties",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "add_leaf_bones",
+     "name": "Add Leaf Bones",
+     "description": "Append a final bone to the end of each chain to specify last bone length (use this when you intend to edit the armature from exported data)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "primary_bone_axis",
+     "name": "Primary Bone Axis",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "-X",
+       "name": "-X Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "-Y",
+       "name": "-Y Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "-Z",
+       "name": "-Z Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "Y",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "secondary_bone_axis",
+     "name": "Secondary Bone Axis",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "-X",
+       "name": "-X Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "-Y",
+       "name": "-Y Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "-Z",
+       "name": "-Z Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "X",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_armature_deform_only",
+     "name": "Only Deform Bones",
+     "description": "Only write deforming bones (and non-deforming ones when they have deforming children)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "armature_nodetype",
+     "name": "Armature FBXNode Type",
+     "description": "FBX type of node (object) used to represent Blender's armatures (use the Null type unless you experience issues with the other app, as other choices may not import back perfectly into Blender...)",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NULL",
+       "name": "Null",
+       "description": "'Null' FBX node, similar to Blender's Empty (default)",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ROOT",
+       "name": "Root",
+       "description": "'Root' FBX node, supposed to be the root of chains of bones...",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "LIMBNODE",
+       "name": "LimbNode",
+       "description": "'LimbNode' FBX node, a regular joint between two bones...",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "NULL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bake_anim",
+     "name": "Baked Animation",
+     "description": "Export baked keyframe animation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bake_anim_use_all_bones",
+     "name": "Key All Bones",
+     "description": "Force exporting at least one key of animation for all bones (needed with some target applications, like UE4)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bake_anim_use_nla_strips",
+     "name": "NLA Strips",
+     "description": "Export each non-muted NLA strip as a separated FBX's AnimStack, if any, instead of global scene animation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bake_anim_use_all_actions",
+     "name": "All Actions",
+     "description": "Export each action as a separated FBX's AnimStack, instead of global scene animation (note that animated objects will get all actions compatible with them, others will get no animation at all)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bake_anim_force_startend_keying",
+     "name": "Force Start/End Keying",
+     "description": "Always add a keyframe at start and end of actions for animated channels",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bake_anim_step",
+     "name": "Sampling Rate",
+     "description": "How often to evaluate animated values (in frames)",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.009999999776482582,
+     "hard_max": 100.0,
+     "soft_min": 0.10000000149011612,
+     "soft_max": 10.0,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bake_anim_simplify_factor",
+     "name": "Simplify",
+     "description": "How much to simplify baked values (0.0 to disable, the higher the more simplified)",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.0,
+     "hard_max": 100.0,
+     "soft_min": 0.0,
+     "soft_max": 10.0,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "path_mode",
+     "name": "Path Mode",
+     "description": "Method used to reference paths",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "AUTO",
+       "name": "Auto",
+       "description": "Use relative paths with subdirectories only",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ABSOLUTE",
+       "name": "Absolute",
+       "description": "Always write absolute paths",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "RELATIVE",
+       "name": "Relative",
+       "description": "Write relative paths where possible",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "MATCH",
+       "name": "Match",
+       "description": "Match absolute/relative setting with input path",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "STRIP",
+       "name": "Strip",
+       "description": "Filename only",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "COPY",
+       "name": "Copy",
+       "description": "Copy the file to the destination path (or subdirectory)",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "AUTO",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "embed_textures",
+     "name": "Embed Textures",
+     "description": "Embed textures in FBX binary file (only for \"Copy\" path mode!)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "batch_mode",
+     "name": "Batch Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "OFF",
+       "name": "Off",
+       "description": "Active scene to file",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SCENE",
+       "name": "Scene",
+       "description": "Each scene as a file",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "COLLECTION",
+       "name": "Collection",
+       "description": "Each collection (data-block ones) as a file, does not include content of children collections",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "SCENE_COLLECTION",
+       "name": "Scene Collections",
+       "description": "Each collection (including master, non-data-block ones) of each scene as a file, including content from children collections",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "ACTIVE_SCENE_COLLECTION",
+       "name": "Active Scene Collections",
+       "description": "Each collection (including master, non-data-block one) of the active scene as a file, including content from children collections",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": "OFF",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_batch_own_dir",
+     "name": "Batch Own Dir",
+     "description": "Create a dir for each exported file",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_metadata",
+     "name": "Use Metadata",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis_forward",
+     "name": "Forward",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X Forward",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y Forward",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z Forward",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "-X",
+       "name": "-X Forward",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "-Y",
+       "name": "-Y Forward",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "-Z",
+       "name": "-Z Forward",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "-Z",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis_up",
+     "name": "Up",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X Up",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y Up",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z Up",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "-X",
+       "name": "-X Up",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "-Y",
+       "name": "-Y Up",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "-Z",
+       "name": "-Z Up",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "Y",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "export_scene.gltf",
+   "bl_idname": "EXPORT_SCENE_OT_gltf",
+   "label": "Export glTF 2.0",
+   "description": "Export scene as glTF 2.0 file",
+   "options": [
+    "PRESET"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "filepath",
+     "name": "File Path",
+     "description": "Filepath used for exporting the file",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1025,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "check_existing",
+     "name": "Check Existing",
+     "description": "Check and warn on overwriting existing files",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_import_convert_lighting_mode",
+     "name": "Lighting Mode",
+     "description": "Optional backwards compatibility for non-standard render engines. Applies to lights",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SPEC",
+       "name": "Standard",
+       "description": "Physically-based glTF lighting units (cd, lx, nt)",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "COMPAT",
+       "name": "Unitless",
+       "description": "Non-physical, unitless lighting. Useful when exposure controls are not available",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "RAW",
+       "name": "Raw (Deprecated)",
+       "description": "Blender lighting strengths with no conversion",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "SPEC",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "gltf_export_id",
+     "name": "Identifier",
+     "description": "Identifier of caller (in case of add-on calling this exporter). Can be useful in case of Extension added by other add-ons",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_use_gltfpack",
+     "name": "Use Gltfpack",
+     "description": "Use gltfpack to simplify the mesh and/or compress its textures",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gltfpack_tc",
+     "name": "KTX2 Compression",
+     "description": "Convert all textures to KTX2 with BasisU supercompression",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gltfpack_tq",
+     "name": "Texture Encoding Quality",
+     "description": "Texture encoding quality",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 8,
+     "hard_min": 1,
+     "hard_max": 10,
+     "soft_min": 1,
+     "soft_max": 10,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gltfpack_si",
+     "name": "Mesh Simplification Ratio",
+     "description": "Simplify meshes targeting triangle count ratio",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gltfpack_sa",
+     "name": "Aggressive Mesh Simplification",
+     "description": "Aggressively simplify to the target ratio disregarding quality",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gltfpack_slb",
+     "name": "Lock Mesh Border Vertices",
+     "description": "Lock border vertices during simplification to avoid gaps on connected meshes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gltfpack_vp",
+     "name": "Position Quantization",
+     "description": "Use N-bit quantization for positions",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 14,
+     "hard_min": 1,
+     "hard_max": 16,
+     "soft_min": 1,
+     "soft_max": 16,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gltfpack_vt",
+     "name": "Texture Coordinate Quantization",
+     "description": "Use N-bit quantization for texture coordinates",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 12,
+     "hard_min": 1,
+     "hard_max": 16,
+     "soft_min": 1,
+     "soft_max": 16,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gltfpack_vn",
+     "name": "Normal/Tangent Quantization",
+     "description": "Use N-bit quantization for normals and tangents",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 8,
+     "hard_min": 1,
+     "hard_max": 16,
+     "soft_min": 1,
+     "soft_max": 16,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gltfpack_vc",
+     "name": "Vertex Color Quantization",
+     "description": "Use N-bit quantization for colors",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 8,
+     "hard_min": 1,
+     "hard_max": 16,
+     "soft_min": 1,
+     "soft_max": 16,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gltfpack_vpi",
+     "name": "Vertex Position Attributes",
+     "description": "Type to use for vertex position attributes",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "Integer",
+       "name": "Integer",
+       "description": "Use integer attributes for positions",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Normalized",
+       "name": "Normalized",
+       "description": "Use normalized attributes for positions",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Floating-point",
+       "name": "Floating-point",
+       "description": "Use floating-point attributes for positions",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "Integer",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gltfpack_noq",
+     "name": "Disable Quantization",
+     "description": "Disable quantization; produces much larger glTF files with no extensions",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gltfpack_kn",
+     "name": "Keep Named Nodes",
+     "description": "Restrict some optimization to keep named nodes and meshes attached to named nodes so that named nodes can be transformed externally",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_format",
+     "name": "Format",
+     "description": "Output format. Binary is most efficient, but JSON may be easier to edit later",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ui_tab",
+     "name": "ui_tab",
+     "description": "Export setting categories",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "GENERAL",
+       "name": "General",
+       "description": "General settings",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "MESHES",
+       "name": "Meshes",
+       "description": "Mesh settings",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "OBJECTS",
+       "name": "Objects",
+       "description": "Object settings",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ANIMATION",
+       "name": "Animation",
+       "description": "Animation settings",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "GENERAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_copyright",
+     "name": "Copyright",
+     "description": "Legal rights and conditions for the model",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_image_format",
+     "name": "Images",
+     "description": "Output format for images. PNG is lossless and generally preferred, but JPEG might be preferable for web applications due to the smaller file size. Alternatively they can be omitted if they are not needed",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "AUTO",
+       "name": "Automatic",
+       "description": "Save PNGs as PNGs, JPEGs as JPEGs, WebPs as WebPs. For other formats, use PNG",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "JPEG",
+       "name": "JPEG Format (.jpg)",
+       "description": "Save images as JPEGs. (Images that need alpha are saved as PNGs though.) Be aware of a possible loss in quality",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "WEBP",
+       "name": "WebP Format",
+       "description": "Save images as WebPs as main image (no fallback)",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "NONE",
+       "name": "None",
+       "description": "Don't export images",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "AUTO",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_image_add_webp",
+     "name": "Create WebP",
+     "description": "Creates WebP textures for every texture. For already WebP textures, nothing happens",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_image_webp_fallback",
+     "name": "WebP Fallback",
+     "description": "For all WebP textures, create a PNG fallback texture",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_texture_dir",
+     "name": "Textures",
+     "description": "Folder to place texture files in. Relative to the .gltf file",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_jpeg_quality",
+     "name": "JPEG Quality",
+     "description": "Quality of JPEG export",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 75,
+     "hard_min": 0,
+     "hard_max": 100,
+     "soft_min": 0,
+     "soft_max": 100,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_image_quality",
+     "name": "Image Quality",
+     "description": "Quality of image export",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 75,
+     "hard_min": 0,
+     "hard_max": 100,
+     "soft_min": 0,
+     "soft_max": 100,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_keep_originals",
+     "name": "Keep Original",
+     "description": "Keep original textures files if possible. WARNING: if you use more than one texture, where pbr standard requires only one, only one texture will be used. This can lead to unexpected results",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_texcoords",
+     "name": "UVs",
+     "description": "Export UVs (texture coordinates) with meshes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_normals",
+     "name": "Normals",
+     "description": "Export vertex normals with meshes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gn_mesh",
+     "name": "Geometry Nodes Instances (Experimental)",
+     "description": "Export Geometry nodes instance meshes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_meshopt_compression_enable",
+     "name": "Meshopt Compression",
+     "description": "Compress mesh using Meshopt",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_meshopt_extension",
+     "name": "Meshopt Extension",
+     "description": "Extension to use for meshopt compression",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "EXT_meshopt_compression",
+       "name": "EXT_meshopt_compression",
+       "description": "Use EXT_meshopt_compression extension for mesh compression",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "KHR_meshopt_compression",
+       "name": "KHR_meshopt_compression",
+       "description": "Use KHR_meshopt_compression extension for mesh compression",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "EXT_meshopt_compression",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_draco_mesh_compression_enable",
+     "name": "Draco Mesh Compression",
+     "description": "Compress mesh using Draco",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_draco_mesh_compression_level",
+     "name": "Compression Level",
+     "description": "Compression level (0 = most speed, 6 = most compression, higher values currently not supported)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 6,
+     "hard_min": 0,
+     "hard_max": 10,
+     "soft_min": 0,
+     "soft_max": 10,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_draco_position_quantization",
+     "name": "Position Quantization Bits",
+     "description": "Quantization bits for position values (0 = no quantization)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 14,
+     "hard_min": 0,
+     "hard_max": 30,
+     "soft_min": 0,
+     "soft_max": 30,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_draco_normal_quantization",
+     "name": "Normal Quantization Bits",
+     "description": "Quantization bits for normal values (0 = no quantization)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 10,
+     "hard_min": 0,
+     "hard_max": 30,
+     "soft_min": 0,
+     "soft_max": 30,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_draco_texcoord_quantization",
+     "name": "Texcoord Quantization Bits",
+     "description": "Quantization bits for texture coordinate values (0 = no quantization)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 12,
+     "hard_min": 0,
+     "hard_max": 30,
+     "soft_min": 0,
+     "soft_max": 30,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_draco_color_quantization",
+     "name": "Color Quantization Bits",
+     "description": "Quantization bits for color values (0 = no quantization)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 10,
+     "hard_min": 0,
+     "hard_max": 30,
+     "soft_min": 0,
+     "soft_max": 30,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_draco_generic_quantization",
+     "name": "Generic Quantization Bits",
+     "description": "Quantization bits for generic values like weights or joints (0 = no quantization)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 12,
+     "hard_min": 0,
+     "hard_max": 30,
+     "soft_min": 0,
+     "soft_max": 30,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_tangents",
+     "name": "Tangents",
+     "description": "Export vertex tangents with meshes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_materials",
+     "name": "Materials",
+     "description": "Export materials",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "EXPORT",
+       "name": "Export",
+       "description": "Export all materials used by included objects",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "PLACEHOLDER",
+       "name": "Placeholder",
+       "description": "Do not export materials, but write multiple primitive groups per mesh, keeping material slot information",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "VIEWPORT",
+       "name": "Viewport",
+       "description": "Export minimal materials as defined in Viewport display properties",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "NONE",
+       "name": "No export",
+       "description": "Do not export materials, and combine mesh primitive groups, losing material slot information",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "EXPORT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_unused_images",
+     "name": "Unused Images",
+     "description": "Export images not assigned to any material",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_unused_textures",
+     "name": "Prepare Unused Textures",
+     "description": "Export image texture nodes not assigned to any material. This feature is not standard and needs an external extension to be included in the glTF file",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_vertex_color",
+     "name": "Use Vertex Color",
+     "description": "How to export vertex color",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "MATERIAL",
+       "name": "Material",
+       "description": "Export vertex color when used by material",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ACTIVE",
+       "name": "Active",
+       "description": "Export active vertex color",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "NAME",
+       "name": "Name",
+       "description": "Export vertex color with this name",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "NONE",
+       "name": "None",
+       "description": "Do not export vertex color",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "MATERIAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_vertex_color_name",
+     "name": "Vertex Color Name",
+     "description": "Name of vertex color to export",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Color",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_all_vertex_colors",
+     "name": "Export All Vertex Colors",
+     "description": "Export all vertex colors, even if not used by any material. If no Vertex Color is used in the mesh materials, a fake COLOR_0 will be created, in order to keep material unchanged",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_active_vertex_color_when_no_material",
+     "name": "Export Active Vertex Color When No Material",
+     "description": "When there is no material on object, export active vertex color",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_attributes",
+     "name": "Attributes",
+     "description": "Export Attributes (when starting with underscore)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_mesh_edges",
+     "name": "Loose Edges",
+     "description": "Export loose edges as lines, using the material from the first material slot",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_mesh_vertices",
+     "name": "Loose Points",
+     "description": "Export loose points as glTF points, using the material from the first material slot",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_cameras",
+     "name": "Cameras",
+     "description": "Export cameras",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_selection",
+     "name": "Selected Objects",
+     "description": "Export selected objects only",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_visible",
+     "name": "Visible Objects",
+     "description": "Export visible objects only",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_renderable",
+     "name": "Renderable Objects",
+     "description": "Export renderable objects only",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_active_collection_with_nested",
+     "name": "Include Nested Collections",
+     "description": "Include active collection and nested collections",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_active_collection",
+     "name": "Active Collection",
+     "description": "Export objects in the active collection only",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_active_scene",
+     "name": "Active Scene",
+     "description": "Export active scene only",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "collection",
+     "name": "Source Collection",
+     "description": "Export only objects from this collection (and its children)",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "at_collection_center",
+     "name": "Export at Collection Center",
+     "description": "Export at Collection center of mass of root objects of the collection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_extras",
+     "name": "Custom Properties",
+     "description": "Export custom properties as glTF extras",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_yup",
+     "name": "+Y Up",
+     "description": "Export using glTF convention, +Y up",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_apply",
+     "name": "Apply Modifiers",
+     "description": "Apply modifiers (excluding Armatures) to mesh objects -WARNING: prevents exporting shape keys",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_shared_accessors",
+     "name": "Shared Accessors",
+     "description": "Export Primitives using shared accessors for attributes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_animations",
+     "name": "Animations",
+     "description": "Exports active actions and NLA tracks as glTF animations",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_frame_range",
+     "name": "Limit to Playback Range",
+     "description": "Clips animations to selected playback range",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_frame_step",
+     "name": "Sampling Rate",
+     "description": "How often to evaluate animated values (in frames)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 1,
+     "hard_max": 120,
+     "soft_min": 1,
+     "soft_max": 120,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_force_sampling",
+     "name": "Always Sample Animations",
+     "description": "Apply sampling to all animations",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_sampling_interpolation_fallback",
+     "name": "Sampling Interpolation Fallback",
+     "description": "Interpolation fallback for sampled animations, when the property is not keyed",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Linear interpolation between keyframes",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "STEP",
+       "name": "Step",
+       "description": "No interpolation between keyframes",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "LINEAR",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_pointer_animation",
+     "name": "Export Animation Pointer (Experimental)",
+     "description": "Export material, Light & Camera animation as Animation Pointer. Available only for baked animation mode 'NLA Tracks' and 'Scene'",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_animation_mode",
+     "name": "Animation Mode",
+     "description": "Export Animation mode",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ACTIONS",
+       "name": "Actions",
+       "description": "Export actions (actives and on NLA tracks) as separate animations",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ACTIVE_ACTIONS",
+       "name": "Active actions merged",
+       "description": "All the currently assigned actions become one glTF animation",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "BROADCAST",
+       "name": "Broadcast actions",
+       "description": "Broadcast all compatible actions to all objects. Animated objects will get all actions compatible with them, others will get no animation at all",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "NLA_TRACKS",
+       "name": "NLA Tracks",
+       "description": "Export individual NLA Tracks as separate animation",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "SCENE",
+       "name": "Scene",
+       "description": "Export baked scene as a single animation",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": "ACTIONS",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_nla_strips_merged_animation_name",
+     "name": "Merged Animation Name",
+     "description": "Name of single glTF animation to be exported",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Animation",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_def_bones",
+     "name": "Export Deformation Bones Only",
+     "description": "Export Deformation bones only",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_hierarchy_flatten_bones",
+     "name": "Flatten Bone Hierarchy",
+     "description": "Flatten Bone Hierarchy. Useful in case of non decomposable transformation matrix",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_hierarchy_flatten_objs",
+     "name": "Flatten Object Hierarchy",
+     "description": "Flatten Object Hierarchy. Useful in case of non decomposable transformation matrix",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_armature_object_remove",
+     "name": "Remove Armature Object",
+     "description": "Remove Armature object if possible. If Armature has multiple root bones, object will not be removed",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_leaf_bone",
+     "name": "Add Leaf Bones",
+     "description": "Append a final bone to the end of each chain to specify last bone length (use this when you intend to edit the armature from exported data)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_optimize_animation_size",
+     "name": "Optimize Animation Size",
+     "description": "Reduce exported file size by removing duplicate keyframes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_optimize_animation_keep_anim_armature",
+     "name": "Force Keeping Channels for Bones",
+     "description": "If all keyframes are identical in a rig, force keeping the minimal animation. When off, all possible channels for the bones will be exported, even if empty (minimal animation, 2 keyframes)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_optimize_animation_keep_anim_object",
+     "name": "Force Keeping Channel for Objects",
+     "description": "If all keyframes are identical for object transformations, force keeping the minimal animation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_optimize_disable_viewport",
+     "name": "Disable Viewport for Other Objects",
+     "description": "When exporting animations, disable viewport for other objects, for performance",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_negative_frame",
+     "name": "Negative Frames",
+     "description": "Negative Frames are slid or cropped",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SLIDE",
+       "name": "Slide",
+       "description": "Slide animation to start at frame 0",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CROP",
+       "name": "Crop",
+       "description": "Keep only frames above frame 0",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "SLIDE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_anim_slide_to_zero",
+     "name": "Set All glTF Animation Starting at 0",
+     "description": "Set all glTF animation starting at 0.0s. Can be useful for looping animations",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_bake_animation",
+     "name": "Bake All Objects Animations",
+     "description": "Force exporting animation on every object. Can be useful when using constraints or driver. Also useful when exporting only selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_merge_animation",
+     "name": "Merge Animation",
+     "description": "Merge Animations",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NLA_TRACK",
+       "name": "NLA Track Names",
+       "description": "Merge by NLA Track Names",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ACTION",
+       "name": "Actions",
+       "description": "Merge by Actions",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "NONE",
+       "name": "No Merge",
+       "description": "Do Not Merge Animations",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "ACTION",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_anim_single_armature",
+     "name": "Export all Armature Actions",
+     "description": "Export all actions, bound to a single armature. WARNING: Option does not support exports including multiple armatures",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_reset_pose_bones",
+     "name": "Reset Pose Bones Between Actions",
+     "description": "Reset pose bones between each action exported. This is needed when some bones are not keyed on some animations",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_current_frame",
+     "name": "Use Current Frame as Object Rest Transformations",
+     "description": "Export the scene in the current animation frame. When off, frame 0 is used as rest transformations for objects",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_rest_position_armature",
+     "name": "Use Rest Position Armature",
+     "description": "Export armatures using rest position as joints' rest pose. When off, current frame pose is used as rest pose",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_anim_scene_split_object",
+     "name": "Split Animation by Object",
+     "description": "Export Scene as seen in Viewport, But split animation by Object",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_skins",
+     "name": "Skinning",
+     "description": "Export skinning (armature) data",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_influence_nb",
+     "name": "Bone Influences",
+     "description": "Choose how many Bone influences to export",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 4,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_all_influences",
+     "name": "Include All Bone Influences",
+     "description": "Allow export of all joint vertex influences. Models may appear incorrectly in many viewers",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_morph",
+     "name": "Shape Keys",
+     "description": "Export shape keys (morph targets)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_morph_normal",
+     "name": "Shape Key Normals",
+     "description": "Export vertex normals with shape keys (morph targets)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_morph_tangent",
+     "name": "Shape Key Tangents",
+     "description": "Export vertex tangents with shape keys (morph targets)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_morph_animation",
+     "name": "Shape Key Animations",
+     "description": "Export shape keys animations (morph targets)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_morph_reset_sk_data",
+     "name": "Reset Shape Keys Between Actions",
+     "description": "Reset shape keys between each action exported. This is needed when some SK channels are not keyed on some animations",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_lights",
+     "name": "Punctual Lights",
+     "description": "Export directional, point, and spot lights. Uses \"KHR_lights_punctual\" glTF extension",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_try_sparse_sk",
+     "name": "Use Sparse Accessor if Better",
+     "description": "Try using Sparse Accessor if it saves space",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_try_omit_sparse_sk",
+     "name": "Omitting Sparse Accessor if Data is Empty",
+     "description": "Omitting Sparse Accessor if data is empty",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_gpu_instances",
+     "name": "GPU Instances",
+     "description": "Export using EXT_mesh_gpu_instancing. Limited to children of a given Empty. Multiple materials might be omitted",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_action_filter",
+     "name": "Filter Actions",
+     "description": "Filter Actions to be exported",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_convert_animation_pointer",
+     "name": "Convert TRS/Weights to Animation Pointer",
+     "description": "Export TRS and weights as Animation Pointer. Using KHR_animation_pointer extension",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_nla_strips",
+     "name": "Group by NLA Track",
+     "description": "When on, multiple actions become part of the same glTF animation if they're pushed onto NLA tracks with the same name. When off, all the currently assigned actions become one glTF animation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_original_specular",
+     "name": "Export Original PBR Specular",
+     "description": "Export original glTF PBR Specular, instead of Blender Principled Shader Specular",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "will_save_settings",
+     "name": "Remember Export Settings",
+     "description": "Store glTF export settings in the Blender project",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_hierarchy_full_collections",
+     "name": "Full Collection Hierarchy",
+     "description": "Export full hierarchy, including intermediate collections",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_extra_animations",
+     "name": "Prepare Extra Animations",
+     "description": "Export additional animations.\nThis feature is not standard and needs an external extension to be included in the glTF file",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_loglevel",
+     "name": "Log Level",
+     "description": "Log Level",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_glob",
+     "name": "filter_glob",
+     "description": "",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "*.glb",
+     "length_max": 0,
+     "flags": [
+      "HIDDEN",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  }
+ ]
+}

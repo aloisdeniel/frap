@@ -1,0 +1,147 @@
+{
+ "identifier": "NodeLink",
+ "name": "NodeLink",
+ "description": "Link between nodes in a node tree",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "is_valid",
+   "name": "Valid",
+   "description": "Link is valid",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_muted",
+   "name": "Muted",
+   "description": "Link is muted and can be ignored",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "from_node",
+   "name": "From node",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Node",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "to_node",
+   "name": "To node",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Node",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "from_socket",
+   "name": "From socket",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeSocket",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "to_socket",
+   "name": "To socket",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeSocket",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "is_hidden",
+   "name": "Is Hidden",
+   "description": "Link is hidden due to invisible sockets",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "multi_input_sort_id",
+   "name": "Multi Input Sort ID",
+   "description": "Used to sort multiple links coming into the same input. The highest ID is at the top.",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "swap_multi_input_sort_id",
+   "description": "Swap the order of two links connected to the same multi-input socket",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "other",
+     "name": "Other",
+     "description": "The other link. Must link to the same multi-input socket.",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeLink",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": true
+}

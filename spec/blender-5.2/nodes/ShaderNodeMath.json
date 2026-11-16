@@ -1,0 +1,433 @@
+{
+ "bl_idname": "ShaderNodeMath",
+ "srna": "ShaderNodeMath",
+ "name": "Math",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Value",
+   "identifier": "Value",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Value",
+   "identifier": "Value_001",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Value",
+   "identifier": "Value_002",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Value",
+   "identifier": "Value",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "operation": "ADD",
+  "use_clamp": false
+ },
+ "availability": {
+  "operation": {
+   "default": "ADD",
+   "by_value": {
+    "ADD": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "SUBTRACT": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "MULTIPLY": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "DIVIDE": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "MULTIPLY_ADD": {
+     "inputs": [
+      "Value",
+      "Value_001",
+      "Value_002"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "POWER": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "LOGARITHM": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "SQRT": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "INVERSE_SQRT": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "ABSOLUTE": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "EXPONENT": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "MINIMUM": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "MAXIMUM": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "LESS_THAN": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "GREATER_THAN": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "SIGN": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "COMPARE": {
+     "inputs": [
+      "Value",
+      "Value_001",
+      "Value_002"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "SMOOTH_MIN": {
+     "inputs": [
+      "Value",
+      "Value_001",
+      "Value_002"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "SMOOTH_MAX": {
+     "inputs": [
+      "Value",
+      "Value_001",
+      "Value_002"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "ROUND": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "FLOOR": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "CEIL": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "TRUNC": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "FRACT": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "MODULO": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "FLOORED_MODULO": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "WRAP": {
+     "inputs": [
+      "Value",
+      "Value_001",
+      "Value_002"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "SNAP": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "PINGPONG": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "SINE": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "COSINE": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "TANGENT": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "ARCSINE": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "ARCCOSINE": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "ARCTANGENT": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "ARCTAN2": {
+     "inputs": [
+      "Value",
+      "Value_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "SINH": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "COSH": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "TANH": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "RADIANS": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "DEGREES": {
+     "inputs": [
+      "Value"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    }
+   }
+  }
+ }
+}

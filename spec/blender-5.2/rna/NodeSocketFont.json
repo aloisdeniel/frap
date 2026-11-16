@@ -1,0 +1,24 @@
+{
+ "identifier": "NodeSocketFont",
+ "name": "Font Node Socket",
+ "description": "Font socket of a node",
+ "base": "NodeSocketStandard",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "default_value",
+   "name": "default_value",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "VectorFont",
+   "is_id": true,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

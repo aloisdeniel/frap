@@ -1,0 +1,129 @@
+{
+ "identifier": "ExplodeModifier",
+ "name": "Explode Modifier",
+ "description": "Explosion effect modifier based on a particle system",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "protect",
+   "name": "Protect",
+   "description": "Clean vertex group edges",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_edge_cut",
+   "name": "Cut Edges",
+   "description": "Cut face edges for nicer shrapnel",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_unborn",
+   "name": "Unborn",
+   "description": "Show mesh when particles are unborn",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_alive",
+   "name": "Alive",
+   "description": "Show mesh when particles are alive",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_dead",
+   "name": "Dead",
+   "description": "Show mesh when particles are dead",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_size",
+   "name": "Size",
+   "description": "Use particle size for the shrapnel",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "particle_uv",
+   "name": "Particle UV",
+   "description": "UV map to change with particle age",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

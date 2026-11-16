@@ -1,0 +1,90 @@
+{
+ "identifier": "NlaTracks",
+ "name": "NLA Tracks",
+ "description": "Collection of NLA Tracks",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "active",
+   "name": "Active Track",
+   "description": "Active NLA Track",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NlaTrack",
+   "is_id": false,
+   "flags": []
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add a new NLA Track",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "prev",
+     "name": "",
+     "description": "NLA Track to add the new one after",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NlaTrack",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "track",
+     "name": "",
+     "description": "New NLA Track",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NlaTrack",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove a NLA Track",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "track",
+     "name": "",
+     "description": "NLA Track to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NlaTrack",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": true
+}

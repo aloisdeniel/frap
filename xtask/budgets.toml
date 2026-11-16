@@ -11,14 +11,14 @@
 factor = 2.0
 
 [baseline_secs]
-frap-spec-rna = 0.0
-frap-spec-ops-object = 0.0
-frap-spec-ops-transform = 0.0
-frap-spec-ops-mesh = 0.0
-frap-spec-ops-uv = 0.0
-frap-spec-ops-anim = 0.0
-frap-spec-ops-data = 0.0
-frap-spec-ops-io = 0.0
-frap-spec-ops-render = 0.0
-frap-spec-ops-frap = 0.0
-frap-spec-catalog = 0.0
+frap-spec-rna = 3.11
+frap-spec-ops-object = 1.3
+frap-spec-ops-transform = 0.68
+frap-spec-ops-mesh = 2.25
+frap-spec-ops-uv = 0.46
+frap-spec-ops-anim = 0.46
+frap-spec-ops-data = 1.97
+frap-spec-ops-io = 0.61
+frap-spec-ops-render = 0.39
+frap-spec-ops-frap = 0.43
+frap-spec-catalog = 0.66

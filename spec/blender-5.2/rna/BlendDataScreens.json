@@ -1,0 +1,37 @@
+{
+ "identifier": "BlendDataScreens",
+ "name": "Main Screens",
+ "description": "Collection of screens",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "tag",
+   "description": "tag",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "value",
+     "name": "Value",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

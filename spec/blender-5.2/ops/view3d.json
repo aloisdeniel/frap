@@ -1,0 +1,3548 @@
+{
+ "namespace": "view3d",
+ "count": 68,
+ "operators": [
+  {
+   "idname": "view3d.bone_select_menu",
+   "bl_idname": "VIEW3D_OT_bone_select_menu",
+   "label": "Select Menu",
+   "description": "Menu bone selection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Bone Name",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "deselect",
+     "name": "Deselect",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "toggle",
+     "name": "Toggle",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.camera_background_image_add",
+   "bl_idname": "VIEW3D_OT_camera_background_image_add",
+   "label": "Add Camera Background Image",
+   "description": "Add a new background image to the active camera",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "filepath",
+     "name": "Filepath",
+     "description": "Path to image file",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1024,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "PATH_SUPPORTS_BLEND_RELATIVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "relative_path",
+     "name": "Relative Path",
+     "description": "Select the file relative to the blend file",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of the data-block to use by the operator",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 256,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "session_uid",
+     "name": "Session UID",
+     "description": "Session UID of the data-block to use by the operator",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.camera_background_image_remove",
+   "bl_idname": "VIEW3D_OT_camera_background_image_remove",
+   "label": "Remove Camera Background Image",
+   "description": "Remove a background image from the camera",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "Background image index to remove",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.camera_to_view",
+   "bl_idname": "VIEW3D_OT_camera_to_view",
+   "label": "Align Camera to View",
+   "description": "Set camera view to active view",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.camera_to_view_selected",
+   "bl_idname": "VIEW3D_OT_camera_to_view_selected",
+   "label": "Camera Fit Frame to Selected",
+   "description": "Move the camera so selected objects are framed",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.clear_render_border",
+   "bl_idname": "VIEW3D_OT_clear_render_border",
+   "label": "Clear Render Region",
+   "description": "Clear the boundaries of the border render and disable border render",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.clip_border",
+   "bl_idname": "VIEW3D_OT_clip_border",
+   "label": "Clipping Region",
+   "description": "Set the view clipping region",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "xmin",
+     "name": "X Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmax",
+     "name": "X Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymin",
+     "name": "Y Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymax",
+     "name": "Y Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.copybuffer",
+   "bl_idname": "VIEW3D_OT_copybuffer",
+   "label": "Copy Objects",
+   "description": "Copy the selected objects to the internal clipboard",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.cursor3d",
+   "bl_idname": "VIEW3D_OT_cursor3d",
+   "label": "Set 3D Cursor",
+   "description": "Set the location of the 3D cursor",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "use_depth",
+     "name": "Surface Project",
+     "description": "Project onto the surface",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orientation",
+     "name": "Orientation",
+     "description": "Preset viewpoint to use",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NONE",
+       "name": "None",
+       "description": "Leave orientation unchanged",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "VIEW",
+       "name": "View",
+       "description": "Orient to the viewport",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "XFORM",
+       "name": "Transform",
+       "description": "Orient to the current transform setting",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "GEOM",
+       "name": "Geometry",
+       "description": "Match the surface normal",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "VIEW",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.dolly",
+   "bl_idname": "VIEW3D_OT_dolly",
+   "label": "Dolly View",
+   "description": "Dolly in/out in the view",
+   "options": [
+    "BLOCKING",
+    "DEPENDS_ON_CURSOR",
+    "GRAB_CURSOR"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mx",
+     "name": "Region Position X",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "my",
+     "name": "Region Position Y",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "delta",
+     "name": "Delta",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_cursor_init",
+     "name": "Use Mouse Position",
+     "description": "Allow the initial mouse position to be used",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.drop_world",
+   "bl_idname": "VIEW3D_OT_drop_world",
+   "label": "Drop World",
+   "description": "Drop a world into the scene",
+   "options": [
+    "INTERNAL",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of the data-block to use by the operator",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 256,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "session_uid",
+     "name": "Session UID",
+     "description": "Session UID of the data-block to use by the operator",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.edit_mesh_extrude_individual_move",
+   "bl_idname": "VIEW3D_OT_edit_mesh_extrude_individual_move",
+   "label": "Extrude Individual and Move",
+   "description": "Extrude each individual face separately along local normals",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.edit_mesh_extrude_manifold_normal",
+   "bl_idname": "VIEW3D_OT_edit_mesh_extrude_manifold_normal",
+   "label": "Extrude Manifold Along Normals",
+   "description": "Extrude manifold region along normals",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.edit_mesh_extrude_move_normal",
+   "bl_idname": "VIEW3D_OT_edit_mesh_extrude_move_normal",
+   "label": "Extrude and Move on Normals",
+   "description": "Extrude region together along the average normal",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "dissolve_and_intersect",
+     "name": "Dissolve and Intersect",
+     "description": "Dissolves adjacent faces and intersects new geometry",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.edit_mesh_extrude_move_shrink_fatten",
+   "bl_idname": "VIEW3D_OT_edit_mesh_extrude_move_shrink_fatten",
+   "label": "Extrude and Move on Individual Normals",
+   "description": "Extrude region together along local normals",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.fly",
+   "bl_idname": "VIEW3D_OT_fly",
+   "label": "Fly Navigation",
+   "description": "Interactively fly around the scene",
+   "options": [
+    "BLOCKING"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.interactive_add",
+   "bl_idname": "VIEW3D_OT_interactive_add",
+   "label": "Add Primitive Object",
+   "description": "Interactively add an object",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "primitive_type",
+     "name": "Primitive",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CUBE",
+       "name": "Cube",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "CYLINDER",
+       "name": "Cylinder",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "CONE",
+       "name": "Cone",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "SPHERE_UV",
+       "name": "UV Sphere",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "SPHERE_ICO",
+       "name": "ICO Sphere",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "CUBE",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "plane_origin_base",
+     "name": "Origin",
+     "description": "The initial position for placement",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Start placing the edge position",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "CENTER",
+       "name": "Center",
+       "description": "Start placing the center position",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "EDGE",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "plane_origin_depth",
+     "name": "Origin",
+     "description": "The initial position for placement",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Start placing the edge position",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "CENTER",
+       "name": "Center",
+       "description": "Start placing the center position",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "EDGE",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "plane_aspect_base",
+     "name": "Aspect",
+     "description": "The initial aspect setting",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FREE",
+       "name": "Free",
+       "description": "Use an unconstrained aspect",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "FIXED",
+       "name": "Fixed",
+       "description": "Use a fixed 1:1 aspect",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "FREE",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "plane_aspect_depth",
+     "name": "Aspect",
+     "description": "The initial aspect setting",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FREE",
+       "name": "Free",
+       "description": "Use an unconstrained aspect",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "FIXED",
+       "name": "Fixed",
+       "description": "Use a fixed 1:1 aspect",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "FREE",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.localview",
+   "bl_idname": "VIEW3D_OT_localview",
+   "label": "Local View",
+   "description": "Toggle display of selected object(s) separately and centered in view",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "frame_selected",
+     "name": "Frame Selected",
+     "description": "Move the view to frame the selected objects",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.localview_remove_from",
+   "bl_idname": "VIEW3D_OT_localview_remove_from",
+   "label": "Remove from Local View",
+   "description": "Move selected objects out of local view",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.move",
+   "bl_idname": "VIEW3D_OT_move",
+   "label": "Pan View",
+   "description": "Move the view",
+   "options": [
+    "BLOCKING",
+    "GRAB_CURSOR"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "use_cursor_init",
+     "name": "Use Mouse Position",
+     "description": "Allow the initial mouse position to be used",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.navigate",
+   "bl_idname": "VIEW3D_OT_navigate",
+   "label": "View Navigation (Walk/Fly)",
+   "description": "Interactively navigate around the scene (uses the mode (walk/fly) preference)",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.ndof_all",
+   "bl_idname": "VIEW3D_OT_ndof_all",
+   "label": "NDOF Transform View",
+   "description": "Pan and rotate the view with the 3D mouse",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.ndof_orbit",
+   "bl_idname": "VIEW3D_OT_ndof_orbit",
+   "label": "NDOF Orbit View",
+   "description": "Orbit the view using the 3D mouse",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.ndof_orbit_zoom",
+   "bl_idname": "VIEW3D_OT_ndof_orbit_zoom",
+   "label": "NDOF Orbit View with Zoom",
+   "description": "Orbit and zoom the view using the 3D mouse",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.ndof_pan",
+   "bl_idname": "VIEW3D_OT_ndof_pan",
+   "label": "NDOF Pan View",
+   "description": "Pan the view with the 3D mouse",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.object_as_camera",
+   "bl_idname": "VIEW3D_OT_object_as_camera",
+   "label": "Set Active Object as Camera",
+   "description": "Set the active object as the active camera for this view or scene",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.object_mode_pie_or_toggle",
+   "bl_idname": "VIEW3D_OT_object_mode_pie_or_toggle",
+   "label": "Object Mode Menu",
+   "description": "(undocumented operator)",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.pastebuffer",
+   "bl_idname": "VIEW3D_OT_pastebuffer",
+   "label": "Paste Objects",
+   "description": "Paste objects from the internal clipboard",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "autoselect",
+     "name": "Select",
+     "description": "Select pasted objects",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "active_collection",
+     "name": "Active Collection",
+     "description": "Put pasted objects in the active collection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.render_border",
+   "bl_idname": "VIEW3D_OT_render_border",
+   "label": "Set Render Region",
+   "description": "Set the boundaries of the border render and enable border render",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "xmin",
+     "name": "X Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmax",
+     "name": "X Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymin",
+     "name": "Y Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymax",
+     "name": "Y Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.rotate",
+   "bl_idname": "VIEW3D_OT_rotate",
+   "label": "Rotate View",
+   "description": "Rotate the view",
+   "options": [
+    "BLOCKING",
+    "GRAB_CURSOR"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "use_cursor_init",
+     "name": "Use Mouse Position",
+     "description": "Allow the initial mouse position to be used",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.ruler_add",
+   "bl_idname": "VIEW3D_OT_ruler_add",
+   "label": "Ruler Add",
+   "description": "Add ruler",
+   "options": [
+    "INTERNAL",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.ruler_remove",
+   "bl_idname": "VIEW3D_OT_ruler_remove",
+   "label": "Ruler Remove",
+   "description": "(undocumented operator)",
+   "options": [
+    "INTERNAL",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.select",
+   "bl_idname": "VIEW3D_OT_select",
+   "label": "Select",
+   "description": "Select and activate item(s)",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend selection instead of deselecting everything first",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "deselect",
+     "name": "Deselect",
+     "description": "Remove from selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "toggle",
+     "name": "Toggle Selection",
+     "description": "Toggle the selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "deselect_all",
+     "name": "Deselect On Nothing",
+     "description": "Deselect all when nothing under the cursor",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "select_passthrough",
+     "name": "Only Select Unselected",
+     "description": "Ignore the select action when the element is already selected",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "center",
+     "name": "Center",
+     "description": "Use the object center when selecting, in edit mode used to extend object selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "enumerate",
+     "name": "Enumerate",
+     "description": "List objects under the mouse (object mode only)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "object",
+     "name": "Object",
+     "description": "Use object selection (edit mode only)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "Mouse location",
+     "type": "INT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0,
+      0
+     ],
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.select_box",
+   "bl_idname": "VIEW3D_OT_select_box",
+   "label": "Box Select",
+   "description": "Select items using box selection",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "xmin",
+     "name": "X Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmax",
+     "name": "X Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymin",
+     "name": "Y Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymax",
+     "name": "Y Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SET",
+       "name": "Set",
+       "description": "Set a new selection",
+       "icon": "SELECT_SET",
+       "value": 3
+      },
+      {
+       "identifier": "ADD",
+       "name": "Extend",
+       "description": "Extend existing selection",
+       "icon": "SELECT_EXTEND",
+       "value": 1
+      },
+      {
+       "identifier": "SUB",
+       "name": "Subtract",
+       "description": "Subtract existing selection",
+       "icon": "SELECT_SUBTRACT",
+       "value": 2
+      },
+      {
+       "identifier": "XOR",
+       "name": "Difference",
+       "description": "Invert existing selection",
+       "icon": "SELECT_DIFFERENCE",
+       "value": 5
+      },
+      {
+       "identifier": "AND",
+       "name": "Intersect",
+       "description": "Intersect existing selection",
+       "icon": "SELECT_INTERSECT",
+       "value": 4
+      }
+     ],
+     "default": "SET",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.select_circle",
+   "bl_idname": "VIEW3D_OT_select_circle",
+   "label": "Circle Select",
+   "description": "Select items using circle selection",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "x",
+     "name": "X",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "y",
+     "name": "Y",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "radius",
+     "name": "Radius",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 25,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SET",
+       "name": "Set",
+       "description": "Set a new selection",
+       "icon": "SELECT_SET",
+       "value": 3
+      },
+      {
+       "identifier": "ADD",
+       "name": "Extend",
+       "description": "Extend existing selection",
+       "icon": "SELECT_EXTEND",
+       "value": 1
+      },
+      {
+       "identifier": "SUB",
+       "name": "Subtract",
+       "description": "Subtract existing selection",
+       "icon": "SELECT_SUBTRACT",
+       "value": 2
+      }
+     ],
+     "default": "SET",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.select_lasso",
+   "bl_idname": "VIEW3D_OT_select_lasso",
+   "label": "Lasso Select",
+   "description": "Select items using lasso selection",
+   "options": [
+    "DEPENDS_ON_CURSOR",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "path",
+     "name": "Path",
+     "description": "",
+     "type": "COLLECTION",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "OperatorMousePath",
+     "is_id": false,
+     "api": null,
+     "flags": [
+      "READONLY",
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_smooth_stroke",
+     "name": "Stabilize Stroke",
+     "description": "Selection lags behind mouse and follows a smoother path",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "smooth_stroke_factor",
+     "name": "Smooth Stroke Factor",
+     "description": "Higher values give a smoother stroke",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.75,
+     "hard_min": 0.5,
+     "hard_max": 0.9900000095367432,
+     "soft_min": 0.5,
+     "soft_max": 0.9900000095367432,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "smooth_stroke_radius",
+     "name": "Smooth Stroke Radius",
+     "description": "Minimum distance from last point before selection continues",
+     "type": "INT",
+     "subtype": "PIXEL",
+     "unit": "NONE",
+     "default": 35,
+     "hard_min": 10,
+     "hard_max": 200,
+     "soft_min": 10,
+     "soft_max": 200,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SET",
+       "name": "Set",
+       "description": "Set a new selection",
+       "icon": "SELECT_SET",
+       "value": 3
+      },
+      {
+       "identifier": "ADD",
+       "name": "Extend",
+       "description": "Extend existing selection",
+       "icon": "SELECT_EXTEND",
+       "value": 1
+      },
+      {
+       "identifier": "SUB",
+       "name": "Subtract",
+       "description": "Subtract existing selection",
+       "icon": "SELECT_SUBTRACT",
+       "value": 2
+      },
+      {
+       "identifier": "XOR",
+       "name": "Difference",
+       "description": "Invert existing selection",
+       "icon": "SELECT_DIFFERENCE",
+       "value": 5
+      },
+      {
+       "identifier": "AND",
+       "name": "Intersect",
+       "description": "Intersect existing selection",
+       "icon": "SELECT_INTERSECT",
+       "value": 4
+      }
+     ],
+     "default": "SET",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.select_menu",
+   "bl_idname": "VIEW3D_OT_select_menu",
+   "label": "Select Menu",
+   "description": "Menu object selection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Object Name",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "deselect",
+     "name": "Deselect",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "toggle",
+     "name": "Toggle",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.smoothview",
+   "bl_idname": "VIEW3D_OT_smoothview",
+   "label": "Smooth View",
+   "description": "(undocumented operator)",
+   "options": [
+    "INTERNAL"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.snap_cursor_to_active",
+   "bl_idname": "VIEW3D_OT_snap_cursor_to_active",
+   "label": "Snap Cursor to Active",
+   "description": "Snap 3D cursor to the active item",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.snap_cursor_to_center",
+   "bl_idname": "VIEW3D_OT_snap_cursor_to_center",
+   "label": "Snap Cursor to World Origin",
+   "description": "Snap 3D cursor to the world origin",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.snap_cursor_to_grid",
+   "bl_idname": "VIEW3D_OT_snap_cursor_to_grid",
+   "label": "Snap Cursor to Grid",
+   "description": "Snap 3D cursor to the nearest grid division",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.snap_cursor_to_selected",
+   "bl_idname": "VIEW3D_OT_snap_cursor_to_selected",
+   "label": "Snap Cursor to Selected",
+   "description": "Snap 3D cursor to the middle of the selected item(s)",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.snap_selected_to_active",
+   "bl_idname": "VIEW3D_OT_snap_selected_to_active",
+   "label": "Snap Selection to Active",
+   "description": "Snap selected item(s) to the active item",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.snap_selected_to_cursor",
+   "bl_idname": "VIEW3D_OT_snap_selected_to_cursor",
+   "label": "Snap Selection to Cursor",
+   "description": "Snap selected item(s) to the 3D cursor",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "use_offset",
+     "name": "Offset",
+     "description": "If the selection should be snapped as a whole or by each object center",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_rotation",
+     "name": "Rotation",
+     "description": "If the selection should be rotated to match the cursor",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.snap_selected_to_grid",
+   "bl_idname": "VIEW3D_OT_snap_selected_to_grid",
+   "label": "Snap Selection to Grid",
+   "description": "Snap selected item(s) to their nearest grid division",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.toggle_matcap_flip",
+   "bl_idname": "VIEW3D_OT_toggle_matcap_flip",
+   "label": "Flip MatCap",
+   "description": "Flip MatCap",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.toggle_shading",
+   "bl_idname": "VIEW3D_OT_toggle_shading",
+   "label": "Toggle Shading Type",
+   "description": "Toggle shading type in 3D viewport",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "Shading type to toggle",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "WIREFRAME",
+       "name": "Wireframe",
+       "description": "Toggle wireframe shading",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "SOLID",
+       "name": "Solid",
+       "description": "Toggle solid shading",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "MATERIAL",
+       "name": "Material Preview",
+       "description": "Toggle material preview shading",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "RENDERED",
+       "name": "Rendered",
+       "description": "Toggle rendered shading",
+       "icon": "NONE",
+       "value": 6
+      }
+     ],
+     "default": "WIREFRAME",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.toggle_xray",
+   "bl_idname": "VIEW3D_OT_toggle_xray",
+   "label": "Toggle X-Ray",
+   "description": "Transparent scene display. Allow selecting through items",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.transform_gizmo_set",
+   "bl_idname": "VIEW3D_OT_transform_gizmo_set",
+   "label": "Transform Gizmo Set",
+   "description": "Set the current transform gizmo",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "TRANSLATE",
+       "name": "Move",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ROTATE",
+       "name": "Rotate",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "SCALE",
+       "name": "Scale",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": [],
+     "flags": [
+      "ENUM_FLAG",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.view_all",
+   "bl_idname": "VIEW3D_OT_view_all",
+   "label": "Frame All",
+   "description": "View all objects in scene",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "use_all_regions",
+     "name": "All Regions",
+     "description": "View selected for all regions",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "center",
+     "name": "Center",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.view_axis",
+   "bl_idname": "VIEW3D_OT_view_axis",
+   "label": "View Axis",
+   "description": "Use a preset viewpoint",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "View",
+     "description": "Preset viewpoint to use",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "LEFT",
+       "name": "Left",
+       "description": "View from the left",
+       "icon": "TRIA_LEFT",
+       "value": 3
+      },
+      {
+       "identifier": "RIGHT",
+       "name": "Right",
+       "description": "View from the right",
+       "icon": "TRIA_RIGHT",
+       "value": 4
+      },
+      {
+       "identifier": "BOTTOM",
+       "name": "Bottom",
+       "description": "View from the bottom",
+       "icon": "TRIA_DOWN",
+       "value": 6
+      },
+      {
+       "identifier": "TOP",
+       "name": "Top",
+       "description": "View from the top",
+       "icon": "TRIA_UP",
+       "value": 5
+      },
+      {
+       "identifier": "FRONT",
+       "name": "Front",
+       "description": "View from the front",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "BACK",
+       "name": "Back",
+       "description": "View from the back",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "LEFT",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "align_active",
+     "name": "Align Active",
+     "description": "Align to the active object's axis",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "relative",
+     "name": "Relative",
+     "description": "Rotate relative to the current orientation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.view_camera",
+   "bl_idname": "VIEW3D_OT_view_camera",
+   "label": "View Camera",
+   "description": "Toggle the camera view",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.view_center_camera",
+   "bl_idname": "VIEW3D_OT_view_center_camera",
+   "label": "Frame Camera Bounds",
+   "description": "Center the camera view, resizing the view to fit its bounds",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.view_center_cursor",
+   "bl_idname": "VIEW3D_OT_view_center_cursor",
+   "label": "Center View to Cursor",
+   "description": "Center the view so that the cursor is in the middle of the view",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.view_center_lock",
+   "bl_idname": "VIEW3D_OT_view_center_lock",
+   "label": "View Lock Center",
+   "description": "Center the view lock offset",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.view_center_pick",
+   "bl_idname": "VIEW3D_OT_view_center_pick",
+   "label": "Center View to Mouse",
+   "description": "Center the view to the Z-depth position under the mouse cursor",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.view_lock_clear",
+   "bl_idname": "VIEW3D_OT_view_lock_clear",
+   "label": "View Lock Clear",
+   "description": "Clear all view locking",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.view_lock_to_active",
+   "bl_idname": "VIEW3D_OT_view_lock_to_active",
+   "label": "View Lock to Active",
+   "description": "Lock the view to the active object/bone",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.view_orbit",
+   "bl_idname": "VIEW3D_OT_view_orbit",
+   "label": "View Orbit",
+   "description": "Orbit the view",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "angle",
+     "name": "Roll",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "type",
+     "name": "Orbit",
+     "description": "Direction of View Orbit",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ORBITLEFT",
+       "name": "Orbit Left",
+       "description": "Orbit the view around to the left",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ORBITRIGHT",
+       "name": "Orbit Right",
+       "description": "Orbit the view around to the right",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ORBITUP",
+       "name": "Orbit Up",
+       "description": "Orbit the view up",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "ORBITDOWN",
+       "name": "Orbit Down",
+       "description": "Orbit the view down",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "ORBITLEFT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.view_pan",
+   "bl_idname": "VIEW3D_OT_view_pan",
+   "label": "Pan View Direction",
+   "description": "Pan the view in a given direction",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Pan",
+     "description": "Direction of View Pan",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PANLEFT",
+       "name": "Pan Left",
+       "description": "Pan the view to the left",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "PANRIGHT",
+       "name": "Pan Right",
+       "description": "Pan the view to the right",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "PANUP",
+       "name": "Pan Up",
+       "description": "Pan the view up",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "PANDOWN",
+       "name": "Pan Down",
+       "description": "Pan the view down",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "PANLEFT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.view_persportho",
+   "bl_idname": "VIEW3D_OT_view_persportho",
+   "label": "View Perspective/Orthographic",
+   "description": "Switch the current view from perspective/orthographic projection",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.view_roll",
+   "bl_idname": "VIEW3D_OT_view_roll",
+   "label": "View Roll",
+   "description": "Roll the view",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "angle",
+     "name": "Roll",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "type",
+     "name": "Roll Angle Source",
+     "description": "How roll angle is calculated",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ANGLE",
+       "name": "Roll Angle",
+       "description": "Roll the view using an angle value",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LEFT",
+       "name": "Roll Left",
+       "description": "Roll the view around to the left",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "RIGHT",
+       "name": "Roll Right",
+       "description": "Roll the view around to the right",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "ANGLE",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.view_selected",
+   "bl_idname": "VIEW3D_OT_view_selected",
+   "label": "Frame Selected",
+   "description": "Move the view to the selection center",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "use_all_regions",
+     "name": "All Regions",
+     "description": "View selected for all regions",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.vr_location_scouting_capture_review",
+   "bl_idname": "VIEW3D_OT_vr_location_scouting_capture_review",
+   "label": "Location Scouting Capture Review",
+   "description": "Interactively review Location Scouting VR Captures",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.walk",
+   "bl_idname": "VIEW3D_OT_walk",
+   "label": "Walk Navigation",
+   "description": "Interactively walk around the scene",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.zoom",
+   "bl_idname": "VIEW3D_OT_zoom",
+   "label": "Zoom View",
+   "description": "Zoom in/out in the view",
+   "options": [
+    "BLOCKING",
+    "GRAB_CURSOR"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mx",
+     "name": "Region Position X",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "my",
+     "name": "Region Position Y",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "delta",
+     "name": "Delta",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_cursor_init",
+     "name": "Use Mouse Position",
+     "description": "Allow the initial mouse position to be used",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "view3d.zoom_border",
+   "bl_idname": "VIEW3D_OT_zoom_border",
+   "label": "Zoom to Border",
+   "description": "Zoom in the view to the nearest object contained in the border",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "xmin",
+     "name": "X Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmax",
+     "name": "X Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymin",
+     "name": "Y Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymax",
+     "name": "Y Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "zoom_out",
+     "name": "Zoom Out",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "view3d.zoom_camera_1_to_1",
+   "bl_idname": "VIEW3D_OT_zoom_camera_1_to_1",
+   "label": "Zoom Camera 1:1",
+   "description": "Match the camera to 1:1 to the render output",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  }
+ ]
+}

@@ -1,0 +1,445 @@
+{
+ "bl_idname": "ShaderNodeTexVoronoi",
+ "srna": "ShaderNodeTexVoronoi",
+ "name": "Voronoi Texture",
+ "label": "",
+ "width": 160.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": true,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "W",
+   "identifier": "W",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Scale",
+   "identifier": "Scale",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 5.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Detail",
+   "identifier": "Detail",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Roughness",
+   "identifier": "Roughness",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Lacunarity",
+   "identifier": "Lacunarity",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 2.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Smoothness",
+   "identifier": "Smoothness",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Exponent",
+   "identifier": "Exponent",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Randomness",
+   "identifier": "Randomness",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Distance",
+   "identifier": "Distance",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Position",
+   "identifier": "Position",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "W",
+   "identifier": "W",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Radius",
+   "identifier": "Radius",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "texture_mapping": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree",
+   "type": "TexMapping"
+  },
+  "color_mapping": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree",
+   "type": "ColorMapping"
+  },
+  "voronoi_dimensions": "3D",
+  "distance": "EUCLIDEAN",
+  "feature": "F1",
+  "normalize": false
+ },
+ "availability": {
+  "voronoi_dimensions": {
+   "default": "3D",
+   "by_value": {
+    "1D": {
+     "inputs": [
+      "W",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Randomness"
+     ],
+     "outputs": [
+      "Distance",
+      "Color",
+      "W"
+     ]
+    },
+    "2D": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Randomness"
+     ],
+     "outputs": [
+      "Distance",
+      "Color",
+      "Position"
+     ]
+    },
+    "3D": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Randomness"
+     ],
+     "outputs": [
+      "Distance",
+      "Color",
+      "Position"
+     ]
+    },
+    "4D": {
+     "inputs": [
+      "Vector",
+      "W",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Randomness"
+     ],
+     "outputs": [
+      "Distance",
+      "Color",
+      "Position",
+      "W"
+     ]
+    }
+   }
+  },
+  "distance": {
+   "default": "EUCLIDEAN",
+   "by_value": {
+    "EUCLIDEAN": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Randomness"
+     ],
+     "outputs": [
+      "Distance",
+      "Color",
+      "Position"
+     ]
+    },
+    "MANHATTAN": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Randomness"
+     ],
+     "outputs": [
+      "Distance",
+      "Color",
+      "Position"
+     ]
+    },
+    "CHEBYCHEV": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Randomness"
+     ],
+     "outputs": [
+      "Distance",
+      "Color",
+      "Position"
+     ]
+    },
+    "MINKOWSKI": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Exponent",
+      "Randomness"
+     ],
+     "outputs": [
+      "Distance",
+      "Color",
+      "Position"
+     ]
+    }
+   }
+  },
+  "feature": {
+   "default": "F1",
+   "by_value": {
+    "F1": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Randomness"
+     ],
+     "outputs": [
+      "Distance",
+      "Color",
+      "Position"
+     ]
+    },
+    "F2": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Randomness"
+     ],
+     "outputs": [
+      "Distance",
+      "Color",
+      "Position"
+     ]
+    },
+    "SMOOTH_F1": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Smoothness",
+      "Randomness"
+     ],
+     "outputs": [
+      "Distance",
+      "Color",
+      "Position"
+     ]
+    },
+    "DISTANCE_TO_EDGE": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Randomness"
+     ],
+     "outputs": [
+      "Distance"
+     ]
+    },
+    "N_SPHERE_RADIUS": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Randomness"
+     ],
+     "outputs": [
+      "Radius"
+     ]
+    }
+   }
+  }
+ }
+}

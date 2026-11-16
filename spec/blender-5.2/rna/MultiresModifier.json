@@ -1,0 +1,258 @@
+{
+ "identifier": "MultiresModifier",
+ "name": "Multires Modifier",
+ "description": "Multiresolution mesh modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "uv_smooth",
+   "name": "UV Smooth",
+   "description": "Controls how smoothing is applied to UVs",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "UVs are not smoothed, boundaries are kept sharp",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "PRESERVE_CORNERS",
+     "name": "Keep Corners",
+     "description": "UVs are smoothed, corners on discontinuous boundary are kept sharp",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "PRESERVE_CORNERS_AND_JUNCTIONS",
+     "name": "Keep Corners, Junctions",
+     "description": "UVs are smoothed, corners on discontinuous boundary and junctions of 3 or more regions are kept sharp",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "PRESERVE_CORNERS_JUNCTIONS_AND_CONCAVE",
+     "name": "Keep Corners, Junctions, Concave",
+     "description": "UVs are smoothed, corners on discontinuous boundary, junctions of 3 or more regions and darts and concave corners are kept sharp",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "PRESERVE_BOUNDARIES",
+     "name": "Keep Boundaries",
+     "description": "UVs are smoothed, boundaries are kept sharp",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "SMOOTH_ALL",
+     "name": "All",
+     "description": "UVs and boundaries are smoothed",
+     "icon": "NONE",
+     "value": 5
+    }
+   ],
+   "default": "PRESERVE_BOUNDARIES",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "quality",
+   "name": "Quality",
+   "description": "Accuracy of vertex positions, lower value is faster but less precise",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 4,
+   "hard_min": 1,
+   "hard_max": 10,
+   "soft_min": 1,
+   "soft_max": 6,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "boundary_smooth",
+   "name": "Boundary Smooth",
+   "description": "Controls how open boundaries are smoothed",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "PRESERVE_CORNERS",
+     "name": "Keep Corners",
+     "description": "Smooth boundaries, but corners are kept sharp",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "ALL",
+     "name": "All",
+     "description": "Smooth boundaries, including corners",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "ALL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "levels",
+   "name": "Levels",
+   "description": "Number of subdivisions to use in the viewport",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 255,
+   "soft_min": 0,
+   "soft_max": 255,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sculpt_levels",
+   "name": "Sculpt Levels",
+   "description": "Number of subdivisions to use in sculpt mode",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 255,
+   "soft_min": 0,
+   "soft_max": 255,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "render_levels",
+   "name": "Render Levels",
+   "description": "The subdivision level visible at render time",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 255,
+   "soft_min": 0,
+   "soft_max": 255,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "total_levels",
+   "name": "Total Levels",
+   "description": "Number of subdivisions for which displacements are stored",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 255,
+   "soft_min": 0,
+   "soft_max": 255,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_external",
+   "name": "External",
+   "description": "Store multires displacements outside the .blend file, to save memory",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "filepath",
+   "name": "File Path",
+   "description": "Path to external displacements file",
+   "type": "STRING",
+   "subtype": "FILE_PATH",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL",
+    "PATH_SUPPORTS_BLEND_RELATIVE"
+   ]
+  },
+  {
+   "identifier": "show_only_control_edges",
+   "name": "Optimal Display",
+   "description": "Skip drawing/rendering of interior subdivided edges",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_creases",
+   "name": "Use Creases",
+   "description": "Use mesh crease information to sharpen edges or corners",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_custom_normals",
+   "name": "Use Custom Normals",
+   "description": "Interpolates existing custom normals to resulting mesh",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_sculpt_base_mesh",
+   "name": "Sculpt Base Mesh",
+   "description": "Make Sculpt Mode tools deform the base mesh while previewing the displacement of higher subdivision levels",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

@@ -1,0 +1,298 @@
+{
+ "identifier": "GreasePencilMultiplyModifier",
+ "name": "Multiply Modifier",
+ "description": "Generate multiple strokes from one stroke",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "tree_node_filter",
+   "name": "Layer",
+   "description": "Layer name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "use_layer_pass_filter",
+   "name": "Use Layer Pass",
+   "description": "Use layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layer_pass_filter",
+   "name": "Layer Pass",
+   "description": "Layer pass filter",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_filter",
+   "name": "Invert Layer",
+   "description": "Invert layer filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_pass_filter",
+   "name": "Invert Layer Pass",
+   "description": "Invert layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_layer_group_filter",
+   "name": "Layer Group",
+   "description": "Filter by layer group name",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_filter",
+   "name": "Material",
+   "description": "Material used for filtering",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_material_pass_filter",
+   "name": "Use Material Pass",
+   "description": "Use material pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_pass_filter",
+   "name": "Material Pass",
+   "description": "Material pass",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_material_filter",
+   "name": "Invert Material",
+   "description": "Invert material filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_material_pass_filter",
+   "name": "Invert Material Pass",
+   "description": "Invert material pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_fading_panel",
+   "name": "open_fading_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_influence_panel",
+   "name": "open_influence_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_fade",
+   "name": "Fade",
+   "description": "Fade the stroke thickness for each generated stroke",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "duplicates",
+   "name": "Duplicates",
+   "description": "How many copies of strokes be displayed",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 3,
+   "hard_min": 0,
+   "hard_max": 999,
+   "soft_min": 1,
+   "soft_max": 10,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "distance",
+   "name": "Distance",
+   "description": "Distance of duplications",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.10000000149011612,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "offset",
+   "name": "Offset",
+   "description": "Offset of duplicates, -1 to 1 (inner to outer)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "fading_thickness",
+   "name": "Thickness",
+   "description": "Fade influence of stroke's thickness",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "fading_opacity",
+   "name": "Opacity",
+   "description": "Fade influence of stroke's opacity",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "fading_center",
+   "name": "Center",
+   "description": "Fade center",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

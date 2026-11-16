@@ -1,0 +1,24 @@
+{
+ "identifier": "ArmatureBones",
+ "name": "Armature Bones",
+ "description": "Collection of armature bones",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "active",
+   "name": "Active Bone",
+   "description": "Armature's active bone",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Bone",
+   "is_id": false,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

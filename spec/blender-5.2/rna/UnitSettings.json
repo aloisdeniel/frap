@@ -1,0 +1,185 @@
+{
+ "identifier": "UnitSettings",
+ "name": "Unit Settings",
+ "description": "",
+ "base": null,
+ "name_property": null,
+ "nested": "Scene",
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "system",
+   "name": "Unit System",
+   "description": "The unit system to use for user interface controls",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "METRIC",
+     "name": "Metric",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "IMPERIAL",
+     "name": "Imperial",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "NONE",
+   "flags": []
+  },
+  {
+   "identifier": "system_rotation",
+   "name": "Rotation Units",
+   "description": "Unit to use for displaying/editing rotation values",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "DEGREES",
+     "name": "Degrees",
+     "description": "Use degrees for measuring angles and rotations",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "RADIANS",
+     "name": "Radians",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "DEGREES",
+   "flags": []
+  },
+  {
+   "identifier": "scale_length",
+   "name": "Unit Scale",
+   "description": "Scale to use when converting between Blender units and dimensions. When working at microscopic or astronomical scale, a small or large unit scale respectively can be used to avoid numerical precision problems",
+   "type": "FLOAT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 9.999999717180685e-10,
+   "hard_max": 1000000000.0,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 100.0,
+   "step": 0.10000000149011612,
+   "precision": 6,
+   "flags": []
+  },
+  {
+   "identifier": "use_separate",
+   "name": "Separate Units",
+   "description": "Display units in pairs (e.g. 1m 0cm)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "length_unit",
+   "name": "Length Unit",
+   "description": "Unit that will be used to display length values",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "DEFAULT",
+     "name": "Default",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "DEFAULT",
+   "flags": []
+  },
+  {
+   "identifier": "mass_unit",
+   "name": "Mass Unit",
+   "description": "Unit that will be used to display mass values",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "DEFAULT",
+     "name": "Default",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "DEFAULT",
+   "flags": []
+  },
+  {
+   "identifier": "time_unit",
+   "name": "Time Unit",
+   "description": "Unit that will be used to display time values",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "DEFAULT",
+     "name": "Default",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "DEFAULT",
+   "flags": []
+  },
+  {
+   "identifier": "temperature_unit",
+   "name": "Temperature Unit",
+   "description": "Unit that will be used to display temperature values",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "DEFAULT",
+     "name": "Default",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "DEFAULT",
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.scenes.new('Scene').unit_settings",
+  "differs_from_default": {
+   "system": "METRIC",
+   "scale_length": 1.0,
+   "length_unit": "METERS",
+   "mass_unit": "KILOGRAMS",
+   "time_unit": "SECONDS",
+   "temperature_unit": "KELVIN"
+  }
+ }
+}

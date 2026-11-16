@@ -1,0 +1,991 @@
+{
+ "identifier": "PreferencesEdit",
+ "name": "Edit Methods",
+ "description": "Settings for interacting with Blender data",
+ "base": null,
+ "name_property": null,
+ "nested": "Preferences",
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "material_link",
+   "name": "Material Link To",
+   "description": "Toggle whether the material is linked to object data or the object block",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OBDATA",
+     "name": "Object Data",
+     "description": "Toggle whether the material is linked to object data or the object block",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "Toggle whether the material is linked to object data or the object block",
+     "icon": "NONE",
+     "value": 256
+    }
+   ],
+   "default": "OBDATA",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "object_align",
+   "name": "Align Object To",
+   "description": "The default alignment for objects added from a 3D viewport menu",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "WORLD",
+     "name": "World",
+     "description": "Align newly added objects to the world coordinate system",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "VIEW",
+     "name": "View",
+     "description": "Align newly added objects to the active 3D view orientation",
+     "icon": "NONE",
+     "value": 524288
+    },
+    {
+     "identifier": "CURSOR",
+     "name": "3D Cursor",
+     "description": "Align newly added objects to the 3D Cursor's rotation",
+     "icon": "NONE",
+     "value": 16384
+    }
+   ],
+   "default": "WORLD",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_enter_edit_mode",
+   "name": "Enter Edit Mode",
+   "description": "Enter edit mode automatically after adding a new object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "collection_instance_empty_size",
+   "name": "Collection Instance Empty Size",
+   "description": "Display size of the empty when new collection instances are created",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0010000000474974513,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_text_edit_auto_close",
+   "name": "Auto Close Character Pairs",
+   "description": "Automatically close relevant character pairs when typing in the text editor",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "undo_steps",
+   "name": "Undo Steps",
+   "description": "Number of undo steps available (smaller values conserve memory)",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 32,
+   "hard_min": 0,
+   "hard_max": 256,
+   "soft_min": 0,
+   "soft_max": 256,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "undo_memory_limit",
+   "name": "Undo Memory Size",
+   "description": "Maximum memory usage in megabytes (0 means unlimited)",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_global_undo",
+   "name": "Global Undo",
+   "description": "Global undo works by keeping a full copy of the file itself in memory, so takes extra memory",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_auto_keying",
+   "name": "Auto Keying Enable",
+   "description": "Automatic keyframe insertion for Objects and Bones (default setting used for new Scenes)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "auto_keying_mode",
+   "name": "Auto Keying Mode",
+   "description": "Mode of automatic keyframe insertion for Objects and Bones (default setting used for new Scenes)",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ADD_REPLACE_KEYS",
+     "name": "Add/Replace",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "REPLACE_KEYS",
+     "name": "Replace",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    }
+   ],
+   "default": "ADD_REPLACE_KEYS",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_keyframe_insert_available",
+   "name": "Auto Keyframe Insert Available",
+   "description": "Insert Keyframes only for properties that are already animated",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_auto_keying_warning",
+   "name": "Show Auto Keying Warning",
+   "description": "Show warning indicators when transforming objects and bones if auto keying is enabled",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "key_insert_channels",
+   "name": "Default Key Channels",
+   "description": "Which channels to insert keys at when no keying set is active",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LOCATION",
+     "name": "Location",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "ROTATION",
+     "name": "Rotation",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "SCALE",
+     "name": "Scale",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "ROTATE_MODE",
+     "name": "Rotation Mode",
+     "description": "",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "CUSTOM_PROPS",
+     "name": "Custom Properties",
+     "description": "",
+     "icon": "NONE",
+     "value": 16
+    }
+   ],
+   "default": [
+    "CUSTOM_PROPS",
+    "LOCATION",
+    "ROTATION",
+    "SCALE"
+   ],
+   "flags": [
+    "ENUM_FLAG",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_auto_keyframe_insert_needed",
+   "name": "Autokey Insert Needed",
+   "description": "Auto-Keying will skip inserting keys that don't affect the animation",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_keyframe_insert_needed",
+   "name": "Keyframe Insert Needed",
+   "description": "When keying manually, skip inserting keys that don't affect the animation",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_visual_keying",
+   "name": "Visual Keying",
+   "description": "Use Visual keying automatically for constrained objects",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_insertkey_xyz_to_rgb",
+   "name": "New F-Curve Colors - XYZ to RGB",
+   "description": "Color for newly added transformation F-Curves (Location, Rotation, Scale) and also Color is based on the transform axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_anim_channel_group_colors",
+   "name": "Channel Group Colors",
+   "description": "Use animation channel group colors; generally this is used to show bone group colors",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "fcurve_new_auto_smoothing",
+   "name": "New Curve Smoothing Mode",
+   "description": "Auto Handle Smoothing mode used for newly added F-Curves",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "Automatic handles only take immediately adjacent keys into account",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CONT_ACCEL",
+     "name": "Continuous Acceleration",
+     "description": "Automatic handles are adjusted to avoid jumps in acceleration, resulting in smoother curves. However, key changes may affect interpolation over a larger stretch of the curve.",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "CONT_ACCEL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "keyframe_new_interpolation_type",
+   "name": "New Interpolation Type",
+   "description": "Interpolation mode used for first keyframe on newly added F-Curves (subsequent keyframes take interpolation from preceding keyframe)",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "CONSTANT",
+     "name": "Constant",
+     "description": "No interpolation, value of A gets held until B is encountered",
+     "icon": "IPO_CONSTANT",
+     "value": 0
+    },
+    {
+     "identifier": "LINEAR",
+     "name": "Linear",
+     "description": "Straight-line interpolation between A and B (i.e. no ease in/out)",
+     "icon": "IPO_LINEAR",
+     "value": 1
+    },
+    {
+     "identifier": "BEZIER",
+     "name": "Bézier",
+     "description": "Smooth interpolation between A and B, with some control over curve shape",
+     "icon": "IPO_BEZIER",
+     "value": 2
+    },
+    {
+     "identifier": "SINE",
+     "name": "Sinusoidal",
+     "description": "Sinusoidal easing (weakest, almost linear but with a slight curvature)",
+     "icon": "IPO_SINE",
+     "value": 12
+    },
+    {
+     "identifier": "QUAD",
+     "name": "Quadratic",
+     "description": "Quadratic easing",
+     "icon": "IPO_QUAD",
+     "value": 9
+    },
+    {
+     "identifier": "CUBIC",
+     "name": "Cubic",
+     "description": "Cubic easing",
+     "icon": "IPO_CUBIC",
+     "value": 6
+    },
+    {
+     "identifier": "QUART",
+     "name": "Quartic",
+     "description": "Quartic easing",
+     "icon": "IPO_QUART",
+     "value": 10
+    },
+    {
+     "identifier": "QUINT",
+     "name": "Quintic",
+     "description": "Quintic easing",
+     "icon": "IPO_QUINT",
+     "value": 11
+    },
+    {
+     "identifier": "EXPO",
+     "name": "Exponential",
+     "description": "Exponential easing (dramatic)",
+     "icon": "IPO_EXPO",
+     "value": 8
+    },
+    {
+     "identifier": "CIRC",
+     "name": "Circular",
+     "description": "Circular easing (strongest and most dynamic)",
+     "icon": "IPO_CIRC",
+     "value": 5
+    },
+    {
+     "identifier": "BACK",
+     "name": "Back",
+     "description": "Cubic easing with overshoot and settle",
+     "icon": "IPO_BACK",
+     "value": 3
+    },
+    {
+     "identifier": "BOUNCE",
+     "name": "Bounce",
+     "description": "Exponentially decaying parabolic bounce, like when objects collide",
+     "icon": "IPO_BOUNCE",
+     "value": 4
+    },
+    {
+     "identifier": "ELASTIC",
+     "name": "Elastic",
+     "description": "Exponentially decaying sine wave, like an elastic band",
+     "icon": "IPO_ELASTIC",
+     "value": 7
+    }
+   ],
+   "default": "BEZIER",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "keyframe_new_handle_type",
+   "name": "New Handles Type",
+   "description": "Handle type for handles of new keyframes",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FREE",
+     "name": "Free",
+     "description": "Completely independent manually set handle",
+     "icon": "HANDLE_FREE",
+     "value": 0
+    },
+    {
+     "identifier": "ALIGNED",
+     "name": "Aligned",
+     "description": "Manually set handle with rotation locked together with its pair",
+     "icon": "HANDLE_ALIGNED",
+     "value": 3
+    },
+    {
+     "identifier": "VECTOR",
+     "name": "Vector",
+     "description": "Automatic handles that create straight lines",
+     "icon": "HANDLE_VECTOR",
+     "value": 2
+    },
+    {
+     "identifier": "AUTO",
+     "name": "Automatic",
+     "description": "Automatic handles that create smooth curves",
+     "icon": "HANDLE_AUTO",
+     "value": 1
+    },
+    {
+     "identifier": "AUTO_CLAMPED",
+     "name": "Auto Clamped",
+     "description": "Automatic handles that create smooth curves which only change direction at keyframes",
+     "icon": "HANDLE_AUTOCLAMPED",
+     "value": 4
+    }
+   ],
+   "default": "FREE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_negative_frames",
+   "name": "Allow Negative Frames",
+   "description": "Current frame number can be manually set to a negative value",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "fcurve_unselected_alpha",
+   "name": "Unselected F-Curve Opacity",
+   "description": "The opacity of unselected F-Curves against the background of the Graph Editor",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.25,
+   "hard_min": 0.0010000000474974513,
+   "hard_max": 1.0,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_only_selected_curve_keyframes",
+   "name": "Only Show Selected F-Curve Keyframes",
+   "description": "Only keyframes of selected F-Curves are visible and editable",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_fcurve_high_quality_drawing",
+   "name": "F-Curve High Quality Drawing",
+   "description": "Draw F-Curves using Anti-Aliasing (disable for better performance)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "grease_pencil_manhattan_distance",
+   "name": "Grease Pencil Manhattan Distance",
+   "description": "Pixels moved by mouse per axis when drawing stroke",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "grease_pencil_euclidean_distance",
+   "name": "Grease Pencil Euclidean Distance",
+   "description": "Distance moved by mouse when drawing stroke to include",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 2,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "grease_pencil_eraser_radius",
+   "name": "Grease Pencil Eraser Radius",
+   "description": "Radius of eraser 'brush'",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 25,
+   "hard_min": 1,
+   "hard_max": 500,
+   "soft_min": 1,
+   "soft_max": 500,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "grease_pencil_default_color",
+   "name": "Annotation Default Color",
+   "description": "Color of new annotation layers",
+   "type": "FLOAT",
+   "subtype": "COLOR_GAMMA",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.3799999952316284,
+    0.6100000143051147,
+    0.7799999713897705,
+    0.8999999761581421
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sculpt_paint_overlay_color",
+   "name": "Sculpt/Paint Overlay Color",
+   "description": "Color of texture overlay",
+   "type": "FLOAT",
+   "subtype": "COLOR_GAMMA",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "connect_strips_by_default",
+   "name": "Connect Movie Strips by Default",
+   "description": "Connect newly added movie strips by default if they have multiple channels",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_mesh",
+   "name": "Duplicate Mesh",
+   "description": "Causes mesh data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_surface",
+   "name": "Duplicate Surface",
+   "description": "Causes surface data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_curve",
+   "name": "Duplicate Curve",
+   "description": "Causes curve data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_lattice",
+   "name": "Duplicate Lattice",
+   "description": "Causes lattice data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_text",
+   "name": "Duplicate Text",
+   "description": "Causes text data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_metaball",
+   "name": "Duplicate Metaball",
+   "description": "Causes metaball data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_armature",
+   "name": "Duplicate Armature",
+   "description": "Causes armature data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_camera",
+   "name": "Duplicate Camera",
+   "description": "Causes camera data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_speaker",
+   "name": "Duplicate Speaker",
+   "description": "Causes speaker data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_light",
+   "name": "Duplicate Light",
+   "description": "Causes light data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_material",
+   "name": "Duplicate Material",
+   "description": "Causes material data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_action",
+   "name": "Duplicate Action",
+   "description": "Causes actions to be duplicated with the data-blocks",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_particle",
+   "name": "Duplicate Particle",
+   "description": "Causes particle systems to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_lightprobe",
+   "name": "Duplicate Light Probe",
+   "description": "Causes light probe data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_grease_pencil",
+   "name": "Duplicate Grease Pencil",
+   "description": "Causes Grease Pencil data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_curves",
+   "name": "Duplicate Curves",
+   "description": "Causes curves data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_pointcloud",
+   "name": "Duplicate Point Cloud",
+   "description": "Causes point cloud data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_volume",
+   "name": "Duplicate Volume",
+   "description": "Causes volume data to be duplicated with the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_duplicate_node_tree",
+   "name": "Duplicate Node Tree",
+   "description": "Make copies of node groups when duplicating nodes in the node editor",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "node_use_insert_offset",
+   "name": "Auto-offset",
+   "description": "Automatically offset the following or previous nodes in a chain when inserting a new node",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "node_margin",
+   "name": "Auto-offset Margin",
+   "description": "Minimum distance between nodes for Auto-offsetting nodes",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 40,
+   "hard_min": 0,
+   "hard_max": 255,
+   "soft_min": 0,
+   "soft_max": 255,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "node_preview_resolution",
+   "name": "Node Preview Resolution",
+   "description": "Resolution used for Shader node previews (should be changed for performance convenience)",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 120,
+   "hard_min": 50,
+   "hard_max": 250,
+   "soft_min": 50,
+   "soft_max": 250,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_cursor_lock_adjust",
+   "name": "Cursor Lock Adjust",
+   "description": "Place the cursor without 'jumping' to the new location (when lock-to-cursor is used)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_mouse_depth_cursor",
+   "name": "Cursor Surface Project",
+   "description": "Use the surface depth for cursor placement",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

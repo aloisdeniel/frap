@@ -1,0 +1,208 @@
+{
+ "identifier": "MeshLoopTriangle",
+ "name": "Mesh Loop Triangle",
+ "description": "Tessellated triangle in a Mesh data-block",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "vertices",
+   "name": "Vertices",
+   "description": "Indices of triangle vertices",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0,
+    0,
+    0
+   ],
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "loops",
+   "name": "Loops",
+   "description": "Indices of mesh loops that make up the triangle",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0,
+    0,
+    0
+   ],
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "polygon_index",
+   "name": "Polygon",
+   "description": "Index of mesh face that the triangle is a part of",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "normal",
+   "name": "Triangle Normal",
+   "description": "Local space unit length normal vector for this triangle",
+   "type": "FLOAT",
+   "subtype": "DIRECTION",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -1.0,
+   "hard_max": 1.0,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "split_normals",
+   "name": "Custom Normals",
+   "description": "Local space unit length custom normal vectors of the face corners of this triangle",
+   "type": "FLOAT",
+   "subtype": "DIRECTION",
+   "unit": "NONE",
+   "array": [
+    3,
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -1.0,
+   "hard_max": 1.0,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "area",
+   "name": "Triangle Area",
+   "description": "Area of this triangle",
+   "type": "FLOAT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "index",
+   "name": "Index",
+   "description": "Index of this loop triangle",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_index",
+   "name": "Material Index",
+   "description": "Material slot index of this triangle",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_smooth",
+   "name": "Smooth",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

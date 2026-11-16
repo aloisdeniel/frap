@@ -1,0 +1,3183 @@
+{
+ "namespace": "pose",
+ "count": 51,
+ "operators": [
+  {
+   "idname": "pose.armature_apply",
+   "bl_idname": "POSE_OT_armature_apply",
+   "label": "Apply Pose as Rest Pose",
+   "description": "Apply the current pose as the new rest pose",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "selected",
+     "name": "Selected Only",
+     "description": "Only apply the selected bones (with propagation to children)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.autoside_names",
+   "bl_idname": "POSE_OT_autoside_names",
+   "label": "Auto-Name by Axis",
+   "description": "Automatically renames the selected bones according to which side of the target axis they fall on",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "axis",
+     "name": "Axis",
+     "description": "Axis to tag names with",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "XAXIS",
+       "name": "X-Axis",
+       "description": "Left/Right",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "YAXIS",
+       "name": "Y-Axis",
+       "description": "Front/Back",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ZAXIS",
+       "name": "Z-Axis",
+       "description": "Top/Bottom",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "XAXIS",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.blend_to_neighbor",
+   "bl_idname": "POSE_OT_blend_to_neighbor",
+   "label": "Blend to Neighbor",
+   "description": "Blend from current position to previous or next keyframe",
+   "options": [
+    "BLOCKING",
+    "GRAB_CURSOR_X",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "factor",
+     "name": "Factor",
+     "description": "Weighting factor for which keyframe is favored more",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.5,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "prev_frame",
+     "name": "Previous Keyframe",
+     "description": "Frame number of keyframe immediately before the current frame",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": 0,
+     "soft_max": 50,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "next_frame",
+     "name": "Next Keyframe",
+     "description": "Frame number of keyframe immediately after the current frame",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": 0,
+     "soft_max": 50,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "channels",
+     "name": "Channels",
+     "description": "Set of properties that are affected",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ALL",
+       "name": "All Properties",
+       "description": "All properties, including transforms, bendy bone shape, and custom properties",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LOC",
+       "name": "Location",
+       "description": "Location only",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ROT",
+       "name": "Rotation",
+       "description": "Rotation only",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "SIZE",
+       "name": "Scale",
+       "description": "Scale only",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "BBONE",
+       "name": "Bendy Bone",
+       "description": "Bendy Bone shape properties",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "CUSTOM",
+       "name": "Custom Properties",
+       "description": "Custom properties",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "ALL",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis_lock",
+     "name": "Axis Lock",
+     "description": "Transform axis to restrict effects to",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FREE",
+       "name": "Free",
+       "description": "All axes are affected",
+       "icon": "NONE",
+       "value": 7
+      },
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "Only X-axis transforms are affected",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "Only Y-axis transforms are affected",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "Z",
+       "name": "Z",
+       "description": "Only Z-axis transforms are affected",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": "FREE",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.blend_with_rest",
+   "bl_idname": "POSE_OT_blend_with_rest",
+   "label": "Blend Pose with Rest Pose",
+   "description": "Make the current pose more similar to, or further away from, the rest pose",
+   "options": [
+    "BLOCKING",
+    "GRAB_CURSOR_X",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "factor",
+     "name": "Factor",
+     "description": "Weighting factor for which keyframe is favored more",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.5,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "prev_frame",
+     "name": "Previous Keyframe",
+     "description": "Frame number of keyframe immediately before the current frame",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": 0,
+     "soft_max": 50,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "next_frame",
+     "name": "Next Keyframe",
+     "description": "Frame number of keyframe immediately after the current frame",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": 0,
+     "soft_max": 50,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "channels",
+     "name": "Channels",
+     "description": "Set of properties that are affected",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ALL",
+       "name": "All Properties",
+       "description": "All properties, including transforms, bendy bone shape, and custom properties",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LOC",
+       "name": "Location",
+       "description": "Location only",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ROT",
+       "name": "Rotation",
+       "description": "Rotation only",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "SIZE",
+       "name": "Scale",
+       "description": "Scale only",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "BBONE",
+       "name": "Bendy Bone",
+       "description": "Bendy Bone shape properties",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "CUSTOM",
+       "name": "Custom Properties",
+       "description": "Custom properties",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "ALL",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis_lock",
+     "name": "Axis Lock",
+     "description": "Transform axis to restrict effects to",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FREE",
+       "name": "Free",
+       "description": "All axes are affected",
+       "icon": "NONE",
+       "value": 7
+      },
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "Only X-axis transforms are affected",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "Only Y-axis transforms are affected",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "Z",
+       "name": "Z",
+       "description": "Only Z-axis transforms are affected",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": "FREE",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.breakdown",
+   "bl_idname": "POSE_OT_breakdown",
+   "label": "Pose Breakdowner",
+   "description": "Create a suitable breakdown pose on the current frame",
+   "options": [
+    "BLOCKING",
+    "GRAB_CURSOR_X",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "factor",
+     "name": "Factor",
+     "description": "Weighting factor for which keyframe is favored more",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.5,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "prev_frame",
+     "name": "Previous Keyframe",
+     "description": "Frame number of keyframe immediately before the current frame",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": 0,
+     "soft_max": 50,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "next_frame",
+     "name": "Next Keyframe",
+     "description": "Frame number of keyframe immediately after the current frame",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": 0,
+     "soft_max": 50,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "channels",
+     "name": "Channels",
+     "description": "Set of properties that are affected",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ALL",
+       "name": "All Properties",
+       "description": "All properties, including transforms, bendy bone shape, and custom properties",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LOC",
+       "name": "Location",
+       "description": "Location only",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ROT",
+       "name": "Rotation",
+       "description": "Rotation only",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "SIZE",
+       "name": "Scale",
+       "description": "Scale only",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "BBONE",
+       "name": "Bendy Bone",
+       "description": "Bendy Bone shape properties",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "CUSTOM",
+       "name": "Custom Properties",
+       "description": "Custom properties",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "ALL",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis_lock",
+     "name": "Axis Lock",
+     "description": "Transform axis to restrict effects to",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FREE",
+       "name": "Free",
+       "description": "All axes are affected",
+       "icon": "NONE",
+       "value": 7
+      },
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "Only X-axis transforms are affected",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "Only Y-axis transforms are affected",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "Z",
+       "name": "Z",
+       "description": "Only Z-axis transforms are affected",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": "FREE",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.constraint_add",
+   "bl_idname": "POSE_OT_constraint_add",
+   "label": "Add Constraint",
+   "description": "Add a constraint to the active bone",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CAMERA_SOLVER",
+       "name": "Camera Solver",
+       "description": "",
+       "icon": "CON_CAMERASOLVER",
+       "value": 27
+      },
+      {
+       "identifier": "FOLLOW_TRACK",
+       "name": "Follow Track",
+       "description": "",
+       "icon": "CON_FOLLOWTRACK",
+       "value": 26
+      },
+      {
+       "identifier": "OBJECT_SOLVER",
+       "name": "Object Solver",
+       "description": "",
+       "icon": "CON_OBJECTSOLVER",
+       "value": 28
+      },
+      {
+       "identifier": "COPY_LOCATION",
+       "name": "Copy Location",
+       "description": "Copy the location of a target (with an optional offset), so that they move together",
+       "icon": "CON_LOCLIKE",
+       "value": 9
+      },
+      {
+       "identifier": "COPY_ROTATION",
+       "name": "Copy Rotation",
+       "description": "Copy the rotation of a target (with an optional offset), so that they rotate together",
+       "icon": "CON_ROTLIKE",
+       "value": 8
+      },
+      {
+       "identifier": "COPY_SCALE",
+       "name": "Copy Scale",
+       "description": "Copy the scale factors of a target (with an optional offset), so that they are scaled by the same amount",
+       "icon": "CON_SIZELIKE",
+       "value": 10
+      },
+      {
+       "identifier": "COPY_TRANSFORMS",
+       "name": "Copy Transforms",
+       "description": "Copy all the transformations of a target, so that they move together",
+       "icon": "CON_TRANSLIKE",
+       "value": 23
+      },
+      {
+       "identifier": "LIMIT_DISTANCE",
+       "name": "Limit Distance",
+       "description": "Restrict movements to within a certain distance of a target (at the time of constraint evaluation only)",
+       "icon": "CON_DISTLIMIT",
+       "value": 14
+      },
+      {
+       "identifier": "LIMIT_LOCATION",
+       "name": "Limit Location",
+       "description": "Restrict movement along each axis within given ranges",
+       "icon": "CON_LOCLIMIT",
+       "value": 6
+      },
+      {
+       "identifier": "LIMIT_ROTATION",
+       "name": "Limit Rotation",
+       "description": "Restrict rotation along each axis within given ranges",
+       "icon": "CON_ROTLIMIT",
+       "value": 5
+      },
+      {
+       "identifier": "LIMIT_SCALE",
+       "name": "Limit Scale",
+       "description": "Restrict scaling along each axis with given ranges",
+       "icon": "CON_SIZELIMIT",
+       "value": 7
+      },
+      {
+       "identifier": "MAINTAIN_VOLUME",
+       "name": "Maintain Volume",
+       "description": "Compensate for scaling one axis by applying suitable scaling to the other two axes",
+       "icon": "CON_SAMEVOL",
+       "value": 24
+      },
+      {
+       "identifier": "TRANSFORM",
+       "name": "Transformation",
+       "description": "Use one transform property from target to control another (or same) property on owner",
+       "icon": "CON_TRANSFORM",
+       "value": 19
+      },
+      {
+       "identifier": "TRANSFORM_CACHE",
+       "name": "Transform Cache",
+       "description": "Look up the transformation matrix from an external file",
+       "icon": "CON_TRANSFORM_CACHE",
+       "value": 29
+      },
+      {
+       "identifier": "CLAMP_TO",
+       "name": "Clamp To",
+       "description": "Restrict movements to lie along a curve by remapping location along curve's longest axis",
+       "icon": "CON_CLAMPTO",
+       "value": 18
+      },
+      {
+       "identifier": "DAMPED_TRACK",
+       "name": "Damped Track",
+       "description": "Point towards a target by performing the smallest rotation necessary",
+       "icon": "CON_TRACKTO",
+       "value": 21
+      },
+      {
+       "identifier": "IK",
+       "name": "Inverse Kinematics",
+       "description": "Control a chain of bones by specifying the endpoint target (Bones only)",
+       "icon": "CON_KINEMATIC",
+       "value": 3
+      },
+      {
+       "identifier": "LOCKED_TRACK",
+       "name": "Locked Track",
+       "description": "Rotate around the specified ('locked') axis to point towards a target",
+       "icon": "CON_LOCKTRACK",
+       "value": 13
+      },
+      {
+       "identifier": "SPLINE_IK",
+       "name": "Spline IK",
+       "description": "Align chain of bones along a curve (Bones only)",
+       "icon": "CON_SPLINEIK",
+       "value": 22
+      },
+      {
+       "identifier": "STRETCH_TO",
+       "name": "Stretch To",
+       "description": "Stretch along Y-Axis to point towards a target",
+       "icon": "CON_STRETCHTO",
+       "value": 15
+      },
+      {
+       "identifier": "TRACK_TO",
+       "name": "Track To",
+       "description": "Legacy tracking constraint prone to twisting artifacts",
+       "icon": "CON_TRACKTO",
+       "value": 2
+      },
+      {
+       "identifier": "ACTION",
+       "name": "Action",
+       "description": "Use transform property of target to look up pose for owner from an Action",
+       "icon": "ACTION",
+       "value": 12
+      },
+      {
+       "identifier": "ARMATURE",
+       "name": "Armature",
+       "description": "Apply weight-blended transformation from multiple bones like the Armature modifier",
+       "icon": "CON_ARMATURE",
+       "value": 30
+      },
+      {
+       "identifier": "CHILD_OF",
+       "name": "Child Of",
+       "description": "Make target the 'detachable' parent of owner",
+       "icon": "CON_CHILDOF",
+       "value": 1
+      },
+      {
+       "identifier": "FLOOR",
+       "name": "Floor",
+       "description": "Use position (and optionally rotation) of target to define a 'wall' or 'floor' that the owner cannot cross",
+       "icon": "CON_FLOOR",
+       "value": 16
+      },
+      {
+       "identifier": "FOLLOW_PATH",
+       "name": "Follow Path",
+       "description": "Use to animate an object/bone following a path",
+       "icon": "CON_FOLLOWPATH",
+       "value": 4
+      },
+      {
+       "identifier": "GEOMETRY_ATTRIBUTE",
+       "name": "Geometry Attribute",
+       "description": "Retrieve transform from target geometry attribute data",
+       "icon": "CON_GEOMETRYATTRIBUTE",
+       "value": 31
+      },
+      {
+       "identifier": "PIVOT",
+       "name": "Pivot",
+       "description": "Change pivot point for transforms (buggy)",
+       "icon": "CON_PIVOT",
+       "value": 25
+      },
+      {
+       "identifier": "SHRINKWRAP",
+       "name": "Shrinkwrap",
+       "description": "Restrict movements to surface of target mesh",
+       "icon": "CON_SHRINKWRAP",
+       "value": 20
+      }
+     ],
+     "default": "CHILD_OF",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.constraint_add_with_targets",
+   "bl_idname": "POSE_OT_constraint_add_with_targets",
+   "label": "Add Constraint (with Targets)",
+   "description": "Add a constraint to the active bone, with target (where applicable) set to the selected Objects/Bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CAMERA_SOLVER",
+       "name": "Camera Solver",
+       "description": "",
+       "icon": "CON_CAMERASOLVER",
+       "value": 27
+      },
+      {
+       "identifier": "FOLLOW_TRACK",
+       "name": "Follow Track",
+       "description": "",
+       "icon": "CON_FOLLOWTRACK",
+       "value": 26
+      },
+      {
+       "identifier": "OBJECT_SOLVER",
+       "name": "Object Solver",
+       "description": "",
+       "icon": "CON_OBJECTSOLVER",
+       "value": 28
+      },
+      {
+       "identifier": "COPY_LOCATION",
+       "name": "Copy Location",
+       "description": "Copy the location of a target (with an optional offset), so that they move together",
+       "icon": "CON_LOCLIKE",
+       "value": 9
+      },
+      {
+       "identifier": "COPY_ROTATION",
+       "name": "Copy Rotation",
+       "description": "Copy the rotation of a target (with an optional offset), so that they rotate together",
+       "icon": "CON_ROTLIKE",
+       "value": 8
+      },
+      {
+       "identifier": "COPY_SCALE",
+       "name": "Copy Scale",
+       "description": "Copy the scale factors of a target (with an optional offset), so that they are scaled by the same amount",
+       "icon": "CON_SIZELIKE",
+       "value": 10
+      },
+      {
+       "identifier": "COPY_TRANSFORMS",
+       "name": "Copy Transforms",
+       "description": "Copy all the transformations of a target, so that they move together",
+       "icon": "CON_TRANSLIKE",
+       "value": 23
+      },
+      {
+       "identifier": "LIMIT_DISTANCE",
+       "name": "Limit Distance",
+       "description": "Restrict movements to within a certain distance of a target (at the time of constraint evaluation only)",
+       "icon": "CON_DISTLIMIT",
+       "value": 14
+      },
+      {
+       "identifier": "LIMIT_LOCATION",
+       "name": "Limit Location",
+       "description": "Restrict movement along each axis within given ranges",
+       "icon": "CON_LOCLIMIT",
+       "value": 6
+      },
+      {
+       "identifier": "LIMIT_ROTATION",
+       "name": "Limit Rotation",
+       "description": "Restrict rotation along each axis within given ranges",
+       "icon": "CON_ROTLIMIT",
+       "value": 5
+      },
+      {
+       "identifier": "LIMIT_SCALE",
+       "name": "Limit Scale",
+       "description": "Restrict scaling along each axis with given ranges",
+       "icon": "CON_SIZELIMIT",
+       "value": 7
+      },
+      {
+       "identifier": "MAINTAIN_VOLUME",
+       "name": "Maintain Volume",
+       "description": "Compensate for scaling one axis by applying suitable scaling to the other two axes",
+       "icon": "CON_SAMEVOL",
+       "value": 24
+      },
+      {
+       "identifier": "TRANSFORM",
+       "name": "Transformation",
+       "description": "Use one transform property from target to control another (or same) property on owner",
+       "icon": "CON_TRANSFORM",
+       "value": 19
+      },
+      {
+       "identifier": "TRANSFORM_CACHE",
+       "name": "Transform Cache",
+       "description": "Look up the transformation matrix from an external file",
+       "icon": "CON_TRANSFORM_CACHE",
+       "value": 29
+      },
+      {
+       "identifier": "CLAMP_TO",
+       "name": "Clamp To",
+       "description": "Restrict movements to lie along a curve by remapping location along curve's longest axis",
+       "icon": "CON_CLAMPTO",
+       "value": 18
+      },
+      {
+       "identifier": "DAMPED_TRACK",
+       "name": "Damped Track",
+       "description": "Point towards a target by performing the smallest rotation necessary",
+       "icon": "CON_TRACKTO",
+       "value": 21
+      },
+      {
+       "identifier": "IK",
+       "name": "Inverse Kinematics",
+       "description": "Control a chain of bones by specifying the endpoint target (Bones only)",
+       "icon": "CON_KINEMATIC",
+       "value": 3
+      },
+      {
+       "identifier": "LOCKED_TRACK",
+       "name": "Locked Track",
+       "description": "Rotate around the specified ('locked') axis to point towards a target",
+       "icon": "CON_LOCKTRACK",
+       "value": 13
+      },
+      {
+       "identifier": "SPLINE_IK",
+       "name": "Spline IK",
+       "description": "Align chain of bones along a curve (Bones only)",
+       "icon": "CON_SPLINEIK",
+       "value": 22
+      },
+      {
+       "identifier": "STRETCH_TO",
+       "name": "Stretch To",
+       "description": "Stretch along Y-Axis to point towards a target",
+       "icon": "CON_STRETCHTO",
+       "value": 15
+      },
+      {
+       "identifier": "TRACK_TO",
+       "name": "Track To",
+       "description": "Legacy tracking constraint prone to twisting artifacts",
+       "icon": "CON_TRACKTO",
+       "value": 2
+      },
+      {
+       "identifier": "ACTION",
+       "name": "Action",
+       "description": "Use transform property of target to look up pose for owner from an Action",
+       "icon": "ACTION",
+       "value": 12
+      },
+      {
+       "identifier": "ARMATURE",
+       "name": "Armature",
+       "description": "Apply weight-blended transformation from multiple bones like the Armature modifier",
+       "icon": "CON_ARMATURE",
+       "value": 30
+      },
+      {
+       "identifier": "CHILD_OF",
+       "name": "Child Of",
+       "description": "Make target the 'detachable' parent of owner",
+       "icon": "CON_CHILDOF",
+       "value": 1
+      },
+      {
+       "identifier": "FLOOR",
+       "name": "Floor",
+       "description": "Use position (and optionally rotation) of target to define a 'wall' or 'floor' that the owner cannot cross",
+       "icon": "CON_FLOOR",
+       "value": 16
+      },
+      {
+       "identifier": "FOLLOW_PATH",
+       "name": "Follow Path",
+       "description": "Use to animate an object/bone following a path",
+       "icon": "CON_FOLLOWPATH",
+       "value": 4
+      },
+      {
+       "identifier": "GEOMETRY_ATTRIBUTE",
+       "name": "Geometry Attribute",
+       "description": "Retrieve transform from target geometry attribute data",
+       "icon": "CON_GEOMETRYATTRIBUTE",
+       "value": 31
+      },
+      {
+       "identifier": "PIVOT",
+       "name": "Pivot",
+       "description": "Change pivot point for transforms (buggy)",
+       "icon": "CON_PIVOT",
+       "value": 25
+      },
+      {
+       "identifier": "SHRINKWRAP",
+       "name": "Shrinkwrap",
+       "description": "Restrict movements to surface of target mesh",
+       "icon": "CON_SHRINKWRAP",
+       "value": 20
+      }
+     ],
+     "default": "CHILD_OF",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.constraints_clear",
+   "bl_idname": "POSE_OT_constraints_clear",
+   "label": "Clear Pose Constraints",
+   "description": "Clear all constraints from the selected bones",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.constraints_copy",
+   "bl_idname": "POSE_OT_constraints_copy",
+   "label": "Copy Constraints to Selected Bones",
+   "description": "Copy constraints to other selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.copy",
+   "bl_idname": "POSE_OT_copy",
+   "label": "Copy Pose",
+   "description": "Copy the current pose of the selected bones to the internal clipboard",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.flip_names",
+   "bl_idname": "POSE_OT_flip_names",
+   "label": "Flip Names",
+   "description": "Flips (and corrects) the axis suffixes of the names of selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "do_strip_numbers",
+     "name": "Strip Numbers",
+     "description": "Try to remove right-most dot-number from flipped names.\nWarning: May result in incoherent naming in some cases",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.hide",
+   "bl_idname": "POSE_OT_hide",
+   "label": "Hide Selected",
+   "description": "Tag selected bones to not be visible in Pose Mode",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "unselected",
+     "name": "Unselected",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.ik_add",
+   "bl_idname": "POSE_OT_ik_add",
+   "label": "Add IK to Bone",
+   "description": "Add an IK Constraint to the active Bone. The target can be a selected bone or object",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "with_targets",
+     "name": "With Targets",
+     "description": "Assign IK Constraint with targets derived from the select bones/objects",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.ik_clear",
+   "bl_idname": "POSE_OT_ik_clear",
+   "label": "Remove IK",
+   "description": "Remove all IK Constraints from selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.loc_clear",
+   "bl_idname": "POSE_OT_loc_clear",
+   "label": "Clear Pose Location",
+   "description": "Reset locations of selected bones to their default values",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.paste",
+   "bl_idname": "POSE_OT_paste",
+   "label": "Paste Pose",
+   "description": "Paste the stored pose on to the current pose",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "flipped",
+     "name": "Flipped on X-Axis",
+     "description": "Paste the stored pose flipped on to current pose",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "selected_mask",
+     "name": "On Selected Only",
+     "description": "Only paste the stored pose on to selected bones in the current pose",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.paths_calculate",
+   "bl_idname": "POSE_OT_paths_calculate",
+   "label": "Calculate Bone Paths",
+   "description": "Calculate paths for the selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "display_type",
+     "name": "Display Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CURRENT_FRAME",
+       "name": "Around Frame",
+       "description": "Display Paths of poses within a fixed number of frames around the current frame",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "RANGE",
+       "name": "In Range",
+       "description": "Display Paths of poses within specified range",
+       "icon": "NONE",
+       "value": 0
+      }
+     ],
+     "default": "RANGE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "range",
+     "name": "Computation Range",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "KEYS_ALL",
+       "name": "All Keys",
+       "description": "From the first keyframe to the last",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "KEYS_SELECTED",
+       "name": "Selected Keys",
+       "description": "From the first selected keyframe to the last",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "SCENE",
+       "name": "Scene Frame Range",
+       "description": "The entire Scene / Preview range",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "MANUAL",
+       "name": "Manual Range",
+       "description": "Manually determined frame range",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "SCENE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bake_location",
+     "name": "Bake Location",
+     "description": "Which point on the bones is used when calculating paths",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "HEADS",
+       "name": "Heads",
+       "description": "Calculate bone paths from heads",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "TAILS",
+       "name": "Tails",
+       "description": "Calculate bone paths from tails",
+       "icon": "NONE",
+       "value": 0
+      }
+     ],
+     "default": "HEADS",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.paths_clear",
+   "bl_idname": "POSE_OT_paths_clear",
+   "label": "Clear Bone Paths",
+   "description": "(undocumented operator)",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "only_selected",
+     "name": "Only Selected",
+     "description": "Only clear motion paths of selected bones",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.paths_range_update",
+   "bl_idname": "POSE_OT_paths_range_update",
+   "label": "Update Range from Scene",
+   "description": "Update frame range for motion paths from the Scene's current frame range",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.paths_update",
+   "bl_idname": "POSE_OT_paths_update",
+   "label": "Update Bone Paths",
+   "description": "Recalculate paths for bones that already have them",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.propagate",
+   "bl_idname": "POSE_OT_propagate",
+   "label": "Propagate Pose",
+   "description": "Copy selected aspects of the current pose to subsequent poses already keyframed",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mode",
+     "name": "Terminate Mode",
+     "description": "Method used to determine when to stop propagating pose to keyframes",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NEXT_KEY",
+       "name": "To Next Keyframe",
+       "description": "Propagate pose to first keyframe following the current frame only",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "LAST_KEY",
+       "name": "To Last Keyframe",
+       "description": "Propagate pose to the last keyframe only (i.e. making action cyclic)",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "BEFORE_FRAME",
+       "name": "Before Frame",
+       "description": "Propagate pose to all keyframes between current frame and 'Frame' property",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "BEFORE_END",
+       "name": "Before Last Keyframe",
+       "description": "Propagate pose to all keyframes from current frame until no more are found",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "SELECTED_KEYS",
+       "name": "On Selected Keyframes",
+       "description": "Propagate pose to all selected keyframes",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "SELECTED_MARKERS",
+       "name": "On Selected Markers",
+       "description": "Propagate pose to all keyframes occurring on frames with Scene Markers after the current frame",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "NEXT_KEY",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "end_frame",
+     "name": "End Frame",
+     "description": "Frame to stop propagating frames to (for 'Before Frame' mode)",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 250.0,
+     "hard_min": 1.1754943508222875e-38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 1.0,
+     "soft_max": 250.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.push",
+   "bl_idname": "POSE_OT_push",
+   "label": "Push Pose from Breakdown",
+   "description": "Exaggerate the current pose in regards to the breakdown pose",
+   "options": [
+    "BLOCKING",
+    "GRAB_CURSOR_X",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "factor",
+     "name": "Factor",
+     "description": "Weighting factor for which keyframe is favored more",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.5,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "prev_frame",
+     "name": "Previous Keyframe",
+     "description": "Frame number of keyframe immediately before the current frame",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": 0,
+     "soft_max": 50,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "next_frame",
+     "name": "Next Keyframe",
+     "description": "Frame number of keyframe immediately after the current frame",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": 0,
+     "soft_max": 50,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "channels",
+     "name": "Channels",
+     "description": "Set of properties that are affected",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ALL",
+       "name": "All Properties",
+       "description": "All properties, including transforms, bendy bone shape, and custom properties",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LOC",
+       "name": "Location",
+       "description": "Location only",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ROT",
+       "name": "Rotation",
+       "description": "Rotation only",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "SIZE",
+       "name": "Scale",
+       "description": "Scale only",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "BBONE",
+       "name": "Bendy Bone",
+       "description": "Bendy Bone shape properties",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "CUSTOM",
+       "name": "Custom Properties",
+       "description": "Custom properties",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "ALL",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis_lock",
+     "name": "Axis Lock",
+     "description": "Transform axis to restrict effects to",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FREE",
+       "name": "Free",
+       "description": "All axes are affected",
+       "icon": "NONE",
+       "value": 7
+      },
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "Only X-axis transforms are affected",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "Only Y-axis transforms are affected",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "Z",
+       "name": "Z",
+       "description": "Only Z-axis transforms are affected",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": "FREE",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.quaternions_flip",
+   "bl_idname": "POSE_OT_quaternions_flip",
+   "label": "Flip Quaternions",
+   "description": "Flip quaternion values to achieve desired rotations, while maintaining the same orientations",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.relax",
+   "bl_idname": "POSE_OT_relax",
+   "label": "Relax Pose to Breakdown",
+   "description": "Make the current pose more similar to its breakdown pose",
+   "options": [
+    "BLOCKING",
+    "GRAB_CURSOR_X",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "factor",
+     "name": "Factor",
+     "description": "Weighting factor for which keyframe is favored more",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.5,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "prev_frame",
+     "name": "Previous Keyframe",
+     "description": "Frame number of keyframe immediately before the current frame",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": 0,
+     "soft_max": 50,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "next_frame",
+     "name": "Next Keyframe",
+     "description": "Frame number of keyframe immediately after the current frame",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": 0,
+     "soft_max": 50,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "channels",
+     "name": "Channels",
+     "description": "Set of properties that are affected",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ALL",
+       "name": "All Properties",
+       "description": "All properties, including transforms, bendy bone shape, and custom properties",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LOC",
+       "name": "Location",
+       "description": "Location only",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ROT",
+       "name": "Rotation",
+       "description": "Rotation only",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "SIZE",
+       "name": "Scale",
+       "description": "Scale only",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "BBONE",
+       "name": "Bendy Bone",
+       "description": "Bendy Bone shape properties",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "CUSTOM",
+       "name": "Custom Properties",
+       "description": "Custom properties",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "ALL",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis_lock",
+     "name": "Axis Lock",
+     "description": "Transform axis to restrict effects to",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FREE",
+       "name": "Free",
+       "description": "All axes are affected",
+       "icon": "NONE",
+       "value": 7
+      },
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "Only X-axis transforms are affected",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "Only Y-axis transforms are affected",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "Z",
+       "name": "Z",
+       "description": "Only Z-axis transforms are affected",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": "FREE",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.reveal",
+   "bl_idname": "POSE_OT_reveal",
+   "label": "Reveal Selected",
+   "description": "Reveal all bones hidden in Pose Mode",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "select",
+     "name": "Select",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.rot_clear",
+   "bl_idname": "POSE_OT_rot_clear",
+   "label": "Clear Pose Rotation",
+   "description": "Reset rotations of selected bones to their default values",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.rotation_mode_set",
+   "bl_idname": "POSE_OT_rotation_mode_set",
+   "label": "Set Rotation Mode",
+   "description": "Set the rotation representation used by selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Rotation Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "QUATERNION",
+       "name": "Quaternion (WXYZ)",
+       "description": "No Gimbal Lock",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "XYZ",
+       "name": "XYZ Euler",
+       "description": "XYZ Rotation Order - prone to Gimbal Lock (default)",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "XZY",
+       "name": "XZY Euler",
+       "description": "XZY Rotation Order - prone to Gimbal Lock",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "YXZ",
+       "name": "YXZ Euler",
+       "description": "YXZ Rotation Order - prone to Gimbal Lock",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "YZX",
+       "name": "YZX Euler",
+       "description": "YZX Rotation Order - prone to Gimbal Lock",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "ZXY",
+       "name": "ZXY Euler",
+       "description": "ZXY Rotation Order - prone to Gimbal Lock",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "ZYX",
+       "name": "ZYX Euler",
+       "description": "ZYX Rotation Order - prone to Gimbal Lock",
+       "icon": "NONE",
+       "value": 6
+      },
+      {
+       "identifier": "AXIS_ANGLE",
+       "name": "Axis Angle",
+       "description": "Axis Angle (W+XYZ), defines a rotation around some axis defined by 3D-Vector",
+       "icon": "NONE",
+       "value": -1
+      }
+     ],
+     "default": "QUATERNION",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.scale_clear",
+   "bl_idname": "POSE_OT_scale_clear",
+   "label": "Clear Pose Scale",
+   "description": "Reset scaling of selected bones to their default values",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.select_all",
+   "bl_idname": "POSE_OT_select_all",
+   "label": "(De)select All",
+   "description": "Toggle selection status of all bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "action",
+     "name": "Action",
+     "description": "Selection action to execute",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "TOGGLE",
+       "name": "Toggle",
+       "description": "Toggle selection for all elements",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SELECT",
+       "name": "Select",
+       "description": "Select all elements",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "DESELECT",
+       "name": "Deselect",
+       "description": "Deselect all elements",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERT",
+       "name": "Invert",
+       "description": "Invert selection of all elements",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "TOGGLE",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.select_constraint_target",
+   "bl_idname": "POSE_OT_select_constraint_target",
+   "label": "Select Constraint Target",
+   "description": "Select bones used as targets for the currently selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.select_grouped",
+   "bl_idname": "POSE_OT_select_grouped",
+   "label": "Select Grouped",
+   "description": "Select all visible bones grouped by similar properties",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend selection instead of deselecting everything first",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "COLLECTION",
+       "name": "Collection",
+       "description": "Same collections as the active bone",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "COLOR",
+       "name": "Color",
+       "description": "Same color as the active bone",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "KEYINGSET",
+       "name": "Keying Set",
+       "description": "All bones affected by active Keying Set",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "CHILDREN",
+       "name": "Children",
+       "description": "Select all children of currently selected bones",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "CHILDREN_IMMEDIATE",
+       "name": "Immediate Children",
+       "description": "Select direct children of currently selected bones",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "PARENT",
+       "name": "Parents",
+       "description": "Select the parents of currently selected bones",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "SIBLINGS",
+       "name": "Siblings",
+       "description": "Select all bones that have the same parent as currently selected bones",
+       "icon": "NONE",
+       "value": 6
+      }
+     ],
+     "default": "COLLECTION",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.select_hierarchy",
+   "bl_idname": "POSE_OT_select_hierarchy",
+   "label": "Select Hierarchy",
+   "description": "Select immediate parent/children of selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "direction",
+     "name": "Direction",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PARENT",
+       "name": "Select Parent",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CHILD",
+       "name": "Select Child",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "PARENT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend the selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.select_linked",
+   "bl_idname": "POSE_OT_select_linked",
+   "label": "Select Connected",
+   "description": "Select all bones linked by connected parent/child relationships from the current selection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.select_linked_pick",
+   "bl_idname": "POSE_OT_select_linked_pick",
+   "label": "Select Connected",
+   "description": "Select bones linked by connected parent/child relationships under the mouse cursor",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend selection instead of deselecting everything first",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.select_mirror",
+   "bl_idname": "POSE_OT_select_mirror",
+   "label": "Select Mirror",
+   "description": "Mirror the bone selection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "only_active",
+     "name": "Active Only",
+     "description": "Only operate on the active bone",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend the selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.select_parent",
+   "bl_idname": "POSE_OT_select_parent",
+   "label": "Select Parent Bone",
+   "description": "Select bones that are parents of the currently selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.selection_set_add",
+   "bl_idname": "POSE_OT_selection_set_add",
+   "label": "Create Selection Set",
+   "description": "Create a new empty Selection Set",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.selection_set_add_and_assign",
+   "bl_idname": "POSE_OT_selection_set_add_and_assign",
+   "label": "Create and Add Bones to Selection Set",
+   "description": "Create a new Selection Set with the currently selected bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.selection_set_assign",
+   "bl_idname": "POSE_OT_selection_set_assign",
+   "label": "Add Bones to Selection Set",
+   "description": "Add selected bones to Selection Set",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.selection_set_copy",
+   "bl_idname": "POSE_OT_selection_set_copy",
+   "label": "Copy Selection Set(s)",
+   "description": "Copy the selected Selection Set(s) to the clipboard",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.selection_set_delete_all",
+   "bl_idname": "POSE_OT_selection_set_delete_all",
+   "label": "Delete All Sets",
+   "description": "Remove all Selection Sets from this Armature",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.selection_set_deselect",
+   "bl_idname": "POSE_OT_selection_set_deselect",
+   "label": "Deselect Selection Set",
+   "description": "Remove Selection Set bones from current selection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.selection_set_move",
+   "bl_idname": "POSE_OT_selection_set_move",
+   "label": "Move Selection Set in List",
+   "description": "Move the active Selection Set up/down the list of sets",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "direction",
+     "name": "Move Direction",
+     "description": "Direction to move the active Selection Set: UP (default) or DOWN",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "UP",
+       "name": "Up",
+       "description": "",
+       "icon": "NONE",
+       "value": -1
+      },
+      {
+       "identifier": "DOWN",
+       "name": "Down",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "UP",
+     "flags": [
+      "HIDDEN",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.selection_set_paste",
+   "bl_idname": "POSE_OT_selection_set_paste",
+   "label": "Paste Selection Set(s)",
+   "description": "Add new Selection Set(s) from the clipboard",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.selection_set_remove",
+   "bl_idname": "POSE_OT_selection_set_remove",
+   "label": "Delete Selection Set",
+   "description": "Remove a Selection Set from this Armature",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.selection_set_remove_bones",
+   "bl_idname": "POSE_OT_selection_set_remove_bones",
+   "label": "Remove Selected Bones from All Sets",
+   "description": "Remove the selected bones from all Selection Sets",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.selection_set_select",
+   "bl_idname": "POSE_OT_selection_set_select",
+   "label": "Select Selection Set",
+   "description": "Select the bones from this Selection Set",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "selection_set_index",
+     "name": "Selection Set Index",
+     "description": "Which Selection Set to select; -1 uses the active Selection Set",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.selection_set_unassign",
+   "bl_idname": "POSE_OT_selection_set_unassign",
+   "label": "Remove Bones from Selection Set",
+   "description": "Remove selected bones from Selection Set",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.transforms_clear",
+   "bl_idname": "POSE_OT_transforms_clear",
+   "label": "Clear Pose Transforms",
+   "description": "Reset location, rotation, and scaling of selected bones to their default values",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.user_transforms_clear",
+   "bl_idname": "POSE_OT_user_transforms_clear",
+   "label": "Clear User Transforms",
+   "description": "Reset pose bone transforms to keyframed state",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "only_selected",
+     "name": "Only Selected",
+     "description": "Only visible/selected bones",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "pose.visual_transform_apply",
+   "bl_idname": "POSE_OT_visual_transform_apply",
+   "label": "Apply Visual Transform to Pose",
+   "description": "Apply final constrained position of pose bones to their transform",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "Y",
+    "DV": "Y",
+    "E": "N",
+    "EV": "N"
+   }
+  }
+ ]
+}

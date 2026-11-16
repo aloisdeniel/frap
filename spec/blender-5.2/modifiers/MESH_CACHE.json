@@ -1,0 +1,42 @@
+{
+ "type": "MESH_CACHE",
+ "ui_name": "Mesh Cache",
+ "srna": "MeshCacheModifier",
+ "values": {
+  "name": "M",
+  "type": "MESH_CACHE",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": false,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 1768478037,
+  "cache_format": "MDD",
+  "interpolation": "LINEAR",
+  "time_mode": "FRAME",
+  "play_mode": "SCENE",
+  "deform_mode": "OVERWRITE",
+  "filepath": "",
+  "factor": 1.0,
+  "vertex_group": "",
+  "invert_vertex_group": false,
+  "forward_axis": "POS_Y",
+  "up_axis": "POS_Z",
+  "flip_axis": [
+   false,
+   false,
+   false
+  ],
+  "frame_start": 0.0,
+  "frame_scale": 1.0,
+  "eval_frame": 0.0,
+  "eval_time": 0.0,
+  "eval_factor": 0.0
+ },
+ "default_name": "MeshCache"
+}

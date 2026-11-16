@@ -1,0 +1,30 @@
+{
+ "type": "UV_PROJECT",
+ "ui_name": "UV Project",
+ "srna": "UVProjectModifier",
+ "values": {
+  "name": "M",
+  "type": "UV_PROJECT",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": true,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 986394667,
+  "uv_layer": "",
+  "projector_count": 1,
+  "projectors": {
+   "$len": 1
+  },
+  "aspect_x": 1.0,
+  "aspect_y": 1.0,
+  "scale_x": 1.0,
+  "scale_y": 1.0
+ },
+ "default_name": "UVProject"
+}

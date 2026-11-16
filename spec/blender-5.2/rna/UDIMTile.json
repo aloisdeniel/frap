@@ -1,0 +1,195 @@
+{
+ "identifier": "UDIMTile",
+ "name": "UDIM Tile",
+ "description": "Properties of the UDIM tile",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "label",
+   "name": "Label",
+   "description": "Tile label",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "number",
+   "name": "Number",
+   "description": "Number of the position that this tile covers",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "size",
+   "name": "Size",
+   "description": "Width and height of the tile buffer in pixels, zero when image data cannot be loaded",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0,
+    0
+   ],
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 0,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "channels",
+   "name": "Channels",
+   "description": "Number of channels in the tile pixels buffer",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "generated_type",
+   "name": "Generated Type",
+   "description": "Generated image type",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BLANK",
+     "name": "Blank",
+     "description": "Generate a blank image",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "UV_GRID",
+     "name": "UV Grid",
+     "description": "Generated grid to test UV mappings",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "COLOR_GRID",
+     "name": "Color Grid",
+     "description": "Generated improved UV grid to test UV mappings",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "BLANK",
+   "flags": []
+  },
+  {
+   "identifier": "generated_width",
+   "name": "Generated Width",
+   "description": "Generated image width",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 1,
+   "hard_max": 65536,
+   "soft_min": 1,
+   "soft_max": 65536,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "generated_height",
+   "name": "Generated Height",
+   "description": "Generated image height",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 1,
+   "hard_max": 65536,
+   "soft_min": 1,
+   "soft_max": 65536,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "use_generated_float",
+   "name": "Float Buffer",
+   "description": "Generate floating-point buffer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "is_generated_tile",
+   "name": "Is Generated Tile",
+   "description": "Is this image tile generated",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "generated_color",
+   "name": "Color",
+   "description": "Fill color for the generated image",
+   "type": "FLOAT",
+   "subtype": "COLOR_GAMMA",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

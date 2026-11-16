@@ -1,0 +1,155 @@
+{
+ "identifier": "ShaderNodeTexIES",
+ "name": "IES Texture",
+ "description": "Match real world lights with IES files, which store the directional intensity distribution of light sources",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "ies",
+   "name": "IES Text",
+   "description": "Internal IES file",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Text",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "filepath",
+   "name": "File Path",
+   "description": "IES light path",
+   "type": "STRING",
+   "subtype": "FILE_PATH",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 1024,
+   "flags": [
+    "NEVER_NULL",
+    "PATH_SUPPORTS_BLEND_RELATIVE"
+   ]
+  },
+  {
+   "identifier": "mode",
+   "name": "Source",
+   "description": "Whether the IES file is loaded from disk or from a text data-block",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "INTERNAL",
+     "name": "Internal",
+     "description": "Use internal text data-block",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "EXTERNAL",
+     "name": "External",
+     "description": "Use external .ies file",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "INTERNAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

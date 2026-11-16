@@ -1,0 +1,39 @@
+{
+ "identifier": "Addon",
+ "name": "Add-on",
+ "description": "Python add-ons to be loaded automatically",
+ "base": null,
+ "name_property": "module",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "module",
+   "name": "Module",
+   "description": "Module name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 128,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "preferences",
+   "name": "preferences",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AddonPreferences",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

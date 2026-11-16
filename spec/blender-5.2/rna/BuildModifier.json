@@ -1,0 +1,90 @@
+{
+ "identifier": "BuildModifier",
+ "name": "Build Modifier",
+ "description": "Build effect modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "frame_start",
+   "name": "Start Frame",
+   "description": "Start frame of the effect",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 1.0,
+   "hard_min": -1048574.0,
+   "hard_max": 1048574.0,
+   "soft_min": -1048574.0,
+   "soft_max": 1048574.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_duration",
+   "name": "Length",
+   "description": "Total time the build effect requires",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 100.0,
+   "hard_min": 1.0,
+   "hard_max": 1048574.0,
+   "soft_min": 1.0,
+   "soft_max": 1048574.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_reverse",
+   "name": "Reversed",
+   "description": "Deconstruct the mesh instead of building it",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_random_order",
+   "name": "Randomize",
+   "description": "Randomize the faces or edges during build",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "seed",
+   "name": "Seed",
+   "description": "Seed for random if used",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 1,
+   "hard_max": 1048574,
+   "soft_min": 1,
+   "soft_max": 1048574,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

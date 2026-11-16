@@ -1,0 +1,84 @@
+{
+ "identifier": "ColorRampElements",
+ "name": "Color Ramp Elements",
+ "description": "Collection of Color Ramp Elements",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add element to Color Ramp",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "position",
+     "name": "Position",
+     "description": "Position to add element",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "element",
+     "name": "",
+     "description": "New element",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ColorRampElement",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Delete element from Color Ramp",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "element",
+     "name": "",
+     "description": "Element to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ColorRampElement",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

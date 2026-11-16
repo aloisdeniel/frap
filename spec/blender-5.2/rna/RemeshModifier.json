@@ -1,0 +1,186 @@
+{
+ "identifier": "RemeshModifier",
+ "name": "Remesh Modifier",
+ "description": "Generate a new surface with regular topology that follows the shape of the input mesh",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "mode",
+   "name": "Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BLOCKS",
+     "name": "Blocks",
+     "description": "Output a blocky surface with no smoothing",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "SMOOTH",
+     "name": "Smooth",
+     "description": "Output a smooth surface with no sharp-features detection",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "SHARP",
+     "name": "Sharp",
+     "description": "Output a surface that reproduces sharp edges and corners from the input mesh",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "VOXEL",
+     "name": "Voxel",
+     "description": "Output a mesh corresponding to the volume of the original mesh",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "VOXEL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "scale",
+   "name": "Scale",
+   "description": "The ratio of the largest dimension of the model over the size of the grid",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.8999999761581421,
+   "hard_min": 0.0,
+   "hard_max": 0.9900000095367432,
+   "soft_min": 0.0,
+   "soft_max": 0.9900000095367432,
+   "step": 0.009999999776482582,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "threshold",
+   "name": "Threshold",
+   "description": "If removing disconnected pieces, minimum size of components to preserve as a ratio of the number of polygons in the largest component",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "octree_depth",
+   "name": "Octree Depth",
+   "description": "Resolution of the octree; higher values give finer details",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 4,
+   "hard_min": 1,
+   "hard_max": 24,
+   "soft_min": 1,
+   "soft_max": 12,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sharpness",
+   "name": "Sharpness",
+   "description": "Tolerance for outliers; lower values filter noise while higher values will reproduce edges closer to the input",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "voxel_size",
+   "name": "Voxel Size",
+   "description": "Size of the voxel in object space used for volume evaluation. Lower values preserve finer details.",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.10000000149011612,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 9.999999747378752e-05,
+   "soft_max": 2.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "adaptivity",
+   "name": "Adaptivity",
+   "description": "Reduces the final face count by simplifying geometry where detail is not needed, generating triangles. A value greater than 0 disables Fix Poles.",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_remove_disconnected",
+   "name": "Remove Disconnected",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_smooth_shade",
+   "name": "Smooth Shading",
+   "description": "Output faces with smooth shading rather than flat shaded",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

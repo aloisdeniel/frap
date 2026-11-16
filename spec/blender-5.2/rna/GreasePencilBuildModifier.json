@@ -1,0 +1,564 @@
+{
+ "identifier": "GreasePencilBuildModifier",
+ "name": "Build Modifier",
+ "description": "Animate strokes appearing and disappearing",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "tree_node_filter",
+   "name": "Layer",
+   "description": "Layer name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "use_layer_pass_filter",
+   "name": "Use Layer Pass",
+   "description": "Use layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layer_pass_filter",
+   "name": "Layer Pass",
+   "description": "Layer pass filter",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_filter",
+   "name": "Invert Layer",
+   "description": "Invert layer filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_pass_filter",
+   "name": "Invert Layer Pass",
+   "description": "Invert layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_layer_group_filter",
+   "name": "Layer Group",
+   "description": "Filter by layer group name",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_filter",
+   "name": "Material",
+   "description": "Material used for filtering",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_material_pass_filter",
+   "name": "Use Material Pass",
+   "description": "Use material pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_pass_filter",
+   "name": "Material Pass",
+   "description": "Material pass",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_material_filter",
+   "name": "Invert Material",
+   "description": "Invert material filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_material_pass_filter",
+   "name": "Invert Material Pass",
+   "description": "Invert material pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_influence_panel",
+   "name": "open_influence_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_frame_range_panel",
+   "name": "open_frame_range_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_fading_panel",
+   "name": "open_fading_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mode",
+   "name": "Mode",
+   "description": "How strokes are being built",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SEQUENTIAL",
+     "name": "Sequential",
+     "description": "Strokes appear/disappear one after the other, but only a single one changes at a time",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CONCURRENT",
+     "name": "Concurrent",
+     "description": "Multiple strokes appear/disappear at once",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "ADDITIVE",
+     "name": "Additive",
+     "description": "Builds only new strokes (assuming 'additive' drawing)",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "SEQUENTIAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "transition",
+   "name": "Transition",
+   "description": "How are strokes animated (i.e. are they appearing or disappearing)",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "GROW",
+     "name": "Grow",
+     "description": "Show points in the order they occur in each stroke (e.g. for animating lines being drawn)",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "SHRINK",
+     "name": "Shrink",
+     "description": "Hide points from the end of each stroke to the start (e.g. for animating lines being erased)",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FADE",
+     "name": "Vanish",
+     "description": "Hide points in the order they occur in each stroke (e.g. for animating ink fading or vanishing after getting drawn)",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "GROW",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "start_delay",
+   "name": "Delay",
+   "description": "Number of frames after each GP keyframe before the modifier has any effect",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1048574.0,
+   "soft_min": 0.0,
+   "soft_max": 200.0,
+   "step": 1.0,
+   "precision": -1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "length",
+   "name": "Length",
+   "description": "Maximum number of frames that the build effect can run for (unless another GP keyframe occurs before this time has elapsed)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 100.0,
+   "hard_min": 1.0,
+   "hard_max": 1048574.0,
+   "soft_min": 1.0,
+   "soft_max": 1000.0,
+   "step": 1.0,
+   "precision": -1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "concurrent_time_alignment",
+   "name": "Time Alignment",
+   "description": "How should strokes start to appear/disappear",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "START",
+     "name": "Align Start",
+     "description": "All strokes start at same time (i.e. short strokes finish earlier)",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "END",
+     "name": "Align End",
+     "description": "All strokes end at same time (i.e. short strokes start later)",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "START",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "time_mode",
+   "name": "Timing",
+   "description": "Use drawing speed, a number of frames, or a manual factor to build strokes",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "DRAWSPEED",
+     "name": "Natural Drawing Speed",
+     "description": "Use recorded speed multiplied by a factor",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "FRAMES",
+     "name": "Number of Frames",
+     "description": "Set a fixed number of frames for all build animations",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "PERCENTAGE",
+     "name": "Percentage Factor",
+     "description": "Set a manual percentage to build",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "FRAMES",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "speed_factor",
+   "name": "Speed Factor",
+   "description": "Multiply recorded drawing speed by a factor",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.2000000476837158,
+   "hard_min": 0.0,
+   "hard_max": 100.0,
+   "soft_min": 0.0,
+   "soft_max": 5.0,
+   "step": 0.0010000000474974513,
+   "precision": -1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "speed_maxgap",
+   "name": "Maximum Gap",
+   "description": "The maximum gap between strokes in seconds",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 100.0,
+   "soft_min": 0.0,
+   "soft_max": 4.0,
+   "step": 0.009999999776482582,
+   "precision": -1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_restrict_frame_range",
+   "name": "Restrict Frame Range",
+   "description": "Only modify strokes during the specified frame range",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_percentage",
+   "name": "Restrict Visible Points",
+   "description": "Use a percentage factor to determine the visible points",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "percentage_factor",
+   "name": "Factor",
+   "description": "Defines how much of the stroke is visible",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_start",
+   "name": "Start Frame",
+   "description": "Start Frame (when Restrict Frame Range is enabled)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": -1048574.0,
+   "hard_max": 1048574.0,
+   "soft_min": -1048574.0,
+   "soft_max": 1048574.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_end",
+   "name": "End Frame",
+   "description": "End Frame (when Restrict Frame Range is enabled)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 125.0,
+   "hard_min": -1048574.0,
+   "hard_max": 1048574.0,
+   "soft_min": -1048574.0,
+   "soft_max": 1048574.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_fading",
+   "name": "Use Fading",
+   "description": "Fade out strokes instead of directly cutting off",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "fade_factor",
+   "name": "Fade Factor",
+   "description": "Defines how much of the stroke is fading in/out",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "target_vertex_group",
+   "name": "Vertex Group",
+   "description": "Output Vertex group",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "fade_opacity_strength",
+   "name": "Opacity Strength",
+   "description": "How much strength fading applies on top of stroke opacity",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "fade_thickness_strength",
+   "name": "Thickness Strength",
+   "description": "How much strength fading applies on top of stroke thickness",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "object",
+   "name": "Object",
+   "description": "Object used as build starting position",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

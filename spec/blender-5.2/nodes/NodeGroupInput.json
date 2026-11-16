@@ -1,0 +1,22 @@
+{
+ "bl_idname": "NodeGroupInput",
+ "srna": "NodeGroupInput",
+ "name": "Group Input",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [],
+ "outputs": [
+  {
+   "name": "",
+   "identifier": "__extend__",
+   "bl_idname": "NodeSocketVirtual",
+   "type": "CUSTOM",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  }
+ ],
+ "props": {}
+}

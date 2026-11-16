@@ -16,9 +16,7 @@
    "unit": "NONE",
    "fixed_type": "ID",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "type",
@@ -257,8 +255,7 @@
    "default": "OBJECT",
    "flags": [
     "READONLY",
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -318,9 +315,7 @@
    "unit": "NONE",
    "fixed_type": "Object",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "parent_type",
@@ -375,8 +370,7 @@
    ],
    "default": "OBJECT",
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -400,8 +394,7 @@
    "soft_max": 10000,
    "step": 1,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -414,8 +407,7 @@
    "default": "",
    "length_max": 64,
    "flags": [
-    "NEVER_NULL",
-    "OVERRIDABLE"
+    "NEVER_NULL"
    ]
   },
   {
@@ -433,8 +425,7 @@
    "step": 1.0,
    "precision": 2,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -446,8 +437,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -459,8 +449,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -516,8 +505,7 @@
    ],
    "default": "POS_X",
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -552,8 +540,7 @@
    ],
    "default": "Y",
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -567,8 +554,7 @@
    "is_id": false,
    "api": null,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -580,9 +566,7 @@
    "unit": "NONE",
    "fixed_type": "Material",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "active_material_index",
@@ -597,9 +581,7 @@
    "soft_min": 0,
    "soft_max": 10000,
    "step": 1,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "location",
@@ -623,8 +605,7 @@
    "step": 1.0,
    "precision": 5,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -650,8 +631,7 @@
    "step": 10.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -677,8 +657,7 @@
    "step": 10.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -703,8 +682,7 @@
    "step": 100.0,
    "precision": 5,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -774,8 +752,7 @@
    ],
    "default": "XYZ",
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -800,8 +777,7 @@
    "step": 1.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -849,8 +825,7 @@
    "step": 1.0,
    "precision": 5,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -875,8 +850,7 @@
    "step": 100.0,
    "precision": 5,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -902,8 +876,7 @@
    "step": 10.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -928,8 +901,7 @@
    "step": 1.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -948,8 +920,7 @@
     false
    ],
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -968,8 +939,7 @@
     false
    ],
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -981,8 +951,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -994,8 +963,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1014,8 +982,7 @@
     false
    ],
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1165,8 +1132,7 @@
    "step": 10.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1180,8 +1146,7 @@
    "is_id": false,
    "api": "ObjectModifiers",
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -1195,8 +1160,7 @@
    "is_id": false,
    "api": "ObjectShaderFx",
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -1210,8 +1174,7 @@
    "is_id": false,
    "api": "ObjectConstraints",
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -1295,8 +1258,7 @@
    ],
    "default": "PLAIN_AXES",
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1314,8 +1276,7 @@
    "step": 1.0,
    "precision": 2,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1339,8 +1300,7 @@
    "step": 0.10000000149011612,
    "precision": 2,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1354,8 +1314,7 @@
    "is_id": false,
    "flags": [
     "READONLY",
-    "NEVER_NULL",
-    "OVERRIDABLE"
+    "NEVER_NULL"
    ]
   },
   {
@@ -1390,8 +1349,7 @@
    ],
    "default": "DEFAULT",
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1403,8 +1361,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1416,8 +1373,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1429,8 +1385,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1442,8 +1397,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1478,8 +1432,7 @@
    ],
    "default": "DOUBLE_SIDED",
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1491,8 +1444,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1509,8 +1461,7 @@
    "soft_max": 32767,
    "step": 1,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1536,8 +1487,7 @@
    "step": 10.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1550,8 +1500,7 @@
    "fixed_type": "FieldSettings",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -1564,8 +1513,7 @@
    "fixed_type": "CollisionSettings",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -1578,8 +1526,7 @@
    "fixed_type": "SoftBodySettings",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -1593,8 +1540,7 @@
    "is_id": false,
    "api": "ParticleSystems",
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -1607,8 +1553,7 @@
    "fixed_type": "RigidBodyObject",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -1621,8 +1566,7 @@
    "fixed_type": "RigidBodyConstraint",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -1633,9 +1577,7 @@
    "subtype": "NONE",
    "unit": "NONE",
    "default": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "hide_viewport",
@@ -1646,8 +1588,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1658,9 +1599,7 @@
    "subtype": "NONE",
    "unit": "NONE",
    "default": false,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "hide_render",
@@ -1671,8 +1610,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1684,8 +1622,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1697,8 +1634,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1710,8 +1646,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1723,8 +1658,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1736,8 +1670,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1749,8 +1682,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1762,8 +1694,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1775,8 +1706,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1788,8 +1718,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1801,8 +1730,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1814,8 +1742,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1827,8 +1754,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1840,8 +1766,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1853,8 +1778,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1866,8 +1790,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1909,8 +1832,7 @@
    ],
    "default": "NONE",
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1922,8 +1844,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1935,8 +1856,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1954,8 +1874,7 @@
    "step": 10.0,
    "precision": 3,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -1967,9 +1886,7 @@
    "unit": "NONE",
    "fixed_type": "Collection",
    "is_id": true,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "is_instancer",
@@ -2023,8 +1940,7 @@
    ],
    "default": "TEXTURED",
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2036,8 +1952,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2086,8 +2001,7 @@
    ],
    "default": "BOX",
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2099,8 +2013,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2112,8 +2025,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2125,8 +2037,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2138,8 +2049,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2151,8 +2061,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2164,8 +2073,7 @@
    "unit": "NONE",
    "default": true,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2177,8 +2085,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2190,8 +2097,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2204,8 +2110,7 @@
    "fixed_type": "Pose",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -2217,8 +2122,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2230,8 +2134,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2260,9 +2163,7 @@
    "soft_min": -32768,
    "soft_max": 32767,
    "step": 1,
-   "flags": [
-    "OVERRIDABLE"
-   ]
+   "flags": []
   },
   {
    "identifier": "use_dynamic_topology_sculpting",
@@ -2274,8 +2175,7 @@
    "default": false,
    "flags": [
     "READONLY",
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2315,8 +2215,7 @@
    "is_id": false,
    "flags": [
     "READONLY",
-    "NEVER_NULL",
-    "OVERRIDABLE"
+    "NEVER_NULL"
    ]
   },
   {
@@ -2329,8 +2228,7 @@
    "fixed_type": "ObjectLineArt",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -2342,8 +2240,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2355,8 +2252,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2368,8 +2264,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2382,8 +2277,7 @@
    "default": "",
    "length_max": 0,
    "flags": [
-    "NEVER_NULL",
-    "OVERRIDABLE"
+    "NEVER_NULL"
    ]
   },
   {
@@ -2397,8 +2291,7 @@
    "is_id": false,
    "flags": [
     "READONLY",
-    "NEVER_NULL",
-    "OVERRIDABLE"
+    "NEVER_NULL"
    ]
   },
   {
@@ -2416,8 +2309,7 @@
    "step": 0.009999999776482582,
    "precision": 4,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2435,8 +2327,7 @@
    "step": 1.0,
    "precision": 2,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2454,8 +2345,7 @@
    "step": 1.0,
    "precision": 2,
    "flags": [
-    "ANIMATABLE",
-    "OVERRIDABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -2468,8 +2358,7 @@
    "fixed_type": "AnimData",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -2483,8 +2372,7 @@
    "is_id": false,
    "flags": [
     "READONLY",
-    "NEVER_NULL",
-    "OVERRIDABLE"
+    "NEVER_NULL"
    ]
   },
   {
@@ -2512,7 +2400,6 @@
    "api": null,
    "flags": [
     "READONLY",
-    "OVERRIDABLE",
     "RUNTIME"
    ]
   },
@@ -2531,7 +2418,6 @@
    "step": 1,
    "flags": [
     "ANIMATABLE",
-    "OVERRIDABLE",
     "RUNTIME"
    ]
   },
@@ -4341,7 +4227,7 @@
    "returns": []
   }
  ],
- "requested": true,
+ "root": true,
  "fresh": {
   "recipe": "bpy.data.objects.new('Object', None)",
   "differs_from_default": {

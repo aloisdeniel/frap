@@ -1,0 +1,36 @@
+{
+ "identifier": "Int2AttributeValue",
+ "name": "2D Integer Vector Attribute Value",
+ "description": "2D value in geometry attribute",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "value",
+   "name": "Vector",
+   "description": "2D vector",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0,
+    0
+   ],
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

@@ -1,0 +1,64 @@
+{
+ "bl_idname": "ShaderNodeNormal",
+ "srna": "ShaderNodeNormal",
+ "name": "Normal",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Normal",
+   "identifier": "Normal",
+   "bl_idname": "NodeSocketVectorDirection",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "DIRECTION",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Normal",
+   "identifier": "Normal",
+   "bl_idname": "NodeSocketVectorDirection",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "DIRECTION",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Dot",
+   "identifier": "Dot",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {}
+}

@@ -1,0 +1,114 @@
+{
+ "identifier": "NlaTrack",
+ "name": "NLA Track",
+ "description": "An animation layer containing Actions referenced as NLA strips",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "strips",
+   "name": "NLA Strips",
+   "description": "NLA Strips on this NLA-track",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NlaStrip",
+   "is_id": false,
+   "api": "NlaStrips",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "is_override_data",
+   "name": "Override Track",
+   "description": "In a local override data, whether this NLA track comes from the linked reference data, or is local to the override",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "active",
+   "name": "Active",
+   "description": "NLA Track is active",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_solo",
+   "name": "Solo",
+   "description": "NLA Track is evaluated itself (i.e. active Action and all other NLA Tracks in the same AnimData block are disabled)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "select",
+   "name": "Select",
+   "description": "NLA Track is selected",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mute",
+   "name": "Muted",
+   "description": "Disable NLA Track evaluation",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock",
+   "name": "Locked",
+   "description": "NLA Track is locked",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

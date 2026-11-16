@@ -1,0 +1,296 @@
+{
+ "identifier": "NodesModifier",
+ "name": "Nodes Modifier",
+ "description": "",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "node_group",
+   "name": "Node Group",
+   "description": "Node group that controls what this modifier does",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeTree",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "bake_directory",
+   "name": "Simulation Bake Directory",
+   "description": "Location on disk where the bake data is stored",
+   "type": "STRING",
+   "subtype": "DIR_PATH",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL",
+    "PATH_SUPPORTS_BLEND_RELATIVE"
+   ]
+  },
+  {
+   "identifier": "bake_target",
+   "name": "Bake Target",
+   "description": "Where to store the baked data",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "PACKED",
+     "name": "Packed",
+     "description": "Pack the baked data into the .blend file",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "DISK",
+     "name": "Disk",
+     "description": "Store the baked data in a directory on disk",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "PACKED",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bakes",
+   "name": "Bakes",
+   "description": "All potential bakes, as defined by the assigned Geometry Nodes",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodesModifierBake",
+   "is_id": false,
+   "api": "NodesModifierBakes",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "panels",
+   "name": "panels",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodesModifierPanel",
+   "is_id": false,
+   "api": "NodesModifierPanels",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "show_group_selector",
+   "name": "Show Node Group",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_manage_panel",
+   "name": "Show Manage Panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "node_warnings",
+   "name": "node_warnings",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodesModifierWarning",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "open_output_attributes_panel",
+   "name": "open_output_attributes_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_manage_panel",
+   "name": "open_manage_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_bake_panel",
+   "name": "open_bake_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_named_attributes_panel",
+   "name": "open_named_attributes_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_bake_data_blocks_panel",
+   "name": "open_bake_data_blocks_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_warnings_panel",
+   "name": "open_warnings_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "properties",
+   "name": "Properties",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodesModifierProperties",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "is_input_visible",
+   "description": "Check whether an input is currently visible based on modifier settings.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "identifier",
+     "name": "",
+     "description": "The identifier of the input",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Identifier",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "Result",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "is_input_used",
+   "description": "Check whether an input is currently used based on modifier settings.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "identifier",
+     "name": "",
+     "description": "The identifier of the input",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Identifier",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "Result",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

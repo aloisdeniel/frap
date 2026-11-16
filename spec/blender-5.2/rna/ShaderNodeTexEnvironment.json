@@ -1,0 +1,225 @@
+{
+ "identifier": "ShaderNodeTexEnvironment",
+ "name": "Environment Texture",
+ "description": "Sample an image file as an environment texture. Typically used to light the scene with the background node",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "image",
+   "name": "Image",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Image",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "texture_mapping",
+   "name": "Texture Mapping",
+   "description": "Texture coordinate mapping settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "TexMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "color_mapping",
+   "name": "Color Mapping",
+   "description": "Color mapping settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "projection",
+   "name": "Projection",
+   "description": "Projection of the input image",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "EQUIRECTANGULAR",
+     "name": "Equirectangular",
+     "description": "Equirectangular or latitude-longitude projection",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "MIRROR_BALL",
+     "name": "Mirror Ball",
+     "description": "Projection from an orthographic photo of a mirror ball",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "EQUIRECTANGULAR",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "interpolation",
+   "name": "Interpolation",
+   "description": "Texture interpolation",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "Linear",
+     "name": "Linear",
+     "description": "Linear interpolation",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "Closest",
+     "name": "Closest",
+     "description": "No interpolation (sample closest texel)",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Cubic",
+     "name": "Cubic",
+     "description": "Cubic interpolation",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "Smart",
+     "name": "Smart",
+     "description": "Bicubic when magnifying, else bilinear (OSL only)",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "Linear",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "image_user",
+   "name": "Image User",
+   "description": "Parameters defining which layer, pass and frame of the image is displayed",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ImageUser",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

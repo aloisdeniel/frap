@@ -1,0 +1,109 @@
+{
+ "identifier": "NodeTreeInterfacePanel",
+ "name": "Node Tree Interface Item",
+ "description": "Declaration of a node panel",
+ "base": "NodeTreeInterfaceItem",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "Panel name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "description",
+   "name": "Description",
+   "description": "Panel description",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "default_closed",
+   "name": "Default Closed",
+   "description": "Panel is closed by default on new nodes",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "select",
+   "name": "Select",
+   "description": "Panel is selected in the interface",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "interface_items",
+   "name": "Items",
+   "description": "Items in the node panel",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeTreeInterfaceItem",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "persistent_uid",
+   "name": "Persistent Identifier",
+   "description": "Unique identifier for this panel within this node tree",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "identifier",
+   "name": "Identifier",
+   "description": "Unique identifier for this panel within this node tree",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

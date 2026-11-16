@@ -169,7 +169,6 @@
    "flags": [
     "READONLY",
     "HIDDEN",
-    "OVERRIDABLE",
     "SKIP_PRESET"
    ]
   },
@@ -186,7 +185,6 @@
    "flags": [
     "READONLY",
     "HIDDEN",
-    "OVERRIDABLE",
     "SKIP_PRESET"
    ]
   },
@@ -8358,7 +8356,7 @@
    ]
   }
  ],
- "requested": false,
+ "root": true,
  "fresh": {
   "recipe": "bpy.data.materials.new('Material').node_tree.nodes['Principled BSDF']",
   "differs_from_default": {
@@ -8373,6 +8371,7 @@
    ],
    "width": 240.0,
    "height": 100.0,
+   "name": "Principled BSDF",
    "color": [
     0.6079999804496765,
     0.6079999804496765,

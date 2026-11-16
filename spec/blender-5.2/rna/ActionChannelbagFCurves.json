@@ -1,0 +1,300 @@
+{
+ "identifier": "ActionChannelbagFCurves",
+ "name": "F-Curves",
+ "description": "Collection of F-Curves for a specific action slot, on a specific strip",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add an F-Curve to the channelbag",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "data_path",
+     "name": "Data Path",
+     "description": "F-Curve data path to use",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "Array index",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "group_name",
+     "name": "Group Name",
+     "description": "Name of the Group for this F-Curve, will be created if it does not exist yet",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "fcurve",
+     "name": "",
+     "description": "Newly created F-Curve",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "FCurve",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "new_from_fcurve",
+   "description": "Copy an F-Curve into the channelbag. The original F-Curve is unchanged",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "source",
+     "name": "Source F-Curve",
+     "description": "The F-Curve to copy",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "FCurve",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "data_path",
+     "name": "Data Path",
+     "description": "F-Curve data path to use. If not provided, this will use the same data path as the given F-Curve",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "fcurve",
+     "name": "",
+     "description": "Newly created F-Curve",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "FCurve",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "ensure",
+   "description": "Returns the F-Curve if it already exists, and creates it if necessary",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "data_path",
+     "name": "Data Path",
+     "description": "F-Curve data path to use",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "Array index",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "group_name",
+     "name": "Group Name",
+     "description": "Name of the Group for this F-Curve, will be created if it does not exist yet. This parameter is ignored if the F-Curve already exists",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "fcurve",
+     "name": "",
+     "description": "Found or newly created F-Curve",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "FCurve",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "find",
+   "description": "Find an F-Curve. Note that this function performs a linear scan of all F-Curves in the channelbag.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "data_path",
+     "name": "Data Path",
+     "description": "F-Curve data path",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "Array index",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "fcurve",
+     "name": "",
+     "description": "The found F-Curve, or None if it does not exist",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "FCurve",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove F-Curve",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "fcurve",
+     "name": "",
+     "description": "F-Curve to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "FCurve",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "clear",
+   "description": "Remove all F-Curves from this channelbag",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  }
+ ],
+ "root": false
+}

@@ -1,0 +1,25 @@
+{
+ "identifier": "NodeSocketBool",
+ "name": "Boolean Node Socket",
+ "description": "Boolean value socket of a node",
+ "base": "NodeSocketStandard",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "default_value",
+   "name": "default_value",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

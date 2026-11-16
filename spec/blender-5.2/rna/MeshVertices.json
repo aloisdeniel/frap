@@ -1,0 +1,42 @@
+{
+ "identifier": "MeshVertices",
+ "name": "Mesh Vertices",
+ "description": "Collection of mesh vertices",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "add",
+   "description": "add",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "count",
+     "name": "Count",
+     "description": "Number of vertices to add",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

@@ -1,0 +1,1020 @@
+{
+ "namespace": "import_scene",
+ "count": 2,
+ "operators": [
+  {
+   "idname": "import_scene.fbx",
+   "bl_idname": "IMPORT_SCENE_OT_fbx",
+   "label": "Import FBX",
+   "description": "Load a FBX file",
+   "options": [
+    "PRESET",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "filepath",
+     "name": "File Path",
+     "description": "Filepath used for importing the file",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1025,
+     "flags": [
+      "HIDDEN",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "directory",
+     "name": "directory",
+     "description": "",
+     "type": "STRING",
+     "subtype": "DIR_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "HIDDEN",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_glob",
+     "name": "filter_glob",
+     "description": "",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "*.fbx",
+     "length_max": 0,
+     "flags": [
+      "HIDDEN",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "files",
+     "name": "File Path",
+     "description": "",
+     "type": "COLLECTION",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "OperatorFileListElement",
+     "is_id": false,
+     "api": null,
+     "flags": [
+      "READONLY",
+      "HIDDEN",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ui_tab",
+     "name": "ui_tab",
+     "description": "Import options categories",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "MAIN",
+       "name": "Main",
+       "description": "Main basic settings",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ARMATURE",
+       "name": "Armatures",
+       "description": "Armature-related settings",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "MAIN",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_manual_orientation",
+     "name": "Manual Orientation",
+     "description": "Specify orientation and scale, instead of using embedded data in FBX file",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "global_scale",
+     "name": "Scale",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.0010000000474974513,
+     "hard_max": 1000.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 1000.0,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bake_space_transform",
+     "name": "Apply Transform",
+     "description": "Bake space transform into object data, avoids getting unwanted rotations to objects when target space is not aligned with Blender's space (WARNING! experimental option, use at own risk, known to be broken with armatures/animations)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_custom_normals",
+     "name": "Custom Normals",
+     "description": "Import custom normals, if available (otherwise Blender will recompute them)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "colors_type",
+     "name": "Vertex Colors",
+     "description": "Import vertex color attributes",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NONE",
+       "name": "None",
+       "description": "Do not import color attributes",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SRGB",
+       "name": "sRGB",
+       "description": "Expect file colors in sRGB color space",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "LINEAR",
+       "name": "Linear",
+       "description": "Expect file colors in linear color space",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "SRGB",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_image_search",
+     "name": "Image Search",
+     "description": "Search subdirs for any associated images (WARNING: may be slow)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_alpha_decals",
+     "name": "Alpha Decals",
+     "description": "Treat materials with alpha as decals (no shadow casting)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "decal_offset",
+     "name": "Decal Offset",
+     "description": "Displace geometry of alpha meshes",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_anim",
+     "name": "Import Animation",
+     "description": "Import FBX animation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "anim_offset",
+     "name": "Animation Offset",
+     "description": "Offset to apply to animation during import, in frames",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_subsurf",
+     "name": "Subdivision Data",
+     "description": "Import FBX subdivision information as subdivision surface modifiers",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_custom_props",
+     "name": "Custom Properties",
+     "description": "Import user properties as custom properties",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_custom_props_enum_as_string",
+     "name": "Import Enums As Strings",
+     "description": "Store enumeration values as strings",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ignore_leaf_bones",
+     "name": "Ignore Leaf Bones",
+     "description": "Ignore the last bone at the end of each chain (used to mark the length of the previous bone)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "force_connect_children",
+     "name": "Force Connect Children",
+     "description": "Force connection of children bones to their parent, even if their computed head/tail positions do not match (can be useful with pure-joints-type armatures)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "automatic_bone_orientation",
+     "name": "Automatic Bone Orientation",
+     "description": "Try to align the major bone axis with the bone children",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "primary_bone_axis",
+     "name": "Primary Bone Axis",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "-X",
+       "name": "-X Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "-Y",
+       "name": "-Y Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "-Z",
+       "name": "-Z Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "Y",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "secondary_bone_axis",
+     "name": "Secondary Bone Axis",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "-X",
+       "name": "-X Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "-Y",
+       "name": "-Y Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "-Z",
+       "name": "-Z Axis",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "X",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_prepost_rot",
+     "name": "Use Pre/Post Rotation",
+     "description": "Use pre/post rotation from FBX transform (you may have to disable that in some cases)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mtl_name_collision_mode",
+     "name": "Material Name Collision",
+     "description": "Behavior when the name of an imported material conflicts with an existing material",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "MAKE_UNIQUE",
+       "name": "Make Unique",
+       "description": "Import each FBX material as a unique Blender material",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "REFERENCE_EXISTING",
+       "name": "Reference Existing",
+       "description": "If a material with the same name already exists, reference that instead of importing",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "MAKE_UNIQUE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis_forward",
+     "name": "Forward",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X Forward",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y Forward",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z Forward",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "-X",
+       "name": "-X Forward",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "-Y",
+       "name": "-Y Forward",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "-Z",
+       "name": "-Z Forward",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "-Z",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis_up",
+     "name": "Up",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X Up",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y Up",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z Up",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "-X",
+       "name": "-X Up",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "-Y",
+       "name": "-Y Up",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "-Z",
+       "name": "-Z Up",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "Y",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "import_scene.gltf",
+   "bl_idname": "IMPORT_SCENE_OT_gltf",
+   "label": "Import glTF 2.0",
+   "description": "Load a glTF 2.0 file",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "filepath",
+     "name": "File Path",
+     "description": "Filepath used for importing the file",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1025,
+     "flags": [
+      "HIDDEN",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_import_convert_lighting_mode",
+     "name": "Lighting Mode",
+     "description": "Optional backwards compatibility for non-standard render engines. Applies to lights",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SPEC",
+       "name": "Standard",
+       "description": "Physically-based glTF lighting units (cd, lx, nt)",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "COMPAT",
+       "name": "Unitless",
+       "description": "Non-physical, unitless lighting. Useful when exposure controls are not available",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "RAW",
+       "name": "Raw (Deprecated)",
+       "description": "Blender lighting strengths with no conversion",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "SPEC",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_glob",
+     "name": "filter_glob",
+     "description": "",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "*.glb;*.gltf",
+     "length_max": 0,
+     "flags": [
+      "HIDDEN",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "directory",
+     "name": "directory",
+     "description": "",
+     "type": "STRING",
+     "subtype": "DIR_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "HIDDEN",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "files",
+     "name": "File Path",
+     "description": "",
+     "type": "COLLECTION",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "OperatorFileListElement",
+     "is_id": false,
+     "api": null,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "loglevel",
+     "name": "Log Level",
+     "description": "Log Level",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "import_pack_images",
+     "name": "Pack Images",
+     "description": "Pack all images into .blend file",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "merge_vertices",
+     "name": "Merge Vertices",
+     "description": "The glTF format requires discontinuous normals, UVs, and other vertex attributes to be stored as separate vertices, as required for rendering on typical graphics hardware. This option attempts to combine co-located vertices where possible. Currently cannot combine verts with different normals",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "import_shading",
+     "name": "Shading",
+     "description": "How normals are computed during import",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NORMALS",
+       "name": "Use Normal Data",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "FLAT",
+       "name": "Flat Shading",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth Shading",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "NORMALS",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bone_heuristic",
+     "name": "Bone Dir",
+     "description": "Heuristic for placing bones. Tries to make bones pretty",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "BLENDER",
+       "name": "Blender (best for import/export round trip)",
+       "description": "Good for re-importing glTFs exported from Blender, and re-exporting glTFs to glTFs after Blender editing. Bone tips are placed on their local +Y axis (in glTF space)",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "TEMPERANCE",
+       "name": "Temperance (average)",
+       "description": "Decent all-around strategy. A bone with one child has its tip placed on the local axis closest to its child",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "FORTUNE",
+       "name": "Fortune (may look better, less accurate)",
+       "description": "Might look better than Temperance, but also might have errors. A bone with one child has its tip placed at its child's root. Non-uniform scalings may get messed up though, so beware",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "BLENDER",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "disable_bone_shape",
+     "name": "Disable Bone Shape",
+     "description": "Do not create bone shapes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bone_shape_scale_factor",
+     "name": "Bone Shape Scale",
+     "description": "Scale factor for bone shapes",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "guess_original_bind_pose",
+     "name": "Guess Original Bind Pose",
+     "description": "Try to guess the original bind pose for skinned meshes from the inverse bind matrices. When off, use default/rest pose as bind pose",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "import_webp_texture",
+     "name": "Import WebP Textures",
+     "description": "If a texture exists in WebP format, loads the WebP texture instead of the fallback PNG/JPEG one",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "import_unused_materials",
+     "name": "Import Unused Materials & Images",
+     "description": "Import materials & Images not assigned to any mesh",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "import_select_created_objects",
+     "name": "Select Imported Objects",
+     "description": "Select created objects at the end of the import",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "import_scene_extras",
+     "name": "Import Scene Extras",
+     "description": "Import scene extras as custom properties. Existing custom properties will be overwritten",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "import_scene_as_collection",
+     "name": "Import Scene as Collection",
+     "description": "Import the scene as a collection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "import_merge_material_slots",
+     "name": "Merge Material Slot when possible",
+     "description": "Merge material slots when possible",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "import_point_as_pointcloud",
+     "name": "Import Points as Point Cloud",
+     "description": "Import mesh with only POINTS primitives as Point Cloud objects",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  }
+ ]
+}

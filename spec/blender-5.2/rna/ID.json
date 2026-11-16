@@ -483,8 +483,7 @@
    "unit": "NONE",
    "default": false,
    "flags": [
-    "ANIMATABLE",
-    "LIBRARY_EDITABLE"
+    "ANIMATABLE"
    ]
   },
   {
@@ -547,8 +546,7 @@
    "fixed_type": "IDOverrideLibrary",
    "is_id": false,
    "flags": [
-    "READONLY",
-    "OVERRIDABLE"
+    "READONLY"
    ]
   },
   {
@@ -1181,5 +1179,5 @@
    ]
   }
  ],
- "requested": false
+ "root": true
 }

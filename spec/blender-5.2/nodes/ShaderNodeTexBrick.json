@@ -1,0 +1,219 @@
+{
+ "bl_idname": "ShaderNodeTexBrick",
+ "srna": "ShaderNodeTexBrick",
+ "name": "Brick Texture",
+ "label": "",
+ "width": 180.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": true,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Color1",
+   "identifier": "Color1",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Color2",
+   "identifier": "Color2",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.20000000298023224,
+    0.20000000298023224,
+    0.20000000298023224,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Mortar",
+   "identifier": "Mortar",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Scale",
+   "identifier": "Scale",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 5.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Mortar Size",
+   "identifier": "Mortar Size",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.019999999552965164,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Mortar Smooth",
+   "identifier": "Mortar Smooth",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.10000000149011612,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Bias",
+   "identifier": "Bias",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Brick Width",
+   "identifier": "Brick Width",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Row Height",
+   "identifier": "Row Height",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.25,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Factor",
+   "identifier": "Fac",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "texture_mapping": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree",
+   "type": "TexMapping"
+  },
+  "color_mapping": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree",
+   "type": "ColorMapping"
+  },
+  "offset_frequency": 2,
+  "squash_frequency": 2,
+  "offset": 0.5,
+  "squash": 1.0
+ }
+}

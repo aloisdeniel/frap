@@ -1,0 +1,427 @@
+{
+ "identifier": "Light",
+ "name": "Light",
+ "description": "Light data-block for lighting a scene",
+ "base": "ID",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "type",
+   "name": "Type",
+   "description": "Type of light",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "POINT",
+     "name": "Point",
+     "description": "Omnidirectional point light source",
+     "icon": "LIGHT_POINT",
+     "value": 0
+    },
+    {
+     "identifier": "SUN",
+     "name": "Sun",
+     "description": "Constant direction parallel ray light source",
+     "icon": "LIGHT_SUN",
+     "value": 1
+    },
+    {
+     "identifier": "SPOT",
+     "name": "Spot",
+     "description": "Directional cone light source",
+     "icon": "LIGHT_SPOT",
+     "value": 2
+    },
+    {
+     "identifier": "AREA",
+     "name": "Area",
+     "description": "Directional area light source",
+     "icon": "LIGHT_AREA",
+     "value": 4
+    }
+   ],
+   "default": "POINT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_temperature",
+   "name": "Use Temperature",
+   "description": "Use blackbody temperature to define a natural light color",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "color",
+   "name": "Color",
+   "description": "Light color",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "temperature",
+   "name": "Temperature",
+   "description": "Light color temperature in Kelvin",
+   "type": "FLOAT",
+   "subtype": "COLOR_TEMPERATURE",
+   "unit": "COLOR_TEMPERATURE",
+   "default": 6500.0,
+   "hard_min": 800.0,
+   "hard_max": 20000.0,
+   "soft_min": 800.0,
+   "soft_max": 20000.0,
+   "step": 400.0,
+   "precision": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "temperature_color",
+   "name": "Temperature Color",
+   "description": "Color from Temperature",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "specular_factor",
+   "name": "Specular Factor",
+   "description": "Specular reflection multiplier",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "diffuse_factor",
+   "name": "Diffuse Factor",
+   "description": "Diffuse reflection multiplier",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "transmission_factor",
+   "name": "Transmission Factor",
+   "description": "Transmission light multiplier",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "volume_factor",
+   "name": "Volume Factor",
+   "description": "Volume light multiplier",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_custom_distance",
+   "name": "Custom Attenuation",
+   "description": "Use custom attenuation distance instead of global light threshold",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "cutoff_distance",
+   "name": "Cutoff Distance",
+   "description": "Distance at which the light influence will be set to 0",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 40.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.009999999776482582,
+   "soft_max": 100.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_shadow",
+   "name": "use_shadow",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "exposure",
+   "name": "Exposure",
+   "description": "Scales the power of the light exponentially, multiplying the intensity by 2^exposure",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -32.0,
+   "hard_max": 32.0,
+   "soft_min": -10.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "normalize",
+   "name": "Normalize",
+   "description": "Normalize intensity by light area, for consistent total light output regardless of size and shape",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "node_tree",
+   "name": "Node Tree",
+   "description": "Node tree for node based lights",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeTree",
+   "is_id": true,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_nodes",
+   "name": "Use Nodes",
+   "description": "Use shader nodes to render the light",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "DEPRECATED"
+   ],
+   "deprecated": {
+    "note": "Unused but kept for compatibility reasons. Setting the property has no effect, and getting it always returns True.",
+    "version": [
+     5,
+     10,
+     0
+    ],
+    "removal_version": [
+     6,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "identifier": "animation_data",
+   "name": "Animation Data",
+   "description": "Animation data for this data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AnimData",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "cycles",
+   "name": "Cycles Light Settings",
+   "description": "Cycles light settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CyclesLightSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "area",
+   "description": "Compute light area based on type and shape. The normalize option divides light intensity by this area",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "matrix_world",
+     "name": "",
+     "description": "Object to world space transformation matrix",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      4,
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "area",
+     "name": "area",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.lights.new('Light', 'POINT')",
+  "differs_from_default": {
+   "id_type": "LIGHT",
+   "is_editable": true,
+   "temperature_color": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "use_nodes": true
+  }
+ }
+}

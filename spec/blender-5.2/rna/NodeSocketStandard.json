@@ -8,5 +8,5 @@
  "is_id": false,
  "props": [],
  "funcs": [],
- "requested": false
+ "root": true
 }

@@ -1,0 +1,277 @@
+{
+ "identifier": "ShaderNodeTexWave",
+ "name": "Wave Texture",
+ "description": "Generate procedural bands or rings with noise",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "texture_mapping",
+   "name": "Texture Mapping",
+   "description": "Texture coordinate mapping settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "TexMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "color_mapping",
+   "name": "Color Mapping",
+   "description": "Color mapping settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "wave_type",
+   "name": "Wave Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BANDS",
+     "name": "Bands",
+     "description": "Use standard wave texture in bands",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "RINGS",
+     "name": "Rings",
+     "description": "Use wave texture in rings",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "BANDS",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bands_direction",
+   "name": "Bands Direction",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "X",
+     "name": "X",
+     "description": "Bands across X axis",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "Y",
+     "name": "Y",
+     "description": "Bands across Y axis",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Z",
+     "name": "Z",
+     "description": "Bands across Z axis",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "DIAGONAL",
+     "name": "Diagonal",
+     "description": "Bands across diagonal axis",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "X",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "rings_direction",
+   "name": "Rings Direction",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "X",
+     "name": "X",
+     "description": "Rings along X axis",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "Y",
+     "name": "Y",
+     "description": "Rings along Y axis",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Z",
+     "name": "Z",
+     "description": "Rings along Z axis",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "SPHERICAL",
+     "name": "Spherical",
+     "description": "Rings along spherical distance",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "X",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "wave_profile",
+   "name": "Wave Profile",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SIN",
+     "name": "Sine",
+     "description": "Use a standard sine profile",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "SAW",
+     "name": "Saw",
+     "description": "Use a sawtooth profile",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "TRI",
+     "name": "Triangle",
+     "description": "Use a triangle profile",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "SIN",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

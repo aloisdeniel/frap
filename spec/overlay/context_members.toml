@@ -1,0 +1,57 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Types of `bpy.context` members that are not RNA properties of `Context` (RFC 0001 F-DEF-5).
+# `dump_rna.py` infers the kind and type of each member from live values in four states (object,
+# pose, armature edit and mesh edit mode, VIEW_3D override); members never seen non-None get their
+# type here, from Blender's context documentation (`bpy.context` API reference, 5.2) and
+# `screen_context.cc` / `view3d_view.cc` context callbacks. Codegen synthesises one
+# `READONLY | CONTEXT_MEMBER` PropDef per member (POINTER or COLLECTION of `type`).
+#
+# Entries here override the inferred kind/type; members listed here but not dumped are added
+# (buttons-context members frap supports: `material`, `material_slot`, `mesh`, …).
+
+[members]
+active_action = { kind = "pointer", type = "Action" }
+active_annotation_layer = { kind = "pointer", type = "AnnotationLayer" }
+active_bone = { kind = "pointer", type = "EditBone" }
+active_editable_fcurve = { kind = "pointer", type = "FCurve" }
+active_nla_strip = { kind = "pointer", type = "NlaStrip" }
+active_nla_track = { kind = "pointer", type = "NlaTrack" }
+active_operator = { kind = "pointer", type = "Operator" }
+active_pose_bone = { kind = "pointer", type = "PoseBone" }
+active_strip = { kind = "pointer", type = "Strip" }
+annotation_data = { kind = "pointer", type = "Annotation" }
+editable_bones = { kind = "collection", type = "EditBone" }
+editable_fcurves = { kind = "collection", type = "FCurve" }
+grease_pencil = { kind = "pointer", type = "GreasePencil" }
+image_paint_object = { kind = "pointer", type = "Object" }
+particle_edit_object = { kind = "pointer", type = "Object" }
+property = { kind = "pointer", type = "AnyType" }
+sculpt_object = { kind = "pointer", type = "Object" }
+selected_bones = { kind = "collection", type = "EditBone" }
+selected_editable_actions = { kind = "collection", type = "Action" }
+selected_editable_bones = { kind = "collection", type = "EditBone" }
+selected_editable_fcurves = { kind = "collection", type = "FCurve" }
+selected_editable_keyframes = { kind = "collection", type = "Keyframe" }
+selected_editable_strips = { kind = "collection", type = "Strip" }
+selected_movieclip_tracks = { kind = "collection", type = "MovieTrackingTrack" }
+selected_nla_strips = { kind = "collection", type = "NlaStrip" }
+selected_pose_bones = { kind = "collection", type = "PoseBone" }
+selected_pose_bones_from_active_object = { kind = "collection", type = "PoseBone" }
+selected_strips = { kind = "collection", type = "Strip" }
+selected_visible_actions = { kind = "collection", type = "Action" }
+selected_visible_fcurves = { kind = "collection", type = "FCurve" }
+sequencer_scene = { kind = "pointer", type = "Scene" }
+strips = { kind = "collection", type = "Strip" }
+ui_list = { kind = "pointer", type = "UIList" }
+vertex_paint_object = { kind = "pointer", type = "Object" }
+visible_bones = { kind = "collection", type = "EditBone" }
+visible_fcurves = { kind = "collection", type = "FCurve" }
+weight_paint_object = { kind = "pointer", type = "Object" }
+# Buttons-context members (Properties editor) frap exposes for agents.
+material = { kind = "pointer", type = "Material" }
+material_slot = { kind = "pointer", type = "MaterialSlot" }
+mesh = { kind = "pointer", type = "Mesh" }
+camera = { kind = "pointer", type = "Camera" }
+light = { kind = "pointer", type = "Light" }
+world = { kind = "pointer", type = "World" }

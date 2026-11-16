@@ -1,0 +1,384 @@
+{
+ "bl_idname": "ShaderNodeBsdfHairPrincipled",
+ "srna": "ShaderNodeBsdfHairPrincipled",
+ "name": "Principled Hair BSDF",
+ "label": "",
+ "width": 240.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.01751299947500229,
+    0.005762999877333641,
+    0.002059000078588724,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Melanin",
+   "identifier": "Melanin",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.800000011920929,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Melanin Redness",
+   "identifier": "Melanin Redness",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Tint",
+   "identifier": "Tint",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Absorption Coefficient",
+   "identifier": "Absorption Coefficient",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.24553099274635315,
+    0.5199999809265137,
+    1.3650000095367432
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Aspect Ratio",
+   "identifier": "Aspect Ratio",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.8500000238418579,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Roughness",
+   "identifier": "Roughness",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.30000001192092896,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Radial Roughness",
+   "identifier": "Radial Roughness",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.30000001192092896,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Coat",
+   "identifier": "Coat",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "IOR",
+   "identifier": "IOR",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.5499999523162842,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Offset",
+   "identifier": "Offset",
+   "bl_idname": "NodeSocketFloatAngle",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.03490658476948738,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "ANGLE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Random Color",
+   "identifier": "Random Color",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Random Roughness",
+   "identifier": "Random Roughness",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Random",
+   "identifier": "Random",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": true,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Weight",
+   "identifier": "Weight",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Reflection",
+   "identifier": "R lobe",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Transmission",
+   "identifier": "TT lobe",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Secondary Reflection",
+   "identifier": "TRT lobe",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  }
+ ],
+ "outputs": [
+  {
+   "name": "BSDF",
+   "identifier": "BSDF",
+   "bl_idname": "NodeSocketShader",
+   "type": "SHADER",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  }
+ ],
+ "props": {
+  "model": "CHIANG",
+  "parametrization": "COLOR"
+ },
+ "availability": {
+  "model": {
+   "default": "CHIANG",
+   "by_value": {
+    "CHIANG": {
+     "inputs": [
+      "Color",
+      "Roughness",
+      "Radial Roughness",
+      "Coat",
+      "IOR",
+      "Offset",
+      "Random Roughness",
+      "Random"
+     ],
+     "outputs": [
+      "BSDF"
+     ]
+    },
+    "HUANG": {
+     "inputs": [
+      "Color",
+      "Aspect Ratio",
+      "Roughness",
+      "IOR",
+      "Offset",
+      "Random Roughness",
+      "Random",
+      "R lobe",
+      "TT lobe",
+      "TRT lobe"
+     ],
+     "outputs": [
+      "BSDF"
+     ]
+    }
+   }
+  },
+  "parametrization": {
+   "default": "COLOR",
+   "by_value": {
+    "ABSORPTION": {
+     "inputs": [
+      "Absorption Coefficient",
+      "Roughness",
+      "Radial Roughness",
+      "Coat",
+      "IOR",
+      "Offset",
+      "Random Roughness",
+      "Random"
+     ],
+     "outputs": [
+      "BSDF"
+     ]
+    },
+    "MELANIN": {
+     "inputs": [
+      "Melanin",
+      "Melanin Redness",
+      "Tint",
+      "Roughness",
+      "Radial Roughness",
+      "Coat",
+      "IOR",
+      "Offset",
+      "Random Color",
+      "Random Roughness",
+      "Random"
+     ],
+     "outputs": [
+      "BSDF"
+     ]
+    },
+    "COLOR": {
+     "inputs": [
+      "Color",
+      "Roughness",
+      "Radial Roughness",
+      "Coat",
+      "IOR",
+      "Offset",
+      "Random Roughness",
+      "Random"
+     ],
+     "outputs": [
+      "BSDF"
+     ]
+    }
+   }
+  }
+ }
+}

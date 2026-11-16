@@ -1,0 +1,39 @@
+{
+ "identifier": "CollectionLightLinking",
+ "name": "Collection Light Linking",
+ "description": "Light linking settings of objects and children collections of a collection",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "link_state",
+   "name": "Link State",
+   "description": "Light or shadow receiving state of the object or collection",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "INCLUDE",
+     "name": "Include",
+     "description": "",
+     "icon": "OUTLINER_OB_LIGHT",
+     "value": 0
+    },
+    {
+     "identifier": "EXCLUDE",
+     "name": "Exclude",
+     "description": "",
+     "icon": "LIGHT",
+     "value": 1
+    }
+   ],
+   "default": "INCLUDE",
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

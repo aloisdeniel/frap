@@ -1,0 +1,27 @@
+{
+ "identifier": "CurveMap",
+ "name": "CurveMap",
+ "description": "Curve in a curve mapping",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "points",
+   "name": "Points",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CurveMapPoint",
+   "is_id": false,
+   "api": "CurveMapPoints",
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

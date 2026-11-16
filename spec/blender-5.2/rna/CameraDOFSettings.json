@@ -1,0 +1,142 @@
+{
+ "identifier": "CameraDOFSettings",
+ "name": "Depth of Field",
+ "description": "Depth of Field settings",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "use_dof",
+   "name": "Depth of Field",
+   "description": "Use Depth of Field",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "focus_object",
+   "name": "Focus Object",
+   "description": "Use this object to define the depth of field focal point",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "focus_subtarget",
+   "name": "Focus Bone",
+   "description": "Use this armature bone to define the depth of field focal point",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "focus_distance",
+   "name": "Focus Distance",
+   "description": "Distance to the focus point for depth of field",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 10.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 5000.0,
+   "step": 1.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "aperture_fstop",
+   "name": "F-Stop",
+   "description": "F-Stop ratio (lower numbers give more defocus, higher numbers give a sharper image)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 2.799999952316284,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.10000000149011612,
+   "soft_max": 128.0,
+   "step": 10.0,
+   "precision": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "aperture_blades",
+   "name": "Blades",
+   "description": "Number of blades in aperture for polygonal bokeh (at least 3)",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 16,
+   "soft_min": 0,
+   "soft_max": 16,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "aperture_rotation",
+   "name": "Rotation",
+   "description": "Rotation of blades in aperture",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": -3.1415927410125732,
+   "hard_max": 3.1415927410125732,
+   "soft_min": -3.1415927410125732,
+   "soft_max": 3.1415927410125732,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "aperture_ratio",
+   "name": "Ratio",
+   "description": "Distortion to simulate anamorphic lens bokeh",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.009999999776482582,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.009999999776482582,
+   "soft_max": 2.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.cameras.new('Camera').dof",
+  "differs_from_default": {}
+ }
+}

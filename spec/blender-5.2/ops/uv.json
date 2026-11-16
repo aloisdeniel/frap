@@ -1,0 +1,5394 @@
+{
+ "namespace": "uv",
+ "count": 55,
+ "operators": [
+  {
+   "idname": "uv.align",
+   "bl_idname": "UV_OT_align",
+   "label": "Align",
+   "description": "Aligns selected UV vertices on a line",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "axis",
+     "name": "Axis",
+     "description": "Axis to align UV locations on",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ALIGN_S",
+       "name": "Straighten",
+       "description": "Align UV vertices along the line defined by the endpoints",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ALIGN_T",
+       "name": "Straighten X",
+       "description": "Align UV vertices, moving them horizontally to the line defined by the endpoints",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ALIGN_U",
+       "name": "Straighten Y",
+       "description": "Align UV vertices, moving them vertically to the line defined by the endpoints",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ALIGN_AUTO",
+       "name": "Align Auto",
+       "description": "Automatically choose the direction on which there is most alignment already",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "ALIGN_X",
+       "name": "Align Vertically",
+       "description": "Align UV vertices on a vertical line",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "ALIGN_Y",
+       "name": "Align Horizontally",
+       "description": "Align UV vertices on a horizontal line",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "ALIGN_AUTO",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "position_mode",
+     "name": "Position Mode",
+     "description": "Method of calculating the alignment position",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "MEAN",
+       "name": "Mean",
+       "description": "Align UVs along the mean position",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "MIN",
+       "name": "Minimum",
+       "description": "Align UVs along the minimum position",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MAX",
+       "name": "Maximum",
+       "description": "Align UVs along the maximum position",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "MEAN",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.align_rotation",
+   "bl_idname": "UV_OT_align_rotation",
+   "label": "Align Rotation",
+   "description": "Align the UV island's rotation",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "method",
+     "name": "Method",
+     "description": "Method to calculate rotation angle",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "AUTO",
+       "name": "Auto",
+       "description": "Align from all edges",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Only selected edges",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "GEOMETRY",
+       "name": "Geometry",
+       "description": "Align to Geometry axis",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "AUTO",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis",
+     "name": "Axis",
+     "description": "Axis to align to",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "X axis",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "Y axis",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Z",
+       "name": "Z",
+       "description": "Z axis",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "X",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "correct_aspect",
+     "name": "Correct Aspect",
+     "description": "Take image aspect ratio into account",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.arrange_islands",
+   "bl_idname": "UV_OT_arrange_islands",
+   "label": "Arrange/Align Islands",
+   "description": "Arrange selected UV islands on a line",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "initial_position",
+     "name": "Initial Position",
+     "description": "Initial position to arrange islands from",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "BOUNDING_BOX",
+       "name": "Bounding Box",
+       "description": "Initial alignment based on the islands bounding box",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "UV_GRID",
+       "name": "UV Grid",
+       "description": "Initial alignment based on UV Tile Grid",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ACTIVE_UDIM",
+       "name": "Active UDIM",
+       "description": "Initial alignment based on Active UDIM",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "CURSOR",
+       "name": "2D Cursor",
+       "description": "Initial alignment based on 2D cursor",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "BOUNDING_BOX",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis",
+     "name": "Axis",
+     "description": "Axis to arrange UV islands on",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "Align UV islands along the X axis",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "Align UV islands along the Y axis",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "Y",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "align",
+     "name": "Align",
+     "description": "Location to align islands on",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "MIN",
+       "name": "Min",
+       "description": "Align the islands to the min of the island",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MAX",
+       "name": "Max",
+       "description": "Align the islands to the max side of the island",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CENTER",
+       "name": "Center",
+       "description": "Align the islands to the center of the largest island",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "NONE",
+       "name": "None",
+       "description": "Preserve island alignment",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "MIN",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "order",
+     "name": "Order",
+     "description": "Order of islands",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "LARGE_TO_SMALL",
+       "name": "Largest to Smallest",
+       "description": "Sort islands from largest to smallest",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SMALL_TO_LARGE",
+       "name": "Smallest to Largest",
+       "description": "Sort islands from smallest to largest",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "Fixed",
+       "name": "Fixed",
+       "description": "Preserve island order",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "LARGE_TO_SMALL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "margin",
+     "name": "Margin",
+     "description": "Space between islands",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.05000000074505806,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.average_islands_scale",
+   "bl_idname": "UV_OT_average_islands_scale",
+   "label": "Average Islands Scale",
+   "description": "Average the size of separate UV islands, based on their area in 3D space",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "scale_uv",
+     "name": "Non-Uniform",
+     "description": "Scale U and V independently",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "shear",
+     "name": "Shear",
+     "description": "Reduce shear within islands",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.copy",
+   "bl_idname": "UV_OT_copy",
+   "label": "Copy UVs",
+   "description": "Copy selected UV vertices",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.copy_mirrored_faces",
+   "bl_idname": "UV_OT_copy_mirrored_faces",
+   "label": "Copy Mirrored UV Coords",
+   "description": "Copy mirror UV coordinates based on a mirrored mesh",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mesh_axis",
+     "name": "Mesh Axis",
+     "description": "Mirror vertices based on mesh axis",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "POS_X",
+       "name": "-X to +X",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "POS_Y",
+       "name": "-Y to +Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "POS_Z",
+       "name": "-Z to +Z",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "NEG_X",
+       "name": "+X to -X",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "NEG_Y",
+       "name": "+Y to -Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "NEG_Z",
+       "name": "+Z to -Z",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "POS_X",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "uv_axis",
+     "name": "UV Axis",
+     "description": "Axis to mirror UV coordinates",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "X",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "precision",
+     "name": "Precision",
+     "description": "Tolerance for finding vertex duplicates",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 3,
+     "hard_min": 1,
+     "hard_max": 16,
+     "soft_min": 1,
+     "soft_max": 16,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.cube_project",
+   "bl_idname": "UV_OT_cube_project",
+   "label": "Cube Projection",
+   "description": "Project the UV vertices of the mesh over the six faces of a cube",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "cube_size",
+     "name": "Cube Size",
+     "description": "Size of the cube to project on",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "correct_aspect",
+     "name": "Correct Aspect",
+     "description": "Map UVs taking aspect ratio of the image associated with the material into account",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "clip_to_bounds",
+     "name": "Clip to Bounds",
+     "description": "Clip UV coordinates to bounds after unwrapping",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "scale_to_bounds",
+     "name": "Scale to Bounds",
+     "description": "Scale UV coordinates to bounds after unwrapping",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.cursor_set",
+   "bl_idname": "UV_OT_cursor_set",
+   "label": "Set 2D Cursor",
+   "description": "Set 2D cursor location",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "Cursor location in normalized (0.0 to 1.0) coordinates",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10.0,
+     "soft_max": 10.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.custom_region_set",
+   "bl_idname": "UV_OT_custom_region_set",
+   "label": "Set User Region",
+   "description": "Set the boundaries of the user region",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "xmin",
+     "name": "X Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmax",
+     "name": "X Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymin",
+     "name": "Y Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymax",
+     "name": "Y Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.cylinder_project",
+   "bl_idname": "UV_OT_cylinder_project",
+   "label": "Cylinder Projection",
+   "description": "Project the UV vertices of the mesh over the curved wall of a cylinder",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "direction",
+     "name": "Direction",
+     "description": "Direction of the sphere or cylinder",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "VIEW_ON_EQUATOR",
+       "name": "View on Equator",
+       "description": "3D view is on the equator",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "VIEW_ON_POLES",
+       "name": "View on Poles",
+       "description": "3D view is on the poles",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ALIGN_TO_OBJECT",
+       "name": "Align to Object",
+       "description": "Align according to object transform",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "VIEW_ON_EQUATOR",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "align",
+     "name": "Align",
+     "description": "How to determine rotation around the pole",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "POLAR_ZX",
+       "name": "Polar ZX",
+       "description": "Polar 0 is X",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "POLAR_ZY",
+       "name": "Polar ZY",
+       "description": "Polar 0 is Y",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "POLAR_ZX",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "pole",
+     "name": "Pole",
+     "description": "How to handle faces at the poles",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PINCH",
+       "name": "Pinch",
+       "description": "UVs are pinched at the poles",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "FAN",
+       "name": "Fan",
+       "description": "UVs are fanned at the poles",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "PINCH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "seam",
+     "name": "Preserve Seams",
+     "description": "Separate projections by islands isolated by seams",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "radius",
+     "name": "Radius",
+     "description": "Radius of the sphere or cylinder",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 9.999999747378752e-05,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "correct_aspect",
+     "name": "Correct Aspect",
+     "description": "Map UVs taking aspect ratio of the image associated with the material into account",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "clip_to_bounds",
+     "name": "Clip to Bounds",
+     "description": "Clip UV coordinates to bounds after unwrapping",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "scale_to_bounds",
+     "name": "Scale to Bounds",
+     "description": "Scale UV coordinates to bounds after unwrapping",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.export_layout",
+   "bl_idname": "UV_OT_export_layout",
+   "label": "Export UV Layout",
+   "description": "Export UV layout to file",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "filepath",
+     "name": "filepath",
+     "description": "",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_all",
+     "name": "All UVs",
+     "description": "Export all UVs in this mesh (not just visible ones)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "export_tiles",
+     "name": "Export Tiles",
+     "description": "Choose whether to export only the [0, 1] range, or all UV tiles",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NONE",
+       "name": "None",
+       "description": "Export only UVs in the [0, 1] range",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "UDIM",
+       "name": "UDIM",
+       "description": "Export tiles in the UDIM numbering scheme: 1001 + u_tile + 10*v_tile",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "UV",
+       "name": "UVTILE",
+       "description": "Export tiles in the UVTILE numbering scheme: u(u_tile + 1)_v(v_tile + 1)",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "NONE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "modified",
+     "name": "Modified",
+     "description": "Exports UVs from the modified mesh",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mode",
+     "name": "Format",
+     "description": "File format to export the UV layout to",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SVG",
+       "name": "Scalable Vector Graphic (.svg)",
+       "description": "Export the UV layout to a vector SVG file",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "EPS",
+       "name": "Encapsulated PostScript (.eps)",
+       "description": "Export the UV layout to a vector EPS file",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "PNG",
+       "name": "PNG Image (.png)",
+       "description": "Export the UV layout to a bitmap image",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "PNG",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "size",
+     "name": "Size",
+     "description": "Dimensions of the exported file",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      1024,
+      1024
+     ],
+     "hard_min": 8,
+     "hard_max": 32768,
+     "soft_min": 8,
+     "soft_max": 32768,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "opacity",
+     "name": "Fill Opacity",
+     "description": "Set amount of opacity for exported UV layout",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.25,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "check_existing",
+     "name": "check_existing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.follow_active_quads",
+   "bl_idname": "UV_OT_follow_active_quads",
+   "label": "Follow Active Quads",
+   "description": "Follow UVs from active quads along continuous face loops",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mode",
+     "name": "Edge Length Mode",
+     "description": "Method to space UV edge loops",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "EVEN",
+       "name": "Even",
+       "description": "Space all UVs evenly",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LENGTH",
+       "name": "Length",
+       "description": "Average space UVs edge length of each loop",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "LENGTH_AVERAGE",
+       "name": "Length Average",
+       "description": "Average space UVs edge length of each loop",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "LENGTH_AVERAGE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.hide",
+   "bl_idname": "UV_OT_hide",
+   "label": "Hide Selected",
+   "description": "Hide (un)selected UV vertices",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "unselected",
+     "name": "Unselected",
+     "description": "Hide unselected rather than selected",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.lightmap_pack",
+   "bl_idname": "UV_OT_lightmap_pack",
+   "label": "Lightmap Pack",
+   "description": "Pack each face's UVs into the UV bounds",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "PREF_CONTEXT",
+     "name": "Selection",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SEL_FACES",
+       "name": "Selected Faces",
+       "description": "Pack only selected faces",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ALL_FACES",
+       "name": "All Faces",
+       "description": "Pack all faces in the mesh",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "SEL_FACES",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "PREF_PACK_IN_ONE",
+     "name": "Share Texture Space",
+     "description": "Objects share texture space, map all objects into a single UV map",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "PREF_NEW_UVLAYER",
+     "name": "New UV Map",
+     "description": "Create a new UV map for every mesh packed",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "PREF_BOX_DIV",
+     "name": "Pack Quality",
+     "description": "Quality of the packing. Higher values will be slower but waste less space",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 12,
+     "hard_min": 1,
+     "hard_max": 48,
+     "soft_min": 1,
+     "soft_max": 48,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "PREF_MARGIN_DIV",
+     "name": "Margin",
+     "description": "Size of the margin as a division of the UV",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.10000000149011612,
+     "hard_min": 0.0010000000474974513,
+     "hard_max": 1.0,
+     "soft_min": 0.0010000000474974513,
+     "soft_max": 1.0,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.mark_seam",
+   "bl_idname": "UV_OT_mark_seam",
+   "label": "Mark Seam",
+   "description": "Mark selected UV edges as seams",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "clear",
+     "name": "Clear Seams",
+     "description": "Clear instead of marking seams",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.minimize_stretch",
+   "bl_idname": "UV_OT_minimize_stretch",
+   "label": "Minimize Stretch",
+   "description": "Reduce UV stretching by relaxing angles",
+   "options": [
+    "BLOCKING",
+    "GRAB_CURSOR",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "fill_holes",
+     "name": "Fill Holes",
+     "description": "Virtually fill holes in mesh before unwrapping, to better avoid overlaps and preserve symmetry",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "blend",
+     "name": "Blend",
+     "description": "Blend factor between stretch minimized and original",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "iterations",
+     "name": "Iterations",
+     "description": "Number of iterations to run, 0 is unlimited when run interactively",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 100,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.move_on_axis",
+   "bl_idname": "UV_OT_move_on_axis",
+   "label": "Move on Axis",
+   "description": "Move UVs on an axis",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "Move Type",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DYNAMIC",
+       "name": "Dynamic",
+       "description": "Move by dynamic grid",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "PIXEL",
+       "name": "Pixel",
+       "description": "Move by pixel",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "UDIM",
+       "name": "UDIM",
+       "description": "Move by UDIM",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "UDIM",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "axis",
+     "name": "Axis",
+     "description": "Axis to move UVs on",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "X",
+       "name": "X axis",
+       "description": "Move vertices on the X axis",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "Y",
+       "name": "Y axis",
+       "description": "Move vertices on the Y axis",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "X",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "distance",
+     "name": "Distance",
+     "description": "Distance to move UVs",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.pack_islands",
+   "bl_idname": "UV_OT_pack_islands",
+   "label": "Pack Islands",
+   "description": "Transform all islands so that they fill up the UV/UDIM space as much as possible",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "udim_source",
+     "name": "Pack to",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CLOSEST_UDIM",
+       "name": "Closest UDIM",
+       "description": "Pack islands to closest UDIM",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ACTIVE_UDIM",
+       "name": "Active UDIM",
+       "description": "Pack islands to active UDIM image tile or UDIM grid tile where 2D cursor is located",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ORIGINAL_AABB",
+       "name": "Original bounding box",
+       "description": "Pack to starting bounding box of islands",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "CUSTOM_REGION",
+       "name": "Custom Region",
+       "description": "Pack islands to custom region",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "CLOSEST_UDIM",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "rotate",
+     "name": "Rotate",
+     "description": "Rotate islands to improve layout",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "rotate_method",
+     "name": "Rotation Method",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ANY",
+       "name": "Any",
+       "description": "Any angle is allowed for rotation",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "CARDINAL",
+       "name": "Cardinal",
+       "description": "Only 90 degree rotations are allowed",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "AXIS_ALIGNED",
+       "name": "Axis-aligned",
+       "description": "Rotated to a minimal rectangle, either vertical or horizontal",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "AXIS_ALIGNED_X",
+       "name": "Axis-aligned (Horizontal)",
+       "description": "Rotate islands to be aligned horizontally",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "AXIS_ALIGNED_Y",
+       "name": "Axis-aligned (Vertical)",
+       "description": "Rotate islands to be aligned vertically",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "ANY",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "scale",
+     "name": "Scale",
+     "description": "Scale islands to fill unit square",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "merge_overlap",
+     "name": "Merge Overlapping",
+     "description": "Overlapping islands stick together",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "margin_method",
+     "name": "Margin Method",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SCALED",
+       "name": "Scaled",
+       "description": "Use scale of existing UVs to multiply margin",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ADD",
+       "name": "Add",
+       "description": "Just add the margin, ignoring any UV scale",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "FRACTION",
+       "name": "Fraction",
+       "description": "Specify a precise fraction of final UV output",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "SCALED",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "margin",
+     "name": "Margin",
+     "description": "Space between islands",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.0010000000474974513,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "pin",
+     "name": "Lock Pinned Islands",
+     "description": "Constrain islands containing any pinned UV's",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "pin_method",
+     "name": "Pin Method",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SCALE",
+       "name": "Scale",
+       "description": "Pinned islands won't rescale",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "ROTATION",
+       "name": "Rotation",
+       "description": "Pinned islands won't rotate",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ROTATION_SCALE",
+       "name": "Rotation and Scale",
+       "description": "Pinned islands will translate only",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "LOCKED",
+       "name": "All",
+       "description": "Pinned islands are locked in place",
+       "icon": "NONE",
+       "value": 5
+      }
+     ],
+     "default": "LOCKED",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "shape_method",
+     "name": "Shape Method",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CONCAVE",
+       "name": "Exact Shape (Concave)",
+       "description": "Uses exact geometry",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "CONVEX",
+       "name": "Boundary Shape (Convex)",
+       "description": "Uses convex hull",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "AABB",
+       "name": "Bounding Box",
+       "description": "Uses bounding boxes",
+       "icon": "NONE",
+       "value": 0
+      }
+     ],
+     "default": "CONCAVE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.paste",
+   "bl_idname": "UV_OT_paste",
+   "label": "Paste UVs",
+   "description": "Paste selected UV vertices",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.pin",
+   "bl_idname": "UV_OT_pin",
+   "label": "Pin",
+   "description": "Set/clear selected UV vertices as anchored between multiple unwrap operations",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "clear",
+     "name": "Clear",
+     "description": "Clear pinning for the selection instead of setting it",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "invert",
+     "name": "Invert",
+     "description": "Invert pinning for the selection instead of setting it",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.project_from_view",
+   "bl_idname": "UV_OT_project_from_view",
+   "label": "Project from View",
+   "description": "Project the UV vertices of the mesh as seen in current 3D view",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "orthographic",
+     "name": "Orthographic",
+     "description": "Use orthographic projection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "camera_bounds",
+     "name": "Camera Bounds",
+     "description": "Map UVs to the camera region taking resolution and aspect into account",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "correct_aspect",
+     "name": "Correct Aspect",
+     "description": "Map UVs taking aspect ratio of the image associated with the material into account",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "clip_to_bounds",
+     "name": "Clip to Bounds",
+     "description": "Clip UV coordinates to bounds after unwrapping",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "scale_to_bounds",
+     "name": "Scale to Bounds",
+     "description": "Scale UV coordinates to bounds after unwrapping",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.randomize_uv_transform",
+   "bl_idname": "UV_OT_randomize_uv_transform",
+   "label": "Randomize",
+   "description": "Randomize the UV island's location, rotation, and scale",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "random_seed",
+     "name": "Random Seed",
+     "description": "Seed value for the random generator",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 10000,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_loc",
+     "name": "Randomize Location",
+     "description": "Randomize the location values",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "loc",
+     "name": "Location",
+     "description": "Maximum distance the objects can spread over each axis",
+     "type": "FLOAT",
+     "subtype": "TRANSLATION",
+     "unit": "LENGTH",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -100.0,
+     "hard_max": 100.0,
+     "soft_min": -100.0,
+     "soft_max": 100.0,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_rot",
+     "name": "Randomize Rotation",
+     "description": "Randomize the rotation value",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "rot",
+     "name": "Rotation",
+     "description": "Maximum rotation",
+     "type": "FLOAT",
+     "subtype": "ANGLE",
+     "unit": "ROTATION",
+     "default": 0.0,
+     "hard_min": -6.2831854820251465,
+     "hard_max": 6.2831854820251465,
+     "soft_min": -6.2831854820251465,
+     "soft_max": 6.2831854820251465,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_scale",
+     "name": "Randomize Scale",
+     "description": "Randomize the scale values",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "scale_even",
+     "name": "Scale Even",
+     "description": "Use the same scale value for both axes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "scale",
+     "name": "Scale",
+     "description": "Maximum scale randomization over each axis",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      1.0,
+      1.0
+     ],
+     "hard_min": -100.0,
+     "hard_max": 100.0,
+     "soft_min": -100.0,
+     "soft_max": 100.0,
+     "step": 3.0,
+     "precision": 2,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.remove_doubles",
+   "bl_idname": "UV_OT_remove_doubles",
+   "label": "Merge UVs by Distance",
+   "description": "Selected UV vertices that are within a radius of each other are welded together",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "threshold",
+     "name": "Merge Distance",
+     "description": "Maximum distance between welded vertices",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.019999999552965164,
+     "hard_min": 0.0,
+     "hard_max": 10.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_unselected",
+     "name": "Unselected",
+     "description": "Merge selected to other unselected vertices",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_shared_vertex",
+     "name": "Shared Vertex",
+     "description": "Weld UVs based on shared vertices",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.reset",
+   "bl_idname": "UV_OT_reset",
+   "label": "Reset",
+   "description": "Reset UV projection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.reveal",
+   "bl_idname": "UV_OT_reveal",
+   "label": "Reveal Hidden",
+   "description": "Reveal all hidden UV vertices",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "select",
+     "name": "Select",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.rip",
+   "bl_idname": "UV_OT_rip",
+   "label": "Rip UVs",
+   "description": "Rip selected vertices or a selected region",
+   "options": [
+    "DEPENDS_ON_CURSOR",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mirror",
+     "name": "Mirror Editing",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "release_confirm",
+     "name": "Confirm on Release",
+     "description": "Always confirm operation when releasing button",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_accurate",
+     "name": "Accurate",
+     "description": "Use accurate transformation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "Mouse location in normalized coordinates, 0.0 to 1.0 is within the image bounds",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -100.0,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.rip_move",
+   "bl_idname": "UV_OT_rip_move",
+   "label": "Rip Move UVs",
+   "description": "Unstitch UVs and move the result",
+   "options": [
+    "MACRO",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [
+    "UV_OT_rip",
+    "TRANSFORM_OT_translate"
+   ],
+   "props": [
+    {
+     "identifier": "UV_OT_rip",
+     "name": "Rip UVs",
+     "description": "Rip selected vertices or a selected region",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "UV_OT_rip",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "TRANSFORM_OT_translate",
+     "name": "Move",
+     "description": "Move selected items",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "TRANSFORM_OT_translate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.seams_from_islands",
+   "bl_idname": "UV_OT_seams_from_islands",
+   "label": "Seams from Islands",
+   "description": "Set mesh seams according to island setup in the UV editor",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mark_seams",
+     "name": "Mark Seams",
+     "description": "Mark boundary edges as seams",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mark_sharp",
+     "name": "Mark Sharp",
+     "description": "Mark boundary edges as sharp",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select",
+   "bl_idname": "UV_OT_select",
+   "label": "Select",
+   "description": "Select UV vertices",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend selection instead of deselecting everything first",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "deselect",
+     "name": "Deselect",
+     "description": "Remove from selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "toggle",
+     "name": "Toggle Selection",
+     "description": "Toggle the selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "deselect_all",
+     "name": "Deselect On Nothing",
+     "description": "Deselect all when nothing under the cursor",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "select_passthrough",
+     "name": "Only Select Unselected",
+     "description": "Ignore the select action when the element is already selected",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "Mouse location in normalized coordinates, 0.0 to 1.0 is within the image bounds",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -100.0,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_all",
+   "bl_idname": "UV_OT_select_all",
+   "label": "(De)select All",
+   "description": "Change selection of all UV vertices",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "action",
+     "name": "Action",
+     "description": "Selection action to execute",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "TOGGLE",
+       "name": "Toggle",
+       "description": "Toggle selection for all elements",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SELECT",
+       "name": "Select",
+       "description": "Select all elements",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "DESELECT",
+       "name": "Deselect",
+       "description": "Deselect all elements",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERT",
+       "name": "Invert",
+       "description": "Invert selection of all elements",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "TOGGLE",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_box",
+   "bl_idname": "UV_OT_select_box",
+   "label": "Box Select",
+   "description": "Select UV vertices using box selection",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "pinned",
+     "name": "Pinned",
+     "description": "Border select pinned UVs only",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmin",
+     "name": "X Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmax",
+     "name": "X Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymin",
+     "name": "Y Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymax",
+     "name": "Y Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SET",
+       "name": "Set",
+       "description": "Set a new selection",
+       "icon": "SELECT_SET",
+       "value": 3
+      },
+      {
+       "identifier": "ADD",
+       "name": "Extend",
+       "description": "Extend existing selection",
+       "icon": "SELECT_EXTEND",
+       "value": 1
+      },
+      {
+       "identifier": "SUB",
+       "name": "Subtract",
+       "description": "Subtract existing selection",
+       "icon": "SELECT_SUBTRACT",
+       "value": 2
+      }
+     ],
+     "default": "SET",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_by_winding",
+   "bl_idname": "UV_OT_select_by_winding",
+   "label": "Select by Winding",
+   "description": "Select UV faces by their winding",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "winding",
+     "name": "Winding",
+     "description": "Select faces with positive or negative winding",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "POSITIVE",
+       "name": "Positive",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "NEGATIVE",
+       "name": "Negative",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "NEGATIVE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend selection rather than clearing the existing selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_circle",
+   "bl_idname": "UV_OT_select_circle",
+   "label": "Circle Select",
+   "description": "Select UV vertices using circle selection",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "x",
+     "name": "X",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "y",
+     "name": "Y",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "radius",
+     "name": "Radius",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 25,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SET",
+       "name": "Set",
+       "description": "Set a new selection",
+       "icon": "SELECT_SET",
+       "value": 3
+      },
+      {
+       "identifier": "ADD",
+       "name": "Extend",
+       "description": "Extend existing selection",
+       "icon": "SELECT_EXTEND",
+       "value": 1
+      },
+      {
+       "identifier": "SUB",
+       "name": "Subtract",
+       "description": "Subtract existing selection",
+       "icon": "SELECT_SUBTRACT",
+       "value": 2
+      }
+     ],
+     "default": "SET",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_edge_ring",
+   "bl_idname": "UV_OT_select_edge_ring",
+   "label": "Edge Ring Select",
+   "description": "Select an edge ring of connected UV vertices",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend selection rather than clearing the existing selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "Mouse location in normalized coordinates, 0.0 to 1.0 is within the image bounds",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -100.0,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_lasso",
+   "bl_idname": "UV_OT_select_lasso",
+   "label": "Lasso Select UV",
+   "description": "Select UVs using lasso selection",
+   "options": [
+    "DEPENDS_ON_CURSOR",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "path",
+     "name": "Path",
+     "description": "",
+     "type": "COLLECTION",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "OperatorMousePath",
+     "is_id": false,
+     "api": null,
+     "flags": [
+      "READONLY",
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_smooth_stroke",
+     "name": "Stabilize Stroke",
+     "description": "Selection lags behind mouse and follows a smoother path",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "smooth_stroke_factor",
+     "name": "Smooth Stroke Factor",
+     "description": "Higher values give a smoother stroke",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.75,
+     "hard_min": 0.5,
+     "hard_max": 0.9900000095367432,
+     "soft_min": 0.5,
+     "soft_max": 0.9900000095367432,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "smooth_stroke_radius",
+     "name": "Smooth Stroke Radius",
+     "description": "Minimum distance from last point before selection continues",
+     "type": "INT",
+     "subtype": "PIXEL",
+     "unit": "NONE",
+     "default": 35,
+     "hard_min": 10,
+     "hard_max": 200,
+     "soft_min": 10,
+     "soft_max": 200,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SET",
+       "name": "Set",
+       "description": "Set a new selection",
+       "icon": "SELECT_SET",
+       "value": 3
+      },
+      {
+       "identifier": "ADD",
+       "name": "Extend",
+       "description": "Extend existing selection",
+       "icon": "SELECT_EXTEND",
+       "value": 1
+      },
+      {
+       "identifier": "SUB",
+       "name": "Subtract",
+       "description": "Subtract existing selection",
+       "icon": "SELECT_SUBTRACT",
+       "value": 2
+      }
+     ],
+     "default": "SET",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_less",
+   "bl_idname": "UV_OT_select_less",
+   "label": "Select Less",
+   "description": "Deselect UV vertices at the boundary of each selection region",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_linked",
+   "bl_idname": "UV_OT_select_linked",
+   "label": "Select Linked",
+   "description": "Select all UV vertices linked to the active UV map",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "delimit",
+     "name": "Delimit",
+     "description": "Delimit selection when selecting linked UVs",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SEAM",
+       "name": "Seam",
+       "description": "Delimit by edge seams",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Delimit by sharp edges",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "MATERIAL",
+       "name": "Material",
+       "description": "Delimit by face material",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": [],
+     "flags": [
+      "ENUM_FLAG",
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_linked_pick",
+   "bl_idname": "UV_OT_select_linked_pick",
+   "label": "Select Linked Pick",
+   "description": "Select all UV vertices linked under the mouse",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend selection rather than clearing the existing selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "deselect",
+     "name": "Deselect",
+     "description": "Deselect linked UV vertices rather than selecting them",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "delimit",
+     "name": "Delimit",
+     "description": "Delimit selection when selecting linked UVs",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SEAM",
+       "name": "Seam",
+       "description": "Delimit by edge seams",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "SHARP",
+       "name": "Sharp",
+       "description": "Delimit by sharp edges",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "MATERIAL",
+       "name": "Material",
+       "description": "Delimit by face material",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": [],
+     "flags": [
+      "ENUM_FLAG",
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "Mouse location in normalized coordinates, 0.0 to 1.0 is within the image bounds",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -100.0,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_loop",
+   "bl_idname": "UV_OT_select_loop",
+   "label": "Loop Select",
+   "description": "Select a loop of connected UV vertices",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend selection rather than clearing the existing selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "Mouse location in normalized coordinates, 0.0 to 1.0 is within the image bounds",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -100.0,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_mode",
+   "bl_idname": "UV_OT_select_mode",
+   "label": "UV Select Mode",
+   "description": "Change UV selection mode",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "VERTEX",
+       "name": "Vertex",
+       "description": "Vertex selection mode",
+       "icon": "UV_VERTEXSEL",
+       "value": 1
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Edge selection mode",
+       "icon": "UV_EDGESEL",
+       "value": 2
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Face selection mode",
+       "icon": "UV_FACESEL",
+       "value": 4
+      }
+     ],
+     "default": "VERTEX",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_more",
+   "bl_idname": "UV_OT_select_more",
+   "label": "Select More",
+   "description": "Select more UV vertices connected to initial selection",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_overlap",
+   "bl_idname": "UV_OT_select_overlap",
+   "label": "Select Overlap",
+   "description": "Select all UV faces which overlap each other",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend selection rather than clearing the existing selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_pinned",
+   "bl_idname": "UV_OT_select_pinned",
+   "label": "Selected Pinned",
+   "description": "Select all pinned UV vertices",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_similar",
+   "bl_idname": "UV_OT_select_similar",
+   "label": "Select Similar",
+   "description": "Select similar UVs by property types",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PIN",
+       "name": "Pinned",
+       "description": "",
+       "icon": "NONE",
+       "value": 1007
+      },
+      {
+       "identifier": "LENGTH",
+       "name": "Length",
+       "description": "Edge length in UV space",
+       "icon": "NONE",
+       "value": 1003
+      },
+      {
+       "identifier": "LENGTH_3D",
+       "name": "Length 3D",
+       "description": "Length of edge in 3D space",
+       "icon": "NONE",
+       "value": 1004
+      },
+      {
+       "identifier": "AREA",
+       "name": "Area",
+       "description": "Face area in UV space",
+       "icon": "NONE",
+       "value": 1000
+      },
+      {
+       "identifier": "AREA_3D",
+       "name": "Area 3D",
+       "description": "Area of face in 3D space",
+       "icon": "NONE",
+       "value": 1001
+      },
+      {
+       "identifier": "MATERIAL",
+       "name": "Material",
+       "description": "",
+       "icon": "NONE",
+       "value": 1005
+      },
+      {
+       "identifier": "OBJECT",
+       "name": "Object",
+       "description": "",
+       "icon": "NONE",
+       "value": 1006
+      },
+      {
+       "identifier": "SIDES",
+       "name": "Polygon Sides",
+       "description": "",
+       "icon": "NONE",
+       "value": 1008
+      },
+      {
+       "identifier": "WINDING",
+       "name": "Winding",
+       "description": "Face direction defined by clockwise or anti-clockwise winding (facing up or facing down)",
+       "icon": "NONE",
+       "value": 1009
+      },
+      {
+       "identifier": "FACE",
+       "name": "Amount of Faces in Island",
+       "description": "",
+       "icon": "NONE",
+       "value": 1002
+      }
+     ],
+     "default": "PIN",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "compare",
+     "name": "Compare",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "EQUAL",
+       "name": "Equal",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "GREATER",
+       "name": "Greater",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "LESS",
+       "name": "Less",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "EQUAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "threshold",
+     "name": "Threshold",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_split",
+   "bl_idname": "UV_OT_select_split",
+   "label": "Select Split",
+   "description": "Select only entirely selected faces",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.select_tile",
+   "bl_idname": "UV_OT_select_tile",
+   "label": "Select Tile",
+   "description": "Select UVs in specified tile",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend the selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "tile",
+     "name": "Tile",
+     "description": "Tile location to select UVs",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0,
+      0
+     ],
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.shortest_path_pick",
+   "bl_idname": "UV_OT_shortest_path_pick",
+   "label": "Pick Shortest Path",
+   "description": "Select shortest path between two selections",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "use_face_step",
+     "name": "Face Stepping",
+     "description": "Traverse connected faces (includes diagonals and edge-rings)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_topology_distance",
+     "name": "Topology Distance",
+     "description": "Find the minimum number of steps, ignoring spatial distance",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_fill",
+     "name": "Fill Region",
+     "description": "Select all paths between the source/destination elements",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "skip",
+     "name": "Deselected",
+     "description": "Number of deselected elements in the repetitive sequence",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 100,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "nth",
+     "name": "Selected",
+     "description": "Number of selected elements in the repetitive sequence",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 100,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "offset",
+     "name": "Offset",
+     "description": "Offset from the starting point",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -100,
+     "soft_max": 100,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "object_index",
+     "name": "",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -1,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "index",
+     "name": "",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -1,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.shortest_path_select",
+   "bl_idname": "UV_OT_shortest_path_select",
+   "label": "Select Shortest Path",
+   "description": "Select shortest path between two vertices/edges/faces",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "use_face_step",
+     "name": "Face Stepping",
+     "description": "Traverse connected faces (includes diagonals and edge-rings)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_topology_distance",
+     "name": "Topology Distance",
+     "description": "Find the minimum number of steps, ignoring spatial distance",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_fill",
+     "name": "Fill Region",
+     "description": "Select all paths between the source/destination elements",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "skip",
+     "name": "Deselected",
+     "description": "Number of deselected elements in the repetitive sequence",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 100,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "nth",
+     "name": "Selected",
+     "description": "Number of selected elements in the repetitive sequence",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 100,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "offset",
+     "name": "Offset",
+     "description": "Offset from the starting point",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -100,
+     "soft_max": 100,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.smart_project",
+   "bl_idname": "UV_OT_smart_project",
+   "label": "Smart UV Project",
+   "description": "Projection unwraps the selected faces of mesh objects",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "angle_limit",
+     "name": "Angle Limit",
+     "description": "Lower for more projection groups, higher for less distortion",
+     "type": "FLOAT",
+     "subtype": "ANGLE",
+     "unit": "ROTATION",
+     "default": 1.1519173383712769,
+     "hard_min": 0.0,
+     "hard_max": 1.5707963705062866,
+     "soft_min": 0.0,
+     "soft_max": 1.5533430576324463,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "margin_method",
+     "name": "Margin Method",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SCALED",
+       "name": "Scaled",
+       "description": "Use scale of existing UVs to multiply margin",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ADD",
+       "name": "Add",
+       "description": "Just add the margin, ignoring any UV scale",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "FRACTION",
+       "name": "Fraction",
+       "description": "Specify a precise fraction of final UV output",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "SCALED",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "rotate_method",
+     "name": "Rotation Method",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "AXIS_ALIGNED",
+       "name": "Axis-aligned",
+       "description": "Rotated to a minimal rectangle, either vertical or horizontal",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "AXIS_ALIGNED_X",
+       "name": "Axis-aligned (Horizontal)",
+       "description": "Rotate islands to be aligned horizontally",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "AXIS_ALIGNED_Y",
+       "name": "Axis-aligned (Vertical)",
+       "description": "Rotate islands to be aligned vertically",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "AXIS_ALIGNED_Y",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "island_margin",
+     "name": "Island Margin",
+     "description": "Margin to reduce bleed from adjacent islands",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "area_weight",
+     "name": "Area Weight",
+     "description": "Weight projection's vector by faces with larger areas",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "correct_aspect",
+     "name": "Correct Aspect",
+     "description": "Map UVs taking aspect ratio of the image associated with the material into account",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "scale_to_bounds",
+     "name": "Scale to Bounds",
+     "description": "Scale UV coordinates to bounds after unwrapping",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.snap_cursor",
+   "bl_idname": "UV_OT_snap_cursor",
+   "label": "Snap Cursor",
+   "description": "Snap cursor to target type",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "target",
+     "name": "Target",
+     "description": "Target to snap the selected UVs to",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PIXELS",
+       "name": "Pixels",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SELECTED",
+       "name": "Selected",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ORIGIN",
+       "name": "Origin",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "PIXELS",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.snap_selected",
+   "bl_idname": "UV_OT_snap_selected",
+   "label": "Snap Selection",
+   "description": "Snap selected UV vertices to target type",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "target",
+     "name": "Target",
+     "description": "Target to snap the selected UVs to",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PIXELS",
+       "name": "Pixels",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CURSOR",
+       "name": "Cursor",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "CURSOR_OFFSET",
+       "name": "Cursor (Offset)",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ADJACENT_UNSELECTED",
+       "name": "Adjacent Unselected",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "PIXELS",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.sphere_project",
+   "bl_idname": "UV_OT_sphere_project",
+   "label": "Sphere Projection",
+   "description": "Project the UV vertices of the mesh over the curved surface of a sphere",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "direction",
+     "name": "Direction",
+     "description": "Direction of the sphere or cylinder",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "VIEW_ON_EQUATOR",
+       "name": "View on Equator",
+       "description": "3D view is on the equator",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "VIEW_ON_POLES",
+       "name": "View on Poles",
+       "description": "3D view is on the poles",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ALIGN_TO_OBJECT",
+       "name": "Align to Object",
+       "description": "Align according to object transform",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "VIEW_ON_EQUATOR",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "align",
+     "name": "Align",
+     "description": "How to determine rotation around the pole",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "POLAR_ZX",
+       "name": "Polar ZX",
+       "description": "Polar 0 is X",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "POLAR_ZY",
+       "name": "Polar ZY",
+       "description": "Polar 0 is Y",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "POLAR_ZX",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "pole",
+     "name": "Pole",
+     "description": "How to handle faces at the poles",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PINCH",
+       "name": "Pinch",
+       "description": "UVs are pinched at the poles",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "FAN",
+       "name": "Fan",
+       "description": "UVs are fanned at the poles",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "PINCH",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "seam",
+     "name": "Preserve Seams",
+     "description": "Separate projections by islands isolated by seams",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "correct_aspect",
+     "name": "Correct Aspect",
+     "description": "Map UVs taking aspect ratio of the image associated with the material into account",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "clip_to_bounds",
+     "name": "Clip to Bounds",
+     "description": "Clip UV coordinates to bounds after unwrapping",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "scale_to_bounds",
+     "name": "Scale to Bounds",
+     "description": "Scale UV coordinates to bounds after unwrapping",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.stitch",
+   "bl_idname": "UV_OT_stitch",
+   "label": "Stitch",
+   "description": "Stitch selected UV vertices by proximity",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "use_limit",
+     "name": "Use Limit",
+     "description": "Stitch UVs within a specified limit distance",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap_islands",
+     "name": "Snap Islands",
+     "description": "Snap islands together (on edge stitch mode, rotates the islands too)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "limit",
+     "name": "Limit",
+     "description": "Limit distance in normalized coordinates",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.009999999776482582,
+     "hard_min": 0.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "static_island",
+     "name": "Static Island",
+     "description": "Island that stays in place when stitching islands",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "active_object_index",
+     "name": "Active Object",
+     "description": "Index of the active object",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "midpoint_snap",
+     "name": "Snap at Midpoint",
+     "description": "UVs are stitched at midpoint instead of at static island",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "clear_seams",
+     "name": "Clear Seams",
+     "description": "Clear seams of stitched edges",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mode",
+     "name": "Operation Mode",
+     "description": "Use vertex or edge stitching",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "VERTEX",
+       "name": "Vertex",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "VERTEX",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "stored_mode",
+     "name": "Stored Operation Mode",
+     "description": "Use vertex or edge stitching",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "VERTEX",
+       "name": "Vertex",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "VERTEX",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "selection",
+     "name": "Selection",
+     "description": "",
+     "type": "COLLECTION",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "SelectedUvElement",
+     "is_id": false,
+     "api": null,
+     "flags": [
+      "READONLY",
+      "HIDDEN",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "objects_selection_count",
+     "name": "Objects Selection Count",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      6
+     ],
+     "default": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0
+     ],
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.unwrap",
+   "bl_idname": "UV_OT_unwrap",
+   "label": "Unwrap",
+   "description": "Unwrap the mesh of the object being edited",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "method",
+     "name": "Method",
+     "description": "Unwrapping method (Angle Based usually gives better results than Conformal, while being somewhat slower)",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ANGLE_BASED",
+       "name": "Angle Based",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "CONFORMAL",
+       "name": "Conformal",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MINIMUM_STRETCH",
+       "name": "Minimum Stretch",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "CONFORMAL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "fill_holes",
+     "name": "Fill Holes",
+     "description": "Virtually fill holes in mesh before unwrapping, to better avoid overlaps and preserve symmetry",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "correct_aspect",
+     "name": "Correct Aspect",
+     "description": "Map UVs taking aspect ratio of the image associated with the material into account",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_subsurf_data",
+     "name": "Use Subdivision Surface",
+     "description": "Map UVs taking vertex position after Subdivision Surface modifier has been applied",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_original_bounds",
+     "name": "Original Bounds",
+     "description": "Unwrap islands into their original bounds, instead of re-packing",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "margin_method",
+     "name": "Margin Method",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SCALED",
+       "name": "Scaled",
+       "description": "Use scale of existing UVs to multiply margin",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ADD",
+       "name": "Add",
+       "description": "Just add the margin, ignoring any UV scale",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "FRACTION",
+       "name": "Fraction",
+       "description": "Specify a precise fraction of final UV output",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "SCALED",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "margin",
+     "name": "Margin",
+     "description": "Space between islands",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.0010000000474974513,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "no_flip",
+     "name": "No Flip",
+     "description": "Prevent flipping UV's, flipping may lower distortion depending on the position of pins",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "iterations",
+     "name": "Iterations",
+     "description": "Number of iterations when \"Minimum Stretch\" method is used",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 10,
+     "hard_min": 0,
+     "hard_max": 10000,
+     "soft_min": 1,
+     "soft_max": 30,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_weights",
+     "name": "Importance Weights",
+     "description": "Whether to take into account per-vertex importance weights",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "weight_group",
+     "name": "Weight Group",
+     "description": "Vertex group name for importance weights (modulating the deform)",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "uv_importance",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "weight_factor",
+     "name": "Weight Factor",
+     "description": "How much influence the weightmap has for weighted parameterization, 0 being no influence",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": -10000.0,
+     "hard_max": 10000.0,
+     "soft_min": -10.0,
+     "soft_max": 10.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "uv.weld",
+   "bl_idname": "UV_OT_weld",
+   "label": "Weld",
+   "description": "Weld selected UV vertices together",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  }
+ ]
+}

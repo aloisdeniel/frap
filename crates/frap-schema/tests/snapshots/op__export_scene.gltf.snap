@@ -13,8 +13,548 @@ source: crates/frap-schema/tests/describe_ops.rs
       "array_length": 1
     },
     {
+      "identifier": "check_existing",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_import_convert_lighting_mode",
+      "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "gltf_export_id",
+      "type": "STRING",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_use_gltfpack",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gltfpack_tc",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gltfpack_tq",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gltfpack_si",
+      "type": "FLOAT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gltfpack_sa",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gltfpack_slb",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gltfpack_vp",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gltfpack_vt",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gltfpack_vn",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gltfpack_vc",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gltfpack_vpi",
+      "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gltfpack_noq",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gltfpack_kn",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
       "identifier": "export_format",
       "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "ui_tab",
+      "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_copyright",
+      "type": "STRING",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_image_format",
+      "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_image_add_webp",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_image_webp_fallback",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_texture_dir",
+      "type": "STRING",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_jpeg_quality",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_image_quality",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_keep_originals",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_texcoords",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_normals",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gn_mesh",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_meshopt_compression_enable",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_meshopt_extension",
+      "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_draco_mesh_compression_enable",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_draco_mesh_compression_level",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_draco_position_quantization",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_draco_normal_quantization",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_draco_texcoord_quantization",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_draco_color_quantization",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_draco_generic_quantization",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_tangents",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_materials",
+      "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_unused_images",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_unused_textures",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_vertex_color",
+      "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_vertex_color_name",
+      "type": "STRING",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_all_vertex_colors",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_active_vertex_color_when_no_material",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_attributes",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "use_mesh_edges",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "use_mesh_vertices",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_cameras",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "use_selection",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "use_visible",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "use_renderable",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "use_active_collection_with_nested",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "use_active_collection",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "use_active_scene",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "collection",
+      "type": "STRING",
+      "array_length": 1
+    },
+    {
+      "identifier": "at_collection_center",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_extras",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_yup",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_apply",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_shared_accessors",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_animations",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_frame_range",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_frame_step",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_force_sampling",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_sampling_interpolation_fallback",
+      "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_pointer_animation",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_animation_mode",
+      "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_nla_strips_merged_animation_name",
+      "type": "STRING",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_def_bones",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_hierarchy_flatten_bones",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_hierarchy_flatten_objs",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_armature_object_remove",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_leaf_bone",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_optimize_animation_size",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_optimize_animation_keep_anim_armature",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_optimize_animation_keep_anim_object",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_optimize_disable_viewport",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_negative_frame",
+      "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_anim_slide_to_zero",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_bake_animation",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_merge_animation",
+      "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_anim_single_armature",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_reset_pose_bones",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_current_frame",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_rest_position_armature",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_anim_scene_split_object",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_skins",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_influence_nb",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_all_influences",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_morph",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_morph_normal",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_morph_tangent",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_morph_animation",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_morph_reset_sk_data",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_lights",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_try_sparse_sk",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_try_omit_sparse_sk",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_gpu_instances",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_action_filter",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_convert_animation_pointer",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_nla_strips",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_original_specular",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "will_save_settings",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_hierarchy_full_collections",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_extra_animations",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_loglevel",
+      "type": "INT",
+      "array_length": 1
+    },
+    {
+      "identifier": "filter_glob",
+      "type": "STRING",
       "array_length": 1
     }
   ],

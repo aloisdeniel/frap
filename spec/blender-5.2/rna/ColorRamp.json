@@ -1,0 +1,212 @@
+{
+ "identifier": "ColorRamp",
+ "name": "Color Ramp",
+ "description": "Color ramp mapping a scalar value to a color",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "elements",
+   "name": "Elements",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "fixed_type": "ColorRampElement",
+   "is_id": false,
+   "api": "ColorRampElements",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "interpolation",
+   "name": "Interpolation",
+   "description": "Set interpolation between color stops",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "EASE",
+     "name": "Ease",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "CARDINAL",
+     "name": "Cardinal",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "LINEAR",
+     "name": "Linear",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "B_SPLINE",
+     "name": "B-Spline",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "CONSTANT",
+     "name": "Constant",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "LINEAR",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "hue_interpolation",
+   "name": "Color Interpolation",
+   "description": "Set color interpolation",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NEAR",
+     "name": "Near",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FAR",
+     "name": "Far",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "CW",
+     "name": "Clockwise",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "CCW",
+     "name": "Counter-Clockwise",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "NEAR",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "color_mode",
+   "name": "Color Mode",
+   "description": "Set color mode to use for interpolation",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "RGB",
+     "name": "RGB",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "HSV",
+     "name": "HSV",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "HSL",
+     "name": "HSL",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "RGB",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "evaluate",
+   "description": "Evaluate Color Ramp",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "position",
+     "name": "Position",
+     "description": "Evaluate Color Ramp at position",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "color",
+     "name": "Color",
+     "description": "Color at given position",
+     "type": "FLOAT",
+     "subtype": "COLOR",
+     "unit": "NONE",
+     "array": [
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": false
+}

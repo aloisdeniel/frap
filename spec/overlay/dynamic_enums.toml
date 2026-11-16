@@ -1,0 +1,374 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Dynamic enum supersets (ARCHITECTURE §4.2, RFC 0001 F-DEF-6). Blender fills these enums from a
+# callback that sees the current context; in `-b --factory-startup` with no instance the dumps
+# get an empty list, a placeholder ('NONE') or a context-dependent subset, so codegen takes the
+# items from here. `coerce` validates against the generated item list, and `frap-op`'s
+# `DynEnumFn` (OperatorDef.dyn_enums) narrows `runtime` enums to the live context.
+#
+# Key: "<BL_IDNAME>.<prop>" for operator props, "<Struct>.<prop>" for RNA struct props.
+# Fields:
+#   items      = [[identifier, name, description, value], ...]   explicit superset
+#   items_from = "op:<BL_IDNAME>.<prop>" | "rna:<Struct>.<prop>" the dumped items of another enum
+#   runtime    = true   items depend on user data / live context (DynEnumFn); `items` may be empty
+#   default    = "X"    replaces the dumped default (which may be "" or a placeholder)
+#   source     = where the superset was verified
+# An enum is dynamic when the dump says so (`items_static` differs from `items`, a non-flag enum
+# with no items, or items that differ between poll contexts) or when it is listed here. Codegen
+# fails on a dynamic enum with no items unless it is listed here (explicit decision per enum).
+#
+# Unless noted, item lists were verified on Blender 5.2.4 `-b --factory-startup` by assigning an
+# invalid value on a live instance / calling the operator in the factory scene with a VIEW_3D
+# override (the TypeError lists the items the callback returns) and reading names with
+# `UILayout.enum_item_name/enum_item_description`. Values are the item index unless known.
+
+# ---------------------------------------------------------------- RNA struct properties
+
+["RenderSettings.engine"]
+source = "R_engines (EEVEE, Workbench registered by the draw manager, Cycles add-on); class-level dump lists only EEVEE"
+default = "BLENDER_EEVEE"
+items = [
+  ["BLENDER_EEVEE", "EEVEE", "", 0],
+  ["BLENDER_WORKBENCH", "Workbench", "", 1],
+  ["CYCLES", "Cycles", "", 2],
+]
+
+["ColorManagedViewSettings.view_transform"]
+source = "OCIO config of 5.2.4 for display 'sRGB' (class-level dump: placeholder 'NONE')"
+runtime = true
+default = "AgX"
+items = [
+  ["Standard", "Standard", "Apply only the display's standard transform without additional mappings", 0],
+  ["ACES 1.3", "ACES 1.3", "ACES 1.0 Output Transform for SDR D65 video, with Rec.709 gamut", 1],
+  ["ACES 2.0", "ACES 2.0", "ACES 2 Output Transform for 100 nit SDR, with Rec709 gamut", 2],
+  ["Khronos PBR Neutral", "Khronos PBR Neutral", "Khronos PBR Neutral Image Encoding for sRGB Display", 3],
+  ["AgX", "AgX", "AgX Base Image Encoding for sRGB and Rec.1886 Display", 4],
+  ["Filmic", "Filmic", "sRGB display space with Filmic view transform", 5],
+  ["Filmic Log", "Filmic Log", "", 6],
+  ["False Color", "False Color", "A heat-map-like image formed from AgX Base for sRGB and Rec.1886 displays", 7],
+  ["Raw", "Raw", "", 8],
+]
+
+["ColorManagedViewSettings.look"]
+source = "OCIO looks of 5.2.4 for view 'AgX' (class-level dump: placeholder 'NONE')"
+runtime = true
+default = "None"
+items = [
+  ["None", "None", "", 0],
+  ["AgX - Punchy", "Punchy", "A darkening punchy look", 1],
+  ["AgX - Greyscale", "Greyscale", "A Black and White Look", 2],
+  ["AgX - Very High Contrast", "Very High Contrast", "A Very High Contrast Look", 3],
+  ["AgX - High Contrast", "High Contrast", "A High Contrast Look", 4],
+  ["AgX - Medium High Contrast", "Medium High Contrast", "A Medium High Contrast Look", 5],
+  ["AgX - Base Contrast", "Base Contrast", "A Base Contrast Look", 6],
+  ["AgX - Medium Low Contrast", "Medium Low Contrast", "A Medium Low Contrast Look", 7],
+  ["AgX - Low Contrast", "Low Contrast", "A Low Contrast Look", 8],
+  ["AgX - Very Low Contrast", "Very Low Contrast", "A Very Low Contrast Look", 9],
+]
+
+["ColorManagedDisplaySettings.display_device"]
+source = "OCIO displays of 5.2.4 (class-level dump: placeholder 'NONE')"
+default = "sRGB"
+items = [
+  ["sRGB", "sRGB", "sRGB IEC 61966-2-1 compound (piece-wise) encoding", 0],
+  ["Display P3", "Display P3", "Apple's Display P3 with sRGB compound (piece-wise) encoding transfer function, common on Mac devices", 1],
+  ["Rec.1886", "Rec.1886", "BT.1886 2.4 Exponent EOTF Display, commonly used for TVs", 2],
+  ["Rec.2020", "Rec.2020", "BT.2020 2.4 Exponent EOTF Display", 3],
+  ["Rec.2100-PQ", "Rec.2100-PQ", "Rec.2100-PQ 10000 nits peak display with reference white at 100 nits", 4],
+  ["Rec.2100-HLG", "Rec.2100-HLG", "Rec.2100-HLG 1000 nits peak display with reference white at 100 nits", 5],
+]
+
+["ColorManagedInputColorspaceSettings.name"]
+source = "OCIO colour spaces of 5.2.4 (the dumped list is complete; the RNA default 'NONE' is a placeholder)"
+default = "sRGB"
+items_from = "rna:ColorManagedInputColorspaceSettings.name"
+
+["ColorManagedSequencerColorspaceSettings.name"]
+source = "OCIO colour spaces of 5.2.4"
+default = "sRGB"
+items_from = "rna:ColorManagedInputColorspaceSettings.name"
+
+["View3DShading.studio_light"]
+source = "studio lights shipped with 5.2.4 (user lights are added at runtime)"
+runtime = true
+default = "Default"
+items = [
+  ["Default", "Default", "", 0],
+  ["basic.sl", "basic.sl", "", 1],
+  ["outdoor.sl", "outdoor.sl", "", 2],
+  ["paint.sl", "paint.sl", "", 3],
+  ["rim.sl", "rim.sl", "", 4],
+  ["studio.sl", "studio.sl", "", 5],
+]
+
+["ActionSlot.target_id_type"]
+source = "rna_enum_id_type_items (the dumped list is complete)"
+items_from = "rna:ActionSlot.target_id_type"
+
+["NodeSocketMenu.default_value"]
+source = "menu items come from the node's menu definition"
+runtime = true
+
+# ------------------------------------------------------------------- operator properties
+
+["EXPORT_SCENE_OT_gltf.export_format"]
+source = "io_scene_gltf2 5.2.41 __init__.py get_format_items: GLTF_EMBEDDED only with the allow_embedded_format add-on preference (off in factory settings)"
+default = "GLB"
+items = [
+  ["GLB", "glTF Binary (.glb)", "Exports a single file, with all data packed in binary form. Most efficient and portable, but more difficult to edit later", 0],
+  ["GLTF_SEPARATE", "glTF Separate (.gltf + .bin + textures)", "Exports multiple files, with separate JSON, binary and texture data. Easiest to edit later", 1],
+]
+
+["OBJECT_OT_mode_set.mode"]
+source = "full static list in -b; Blender narrows it to the active object's type (rna_enum_object_mode_items + itemf)"
+runtime = true
+
+["OBJECT_OT_modifier_add.type"]
+source = "full list in -b; Blender narrows it to the active object's type"
+runtime = true
+
+["OBJECT_OT_constraint_add.type"]
+items_from = "rna:Constraint.type"
+["OBJECT_OT_constraint_add_with_targets.type"]
+items_from = "rna:Constraint.type"
+
+# Transform orientations: the built-in seven, plus custom orientations at runtime.
+["TRANSFORM_OT_translate.orient_type"]
+runtime = true
+["TRANSFORM_OT_translate.orient_matrix_type"]
+runtime = true
+["TRANSFORM_OT_transform.orient_type"]
+runtime = true
+["TRANSFORM_OT_transform.orient_matrix_type"]
+runtime = true
+["TRANSFORM_OT_rotate.orient_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_rotate.orient_matrix_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_resize.orient_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_resize.orient_matrix_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_mirror.orient_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_mirror.orient_matrix_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_shear.orient_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_shear.orient_matrix_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_bbone_resize.orient_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_bbone_resize.orient_matrix_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_skin_resize.orient_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_skin_resize.orient_matrix_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_rotate_normal.orient_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_rotate_normal.orient_matrix_type"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+["TRANSFORM_OT_select_orientation.orientation"]
+runtime = true
+items_from = "op:TRANSFORM_OT_translate.orient_type"
+
+# File-browser sort methods (WM_operator_properties_filesel): the same six items everywhere.
+["OBJECT_OT_empty_image_add.sort_method"]
+default = "DEFAULT"
+["OBJECT_OT_volume_import.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["OBJECT_OT_multires_external_save.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["IMAGE_OT_file_browse.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["IMAGE_OT_open.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["IMAGE_OT_replace.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["IMAGE_OT_save_as.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["SCREEN_OT_screenshot.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["SCREEN_OT_screenshot_area.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_alembic_export.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_alembic_import.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_append.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_fbx_import.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_grease_pencil_export_pdf.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_grease_pencil_export_svg.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_grease_pencil_import_svg.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_id_linked_relocate.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_lib_reload.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_lib_relocate.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_link.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_obj_export.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_obj_import.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_open_mainfile.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_ply_export.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_ply_import.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_recover_auto_save.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_save_as_mainfile.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_save_mainfile.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_stl_export.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_stl_import.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_usd_export.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["WM_OT_usd_import.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+
+# Vertex-group subsets (WT_vertex_group_select_item, object_vgroup.cc). Verified: with a mesh
+# and no armature the callback returns ACTIVE, ALL; with an armature-deformed mesh in pose mode
+# ACTIVE, BONE_SELECT, BONE_DEFORM, ALL. Names and descriptions from the C item table; values
+# are the item index.
+["OBJECT_OT_vertex_group_clean.group_select_mode"]
+runtime = true
+items = [
+  ["ACTIVE", "Active Group", "The active Vertex Group", 0],
+  ["BONE_SELECT", "Selected Pose Bones", "All Vertex Groups assigned to Selection", 1],
+  ["BONE_DEFORM", "Deform Pose Bones", "All Vertex Groups assigned to Deform Bones", 2],
+  ["ALL", "All Groups", "All Vertex Groups", 3],
+]
+["OBJECT_OT_vertex_group_invert.group_select_mode"]
+runtime = true
+items_from = "op:OBJECT_OT_vertex_group_clean.group_select_mode"
+["OBJECT_OT_vertex_group_levels.group_select_mode"]
+runtime = true
+items_from = "op:OBJECT_OT_vertex_group_clean.group_select_mode"
+["OBJECT_OT_vertex_group_limit_total.group_select_mode"]
+runtime = true
+items_from = "op:OBJECT_OT_vertex_group_clean.group_select_mode"
+["OBJECT_OT_vertex_group_normalize_all.group_select_mode"]
+runtime = true
+items_from = "op:OBJECT_OT_vertex_group_clean.group_select_mode"
+["OBJECT_OT_vertex_group_quantize.group_select_mode"]
+runtime = true
+items_from = "op:OBJECT_OT_vertex_group_clean.group_select_mode"
+["OBJECT_OT_vertex_group_smooth.group_select_mode"]
+runtime = true
+items_from = "op:OBJECT_OT_vertex_group_clean.group_select_mode"
+
+# User data: items are the names of the live data (DynEnumFn); no static superset exists.
+["OBJECT_OT_vertex_group_set_active.group"]
+runtime = true
+source = "vertex group names of the active object"
+["MESH_OT_blend_from_shape.shape"]
+runtime = true
+source = "shape key names"
+["NLA_OT_actionclip_add.action"]
+runtime = true
+source = "bpy.data.actions names"
+["COLLECTION_OT_objects_add_active.collection"]
+runtime = true
+source = "bpy.data.collections names"
+["COLLECTION_OT_objects_remove.collection"]
+runtime = true
+source = "bpy.data.collections names"
+["COLLECTION_OT_objects_remove_active.collection"]
+runtime = true
+source = "bpy.data.collections names"
+["OBJECT_OT_collection_link.collection"]
+runtime = true
+source = "bpy.data.collections names"
+["OBJECT_OT_collection_instance_add.collection"]
+runtime = true
+source = "bpy.data.collections names"
+["OBJECT_OT_collection_external_asset_drop.collection"]
+runtime = true
+source = "bpy.data.collections names"
+["OBJECT_OT_make_links_scene.scene"]
+runtime = true
+source = "bpy.data.scenes names"
+["OBJECT_OT_hook_assign.modifier"]
+runtime = true
+source = "HOOK modifiers of the active object"
+["OBJECT_OT_hook_recenter.modifier"]
+runtime = true
+source = "HOOK modifiers of the active object"
+["OBJECT_OT_hook_remove.modifier"]
+runtime = true
+source = "HOOK modifiers of the active object"
+["OBJECT_OT_hook_reset.modifier"]
+runtime = true
+source = "HOOK modifiers of the active object"
+["OBJECT_OT_hook_select.modifier"]
+runtime = true
+source = "HOOK modifiers of the active object"
+["VIEW3D_OT_bone_select_menu.name"]
+runtime = true
+source = "bones under the cursor (UI only)"
+["VIEW3D_OT_select_menu.name"]
+runtime = true
+source = "objects under the cursor (UI only)"
+
+["WM_OT_properties_edit.subtype"]
+source = "rna_enum_property_subtype_number_items (for a FLOAT property)"
+runtime = true
+items = [
+  ["NONE", "Plain Data", "", 0],
+  ["PIXEL", "Pixel", "", 1],
+  ["PERCENTAGE", "Percentage", "", 2],
+  ["FACTOR", "Factor", "", 3],
+  ["ANGLE", "Angle", "", 4],
+  ["TIME_ABSOLUTE", "Time", "", 5],
+  ["DISTANCE", "Distance", "", 6],
+  ["POWER", "Power", "", 7],
+  ["TEMPERATURE", "Temperature", "", 8],
+]
+
+["WM_OT_set_working_color_space.working_space"]
+source = "OCIO working spaces of 5.2.4"
+items = [
+  ["Linear Rec.709", "Linear Rec.709", "", 0],
+  ["Linear Rec.2020", "Linear Rec.2020", "", 1],
+  ["ACEScg", "ACEScg", "", 2],
+]
+
+["WM_OT_url_open_preset.type"]
+source = "WM_OT_url_open_preset preset table (names are the identifiers: UI only)"
+items = [
+  ["BUG", "BUG", "", 0],
+  ["RELEASE_NOTES", "RELEASE_NOTES", "", 1],
+  ["MANUAL", "MANUAL", "", 2],
+  ["API", "API", "", 3],
+  ["FUND", "FUND", "", 4],
+  ["BLENDER", "BLENDER", "", 5],
+  ["CREDITS", "CREDITS", "", 6],
+  ["EXTENSIONS", "EXTENSIONS", "", 7],
+]

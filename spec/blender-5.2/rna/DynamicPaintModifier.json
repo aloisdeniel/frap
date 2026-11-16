@@ -1,0 +1,65 @@
+{
+ "identifier": "DynamicPaintModifier",
+ "name": "Dynamic Paint Modifier",
+ "description": "Dynamic Paint modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "canvas_settings",
+   "name": "Canvas Settings",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "DynamicPaintCanvasSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "brush_settings",
+   "name": "Brush Settings",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "DynamicPaintBrushSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "ui_type",
+   "name": "Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "CANVAS",
+     "name": "Canvas",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "BRUSH",
+     "name": "Brush",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "CANVAS",
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

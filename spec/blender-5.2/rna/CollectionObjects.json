@@ -1,0 +1,64 @@
+{
+ "identifier": "CollectionObjects",
+ "name": "Collection Objects",
+ "description": "Collection of collection objects",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "link",
+   "description": "Add this object to a collection",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "object",
+     "name": "",
+     "description": "Object to add",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Object",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "unlink",
+   "description": "Remove this object from a collection",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "object",
+     "name": "",
+     "description": "Object to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Object",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": true
+}

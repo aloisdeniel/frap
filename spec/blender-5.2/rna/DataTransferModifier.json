@@ -1,0 +1,925 @@
+{
+ "identifier": "DataTransferModifier",
+ "name": "Data Transfer Modifier",
+ "description": "Modifier transferring some data from a source mesh",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "object",
+   "name": "Source Object",
+   "description": "Object to transfer data from",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_object_transform",
+   "name": "Object Transform",
+   "description": "Evaluate source and destination meshes in global space",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_vert_data",
+   "name": "Vertex Data",
+   "description": "Enable vertex data transfer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_edge_data",
+   "name": "Edge Data",
+   "description": "Enable edge data transfer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_loop_data",
+   "name": "Face Corner Data",
+   "description": "Enable face corner data transfer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_poly_data",
+   "name": "Face Data",
+   "description": "Enable face data transfer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "data_types_verts",
+   "name": "Vertex Data Types",
+   "description": "Which vertex data layers to transfer",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "VGROUP_WEIGHTS",
+     "name": "Vertex Groups",
+     "description": "Transfer active or all vertex groups",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "BEVEL_WEIGHT_VERT",
+     "name": "Bevel Weight",
+     "description": "Transfer bevel weights",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "COLOR_VERTEX",
+     "name": "Colors",
+     "description": "Transfer color attributes",
+     "icon": "NONE",
+     "value": 134283264
+    }
+   ],
+   "default": [],
+   "flags": [
+    "ENUM_FLAG",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "data_types_edges",
+   "name": "Edge Data Types",
+   "description": "Which edge data layers to transfer",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SHARP_EDGE",
+     "name": "Sharp",
+     "description": "Transfer sharp mark",
+     "icon": "NONE",
+     "value": 256
+    },
+    {
+     "identifier": "SEAM",
+     "name": "UV Seam",
+     "description": "Transfer UV seam mark",
+     "icon": "NONE",
+     "value": 512
+    },
+    {
+     "identifier": "CREASE",
+     "name": "Crease",
+     "description": "Transfer subdivision crease values",
+     "icon": "NONE",
+     "value": 1024
+    },
+    {
+     "identifier": "BEVEL_WEIGHT_EDGE",
+     "name": "Bevel Weight",
+     "description": "Transfer bevel weights",
+     "icon": "NONE",
+     "value": 2048
+    },
+    {
+     "identifier": "FREESTYLE_EDGE",
+     "name": "Freestyle",
+     "description": "Transfer Freestyle edge mark",
+     "icon": "NONE",
+     "value": 4096
+    }
+   ],
+   "default": [],
+   "flags": [
+    "ENUM_FLAG",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "data_types_loops",
+   "name": "Face Corner Data Types",
+   "description": "Which face corner data layers to transfer",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "CUSTOM_NORMAL",
+     "name": "Custom Normals",
+     "description": "Transfer custom normals",
+     "icon": "NONE",
+     "value": 131072
+    },
+    {
+     "identifier": "COLOR_CORNER",
+     "name": "Colors",
+     "description": "Transfer color attributes",
+     "icon": "NONE",
+     "value": 805306368
+    },
+    {
+     "identifier": "UV",
+     "name": "UVs",
+     "description": "Transfer UV layers",
+     "icon": "NONE",
+     "value": 16777216
+    }
+   ],
+   "default": [],
+   "flags": [
+    "ENUM_FLAG",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "data_types_polys",
+   "name": "Poly Data Types",
+   "description": "Which face data layers to transfer",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SMOOTH",
+     "name": "Smooth",
+     "description": "Transfer flat/smooth mark",
+     "icon": "NONE",
+     "value": 33554432
+    },
+    {
+     "identifier": "FREESTYLE_FACE",
+     "name": "Freestyle Mark",
+     "description": "Transfer Freestyle face mark",
+     "icon": "NONE",
+     "value": 67108864
+    }
+   ],
+   "default": [],
+   "flags": [
+    "ENUM_FLAG",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vert_mapping",
+   "name": "Vertex Mapping",
+   "description": "Method used to map source vertices to destination ones",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "TOPOLOGY",
+     "name": "Topology",
+     "description": "Copy from identical topology meshes",
+     "icon": "NONE",
+     "value": 251658240
+    },
+    {
+     "identifier": "NEAREST",
+     "name": "Nearest Vertex",
+     "description": "Copy from closest vertex",
+     "icon": "NONE",
+     "value": 16777488
+    },
+    {
+     "identifier": "EDGE_NEAREST",
+     "name": "Nearest Edge Vertex",
+     "description": "Copy from closest vertex of closest edge",
+     "icon": "NONE",
+     "value": 16777504
+    },
+    {
+     "identifier": "EDGEINTERP_NEAREST",
+     "name": "Nearest Edge Interpolated",
+     "description": "Copy from interpolated values of vertices from closest point on closest edge",
+     "icon": "NONE",
+     "value": 16778528
+    },
+    {
+     "identifier": "POLY_NEAREST",
+     "name": "Nearest Face Vertex",
+     "description": "Copy from closest vertex of closest face",
+     "icon": "NONE",
+     "value": 16777600
+    },
+    {
+     "identifier": "POLYINTERP_NEAREST",
+     "name": "Nearest Face Interpolated",
+     "description": "Copy from interpolated values of vertices from closest point on closest face",
+     "icon": "NONE",
+     "value": 16778624
+    },
+    {
+     "identifier": "POLYINTERP_VNORPROJ",
+     "name": "Projected Face Interpolated",
+     "description": "Copy from interpolated values of vertices from point on closest face hit by normal-projection",
+     "icon": "NONE",
+     "value": 16778880
+    }
+   ],
+   "default": "NEAREST",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "edge_mapping",
+   "name": "Edge Mapping",
+   "description": "Method used to map source edges to destination ones",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "TOPOLOGY",
+     "name": "Topology",
+     "description": "Copy from identical topology meshes",
+     "icon": "NONE",
+     "value": 251658240
+    },
+    {
+     "identifier": "VERT_NEAREST",
+     "name": "Nearest Vertices",
+     "description": "Copy from most similar edge (edge which vertices are the closest of destination edge's ones)",
+     "icon": "NONE",
+     "value": 33554704
+    },
+    {
+     "identifier": "NEAREST",
+     "name": "Nearest Edge",
+     "description": "Copy from closest edge (using midpoints)",
+     "icon": "NONE",
+     "value": 33554720
+    },
+    {
+     "identifier": "POLY_NEAREST",
+     "name": "Nearest Face Edge",
+     "description": "Copy from closest edge of closest face (using midpoints)",
+     "icon": "NONE",
+     "value": 33554816
+    },
+    {
+     "identifier": "EDGEINTERP_VNORPROJ",
+     "name": "Projected Edge Interpolated",
+     "description": "Interpolate all source edges hit by the projection of destination one along its own normal (from vertices)",
+     "icon": "NONE",
+     "value": 33555984
+    }
+   ],
+   "default": "NEAREST",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "loop_mapping",
+   "name": "Face Corner Mapping",
+   "description": "Method used to map source faces' corners to destination ones",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "TOPOLOGY",
+     "name": "Topology",
+     "description": "Copy from identical topology meshes",
+     "icon": "NONE",
+     "value": 251658240
+    },
+    {
+     "identifier": "NEAREST_NORMAL",
+     "name": "Nearest Corner and Best Matching Normal",
+     "description": "Copy from nearest corner which has the best matching normal",
+     "icon": "NONE",
+     "value": 67111248
+    },
+    {
+     "identifier": "NEAREST_POLYNOR",
+     "name": "Nearest Corner and Best Matching Face Normal",
+     "description": "Copy from nearest corner which has the face with the best matching normal to destination corner's face one",
+     "icon": "NONE",
+     "value": 67111312
+    },
+    {
+     "identifier": "NEAREST_POLY",
+     "name": "Nearest Corner of Nearest Face",
+     "description": "Copy from nearest corner of nearest face",
+     "icon": "NONE",
+     "value": 67109248
+    },
+    {
+     "identifier": "POLYINTERP_NEAREST",
+     "name": "Nearest Face Interpolated",
+     "description": "Copy from interpolated corners of the nearest source face",
+     "icon": "NONE",
+     "value": 67110272
+    },
+    {
+     "identifier": "POLYINTERP_LNORPROJ",
+     "name": "Projected Face Interpolated",
+     "description": "Copy from interpolated corners of the source face hit by corner normal projection",
+     "icon": "NONE",
+     "value": 67110528
+    }
+   ],
+   "default": "NEAREST_POLYNOR",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "poly_mapping",
+   "name": "Face Mapping",
+   "description": "Method used to map source faces to destination ones",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "TOPOLOGY",
+     "name": "Topology",
+     "description": "Copy from identical topology meshes",
+     "icon": "NONE",
+     "value": 251658240
+    },
+    {
+     "identifier": "NEAREST",
+     "name": "Nearest Face",
+     "description": "Copy from nearest face (using center points)",
+     "icon": "NONE",
+     "value": 134218112
+    },
+    {
+     "identifier": "NORMAL",
+     "name": "Best Normal-Matching",
+     "description": "Copy from source face which normal is the closest to destination one",
+     "icon": "NONE",
+     "value": 134219904
+    },
+    {
+     "identifier": "POLYINTERP_PNORPROJ",
+     "name": "Projected Face Interpolated",
+     "description": "Interpolate all source polygons intersected by the projection of destination one along its own normal",
+     "icon": "NONE",
+     "value": 134219392
+    }
+   ],
+   "default": "NEAREST",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_max_distance",
+   "name": "Only Neighbor Geometry",
+   "description": "Source elements must be closer than given distance from destination one",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "max_distance",
+   "name": "Max Distance",
+   "description": "Maximum allowed distance between source and destination element, for non-topology mappings",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ray_radius",
+   "name": "Ray Radius",
+   "description": "'Width' of rays (especially useful when raycasting against vertices or edges)",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "islands_precision",
+   "name": "Islands Precision",
+   "description": "Factor controlling precision of islands handling (typically, 0.1 should be enough, higher values can make things really slow)",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layers_vgroup_select_src",
+   "name": "Source Layers Selection",
+   "description": "Which layers to transfer, in case of multi-layers types",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ACTIVE",
+     "name": "Active Layer",
+     "description": "Only transfer active data layer",
+     "icon": "NONE",
+     "value": -1
+    },
+    {
+     "identifier": "ALL",
+     "name": "All Layers",
+     "description": "Transfer all data layers",
+     "icon": "NONE",
+     "value": -2
+    },
+    {
+     "identifier": "BONE_SELECT",
+     "name": "Selected Pose Bones",
+     "description": "Transfer all vertex groups used by selected pose bones",
+     "icon": "NONE",
+     "value": -257
+    },
+    {
+     "identifier": "BONE_DEFORM",
+     "name": "Deform Pose Bones",
+     "description": "Transfer all vertex groups used by deform bones",
+     "icon": "NONE",
+     "value": -258
+    }
+   ],
+   "default": "ALL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layers_vcol_vert_select_src",
+   "name": "Source Layers Selection",
+   "description": "Which layers to transfer, in case of multi-layers types",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ACTIVE",
+     "name": "Active Layer",
+     "description": "Only transfer active data layer",
+     "icon": "NONE",
+     "value": -1
+    },
+    {
+     "identifier": "ALL",
+     "name": "All Layers",
+     "description": "Transfer all data layers",
+     "icon": "NONE",
+     "value": -2
+    },
+    {
+     "identifier": "BONE_SELECT",
+     "name": "Selected Pose Bones",
+     "description": "Transfer all vertex groups used by selected pose bones",
+     "icon": "NONE",
+     "value": -257
+    },
+    {
+     "identifier": "BONE_DEFORM",
+     "name": "Deform Pose Bones",
+     "description": "Transfer all vertex groups used by deform bones",
+     "icon": "NONE",
+     "value": -258
+    }
+   ],
+   "default": "ALL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layers_vcol_loop_select_src",
+   "name": "Source Layers Selection",
+   "description": "Which layers to transfer, in case of multi-layers types",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ACTIVE",
+     "name": "Active Layer",
+     "description": "Only transfer active data layer",
+     "icon": "NONE",
+     "value": -1
+    },
+    {
+     "identifier": "ALL",
+     "name": "All Layers",
+     "description": "Transfer all data layers",
+     "icon": "NONE",
+     "value": -2
+    },
+    {
+     "identifier": "BONE_SELECT",
+     "name": "Selected Pose Bones",
+     "description": "Transfer all vertex groups used by selected pose bones",
+     "icon": "NONE",
+     "value": -257
+    },
+    {
+     "identifier": "BONE_DEFORM",
+     "name": "Deform Pose Bones",
+     "description": "Transfer all vertex groups used by deform bones",
+     "icon": "NONE",
+     "value": -258
+    }
+   ],
+   "default": "ALL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layers_uv_select_src",
+   "name": "Source Layers Selection",
+   "description": "Which layers to transfer, in case of multi-layers types",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ACTIVE",
+     "name": "Active Layer",
+     "description": "Only transfer active data layer",
+     "icon": "NONE",
+     "value": -1
+    },
+    {
+     "identifier": "ALL",
+     "name": "All Layers",
+     "description": "Transfer all data layers",
+     "icon": "NONE",
+     "value": -2
+    },
+    {
+     "identifier": "BONE_SELECT",
+     "name": "Selected Pose Bones",
+     "description": "Transfer all vertex groups used by selected pose bones",
+     "icon": "NONE",
+     "value": -257
+    },
+    {
+     "identifier": "BONE_DEFORM",
+     "name": "Deform Pose Bones",
+     "description": "Transfer all vertex groups used by deform bones",
+     "icon": "NONE",
+     "value": -258
+    }
+   ],
+   "default": "ALL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layers_vgroup_select_dst",
+   "name": "Destination Layers Matching",
+   "description": "How to match source and destination layers",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ACTIVE",
+     "name": "Active Layer",
+     "description": "Affect active data layer of all targets",
+     "icon": "NONE",
+     "value": -1
+    },
+    {
+     "identifier": "NAME",
+     "name": "By Name",
+     "description": "Match target data layers to affect by name",
+     "icon": "NONE",
+     "value": -2
+    },
+    {
+     "identifier": "INDEX",
+     "name": "By Order",
+     "description": "Match target data layers to affect by order (indices)",
+     "icon": "NONE",
+     "value": -3
+    }
+   ],
+   "default": "NAME",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layers_vcol_vert_select_dst",
+   "name": "Destination Layers Matching",
+   "description": "How to match source and destination layers",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ACTIVE",
+     "name": "Active Layer",
+     "description": "Affect active data layer of all targets",
+     "icon": "NONE",
+     "value": -1
+    },
+    {
+     "identifier": "NAME",
+     "name": "By Name",
+     "description": "Match target data layers to affect by name",
+     "icon": "NONE",
+     "value": -2
+    },
+    {
+     "identifier": "INDEX",
+     "name": "By Order",
+     "description": "Match target data layers to affect by order (indices)",
+     "icon": "NONE",
+     "value": -3
+    }
+   ],
+   "default": "NAME",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layers_vcol_loop_select_dst",
+   "name": "Destination Layers Matching",
+   "description": "How to match source and destination layers",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ACTIVE",
+     "name": "Active Layer",
+     "description": "Affect active data layer of all targets",
+     "icon": "NONE",
+     "value": -1
+    },
+    {
+     "identifier": "NAME",
+     "name": "By Name",
+     "description": "Match target data layers to affect by name",
+     "icon": "NONE",
+     "value": -2
+    },
+    {
+     "identifier": "INDEX",
+     "name": "By Order",
+     "description": "Match target data layers to affect by order (indices)",
+     "icon": "NONE",
+     "value": -3
+    }
+   ],
+   "default": "NAME",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layers_uv_select_dst",
+   "name": "Destination Layers Matching",
+   "description": "How to match source and destination layers",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ACTIVE",
+     "name": "Active Layer",
+     "description": "Affect active data layer of all targets",
+     "icon": "NONE",
+     "value": -1
+    },
+    {
+     "identifier": "NAME",
+     "name": "By Name",
+     "description": "Match target data layers to affect by name",
+     "icon": "NONE",
+     "value": -2
+    },
+    {
+     "identifier": "INDEX",
+     "name": "By Order",
+     "description": "Match target data layers to affect by order (indices)",
+     "icon": "NONE",
+     "value": -3
+    }
+   ],
+   "default": "NAME",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mix_mode",
+   "name": "Mix Mode",
+   "description": "How to affect destination elements with source values",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "REPLACE",
+     "name": "Replace",
+     "description": "Overwrite all elements' data",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "ABOVE_THRESHOLD",
+     "name": "Above Threshold",
+     "description": "Only replace destination elements where data is above given threshold (exact behavior depends on data type)",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "BELOW_THRESHOLD",
+     "name": "Below Threshold",
+     "description": "Only replace destination elements where data is below given threshold (exact behavior depends on data type)",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "MIX",
+     "name": "Mix",
+     "description": "Mix source value into destination one, using given threshold as factor",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "ADD",
+     "name": "Add",
+     "description": "Add source value to destination one, using given threshold as factor",
+     "icon": "NONE",
+     "value": 17
+    },
+    {
+     "identifier": "SUB",
+     "name": "Subtract",
+     "description": "Subtract source value to destination one, using given threshold as factor",
+     "icon": "NONE",
+     "value": 18
+    },
+    {
+     "identifier": "MUL",
+     "name": "Multiply",
+     "description": "Multiply source value to destination one, using given threshold as factor",
+     "icon": "NONE",
+     "value": 19
+    }
+   ],
+   "default": "REPLACE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mix_factor",
+   "name": "Mix Factor",
+   "description": "Factor to use when applying data to destination (exact behavior depends on mix mode, multiplied with weights from vertex group when defined)",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name for selecting the affected areas",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

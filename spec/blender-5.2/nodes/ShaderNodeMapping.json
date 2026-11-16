@@ -1,0 +1,155 @@
+{
+ "bl_idname": "ShaderNodeMapping",
+ "srna": "ShaderNodeMapping",
+ "name": "Mapping",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Location",
+   "identifier": "Location",
+   "bl_idname": "NodeSocketVectorTranslation",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "TRANSLATION",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Rotation",
+   "identifier": "Rotation",
+   "bl_idname": "NodeSocketVectorEuler",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "EULER",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Scale",
+   "identifier": "Scale",
+   "bl_idname": "NodeSocketVectorXYZ",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "XYZ",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "vector_type": "POINT"
+ },
+ "availability": {
+  "vector_type": {
+   "default": "POINT",
+   "by_value": {
+    "POINT": {
+     "inputs": [
+      "Vector",
+      "Location",
+      "Rotation",
+      "Scale"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "TEXTURE": {
+     "inputs": [
+      "Vector",
+      "Location",
+      "Rotation",
+      "Scale"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "VECTOR": {
+     "inputs": [
+      "Vector",
+      "Rotation",
+      "Scale"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "NORMAL": {
+     "inputs": [
+      "Vector",
+      "Rotation",
+      "Scale"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,324 @@
+{
+ "identifier": "ShaderNodeVectorMath",
+ "name": "Vector Math",
+ "description": "Perform vector math operation",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "operation",
+   "name": "Operation",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ADD",
+     "name": "Add",
+     "description": "A + B",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "SUBTRACT",
+     "name": "Subtract",
+     "description": "A - B",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "MULTIPLY",
+     "name": "Multiply",
+     "description": "Entry-wise multiply",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "DIVIDE",
+     "name": "Divide",
+     "description": "Entry-wise divide",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "MULTIPLY_ADD",
+     "name": "Multiply Add",
+     "description": "A * B + C",
+     "icon": "NONE",
+     "value": 26
+    },
+    {
+     "identifier": "CROSS_PRODUCT",
+     "name": "Cross Product",
+     "description": "A cross B",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "PROJECT",
+     "name": "Project",
+     "description": "Project A onto B",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "REFLECT",
+     "name": "Reflect",
+     "description": "Reflect A around the normal B. B does not need to be normalized.",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "REFRACT",
+     "name": "Refract",
+     "description": "For a given incident vector A, surface normal B and ratio of indices of refraction, Ior, refract returns the refraction vector, R",
+     "icon": "NONE",
+     "value": 24
+    },
+    {
+     "identifier": "FACEFORWARD",
+     "name": "Faceforward",
+     "description": "Orients a vector A to point away from a surface B as defined by its normal C. Returns (dot(B, C) < 0) ? A : -A",
+     "icon": "NONE",
+     "value": 25
+    },
+    {
+     "identifier": "DOT_PRODUCT",
+     "name": "Dot Product",
+     "description": "A dot B",
+     "icon": "NONE",
+     "value": 7
+    },
+    {
+     "identifier": "DISTANCE",
+     "name": "Distance",
+     "description": "Distance between A and B",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "LENGTH",
+     "name": "Length",
+     "description": "Length of A",
+     "icon": "NONE",
+     "value": 9
+    },
+    {
+     "identifier": "SCALE",
+     "name": "Scale",
+     "description": "A multiplied by Scale",
+     "icon": "NONE",
+     "value": 10
+    },
+    {
+     "identifier": "NORMALIZE",
+     "name": "Normalize",
+     "description": "Normalize A",
+     "icon": "NONE",
+     "value": 11
+    },
+    {
+     "identifier": "ABSOLUTE",
+     "name": "Absolute",
+     "description": "Entry-wise absolute",
+     "icon": "NONE",
+     "value": 17
+    },
+    {
+     "identifier": "POWER",
+     "name": "Power",
+     "description": "Entry-wise power",
+     "icon": "NONE",
+     "value": 27
+    },
+    {
+     "identifier": "SIGN",
+     "name": "Sign",
+     "description": "Entry-wise sign",
+     "icon": "NONE",
+     "value": 28
+    },
+    {
+     "identifier": "MINIMUM",
+     "name": "Minimum",
+     "description": "Entry-wise minimum",
+     "icon": "NONE",
+     "value": 18
+    },
+    {
+     "identifier": "MAXIMUM",
+     "name": "Maximum",
+     "description": "Entry-wise maximum",
+     "icon": "NONE",
+     "value": 19
+    },
+    {
+     "identifier": "ROUND",
+     "name": "Round",
+     "description": "Entry-wise round to the nearest integer. Round upward if the fraction part is 0.5",
+     "icon": "NONE",
+     "value": 29
+    },
+    {
+     "identifier": "FLOOR",
+     "name": "Floor",
+     "description": "Entry-wise floor",
+     "icon": "NONE",
+     "value": 13
+    },
+    {
+     "identifier": "CEIL",
+     "name": "Ceil",
+     "description": "Entry-wise ceil",
+     "icon": "NONE",
+     "value": 14
+    },
+    {
+     "identifier": "FRACTION",
+     "name": "Fraction",
+     "description": "The fraction part of A entry-wise",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "MODULO",
+     "name": "Modulo",
+     "description": "Entry-wise modulo using fmod(A,B)",
+     "icon": "NONE",
+     "value": 15
+    },
+    {
+     "identifier": "WRAP",
+     "name": "Wrap",
+     "description": "Entry-wise wrap(A,B)",
+     "icon": "NONE",
+     "value": 20
+    },
+    {
+     "identifier": "SNAP",
+     "name": "Snap",
+     "description": "Round A to the largest integer multiple of B less than or equal A",
+     "icon": "NONE",
+     "value": 12
+    },
+    {
+     "identifier": "SINE",
+     "name": "Sine",
+     "description": "Entry-wise sin(A)",
+     "icon": "NONE",
+     "value": 21
+    },
+    {
+     "identifier": "COSINE",
+     "name": "Cosine",
+     "description": "Entry-wise cos(A)",
+     "icon": "NONE",
+     "value": 22
+    },
+    {
+     "identifier": "TANGENT",
+     "name": "Tangent",
+     "description": "Entry-wise tan(A)",
+     "icon": "NONE",
+     "value": 23
+    }
+   ],
+   "default": "ADD",
+   "flags": []
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

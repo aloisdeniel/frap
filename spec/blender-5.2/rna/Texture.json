@@ -1,0 +1,372 @@
+{
+ "identifier": "Texture",
+ "name": "Texture",
+ "description": "Texture data-block used by materials, lights, worlds and brushes",
+ "base": "ID",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "type",
+   "name": "Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "BLEND",
+     "name": "Blend",
+     "description": "Procedural - create a ramp texture",
+     "icon": "TEXTURE",
+     "value": 5
+    },
+    {
+     "identifier": "CLOUDS",
+     "name": "Clouds",
+     "description": "Procedural - create a cloud-like fractal noise texture",
+     "icon": "TEXTURE",
+     "value": 1
+    },
+    {
+     "identifier": "DISTORTED_NOISE",
+     "name": "Distorted Noise",
+     "description": "Procedural - noise texture distorted by two noise algorithms",
+     "icon": "TEXTURE",
+     "value": 13
+    },
+    {
+     "identifier": "IMAGE",
+     "name": "Image or Movie",
+     "description": "Allow for images or movies to be used as textures",
+     "icon": "IMAGE_DATA",
+     "value": 8
+    },
+    {
+     "identifier": "MAGIC",
+     "name": "Magic",
+     "description": "Procedural - color texture based on trigonometric functions",
+     "icon": "TEXTURE",
+     "value": 4
+    },
+    {
+     "identifier": "MARBLE",
+     "name": "Marble",
+     "description": "Procedural - marble-like noise texture with wave generated bands",
+     "icon": "TEXTURE",
+     "value": 3
+    },
+    {
+     "identifier": "MUSGRAVE",
+     "name": "Musgrave",
+     "description": "Procedural - highly flexible fractal noise texture",
+     "icon": "TEXTURE",
+     "value": 11
+    },
+    {
+     "identifier": "NOISE",
+     "name": "Noise",
+     "description": "Procedural - random noise, gives a different result every time, for every frame, for every pixel",
+     "icon": "TEXTURE",
+     "value": 7
+    },
+    {
+     "identifier": "STUCCI",
+     "name": "Stucci",
+     "description": "Procedural - create a fractal noise texture",
+     "icon": "TEXTURE",
+     "value": 6
+    },
+    {
+     "identifier": "VORONOI",
+     "name": "Voronoi",
+     "description": "Procedural - create cell-like patterns based on Worley noise",
+     "icon": "TEXTURE",
+     "value": 12
+    },
+    {
+     "identifier": "WOOD",
+     "name": "Wood",
+     "description": "Procedural - wave generated bands or rings, with optional noise",
+     "icon": "TEXTURE",
+     "value": 2
+    }
+   ],
+   "default": "IMAGE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_clamp",
+   "name": "Clamp",
+   "description": "Set negative texture RGB and intensity values to zero, for some uses like displacement this option can be disabled to get the full range",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_color_ramp",
+   "name": "Use Color Ramp",
+   "description": "Map the texture intensity to the color ramp. Note that the alpha value is used for image textures, enable \"Calculate Alpha\" for images without an alpha channel.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "color_ramp",
+   "name": "Color Ramp",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "",
+   "unit": "MASS",
+   "fixed_type": "ColorRamp",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "intensity",
+   "name": "Brightness",
+   "description": "Adjust the brightness of the texture",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 2.0,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "contrast",
+   "name": "Contrast",
+   "description": "Adjust the contrast of the texture",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 5.0,
+   "soft_min": 0.0,
+   "soft_max": 5.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "saturation",
+   "name": "Saturation",
+   "description": "Adjust the saturation of colors in the texture",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 2.0,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "factor_red",
+   "name": "Factor Red",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 2.0,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "factor_green",
+   "name": "Factor Green",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 2.0,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "factor_blue",
+   "name": "Factor Blue",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 2.0,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_preview_alpha",
+   "name": "Show Alpha",
+   "description": "Show Alpha in Preview Render",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_nodes",
+   "name": "Use Nodes",
+   "description": "Make this a node-based texture",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "node_tree",
+   "name": "Node Tree",
+   "description": "Node tree for node-based textures",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeTree",
+   "is_id": true,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "animation_data",
+   "name": "Animation Data",
+   "description": "Animation data for this data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AnimData",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "evaluate",
+   "description": "Evaluate the texture at the given coordinate and returns the result",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "value",
+     "name": "The coordinates (x,y,z) of the texture, in case of a 3D texture, the z value is the slice of the texture that is evaluated. For 2D textures such as images, the z value is ignored.",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "The result of the texture where (x,y,z,w) are (red, green, blue, intensity). For grayscale textures, often intensity only will be used.",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

@@ -1,0 +1,450 @@
+{
+ "identifier": "GreasePencilArrayModifier",
+ "name": "Instance Modifier",
+ "description": "Create grid of duplicate instances",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "tree_node_filter",
+   "name": "Layer",
+   "description": "Layer name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "use_layer_pass_filter",
+   "name": "Use Layer Pass",
+   "description": "Use layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layer_pass_filter",
+   "name": "Layer Pass",
+   "description": "Layer pass filter",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_filter",
+   "name": "Invert Layer",
+   "description": "Invert layer filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_pass_filter",
+   "name": "Invert Layer Pass",
+   "description": "Invert layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_layer_group_filter",
+   "name": "Layer Group",
+   "description": "Filter by layer group name",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_filter",
+   "name": "Material",
+   "description": "Material used for filtering",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_material_pass_filter",
+   "name": "Use Material Pass",
+   "description": "Use material pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_pass_filter",
+   "name": "Material Pass",
+   "description": "Material pass",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_material_filter",
+   "name": "Invert Material",
+   "description": "Invert material filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_material_pass_filter",
+   "name": "Invert Material Pass",
+   "description": "Invert material pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_constant_offset_panel",
+   "name": "open_constant_offset_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_relative_offset_panel",
+   "name": "open_relative_offset_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_object_offset_panel",
+   "name": "open_object_offset_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_randomize_panel",
+   "name": "open_randomize_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_influence_panel",
+   "name": "open_influence_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "count",
+   "name": "Count",
+   "description": "Number of items",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 2,
+   "hard_min": 1,
+   "hard_max": 32767,
+   "soft_min": 1,
+   "soft_max": 50,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "offset_object",
+   "name": "Offset Object",
+   "description": "Use the location and rotation of another object to determine the distance and rotational change between arrayed items",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "constant_offset",
+   "name": "Constant Offset",
+   "description": "Value for the distance between items",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "relative_offset",
+   "name": "Relative Offset",
+   "description": "The size of the geometry will determine the distance between arrayed items",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    1.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "random_offset",
+   "name": "Random Offset",
+   "description": "Value for changes in location",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "random_rotation",
+   "name": "Random Rotation",
+   "description": "Value for changes in rotation",
+   "type": "FLOAT",
+   "subtype": "EULER",
+   "unit": "ROTATION",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 100.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "random_scale",
+   "name": "Scale",
+   "description": "Value for changes in scale",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "seed",
+   "name": "Seed",
+   "description": "Random seed",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "replace_material",
+   "name": "Material",
+   "description": "Index of the material used for generated strokes (0 keep original material)",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_constant_offset",
+   "name": "Offset",
+   "description": "Enable offset",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_object_offset",
+   "name": "Use Object Offset",
+   "description": "Add another object's transformation to the total offset",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_relative_offset",
+   "name": "Shift",
+   "description": "Add an offset relative to the object's bounding box",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_uniform_random_scale",
+   "name": "Uniform Scale",
+   "description": "Use the same random seed for each scale axis for a uniform scale",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

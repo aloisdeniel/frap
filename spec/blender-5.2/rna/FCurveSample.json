@@ -1,0 +1,49 @@
+{
+ "identifier": "FCurveSample",
+ "name": "F-Curve Sample",
+ "description": "Sample point for F-Curve",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "select",
+   "name": "Select",
+   "description": "Selection status",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "co",
+   "name": "Point",
+   "description": "Point coordinates",
+   "type": "FLOAT",
+   "subtype": "COORDINATES",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

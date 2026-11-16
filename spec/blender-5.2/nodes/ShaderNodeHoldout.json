@@ -1,0 +1,37 @@
+{
+ "bl_idname": "ShaderNodeHoldout",
+ "srna": "ShaderNodeHoldout",
+ "name": "Holdout",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Weight",
+   "identifier": "Weight",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Holdout",
+   "identifier": "Holdout",
+   "bl_idname": "NodeSocketShader",
+   "type": "SHADER",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  }
+ ],
+ "props": {}
+}

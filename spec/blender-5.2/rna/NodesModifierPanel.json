@@ -1,0 +1,25 @@
+{
+ "identifier": "NodesModifierPanel",
+ "name": "Nodes Modifier Panel",
+ "description": "",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "is_open",
+   "name": "Is Open",
+   "description": "Whether the panel is expanded or closed",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

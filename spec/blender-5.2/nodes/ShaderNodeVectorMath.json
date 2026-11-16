@@ -1,0 +1,386 @@
+{
+ "bl_idname": "ShaderNodeVectorMath",
+ "srna": "ShaderNodeVectorMath",
+ "name": "Vector Math",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Vector",
+   "identifier": "Vector_001",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Vector",
+   "identifier": "Vector_002",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Scale",
+   "identifier": "Scale",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Value",
+   "identifier": "Value",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "operation": "ADD"
+ },
+ "availability": {
+  "operation": {
+   "default": "ADD",
+   "by_value": {
+    "ADD": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "SUBTRACT": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "MULTIPLY": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "DIVIDE": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "MULTIPLY_ADD": {
+     "inputs": [
+      "Vector",
+      "Vector_001",
+      "Vector_002"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "CROSS_PRODUCT": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "PROJECT": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "REFLECT": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "REFRACT": {
+     "inputs": [
+      "Vector",
+      "Vector_001",
+      "Scale"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "FACEFORWARD": {
+     "inputs": [
+      "Vector",
+      "Vector_001",
+      "Vector_002"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "DOT_PRODUCT": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "DISTANCE": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "LENGTH": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Value"
+     ]
+    },
+    "SCALE": {
+     "inputs": [
+      "Vector",
+      "Scale"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "NORMALIZE": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "ABSOLUTE": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "POWER": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "SIGN": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "MINIMUM": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "MAXIMUM": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "ROUND": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "FLOOR": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "CEIL": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "FRACTION": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "MODULO": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "WRAP": {
+     "inputs": [
+      "Vector",
+      "Vector_001",
+      "Vector_002"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "SNAP": {
+     "inputs": [
+      "Vector",
+      "Vector_001"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "SINE": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "COSINE": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "TANGENT": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,27 @@
+{
+ "identifier": "ByteIntAttribute",
+ "name": "8-bit Integer Attribute",
+ "description": "Geometry attribute that stores 8-bit integers",
+ "base": "Attribute",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "data",
+   "name": "data",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ByteIntAttributeValue",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

@@ -1,0 +1,314 @@
+{
+ "identifier": "WarpModifier",
+ "name": "Warp Modifier",
+ "description": "Warp modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "object_from",
+   "name": "Object From",
+   "description": "Object to transform from",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "bone_from",
+   "name": "Bone From",
+   "description": "Bone to transform from",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "object_to",
+   "name": "Object To",
+   "description": "Object to transform to",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "bone_to",
+   "name": "Bone To",
+   "description": "Bone defining offset",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "strength",
+   "name": "Strength",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -100.0,
+   "soft_max": 100.0,
+   "step": 10.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "falloff_type",
+   "name": "Falloff Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "No Falloff",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CURVE",
+     "name": "Curve",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "SMOOTH",
+     "name": "Smooth",
+     "description": "",
+     "icon": "SMOOTHCURVE",
+     "value": 3
+    },
+    {
+     "identifier": "SPHERE",
+     "name": "Sphere",
+     "description": "",
+     "icon": "SPHERECURVE",
+     "value": 7
+    },
+    {
+     "identifier": "ROOT",
+     "name": "Root",
+     "description": "",
+     "icon": "ROOTCURVE",
+     "value": 4
+    },
+    {
+     "identifier": "INVERSE_SQUARE",
+     "name": "Inverse Square",
+     "description": "",
+     "icon": "INVERSESQUARECURVE",
+     "value": 8
+    },
+    {
+     "identifier": "SHARP",
+     "name": "Sharp",
+     "description": "",
+     "icon": "SHARPCURVE",
+     "value": 2
+    },
+    {
+     "identifier": "LINEAR",
+     "name": "Linear",
+     "description": "",
+     "icon": "LINCURVE",
+     "value": 5
+    },
+    {
+     "identifier": "CONSTANT",
+     "name": "Constant",
+     "description": "",
+     "icon": "NOCURVE",
+     "value": 6
+    }
+   ],
+   "default": "SMOOTH",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "falloff_radius",
+   "name": "Radius",
+   "description": "Radius to apply",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 1.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "falloff_curve",
+   "name": "Falloff Curve",
+   "description": "Custom falloff curve",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CurveMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_volume_preserve",
+   "name": "Preserve Volume",
+   "description": "Preserve volume when rotations are used",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name for modulating the deform",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "texture",
+   "name": "Texture",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Texture",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "texture_coords",
+   "name": "Texture Coordinates",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LOCAL",
+     "name": "Local",
+     "description": "Use the local coordinate system for the texture coordinates",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "GLOBAL",
+     "name": "Global",
+     "description": "Use the global coordinate system for the texture coordinates",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "Use the linked object's local coordinate system for the texture coordinates",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "UV",
+     "name": "UV",
+     "description": "Use UV coordinates for the texture coordinates",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "LOCAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "uv_layer",
+   "name": "UV Map",
+   "description": "UV map name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 68,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "texture_coords_object",
+   "name": "Texture Coordinate Object",
+   "description": "Object to set the texture coordinates",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "texture_coords_bone",
+   "name": "Texture Coordinate Bone",
+   "description": "Bone to set the texture coordinates",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

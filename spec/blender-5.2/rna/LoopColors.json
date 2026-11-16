@@ -1,0 +1,117 @@
+{
+ "identifier": "LoopColors",
+ "name": "Loop Colors",
+ "description": "Collection of vertex colors",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "active",
+   "name": "Active Vertex Color Layer",
+   "description": "Active vertex color layer",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshLoopColorLayer",
+   "is_id": false,
+   "flags": []
+  },
+  {
+   "identifier": "active_index",
+   "name": "Active Vertex Color Index",
+   "description": "Active vertex color index",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add a vertex color layer to Mesh",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "",
+     "description": "Vertex color name",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Col",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "do_init",
+     "name": "",
+     "description": "Whether new layer's data should be initialized by copying current active one",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "layer",
+     "name": "",
+     "description": "The newly created layer",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "MeshLoopColorLayer",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove a vertex color layer",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "layer",
+     "name": "",
+     "description": "The layer to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "MeshLoopColorLayer",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

@@ -1,0 +1,442 @@
+{
+ "identifier": "Preferences",
+ "name": "Preferences",
+ "description": "Global preferences",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "active_section",
+   "name": "Active Section",
+   "description": "Preferences",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "INTERFACE",
+     "name": "Interface",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "VIEWPORT",
+     "name": "Viewport",
+     "description": "",
+     "icon": "NONE",
+     "value": 12
+    },
+    {
+     "identifier": "LIGHTS",
+     "name": "Lights",
+     "description": "",
+     "icon": "NONE",
+     "value": 7
+    },
+    {
+     "identifier": "EDITING",
+     "name": "Editing",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "ANIMATION",
+     "name": "Animation",
+     "description": "",
+     "icon": "NONE",
+     "value": 13
+    },
+    {
+     "identifier": "EXTENSIONS",
+     "name": "Get Extensions",
+     "description": "Browse, install and manage extensions from remote and local repositories",
+     "icon": "NONE",
+     "value": 17
+    },
+    {
+     "identifier": "ADDONS",
+     "name": "Add-ons",
+     "description": "Manage add-ons installed via Extensions",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "THEMES",
+     "name": "Themes",
+     "description": "Edit and save themes installed via Extensions",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "ASSETS",
+     "name": "Asset Libraries",
+     "description": "",
+     "icon": "NONE",
+     "value": 19
+    },
+    {
+     "identifier": "INPUT",
+     "name": "Input",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "NAVIGATION",
+     "name": "Navigation",
+     "description": "",
+     "icon": "NONE",
+     "value": 14
+    },
+    {
+     "identifier": "KEYMAP",
+     "name": "Keymap",
+     "description": "",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "SYSTEM",
+     "name": "System",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "SAVE_LOAD",
+     "name": "Save & Load",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "FILE_PATHS",
+     "name": "File Paths",
+     "description": "",
+     "icon": "NONE",
+     "value": 15
+    },
+    {
+     "identifier": "DEVELOPER_TOOLS",
+     "name": "Developer Tools",
+     "description": "",
+     "icon": "NONE",
+     "value": 18
+    },
+    {
+     "identifier": "EXPERIMENTAL",
+     "name": "Experimental",
+     "description": "",
+     "icon": "NONE",
+     "value": 16
+    }
+   ],
+   "default": "INTERFACE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "app_template",
+   "name": "Application Template",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "themes",
+   "name": "Themes",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Theme",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "ui_styles",
+   "name": "Styles",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ThemeStyle",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "addons",
+   "name": "Add-on",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Addon",
+   "is_id": false,
+   "api": "Addons",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "autoexec_paths",
+   "name": "Auto-Execution Paths",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PathCompare",
+   "is_id": false,
+   "api": "PathCompareCollection",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_recent_searches",
+   "name": "Recent Searches",
+   "description": "Sort the recently searched items at the top",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_hidden_ids",
+   "name": "Show Hidden",
+   "description": "Show data-blocks with dot-prefixed names in search menus",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "view",
+   "name": "View & Controls",
+   "description": "Preferences related to viewing data",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PreferencesView",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "edit",
+   "name": "Edit Methods",
+   "description": "Settings for interacting with Blender data",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PreferencesEdit",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "inputs",
+   "name": "Inputs",
+   "description": "Settings for input devices",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PreferencesInput",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "keymap",
+   "name": "Keymap",
+   "description": "Shortcut setup for keyboards and other input devices",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PreferencesKeymap",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "filepaths",
+   "name": "File Paths",
+   "description": "Default paths for external files",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PreferencesFilePaths",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "asset_libraries",
+   "name": "Asset Libraries",
+   "description": "Setup for custom and builtin asset libraries",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PreferencesAssetLibraries",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "extensions",
+   "name": "Extensions",
+   "description": "Settings for extensions",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PreferencesExtensions",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "system",
+   "name": "System & OpenGL",
+   "description": "Graphics driver and operating system settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PreferencesSystem",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "apps",
+   "name": "Apps",
+   "description": "Preferences that work only for apps",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PreferencesApps",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "experimental",
+   "name": "Experimental",
+   "description": "Settings for features that are still early in their development stage",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PreferencesExperimental",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "version",
+   "name": "Version",
+   "description": "Version of Blender the userpref.blend was saved with",
+   "type": "INT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0,
+    0,
+    0
+   ],
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "studio_lights",
+   "name": "Studio Lights",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "StudioLight",
+   "is_id": false,
+   "api": "StudioLights",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_preferences_save",
+   "name": "Save on Exit",
+   "description": "Save preferences on exit when modified (unless factory settings have been loaded)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_dirty",
+   "name": "Dirty",
+   "description": "Preferences have changed",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

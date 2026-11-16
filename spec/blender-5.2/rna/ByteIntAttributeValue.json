@@ -1,0 +1,30 @@
+{
+ "identifier": "ByteIntAttributeValue",
+ "name": "8-bit Integer Attribute Value",
+ "description": "8-bit value in geometry attribute",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "value",
+   "name": "value",
+   "description": "",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -128,
+   "hard_max": 127,
+   "soft_min": -128,
+   "soft_max": 127,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

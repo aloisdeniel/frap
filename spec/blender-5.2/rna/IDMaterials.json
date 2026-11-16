@@ -1,0 +1,91 @@
+{
+ "identifier": "IDMaterials",
+ "name": "ID Materials",
+ "description": "Collection of materials",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "append",
+   "description": "Add a new material to the data-block",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "material",
+     "name": "",
+     "description": "Material to add",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Material",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "pop",
+   "description": "Remove a material from the data-block",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "",
+     "description": "Index of material to remove",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -32766,
+     "hard_max": 32766,
+     "soft_min": 0,
+     "soft_max": 32766,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "material",
+     "name": "",
+     "description": "Material to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Material",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "clear",
+   "description": "Remove all materials from the data-block",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  }
+ ],
+ "root": true
+}

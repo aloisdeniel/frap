@@ -1,0 +1,139 @@
+{
+ "identifier": "BlendDataSpeakers",
+ "name": "Main Speakers",
+ "description": "Collection of speakers",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add a new speaker to the main database",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "",
+     "description": "New name for the data-block",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Speaker",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "speaker",
+     "name": "",
+     "description": "New speaker data-block",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Speaker",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove a speaker from the current blendfile",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "speaker",
+     "name": "",
+     "description": "Speaker to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Speaker",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "do_unlink",
+     "name": "",
+     "description": "Unlink all usages of this speaker before deleting it (WARNING: will also delete objects instancing that speaker data)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "do_id_user",
+     "name": "",
+     "description": "Decrement user counter of all data-blocks used by this speaker data",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "do_ui_user",
+     "name": "",
+     "description": "Make sure interface does not reference this speaker data",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "tag",
+   "description": "tag",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "value",
+     "name": "Value",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

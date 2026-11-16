@@ -1,0 +1,282 @@
+{
+ "identifier": "GreasePencilTimeModifier",
+ "name": "Grease Pencil Time Modifier",
+ "description": "Offset keyframes",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "tree_node_filter",
+   "name": "Layer",
+   "description": "Layer name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "use_layer_pass_filter",
+   "name": "Use Layer Pass",
+   "description": "Use layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layer_pass_filter",
+   "name": "Layer Pass",
+   "description": "Layer pass filter",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_filter",
+   "name": "Invert Layer",
+   "description": "Invert layer filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_layer_pass_filter",
+   "name": "Invert Layer Pass",
+   "description": "Invert layer pass filter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_layer_group_filter",
+   "name": "Layer Group",
+   "description": "Filter by layer group name",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_influence_panel",
+   "name": "open_influence_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_custom_range_panel",
+   "name": "open_custom_range_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "segments",
+   "name": "Segments",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "GreasePencilTimeModifierSegment",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "segment_active_index",
+   "name": "Active Time Segment Index",
+   "description": "Active index in the segment list",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "mode",
+   "name": "Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NORMAL",
+     "name": "Regular",
+     "description": "Apply offset in usual animation direction",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "REVERSE",
+     "name": "Reverse",
+     "description": "Apply offset in reverse animation direction",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FIX",
+     "name": "Fixed Frame",
+     "description": "Keep frame and do not change with time",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "PINGPONG",
+     "name": "Ping Pong",
+     "description": "Loop back and forth starting in reverse",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "CHAIN",
+     "name": "Chain",
+     "description": "List of chained animation segments",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "NORMAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "offset",
+   "name": "Frame Offset",
+   "description": "Number of frames to offset original keyframe number or frame to fix",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": -32768,
+   "hard_max": 32767,
+   "soft_min": -32768,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_scale",
+   "name": "Frame Scale",
+   "description": "Evaluation time in seconds",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0010000000474974513,
+   "hard_max": 100.0,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 100.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_start",
+   "name": "Start Frame",
+   "description": "First frame of the range",
+   "type": "INT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 1,
+   "hard_min": -1048574,
+   "hard_max": 1048574,
+   "soft_min": 0,
+   "soft_max": 1048574,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "frame_end",
+   "name": "End Frame",
+   "description": "Final frame of the range",
+   "type": "INT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 250,
+   "hard_min": -1048574,
+   "hard_max": 1048574,
+   "soft_min": 0,
+   "soft_max": 1048574,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "use_keep_loop",
+   "name": "Keep Loop",
+   "description": "Retiming end frames and move to start of animation to keep loop",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_custom_frame_range",
+   "name": "Custom Range",
+   "description": "Define a custom range of frames to use in modifier",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

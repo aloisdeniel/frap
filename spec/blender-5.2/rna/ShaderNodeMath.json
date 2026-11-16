@@ -1,0 +1,413 @@
+{
+ "identifier": "ShaderNodeMath",
+ "name": "Math",
+ "description": "Perform math operations",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "operation",
+   "name": "Operation",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ADD",
+     "name": "Add",
+     "description": "A + B",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "SUBTRACT",
+     "name": "Subtract",
+     "description": "A - B",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "MULTIPLY",
+     "name": "Multiply",
+     "description": "A * B",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "DIVIDE",
+     "name": "Divide",
+     "description": "A / B",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "MULTIPLY_ADD",
+     "name": "Multiply Add",
+     "description": "A * B + C",
+     "icon": "NONE",
+     "value": 36
+    },
+    {
+     "identifier": "POWER",
+     "name": "Power",
+     "description": "A power B",
+     "icon": "NONE",
+     "value": 10
+    },
+    {
+     "identifier": "LOGARITHM",
+     "name": "Logarithm",
+     "description": "Logarithm A base B",
+     "icon": "NONE",
+     "value": 11
+    },
+    {
+     "identifier": "SQRT",
+     "name": "Square Root",
+     "description": "Square root of A",
+     "icon": "NONE",
+     "value": 23
+    },
+    {
+     "identifier": "INVERSE_SQRT",
+     "name": "Inverse Square Root",
+     "description": "1 / Square root of A",
+     "icon": "NONE",
+     "value": 24
+    },
+    {
+     "identifier": "ABSOLUTE",
+     "name": "Absolute",
+     "description": "Magnitude of A",
+     "icon": "NONE",
+     "value": 18
+    },
+    {
+     "identifier": "EXPONENT",
+     "name": "Exponent",
+     "description": "exp(A)",
+     "icon": "NONE",
+     "value": 26
+    },
+    {
+     "identifier": "MINIMUM",
+     "name": "Minimum",
+     "description": "The minimum from A and B",
+     "icon": "NONE",
+     "value": 12
+    },
+    {
+     "identifier": "MAXIMUM",
+     "name": "Maximum",
+     "description": "The maximum from A and B",
+     "icon": "NONE",
+     "value": 13
+    },
+    {
+     "identifier": "LESS_THAN",
+     "name": "Less Than",
+     "description": "1 if A < B else 0",
+     "icon": "NONE",
+     "value": 15
+    },
+    {
+     "identifier": "GREATER_THAN",
+     "name": "Greater Than",
+     "description": "1 if A > B else 0",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "SIGN",
+     "name": "Sign",
+     "description": "Returns the sign of A",
+     "icon": "NONE",
+     "value": 25
+    },
+    {
+     "identifier": "COMPARE",
+     "name": "Compare",
+     "description": "1 if (A == B) within tolerance C else 0",
+     "icon": "NONE",
+     "value": 35
+    },
+    {
+     "identifier": "SMOOTH_MIN",
+     "name": "Smooth Minimum",
+     "description": "The minimum from A and B with smoothing C",
+     "icon": "NONE",
+     "value": 38
+    },
+    {
+     "identifier": "SMOOTH_MAX",
+     "name": "Smooth Maximum",
+     "description": "The maximum from A and B with smoothing C",
+     "icon": "NONE",
+     "value": 39
+    },
+    {
+     "identifier": "ROUND",
+     "name": "Round",
+     "description": "Round A to the nearest integer. Round upward if the fraction part is 0.5",
+     "icon": "NONE",
+     "value": 14
+    },
+    {
+     "identifier": "FLOOR",
+     "name": "Floor",
+     "description": "The largest integer smaller than or equal A",
+     "icon": "NONE",
+     "value": 20
+    },
+    {
+     "identifier": "CEIL",
+     "name": "Ceil",
+     "description": "The smallest integer greater than or equal A",
+     "icon": "NONE",
+     "value": 21
+    },
+    {
+     "identifier": "TRUNC",
+     "name": "Truncate",
+     "description": "The integer part of A, removing fractional digits",
+     "icon": "NONE",
+     "value": 32
+    },
+    {
+     "identifier": "FRACT",
+     "name": "Fraction",
+     "description": "The fraction part of A",
+     "icon": "NONE",
+     "value": 22
+    },
+    {
+     "identifier": "MODULO",
+     "name": "Truncated Modulo",
+     "description": "The remainder of truncated division using fmod(A,B)",
+     "icon": "NONE",
+     "value": 17
+    },
+    {
+     "identifier": "FLOORED_MODULO",
+     "name": "Floored Modulo",
+     "description": "The remainder of floored division",
+     "icon": "NONE",
+     "value": 40
+    },
+    {
+     "identifier": "WRAP",
+     "name": "Wrap",
+     "description": "Wrap value to range, wrap(A,B)",
+     "icon": "NONE",
+     "value": 34
+    },
+    {
+     "identifier": "SNAP",
+     "name": "Snap",
+     "description": "Snap to increment, snap(A,B)",
+     "icon": "NONE",
+     "value": 33
+    },
+    {
+     "identifier": "PINGPONG",
+     "name": "Ping-Pong",
+     "description": "Wraps a value and reverses every other cycle (A,B)",
+     "icon": "NONE",
+     "value": 37
+    },
+    {
+     "identifier": "SINE",
+     "name": "Sine",
+     "description": "sin(A)",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "COSINE",
+     "name": "Cosine",
+     "description": "cos(A)",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "TANGENT",
+     "name": "Tangent",
+     "description": "tan(A)",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "ARCSINE",
+     "name": "Arcsine",
+     "description": "arcsin(A)",
+     "icon": "NONE",
+     "value": 7
+    },
+    {
+     "identifier": "ARCCOSINE",
+     "name": "Arccosine",
+     "description": "arccos(A)",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "ARCTANGENT",
+     "name": "Arctangent",
+     "description": "arctan(A)",
+     "icon": "NONE",
+     "value": 9
+    },
+    {
+     "identifier": "ARCTAN2",
+     "name": "Arctan2",
+     "description": "The signed angle arctan(A / B)",
+     "icon": "NONE",
+     "value": 19
+    },
+    {
+     "identifier": "SINH",
+     "name": "Hyperbolic Sine",
+     "description": "sinh(A)",
+     "icon": "NONE",
+     "value": 29
+    },
+    {
+     "identifier": "COSH",
+     "name": "Hyperbolic Cosine",
+     "description": "cosh(A)",
+     "icon": "NONE",
+     "value": 30
+    },
+    {
+     "identifier": "TANH",
+     "name": "Hyperbolic Tangent",
+     "description": "tanh(A)",
+     "icon": "NONE",
+     "value": 31
+    },
+    {
+     "identifier": "RADIANS",
+     "name": "To Radians",
+     "description": "Convert from degrees to radians",
+     "icon": "NONE",
+     "value": 27
+    },
+    {
+     "identifier": "DEGREES",
+     "name": "To Degrees",
+     "description": "Convert from radians to degrees",
+     "icon": "NONE",
+     "value": 28
+    }
+   ],
+   "default": "ADD",
+   "flags": []
+  },
+  {
+   "identifier": "use_clamp",
+   "name": "Clamp",
+   "description": "Clamp result of the node to 0.0 to 1.0 range",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}
