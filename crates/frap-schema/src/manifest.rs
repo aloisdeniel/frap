@@ -21,7 +21,8 @@ use frap_rna::{FuncDef, FuncFlags, OpOptions, OperatorSpec, PollCell, PropFlags,
 use serde_json::{Map, Value as J, json};
 
 pub use curated::{
-    DEFAULTS_THAT_SURPRISE, POLL_CONTEXTS, SurpriseDefault, SurpriseKind, unset_semantics,
+    DEFAULTS_THAT_SURPRISE, POLL_CONTEXTS, PRIMITIVES_APPLYING_SCALE, PRIMITIVES_IGNORING_SCALE,
+    SurpriseDefault, SurpriseKind, unset_semantics,
 };
 pub use ops::{OpEntry, all_ops, find_op, glob_match, namespaces};
 pub use planned::{PlannedRow, operator_milestone, row as planned_row};

@@ -93,22 +93,22 @@ source: crates/frap-schema/tests/snapshots.rs
                     "use_active_collection": {
                       "type": "boolean",
                       "title": "Active Collection",
-                      "description": "Export only objects from the active collection (and its children) Default: false."
+                      "description": "Export only objects from the active collection (and its children). Default: false."
                     },
                     "collection": {
                       "type": "string",
                       "title": "Source Collection",
-                      "description": "Export only objects from this collection (and its children) Default: \"\"."
+                      "description": "Export only objects from this collection (and its children). Default: \"\"."
                     },
                     "global_scale": {
                       "type": "number",
                       "title": "Scale",
-                      "description": "Scale all data (Some importers do not support scaled armatures!) Range [0.001, 1000]. Default: 1."
+                      "description": "Scale all data (Some importers do not support scaled armatures!). Range [0.001, 1000]. Default: 1."
                     },
                     "apply_unit_scale": {
                       "type": "boolean",
                       "title": "Apply Unit",
-                      "description": "Take into account current Blender units settings (if unset, raw Blender Units values are used as-is) Default: true."
+                      "description": "Take into account current Blender units settings (if unset, raw Blender Units values are used as-is). Default: true."
                     },
                     "apply_scale_options": {
                       "type": "string",
@@ -119,7 +119,7 @@ source: crates/frap-schema/tests/snapshots.rs
                         "FBX_SCALE_ALL"
                       ],
                       "title": "Apply Scalings",
-                      "description": "How to apply custom and units scalings in generated FBX file (Blender uses FBX scale to detect units on import, but many other applications do not handle the same way) Default: \"FBX_SCALE_NONE\"."
+                      "description": "How to apply custom and units scalings in generated FBX file (Blender uses FBX scale to detect units on import, but many other applications do not handle the same way). Default: \"FBX_SCALE_NONE\"."
                     },
                     "use_space_transform": {
                       "type": "boolean",
@@ -129,7 +129,7 @@ source: crates/frap-schema/tests/snapshots.rs
                     "bake_space_transform": {
                       "type": "boolean",
                       "title": "Apply Transform",
-                      "description": "Bake space transform into object data, avoids getting unwanted rotations to objects when target space is not aligned with Blender's space (WARNING! experimental option, use at own risk, known to be broken with armatures/animations) Default: false."
+                      "description": "Bake space transform into object data, avoids getting unwanted rotations to objects when target space is not aligned with Blender's space (WARNING! experimental option, use at own risk, known to be broken with armatures/animations). Default: false."
                     },
                     "object_types": {
                       "type": "array",
@@ -155,7 +155,7 @@ source: crates/frap-schema/tests/snapshots.rs
                     "use_mesh_modifiers_render": {
                       "type": "boolean",
                       "title": "Use Modifiers Render Setting",
-                      "description": "Use render settings when applying modifiers to mesh objects (DISABLED in Blender 2.8) Default: true."
+                      "description": "Use render settings when applying modifiers to mesh objects (DISABLED in Blender 2.8). Default: true."
                     },
                     "mesh_smooth_type": {
                       "type": "string",
@@ -166,7 +166,7 @@ source: crates/frap-schema/tests/snapshots.rs
                         "SMOOTH_GROUP"
                       ],
                       "title": "Smoothing",
-                      "description": "Export smoothing information (prefer 'Normals Only' option if your target importer understands custom normals) Default: \"OFF\"."
+                      "description": "Export smoothing information (prefer 'Normals Only' option if your target importer understands custom normals). Default: \"OFF\"."
                     },
                     "colors_type": {
                       "type": "string",
@@ -186,17 +186,17 @@ source: crates/frap-schema/tests/snapshots.rs
                     "use_subsurf": {
                       "type": "boolean",
                       "title": "Export Subdivision Surface",
-                      "description": "Export the last Catmull-Rom subdivision modifier as FBX subdivision (does not apply the modifier even if 'Apply Modifiers' is enabled) Default: false."
+                      "description": "Export the last Catmull-Rom subdivision modifier as FBX subdivision (does not apply the modifier even if 'Apply Modifiers' is enabled). Default: false."
                     },
                     "use_mesh_edges": {
                       "type": "boolean",
                       "title": "Loose Edges",
-                      "description": "Export loose edges (as two-vertices polygons) Default: false."
+                      "description": "Export loose edges (as two-vertices polygons). Default: false."
                     },
                     "use_tspace": {
                       "type": "boolean",
                       "title": "Tangent Space",
-                      "description": "Add binormal and tangent vectors, together with normal they form the tangent space (will only work correctly with tris/quads only meshes!) Default: false."
+                      "description": "Add binormal and tangent vectors, together with normal they form the tangent space (will only work correctly with tris/quads only meshes!). Default: false."
                     },
                     "use_triangles": {
                       "type": "boolean",
@@ -211,7 +211,7 @@ source: crates/frap-schema/tests/snapshots.rs
                     "add_leaf_bones": {
                       "type": "boolean",
                       "title": "Add Leaf Bones",
-                      "description": "Append a final bone to the end of each chain to specify last bone length (use this when you intend to edit the armature from exported data) Default: true."
+                      "description": "Append a final bone to the end of each chain to specify last bone length (use this when you intend to edit the armature from exported data). Default: true."
                     },
                     "primary_bone_axis": {
                       "type": "string",
@@ -242,7 +242,7 @@ source: crates/frap-schema/tests/snapshots.rs
                     "use_armature_deform_only": {
                       "type": "boolean",
                       "title": "Only Deform Bones",
-                      "description": "Only write deforming bones (and non-deforming ones when they have deforming children) Default: false."
+                      "description": "Only write deforming bones (and non-deforming ones when they have deforming children). Default: false."
                     },
                     "armature_nodetype": {
                       "type": "string",
@@ -252,7 +252,7 @@ source: crates/frap-schema/tests/snapshots.rs
                         "LIMBNODE"
                       ],
                       "title": "Armature FBXNode Type",
-                      "description": "FBX type of node (object) used to represent Blender's armatures (use the Null type unless you experience issues with the other app, as other choices may not import back perfectly into Blender...) Default: \"NULL\"."
+                      "description": "FBX type of node (object) used to represent Blender's armatures (use the Null type unless you experience issues with the other app, as other choices may not import back perfectly into Blender...). Default: \"NULL\"."
                     },
                     "bake_anim": {
                       "type": "boolean",
@@ -262,7 +262,7 @@ source: crates/frap-schema/tests/snapshots.rs
                     "bake_anim_use_all_bones": {
                       "type": "boolean",
                       "title": "Key All Bones",
-                      "description": "Force exporting at least one key of animation for all bones (needed with some target applications, like UE4) Default: true."
+                      "description": "Force exporting at least one key of animation for all bones (needed with some target applications, like UE4). Default: true."
                     },
                     "bake_anim_use_nla_strips": {
                       "type": "boolean",
@@ -272,7 +272,7 @@ source: crates/frap-schema/tests/snapshots.rs
                     "bake_anim_use_all_actions": {
                       "type": "boolean",
                       "title": "All Actions",
-                      "description": "Export each action as a separated FBX's AnimStack, instead of global scene animation (note that animated objects will get all actions compatible with them, others will get no animation at all) Default: true."
+                      "description": "Export each action as a separated FBX's AnimStack, instead of global scene animation (note that animated objects will get all actions compatible with them, others will get no animation at all). Default: true."
                     },
                     "bake_anim_force_startend_keying": {
                       "type": "boolean",
@@ -282,12 +282,12 @@ source: crates/frap-schema/tests/snapshots.rs
                     "bake_anim_step": {
                       "type": "number",
                       "title": "Sampling Rate",
-                      "description": "How often to evaluate animated values (in frames) Range [0.01, 100]. Default: 1."
+                      "description": "How often to evaluate animated values (in frames). Range [0.01, 100]. Default: 1."
                     },
                     "bake_anim_simplify_factor": {
                       "type": "number",
                       "title": "Simplify",
-                      "description": "How much to simplify baked values (0.0 to disable, the higher the more simplified) Range [0, 100]. Default: 1."
+                      "description": "How much to simplify baked values (0.0 to disable, the higher the more simplified). Range [0, 100]. Default: 1."
                     },
                     "path_mode": {
                       "type": "string",
@@ -305,7 +305,7 @@ source: crates/frap-schema/tests/snapshots.rs
                     "embed_textures": {
                       "type": "boolean",
                       "title": "Embed Textures",
-                      "description": "Embed textures in FBX binary file (only for \"Copy\" path mode!) Default: false."
+                      "description": "Embed textures in FBX binary file (only for \"Copy\" path mode!). Default: false."
                     },
                     "batch_mode": {
                       "type": "string",
@@ -576,32 +576,32 @@ source: crates/frap-schema/tests/snapshots.rs
                     "export_draco_mesh_compression_level": {
                       "type": "integer",
                       "title": "Compression Level",
-                      "description": "Compression level (0 = most speed, 6 = most compression, higher values currently not supported) Range [0, 10]. Default: 6."
+                      "description": "Compression level (0 = most speed, 6 = most compression, higher values currently not supported). Range [0, 10]. Default: 6."
                     },
                     "export_draco_position_quantization": {
                       "type": "integer",
                       "title": "Position Quantization Bits",
-                      "description": "Quantization bits for position values (0 = no quantization) Range [0, 30]. Default: 14."
+                      "description": "Quantization bits for position values (0 = no quantization). Range [0, 30]. Default: 14."
                     },
                     "export_draco_normal_quantization": {
                       "type": "integer",
                       "title": "Normal Quantization Bits",
-                      "description": "Quantization bits for normal values (0 = no quantization) Range [0, 30]. Default: 10."
+                      "description": "Quantization bits for normal values (0 = no quantization). Range [0, 30]. Default: 10."
                     },
                     "export_draco_texcoord_quantization": {
                       "type": "integer",
                       "title": "Texcoord Quantization Bits",
-                      "description": "Quantization bits for texture coordinate values (0 = no quantization) Range [0, 30]. Default: 12."
+                      "description": "Quantization bits for texture coordinate values (0 = no quantization). Range [0, 30]. Default: 12."
                     },
                     "export_draco_color_quantization": {
                       "type": "integer",
                       "title": "Color Quantization Bits",
-                      "description": "Quantization bits for color values (0 = no quantization) Range [0, 30]. Default: 10."
+                      "description": "Quantization bits for color values (0 = no quantization). Range [0, 30]. Default: 10."
                     },
                     "export_draco_generic_quantization": {
                       "type": "integer",
                       "title": "Generic Quantization Bits",
-                      "description": "Quantization bits for generic values like weights or joints (0 = no quantization) Range [0, 30]. Default: 12."
+                      "description": "Quantization bits for generic values like weights or joints (0 = no quantization). Range [0, 30]. Default: 12."
                     },
                     "export_tangents": {
                       "type": "boolean",
@@ -658,7 +658,7 @@ source: crates/frap-schema/tests/snapshots.rs
                     "export_attributes": {
                       "type": "boolean",
                       "title": "Attributes",
-                      "description": "Export Attributes (when starting with underscore) Default: false."
+                      "description": "Export Attributes (when starting with underscore). Default: false."
                     },
                     "use_mesh_edges": {
                       "type": "boolean",
@@ -708,7 +708,7 @@ source: crates/frap-schema/tests/snapshots.rs
                     "collection": {
                       "type": "string",
                       "title": "Source Collection",
-                      "description": "Export only objects from this collection (and its children) Default: \"\"."
+                      "description": "Export only objects from this collection (and its children). Default: \"\"."
                     },
                     "at_collection_center": {
                       "type": "boolean",
@@ -748,7 +748,7 @@ source: crates/frap-schema/tests/snapshots.rs
                     "export_frame_step": {
                       "type": "integer",
                       "title": "Sampling Rate",
-                      "description": "How often to evaluate animated values (in frames) Range [1, 120]. Default: 1."
+                      "description": "How often to evaluate animated values (in frames). Range [1, 120]. Default: 1."
                     },
                     "export_force_sampling": {
                       "type": "boolean",
@@ -809,7 +809,7 @@ source: crates/frap-schema/tests/snapshots.rs
                     "export_leaf_bone": {
                       "type": "boolean",
                       "title": "Add Leaf Bones",
-                      "description": "Append a final bone to the end of each chain to specify last bone length (use this when you intend to edit the armature from exported data) Default: false."
+                      "description": "Append a final bone to the end of each chain to specify last bone length (use this when you intend to edit the armature from exported data). Default: false."
                     },
                     "export_optimize_animation_size": {
                       "type": "boolean",
@@ -819,7 +819,7 @@ source: crates/frap-schema/tests/snapshots.rs
                     "export_optimize_animation_keep_anim_armature": {
                       "type": "boolean",
                       "title": "Force Keeping Channels for Bones",
-                      "description": "If all keyframes are identical in a rig, force keeping the minimal animation. When off, all possible channels for the bones will be exported, even if empty (minimal animation, 2 keyframes) Default: true."
+                      "description": "If all keyframes are identical in a rig, force keeping the minimal animation. When off, all possible channels for the bones will be exported, even if empty (minimal animation, 2 keyframes). Default: true."
                     },
                     "export_optimize_animation_keep_anim_object": {
                       "type": "boolean",
@@ -903,22 +903,22 @@ source: crates/frap-schema/tests/snapshots.rs
                     "export_morph": {
                       "type": "boolean",
                       "title": "Shape Keys",
-                      "description": "Export shape keys (morph targets) Default: true."
+                      "description": "Export shape keys (morph targets). Default: true."
                     },
                     "export_morph_normal": {
                       "type": "boolean",
                       "title": "Shape Key Normals",
-                      "description": "Export vertex normals with shape keys (morph targets) Default: true."
+                      "description": "Export vertex normals with shape keys (morph targets). Default: true."
                     },
                     "export_morph_tangent": {
                       "type": "boolean",
                       "title": "Shape Key Tangents",
-                      "description": "Export vertex tangents with shape keys (morph targets) Default: false."
+                      "description": "Export vertex tangents with shape keys (morph targets). Default: false."
                     },
                     "export_morph_animation": {
                       "type": "boolean",
                       "title": "Shape Key Animations",
-                      "description": "Export shape keys animations (morph targets) Default: true."
+                      "description": "Export shape keys animations (morph targets). Default: true."
                     },
                     "export_morph_reset_sk_data": {
                       "type": "boolean",

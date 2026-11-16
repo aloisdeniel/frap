@@ -187,6 +187,102 @@ fn unimplemented_operators_are_listed_as_not_implemented() {
     assert_eq!(fe.code.0, "DESCRIBE_TARGET");
 }
 
+/// Which `*.primitive_*_add` operators apply `scale`, as measured on Blender 5.2.4
+/// `-b --factory-startup` (`scale=(3, 1, 0.5)` against unset: dimensions change only for the
+/// APPLIES rows; object scale stays 1 everywhere). `mesh.primitive_torus_add` has no `scale`.
+const SCALE_ON_5_2_4: &[(&str, bool)] = &[
+    ("mesh.primitive_cube_add", true),
+    ("mesh.primitive_cone_add", true),
+    ("mesh.primitive_cylinder_add", true),
+    ("mesh.primitive_uv_sphere_add", true),
+    ("mesh.primitive_ico_sphere_add", true),
+    ("mesh.primitive_plane_add", false),
+    ("mesh.primitive_grid_add", false),
+    ("mesh.primitive_circle_add", false),
+    ("mesh.primitive_monkey_add", false),
+    ("curve.primitive_bezier_curve_add", false),
+    ("curve.primitive_bezier_circle_add", false),
+    ("curve.primitive_nurbs_curve_add", false),
+    ("curve.primitive_nurbs_circle_add", false),
+    ("curve.primitive_nurbs_path_add", false),
+    ("surface.primitive_nurbs_surface_curve_add", false),
+    ("surface.primitive_nurbs_surface_circle_add", false),
+    ("surface.primitive_nurbs_surface_surface_add", false),
+    ("surface.primitive_nurbs_surface_cylinder_add", false),
+    ("surface.primitive_nurbs_surface_sphere_add", false),
+    ("surface.primitive_nurbs_surface_torus_add", false),
+];
+
+#[test]
+fn primitive_scale_semantics_match_blender() {
+    link();
+    // The curated lists are exactly the measured table.
+    let mut applying: Vec<&str> = SCALE_ON_5_2_4.iter().filter(|r| r.1).map(|r| r.0).collect();
+    let mut ignoring: Vec<&str> = SCALE_ON_5_2_4
+        .iter()
+        .filter(|r| !r.1)
+        .map(|r| r.0)
+        .collect();
+    let sorted = |l: &[&'static str]| {
+        let mut v = l.to_vec();
+        v.sort_unstable();
+        v
+    };
+    applying.sort_unstable();
+    ignoring.sort_unstable();
+    assert_eq!(sorted(manifest::PRIMITIVES_APPLYING_SCALE), applying);
+    assert_eq!(sorted(manifest::PRIMITIVES_IGNORING_SCALE), ignoring);
+    // Every primitive add operator whose spec has generic add props and a scale is either in
+    // the table or gets no claim (cube_add_gizmo needs a 3D view and cannot be probed headless).
+    let mut claimed = 0;
+    for e in all_ops() {
+        let spec = e.spec;
+        if !spec.idname.contains(".primitive_") || spec.prop("scale").is_none() {
+            continue;
+        }
+        let u = manifest::unset_semantics(spec, "scale");
+        match SCALE_ON_5_2_4.iter().find(|r| r.0 == spec.idname) {
+            Some(&(op, applies)) if spec.prop("align").is_some() => {
+                let u = u.unwrap_or_else(|| panic!("{op}"));
+                assert_eq!(u.starts_with("unset: (1, 1, 1)"), applies, "{op}: {u}");
+                assert_eq!(u.starts_with("ignored:"), !applies, "{op}: {u}");
+                let schema = op_input_schema(spec);
+                let d = schema["properties"]["scale"]["description"]
+                    .as_str()
+                    .unwrap();
+                assert_eq!(d.contains("If unset: (1, 1, 1)"), applies, "{op}: {d}");
+                assert_eq!(d.contains("Ignored: this primitive"), !applies, "{op}: {d}");
+                claimed += 1;
+            }
+            Some(_) => {}
+            None => assert_eq!(
+                (spec.idname, u),
+                ("mesh.primitive_cube_add_gizmo", None),
+                "unverified primitive with a scale"
+            ),
+        }
+    }
+    // At least every mesh primitive of the table has a full typed spec.
+    assert!(claimed >= 9, "{claimed}");
+    assert!(
+        find_op("mesh.primitive_torus_add")
+            .unwrap()
+            .spec
+            .prop("scale")
+            .is_none()
+    );
+    let cube = DEFAULTS_THAT_SURPRISE
+        .iter()
+        .find(|s| s.target == "mesh.primitive_cube_add.scale")
+        .unwrap();
+    assert!(!cube.why.contains("every mesh.primitive"), "{}", cube.why);
+    assert!(
+        cube.why.contains("plane, grid, circle, monkey"),
+        "{}",
+        cube.why
+    );
+}
+
 #[test]
 fn defaults_that_surprise_match_the_specs() {
     for s in DEFAULTS_THAT_SURPRISE {
@@ -214,6 +310,22 @@ fn defaults_that_surprise_match_the_specs() {
                 other => panic!("no check for data default {other}"),
             },
         }
+    }
+    // The §14 list: export_apply, export_cameras, export_lights, light_add 10 W, bevel
+    // offset=0, vertices_smooth factor=0, rest frame 0.
+    for t in [
+        "export_scene.gltf.export_apply",
+        "export_scene.gltf.export_cameras",
+        "export_scene.gltf.export_lights",
+        "Light.energy",
+        "mesh.bevel.offset",
+        "mesh.vertices_smooth.factor",
+        "export_scene.gltf.export_current_frame",
+    ] {
+        assert!(
+            DEFAULTS_THAT_SURPRISE.iter().any(|s| s.target == t),
+            "{t} missing"
+        );
     }
 }
 

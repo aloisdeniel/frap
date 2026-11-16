@@ -58,7 +58,13 @@ source: crates/frap-schema/tests/snapshots.rs
       0,
       0
     ],
-    "why": "the (0, 0, 0) default is a placeholder: unset means (1, 1, 1); scale is applied to the mesh data and the new object's scale stays 1 (same for every mesh.primitive_*_add)"
+    "why": "the (0, 0, 0) default is a placeholder: unset means (1, 1, 1); scale is applied to the mesh data and the new object's scale stays 1. Only cube, cone, cylinder, uv_sphere and ico_sphere apply scale: plane, grid, circle, monkey and the curve.*/surface.* primitives ignore it (set object.scale or use transform.resize afterwards)"
+  },
+  {
+    "target": "export_scene.gltf.export_current_frame",
+    "kind": "operator_property",
+    "default": false,
+    "why": "objects are exported at their frame-0 rest transforms, not at scene.frame_current; pass export_current_frame=True to export the pose of the current frame"
   },
   {
     "target": "transform.rotate.value",

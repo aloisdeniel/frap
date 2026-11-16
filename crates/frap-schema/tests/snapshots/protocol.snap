@@ -756,5 +756,101 @@ source: crates/frap-schema/tests/snapshots.rs
       "description": "The last line of every serve/MCP request.",
       "$schema": "https://json-schema.org/draft/2020-12/schema"
     }
+  },
+  "frap_project_manifest": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "format": {
+        "type": "string",
+        "enum": [
+          "frap"
+        ],
+        "description": "Value of the `.frap` manifest's `format`."
+      },
+      "schema_version": {
+        "type": "integer",
+        "format": "uint32",
+        "minimum": 1,
+        "description": "Integer project schema version (1 in this build); older files are migrated on load."
+      },
+      "blender_api": {
+        "type": "string",
+        "description": "The Blender Python API whose RNA identifiers `scene.json` uses (`\"5.2\"`)."
+      },
+      "generator": {
+        "type": "string",
+        "description": "`\"frap <version>\"`."
+      },
+      "buffers": {
+        "type": "array",
+        "items": {
+          "description": "One `buffers/<hash>.bin` entry of a `.frap`.",
+          "type": "object",
+          "properties": {
+            "hash": {
+              "description": "sha256 of the content, first 32 lowercase hex characters.",
+              "type": "string",
+              "pattern": "^[0-9a-f]{32}$"
+            },
+            "size": {
+              "description": "Uncompressed size in bytes.",
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "hash",
+            "size"
+          ]
+        },
+        "description": "Every `buffers/<hash>.bin` entry, in archive order."
+      },
+      "images": {
+        "type": "array",
+        "items": {
+          "description": "One `images/<hash>.<ext>` entry of a `.frap`.",
+          "type": "object",
+          "properties": {
+            "hash": {
+              "description": "sha256 of the encoded bytes, first 32 lowercase hex characters.",
+              "type": "string",
+              "pattern": "^[0-9a-f]{32}$"
+            },
+            "ext": {
+              "description": "Lowercase file extension without the dot (`png`, `jpg`, `exr`, …).",
+              "type": "string",
+              "pattern": "^[0-9a-z]{1,8}$"
+            },
+            "size": {
+              "description": "Size in bytes.",
+              "type": "integer",
+              "format": "uint64",
+              "minimum": 0
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "hash",
+            "ext",
+            "size"
+          ]
+        },
+        "description": "Every `images/<hash>.<ext>` entry, in archive order."
+      }
+    },
+    "required": [
+      "format",
+      "schema_version",
+      "blender_api",
+      "generator",
+      "buffers",
+      "images"
+    ],
+    "title": "frap project manifest.json",
+    "description": "`manifest.json` of a `.frap` project (§15; mirror of `frap_project::manifest::Manifest`).\nUnknown fields fail the load unless `--lenient`; a newer `schema_version` is refused.",
+    "$schema": "https://json-schema.org/draft/2020-12/schema"
   }
 }

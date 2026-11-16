@@ -46,7 +46,7 @@ Responses (one line each), then the done record:
 If your harness does not speak MCP, use the definitions from `frap --describe=tools-anthropic` (Anthropic Messages API) or `frap --describe=tools-openai` (OpenAI function calling, strict mode), and back them with one long-lived `frap serve --jsonl` process. Keep that one process for the whole conversation: it holds the scene between tool calls.
 
 - `frap_exec({statements, on_error})`: write `{"id": <n>, "src": statements, "on_error": on_error}` and return the response lines up to and including the done record.
-- `frap_describe({target})`: write `{"id": <n>, "src": "bpy.ops.frap.describe(target=<target as a Python string>)"}`, or run `frap --describe=<target>` in a separate process (the manifest does not depend on the scene).
+- `frap_describe({target})`: run `frap --describe=<target>` in a separate process and return its stdout (the manifest does not depend on the scene, so it does not have to be the serve process). In this build `bpy.ops.frap.describe(target=…)` and `bpy.ops.<ns>.<op>.get_rna_type()` inside a session are not wired to the manifest yet (`OP_NOT_IMPLEMENTED`); they arrive in a later milestone.
 
 A minimal Python backing (no SDK needed):
 
@@ -98,9 +98,9 @@ The full schemas of the request, response, error, ready/end events and done reco
 
 ## 5. Ask before calling: `poll()` and `--describe`
 
-- `bpy.ops.mesh.bevel.poll()` returns `False` (a `get`-kind response) without changing anything. On failure `detail.unmet` lists the unmet requirements. Use it to check the mode before an edit-mode operator.
+- `bpy.ops.mesh.bevel.poll()` returns `False` (a `get`-kind response) without changing anything. On failure `detail.unmet` lists the unmet requirements. Use it to check the mode before an edit-mode operator. (In this build `detail.requires`/`unmet` of `OP_POLL_FAILED` still spell requirements as `ModeEditMesh` rather than the manifest's `MODE_EDIT_MESH`; compare them ignoring case and underscores.)
 - Every operator's manifest entry has `poll.requires`, the declarative requirements frap checks (`MODE_OBJECT`, `MODE_EDIT_MESH`, `ACTIVE_OBJECT`, `ACTIVE_TYPE(MESH)`, `HAS_SELECTED_OBJECTS`, …), plus `poll.text` in words. `poll.matrix` is Blender's dumped poll result in contexts A–E (legend in `poll_contexts`). An operator frap does not implement has `requires: null` and only the dumped matrix.
-- `bpy.ops.mesh.bevel.get_rna_type()` returns the operator's describe fragment and `bpy.ops.mesh.bevel.idname()` returns `"MESH_OT_bevel"`.
+- `bpy.ops.mesh.bevel.idname()` returns `"MESH_OT_bevel"`. `bpy.ops.mesh.bevel.get_rna_type()` will return the operator's describe fragment once it is wired (later milestone); until then use `frap --describe op:mesh.bevel`.
 
 `frap --describe` prints the whole manifest: `operators[]` (every Blender 5.2 operator plus frap's `frap.*`), `structs[]`, `bpy_struct_functions[]`, `context_members[]`, `modifier_types[]` (with evaluator support), `node_types[]` and `defaults_that_surprise[]`. Other targets:
 
@@ -115,7 +115,7 @@ frap --describe=protocol                 # also errors
 
 Each property entry gives `type`, `subtype`, `unit`, `array`, `default`, `hard_min/max`, `soft_min/max`, `enum_items`, `is_enum_flag`, `hidden`, `skip_save`, `dynamic_enum` with its `context_rule`, `unset_semantics` (what leaving it out means, e.g. `location` unset = the 3D cursor), `frap_note` and `frap_extension`. Hidden properties are listed and flagged.
 
-**Read `defaults_that_surprise` once.** Some defaults surprise: `export_scene.gltf` does not apply modifiers (`export_apply=False`) and exports neither cameras nor lights; `render.render()` writes nothing to disk unless `write_still=True`; `mesh.bevel`'s default `offset=0` does nothing; a light from `object.light_add` has 10 W; the `scale` of the `primitive_*_add` operators defaults to a `(0, 0, 0)` placeholder that means 1.
+**Read `defaults_that_surprise` once.** Some defaults surprise: `export_scene.gltf` does not apply modifiers (`export_apply=False`) and exports neither cameras nor lights; `render.render()` writes nothing to disk unless `write_still=True`; `mesh.bevel`'s default `offset=0` does nothing; a light from `object.light_add` has 10 W; `export_scene.gltf` exports objects at their frame-0 rest transforms unless `export_current_frame=True`. The `scale` of `mesh.primitive_cube_add`, `cone_add`, `cylinder_add`, `uv_sphere_add` and `ico_sphere_add` defaults to a `(0, 0, 0)` placeholder that means 1 and scales the new mesh data (the object's scale stays 1). `mesh.primitive_plane_add`, `grid_add`, `circle_add`, `monkey_add` and every `curve.primitive_*`/`surface.primitive_*` operator ignore `scale` (their `unset_semantics` says `ignored`): set `object.scale` or use `transform.resize` afterwards. `mesh.primitive_torus_add` has no `scale`.
 
 ## 6. Units and values
 

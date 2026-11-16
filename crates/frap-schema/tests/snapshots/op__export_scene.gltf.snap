@@ -2028,7 +2028,7 @@ source: crates/frap-schema/tests/describe_ops.rs
       ],
       "required": false,
       "unset_semantics": null,
-      "frap_note": null,
+      "frap_note": "objects are exported at their frame-0 rest transforms, not at scene.frame_current; pass export_current_frame=True to export the pose of the current frame",
       "frap_extension": false
     },
     {

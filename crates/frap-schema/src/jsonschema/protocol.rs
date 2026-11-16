@@ -314,6 +314,57 @@ enum DoneTag {
     Done,
 }
 
+/// Value of the `.frap` manifest's `format`.
+#[derive(JsonSchema)]
+enum FrapFormat {
+    #[serde(rename = "frap")]
+    Frap,
+}
+
+/// One `buffers/<hash>.bin` entry of a `.frap`.
+#[derive(JsonSchema)]
+#[schemars(deny_unknown_fields)]
+struct FrapBufferEntry {
+    /// sha256 of the content, first 32 lowercase hex characters.
+    #[schemars(pattern("^[0-9a-f]{32}$"))]
+    hash: String,
+    /// Uncompressed size in bytes.
+    size: u64,
+}
+
+/// One `images/<hash>.<ext>` entry of a `.frap`.
+#[derive(JsonSchema)]
+#[schemars(deny_unknown_fields)]
+struct FrapImageEntry {
+    /// sha256 of the encoded bytes, first 32 lowercase hex characters.
+    #[schemars(pattern("^[0-9a-f]{32}$"))]
+    hash: String,
+    /// Lowercase file extension without the dot (`png`, `jpg`, `exr`, …).
+    #[schemars(pattern("^[0-9a-z]{1,8}$"))]
+    ext: String,
+    /// Size in bytes.
+    size: u64,
+}
+
+/// `manifest.json` of a `.frap` project (§15; mirror of `frap_project::manifest::Manifest`).
+/// Unknown fields fail the load unless `--lenient`; a newer `schema_version` is refused.
+#[derive(JsonSchema)]
+#[schemars(title = "frap project manifest.json", deny_unknown_fields)]
+struct FrapManifest {
+    format: FrapFormat,
+    /// Integer project schema version (1 in this build); older files are migrated on load.
+    #[schemars(range(min = 1))]
+    schema_version: u32,
+    /// The Blender Python API whose RNA identifiers `scene.json` uses (`"5.2"`).
+    blender_api: String,
+    /// `"frap <version>"`.
+    generator: String,
+    /// Every `buffers/<hash>.bin` entry, in archive order.
+    buffers: Vec<FrapBufferEntry>,
+    /// Every `images/<hash>.<ext>` entry, in archive order.
+    images: Vec<FrapImageEntry>,
+}
+
 fn root<T: JsonSchema>() -> J {
     schemars::generate::SchemaSettings::draft2020_12()
         .with(|s| s.inline_subschemas = true)
@@ -334,5 +385,6 @@ pub fn protocol() -> J {
             "end": root::<End>(),
             "done": root::<Done>(),
         },
+        "frap_project_manifest": root::<FrapManifest>(),
     })
 }

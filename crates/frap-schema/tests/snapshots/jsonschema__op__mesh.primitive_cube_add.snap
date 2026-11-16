@@ -67,7 +67,7 @@ source: crates/frap-schema/tests/snapshots.rs
       "minItems": 3,
       "maxItems": 3,
       "title": "Rotation",
-      "description": "Rotation for the newly added object (radians) If unset: from align (WORLD: no rotation, VIEW: the 3D view rotation, CURSOR: the 3D cursor rotation); an explicit rotation always wins.",
+      "description": "Rotation for the newly added object (radians). If unset: from align (WORLD: no rotation, VIEW: the 3D view rotation, CURSOR: the 3D cursor rotation); an explicit rotation always wins.",
       "default": [
         0,
         0,

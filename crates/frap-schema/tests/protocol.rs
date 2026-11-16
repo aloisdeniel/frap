@@ -87,6 +87,36 @@ fn documented_examples_validate() {
 }
 
 #[test]
+fn frap_project_manifest_schema() {
+    let s = &protocol()["frap_project_manifest"];
+    // The frap-project (WP 1.9) documented manifest.json shape.
+    let ok = json!({
+        "format": "frap",
+        "schema_version": 1,
+        "blender_api": "5.2",
+        "generator": "frap 0.1.0",
+        "buffers": [{"hash": "5e1c00000000000000000000000000ab", "size": 28}],
+        "images": [{"hash": "77aa00000000000000000000000000cd", "ext": "png", "size": 5120}]
+    });
+    validate(s, &ok).unwrap();
+    for (k, v) in [
+        ("format", json!("blend")),
+        ("schema_version", json!("1")),
+        ("buffers", json!([{"hash": "5e1c", "size": 28, "extra": 1}])),
+        ("images", json!([{"hash": "77aa", "size": 1}])),
+    ] {
+        let mut bad = ok.clone();
+        bad[k] = v;
+        assert!(validate(s, &bad).is_err(), "{k}");
+    }
+    let mut extra = ok.clone();
+    extra["unknown"] = json!(1);
+    assert!(validate(s, &extra).is_err());
+    let txt = s.to_string();
+    assert!(txt.contains("^[0-9a-f]{32}$"), "{txt}");
+}
+
+#[test]
 fn protocol_schemas_are_flat() {
     let s = protocol().to_string();
     assert!(

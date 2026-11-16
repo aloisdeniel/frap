@@ -82,6 +82,15 @@ fn py(v: &J, prop: Option<&PropDef>) -> Result<String, CallError> {
     })
 }
 
+/// An ASCII Python identifier (`[A-Za-z_][A-Za-z0-9_]*`): the only keys written into the
+/// statement unchecked against the spec, so a key cannot inject statement text.
+fn is_identifier(k: &str) -> bool {
+    let mut c = k.chars();
+    c.next()
+        .is_some_and(|f| f.is_ascii_alphabetic() || f == '_')
+        && c.all(|x| x.is_ascii_alphanumeric() || x == '_')
+}
+
 /// The statement of a `frap_ops_<ns>` tool call.
 pub fn call_to_statement(tool: &str, input: &J) -> Result<String, CallError> {
     let ns = tool
@@ -114,6 +123,12 @@ pub fn call_to_statement(tool: &str, input: &J) -> Result<String, CallError> {
         }
         for (k, v) in a {
             if entry.spec.prop(k).is_none() && !v.is_null() {
+                if !is_identifier(k) {
+                    return Err(CallError(format!(
+                        "'call.args' key {} is not a Python identifier",
+                        py_str(k)
+                    )));
+                }
                 args.push(format!("{k}={}", py(v, None)?));
             }
         }
@@ -154,5 +169,31 @@ mod tests {
         assert_eq!(s, r"bpy.ops.object.select_pattern(pattern='it\'s\\')");
         assert!(call_to_statement("frap_exec", &json!({})).is_err());
         assert!(call_to_statement("frap_ops_mesh", &json!({"call": {"op": "nope"}})).is_err());
+    }
+
+    #[test]
+    fn unknown_keys_must_be_identifiers() {
+        // An unknown identifier is passed through so the registry reports OP_ARG_UNKNOWN.
+        let s = call_to_statement(
+            "frap_ops_mesh",
+            &json!({"call": {"op": "primitive_cube_add", "args": {"sizee": 2}}}),
+        )
+        .unwrap();
+        assert_eq!(s, "bpy.ops.mesh.primitive_cube_add(sizee=2)");
+        for bad in [
+            "x=1); bpy.ops.wm.read_factory_settings(",
+            "a b",
+            "1x",
+            "",
+            "caf\u{e9}",
+        ] {
+            let e = call_to_statement(
+                "frap_ops_mesh",
+                &json!({"call": {"op": "primitive_cube_add", "args": {bad: 1}}}),
+            )
+            .unwrap_err();
+            assert!(e.0.contains("not a Python identifier"), "{bad}: {e}");
+        }
+        assert!(is_identifier("_a1") && !is_identifier("é"));
     }
 }

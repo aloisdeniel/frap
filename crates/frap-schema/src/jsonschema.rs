@@ -176,7 +176,7 @@ pub fn append_description(s: &mut J, text: &str) {
         .to_owned();
     let joined = if d.is_empty() {
         text.to_owned()
-    } else if d.ends_with(['.', '!', '?', ')', ':']) {
+    } else if d.ends_with(['.', '!', '?', ':']) {
         format!("{d} {text}")
     } else {
         format!("{d}. {text}")
@@ -189,8 +189,19 @@ pub fn append_description(s: &mut J, text: &str) {
 pub fn op_prop_schema(spec: &OperatorSpec, p: &PropDef, depth: u8) -> J {
     let mut s = prop_schema(p, depth);
     if let Some(u) = manifest::unset_semantics(spec, p.identifier) {
-        let u = u.strip_prefix("unset: ").unwrap_or(u);
-        append_description(&mut s, &format!("If unset: {u}."));
+        let sentence = match u.strip_prefix("unset: ") {
+            Some(rest) => format!("If unset: {rest}."),
+            None => {
+                let mut c = u.chars();
+                let first = c.next().map(|f| f.to_ascii_uppercase());
+                format!(
+                    "{}{}.",
+                    first.map(String::from).unwrap_or_default(),
+                    c.as_str()
+                )
+            }
+        };
+        append_description(&mut s, &sentence);
     }
     s
 }
@@ -283,10 +294,43 @@ mod tests {
         assert!(ok(json!({"size": -1})).is_err());
         let rot = s["properties"]["rotation"]["description"].as_str().unwrap();
         assert!(
-            rot.starts_with("Rotation for the newly added object (radians) If unset: from align"),
+            rot.starts_with("Rotation for the newly added object (radians). If unset: from align"),
             "{rot}"
         );
         assert_eq!(s["properties"]["location"]["minItems"], 3);
         assert_eq!(s["properties"]["location"]["maxItems"], 3);
+    }
+
+    #[test]
+    fn append_description_sentences() {
+        let with = |d: &str| {
+            let mut s = json!({"description": d});
+            append_description(&mut s, "Next.");
+            s["description"].as_str().unwrap().to_owned()
+        };
+        assert_eq!(with("Angle (radians)"), "Angle (radians). Next.");
+        assert_eq!(with("Done."), "Done. Next.");
+        assert_eq!(with("Really?"), "Really? Next.");
+        assert_eq!(with("Plain"), "Plain. Next.");
+        assert_eq!(with(""), "Next.");
+    }
+
+    #[test]
+    fn ignored_scale_is_described() {
+        let s = op_input_schema(&frap_spec_ops_mesh::mesh::OPSPEC_MESH_OT_PRIMITIVE_PLANE_ADD);
+        let d = s["properties"]["scale"]["description"].as_str().unwrap();
+        assert!(
+            d.contains(". Ignored: this primitive does not apply scale"),
+            "{d}"
+        );
+        assert!(!d.contains("If unset"), "{d}");
+        let d = cube()["properties"]["scale"]["description"]
+            .as_str()
+            .unwrap()
+            .to_owned();
+        assert!(
+            d.contains("If unset: (1, 1, 1); the scale is applied"),
+            "{d}"
+        );
     }
 }
