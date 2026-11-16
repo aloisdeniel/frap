@@ -76,7 +76,33 @@ impl Image {
     }
 }
 
-crate::id::name_only_rna!(Image, frap_spec_rna::IMAGE, ImageId);
+/// `Image.type` (`ima->type`): what a source makes of the image.
+fn image_type(i: &Image) -> &'static str {
+    match (i.source.as_str(), i.header.name.as_str()) {
+        ("GENERATED", _) => "UV_TEST",
+        ("VIEWER", "Render Result") => "RENDER_RESULT",
+        ("VIEWER", _) => "COMPOSITING",
+        _ => "IMAGE",
+    }
+}
+
+crate::id::id_rna! { Image as frap_spec_rna::IMAGE, "IMAGE" {
+    filepath => filepath,
+    filepath_raw => get(|i| i.filepath.clone()) set(|i, v: String| i.filepath = v),
+    file_format => file_format,
+    source => source,
+    type => readonly(|i| image_type(i)),
+    generated_type => generated_type,
+    generated_width => generated_width,
+    generated_height => generated_height,
+    use_generated_float => use_generated_float,
+    generated_color => generated_color,
+    size => readonly(|i| i.size),
+    has_data => readonly(|i| i.packed_file.is_some() || i.source == "GENERATED"),
+    is_float => readonly(|i| i.use_generated_float),
+    colorspace_settings => struct(colorspace_settings),
+    alpha_mode => alpha_mode,
+}}
 
 impl IdType for Image {
     type Kind = ImageId;
@@ -91,5 +117,7 @@ impl IdType for Image {
             f(a.any());
         }
     }
-    fn remap_ref(&mut self, _from: IdAny, _to: Option<IdAny>) {}
+    fn remap_ref(&mut self, from: IdAny, to: Option<IdAny>) {
+        crate::id::remap_action(&mut self.animation_data, from, to);
+    }
 }

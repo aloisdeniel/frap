@@ -55,6 +55,17 @@ pub struct Scene {
 }
 
 impl Scene {
+    /// `(struct, property)` pairs whose setter applies its own range: a caller coerces these
+    /// without the generic hard-range clamp and passes the raw integer to the set hook
+    /// (`Scene.frame_current`: `= 1000000000` reads back 1000000000 in Blender 5.2.4).
+    pub const UNCLAMPED: &'static [(&'static str, &'static str)] = &[("Scene", "frame_current")];
+
+    /// Blender's `frame_current` setter on a raw Python int (`rna_Scene_frame_current_set`
+    /// with "Allow Negative Frames" off: negative frames become 0, large ones are kept).
+    pub fn frame_from_input(v: i64) -> i32 {
+        v.clamp(0, i64::from(i32::MAX)) as i32
+    }
+
     /// A scene with an empty master collection, the given view layers and the factory values
     /// of every setting (`bpy.data.scenes.new` refines them in WP 1.10 / M3 WP 3.10).
     pub fn new(name: &str, view_layers: Vec<ViewLayer>) -> Scene {
@@ -81,7 +92,26 @@ impl Scene {
     }
 }
 
-crate::id::name_only_rna!(Scene, frap_spec_rna::SCENE, SceneId);
+crate::id::id_rna! { Scene as frap_spec_rna::SCENE, "SCENE" {
+    camera => id(camera),
+    world => id(world),
+    objects => hook_coll,
+    frame_current => frame_current (set = hook),
+    frame_start => frame_start (set = hook),
+    frame_end => frame_end (set = hook),
+    frame_step => frame_step,
+    frame_current_final => readonly(|s| s.frame_current as f32),
+    collection => embedded(collection, MasterCollection),
+    view_layers => coll(view_layers, api = "ViewLayers"),
+    render => struct(render),
+    view_settings => struct(view_settings),
+    display_settings => struct(display_settings),
+    display => struct(display),
+    eevee => struct(eevee),
+    cursor => struct(cursor),
+    tool_settings => struct(tool_settings),
+    unit_settings => struct(unit_settings),
+}}
 
 impl IdType for Scene {
     type Kind = SceneId;
@@ -104,9 +134,30 @@ impl IdType for Scene {
             f(a.any());
         }
     }
+    /// Unlink / relink in the master collection, `camera`, `world` and the action; view
+    /// layers drop bases of removed objects at the next sync (`Main::remap` resyncs).
     fn remap_ref(&mut self, from: IdAny, to: Option<IdAny>) {
-        let _ = (from, to);
-        todo!("WP 1.10: unlink / relink in the master collection, view layers, camera, world")
+        self.collection.remap_ref(from, to);
+        if self.camera.map(|c| c.any()) == Some(from) {
+            self.camera = to.and_then(IdRef::from_any);
+        }
+        if self.world.map(|w| w.any()) == Some(from) {
+            self.world = to.and_then(IdRef::from_any);
+        }
+        for vl in &mut self.view_layers {
+            if vl.active.map(|a| a.any()) == Some(from) {
+                vl.active = to.and_then(IdRef::from_any);
+            }
+            match to.and_then(IdRef::<ObjectId>::from_any) {
+                Some(t) => vl
+                    .bases
+                    .iter_mut()
+                    .filter(|b| b.object.any() == from)
+                    .for_each(|b| b.object = t),
+                None => vl.bases.retain(|b| b.object.any() != from),
+            }
+        }
+        crate::id::remap_action(&mut self.animation_data, from, to);
     }
     fn embedded(&self) -> &'static [EmbeddedSlot] {
         &[EmbeddedSlot::MasterCollection]

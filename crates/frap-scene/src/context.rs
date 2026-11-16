@@ -18,6 +18,10 @@ use smol_str::SmolStr;
 use crate::data::Main;
 use crate::generated::plain::{ToolSettings, View3DCursor, View3DShading};
 use crate::id::Scene;
+use crate::id::layers::{self, BaseVisibility};
+
+/// RNA bindings of `Context`, `Window`, `ViewLayer` and `LayerCollection` (§8, §9.4).
+pub mod rna;
 
 /// Part of the snapshot; RNA: `bpy.context.window` (a `Window` stub).
 #[derive(Clone, Debug)]
@@ -111,7 +115,7 @@ impl LayerCollection {
 pub struct LayerCollectionPath(pub SmallVec<[u16; 4]>);
 
 /// A view layer (inside `Scene`).
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ViewLayer {
     /// Name ("ViewLayer").
     pub name: SmolStr,
@@ -261,47 +265,112 @@ impl<'a> Context<'a> {
     pub fn object(&self) -> Option<IdRef<ObjectId>> {
         self.active_object()
     }
-    /// `context.selected_objects`, in base order (not click order, verified).
-    pub fn selected_objects(&self) -> Vec<IdRef<ObjectId>> {
+    /// Visibility of every base of the context view layer (§8).
+    pub fn base_visibility(&self) -> BTreeMap<IdRef<ObjectId>, BaseVisibility> {
+        layers::visibility(
+            self.scene(),
+            self.view_layer(),
+            &self.main.collections,
+            &self.main.objects,
+        )
+    }
+    /// Bases of the context view layer (base order) whose visibility passes `f`.
+    fn bases_where(&self, f: impl Fn(&Base, BaseVisibility) -> bool) -> Vec<IdRef<ObjectId>> {
+        let vis = self.base_visibility();
         self.view_layer()
             .bases
             .iter()
-            .filter(|b| b.selected())
+            .filter(|b| f(b, vis.get(&b.object).copied().unwrap_or_default()))
             .map(|b| b.object)
             .collect()
     }
-    /// `context.selected_editable_objects`
+    fn editable(&self, ob: IdRef<ObjectId>) -> bool {
+        self.main
+            .objects
+            .get(ob)
+            .is_some_and(|o| o.header.library.is_none())
+    }
+    /// `context.selected_objects`: selected and visible bases, in base order (not click order,
+    /// verified; a hidden layer collection empties it while `select_get()` stays True).
+    pub fn selected_objects(&self) -> Vec<IdRef<ObjectId>> {
+        self.bases_where(|b, v| b.selected() && v.visible)
+    }
+    /// `context.selected_editable_objects`: selected, visible and not linked.
     pub fn selected_editable_objects(&self) -> Vec<IdRef<ObjectId>> {
-        todo!("WP 1.10: selected and not linked")
+        self.bases_where(|b, v| b.selected() && v.visible && self.editable(b.object))
     }
     /// `context.visible_objects`
     pub fn visible_objects(&self) -> Vec<IdRef<ObjectId>> {
-        todo!("WP 1.10: base and layer-collection visibility")
+        self.bases_where(|_, v| v.visible)
+    }
+    /// `context.selectable_objects`: visible and selectable.
+    pub fn selectable_objects(&self) -> Vec<IdRef<ObjectId>> {
+        self.bases_where(|_, v| v.visible && v.selectable)
+    }
+    /// `context.editable_objects`: visible and not linked.
+    pub fn editable_objects(&self) -> Vec<IdRef<ObjectId>> {
+        self.bases_where(|b, v| v.visible && self.editable(b.object))
     }
     /// `context.mode`, derived from the active object's mode and type.
     pub fn mode(&self) -> ContextMode {
-        let mode = self
+        let Some(ob) = self
             .active_object()
             .and_then(|ob| self.main.objects.get(ob))
-            .map(|o| o.mode)
-            .unwrap_or_default();
-        match mode {
-            ObjectMode::Object => ContextMode::Object,
-            ObjectMode::Edit => ContextMode::EditMesh,
-            ObjectMode::Pose => ContextMode::Pose,
+        else {
+            return ContextMode::Object;
+        };
+        match (ob.mode, ob.object_type()) {
+            (ObjectMode::Edit, "ARMATURE") => ContextMode::EditArmature,
+            (ObjectMode::Edit, _) => ContextMode::EditMesh,
+            (ObjectMode::Pose, _) => ContextMode::Pose,
+            _ => ContextMode::Object,
         }
     }
-    /// `context.edit_object`
+    /// `context.edit_object`: the active object when it is in Edit Mode.
     pub fn edit_object(&self) -> Option<IdRef<ObjectId>> {
-        todo!("WP 1.10 (M2 for edit mode)")
+        let a = self.active_object()?;
+        (self.main.objects.get(a)?.mode == ObjectMode::Edit).then_some(a)
     }
-    /// `context.objects_in_mode`
+    /// `context.objects_in_mode`: the active object first, then every other visible object of
+    /// the same type in the same mode, in base order
+    /// (`BKE_view_layer_array_from_objects_in_mode`); empty in Object Mode.
     pub fn objects_in_mode(&self) -> Vec<IdRef<ObjectId>> {
-        todo!("WP 1.10 (M2 for edit mode)")
+        self.in_mode(false)
     }
-    /// `context.objects_in_mode_unique_data`
+    /// `context.objects_in_mode_unique_data`: like `objects_in_mode`, one object per data.
     pub fn objects_in_mode_unique_data(&self) -> Vec<IdRef<ObjectId>> {
-        todo!("WP 1.10 (M2 for edit mode)")
+        self.in_mode(true)
+    }
+    fn in_mode(&self, unique_data: bool) -> Vec<IdRef<ObjectId>> {
+        let Some(a) = self.active_object() else {
+            return Vec::new();
+        };
+        let Some(ao) = self.main.objects.get(a) else {
+            return Vec::new();
+        };
+        if ao.mode == ObjectMode::Object {
+            return Vec::new();
+        }
+        let (mode, ty) = (ao.mode, ao.object_type());
+        let mut out = vec![a];
+        let mut data = vec![ao.data];
+        for ob in self.visible_objects() {
+            if ob == a {
+                continue;
+            }
+            let Some(o) = self.main.objects.get(ob) else {
+                continue;
+            };
+            if o.mode != mode || o.object_type() != ty {
+                continue;
+            }
+            if unique_data && data.contains(&o.data) {
+                continue;
+            }
+            data.push(o.data);
+            out.push(ob);
+        }
+        out
     }
     /// `context.collection`: where `*_add` links new objects (the active layer collection's
     /// collection). `None` = the scene's master collection, which is embedded and has no

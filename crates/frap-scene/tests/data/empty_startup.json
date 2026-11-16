@@ -1,0 +1,3221 @@
+{
+ "blender": {
+  "blender_version": "5.2.4 LTS",
+  "build_hash": "cd5dc428cce1",
+  "factory_startup": true,
+  "addon_prefs": {
+   "io_scene_gltf2": {
+    "KHR_materials_variants_ui": true
+   }
+  }
+ },
+ "context": {
+  "mode": "OBJECT",
+  "active_object": null,
+  "selected_objects": []
+ },
+ "window": {
+  "scene": "Scene",
+  "view_layer": "ViewLayer",
+  "workspace": "Layout",
+  "screen": "Layout"
+ },
+ "view3d": {
+  "workspace": "Layout",
+  "screen": "Layout",
+  "region_3d": {
+   "view_perspective": "PERSP",
+   "is_perspective": true,
+   "is_orthographic_side_view": false,
+   "view_location": [
+    -0.020693248137831688,
+    -0.04602546989917755,
+    0.0006694307667203248
+   ],
+   "view_rotation": [
+    0.7123758792877197,
+    0.4410620927810669,
+    0.28735825419425964,
+    0.4641229212284088
+   ],
+   "view_distance": 18.38804817199707,
+   "view_camera_zoom": 0.0,
+   "view_camera_offset": [
+    0.0,
+    0.0
+   ],
+   "view_matrix": [
+    [
+     0.4100283980369568,
+     0.9119764566421509,
+     -0.013264661654829979,
+     0.0504678450524807
+    ],
+    [
+     -0.4017425775527954,
+     0.19364342093467712,
+     0.8950449228286743,
+     4.0745362639427185e-10
+    ],
+    [
+     0.8188283443450928,
+     -0.36166495084762573,
+     0.44577890634536743,
+     -18.38804817199707
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "window_matrix": [
+    [
+     1.3888888359069824,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     2.2915210723876953,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     -1.0000200271606445,
+     -0.02000020071864128
+    ],
+    [
+     0.0,
+     0.0,
+     -1.0,
+     0.0
+    ]
+   ],
+   "perspective_matrix": [
+    [
+     0.5694838762283325,
+     1.2666338682174683,
+     -0.018423140048980713,
+     0.07009422779083252
+    ],
+    [
+     -0.9206016063690186,
+     0.4437379837036133,
+     2.0510141849517822,
+     9.336885709032572e-10
+    ],
+    [
+     -0.818844735622406,
+     0.36167219281196594,
+     -0.44578784704208374,
+     18.36841583251953
+    ],
+    [
+     -0.8188283443450928,
+     0.36166495084762573,
+     -0.44577890634536743,
+     18.38804817199707
+    ]
+   ]
+  },
+  "space": {
+   "lens": 50.0,
+   "clip_start": 0.009999999776482582,
+   "clip_end": 1000.0,
+   "camera": null,
+   "use_local_camera": false,
+   "shading": {
+    "$type": "View3DShading",
+    "type": "SOLID",
+    "light": "STUDIO",
+    "show_object_outline": true,
+    "studio_light": "Default",
+    "use_world_space_lighting": false,
+    "show_backface_culling": false,
+    "show_cavity": false,
+    "cavity_type": "SCREEN",
+    "curvature_ridge_factor": 1.0,
+    "curvature_valley_factor": 1.0,
+    "cavity_ridge_factor": 1.0,
+    "cavity_valley_factor": 1.0,
+    "selected_studio_light": {
+     "$type": "StudioLight",
+     "index": 1,
+     "is_user_defined": false,
+     "has_specular_highlight_pass": true,
+     "type": "STUDIO",
+     "name": "Default",
+     "path": "",
+     "solid_lights": [
+      {
+       "$type": "UserSolidLight",
+       "use": true,
+       "smooth": 0.5266199707984924,
+       "direction": [
+        -0.35254600644111633,
+        0.17093099653720856,
+        -0.9200509786605835
+       ],
+       "specular_color": [
+        0.26676100492477417,
+        0.26676100492477417,
+        0.26676100492477417
+       ],
+       "diffuse_color": [
+        0.03310300037264824,
+        0.03310300037264824,
+        0.03310300037264824
+       ]
+      },
+      {
+       "$type": "UserSolidLight",
+       "use": true,
+       "smooth": 0.0,
+       "direction": [
+        -0.40816301107406616,
+        0.34693899750709534,
+        0.844415009021759
+       ],
+       "specular_color": [
+        0.5990300178527832,
+        0.5990300178527832,
+        0.5990300178527832
+       ],
+       "diffuse_color": [
+        0.5210829973220825,
+        0.5382260084152222,
+        0.5382260084152222
+       ]
+      },
+      {
+       "$type": "UserSolidLight",
+       "use": true,
+       "smooth": 0.47826099395751953,
+       "direction": [
+        0.5217390060424805,
+        0.8260869979858398,
+        0.21299900114536285
+       ],
+       "specular_color": [
+        0.10610199719667435,
+        0.12598100304603577,
+        0.15852299332618713
+       ],
+       "diffuse_color": [
+        0.03840300068259239,
+        0.03435700014233589,
+        0.04952999949455261
+       ]
+      },
+      {
+       "$type": "UserSolidLight",
+       "use": true,
+       "smooth": 0.20000000298023224,
+       "direction": [
+        0.6245189905166626,
+        -0.5620669722557068,
+        -0.5422689914703369
+       ],
+       "specular_color": [
+        0.10653500258922577,
+        0.08477099984884262,
+        0.0660799965262413
+       ],
+       "diffuse_color": [
+        0.0908380001783371,
+        0.08207999914884567,
+        0.07225500047206879
+       ]
+      }
+     ],
+     "light_ambient": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    "studiolight_rotate_z": 0.0,
+    "studiolight_intensity": 1.0,
+    "studiolight_background_alpha": 0.0,
+    "studiolight_background_blur": 0.5,
+    "use_studiolight_view_rotation": true,
+    "color_type": "MATERIAL",
+    "wireframe_color_type": "THEME",
+    "single_color": [
+     0.800000011920929,
+     0.800000011920929,
+     0.800000011920929
+    ],
+    "background_type": "THEME",
+    "background_color": [
+     0.05000000074505806,
+     0.05000000074505806,
+     0.05000000074505806
+    ],
+    "show_shadows": false,
+    "show_xray": false,
+    "show_xray_wireframe": true,
+    "xray_alpha": 0.5,
+    "xray_alpha_wireframe": 0.0,
+    "use_dof": false,
+    "use_scene_lights": false,
+    "use_scene_world": false,
+    "use_scene_lights_render": true,
+    "use_scene_world_render": true,
+    "show_specular_highlight": true,
+    "object_outline_color": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "shadow_intensity": 0.5,
+    "render_pass": "COMBINED",
+    "aov_name": "",
+    "use_compositor": "DISABLED",
+    "cycles": {
+     "$type": "CyclesView3DShadingSettings",
+     "name": "",
+     "render_pass": "COMBINED",
+     "show_active_pixels": false
+    }
+   },
+   "overlay_show_overlays": true
+  },
+  "area_size": [
+   1574,
+   954
+  ],
+  "region_size": [
+   1574,
+   954
+  ]
+ },
+ "ids": {
+  "scenes": [
+   {
+    "$type": "Scene",
+    "name": "Scene",
+    "name_full": "Scene",
+    "id_type": "SCENE",
+    "users": 1,
+    "use_fake_user": false,
+    "use_extra_user": true,
+    "is_embedded_data": false,
+    "is_linked_packed": false,
+    "is_missing": false,
+    "is_editable": true,
+    "tag": false,
+    "is_library_indirect": false,
+    "library": null,
+    "camera": null,
+    "background_set": null,
+    "world": null,
+    "objects": [],
+    "frame_current": 1,
+    "frame_subframe": 0.0,
+    "frame_float": 1.0,
+    "frame_start": 1,
+    "frame_end": 250,
+    "frame_step": 1,
+    "time_jump_unit": "SECOND",
+    "time_jump_delta": 1.0,
+    "frame_current_final": 1.0,
+    "lock_frame_selection_to_range": false,
+    "allow_preroll": false,
+    "use_preview_range": false,
+    "frame_preview_start": 0,
+    "frame_preview_end": 0,
+    "show_subframe": false,
+    "show_keys_from_selected_only": true,
+    "use_stamp_note": "",
+    "animation_data": null,
+    "is_nla_tweakmode": false,
+    "use_custom_simulation_range": false,
+    "simulation_frame_start": 1,
+    "simulation_frame_end": 250,
+    "sync_mode": "NONE",
+    "playback_loop_mode": "INFINITE",
+    "compositing_node_group": null,
+    "use_nodes": true,
+    "sequence_editor": {
+     "$ptr": "bpy.data.scenes['Scene'].sequence_editor",
+     "type": "SequenceEditor"
+    },
+    "keying_sets": [],
+    "keying_sets_all": [
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "Available",
+      "bl_label": "Available",
+      "bl_description": "Insert a keyframe on each of the already existing F-Curves",
+      "type_info": {
+       "$type": "Available",
+       "bl_idname": "Available",
+       "bl_label": "Available",
+       "bl_description": "Insert a keyframe on each of the already existing F-Curves",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "Location",
+      "bl_label": "Location",
+      "bl_description": "Insert a keyframe on each of the location channels",
+      "type_info": {
+       "$type": "Location",
+       "bl_idname": "Location",
+       "bl_label": "Location",
+       "bl_description": "Insert a keyframe on each of the location channels",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "Rotation",
+      "bl_label": "Rotation",
+      "bl_description": "Insert a keyframe on each of the rotation channels",
+      "type_info": {
+       "$type": "Rotation",
+       "bl_idname": "Rotation",
+       "bl_label": "Rotation",
+       "bl_description": "Insert a keyframe on each of the rotation channels",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "Scaling",
+      "bl_label": "Scale",
+      "bl_description": "Insert a keyframe on each of the scale channels",
+      "type_info": {
+       "$type": "Scaling",
+       "bl_idname": "Scaling",
+       "bl_label": "Scale",
+       "bl_description": "Insert a keyframe on each of the scale channels",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_LocRot",
+      "bl_label": "Location & Rotation",
+      "bl_description": "Insert a keyframe on each of the location and rotation channels",
+      "type_info": {
+       "$type": "BUILTIN_KSI_LocRot",
+       "bl_idname": "BUILTIN_KSI_LocRot",
+       "bl_label": "Location & Rotation",
+       "bl_description": "Insert a keyframe on each of the location and rotation channels",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "LocRotScale",
+      "bl_label": "Location, Rotation & Scale",
+      "bl_description": "Insert a keyframe on each of the location, rotation, and scale channels",
+      "type_info": {
+       "$type": "LocRotScale",
+       "bl_idname": "LocRotScale",
+       "bl_label": "Location, Rotation & Scale",
+       "bl_description": "Insert a keyframe on each of the location, rotation, and scale channels",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "LocRotScaleCProp",
+      "bl_label": "Location, Rotation, Scale & Custom Properties",
+      "bl_description": "Key location/rotation/scale as well as custom properties",
+      "type_info": {
+       "$type": "LocRotScaleCProp",
+       "bl_idname": "LocRotScaleCProp",
+       "bl_label": "Location, Rotation, Scale & Custom Properties",
+       "bl_description": "Key location/rotation/scale as well as custom properties",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_LocScale",
+      "bl_label": "Location & Scale",
+      "bl_description": "Insert a keyframe on each of the location and scale channels",
+      "type_info": {
+       "$type": "BUILTIN_KSI_LocScale",
+       "bl_idname": "BUILTIN_KSI_LocScale",
+       "bl_label": "Location & Scale",
+       "bl_description": "Insert a keyframe on each of the location and scale channels",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_RotScale",
+      "bl_label": "Rotation & Scale",
+      "bl_description": "Insert a keyframe on each of the rotation and scale channels",
+      "type_info": {
+       "$type": "BUILTIN_KSI_RotScale",
+       "bl_idname": "BUILTIN_KSI_RotScale",
+       "bl_label": "Rotation & Scale",
+       "bl_description": "Insert a keyframe on each of the rotation and scale channels",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_DeltaLocation",
+      "bl_label": "Delta Location",
+      "bl_description": "Insert keyframes for additional location offset",
+      "type_info": {
+       "$type": "BUILTIN_KSI_DeltaLocation",
+       "bl_idname": "BUILTIN_KSI_DeltaLocation",
+       "bl_label": "Delta Location",
+       "bl_description": "Insert keyframes for additional location offset",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_DeltaRotation",
+      "bl_label": "Delta Rotation",
+      "bl_description": "Insert keyframes for additional rotation offset",
+      "type_info": {
+       "$type": "BUILTIN_KSI_DeltaRotation",
+       "bl_idname": "BUILTIN_KSI_DeltaRotation",
+       "bl_label": "Delta Rotation",
+       "bl_description": "Insert keyframes for additional rotation offset",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_DeltaScale",
+      "bl_label": "Delta Scale",
+      "bl_description": "Insert keyframes for additional scale factor",
+      "type_info": {
+       "$type": "BUILTIN_KSI_DeltaScale",
+       "bl_idname": "BUILTIN_KSI_DeltaScale",
+       "bl_label": "Delta Scale",
+       "bl_description": "Insert keyframes for additional scale factor",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_VisualLoc",
+      "bl_label": "Visual Location",
+      "bl_description": "Insert a keyframe on each of the location channels, taking into account effects of constraints and relationships",
+      "type_info": {
+       "$type": "BUILTIN_KSI_VisualLoc",
+       "bl_idname": "BUILTIN_KSI_VisualLoc",
+       "bl_label": "Visual Location",
+       "bl_description": "Insert a keyframe on each of the location channels, taking into account effects of constraints and relationships",
+       "bl_options": [
+        "INSERTKEY_VISUAL"
+       ]
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": true,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": true
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_VisualRot",
+      "bl_label": "Visual Rotation",
+      "bl_description": "Insert a keyframe on each of the rotation channels, taking into account effects of constraints and relationships",
+      "type_info": {
+       "$type": "BUILTIN_KSI_VisualRot",
+       "bl_idname": "BUILTIN_KSI_VisualRot",
+       "bl_label": "Visual Rotation",
+       "bl_description": "Insert a keyframe on each of the rotation channels, taking into account effects of constraints and relationships",
+       "bl_options": [
+        "INSERTKEY_VISUAL"
+       ]
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": true,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": true
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_VisualScaling",
+      "bl_label": "Visual Scale",
+      "bl_description": "Insert a keyframe on each of the scale channels, taking into account effects of constraints and relationships",
+      "type_info": {
+       "$type": "BUILTIN_KSI_VisualScaling",
+       "bl_idname": "BUILTIN_KSI_VisualScaling",
+       "bl_label": "Visual Scale",
+       "bl_description": "Insert a keyframe on each of the scale channels, taking into account effects of constraints and relationships",
+       "bl_options": [
+        "INSERTKEY_VISUAL"
+       ]
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": true,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": true
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_VisualLocRot",
+      "bl_label": "Visual Location & Rotation",
+      "bl_description": "Insert a keyframe on each of the location and rotation channels, taking into account effects of constraints and relationships",
+      "type_info": {
+       "$type": "BUILTIN_KSI_VisualLocRot",
+       "bl_idname": "BUILTIN_KSI_VisualLocRot",
+       "bl_label": "Visual Location & Rotation",
+       "bl_description": "Insert a keyframe on each of the location and rotation channels, taking into account effects of constraints and relationships",
+       "bl_options": [
+        "INSERTKEY_VISUAL"
+       ]
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": true,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": true
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_VisualLocRotScale",
+      "bl_label": "Visual Location, Rotation & Scale",
+      "bl_description": "Insert a keyframe on each of the location, rotation and scale channels, taking into account effects of constraints and relationships",
+      "type_info": {
+       "$type": "BUILTIN_KSI_VisualLocRotScale",
+       "bl_idname": "BUILTIN_KSI_VisualLocRotScale",
+       "bl_label": "Visual Location, Rotation & Scale",
+       "bl_description": "Insert a keyframe on each of the location, rotation and scale channels, taking into account effects of constraints and relationships",
+       "bl_options": [
+        "INSERTKEY_VISUAL"
+       ]
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": true,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": true
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_VisualLocScale",
+      "bl_label": "Visual Location & Scale",
+      "bl_description": "Insert a keyframe on each of the location and scale channels, taking into account effects of constraints and relationships",
+      "type_info": {
+       "$type": "BUILTIN_KSI_VisualLocScale",
+       "bl_idname": "BUILTIN_KSI_VisualLocScale",
+       "bl_label": "Visual Location & Scale",
+       "bl_description": "Insert a keyframe on each of the location and scale channels, taking into account effects of constraints and relationships",
+       "bl_options": [
+        "INSERTKEY_VISUAL"
+       ]
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": true,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": true
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_VisualRotScale",
+      "bl_label": "Visual Rotation & Scale",
+      "bl_description": "Insert a keyframe on each of the rotation and scale channels, taking into account effects of constraints and relationships",
+      "type_info": {
+       "$type": "BUILTIN_KSI_VisualRotScale",
+       "bl_idname": "BUILTIN_KSI_VisualRotScale",
+       "bl_label": "Visual Rotation & Scale",
+       "bl_description": "Insert a keyframe on each of the rotation and scale channels, taking into account effects of constraints and relationships",
+       "bl_options": [
+        "INSERTKEY_VISUAL"
+       ]
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": true,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": true
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "BUILTIN_KSI_BendyBones",
+      "bl_label": "B-Bone Shape",
+      "bl_description": "Insert a keyframe for each of the B-Bone shape properties",
+      "type_info": {
+       "$type": "BUILTIN_KSI_BendyBones",
+       "bl_idname": "BUILTIN_KSI_BendyBones",
+       "bl_label": "B-Bone Shape",
+       "bl_description": "Insert a keyframe for each of the B-Bone shape properties",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "WholeCharacter",
+      "bl_label": "Whole Character",
+      "bl_description": "Insert a keyframe for all properties that are likely to get animated in a character rig (useful when blocking out a shot)",
+      "type_info": {
+       "$type": "WholeCharacter",
+       "bl_idname": "WholeCharacter",
+       "bl_label": "Whole Character",
+       "bl_description": "Insert a keyframe for all properties that are likely to get animated in a character rig (useful when blocking out a shot)",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     },
+     {
+      "$type": "KeyingSet",
+      "bl_idname": "WholeCharacterSelected",
+      "bl_label": "Whole Character (Selected Bones Only)",
+      "bl_description": "Insert a keyframe for all properties that are likely to get animated in a character rig (only selected bones)",
+      "type_info": {
+       "$type": "WholeCharacterSelected",
+       "bl_idname": "WholeCharacterSelected",
+       "bl_label": "Whole Character (Selected Bones Only)",
+       "bl_description": "Insert a keyframe for all properties that are likely to get animated in a character rig (only selected bones)",
+       "bl_options": []
+      },
+      "paths": [],
+      "is_path_absolute": false,
+      "use_insertkey_override_needed": false,
+      "use_insertkey_override_visual": false,
+      "use_insertkey_needed": false,
+      "use_insertkey_visual": false
+     }
+    ],
+    "rigidbody_world": null,
+    "tool_settings": {
+     "$type": "ToolSettings",
+     "sculpt": {
+      "$type": "Sculpt",
+      "brush": null,
+      "brush_asset_reference": {
+       "$type": "AssetWeakReference",
+       "asset_library_type": "ESSENTIALS",
+       "asset_library_identifier": "",
+       "relative_asset_identifier": "brushes/essentials_brushes-mesh_sculpt.blend/Brush/Draw"
+      },
+      "palette": null,
+      "show_brush": true,
+      "show_brush_on_surface": false,
+      "show_low_resolution": true,
+      "use_sculpt_delay_updates": true,
+      "show_bvh_nodes": false,
+      "use_symmetry_x": true,
+      "use_symmetry_y": false,
+      "use_symmetry_z": false,
+      "use_symmetry_feather": true,
+      "cavity_curve": {
+       "$type": "CurveMapping",
+       "tone": "STANDARD",
+       "use_clip": true,
+       "clip_min_x": 0.0,
+       "clip_min_y": 0.0,
+       "clip_max_x": 1.0,
+       "clip_max_y": 1.0,
+       "extend": "HORIZONTAL",
+       "curves": [
+        {
+         "$type": "CurveMap",
+         "points": {
+          "$len": 2
+         }
+        }
+       ],
+       "black_level": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "white_level": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "use_cavity": false,
+      "tile_offset": [
+       1.0,
+       1.0,
+       1.0
+      ],
+      "tile_x": false,
+      "tile_y": false,
+      "tile_z": false,
+      "show_strength_curve": false,
+      "show_size_curve": false,
+      "show_jitter_curve": false,
+      "unified_paint_settings": {
+       "$type": "UnifiedPaintSettings",
+       "use_unified_size": true,
+       "use_unified_strength": false,
+       "use_unified_weight": false,
+       "use_unified_color": true,
+       "use_unified_input_samples": false,
+       "size": 100,
+       "unprojected_size": 0.5799999833106995,
+       "strength": 0.5,
+       "weight": 0.5,
+       "color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "secondary_color": [
+        1.0,
+        1.0,
+        1.0
+       ],
+       "use_color_jitter": false,
+       "hue_jitter": 0.0,
+       "saturation_jitter": 0.0,
+       "value_jitter": 0.0,
+       "use_stroke_random_hue": false,
+       "use_stroke_random_sat": false,
+       "use_stroke_random_val": false,
+       "use_random_press_hue": false,
+       "use_random_press_sat": false,
+       "use_random_press_val": false,
+       "input_samples": 1,
+       "use_locked_size": "VIEW"
+      },
+      "mesh_automasking_settings": {
+       "$type": "MeshAutomaskingSettings",
+       "use_automasking_topology": false,
+       "use_automasking_face_sets": false,
+       "use_automasking_boundary_edges": false,
+       "use_automasking_boundary_face_sets": false,
+       "use_automasking_cavity": false,
+       "use_automasking_cavity_inverted": false,
+       "use_automasking_custom_cavity_curve": false,
+       "use_automasking_start_normal": false,
+       "use_automasking_view_normal": false,
+       "use_automasking_view_occlusion": false,
+       "boundary_edges_propagation_steps": 1,
+       "cavity_factor": 0.5,
+       "cavity_blur_steps": 0,
+       "cavity_curve": {
+        "$type": "CurveMapping",
+        "tone": "STANDARD",
+        "use_clip": true,
+        "clip_min_x": 0.0,
+        "clip_min_y": 0.0,
+        "clip_max_x": 1.0,
+        "clip_max_y": 1.0,
+        "extend": "HORIZONTAL",
+        "curves": {
+         "$len": 1
+        },
+        "black_level": [
+         0.0,
+         0.0,
+         0.0
+        ],
+        "white_level": [
+         1.0,
+         1.0,
+         1.0
+        ]
+       },
+       "cavity_curve_op": {
+        "$type": "CurveMapping",
+        "tone": "STANDARD",
+        "use_clip": true,
+        "clip_min_x": 0.0,
+        "clip_min_y": 0.0,
+        "clip_max_x": 1.0,
+        "clip_max_y": 1.0,
+        "extend": "HORIZONTAL",
+        "curves": {
+         "$len": 1
+        },
+        "black_level": [
+         0.0,
+         0.0,
+         0.0
+        ],
+        "white_level": [
+         1.0,
+         1.0,
+         1.0
+        ]
+       },
+       "start_normal_limit": 0.3490658402442932,
+       "start_normal_falloff": 0.25,
+       "view_normal_limit": 1.5707963705062866,
+       "view_normal_falloff": 0.25
+      },
+      "lock_x": false,
+      "lock_y": false,
+      "lock_z": false,
+      "use_deform_only": false,
+      "detail_size": 12.0,
+      "detail_percent": 25.0,
+      "constant_detail_resolution": 3.0,
+      "symmetrize_direction": "NEGATIVE_X",
+      "detail_refine_method": "SUBDIVIDE_COLLAPSE",
+      "detail_type_method": "RELATIVE",
+      "gravity": 0.0,
+      "transform_mode": "ALL_VERTICES",
+      "gravity_object": null
+     },
+     "curves_sculpt": null,
+     "use_auto_normalize": false,
+     "use_lock_relative": false,
+     "use_multipaint": false,
+     "vertex_group_user": "ACTIVE",
+     "vertex_group_subset": "ALL",
+     "vertex_paint": {
+      "$type": "VertexPaint",
+      "brush": null,
+      "brush_asset_reference": {
+       "$type": "AssetWeakReference",
+       "asset_library_type": "ESSENTIALS",
+       "asset_library_identifier": "",
+       "relative_asset_identifier": "brushes/essentials_brushes-mesh_vertex.blend/Brush/Paint Hard"
+      },
+      "palette": null,
+      "show_brush": true,
+      "show_brush_on_surface": false,
+      "show_low_resolution": false,
+      "use_sculpt_delay_updates": false,
+      "show_bvh_nodes": false,
+      "use_symmetry_x": false,
+      "use_symmetry_y": false,
+      "use_symmetry_z": false,
+      "use_symmetry_feather": false,
+      "cavity_curve": {
+       "$type": "CurveMapping",
+       "tone": "STANDARD",
+       "use_clip": true,
+       "clip_min_x": 0.0,
+       "clip_min_y": 0.0,
+       "clip_max_x": 1.0,
+       "clip_max_y": 1.0,
+       "extend": "HORIZONTAL",
+       "curves": [
+        {
+         "$type": "CurveMap",
+         "points": {
+          "$len": 2
+         }
+        }
+       ],
+       "black_level": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "white_level": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "use_cavity": false,
+      "tile_offset": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tile_x": false,
+      "tile_y": false,
+      "tile_z": false,
+      "show_strength_curve": false,
+      "show_size_curve": false,
+      "show_jitter_curve": false,
+      "unified_paint_settings": {
+       "$type": "UnifiedPaintSettings",
+       "use_unified_size": true,
+       "use_unified_strength": false,
+       "use_unified_weight": false,
+       "use_unified_color": true,
+       "use_unified_input_samples": false,
+       "size": 100,
+       "unprojected_size": 0.5799999833106995,
+       "strength": 0.5,
+       "weight": 0.5,
+       "color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "secondary_color": [
+        1.0,
+        1.0,
+        1.0
+       ],
+       "use_color_jitter": false,
+       "hue_jitter": 0.0,
+       "saturation_jitter": 0.0,
+       "value_jitter": 0.0,
+       "use_stroke_random_hue": false,
+       "use_stroke_random_sat": false,
+       "use_stroke_random_val": false,
+       "use_random_press_hue": false,
+       "use_random_press_sat": false,
+       "use_random_press_val": false,
+       "input_samples": 1,
+       "use_locked_size": "VIEW"
+      },
+      "mesh_automasking_settings": null,
+      "use_group_restrict": false
+     },
+     "weight_paint": {
+      "$type": "VertexPaint",
+      "brush": null,
+      "brush_asset_reference": {
+       "$type": "AssetWeakReference",
+       "asset_library_type": "ESSENTIALS",
+       "asset_library_identifier": "",
+       "relative_asset_identifier": "brushes/essentials_brushes-mesh_weight.blend/Brush/Paint"
+      },
+      "palette": null,
+      "show_brush": true,
+      "show_brush_on_surface": false,
+      "show_low_resolution": false,
+      "use_sculpt_delay_updates": false,
+      "show_bvh_nodes": false,
+      "use_symmetry_x": false,
+      "use_symmetry_y": false,
+      "use_symmetry_z": false,
+      "use_symmetry_feather": false,
+      "cavity_curve": {
+       "$type": "CurveMapping",
+       "tone": "STANDARD",
+       "use_clip": true,
+       "clip_min_x": 0.0,
+       "clip_min_y": 0.0,
+       "clip_max_x": 1.0,
+       "clip_max_y": 1.0,
+       "extend": "HORIZONTAL",
+       "curves": [
+        {
+         "$type": "CurveMap",
+         "points": {
+          "$len": 2
+         }
+        }
+       ],
+       "black_level": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "white_level": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "use_cavity": false,
+      "tile_offset": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tile_x": false,
+      "tile_y": false,
+      "tile_z": false,
+      "show_strength_curve": false,
+      "show_size_curve": false,
+      "show_jitter_curve": false,
+      "unified_paint_settings": {
+       "$type": "UnifiedPaintSettings",
+       "use_unified_size": true,
+       "use_unified_strength": false,
+       "use_unified_weight": false,
+       "use_unified_color": true,
+       "use_unified_input_samples": false,
+       "size": 100,
+       "unprojected_size": 0.5799999833106995,
+       "strength": 0.5,
+       "weight": 0.5,
+       "color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "secondary_color": [
+        1.0,
+        1.0,
+        1.0
+       ],
+       "use_color_jitter": false,
+       "hue_jitter": 0.0,
+       "saturation_jitter": 0.0,
+       "value_jitter": 0.0,
+       "use_stroke_random_hue": false,
+       "use_stroke_random_sat": false,
+       "use_stroke_random_val": false,
+       "use_random_press_hue": false,
+       "use_random_press_sat": false,
+       "use_random_press_val": false,
+       "input_samples": 1,
+       "use_locked_size": "VIEW"
+      },
+      "mesh_automasking_settings": null,
+      "use_group_restrict": false
+     },
+     "image_paint": {
+      "$type": "ImagePaint",
+      "brush": null,
+      "brush_asset_reference": {
+       "$type": "AssetWeakReference",
+       "asset_library_type": "ESSENTIALS",
+       "asset_library_identifier": "",
+       "relative_asset_identifier": "brushes/essentials_brushes-mesh_texture.blend/Brush/Paint Hard"
+      },
+      "palette": null,
+      "show_brush": true,
+      "show_brush_on_surface": false,
+      "show_low_resolution": false,
+      "use_sculpt_delay_updates": false,
+      "show_bvh_nodes": false,
+      "use_symmetry_x": false,
+      "use_symmetry_y": false,
+      "use_symmetry_z": false,
+      "use_symmetry_feather": false,
+      "cavity_curve": {
+       "$type": "CurveMapping",
+       "tone": "STANDARD",
+       "use_clip": true,
+       "clip_min_x": 0.0,
+       "clip_min_y": 0.0,
+       "clip_max_x": 1.0,
+       "clip_max_y": 1.0,
+       "extend": "HORIZONTAL",
+       "curves": [
+        {
+         "$type": "CurveMap",
+         "points": {
+          "$len": 2
+         }
+        }
+       ],
+       "black_level": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "white_level": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "use_cavity": false,
+      "tile_offset": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tile_x": false,
+      "tile_y": false,
+      "tile_z": false,
+      "show_strength_curve": false,
+      "show_size_curve": false,
+      "show_jitter_curve": false,
+      "unified_paint_settings": {
+       "$type": "UnifiedPaintSettings",
+       "use_unified_size": true,
+       "use_unified_strength": false,
+       "use_unified_weight": false,
+       "use_unified_color": true,
+       "use_unified_input_samples": false,
+       "size": 100,
+       "unprojected_size": 0.5799999833106995,
+       "strength": 0.5,
+       "weight": 0.5,
+       "color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "secondary_color": [
+        1.0,
+        1.0,
+        1.0
+       ],
+       "use_color_jitter": false,
+       "hue_jitter": 0.0,
+       "saturation_jitter": 0.0,
+       "value_jitter": 0.0,
+       "use_stroke_random_hue": false,
+       "use_stroke_random_sat": false,
+       "use_stroke_random_val": false,
+       "use_random_press_hue": false,
+       "use_random_press_sat": false,
+       "use_random_press_val": false,
+       "input_samples": 1,
+       "use_locked_size": "VIEW"
+      },
+      "mesh_automasking_settings": null,
+      "use_occlude": true,
+      "use_backface_culling": true,
+      "use_normal_falloff": true,
+      "use_stencil_layer": false,
+      "invert_stencil": false,
+      "stencil_image": null,
+      "canvas": null,
+      "clone_image": null,
+      "stencil_color": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "dither": 0.0,
+      "use_clone_layer": false,
+      "seam_bleed": 2,
+      "normal_angle": 80,
+      "screen_grab_size": [
+       512,
+       512
+      ],
+      "mode": "MATERIAL",
+      "interpolation": "LINEAR",
+      "missing_uvs": false,
+      "missing_materials": false,
+      "missing_stencil": false,
+      "missing_texture": true,
+      "clone_alpha": 0.5,
+      "clone_offset": [
+       0.0,
+       0.0
+      ]
+     },
+     "paint_mode": {
+      "$type": "PaintModeSettings",
+      "canvas_source": "MATERIAL",
+      "canvas_image": null
+     },
+     "uv_sculpt": {
+      "$type": "UvSculpt",
+      "size": 100,
+      "strength": 1.0,
+      "curve_distance_falloff": {
+       "$type": "CurveMapping",
+       "tone": "STANDARD",
+       "use_clip": true,
+       "clip_min_x": 0.0,
+       "clip_min_y": 0.0,
+       "clip_max_x": 1.0,
+       "clip_max_y": 1.0,
+       "extend": "EXTRAPOLATED",
+       "curves": [
+        {
+         "$type": "CurveMap",
+         "points": {
+          "$len": 2
+         }
+        }
+       ],
+       "black_level": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "white_level": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "curve_distance_falloff_preset": "SMOOTH"
+     },
+     "gpencil_paint": {
+      "$type": "GpPaint",
+      "brush": null,
+      "brush_asset_reference": {
+       "$type": "AssetWeakReference",
+       "asset_library_type": "ESSENTIALS",
+       "asset_library_identifier": "",
+       "relative_asset_identifier": "brushes/essentials_brushes-gp_draw.blend/Brush/Pencil"
+      },
+      "palette": null,
+      "show_brush": true,
+      "show_brush_on_surface": false,
+      "show_low_resolution": false,
+      "use_sculpt_delay_updates": false,
+      "show_bvh_nodes": false,
+      "use_symmetry_x": false,
+      "use_symmetry_y": false,
+      "use_symmetry_z": false,
+      "use_symmetry_feather": false,
+      "cavity_curve": {
+       "$type": "CurveMapping",
+       "tone": "STANDARD",
+       "use_clip": true,
+       "clip_min_x": 0.0,
+       "clip_min_y": 0.0,
+       "clip_max_x": 1.0,
+       "clip_max_y": 1.0,
+       "extend": "HORIZONTAL",
+       "curves": [
+        {
+         "$type": "CurveMap",
+         "points": {
+          "$len": 2
+         }
+        }
+       ],
+       "black_level": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "white_level": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "use_cavity": false,
+      "tile_offset": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tile_x": false,
+      "tile_y": false,
+      "tile_z": false,
+      "show_strength_curve": false,
+      "show_size_curve": false,
+      "show_jitter_curve": false,
+      "unified_paint_settings": {
+       "$type": "UnifiedPaintSettings",
+       "use_unified_size": true,
+       "use_unified_strength": false,
+       "use_unified_weight": false,
+       "use_unified_color": true,
+       "use_unified_input_samples": false,
+       "size": 100,
+       "unprojected_size": 0.5799999833106995,
+       "strength": 0.5,
+       "weight": 0.5,
+       "color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "secondary_color": [
+        1.0,
+        1.0,
+        1.0
+       ],
+       "use_color_jitter": false,
+       "hue_jitter": 0.0,
+       "saturation_jitter": 0.0,
+       "value_jitter": 0.0,
+       "use_stroke_random_hue": false,
+       "use_stroke_random_sat": false,
+       "use_stroke_random_val": false,
+       "use_random_press_hue": false,
+       "use_random_press_sat": false,
+       "use_random_press_val": false,
+       "input_samples": 1,
+       "use_locked_size": "VIEW"
+      },
+      "mesh_automasking_settings": null,
+      "color_mode": "MATERIAL"
+     },
+     "gpencil_vertex_paint": {
+      "$type": "GpVertexPaint",
+      "brush": null,
+      "brush_asset_reference": {
+       "$type": "AssetWeakReference",
+       "asset_library_type": "ESSENTIALS",
+       "asset_library_identifier": "",
+       "relative_asset_identifier": "brushes/essentials_brushes-gp_vertex.blend/Brush/Paint"
+      },
+      "palette": null,
+      "show_brush": true,
+      "show_brush_on_surface": false,
+      "show_low_resolution": false,
+      "use_sculpt_delay_updates": false,
+      "show_bvh_nodes": false,
+      "use_symmetry_x": false,
+      "use_symmetry_y": false,
+      "use_symmetry_z": false,
+      "use_symmetry_feather": false,
+      "cavity_curve": {
+       "$type": "CurveMapping",
+       "tone": "STANDARD",
+       "use_clip": true,
+       "clip_min_x": 0.0,
+       "clip_min_y": 0.0,
+       "clip_max_x": 1.0,
+       "clip_max_y": 1.0,
+       "extend": "HORIZONTAL",
+       "curves": [
+        {
+         "$type": "CurveMap",
+         "points": {
+          "$len": 2
+         }
+        }
+       ],
+       "black_level": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "white_level": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "use_cavity": false,
+      "tile_offset": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tile_x": false,
+      "tile_y": false,
+      "tile_z": false,
+      "show_strength_curve": false,
+      "show_size_curve": false,
+      "show_jitter_curve": false,
+      "unified_paint_settings": {
+       "$type": "UnifiedPaintSettings",
+       "use_unified_size": true,
+       "use_unified_strength": false,
+       "use_unified_weight": false,
+       "use_unified_color": true,
+       "use_unified_input_samples": false,
+       "size": 100,
+       "unprojected_size": 0.5799999833106995,
+       "strength": 0.5,
+       "weight": 0.5,
+       "color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "secondary_color": [
+        1.0,
+        1.0,
+        1.0
+       ],
+       "use_color_jitter": false,
+       "hue_jitter": 0.0,
+       "saturation_jitter": 0.0,
+       "value_jitter": 0.0,
+       "use_stroke_random_hue": false,
+       "use_stroke_random_sat": false,
+       "use_stroke_random_val": false,
+       "use_random_press_hue": false,
+       "use_random_press_sat": false,
+       "use_random_press_val": false,
+       "input_samples": 1,
+       "use_locked_size": "VIEW"
+      },
+      "mesh_automasking_settings": null
+     },
+     "gpencil_sculpt_paint": {
+      "$type": "GpSculptPaint",
+      "brush": null,
+      "brush_asset_reference": {
+       "$type": "AssetWeakReference",
+       "asset_library_type": "ESSENTIALS",
+       "asset_library_identifier": "",
+       "relative_asset_identifier": "brushes/essentials_brushes-gp_sculpt.blend/Brush/Smooth"
+      },
+      "palette": null,
+      "show_brush": true,
+      "show_brush_on_surface": false,
+      "show_low_resolution": false,
+      "use_sculpt_delay_updates": false,
+      "show_bvh_nodes": false,
+      "use_symmetry_x": false,
+      "use_symmetry_y": false,
+      "use_symmetry_z": false,
+      "use_symmetry_feather": false,
+      "cavity_curve": {
+       "$type": "CurveMapping",
+       "tone": "STANDARD",
+       "use_clip": true,
+       "clip_min_x": 0.0,
+       "clip_min_y": 0.0,
+       "clip_max_x": 1.0,
+       "clip_max_y": 1.0,
+       "extend": "HORIZONTAL",
+       "curves": [
+        {
+         "$type": "CurveMap",
+         "points": {
+          "$len": 2
+         }
+        }
+       ],
+       "black_level": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "white_level": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "use_cavity": false,
+      "tile_offset": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tile_x": false,
+      "tile_y": false,
+      "tile_z": false,
+      "show_strength_curve": false,
+      "show_size_curve": false,
+      "show_jitter_curve": false,
+      "unified_paint_settings": {
+       "$type": "UnifiedPaintSettings",
+       "use_unified_size": true,
+       "use_unified_strength": false,
+       "use_unified_weight": false,
+       "use_unified_color": true,
+       "use_unified_input_samples": false,
+       "size": 100,
+       "unprojected_size": 0.5799999833106995,
+       "strength": 0.5,
+       "weight": 0.5,
+       "color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "secondary_color": [
+        1.0,
+        1.0,
+        1.0
+       ],
+       "use_color_jitter": false,
+       "hue_jitter": 0.0,
+       "saturation_jitter": 0.0,
+       "value_jitter": 0.0,
+       "use_stroke_random_hue": false,
+       "use_stroke_random_sat": false,
+       "use_stroke_random_val": false,
+       "use_random_press_hue": false,
+       "use_random_press_sat": false,
+       "use_random_press_val": false,
+       "input_samples": 1,
+       "use_locked_size": "VIEW"
+      },
+      "mesh_automasking_settings": null
+     },
+     "gpencil_weight_paint": {
+      "$type": "GpWeightPaint",
+      "brush": null,
+      "brush_asset_reference": {
+       "$type": "AssetWeakReference",
+       "asset_library_type": "ESSENTIALS",
+       "asset_library_identifier": "",
+       "relative_asset_identifier": "brushes/essentials_brushes-gp_weight.blend/Brush/Paint"
+      },
+      "palette": null,
+      "show_brush": true,
+      "show_brush_on_surface": false,
+      "show_low_resolution": false,
+      "use_sculpt_delay_updates": false,
+      "show_bvh_nodes": false,
+      "use_symmetry_x": false,
+      "use_symmetry_y": false,
+      "use_symmetry_z": false,
+      "use_symmetry_feather": false,
+      "cavity_curve": {
+       "$type": "CurveMapping",
+       "tone": "STANDARD",
+       "use_clip": true,
+       "clip_min_x": 0.0,
+       "clip_min_y": 0.0,
+       "clip_max_x": 1.0,
+       "clip_max_y": 1.0,
+       "extend": "HORIZONTAL",
+       "curves": [
+        {
+         "$type": "CurveMap",
+         "points": {
+          "$len": 2
+         }
+        }
+       ],
+       "black_level": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "white_level": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "use_cavity": false,
+      "tile_offset": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "tile_x": false,
+      "tile_y": false,
+      "tile_z": false,
+      "show_strength_curve": false,
+      "show_size_curve": false,
+      "show_jitter_curve": false,
+      "unified_paint_settings": {
+       "$type": "UnifiedPaintSettings",
+       "use_unified_size": true,
+       "use_unified_strength": false,
+       "use_unified_weight": true,
+       "use_unified_color": false,
+       "use_unified_input_samples": false,
+       "size": 100,
+       "unprojected_size": 0.5804149508476257,
+       "strength": 0.5,
+       "weight": 1.0,
+       "color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "secondary_color": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "use_color_jitter": false,
+       "hue_jitter": 0.0,
+       "saturation_jitter": 0.0,
+       "value_jitter": 0.0,
+       "use_stroke_random_hue": false,
+       "use_stroke_random_sat": false,
+       "use_stroke_random_val": false,
+       "use_random_press_hue": false,
+       "use_random_press_sat": false,
+       "use_random_press_val": false,
+       "input_samples": 0,
+       "use_locked_size": "VIEW"
+      },
+      "mesh_automasking_settings": null
+     },
+     "particle_edit": {
+      "$type": "ParticleEdit",
+      "tool": "COMB",
+      "select_mode": "PATH",
+      "use_preserve_length": true,
+      "use_preserve_root": true,
+      "use_emitter_deflect": true,
+      "emitter_distance": 0.25,
+      "use_fade_time": false,
+      "use_auto_velocity": false,
+      "show_particles": false,
+      "use_default_interpolate": false,
+      "default_key_count": 5,
+      "brush": {
+       "$type": "ParticleBrush",
+       "size": 50,
+       "strength": 0.5,
+       "count": 10,
+       "steps": 10,
+       "puff_mode": "ADD",
+       "use_puff_volume": false,
+       "length_mode": "GROW",
+       "curve": null
+      },
+      "display_step": 2,
+      "fade_frames": 0,
+      "type": "PARTICLES",
+      "is_editable": false,
+      "is_hair": false,
+      "object": null,
+      "shape_object": null
+     },
+     "uv_sculpt_lock_borders": false,
+     "uv_sculpt_all_islands": false,
+     "lock_object_mode": true,
+     "workspace_tool_type": "FALLBACK",
+     "use_proportional_edit": false,
+     "use_proportional_edit_objects": false,
+     "use_proportional_projected": false,
+     "use_proportional_connected": false,
+     "use_proportional_edit_mask": false,
+     "use_proportional_action": false,
+     "use_proportional_fcurve": false,
+     "lock_markers": false,
+     "proportional_edit_falloff": "SMOOTH",
+     "proportional_size": 1.0,
+     "proportional_distance": 1.0,
+     "double_threshold": 0.0010000000474974513,
+     "transform_pivot_point": "MEDIAN_POINT",
+     "use_transform_pivot_point_align": false,
+     "use_transform_data_origin": false,
+     "use_transform_skip_children": false,
+     "use_transform_correct_face_attributes": false,
+     "use_transform_correct_keep_connected": false,
+     "use_mesh_automerge": false,
+     "use_mesh_automerge_and_split": false,
+     "use_snap": false,
+     "use_snap_node": false,
+     "use_snap_sequencer": true,
+     "use_snap_uv": false,
+     "use_snap_align_rotation": false,
+     "use_snap_grid_absolute": false,
+     "snap_angle_increment_2d": 0.0872664600610733,
+     "snap_angle_increment_2d_precision": 0.01745329238474369,
+     "snap_angle_increment_3d": 0.0872664600610733,
+     "snap_angle_increment_3d_precision": 0.01745329238474369,
+     "snap_elements": [
+      "INCREMENT"
+     ],
+     "snap_elements_base": [
+      "INCREMENT"
+     ],
+     "snap_elements_individual": [],
+     "snap_face_nearest_steps": 1,
+     "use_snap_to_same_target": false,
+     "use_snap_anim": true,
+     "use_snap_driver": false,
+     "use_snap_time_absolute": false,
+     "use_snap_driver_absolute": false,
+     "snap_anim_element": "FRAME",
+     "use_snap_playhead": false,
+     "snap_playhead_element": [
+      "KEY",
+      "Strip"
+     ],
+     "snap_playhead_frame_step": 2,
+     "snap_playhead_second_step": 1,
+     "playhead_snap_distance": 20,
+     "snap_uv_element": [
+      "INCREMENT"
+     ],
+     "snap_target": "CLOSEST",
+     "use_snap_peel_object": false,
+     "use_snap_backface_culling": false,
+     "use_snap_self": true,
+     "use_snap_edit": true,
+     "use_snap_nonedit": true,
+     "use_snap_selectable": false,
+     "use_snap_translate": true,
+     "use_snap_rotate": false,
+     "use_snap_scale": false,
+     "plane_axis": "Z",
+     "plane_axis_auto": false,
+     "plane_depth": "SURFACE",
+     "plane_orientation": "SURFACE",
+     "snap_elements_tool": "GEOMETRY",
+     "use_gpencil_draw_additive": false,
+     "use_gpencil_draw_onback": false,
+     "use_gpencil_thumbnail_list": true,
+     "use_gpencil_weight_data_add": false,
+     "use_gpencil_automerge_strokes": false,
+     "gpencil_sculpt": {
+      "$type": "GPencilSculptSettings",
+      "guide": {
+       "$type": "GPencilSculptGuide",
+       "use_guide": false,
+       "use_snapping": false,
+       "reference_object": null,
+       "reference_point": "CURSOR",
+       "type": "CIRCULAR",
+       "angle": 0.0,
+       "angle_snap": 0.0,
+       "spacing": 0.0,
+       "location": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "use_multiframe_falloff": false,
+      "use_thickness_curve": false,
+      "use_scale_thickness": false,
+      "use_automasking_stroke": false,
+      "use_automasking_layer_stroke": false,
+      "use_automasking_material_stroke": false,
+      "use_automasking_layer_active": false,
+      "use_automasking_material_active": false,
+      "multiframe_falloff_curve": {
+       "$type": "CurveMapping",
+       "tone": "STANDARD",
+       "use_clip": true,
+       "clip_min_x": 0.0,
+       "clip_min_y": 0.0,
+       "clip_max_x": 1.0,
+       "clip_max_y": 1.0,
+       "extend": "EXTRAPOLATED",
+       "curves": [
+        {
+         "$type": "CurveMap",
+         "points": {
+          "$len": 7
+         }
+        }
+       ],
+       "black_level": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "white_level": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "thickness_primitive_curve": {
+       "$type": "CurveMapping",
+       "tone": "STANDARD",
+       "use_clip": true,
+       "clip_min_x": 0.0,
+       "clip_min_y": 0.0,
+       "clip_max_x": 1.0,
+       "clip_max_y": 1.0,
+       "extend": "EXTRAPOLATED",
+       "curves": [
+        {
+         "$type": "CurveMap",
+         "points": {
+          "$len": 3
+         }
+        }
+       ],
+       "black_level": [
+        0.0,
+        0.0,
+        0.0
+       ],
+       "white_level": [
+        1.0,
+        1.0,
+        1.0
+       ]
+      },
+      "lock_axis": "VIEW",
+      "intersection_threshold": 0.10000000149011612
+     },
+     "gpencil_interpolate": {
+      "$type": "GPencilInterpolateSettings",
+      "interpolation_curve": null
+     },
+     "gpencil_stroke_placement_view3d": "ORIGIN",
+     "gpencil_stroke_snap_mode": "NONE",
+     "gpencil_surface_offset": 0.0,
+     "use_gpencil_project_only_selected": false,
+     "gpencil_selectmode_edit": "POINT",
+     "use_gpencil_select_mask_point": false,
+     "use_gpencil_select_mask_stroke": false,
+     "use_gpencil_select_mask_segment": false,
+     "use_gpencil_vertex_select_mask_point": false,
+     "use_gpencil_vertex_select_mask_stroke": false,
+     "use_gpencil_vertex_select_mask_segment": false,
+     "use_grease_pencil_multi_frame_editing": false,
+     "annotation_stroke_placement_view2d": "IMAGE",
+     "annotation_stroke_placement_view3d": "CURSOR",
+     "use_annotation_stroke_endpoints": false,
+     "use_annotation_project_only_selected": false,
+     "annotation_thickness": 3,
+     "use_keyframe_insert_auto": false,
+     "auto_keying_mode": "ADD_REPLACE_KEYS",
+     "use_record_with_nla": false,
+     "use_keyframe_insert_keyingset": false,
+     "use_keyframe_cycle_aware": false,
+     "keyframe_type": "KEYFRAME",
+     "anim_mirror_object": null,
+     "anim_mirror_bone": "",
+     "anim_relative_object": null,
+     "anim_fix_to_cam_use_loc": true,
+     "anim_fix_to_cam_use_rot": true,
+     "anim_fix_to_cam_use_scale": true,
+     "uv_select_mode": "VERTEX",
+     "uv_sticky_select_mode": "SHARED_LOCATION",
+     "use_uv_select_sync": true,
+     "use_uv_select_island": false,
+     "show_uv_local_view": false,
+     "use_uv_custom_region": false,
+     "mesh_select_mode": [
+      true,
+      false,
+      false
+     ],
+     "vertex_group_weight": 1.0,
+     "use_edge_path_live_unwrap": false,
+     "normal_vector": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "curve_paint_settings": {
+      "$type": "CurvePaintSettings",
+      "curve_type": "BEZIER",
+      "use_corners_detect": true,
+      "use_pressure_radius": false,
+      "use_stroke_endpoints": false,
+      "use_offset_absolute": false,
+      "use_project_only_selected": false,
+      "error_threshold": 8,
+      "fit_method": "REFIT",
+      "corner_angle": 1.2217304706573486,
+      "radius_min": 0.0,
+      "radius_max": 1.0,
+      "radius_taper_start": 0.0,
+      "radius_taper_end": 0.0,
+      "surface_offset": 0.0,
+      "depth_mode": "CURSOR",
+      "surface_plane": "NORMAL_VIEW"
+     },
+     "statvis": {
+      "$type": "MeshStatVis",
+      "type": "OVERHANG",
+      "overhang_min": 0.0,
+      "overhang_max": 0.7853981852531433,
+      "overhang_axis": "NEG_Z",
+      "thickness_min": 0.0,
+      "thickness_max": 0.10000000149011612,
+      "thickness_samples": 1,
+      "distort_min": 0.0872664600610733,
+      "distort_max": 0.7853981852531433,
+      "sharp_min": 1.5707963705062866,
+      "sharp_max": 3.1415927410125732
+     },
+     "custom_bevel_profile_preset": {
+      "$type": "CurveProfile",
+      "preset": "LINE",
+      "use_clip": true,
+      "use_sample_straight_edges": false,
+      "use_sample_even_lengths": false,
+      "points": [
+       {
+        "$type": "CurveProfilePoint",
+        "location": [
+         1.0,
+         0.0
+        ],
+        "handle_type_1": "AUTO",
+        "handle_type_2": "AUTO",
+        "select": false
+       },
+       {
+        "$type": "CurveProfilePoint",
+        "location": [
+         0.0,
+         1.0
+        ],
+        "handle_type_1": "AUTO",
+        "handle_type_2": "AUTO",
+        "select": false
+       }
+      ],
+      "segments": []
+     },
+     "sequencer_tool_settings": {
+      "$type": "SequencerToolSettings",
+      "fit_method": "FIT",
+      "snap_to_current_frame": true,
+      "snap_to_hold_offset": true,
+      "snap_to_markers": true,
+      "snap_to_retiming_keys": true,
+      "snap_to_frame_range": true,
+      "snap_to_borders": true,
+      "snap_to_center": true,
+      "snap_to_strips_preview": true,
+      "snap_ignore_muted": false,
+      "snap_ignore_sound": false,
+      "use_snap_current_frame_to_strips": false,
+      "snap_to_all_channels": true,
+      "snap_distance": 15,
+      "overlap_mode": "SHUFFLE",
+      "pivot_point": "MEDIAN"
+     }
+    },
+    "unit_settings": {
+     "$type": "UnitSettings",
+     "system": "METRIC",
+     "system_rotation": "DEGREES",
+     "scale_length": 1.0,
+     "use_separate": false,
+     "length_unit": "METERS",
+     "mass_unit": "KILOGRAMS",
+     "time_unit": "SECONDS",
+     "temperature_unit": "KELVIN"
+    },
+    "gravity": [
+     0.0,
+     0.0,
+     -9.8100004196167
+    ],
+    "use_gravity": true,
+    "render": {
+     "$type": "RenderSettings",
+     "image_settings": {
+      "$type": "ImageFormatSettings",
+      "media_type": "IMAGE",
+      "file_format": "PNG",
+      "color_mode": "RGBA",
+      "color_depth": "8",
+      "quality": 90,
+      "compression": 15,
+      "use_preview": false,
+      "exr_codec": "ZIP",
+      "use_exr_interleave": false,
+      "use_jpeg2k_ycc": false,
+      "use_jpeg2k_cinema_preset": false,
+      "use_jpeg2k_cinema_48": false,
+      "jpeg2k_codec": "JP2",
+      "tiff_codec": "DEFLATE",
+      "use_cineon_log": false,
+      "cineon_black": 0,
+      "cineon_white": 0,
+      "cineon_gamma": 0.0,
+      "views_format": "INDIVIDUAL",
+      "stereo_3d_format": {
+       "$type": "Stereo3dFormat",
+       "display_mode": "ANAGLYPH",
+       "anaglyph_type": "RED_CYAN",
+       "interlace_type": "ROW_INTERLEAVED",
+       "use_interlace_swap": false,
+       "use_sidebyside_crosseyed": false,
+       "use_squeezed_frame": false
+      },
+      "color_management": "FOLLOW_SCENE",
+      "view_settings": {
+       "$type": "ColorManagedViewSettings",
+       "look": "None",
+       "view_transform": "Standard",
+       "exposure": 0.0,
+       "gamma": 1.0,
+       "curve_mapping": null,
+       "use_curve_mapping": false,
+       "use_white_balance": false,
+       "white_balance_temperature": 0.0,
+       "white_balance_tint": 0.0,
+       "white_balance_whitepoint": [
+        2.970402717590332,
+        0.5192680954933167,
+        -0.04139183461666107
+       ],
+       "is_hdr": false,
+       "support_emulation": false
+      },
+      "display_settings": {
+       "$type": "ColorManagedDisplaySettings",
+       "display_device": "sRGB",
+       "emulation": "AUTO"
+      },
+      "linear_colorspace_settings": {
+       "$type": "ColorManagedInputColorspaceSettings",
+       "name": "",
+       "is_data": false
+      },
+      "has_linear_colorspace": false
+     },
+     "resolution_x": 1920,
+     "resolution_y": 1080,
+     "resolution_percentage": 100,
+     "preview_pixel_size": "AUTO",
+     "pixel_aspect_x": 1.0,
+     "pixel_aspect_y": 1.0,
+     "ppm_factor": 72.0,
+     "ppm_base": 0.02539999969303608,
+     "ffmpeg": {
+      "$type": "FFmpegSettings",
+      "format": "MPEG1",
+      "codec": "NONE",
+      "video_bitrate": 0,
+      "minrate": 0,
+      "maxrate": 0,
+      "muxrate": 0,
+      "gopsize": 0,
+      "max_b_frames": 0,
+      "use_max_b_frames": false,
+      "buffersize": 0,
+      "packetsize": 0,
+      "constant_rate_factor": "NONE",
+      "custom_constant_rate_factor": 23,
+      "ffmpeg_preset": "GOOD",
+      "ffmpeg_prores_profile": "422_PROXY",
+      "use_autosplit": false,
+      "use_lossless_output": false,
+      "audio_codec": "NONE",
+      "audio_bitrate": 192,
+      "audio_volume": 1.0,
+      "audio_mixrate": 48000,
+      "audio_channels": "STEREO"
+     },
+     "fps": 24,
+     "fps_base": 1.0,
+     "frame_map_old": 100,
+     "frame_map_new": 100,
+     "dither_intensity": 1.0,
+     "filter_size": 1.5,
+     "film_transparent": false,
+     "use_freestyle": false,
+     "threads_mode": "AUTO",
+     "use_motion_blur": false,
+     "motion_blur_shutter": 0.5,
+     "motion_blur_position": "CENTER",
+     "motion_blur_shutter_curve": {
+      "$type": "CurveMapping",
+      "tone": "STANDARD",
+      "use_clip": true,
+      "clip_min_x": 0.0,
+      "clip_min_y": 0.0,
+      "clip_max_x": 1.0,
+      "clip_max_y": 1.0,
+      "extend": "EXTRAPOLATED",
+      "curves": [
+       {
+        "$type": "CurveMap",
+        "points": [
+         {
+          "$type": "CurveMapPoint",
+          "location": [
+           0.0,
+           1.0
+          ],
+          "handle_type": "AUTO",
+          "select": false
+         },
+         {
+          "$type": "CurveMapPoint",
+          "location": [
+           0.5,
+           1.0
+          ],
+          "handle_type": "AUTO",
+          "select": false
+         },
+         {
+          "$type": "CurveMapPoint",
+          "location": [
+           1.0,
+           1.0
+          ],
+          "handle_type": "AUTO",
+          "select": false
+         }
+        ]
+       }
+      ],
+      "black_level": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "white_level": [
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     "hair_type": "STRAND",
+     "hair_subdiv": 0,
+     "use_high_quality_normals": false,
+     "anisotropic_filter": "FILTER_2",
+     "use_border": false,
+     "border_min_x": 0.0,
+     "border_min_y": 0.0,
+     "border_max_x": 1.0,
+     "border_max_y": 1.0,
+     "use_crop_to_border": false,
+     "use_placeholder": false,
+     "use_overwrite": true,
+     "save_output": true,
+     "use_compositing": true,
+     "use_sequencer": true,
+     "use_file_extension": true,
+     "file_extension": ".png",
+     "is_movie_format": false,
+     "use_lock_interface": false,
+     "filepath": "/tmp/",
+     "use_render_cache": false,
+     "use_stamp_time": true,
+     "use_stamp_date": true,
+     "use_stamp_frame": true,
+     "use_stamp_frame_range": false,
+     "use_stamp_camera": true,
+     "use_stamp_lens": false,
+     "use_stamp_scene": true,
+     "use_stamp_note": false,
+     "use_stamp_marker": false,
+     "use_stamp_filename": true,
+     "use_stamp_sequencer_strip": false,
+     "use_stamp_render_time": true,
+     "stamp_note_text": "",
+     "use_stamp": false,
+     "use_stamp_labels": true,
+     "metadata_input": "SCENE",
+     "use_stamp_memory": false,
+     "use_stamp_hostname": false,
+     "stamp_font_size": 12,
+     "stamp_foreground": [
+      0.800000011920929,
+      0.800000011920929,
+      0.800000011920929,
+      1.0
+     ],
+     "stamp_background": [
+      0.0,
+      0.0,
+      0.0,
+      0.25
+     ],
+     "sequencer_gl_preview": "SOLID",
+     "use_sequencer_override_scene_strip": false,
+     "use_single_layer": false,
+     "views": [
+      {
+       "$type": "SceneRenderView",
+       "name": "left",
+       "file_suffix": "_L",
+       "camera_suffix": "_L",
+       "use": true
+      },
+      {
+       "$type": "SceneRenderView",
+       "name": "right",
+       "file_suffix": "_R",
+       "camera_suffix": "_R",
+       "use": true
+      }
+     ],
+     "stereo_views": [
+      {
+       "$type": "SceneRenderView",
+       "name": "left",
+       "file_suffix": "_L",
+       "camera_suffix": "_L",
+       "use": true
+      },
+      {
+       "$type": "SceneRenderView",
+       "name": "right",
+       "file_suffix": "_R",
+       "camera_suffix": "_R",
+       "use": true
+      }
+     ],
+     "use_multiview": false,
+     "views_format": "STEREO_3D",
+     "engine": "BLENDER_EEVEE",
+     "has_multiple_engines": true,
+     "use_spherical_stereo": false,
+     "use_simplify": false,
+     "simplify_subdivision": 6,
+     "simplify_child_particles": 1.0,
+     "simplify_subdivision_render": 6,
+     "simplify_child_particles_render": 1.0,
+     "simplify_volumes": 1.0,
+     "use_simplify_normals": false,
+     "use_texture_cache": true,
+     "use_auto_generate_texture_cache": false,
+     "simplify_gpencil": false,
+     "simplify_gpencil_onplay": false,
+     "simplify_gpencil_antialiasing": true,
+     "simplify_gpencil_view_fill": true,
+     "simplify_gpencil_modifier": true,
+     "simplify_gpencil_shader_fx": true,
+     "simplify_gpencil_tint": true,
+     "use_persistent_data": false,
+     "line_thickness_mode": "ABSOLUTE",
+     "line_thickness": 1.0,
+     "bake": {
+      "$type": "BakeSettings",
+      "type": "NORMALS",
+      "cage_object": null,
+      "filepath": "//",
+      "width": 512,
+      "height": 512,
+      "margin": 16,
+      "margin_type": "ADJACENT_FACES",
+      "max_ray_distance": 0.0,
+      "cage_extrusion": 0.0,
+      "normal_space": "TANGENT",
+      "normal_r": "POS_X",
+      "normal_g": "POS_Y",
+      "normal_b": "POS_Z",
+      "image_settings": {
+       "$type": "ImageFormatSettings",
+       "media_type": "IMAGE",
+       "file_format": "PNG",
+       "color_mode": "RGBA",
+       "color_depth": "8",
+       "quality": 90,
+       "compression": 15,
+       "use_preview": false,
+       "exr_codec": "NONE",
+       "use_exr_interleave": false,
+       "use_jpeg2k_ycc": false,
+       "use_jpeg2k_cinema_preset": false,
+       "use_jpeg2k_cinema_48": false,
+       "jpeg2k_codec": "JP2",
+       "tiff_codec": "DEFLATE",
+       "use_cineon_log": false,
+       "cineon_black": 0,
+       "cineon_white": 0,
+       "cineon_gamma": 0.0,
+       "views_format": "INDIVIDUAL",
+       "stereo_3d_format": {
+        "$type": "Stereo3dFormat",
+        "display_mode": "ANAGLYPH",
+        "anaglyph_type": "RED_CYAN",
+        "interlace_type": "ROW_INTERLEAVED",
+        "use_interlace_swap": false,
+        "use_sidebyside_crosseyed": false,
+        "use_squeezed_frame": false
+       },
+       "color_management": "FOLLOW_SCENE",
+       "view_settings": {
+        "$type": "ColorManagedViewSettings",
+        "look": "None",
+        "view_transform": "Standard",
+        "exposure": 0.0,
+        "gamma": 1.0,
+        "curve_mapping": null,
+        "use_curve_mapping": false,
+        "use_white_balance": false,
+        "white_balance_temperature": 0.0,
+        "white_balance_tint": 0.0,
+        "white_balance_whitepoint": [
+         2.970402717590332,
+         0.5192680954933167,
+         -0.04139183461666107
+        ],
+        "is_hdr": false,
+        "support_emulation": false
+       },
+       "display_settings": {
+        "$type": "ColorManagedDisplaySettings",
+        "display_device": "sRGB",
+        "emulation": "AUTO"
+       },
+       "linear_colorspace_settings": {
+        "$type": "ColorManagedInputColorspaceSettings",
+        "name": "",
+        "is_data": false
+       },
+       "has_linear_colorspace": false
+      },
+      "target": "IMAGE_TEXTURES",
+      "save_mode": "INTERNAL",
+      "view_from": "ABOVE_SURFACE",
+      "use_selected_to_active": false,
+      "use_clear": true,
+      "use_split_materials": false,
+      "use_automatic_name": false,
+      "use_cage": false,
+      "use_pass_emit": true,
+      "use_pass_direct": true,
+      "use_pass_indirect": true,
+      "use_pass_color": true,
+      "use_pass_diffuse": true,
+      "use_pass_glossy": true,
+      "use_pass_transmission": true,
+      "pass_filter": [
+       "COLOR",
+       "DIFFUSE",
+       "DIRECT",
+       "EMIT",
+       "GLOSSY",
+       "INDIRECT",
+       "TRANSMISSION"
+      ],
+      "use_multires": false,
+      "use_lores_mesh": false,
+      "displacement_space": "OBJECT"
+     },
+     "compositor_device": "GPU",
+     "compositor_precision": "AUTO",
+     "compositor_denoise_device": "AUTO",
+     "compositor_denoise_preview_quality": "BALANCED",
+     "compositor_denoise_final_quality": "HIGH"
+    },
+    "safe_areas": {
+     "$type": "DisplaySafeAreas",
+     "title": [
+      0.10000000149011612,
+      0.05000000074505806
+     ],
+     "action": [
+      0.03500000014901161,
+      0.03500000014901161
+     ],
+     "title_center": [
+      0.17499999701976776,
+      0.05000000074505806
+     ],
+     "action_center": [
+      0.15000000596046448,
+      0.05000000074505806
+     ]
+    },
+    "timeline_markers": [],
+    "transform_orientation_slots": [
+     {
+      "$type": "TransformOrientationSlot",
+      "type": "GLOBAL",
+      "custom_orientation": null,
+      "use": false
+     },
+     {
+      "$type": "TransformOrientationSlot",
+      "type": "DEFAULT",
+      "custom_orientation": null,
+      "use": false
+     },
+     {
+      "$type": "TransformOrientationSlot",
+      "type": "DEFAULT",
+      "custom_orientation": null,
+      "use": false
+     },
+     {
+      "$type": "TransformOrientationSlot",
+      "type": "DEFAULT",
+      "custom_orientation": null,
+      "use": false
+     }
+    ],
+    "cursor": {
+     "$type": "View3DCursor",
+     "location": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_quaternion": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_axis_angle": [
+      0.0,
+      0.0,
+      1.0,
+      0.0
+     ],
+     "rotation_euler": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "rotation_mode": "XYZ",
+     "matrix": [
+      [
+       1.0,
+       0.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "use_audio": true,
+    "use_audio_scrub": false,
+    "audio_doppler_speed": 343.29998779296875,
+    "audio_doppler_factor": 1.0,
+    "audio_distance_model": "INVERSE_CLAMPED",
+    "audio_volume": 1.0,
+    "annotation": null,
+    "active_clip": null,
+    "view_settings": {
+     "$type": "ColorManagedViewSettings",
+     "look": "None",
+     "view_transform": "AgX",
+     "exposure": 0.0,
+     "gamma": 1.0,
+     "curve_mapping": {
+      "$type": "CurveMapping",
+      "tone": "STANDARD",
+      "use_clip": true,
+      "clip_min_x": 0.0,
+      "clip_min_y": 0.0,
+      "clip_max_x": 1.0,
+      "clip_max_y": 1.0,
+      "extend": "EXTRAPOLATED",
+      "curves": [
+       {
+        "$type": "CurveMap",
+        "points": [
+         {
+          "$type": "CurveMapPoint",
+          "location": [
+           0.0,
+           0.0
+          ],
+          "handle_type": "AUTO",
+          "select": false
+         },
+         {
+          "$type": "CurveMapPoint",
+          "location": [
+           1.0,
+           1.0
+          ],
+          "handle_type": "AUTO",
+          "select": false
+         }
+        ]
+       },
+       {
+        "$type": "CurveMap",
+        "points": [
+         {
+          "$type": "CurveMapPoint",
+          "location": [
+           0.0,
+           0.0
+          ],
+          "handle_type": "AUTO",
+          "select": false
+         },
+         {
+          "$type": "CurveMapPoint",
+          "location": [
+           1.0,
+           1.0
+          ],
+          "handle_type": "AUTO",
+          "select": false
+         }
+        ]
+       },
+       {
+        "$type": "CurveMap",
+        "points": [
+         {
+          "$type": "CurveMapPoint",
+          "location": [
+           0.0,
+           0.0
+          ],
+          "handle_type": "AUTO",
+          "select": false
+         },
+         {
+          "$type": "CurveMapPoint",
+          "location": [
+           1.0,
+           1.0
+          ],
+          "handle_type": "AUTO",
+          "select": false
+         }
+        ]
+       },
+       {
+        "$type": "CurveMap",
+        "points": [
+         {
+          "$type": "CurveMapPoint",
+          "location": [
+           0.0,
+           0.0
+          ],
+          "handle_type": "AUTO",
+          "select": false
+         },
+         {
+          "$type": "CurveMapPoint",
+          "location": [
+           1.0,
+           1.0
+          ],
+          "handle_type": "AUTO",
+          "select": false
+         }
+        ]
+       }
+      ],
+      "black_level": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "white_level": [
+       1.0,
+       1.0,
+       1.0
+      ]
+     },
+     "use_curve_mapping": false,
+     "use_white_balance": false,
+     "white_balance_temperature": 6500.0,
+     "white_balance_tint": 10.0,
+     "white_balance_whitepoint": [
+      0.9993047714233398,
+      1.0003489255905151,
+      0.9985780119895935
+     ],
+     "is_hdr": false,
+     "support_emulation": true
+    },
+    "display_settings": {
+     "$type": "ColorManagedDisplaySettings",
+     "display_device": "sRGB",
+     "emulation": "AUTO"
+    },
+    "sequencer_colorspace_settings": {
+     "$type": "ColorManagedSequencerColorspaceSettings",
+     "name": "sRGB"
+    },
+    "view_layers": [
+     {
+      "$type": "ViewLayer",
+      "name": "ViewLayer",
+      "material_override": null,
+      "world_override": null,
+      "samples": 0,
+      "pass_alpha_threshold": 0.5,
+      "eevee": {
+       "$type": "ViewLayerEEVEE",
+       "use_pass_volume_direct": false,
+       "use_pass_bloom": false,
+       "use_pass_transparent": false,
+       "ambient_occlusion_distance": 10.0
+      },
+      "aovs": [],
+      "active_aov": null,
+      "active_aov_index": -1,
+      "lightgroups": [],
+      "active_lightgroup": null,
+      "active_lightgroup_index": -1,
+      "use_pass_cryptomatte_object": false,
+      "use_pass_cryptomatte_material": false,
+      "use_pass_cryptomatte_asset": false,
+      "pass_cryptomatte_depth": 6,
+      "use_pass_cryptomatte_accurate": true,
+      "use_solid": true,
+      "use_sky": true,
+      "use_ao": true,
+      "use_strand": true,
+      "use_volumes": true,
+      "use_motion_blur": true,
+      "use_grease_pencil": true,
+      "use_pass_combined": true,
+      "use_pass_z": false,
+      "use_pass_vector": false,
+      "use_pass_position": false,
+      "use_pass_normal": false,
+      "use_pass_uv": false,
+      "use_pass_mist": false,
+      "use_pass_object_index": false,
+      "use_pass_material_index": false,
+      "use_pass_shadow": false,
+      "use_pass_ambient_occlusion": false,
+      "use_pass_emit": false,
+      "use_pass_environment": false,
+      "use_pass_diffuse_direct": false,
+      "use_pass_diffuse_indirect": false,
+      "use_pass_diffuse_color": false,
+      "use_pass_glossy_direct": false,
+      "use_pass_glossy_indirect": false,
+      "use_pass_glossy_color": false,
+      "use_pass_transmission_direct": false,
+      "use_pass_transmission_indirect": false,
+      "use_pass_transmission_color": false,
+      "use_pass_subsurface_direct": false,
+      "use_pass_subsurface_indirect": false,
+      "use_pass_subsurface_color": false,
+      "layer_collection": {
+       "$type": "LayerCollection",
+       "collection": {
+        "$ref": "bpy.data.scenes['Scene'].collection"
+       },
+       "name": "Scene Collection",
+       "exclude": false,
+       "holdout": false,
+       "indirect_only": false,
+       "hide_viewport": false,
+       "is_visible": true
+      },
+      "active_layer_collection": {
+       "$type": "LayerCollection",
+       "collection": {
+        "$ref": "bpy.data.scenes['Scene'].collection"
+       },
+       "name": "Scene Collection",
+       "exclude": false,
+       "holdout": false,
+       "indirect_only": false,
+       "hide_viewport": false,
+       "is_visible": true
+      },
+      "objects": [],
+      "use": true,
+      "has_export_collections": false,
+      "use_freestyle": true,
+      "freestyle_settings": {
+       "$type": "FreestyleSettings",
+       "modules": [],
+       "mode": "EDITOR",
+       "use_culling": false,
+       "use_suggestive_contours": false,
+       "use_ridges_and_valleys": false,
+       "use_material_boundaries": false,
+       "use_smoothness": false,
+       "use_view_map_cache": false,
+       "as_render_pass": false,
+       "sphere_radius": 0.10000000149011612,
+       "kr_derivative_epsilon": 0.0,
+       "crease_angle": 2.3462471961975098,
+       "linesets": [
+        {
+         "$type": "FreestyleLineSet",
+         "linestyle": null,
+         "name": "LineSet",
+         "show_render": true,
+         "select_by_visibility": true,
+         "select_by_edge_types": true,
+         "select_by_collection": false,
+         "select_by_image_border": true,
+         "select_by_face_marks": false,
+         "edge_type_negation": "INCLUSIVE",
+         "edge_type_combination": "OR",
+         "collection": null,
+         "collection_negation": "INCLUSIVE",
+         "face_mark_negation": "INCLUSIVE",
+         "face_mark_condition": "ONE",
+         "select_silhouette": true,
+         "select_border": true,
+         "select_crease": true,
+         "select_ridge_valley": false,
+         "select_suggestive_contour": false,
+         "select_material_boundary": false,
+         "select_contour": false,
+         "select_external_contour": false,
+         "select_edge_mark": false,
+         "exclude_silhouette": false,
+         "exclude_border": false,
+         "exclude_crease": false,
+         "exclude_ridge_valley": false,
+         "exclude_suggestive_contour": false,
+         "exclude_material_boundary": false,
+         "exclude_contour": false,
+         "exclude_external_contour": false,
+         "exclude_edge_mark": false,
+         "visibility": "VISIBLE",
+         "qi_start": 0,
+         "qi_end": 100
+        }
+       ]
+      },
+      "use_pass_grease_pencil": false,
+      "cycles": {
+       "$type": "CyclesRenderLayerSettings",
+       "name": "",
+       "pass_debug_sample_count": false,
+       "pass_render_time": false,
+       "use_pass_volume_direct": false,
+       "use_pass_volume_indirect": false,
+       "use_pass_volume_scatter": false,
+       "use_pass_volume_transmit": false,
+       "use_pass_volume_majorant": false,
+       "use_pass_shadow_catcher": false,
+       "use_denoising": true,
+       "denoising_store_passes": false,
+       "denoising_pass_follow_reflections": true,
+       "denoising_pass_use_albedo_roughness_weighting": true
+      }
+     }
+    ],
+    "collection": {
+     "$ref": "bpy.data.scenes['Scene'].collection"
+    },
+    "display": {
+     "$type": "SceneDisplay",
+     "light_direction": [
+      0.5773502588272095,
+      0.5773502588272095,
+      0.5773502588272095
+     ],
+     "shadow_shift": 0.10000000149011612,
+     "shadow_focus": 0.0,
+     "matcap_ssao_distance": 0.20000000298023224,
+     "matcap_ssao_attenuation": 1.0,
+     "matcap_ssao_samples": 16,
+     "render_aa": "8",
+     "viewport_aa": "FXAA",
+     "shading": {
+      "$type": "View3DShading",
+      "type": "SOLID",
+      "light": "STUDIO",
+      "show_object_outline": false,
+      "studio_light": "Default",
+      "use_world_space_lighting": false,
+      "show_backface_culling": false,
+      "show_cavity": false,
+      "cavity_type": "WORLD",
+      "curvature_ridge_factor": 0.0,
+      "curvature_valley_factor": 0.0,
+      "cavity_ridge_factor": 1.0,
+      "cavity_valley_factor": 1.0,
+      "selected_studio_light": {
+       "$type": "StudioLight",
+       "index": 1,
+       "is_user_defined": false,
+       "has_specular_highlight_pass": true,
+       "type": "STUDIO",
+       "name": "Default",
+       "path": "",
+       "solid_lights": [
+        {
+         "$type": "UserSolidLight",
+         "use": true,
+         "smooth": 0.5266199707984924,
+         "direction": [
+          -0.35254600644111633,
+          0.17093099653720856,
+          -0.9200509786605835
+         ],
+         "specular_color": [
+          0.26676100492477417,
+          0.26676100492477417,
+          0.26676100492477417
+         ],
+         "diffuse_color": [
+          0.03310300037264824,
+          0.03310300037264824,
+          0.03310300037264824
+         ]
+        },
+        {
+         "$type": "UserSolidLight",
+         "use": true,
+         "smooth": 0.0,
+         "direction": [
+          -0.40816301107406616,
+          0.34693899750709534,
+          0.844415009021759
+         ],
+         "specular_color": [
+          0.5990300178527832,
+          0.5990300178527832,
+          0.5990300178527832
+         ],
+         "diffuse_color": [
+          0.5210829973220825,
+          0.5382260084152222,
+          0.5382260084152222
+         ]
+        },
+        {
+         "$type": "UserSolidLight",
+         "use": true,
+         "smooth": 0.47826099395751953,
+         "direction": [
+          0.5217390060424805,
+          0.8260869979858398,
+          0.21299900114536285
+         ],
+         "specular_color": [
+          0.10610199719667435,
+          0.12598100304603577,
+          0.15852299332618713
+         ],
+         "diffuse_color": [
+          0.03840300068259239,
+          0.03435700014233589,
+          0.04952999949455261
+         ]
+        },
+        {
+         "$type": "UserSolidLight",
+         "use": true,
+         "smooth": 0.20000000298023224,
+         "direction": [
+          0.6245189905166626,
+          -0.5620669722557068,
+          -0.5422689914703369
+         ],
+         "specular_color": [
+          0.10653500258922577,
+          0.08477099984884262,
+          0.0660799965262413
+         ],
+         "diffuse_color": [
+          0.0908380001783371,
+          0.08207999914884567,
+          0.07225500047206879
+         ]
+        }
+       ],
+       "light_ambient": [
+        0.0,
+        0.0,
+        0.0
+       ]
+      },
+      "studiolight_rotate_z": 0.0,
+      "studiolight_intensity": 0.0,
+      "studiolight_background_alpha": 0.0,
+      "studiolight_background_blur": 0.0,
+      "use_studiolight_view_rotation": true,
+      "color_type": "MATERIAL",
+      "wireframe_color_type": "",
+      "single_color": [
+       0.800000011920929,
+       0.800000011920929,
+       0.800000011920929
+      ],
+      "background_type": "THEME",
+      "background_color": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "show_shadows": false,
+      "show_xray": false,
+      "show_xray_wireframe": false,
+      "xray_alpha": 0.5,
+      "xray_alpha_wireframe": 0.0,
+      "use_dof": false,
+      "use_scene_lights": false,
+      "use_scene_world": false,
+      "use_scene_lights_render": false,
+      "use_scene_world_render": false,
+      "show_specular_highlight": true,
+      "object_outline_color": [
+       0.0,
+       0.0,
+       0.0
+      ],
+      "shadow_intensity": 0.5,
+      "render_pass": "COMBINED",
+      "aov_name": "",
+      "use_compositor": "DISABLED",
+      "cycles": {
+       "$type": "CyclesView3DShadingSettings",
+       "name": "",
+       "render_pass": "COMBINED",
+       "show_active_pixels": false
+      }
+     }
+    },
+    "eevee": {
+     "$type": "SceneEEVEE",
+     "gi_diffuse_bounces": 3,
+     "gi_cubemap_resolution": "512",
+     "gi_visibility_resolution": "32",
+     "gi_glossy_clamp": 0.0,
+     "gi_irradiance_pool_size": "16",
+     "taa_samples": 16,
+     "taa_render_samples": 64,
+     "use_taa_reprojection": true,
+     "ray_tracing_method": "SCREEN",
+     "use_shadow_jitter_viewport": false,
+     "clamp_surface_direct": 0.0,
+     "clamp_surface_indirect": 10.0,
+     "clamp_volume_direct": 0.0,
+     "clamp_volume_indirect": 0.0,
+     "direct_light_intensity": 1.0,
+     "indirect_light_intensity": 1.0,
+     "volumetric_start": 0.10000000149011612,
+     "volumetric_end": 100.0,
+     "volumetric_tile_size": "8",
+     "volumetric_samples": 64,
+     "volumetric_sample_distribution": 0.800000011920929,
+     "volumetric_ray_depth": 16,
+     "volumetric_light_clamp": 0.0,
+     "use_volumetric_shadows": false,
+     "volumetric_shadow_samples": 16,
+     "use_volume_custom_range": false,
+     "use_fast_gi": true,
+     "fast_gi_thickness_near": 0.10000000149011612,
+     "fast_gi_quality": 0.25,
+     "fast_gi_step_count": 8,
+     "fast_gi_ray_count": 2,
+     "fast_gi_method": "GLOBAL_ILLUMINATION",
+     "fast_gi_distance": 0.0,
+     "fast_gi_bias": 0.05000000074505806,
+     "fast_gi_resolution": "2",
+     "bokeh_max_size": 100.0,
+     "bokeh_threshold": 1.0,
+     "bokeh_neighbor_max": 10.0,
+     "use_bokeh_jittered": false,
+     "bokeh_overblur": 5.0,
+     "motion_blur_depth_scale": 100.0,
+     "motion_blur_max": 32,
+     "motion_blur_steps": 1,
+     "use_shadows": true,
+     "shadow_pool_size": "512",
+     "shadow_ray_count": 1,
+     "shadow_step_count": 6,
+     "light_threshold": 0.009999999776482582,
+     "use_overscan": false,
+     "overscan_size": 3.0,
+     "ray_tracing_options": {
+      "$type": "RaytraceEEVEE",
+      "resolution_scale": "2",
+      "use_backface_hit": true,
+      "backface_radiance_scale": 0.25,
+      "use_denoise": true,
+      "denoise_spatial": true,
+      "denoise_temporal": true,
+      "denoise_bilateral": true,
+      "screen_trace_thickness": 0.10000000149011612,
+      "trace_max_roughness": 0.5,
+      "screen_trace_quality": 0.25
+     },
+     "use_raytracing": false,
+     "shadow_resolution_scale": 1.0
+    },
+    "grease_pencil_settings": {
+     "$type": "SceneGpencil",
+     "antialias_threshold": 1.0,
+     "antialias_threshold_render": 0.25,
+     "aa_samples": 8,
+     "motion_blur_steps": 8
+    },
+    "hydra": {
+     "$type": "SceneHydra",
+     "export_method": "HYDRA"
+    },
+    "cycles": {
+     "$type": "CyclesRenderSettings",
+     "name": "",
+     "device": "CPU",
+     "shading_system": false,
+     "preview_pause": false,
+     "use_denoising": true,
+     "denoiser": "OPENIMAGEDENOISE",
+     "denoising_prefilter": "ACCURATE",
+     "denoising_quality": "HIGH",
+     "denoising_input_passes": "RGB_ALBEDO_NORMAL",
+     "denoising_use_gpu": false,
+     "use_preview_denoising": false,
+     "preview_denoiser": "AUTO",
+     "preview_denoising_prefilter": "FAST",
+     "preview_denoising_quality": "BALANCED",
+     "preview_denoising_input_passes": "RGB_ALBEDO",
+     "preview_denoising_start_sample": 1,
+     "preview_denoising_use_gpu": true,
+     "samples": 4096,
+     "preview_samples": 1024,
+     "use_sample_subset": false,
+     "sample_offset": 0,
+     "sample_subset_length": 2048,
+     "time_limit": 0.0,
+     "sampling_pattern": "AUTOMATIC",
+     "scrambling_distance": 1.0,
+     "preview_scrambling_distance": false,
+     "auto_scrambling_distance": false,
+     "use_layer_samples": "USE",
+     "light_sampling_threshold": 0.009999999776482582,
+     "use_adaptive_sampling": true,
+     "adaptive_threshold": 0.009999999776482582,
+     "adaptive_min_samples": 0,
+     "use_preview_adaptive_sampling": true,
+     "preview_adaptive_threshold": 0.10000000149011612,
+     "preview_adaptive_min_samples": 0,
+     "direct_light_sampling_type": "MULTIPLE_IMPORTANCE_SAMPLING",
+     "use_light_tree": true,
+     "min_light_bounces": 0,
+     "min_transparent_bounces": 0,
+     "caustics_reflective": true,
+     "caustics_refractive": true,
+     "blur_glossy": 1.0,
+     "use_guiding": false,
+     "use_deterministic_guiding": true,
+     "guiding_distribution_type": "PARALLAX_AWARE_VMM",
+     "guiding_directional_sampling_type": "RIS",
+     "use_surface_guiding": true,
+     "surface_guiding_probability": 0.5,
+     "use_volume_guiding": true,
+     "guiding_training_samples": 128,
+     "volume_guiding_probability": 0.5,
+     "use_guiding_direct_light": true,
+     "use_guiding_mis_weights": true,
+     "guiding_roughness_threshold": 0.05000000074505806,
+     "max_bounces": 12,
+     "diffuse_bounces": 4,
+     "glossy_bounces": 4,
+     "transmission_bounces": 12,
+     "volume_bounces": 0,
+     "transparent_max_bounces": 8,
+     "volume_step_rate": 1.0,
+     "volume_preview_step_rate": 1.0,
+     "volume_max_steps": 1024,
+     "volume_biased": false,
+     "dicing_rate": 1.0,
+     "preview_dicing_rate": 8.0,
+     "max_subdivisions": 12,
+     "dicing_camera": null,
+     "offscreen_dicing_scale": 4.0,
+     "film_exposure": 1.0,
+     "film_transparent_glass": false,
+     "film_transparent_roughness": 0.10000000149011612,
+     "pixel_filter_type": "BLACKMAN_HARRIS",
+     "filter_width": 1.5,
+     "use_pixel_jitter": false,
+     "seed": 0,
+     "use_animated_seed": false,
+     "sample_clamp_direct": 0.0,
+     "sample_clamp_indirect": 10.0,
+     "debug_bvh_type": "DYNAMIC_BVH",
+     "debug_use_spatial_splits": false,
+     "debug_use_hair_bvh": true,
+     "debug_use_compact_bvh": false,
+     "debug_bvh_time_steps": 0,
+     "bake_type": "COMBINED",
+     "use_camera_cull": false,
+     "camera_cull_margin": 0.10000000149011612,
+     "use_distance_cull": false,
+     "distance_cull_margin": 50.0,
+     "rolling_shutter_type": "NONE",
+     "rolling_shutter_duration": 0.10000000149011612,
+     "texture_resolution": 1.0,
+     "texture_resolution_render": 1.0,
+     "texture_limit": "OFF",
+     "texture_limit_render": "OFF",
+     "use_fast_gi": false,
+     "fast_gi_method": "REPLACE",
+     "ao_bounces": 1,
+     "ao_bounces_render": 1,
+     "use_auto_tile": true,
+     "tile_size": 2048,
+     "debug_use_cpu_avx2": true,
+     "debug_use_cpu_sse42": true,
+     "debug_bvh_layout": "EMBREE",
+     "debug_use_cuda_adaptive_compile": false,
+     "debug_use_optix_debug": false,
+     "debug_use_hip_adaptive_compile": false,
+     "debug_use_metal_adaptive_compile": false,
+     "debug_use_texture_cache_eviction": true,
+     "debug_texture_cache_preserve_unused": 0
+    },
+    "cycles_curves": {
+     "$type": "CyclesCurveRenderSettings",
+     "name": "",
+     "shape": "RIBBONS",
+     "subdivisions": 2
+    },
+    "gltf2_KHR_materials_variants_variants": [],
+    "gltf2_active_variant": 0
+   }
+  ]
+ },
+ "meshes_exact": []
+}

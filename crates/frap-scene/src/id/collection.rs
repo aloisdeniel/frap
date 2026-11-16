@@ -46,7 +46,15 @@ impl Collection {
     }
 }
 
-crate::id::name_only_rna!(Collection, frap_spec_rna::COLLECTION, CollectionId);
+crate::id::id_rna! { Collection as frap_spec_rna::COLLECTION, "COLLECTION" {
+    objects => id_coll(objects, item = frap_spec_rna::OBJECT, api = "CollectionObjects"),
+    children => id_coll(children, item = frap_spec_rna::COLLECTION, api = "CollectionChildren"),
+    all_objects => hook_coll,
+    hide_select => hide_select (set = hook),
+    hide_viewport => hide_viewport (set = hook),
+    hide_render => hide_render,
+    color_tag => color_tag,
+}}
 
 impl IdType for Collection {
     type Kind = CollectionId;
@@ -60,8 +68,28 @@ impl IdType for Collection {
         self.objects.iter().for_each(|o| f(o.any()));
         self.children.iter().for_each(|c| f(c.any()));
     }
+    /// Unlink (`to = None`) or relink: an object or child listed twice after a relink keeps
+    /// its first place (Blender's `collection_object_remap` removes duplicates).
     fn remap_ref(&mut self, from: IdAny, to: Option<IdAny>) {
-        let _ = (from, to);
-        todo!("WP 1.10: unlink / relink objects and children")
+        fn remap<K: IdKind>(v: &mut Vec<IdRef<K>>, from: IdAny, to: Option<IdAny>) {
+            let to = to.and_then(IdRef::<K>::from_any);
+            let mut out: Vec<IdRef<K>> = Vec::with_capacity(v.len());
+            for r in v.drain(..) {
+                let r = if r.any() == from {
+                    match to {
+                        Some(t) => t,
+                        None => continue,
+                    }
+                } else {
+                    r
+                };
+                if !out.contains(&r) {
+                    out.push(r);
+                }
+            }
+            *v = out;
+        }
+        remap(&mut self.objects, from, to);
+        remap(&mut self.children, from, to);
     }
 }
