@@ -1,0 +1,1185 @@
+{
+ "identifier": "ID",
+ "name": "ID",
+ "description": "Base type for data-blocks, defining a unique name, linking from other libraries and garbage collection",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "Unique data-block ID name (within a same type and library)",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 256,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "name_full",
+   "name": "Full Name",
+   "description": "Unique data-block ID name, including library one if any",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 516,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "id_type",
+   "name": "Type",
+   "description": "Type identifier of this data-block",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ACTION",
+     "name": "Action",
+     "description": "",
+     "icon": "ACTION",
+     "value": 17217
+    },
+    {
+     "identifier": "ARMATURE",
+     "name": "Armature",
+     "description": "",
+     "icon": "ARMATURE_DATA",
+     "value": 21057
+    },
+    {
+     "identifier": "BRUSH",
+     "name": "Brush",
+     "description": "",
+     "icon": "BRUSH_DATA",
+     "value": 21058
+    },
+    {
+     "identifier": "CACHEFILE",
+     "name": "Cache File",
+     "description": "",
+     "icon": "FILE",
+     "value": 17987
+    },
+    {
+     "identifier": "CAMERA",
+     "name": "Camera",
+     "description": "",
+     "icon": "CAMERA_DATA",
+     "value": 16707
+    },
+    {
+     "identifier": "COLLECTION",
+     "name": "Collection",
+     "description": "",
+     "icon": "OUTLINER_COLLECTION",
+     "value": 21063
+    },
+    {
+     "identifier": "CURVE",
+     "name": "Curve",
+     "description": "",
+     "icon": "CURVE_DATA",
+     "value": 21827
+    },
+    {
+     "identifier": "CURVES",
+     "name": "Curves",
+     "description": "",
+     "icon": "CURVES_DATA",
+     "value": 22083
+    },
+    {
+     "identifier": "FONT",
+     "name": "Font",
+     "description": "",
+     "icon": "FONT_DATA",
+     "value": 18006
+    },
+    {
+     "identifier": "GREASEPENCIL",
+     "name": "Grease Pencil",
+     "description": "",
+     "icon": "GREASEPENCIL",
+     "value": 17479
+    },
+    {
+     "identifier": "GREASEPENCIL_V3",
+     "name": "Grease Pencil v3",
+     "description": "",
+     "icon": "GREASEPENCIL",
+     "value": 20551
+    },
+    {
+     "identifier": "IMAGE",
+     "name": "Image",
+     "description": "",
+     "icon": "IMAGE_DATA",
+     "value": 19785
+    },
+    {
+     "identifier": "KEY",
+     "name": "Key",
+     "description": "",
+     "icon": "SHAPEKEY_DATA",
+     "value": 17739
+    },
+    {
+     "identifier": "LATTICE",
+     "name": "Lattice",
+     "description": "",
+     "icon": "LATTICE_DATA",
+     "value": 21580
+    },
+    {
+     "identifier": "LIBRARY",
+     "name": "Library",
+     "description": "",
+     "icon": "LIBRARY_DATA_DIRECT",
+     "value": 18764
+    },
+    {
+     "identifier": "LIGHT",
+     "name": "Light",
+     "description": "",
+     "icon": "LIGHT_DATA",
+     "value": 16716
+    },
+    {
+     "identifier": "LIGHT_PROBE",
+     "name": "Light Probe",
+     "description": "",
+     "icon": "LIGHTPROBE_SPHERE",
+     "value": 20556
+    },
+    {
+     "identifier": "LINESTYLE",
+     "name": "Line Style",
+     "description": "",
+     "icon": "LINE_DATA",
+     "value": 21324
+    },
+    {
+     "identifier": "MASK",
+     "name": "Mask",
+     "description": "",
+     "icon": "MOD_MASK",
+     "value": 21325
+    },
+    {
+     "identifier": "MATERIAL",
+     "name": "Material",
+     "description": "",
+     "icon": "MATERIAL_DATA",
+     "value": 16717
+    },
+    {
+     "identifier": "MESH",
+     "name": "Mesh",
+     "description": "",
+     "icon": "MESH_DATA",
+     "value": 17741
+    },
+    {
+     "identifier": "META",
+     "name": "Metaball",
+     "description": "",
+     "icon": "META_DATA",
+     "value": 16973
+    },
+    {
+     "identifier": "MOVIECLIP",
+     "name": "Movie Clip",
+     "description": "",
+     "icon": "TRACKER",
+     "value": 17229
+    },
+    {
+     "identifier": "NODETREE",
+     "name": "Node Tree",
+     "description": "",
+     "icon": "NODETREE",
+     "value": 21582
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "",
+     "icon": "OBJECT_DATA",
+     "value": 16975
+    },
+    {
+     "identifier": "PAINTCURVE",
+     "name": "Paint Curve",
+     "description": "",
+     "icon": "CURVE_BEZCURVE",
+     "value": 17232
+    },
+    {
+     "identifier": "PALETTE",
+     "name": "Palette",
+     "description": "",
+     "icon": "COLOR",
+     "value": 19536
+    },
+    {
+     "identifier": "PARTICLE",
+     "name": "Particle",
+     "description": "",
+     "icon": "PARTICLE_DATA",
+     "value": 16720
+    },
+    {
+     "identifier": "POINTCLOUD",
+     "name": "Point Cloud",
+     "description": "",
+     "icon": "POINTCLOUD_DATA",
+     "value": 21584
+    },
+    {
+     "identifier": "SCENE",
+     "name": "Scene",
+     "description": "",
+     "icon": "SCENE_DATA",
+     "value": 17235
+    },
+    {
+     "identifier": "SCREEN",
+     "name": "Screen",
+     "description": "",
+     "icon": "WORKSPACE",
+     "value": 21075
+    },
+    {
+     "identifier": "SOUND",
+     "name": "Sound",
+     "description": "",
+     "icon": "SOUND",
+     "value": 20307
+    },
+    {
+     "identifier": "SPEAKER",
+     "name": "Speaker",
+     "description": "",
+     "icon": "SPEAKER",
+     "value": 19283
+    },
+    {
+     "identifier": "TEXT",
+     "name": "Text",
+     "description": "",
+     "icon": "TEXT",
+     "value": 22612
+    },
+    {
+     "identifier": "TEXTURE",
+     "name": "Texture",
+     "description": "",
+     "icon": "TEXTURE_DATA",
+     "value": 17748
+    },
+    {
+     "identifier": "VOLUME",
+     "name": "Volume",
+     "description": "",
+     "icon": "VOLUME_DATA",
+     "value": 20310
+    },
+    {
+     "identifier": "WINDOWMANAGER",
+     "name": "Window Manager",
+     "description": "",
+     "icon": "WINDOW",
+     "value": 19799
+    },
+    {
+     "identifier": "WORKSPACE",
+     "name": "Workspace",
+     "description": "",
+     "icon": "WORKSPACE",
+     "value": 21335
+    },
+    {
+     "identifier": "WORLD",
+     "name": "World",
+     "description": "",
+     "icon": "WORLD_DATA",
+     "value": 20311
+    }
+   ],
+   "default": "ACTION",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "session_uid",
+   "name": "Session UID",
+   "description": "A session-wide unique identifier for the data block that remains the same across renames and internal reallocations, unchanged when reloading the file",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_evaluated",
+   "name": "Is Evaluated",
+   "description": "Whether this ID is runtime-only, evaluated data-block, or actual data from .blend file",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "original",
+   "name": "Original ID",
+   "description": "Actual data-block from .blend file (Main database) that generated that evaluated one",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ID",
+   "is_id": true,
+   "flags": [
+    "READONLY",
+    "HIDDEN",
+    "SKIP_PRESET"
+   ]
+  },
+  {
+   "identifier": "users",
+   "name": "Users",
+   "description": "Number of times this data-block is referenced",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_fake_user",
+   "name": "Fake User",
+   "description": "Save this data-block even if it has no users",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_extra_user",
+   "name": "Extra User",
+   "description": "Indicates whether an extra user is set or not (mainly for internal/debug usages)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_embedded_data",
+   "name": "Embedded Data",
+   "description": "This data-block is not an independent one, but is actually a sub-data of another ID (typical example: root node trees or master collections)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_linked_packed",
+   "name": "Linked Packed",
+   "description": "This data-block is linked and packed into the .blend file",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_missing",
+   "name": "Missing Data",
+   "description": "This data-block is a place-holder for missing linked data (i.e. it is [an override of] a linked data that could not be found anymore)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_runtime_data",
+   "name": "Runtime Data",
+   "description": "This data-block is runtime data, i.e. it won't be saved in .blend file. Note that e.g. evaluated IDs are always runtime, so this value is only editable for data-blocks in Main data-base.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_editable",
+   "name": "Editable",
+   "description": "This data-block is editable in the user interface. Linked data-blocks are not editable, except if they were loaded as editable assets.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "tag",
+   "name": "Tag",
+   "description": "Tools can use this to tag data for their own purposes (initial state is undefined)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "LIBRARY_EDITABLE"
+   ]
+  },
+  {
+   "identifier": "is_library_indirect",
+   "name": "Is Indirect",
+   "description": "Is this ID block linked indirectly",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "library",
+   "name": "Library",
+   "description": "Library file the data-block is linked from",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Library",
+   "is_id": true,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "library_weak_reference",
+   "name": "Library Weak Reference",
+   "description": "Weak reference to a data-block in another library .blend file (used to re-use already appended data instead of appending new copies)",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "LibraryWeakReference",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "asset_data",
+   "name": "Asset Data",
+   "description": "Additional data for an asset data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AssetMetaData",
+   "is_id": false,
+   "flags": []
+  },
+  {
+   "identifier": "override_library",
+   "name": "Library Override",
+   "description": "Library override data",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "IDOverrideLibrary",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "preview",
+   "name": "Preview",
+   "description": "Preview image and icon of this data-block (always None if not supported for this type of data)",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ImagePreview",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "bl_system_properties_get",
+   "description": "DEBUG ONLY. Internal access to runtime-defined RNA data storage, intended solely for testing and debugging purposes. Do not access it in regular scripting work, and in particular, do not assume that it contains writable data",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "do_create",
+     "name": "",
+     "description": "Ensure that system properties are created if they do not exist yet",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "system_properties",
+     "name": "",
+     "description": "The system properties root container, or None if there are no system properties stored in this data yet, and its creation was not requested",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "PropertyGroup",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "rename",
+   "description": "More refined handling in case the new name collides with another ID's name",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "",
+     "description": "New name to rename the ID to, if empty will re-use the current ID name",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "mode",
+     "name": "",
+     "description": "How to handle name collision, in case the requested new name is already used by another ID of the same type",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NEVER",
+       "name": "Never Rename",
+       "description": "Never rename an existing ID whose name would conflict, the currently renamed ID will get a numeric suffix appended to its new name",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ALWAYS",
+       "name": "Always Rename",
+       "description": "Always rename an existing ID whose name would conflict, ensuring that the currently renamed ID will get requested name",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "SAME_ROOT",
+       "name": "Rename If Same Root",
+       "description": "Only rename an existing ID whose name would conflict if its name root (everything besides the numerical suffix) is the same as the existing name of the currently renamed ID",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "NEVER",
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "id_rename_result",
+     "name": "",
+     "description": "How did the renaming of the data-block went on",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "UNCHANGED",
+       "name": "Unchanged",
+       "description": "The ID was not renamed, e.g. because it is already named as requested",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "UNCHANGED_COLLISION",
+       "name": "Unchanged Due to Collision",
+       "description": "The ID was not renamed, because requested name would have collided with another existing ID's name, and the automatically adjusted name was the same as the current ID's name",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "RENAMED_NO_COLLISION",
+       "name": "Renamed Without Collision",
+       "description": "The ID was renamed as requested, without creating any name collision",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "RENAMED_COLLISION_ADJUSTED",
+       "name": "Renamed With Collision",
+       "description": "The ID was renamed with adjustment of the requested name, to avoid a name collision",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "RENAMED_COLLISION_FORCED",
+       "name": "Renamed Enforced With Collision",
+       "description": "The ID was renamed as requested, also renaming another ID to avoid a name collision",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": "UNCHANGED",
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "evaluated_get",
+   "description": "Get corresponding evaluated ID from the given dependency graph. Note that this does not ensure the dependency graph is fully evaluated, it just returns the result of the last evaluation.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "depsgraph",
+     "name": "",
+     "description": "Dependency graph to perform lookup in",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Depsgraph",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "id",
+     "name": "",
+     "description": "New copy of the ID",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ID",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "copy",
+   "description": "Create a copy of this data-block (not supported for all data-blocks). The result is added to the Blend-File Data (Main database), with all references to other data-blocks ensured to be from within the same Blend-File Data.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "id",
+     "name": "",
+     "description": "New copy of the ID",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ID",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "asset_mark",
+   "description": "Enable easier reuse of the data-block through the Asset Browser, with the help of customizable metadata (like previews, descriptions and tags)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "asset_clear",
+   "description": "Delete all asset metadata and turn the asset data-block back into a normal data-block",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "asset_generate_preview",
+   "description": "Generate preview image (might be scheduled in a background thread)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "override_create",
+   "description": "Create an overridden local copy of this linked data-block (not supported for all data-blocks)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "remap_local_usages",
+     "name": "",
+     "description": "Whether local usages of the linked ID should be remapped to the new library override of it",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "id",
+     "name": "",
+     "description": "New overridden local copy of the ID",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ID",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "override_hierarchy_create",
+   "description": "Create an overridden local copy of this linked data-block, and most of its dependencies when it is a Collection or and Object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "scene",
+     "name": "",
+     "description": "In which scene the new overrides should be instantiated",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Scene",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "view_layer",
+     "name": "",
+     "description": "In which view layer the new overrides should be instantiated",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ViewLayer",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "reference",
+     "name": "",
+     "description": "Another ID (usually an Object or Collection) used as a hint to decide where to instantiate the new overrides",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ID",
+     "is_id": true,
+     "flags": [
+      "READONLY"
+     ]
+    },
+    {
+     "identifier": "do_fully_editable",
+     "name": "",
+     "description": "Make all library overrides generated by this call fully editable by the user (none will be 'system overrides')",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "id",
+     "name": "",
+     "description": "New overridden local copy of the root ID",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ID",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "user_clear",
+   "description": "Clear the user count of a data-block so its not saved, on reload the data will be removed",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "user_remap",
+   "description": "Replace all usage in the .blend file of this ID by new given one",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "new_id",
+     "name": "",
+     "description": "New ID to use",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ID",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "make_local",
+   "description": "Make this data-block local, return local one (may be a copy of the original, in case it is also indirectly used)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "clear_proxy",
+     "name": "",
+     "description": "Deprecated, has no effect",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "clear_liboverride",
+     "name": "",
+     "description": "Remove potential library override data from the newly made local data",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "clear_asset_data",
+     "name": "",
+     "description": "Remove potential asset metadata so the newly local data-block is not treated as asset data-block and won't show up in asset libraries",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "id",
+     "name": "",
+     "description": "This ID, or the new ID if it was copied",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ID",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "user_of_id",
+   "description": "Count the number of times that ID uses/references given one",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "id",
+     "name": "",
+     "description": "ID to count usages",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ID",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "count",
+     "name": "",
+     "description": "Number of usages/references of given id by current data-block",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "animation_data_create",
+   "description": "Create animation data to this ID, note that not all ID types support this",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "anim_data",
+     "name": "",
+     "description": "New animation data or None",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "AnimData",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "animation_data_clear",
+   "description": "Clear animation on this ID",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "update_tag",
+   "description": "Tag the ID to update its display data, e.g. when calling :class:`bpy.types.Scene.update`",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "refresh",
+     "name": "",
+     "description": "Type of updates to perform",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "OBJECT",
+       "name": "Object",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "DATA",
+       "name": "Data",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "TIME",
+       "name": "Time",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": [],
+     "flags": [
+      "ENUM_FLAG",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "preview_ensure",
+   "description": "Ensure that this ID has preview data (if ID type supports it)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "preview_image",
+     "name": "",
+     "description": "The existing or created preview",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ImagePreview",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "requested": false
+}

@@ -1,0 +1,30 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "export_scene.gltf",
+  "bl_idname": "EXPORT_SCENE_OT_gltf",
+  "label": "Export glTF 2.0",
+  "description": "Export scene as glTF 2.0 file",
+  "props": [
+    {
+      "identifier": "filepath",
+      "type": "STRING",
+      "array_length": 1
+    },
+    {
+      "identifier": "export_format",
+      "type": "ENUM",
+      "array_length": 1
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T2",
+    "requires": [],
+    "notes": [
+      "M0: static meshes, Principled base factors; other export props arrive in M1/M3",
+      "missing parent directories are created, as Blender's add-on does"
+    ]
+  }
+}

@@ -1,0 +1,54 @@
+[package]
+name = "frap-cli"
+description = "frap L12: The `frap` binary: raw stdin / run / -c, `frap serve --jsonl`, `frap mcp`; JSON Lines on stdout (ARCHITECTURE §13.1)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "frap"
+path = "src/main.rs"
+
+[dependencies]
+frap-rna.workspace = true
+frap-lang.workspace = true
+frap-schema.workspace = true
+clap.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+trycmd.workspace = true
+gltf.workspace = true
+serde_json.workspace = true
+assert_cmd.workspace = true
+insta.workspace = true
+
+# frap-session and frap-ops-all have no default features: frap-cli decides (§3.6).
+[dependencies.frap-session]
+workspace = true
+
+[dependencies.frap-ops-all]
+workspace = true
+
+[features]
+# ARCHITECTURE §3.6.
+default = ["gpu", "webp-lossy", "meshopt", "basisu", "boolean-manifold"]
+gpu = ["frap-session/gpu", "frap-ops-all/gpu"]
+webp-lossy = ["frap-ops-all/webp-lossy"]
+meshopt = ["frap-ops-all/meshopt"]
+draco = ["frap-ops-all/draco"]
+draco-sys = ["frap-ops-all/draco-sys"]
+basisu = ["frap-ops-all/basisu"]
+basisu-encode = ["frap-ops-all/basisu-encode"]
+subdiv-osd = ["frap-ops-all/subdiv-osd"]
+boolean-manifold = ["frap-ops-all/boolean-manifold"]
+
+[lints]
+workspace = true

@@ -1,0 +1,12 @@
+{
+ "identifier": "NodeSocketStandard",
+ "name": "NodeSocketStandard",
+ "description": "",
+ "base": "NodeSocket",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [],
+ "requested": false
+}

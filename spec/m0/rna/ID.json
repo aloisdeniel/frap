@@ -1,0 +1,26 @@
+{
+ "identifier": "ID",
+ "base": null,
+ "name": "ID",
+ "description": "Base type for data-blocks, defining a unique name, linking from other libraries and garbage collection",
+ "name_property": "name",
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "Unique data-block ID name (within a same type and library)",
+   "type": "STRING",
+   "subtype": "NONE",
+   "array": [],
+   "default": "",
+   "max_bytes": 256,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "_stamp": {
+  "blender": "5.2.4 LTS",
+  "build_hash": "cd5dc428cce1"
+ }
+}

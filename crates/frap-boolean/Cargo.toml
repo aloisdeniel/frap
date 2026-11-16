@@ -1,0 +1,12 @@
+[package]
+name = "frap-boolean"
+description = "frap L3: BooleanSolver trait, manifold-rust backend (ARCHITECTURE §3.2). Empty until M4"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true

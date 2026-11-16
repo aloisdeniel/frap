@@ -1,0 +1,43 @@
+[package]
+name = "frap-session"
+description = "frap L11: Session: executor (IR -> calls), path resolver, transactions, response builder, JSON value encoding, serve framing, Host/Services implementation (ARCHITECTURE §12, §13)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-lang.workspace = true
+frap-mesh.workspace = true
+frap-scene.workspace = true
+frap-op.workspace = true
+frap-ops-all.workspace = true
+frap-eval.workspace = true
+frap-render-scene.workspace = true
+frap-imbuf.workspace = true
+frap-spec-rna.workspace = true
+indexmap.workspace = true
+smallvec.workspace = true
+smol_str.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+insta.workspace = true
+
+[dependencies.frap-render]
+workspace = true
+optional = true
+
+[features]
+default = []
+# Lazily created wgpu RenderService (frap-render). Off: render.render -> GPU_UNAVAILABLE.
+gpu = ["dep:frap-render"]
+
+[lints]
+workspace = true

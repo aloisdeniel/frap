@@ -1,0 +1,18 @@
+[package]
+name = "frap-probe-op"
+description = "WP 0.2 probe of frap-op (§10.1): OperatorDef, Services, OpCtx (split_edit/split_eval/services)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-probe-rna.workspace = true
+frap-probe-mesh.workspace = true
+frap-probe-scene.workspace = true
+frap-probe-render-scene.workspace = true
+smallvec.workspace = true
+smol_str.workspace = true
+indexmap.workspace = true
+linkme.workspace = true

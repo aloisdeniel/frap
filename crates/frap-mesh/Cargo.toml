@@ -1,0 +1,31 @@
+[package]
+name = "frap-mesh"
+description = "frap L4: Mesh (struct-of-arrays attributes on 4 domains), primitives, looptris, corner split, RNA bindings (ARCHITECTURE §6.1)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-spec-rna.workspace = true
+frap-geom.workspace = true
+frap-math.workspace = true
+smol_str.workspace = true
+smallvec.workspace = true
+libm.workspace = true
+glam.workspace = true
+serde.workspace = true
+# `primitives/` is a per-concept directory (rule 2.2.1).
+automod.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+proptest.workspace = true
+insta.workspace = true
+approx.workspace = true
+
+[lints]
+workspace = true

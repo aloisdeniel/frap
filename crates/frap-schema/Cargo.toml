@@ -1,0 +1,29 @@
+[package]
+name = "frap-schema"
+description = "frap L11: --describe: manifest, JSON Schema, LLM tool formats (ARCHITECTURE §14)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-op.workspace = true
+frap-spec-rna.workspace = true
+frap-spec-catalog.workspace = true
+frap-scene.workspace = true
+schemars.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+indexmap.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+# tests/describe_ops.rs: every operator linked in, one `op__<idname>.snap` each (§22.1).
+# L11 -> L10, no cycle (frap-ops-all never depends on frap-schema).
+frap-ops-all.workspace = true
+
+[lints]
+workspace = true

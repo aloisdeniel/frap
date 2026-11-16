@@ -1,0 +1,97 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# GPU tests on the three CI adapters of ARCHITECTURE §20.5 (successor of WP 0.2's gpu-probe.yml):
+#   macOS arm64  -> Metal (the runner's GPU)
+#   Linux x86_64 -> Vulkan through Mesa lavapipe (software)
+#   Windows      -> DX12 through WARP (software), FXC shader compiler (§19.2)
+# The GPU tests (crates/frap-render/tests/gpu.rs, later the Workbench render goldens) FAIL when
+# no adapter is found (FRAP_GPU_OPTIONAL is never set here), and FRAP_EXPECT_ADAPTER makes them
+# fail when the adapter is not the expected one (e.g. lavapipe silently replaced by another ICD).
+
+name: gpu
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gpu-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+  # Same pin as wgpu's own CI (gfx-rs/wgpu xtask install_warp.rs).
+  WARP_VERSION: "1.0.20"
+
+jobs:
+  gpu:
+    name: gpu (${{ matrix.name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macos-metal
+            os: macos-15
+            backend: metal
+            expect_adapter: "Metal"
+          - name: linux-lavapipe
+            os: ubuntu-24.04
+            backend: vulkan
+            expect_adapter: "llvmpipe"
+          - name: windows-warp
+            os: windows-2025
+            backend: dx12
+            expect_adapter: "Microsoft Basic Render Driver"
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: git config (no CRLF conversion)
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.97"
+      # Must run before WARP is copied into target/ (rust-cache restores the whole directory).
+      - uses: Swatinem/rust-cache@v2
+
+      - name: (Linux) Install Mesa lavapipe
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libvulkan1 mesa-vulkan-drivers vulkan-tools
+          icd=$(ls /usr/share/vulkan/icd.d/lvp_icd*.json | head -n1)
+          echo "lavapipe ICD: $icd"
+          # Only lavapipe is visible to the Vulkan loader.
+          echo "VK_DRIVER_FILES=$icd" >> "$GITHUB_ENV"
+          echo "VK_ICD_FILENAMES=$icd" >> "$GITHUB_ENV"
+          VK_DRIVER_FILES="$icd" vulkaninfo --summary || true
+
+      - name: (Windows) Install WARP ${{ env.WARP_VERSION }}
+        if: runner.os == 'Windows'
+        run: |
+          set -euo pipefail
+          curl.exe -L --retry 5 "https://www.nuget.org/api/v2/package/Microsoft.Direct3D.WARP/${WARP_VERSION}" -o warp.zip
+          mkdir -p warp target/debug/deps
+          tar -xf warp.zip -C warp build/native/bin/x64/d3d10warp.dll
+          cp warp/build/native/bin/x64/d3d10warp.dll target/debug/
+          cp warp/build/native/bin/x64/d3d10warp.dll target/debug/deps/
+
+      - name: GPU tests (${{ matrix.backend }})
+        env:
+          FRAP_WGPU_BACKEND: ${{ matrix.backend }}
+          FRAP_EXPECT_ADAPTER: ${{ matrix.expect_adapter }}
+        run: cargo test --locked -p frap-render -- --nocapture
+
+      - name: (Windows) Default backend order (Vulkan first, then DX12)
+        if: runner.os == 'Windows'
+        run: cargo test --locked -p frap-render --test gpu -- --nocapture

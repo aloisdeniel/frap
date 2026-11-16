@@ -1,6 +1,6 @@
 # frap architecture (definitive)
 
-Status: **normative**. Version 1.1, 2026-11-16 (revised after the adversarial review; see the Decision log at the end). This document is the single source of truth for implementers. Where it disagrees with `docs/design/proposal-*.md` or `docs/research/*.md`, this document wins. Changes go through an RFC in `docs/design/rfc/` (see §21.8).
+Status: **normative**. Version 1.2, 2026-11-16 (v1.1 revised after the adversarial review; v1.2 applies RFC 0001 and freezes the M1 W0 contracts; see the Decision logs at the end). This document is the single source of truth for implementers. Where it disagrees with `docs/design/proposal-*.md` or `docs/research/*.md`, this document wins. Changes go through an RFC in `docs/design/rfc/` (see §21.8).
 
 Target: Blender **5.2 LTS** Python API (verified against local Blender 5.2.4, build `cd5dc428cce1`). Toolchain: Rust 1.97 stable.
 
@@ -120,8 +120,8 @@ Operators start at T2 or T3 and are promoted to T1 when goldens prove index pari
 
 ### 2.2 Buildability rules (reviewers reject PRs that break them)
 
-1. **One concept, one file.** Each operator, RNA function hook, modifier evaluator, glTF extension, bmesh operator, primitive generator, material pattern, comparator and golden case is its own file. Directories of such files are included with `automod::dir!` and register through `linkme` slices. **Nobody edits a `mod` list or a `register_all()`.**
-2. **Generated code is never hand-edited.** Everything under `*/src/gen/` and all of `crates/frap-spec-*/` is written by `cargo xtask codegen`. CI runs `cargo xtask codegen --check`.
+1. **One concept, one file.** Each operator, RNA function hook, modifier evaluator, glTF extension, bmesh operator, primitive generator, material pattern, comparator and golden case is its own file. Directories of such files are included with `automod::dir!` and register through `linkme` slices. **Nobody edits a `mod` list or a `register_all()`.** `automod::dir!` refuses an empty directory, so a per-concept directory that has no concept yet holds a `_dir.rs` placeholder; files whose name starts with `_` are never concepts (the §10.5 registry test skips them).
+2. **Generated code is never hand-edited.** Everything under `*/src/generated/` (not `gen/`: `gen` is a reserved keyword in edition 2024, RFC 0001 F-ED-1) and all of `crates/frap-spec-*/` is written by `cargo xtask codegen`. CI runs `cargo xtask codegen --check`.
 3. **Workspace dependencies are pre-declared** in root `[workspace.dependencies]` (§3.5). Members use `foo.workspace = true`. A new external dependency needs the integrator.
 4. **Contracts freeze per milestone.** Types and traits marked `// CONTRACT` (§3.4) change only through an RFC merged before dependent work starts. Additive changes (new variants on `#[non_exhaustive]` enums, trait methods with defaults) are allowed.
 5. **Stubs first.** Each milestone from M1 on starts with a Wave 0 that makes every new public signature compile (bodies `todo!()` or `Err(NotImplemented)`). Downstream work waits on *signatures*, never on implementations.
@@ -144,7 +144,9 @@ frap/
 ├─ Cargo.toml                 # [workspace], [workspace.dependencies], profiles     (integrator)
 ├─ rust-toolchain.toml        # channel = "1.97"
 ├─ deny.toml                  # cargo-deny: licences (GPL-3 compatible), advisories, bans
+├─ .cargo/config.toml         # `cargo xtask` alias
 ├─ spec/
+│  ├─ current_milestone       # the milestone whose operators get typed props structs (§4.2)
 │  ├─ blender-5.2/            # COMMITTED Blender dumps (source of truth, §4)
 │  │  ├─ ops/<namespace>.json
 │  │  ├─ rna/<Struct>.json
@@ -163,7 +165,7 @@ frap/
 │  ├─ golden_runner.py        # executes a golden case statement by statement
 │  ├─ dump_state.py           # writes GoldenState JSON (reads tests/golden/props.toml)
 │  └─ emulations.py           # Blender-side equivalents for frap.* and headless-extended ops
-├─ xtask/                     # cargo xtask codegen [--check] | golden [bless|live|report] | luts | describe-diff
+├─ xtask/                     # cargo xtask check-deps | budgets | codegen [--check] | golden [bless|live|report] | luts | describe-diff
 ├─ assets/                    # generated, checked in: luts/*.cube, matcaps/, studio_lights/, brdf_lut.bin, font/
 ├─ crates/                    # see 3.2 (plus test-only crates frap-ops-<x>-tests, rule 2.2.11)
 ├─ tests/
@@ -176,13 +178,13 @@ frap/
 
 ### 3.2 Crates and responsibilities
 
-Layers: a crate may depend only on crates in **lower** layers.
+Layers: a crate may depend only on crates in **lower** layers. The table itself draws two same-layer edges, which are the only exceptions: `frap-lang` → `frap-rna` (L1) and `frap-ops-all` → every `frap-ops-*` (L10). `cargo xtask check-deps` enforces the table (§20.5).
 
 | Layer | Crate | Responsibility | Key public items |
 |---|---|---|---|
 | L0 | `frap-math` | Blender math conventions on top of `glam`: `eul_to_mat3` (XYZ = Rz·Ry·Rx), compatible Euler, quaternions w-first, `mat4_to_loc_rot_size`, axis-angle, `BliRng` (drand48-style LCG), shortest-f32 formatting. | `EulerOrder`, `Euler`, `decompose`, `BliRng` |
 | L0 | `frap-macros` | Proc-macros, one file each: `rna_struct!`, `#[rna_func]`, `#[rna_hook]` (RNA tier, needed in M1 W1/W2) and `#[operator]`, `#[modifier]`, `#[bmesh_op]` (operator tier). | — |
-| L1 | `frap-rna` | Identity (`IdKey`, `IdKind` + one zero-sized marker per ID type, `IdRef<K>`, `IdAny`, `IdCode`, `IdHeader`, `IdType`, `EmbeddedSlot`), metadata (`StructDef`, `PropDef`, `FuncDef`, `EnumItem`), values (`Input`, `Value`), `coerce()`, naming (`unique_name`), `RnaPtr`, traits (`Rna`, `RnaMut`, `RnaColl`, `StructRef`, guard types), `FrapError`, `PyExc`, `ErrorCode`, `Span`, `serde_buf`. | §5.1, §9 |
+| L1 | `frap-rna` | Identity (`IdKey`, `IdKind` + one zero-sized marker per ID type, `IdRef<K>`, `IdAny`, `IdCode`, `IdHeader`, `IdType`, `EmbeddedSlot`), metadata (`StructDef`, `PropDef`, `FuncDef`, `EnumItem`), values (`Input`, `Value`), `coerce()`, naming (`unique_name`), `RnaPtr`, `IdNames`, traits (`Rna`, `RnaMut`, `RnaColl`, `StructRef`, `Item`, `Bulk`, guard types), operator spec types (`OperatorSpec`, `OpArgs`, `Prop<T>`), `FrapError`, `PyExc`, `ErrorCode`, `Span`, `Report`, `ReportType`, `serde_buf`, `HOOK_DECLS`, `ERROR_CODES`. | §5.1, §9 |
 | L1 | `frap-geom` | `BLI_polyfill_2d` + beautify, Newell normals, corner/face/vertex normals, kd-tree, MikkTSpace wrapper (`bevy_mikktspace`), spatial hash for welding. | |
 | L1 | `frap-color` | Colour spaces, sRGB transfer, view transforms (LUT application over a log2 shaper), looks, exposure/gamma, dither. CPU only. | `display_transform()` |
 | L1 | `frap-lang` | Hand-written lexer, bpy-line parser, short-form parser, semantic IR (`Stmt`, `Command`, `Expr`). Depends only on `frap-rna` (`Input`, `Span`). | §11 |
@@ -203,8 +205,8 @@ Layers: a crate may depend only on crates in **lower** layers.
 | L7 | `frap-modifiers` | `ModifierTypeInfo` registry, one evaluator per file (`types/<type>.rs`). | §7.2 |
 | L7 | `frap-material` | `lower(NodeTree) -> LoweredMaterial` (one pattern recogniser per file) and `raise(LoweredMaterial) -> NodeTree`. | §16.2 |
 | L8 | `frap-eval` | Depsgraph-lite: evaluated objects, meshes (shape keys + modifiers), world matrices, poses, bounds; animation application at evaluation boundaries (§7.3). Implements `frap_scene::Evaluator`. | §7.3 |
-| L8 | `frap-render-scene` | `types` module: `RenderScene`, `Film`, `RenderError`, `trait RenderService` (plain data, no wgpu). `build` module: evaluated scene → `RenderScene` through the `Evaluator` trait (corner-split meshes, `LoweredMaterial`s, images, lights, camera (`BKE_camera_params` port), world, settings). | §19.2 |
-| L9 | `frap-op` | Operator framework: `OperatorDef`, `Registry`, invocation pipeline, `OpCtx`, `Services` (render, image cache, path resolver), declarative poll library (`ED_operator_*` names), macro runner, shared helpers (placement, add-primitive-or-merge, multi-object edit loop), extension-point slices (`MODE_HANDLERS`, `TRANSFORM_MODE_HANDLERS`). | §10 |
+| L8 | `frap-render-scene` | `types` module: `RenderScene`, `Film`, `RenderError`, `RenderRequest`, `GpuOptions`, `trait RenderService` (plain data, no wgpu). `build` module: evaluated scene → `RenderScene` through the `Evaluator` trait (corner-split meshes, `LoweredMaterial`s, images, lights, camera (`BKE_camera_params` port), world, settings). | §19.2 |
+| L9 | `frap-op` | Operator framework: `OperatorDef`, `Registry`, invocation pipeline, `OpCtx`, `Services` (render, image cache, path resolver), declarative poll library (`ED_operator_*` names), macro runner, shared helpers (placement, add-primitive-or-merge, multi-object edit loop), extension-point slices (`MODE_HANDLERS`, `TRANSFORM_MODE_HANDLERS`). Re-exports `Report`/`ReportType` from `frap-rna`. | §10 |
 | L9 | `frap-render` | wgpu device (lazy), offscreen targets, readback, Workbench and EEVEE-like engines behind `trait Engine`, GPU cache, contact-sheet compositor; implements `frap_render_scene::RenderService`. Only crate that depends on `wgpu`. | §19 |
 | L9 | `frap-io-gltf` | Scene ↔ glTF with io_scene_gltf2 5.2.41 semantics; module structure mirrors the add-on (`export/`, `import/`); export extension-point slices (§17.2). | §17 |
 | L9 | `frap-project` | `.frap` container: deterministic zip, manifest, content-addressed buffers/images, scene mapping, migrations. | §15 |
@@ -249,25 +251,25 @@ L0   frap-math   frap-macros
 
 ### 3.4 Contract surfaces
 
-Contracts marked "M1 W0" are **drafted** in M0 (§22.2), exercised end to end by the walking skeleton and the contract probes, amended by RFC 0001, and only then frozen by the M1 W0 integrator.
+Contracts marked "M1 W0" are **drafted** in M0 (§22.2), exercised end to end by the walking skeleton and the contract probes, amended by RFC 0001, and only then frozen by the M1 W0 integrator. **Frozen 2026-11-16 (M1 W0, WP 1.0).** Every signature of this table compiles: `crates/frap-ops-all/tests/contracts.rs` pins L0–L10 and `crates/frap-golden/tests/contracts.rs` pins L11–L12 with typed function pointers and bindings, so a signature change breaks those files first. Contract files are created by the W0 integrator and owned afterwards by the WP that implements them; their signatures change only through an RFC (rule 2.2.4).
 
 | Contract | Crate | Section | Frozen at |
 |---|---|---|---|
 | `IdKey`, `IdKind` + marker kinds, `IdRef<K>`, `IdAny`, `IdCode`, `IdHeader`, `IdType`, `EmbeddedSlot` | frap-rna | §5.1 | M1 W0 |
-| `StructDef`, `PropDef`, `FuncDef`, `EnumItem`, `Input`, `Value`, `coerce`, `RnaError` | frap-rna | §9 | M1 W0 |
-| `Rna`, `RnaMut`, `RnaColl`, `RnaCollMut`, `Field`, `StructRef`, `RnaMutGuard`, `RnaPtr`, `Seg`, `Root` | frap-rna | §9 | M1 W0 |
-| `FrapError`, `PyExc`, `ErrorCode`, `Span` | frap-rna | §13.4 | M1 W0 |
-| `Prop<T>`, `OpArgs`, `OpProps`, `OperatorSpec` | frap-rna / frap-spec-ops-* | §10 | M1 W0 |
+| `StructDef`, `PropDef`, `FuncDef`, `EnumItem`, `Input`, `Value`, `coerce`, `CoerceCx`, `clamp_report`, `RnaError` | frap-rna | §9 | M1 W0 |
+| `Rna`, `RnaMut`, `RnaColl`, `RnaCollMut`, `Field`, `StructRef`, `CollRef`, `Item`, `Bulk`, `RnaMutGuard`, `RnaPtr`, `Seg`, `Root`, `IdNames`, `Resolved` | frap-rna | §9 | M1 W0 |
+| `FrapError`, `PyExc`, `ErrorCode`, `Span`, `Report`, `ReportType` | frap-rna | §13.4 | M1 W0 |
+| `Prop<T>`, `OpArgs`, `BitSet`, `FromValue`, `OpProps`, `OperatorSpec`, `PollMatrix` | frap-rna / frap-spec-ops-* | §10 | M1 W0 |
 | `Stmt`, `Command`, `Expr`, `PathExpr` | frap-lang | §11.2 | M1 W0 |
 | `Mesh` (accessor API), `AttributeSet`, `Attribute`, `AttrData`, `Domain` | frap-mesh | §6.1 | M1 W0 |
 | `NodeTree`, `Node`, `Socket`, `Link` | frap-nodes | §16.1 | M1 W0 |
-| `Main`, `IdMap<T>`, `ChangeLog`, `Context`, `WindowState`, `EditState`, `Host`, `Evaluator` | frap-scene | §5, §8 | M1 W0 |
+| `Main`, `IdMap<T>`, `ChangeLog`, `Context`, `WindowState`, `EditState`, `HostRead`, `Host`, `Snapshot`, `Evaluator`, `RNA_FUNCS`, `RNA_HOOKS`, `RnaHookReg` | frap-scene | §5, §8, §9.5 | M1 W0 |
 | `EvaluatedObject` | frap-scene | §7.3 | M1 W0 |
-| `OperatorDef`, `Poll`, `PollReq`, `OpCtx` (incl. `split_edit`, `split_eval`, `services`), `Services`, `OpStatus`, `OpError`, `Report`, `PollFail` | frap-op | §10 | M1 W0 |
+| `OperatorDef`, `Poll`, `PollReq`, `OpCtx` (incl. `split_edit`, `split_eval`, `services`, `snapshot_at`), `Services`, `OpStatus`, `OpError`, `PollFail` | frap-op | §10 | M1 W0 |
 | `MODE_HANDLERS` (`ModeHandler`), `TRANSFORM_MODE_HANDLERS` (`TransformModeHandler`) | frap-op | §8, §10.3 | M1 W0 |
-| `PRIMITIVE_EXTRACTORS`, `PRIMITIVE_ATTRIBUTE_WRITERS`, `PRIMITIVE_POST_PROCESS` | frap-io-gltf | §17.2 | M1 W0 |
-| `LoweredMaterial` | frap-material | §16.2 | M1 W0 (extended M3) |
-| `RenderScene`, `RenderService`, `Film`, `Engine` | frap-render-scene / frap-render | §19 | M1 W0 |
+| `PRIMITIVE_EXTRACTORS`, `PRIMITIVE_ATTRIBUTE_WRITERS`, `PRIMITIVE_POST_PROCESS`, `MeshExportCx` | frap-io-gltf | §17.2 | M1 W0 |
+| `LoweredMaterial`, `MATERIAL_PATTERNS` (`MaterialPattern`, `LowerCx`, `RaiseCx`) | frap-material | §16.2 | M1 W0 (extended M3) |
+| `RenderScene`, `RenderService`, `Film`, `RenderRequest`, `GpuOptions`, `Engine`, `Gpu`, `new_service` | frap-render-scene / frap-render | §19 | M1 W0 |
 | `Response` JSON shape, `serve` request/response framing | frap-session | §13 | M1 W0 |
 | `GoldenState` JSON schema | frap-golden | §20.3 | M1 W0 |
 | `BMesh` public API | frap-bmesh | §6.2 | M2 W0 |
@@ -279,7 +281,7 @@ From [RUST §13]; exact patch versions are locked in `Cargo.lock`.
 
 | Crate | Req | Use |
 |---|---|---|
-| glam | 0.34.3 (`serde`, `approx-05`) | f32 math; f64 inside solvers |
+| glam | 0.34.3 (`serde`, `approx-05`, `libm`) | f32 math; f64 inside solvers; `libm` routes glam's own transcendentals through libm (rule 2.2.12) |
 | wgpu | 30.0.2 (`default-features=false`, `wgsl`, `metal`, `vulkan`, `dx12`, `std`; **not** `static-dxc`, which downloads binaries at build time) | GPU, `frap-render` only. Windows backend order Vulkan, then DX12 with the FXC compiler selected explicitly (§19.2). |
 | libm | 0.2 | portable transcendentals (rule 2.2.12) |
 | flate2 | 1 (`zlib-rs` backend, shared with `zip`) | `frap-spec-catalog` blob |
@@ -300,7 +302,10 @@ From [RUST §13]; exact patch versions are locked in `Cargo.lock`.
 | serde 1.0.229, serde_json 1.0.154 (`preserve_order`, `float_roundtrip`, `raw_value`) | | JSON |
 | zip 9.6.0 (`deflate-flate2-zlib-rs`), sha2 0.11.1, bytemuck 1.25.2, half 2.7.1, base64 0.23.1 | | containers, buffers |
 | clap 4.6.7, schemars 1.2.3, thiserror 2.0.21, anyhow 1.0.104 (bin only), tracing 0.1.44, tracing-subscriber 0.3.23 | | CLI, schema, errors, logs |
-| linkme 0.3, automod 1 | | registration (exact versions locked in M1 W0) |
+| linkme 0.3.38, automod 1.0.17 | | registration (locked in M1 W0) |
+| bitflags 2.13 (`serde`) | | `PropFlags`, `FuncFlags`, `OpOptions`, `BaseFlag`, `ElemFlag` (RFC 0001 F-DEP-1) |
+| proc-macro2 1.0.107, quote 1.0.47, syn 2.0.119 (`full`) | | `frap-macros` (M1 W0) |
+| toml 1.2.1 | | overlays, `props.toml`, `xtask/budgets.toml` (M1 W0) |
 | dev: insta 1.49, approx 0.5.1, proptest 1.12, trycmd 1.2.1, assert_cmd 2.2.2, rstest 0.28, image-compare 0.5, gltf =1.4.1 | | tests |
 
 Not used: `gltf-json` as write model, `nalgebra`, `chumsky`, `csgrs`, `manifold3d`, `draco-rs`, `opensubdiv-petite`, `xatlas-rs*`, `zenwebp` (AGPL) [RUST §13].
@@ -343,15 +348,15 @@ Dynamic enums are dumped as Blender reports them in `-b` (often incomplete). The
 
 | Output | Location | Hand-written counterpart |
 |---|---|---|
-| `OperatorSpec` statics and one typed props struct per operator assigned to a milestone ≤ `spec/current_milestone` in OPERATORS.md (the integrator bumps the file in each milestone's W0) | `crates/frap-spec-ops-<group>/src/gen/<ns>.rs` | `#[operator]` function in a `frap-ops-*` crate |
-| Every other dumped operator (≈ 900 of ≈ 1,100) as a compressed JSON blob, lazily decoded into leaked `&'static` tables | `crates/frap-spec-catalog/src/gen/catalog.json.deflate` | none (`KnownNotImplemented`, `--describe`) |
-| `StructDef` statics for every dumped struct, `const` `PropIdx` per property | `crates/frap-spec-rna/src/gen/<struct>.rs` | `Rna` bindings in the data crates |
-| Plain data structs with `Default` = fresh values, serde, and generated `Rna` impls: RenderSettings, ImageFormatSettings, ColorManagedViewSettings, ColorManagedDisplaySettings, View3DShading, SceneDisplay, SceneEEVEE, ToolSettings (subset), UnitSettings, View3DCursor, Camera fields, CameraDOFSettings, Light fields per type, every modifier settings struct, Keyframe, NlaStrip fields | `crates/frap-scene/src/gen/plain/*.rs`, `crates/frap-anim/src/gen/*.rs` | none |
-| `ModifierType` enum and `ModifierSettings` enum of generated structs | `crates/frap-scene/src/gen/modifier_settings.rs` | evaluators in `frap-modifiers/src/types/*.rs` |
-| `NodeTypeDef` per `bl_idname` | `crates/frap-nodes/src/gen/types/*.rs` | `availability/<node>.rs` for nodes whose sockets depend on a mode |
-| glTF exporter/importer settings structs (110 / 20 props) | `crates/frap-spec-ops-io/src/gen/{export_scene,import_scene}.rs` | `frap-io-gltf` |
+| `OperatorSpec` statics and one typed props struct per operator assigned to a milestone ≤ `spec/current_milestone` in OPERATORS.md (the integrator bumps the file in each milestone's W0) | `crates/frap-spec-ops-<group>/src/generated/<ns>.rs` | `#[operator]` function in a `frap-ops-*` crate |
+| Every other dumped operator (≈ 900 of ≈ 1,100) as a compressed JSON blob, lazily decoded into leaked `&'static` tables | `crates/frap-spec-catalog/src/generated/catalog.json.deflate` | none (`KnownNotImplemented`, `--describe`) |
+| `StructDef` statics for every dumped struct (`frap_spec_rna::OBJECT`), one module per struct holding a `const &PropDef` per property (`frap_spec_rna::object::LOCATION`; flat `<STRUCT>_<PROP>` names collide in the full API, RFC 0001 F-GEN-1, and codegen fails on any collision) | `crates/frap-spec-rna/src/generated/<struct>.rs` | `Rna` bindings in the data crates |
+| Plain data structs with `Default` = fresh values (read-only props ignored, RFC 0001 F-DEF-7), serde, and generated `Rna` impls: RenderSettings, ImageFormatSettings, ColorManagedViewSettings, ColorManagedDisplaySettings, View3DShading, SceneDisplay, SceneEEVEE, ToolSettings (subset), UnitSettings, View3DCursor, Camera fields, CameraDOFSettings, Light fields per type, every modifier settings struct, Keyframe, NlaStrip fields | `crates/frap-scene/src/generated/plain/*.rs`, `crates/frap-anim/src/generated/*.rs` | none |
+| `ModifierType` enum and `ModifierSettings` enum of generated structs | `crates/frap-scene/src/generated/modifier_settings.rs` | evaluators in `frap-modifiers/src/types/*.rs` |
+| `NodeTypeDef` per `bl_idname` | `crates/frap-nodes/src/generated/types/*.rs` | `availability/<node>.rs` for nodes whose sockets depend on a mode |
+| glTF exporter/importer settings structs (110 / 20 props) | `crates/frap-spec-ops-io/src/generated/{export_scene,import_scene}.rs` | `frap-io-gltf` |
 
-Generation is a committed, hermetic step: no `build.rs`. A drift test in each `frap-spec-*` crate reloads the JSON and compares it with the compiled tables. `cargo xtask spec-refresh --check` re-dumps from a live Blender and fails on any diff (run on every Blender 5.2.x patch release).
+Generation is a committed, hermetic step: no `build.rs`. Dump facts that bpy does not expose come from `spec/overlay/`: dynamic enum supersets (`dynamic_enums.toml`, required for correctness: 22 operator enums are empty in `-b`, RFC 0001 F-DEF-6), Python-only members and keyword-only markers (`python_only.toml`), context-member types (`context_members.toml`, F-DEF-5: `object`, `selected_objects`, … are not RNA props of `Context`; codegen synthesises `READONLY | CONTEXT_MEMBER` PropDefs), and float storage width (`float_storage.toml`, F-DEF-2: default `F32`). A drift test in each `frap-spec-*` crate reloads the JSON and compares it with the compiled tables. `cargo xtask spec-refresh --check` re-dumps from a live Blender and fails on any diff (run on every Blender 5.2.x patch release).
 
 **Build-time budget.** CI records the clean build time of `frap-spec-rna` and of each `frap-spec-ops-<group>` and fails when one exceeds 2× its recorded baseline (`xtask/budgets.toml`). Promoting an operator from the catalog to a typed struct is a one-line change to `spec/current_milestone` plus `cargo xtask codegen`; pointer identity of `&'static OperatorSpec` is stable within a process either way.
 
@@ -373,11 +378,13 @@ Every crate with hand-written `Rna` bindings runs `frap_rna::testing::check_bind
 /// Session-unique, never persisted, never reused (not even after rollback).
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd, Debug)]
 pub struct IdKey(NonZeroU64);
+impl IdKey { pub fn next() -> IdKey; }                          // process-global counter (F-ID-3)
 
 /// Blender's 2-letter ID codes; also the prefix of action slot identifiers ("OBCube", "KEKey").
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd, Debug)]
 #[non_exhaustive]
 pub enum IdCode { OB, ME, MA, CA, LA, WO, IM, AR, AC, SC, GR, KE, NT, TE, LI, PT }
+impl IdCode { pub const fn collection(self) -> &'static str; }  // repr of a dynamic IdAny (F-ID-1)
 
 /// Zero-sized marker per ID type, declared here (L1) so that any crate can name an ID
 /// type without depending on the crate that defines its data (frap-mesh points at
@@ -393,8 +400,13 @@ pub enum NodeTreeId {}  pub enum LibraryId {}  pub enum PointCloudId {}  /* … 
 impl IdKind for MaterialId { const CODE: IdCode = IdCode::MA; const COLLECTION: &'static str = "materials";
                              const DEFAULT_NAME: &'static str = "Material"; }
 
-/// Typed pointer between datablocks. Never a name, never an Arc.
-pub struct IdRef<K: IdKind>(IdKey, PhantomData<fn() -> K>);   // Copy, Eq, Hash, Ord
+/// Typed pointer between datablocks. Never a name, never an Arc. Clone/Copy/Eq/Hash/Ord/Debug
+/// are implemented by hand (derives would add `K:` bounds).
+pub struct IdRef<K: IdKind>(IdKey, PhantomData<fn() -> K>);
+impl<K: IdKind> IdRef<K> {                                     // F-ID-2
+    pub fn from_key(k: IdKey) -> Self; pub fn key(self) -> IdKey;
+    pub fn from_any(a: IdAny) -> Option<Self>; pub fn any(self) -> IdAny;   // checked by code
+}
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Ord, PartialOrd, Debug)]
 pub struct IdAny { pub code: IdCode, pub key: IdKey }
 
@@ -416,6 +428,7 @@ pub trait IdType: Rna + Clone + Send + Sync + 'static {
 #[derive(Copy, Clone, Eq, PartialEq, Hash, Debug)]
 #[non_exhaustive]
 pub enum EmbeddedSlot { NodeTree /* Material, World */, MasterCollection /* Scene */ }
+impl EmbeddedSlot { pub const fn prop_identifier(self) -> &'static str; }   // "node_tree" | "collection" (F-ID-4)
 
 pub struct IdHeader {
     pub name: SmolStr,                       // ≤255 bytes UTF-8, unique within its IdMap per library
@@ -423,19 +436,23 @@ pub struct IdHeader {
     pub library: Option<IdRef<LibraryId>>,   // ID.library; None = local
     pub is_linked_packed: bool,              // ID.is_linked_packed (linked from a packed library)
     pub is_embedded_data: bool,              // ID.is_embedded_data
-    pub gen: u64,                            // bumped on every mutable access (§5.3)
+    pub generation: u64,                     // bumped on every mutable access (§5.3); not `gen` (reserved, F-ED-1)
     pub session_uid: u32,                    // deterministic per session, exposed as RNA session_uid
     pub custom: IndexMap<SmolStr, IdProp>,   // ID properties (obj["foo"]) -> glTF extras
 }
+pub enum IdProp { Int(i64), Float(f64), Bool(bool), Str(SmolStr), IntArray(Vec<i64>), FloatArray(Vec<f64>),
+                  Group(IndexMap<SmolStr, IdProp>), List(Vec<IdProp>) }   // #[non_exhaustive]
 ```
 
 `IdMap<T>` ties the two together: `impl<T: IdType> IdMap<T> { fn get(&self, r: IdRef<T::Kind>) -> Option<&T>; … }`. `frap-mesh` stores `Vec<Option<IdRef<MaterialId>>>` and never needs `frap-scene`.
 
-**Embedded IDs** (verified: `material.node_tree.is_embedded_data == True`, repr `bpy.data.materials['X'].node_tree`; `Scene.collection` and `World.node_tree` likewise). They are stored inline in their owner, addressed as `Root::Embedded { owner, slot }` (§9.3), and mutated only through the owner's `IdMap::get_mut`, so the **owner's** `gen` bumps and the owner is logged as modified. They can carry `AnimData` (`NTShader Nodetree` action slot, §18) and are valid KHR_animation_pointer targets through that root.
+**Embedded IDs** (verified: `material.node_tree.is_embedded_data == True`, repr `bpy.data.materials['X'].node_tree`; `Scene.collection` and `World.node_tree` likewise). They are stored inline in their owner, addressed as `Root::Embedded { owner, slot }` (§9.3), and mutated only through the owner's `IdMap::get_mut`, so the **owner's** `generation` bumps and the owner is logged as modified. They can carry `AnimData` (`NTShader Nodetree` action slot, §18) and are valid KHR_animation_pointer targets through that root.
 
 **Linked IDs.** Blender links IDs from libraries even in a factory session: `object.shade_auto_smooth` links the packed "Smooth by Angle" group from `geometry_nodes_essentials.blend` and adds two `bpy.data.libraries` entries (verified; the group's `library` is the `.blend.001` one). frap models a minimal `Library` ID (`LI`: `name`, `filepath`, `parent`, `is_archive`, `packed_file` absent) and linked IDs are read-only for RNA writes (`AttributeError`-style Blender wording captured in `messages.json`). Linked built-in groups are created by frap itself from `frap-nodes/src/builtin_groups/`; nothing is read from a `.blend`.
 
-### 5.2 `Main` (= `bpy.data`) (`frap-scene/src/main.rs`, CONTRACT)
+### 5.2 `Main` (= `bpy.data`) (`frap-scene/src/data.rs`, CONTRACT)
+
+The file is `data.rs`, not `main.rs`: Cargo builds a `src/main.rs` next to `lib.rs` as a binary target (RFC 0001 F-ED-2).
 
 ```rust
 pub struct Main {
@@ -445,9 +462,16 @@ pub struct Main {
     pub scenes: IdMap<Scene>,       pub collections: IdMap<Collection>, pub shape_keys: IdMap<Key>,
     pub node_groups: IdMap<NodeTree>, pub textures: IdMap<Texture>,   pub libraries: IdMap<Library>,
     pub pointclouds: IdMap<PointCloud>,
-    pub filepath: Option<Utf8PathBuf>,
+    pub filepath: Option<String>,               // plain string: camino is not a workspace dependency
     pub is_dirty: bool,
 }
+impl Main {                                      // F-MAIN-1: the resolver and hooks reach IDs through IdAny
+    pub fn id(&self, a: IdAny) -> Option<&dyn Rna>;
+    pub fn id_mut(&mut self, a: IdAny, log: &mut ChangeLog) -> Option<&mut dyn RnaMut>;  // via get_mut
+    pub fn header(&self, a: IdAny) -> Option<&IdHeader>;
+    pub fn collection(&self, attr: &str) -> Option<(Vec<IdAny>, &'static StructDef)>;   // bpy.data.<attr>
+}
+impl IdNames for Main { … }                      // §9.3
 
 pub struct IdMap<T: IdType> {
     items: IndexMap<IdKey, Arc<T>>,          // iteration order = Blender ListBase order (5.4)
@@ -455,7 +479,8 @@ pub struct IdMap<T: IdType> {
 }
 impl<T: IdType> IdMap<T> {
     pub fn get(&self, r: IdRef<T::Kind>) -> Option<&T>;
-    /// Arc::make_mut (clones only if a snapshot shares it) + header.gen = GEN.fetch_add(1) + log.modified.
+    pub fn get_arc(&self, r: IdRef<T::Kind>) -> Option<Arc<T>>;     // F-MAIN-2 (mesh_view in object mode)
+    /// Arc::make_mut (clones only if a snapshot shares it) + header.generation = GEN.fetch_add(1) + log.modified.
     pub fn get_mut(&mut self, r: IdRef<T::Kind>, log: &mut ChangeLog) -> Option<&mut T>;
     /// coll['Name'], coll.get(): the local ID first, then linked IDs in library order.
     pub fn find(&self, name: &str) -> Option<IdRef<T::Kind>>;
@@ -472,16 +497,18 @@ impl<T: IdType> IdMap<T> {
 }
 
 pub struct ChangeLog {                       // per statement; feeds Response.changes
-    pub added: Vec<IdAny>, pub removed: Vec<IdAny>, pub modified: IndexSet<IdAny>,
+    pub added: Vec<IdAny>, pub removed: Vec<(IdAny, SmolStr /*last name*/)>, pub modified: IndexSet<IdAny>,
     pub renamed: Vec<(IdAny, SmolStr /*old*/)>, pub context_changed: bool,
 }
+pub enum RenameMode { Never, Always, SameRoot }   // ID.rename(mode=…)
+pub enum RenameResult { Unchanged, UnchangedCollision, RenamedNoCollision, RenamedCollisionAdjusted, RenamedCollisionForced }
 ```
 
 ### 5.3 Copy-on-write, generations, change tracking
 
 - Every datablock is an `Arc<T>`. Heavy arrays inside datablocks are `Arc<[T]>`/`Arc<Vec<T>>` (Blender's implicit sharing). Changing `obj.location` copies a ~1 KB `Object`, never a mesh.
 - `GEN: AtomicU64` is process-global and lives **outside** any snapshot, so rollback never reuses a generation. Evaluation caches key on generations (§7.3).
-- `IdMap::get_mut` is the **only** mutable access path. It bumps `gen` and logs the ID as modified. Change sets in responses are therefore exact and free. Embedded IDs are reached through their owner's `get_mut` (§5.1).
+- `IdMap::get_mut` is the **only** mutable access path. It bumps `generation` and logs the ID as modified. Change sets in responses are therefore exact and free. Embedded IDs are reached through their owner's `get_mut` (§5.1).
 - Heavy per-ID runtime caches (mesh normals, looptris, decoded image pixels) are **not** cloned with the ID: their `Clone` returns an empty cache (§6.1), so a COW copy can never carry caches computed for the pre-write data.
 - `State::clone()` (§12) clones the `IdMap` tables in O(#IDs); data is shared until written.
 
@@ -499,17 +526,17 @@ User counts are computed on demand by scanning `for_each_ref` over all IDs (plus
 
 ### 5.6 Datablock types
 
-One file each under `crates/frap-scene/src/id/` (except Mesh in `frap-mesh`, NodeTree in `frap-nodes`, Action in `frap-anim`). **Struct fields are named after the RNA identifier whenever a 1:1 property exists** (`location`, `rotation_euler`, `matrix_parent_inverse`), so serde keys in `.frap` equal RNA identifiers.
+One file each under `crates/frap-scene/src/id/` (except Mesh in `frap-mesh`, NodeTree in `frap-nodes`, Action in `frap-anim`). **Struct fields are named after the RNA identifier whenever a 1:1 property exists** (`location`, `rotation_euler`, `matrix_parent_inverse`; `r#type` for `type`), so serde keys in `.frap` equal RNA identifiers. Enum properties are stored as their RNA identifier (`SmolStr`), validated by `coerce` on write. **The field sets of the M1 types (Object, Scene, Collection, Material, Camera, Light, World, Image, Library) are frozen at M1 W0** with Blender-verified constructors (`Object::new`, `Material::new`, `Camera::new`, `Light::new(name, type)`, `World::new`, `Image::new(name, w, h)`, `Collection::new`/`master`, `Scene::new`), so W2 packages compile against them before WP 1.10 lands; their generated plain sub-structs (`CameraFields`, `LightFields`, `RenderSettings`, …) are W0 stand-ins with the same names and field types until WP 1.1 generates them (decision log W0-21). Every animatable ID also has `animation_data: Option<AnimData>`.
 
 | Type | Key content (Blender names) |
 |---|---|
 | `Object` | `data: Option<IdAny>` (fixed at creation, determines read-only `type`), `location`, `rotation_mode`, `rotation_euler`/`_quaternion`/`_axis_angle` (all kept), `scale`, `delta_*`, `parent`, `parent_type`, `parent_bone`, `parent_vertices`, `matrix_parent_inverse`, `modifiers: Vec<Modifier>`, `material_slot_overrides: Vec<SlotOverride{link, material}>` (see below), `active_material_index`, `vertex_groups_active_index`, `pose: Option<Pose>`, `mode: ObjectMode`, `hide_viewport`, `hide_render`, `hide_select`, `display_type`, `color`, `empty_display_type`, `empty_display_size`, `active_shape_key_index`, `show_*`, `animation_data: Option<AnimData>` |
 | `Mesh` (frap-mesh) | §6.1. Vertex-group **names live on the Mesh** (`vertex_group_names`, DNA-level; RNA exposes them through `Object.vertex_groups`, verified: linked duplicates share them) |
-| `Material` | `node_tree: NodeTree` (embedded, always present, name "Shader Nodetree"), `surface_render_method` (`DITHERED`/`BLENDED`), `blend_method` (deprecated mirror, fresh `HASHED`), `use_backface_culling`, `diffuse_color`, `metallic`, `roughness`, `alpha_threshold`, `pass_index`, `use_nodes` (deprecated, always True) |
+| `Material` | `node_tree: NodeTree` (embedded, always present, name "Shader Nodetree"), `surface_render_method` (`DITHERED`/`BLENDED`), `blend_method` (deprecated mirror, fresh `HASHED`), `use_backface_culling`, `diffuse_color`, `metallic`, `roughness` (these three are the **viewport display** values, not the Principled inputs), `alpha_threshold`, `pass_index`, `use_nodes` (deprecated, always True) |
 | `Library` | `name`, `filepath`, `parent`, `is_archive`; only the libraries frap's built-in linked groups need (§5.1) |
 | `PointCloud` | `position` and `radius` POINT attributes plus generic attributes, `materials`; type, storage and RNA exist from M1 (so `Main` does not change shape later); created by `import_scene.gltf(import_point_as_pointcloud=True)` and exported as POINTS from M3 |
-| `Camera`, `Light`, `World` | generated plain fields + hooks (`angle`↔`lens`; `light.type` re-types the struct: `PointLight`/`SunLight`/`SpotLight`/`AreaLight`); `World.node_tree` embedded |
-| `Image` | `source`, `filepath`, `packed_file: Option<Arc<EncodedImage{bytes, mime}>>`, `generated_*`, `colorspace_settings.name`, `alpha_mode`, `size`; decoded pixels cached in runtime |
+| `Camera`, `Light`, `World` | generated plain fields + hooks: `Camera { fields: CameraFields /* type, lens, sensor_*, shift_*, clip_*, ortho_scale, dof, … */ }` (`angle`↔`lens` hook); `Light { type, fields: LightFields }`, where `LightFields` is the union of every light type's fields as in Blender's DNA, so assigning `light.type` re-types the RNA struct (`PointLight`/`SunLight`/`SpotLight`/`AreaLight`) and keeps the values; `World { node_tree (embedded), color, use_nodes }` |
+| `Image` | `source`, `filepath`, `packed_file: Option<Arc<EncodedImage{bytes, mime}>>`, `file_format`, `generated_*`, `colorspace_settings.name`, `alpha_mode`, `size`; decoded pixels cached outside the snapshot (`Services::images`) |
 | `Armature` | `bones` (rest), `collections`, `pose_position`, `display_type`; edit bones live in `EditState` |
 | `Action` (frap-anim) | slots, layers, strips, channelbags, F-curves (§18) |
 | `Key` | `key_blocks: Vec<ShapeKey{name, value, slider_min, slider_max, relative_key, vertex_group, mute, interpolation, data: Arc<Vec<[f32;3]>>}>`, `use_relative`, `reference_key` |
@@ -524,7 +551,7 @@ Fresh defaults come from instance dumps, not RNA defaults, because they differ [
 
 ### 5.7 Factory startup
 
-`frap_scene::startup::factory() -> State` builds the state in `spec/blender-5.2/startup.json` (compiled in with `include_str!`): Camera, Cube (factory vertex order), Light (POINT 1000 W), `Material`, `World`, `Collection`, `ViewLayer`, render settings (EEVEE, 1920×1080, 100%, `/tmp/`, PNG RGBA 8), AgX, cursor at origin, active and selected = Cube. `frap --empty` and `wm.read_homefile(use_empty=True)` give `startup::empty()`. `wm.read_homefile()` and `wm.read_factory_settings()` reset to the factory state. Only `Dots Stroke` (grease pencil material) is omitted, documented in `docs/deviations.md`.
+`frap_scene::startup::factory() -> (Main, WindowState)` builds `bpy.data` and the window state (the session wraps them into its `State`, §12) from `spec/blender-5.2/startup.json` (compiled in with `include_str!`): Camera, Cube (factory vertex order), Light (POINT 1000 W), `Material`, `World`, `Collection`, `ViewLayer`, render settings (EEVEE, 1920×1080, 100%, `/tmp/`, PNG RGBA 8), AgX, cursor at origin, active and selected = Cube. `frap --empty` and `wm.read_homefile(use_empty=True)` give `startup::empty() -> (Main, WindowState)`. `wm.read_homefile()` and `wm.read_factory_settings()` reset to the factory state. Only `Dots Stroke` (grease pencil material) is omitted, documented in `docs/deviations.md`.
 
 ---
 
@@ -562,7 +589,11 @@ impl Mesh {
     pub fn attributes_mut(&mut self) -> &mut AttributeSet;          // clears runtime, then hands out the set
     pub fn set_topology(&mut self, face_offsets: Vec<i32>, corner_verts: Vec<i32>, edges: Vec<[i32; 2]>);
     pub fn deform_verts_mut(&mut self) -> &mut Vec<DeformVert>;
-    pub fn corner_normals(&self) -> Arc<Vec<[f32; 3]>>;            // cached; likewise face/vert normals, looptris, bounds
+    pub fn corner_normals(&self) -> Arc<Vec<[f32; 3]>>;            // cached; likewise:
+    pub fn face_normals(&self) -> Arc<Vec<[f32; 3]>>;
+    pub fn vert_normals(&self) -> Arc<Vec<[f32; 3]>>;
+    pub fn looptris(&self) -> Arc<Vec<[u32; 3]>>;
+    pub fn bounds(&self) -> Option<[[f32; 3]; 2]>;                 // [min, max]; None without vertices
 }
 impl Clone for MeshRuntime { fn clone(&self) -> Self { MeshRuntime::default() } }   // COW copies start cold
 pub struct AttributeSet { attrs: Vec<Attribute> }    // Blender order: by domain, then creation
@@ -747,7 +778,7 @@ pub struct EditState {                        // part of the snapshot
 }
 
 /// No EditState borrow: the mode is on Object.mode, so an operator can hold a Context and
-/// a `&mut EditState` at the same time (OpCtx::split_edit, §10.1).
+/// a `&mut EditState` at the same time (Host::split_edit / OpCtx::split_edit, §9.5, §10.1).
 pub struct Context<'a> { pub main: &'a Main, pub win: &'a WindowState, pub prefs: &'a Preferences }
 impl<'a> Context<'a> {
     pub fn scene(&self) -> &'a Scene;                     pub fn view_layer(&self) -> &'a ViewLayer;
@@ -759,7 +790,8 @@ impl<'a> Context<'a> {
     pub fn edit_object(&self) -> Option<IdRef<ObjectId>>;
     pub fn objects_in_mode(&self) -> Vec<IdRef<ObjectId>>;
     pub fn objects_in_mode_unique_data(&self) -> Vec<IdRef<ObjectId>>;
-    pub fn collection(&self) -> IdRef<CollectionId>;        // where *_add links new objects
+    pub fn collection(&self) -> Option<IdRef<CollectionId>>; // where *_add links new objects; None = the
+                                                          // scene's master collection (embedded, no IdRef)
     pub fn tool_settings(&self) -> &'a ToolSettings;      pub fn cursor(&self) -> &'a View3DCursor;
     pub fn active_bone(&self) -> Option<BoneRef>;         pub fn active_pose_bone(&self) -> Option<BoneRef>;
     pub fn selected_pose_bones(&self) -> Vec<BoneRef>;    pub fn pose_object(&self) -> Option<IdRef<ObjectId>>;
@@ -797,13 +829,18 @@ pub struct PropDef {
     pub identifier: &'static str, pub name: &'static str, pub description: &'static str,
     pub kind: PropKind, pub subtype: Subtype, pub unit: Unit,
     pub array: ArrayShape,                     // Scalar | Fixed(n) | Matrix(r, c) | Dynamic
-    pub flags: PropFlags,                      // READONLY HIDDEN SKIP_SAVE ENUM_FLAG REQUIRED OUTPUT ANIMATABLE
-                                               // PYTHON_ONLY DYNAMIC_ENUM NEVER_NULL
+    pub flags: PropFlags,                      // bitflags: READONLY HIDDEN SKIP_SAVE ENUM_FLAG REQUIRED OUTPUT ANIMATABLE
+                                               // PYTHON_ONLY DYNAMIC_ENUM NEVER_NULL + (F-DEF-1) ARGUMENT_OPTIONAL
+                                               // DEPRECATED PATH_SUPPORTS_BLEND_RELATIVE CONTEXT_MEMBER SKIP_PRESET
+    pub deprecated: Option<&'static Deprecation>,   // F-DEF-3 (Material.use_nodes: DeprecationWarning report)
 }
+pub struct Deprecation { pub note: &'static str, pub version: [u16; 3], pub removal_version: [u16; 3] }
+pub struct EnumItem { pub identifier: &'static str, pub name: &'static str, pub description: &'static str, pub value: i32 }
 pub enum PropKind {
     Bool  { default: Defaults<bool> },
     Int   { default: Defaults<i64>, hard: (i64, i64), soft: (i64, i64) },
-    Float { default: Defaults<f64>, hard: (f64, f64), soft: (f64, f64), precision: u8, storage: FloatStorage /*F32|F64*/ },
+    Float { default: Defaults<f64>, hard: (f64, f64), soft: (f64, f64), precision: u8,
+            storage: FloatStorage /*F32|F64: not dumpable, from spec/overlay/float_storage.toml (F-DEF-2)*/ },
     String{ default: &'static str, max_bytes: u32 /* 0 = unlimited */ },
     Enum  { items: &'static [EnumItem], default: EnumDefault, dynamic: Option<&'static str /*overlay key*/> },
     Pointer    { fixed_type: &'static str, is_id: bool },
@@ -813,8 +850,8 @@ pub struct FuncDef {
     pub identifier: &'static str, pub description: &'static str,
     pub params: &'static [PropDef],            // positional order
     pub returns: &'static [PropDef],
-    pub keyword_only_from: Option<u8>,         // keyframe_insert(data_path, *, …)
-    pub flags: FuncFlags,                      // NO_SELF | USE_SELF_ID | USE_CONTEXT | PYTHON_ONLY
+    pub keyword_only_from: Option<u8>,         // keyframe_insert(data_path, *, …); overlay-only (not dumpable, F-DEF-4)
+    pub flags: FuncFlags,                      // NO_SELF | USE_SELF_TYPE | PYTHON_ONLY (what bpy exposes, F-DEF-4)
 }
 ```
 
@@ -830,18 +867,25 @@ pub enum Input {
     Math(MathValue),                           // Vector, Euler(order), Quaternion, Matrix, Color
     Ptr(RnaPtr),                               // evaluated path expression (an ID or struct)
 }
+pub enum MathValue { Vector(Vec<f64>), Euler([f64; 3], EulerOrder), Quaternion([f64; 4]), Matrix(Vec<Vec<f64>>), Color(Vec<f64>) }
 pub enum Value {
     None, Bool(bool), Int(i64), Float(f32), Double(f64), Str(SmolStr),
     Enum(SmolStr), EnumSet(BTreeSet<SmolStr>),
     BoolArray(SmallVec<[bool; 4]>), IntArray(SmallVec<[i64; 4]>),
-    FloatArray { data: SmallVec<[f32; 16]>, shape: ArrayShape, tag: MathTag },  // Vector|Euler(order)|Quaternion|AxisAngle|Matrix|Color|None
-    Ptr(RnaPtr), Coll(RnaPtr), Tuple(Vec<Value>),
+    FloatArray { data: SmallVec<[f32; 16]>, shape: ArrayShape, tag: MathTag },  // Vector|Euler(EulerOrder)|Quaternion|AxisAngle|Matrix|Color|None
+    Id(Option<IdAny>),                         // ID pointer, JSON {"$ref"} (F-VAL-4); From<IdRef<K>> for Value
+    Ptr(Box<RnaPtr>), Coll(Box<RnaPtr>),       // boxed: Value would be 200 B otherwise (F-VAL-1)
+    Tuple(Vec<Value>),
+    Structs(Vec<IndexMap<SmolStr, Value>>),    // operator collection props: files=[{"name": "a.glb"}] (F-VAL-3)
 }
+/// Blender's message prefix depends on the assignment site (F-VAL-2): coerce returns the message
+/// without prefix; callers convert with RnaError::into_frap(cx.prefix(), …).
+pub enum CoerceCx { RnaSet { owner: &'static str /*struct*/ }, OpArgs { owner: &'static str /*bl_idname*/ } }
 pub fn coerce(def: &PropDef, input: Input, cx: &CoerceCx) -> Result<Coerced, RnaError>;
 pub struct Coerced { pub value: Value, pub clamped: bool }
 ```
 
-`coerce` is the **only** place where Blender's assignment rules live [RNA §1.2]: ints accepted for floats; any sequence of the right length for arrays (`ValueError: … sequences of dimension 0 should contain 3 items, not 2`); scalar to array → `TypeError`; enum checked (`enum "FOO" not found in ('A', 'B')`, item list included); enum flags accept set/list/tuple; numbers clamped to the hard range (silently in Blender; frap adds an INFO report `value 5000 clamped to hard max 1000`); strings truncated to `max_bytes` on a UTF-8 boundary; `Math` accepted where the shape fits; pointers checked against `fixed_type`; `Bare` accepted for String/Enum/EnumSet only, otherwise `TypeError` with hint `quote it or pass a number`.
+`coerce` is the **only** place where Blender's assignment rules live [RNA §1.2]: ints accepted for floats; any sequence of the right length for arrays (`ValueError: … sequences of dimension 0 should contain 3 items, not 2`); scalar to array → `TypeError`; enum checked (`enum "FOO" not found in ('A', 'B')`, item list included); enum flags accept set/list/tuple; numbers clamped to the hard range (silently in Blender; frap adds an INFO report built by `frap_rna::clamp_report`, the same for assignments and operator arguments: `frap: size=-5 clamped to hard min 0.0`, `frap: size=10000000000000.0 clamped to hard max 999999995904.0`, and for arrays `frap: location=(…) clamped to hard range [lo, hi]`; values and bounds in Python `repr`, deviation D-03); strings truncated to `max_bytes` on a UTF-8 boundary; `Math` accepted where the shape fits; pointers checked against `fixed_type`; `Bare` accepted for String/Enum/EnumSet only, otherwise `TypeError` with hint `quote it or pass a number`.
 
 ### 9.3 Paths (`frap-rna/src/ptr.rs`, CONTRACT)
 
@@ -856,6 +900,8 @@ impl RnaPtr {
     pub fn repr(&self, names: &dyn IdNames) -> String;   // bpy.data.objects['Cube'].modifiers["Bevel"]
     pub fn path_from_id(&self) -> Option<String>;        // modifiers["Bevel"].width  (F-curve data_path form)
 }
+/// Implemented by Main (F-PTR-1). Linked IDs repr as bpy.data.node_groups['Name', '<lib path>'].
+pub trait IdNames { fn id_name(&self, id: IdAny) -> Option<(SmolStr /*name*/, Option<SmolStr> /*library path*/)>; }
 pub enum Resolved {
     Struct(RnaPtr),
     Prop { ptr: RnaPtr, prop: &'static PropDef, index: Option<i64>, component: Option<char> /* .x .y .z .w .r .g .b */ },
@@ -877,13 +923,24 @@ Resolution (`frap-session/src/resolve.rs`):
 Many RNA structs do not exist in memory: `MeshVertex`, `MeshEdge`, `MeshPolygon`, `MeshLoop`, `MeshUVLoop` and attribute `data[i]` are views into struct-of-arrays columns; `MaterialSlot` is derived from the object and its data; `VertexGroup` lives on the Object but its name on the Mesh; `Context` and `Window` are computed. The traits therefore return **owned proxies** wherever a borrow is impossible:
 
 ```rust
-pub enum Field<'a> { Value(Value), Struct(StructRef<'a>), Id(Option<IdAny>), Coll(CollRef<'a>) }
+#[non_exhaustive]
+pub enum Field<'a> {
+    Value(Value), Struct(StructRef<'a>), Id(Option<IdAny>), Coll(CollRef<'a>),
+    Embedded(EmbeddedSlot, StructRef<'a>),   // re-root at Root::Embedded { owner: <current ID>, slot } (F-TR-1)
+    Ptr(RnaPtr),                             // re-root at a canonical pointer: context.tool_settings is
+                                             // bpy.data.scenes['Scene'].tool_settings (F-TR-2)
+    NeedsHook,                               // `=> hook` / `hook_coll` getter: call RNA_HOOKS (F-TR-3)
+}
 pub enum StructRef<'a> { Borrowed(&'a dyn Rna), Owned(Box<dyn Rna + 'a>) }          // e.g. MeshVertexRef { mesh: &Mesh, i }
 pub enum CollRef<'a>   { Borrowed(&'a dyn RnaColl), Owned(Box<dyn RnaColl + 'a>) }
-/// Mutable access is always a guard: either a reborrow of real memory or a proxy such as
+pub enum Item<'a> { Struct(StructRef<'a>), Id(Option<IdAny>) }   // ID items and None items (F-TR-4)
+/// Mutable access is always a guard: either a reborrow of real memory (Box::new(&mut node), through
+/// the blanket `impl Rna/RnaMut for &mut T`, F-TR-6) or a proxy such as
 /// MeshVertexMut { mesh: &'a mut Mesh, i: usize }, which writes through Mesh's &mut methods (§6.1).
 pub type RnaMutGuard<'a> = Box<dyn RnaMut + 'a>;
 pub type RnaCollMutGuard<'a> = Box<dyn RnaCollMut + 'a>;
+/// Dense bulk buffer (F-TR-7): 4 bytes per scalar; flat row-major, item length = prop.array_len().
+pub enum Bulk { F32(Vec<f32>), I32(Vec<i32>), Bool(Vec<bool>) }
 
 pub trait Rna: Send + Sync {
     fn srna(&self) -> &'static StructDef;                       // refined (e.g. BevelModifier)
@@ -897,15 +954,21 @@ pub trait RnaMut: Rna {
 pub trait RnaColl {
     fn item_type(&self) -> &'static StructDef;
     fn len(&self) -> usize;
+    fn is_empty(&self) -> bool { self.len() == 0 }              // clippy len_without_is_empty (F-TR-8)
     fn key_of(&self, i: usize) -> Option<SmolStr>;             // None for nameless items (vertices, loops)
-    fn find(&self, key: &str) -> Option<usize>;                 // node sockets: first enabled match
-    fn item(&self, i: usize) -> Result<StructRef<'_>, RnaError>;
+    fn find(&self, key: &str) -> Option<usize>;                 // node sockets: first enabled match; ID-item
+                                                                // collections: None, the resolver uses IdNames
+    fn item(&self, i: usize) -> Result<Item<'_>, RnaError>;     // F-TR-4
+    /// Canonical repr/path segment of item i (F-TR-5): Key(name) when named, else Index(i); sockets and
+    /// material slots override it to Index(i) even when looked up by name (verified).
+    fn item_seg(&self, i: usize) -> Seg { … }
     /// Bulk access (foreach_get / slices, §13.3). Default: loop over item(); SoA collections override.
-    fn foreach_get(&self, prop: &'static PropDef, range: Range<usize>) -> Result<Value, RnaError> { … }
+    fn foreach_get(&self, prop: &'static PropDef, range: Range<usize>) -> Result<Bulk, RnaError> { … }
 }
 pub trait RnaCollMut: RnaColl {
     fn item_mut(&mut self, i: usize) -> Result<RnaMutGuard<'_>, RnaError>;
-    fn foreach_set(&mut self, prop: &'static PropDef, flat: &[Value]) -> Result<(), RnaError> { … }
+    /// Wrong length: RuntimeError "internal error setting the array" (verified, F-TR-7).
+    fn foreach_set(&mut self, prop: &'static PropDef, data: &Bulk) -> Result<(), RnaError> { … }
 }
 pub enum SetOutcome { Done, NeedsHook }                         // NeedsHook => §9.5
 ```
@@ -924,26 +987,37 @@ pub trait HostRead {
     /// Read-only, cached view of a mesh in Edit Mode (§6.3); the original Mesh otherwise.
     fn mesh_view(&self, mesh: IdRef<MeshId>) -> Arc<Mesh>;
 }
-pub trait Host: HostRead {                                // implemented by frap-session::Session
+pub trait Host: HostRead {     // implemented by frap_session::HostImpl, a field of Session disjoint from
+                               // its Services, so an OpCtx can borrow both (F-SES-1)
     fn main_mut(&mut self) -> (&mut Main, &mut ChangeLog);
     fn edit_mut(&mut self) -> &mut EditState;
+    fn split_edit(&mut self) -> (Context<'_>, &mut EditState);   // disjoint fields of the state (F-OP-5)
     fn win_mut(&mut self) -> &mut WindowState;
     fn eval(&mut self) -> (&dyn HostRead, &mut dyn Evaluator);   // split-borrow helper
+    /// COW clone of the state with pending animation applied at `frame` (scene frame if None) and a
+    /// fresh evaluator, for render and export (§7.3, §19.4; F-OP-7).
+    fn snapshot_at(&mut self, frame: Option<i32>) -> Result<Snapshot, RnaError>;
     fn mark_time_dirty(&mut self);                         // frame_current setter
     fn apply_pending_animation(&mut self) -> Result<(), RnaError>;  // evaluation boundaries (§7.3)
     fn report(&mut self, r: Report);
     fn set_path(&mut self, owner: Root, data_path: &str, index: i32, v: Value) -> Result<(), RnaError>; // animation; owner is Id or Embedded
 }
+pub struct Snapshot { pub host: Box<dyn HostRead + Send>, pub eval: Box<dyn Evaluator + Send> }
 pub type RnaFuncImpl = fn(&mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Result<Value, RnaError>;
 pub type RnaSetHook  = fn(&mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError>;
-pub type RnaGetHook  = fn(&mut dyn Host, this: &RnaPtr, prop: &'static PropDef) -> Result<Value, RnaError>;
+/// Reads need no transaction (§12), so get hooks take &dyn HostRead and may return a proxy that
+/// borrows the scene (material_slots → CollRef::Owned(MaterialSlots { main, ob })) (F-HOOK-1).
+pub type RnaGetHook  = for<'h> fn(&'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError>;
 
 pub struct RnaFuncReg { pub srna: &'static str, pub func: &'static str, pub imp: RnaFuncImpl }
+pub struct RnaHookReg { pub srna: &'static str, pub prop: &'static str,
+                        pub get: Option<RnaGetHook>, pub set: Option<RnaSetHook> }   // lookup walks the base chain
+pub struct FuncArgs { pub func: &'static FuncDef, pub values: IndexMap<&'static str, Value>, pub is_set: BitSet }
 #[linkme::distributed_slice] pub static RNA_FUNCS: [RnaFuncReg];
 #[linkme::distributed_slice] pub static RNA_HOOKS: [RnaHookReg];   // get and/or set per (srna, prop)
 ```
 
-`FuncArgs` binds positional and keyword arguments against `FuncDef.params`, enforces keyword-only markers (`obj.keyframe_insert("location", 2, 20)` → Blender's TypeError) and coerces each argument. Python-only members (`children`, `children_recursive`, `users_collection`, `users_scene`, `Mesh.from_pydata/shade_smooth/shade_flat`, `bpy_struct.keyframe_insert/keyframe_delete` signatures) come from `spec/overlay/python_only.toml` and are implemented as hooks flagged `PYTHON_ONLY`.
+`FuncArgs` binds positional and keyword arguments against `FuncDef.params`, enforces keyword-only markers (`obj.keyframe_insert("location", 2, 20)` → Blender's TypeError) and coerces each argument. Python-only members (`children`, `children_recursive`, `users_collection`, `users_scene`, `Mesh.from_pydata/shade_smooth/shade_flat`, `bpy_struct.keyframe_insert/keyframe_delete` signatures) come from `spec/overlay/python_only.toml` and are implemented as hooks flagged `PYTHON_ONLY`. An RNA function or hook is registered in a crate that can name `frap_scene::{RNA_FUNCS, RNA_HOOKS}` (L6 or above): crates below L6 (`frap-mesh`, `frap-nodes`) provide the Rust API and the struct-local bindings, and the global registration lives in `frap-scene/src/{funcs,hooks}/` or `frap-ops-data/src/funcs/` (e.g. `Mesh.from_pydata`, decision log W0-22).
 
 ### 9.6 Worked example: the property `Object.location`
 
@@ -956,18 +1030,18 @@ pub struct RnaFuncReg { pub srna: &'static str, pub func: &'static str, pub imp:
    "soft_min":-3.4028235e38,"soft_max":3.4028235e38,"precision":5,"flags":["ANIMATABLE"]}, "…"]}
 ```
 
-**2. Generated** (`crates/frap-spec-rna/src/gen/object.rs`, never edited):
+**2. Generated** (`crates/frap-spec-rna/src/generated/object.rs`, never edited):
 
 ```rust
 pub static OBJECT: StructDef = StructDef { identifier: "Object", base: Some(&ID), name_property: Some("name"),
     props: &OBJECT_PROPS, funcs: &OBJECT_FUNCS, is_id: true, /* … */ };
-pub const OBJECT_LOCATION: &PropDef = &OBJECT_PROPS[17];
+pub mod object { pub const LOCATION: &PropDef = &super::OBJECT_PROPS[17]; /* one const per prop (F-GEN-1) */ }
 pub static OBJECT_PROPS: [PropDef; N] = [ /* … */
     PropDef { identifier: "location", name: "Location", description: "Location of the object",
         kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028235e38, 3.4028235e38),
                                 soft: (-3.4028235e38, 3.4028235e38), precision: 5, storage: FloatStorage::F32 },
         subtype: Subtype::Translation, unit: Unit::Length, array: ArrayShape::Fixed(3),
-        flags: PropFlags::ANIMATABLE },
+        flags: PropFlags::ANIMATABLE, deprecated: None },
     /* … */ ];
 ```
 
@@ -998,9 +1072,9 @@ rna_struct! { Object as frap_spec_rna::OBJECT {
 The macro generates `impl Rna`/`impl RnaMut` with a `match prop.identifier` that converts `[f32; 3]` to and from `Value::FloatArray { shape: Fixed(3), tag: Vector }`.
 
 **5. Set at runtime**: `bpy.data.objects['Cube'].location = (1, 2, 3)`
-1. The executor resolves `bpy.data.objects['Cube']` → `RnaPtr { root: Id(OB Cube) }`, then `.location` → `Resolved::Prop { prop: OBJECT_LOCATION }` (`frap_spec_rna::OBJECT_LOCATION`).
-2. `coerce(OBJECT_LOCATION, Input::Tuple([Int(1), Int(2), Int(3)]))` → `Value::FloatArray([1.0, 2.0, 3.0], Fixed(3), Vector)`.
-3. The transaction walks again **mutably** from the owning ID: `main.objects.get_mut(cube, log)` (COW, `gen` bump, `modified += OB Cube`) → `RnaMut::set` → `SetOutcome::Done`.
+1. The executor resolves `bpy.data.objects['Cube']` → `RnaPtr { root: Id(OB Cube) }`, then `.location` → `Resolved::Prop { prop: object::LOCATION }` (`frap_spec_rna::object::LOCATION`).
+2. `coerce(object::LOCATION, Input::Tuple([Int(1), Int(2), Int(3)]), &CoerceCx::RnaSet { owner: "Object" })` → `Value::FloatArray([1.0, 2.0, 3.0], Fixed(3), Vector)`.
+3. The transaction walks again **mutably** from the owning ID: `main.objects.get_mut(cube, log)` (COW, `generation` bump, `modified += OB Cube`) → `RnaMut::set` → `SetOutcome::Done`.
 4. Response: `{"kind":"set","ok":true,"path":"bpy.data.objects['Cube'].location","value":[1,2,3],"changes":{"modified":["bpy.data.objects['Cube']"]}, …}`.
 
 Component writes (`….location.x = 5`, `….location[1] = 7`) resolve with `component`/`index`, read the array, replace one element, and write back through the same path. `….location = (1, 2)` → `ValueError: bpy_struct: item.attr = val: sequences of dimension 0 should contain 3 items, not 2` (verified wording).
@@ -1017,11 +1091,17 @@ Component writes (`….location.x = 5`, `….location[1] = 7`) resolve with `com
 // frap-rna/src/op.rs (CONTRACT): shared by generated code and the framework
 #[derive(Clone, Debug)]
 pub struct Prop<T> { pub value: T, pub is_set: bool }      // RNA_struct_property_is_set
+impl<T> Prop<T> { pub fn map<U>(self, f: impl FnOnce(T) -> U) -> Prop<U>; }   // F-OP-4
+pub struct BitSet(SmallVec<[u64; 2]>);                      // F-OP-1 (glTF export has 110 props)
 pub struct OpArgs {                                         // output of argument conversion
-    pub values: IndexMap<&'static str, Value>,              // defaults filled for unset props
-    pub is_set: BitSet,
+    pub values: IndexMap<&'static str, Value>,              // spec order, defaults filled for unset props
+    pub is_set: BitSet,                                     // indices into `values`
     pub nested: IndexMap<&'static str, OpArgs>,             // macro sub-ops: "TRANSFORM_OT_translate"
 }
+impl OpArgs { pub fn prop<T: FromValue>(&self, index: usize, identifier: &'static str) -> Prop<T>; }  // F-OP-2
+pub trait FromValue: Sized { fn from_value(v: &Value) -> Self; }   // infallible after coerce; bool, i32, f32,
+                                                            // SmolStr, [f32; N], [[f32; C]; R], [bool; N], [i32; N],
+                                                            // BTreeSet<SmolStr>, Vec<IndexMap<..>>, generated enums
 pub trait OpProps: Sized {
     const IDNAME: &'static str;                             // "mesh.primitive_cube_add"
     const BL_IDNAME: &'static str;                          // "MESH_OT_primitive_cube_add"
@@ -1035,8 +1115,10 @@ pub struct OperatorSpec {
     pub description: &'static str, pub options: OpOptions,  // REGISTER | UNDO | INTERNAL | MACRO | …
     pub props: &'static [PropDef],
     pub macro_steps: &'static [&'static str],               // ["MESH_OT_extrude_region", "TRANSFORM_OT_translate"]
-    pub poll_matrix: PollMatrix,                            // dumped A–E (+V) results: tests and --describe
+    pub poll_matrix: Option<PollMatrix>,                    // dumped A–E (+V) results; None for hand-written frap.* (F-OP-3)
 }
+pub struct PollMatrix { pub plain: [PollCell; 5], pub view3d: [PollCell; 5] }
+pub enum PollCell { Y, N, Raised }
 
 // frap-op/src/def.rs (CONTRACT)
 pub struct OperatorDef {
@@ -1057,8 +1139,10 @@ pub struct PollFail { pub message: Option<String>,          // None => "failed, 
 
 pub enum OpStatus { Finished, Cancelled }
 pub enum OpError { Runtime(String) /* raised as RuntimeError("Error: <msg>") */, Rna(RnaError),
-                   NotImplemented(String), Io(String), Gpu(String), Limit(String) }
+                   NotImplemented(String), Io(String), Gpu(String), Limit(String) }   // From<RnaError>
 pub type OpResult = Result<OpStatus, OpError>;
+// Report { level: ReportType, message } and ReportType { Info, Warning, Error, Operator, Property } live in
+// frap-rna/src/error.rs (frap-scene and frap-material name them; F-LAYER-1) and are re-exported by frap-op.
 
 /// Side-effect services that live outside the snapshot (never rolled back). Implemented by frap-session.
 pub trait Services {
@@ -1066,24 +1150,35 @@ pub trait Services {
     fn images(&mut self) -> &mut dyn ImageCache;                      // decoded pixels by (IdKey, gen)
     fn paths(&self) -> &PathResolver;                                 // cwd, `//` relative to bpy.data.filepath
 }
+pub struct PathResolver { pub cwd: PathBuf, pub blend_dir: Option<PathBuf> }   // F-REN-1
+pub trait ImageCache {                                                // F-REN-1
+    fn get(&self, image: IdRef<ImageId>, generation: u64) -> Option<Arc<DecodedImage>>;
+    fn put(&mut self, image: IdRef<ImageId>, generation: u64, pixels: Arc<DecodedImage>);
+    fn evict(&mut self, key: IdKey);
+}
 
 pub struct OpCtx<'h> { host: &'h mut dyn Host, services: &'h mut dyn Services, reports: Vec<Report>,
                        result: IndexMap<SmolStr, Value>, op: &'static OperatorSpec }
-impl OpCtx<'_> {
+impl<'h> OpCtx<'h> {
+    pub fn new(host: &'h mut dyn Host, services: &'h mut dyn Services, op: &'static OperatorSpec) -> Self;  // F-OP-8
+    pub fn finish(self) -> OpOutput;                        // OpOutput { reports, result } (F-OP-8)
     pub fn ctx(&self) -> Context<'_>;
     pub fn main(&self) -> &Main;
+    pub fn main_mut(&mut self) -> (&mut Main, &mut ChangeLog);   // inserts into any IdMap (F-OP-9)
     pub fn object_mut(&mut self, r: IdRef<ObjectId>) -> Result<&mut Object, OpError>;
     pub fn mesh_mut(&mut self, r: IdRef<MeshId>) -> Result<&mut Mesh, OpError>;
     pub fn bmesh_mut(&mut self, me: IdRef<MeshId>) -> Result<&mut BMesh, OpError>;   // EditState COW, bumps bm_gen
     /// Read the context (tool settings, cursor, selection) while editing BMeshes.
     pub fn split_edit(&mut self) -> (Context<'_>, &mut EditState);
-    /// Read the context while asking the evaluator for evaluated objects.
-    pub fn split_eval(&mut self) -> (Context<'_>, &mut dyn Evaluator);
+    /// Read the state while asking the evaluator for evaluated objects; the context is
+    /// HostRead::ctx() (a Context is not a HostRead, F-OP-6).
+    pub fn split_eval(&mut self) -> (&dyn HostRead, &mut dyn Evaluator);
     pub fn services(&mut self) -> &mut dyn Services;
+    pub fn snapshot_at(&mut self, frame: Option<i32>) -> Result<Snapshot, OpError>;   // render/export (F-OP-7)
     pub fn add_object(&mut self, name: &str, data: Option<IdAny>, at: Placement) -> IdRef<ObjectId>; // link to ctx.collection, select only it, make active
     pub fn evaluated(&mut self, ob: IdRef<ObjectId>) -> Result<Arc<EvaluatedObject>, OpError>;
     pub fn report(&mut self, level: ReportType, msg: impl Into<String>);
-    pub fn result(&mut self, key: &str, v: impl Into<Value>);   // Response.result
+    pub fn result(&mut self, key: &str, v: impl Into<Value>);   // Response.result; IdRef<K>: Into<Value>
     pub fn run_op(&mut self, idname: &str, args: OpArgs) -> OpResult;   // ops calling ops
 }
 ```
@@ -1106,10 +1201,21 @@ Registry: `Registry::global()` is built once from `OPERATORS` plus `frap_spec_ca
 
 ### 10.3 Is-set semantics and shared helpers (`frap-op/src/helpers/`)
 
-- `placement(cx, &location, &rotation, &align, &scale) -> Placement`: unset `location` → 3D cursor; unset `rotation` → from `align` (`WORLD` identity, `VIEW` virtual view rotation, `CURSOR` cursor rotation); `scale` sentinel `(0,0,0)` → 1 [OBJ §1.3].
+- `placement(cx, &location, &rotation, align: Align, &scale) -> Result<Placement, OpError>`: unset `location` → 3D cursor; unset `rotation` → from `align` (`WORLD` identity, `VIEW` virtual view rotation, `CURSOR` cursor rotation); `scale` sentinel `(0,0,0)` → 1 [OBJ §1.3]. `align` is taken by value: Blender reads only its value, never whether it was set (decision log W0-25).
 - `add_primitive_or_merge(cx, name, mesh, placement, enter_editmode)`: in object mode creates an object and a mesh, both requested as `name` and **uniquified independently** in `objects` and `meshes` (after deleting the factory Cube: object `Cube`, mesh `Cube.001`, verified, §5.4), links it to `context.collection`, deselects others, selects and activates it; in edit mode merges into the edit mesh and selects only the new geometry. `add_object_with_data` applies the same rule for cameras, lights, empties and armatures.
-- `frame_range_or_scene(cx, &frame_start, &frame_end)`, `iter_edit_meshes(cx)` (multi-object edit loop).
+- `add_object_with_data(cx, name, data: Option<IdAny>, placement, enter_editmode) -> Result<IdRef<ObjectId>, OpError>` (`data` inserted by the caller under its own requested name; `None` = Empty), `frame_range_or_scene(cx, &frame_start, &frame_end) -> (i32, i32)`, `iter_edit_meshes(cx) -> Vec<(IdRef<ObjectId>, IdRef<MeshId>)>` (multi-object edit loop). Signatures frozen at M1 W0; bodies WP 1.12.
 - **Transform dispatch is an extension point.** `transform.translate/rotate/resize` (`frap-ops-transform/src/ops/*.rs`, owned once in M1) call the shared core and dispatch per context mode through `TRANSFORM_MODE_HANDLERS`: `object/` (M1), `edit/` (M2), `pose/` (M6). Later milestones add handler files only.
+
+```rust
+// frap-op/src/modes.rs (CONTRACT, M1 W0)
+pub struct ModeHandler { pub mode: ObjectMode, pub object_type: &'static str /* "MESH", "" = any */,
+                         pub enter: fn(&mut OpCtx, objects: &[IdRef<ObjectId>]) -> OpResult,
+                         pub exit:  fn(&mut OpCtx, objects: &[IdRef<ObjectId>]) -> OpResult }
+pub enum TransformOp { Translate, Rotate, Resize }
+pub struct TransformModeHandler { pub mode: ContextMode, pub apply: fn(&mut OpCtx, op: TransformOp, args: &OpArgs) -> OpResult }
+#[linkme::distributed_slice] pub static MODE_HANDLERS: [ModeHandler];
+#[linkme::distributed_slice] pub static TRANSFORM_MODE_HANDLERS: [TransformModeHandler];
+```
 
 ### 10.4 Worked example: `mesh.primitive_cube_add`
 
@@ -1130,7 +1236,7 @@ Registry: `Registry::global()` is built once from `OPERATORS` plus `frap_spec_ca
   {"identifier":"scale","type":"FLOAT","subtype":"XYZ_LENGTH","unit":"LENGTH","array":[3],"default":[0,0,0],"flags":["HIDDEN","SKIP_SAVE"]}]}
 ```
 
-**2. Generated** (`crates/frap-spec-ops-mesh/src/gen/mesh.rs`, never edited):
+**2. Generated** (`crates/frap-spec-ops-mesh/src/generated/mesh.rs`, never edited):
 
 ```rust
 pub mod primitive_cube_add {
@@ -1151,7 +1257,7 @@ impl OpProps for PrimitiveCubeAdd {
     const IDNAME: &'static str = "mesh.primitive_cube_add";
     const BL_IDNAME: &'static str = "MESH_OT_primitive_cube_add";
     fn spec() -> &'static OperatorSpec { &OPSPEC_MESH_OT_PRIMITIVE_CUBE_ADD }
-    fn from_args(a: &OpArgs) -> Self { /* generated */ }
+    fn from_args(a: &OpArgs) -> Self { PrimitiveCubeAdd { size: a.prop(0, "size"), /* … */ scale: a.prop(6, "scale") } }
 }
 ```
 
@@ -1321,7 +1427,8 @@ bpy.ops.mesh.select_mode(type='FACE')                mesh.select_mode type=FACE 
 
 ```rust
 impl Session {
-    pub fn exec_request(&mut self, req: Request) -> Vec<Response>;   // serve/MCP framing (§13.1)
+    pub fn exec_request(&mut self, req: Request) -> Vec<Response>;   // serve/MCP framing (§13.1); the caller
+                                                                     // then writes DoneRecord::from_responses(id, &rs)
     pub fn invoke(&mut self, idname: &str, kwargs: IndexMap<String, Input>) -> Response;
     pub fn get(&mut self, path: &str) -> Response;                         // path parsed with the shared path grammar
     pub fn set(&mut self, path: &str, value: Input) -> Response;
@@ -1337,15 +1444,23 @@ A future `frap-lua` crate (`mlua`, `lua54` + `vendored`, or `luau` for sandboxin
 
 ```rust
 pub struct Session {
-    state: State,                              // everything rolled back
-    eval: EvalCache,                           // keyed by generation; safe across rollback (§5.3)
-    services: SessionServices,                 // implements frap_op::Services; never snapshotted
+    host: HostImpl,                            // implements frap_scene::Host: { state: State (everything rolled
+                                               // back), eval: EvalCache (keyed by generation; safe across
+                                               // rollback, §5.3), log: ChangeLog, reports } — disjoint from
+    services: SessionServices,                 // services (F-SES-1): implements frap_op::Services; never snapshotted
     opts: SessionOptions,                      // verbosity, max_items, max_array, cwd, limits, fail_fast
     seq: u64,
 }
+#[non_exhaustive]                              // built from Default, then fields assigned (W0-24)
+pub struct SessionOptions { pub cwd: PathBuf, pub gpu: GpuOptions, pub startup: Startup, pub verbosity: Verbosity,
+                            pub max_items: usize /*100*/, pub max_array: usize /*65,536*/, pub limits: Limits, pub fail_fast: bool }
+#[non_exhaustive] pub enum Startup { Factory, Empty, File(PathBuf) }
+#[non_exhaustive] pub enum Verbosity { Minimal, Normal, Full }
+#[non_exhaustive] pub struct Limits { pub max_elements: u64 /*50M corners*/, pub stmt_timeout: Option<Duration> }
 struct SessionServices {
     render: Option<Box<dyn RenderService>>,    // created on first use by `render_factory`
-    render_factory: fn(&GpuOptions) -> Result<Box<dyn RenderService>, RenderError>,  // frap_render::new_service (feature gpu) or a stub returning GPU_UNAVAILABLE
+    render_factory: fn(&GpuOptions) -> Result<Box<dyn RenderService>, RenderError>,  // frap_render::new_service (feature gpu) or a stub returning GPU_UNAVAILABLE;
+                                               // GpuOptions lives in frap-render-scene so this compiles without `gpu` (F-REN-2)
     images: ImageCacheImpl, paths: PathResolver,
 }
 #[derive(Clone)] struct State { main: Main, win: WindowState, edit: EditState, prefs: Preferences, time_dirty: bool }
@@ -1406,15 +1521,15 @@ frap has three transports over the same `Session`:
 | `id` | serve/MCP | the request's `id`, echoed on every response of that request |
 | `seq` | always | 1-based statement counter (per session) |
 | `line` | always | source line of the statement's first token (within the request in serve mode) |
-| `kind` | always | `op`, `op_meta`, `get`, `set`, `call`, `print`, `noop` |
+| `kind` | always | `op`, `op_meta`, `get`, `set`, `call`, `print`, `noop`; `invalid` for input that never became a statement (syntax error, invalid UTF-8 on a line): exactly one `ERROR` response, no `op`/`path`/`func` |
 | `ok` | always | `true` iff `status` is `FINISHED` |
 | `status` | always | `FINISHED`, `CANCELLED`, `ERROR`, `SKIPPED` (serve/MCP with `on_error:"skip_rest"`) |
 | `op` / `path` / `func` | by kind | idname / resolved repr path / function path |
 | `reports` | always | Blender-style `[{type: INFO\|WARNING\|ERROR\|OPERATOR\|PROPERTY, message}]`, wording copied (`Removed 6 vertice(s)`) |
 | `result` | op | op-specific values from `cx.result()`: created `object`/`objects`, `removed` counts, render `filepath`/`frames`, export `filepath`/`bytes`/`extensions_used`, UV `islands`, select counts |
-| `value` / `rna` | get, call, print | JSON value (§13.3) and its RNA type tag |
+| `value` / `rna` | get, call, print; `value` also on set | JSON value (§13.3) and its RNA type tag; a `set` response echoes the assigned value after coercion (clamped, converted) in `value`, without `rna` (§9.6) |
 | `changes` | mutations | `{"added":[],"removed":[],"modified":[],"renamed":[]}` as repr paths, from the `ChangeLog` |
-| `context` | normal+ | `mode`, `active_object`, `selected_objects` (names, base order), `frame_current`; in edit mode also `edit_object`, `select_mode` |
+| `context` | normal+ (absent with `--verbosity minimal`) | `mode`, `active_object`, `selected_objects` (names, base order), `frame_current`; in edit mode also `edit_object`, `select_mode` |
 | `edit_mesh` | edit mode, normal+ | per object in mode: `{"verts","edges","faces","tris","selected":{…},"active":{"type","index"}}` |
 | `hints` | always (may be empty) | `[{code, message}]`: frap help (e.g. `NO_OP_DEFAULT`: "mesh.bevel offset=0 is a no-op; pass offset"; `ANGLE_LIKELY_DEGREES`: "rotation=0,0,90 is in radians (90 rad); did you mean radians(90)?", raised when a value of a ROTATION/ANGLE-unit prop is a whole number with magnitude > 2π) |
 | `error` | ERROR | §13.4 |
@@ -1468,6 +1583,7 @@ pub struct FrapError {
 | `NAME` | NameError | executor | `name 'cube' is not defined` |
 | `OP_UNKNOWN` | AttributeError | registry | `Calling operator "bpy.ops.mesh.foo" error, could not be found` |
 | `OP_NOT_IMPLEMENTED` | NotImplementedError | registry | `mesh.knife_project exists in Blender 5.2 but is not implemented by frap` |
+| `NOT_IMPLEMENTED` | NotImplementedError | executor | a statement form or path that is valid in Blender but not implemented by frap in this milestone (temporary, `deviations.md` §2) |
 | `OP_ARG_UNKNOWN` / `OP_ARG_TYPE` / `OP_ARG_ENUM` / `OP_ARG_POSITIONAL` | TypeError | invoke | Blender wording (§10.2) |
 | `OP_ARG_LENGTH` | ValueError | invoke | `… sequences of dimension 0 should contain 3 items, not 2` |
 | `OP_POLL_FAILED` | RuntimeError | invoke | `Operator bpy.ops.mesh.bevel.poll() failed, context is incorrect` + `detail.requires`/`unmet` + `hint: "bpy.ops.object.mode_set(mode='EDIT')"` |
@@ -1481,10 +1597,14 @@ pub struct FrapError {
 | `RNA_TYPE` / `RNA_ENUM` / `RNA_FUNC_ARGS` | TypeError | coerce, FuncArgs | Blender wording |
 | `RNA_LENGTH` | ValueError | coerce | `bpy_struct: item.attr = val: sequences of dimension 0 should contain 3 items, not 2` |
 | `RNA_EDITMODE_WRITE` | RuntimeError | mesh hooks | `Mesh "Cube" is in Edit Mode; mesh data writes would be lost` |
+| `RNA_NOT_IMPLEMENTED` | NotImplementedError | RNA layer (`RnaErrorKind::NotImplemented`) | part of the RNA surface frap does not implement yet (temporary) |
+| `RNA_RUNTIME` | RuntimeError | RNA functions/hooks (`RnaErrorKind::Other`) | the function's own error in Blender's wording (exception as Blender raises it, usually RuntimeError) |
 | `IO_ERROR` / `IO_UNSUPPORTED_FORMAT` | RuntimeError | io ops | `Error: frap cannot write .blend files; use a .frap path` |
 | `GPU_UNAVAILABLE` | RuntimeError | render | no adapter / built without gpu |
 | `LIMIT_EXCEEDED` | RuntimeError | session | `Error: frap: limit exceeded (max_elements)` |
 | `INTERNAL` | RuntimeError | panic | includes the panic message |
+
+`RnaError` (frap-rna, RFC 0001 F-ERR-1) is the RNA-layer error: `{ kind: RnaErrorKind, exception: PyExc, message, hint, detail }`, where `message` has **no** context prefix and `kind` selects the code family; callers convert with `into_frap(prefix, code_for_kind)` because Blender's prefix depends on the site (`bpy_struct: item.attr = val: ` vs `Converting py args to operator properties: `), or with `From<RnaError> for FrapError` (no prefix, default code of the kind). RNA codes are constants in `frap_rna::codes`.
 
 Library crates use `thiserror` enums converting `Into<FrapError>`. Only `frap-cli` uses `anyhow`. `frap --describe=errors` lists every registered code (collected through a `linkme` slice of `ErrorCodeDoc`).
 
@@ -1610,9 +1730,11 @@ pub struct NodeTree { pub header: IdHeader, pub ty: NodeTreeType /* SHADER | GEO
 pub struct Node { pub uid: u32, pub name: SmolStr, pub label: String, pub bl_idname: &'static str,
                   pub location: [f32; 2], pub width: f32, pub parent: Option<u32>, pub mute: bool, pub hide: bool,
                   pub inputs: Vec<Socket>, pub outputs: Vec<Socket>, pub props: PropBag /* generated per type */ }
-pub struct Socket { pub name: &'static str, pub identifier: &'static str, pub ty: SocketType,
+// Socket and link names are SmolStr: group sockets take them from user data and .frap load cannot
+// produce &'static str without leaking (RFC 0001 F-NODE-1).
+pub struct Socket { pub name: SmolStr, pub identifier: SmolStr, pub ty: SocketType,
                     pub enabled: bool, pub hide_value: bool, pub default_value: SocketValue }
-pub struct Link { pub from_node: u32, pub from_socket: &'static str /*identifier*/, pub to_node: u32, pub to_socket: &'static str }
+pub struct Link { pub from_node: u32, pub from_socket: SmolStr /*identifier*/, pub to_node: u32, pub to_socket: SmolStr }
 ```
 
 - `nodes.new(type="ShaderNodeTexImage")` builds the node from the generated `NodeTypeDef` (sockets, defaults, width, name = uniquified default name). Removed 5.x node types (`ShaderNodeSeparateRGB`, …) → `RuntimeError: Error: Node type ShaderNodeSeparateRGB undefined` (verified [FID S1]).
@@ -1642,9 +1764,17 @@ pub struct TexRef { pub image: IdRef<ImageId>, pub uv: UvSource /* Named | Activ
                     pub transform: Option<TexTransform>, pub sampler: Sampler, pub colorspace_is_data: bool }
 pub fn lower(tree: &NodeTree, mat: &Material, images: &dyn ImageLookup) -> LoweredMaterial;
 pub fn raise(lm: &LoweredMaterial, into: &mut Material, names: &mut NameAlloc);   // importer: Blender-style graph
+
+// Extension point (M1 W0, W0-28): one entry per file in patterns/; lower/raise run every entry in `order`.
+pub struct MaterialPattern { pub name: &'static str, pub order: u16,
+    pub lower: fn(&LowerCx, &mut LoweredMaterial),                   // fallback + WARNING when unrecognised
+    pub raise: Option<fn(&LoweredMaterial, &mut RaiseCx)> }
+#[non_exhaustive] pub struct LowerCx<'a> { pub tree: &'a NodeTree, pub mat: &'a Material, pub images: &'a dyn ImageLookup }
+#[non_exhaustive] pub struct RaiseCx<'a> { pub into: &'a mut Material, pub names: &'a mut NameAlloc }   // WP 1.11 adds shared fields
+#[linkme::distributed_slice] pub static MATERIAL_PATTERNS: [MaterialPattern];
 ```
 
-- `lower` is one **pattern recogniser per file** (`patterns/base_color.rs`, `metallic_roughness.rs`, `normal_map.rs`, `alpha.rs`, `emission.rs`, `occlusion.rs`, `texture_transform.rs`, `vertex_color.rs`, `clearcoat.rs`, …), mirroring `io_scene_gltf2/blender/exp/material/*` and `search_node_tree.py`. Alpha mode comes from the graph, not `blend_method` [RNA §0.9].
+- `lower` is one **pattern recogniser per file**, each registering a `MaterialPattern` in `MATERIAL_PATTERNS` (so M3 adds files and never edits `lower`/`raise`, §22.1) (`patterns/base_color.rs`, `metallic_roughness.rs`, `normal_map.rs`, `alpha.rs`, `emission.rs`, `occlusion.rs`, `texture_transform.rs`, `vertex_color.rs`, `clearcoat.rs`, …), mirroring `io_scene_gltf2/blender/exp/material/*` and `search_node_tree.py`. Alpha mode comes from the graph, not `blend_method` [RNA §0.9].
 - **Both the exporter and the renderer consume `LoweredMaterial`.** Whatever exports correctly renders correctly.
 - Round-trip law (tested for every fixture material): `lower(raise(lower(x))) == lower(x)`.
 
@@ -1713,8 +1843,21 @@ crates/frap-io-gltf/src/import/
 
 ```rust
 // frap-io-gltf/src/export/mesh/ext.rs (CONTRACT, M1 W0). Later milestones add files, never edit primitives.rs.
-pub struct PrimitiveExtractor   { pub name: &'static str, pub order: u16, pub run: fn(&MeshExportCx, &mut Vec<PrimitiveDraft>) }
-pub struct PrimitiveAttributeWriter { pub name: &'static str, pub order: u16, pub run: fn(&MeshExportCx, &mut PrimitiveDraft) -> Result<(), ExportError> }
+// Driver: (1) writers' `key` fill one SplitKey (the add-on's per-corner `dots`), (2) extractors dedupe on
+// (vertex index, key) and record a representative corner + vertex per glTF vertex, (3) writers' `run`, (4) post.
+#[non_exhaustive] pub struct MeshExportCx<'a> { pub main: &'a Main, pub mesh: &'a Mesh,
+    pub object: Option<IdRef<ObjectId>>,                     // vertex groups/armature (M6), object-linked slots; None if shared
+    pub settings: &'a ExportSettings }                       // built by the driver with MeshExportCx::new; fields added additively
+pub struct SplitKey { pub corners: usize, pub columns: Vec<KeyColumn> }   // KeyColumn { writer, stride, words: Vec<u32> }
+#[non_exhaustive] pub struct PrimitiveDraft { pub mode: u32, pub material_slot: usize, pub positions, pub normals, pub texcoords,
+    pub indices: Vec<u32>, pub corners: Vec<u32>, pub vertices: Vec<u32>,
+    pub attributes: IndexMap<SmolStr, AttrColumn>,           // COLOR_n, TANGENT, JOINTS_n, WEIGHTS_n, … in output order
+    pub targets: Vec<IndexMap<SmolStr, AttrColumn>> }        // morph targets (M6)
+pub struct AttrColumn { pub values: AttrValues /* F32x2|F32x3|F32x4|U8x4|U16x4, non_exhaustive */, pub normalized: bool }
+pub struct PrimitiveExtractor   { pub name: &'static str, pub order: u16, pub run: fn(&MeshExportCx, &SplitKey, &mut Vec<PrimitiveDraft>) }
+pub struct PrimitiveAttributeWriter { pub name: &'static str, pub order: u16,
+    pub key: Option<fn(&MeshExportCx, &mut SplitKey) -> Result<(), ExportError>>,   // None: per-vertex data (skin)
+    pub run: fn(&MeshExportCx, &SplitKey, &mut PrimitiveDraft) -> Result<(), ExportError> }
 pub struct PrimitivePostProcess { pub name: &'static str, pub order: u16, pub run: fn(&MeshExportCx, &mut PrimitiveDraft, &mut BufferBuilder) -> Result<(), ExportError> }
 #[linkme::distributed_slice] pub static PRIMITIVE_EXTRACTORS: [PrimitiveExtractor];
 #[linkme::distributed_slice] pub static PRIMITIVE_ATTRIBUTE_WRITERS: [PrimitiveAttributeWriter];
@@ -1751,7 +1894,7 @@ pub struct PrimitivePostProcess { pub name: &'static str, pub order: u16, pub ru
 ### 19.1 Data flow
 
 ```
-State clone + animation at frame ──► frap-render-scene::build(&dyn HostRead, &mut dyn Evaluator, &RenderRequest) -> RenderScene   (CPU, no wgpu)
+State clone + animation at frame ──► frap-render-scene::build(&dyn HostRead, &mut dyn Evaluator, &RenderRequest) -> Result<RenderScene, RenderError>   (CPU, no wgpu)
                        │  plain data: corner-split meshes, LoweredMaterials, decoded images, lights, camera, world, settings
                        ▼
 OpCtx::services().render() ──► dyn RenderService = frap-render::Renderer { gpu (lazy), engines: {Workbench, Eevee}, cache } ──► Film (scene-linear f32 RGBA)
@@ -1786,8 +1929,12 @@ pub trait RenderService: Send {
     fn adapter_info(&self) -> AdapterSummary;
 }
 pub struct Film { pub width: u32, pub height: u32, pub rgba: Vec<[f32; 4]> }   // scene-linear, straight alpha
+// Defined here (F-REN-1/F-REN-2) so the session's render factory compiles without the gpu feature:
+pub struct GpuOptions { pub backend: Option<String>, pub adapter: Option<String>, pub force_fallback: bool }  // from_env()
+pub struct RenderRequest { pub frame: Option<i32>, pub resolution: Option<[u32; 2]>,
+                           pub camera: Option<RCamera>, pub objects: Option<Vec<SmolStr>> }
 
-// frap-render/src/lib.rs (CONTRACT)
+// frap-render (CONTRACT; lib.rs re-exports gpu.rs, engine.rs, service.rs; GpuOptions re-exported from frap-render-scene)
 pub fn new_service(opts: &GpuOptions) -> Result<Box<dyn RenderService>, RenderError>;  // used by frap-session
 pub trait Engine { fn render(&mut self, gpu: &Gpu, cache: &mut GpuCache, scene: &RenderScene) -> Result<Film, RenderError>; }
 pub struct Gpu { pub device: wgpu::Device, pub queue: wgpu::Queue, pub info: wgpu::AdapterInfo }
@@ -1944,7 +2091,7 @@ f32 storage everywhere Blender stores f32; f64 only inside algorithms (QEM, LSCM
 
 ### 21.6 Code
 
-- `#![forbid(unsafe_code)]` in every crate except `frap-render` (wgpu/bytemuck interop if needed), `frap-codec-mesh` and `frap-imbuf` (FFI wrappers), each with a `// SAFETY:` comment per block.
+- `#![deny(unsafe_code)]` in every crate (workspace lint). The only allowed exception is `#[allow(unsafe_code)]` on a `linkme` slice declaration or entry, which expands to `#[link_section]` and trips the lint, so `forbid` is impossible in registering crates (RFC 0001 F-LINK-1); `#[operator]`, `#[rna_func]`, `#[rna_hook]`, `#[modifier]` and `#[bmesh_op]` emit that allow themselves, so hand-written code never needs it. `frap-render`, `frap-codec-mesh` and `frap-imbuf` may `allow` real unsafe blocks (wgpu/bytemuck interop, FFI wrappers), each with a `// SAFETY:` comment.
 - `cargo fmt`, `cargo clippy --workspace --all-targets -D warnings`. Public items documented (`#![warn(missing_docs)]` on contract crates).
 - Every `pub` contract type is `#[non_exhaustive]` where it is an enum likely to grow.
 
@@ -1965,7 +2112,8 @@ Cold start < 30 ms without GPU init; a 100k-face edit-mode op < 200 ms; a proper
 ### 22.1 Rules
 
 - A milestone is a sequence of **waves**. Work packages (WPs) inside one wave run in parallel, each by one agent.
-- **Wave 0 of every milestone from M1 on is a single integrator WP.** It is the only WP that edits shared files: root `Cargo.toml`, crate `Cargo.toml`s, `lib.rs` module declarations, `frap-ops-all`, `spec/current_milestone`, and new CONTRACT signatures (bodies `todo!()`). It creates every module file named in that milestone's ownership lists as a compiling stub, and every extension-point slice (§3.4) the milestone's WPs register into. After Wave 0, **a WP edits only the paths it owns**. Directories of per-concept files (`ops/`, `funcs/`, `types/`, `patterns/`, `ext/`, `modes/`, `extract/`, `writers/`, `post/`, `cases/`) are included with `automod::dir!`, so adding a file there needs no `mod` edit.
+- **Wave 0 of every milestone from M1 on is a single integrator WP.** It is the only WP that edits shared files: root `Cargo.toml`, crate `Cargo.toml`s, `lib.rs` module declarations, `frap-ops-all`, `spec/current_milestone`, and new CONTRACT signatures (bodies `todo!()`). It creates every module file named in that milestone's ownership lists as a compiling stub, and every extension-point slice (§3.4) the milestone's WPs register into. **Exception:** per-concept files inside `automod` directories (`ops/primitive_*.rs`, `funcs/*.rs`, `modes/object.rs`, …) are not stubbed: W0 creates the directory with its `_dir.rs` placeholder and the owning WP adds the files, because the §10.5 registry test requires every concept file to register something (decision log W0-23). It also creates the test-only crates (`crates/frap-ops-<x>-tests`, rule 2.2.11) that a WP's acceptance needs, and the dev-dependencies every WP's tests need. After Wave 0, **a WP edits only the paths it owns**. Directories of per-concept files (`ops/`, `funcs/`, `types/`, `patterns/`, `ext/`, `modes/`, `extract/`, `writers/`, `post/`, `cases/`) are included with `automod::dir!`, so adding a file there needs no `mod` edit.
+- **`lib.rs` and module files.** Every crate's `Cargo.toml` and `src/lib.rs` belong to the integrator, so W0 declares every module a WP needs. A WP that needs another module declares it as a submodule of a file it owns (`polyfill.rs` → `polyfill/beautify.rs`), never in `lib.rs`. Per-concept directories are `automod` directories with a `_dir.rs` placeholder until their first file lands (rule 2.2.1).
 - **Ownership is per milestone.** A path owned by a WP in one milestone may be re-assigned in a later milestone (stated explicitly as "reassigned"). Where later milestones extend behaviour that one file dispatches (mode switching, transforms, glTF primitive export), the dispatcher is owned once and later WPs add handler files to an extension-point slice instead of reassigning it.
 - **Needs** lists the WPs whose *signatures* a WP needs (always satisfied by Wave 0) and, marked *(impl)*, WPs whose implementation must have landed. Within a wave there are no *(impl)* dependencies except where marked *(soft)*: the WP can start against stubs and fixtures, and its acceptance runs once the other lands.
 - **Golden prerequisite set.** Golden cases are scripts that both tools run, so a WP's goldens need the operators and RNA functions they call. Each milestone names a *golden prerequisite set* (the minimal calls its goldens use to build a scene: primitives, selection, mode switching, data-API creation). It is owned by WPs that land **one wave earlier** than every WP whose goldens use it, and nobody's acceptance depends on a same-wave prerequisite.
@@ -2029,32 +2177,32 @@ Plus: ≥ 60 golden cases blessed and green (primitives at T1, object ops, RNA g
 
 | WP | Wave | Title | Owns | Needs | Acceptance |
 |---|---|---|---|---|---|
-| 1.0 | W0 | Skeleton and contracts (integrator) | root `Cargo.toml`, `rust-toolchain.toml`, `deny.toml`, `.github/workflows/**`, `xtask/src/main.rs`, `xtask/src/check_deps.rs`, `xtask/budgets.toml`, `spec/current_milestone`, every `crates/*/Cargo.toml` and `src/lib.rs` (all crates of §3.2 created, later-milestone crates empty), every CONTRACT file of §3.4 frozen at M1 W0 as stubs (incl. the `MODE_HANDLERS`, `TRANSFORM_MODE_HANDLERS` and glTF `PRIMITIVE_*` slices), `crates/frap-ops-all/**`, `docs/deviations.md` | M0, RFC 0001 | Folds M0 code in, deletes `crates/frap-probe`; `cargo build/test --workspace` green on the CI matrix; `cargo deny check` and `cargo xtask check-deps` (no dev-dependency cycles) pass; the clean `cc`-only container builds default features; every CONTRACT signature in this document compiles. |
-| 1.1 | W1 | Blender dumps and codegen | `tools/blender/dump_{ops,rna,nodes,modifiers,startup}.py`, `spec/**` (except `spec/blender-5.2/primitives/`, `spec/current_milestone`), `xtask/src/codegen/**`, `crates/frap-spec-rna/**`, `crates/frap-spec-ops-*/**`, `crates/frap-spec-catalog/**`, every `crates/*/src/gen/**` | 1.0 | `cargo xtask codegen --check` clean; drift tests pass; typed props structs exist exactly for OPERATORS.md operators with M ≤ 1, every other curated operator decodes from the catalog with a stable `&'static` address; `PrimitiveCubeAdd` equals §10.4; plain structs' `Default` equals dumped fresh values (test per struct); dumps taken with the glTF variants preference on (§4.1); `frap_*` option audit test (§4.2); `frap-spec-*` build-time budgets recorded; overlay files seeded (`dynamic_enums`, `python_only`, `compat_4x`, `frap_options`). |
-| 1.2 | W1 | Math, RNA core and RNA macros | `crates/frap-math/**`, `crates/frap-rna/**`, `crates/frap-macros/src/{rna_struct,rna_func,rna_hook}.rs`, `tools/blender/dump_rng.py` | 1.0 | `coerce` table tests cover every row of [RNA §1.2] with the messages of Appendix A; `unique_name` reproduces all verified cases; `BliRng` reproduces a Blender-dumped sequence; Euler/matrix decomposition within 1e-6 of Blender, bit-identical across the 3 OSes (`libm`); `IdKind` markers for every `IdCode`; `Root::Embedded` repr/path_from_id reproduce the verified socket strings; `serde_buf` round-trip; `rna_struct!` generates value, hook, coll and SoA-proxy bindings for test structs; `check_bindings` and `HOOK_DECLS` emission. |
+| 1.0 | W0 | Skeleton and contracts (integrator) | root `Cargo.toml`, `rust-toolchain.toml`, `deny.toml`, `.github/workflows/**`, `xtask/Cargo.toml`, `xtask/src/main.rs`, `xtask/src/check_deps.rs`, `xtask/src/budgets.rs`, `xtask/budgets.toml`, `spec/current_milestone`, every `crates/*/Cargo.toml` and `src/lib.rs` (all crates of §3.2 created, later-milestone crates empty), every CONTRACT file of §3.4 frozen at M1 W0 as stubs (incl. the `MODE_HANDLERS`, `TRANSFORM_MODE_HANDLERS` and glTF `PRIMITIVE_*` slices), `crates/frap-ops-all/**`, `docs/deviations.md`, `fuzz/Cargo.toml`, `crates/*/clippy.toml`, `crates/frap-schema/tests/describe_ops.rs` (stub; then WP 1.18) | M0, RFC 0001 | Folds M0 code in, deletes `crates/frap-probe`; `cargo build/test --workspace` green on the CI matrix; `cargo deny check` and `cargo xtask check-deps` (no dev-dependency cycles) pass; the clean `cc`-only container builds default features; every CONTRACT signature in this document compiles. |
+| 1.1 | W1 | Blender dumps and codegen | `tools/blender/dump_{ops,rna,nodes,modifiers,startup}.py`, `spec/**` (except `spec/blender-5.2/primitives/`, `spec/current_milestone`), `xtask/src/codegen/**`, the `[baseline_secs]` values of `xtask/budgets.toml` (written by `cargo xtask budgets --record`), appended `[dependencies]` lines of `xtask/Cargo.toml` (W0-28), `crates/frap-spec-rna/**`, `crates/frap-spec-ops-*/**`, `crates/frap-spec-catalog/**`, every `crates/*/src/generated/**` | 1.0 | `cargo xtask codegen --check` clean; drift tests pass; typed props structs exist exactly for OPERATORS.md operators with M ≤ 1, every other curated operator decodes from the catalog with a stable `&'static` address; `PrimitiveCubeAdd` equals §10.4; plain structs' `Default` equals dumped fresh values (test per struct); dumps taken with the glTF variants preference on (§4.1); `frap_*` option audit test (§4.2); `frap-spec-*` build-time budgets recorded; overlay files seeded (`dynamic_enums`, `python_only`, `compat_4x`, `frap_options`). |
+| 1.2 | W1 | Math, RNA core and RNA macros | `crates/frap-math/**`, `crates/frap-rna/**`, `crates/frap-macros/src/{rna_struct,rna_func,rna_hook}.rs`, `tools/blender/dump_rng.py` | 1.0 | `coerce` table tests cover every row of [RNA §1.2] with the messages of Appendix A (an empty message body drops the prefix's trailing space: `TypeError: bpy_struct: item.attr = val:`); `clamp_report` wording of §9.2 tested for scalar min/max and arrays; `unique_name` reproduces all verified cases; `BliRng` reproduces a Blender-dumped sequence; Euler/matrix decomposition within 1e-6 of Blender, bit-identical across the 3 OSes (`libm`); `IdKind` markers for every `IdCode`; `Root::Embedded` repr/path_from_id reproduce the verified socket strings; `serde_buf` round-trip; `rna_struct!` generates value, hook, coll and SoA-proxy bindings for test structs; `check_bindings` and `HOOK_DECLS` emission. |
 | 1.3 | W1 | Language front-ends | `crates/frap-lang/**`, `fuzz/fuzz_targets/lang_*.rs` | 1.0 | Corpus ≥ 250 statements (one file each) incl. every example in this document with IR snapshots; the four pairs of §11.5 produce identical IR; `parse_complete` never waits (unclosed bracket → `SyntaxError: '(' was never closed`); raw splitter ends continuations on blank line/EOF; §11.4 path/BARE and `D`/`C` routing cases; `bpy.ops.x.y.poll()` → `OpMeta`; every error has a span with byte `col` and `col_chars` (non-ASCII test); proptest/fuzz 10 min without panic. |
-| 1.4 | W1 | Mesh, geometry, primitives | `crates/frap-mesh/**` (except `src/rna/**`), `crates/frap-geom/**`, `tools/blender/dump_primitives.py`, `spec/blender-5.2/primitives/**` | 1.0 | All 10 primitive generators index-exact (T1) vs dumps for defaults and ≥ 2 variants each (monkey per D1), bit-identical across OSes; `normals_domain` rules; looptri rule; default cube corner split = 24; all-false attribute removal; `from_pydata` (Rust API); `MeshRuntime` clone is empty and every `&mut` accessor clears caches (proptest: cached normals/looptris always equal a fresh computation). |
+| 1.4 | W1 | Mesh, geometry, primitives | `crates/frap-mesh/**` (except `src/rna/**`), `crates/frap-geom/**`, `tools/blender/dump_primitives.py`, `spec/blender-5.2/primitives/**` | 1.0 | All 10 primitive generators index-exact (T1) vs dumps for defaults and ≥ 2 variants each (monkey per D1), bit-identical across OSes; `normals_domain` rules; looptri rule; default cube corner split = 24; generators create Blender's internal `.select_vert/.select_edge/.select_poly` and `.uv_select_vert/.uv_select_edge/.uv_select_face` attributes (closes the deviations.md §2 gap); all-false attribute removal; `from_pydata` (Rust API); `MeshRuntime` clone is empty and every `&mut` accessor clears caches (proptest: cached normals/looptris always equal a fresh computation). |
 | 1.5 | W1 | glTF format crate | `crates/frap-gltf/**` (core JSON, `glb.rs`, `accessor.rs`, `builder.rs`, `validate.rs`, `ext/khr_lights_punctual.rs`, `ext/khr_texture_transform.rs`, `ext/khr_materials_emissive_strength.rs`), `tests/data/gltf-samples/**` | 1.0 | Reads a vendored Khronos sample subset (licences recorded) and writes it back losslessly modulo buffer layout; all primitive modes (POINTS…TRIANGLE_FAN) decode; unknown extensions/extras round-trip; `gltf =1.4.1` reads frap output; validator tests. |
 | 1.6 | W1 | Images and colour | `crates/frap-imbuf/**`, `crates/frap-color/**`, `tools/blender/bake_view_luts.py`, `assets/luts/**` | 1.0 | PNG 8/16, JPEG, WebP lossless, HDR, EXR decode/encode round-trips; Standard and AgX within ΔE < 1 of Blender on the **held-out** colour set, not the baked lattice (CPU test). |
 | 1.7 | W1 | GPU and basic Workbench | `crates/frap-render/**`, `assets/studio_lights/**` | 1.0 | `new_service` works on Metal, lavapipe, WARP (Windows: Vulkan, else DX12 with FXC; no `static-dxc`); one Workbench uber-shader, no per-material pipelines; synthetic `RenderScene`s render with SOLID + STUDIO/FLAT + MATERIAL/OBJECT/SINGLE/RANDOM, `film_transparent`, background; `Rgba32Float` accumulation; readback padding test; same-adapter determinism (SSIM ≥ 0.995 between runs); cold first-render time recorded per CI adapter. |
-| 1.8 | W1 | Golden harness | `crates/frap-golden/**`, `tools/blender/{golden_runner,dump_state,emulations}.py`, `tests/golden/props.toml`, `tests/golden/README.md`, `xtask/src/golden.rs` | 1.0 | Comparators `lines`, `rna_values`, `mesh_exact`, `mesh_canonical`, `gltf_canonical`, `gltf_roundtrip`, `image_ssim` with self-tests (equal under permutation, different under a one-element change); runner normalisation list matches `deviations.md` (no time normalisation, §20.3); bless/live/skip paths tested; `locate_blender` order tested; Blender-side runner blesses 3 seed cases. |
+| 1.8 | W1 | Golden harness | `crates/frap-golden/**`, `tools/blender/{golden_runner,dump_state,emulations}.py`, `tests/golden/props.toml`, `tests/golden/README.md`, `xtask/src/golden.rs`, appended `[dependencies]` lines of `xtask/Cargo.toml` (W0-28) | 1.0 | Comparators `lines`, `rna_values`, `mesh_exact`, `mesh_canonical`, `gltf_canonical`, `gltf_roundtrip`, `image_ssim` with self-tests (equal under permutation, different under a one-element change); runner normalisation list matches `deviations.md` (no time normalisation, §20.3); bless/live/skip paths tested; `locate_blender` order tested; Blender-side runner blesses 3 seed cases. |
 | 1.9 | W1 | `.frap` container | `crates/frap-project/src/{container,manifest,buffers,migrate}/**` | 1.0, 1.2 *(soft)* | Deterministic zip (byte-identical twice); content addressing and inline threshold; migration framework with a v0→v1 test; refuses newer versions. |
-| 1.10 | W2 | Scene data, startup and scene RNA functions | `crates/frap-scene/**` (except `src/gen/**`) | 1.1 *(impl)*, 1.2 *(impl)* | `IdMap` COW/gen/`ChangeLog` tests; ordering rule (§5.4) test; `(name, library)` keys, local-before-linked lookup and the tuple-key rule pinned by T0 goldens; `Library` ID; embedded IDs mutate through the owner (owner `gen` bump); rename/remove/users/orphans; derived material slots (count follows `data.materials`, overrides padded lazily); factory and empty startup equal `startup.json` (compared through RNA); bindings for Object, Scene, ViewLayer, LayerCollection, Collection, Camera, Light (all types), World, Material (non-node), Image metadata, Window stub, generated settings structs pass `check_bindings`; hooks `rotation_mode` conversion and `matrix_world` write decomposition (goldens vs Blender), `parent`, `name`, `frame_current` (marks time dirty only); RNA functions `select_set/select_get/hide_set/hide_get/visible_get`, `view_layer.objects.active`; `Context` members; Python-only `children`, `children_recursive`, `users_collection`, `users_scene`. |
-| 1.11 | W2 | Nodes and basic lowering | `crates/frap-nodes/**` (except `src/gen/**`), `crates/frap-material/**` | 1.1 *(impl)*, 1.2 *(impl)* | `materials.new` graph and locations; embedded node tree (`is_embedded_data`, verified repr); first-enabled socket lookup (Mix test); `links.new` replacement; `ShaderNodeSeparateRGB` error; patterns `base_color`, `metallic_roughness`, constant `alpha`, constant `emission`, Image Texture on base colour; `lower(raise(lower(x))) == lower(x)` on M1 fixtures. |
-| 1.12 | W2 | Operator framework | `crates/frap-macros/src/{operator,modifier,bmesh_op}.rs`, `crates/frap-op/**` | 1.2 *(impl)* | Dummy ops in a test crate register via `linkme`; duplicate idnames make `Registry::global()` fail; pipeline tests for unknown op + suggestions, unknown keyword wording, positional rule, macro args in both spellings, dynamic enums, `is_set`, clamping report, `ANGLE_LIKELY_DEGREES` hint; declarative poll: `requires`/`unmet`/`hint` for every poll in the library; `OpMeta` (`poll()`, `get_rna_type()`, `idname()`, `idname_py()`); `split_edit`/`split_eval`/`services` borrow tests; `placement` matches Blender for `align='VIEW'` and cursor cases; `add_primitive_or_merge`/`add_object_with_data` uniquify object and data independently. |
+| 1.10 | W2 | Scene data, startup and scene RNA functions | `crates/frap-scene/**` (except `src/generated/**` and `src/lib.rs`; the datablock field sets in `src/id/` are frozen by W0, W0-21) | 1.1 *(impl)*, 1.2 *(impl)* | `IdMap` COW/generation/`ChangeLog` tests; ordering rule (§5.4) test; `(name, library)` keys, local-before-linked lookup and the tuple-key rule pinned by T0 goldens; `Library` ID; embedded IDs mutate through the owner (owner `generation` bump); rename/remove/users/orphans; derived material slots (count follows `data.materials`, overrides padded lazily); factory and empty startup equal `startup.json` (compared through RNA), including the factory `World` (closes the deviations.md §2 gap); bindings for Object, Scene, ViewLayer, LayerCollection, Collection, Camera, Light (all types), World, Material (non-node), Image metadata, Window stub, generated settings structs pass `check_bindings`; hooks `rotation_mode` conversion and `matrix_world` write decomposition (goldens vs Blender), `parent`, `name`, `frame_current` (marks time dirty only); RNA functions `select_set/select_get/hide_set/hide_get/visible_get`, `view_layer.objects.active`; `Context` members; Python-only `children`, `children_recursive`, `users_collection`, `users_scene`. |
+| 1.11 | W2 | Nodes and basic lowering | `crates/frap-nodes/**` (except `src/generated/**`), `crates/frap-material/**` | 1.1 *(impl)*, 1.2 *(impl)* | `materials.new` graph and locations; embedded node tree (`is_embedded_data`, verified repr); first-enabled socket lookup (Mix test); `links.new` replacement; `ShaderNodeSeparateRGB` error; patterns `base_color`, `metallic_roughness`, constant `alpha`, constant `emission`, Image Texture on base colour; `lower(raise(lower(x))) == lower(x)` on M1 fixtures; every `patterns/*.rs` registers exactly one `MATERIAL_PATTERNS` entry and `lower`/`raise` name no pattern. |
+| 1.12 | W2 | Operator framework | `crates/frap-macros/src/{operator,modifier,bmesh_op}.rs`, `crates/frap-op/**` | 1.2 *(impl)* | Dummy ops in integration tests under `crates/frap-op/tests/` (each file is its own test binary, so a duplicate-idname test does not disturb the others) register via `linkme`; duplicate idnames make `Registry::global()` fail; pipeline tests for unknown op + suggestions, a catalog operator without an implementation (`mesh.bevel`) → `NotImplementedError` `OP_NOT_IMPLEMENTED` (closes the deviations.md §2 gap), unknown keyword wording, positional rule, macro args in both spellings, dynamic enums, `is_set`, clamping report (exact §9.2 wording), `ANGLE_LIKELY_DEGREES` hint; declarative poll: `requires`/`unmet`/`hint` for every poll in the library; `OpMeta` (`poll()`, `get_rna_type()`, `idname()`, `idname_py()`); `split_edit`/`split_eval`/`services` borrow tests; `placement` matches Blender for `align='VIEW'` and cursor cases; `add_primitive_or_merge`/`add_object_with_data` uniquify object and data independently; `frame_range_or_scene` and `iter_edit_meshes` implemented and unit-tested (no `todo!()` left in `frap-op`). |
 | 1.13 | W2 | Evaluation v1 | `crates/frap-eval/**` | 1.10 *(soft)* | World matrices with parents and `matrix_parent_inverse`; bounds and `dimensions`; fingerprint invalidation on every `gen` bump; reads never change a fingerprint; cycle report; evaluated mesh shares the original `Arc` when there are no modifiers; `apply_pending_animation` boundary API (no-op until M6). |
-| 1.14 | W2 | Session and protocol | `crates/frap-session/**` | 1.3 *(impl)*, 1.10 *(soft)*, 1.12 *(soft)* | Every path form of [RNA §1.1]; get/set/call/print/op_meta responses and value encoding (§13.3) incl. nameless `$coll`, `$array`, `foreach_get`/`foreach_set`, slices and `--max-array` truncation; `changes` and `context`; reads run without a transaction and leave `State` bit-identical; rollback on ERROR/CANCELLED/panic with a proptest that state is unchanged; `exec_request` with `id` echo, done record and `on_error` (`SKIPPED`); `Services` with a lazily created `RenderService` (stub when `gpu` is off); compat errors with hints. |
+| 1.14 | W2 | Session and protocol | `crates/frap-session/**` | 1.3 *(impl)*, 1.10 *(soft)*, 1.12 *(soft)* | Every path form of [RNA §1.1]; get/set/call/print/op_meta responses and value encoding (§13.3) incl. nameless `$coll`, `$array`, `foreach_get`/`foreach_set`, slices and `--max-array` truncation; `changes` and `context`; reads run without a transaction and leave `State` bit-identical; rollback on ERROR/CANCELLED/panic with a proptest that state is unchanged; `exec_request` with `id` echo, done record (`DoneRecord::from_responses`) and `on_error` (`SKIPPED`); `Services` with a lazily created `RenderService` (stub when `gpu` is off); compat errors with hints. |
 | 1.15 | W2 | Render-scene builder | `crates/frap-render-scene/src/build/**`, `tools/blender/dump_camera_cases.py` | 1.10, 1.11, 1.13 *(soft)* | Camera matrices equal Blender's for sensor fit/shift/ortho/clip cases; deterministic object order; mesh extraction equals `corner_split`; Workbench colour sources; builds from a `State` clone without touching the session state. |
 | 1.16 | W2 | glTF static export (library level) | `crates/frap-io-gltf/src/export/**` (incl. `mesh/primitives.rs`, `mesh/extract/triangles.rs`, `mesh/writers/{normal,texcoord}.rs`) | 1.5, 1.10, 1.11 *(soft)* | Rust-built scenes export to GLBs that pass `validate.rs` and `gltf =1.4.1`; unit tests of the Blender rules (looptris, corner split, 4-dp normals, V flip, natural root order, Y-up, omission rules, BYTE_COLOR → USHORT); the three extension-point slices drive TRIANGLES/NORMAL/TEXCOORD_0 (a test-only writer proves a new file is picked up); `insta` snapshots. Blender goldens are in 1.23. |
-| 1.17 | W2 | glTF static import (library level) | `crates/frap-io-gltf/src/import/**`, `tools/blender/make_gltf_fixtures.py`, `tests/data/gltf-blender/**` | 1.5, 1.10, 1.11 *(soft)* | For ≥ 5 Blender-exported fixture GLBs and the Khronos subset, calling the importer in-process yields a `GoldenState` equal to Blender's `import_scene.gltf` dump (names, hierarchy, `merge_vertices`, `import_shading`, strips/fans/lines/points converted). No operators needed. |
+| 1.17 | W2 | glTF static import (library level) | `crates/frap-io-gltf/src/import/**`, `tools/blender/make_gltf_fixtures.py`, `tests/data/gltf-blender/**` | 1.5, 1.10, 1.11 *(soft)* | For ≥ 5 Blender-exported fixture GLBs and the Khronos subset, calling the importer in-process yields a state equal to Blender's `import_scene.gltf` dump, compared field by field against the dump JSON (`frap-io-gltf` cannot dev-depend on `frap-golden`, rule 2.2.11; the `GoldenState` comparison runs through the operator in 1.23) (names, hierarchy, `merge_vertices`, `import_shading`, strips/fans/lines/points converted). No operators needed. |
 | 1.18 | W2 | Schema export | `crates/frap-schema/**`, `docs/agents.md` | 1.1, 1.12 | Manifest, jsonschema and tools snapshots; tool formats validate against the provider JSON-Schema subsets; `poll.requires` per operator; angle units shown as `ROTATION (radians)`; unimplemented ops visible with `not_implemented`; `agents.md` covers `serve`, `mcp`, `on_error`, `poll()`, bulk reads. |
-| 1.27 | W2 | Mesh RNA bindings | `crates/frap-mesh/src/rna/**` | 1.1 *(impl)*, 1.2 *(impl)*, 1.4 *(impl)* | `Mesh` and element bindings (`MeshVertex`, `MeshEdge`, `MeshPolygon`, `MeshLoop`, `MeshLoopTriangle`, `MeshUVLoopLayer`/`MeshUVLoop`, attributes and typed `data[i]`) through SoA proxies pass `check_bindings`; `use_smooth`/`use_seam`/`use_edge_sharp` proxies create/remove attributes; `foreach_get`/`foreach_set` overrides on every SoA collection; `from_pydata` RNA function. |
+| 1.27 | W2 | Mesh RNA bindings | `crates/frap-mesh/src/rna/**` | 1.1 *(impl)*, 1.2 *(impl)*, 1.4 *(impl)* | `Mesh` and element bindings (`MeshVertex`, `MeshEdge`, `MeshPolygon`, `MeshLoop`, `MeshLoopTriangle`, `MeshUVLoopLayer`/`MeshUVLoop`, attributes and typed `data[i]`) through SoA proxies pass `check_bindings`; `use_smooth`/`use_seam`/`use_edge_sharp` proxies create/remove attributes; `foreach_get`/`foreach_set` overrides on every SoA collection. (The `from_pydata` RNA function moved to 1.22, decision log W0-22.) |
 | 1.19 | W3 | Primitives and object golden prerequisites | `crates/frap-ops-mesh/src/ops/primitive_*.rs`, `crates/frap-ops-object/src/ops/{select_all,delete,mode_set}.rs`, `crates/frap-ops-object/src/modes/object.rs`, `tests/golden/cases/primitives/**`, `tests/golden/cases/object/delete/**` | 1.4, 1.12, 1.14 *(impl)*, 1.10 *(impl)* | All 10 `mesh.primitive_*_add` at T1 incl. `location`/`rotation`/`align`/`scale` variants and cursor placement; `cube_add_after_delete` (object `Cube`, mesh `Cube.001`) at T0; `select_all` actions; `delete` leaves orphans; `mode_set(mode='OBJECT')` and `OP_NOT_IMPLEMENTED` for modes without a handler. |
-| 1.22 | W3 | Data API core | `crates/frap-ops-data/src/funcs/**`, `tests/golden/cases/data/**` | 1.10, 1.11, 1.14 *(impl)*, 1.27 *(impl)* | `bpy.data.<coll>.new/remove/get/find` for objects, meshes, materials, cameras, lights, collections, worlds, images (`new`); `collection.objects.link/unlink`, `children.link`; `mesh.materials.append/pop/clear` (slots follow on every user object); `nodes.new/remove`, `links.new/remove`; `evaluated_get`, `evaluated_depsgraph_get`, `to_mesh`, `view_layer.update`; `ID.rename/copy/user_clear`. Goldens use only the factory scene and data-API calls. |
+| 1.22 | W3 | Data API core | `crates/frap-ops-data/src/funcs/**`, `tests/golden/cases/data/**` | 1.10, 1.11, 1.14 *(impl)*, 1.27 *(impl)* | `bpy.data.<coll>.new/remove/get/find` for objects, meshes, materials, cameras, lights, collections, worlds, images (`new`); `collection.objects.link/unlink`, `children.link`; `mesh.materials.append/pop/clear` (slots follow on every user object); `nodes.new/remove`, `links.new/remove`; `evaluated_get`, `evaluated_depsgraph_get`, `to_mesh`, `view_layer.update`; `ID.rename/copy/user_clear`; the Python-only `Mesh.from_pydata/shade_smooth/shade_flat` RNA functions (`funcs/mesh_*.rs` over the WP 1.4 Rust API; moved from 1.27, decision log W0-22). Goldens use only the factory scene and data-API calls. |
 | 1.25 | W3 | CLI, serve and MCP | `crates/frap-cli/**`, `tests/cli/m1/cli/**` | 1.14 *(impl)*, 1.18 *(impl)* | Flags (§13.1, §14); exit codes; `--fail-fast`; ready/end events; raw mode never hangs on an unclosed bracket (blank line/EOF → `SyntaxError`); `frap serve --jsonl` transcripts (ids, done records, `on_error`); `frap mcp` handshake, `tools/list` equals `--describe=tools-anthropic`, `tools/call` keeps state across calls. |
 | 1.20 | W4 | Object ops: select, add, duplicate, join, collections, slots, material.new | `crates/frap-ops-object/src/ops/{select_by_type,select_pattern,camera_add,light_add,empty_add,duplicate,duplicate_move,duplicate_move_linked,join,move_to_collection,link_to_collection}.rs`, `crates/frap-ops-object/src/ops/{collection_*,material_slot_*}.rs`, `crates/frap-ops-data/src/ops/material__new.rs`, `tests/golden/cases/object/{select,add,duplicate,join,collection,slots}/**` | 1.12, 1.19 *(impl)*, 1.22 *(impl)* | Selection base order; duplicate preferences (materials shared); join CANCELLED reports; `camera_add` sets `scene.camera` when None; camera/light data named independently of the object; material slot ops on shared meshes. |
 | 1.21 | W4 | Object ops: transforms, parenting, origin, apply, shading, snapping | `crates/frap-ops-transform/src/{ops/translate.rs,ops/rotate.rs,ops/resize.rs,core/**,object/**}`, `crates/frap-ops-object/src/ops/{transform_apply,parent_set,parent_clear,parent_no_inverse_set,origin_set,location_clear,rotation_clear,scale_clear,shade_smooth,shade_flat,shade_smooth_by_angle}.rs`, `crates/frap-ops-object/src/support/**`, `crates/frap-ops-object/src/ops/view3d__snap_*.rs`, `tests/golden/cases/object/{transform,parent,origin,apply,shade,snap}/**` | 1.12, 1.13, 1.14 *(impl)*, 1.19 *(impl)* | `transform.*` with orient types and pivots in object mode through `TRANSFORM_MODE_HANDLERS` (matrix decomposition loses shear like Blender); `parent_set` inverse; `transform_apply` incl. multi-user error; all `origin_set` types; shade ops' attribute effects; snap ops. |
-| 1.23 | W4 | IO operators, `.frap` mapping, glTF goldens | `crates/frap-ops-io/**`, `crates/frap-project/src/scene_map/**`, `tests/golden/cases/gltf/m1/**`, `tests/golden/cases/io/**`, `tests/data/gltf-roundtrip/allow.toml` | 1.9, 1.16, 1.17, 1.10 *(impl)*, 1.19 *(impl)*, 1.22 *(impl)* | `gltf_canonical` equal to Blender on ≥ 10 export cases: primitives, hierarchy (via `Object.parent`), multi-material, transforms, base colour/metallic/roughness + base-colour texture, flat vs smooth normals, `use_selection`, `export_format` GLB and GLTF_SEPARATE; ≥ 5 import goldens through the operator; differential round-trip law (§17.2) on the M1 allow-list; `wm.save_as_mainfile/save_mainfile/open_mainfile/read_homefile/read_factory_settings`; proptest: random M1 op sequences → save → open → identical state; byte-identical saves; orphans dropped; linked built-in groups and window state round-trip; all 110/20 glTF props accepted (unsupported non-default values give a WARNING naming the prop); `//` resolution as listed in `deviations.md`. |
+| 1.23 | W4 | IO operators, `.frap` mapping, glTF goldens | `crates/frap-ops-io/**`, `crates/frap-ops-io-tests/**` (test-only crate with a `Session`, rule 2.2.11), `crates/frap-project/src/scene_map/**`, `tests/golden/cases/gltf/m1/**`, `tests/golden/cases/io/**`, `tests/data/gltf-roundtrip/allow.toml` | 1.9, 1.16, 1.17, 1.10 *(impl)*, 1.19 *(impl)*, 1.22 *(impl)* | `gltf_canonical` equal to Blender on ≥ 10 export cases: primitives, hierarchy (via `Object.parent`), multi-material, transforms, base colour/metallic/roughness + base-colour texture, flat vs smooth normals, `use_selection`, `export_format` GLB and GLTF_SEPARATE; ≥ 5 import goldens through the operator; differential round-trip law (§17.2) on the M1 allow-list; `wm.save_as_mainfile/save_mainfile/open_mainfile/read_homefile/read_factory_settings`; proptest (in `frap-ops-io-tests`): random M1 op sequences → save → open → identical state; byte-identical saves; orphans dropped; linked built-in groups and window state round-trip; all 110/20 glTF props accepted (unsupported non-default values give a WARNING naming the prop); `//` resolution as listed in `deviations.md`. |
 | 1.24 | W4 | Render operator | `crates/frap-ops-render/src/ops/render__render.rs`, `crates/frap-ops-render/src/output.rs`, `tests/golden/cases/render/m1/**` | 1.6, 1.7, 1.15 *(impl)*, 1.19 *(impl)* | ≥ 3 Workbench scenes match frap-blessed self-goldens (SSIM ≥ 0.995) on every CI adapter; SSIM vs Blender Workbench reported (not gating); GPU reached only via `services().render()`; `GPU_UNAVAILABLE` without `gpu`; output path rules (cwd-relative and `//`); `Cannot render, no camera`; `Render Result` image; EEVEE/CYCLES fall back to Workbench with WARNING; rendering changes nothing in the session except adding/updating `Render Result` (animation evaluated on a clone). |
 | 1.26 | W4 | Cross-cutting goldens and exit transcript | `tests/golden/cases/{rna,errors,context,poll}/**`, `tests/cli/m1/vertical_slice.trycmd` | 1.8, 1.14 *(impl)*, 1.19 *(impl)*, 1.22 *(impl)*, 1.20/1.23/1.24 *(soft)* | ≥ 25 T0 cases: every error code reachable in M1 with Blender's class and message; context read-only; path forms; `bpy.ops.<op>.poll()` results equal Blender's; the exit transcript in raw and `serve` modes on all three OS. |
 
@@ -2286,3 +2434,40 @@ An adversarial review of v1.0 raised 32 issues (6 blocker, 18 major, 8 minor). E
 | 30 | minor | Short-form grammar contradictions | Accepted. Path only when a root is followed by `.`/`[`; `D`/`C` routed by what follows the path; any other `ident.ident` is an op call (unknown → `OP_UNKNOWN`), so `frap-lang` needs no operator list. | §11.4 |
 | 31 | minor | Radians vs degrees | Accepted. `ANGLE_LIKELY_DEGREES` hint; `ROTATION (radians)` in `--describe`. | §13.2, §14 |
 | 32 | minor | `//` export paths, `scale_length`, span units | Accepted. Exit transcripts use cwd-relative paths; frap resolves `//` in export paths (listed deviation, never golden-tested); `scale_length` asymmetry stated; spans are UTF-8 byte offsets plus `col_chars`. | §11.2, §13.4, §17.2, §22.3 |
+
+---
+
+## Decision log (M1 W0, v1.2: RFC 0001 applied, contracts frozen)
+
+WP 1.0 applied every finding of `docs/design/rfc/0001-m0-contract-findings.md` (status: accepted) to this document and to the code, folded the M0 walking skeleton into the full crate tree of §3.2, and froze the §3.4 contracts as compiling stubs. Where RFC 0001 left a choice to the integrator, or the contracts as written could not compile, the decision is recorded here.
+
+| # | Topic | Decision | Where |
+|---|---|---|---|
+| W0-1 | RFC 0001 blocking findings (F-ED-1/2, F-LINK-1, F-OP-5..9, F-HOOK-1, F-TR-1..4, F-VAL-1..4, F-LAYER-1, F-REN-1/2, F-SES-1) | Applied as proposed: `IdHeader.generation`, `src/generated/`, `frap-scene/src/data.rs`, `deny(unsafe_code)` + per-entry `allow`, `Host::split_edit`/`snapshot_at`, `split_eval → (&dyn HostRead, &mut dyn Evaluator)`, read get hooks returning `Field<'h>`, `RnaHookReg`, `Field::{Embedded, Ptr, NeedsHook}` (`#[non_exhaustive]`), `Item`, `Value::{Id, Structs}` + boxed `Ptr`/`Coll`, `CoerceCx`, `Report` in frap-rna, `GpuOptions`/`RenderRequest` in frap-render-scene, `OpCtx::{new, finish, main_mut, snapshot_at}`, `HostImpl` disjoint from `SessionServices`. | §5.1, §5.2, §9, §10.1, §12, §19.2, §21.6 |
+| W0-2 | F-TR-6 (boxing a reborrow) | **Blanket impls** `impl Rna for &mut T` / `impl RnaMut for &mut T`; `RnaMutGuard` stays `Box<dyn RnaMut + 'a>` (the form the probe ran end to end). | §9.4 |
+| W0-3 | F-TR-4 (collection items) | **Direct change**: `RnaColl::item` returns `Item<'_>`; no additive `item_any`. | §9.4 |
+| W0-4 | F-TR-7 (bulk) | `Bulk { F32, I32, Bool }`, item length from `prop.array_len()`; default `foreach_get`/`foreach_set` loop over items; a wrong length raises Blender's `RuntimeError: internal error setting the array`. | §9.4 |
+| W0-5 | F-GEN-1 (const names) | **Module-scoped consts**: struct statics at the crate root (`frap_spec_rna::OBJECT`), property consts in a per-struct module (`frap_spec_rna::object::LOCATION`); codegen fails on any collision and escapes keyword module names. | §4.2, §9.6 |
+| W0-6 | F-DEF-2 (`FloatStorage`) | Kept; filled from `spec/overlay/float_storage.toml`, default `F32`. | §4.2, §9.1 |
+| W0-7 | `Context::collection()` | Returns `Option<IdRef<CollectionId>>`: the scene's master collection is embedded and has no `IdRef` (`None`), which the bare `IdRef` of v1.1 could not express (e.g. `wm.read_homefile(use_empty=True)`). | §8 |
+| W0-8 | `Main.filepath` | `Option<String>`: `camino::Utf8PathBuf` was never a §3.5 dependency and `bpy.data.filepath` is a string. | §5.2 |
+| W0-9 | New workspace dependencies | `bitflags 2.13` (F-DEP-1), `proc-macro2`/`quote`/`syn 2` (frap-macros), `toml 1.2` (overlays, `props.toml`, budgets); glam gains its `libm` feature (rule 2.2.12). | §3.5 |
+| W0-10 | Same-layer edges | `frap-lang → frap-rna` (L1) and `frap-ops-all → frap-ops-*` (L10) are the only allowed same-layer edges; `cargo xtask check-deps` also checks dev-dependency cycles, `wgpu` only in frap-render, `anyhow` only in frap-cli, no direct `frap-render → frap-scene`, and `workspace = true` on every member dependency. | §3.2, §20.5 |
+| W0-11 | Extension-point signatures not spelled out in v1.1 | `ModeHandler { mode: ObjectMode, object_type, enter, exit: fn(&mut OpCtx, &[IdRef<ObjectId>]) -> OpResult }`; `TransformModeHandler { mode: ContextMode, apply: fn(&mut OpCtx, TransformOp, &OpArgs) -> OpResult }`; `MeshExportCx { main, mesh, settings }` and `PrimitiveDraft { mode, material_slot, positions, normals, texcoords, indices, corners }` for the glTF `PRIMITIVE_*` slices. | §10.3, §17.2 |
+| W0-12 | Types named but undefined in v1.1 | Defined minimally and frozen as data: `IdProp`, `EvalError`, `BoneRef`, `Preferences`, `VirtualView3D { view_matrix, shading }`, `ObjectMode`, `ContextMode`, `BaseFlag`, `LayerCollection(Path)`, `ViewCache`, `EvaluatedPose`, `ModifierStatus`, `FuncArgs`, `PathResolver`, `ImageCache`, `DecodedImage`, `RCamera`/`RObject`/`RLight`/`RWorld`/`RSettings`, `LoweredMaterial` sub-types, `GoldenState` sub-types, `Request`/`OnError`/`DoneRecord`. Enums likely to grow are `#[non_exhaustive]`; additive changes need no RFC (rule 2.2.4). | crate sources |
+| W0-13 | Placeholders for later contracts | `frap_bmesh::BMesh` (contract frozen in M2 W0) and `frap_anim::{Action, AnimData}` (M6) exist as opaque/minimal types so `EditState`, `OpCtx::bmesh_mut`, `NodeTree.animation_data` and `Main.actions` compile now. Later-milestone crates (`frap-uv`, `frap-subdiv`, `frap-boolean`, `frap-codec-mesh`, `frap-modifiers`, `frap-ops-uv`, `frap-ops-anim`) are empty. | §3.2, §6.2 |
+| W0-14 | `Response` | Gains `id` (serve/MCP echo), `func` and `edit_mesh` fields to match §13.2; `exec_request` returns `Vec<Response>` and `DoneRecord::from_responses` builds the done record. | §11.6, §13.2 |
+| W0-15 | `linkme` retention | Verified on macOS (debug and fat-LTO release): referencing **one** symbol per ops crate (`frap_ops_<x>::link()`) keeps every entry of that crate; `frap_ops_all::link()` calls them all. CI runs the registry test with `CARGO_PROFILE_RELEASE_LTO=fat`. | §10.5 |
+| W0-16 | M0 stand-ins | The hand-written M0 `StructDef`/`OperatorSpec` statics moved from `frap_rna::spec_m0` into `frap-spec-rna/src/generated/` and `frap-spec-ops-{mesh,io}/src/generated/` with the W0-5 naming (drift-tested against `spec/m0/`), so WP 1.1's codegen replaces whole directories without touching any `lib.rs`. The M0 operators moved to `frap-ops-mesh/src/ops/primitive_cube_add.rs` and `frap-ops-io/src/ops/export_scene__gltf.rs`; the M0 exit transcript is byte-identical. | §4.2, §22.2 |
+| W0-17 | Verifier fixes to W0 (contract amendments before W1 starts) | **glTF primitive contract** (§17.2): W0-11's fixed-field `PrimitiveDraft` could not hold M3/M6 attributes and deduplicated before writers ran, while the add-on's split key includes every per-corner attribute. Now: writers contribute per-corner words to a `SplitKey` before extraction (`PrimitiveAttributeWriter::key`), extractors dedupe on `(vertex, key)` and record `corners`/`vertices`, `PrimitiveDraft` is `#[non_exhaustive]` with an ordered `attributes: IndexMap<SmolStr, AttrColumn>` and `targets`. **Mesh** (§6.1): `vert_normals()`/`bounds()` accessors and caches (body of `vert_normals` WP 1.4). **Helpers/polls** (§10.3, §8): `add_object_with_data`, `frame_range_or_scene`, `iter_edit_meshes` and the named `ED_operator_*` polls declared (bodies WP 1.12); `OpCtx::add_object` changes selection and active only in the context view layer. **`startup::empty()`** declared (WP 1.10); §5.7 states the real `(Main, WindowState)` return type. | §5.7, §6.1, §8, §10.3, §17.2 |
+| W0-18 | `Mesh` serialization | No serde derive on `Mesh` in W0: the §15 shape of attributes (`name`/`domain`/`data_type`/`data` with `$buf`) is not what a derive produces, and `frap_rna::serde_buf`/`IdRef` serde are WP 1.2's. WP 1.4 adds serde to `Mesh` (`runtime` never serialized) on top of them; `smallvec` gains its `serde` feature for `DeformVert`. | §6.1, §15 |
+| W0-19 | Protocol kinds and codes | The M0 code emits response kind `invalid` and the codes `NOT_IMPLEMENTED` (executor), `RNA_NOT_IMPLEMENTED` and `RNA_RUNTIME` (RNA layer); they are now listed in §13.2/§13.4 instead of only in `deviations.md`. | §13.2, §13.4 |
+| W0-20 | Shared files WPs would otherwise need | `fuzz/` is a cargo-fuzz workspace excluded from the root one (targets `lang_parse`, `lang_split` owned by WP 1.3; CI checks they compile on stable); `xtask` depends on `flate2` (WP 1.1's `catalog.json.deflate`); `frap-schema` dev-depends on `frap-ops-all` and `tests/describe_ops.rs` snapshots every registered operator as `tests/snapshots/op__<idname>.snap` (M0 ops blessed with a minimal fragment; WP 1.18 re-blesses with the §14 shape); `frap-io-gltf` depends on `frap-geom` (WP 1.17 welding); the transcript runner globs `tests/cli/**/*.{trycmd,toml}` (fixtures in `*.in/`/`*.out/` skipped); `frap-mesh/src/primitives/` is an `automod` directory; rule 2.2.12 and the §3.2 `frap-render` type ban are enforced by per-crate `clippy.toml` files. | §3.2, §4.2, §20.1, §22.1, rule 2.2.12 |
+| W0-21 | Verifier fix: datablock shapes (§5.6, §22.1 "Needs … always satisfied by Wave 0") | W2 packages (1.13, 1.15, 1.16, 1.17, 1.11) need the datablock fields that WP 1.10 implements in the same wave. W0 now declares the §5.6 field sets: `Object` (all three rotations, `delta_*`, `parent`/`parent_type`/`parent_bone`/`parent_vertices`, `matrix_parent_inverse: Mat4`, `modifiers: Vec<Modifier>`, `material_slot_overrides: Vec<SlotOverride { link: SlotLink, material }>`, `active_material_index`, `pose`, `hide_*`, display fields, `show_*`, `animation_data`), `Scene` (embedded master `collection: Collection`, `camera`, `world`, `frame_start/end/current/step`, `render`, `view_settings`, `display_settings`, `display`, `eevee`, `cursor`, `tool_settings`, `unit_settings`), `Collection` (`hide_*`, `color_tag`), `Material` (embedded `node_tree`, viewport `diffuse_color`/`metallic`/`roughness`, …; the M0 flat Principled values are gone and the M0 exporter reads the factory tree's Principled inputs), `Camera { fields: CameraFields }`, `Light { type, fields: LightFields }` (union of the per-type fields), `World` (embedded `node_tree`, `color`), `Image` (metadata, `EncodedImage`), `Modifier` (§7.1, settings a `#[non_exhaustive]` stand-in until M4 W0) and a placeholder `Pose` (M6 W0). Constructors use values verified on Blender 5.2.4 (`*.new()` fresh values; factory overrides in `startup.rs`). Generated plain sub-structs (`CameraFields`, `CameraDOFSettings`, `LightFields`, `RenderSettings`, `ImageFormatSettings`, `ColorManaged*Settings`, `SceneDisplay`, `SceneEEVEE`, `UnitSettings`) are hand-written stand-ins in `frap-scene/src/generated/` that WP 1.1 regenerates with the same names and field types. `NodeTree::new(name, ty, embedded)` added. | §5.6, §7.1 |
+| W0-22 | Verifier fix: `Mesh.from_pydata` RNA function | `RnaFuncImpl` and `RNA_FUNCS` live in frap-scene (L6), which frap-mesh (L4) cannot reach, and frap-rna's traits have no struct-local call hook. The Python-only `Mesh.from_pydata/shade_smooth/shade_flat` RNA functions move from WP 1.27 to WP 1.22 (`frap-ops-data/src/funcs/mesh_*.rs`, over the WP 1.4 Rust API); 1.27 keeps the bindings and the bulk `foreach_*` overrides (which are `RnaColl` methods). Rule stated in §9.5: global registrations live at L6 or above. | §9.5, §22.3 |
+| W0-23 | Verifier fix: stubs in `automod` directories | §22.1 now exempts per-concept files in `automod` directories from W0 stubbing (`ops/primitive_*.rs`, the `frap-ops-object` op files, `modes/object.rs`, `material__new.rs`, `transform` ops, `render__render.rs`): the directories exist with `_dir.rs`, and an empty op file would fail the §10.5 registry test. Every non-`automod` module named in §22.3 exists. | §22.1 |
+| W0-24 | Verifier fix: session options and response shape | `SessionOptions` is `#[non_exhaustive]` (construct from `Default`, assign fields) with `cwd`, `gpu`, `startup: Startup { Factory, Empty, File }`, `verbosity: Verbosity { Minimal, Normal, Full }`, `max_items`, `max_array`, `limits: Limits { max_elements, stmt_timeout }`, `fail_fast`; `Session` keeps them (`Session::options()`). `Response.context` is `Option<J>` (absent with `--verbosity minimal`). §13.2 now states that a `set` response echoes the coerced value in `value` (without `rna`), as §9.6 and the frozen M0 transcript do. | §12, §13.1, §13.2 |
+| W0-25 | Verifier fix: `placement` signature | The text now matches the frozen code: `placement(cx, &location, &rotation, align: Align, &scale) -> Result<Placement, OpError>`; `align` by value because Blender uses only its value. | §10.3 |
+| W0-26 | Verifier fix: test dependencies and test crates | Dev-dependencies added so WPs never edit a `Cargo.toml`: `proptest`, `insta`, `approx`, `serde_json` on every M1 `frap-ops-*` crate, `frap-op` (plus `frap-spec-rna`, `frap-spec-ops-{mesh,object}`), `frap-render-scene`; `approx`/`serde_json`/`proptest`/`insta` where missing on frap-rna, frap-mesh, frap-scene, frap-nodes, frap-material, frap-eval, frap-io-gltf. New test-only crate `crates/frap-ops-io-tests` (layer 12 in `check-deps`, owned by WP 1.23) for the save/open proptest that needs a `Session`. WP 1.12's dummy-op tests are integration tests in `crates/frap-op/tests/`. WP 1.17 compares its in-process import against the dump JSON (it cannot dev-depend on `frap-golden`). | §22.1, §22.3, rule 2.2.11 |
+| W0-27 | `codegen --check` and `budgets` before WP 1.1 | Both pass vacuously until WP 1.1 generates code and records baselines; they are non-gating until then and say so with a `::warning` annotation on GitHub Actions (`xtask::ci_warning`). | §4.2, §20.5 |
+| W0-28 | Second verifier pass on W0 | **Ownership**: `xtask/Cargo.toml` and `xtask/src/budgets.rs` belong to WP 1.0; in M1 W1, WP 1.1 and WP 1.8 may append `foo.workspace = true` lines to `xtask/Cargo.toml` for dependencies already in `[workspace.dependencies]` (append-only), and WP 1.1 writes the `xtask/budgets.toml` baselines with `budgets --record`. **insta** gains `glob`, `yaml`, `redactions` (WP 1.3 corpus, WP 1.18 per-op snapshots). **Messages**: `RnaError::into_frap` drops the prefix's trailing space when the body is empty (`TypeError: bpy_struct: item.attr = val:`, `Converting py args to operator properties:`, verified on 5.2.4); the clamp INFO report has one wording, `frap_rna::clamp_report` (§9.2, D-03), used by both the operator pipeline and assignments. **Extension points**: `MATERIAL_PATTERNS` (`MaterialPattern { name, order, lower, raise }`, `LowerCx`, `RaiseCx`, the last two `#[non_exhaustive]`) so M3 adds pattern files without editing `lower`; `MeshExportCx` is `#[non_exhaustive]`, built with `MeshExportCx::new`, and carries `object: Option<IdRef<ObjectId>>` for M6 skinning and object-linked slots. **Gaps** recorded in `deviations.md` §2 with owners and closing acceptance: `OP_UNKNOWN` for known-but-unimplemented operators (WP 1.1/1.12), no factory `World` (WP 1.10), missing internal `.select_*`/`.uv_select_*` attributes on primitives (WP 1.4). **Vacuous W0 gates and `todo!()` stubs** (`codegen --check`, `budgets`, `Session::exec_request`, `DoneRecord::from_responses`, `IdMap::rename`, `helpers::frame_range_or_scene`/`iter_edit_meshes`) panic or pass vacuously until their WP lands; WP 1.1, 1.10, 1.12 and 1.14 acceptance makes them real. | §3.4, §9.2, §16.2, §17.2, §22.3 |

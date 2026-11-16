@@ -1,0 +1,54 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.primitive_cube_add",
+  "bl_idname": "MESH_OT_primitive_cube_add",
+  "label": "Add Cube",
+  "description": "Construct a cube mesh that consists of six square faces",
+  "props": [
+    {
+      "identifier": "size",
+      "type": "FLOAT",
+      "array_length": 1
+    },
+    {
+      "identifier": "calc_uvs",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "enter_editmode",
+      "type": "BOOLEAN",
+      "array_length": 1
+    },
+    {
+      "identifier": "align",
+      "type": "ENUM",
+      "array_length": 1
+    },
+    {
+      "identifier": "location",
+      "type": "FLOAT",
+      "array_length": 3
+    },
+    {
+      "identifier": "rotation",
+      "type": "FLOAT",
+      "array_length": 3
+    },
+    {
+      "identifier": "scale",
+      "type": "FLOAT",
+      "array_length": 3
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "requires": [],
+    "notes": [
+      "unset location => 3D cursor; unset rotation => from align; scale (0,0,0) => 1"
+    ]
+  }
+}

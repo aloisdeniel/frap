@@ -1,0 +1,37 @@
+{
+ "identifier": "Object",
+ "base": "ID",
+ "name": "Object",
+ "description": "Object data-block defining an object in a scene",
+ "name_property": "name",
+ "props": [
+  {
+   "identifier": "location",
+   "name": "Location",
+   "description": "Location of the object",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "precision": 5,
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "_stamp": {
+  "blender": "5.2.4 LTS",
+  "build_hash": "cd5dc428cce1"
+ }
+}

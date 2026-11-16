@@ -1,0 +1,19 @@
+[package]
+name = "frap-spec-ops-uv"
+description = "frap L2: GENERATED: OperatorSpec statics and typed props structs of the `uv` ops group for operators with M <= spec/current_milestone (ARCHITECTURE §4.2)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+smol_str.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,28 @@
+[package]
+name = "frap-gltf"
+description = "frap L3: glTF 2.0 serde model, GLB container, accessor codec, BufferBuilder, validator, typed extensions; Blender-agnostic (ARCHITECTURE §17.1)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+indexmap.workspace = true
+base64.workspace = true
+thiserror.workspace = true
+bytemuck.workspace = true
+half.workspace = true
+libm.workspace = true
+automod.workspace = true
+
+[dev-dependencies]
+gltf.workspace = true
+insta.workspace = true
+proptest.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,12 @@
+{
+ "_comment": "Hand-written facts Blender cannot dump in -b (ARCHITECTURE §4.1, spec/overlay in M1). Source: io_scene_gltf2 5.2.41 __init__.py get_format_items (GLTF_EMBEDDED only with the allow_embedded_format add-on preference, off in factory settings).",
+ "dynamic_enums": {
+  "EXPORT_SCENE_OT_gltf.export_format": {
+   "default": "GLB",
+   "items": [
+    {"identifier": "GLB", "name": "glTF Binary (.glb)", "description": "Exports a single file, with all data packed in binary form. Most efficient and portable, but more difficult to edit later"},
+    {"identifier": "GLTF_SEPARATE", "name": "glTF Separate (.gltf + .bin + textures)", "description": "Exports multiple files, with separate JSON, binary and texture data. Easiest to edit later"}
+   ]
+  }
+ }
+}

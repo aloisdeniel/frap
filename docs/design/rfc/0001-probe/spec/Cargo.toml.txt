@@ -1,0 +1,12 @@
+[package]
+name = "frap-probe-spec"
+description = "WP 0.2 probe: GENERATED StructDef/PropDef/OperatorSpec statics (frap-spec-rna + frap-spec-ops-*)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-probe-rna.workspace = true
+smol_str.workspace = true

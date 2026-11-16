@@ -1,0 +1,43 @@
+{
+ "idname": "export_scene.gltf",
+ "bl_idname": "EXPORT_SCENE_OT_gltf",
+ "label": "Export glTF 2.0",
+ "description": "Export scene as glTF 2.0 file",
+ "options": [
+  "PRESET"
+ ],
+ "props_subset": true,
+ "props": [
+  {
+   "identifier": "filepath",
+   "name": "File Path",
+   "description": "Filepath used for exporting the file",
+   "type": "STRING",
+   "subtype": "FILE_PATH",
+   "array": [],
+   "default": "",
+   "max_bytes": 1025,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "export_format",
+   "name": "Format",
+   "description": "Output format. Binary is most efficient, but JSON may be easier to edit later",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "array": [],
+   "items": [],
+   "default": "",
+   "dynamic": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "_stamp": {
+  "blender": "5.2.4 LTS",
+  "build_hash": "cd5dc428cce1"
+ }
+}

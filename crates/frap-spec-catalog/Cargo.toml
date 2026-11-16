@@ -1,0 +1,18 @@
+[package]
+name = "frap-spec-catalog"
+description = "frap L2: GENERATED: every other dumped operator as a deflated JSON blob, decoded lazily into leaked &'static OperatorSpec tables (ARCHITECTURE §4.2)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+flate2.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

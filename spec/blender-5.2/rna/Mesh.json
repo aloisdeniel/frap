@@ -1,0 +1,1309 @@
+{
+ "identifier": "Mesh",
+ "name": "Mesh",
+ "description": "Mesh data-block defining geometric surfaces",
+ "base": "ID",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "vertices",
+   "name": "Vertices",
+   "description": "Vertices of the mesh",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshVertex",
+   "is_id": false,
+   "api": "MeshVertices",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "edges",
+   "name": "Edges",
+   "description": "Edges of the mesh",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshEdge",
+   "is_id": false,
+   "api": "MeshEdges",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "loops",
+   "name": "Loops",
+   "description": "Loops of the mesh (face corners)",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshLoop",
+   "is_id": false,
+   "api": "MeshLoops",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "polygons",
+   "name": "Polygons",
+   "description": "Polygons of the mesh",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshPolygon",
+   "is_id": false,
+   "api": "MeshPolygons",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "normals_domain",
+   "name": "Normal Domain",
+   "description": "The attribute domain that gives enough information to represent the mesh's normals",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "POINT",
+     "name": "Point",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FACE",
+     "name": "Face",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CORNER",
+     "name": "Corner",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "FACE",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_normals",
+   "name": "Vertex Normals",
+   "description": "The normal direction of each vertex, defined as the average of the surrounding face normals",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshNormalValue",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "polygon_normals",
+   "name": "Polygon Normals",
+   "description": "The normal direction of each face, defined by the winding order and position of its vertices",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshNormalValue",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "corner_normals",
+   "name": "Corner Normals",
+   "description": "The \"slit\" normal direction of each face corner, influenced by vertex normals, sharp faces, sharp edges, and custom normals. May be empty.",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshNormalValue",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "loop_triangles",
+   "name": "Loop Triangles",
+   "description": "Tessellation of mesh polygons into triangles",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshLoopTriangle",
+   "is_id": false,
+   "api": "MeshLoopTriangles",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "loop_triangle_polygons",
+   "name": "Triangle Faces",
+   "description": "The face index for each loop triangle",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ReadOnlyInteger",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "texture_mesh",
+   "name": "Texture Mesh",
+   "description": "Use another mesh for texture indices (vertex indices must be aligned)",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Mesh",
+   "is_id": true,
+   "flags": [
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "uv_layers",
+   "name": "UV Loop Layers",
+   "description": "All UV loop layers",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshUVLoopLayer",
+   "is_id": false,
+   "api": "UVLoopLayers",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "uv_layer_clone",
+   "name": "Clone UV Loop Layer",
+   "description": "UV loop layer to be used as cloning source",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshUVLoopLayer",
+   "is_id": false,
+   "flags": []
+  },
+  {
+   "identifier": "uv_layer_clone_index",
+   "name": "Clone UV Loop Layer Index",
+   "description": "Clone UV loop layer index",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "uv_layer_stencil",
+   "name": "Mask UV Loop Layer",
+   "description": "UV loop layer to mask the painted area",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshUVLoopLayer",
+   "is_id": false,
+   "flags": []
+  },
+  {
+   "identifier": "uv_layer_stencil_index",
+   "name": "Mask UV Loop Layer Index",
+   "description": "Mask UV loop layer index",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "vertex_colors",
+   "name": "Vertex Colors",
+   "description": "Legacy vertex color layers. Deprecated, use color attributes instead.",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshLoopColorLayer",
+   "is_id": false,
+   "api": "LoopColors",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "skin_vertices",
+   "name": "Skin Vertices",
+   "description": "All skin vertices",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshSkinVertexLayer",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "attributes",
+   "name": "Attributes",
+   "description": "Geometry attributes",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Attribute",
+   "is_id": false,
+   "api": "AttributeGroupMesh",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "color_attributes",
+   "name": "Color Attributes",
+   "description": "Geometry color attributes",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Attribute",
+   "is_id": false,
+   "api": "AttributeGroupMesh",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "remesh_voxel_size",
+   "name": "Voxel Size",
+   "description": "Size of the voxel in object space used for volume evaluation. Lower values preserve finer details.",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.10000000149011612,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 9.999999747378752e-05,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 0.009999999776482582,
+   "precision": 4,
+   "flags": []
+  },
+  {
+   "identifier": "remesh_voxel_adaptivity",
+   "name": "Adaptivity",
+   "description": "Reduces the final face count by simplifying geometry where detail is not needed, generating triangles. A value greater than 0 disables Fix Poles.",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 4,
+   "flags": []
+  },
+  {
+   "identifier": "use_remesh_fix_poles",
+   "name": "Fix Poles",
+   "description": "Produces fewer poles and a better topology flow",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_remesh_preserve_volume",
+   "name": "Preserve Volume",
+   "description": "Projects the mesh to preserve the volume and details of the original mesh",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_remesh_preserve_attributes",
+   "name": "Preserve Attributes",
+   "description": "Transfer all attributes to the new mesh",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "remesh_mode",
+   "name": "Remesh Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "VOXEL",
+     "name": "Voxel",
+     "description": "Use the voxel remesher",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "QUAD",
+     "name": "Quad",
+     "description": "Use the quad remesher",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "VOXEL",
+   "flags": []
+  },
+  {
+   "identifier": "use_mirror_x",
+   "name": "X",
+   "description": "Enable symmetry in the X axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_mirror_y",
+   "name": "Y",
+   "description": "Enable symmetry in the Y axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_mirror_z",
+   "name": "Z",
+   "description": "Enable symmetry in the Z axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_mirror_vertex_groups",
+   "name": "Mirror Vertex Groups",
+   "description": "Mirror the left/right vertex groups when painting. The symmetry axis is determined by the symmetry settings.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "radial_symmetry",
+   "name": "Radial Symmetry Count",
+   "description": "Number of mirrored regions around a central axis",
+   "type": "INT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    1,
+    1,
+    1
+   ],
+   "hard_min": 1,
+   "hard_max": 64,
+   "soft_min": 1,
+   "soft_max": 32,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "has_custom_normals",
+   "name": "Has Custom Normals",
+   "description": "True if there is custom normal data for this mesh",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "texco_mesh",
+   "name": "Texture Space Mesh",
+   "description": "Derive texture coordinates from another mesh",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Mesh",
+   "is_id": true,
+   "flags": [
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "shape_keys",
+   "name": "Shape Keys",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Key",
+   "is_id": true,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_auto_texspace",
+   "name": "Auto Texture Space",
+   "description": "Adjust active object's texture space automatically when transforming object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_mirror_topology",
+   "name": "Topology Mirror",
+   "description": "Use topology based mirroring (for when both sides of mesh have matching, unique topology)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_paint_bone_selection",
+   "name": "Bone Selection",
+   "description": "Bone selection during painting",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_paint_mask",
+   "name": "Paint Mask",
+   "description": "Face selection masking for painting",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_paint_mask_vertex",
+   "name": "Vertex Selection",
+   "description": "Vertex selection masking for painting",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "total_vert_sel",
+   "name": "Selected Vertex Total",
+   "description": "Selected vertex count in editmode",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "total_edge_sel",
+   "name": "Selected Edge Total",
+   "description": "Selected edge count in editmode",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "total_face_sel",
+   "name": "Selected Face Total",
+   "description": "Selected face count in editmode",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_editmode",
+   "name": "Is Editmode",
+   "description": "True when used in editmode",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "animation_data",
+   "name": "Animation Data",
+   "description": "Animation data for this data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AnimData",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "auto_texspace",
+   "name": "Auto Texture Space",
+   "description": "Adjust active object's texture space automatically when transforming object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "texspace_location",
+   "name": "Texture Space Location",
+   "description": "Texture space location",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "texspace_size",
+   "name": "Texture Space Size",
+   "description": "Texture space size",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "materials",
+   "name": "Materials",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "api": "IDMaterials",
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "cycles",
+   "name": "Cycles Mesh Settings",
+   "description": "Cycles mesh settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CyclesMeshSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "gltf2_variant_mesh_data",
+   "name": "gltf2_variant_mesh_data",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "gltf2_KHR_materials_variants_primitive",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "gltf2_variant_default_materials",
+   "name": "gltf2_variant_default_materials",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "gltf2_KHR_materials_variants_default_material",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "gltf2_variant_pointer",
+   "name": "gltf2_variant_pointer",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL",
+    "RUNTIME"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "transform",
+   "description": "Transform mesh vertices by a matrix (Warning: inverts normals if matrix is negative)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "matrix",
+     "name": "",
+     "description": "Matrix",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      4,
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "shape_keys",
+     "name": "",
+     "description": "Transform Shape Keys",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "flip_normals",
+   "description": "Invert winding of all polygons (clears tessellation, does not handle custom normals)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "set_sharp_from_angle",
+   "description": "Reset and fill the \"sharp_edge\" attribute based on the angle of faces neighboring manifold edges",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "angle",
+     "name": "Angle",
+     "description": "Angle between faces beyond which edges are marked sharp",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 3.1415927410125732,
+     "hard_min": 0.0,
+     "hard_max": 3.1415927410125732,
+     "soft_min": 0.0,
+     "soft_max": 3.1415927410125732,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "split_faces",
+   "description": "Split faces based on the edge angle",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "calc_tangents",
+   "description": "Compute tangents and bitangent signs, to be used together with the custom normals to get a complete tangent space for normal mapping (custom normals are also computed if not yet present)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "uvmap",
+     "name": "",
+     "description": "Name of the UV map to use for tangent space computation",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "free_tangents",
+   "description": "Free tangents",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "calc_loop_triangles",
+   "description": "Calculate loop triangle tessellation (supports editmode too)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "calc_smooth_groups",
+   "description": "Calculate smooth groups from sharp edges",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "use_bitflags",
+     "name": "",
+     "description": "Produce bitflags groups instead of simple numeric values",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "use_boundary_vertices_for_bitflags",
+     "name": "",
+     "description": "Also consider different smoothgroups sharing only vertices (but without any common edge) as neighbors, preventing them from sharing the same bitflag value. Only effective when ``use_bitflags`` is set. WARNING: Will overflow (run out of available bits) easily with some types of topology, e.g. large fans of sharp edges",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "poly_groups",
+     "name": "",
+     "description": "Smooth Groups",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      1
+     ],
+     "default": [
+      0
+     ],
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 0,
+     "step": 1,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "groups",
+     "name": "groups",
+     "description": "Total number of groups",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "normals_split_custom_set",
+   "description": "Define custom normals of this mesh (use zero-vectors to keep auto ones)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "normals",
+     "name": "",
+     "description": "Normals",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      1,
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -1.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "normals_split_custom_set_from_vertices",
+   "description": "Define custom normals of this mesh, from vertices' normals (use zero-vectors to keep auto ones)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "normals",
+     "name": "",
+     "description": "Normals",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      1,
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -1.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "update",
+   "description": "update",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "calc_edges",
+     "name": "Calculate Edges",
+     "description": "Force recalculation of edges",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "calc_edges_loose",
+     "name": "Calculate Loose Edges",
+     "description": "Calculate the loose state of each edge",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "update_gpu_tag",
+   "description": "update_gpu_tag",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "unit_test_compare",
+   "description": "unit_test_compare",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "mesh",
+     "name": "",
+     "description": "Mesh to compare to",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Mesh",
+     "is_id": true,
+     "flags": [
+      "READONLY"
+     ]
+    },
+    {
+     "identifier": "threshold",
+     "name": "Threshold",
+     "description": "Comparison tolerance threshold",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 7.152600119297858e-06,
+     "hard_min": 0.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "Return value",
+     "description": "String description of result of comparison",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "nothing",
+     "length_max": 64,
+     "flags": [
+      "OUTPUT",
+      "NEVER_NULL"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "clear_geometry",
+   "description": "Remove all geometry from the mesh. Note that this does not free shape keys or materials.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "validate",
+   "description": "Validate geometry, return True when the mesh has had invalid geometry corrected/removed",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "verbose",
+     "name": "Verbose",
+     "description": "Output information about the errors found",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "clean_customdata",
+     "name": "Clean Custom Data",
+     "description": "Deprecated, has no effect",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "Result",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "validate_material_indices",
+   "description": "Validate material indices of polygons, return True when the mesh has had invalid indices corrected (to default 0)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "Result",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "count_selected_items",
+   "description": "Return the number of selected items (vert, edge, face)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "Result",
+     "description": "",
+     "type": "INT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0,
+      0,
+      0
+     ],
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  }
+ ],
+ "requested": true,
+ "fresh": {
+  "recipe": "bpy.data.meshes.new('Mesh')",
+  "differs_from_default": {
+   "id_type": "MESH",
+   "is_editable": true,
+   "normals_domain": "POINT",
+   "use_remesh_preserve_volume": true,
+   "use_remesh_preserve_attributes": true
+  }
+ }
+}

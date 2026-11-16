@@ -1,0 +1,18 @@
+[package]
+name = "frap-anim"
+description = "frap L3: Actions, slots, layers, strips, channelbags, F-curves, NLA; F-curve evaluation (ARCHITECTURE §18). M1: the Action datablock type only"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-spec-rna.workspace = true
+smol_str.workspace = true
+serde.workspace = true
+
+[lints]
+workspace = true

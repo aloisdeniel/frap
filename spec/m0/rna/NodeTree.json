@@ -1,0 +1,12 @@
+{
+ "identifier": "NodeTree",
+ "base": "ID",
+ "name": "Node Tree",
+ "description": "Node tree consisting of linked nodes used for shading, textures and compositing",
+ "name_property": "name",
+ "props": [],
+ "_stamp": {
+  "blender": "5.2.4 LTS",
+  "build_hash": "cd5dc428cce1"
+ }
+}

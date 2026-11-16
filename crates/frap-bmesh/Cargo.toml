@@ -1,0 +1,16 @@
+[package]
+name = "frap-bmesh"
+description = "frap L5: BMesh with BLI_mempool-identical pools, kernel Euler ops, CustomData, walkers, bmesh.ops (ARCHITECTURE §6.2). M1: placeholder type only; contract frozen in M2 W0"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-mesh.workspace = true
+
+[lints]
+workspace = true

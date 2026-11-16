@@ -1,0 +1,31 @@
+[package]
+name = "frap-project"
+description = "frap L9: .frap container: deterministic zip, manifest, content-addressed buffers/images, scene mapping, migrations (ARCHITECTURE §15)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-scene.workspace = true
+frap-mesh.workspace = true
+frap-nodes.workspace = true
+frap-anim.workspace = true
+zip.workspace = true
+sha2.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+indexmap.workspace = true
+smol_str.workspace = true
+thiserror.workspace = true
+automod.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+insta.workspace = true
+
+[lints]
+workspace = true

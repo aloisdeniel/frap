@@ -1,0 +1,4433 @@
+{
+ "identifier": "Object",
+ "name": "Object",
+ "description": "Object data-block defining an object in a scene",
+ "base": "ID",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "data",
+   "name": "Data",
+   "description": "Object data",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ID",
+   "is_id": true,
+   "flags": [
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "type",
+   "name": "Type",
+   "description": "Type of object",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "MESH",
+     "name": "Mesh",
+     "description": "",
+     "icon": "OUTLINER_OB_MESH",
+     "value": 1
+    },
+    {
+     "identifier": "CURVE",
+     "name": "Curve",
+     "description": "",
+     "icon": "OUTLINER_OB_CURVE",
+     "value": 2
+    },
+    {
+     "identifier": "SURFACE",
+     "name": "Surface",
+     "description": "",
+     "icon": "OUTLINER_OB_SURFACE",
+     "value": 3
+    },
+    {
+     "identifier": "META",
+     "name": "Metaball",
+     "description": "",
+     "icon": "OUTLINER_OB_META",
+     "value": 5
+    },
+    {
+     "identifier": "FONT",
+     "name": "Text",
+     "description": "",
+     "icon": "OUTLINER_OB_FONT",
+     "value": 4
+    },
+    {
+     "identifier": "CURVES",
+     "name": "Hair Curves",
+     "description": "",
+     "icon": "OUTLINER_OB_CURVES",
+     "value": 27
+    },
+    {
+     "identifier": "POINTCLOUD",
+     "name": "Point Cloud",
+     "description": "",
+     "icon": "OUTLINER_OB_POINTCLOUD",
+     "value": 28
+    },
+    {
+     "identifier": "VOLUME",
+     "name": "Volume",
+     "description": "",
+     "icon": "OUTLINER_OB_VOLUME",
+     "value": 29
+    },
+    {
+     "identifier": "GREASEPENCIL",
+     "name": "Grease Pencil",
+     "description": "",
+     "icon": "OUTLINER_OB_GREASEPENCIL",
+     "value": 30
+    },
+    {
+     "identifier": "ARMATURE",
+     "name": "Armature",
+     "description": "",
+     "icon": "OUTLINER_OB_ARMATURE",
+     "value": 25
+    },
+    {
+     "identifier": "LATTICE",
+     "name": "Lattice",
+     "description": "",
+     "icon": "OUTLINER_OB_LATTICE",
+     "value": 22
+    },
+    {
+     "identifier": "EMPTY",
+     "name": "Empty",
+     "description": "",
+     "icon": "OUTLINER_OB_EMPTY",
+     "value": 0
+    },
+    {
+     "identifier": "LIGHT",
+     "name": "Light",
+     "description": "",
+     "icon": "OUTLINER_OB_LIGHT",
+     "value": 10
+    },
+    {
+     "identifier": "LIGHT_PROBE",
+     "name": "Light Probe",
+     "description": "",
+     "icon": "OUTLINER_OB_LIGHTPROBE",
+     "value": 13
+    },
+    {
+     "identifier": "CAMERA",
+     "name": "Camera",
+     "description": "",
+     "icon": "OUTLINER_OB_CAMERA",
+     "value": 11
+    },
+    {
+     "identifier": "SPEAKER",
+     "name": "Speaker",
+     "description": "",
+     "icon": "OUTLINER_OB_SPEAKER",
+     "value": 12
+    }
+   ],
+   "default": "EMPTY",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mode",
+   "name": "Mode",
+   "description": "Object interaction mode",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OBJECT",
+     "name": "Object Mode",
+     "description": "",
+     "icon": "OBJECT_DATAMODE",
+     "value": 0
+    },
+    {
+     "identifier": "EDIT",
+     "name": "Edit Mode",
+     "description": "",
+     "icon": "EDITMODE_HLT",
+     "value": 1
+    },
+    {
+     "identifier": "POSE",
+     "name": "Pose Mode",
+     "description": "",
+     "icon": "POSE_HLT",
+     "value": 64
+    },
+    {
+     "identifier": "SCULPT",
+     "name": "Sculpt Mode",
+     "description": "",
+     "icon": "SCULPTMODE_HLT",
+     "value": 2
+    },
+    {
+     "identifier": "VERTEX_PAINT",
+     "name": "Vertex Paint",
+     "description": "",
+     "icon": "VPAINT_HLT",
+     "value": 4
+    },
+    {
+     "identifier": "WEIGHT_PAINT",
+     "name": "Weight Paint",
+     "description": "",
+     "icon": "WPAINT_HLT",
+     "value": 8
+    },
+    {
+     "identifier": "TEXTURE_PAINT",
+     "name": "Texture Paint",
+     "description": "",
+     "icon": "TPAINT_HLT",
+     "value": 16
+    },
+    {
+     "identifier": "PARTICLE_EDIT",
+     "name": "Particle Edit",
+     "description": "",
+     "icon": "PARTICLEMODE",
+     "value": 32
+    },
+    {
+     "identifier": "EDIT_GPENCIL",
+     "name": "Edit Mode",
+     "description": "Edit Grease Pencil Strokes",
+     "icon": "EDITMODE_HLT",
+     "value": 128
+    },
+    {
+     "identifier": "SCULPT_GREASE_PENCIL",
+     "name": "Sculpt Mode",
+     "description": "Sculpt Grease Pencil Strokes",
+     "icon": "SCULPTMODE_HLT",
+     "value": 512
+    },
+    {
+     "identifier": "PAINT_GREASE_PENCIL",
+     "name": "Draw Mode",
+     "description": "Paint Grease Pencil Strokes",
+     "icon": "GREASEPENCIL",
+     "value": 256
+    },
+    {
+     "identifier": "WEIGHT_GREASE_PENCIL",
+     "name": "Weight Paint",
+     "description": "Grease Pencil Weight Paint Strokes",
+     "icon": "WPAINT_HLT",
+     "value": 1024
+    },
+    {
+     "identifier": "VERTEX_GREASE_PENCIL",
+     "name": "Vertex Paint",
+     "description": "Grease Pencil Vertex Paint Strokes",
+     "icon": "VPAINT_HLT",
+     "value": 2048
+    },
+    {
+     "identifier": "SCULPT_CURVES",
+     "name": "Sculpt Mode",
+     "description": "",
+     "icon": "SCULPTMODE_HLT",
+     "value": 4096
+    }
+   ],
+   "default": "OBJECT",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "bound_box",
+   "name": "Bounding Box",
+   "description": "Object's bounding box in object-space coordinates, all values are -1.0 when not available",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    8,
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "parent",
+   "name": "Parent",
+   "description": "Parent object",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": [
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "parent_type",
+   "name": "Parent Type",
+   "description": "Type of parent relation",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "The object is parented to an object",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "ARMATURE",
+     "name": "Armature",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "LATTICE",
+     "name": "Lattice",
+     "description": "The object is parented to a lattice",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "VERTEX",
+     "name": "Vertex",
+     "description": "The object is parented to a vertex",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "VERTEX_3",
+     "name": "3 Vertices",
+     "description": "",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "BONE",
+     "name": "Bone",
+     "description": "The object is parented to a bone",
+     "icon": "NONE",
+     "value": 7
+    }
+   ],
+   "default": "OBJECT",
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "parent_vertices",
+   "name": "Parent Vertices",
+   "description": "Indices of vertices in case of a vertex parenting relation",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0,
+    0,
+    0
+   ],
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "parent_bone",
+   "name": "Parent Bone",
+   "description": "Name of parent bone in case of a bone parenting relation",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "parent_bone_head_tail_factor",
+   "name": "Parent Bone Head/Tail",
+   "description": "Position along the length of bone",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_parent_final_indices",
+   "name": "Use Final Indices",
+   "description": "Use the final evaluated indices rather than the original mesh indices",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_camera_lock_parent",
+   "name": "Camera Parent Lock",
+   "description": "View Lock 3D viewport camera transformation affects the object's parent instead",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "track_axis",
+   "name": "Track Axis",
+   "description": "Axis that points in the 'forward' direction (applies to Instance Vertices when Align to Vertex Normal is enabled)",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "POS_X",
+     "name": "+X",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "POS_Y",
+     "name": "+Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "POS_Z",
+     "name": "+Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "NEG_X",
+     "name": "-X",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "NEG_Y",
+     "name": "-Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "NEG_Z",
+     "name": "-Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    }
+   ],
+   "default": "POS_X",
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "up_axis",
+   "name": "Up Axis",
+   "description": "Axis that points in the upward direction (applies to Instance Vertices when Align to Vertex Normal is enabled)",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "X",
+     "name": "X",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "Y",
+     "name": "Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Z",
+     "name": "Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "Y",
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "material_slots",
+   "name": "Material Slots",
+   "description": "Material slots in the object",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MaterialSlot",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "active_material",
+   "name": "Active Material",
+   "description": "Active material being displayed",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "flags": [
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "active_material_index",
+   "name": "Active Material Index",
+   "description": "Index of active material slot",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "location",
+   "name": "Location",
+   "description": "Location of the object",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "rotation_quaternion",
+   "name": "Quaternion Rotation",
+   "description": "Rotation in Quaternions",
+   "type": "FLOAT",
+   "subtype": "QUATERNION",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "rotation_axis_angle",
+   "name": "Axis-Angle Rotation",
+   "description": "Angle of Rotation for Axis-Angle rotation representation",
+   "type": "FLOAT",
+   "subtype": "AXISANGLE",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "rotation_euler",
+   "name": "Euler Rotation",
+   "description": "Rotation in Eulers",
+   "type": "FLOAT",
+   "subtype": "EULER",
+   "unit": "ROTATION",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 100.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "rotation_mode",
+   "name": "Rotation Mode",
+   "description": "The kind of rotation to apply, values from other rotation modes are not used",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "QUATERNION",
+     "name": "Quaternion (WXYZ)",
+     "description": "No Gimbal Lock",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "XYZ",
+     "name": "XYZ Euler",
+     "description": "XYZ Rotation Order - prone to Gimbal Lock (default)",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "XZY",
+     "name": "XZY Euler",
+     "description": "XZY Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "YXZ",
+     "name": "YXZ Euler",
+     "description": "YXZ Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "YZX",
+     "name": "YZX Euler",
+     "description": "YZX Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "ZXY",
+     "name": "ZXY Euler",
+     "description": "ZXY Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "ZYX",
+     "name": "ZYX Euler",
+     "description": "ZYX Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "AXIS_ANGLE",
+     "name": "Axis Angle",
+     "description": "Axis Angle (W+XYZ), defines a rotation around some axis defined by 3D-Vector",
+     "icon": "NONE",
+     "value": -1
+    }
+   ],
+   "default": "XYZ",
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "scale",
+   "name": "Scale",
+   "description": "Scaling of the object",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "dimensions",
+   "name": "Dimensions",
+   "description": "Absolute bounding box dimensions of the object.\nWarning: Assigning to it or its members multiple consecutive times will not work correctly, as this needs up-to-date evaluated data",
+   "type": "FLOAT",
+   "subtype": "XYZ_LENGTH",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": []
+  },
+  {
+   "identifier": "delta_location",
+   "name": "Delta Location",
+   "description": "Extra translation added to the location of the object",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "delta_rotation_euler",
+   "name": "Delta Rotation (Euler)",
+   "description": "Extra rotation added to the rotation of the object (when using Euler rotations)",
+   "type": "FLOAT",
+   "subtype": "EULER",
+   "unit": "ROTATION",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 100.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "delta_rotation_quaternion",
+   "name": "Delta Rotation (Quaternion)",
+   "description": "Extra rotation added to the rotation of the object (when using Quaternion rotations)",
+   "type": "FLOAT",
+   "subtype": "QUATERNION",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "delta_scale",
+   "name": "Delta Scale",
+   "description": "Extra scaling added to the scale of the object",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "lock_location",
+   "name": "Lock Location",
+   "description": "Lock editing of location when transforming",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    false,
+    false,
+    false
+   ],
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "lock_rotation",
+   "name": "Lock Rotation",
+   "description": "Lock editing of rotation when transforming",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    false,
+    false,
+    false
+   ],
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "lock_rotation_w",
+   "name": "Lock Rotation (4D Angle)",
+   "description": "Lock editing of 'angle' component of four-component rotations when transforming",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "lock_rotations_4d",
+   "name": "Lock Rotations (4D)",
+   "description": "Lock editing of four component rotations by components (instead of as Eulers)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "lock_scale",
+   "name": "Lock Scale",
+   "description": "Lock editing of scale when transforming",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    false,
+    false,
+    false
+   ],
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "matrix_world",
+   "name": "Matrix World",
+   "description": "Worldspace transformation matrix",
+   "type": "FLOAT",
+   "subtype": "MATRIX",
+   "unit": "NONE",
+   "array": [
+    4,
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "matrix_local",
+   "name": "Local Matrix",
+   "description": "Parent relative transformation matrix.\nWarning: Only takes into account object parenting, so e.g. in case of bone parenting you get a matrix relative to the Armature object, not to the actual parent bone",
+   "type": "FLOAT",
+   "subtype": "MATRIX",
+   "unit": "NONE",
+   "array": [
+    4,
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "matrix_basis",
+   "name": "Input Matrix",
+   "description": "Matrix access to location, rotation and scale (including deltas), before constraints and parenting are applied",
+   "type": "FLOAT",
+   "subtype": "MATRIX",
+   "unit": "NONE",
+   "array": [
+    4,
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "matrix_parent_inverse",
+   "name": "Parent Inverse Matrix",
+   "description": "Inverse of object's parent matrix at time of parenting",
+   "type": "FLOAT",
+   "subtype": "MATRIX",
+   "unit": "NONE",
+   "array": [
+    4,
+    4
+   ],
+   "default": [
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "modifiers",
+   "name": "Modifiers",
+   "description": "Modifiers affecting the geometric data of the object",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Modifier",
+   "is_id": false,
+   "api": "ObjectModifiers",
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "shader_effects",
+   "name": "Shader Effects",
+   "description": "Effects affecting display of object",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ShaderFx",
+   "is_id": false,
+   "api": "ObjectShaderFx",
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "constraints",
+   "name": "Constraints",
+   "description": "Constraints affecting the transformation of the object",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Constraint",
+   "is_id": false,
+   "api": "ObjectConstraints",
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_groups",
+   "name": "Vertex Groups",
+   "description": "Vertex groups of the object",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "VertexGroup",
+   "is_id": false,
+   "api": "VertexGroups",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "empty_display_type",
+   "name": "Empty Display Type",
+   "description": "Viewport display style for empties",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "PLAIN_AXES",
+     "name": "Plain Axes",
+     "description": "",
+     "icon": "EMPTY_AXIS",
+     "value": 2
+    },
+    {
+     "identifier": "ARROWS",
+     "name": "Arrows",
+     "description": "",
+     "icon": "EMPTY_ARROWS",
+     "value": 1
+    },
+    {
+     "identifier": "SINGLE_ARROW",
+     "name": "Single Arrow",
+     "description": "",
+     "icon": "EMPTY_SINGLE_ARROW",
+     "value": 4
+    },
+    {
+     "identifier": "CIRCLE",
+     "name": "Circle",
+     "description": "",
+     "icon": "MESH_CIRCLE",
+     "value": 3
+    },
+    {
+     "identifier": "CUBE",
+     "name": "Cube",
+     "description": "",
+     "icon": "CUBE",
+     "value": 5
+    },
+    {
+     "identifier": "SPHERE",
+     "name": "Sphere",
+     "description": "",
+     "icon": "SPHERE",
+     "value": 6
+    },
+    {
+     "identifier": "CONE",
+     "name": "Cone",
+     "description": "",
+     "icon": "CONE",
+     "value": 7
+    },
+    {
+     "identifier": "IMAGE",
+     "name": "Image",
+     "description": "",
+     "icon": "FILE_IMAGE",
+     "value": 8
+    }
+   ],
+   "default": "PLAIN_AXES",
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "empty_display_size",
+   "name": "Empty Display Size",
+   "description": "Size of display for empties in the viewport",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 1.0,
+   "hard_min": 9.999999747378752e-05,
+   "hard_max": 1000.0,
+   "soft_min": 0.009999999776482582,
+   "soft_max": 100.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "empty_image_offset",
+   "name": "Origin Offset",
+   "description": "Origin offset distance",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    -0.5,
+    -0.5
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 0.10000000149011612,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "image_user",
+   "name": "Image User",
+   "description": "Parameters defining which layer, pass and frame of the image is displayed",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ImageUser",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "empty_image_depth",
+   "name": "Empty Image Depth",
+   "description": "Determine which other objects will occlude the image",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "DEFAULT",
+     "name": "Default",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FRONT",
+     "name": "Front",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "BACK",
+     "name": "Back",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "DEFAULT",
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_empty_image_perspective",
+   "name": "Display in Perspective Mode",
+   "description": "Display image in perspective mode",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_empty_image_orthographic",
+   "name": "Display in Orthographic Mode",
+   "description": "Display image in orthographic mode",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_empty_image_only_axis_aligned",
+   "name": "Display Only Axis Aligned",
+   "description": "Only display the image when it is aligned with the view axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_empty_image_alpha",
+   "name": "Use Alpha",
+   "description": "Use alpha blending instead of alpha test (can produce sorting artifacts)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "empty_image_side",
+   "name": "Empty Image Side",
+   "description": "Show front/back side",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "DOUBLE_SIDED",
+     "name": "Both",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FRONT",
+     "name": "Front",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "BACK",
+     "name": "Back",
+     "description": "",
+     "icon": "NONE",
+     "value": 8
+    }
+   ],
+   "default": "DOUBLE_SIDED",
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "add_rest_position_attribute",
+   "name": "Add Rest Position",
+   "description": "Add a \"rest_position\" attribute that is a copy of the position attribute before shape keys and modifiers are evaluated",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "pass_index",
+   "name": "Pass Index",
+   "description": "Index number for the \"Object Index\" render pass",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "color",
+   "name": "Color",
+   "description": "Object color and alpha, used when the Object Color mode is enabled",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "field",
+   "name": "Field Settings",
+   "description": "Settings for using the object as a field in physics simulation",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FieldSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "collision",
+   "name": "Collision Settings",
+   "description": "Settings for using the object as a collider in physics simulation",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CollisionSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "soft_body",
+   "name": "Soft Body Settings",
+   "description": "Settings for soft body simulation",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "SoftBodySettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "particle_systems",
+   "name": "Particle Systems",
+   "description": "Particle systems emitted from the object",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ParticleSystem",
+   "is_id": false,
+   "api": "ParticleSystems",
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "rigid_body",
+   "name": "Rigid Body Settings",
+   "description": "Settings for rigid body simulation",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "RigidBodyObject",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "rigid_body_constraint",
+   "name": "Rigid Body Constraint",
+   "description": "Constraint constraining rigid bodies",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "RigidBodyConstraint",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_simulation_cache",
+   "name": "Use Simulation Cache",
+   "description": "Cache frames during simulation nodes playback",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "hide_viewport",
+   "name": "Disable in Viewports",
+   "description": "Globally disable in viewports",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "hide_select",
+   "name": "Disable Selection",
+   "description": "Disable selection in viewport",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "hide_render",
+   "name": "Disable in Renders",
+   "description": "Globally disable in renders",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "hide_probe_volume",
+   "name": "Disable in Volume Probes",
+   "description": "Globally disable in volume probes",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "hide_probe_sphere",
+   "name": "Disable in Spherical Light Probes",
+   "description": "Globally disable in spherical light probes",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "hide_probe_plane",
+   "name": "Disable in Planar Light Probes",
+   "description": "Globally disable in planar light probes",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "hide_surface_pick",
+   "name": "Disable in Surface Picking",
+   "description": "Disable surface influence during selection, snapping and depth-picking operators. Usually used to avoid semi-transparent objects to affect scene navigation",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_instancer_for_render",
+   "name": "Render Instancer",
+   "description": "Make instancer visible when rendering",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_instancer_for_viewport",
+   "name": "Display Instancer",
+   "description": "Make instancer visible in the viewport",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "visible_camera",
+   "name": "Camera Visibility",
+   "description": "Object visibility to camera rays",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "visible_diffuse",
+   "name": "Diffuse Visibility",
+   "description": "Object visibility to diffuse rays",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "visible_glossy",
+   "name": "Glossy Visibility",
+   "description": "Object visibility to glossy rays",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "visible_transmission",
+   "name": "Transmission Visibility",
+   "description": "Object visibility to transmission rays",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "visible_volume_scatter",
+   "name": "Volume Scatter Visibility",
+   "description": "Object visibility to volume scattering rays",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "visible_shadow",
+   "name": "Shadow Visibility",
+   "description": "Object visibility to shadow rays",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "is_holdout",
+   "name": "Holdout",
+   "description": "Render objects as a holdout or matte, creating a hole in the image with zero alpha, to fill out in compositing with real footage or another render",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "is_shadow_catcher",
+   "name": "Shadow Catcher",
+   "description": "Only render shadows and reflections on this object, for compositing renders into real footage. Objects with this setting are considered to already exist in the footage, objects without it are synthetic objects being composited into it.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "visible_raycast",
+   "name": "Raycast Visibility",
+   "description": "Object visibility to raycast rays. Implicitly false for Blended materials.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "instance_type",
+   "name": "Instance Type",
+   "description": "If not None, object instancing method to use",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "VERTS",
+     "name": "Vertices",
+     "description": "Instantiate child objects on all vertices",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "FACES",
+     "name": "Faces",
+     "description": "Instantiate child objects on all faces",
+     "icon": "NONE",
+     "value": 512
+    },
+    {
+     "identifier": "COLLECTION",
+     "name": "Collection",
+     "description": "Enable collection instancing",
+     "icon": "NONE",
+     "value": 256
+    }
+   ],
+   "default": "NONE",
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_instance_vertices_rotation",
+   "name": "Orient with Normals",
+   "description": "Rotate instance according to vertex normal",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_instance_faces_scale",
+   "name": "Scale to Face Sizes",
+   "description": "Scale instance based on face size",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "instance_faces_scale",
+   "name": "Instance Faces Scale",
+   "description": "Scale the face instance objects",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0010000000474974513,
+   "hard_max": 10000.0,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "instance_collection",
+   "name": "Instance Collection",
+   "description": "Instance an existing collection",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Collection",
+   "is_id": true,
+   "flags": [
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "is_instancer",
+   "name": "is_instancer",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "display_type",
+   "name": "Display As",
+   "description": "How to display object in viewport",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BOUNDS",
+     "name": "Bounds",
+     "description": "Display the bounds of the object",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "WIRE",
+     "name": "Wire",
+     "description": "Display the object as a wireframe",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "SOLID",
+     "name": "Solid",
+     "description": "Display the object as a solid (if solid drawing is enabled in the viewport)",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "TEXTURED",
+     "name": "Textured",
+     "description": "Display the object with textures (if textures are enabled in the viewport)",
+     "icon": "NONE",
+     "value": 5
+    }
+   ],
+   "default": "TEXTURED",
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_bounds",
+   "name": "Display Bounds",
+   "description": "Display the object's bounds",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "display_bounds_type",
+   "name": "Display Bounds Type",
+   "description": "Object boundary display type",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BOX",
+     "name": "Box",
+     "description": "Display bounds as box",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "SPHERE",
+     "name": "Sphere",
+     "description": "Display bounds as sphere",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "CYLINDER",
+     "name": "Cylinder",
+     "description": "Display bounds as cylinder",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "CONE",
+     "name": "Cone",
+     "description": "Display bounds as cone",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "CAPSULE",
+     "name": "Capsule",
+     "description": "Display bounds as capsule",
+     "icon": "NONE",
+     "value": 7
+    }
+   ],
+   "default": "BOX",
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_name",
+   "name": "Display Name",
+   "description": "Display the object's name",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_axis",
+   "name": "Display Axes",
+   "description": "Display the object's origin and axes",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_texture_space",
+   "name": "Display Texture Space",
+   "description": "Display the object's texture space",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_wire",
+   "name": "Display Wire",
+   "description": "Display the object's wireframe over solid shading",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_all_edges",
+   "name": "Display All Edges",
+   "description": "Display all edges for mesh objects",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_grease_pencil_lights",
+   "name": "Use Lights",
+   "description": "Lights affect Grease Pencil object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_transparent",
+   "name": "Display Transparent",
+   "description": "Display material transparency in the object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_in_front",
+   "name": "In Front",
+   "description": "Make the object display in front of others",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "pose",
+   "name": "Pose",
+   "description": "Current pose for armatures",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Pose",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "show_only_shape_key",
+   "name": "Solo Active Shape Key",
+   "description": "Only show the active shape key at full value",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_shape_key_edit_mode",
+   "name": "Shape Key Edit Mode",
+   "description": "Display shape keys in edit mode (for meshes only)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "active_shape_key",
+   "name": "Active Shape Key",
+   "description": "Current shape key",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ShapeKey",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "active_shape_key_index",
+   "name": "Active Shape Key Index",
+   "description": "Current shape key index",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -32768,
+   "hard_max": 32767,
+   "soft_min": -32768,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_dynamic_topology_sculpting",
+   "name": "Dynamic Topology Sculpting",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "is_from_instancer",
+   "name": "Base from Instancer",
+   "description": "Object comes from a instancer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_from_set",
+   "name": "Base from Set",
+   "description": "Object comes from a background set",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "display",
+   "name": "Object Display",
+   "description": "Object display settings for 3D viewport",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ObjectDisplay",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "lineart",
+   "name": "Line Art",
+   "description": "Line Art settings for the object",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ObjectLineArt",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_mesh_mirror_x",
+   "name": "X",
+   "description": "Enable mesh symmetry in the X axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_mesh_mirror_y",
+   "name": "Y",
+   "description": "Enable mesh symmetry in the Y axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "use_mesh_mirror_z",
+   "name": "Z",
+   "description": "Enable mesh symmetry in the Z axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "lightgroup",
+   "name": "Lightgroup",
+   "description": "Lightgroup that the object belongs to",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "light_linking",
+   "name": "Light Linking",
+   "description": "Light linking settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ObjectLightLinking",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_terminator_normal_offset",
+   "name": "Shadow Terminator Normal Offset",
+   "description": "Offset rays from the surface to reduce shadow terminator artifact on low poly geometry. Only affect triangles that are affected by the geometry offset",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 10.0,
+   "step": 0.009999999776482582,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_terminator_geometry_offset",
+   "name": "Shadow Terminator Geometry Offset",
+   "description": "Offset rays from the surface to reduce shadow terminator artifact on low poly geometry. Only affects triangles at grazing angles to light",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.10000000149011612,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_terminator_shading_offset",
+   "name": "Shadow Terminator Shading Offset",
+   "description": "Push the shadow terminator towards the light to hide artifacts on low poly geometry",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "animation_data",
+   "name": "Animation Data",
+   "description": "Animation data for this data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AnimData",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "animation_visualization",
+   "name": "Animation Visualization",
+   "description": "Animation data for this data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AnimViz",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL",
+    "OVERRIDABLE"
+   ]
+  },
+  {
+   "identifier": "motion_path",
+   "name": "Motion Path",
+   "description": "Motion Path for this element",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MotionPath",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "selection_sets",
+   "name": "Selection Sets",
+   "description": "List of groups of bones for easy selection",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "SelectionSet",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY",
+    "OVERRIDABLE",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "active_selection_set",
+   "name": "Active Selection Set",
+   "description": "Index of the currently active selection set",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -2147483648,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE",
+    "OVERRIDABLE",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "cycles",
+   "name": "Cycles Object Settings",
+   "description": "Cycles object settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CyclesObjectSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "select_get",
+   "description": "Test if the object is selected. The selection state is per view layer.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "view_layer",
+     "name": "",
+     "description": "Use this instead of the active view layer",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ViewLayer",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Object selected",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "select_set",
+   "description": "Select or deselect the object. The selection state is per view layer.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "state",
+     "name": "",
+     "description": "Selection state to define",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "view_layer",
+     "name": "",
+     "description": "Use this instead of the active view layer",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ViewLayer",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "hide_get",
+   "description": "Test if the object is hidden for viewport editing. This hiding state is per view layer.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "view_layer",
+     "name": "",
+     "description": "Use this instead of the active view layer",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ViewLayer",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Object hidden",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "hide_set",
+   "description": "Hide the object for viewport editing. This hiding state is per view layer.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "state",
+     "name": "",
+     "description": "Hide state to define",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "view_layer",
+     "name": "",
+     "description": "Use this instead of the active view layer",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ViewLayer",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "visible_get",
+   "description": "Test if the object is visible in the 3D viewport, taking into account all visibility settings",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "view_layer",
+     "name": "",
+     "description": "Use this instead of the active view layer",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ViewLayer",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    },
+    {
+     "identifier": "viewport",
+     "name": "",
+     "description": "Use this instead of the active 3D viewport",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "SpaceView3D",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Object visible",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "holdout_get",
+   "description": "Test if object is masked in the view layer",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "view_layer",
+     "name": "",
+     "description": "Use this instead of the active view layer",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ViewLayer",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Object holdout",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "indirect_only_get",
+   "description": "Test if object is set to contribute only indirectly (through shadows and reflections) in the view layer",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "view_layer",
+     "name": "",
+     "description": "Use this instead of the active view layer",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ViewLayer",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Object indirect only",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "local_view_get",
+   "description": "Get the local view state for this object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "viewport",
+     "name": "",
+     "description": "Viewport in local view",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "SpaceView3D",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Object local view state",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "local_view_set",
+   "description": "Set the local view state for this object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "viewport",
+     "name": "",
+     "description": "Viewport in local view",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "SpaceView3D",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "state",
+     "name": "",
+     "description": "Local view state to define",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "visible_in_viewport_get",
+   "description": "Check for local view and local collections for this viewport and object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "viewport",
+     "name": "",
+     "description": "Viewport in local collections",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "SpaceView3D",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Object viewport visibility",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "convert_space",
+   "description": "Convert (transform) the given matrix from one space to another",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "pose_bone",
+     "name": "",
+     "description": "Bone to use to define spaces (may be None, in which case only the two 'WORLD' and 'LOCAL' spaces are usable)",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "PoseBone",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    },
+    {
+     "identifier": "matrix",
+     "name": "",
+     "description": "The matrix to transform",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      4,
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "from_space",
+     "name": "",
+     "description": "The space in which 'matrix' is currently",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "WORLD",
+       "name": "World Space",
+       "description": "The most global space in Blender",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "POSE",
+       "name": "Pose Space",
+       "description": "The pose space of a bone (its armature's object space)",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "LOCAL_WITH_PARENT",
+       "name": "Local With Parent",
+       "description": "The rest pose local space of a bone (this matrix includes parent transforms)",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "LOCAL",
+       "name": "Local Space",
+       "description": "The local space of an object/bone",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "WORLD",
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "to_space",
+     "name": "",
+     "description": "The space to which you want to transform 'matrix'",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "WORLD",
+       "name": "World Space",
+       "description": "The most global space in Blender",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "POSE",
+       "name": "Pose Space",
+       "description": "The pose space of a bone (its armature's object space)",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "LOCAL_WITH_PARENT",
+       "name": "Local With Parent",
+       "description": "The rest pose local space of a bone (this matrix includes parent transforms)",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "LOCAL",
+       "name": "Local Space",
+       "description": "The local space of an object/bone",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "WORLD",
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "matrix_return",
+     "name": "",
+     "description": "The transformed matrix",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      4,
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "calc_matrix_camera",
+   "description": "Generate the camera projection matrix of this object (mostly useful for Camera and Light types)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "depsgraph",
+     "name": "",
+     "description": "Depsgraph to get evaluated data from",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Depsgraph",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    },
+    {
+     "identifier": "x",
+     "name": "",
+     "description": "Width of the render area",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "y",
+     "name": "",
+     "description": "Height of the render area",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "scale_x",
+     "name": "",
+     "description": "Width scaling factor",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.009999999776482582,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "scale_y",
+     "name": "",
+     "description": "Height scaling factor",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 9.999999974752427e-07,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.009999999776482582,
+     "soft_max": 100.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "The camera projection matrix",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      4,
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "camera_fit_coords",
+   "description": "Compute the coordinate (and scale for ortho cameras) given object should be to 'see' all given coordinates",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "depsgraph",
+     "name": "",
+     "description": "Depsgraph to get evaluated data from",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Depsgraph",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    },
+    {
+     "identifier": "coordinates",
+     "name": "",
+     "description": "Coordinates to fit in",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      1
+     ],
+     "default": [
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "co_return",
+     "name": "",
+     "description": "The location to aim to be able to see all given points",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "scale_return",
+     "name": "",
+     "description": "The ortho scale to aim to be able to see all given points (if relevant)",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "crazyspace_eval",
+   "description": "Compute orientation mapping between vertices of an original object and object with shape keys and deforming modifiers applied.The evaluation is to be freed with the crazyspace_eval_free function",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "depsgraph",
+     "name": "Dependency Graph",
+     "description": "Evaluated dependency graph",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Depsgraph",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    },
+    {
+     "identifier": "scene",
+     "name": "Scene",
+     "description": "Scene of the object",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Scene",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "crazyspace_displacement_to_deformed",
+   "description": "Convert displacement vector from non-deformed object space to deformed object space",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "vertex_index",
+     "name": "vertex_index",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -10000,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "displacement",
+     "name": "displacement",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "displacement_deformed",
+     "name": "displacement_deformed",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "crazyspace_displacement_to_original",
+   "description": "Free evaluated state of crazyspace",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "vertex_index",
+     "name": "vertex_index",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -10000,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "displacement",
+     "name": "displacement",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "displacement_original",
+     "name": "displacement_original",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "crazyspace_eval_clear",
+   "description": "crazyspace_eval_clear",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "to_mesh",
+   "description": "Create a Mesh data-block from the current state of the object. The object owns the data-block. To force free it use to_mesh_clear(). The result is temporary and cannot be used by objects from the main database.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "preserve_all_data_layers",
+     "name": "",
+     "description": "Preserve all data layers in the mesh, like UV maps and vertex groups. By default Blender only computes the subset of data layers needed for viewport display and rendering, for better performance.",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "depsgraph",
+     "name": "Dependency Graph",
+     "description": "Evaluated dependency graph which is required when preserve_all_data_layers is true",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Depsgraph",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "mesh",
+     "name": "",
+     "description": "Mesh created from object",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Mesh",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "to_mesh_clear",
+   "description": "Clears mesh data-block created by to_mesh()",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "to_curve",
+   "description": "Create a Curve data-block from the current state of the object. This only works for curve and text objects. The object owns the data-block. To force free it, use to_curve_clear(). The result is temporary and cannot be used by objects from the main database.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "depsgraph",
+     "name": "Dependency Graph",
+     "description": "Evaluated dependency graph",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Depsgraph",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    },
+    {
+     "identifier": "apply_modifiers",
+     "name": "",
+     "description": "Apply the deform modifiers on the control points of the curve. This is only supported for curve objects.",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "curve",
+     "name": "",
+     "description": "Curve created from object",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Curve",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "to_curve_clear",
+   "description": "Clears curve data-block created by to_curve()",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "find_armature",
+   "description": "Find armature influencing this object as a parent or via a modifier",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "ob_arm",
+     "name": "",
+     "description": "Armature object influencing this object or nullptr",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Object",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "shape_key_add",
+   "description": "Add shape key to this object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "",
+     "description": "Unique name for the new key-block",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Key",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "from_mix",
+     "name": "",
+     "description": "Create new shape from existing mix of shapes",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "key",
+     "name": "",
+     "description": "New shape key-block",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ShapeKey",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "shape_key_remove",
+   "description": "Remove a Shape Key from this object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "key",
+     "name": "",
+     "description": "Key-block to be removed",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ShapeKey",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "shape_key_clear",
+   "description": "Remove all Shape Keys from this object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "shape_keys_selected",
+   "description": "Return selected shape keys",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "keyblocks",
+     "name": "keyblocks",
+     "description": "",
+     "type": "COLLECTION",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ShapeKey",
+     "is_id": false,
+     "api": null,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "ray_cast",
+   "description": "Cast a ray onto evaluated geometry, in object space (using context's or provided depsgraph to get evaluated mesh if needed)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "origin",
+     "name": "",
+     "description": "Origin of the ray, in object space",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "direction",
+     "name": "",
+     "description": "Direction of the ray, in object space",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "distance",
+     "name": "",
+     "description": "Maximum distance",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.7014117331926443e+38,
+     "hard_min": 0.0,
+     "hard_max": 1.7014117331926443e+38,
+     "soft_min": 0.0,
+     "soft_max": 1.7014117331926443e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "depsgraph",
+     "name": "",
+     "description": "Depsgraph to use to get evaluated data, when called from original object (only needed if current Context's depsgraph is not suitable)",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Depsgraph",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Whether the ray successfully hit the geometry",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "The hit location of this ray cast",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "normal",
+     "name": "Normal",
+     "description": "The face normal at the ray cast hit location",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "index",
+     "name": "",
+     "description": "The face index, -1 when original data isn't available",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 0,
+     "step": 1,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "closest_point_on_mesh",
+   "description": "Find the nearest point on evaluated geometry, in object space (using context's or provided depsgraph to get evaluated mesh if needed)",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "origin",
+     "name": "",
+     "description": "Point to find closest geometry from (in object space)",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "distance",
+     "name": "",
+     "description": "Maximum distance",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.8446742974197924e+19,
+     "hard_min": 0.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "depsgraph",
+     "name": "",
+     "description": "Depsgraph to use to get evaluated data, when called from original object (only needed if current Context's depsgraph is not suitable)",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Depsgraph",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Whether closest point on geometry was found",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "The location on the object closest to the point",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "normal",
+     "name": "Normal",
+     "description": "The face normal at the closest point",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "index",
+     "name": "",
+     "description": "The face index, -1 when original data isn't available",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 0,
+     "step": 1,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "is_modified",
+   "description": "Determine if this object is modified from the base mesh data",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "scene",
+     "name": "",
+     "description": "Scene in which to check the object",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Scene",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "settings",
+     "name": "",
+     "description": "Modifier settings to apply",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PREVIEW",
+       "name": "Preview",
+       "description": "Apply modifier preview settings",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "RENDER",
+       "name": "Render",
+       "description": "Apply modifier render settings",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "PREVIEW",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Whether the object is modified",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "is_deform_modified",
+   "description": "Determine if this object is modified by a deformation from the base mesh data",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "scene",
+     "name": "",
+     "description": "Scene in which to check the object",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Scene",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "settings",
+     "name": "",
+     "description": "Modifier settings to apply",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PREVIEW",
+       "name": "Preview",
+       "description": "Apply modifier preview settings",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "RENDER",
+       "name": "Render",
+       "description": "Apply modifier render settings",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "PREVIEW",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Whether the object is deform-modified",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "update_from_editmode",
+   "description": "Load the objects edit-mode data into the object data",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "Success",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "cache_release",
+   "description": "Release memory used by caches associated with this object. Intended to be used by render engines only.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  }
+ ],
+ "requested": true,
+ "fresh": {
+  "recipe": "bpy.data.objects.new('Object', None)",
+  "differs_from_default": {
+   "id_type": "OBJECT",
+   "is_editable": true,
+   "track_axis": "POS_Y",
+   "up_axis": "Z",
+   "matrix_world": [
+    [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     1.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "matrix_local": [
+    [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     1.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "matrix_basis": [
+    [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     1.0,
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     1.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0,
+     0.0,
+     1.0
+    ]
+   ],
+   "use_grease_pencil_lights": false
+  }
+ }
+}

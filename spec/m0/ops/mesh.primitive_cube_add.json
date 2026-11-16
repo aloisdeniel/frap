@@ -1,0 +1,166 @@
+{
+ "idname": "mesh.primitive_cube_add",
+ "bl_idname": "MESH_OT_primitive_cube_add",
+ "label": "Add Cube",
+ "description": "Construct a cube mesh that consists of six square faces",
+ "options": [
+  "REGISTER",
+  "UNDO"
+ ],
+ "props_subset": false,
+ "props": [
+  {
+   "identifier": "size",
+   "name": "Size",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "hard_min": 0.0,
+   "hard_max": 999999995904.0,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 100.0,
+   "precision": 3,
+   "array": [],
+   "default": 2.0,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "calc_uvs",
+   "name": "Generate UVs",
+   "description": "Generate a default UV map",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "array": [],
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "enter_editmode",
+   "name": "Enter Edit Mode",
+   "description": "Enter edit mode when adding this object",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "array": [],
+   "default": false,
+   "flags": [
+    "HIDDEN",
+    "SKIP_SAVE",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "align",
+   "name": "Align",
+   "description": "The alignment of the new object",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "array": [],
+   "items": [
+    {
+     "identifier": "WORLD",
+     "name": "World",
+     "description": "Align the new object to the world"
+    },
+    {
+     "identifier": "VIEW",
+     "name": "View",
+     "description": "Align the new object to the view"
+    },
+    {
+     "identifier": "CURSOR",
+     "name": "3D Cursor",
+     "description": "Use the 3D cursor orientation for the new object"
+    }
+   ],
+   "default": "WORLD",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "location",
+   "name": "Location",
+   "description": "Location for the newly added object",
+   "type": "FLOAT",
+   "subtype": "XYZ_LENGTH",
+   "unit": "LENGTH",
+   "hard_min": -999999995904.0,
+   "hard_max": 999999995904.0,
+   "soft_min": -1000.0,
+   "soft_max": 1000.0,
+   "precision": 3,
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "flags": [
+    "SKIP_SAVE",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "rotation",
+   "name": "Rotation",
+   "description": "Rotation for the newly added object",
+   "type": "FLOAT",
+   "subtype": "EULER",
+   "unit": "ROTATION",
+   "hard_min": -999999995904.0,
+   "hard_max": 999999995904.0,
+   "soft_min": -6.2831854820251465,
+   "soft_max": 6.2831854820251465,
+   "precision": 3,
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "flags": [
+    "SKIP_SAVE",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "scale",
+   "name": "Scale",
+   "description": "Scale for the newly added object",
+   "type": "FLOAT",
+   "subtype": "XYZ_LENGTH",
+   "unit": "LENGTH",
+   "hard_min": -999999995904.0,
+   "hard_max": 999999995904.0,
+   "soft_min": -1000.0,
+   "soft_max": 1000.0,
+   "precision": 3,
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "flags": [
+    "HIDDEN",
+    "SKIP_SAVE",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "_stamp": {
+  "blender": "5.2.4 LTS",
+  "build_hash": "cd5dc428cce1"
+ }
+}

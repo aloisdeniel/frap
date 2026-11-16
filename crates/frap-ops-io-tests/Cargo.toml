@@ -1,0 +1,27 @@
+[package]
+name = "frap-ops-io-tests"
+description = "frap test-only crate (rule 2.2.11): behaviour tests of the IO operators through a real Session, e.g. the WP 1.23 proptest random M1 op sequences -> save -> open -> identical state"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+# Test-only: nothing depends on this crate, so it may depend on frap-session (L11) without a
+# dev-dependency cycle (`frap-ops-io` itself must not, rule 2.2.11). Owned by WP 1.23 (M1).
+[dependencies]
+
+[dev-dependencies]
+frap-session.workspace = true
+frap-ops-all.workspace = true
+frap-scene.workspace = true
+frap-rna.workspace = true
+frap-project.workspace = true
+frap-gltf.workspace = true
+proptest.workspace = true
+insta.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

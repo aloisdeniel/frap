@@ -1,0 +1,12 @@
+{
+ "identifier": "PointCloud",
+ "base": "ID",
+ "name": "Point Cloud",
+ "description": "Point cloud data-block",
+ "name_property": "name",
+ "props": [],
+ "_stamp": {
+  "blender": "5.2.4 LTS",
+  "build_hash": "cd5dc428cce1"
+ }
+}

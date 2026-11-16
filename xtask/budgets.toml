@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Build-time budgets of the generated spec crates (ARCHITECTURE §4.2, §21.7).
+# `cargo xtask budgets` rebuilds each crate alone (`cargo clean -p X && cargo build -p X`,
+# dependencies cached) and fails when one takes more than `factor` × its recorded baseline.
+# `cargo xtask budgets --record` rewrites the baselines (WP 1.1 records them once the crates are
+# generated; a baseline of 0 means "not recorded yet" and is reported, not enforced).
+# Reference point (RFC 0001 §4): the WP 0.2 probe's generated crate (19 structs, 417 operators,
+# 21k lines) built clean in ~3.0 s (debug) on an M1 Max.
+
+factor = 2.0
+
+[baseline_secs]
+frap-spec-rna = 0.0
+frap-spec-ops-object = 0.0
+frap-spec-ops-transform = 0.0
+frap-spec-ops-mesh = 0.0
+frap-spec-ops-uv = 0.0
+frap-spec-ops-anim = 0.0
+frap-spec-ops-data = 0.0
+frap-spec-ops-io = 0.0
+frap-spec-ops-render = 0.0
+frap-spec-ops-frap = 0.0
+frap-spec-catalog = 0.0

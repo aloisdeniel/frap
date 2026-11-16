@@ -1,0 +1,12 @@
+{
+ "identifier": "Light",
+ "base": "ID",
+ "name": "Light",
+ "description": "Light data-block for lighting a scene",
+ "name_property": "name",
+ "props": [],
+ "_stamp": {
+  "blender": "5.2.4 LTS",
+  "build_hash": "cd5dc428cce1"
+ }
+}

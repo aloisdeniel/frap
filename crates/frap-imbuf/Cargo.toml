@@ -1,0 +1,31 @@
+[package]
+name = "frap-imbuf"
+description = "frap L3: Image decode/encode (PNG 8/16, JPEG, WebP, HDR, EXR, TGA, BMP) behind ImageCodec (ARCHITECTURE §3.2)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+image.workspace = true
+png.workspace = true
+exr.workspace = true
+half.workspace = true
+thiserror.workspace = true
+
+[dependencies.webp]
+workspace = true
+optional = true
+
+[dev-dependencies]
+proptest.workspace = true
+
+[features]
+default = []
+# Lossy WebP encode via libwebp (cc-built, rule 2.2.9). Enabled by frap-cli/frap-ops-all `webp-lossy`.
+webp-lossy = ["dep:webp"]
+
+[lints]
+workspace = true

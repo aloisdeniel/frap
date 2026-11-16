@@ -1,0 +1,4 @@
+# The M0 exit transcript fed on stdin (raw mode, §13.1); expected output = skeleton.trycmd.
+bin.name = "frap"
+args = []
+fs.sandbox = true

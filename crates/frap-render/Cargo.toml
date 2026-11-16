@@ -1,0 +1,24 @@
+[package]
+name = "frap-render"
+description = "frap L9: wgpu device, offscreen targets, readback, Workbench and EEVEE-like engines; implements RenderService. The only wgpu crate (ARCHITECTURE §19)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-render-scene.workspace = true
+frap-color.workspace = true
+frap-imbuf.workspace = true
+wgpu.workspace = true
+pollster.workspace = true
+bytemuck.workspace = true
+glam.workspace = true
+
+[dev-dependencies]
+image-compare.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,32 @@
+[package]
+name = "frap-ops-render"
+description = "frap L10: Operators: `render.render`, output path rules, `frap.render_contact_sheet`; GPU only through OpCtx::services().render() (ARCHITECTURE §3.2, §10)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-op.workspace = true
+frap-rna.workspace = true
+frap-scene.workspace = true
+frap-spec-rna.workspace = true
+frap-spec-ops-render.workspace = true
+frap-render-scene.workspace = true
+frap-color.workspace = true
+frap-imbuf.workspace = true
+linkme.workspace = true
+automod.workspace = true
+smol_str.workspace = true
+indexmap.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+insta.workspace = true
+approx.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

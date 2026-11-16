@@ -1,0 +1,12 @@
+{
+ "identifier": "Library",
+ "base": "ID",
+ "name": "Library",
+ "description": "External .blend file from which data is linked",
+ "name_property": "name",
+ "props": [],
+ "_stamp": {
+  "blender": "5.2.4 LTS",
+  "build_hash": "cd5dc428cce1"
+ }
+}

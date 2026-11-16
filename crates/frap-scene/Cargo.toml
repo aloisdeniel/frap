@@ -1,0 +1,36 @@
+[package]
+name = "frap-scene"
+description = "frap L6: Main (bpy.data), IdMap, datablock types, Scene/ViewLayer/Collection, Context, Host and Evaluator traits, factory startup (ARCHITECTURE §5, §8)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-spec-rna.workspace = true
+frap-math.workspace = true
+frap-mesh.workspace = true
+frap-nodes.workspace = true
+frap-bmesh.workspace = true
+frap-anim.workspace = true
+glam.workspace = true
+indexmap.workspace = true
+smol_str.workspace = true
+smallvec.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+linkme.workspace = true
+bitflags.workspace = true
+automod.workspace = true
+rustc-hash.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+insta.workspace = true
+approx.workspace = true
+
+[lints]
+workspace = true

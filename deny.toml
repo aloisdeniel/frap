@@ -1,0 +1,60 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# cargo-deny (ARCHITECTURE §3.1, §20.5): licences compatible with GPL-3.0-or-later, RustSec
+# advisories, banned crates and sources. CI: `cargo deny check`.
+
+[graph]
+all-features = false
+no-default-features = false
+
+[advisories]
+# RustSec database; yanked crates fail too.
+yanked = "deny"
+ignore = []
+
+[licenses]
+# frap is GPL-3.0-or-later (§24 D1). Every licence below is GPL-3 compatible.
+allow = [
+    "GPL-3.0-or-later",
+    "MIT",
+    "MIT-0",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "MPL-2.0",
+    "Unicode-3.0",
+    "CC0-1.0",
+    "BSL-1.0",
+    "Unlicense",
+    "CDLA-Permissive-2.0",
+]
+confidence-threshold = 0.9
+
+[licenses.private]
+# Workspace crates are `publish = false`; they are checked against the allow list too.
+ignore = false
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+allow-wildcard-paths = true
+deny = [
+    # §3.5 "Not used": AGPL WebP encoder, and the rejected alternatives.
+    { crate = "zenwebp", reason = "AGPL (§3.5)" },
+    # Allowed only inside the dev-only `gltf =1.4.1` validator.
+    { crate = "gltf-json", wrappers = ["gltf"], reason = "frap-gltf is the write model (§3.5)" },
+    { crate = "nalgebra", reason = "glam + faer only (§3.5)" },
+    { crate = "chumsky", reason = "hand-written parser (§3.5)" },
+    { crate = "csgrs", reason = "manifold-rust behind BooleanSolver (§3.5)" },
+    { crate = "manifold3d", reason = "manifold-rust behind BooleanSolver (§3.5)" },
+    { crate = "draco-rs", reason = "draco-core / cc-built fallback (§3.5)" },
+    { crate = "opensubdiv-petite", reason = "opensubdiv-rs behind Subdivider (§3.5)" },
+]
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
