@@ -167,7 +167,8 @@ pub fn f32_json(x: f32) -> J {
     if x.is_infinite() {
         return json!({"$float": if x > 0.0 { "inf" } else { "-inf" }});
     }
-    if x.fract() == 0.0 && x.abs() < 9.0e15 {
+    // Integral values as integers, except -0.0, which keeps its sign (as Python does).
+    if x.fract() == 0.0 && x.abs() < 9.0e15 && !(x == 0.0 && x.is_sign_negative()) {
         return J::from(x as i64);
     }
     // Rust's Display is the shortest string that round-trips the f32; as f64 it prints the same.
@@ -177,6 +178,21 @@ pub fn f32_json(x: f32) -> J {
     J::from(shortest)
 }
 
+/// Shortest round-trip JSON of an `f64` (integral values as integers, `-0.0` kept);
+/// non-finite values tagged (§13.3).
+pub fn f64_json(x: f64) -> J {
+    if x.is_nan() {
+        return json!({"$float": "nan"});
+    }
+    if x.is_infinite() {
+        return json!({"$float": if x > 0.0 { "inf" } else { "-inf" }});
+    }
+    if x.fract() == 0.0 && x.abs() < 9.0e15 && !(x == 0.0 && x.is_sign_negative()) {
+        return J::from(x as i64);
+    }
+    serde_json::Number::from_f64(x).map_or(J::Null, J::Number)
+}
+
 /// Encodes a value (§13.3).
 pub fn value_json(v: &Value, names: &dyn IdNames) -> J {
     match v {
@@ -184,9 +200,7 @@ pub fn value_json(v: &Value, names: &dyn IdNames) -> J {
         Value::Bool(b) => J::from(*b),
         Value::Int(i) => J::from(*i),
         Value::Float(f) => f32_json(*f),
-        Value::Double(d) => serde_json::Number::from_f64(*d)
-            .map(J::Number)
-            .unwrap_or(J::Null),
+        Value::Double(d) => f64_json(*d),
         Value::Str(s) | Value::Enum(s) => J::from(s.as_str()),
         Value::EnumSet(s) => J::Array(s.iter().map(|x| J::from(x.as_str())).collect()),
         Value::BoolArray(a) => J::Array(a.iter().map(|b| J::from(*b)).collect()),

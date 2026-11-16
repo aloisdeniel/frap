@@ -1,35 +1,40 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `Session`: executor (IR → calls), transactions and response building (ARCHITECTURE §11.6,
-//! §12, §13). One statement is one transaction; errors leave the state unchanged.
+//! §12, §13). One statement is one transaction; errors, CANCELLED and caught panics restore
+//! the snapshot, and pure reads run without one.
 
-use std::panic::{AssertUnwindSafe, catch_unwind};
-use std::path::PathBuf;
+mod eval;
+mod exec;
+mod funcs;
 
 use std::collections::BTreeMap;
+use std::panic::{AssertUnwindSafe, catch_unwind};
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use frap_eval::EvalCache;
 use frap_imbuf::DecodedImage;
-use frap_lang::{Command, Expr, Lit, PathExpr, Stmt, UnOp};
+use frap_lang::Stmt;
 use frap_mesh::Mesh;
-use frap_op::{ImageCache, OpCtx, OpError, OpStatus, PathResolver, Services};
+use frap_op::{ImageCache, OpError, PathResolver, Services};
 use frap_render_scene::{GpuOptions, RenderError, RenderService};
-use frap_rna::ptr::{IdNames, id_repr};
 use frap_rna::{
-    CoerceCx, Field, FrapError, IdAny, IdCode, IdKey, IdRef, ImageId, Input, MeshId, PropFlags,
-    PyExc, Report, RnaError, RnaErrorKind, RnaPtr, Root, SetOutcome, Span, Value, coerce,
+    FrapError, IdCode, IdKey, IdRef, ImageId, Input, MeshId, PyExc, Report, RnaError, RnaErrorKind,
+    Root, Span, Value,
 };
 use frap_scene::{
     ChangeLog, Context, EditState, Evaluator, Host, HostRead, Main, Preferences, Snapshot,
     WindowState,
 };
 use indexmap::IndexMap;
-use serde_json::{Map, Value as J, json};
+use serde_json::{Value as J, json};
 use smol_str::SmolStr;
 
 use crate::errors::*;
-use crate::resolve::{Target, item_type, resolve, srna_of};
-use crate::response::{Response, Status, info, rna_json, value_json};
+use crate::resolve::{Caps, id_repr};
+use crate::response::{Response, Status};
+
+pub(crate) use exec::{stmt_kind, stmt_op};
 
 /// Everything a rollback restores (§12).
 #[derive(Clone)]
@@ -189,6 +194,7 @@ impl ImageCache for ImageCacheImpl {
 
 /// Side-effect services, never snapshotted (§12).
 struct SessionServices {
+    /// Created on first use by `render_factory` (and kept, also after a failure is retried).
     render: Option<Box<dyn RenderService>>,
     render_factory: RenderFactory,
     gpu: GpuOptions,
@@ -261,6 +267,7 @@ impl Host for HostImpl {
         )
     }
     fn win_mut(&mut self) -> &mut WindowState {
+        self.log.context_changed = true;
         &mut self.state.win
     }
     fn eval(&mut self) -> (&dyn HostRead, &mut dyn Evaluator) {
@@ -307,23 +314,61 @@ pub struct Session {
     services: SessionServices,
     opts: SessionOptions,
     seq: u64,
+    /// Nesting depth of [`Session::transact`] (an operator called with nested calls in its
+    /// arguments runs its own transaction inside the statement's).
+    txn_depth: u32,
+}
+
+/// A statement failure before it becomes a response: kind, operator, error, reports.
+pub(crate) struct Fail {
+    kind: &'static str,
+    op: Option<SmolStr>,
+    err: FrapError,
+    reports: Vec<Report>,
+}
+
+impl Fail {
+    pub(crate) fn new(kind: &'static str, err: FrapError) -> Fail {
+        Fail {
+            kind,
+            op: None,
+            err,
+            reports: vec![],
+        }
+    }
+}
+
+/// Result of a transaction body: a value and whether the statement asks for a rollback
+/// (CANCELLED).
+pub(crate) struct Txn<R> {
+    /// The body's result (`Err` = rolled back).
+    pub(crate) result: Result<R, FrapError>,
+    /// CANCELLED (rolled back).
+    pub(crate) cancelled: bool,
+    /// The statement's change log (empty after a rollback is still returned for reports).
+    pub(crate) log: ChangeLog,
+    /// Reports raised through `Host::report`.
+    pub(crate) reports: Vec<Report>,
 }
 
 fn not_yet(what: &str) -> FrapError {
     FrapError::new(
         PyExc::NotImplementedError,
         NOT_IMPLEMENTED,
-        format!("frap M0: {what} is not supported yet"),
+        format!("frap: {what} is not supported yet"),
     )
 }
 
 impl Session {
-    /// Starts from Blender's factory startup (§5.7).
+    /// Starts a session (factory startup by default, §5.7).
     pub fn new(opts: SessionOptions) -> Result<Session, FrapError> {
         frap_ops_all::link();
         let (main, win) = match &opts.startup {
             Startup::Factory => frap_scene::startup::factory(),
-            Startup::Empty => return Err(not_yet("the empty startup (WP 1.10)")),
+            // `startup::empty` is WP 1.10's; until it lands it panics, reported as INTERNAL.
+            Startup::Empty => {
+                catch_unwind(frap_scene::startup::empty).map_err(FrapError::internal_panic)?
+            }
             Startup::File(_) => return Err(not_yet("opening a .frap file at startup (WP 1.23)")),
         };
         Ok(Session {
@@ -351,6 +396,7 @@ impl Session {
             },
             opts,
             seq: 0,
+            txn_depth: 0,
         })
     }
 
@@ -362,6 +408,27 @@ impl Session {
     /// Read-only access to `bpy.data` (tests, schema export).
     pub fn main(&self) -> &Main {
         &self.host.state.main
+    }
+
+    /// Read-only access to the whole session state (`bpy.data`, window, edit state).
+    pub fn host(&self) -> &dyn HostRead {
+        &self.host
+    }
+
+    /// A textual dump of everything a rollback restores (`Main`, window state, edit state,
+    /// preferences, pending time change). Two equal dumps mean equal states; tests use it to
+    /// check that reads and failed statements leave the state bit-identical (§12).
+    pub fn state_dump(&self) -> String {
+        let s = &self.host.state;
+        format!(
+            "{:?}\n{:?}\n{:?}\n{:?}\n{}",
+            s.main, s.win, s.edit, s.prefs.addons, s.time_dirty
+        )
+    }
+
+    /// True once the lazily created render service exists (§12: created on first use).
+    pub fn render_service_started(&self) -> bool {
+        self.services.render.is_some()
     }
 
     /// Runs a complete source unit; one response per statement.
@@ -376,9 +443,8 @@ impl Session {
             .map(|r| match r {
                 Ok(stmt) => self.exec(&stmt),
                 Err(e) => {
-                    self.seq += 1;
                     let line = e.span.map(|s| s.line).unwrap_or(first_line);
-                    self.error_response("invalid", None, line, e)
+                    self.reject(line, e)
                 }
             })
             .collect()
@@ -387,58 +453,60 @@ impl Session {
     /// A response for input that never became a statement (e.g. invalid UTF-8 on a line).
     pub fn reject(&mut self, line: u32, e: FrapError) -> Response {
         self.seq += 1;
-        self.error_response("invalid", None, line, e)
+        self.error_response(Fail::new("invalid", e), line)
     }
 
     /// Executes one parsed statement.
     pub fn exec(&mut self, stmt: &Stmt) -> Response {
         self.seq += 1;
-        let r = match &stmt.cmd {
-            Command::Invoke {
-                idname,
-                positional,
-                args,
-            } => self.exec_invoke(stmt, idname, positional, args),
-            Command::Get { target } => self.exec_get(stmt, target),
-            Command::Set { target, value, .. } => self.exec_set(stmt, target, value),
-            Command::Noop { .. } => Ok(self.base("noop", stmt.line, Status::Finished)),
-            _ => Err(("noop", None, not_yet("this statement kind"))),
-        };
-        r.unwrap_or_else(|(kind, op, e)| {
-            self.error_response(kind, op, stmt.line, e.with_span(stmt.span))
+        let r = catch_unwind(AssertUnwindSafe(|| self.dispatch(stmt))).unwrap_or_else(|p| {
+            Err(Fail::new(
+                exec::stmt_kind(&stmt.cmd),
+                FrapError::internal_panic(p),
+            ))
+        });
+        r.unwrap_or_else(|mut f| {
+            f.err = f.err.with_span(stmt.span);
+            self.error_response(f, stmt.line)
         })
     }
 
     /// Invokes an operator by idname with keyword inputs (front-end-free entry point, §11.6).
     pub fn invoke(&mut self, idname: &str, kwargs: IndexMap<String, Input>) -> Response {
         self.seq += 1;
-        let line = 1;
-        let fake = Stmt {
-            cmd: Command::Noop {
-                reason: frap_lang::NoopReason::Pass,
-            },
-            span: Span::default(),
-            line,
-            form: frap_lang::Form::Bpy,
-        };
-        let kw: Vec<(String, Input, Span)> = kwargs
+        let kw = kwargs
             .into_iter()
-            .map(|(k, v)| (k, v, Span::default()))
+            .map(|(k, v)| (k, eval::Py::from_input(v), Span::default()))
             .collect();
-        self.invoke_inputs(&fake, idname, vec![], kw)
-            .unwrap_or_else(|(kind, op, e)| self.error_response(kind, op, line, e))
+        self.invoke_values(1, idname, vec![], kw)
+            .unwrap_or_else(|f| self.error_response(f, 1))
     }
 
     /// Reads a property path (§11.6; the path uses the shared path grammar).
     pub fn get(&mut self, path: &str) -> Response {
-        let _ = path;
-        todo!("WP 1.14")
+        self.seq += 1;
+        match exec::parse_path(path) {
+            Ok(p) => self
+                .get_path(1, &p)
+                .unwrap_or_else(|f| self.error_response(f, 1)),
+            Err(e) => self.error_response(Fail::new("get", e), 1),
+        }
     }
 
     /// Assigns a property path (§11.6).
     pub fn set(&mut self, path: &str, value: Input) -> Response {
-        let _ = (path, value);
-        todo!("WP 1.14")
+        self.seq += 1;
+        match exec::parse_path(path) {
+            Ok(p) => self
+                .set_path(
+                    1,
+                    &p,
+                    frap_lang::AssignOp::Assign,
+                    exec::ValueSrc::Value(eval::Py::from_input(value)),
+                )
+                .unwrap_or_else(|f| self.error_response(f, 1)),
+            Err(e) => self.error_response(Fail::new("set", e), 1),
+        }
     }
 
     /// Calls an RNA function path (§11.6).
@@ -448,13 +516,38 @@ impl Session {
         args: Vec<Input>,
         kwargs: IndexMap<String, Input>,
     ) -> Response {
-        let _ = (path, args, kwargs);
-        todo!("WP 1.14")
+        self.seq += 1;
+        let mut call_args: Vec<funcs::CallArg> = args
+            .into_iter()
+            .map(|v| funcs::CallArg {
+                name: None,
+                value: eval::Py::from_input(v),
+                span: Span::default(),
+            })
+            .collect();
+        call_args.extend(kwargs.into_iter().map(|(k, v)| funcs::CallArg {
+            name: Some(k.into()),
+            value: eval::Py::from_input(v),
+            span: Span::default(),
+        }));
+        match exec::parse_path(path) {
+            Ok(p) => self
+                .call_path(1, &p, exec::ArgsSrc::Values(call_args))
+                .unwrap_or_else(|f| self.error_response(f, 1)),
+            Err(e) => self.error_response(Fail::new("call", e), 1),
+        }
     }
 
     // ------------------------------------------------------------------ helpers
 
-    fn base(&self, kind: &'static str, line: u32, status: Status) -> Response {
+    pub(crate) fn caps(&self) -> Caps {
+        Caps {
+            max_items: self.opts.max_items,
+            max_array: self.opts.max_array,
+        }
+    }
+
+    pub(crate) fn base(&self, kind: &'static str, line: u32, status: Status) -> Response {
         Response {
             id: None,
             seq: self.seq,
@@ -476,16 +569,24 @@ impl Session {
         }
     }
 
-    fn error_response(
-        &self,
+    pub(crate) fn error_response(&self, f: Fail, line: u32) -> Response {
+        let mut r = self.base(f.kind, line, Status::Error);
+        r.op = f.op;
+        r.reports = f.reports;
+        r.error = Some(f.err);
+        r
+    }
+
+    /// A `SKIPPED` response (serve/MCP `on_error: "skip_rest"`); the statement is not run.
+    pub(crate) fn skipped(
+        &mut self,
         kind: &'static str,
         op: Option<SmolStr>,
         line: u32,
-        e: FrapError,
     ) -> Response {
-        let mut r = self.base(kind, line, Status::Error);
+        self.seq += 1;
+        let mut r = self.base(kind, line, Status::Skipped);
         r.op = op;
-        r.error = Some(e);
         r
     }
 
@@ -493,22 +594,46 @@ impl Session {
         let main = &self.host.state.main;
         let ctx = self.host.state.ctx();
         let name = |r| main.objects.name_of(r).map(J::from).unwrap_or(J::Null);
-        json!({
-            "mode": ctx.mode().as_str(),
+        let mode = ctx.mode();
+        let mut j = json!({
+            "mode": mode.as_str(),
             "active_object": ctx.active_object().map(name).unwrap_or(J::Null),
             "selected_objects": ctx.selected_objects().into_iter().map(name).collect::<Vec<_>>(),
             "frame_current": ctx.scene().frame_current,
-        })
-    }
-
-    fn repr_id(&self, id: IdAny) -> String {
-        match self.host.state.main.id_name(id) {
-            Some((n, lib)) => id_repr(id.code, &n, lib.as_deref()),
-            None => id_repr(id.code, "<removed>", None),
+        });
+        // `bpy.context.edit_object` is set in the edit modes only (not in Pose Mode); the
+        // mesh select mode only matters in mesh Edit Mode.
+        let edit = matches!(
+            mode,
+            frap_scene::ContextMode::EditMesh | frap_scene::ContextMode::EditArmature
+        );
+        if edit && let J::Object(m) = &mut j {
+            m.insert(
+                "edit_object".into(),
+                ctx.active_object().map(name).unwrap_or(J::Null),
+            );
         }
+        if mode == frap_scene::ContextMode::EditMesh
+            && let J::Object(m) = &mut j
+        {
+            let sm = ctx.tool_settings().mesh_select_mode;
+            m.insert(
+                "select_mode".into(),
+                J::Array(
+                    ["VERT", "EDGE", "FACE"]
+                        .iter()
+                        .zip(sm)
+                        .filter(|(_, on)| *on)
+                        .map(|(n, _)| J::from(*n))
+                        .collect(),
+                ),
+            );
+        }
+        j
     }
 
-    fn changes_json(&self, log: &ChangeLog) -> J {
+    pub(crate) fn changes_json(&self, log: &ChangeLog) -> J {
+        let main = &self.host.state.main;
         let rank = |c: IdCode| {
             [
                 IdCode::OB,
@@ -525,359 +650,140 @@ impl Session {
         };
         let mut added = log.added.clone();
         added.sort_by_key(|a| rank(a.code)); // stable: object before its data
-        let added_j: Vec<J> = added.iter().map(|a| J::from(self.repr_id(*a))).collect();
+        let added_j: Vec<J> = added.iter().map(|a| J::from(id_repr(main, *a))).collect();
         let modified: Vec<J> = log
             .modified
             .iter()
-            .filter(|m| !log.added.contains(m))
-            .map(|m| J::from(self.repr_id(*m)))
+            .filter(|m| !log.added.contains(m) && main.header(**m).is_some())
+            .map(|m| J::from(id_repr(main, *m)))
             .collect();
         let removed: Vec<J> = log
             .removed
             .iter()
-            .map(|(a, n)| J::from(id_repr(a.code, n, None)))
+            .map(|(a, n)| J::from(frap_rna::ptr::id_repr(a.code, n, None)))
             .collect();
         let renamed: Vec<J> = log
             .renamed
             .iter()
-            .map(|(a, old)| json!({"from": id_repr(a.code, old, None), "to": self.repr_id(*a)}))
+            .map(|(a, old)| {
+                json!({"from": frap_rna::ptr::id_repr(a.code, old, None), "to": id_repr(main, *a)})
+            })
             .collect();
         json!({"added": added_j, "removed": removed, "modified": modified, "renamed": renamed})
     }
 
-    fn eval(&self, e: &Expr) -> Result<Input, FrapError> {
-        Ok(match e {
-            Expr::Lit(l, _) => match l {
-                Lit::Int(i) => Input::Int(*i),
-                Lit::Float(f) => Input::Float(*f),
-                Lit::Str(s) => Input::Str(s.clone()),
-                Lit::Bool(b) => Input::Bool(*b),
-                Lit::None => Input::None,
-            },
-            Expr::Bare(s, _) => Input::Bare(s.clone()),
-            Expr::Tuple(v, _) => {
-                Input::Tuple(v.iter().map(|x| self.eval(x)).collect::<Result<_, _>>()?)
-            }
-            Expr::List(v, _) => {
-                Input::List(v.iter().map(|x| self.eval(x)).collect::<Result<_, _>>()?)
-            }
-            Expr::Unary(op, inner, sp) => {
-                let v = self.eval(inner)?;
-                let sign = if *op == UnOp::Neg { -1 } else { 1 };
-                match v {
-                    Input::Int(i) => Input::Int(i * sign),
-                    Input::Float(f) => Input::Float(f * sign as f64),
-                    Input::Bool(b) => Input::Int(b as i64 * sign),
-                    other => {
-                        return Err(FrapError::new(
-                            PyExc::TypeError,
-                            RNA_TYPE,
-                            format!(
-                                "bad operand type for unary {}: '{}'",
-                                if *op == UnOp::Neg { '-' } else { '+' },
-                                other.py_type_name()
-                            ),
-                        )
-                        .with_span(*sp));
-                    }
-                }
-            }
-            Expr::Path(p) => {
-                let main = &self.host.state.main;
-                match resolve(main, p).map_err(|e| e.with_span(p.span))? {
-                    Target::Id(id) => Input::Ptr(RnaPtr::id(id, srna_of(id.code))),
-                    Target::Prop { id, prop } => {
-                        let rna = main.id(id).expect("invariant: resolved ID exists");
-                        match rna
-                            .get(prop)
-                            .map_err(|e| e.into_frap("", |_| RNA_NO_ATTRIBUTE))?
-                        {
-                            Field::Value(Value::FloatArray { data, .. }) => {
-                                Input::Tuple(data.iter().map(|f| Input::Float(*f as f64)).collect())
-                            }
-                            Field::Value(Value::Float(f)) => Input::Float(f as f64),
-                            Field::Value(Value::Int(i)) => Input::Int(i),
-                            Field::Value(Value::Bool(b)) => Input::Bool(b),
-                            Field::Value(Value::Str(s)) | Field::Value(Value::Enum(s)) => {
-                                Input::Str(s.to_string())
-                            }
-                            _ => return Err(not_yet("using this value in an expression")),
-                        }
-                    }
-                    _ => return Err(not_yet("using this path in an expression")),
-                }
-            }
-            _ => return Err(not_yet("this expression")),
-        })
-    }
-
-    // ------------------------------------------------------------------ op
-
-    fn exec_invoke(
+    /// Runs `f` as one transaction (§12): snapshot, run (panics caught), and restore the
+    /// snapshot on error, on CANCELLED (`Ok((_, true))`) or when a limit is exceeded.
+    ///
+    /// Re-entrant: a nested transaction keeps the change log and reports gathered so far by
+    /// the enclosing one (nested calls in an operator's arguments), so its limits, `changes`
+    /// and reports cover the whole statement; the enclosing transaction still restores its
+    /// own snapshot when the statement fails.
+    pub(crate) fn transact<R>(
         &mut self,
-        stmt: &Stmt,
-        idname: &SmolStr,
-        positional: &[Expr],
-        args: &[frap_lang::Arg],
-    ) -> Result<Response, (&'static str, Option<SmolStr>, FrapError)> {
-        let op = Some(idname.clone());
-        let pos = positional
-            .iter()
-            .map(|e| self.eval(e))
-            .collect::<Result<Vec<_>, _>>()
-            .map_err(|e| ("op", op.clone(), e))?;
-        let mut kw = Vec::with_capacity(args.len());
-        for a in args {
-            let v = self.eval(&a.value).map_err(|e| ("op", op.clone(), e))?;
-            let name = a.name.clone().map(|n| n.to_string()).unwrap_or_default();
-            kw.push((name, v, a.span));
-        }
-        self.invoke_inputs(stmt, idname, pos, kw)
-    }
-
-    fn invoke_inputs(
-        &mut self,
-        stmt: &Stmt,
-        idname: &str,
-        positional: Vec<Input>,
-        kwargs: Vec<(String, Input, Span)>,
-    ) -> Result<Response, (&'static str, Option<SmolStr>, FrapError)> {
-        let op = Some(SmolStr::new(idname));
-        let fail = |e: FrapError| ("op", op.clone(), e);
-        // §10.2 step 1: lookup.
-        let def = frap_op::lookup(idname).map_err(fail)?;
-        // Steps 2–3: arguments, before poll.
-        let spans: Vec<(String, Span)> = kwargs.iter().map(|(k, _, s)| (k.clone(), *s)).collect();
-        let kw: Vec<(String, Input)> = kwargs.into_iter().map(|(k, v, _)| (k, v)).collect();
-        let (args, mut reports) = frap_op::convert_args(def.spec, positional, kw).map_err(|e| {
-            let arg_span = e
-                .detail
-                .get("argument")
-                .and_then(|a| a.as_str())
-                .and_then(|a| spans.iter().find(|(k, _)| k == a))
-                .map(|(_, s)| *s);
-            fail(match arg_span {
-                Some(mut s) if s != Span::default() => {
-                    // An unknown keyword points at the keyword itself (§13.5).
-                    if e.code == frap_op::errors::OP_ARG_UNKNOWN {
-                        s.len = e
-                            .detail
-                            .get("argument")
-                            .and_then(|a| a.as_str())
-                            .map_or(s.len, |a| a.len() as u32);
-                    }
-                    e.with_span(s)
-                }
-                _ => e,
-            })
-        })?;
-        // Step 4 (ensure evaluated) is a no-op in M0. Step 5: poll.
-        frap_op::check_poll(def, &self.host.state.ctx()).map_err(fail)?;
-        // Steps 6–8: transaction + exec.
+        f: impl FnOnce(&mut Self) -> Result<(R, bool), FrapError>,
+    ) -> Txn<R> {
         let snapshot = self.host.state.clone();
-        self.host.log = ChangeLog::default();
-        self.host.reports.clear();
-        let (outcome, out) = {
-            let mut cx = OpCtx::new(&mut self.host, &mut self.services, def.spec);
-            let r = catch_unwind(AssertUnwindSafe(|| (def.exec)(&mut cx, &args)));
-            (r, cx.finish())
-        };
+        if self.txn_depth == 0 {
+            self.host.log = ChangeLog::default();
+            self.host.reports.clear();
+        }
+        self.txn_depth += 1;
+        let r = catch_unwind(AssertUnwindSafe(|| f(self)))
+            .unwrap_or_else(|p| Err(FrapError::internal_panic(p)))
+            .and_then(|(v, cancelled)| {
+                if !cancelled {
+                    self.check_limits()?;
+                }
+                Ok((v, cancelled))
+            });
+        self.txn_depth -= 1;
         let log = std::mem::take(&mut self.host.log);
-        reports.append(&mut self.host.reports);
-        reports.extend(out.reports);
-        let result = out.result;
-        let status = match outcome {
-            Ok(Ok(OpStatus::Finished)) => Status::Finished,
-            Ok(Ok(OpStatus::Cancelled)) => Status::Cancelled,
-            Ok(Err(e)) => {
+        let reports = std::mem::take(&mut self.host.reports);
+        let (result, cancelled) = match r {
+            Ok((v, false)) => (Ok(v), false),
+            Ok((v, true)) => {
                 self.host.state = snapshot;
-                let mut r = self.error_response(
-                    "op",
-                    op.clone(),
-                    stmt.line,
-                    e.into_frap().with_span(stmt.span),
-                );
-                r.reports = reports;
-                return Ok(r);
-            }
-            Err(panic) => {
-                self.host.state = snapshot;
-                return Err(fail(FrapError::internal_panic(panic)));
-            }
-        };
-        if status == Status::Cancelled {
-            self.host.state = snapshot;
-        }
-        // Step 9: response.
-        let mut r = self.base("op", stmt.line, status);
-        r.op = op;
-        r.reports = reports;
-        if status == Status::Finished {
-            let names: &dyn IdNames = &self.host.state.main;
-            let mut res = Map::new();
-            for (k, v) in &result {
-                res.insert(k.to_string(), value_json(v, names));
-            }
-            r.result = Some(res);
-            r.changes = Some(self.changes_json(&log));
-        }
-        Ok(r)
-    }
-
-    // ------------------------------------------------------------------ get / set
-
-    fn exec_get(
-        &mut self,
-        stmt: &Stmt,
-        target: &PathExpr,
-    ) -> Result<Response, (&'static str, Option<SmolStr>, FrapError)> {
-        let fail = |e: FrapError| ("get", None, e);
-        let main = &self.host.state.main;
-        let t = resolve(main, target).map_err(|e| fail(e.with_span(target.span)))?;
-        let mut r = self.base("get", stmt.line, Status::Finished);
-        match t {
-            Target::DataRoot => {
-                r.path = Some("bpy.data".into());
-                r.value = Some(json!({"$ptr": "bpy.data", "type": "BlendData"}));
-            }
-            Target::Coll(c) => {
-                let names = main.names(c).unwrap_or_default();
-                r.path = Some(format!("bpy.data.{c}"));
-                r.value = Some(json!({
-                    "$coll": format!("bpy.data.{c}"), "item_type": item_type(c), "len": names.len(),
-                    "items": names.iter().map(|n| n.as_str()).collect::<Vec<_>>(),
-                }));
-            }
-            Target::Id(id) => {
-                let repr = self.repr_id(id);
-                r.path = Some(repr.clone());
-                r.value = Some(json!({"$ref": repr}));
-            }
-            Target::Prop { id, prop } => {
-                let rna = main.id(id).expect("invariant: resolved ID exists");
-                let field = rna
-                    .get(prop)
-                    .map_err(|e| fail(e.into_frap("", |_| RNA_NO_ATTRIBUTE)))?;
-                r.path = Some(format!("{}.{}", self.repr_id(id), prop.identifier));
-                match field {
-                    Field::Value(v) => {
-                        r.rna = Some(rna_json(prop, &v));
-                        r.value = Some(value_json(&v, main));
-                    }
-                    Field::Id(i) => {
-                        r.value = Some(
-                            i.map(|i| json!({"$ref": self.repr_id(i)}))
-                                .unwrap_or(J::Null),
-                        )
-                    }
-                    _ => return Err(fail(not_yet("this field kind"))),
-                }
-            }
-            Target::Context(m) => {
-                let ctx = self.host.state.ctx();
-                let as_ref =
-                    |o: frap_rna::IdRef<frap_rna::ObjectId>| json!({"$ref": self.repr_id(o.any())});
-                r.path = Some(format!("bpy.context.{m}"));
-                r.value = Some(match m {
-                    "active_object" | "object" => {
-                        ctx.active_object().map(as_ref).unwrap_or(J::Null)
-                    }
-                    "selected_objects" => {
-                        J::Array(ctx.selected_objects().into_iter().map(as_ref).collect())
-                    }
-                    "mode" => J::from(ctx.mode().as_str()),
-                    "scene" => json!({"$ref": self.repr_id(ctx.win.scene.any())}),
-                    _ => J::Null,
-                });
-            }
-        }
-        Ok(r)
-    }
-
-    fn exec_set(
-        &mut self,
-        stmt: &Stmt,
-        target: &PathExpr,
-        value: &Expr,
-    ) -> Result<Response, (&'static str, Option<SmolStr>, FrapError)> {
-        let fail = |e: FrapError| ("set", None, e);
-        let t =
-            resolve(&self.host.state.main, target).map_err(|e| fail(e.with_span(target.span)))?;
-        let (id, prop) = match t {
-            Target::Prop { id, prop } => (id, prop),
-            Target::Context(m) => {
-                return Err(fail(
-                    FrapError::new(
-                        PyExc::AttributeError,
-                        CONTEXT_READONLY,
-                        format!("bpy_struct: Context property \"{m}\" is read-only"),
-                    )
-                    .with_hint(
-                        "change selection with select_set() and the active object with view_layer.objects.active (M1)",
-                    ),
-                ));
-            }
-            _ => return Err(fail(not_yet("assigning to a datablock or collection"))),
-        };
-        let srna = srna_of(id.code);
-        if prop.flags.contains(PropFlags::READONLY) {
-            return Err(fail(FrapError::new(
-                PyExc::AttributeError,
-                RNA_READONLY,
-                format!(
-                    "bpy_struct: attribute \"{}\" from \"{}\" is read-only",
-                    prop.identifier, srna.identifier
-                ),
-            )));
-        }
-        let input = self.eval(value).map_err(fail)?;
-        let written = input.clone();
-        let coerced = coerce(
-            prop,
-            input,
-            &CoerceCx::RnaSet {
-                owner: srna.identifier,
-            },
-        )
-        .map_err(|e| {
-            fail(e.into_frap("bpy_struct: item.attr = val: ", |k| match k {
-                RnaErrorKind::Enum => RNA_ENUM,
-                RnaErrorKind::Length => RNA_LENGTH,
-                _ => RNA_TYPE,
-            }))
-        })?;
-        let snapshot = self.host.state.clone();
-        let mut log = ChangeLog::default();
-        let outcome = {
-            let main = &mut self.host.state.main;
-            match main.id_mut(id, &mut log) {
-                Some(rna) => rna.set(prop, coerced.value.clone()),
-                None => Ok(SetOutcome::NeedsHook),
-            }
-        };
-        match outcome {
-            Ok(SetOutcome::Done) => {}
-            Ok(SetOutcome::NeedsHook) => {
-                self.host.state = snapshot;
-                return Err(fail(not_yet(&format!(
-                    "assigning {}.{} (needs an RNA hook, M1)",
-                    srna.identifier, prop.identifier
-                ))));
+                (Ok(v), true)
             }
             Err(e) => {
                 self.host.state = snapshot;
-                return Err(fail(
-                    e.into_frap("bpy_struct: item.attr = val: ", |_| RNA_TYPE),
-                ));
+                (Err(e), false)
             }
+        };
+        Txn {
+            result,
+            cancelled,
+            log,
+            reports,
         }
-        let mut r = self.base("set", stmt.line, Status::Finished);
-        r.path = Some(format!("{}.{}", self.repr_id(id), prop.identifier));
-        r.value = Some(value_json(&coerced.value, &self.host.state.main));
-        if coerced.clamped {
-            r.reports.push(info(frap_rna::clamp_report(prop, &written)));
+    }
+
+    /// `--max-elements`: corners of the meshes the statement created or modified.
+    fn check_limits(&self) -> Result<(), FrapError> {
+        let main = &self.host.state.main;
+        let log = &self.host.log;
+        let corners: u64 = log
+            .added
+            .iter()
+            .chain(log.modified.iter())
+            .filter_map(|id| id.typed::<MeshId>())
+            .filter_map(|m| main.meshes.get(m))
+            .map(|m| m.corners_num() as u64)
+            .sum();
+        if corners > self.opts.limits.max_elements {
+            return Err(FrapError::new(
+                PyExc::RuntimeError,
+                frap_op::errors::LIMIT_EXCEEDED,
+                "Error: frap: limit exceeded (max_elements)",
+            )
+            .with_detail("max_elements", self.opts.limits.max_elements)
+            .with_detail("corners", corners)
+            .with_hint("raise --max-elements, or build less geometry per statement"));
         }
-        r.changes = Some(self.changes_json(&log));
-        Ok(r)
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use frap_scene::ObjectMode;
+
+    fn with_mode(mode: ObjectMode) -> Session {
+        let mut s = Session::new(SessionOptions::default()).expect("factory session");
+        let ob = s.host.state.ctx().active_object().expect("active Cube");
+        let (main, log) = (&mut s.host.state.main, &mut s.host.log);
+        main.objects.get_mut(ob, log).expect("Cube").mode = mode;
+        s
+    }
+
+    #[test]
+    fn edit_object_and_select_mode_only_in_edit_modes() {
+        let s = with_mode(ObjectMode::Edit);
+        let c = s.context_json();
+        assert_eq!(c["mode"], "EDIT_MESH");
+        assert_eq!(c["edit_object"], "Cube");
+        assert_eq!(c["select_mode"], json!(["VERT"]));
+        let mut s = s;
+        assert_eq!(
+            s.get("bpy.context.edit_object").value,
+            Some(json!({"$ref": "bpy.data.objects['Cube']"}))
+        );
+        assert_eq!(
+            s.get("bpy.context.objects_in_mode").value,
+            Some(json!([{"$ref": "bpy.data.objects['Cube']"}]))
+        );
+
+        let mut s = with_mode(ObjectMode::Pose);
+        let c = s.context_json();
+        assert_eq!(c["mode"], "POSE");
+        assert!(c.get("edit_object").is_none(), "{c}");
+        assert!(c.get("select_mode").is_none(), "{c}");
+        assert_eq!(s.get("bpy.context.edit_object").value, Some(J::Null));
+
+        let s = with_mode(ObjectMode::Object);
+        let c = s.context_json();
+        assert!(c.get("edit_object").is_none(), "{c}");
     }
 }

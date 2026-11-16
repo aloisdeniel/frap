@@ -1285,6 +1285,7 @@ dependencies = [
  "frap-eval",
  "frap-imbuf",
  "frap-lang",
+ "frap-math",
  "frap-mesh",
  "frap-op",
  "frap-ops-all",
@@ -1300,6 +1301,7 @@ dependencies = [
  "serde_json",
  "smallvec",
  "smol_str",
+ "toml",
  "tracing",
 ]
 
