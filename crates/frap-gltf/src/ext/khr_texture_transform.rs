@@ -19,7 +19,11 @@ pub struct KhrTextureTransform {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
     /// Translation (default `[0, 0]`).
     #[serde(default, skip_serializing_if = "Option::is_none")]

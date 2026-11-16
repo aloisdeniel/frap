@@ -10,14 +10,19 @@
 //!   indices in range and free of restart values, sparse indices and animation times
 //!   increasing).
 //! - [`validate_glb`]: plus GLB container rules (buffer 0 is the BIN chunk).
+//! - [`validate_file`]: from the file bytes, plus what only the JSON text shows (members the
+//!   model does not keep, integers written as floats; [`json_text_issues`]).
+//!
+//! Every size and offset computed from file values uses checked arithmetic: an overflow is
+//! reported as the corresponding TOO_LONG / INVALID_COUNT error, never a panic or a wrap.
 //!
 //! Issue codes follow the Khronos glTF-Validator's where one exists.
 
 use std::fmt;
 
 use crate::accessor::{AccessorData, element_size, load_buffers, read_accessor};
-use crate::glb::Glb;
-use crate::json::root::escape_pointer_token;
+use crate::glb::{Glb, is_glb, split_glb};
+use crate::json::root::{escape_pointer_token, trim_json};
 use crate::json::{
     AccessorType, AnimationPath, CameraType, ComponentType, Document, ExtensionCx, Interpolation,
     Target, TextureInfo, extensions::extension_def,
@@ -789,7 +794,7 @@ fn check_accessors(r: &mut Report, doc: &Document) {
                     format!("{ptr}/byteOffset"),
                     format!("offset {off} is not a multiple of the {csize}-byte component"),
                 );
-            } else if !(off + bv.byte_offset_or_default()).is_multiple_of(csize) {
+            } else if !(off % csize + bv.byte_offset_or_default() % csize).is_multiple_of(csize) {
                 r.error(
                     "ACCESSOR_TOTAL_OFFSET_ALIGNMENT",
                     format!("{ptr}/byteOffset"),
@@ -874,7 +879,8 @@ fn check_accessors(r: &mut Report, doc: &Document) {
                         "sparse buffer views have no byteStride and no target",
                     );
                 }
-                if off + size * sp.count > bv.byte_length {
+                let end = size.checked_mul(sp.count).and_then(|x| x.checked_add(off));
+                if end.is_none_or(|e| e > bv.byte_length) {
                     r.error(
                         "ACCESSOR_SPARSE_TOO_LONG",
                         &vptr,
@@ -1272,7 +1278,11 @@ fn check_animations(r: &mut Report, doc: &Document) {
             } else {
                 1
             };
-            if output.count != input.count * per_key * targets {
+            let expected = input
+                .count
+                .checked_mul(per_key)
+                .and_then(|x| x.checked_mul(targets));
+            if expected != Some(output.count) {
                 r.error(
                     "ANIMATION_SAMPLER_OUTPUT_ACCESSOR_INVALID_COUNT",
                     format!("{ptr}/samplers/{}/output", ch.sampler),
@@ -1531,4 +1541,82 @@ pub fn validate_glb(glb: &Glb) -> Report {
     };
     container.issues.append(&mut r.issues);
     container
+}
+
+/// Validates a `.glb` or `.gltf` file from its bytes: [`validate_glb`] (data checks included
+/// when every buffer is embedded) plus [`json_text_issues`]. Fails only when the file cannot be
+/// read at all (bad container, invalid JSON, a property of the wrong type).
+pub fn validate_file(bytes: &[u8]) -> Result<Report, crate::GltfError> {
+    let (json, bin) = if is_glb(bytes) {
+        split_glb(bytes)?
+    } else {
+        (bytes, None)
+    };
+    let glb = Glb {
+        document: Document::from_slice(json)?,
+        bin,
+    };
+    let mut r = validate_glb(&glb);
+    json_text_issues(json, &glb.document, &mut r);
+    Ok(r)
+}
+
+/// Issues visible only in the JSON text `doc` was parsed from: members [`Document`] does not
+/// model (UNEXPECTED_PROPERTY, warning; they are not written back) and integer properties
+/// written with a fraction (INTEGER_WRITTEN_AS_FLOAT, warning). `extensions` and `extras`
+/// values are kept verbatim and not inspected.
+pub fn json_text_issues(json: &[u8], doc: &Document, r: &mut Report) {
+    let Ok(src) = serde_json::from_slice::<serde_json::Value>(trim_json(json)) else {
+        return;
+    };
+    let mut ptr = String::new();
+    compare_json(&src, &doc.to_value(), &mut ptr, r);
+}
+
+fn compare_json(
+    src: &serde_json::Value,
+    kept: &serde_json::Value,
+    ptr: &mut String,
+    r: &mut Report,
+) {
+    use serde_json::Value;
+    match (src, kept) {
+        (Value::Object(s), Value::Object(k)) => {
+            for (key, sv) in s {
+                if key == "extensions" || key == "extras" {
+                    continue;
+                }
+                let len = ptr.len();
+                ptr.push('/');
+                ptr.push_str(&escape_pointer_token(key));
+                match k.get(key) {
+                    Some(kv) => compare_json(sv, kv, ptr, r),
+                    // Empty arrays and objects are known members the writer leaves out.
+                    None if matches!(sv, Value::Array(a) if a.is_empty())
+                        || matches!(sv, Value::Object(o) if o.is_empty()) => {}
+                    None => r.warning(
+                        "UNEXPECTED_PROPERTY",
+                        ptr.as_str(),
+                        format!("unexpected property {key:?} (not kept)"),
+                    ),
+                }
+                ptr.truncate(len);
+            }
+        }
+        (Value::Array(s), Value::Array(k)) => {
+            for (i, (sv, kv)) in s.iter().zip(k).enumerate() {
+                let len = ptr.len();
+                ptr.push('/');
+                ptr.push_str(&i.to_string());
+                compare_json(sv, kv, ptr, r);
+                ptr.truncate(len);
+            }
+        }
+        (Value::Number(s), Value::Number(k)) if s.is_f64() && !k.is_f64() => r.warning(
+            "INTEGER_WRITTEN_AS_FLOAT",
+            ptr.as_str(),
+            format!("integer value written as {s}"),
+        ),
+        _ => {}
+    }
 }

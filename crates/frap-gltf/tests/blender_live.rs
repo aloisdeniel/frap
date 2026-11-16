@@ -3,7 +3,8 @@
 //! texture with KHR_texture_transform, KHR_materials_emissive_strength, four
 //! KHR_lights_punctual lights, an animation and extras) is read, validated, and written back
 //! **byte-identical** — GLB container and compact JSON, and the tab-indented `.gltf` JSON.
-//! This pins the key order, the integral-float rule (`__fix_json`), separators and padding.
+//! This pins the key order, the integral-float rule (`__fix_json`), Python's float `repr`
+//! (exponent forms included), separators and padding.
 //!
 //! Runs when Blender is found (`$BLENDER_BIN`, then `blender` on PATH, then the usual install
 //! locations, as `frap-golden::locate_blender`), otherwise it is skipped with a notice;
@@ -76,6 +77,11 @@ cube.keyframe_insert('location', frame=1)
 cube.location = (1, 2, 3)
 cube.keyframe_insert('location', frame=20)
 cube['custom'] = {'a': 1, 'b': [1.5, 2]}
+# Tiny and huge transforms: Python's repr writes -1.9999999494757503e-05 and
+# 1.0000000116860974e-07, and int(v) for integral floats at any magnitude.
+bpy.ops.mesh.primitive_plane_add(location=(0, 2e-5, 3))
+plane = bpy.context.object
+plane.scale = (1e-7, 0.5, 2.5e16)
 common = dict(export_extras=True, export_lights=True)
 bpy.ops.export_scene.gltf(filepath=os.path.join(out, 'scene.glb'), **common)
 bpy.ops.export_scene.gltf(filepath=os.path.join(out, 'scene.gltf'),
@@ -139,6 +145,9 @@ fn blender_exports_round_trip_byte_identical() {
     );
     let e: KhrMaterialsEmissiveStrength = doc.materials[0].extensions.get().unwrap().unwrap();
     assert_eq!(e.emissive_strength, Some(5.0));
+    // The scene exercises Python's exponent form.
+    let json = String::from_utf8_lossy(json_chunk(&glb)).into_owned();
+    assert!(json.contains("e-05") && json.contains("e-07"), "{json}");
     let ours = write_glb(&g, &WriteOpts::default());
     if ours != glb {
         panic!(

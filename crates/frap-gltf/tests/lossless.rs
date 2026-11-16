@@ -99,14 +99,15 @@ fn typed_access_preserves_neighbours() {
     assert_eq!(ti.extensions.get_raw("EXT_future").unwrap()["x"], 1e-7);
     let text = String::from_utf8(doc.to_vec(&WriteOpts::default())).unwrap();
     assert!(
-        text.contains(r#""extensions":{"KHR_texture_transform":{"rotation":0.5,"scale":[2,2]},"EXT_future":{"x":1e-7}}"#),
+        text.contains(r#""extensions":{"KHR_texture_transform":{"rotation":0.5,"scale":[2,2]},"EXT_future":{"x":1e-07}}"#),
         "{text}"
     );
 }
 
 #[test]
 fn integral_floats_are_written_as_integers() {
-    // io_scene_gltf2's __fix_json: 1.0 → 1; other values keep their shortest repr.
+    // io_scene_gltf2's __fix_json: `int(v)` for integral floats (exact at any magnitude);
+    // other values print as Python's `repr`.
     let mut doc = Document::default();
     doc.nodes.push(frap_gltf::json::Node {
         translation: Some([1.0, -2.0, 0.800000011920929]),
@@ -116,7 +117,7 @@ fn integral_floats_are_written_as_integers() {
     let text = String::from_utf8(doc.to_vec(&WriteOpts::default())).unwrap();
     assert!(
         text.contains(
-            r#""scale":[0.10000000149011612,1e+20,0],"translation":[1,-2,0.800000011920929]"#
+            r#""scale":[0.10000000149011612,100000000000000000000,0],"translation":[1,-2,0.800000011920929]"#
         ),
         "{text}"
     );
@@ -124,4 +125,56 @@ fn integral_floats_are_written_as_integers() {
         Document::from_slice(text.as_bytes()).unwrap().nodes[0].translation,
         doc.nodes[0].translation
     );
+}
+
+#[test]
+fn non_integral_floats_print_like_python_repr() {
+    // `json.dumps` in Blender 5.2's Python writes `repr(float)`: exponent form below 1e-4 and
+    // from 1e16, with a signed two-digit exponent.
+    let mut doc = Document::default();
+    doc.nodes.push(frap_gltf::json::Node {
+        translation: Some([-1.9999999494757503e-05, 1.5e-8, 0.0001]),
+        scale: Some([1e-7, 1.5e16 + 2.0, 12345.678]),
+        ..Default::default()
+    });
+    let text = String::from_utf8(doc.to_vec(&WriteOpts::default())).unwrap();
+    assert!(
+        text.contains(
+            r#""scale":[1e-07,15000000000000002,12345.678],"translation":[-1.9999999494757503e-05,1.5e-08,0.0001]"#
+        ),
+        "{text}"
+    );
+    let back = Document::from_slice(text.as_bytes()).unwrap();
+    assert_eq!(back.nodes[0], doc.nodes[0]);
+}
+
+#[test]
+fn null_extras_round_trip() {
+    let src = r#"{"asset":{"version":"2.0"},"extras":null,"nodes":[{"extras":null},{}]}"#;
+    let doc = Document::from_slice(src.as_bytes()).unwrap();
+    assert_eq!(doc.extras.as_ref().map(|e| e.get()), Some("null"));
+    assert_eq!(doc.nodes[0].extras.as_ref().map(|e| e.get()), Some("null"));
+    assert!(doc.nodes[1].extras.is_none());
+    let out = String::from_utf8(doc.to_vec(&WriteOpts::default())).unwrap();
+    assert_eq!(
+        out,
+        r#"{"asset":{"version":"2.0"},"extras":null,"nodes":[{"extras":null},{}]}"#
+    );
+}
+
+#[test]
+fn integers_written_as_floats_still_read() {
+    let src = r#"{"asset":{"version":"2.0"},"buffers":[{"byteLength":4.0}],
+        "bufferViews":[{"buffer":0.0,"byteLength":4,"byteOffset":0.0}],
+        "extensions":{"VENDOR_x":{"n":2.0}}}"#;
+    let doc = Document::from_slice(src.as_bytes()).unwrap();
+    assert_eq!(doc.buffers[0].byte_length, 4);
+    assert_eq!(doc.buffer_views[0].byte_offset, Some(0));
+    // Extension values are kept as written.
+    let out = String::from_utf8(doc.to_vec(&WriteOpts::default())).unwrap();
+    assert!(out.contains(r#""VENDOR_x":{"n":2}"#), "{out}");
+    // A fractional value in an integer property is still a parse error.
+    let bad = src.replace("4.0", "4.5");
+    let e = Document::from_slice(bad.as_bytes()).unwrap_err();
+    assert!(e.to_string().contains("4.5"), "{e}");
 }

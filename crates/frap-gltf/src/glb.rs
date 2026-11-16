@@ -50,6 +50,15 @@ pub fn is_glb(bytes: &[u8]) -> bool {
 /// declared length bounds parsing (trailing bytes after it are ignored); chunk lengths that
 /// are not multiples of 4 are tolerated.
 pub fn read_glb(bytes: &[u8]) -> Result<Glb, GltfError> {
+    let (json, bin) = split_glb(bytes)?;
+    Ok(Glb {
+        document: Document::from_slice(json)?,
+        bin,
+    })
+}
+
+/// The JSON chunk and the BIN chunk of a GLB, checked as [`read_glb`] describes.
+pub(crate) fn split_glb(bytes: &[u8]) -> Result<(&[u8], Option<Vec<u8>>), GltfError> {
     let err = |m: String| GltfError::Glb(m);
     if bytes.len() < 12 {
         return Err(err(format!(
@@ -110,10 +119,7 @@ pub fn read_glb(bytes: &[u8]) -> Result<Glb, GltfError> {
         index += 1;
     }
     let json = json.ok_or_else(|| err("missing JSON chunk".into()))?;
-    Ok(Glb {
-        document: Document::from_slice(json)?,
-        bin,
-    })
+    Ok((json, bin))
 }
 
 /// Reads a GLB, or a `.gltf` JSON document (then `bin` is `None`), by sniffing the magic.

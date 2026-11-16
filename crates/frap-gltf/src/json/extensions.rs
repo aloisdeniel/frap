@@ -256,3 +256,11 @@ pub static EXTENSIONS: [ExtensionDef];
 pub fn extension_def(name: &str) -> Option<&'static ExtensionDef> {
     EXTENSIONS.iter().find(|d| d.name == name)
 }
+
+/// Deserializes a present `extras` member, `null` included (kept as `Some("null")` so it is
+/// written back); a missing member is `None` through `#[serde(default)]`.
+pub(crate) fn de_extras<'de, D: serde::Deserializer<'de>>(
+    d: D,
+) -> Result<Option<Extras>, D::Error> {
+    Extras::deserialize(d).map(Some)
+}

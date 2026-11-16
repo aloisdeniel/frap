@@ -81,7 +81,11 @@ pub struct Animation {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
     /// Name.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -98,7 +102,11 @@ pub struct Channel {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
     /// Sampler (index into the animation's `samplers`).
     pub sampler: Index,
@@ -114,7 +122,11 @@ pub struct ChannelTarget {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
     /// Node (absent with KHR_animation_pointer).
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -131,7 +143,11 @@ pub struct AnimationSampler {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
     /// SCALAR FLOAT seconds, strictly increasing.
     pub input: Index,

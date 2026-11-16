@@ -33,7 +33,11 @@ pub struct KhrLightsPunctual {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
     /// Lights, referenced by index from nodes.
     pub lights: Vec<Light>,
@@ -52,7 +56,11 @@ pub struct KhrLightsPunctualNode {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
     /// Index into the root `lights`.
     pub light: Index,
@@ -90,7 +98,11 @@ pub struct Light {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
 }
 
@@ -132,7 +144,11 @@ pub struct Spot {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
 }
 

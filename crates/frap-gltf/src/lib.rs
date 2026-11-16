@@ -15,7 +15,8 @@
 //! - [`primitive`]: primitive topology (POINTS … TRIANGLE_FAN) to points, edges and triangles.
 //! - [`builder`]: [`BufferBuilder`], which lays out buffer views and accessors.
 //! - [`mod@validate`]: structural and data validation; typed extensions add their own checks
-//!   through [`json::EXTENSIONS`].
+//!   through [`json::EXTENSIONS`]. [`validate_file`] validates file bytes, JSON-text checks
+//!   included.
 #![deny(unsafe_code)]
 
 pub mod accessor;
@@ -37,4 +38,4 @@ pub use builder::{AccessorOpts, BufferBuilder, repack};
 pub use error::GltfError;
 pub use glb::{Glb, WriteOpts, read, read_glb, write_glb};
 pub use json::{Document, Extension, Extensions, Extras};
-pub use validate::{Issue, Report, Severity, validate, validate_data, validate_glb};
+pub use validate::{Issue, Report, Severity, validate, validate_data, validate_file, validate_glb};

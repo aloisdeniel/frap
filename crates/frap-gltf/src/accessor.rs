@@ -12,8 +12,25 @@ use base64::Engine as _;
 use crate::error::GltfError;
 use crate::json::{Accessor, AccessorType, ComponentType, Document};
 
-/// Most components an accessor without a buffer view may expand to (it allocates zeros).
-const MAX_ZERO_FILL: usize = 1 << 28;
+/// Bytes an accessor without a buffer view may always expand to (it allocates zeros).
+const ZERO_FILL_FLOOR: usize = 1 << 24;
+/// Beyond [`ZERO_FILL_FLOOR`], an accessor without a buffer view may expand to at most this
+/// many times the total size of the loaded buffers, so a few bytes of hostile JSON cannot
+/// make a reader allocate gigabytes (a real zero-filled accessor, e.g. a sparse morph target,
+/// sits next to vertex data of a comparable size).
+const ZERO_FILL_PER_BUFFER_BYTE: usize = 16;
+/// Absolute cap on the bytes of a zero-filled accessor.
+const ZERO_FILL_MAX: usize = 1 << 30;
+
+/// Most bytes an accessor without a buffer view may expand to, given the loaded buffers.
+fn zero_fill_limit<B: AsRef<[u8]>>(buffers: &[B]) -> usize {
+    let total = buffers
+        .iter()
+        .fold(0usize, |t, b| t.saturating_add(b.as_ref().len()));
+    total
+        .saturating_mul(ZERO_FILL_PER_BUFFER_BYTE)
+        .clamp(ZERO_FILL_FLOOR, ZERO_FILL_MAX)
+}
 
 /// Raw component values of an accessor, element-major, without padding.
 #[derive(Clone, Debug, PartialEq)]
@@ -547,9 +564,12 @@ pub fn read_accessor_obj<B: AsRef<[u8]>>(
             })?
         }
         None => {
-            if count.saturating_mul(n) > MAX_ZERO_FILL {
+            let bytes = count.saturating_mul(n).saturating_mul(ct.size());
+            let limit = zero_fill_limit(buffers);
+            if bytes > limit {
                 return Err(GltfError::Data(format!(
-                    "accessor without bufferView has {count} elements, too many to zero-fill"
+                    "accessor without bufferView has {count} elements ({bytes} bytes), more \
+                     than the {limit} bytes it may zero-fill"
                 )));
             }
             Components::zeros(ct, count * n)

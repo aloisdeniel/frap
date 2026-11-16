@@ -11,7 +11,7 @@
 use std::path::{Path, PathBuf};
 
 use frap_gltf::accessor::{buffer_view_bytes, read_accessor, uri_to_path};
-use frap_gltf::json::{Mode, json_eq};
+use frap_gltf::json::{ComponentType, Mode, json_eq};
 use frap_gltf::primitive::read_topology;
 use frap_gltf::{
     Document, Glb, WriteOpts, load_buffers, read, read_glb, repack, validate_data, validate_glb,
@@ -241,9 +241,11 @@ fn every_primitive_mode_decodes() {
 #[test]
 fn gltf_crate_reads_frap_output() {
     let mut accepted = 0;
+    let mut stripped = 0;
     for p in samples() {
         let l = load(&p);
         let (packed, bin) = repack(&l.glb.document, &l.buffers).unwrap();
+        let packed_doc = packed.clone();
         let out = write_glb(
             &Glb {
                 document: packed,
@@ -263,7 +265,30 @@ fn gltf_crate_reads_frap_output() {
             source.as_ref().err().map(ToString::to_string),
             ours.as_ref().err().map(ToString::to_string)
         );
-        let Ok(g) = ours else { continue };
+        let g = match ours {
+            Ok(g) => g,
+            // Rejected only for extensionsRequired: drop the list (the data stays readable by
+            // gltf, which ignores extension members) and compare the data all the same.
+            Err(_) if !packed_doc.extensions_required.is_empty() => {
+                let mut d = packed_doc.clone();
+                d.extensions_required.clear();
+                let out = write_glb(
+                    &Glb {
+                        document: d,
+                        bin: Some(bin.clone()),
+                    },
+                    &WriteOpts::default(),
+                );
+                // Files gltf rejects for other reasons too (LightVisibility's
+                // KHR_animation_pointer channels have no `node`) stay skipped.
+                let Ok(g) = gltf::Gltf::from_slice(&out) else {
+                    continue;
+                };
+                stripped += 1;
+                g
+            }
+            Err(_) => continue,
+        };
         accepted += 1;
         let doc = &l.glb.document;
         assert_eq!(g.nodes().count(), doc.nodes.len());
@@ -276,7 +301,11 @@ fn gltf_crate_reads_frap_output() {
                 let fp = &doc.meshes[m].primitives[k];
                 assert_eq!(prim.mode().as_gl_enum(), fp.mode_or_default() as u32);
                 let reader = prim.reader(|b| (b.index() == 0).then_some(&bin[..]));
-                if let Some(pos) = reader.read_positions() {
+                let float_positions = fp.attributes.get("POSITION").is_some_and(|&a| {
+                    doc.accessors[a as usize].component_type == ComponentType::Float
+                });
+                // gltf reads POSITION as f32 only (it asserts on quantized positions).
+                if float_positions && let Some(pos) = reader.read_positions() {
                     let theirs: Vec<[f32; 3]> = pos.collect();
                     let mine = read_accessor(doc, &l.buffers, fp.attributes["POSITION"])
                         .unwrap()
@@ -296,11 +325,15 @@ fn gltf_crate_reads_frap_output() {
         }
     }
     eprintln!(
-        "gltf 1.4.1 accepted {accepted} of {} outputs",
+        "gltf 1.4.1 read {accepted} of {} outputs ({stripped} after dropping extensionsRequired)",
         samples().len()
     );
     assert!(
-        accepted >= 15,
+        stripped >= 2,
+        "only {stripped} outputs read after dropping extensionsRequired"
+    );
+    assert!(
+        accepted >= 23,
         "gltf 1.4.1 accepted only {accepted} outputs"
     );
 }

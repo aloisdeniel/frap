@@ -13,6 +13,10 @@
 //! - `extensions` keeps every extension as a JSON value ([`Extensions`]); typed access goes
 //!   through [`Extension`]. `extras` keeps the raw JSON text ([`Extras`]).
 //! - Empty arrays are omitted on write (the spec forbids empty arrays).
+//! - Not kept (see [`Document::from_slice`]): members that are neither glTF properties nor
+//!   `extensions`/`extras` (reported by [`crate::validate::validate_file`] as
+//!   UNEXPECTED_PROPERTY), and the exact digits of integers beyond 64 bits inside extension
+//!   values (read as the nearest `f64`). `"extras": null` is kept.
 
 pub mod accessor;
 pub mod animation;

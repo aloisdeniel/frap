@@ -109,7 +109,11 @@ pub struct Accessor {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
     /// Per-component maximum (raw component values).
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -176,7 +180,11 @@ pub struct Sparse {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
     /// Strictly increasing element indices.
     pub indices: SparseIndices,
@@ -199,7 +207,11 @@ pub struct SparseIndices {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
 }
 
@@ -216,6 +228,10 @@ pub struct SparseValues {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
 }

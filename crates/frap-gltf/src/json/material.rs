@@ -40,7 +40,11 @@ pub struct Material {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
     /// Name.
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -85,7 +89,11 @@ pub struct PbrMetallicRoughness {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
     /// Metalness (default 1).
     #[serde(default, skip_serializing_if = "Option::is_none")]

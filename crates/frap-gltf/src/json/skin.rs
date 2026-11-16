@@ -13,7 +13,11 @@ pub struct Skin {
     #[serde(default, skip_serializing_if = "Extensions::is_empty")]
     pub extensions: Extensions,
     /// Application data.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "crate::json::extensions::de_extras"
+    )]
     pub extras: Option<Extras>,
     /// MAT4 FLOAT accessor, one per joint (identity when absent).
     #[serde(default, skip_serializing_if = "Option::is_none")]

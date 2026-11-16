@@ -78,13 +78,11 @@ pub fn primitive_indices<B: AsRef<[u8]>>(
         .get("POSITION")
         .or_else(|| prim.attributes.values().next())
         .ok_or_else(|| GltfError::Data("primitive has no attributes".into()))?;
-    let acc = doc.accessors.get(*attr as usize).ok_or(GltfError::Index {
-        what: "accessor",
-        index: u64::from(*attr),
-        len: doc.accessors.len(),
-    })?;
-    let count = u32::try_from(acc.count)
-        .map_err(|_| GltfError::Data(format!("{} vertices is too many", acc.count)))?;
+    // Decoding the attribute bounds the vertex count by real data: a bare `count` from the
+    // JSON could ask for billions of indices.
+    let count = read_accessor(doc, buffers, *attr)?.count();
+    let count = u32::try_from(count)
+        .map_err(|_| GltfError::Data(format!("{count} vertices is too many")))?;
     Ok((0..count).collect())
 }
 

@@ -9,7 +9,7 @@ use frap_gltf::json::{
 };
 use frap_gltf::{
     AccessorOpts, BufferBuilder, Glb, Report, Severity, WriteOpts, read_glb, validate,
-    validate_data, validate_glb, write_glb,
+    validate_data, validate_file, validate_glb, write_glb,
 };
 
 /// A valid one-triangle document with an animation, and its buffer.
@@ -424,4 +424,40 @@ fn image_and_view_rules() {
         "BUFFER_VIEW_INVALID_BYTE_STRIDE",
         "/bufferViews/4/byteStride",
     );
+}
+
+#[test]
+fn json_text_issues() {
+    let src = br#"{"asset":{"version":"2.0","foo":1},"bar":{"x":1},"nodes":[{"name":"n","baz":[1],
+        "extensions":{"VENDOR_n":{"anything":1.0}},"extras":{"free":2.0}}],
+        "buffers":[{"byteLength":4.0,"uri":"data:application/octet-stream;base64,AAAAAA=="}],
+        "extensionsUsed":["VENDOR_n"],"scenes":[],"meshes":[]}"#;
+    let r = validate_file(src).unwrap();
+    let warned = |code: &str, ptr: &str| {
+        r.issues
+            .iter()
+            .any(|i| i.code == code && i.pointer == ptr && i.severity == Severity::Warning)
+    };
+    assert!(warned("UNEXPECTED_PROPERTY", "/asset/foo"), "{r}");
+    assert!(warned("UNEXPECTED_PROPERTY", "/bar"), "{r}");
+    assert!(warned("UNEXPECTED_PROPERTY", "/nodes/0/baz"), "{r}");
+    assert!(
+        warned("INTEGER_WRITTEN_AS_FLOAT", "/buffers/0/byteLength"),
+        "{r}"
+    );
+    // Extensions and extras are free-form; empty arrays are known members.
+    assert_eq!(r.issues.len(), 4, "{r}");
+    assert!(r.is_ok(), "{r}");
+
+    // A GLB goes through the same checks.
+    let (doc, bin) = triangle();
+    let glb = write_glb(
+        &Glb {
+            document: doc,
+            bin: Some(bin),
+        },
+        &WriteOpts::default(),
+    );
+    let r = validate_file(&glb).unwrap();
+    assert!(r.issues.is_empty(), "{r}");
 }
