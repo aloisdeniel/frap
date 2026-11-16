@@ -415,8 +415,13 @@ fn base_color_textures_glb() {
             .base_color_factor
             .is_none()
     );
-    // Same image with alpha: same PNG image, BLEND.
-    assert_eq!(tex_of(1).index, t0.index);
+    // Same image with alpha: same PNG image and sampler, but a texture of its own (Blender
+    // writes one texture per material usage), BLEND.
+    assert_ne!(tex_of(1).index, t0.index);
+    assert_eq!(
+        d.textures[tex_of(1).index as usize],
+        d.textures[t0.index as usize]
+    );
     assert_eq!(d.materials[1].alpha_mode, Some(AlphaMode::Blend));
     // Generated image encoded to PNG, its own image.
     let gi = &d.images[d.textures[tex_of(2).index as usize].source.unwrap() as usize];
@@ -439,6 +444,57 @@ fn base_color_textures_glb() {
         ..settings()
     });
     assert!(none.document.images.is_empty() && none.document.textures.is_empty());
+}
+
+/// Blender 5.2.4 (`bpy.ops.export_scene.gltf`, GLTF_SEPARATE) on: materials Textured (Color),
+/// Alpha (Color + Alpha) and Again (Color into Base Color and Emission Color) all using one
+/// Checker.png; a cube using the three, then a plane using Textured. Result: textures
+/// `[{0,0}] * 4`, one image, one sampler; Textured 0, Alpha 1, Again emissive 2 then base 3,
+/// the plane's material shares Textured's texture.
+#[test]
+fn one_texture_per_material_usage_like_blender() {
+    let mut s = Scene::empty();
+    let img = s.packed_image("Checker.png", png(2, 2), "image/png");
+    let m1 = s.material("Textured", [1.0; 4], 0.0, 0.5);
+    s.base_color_texture(m1, img, false);
+    let m2 = s.material("Alpha", [1.0; 4], 0.0, 0.5);
+    s.base_color_texture(m2, img, true);
+    let m3 = s.material("Again", [1.0; 4], 0.0, 0.5);
+    s.base_color_texture(m3, img, false);
+    s.link_emission_from_texture(m3, 1.0);
+    let ob = s.mesh_object("Cube", cube(2.0, true, [1.0; 3]));
+    {
+        let me = s.mesh_of(ob);
+        me.materials = vec![Some(m1), Some(m2), Some(m3)];
+        set_material_indices(me, vec![0, 1, 2, 0, 0, 0]);
+    }
+    let plane = s.mesh_object("Plane", cube(1.0, true, [1.0; 3]));
+    s.mesh_of(plane).materials = vec![Some(m1)];
+    let out = s.export(&settings());
+    let d = &out.document;
+    assert_eq!(d.textures.len(), 4);
+    assert!(
+        d.textures
+            .iter()
+            .all(|t| t.sampler == Some(0) && t.source == Some(0))
+    );
+    assert_eq!((d.images.len(), d.samplers.len()), (1, 1));
+    let base = |name: &str| {
+        let m = d
+            .materials
+            .iter()
+            .find(|m| m.name.as_deref() == Some(name))
+            .unwrap();
+        let b = m.pbr_metallic_roughness.as_ref().unwrap();
+        (
+            b.base_color_texture.as_ref().unwrap().index,
+            m.emissive_texture.as_ref().map(|t| t.index),
+        )
+    };
+    assert_eq!(base("Textured"), (0, None));
+    assert_eq!(base("Alpha"), (1, None));
+    assert_eq!(base("Again"), (3, Some(2)));
+    assert_eq!(d.materials.len(), 3, "the plane reuses Textured");
 }
 
 #[test]

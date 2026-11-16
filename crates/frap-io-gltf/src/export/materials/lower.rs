@@ -7,7 +7,7 @@
 //! [`bootstrap`], a minimal recogniser for the M1 vocabulary: the unlinked inputs of the
 //! "Principled BSDF" feeding the material output (Base Color, Metallic, Roughness, Alpha,
 //! Emission Color × Emission Strength) and an Image Texture whose Color (and optionally Alpha)
-//! output feeds Base Color directly. Delete `bootstrap` once `frap-material` patterns are
+//! output feeds Base Color directly, or whose Color feeds Emission Color. Delete `bootstrap` once `frap-material` patterns are
 //! merged; nothing else in the exporter depends on it.
 
 use frap_material::{
@@ -192,7 +192,15 @@ pub fn bootstrap(main: &Main, mat: &Material) -> LoweredMaterial {
     }
     lm.metallic.factor = float(bsdf, "Metallic", 0.0);
     lm.roughness.factor = float(bsdf, "Roughness", 0.5);
-    let e = color(bsdf, "Emission Color", [1.0; 4]);
+    let mut e = color(bsdf, "Emission Color", [1.0; 4]);
+    // An Image Texture's Color into Emission Color: `emissiveTexture`, factor white
+    // (emission.py `export_emission_factor`: a linked socket's value is not read).
+    if let Some((t, _)) = link_into(tree, bsdf, "Emission Color")
+        .filter(|(n, s)| n.bl_idname == "ShaderNodeTexImage" && *s == "Color")
+    {
+        lm.emissive.texture = tex_ref(main, t, ChannelSel::Rgb);
+        e = [1.0; 4];
+    }
     lm.emissive.factor = [e[0], e[1], e[2]];
     lm.emissive_strength = float(bsdf, "Emission Strength", 0.0);
     lm

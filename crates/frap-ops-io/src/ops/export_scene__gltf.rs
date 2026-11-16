@@ -13,12 +13,15 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
     if p.filepath.value.is_empty() {
         return Err(OpError::Io("filepath not set".into()));
     }
+    // M0 subset until WP 1.23 writes `ExportOutput.files` and derives `file_stem`.
+    if p.export_format.value != "GLB" {
+        return Err(OpError::NotImplemented(format!(
+            "export_format='{}' is not supported yet (M0: 'GLB' only)",
+            p.export_format.value
+        )));
+    }
     let settings = ExportSettings {
-        export_format: if p.export_format.value == "GLB" {
-            ExportFormat::Glb
-        } else {
-            ExportFormat::GltfSeparate
-        },
+        export_format: ExportFormat::Glb,
         ..ExportSettings::default()
     };
     let out = frap_io_gltf::export(cx.main(), &cx.ctx(), &settings)

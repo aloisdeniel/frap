@@ -6,7 +6,11 @@
 //!   LINEAR / LINEAR_MIPMAP_LINEAR (always written); EXTEND and CLIP → CLAMP_TO_EDGE, MIRROR →
 //!   MIRRORED_REPEAT; both wraps omitted when both are REPEAT; equal samplers shared.
 //! - material/texture.py: a texture is `{sampler, source}`, gathered sampler first; no textures
-//!   at all with `export_image_format='NONE'`.
+//!   at all with `export_image_format='NONE'`. `gather_texture` is `@cached` on the material's
+//!   shader sockets and the exporter shares objects by identity (`__append_unique_and_get_index`),
+//!   so there is one texture per material feature even when image and sampler are equal
+//!   (verified on 5.2.4: two materials using the same image get two textures); samplers are
+//!   shared by value (sampler.py, `__sampler_by_value`) and images by image and MIME type.
 //! - material/texture_info.py: `texCoord` from the UV map the texture uses (0 omitted), the
 //!   Mapping node as `KHR_texture_transform` (an `Extension` is required by default, so the
 //!   add-on lists it in `extensionsRequired`).
@@ -33,7 +37,7 @@ use frap_gltf::json::{
 use frap_imbuf::{DecodedImage, EncodeFormat, PixelData};
 use frap_material::{ChannelSel, Filter, TexRef, UvSource, Wrap};
 use frap_mesh::Mesh;
-use frap_rna::{IdRef, ImageId};
+use frap_rna::{IdRef, ImageId, MaterialId};
 use frap_scene::id::Image;
 
 use crate::export::gather::Gather;
@@ -45,12 +49,28 @@ pub const PNG: &str = "image/png";
 /// JPEG.
 pub const JPEG: &str = "image/jpeg";
 
+/// The material feature a texture is gathered for (the add-on's shader sockets).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub enum TextureSlot {
+    /// `emissiveTexture` (Emission Color).
+    Emissive,
+    /// `normalTexture` (Normal).
+    Normal,
+    /// `baseColorTexture` (Base Color, plus Alpha when it is used).
+    BaseColor,
+    /// `metallicRoughnessTexture` (Metallic and Roughness).
+    MetallicRoughness,
+}
+
+/// A texture's identity: the material and the feature using it.
+pub type TextureUse = (IdRef<MaterialId>, TextureSlot);
+
 /// Textures, samplers and images gathered so far.
 #[derive(Default)]
 pub struct ImageCache {
     samplers: HashMap<(u32, u32, Option<u32>, Option<u32>), Index>,
     images: HashMap<(IdRef<ImageId>, &'static str), Option<Index>>,
-    textures: HashMap<(Option<Index>, Index), Index>,
+    textures: HashMap<TextureUse, Option<Index>>,
     file_names: Vec<String>,
 }
 
@@ -126,8 +146,15 @@ pub fn image_name(im: &Image) -> String {
     }
 }
 
+/// Sources with file data (`__is_blender_image_a_jpeg`: FILE and TILED).
 fn is_file_source(im: &Image) -> bool {
     matches!(im.source.as_str(), "FILE" | "SEQUENCE" | "TILED")
+}
+
+/// Sources whose file bytes may be copied as is (`__encode_from_image`: FILE and SEQUENCE,
+/// and `not image.is_dirty`; frap does not track `is_dirty` yet, see deviations.md).
+fn is_passthrough_source(im: &Image) -> bool {
+    matches!(im.source.as_str(), "FILE" | "SEQUENCE")
 }
 
 /// The MIME type of a texture's image (`__gather_mime_type`).
@@ -142,7 +169,7 @@ pub fn mime_type(
     if settings.wants_jpeg() {
         return JPEG;
     }
-    let jpeg_source = is_file_source(im)
+    let jpeg_source = matches!(im.source.as_str(), "FILE" | "TILED")
         && if im.filepath.is_empty() {
             im.packed_file.as_ref().is_some_and(|p| is_jpeg(&p.bytes))
         } else {
@@ -199,7 +226,8 @@ fn encode(g: &mut Gather, im: &Image, mime: &'static str) -> Option<Vec<u8>> {
     let name = im.header.name.clone();
     let src = source_bytes(g, im);
     if let Some(b) = &src {
-        if (mime == PNG && is_png(b)) || (mime == JPEG && is_jpeg(b)) {
+        let passthrough = is_passthrough_source(im);
+        if passthrough && ((mime == PNG && is_png(b)) || (mime == JPEG && is_jpeg(b))) {
             return Some(b.clone());
         }
         if is_webp(b) {
@@ -322,8 +350,22 @@ fn gather_image(
     i
 }
 
-/// The texture index of a texture reference (`None` when its image cannot be exported).
-pub fn gather_texture(g: &mut Gather, t: &TexRef) -> Result<Option<Index>, ExportError> {
+/// The texture index of a texture reference used by `usage` (`None` when its image cannot be
+/// exported). One texture per usage, as the add-on does.
+pub fn gather_texture(
+    g: &mut Gather,
+    t: &TexRef,
+    usage: TextureUse,
+) -> Result<Option<Index>, ExportError> {
+    if let Some(i) = g.images.textures.get(&usage) {
+        return Ok(*i);
+    }
+    let i = gather_new_texture(g, t)?;
+    g.images.textures.insert(usage, i);
+    Ok(i)
+}
+
+fn gather_new_texture(g: &mut Gather, t: &TexRef) -> Result<Option<Index>, ExportError> {
     let main = g.main;
     let Some(im) = main.images.get(t.image) else {
         return Ok(None);
@@ -367,18 +409,12 @@ pub fn gather_texture(g: &mut Gather, t: &TexRef) -> Result<Option<Index>, Expor
         (_, Some(b)) => gather_image(g, t.image, im, mime, b),
         _ => return Ok(None),
     };
-    let tkey = (Some(sampler_index), image_index);
-    if let Some(i) = g.images.textures.get(&tkey) {
-        return Ok(Some(*i));
-    }
     g.doc.textures.push(Texture {
         sampler: Some(sampler_index),
         source: Some(image_index),
         ..Texture::default()
     });
-    let i = (g.doc.textures.len() - 1) as Index;
-    g.images.textures.insert(tkey, i);
-    Ok(Some(i))
+    Ok(Some((g.doc.textures.len() - 1) as Index))
 }
 
 /// `KHR_texture_transform` of a texture (identity members omitted; `None` when all are).
@@ -393,16 +429,18 @@ pub fn texture_transform(t: &TexRef) -> Option<KhrTextureTransform> {
     (ext != KhrTextureTransform::default()).then_some(ext)
 }
 
-/// A `textureInfo` for a texture reference on `mesh` (`None` when nothing is written).
+/// A `textureInfo` for a texture reference used by `usage` on `mesh` (`None` when nothing is
+/// written).
 pub fn gather_texture_info(
     g: &mut Gather,
     t: &TexRef,
+    usage: TextureUse,
     mesh: &Mesh,
 ) -> Result<Option<TextureInfo>, ExportError> {
     if g.settings.export_image_format == ExportImageFormat::None {
         return Ok(None);
     }
-    let Some(index) = gather_texture(g, t)? else {
+    let Some(index) = gather_texture(g, t, usage)? else {
         return Ok(None);
     };
     let n = tex_coord(t, mesh);
@@ -483,6 +521,16 @@ mod tests {
         assert_eq!(mime_type(&s, &im, ChannelSel::Rgb), JPEG);
         // Alpha forces PNG.
         assert_eq!(mime_type(&s, &im, ChannelSel::Rgba), PNG);
+        // `__is_blender_image_a_jpeg`: FILE and TILED only.
+        im.source = "TILED".into();
+        assert_eq!(mime_type(&s, &im, ChannelSel::Rgb), JPEG);
+        im.source = "SEQUENCE".into();
+        assert_eq!(mime_type(&s, &im, ChannelSel::Rgb), PNG);
+        // `__encode_from_image` copies bytes for FILE and SEQUENCE only.
+        assert!(is_passthrough_source(&im));
+        im.source = "TILED".into();
+        assert!(!is_passthrough_source(&im));
+        im.source = "FILE".into();
         im.filepath.clear();
         im.packed_file = Some(Arc::new(EncodedImage {
             bytes: vec![0xFF, 0xD8, 0xFF, 0xE0],

@@ -13,11 +13,12 @@
 use frap_gltf::json::{Material, PbrMetallicRoughness};
 use frap_material::{ChannelSel, LoweredMaterial};
 use frap_mesh::Mesh;
+use frap_rna::{IdRef, MaterialId};
 
 use super::num;
 use crate::export::ExportError;
 use crate::export::gather::Gather;
-use crate::export::images::gather_texture_info;
+use crate::export::images::{TextureSlot, gather_texture_info};
 
 /// `baseColorFactor` (`None` when it equals the glTF default).
 pub fn base_color_factor(lm: &LoweredMaterial) -> Option<[f64; 4]> {
@@ -35,6 +36,7 @@ pub fn scalar_factor(x: f32) -> Option<f64> {
 /// Writes `pbrMetallicRoughness`.
 pub fn apply(
     g: &mut Gather,
+    r: IdRef<MaterialId>,
     lm: &LoweredMaterial,
     mesh: &Mesh,
     m: &mut Material,
@@ -46,7 +48,7 @@ pub fn apply(
         ..PbrMetallicRoughness::default()
     };
     if let Some(t) = &lm.base_color.texture {
-        pbr.base_color_texture = gather_texture_info(g, t, mesh)?;
+        pbr.base_color_texture = gather_texture_info(g, t, (r, TextureSlot::BaseColor), mesh)?;
     }
     // A metallic-roughness texture is written when the image already holds metallic in B and
     // roughness in G (one image, or only one of the two channels textured).
@@ -70,7 +72,8 @@ pub fn apply(
         }
     };
     if let Some(t) = mr {
-        pbr.metallic_roughness_texture = gather_texture_info(g, t, mesh)?;
+        pbr.metallic_roughness_texture =
+            gather_texture_info(g, t, (r, TextureSlot::MetallicRoughness), mesh)?;
     }
     if pbr != PbrMetallicRoughness::default() {
         m.pbr_metallic_roughness = Some(pbr);

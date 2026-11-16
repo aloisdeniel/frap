@@ -195,6 +195,37 @@ impl Scene {
         }
     }
 
+    /// Links the material's last Image Texture `Color` into the Principled `Emission Color`
+    /// and sets `Emission Strength`.
+    pub fn link_emission_from_texture(&mut self, mat: IdRef<MaterialId>, strength: f32) {
+        let m = self.main.materials.get_mut(mat, &mut self.log).unwrap();
+        let tree = &mut m.node_tree;
+        let tex = tree
+            .nodes
+            .iter()
+            .rev()
+            .find(|n| n.bl_idname == "ShaderNodeTexImage")
+            .unwrap()
+            .uid;
+        let bsdf = tree
+            .nodes
+            .iter_mut()
+            .find(|n| n.bl_idname == "ShaderNodeBsdfPrincipled")
+            .unwrap();
+        for s in &mut bsdf.inputs {
+            if s.name == "Emission Strength" {
+                s.default_value = SocketValue::Float(strength);
+            }
+        }
+        let bsdf = bsdf.uid;
+        tree.links.push(Link {
+            from_node: tex,
+            from_socket: "Color".into(),
+            to_node: bsdf,
+            to_socket: "Emission Color".into(),
+        });
+    }
+
     /// A packed image holding `bytes`.
     pub fn packed_image(&mut self, name: &str, bytes: Vec<u8>, mime: &str) -> IdRef<ImageId> {
         let mut im = Image::new("", 2, 2);

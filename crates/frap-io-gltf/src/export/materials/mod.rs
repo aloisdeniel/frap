@@ -28,7 +28,7 @@ use frap_rna::{IdRef, MaterialId};
 use frap_scene::id::Material;
 
 use crate::export::gather::Gather;
-use crate::export::images::{gather_texture_info, tex_coord};
+use crate::export::images::{TextureSlot, gather_texture_info, tex_coord};
 use crate::export::{ExportError, ExportMaterials};
 
 /// Materials gathered so far.
@@ -92,7 +92,7 @@ pub fn gather(
             if let Some(i) = g.materials.written.get(&key) {
                 return Ok(*i);
             }
-            let m = build(g, mat, &lm, mesh)?;
+            let m = build(g, r, mat, &lm, mesh)?;
             g.doc.materials.push(m);
             let i = Some((g.doc.materials.len() - 1) as Index);
             g.materials.written.insert(key, i);
@@ -121,6 +121,7 @@ pub fn viewport(mat: &Material) -> GMaterial {
 /// `pbrMetallicRoughness`).
 fn build(
     g: &mut Gather,
+    r: IdRef<MaterialId>,
     mat: &Material,
     lm: &LoweredMaterial,
     mesh: &Mesh,
@@ -138,9 +139,9 @@ fn build(
     core_alpha::apply(lm, &mut m);
     // `use_backface_culling` is read on the original material, as the add-on does.
     m.double_sided = (!mat.use_backface_culling).then_some(true);
-    core_emissive::apply(g, lm, mesh, &mut m)?;
+    core_emissive::apply(g, r, lm, mesh, &mut m)?;
     if let Some(n) = &lm.normal
-        && let Some(info) = gather_texture_info(g, &n.texture, mesh)?
+        && let Some(info) = gather_texture_info(g, &n.texture, (r, TextureSlot::Normal), mesh)?
     {
         m.normal_texture = Some(NormalTextureInfo {
             index: info.index,
@@ -160,6 +161,6 @@ fn build(
             "material '{name}': KHR_materials_unlit is not exported yet (M3)"
         ));
     }
-    core_pbr::apply(g, lm, mesh, &mut m)?;
+    core_pbr::apply(g, r, lm, mesh, &mut m)?;
     Ok(m)
 }

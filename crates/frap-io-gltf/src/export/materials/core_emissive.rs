@@ -12,10 +12,11 @@ use frap_gltf::ext::khr_materials_emissive_strength::KhrMaterialsEmissiveStrengt
 use frap_gltf::json::Material;
 use frap_material::LoweredMaterial;
 use frap_mesh::Mesh;
+use frap_rna::{IdRef, MaterialId};
 
 use crate::export::ExportError;
 use crate::export::gather::Gather;
-use crate::export::images::gather_texture_info;
+use crate::export::images::{TextureSlot, gather_texture_info};
 
 /// The emissive factor and the strength extension value (`None` when not needed).
 pub fn factor(lm: &LoweredMaterial) -> (Option<[f64; 3]>, Option<f64>) {
@@ -38,6 +39,7 @@ pub fn factor(lm: &LoweredMaterial) -> (Option<[f64; 3]>, Option<f64>) {
 /// Writes the emission members (gathering the texture in member order).
 pub fn apply(
     g: &mut Gather,
+    r: IdRef<MaterialId>,
     lm: &LoweredMaterial,
     mesh: &Mesh,
     m: &mut Material,
@@ -45,7 +47,7 @@ pub fn apply(
     let (f, strength) = factor(lm);
     m.emissive_factor = f;
     if let Some(t) = &lm.emissive.texture {
-        m.emissive_texture = gather_texture_info(g, t, mesh)?;
+        m.emissive_texture = gather_texture_info(g, t, (r, TextureSlot::Emissive), mesh)?;
     }
     if let Some(s) = strength {
         m.extensions.set(Some(KhrMaterialsEmissiveStrength {
