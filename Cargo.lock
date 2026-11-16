@@ -750,6 +750,7 @@ dependencies = [
  "indexmap",
  "insta",
  "libm",
+ "linkme",
  "proptest",
  "serde",
  "serde_json",
