@@ -75,7 +75,11 @@ pub struct RObject {
     pub materials: Vec<Option<MatKey>>,
     /// `Object.color` (Workbench OBJECT colour).
     pub color: [f32; 4],
-    /// Workbench RANDOM colour hash (`BLI_hash_int_*` of the name).
+    /// Workbench RANDOM colour hash: `BLI_ghashutil_strhash_p_murmur(ob->id.name)`, i.e.
+    /// MurmurHash2 (seed 0) of the UTF-8 bytes `"OB" + name` including the trailing NUL (a
+    /// linked object also mixes in its library path, as `workbench_materials.cc` does). The
+    /// renderer applies `BLI_hash_int_01` itself; do not pre-hash. Reference implementation:
+    /// `murmur2` in `crates/frap-render/tests/workbench_ref.rs`.
     pub random_hash: u32,
 }
 

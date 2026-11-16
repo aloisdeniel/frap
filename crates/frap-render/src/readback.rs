@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Offscreen clear / WGSL draw and padded readback (§19.2: `RENDER_ATTACHMENT | COPY_SRC`
-//! targets, rows padded to 256 bytes). Moved from the WP 0.2 contract probe
-//! (`crates/frap-probe/render`), where it passed on Metal; WP 1.7 builds the engines on it.
+//! Padded texture readback (§19.2: `RENDER_ATTACHMENT | COPY_SRC` targets, rows padded to 256
+//! bytes) used by every engine, plus the WP 0.2 contract probe's clear / WGSL-draw self-test
+//! (moved from `crates/frap-probe/render`, kept as the smallest end-to-end GPU check).
 
 use frap_render_scene::RenderError;
 
@@ -65,13 +65,6 @@ impl Gpu {
             view_formats: &[],
         });
         let view = tex.create_view(&wgpu::TextureViewDescriptor::default());
-        let bpr = padded_bytes_per_row(width, format);
-        let buf = dev.create_buffer(&wgpu::BufferDescriptor {
-            label: Some("frap readback"),
-            size: u64::from(bpr) * u64::from(height),
-            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
-            mapped_at_creation: false,
-        });
         let pipeline = draw_triangle.then(|| {
             let module = dev.create_shader_module(wgpu::ShaderModuleDescriptor {
                 label: Some("frap triangle"),
@@ -133,70 +126,156 @@ impl Gpu {
                 pass.draw(0..3, 0..1);
             }
         }
-        enc.copy_texture_to_buffer(
-            wgpu::TexelCopyTextureInfo {
-                texture: &tex,
-                mip_level: 0,
-                origin: wgpu::Origin3d::ZERO,
-                aspect: wgpu::TextureAspect::All,
-            },
-            wgpu::TexelCopyBufferInfo {
-                buffer: &buf,
-                layout: wgpu::TexelCopyBufferLayout {
-                    offset: 0,
-                    bytes_per_row: Some(bpr),
-                    rows_per_image: Some(height),
-                },
-            },
-            wgpu::Extent3d {
-                width,
-                height,
-                depth_or_array_layers: 1,
-            },
-        );
         self.queue.submit([enc.finish()]);
+        self.read_texture(&tex, width, height, format)
+    }
 
-        let slice = buf.slice(..);
-        let (tx, rx) = std::sync::mpsc::channel();
-        slice.map_async(wgpu::MapMode::Read, move |r| {
-            let _ = tx.send(r);
-        });
-        dev.poll(wgpu::PollType::Wait {
-            submission_index: None,
-            timeout: None,
-        })
-        .map_err(|e| RenderError::Readback(e.to_string()))?;
-        rx.recv()
-            .map_err(|e| RenderError::Readback(e.to_string()))?
-            .map_err(|e| RenderError::Readback(e.to_string()))?;
-        let data = slice
-            .get_mapped_range()
-            .map_err(|e| RenderError::Readback(format!("{e:?}")))?;
-        let ts = texel_size(format) as usize;
-        let mut out = Vec::with_capacity((width * height) as usize);
-        for row in 0..height as usize {
-            let start = row * bpr as usize;
-            for x in 0..width as usize {
-                let px = &data[start + x * ts..start + (x + 1) * ts];
-                out.push(match format {
-                    wgpu::TextureFormat::Rgba32Float => {
-                        let f =
-                            |i: usize| f32::from_le_bytes([px[i], px[i + 1], px[i + 2], px[i + 3]]);
-                        [f(0), f(4), f(8), f(12)]
-                    }
-                    _ => [
-                        px[0] as f32 / 255.0,
-                        px[1] as f32 / 255.0,
-                        px[2] as f32 / 255.0,
-                        px[3] as f32 / 255.0,
-                    ],
-                });
-            }
+    /// Copies a whole `width × height` 2D texture (`COPY_SRC`, format `Rgba32Float` or
+    /// `Rgba8Unorm`) into buffers whose rows are padded to 256 bytes, waits, and returns
+    /// tightly packed RGBA rows (top row first) as f32.
+    ///
+    /// The copy runs in row bands of at most [`READBACK_BAND_BYTES`] (and never more than the
+    /// device's `max_buffer_size`), so any texture the device can create can be read back:
+    /// a single staging buffer for 4K at 200% `Rgba32Float` (7680 × 4320 × 16 bytes ≈ 531 MB)
+    /// exceeds wgpu's default 256 MiB buffer limit.
+    pub fn read_texture(
+        &self,
+        tex: &wgpu::Texture,
+        width: u32,
+        height: u32,
+        format: wgpu::TextureFormat,
+    ) -> Result<Vec<[f32; 4]>, RenderError> {
+        let max = self
+            .device
+            .limits()
+            .max_buffer_size
+            .min(READBACK_BAND_BYTES);
+        self.read_texture_in_bands(tex, width, height, format, max)
+    }
+
+    /// [`Gpu::read_texture`] with an explicit band size limit in bytes (each band's staging
+    /// buffer holds at most `max_band_bytes`, and at least one padded row). Public so the band
+    /// split can be tested at a small forced limit.
+    pub fn read_texture_in_bands(
+        &self,
+        tex: &wgpu::Texture,
+        width: u32,
+        height: u32,
+        format: wgpu::TextureFormat,
+        max_band_bytes: u64,
+    ) -> Result<Vec<[f32; 4]>, RenderError> {
+        if !matches!(
+            format,
+            wgpu::TextureFormat::Rgba32Float | wgpu::TextureFormat::Rgba8Unorm
+        ) {
+            return Err(RenderError::Unsupported(format!(
+                "readback of {format:?} textures"
+            )));
         }
-        drop(data);
-        buf.unmap();
+        let dev = &self.device;
+        let bpr = padded_bytes_per_row(width, format);
+        let band_rows = band_rows(
+            bpr,
+            height,
+            max_band_bytes.min(dev.limits().max_buffer_size),
+        );
+        if band_rows == 0 {
+            return Err(RenderError::Unsupported(format!(
+                "readback of a {width}-pixel-wide {format:?} row ({bpr} bytes) exceeds this \
+                 device's max_buffer_size ({})",
+                dev.limits().max_buffer_size
+            )));
+        }
+        let buf = dev.create_buffer(&wgpu::BufferDescriptor {
+            label: Some("frap readback"),
+            size: u64::from(bpr) * u64::from(band_rows),
+            usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
+            mapped_at_creation: false,
+        });
+        let ts = texel_size(format) as usize;
+        let mut out = Vec::with_capacity(width as usize * height as usize);
+        let mut y0 = 0u32;
+        while y0 < height {
+            let rows = band_rows.min(height - y0);
+            let mut enc = dev.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("frap readback"),
+            });
+            enc.copy_texture_to_buffer(
+                wgpu::TexelCopyTextureInfo {
+                    texture: tex,
+                    mip_level: 0,
+                    origin: wgpu::Origin3d { x: 0, y: y0, z: 0 },
+                    aspect: wgpu::TextureAspect::All,
+                },
+                wgpu::TexelCopyBufferInfo {
+                    buffer: &buf,
+                    layout: wgpu::TexelCopyBufferLayout {
+                        offset: 0,
+                        bytes_per_row: Some(bpr),
+                        rows_per_image: Some(rows),
+                    },
+                },
+                wgpu::Extent3d {
+                    width,
+                    height: rows,
+                    depth_or_array_layers: 1,
+                },
+            );
+            self.queue.submit([enc.finish()]);
+
+            let slice = buf.slice(..u64::from(bpr) * u64::from(rows));
+            let (tx, rx) = std::sync::mpsc::channel();
+            slice.map_async(wgpu::MapMode::Read, move |r| {
+                let _ = tx.send(r);
+            });
+            dev.poll(wgpu::PollType::Wait {
+                submission_index: None,
+                timeout: None,
+            })
+            .map_err(|e| RenderError::Readback(e.to_string()))?;
+            rx.recv()
+                .map_err(|e| RenderError::Readback(e.to_string()))?
+                .map_err(|e| RenderError::Readback(e.to_string()))?;
+            let data = slice
+                .get_mapped_range()
+                .map_err(|e| RenderError::Readback(format!("{e:?}")))?;
+            for row in 0..rows as usize {
+                let start = row * bpr as usize;
+                for x in 0..width as usize {
+                    let px = &data[start + x * ts..start + (x + 1) * ts];
+                    out.push(match format {
+                        wgpu::TextureFormat::Rgba32Float => {
+                            let f = |i: usize| {
+                                f32::from_le_bytes([px[i], px[i + 1], px[i + 2], px[i + 3]])
+                            };
+                            [f(0), f(4), f(8), f(12)]
+                        }
+                        _ => [
+                            px[0] as f32 / 255.0,
+                            px[1] as f32 / 255.0,
+                            px[2] as f32 / 255.0,
+                            px[3] as f32 / 255.0,
+                        ],
+                    });
+                }
+            }
+            drop(data);
+            buf.unmap();
+            y0 += rows;
+        }
         Ok(out)
     }
+}
+
+/// Upper bound of one readback band's staging buffer (64 MiB): keeps peak host-visible memory
+/// bounded independently of the image size.
+pub const READBACK_BAND_BYTES: u64 = 64 << 20;
+
+/// Rows per readback band: as many padded rows as fit in `max_bytes`, at most `height`, and
+/// 0 when not even one row fits.
+pub fn band_rows(bytes_per_row: u32, height: u32, max_bytes: u64) -> u32 {
+    let fit = max_bytes / u64::from(bytes_per_row).max(1);
+    u32::try_from(fit).unwrap_or(u32::MAX).min(height)
 }
 
 #[cfg(test)]
@@ -215,6 +294,16 @@ mod tests {
             super::padded_bytes_per_row(64, wgpu::TextureFormat::Rgba8Unorm),
             256
         );
+    }
+
+    #[test]
+    fn band_rows_split() {
+        use super::band_rows;
+        // 7680 px Rgba32Float = 122880 bytes per row; 4320 rows = 531 MB in 9 bands of 546.
+        assert_eq!(band_rows(122_880, 4320, super::READBACK_BAND_BYTES), 546);
+        assert_eq!(band_rows(256, 7, 1 << 20), 7);
+        assert_eq!(band_rows(1280, 33, 1280 * 4 + 5), 4);
+        assert_eq!(band_rows(1280, 33, 1279), 0);
     }
 
     #[test]

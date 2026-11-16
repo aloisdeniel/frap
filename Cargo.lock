@@ -1177,6 +1177,7 @@ dependencies = [
  "bytemuck",
  "frap-color",
  "frap-imbuf",
+ "frap-material",
  "frap-render-scene",
  "glam",
  "image-compare",

@@ -19,6 +19,7 @@ glam.workspace = true
 
 [dev-dependencies]
 image-compare.workspace = true
+frap-material.workspace = true
 
 [lints]
 workspace = true
