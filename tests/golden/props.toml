@@ -1,0 +1,80 @@
+# The property list shared by both golden dumpers (ARCHITECTURE §20.3):
+#   - Blender side: tools/blender/dump_state.py reads it inside Blender;
+#   - frap side: crates/frap-golden/src/runner.rs reads the same paths through frap's own RNA
+#     (statements executed by the session, exactly as an agent would read them), so the golden
+#     suite also tests the RNA layer.
+# Owned by WP 1.8. Paths are RNA paths relative to the struct named by the section.
+# `coll/prop` means "prop of every item of collection coll", in collection order.
+version = 1
+
+# GObject (crates/frap-golden/src/state.rs) fields, relative to bpy.data.objects[<name>].
+# Every object of bpy.data.objects is dumped.
+[object]
+type = "type"
+parent = "parent"
+matrix_world = "matrix_world"          # derived (D-04)
+location = "location"
+rotation_mode = "rotation_mode"
+scale = "scale"
+mode = "mode"
+modifiers = "modifiers"                # items dumped as (name, type)
+modifier_props = ["name", "type"]
+materials = "material_slots/material"  # one entry per slot: material name or null
+
+# GObject.rotation: the rotation property used for each rotation_mode.
+[object.rotation]
+QUATERNION = "rotation_quaternion"     # (w, x, y, z)
+AXIS_ANGLE = "rotation_axis_angle"     # (angle, x, y, z)
+EULER = "rotation_euler"               # every Euler order (XYZ ... ZYX)
+
+# GMesh fields, relative to bpy.data.meshes[<name>] (meshes named by `compare=mesh:<name>`)
+# or to the evaluated mesh of bpy.data.objects[<name>] (`compare=evaluated:<name>`).
+[mesh]
+positions = "vertices/co"
+edges = "edges/vertices"
+faces = "polygons/vertices"
+corner_normals = "corner_normals/vector"
+uv_layers = "uv_layers"                # per layer: data/uv (per corner)
+uv_value = "data/uv"
+attributes = "attributes"              # every attribute except internal (`.`-prefixed) ones,
+                                       # `position` and UV maps: {domain, data_type, data}
+attribute_props = ["domain", "data_type"]
+# Edit-mode state (M2): only dumped for objects in Edit Mode, else null.
+selection = ["vertices/select", "edges/select", "polygons/select"]
+
+# The `data` value field per attribute data_type (`attributes[n].data/<field>`).
+[mesh.attribute_value]
+FLOAT = "value"
+INT = "value"
+INT8 = "value"
+BOOLEAN = "value"
+FLOAT2 = "vector"
+FLOAT_VECTOR = "vector"
+FLOAT4 = "value"
+FLOAT_COLOR = "color"
+BYTE_COLOR = "color"                   # linear floats, as Blender's `color` reads them
+INT16_2D = "value"
+INT32_2D = "value"
+QUATERNION = "value"
+FLOAT4X4 = "value"
+STRING = "value"
+
+# GContext fields, relative to bpy.context.
+[context]
+active = "view_layer.objects.active"
+selected = "selected_objects"          # base order
+mode = "mode"
+select_mode = "scene.tool_settings.mesh_select_mode"   # only in EDIT_MESH, else null
+cursor = "scene.cursor.location"
+
+# GMaterial, relative to bpy.data.materials[<name>] (every material except `Dots Stroke`, D-11).
+[material]
+nodes = "node_tree.nodes"              # keyed by node name
+node_props = ["bl_idname", "mute"]
+inputs = "inputs/default_value"        # keyed by socket identifier; sockets without a value skipped
+links = "node_tree.links"              # [from_node, from_socket.identifier, to_node, to_socket.identifier], sorted
+
+# Reads of these properties are derived values: the Blender runner calls
+# view_layer.update() before a statement that reads one, unless time is dirty (D-04, §20.3).
+[derived]
+props = ["matrix_world", "matrix_local", "dimensions", "bound_box", "evaluated_get", "to_mesh"]
