@@ -76,6 +76,9 @@ pub enum ImageError {
     /// Encoder failure.
     #[error("cannot encode image: {0}")]
     Encode(String),
+    /// File read/write failure (`load`/`save`).
+    #[error("{0}")]
+    Io(String),
 }
 
 /// Decoder/encoder (one implementation per format family, `formats`).

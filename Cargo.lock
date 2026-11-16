@@ -705,6 +705,7 @@ dependencies = [
  "glam",
  "libm",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -787,6 +788,7 @@ dependencies = [
  "image",
  "png",
  "proptest",
+ "serde_json",
  "thiserror",
  "webp",
 ]
