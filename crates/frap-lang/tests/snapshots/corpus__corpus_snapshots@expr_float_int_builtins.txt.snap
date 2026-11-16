@@ -1,0 +1,21 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_float_int_builtins.txt
+---
+> print(float('nan'), float('-inf'), int(2.7), float(3))
+---
+stmt 1 Bpy line 1 @1:1/1+54
+  Print
+    Builtin Float @1:7/7+12
+      arg (positional) @1:13/13+5
+        Str "nan" @1:13/13+5
+    Builtin Float @1:21/21+13
+      arg (positional) @1:27/27+6
+        Str "-inf" @1:27/27+6
+    Builtin Int @1:36/36+8
+      arg (positional) @1:40/40+3
+        Float 2.7 @1:40/40+3
+    Builtin Float @1:46/46+8
+      arg (positional) @1:52/52+1
+        Int 3 @1:52/52+1

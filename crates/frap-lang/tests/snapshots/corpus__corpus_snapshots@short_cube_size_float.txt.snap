@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_cube_size_float.txt
+---
+> mesh.primitive_cube_add size=2.5
+---
+stmt 1 Short line 1 @1:1/1+32
+  Invoke mesh.primitive_cube_add
+    arg size @1:25/25+8
+      Float 2.5 @1:30/30+3

@@ -1,0 +1,39 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_golden_case.txt
+---
+> import bpy
+> bpy.ops.mesh.primitive_cube_add()
+> bpy.ops.object.mode_set(mode='EDIT')
+> bpy.ops.mesh.select_all(action='DESELECT')
+> #@frap    bpy.ops.frap.select_elements(type='FACE', indices=[5])
+> bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value": (0, 0, 1)})
+> bpy.ops.object.mode_set(mode='OBJECT')
+---
+stmt 1 Bpy line 1 @1:1/1+10
+  Noop Import
+stmt 2 Bpy line 2 @2:1/1+33
+  Invoke mesh.primitive_cube_add
+stmt 3 Bpy line 3 @3:1/1+36
+  Invoke object.mode_set
+    arg mode @3:25/25+11
+      Str "EDIT" @3:30/30+6
+stmt 4 Bpy line 4 @4:1/1+42
+  Invoke mesh.select_all
+    arg action @4:25/25+17
+      Str "DESELECT" @4:32/32+10
+stmt 5 Bpy line 6 @6:1/1+77
+  Invoke mesh.extrude_region_move
+    arg TRANSFORM_OT_translate @6:34/34+43
+      Dict @6:57/57+20
+        entry
+          Str "value" @6:58/58+7
+          Tuple @6:67/67+9
+            Int 0 @6:68/68+1
+            Int 0 @6:71/71+1
+            Int 1 @6:74/74+1
+stmt 6 Bpy line 7 @7:1/1+38
+  Invoke object.mode_set
+    arg mode @7:25/25+13
+      Str "OBJECT" @7:30/30+8

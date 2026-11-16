@@ -1,0 +1,1 @@
+bpy.data.objects['A'].hide_render, bpy.data.objects['B'].hide_render = True, True

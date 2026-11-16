@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_math_unsupported.txt
+---
+> print(math.floor(1.5))
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:12/12+5
+  message: frap: math.floor is not supported (supported: pi, radians, degrees, sqrt, sin, cos, tan)

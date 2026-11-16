@@ -1,0 +1,15 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_rotate_radians.txt
+---
+> transform.rotate value=(radians(90)) orient_axis=Z
+---
+stmt 1 Short line 1 @1:1/1+50
+  Invoke transform.rotate
+    arg value @1:18/18+19
+      Builtin Radians @1:25/25+11
+        arg (positional) @1:33/33+2
+          Int 90 @1:33/33+2
+    arg orient_axis @1:38/38+13
+      Bare Z @1:50/50+1

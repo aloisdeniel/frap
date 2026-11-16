@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/stmt_semicolon_in_string.txt
+---
+> bpy.data.objects['a;b'].name = 'c;d'
+---
+stmt 1 Bpy line 1 @1:1/1+36
+  Set Assign
+    Path bpy.data @1:1/1+28
+      .objects
+      ["a;b"]
+      .name
+    Str "c;d" @1:32/32+5

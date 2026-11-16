@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_mode_set_object.txt
+---
+> bpy.ops.object.mode_set(mode='OBJECT')
+---
+stmt 1 Bpy line 1 @1:1/1+38
+  Invoke object.mode_set
+    arg mode @1:25/25+13
+      Str "OBJECT" @1:30/30+8

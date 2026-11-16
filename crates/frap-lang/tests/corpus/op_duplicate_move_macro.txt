@@ -1,0 +1,1 @@
+bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked": False}, TRANSFORM_OT_translate={"value": (2, 0, 0)})

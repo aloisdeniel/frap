@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_m1_read_homefile.txt
+---
+> bpy.ops.wm.read_homefile(use_empty=True)
+---
+stmt 1 Bpy line 1 @1:1/1+40
+  Invoke wm.read_homefile
+    arg use_empty @1:26/26+14
+      Bool true @1:36/36+4

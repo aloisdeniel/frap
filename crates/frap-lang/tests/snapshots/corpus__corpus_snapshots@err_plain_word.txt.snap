@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_plain_word.txt
+---
+> hello
+---
+error 1 SyntaxError SYNTAX @1:1/1+5
+  message: invalid syntax
+  hint: write either the bpy form, e.g. bpy.ops.mesh.primitive_cube_add(size=2) or bpy.data.objects['Cube'].location = (1, 2, 3), or the short form, e.g. mesh.primitive_cube_add size=2 or data.objects['Cube'].location = 1,2,3

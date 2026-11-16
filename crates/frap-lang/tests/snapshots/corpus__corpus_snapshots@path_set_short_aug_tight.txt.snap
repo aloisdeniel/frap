@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_short_aug_tight.txt
+---
+> context.scene.frame_current+=1
+---
+stmt 1 Short line 1 @1:1/1+30
+  Set Add
+    Path bpy.context @1:1/1+27
+      .scene
+      .frame_current
+    Int 1 @1:30/30+1

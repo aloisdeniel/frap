@@ -1,0 +1,1 @@
+frap.render_contact_sheet views={FRONT,RIGHT,TOP,ISO}

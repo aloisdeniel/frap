@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_m1_import_gltf.txt
+---
+> bpy.ops.import_scene.gltf(filepath='out/part.glb')
+---
+stmt 1 Bpy line 1 @1:1/1+50
+  Invoke import_scene.gltf
+    arg filepath @1:27/27+23
+      Str "out/part.glb" @1:36/36+14

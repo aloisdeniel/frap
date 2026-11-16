@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_unicode_string.txt
+---
+> print('Würfel 🧊')
+---
+stmt 1 Bpy line 1 @1:1/1+21
+  Print
+    Str "Würfel 🧊" @1:7/7+14

@@ -1,0 +1,1 @@
+bpy.data.materials['X'].node_tree.nodes["Principled BSDF"].inputs[0]

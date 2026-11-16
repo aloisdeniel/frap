@@ -1,0 +1,1 @@
+bpy.ops.object.delete('INVOKE_DEFAULT', use_global=False)

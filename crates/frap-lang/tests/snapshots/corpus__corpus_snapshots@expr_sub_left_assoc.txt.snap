@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_sub_left_assoc.txt
+---
+> print(10 - 2 - 3)
+---
+stmt 1 Bpy line 1 @1:1/1+17
+  Print
+    Sub @1:7/7+10
+      Sub @1:7/7+6
+        Int 10 @1:7/7+2
+        Int 2 @1:12/12+1
+      Int 3 @1:16/16+1

@@ -1,0 +1,12 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_set_literal_arg.txt
+---
+> bpy.ops.frap.render_contact_sheet(views={'FRONT'})
+---
+stmt 1 Bpy line 1 @1:1/1+50
+  Invoke frap.render_contact_sheet
+    arg views @1:35/35+15
+      Set @1:41/41+9
+        Str "FRONT" @1:42/42+7

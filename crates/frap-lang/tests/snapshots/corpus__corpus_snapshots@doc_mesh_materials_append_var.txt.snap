@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_mesh_materials_append_var.txt
+---
+> mesh.materials.append(bpy.data.materials.new("Red"))
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:1/1+4
+  message: frap: variables are not supported; use a full path such as bpy.data.objects['Cube']
+  hint: use a full path such as bpy.data.objects['Cube']
+  detail: name="mesh"

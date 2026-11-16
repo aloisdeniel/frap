@@ -1,0 +1,12 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_node_groups_local.txt
+---
+> bpy.data.node_groups['Smooth by Angle']
+---
+stmt 1 Bpy line 1 @1:1/1+39
+  Get
+    Path bpy.data @1:1/1+39
+      .node_groups
+      ["Smooth by Angle"]

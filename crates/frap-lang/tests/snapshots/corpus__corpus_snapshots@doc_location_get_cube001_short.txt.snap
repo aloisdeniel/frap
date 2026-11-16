@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_location_get_cube001_short.txt
+---
+> data.objects['Cube.001'].location
+---
+stmt 1 Short line 1 @1:1/1+33
+  Get
+    Path bpy.data @1:1/1+33
+      .objects
+      ["Cube.001"]
+      .location

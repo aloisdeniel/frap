@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_short_bool.txt
+---
+> data.objects['Cube'].hide_render = true
+---
+stmt 1 Short line 1 @1:1/1+39
+  Set Assign
+    Path bpy.data @1:1/1+32
+      .objects
+      ["Cube"]
+      .hide_render
+    Bool true @1:36/36+4

@@ -1,0 +1,1 @@
+bpy.context.object.modifiers.new(name='Bevel', type='BEVEL')

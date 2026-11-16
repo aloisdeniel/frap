@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_bare_dashed_name.txt
+---
+> object.select_pattern pattern=my-object
+---
+stmt 1 Short line 1 @1:1/1+39
+  Invoke object.select_pattern
+    arg pattern @1:23/23+17
+      Bare my-object @1:31/31+9

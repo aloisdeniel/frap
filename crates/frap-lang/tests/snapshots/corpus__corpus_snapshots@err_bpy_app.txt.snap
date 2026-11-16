@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_bpy_app.txt
+---
+> bpy.app.version
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:5/5+3
+  message: frap: bpy.app is not supported
+  hint: frap exposes bpy.ops, bpy.data and bpy.context

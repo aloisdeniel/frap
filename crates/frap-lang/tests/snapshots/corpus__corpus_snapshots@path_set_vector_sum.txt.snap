@@ -1,0 +1,24 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_vector_sum.txt
+---
+> bpy.data.objects['Cube'].location = bpy.data.objects['Cube'].location + Vector((0, 0, 1))
+---
+stmt 1 Bpy line 1 @1:1/1+89
+  Set Assign
+    Path bpy.data @1:1/1+33
+      .objects
+      ["Cube"]
+      .location
+    Add @1:37/37+53
+            Path bpy.data @1:37/37+33
+        .objects
+        ["Cube"]
+        .location
+      Builtin Vector @1:73/73+17
+        arg (positional) @1:80/80+9
+          Tuple @1:80/80+9
+            Int 0 @1:81/81+1
+            Int 0 @1:84/84+1
+            Int 1 @1:87/87+1

@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_objects_new.txt
+---
+> bpy.data.objects.new('Empty', None)
+---
+stmt 1 Bpy line 1 @1:1/1+35
+  Call
+    Path bpy.data @1:1/1+20
+      .objects
+      .new
+    arg (positional) @1:22/22+7
+      Str "Empty" @1:22/22+7
+    arg (positional) @1:31/31+4
+      None @1:31/31+4

@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_translate.txt
+---
+> transform.translate value=1,0,0 orient_type=GLOBAL
+---
+stmt 1 Short line 1 @1:1/1+50
+  Invoke transform.translate
+    arg value @1:21/21+11
+      Tuple @1:27/27+5
+        Int 1 @1:27/27+1
+        Int 0 @1:29/29+1
+        Int 0 @1:31/31+1
+    arg orient_type @1:33/33+18
+      Bare GLOBAL @1:45/45+6

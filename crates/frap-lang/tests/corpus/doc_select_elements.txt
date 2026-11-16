@@ -1,0 +1,1 @@
+bpy.ops.frap.select_elements(type='FACE', indices=[5])

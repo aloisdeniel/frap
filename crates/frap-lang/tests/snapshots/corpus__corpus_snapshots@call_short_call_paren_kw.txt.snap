@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_short_call_paren_kw.txt
+---
+> context.object.modifiers.new(name='Bevel', type='BEVEL')
+---
+stmt 1 Short line 1 @1:1/1+56
+  Call
+    Path bpy.context @1:1/1+28
+      .object
+      .modifiers
+      .new
+    arg name @1:30/30+12
+      Str "Bevel" @1:35/35+7
+    arg type @1:44/44+12
+      Str "BEVEL" @1:49/49+7

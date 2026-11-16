@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_multi_target.txt
+---
+> bpy.data.objects['A'].hide_render, bpy.data.objects['B'].hide_render = True, True
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:34/34+1
+  message: frap: assigning to several targets is not supported; use one statement per target

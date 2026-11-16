@@ -1,0 +1,19 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_matrix_world.txt
+---
+> bpy.data.objects['Cube'].matrix_world = Matrix.Translation((1, 2, 3))
+---
+stmt 1 Bpy line 1 @1:1/1+69
+  Set Assign
+    Path bpy.data @1:1/1+37
+      .objects
+      ["Cube"]
+      .matrix_world
+    Builtin MatrixTranslation @1:41/41+29
+      arg (positional) @1:60/60+9
+        Tuple @1:60/60+9
+          Int 1 @1:61/61+1
+          Int 2 @1:64/64+1
+          Int 3 @1:67/67+1

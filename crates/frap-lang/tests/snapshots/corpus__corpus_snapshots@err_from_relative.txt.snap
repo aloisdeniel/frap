@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_from_relative.txt
+---
+> from . import x
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:6/6+1
+  message: frap: relative imports are not supported

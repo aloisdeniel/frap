@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_links_new_var.txt
+---
+> links.new(output, input)
+---
+error 1 SyntaxError SYNTAX @1:10/10+1
+  message: invalid syntax
+  hint: call an operator as bpy.ops.links.new(key=value, ...) or, in the short form, links.new key=value ...; an RNA function needs a full path such as bpy.data.objects['Cube'].select_set(True)

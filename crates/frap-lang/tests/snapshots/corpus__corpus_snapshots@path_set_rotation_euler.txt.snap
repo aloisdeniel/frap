@@ -1,0 +1,23 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_rotation_euler.txt
+---
+> bpy.data.objects['Cube'].rotation_euler = Euler((0, 0, radians(90)), 'XYZ')
+---
+stmt 1 Bpy line 1 @1:1/1+75
+  Set Assign
+    Path bpy.data @1:1/1+39
+      .objects
+      ["Cube"]
+      .rotation_euler
+    Builtin Euler @1:43/43+33
+      arg (positional) @1:49/49+19
+        Tuple @1:49/49+19
+          Int 0 @1:50/50+1
+          Int 0 @1:53/53+1
+          Builtin Radians @1:56/56+11
+            arg (positional) @1:64/64+2
+              Int 90 @1:64/64+2
+      arg (positional) @1:70/70+5
+        Str "XYZ" @1:70/70+5

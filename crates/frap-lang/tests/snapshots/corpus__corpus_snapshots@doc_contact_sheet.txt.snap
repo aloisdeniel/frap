@@ -1,0 +1,41 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_contact_sheet.txt
+---
+> bpy.ops.frap.render_contact_sheet(filepath='//sheet.png', views={'FRONT','RIGHT','TOP','ISO'},
+>     engine='BLENDER_WORKBENCH', objects='VISIBLE', view_size=512, columns=0, margin=0.05,
+>     show_labels=True, background=(0.2, 0.2, 0.2, 1.0), use_scene_camera=False, frame=None)
+---
+stmt 1 Bpy line 1 @1:1/1+275
+  Invoke frap.render_contact_sheet
+    arg filepath @1:35/35+22
+      Str "//sheet.png" @1:44/44+13
+    arg views @1:59/59+35
+      Set @1:65/65+29
+        Str "FRONT" @1:66/66+7
+        Str "RIGHT" @1:74/74+7
+        Str "TOP" @1:82/82+5
+        Str "ISO" @1:88/88+5
+    arg engine @2:5/5+26
+      Str "BLENDER_WORKBENCH" @2:12/12+19
+    arg objects @2:33/33+17
+      Str "VISIBLE" @2:41/41+9
+    arg view_size @2:52/52+13
+      Int 512 @2:62/62+3
+    arg columns @2:67/67+9
+      Int 0 @2:75/75+1
+    arg margin @2:78/78+11
+      Float 0.05 @2:85/85+4
+    arg show_labels @3:5/5+16
+      Bool true @3:17/17+4
+    arg background @3:23/23+31
+      Tuple @3:34/34+20
+        Float 0.2 @3:35/35+3
+        Float 0.2 @3:40/40+3
+        Float 0.2 @3:45/45+3
+        Float 1.0 @3:50/50+3
+    arg use_scene_camera @3:56/56+22
+      Bool false @3:73/73+5
+    arg frame @3:80/80+10
+      None @3:86/86+4

@@ -1,0 +1,21 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_children_link.txt
+---
+> bpy.context.scene.collection.children.link(bpy.data.collections.new('Parts'))
+---
+stmt 1 Bpy line 1 @1:1/1+77
+  Call
+    Path bpy.context @1:1/1+42
+      .scene
+      .collection
+      .children
+      .link
+    arg (positional) @1:44/44+33
+            Path bpy.data @1:44/44+33
+        .collections
+        .new
+        (call)
+          arg (positional) @1:69/69+7
+            Str "Parts" @1:69/69+7

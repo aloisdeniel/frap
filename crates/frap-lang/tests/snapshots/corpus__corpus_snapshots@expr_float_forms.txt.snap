@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_float_forms.txt
+---
+> print(1., .5, 1.e5, 1e-3, 1_0.0_1)
+---
+stmt 1 Bpy line 1 @1:1/1+34
+  Print
+    Float 1.0 @1:7/7+2
+    Float 0.5 @1:11/11+2
+    Float 100000.0 @1:15/15+4
+    Float 0.001 @1:21/21+4
+    Float 10.01 @1:27/27+7

@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_uv_sphere.txt
+---
+> mesh.primitive_uv_sphere_add segments=16 ring_count=8
+---
+stmt 1 Short line 1 @1:1/1+53
+  Invoke mesh.primitive_uv_sphere_add
+    arg segments @1:30/30+11
+      Int 16 @1:39/39+2
+    arg ring_count @1:42/42+12
+      Int 8 @1:53/53+1

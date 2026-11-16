@@ -1,0 +1,1 @@
+mesh.materials.append(bpy.data.materials.new("Red"))

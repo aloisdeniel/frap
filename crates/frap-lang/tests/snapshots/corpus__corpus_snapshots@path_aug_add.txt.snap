@@ -1,0 +1,19 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_aug_add.txt
+---
+> bpy.data.objects['Cube'].location += Vector((0, 0, 1))
+---
+stmt 1 Bpy line 1 @1:1/1+54
+  Set Add
+    Path bpy.data @1:1/1+33
+      .objects
+      ["Cube"]
+      .location
+    Builtin Vector @1:38/38+17
+      arg (positional) @1:45/45+9
+        Tuple @1:45/45+9
+          Int 0 @1:46/46+1
+          Int 0 @1:49/49+1
+          Int 1 @1:52/52+1

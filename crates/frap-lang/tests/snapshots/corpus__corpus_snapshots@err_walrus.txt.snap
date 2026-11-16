@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_walrus.txt
+---
+> print(x := 1)
+---
+error 1 NameError NAME @1:7/7+1
+  message: name 'x' is not defined
+  hint: frap has no variables: quote strings ('Cube') and use full paths such as bpy.data.objects['Cube']
+  detail: name="x"

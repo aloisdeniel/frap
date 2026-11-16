@@ -1,0 +1,1 @@
+bpy.ops.mesh.bevel.get_rna_type()

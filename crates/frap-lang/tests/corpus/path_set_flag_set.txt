@@ -1,0 +1,1 @@
+bpy.context.tool_settings.mesh_select_mode = (True, False, False)

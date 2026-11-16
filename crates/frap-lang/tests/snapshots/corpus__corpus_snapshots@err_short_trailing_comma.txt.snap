@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_trailing_comma.txt
+---
+> mesh.primitive_cube_add location=0,0,
+---
+error 1 SyntaxError SYNTAX @1:38/38+0
+  message: invalid syntax
+  hint: no spaces inside a short-form tuple: 0,0,1

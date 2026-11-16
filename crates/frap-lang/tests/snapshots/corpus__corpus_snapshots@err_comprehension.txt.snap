@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_comprehension.txt
+---
+> print([o.name for o in bpy.data.objects])
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:15/15+3
+  message: frap: comprehensions and generator expressions are not supported

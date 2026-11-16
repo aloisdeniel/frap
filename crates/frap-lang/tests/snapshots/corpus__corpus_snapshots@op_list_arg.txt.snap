@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_list_arg.txt
+---
+> bpy.ops.frap.select_elements(type='VERT', indices=[0, 1, 2, 3])
+---
+stmt 1 Bpy line 1 @1:1/1+63
+  Invoke frap.select_elements
+    arg type @1:30/30+11
+      Str "VERT" @1:35/35+6
+    arg indices @1:43/43+20
+      List @1:51/51+12
+        Int 0 @1:52/52+1
+        Int 1 @1:55/55+1
+        Int 2 @1:58/58+1
+        Int 3 @1:61/61+1

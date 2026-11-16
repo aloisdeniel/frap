@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_rotation_degrees_short.txt
+---
+> mesh.primitive_cube_add rotation=0,0,90
+---
+stmt 1 Short line 1 @1:1/1+39
+  Invoke mesh.primitive_cube_add
+    arg rotation @1:25/25+15
+      Tuple @1:34/34+6
+        Int 0 @1:34/34+1
+        Int 0 @1:36/36+1
+        Int 90 @1:38/38+2

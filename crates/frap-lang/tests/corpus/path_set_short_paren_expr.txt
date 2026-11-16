@@ -1,0 +1,1 @@
+data.objects['Cube'].rotation_euler = (0, 0, radians(90))

@@ -1,0 +1,20 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_macro_two_props.txt
+---
+> mesh.extrude_region_move TRANSFORM_OT_translate.value=0,0,1 TRANSFORM_OT_translate.orient_type=NORMAL
+---
+stmt 1 Short line 1 @1:1/1+101
+  Invoke mesh.extrude_region_move
+    arg TRANSFORM_OT_translate @1:26/26+76
+      Dict @1:26/26+76
+        entry
+          Str "value" @1:49/49+5
+          Tuple @1:55/55+5
+            Int 0 @1:55/55+1
+            Int 0 @1:57/57+1
+            Int 1 @1:59/59+1
+        entry
+          Str "orient_type" @1:84/84+11
+          Bare NORMAL @1:96/96+6

@@ -1,0 +1,1 @@
+object.delete use_global=false

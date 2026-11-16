@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_extrude_macro_bpy.txt
+---
+> bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value": (0, 0, 1)})
+---
+stmt 1 Bpy line 1 @1:1/1+77
+  Invoke mesh.extrude_region_move
+    arg TRANSFORM_OT_translate @1:34/34+43
+      Dict @1:57/57+20
+        entry
+          Str "value" @1:58/58+7
+          Tuple @1:67/67+9
+            Int 0 @1:68/68+1
+            Int 0 @1:71/71+1
+            Int 1 @1:74/74+1

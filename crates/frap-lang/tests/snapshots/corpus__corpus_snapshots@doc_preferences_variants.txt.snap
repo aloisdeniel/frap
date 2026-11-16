@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_preferences_variants.txt
+---
+> bpy.context.preferences.addons['io_scene_gltf2'].preferences.KHR_materials_variants_ui = True
+---
+stmt 1 Bpy line 1 @1:1/1+93
+  Set Assign
+    Path bpy.context @1:1/1+86
+      .preferences
+      .addons
+      ["io_scene_gltf2"]
+      .preferences
+      .KHR_materials_variants_ui
+    Bool true @1:90/90+4

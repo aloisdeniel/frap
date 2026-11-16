@@ -1,0 +1,1 @@
+bpy.data.objects.new(name='Thing', object_data=bpy.data.meshes['Cube'])

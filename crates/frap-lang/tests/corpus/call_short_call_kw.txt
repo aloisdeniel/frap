@@ -1,0 +1,1 @@
+data.objects.new name=Thing object_data=data.meshes['Cube']

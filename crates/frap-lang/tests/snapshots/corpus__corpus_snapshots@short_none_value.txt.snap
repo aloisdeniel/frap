@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_none_value.txt
+---
+> frap.render_contact_sheet frame=none
+---
+stmt 1 Short line 1 @1:1/1+36
+  Invoke frap.render_contact_sheet
+    arg frame @1:27/27+10
+      None @1:33/33+4

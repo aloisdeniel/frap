@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_get_render_settings.txt
+---
+> bpy.context.scene.render.resolution_x
+---
+stmt 1 Bpy line 1 @1:1/1+37
+  Get
+    Path bpy.context @1:1/1+37
+      .scene
+      .render
+      .resolution_x

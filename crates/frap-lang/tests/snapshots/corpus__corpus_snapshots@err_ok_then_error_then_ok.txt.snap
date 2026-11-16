@@ -1,0 +1,15 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_ok_then_error_then_ok.txt
+---
+> bpy.data.objects
+> bpy.data.objects[
+> bpy.data.objects
+---
+stmt 1 Bpy line 1 @1:1/1+16
+  Get
+    Path bpy.data @1:1/1+16
+      .objects
+error 2 SyntaxError SYNTAX @2:17/17+1
+  message: '[' was never closed

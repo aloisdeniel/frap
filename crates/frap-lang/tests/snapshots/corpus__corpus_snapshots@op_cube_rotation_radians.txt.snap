@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_cube_rotation_radians.txt
+---
+> bpy.ops.mesh.primitive_cube_add(rotation=(0, 0, radians(45)))
+---
+stmt 1 Bpy line 1 @1:1/1+61
+  Invoke mesh.primitive_cube_add
+    arg rotation @1:33/33+28
+      Tuple @1:42/42+19
+        Int 0 @1:43/43+1
+        Int 0 @1:46/46+1
+        Builtin Radians @1:49/49+11
+          arg (positional) @1:57/57+2
+            Int 45 @1:57/57+2

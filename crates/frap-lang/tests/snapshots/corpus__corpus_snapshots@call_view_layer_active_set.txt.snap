@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_view_layer_active_set.txt
+---
+> bpy.context.view_layer.objects.active = bpy.data.objects['Cube']
+---
+stmt 1 Bpy line 1 @1:1/1+64
+  Set Assign
+    Path bpy.context @1:1/1+37
+      .view_layer
+      .objects
+      .active
+        Path bpy.data @1:41/41+24
+      .objects
+      ["Cube"]

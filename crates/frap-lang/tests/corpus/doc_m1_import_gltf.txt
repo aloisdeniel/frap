@@ -1,0 +1,1 @@
+bpy.ops.import_scene.gltf(filepath='out/part.glb')

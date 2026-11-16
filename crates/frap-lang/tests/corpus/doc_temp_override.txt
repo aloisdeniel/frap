@@ -1,0 +1,1 @@
+bpy.context.temp_override(window, area=<VIEW_3D>, region=<WINDOW>)

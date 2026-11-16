@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_unterminated_string_short.txt
+---
+> export_scene.gltf filepath='out.glb
+---
+error 1 SyntaxError SYNTAX @1:28/28+8
+  message: unterminated string literal (detected at line 1)

@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_foreach_get_co.txt
+---
+> bpy.data.meshes['Cube'].vertices.foreach_get("co")
+---
+stmt 1 Bpy line 1 @1:1/1+50
+  Call
+    Path bpy.data @1:1/1+44
+      .meshes
+      ["Cube"]
+      .vertices
+      .foreach_get
+    arg (positional) @1:46/46+4
+      Str "co" @1:46/46+4

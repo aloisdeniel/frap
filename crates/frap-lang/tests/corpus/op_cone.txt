@@ -1,0 +1,1 @@
+bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=1, radius2=0, depth=2)

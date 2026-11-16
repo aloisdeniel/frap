@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_bevel_idname_py.txt
+---
+> bpy.ops.mesh.bevel.idname_py()
+---
+stmt 1 Bpy line 1 @1:1/1+30
+  OpMeta mesh.bevel IdnamePy

@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_rotation_radians_hint.txt
+---
+> mesh.primitive_cube_add rotation=0,0,radians(90)
+---
+stmt 1 Short line 1 @1:1/1+48
+  Invoke mesh.primitive_cube_add
+    arg rotation @1:25/25+24
+      Tuple @1:34/34+15
+        Int 0 @1:34/34+1
+        Int 0 @1:36/36+1
+        Builtin Radians @1:38/38+11
+          arg (positional) @1:46/46+2
+            Int 90 @1:46/46+2

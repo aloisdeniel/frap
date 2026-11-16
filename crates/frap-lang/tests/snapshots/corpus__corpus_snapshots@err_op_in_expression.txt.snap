@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_op_in_expression.txt
+---
+> print(bpy.ops.mesh.primitive_cube_add())
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:7/7+7
+  message: frap: operator calls cannot be used inside expressions or as paths
+  hint: call the operator as its own statement

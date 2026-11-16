@@ -1,0 +1,1 @@
+bpy.ops.mesh.extrude_region_move(MESH_OT_extrude_region={'use_normal_flip': False}, TRANSFORM_OT_translate={'value': (0, 0, 1), 'orient_type': 'NORMAL'})

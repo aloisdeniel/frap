@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_star_args.txt
+---
+> bpy.ops.mesh.primitive_cube_add(*args)
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:33/33+1
+  message: frap: argument unpacking (*args, **kwargs) is not supported

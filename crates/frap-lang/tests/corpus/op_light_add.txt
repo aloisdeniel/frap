@@ -1,0 +1,1 @@
+bpy.ops.object.light_add(type='SUN', radius=1, location=(0, 0, 5))

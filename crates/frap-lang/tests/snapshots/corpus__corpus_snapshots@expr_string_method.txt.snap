@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_string_method.txt
+---
+> print('abc'.upper())
+---
+stmt 1 Bpy line 1 @1:1/1+20
+  Print
+    Method upper @1:7/7+13
+      Str "abc" @1:7/7+5

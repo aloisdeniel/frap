@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_string_escapes.txt
+---
+> print('\n\t\\ \x41 \u00e9 \101 \q')
+---
+stmt 1 Bpy line 1 @1:1/1+35
+  Print
+    Str "\n\t\\ A é A \\q" @1:7/7+28

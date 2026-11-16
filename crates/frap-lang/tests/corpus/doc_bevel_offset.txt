@@ -1,0 +1,1 @@
+bpy.ops.mesh.bevel(offset=0.1)

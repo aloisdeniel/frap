@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_comparison.txt
+---
+> print(bpy.context.scene.frame_current == 1)
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:39/39+2
+  message: frap: comparisons are not supported

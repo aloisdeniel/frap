@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_call_positional_after_kw.txt
+---
+> data.objects.new name=Thing none
+---
+error 1 SyntaxError SYNTAX @1:29/29+4
+  message: positional argument follows keyword argument

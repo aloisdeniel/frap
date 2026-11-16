@@ -1,0 +1,1 @@
+bpy.data.meshes['Cube'].vertices[1000:2000].foreach_get("co")

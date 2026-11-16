@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_raw_string.txt
+---
+> export_scene.gltf filepath=r'C:\out\a.glb'
+---
+stmt 1 Short line 1 @1:1/1+42
+  Invoke export_scene.gltf
+    arg filepath @1:19/19+24
+      Str "C:\\out\\a.glb" @1:28/28+15

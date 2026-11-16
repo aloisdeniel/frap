@@ -1,0 +1,1 @@
+print(float('nan'), float('-inf'), int(2.7), float(3))

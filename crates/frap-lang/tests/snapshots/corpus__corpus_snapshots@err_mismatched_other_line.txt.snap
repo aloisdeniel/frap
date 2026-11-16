@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_mismatched_other_line.txt
+---
+> x = (1,
+>  2]
+---
+error 1 SyntaxError SYNTAX @2:3/3+1
+  message: closing parenthesis ']' does not match opening parenthesis '(' on line 1

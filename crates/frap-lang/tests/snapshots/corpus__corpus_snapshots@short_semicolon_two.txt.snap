@@ -1,0 +1,15 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_semicolon_two.txt
+---
+> object.select_all action=DESELECT; mesh.primitive_cube_add size=1
+---
+stmt 1 Short line 1 @1:1/1+33
+  Invoke object.select_all
+    arg action @1:19/19+15
+      Bare DESELECT @1:26/26+8
+stmt 2 Short line 1 @1:36/36+30
+  Invoke mesh.primitive_cube_add
+    arg size @1:60/60+6
+      Int 1 @1:65/65+1

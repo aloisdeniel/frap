@@ -1,0 +1,15 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_literals_mix.txt
+---
+> print(1, 2.5, 'x', True, False, None)
+---
+stmt 1 Bpy line 1 @1:1/1+37
+  Print
+    Int 1 @1:7/7+1
+    Float 2.5 @1:10/10+3
+    Str "x" @1:15/15+3
+    Bool true @1:20/20+4
+    Bool false @1:26/26+5
+    None @1:33/33+4

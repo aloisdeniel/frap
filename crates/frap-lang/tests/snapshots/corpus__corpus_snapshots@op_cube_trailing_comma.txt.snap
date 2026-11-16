@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_cube_trailing_comma.txt
+---
+> bpy.ops.mesh.primitive_cube_add(size=2,)
+---
+stmt 1 Bpy line 1 @1:1/1+40
+  Invoke mesh.primitive_cube_add
+    arg size @1:33/33+6
+      Int 2 @1:38/38+1

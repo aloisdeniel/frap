@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/stmt_pass.txt
+---
+> pass
+---
+stmt 1 Bpy line 1 @1:1/1+4
+  Noop Pass

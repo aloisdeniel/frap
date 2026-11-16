@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_positional_after_keyword.txt
+---
+> bpy.ops.mesh.primitive_cube_add(size=2, (0, 0, 1))
+---
+error 1 SyntaxError SYNTAX @1:41/41+9
+  message: positional argument follows keyword argument

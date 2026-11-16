@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_objects_get.txt
+---
+> bpy.data.objects.get('Cube')
+---
+stmt 1 Bpy line 1 @1:1/1+28
+  Call
+    Path bpy.data @1:1/1+20
+      .objects
+      .get
+    arg (positional) @1:22/22+6
+      Str "Cube" @1:22/22+6

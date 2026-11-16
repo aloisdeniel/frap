@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_op_bad_meta.txt
+---
+> bpy.ops.mesh.bevel.bl_rna
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:20/20+6
+  message: frap: bpy.ops.mesh.bevel.bl_rna is not supported; use .poll(), .get_rna_type(), .idname() or .idname_py()

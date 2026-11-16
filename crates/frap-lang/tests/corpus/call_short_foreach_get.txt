@@ -1,0 +1,1 @@
+data.meshes['Cube'].vertices.foreach_get co

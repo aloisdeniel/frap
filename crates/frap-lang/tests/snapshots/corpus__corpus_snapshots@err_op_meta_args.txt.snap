@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_op_meta_args.txt
+---
+> bpy.ops.mesh.bevel.poll('INVOKE_DEFAULT')
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:25/25+16
+  message: frap: bpy.ops.mesh.bevel.poll() takes no arguments

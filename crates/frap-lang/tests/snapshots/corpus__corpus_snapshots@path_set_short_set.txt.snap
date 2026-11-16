@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_short_set.txt
+---
+> context.tool_settings.mesh_select_mode = True,False,False
+---
+stmt 1 Short line 1 @1:1/1+57
+  Set Assign
+    Path bpy.context @1:1/1+38
+      .tool_settings
+      .mesh_select_mode
+    Tuple @1:42/42+16
+      Bool true @1:42/42+4
+      Bool false @1:47/47+5
+      Bool false @1:53/53+5

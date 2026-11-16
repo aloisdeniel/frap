@@ -1,0 +1,1 @@
+bpy.data.objects['a;b'].name = 'c;d'

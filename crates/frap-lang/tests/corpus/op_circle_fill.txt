@@ -1,0 +1,1 @@
+bpy.ops.mesh.primitive_circle_add(vertices=32, fill_type='NGON')

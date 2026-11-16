@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_u_prefix.txt
+---
+> print(u'x')
+---
+stmt 1 Bpy line 1 @1:1/1+11
+  Print
+    Str "x" @1:7/7+4

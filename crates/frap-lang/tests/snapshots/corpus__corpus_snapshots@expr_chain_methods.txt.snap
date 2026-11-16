@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_chain_methods.txt
+---
+> print(Euler((0, 0, 1)).to_matrix().to_4x4())
+---
+stmt 1 Bpy line 1 @1:1/1+44
+  Print
+    Method to_4x4 @1:7/7+37
+      Method to_matrix @1:7/7+28
+        Builtin Euler @1:7/7+16
+          arg (positional) @1:13/13+9
+            Tuple @1:13/13+9
+              Int 0 @1:14/14+1
+              Int 0 @1:17/17+1
+              Int 1 @1:20/20+1

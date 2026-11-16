@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_read_factory.txt
+---
+> bpy.ops.wm.read_factory_settings(use_empty=False)
+---
+stmt 1 Bpy line 1 @1:1/1+49
+  Invoke wm.read_factory_settings
+    arg use_empty @1:34/34+15
+      Bool false @1:44/44+5

@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_float_exponent.txt
+---
+> transform.resize value=1e-3,1E3,2.5e+2
+---
+stmt 1 Short line 1 @1:1/1+38
+  Invoke transform.resize
+    arg value @1:18/18+21
+      Tuple @1:24/24+15
+        Float 0.001 @1:24/24+4
+        Float 1000.0 @1:29/29+3
+        Float 250.0 @1:33/33+6

@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_macro_and_plain.txt
+---
+> mesh.extrude_region_move TRANSFORM_OT_translate.value=0,0,1 TRANSFORM_OT_translate=1
+---
+error 1 SyntaxError SYNTAX @1:61/61+22
+  message: keyword argument repeated: TRANSFORM_OT_translate

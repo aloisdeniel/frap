@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_short_call_set_value.txt
+---
+> data.objects['Cube'].select_set {A,B}
+---
+stmt 1 Short line 1 @1:1/1+37
+  Call
+    Path bpy.data @1:1/1+31
+      .objects
+      ["Cube"]
+      .select_set
+    arg (positional) @1:33/33+5
+      Set @1:33/33+5
+        Bare A @1:34/34+1
+        Bare B @1:36/36+1

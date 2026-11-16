@@ -1,0 +1,15 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_enum_flag.txt
+---
+> bpy.data.objects['Cube'].display.show_shadows = False
+---
+stmt 1 Bpy line 1 @1:1/1+53
+  Set Assign
+    Path bpy.data @1:1/1+45
+      .objects
+      ["Cube"]
+      .display
+      .show_shadows
+    Bool false @1:49/49+5

@@ -1,0 +1,1 @@
+mesh.extrude_region_move MESH_OT_extrude_region.use_normal_flip=false TRANSFORM_OT_translate.value=0,0,1

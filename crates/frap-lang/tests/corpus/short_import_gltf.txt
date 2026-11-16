@@ -1,0 +1,1 @@
+import_scene.gltf filepath='in.glb'

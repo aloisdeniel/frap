@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_scenes_new.txt
+---
+> bpy.data.scenes.new('S2')
+---
+stmt 1 Bpy line 1 @1:1/1+25
+  Call
+    Path bpy.data @1:1/1+19
+      .scenes
+      .new
+    arg (positional) @1:21/21+4
+      Str "S2" @1:21/21+4
