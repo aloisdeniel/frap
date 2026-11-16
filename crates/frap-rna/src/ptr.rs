@@ -58,7 +58,9 @@ impl PartialEq for RnaPtr {
 }
 
 /// Name lookup for `repr` (implemented by `Main`): the ID's name and, for linked IDs, its
-/// library path.
+/// library **filepath** (`Library.filepath` as stored, e.g. `//lib.blend` or an absolute path),
+/// the second element of the `['Name', '<library filepath>']` repr. `.frap` references use the
+/// library *name* instead, through [`crate::serde_id::IdRefNamer`].
 pub trait IdNames {
     /// `(name, library)`; `None` if the ID does not exist.
     fn id_name(&self, id: IdAny) -> Option<(SmolStr, Option<SmolStr>)>;
@@ -127,7 +129,13 @@ pub fn rna_key_repr(s: &str) -> String {
     format!("[\"{}\"]", s.replace('\\', "\\\\").replace('"', "\\\""))
 }
 
-/// `bpy.data.objects['Cube']`, or `bpy.data.node_groups['Name', '<lib>']` for linked IDs.
+/// `bpy.data.objects['Cube']`, or `bpy.data.node_groups['Name', '<library filepath>']` for
+/// linked IDs (§9.3 contract, the `bpy_prop_collection[name, lib]` key form).
+///
+/// Deviation (pending a `docs/deviations.md` entry): Blender 5.2.4 prints linked IDs without
+/// their library (`bpy.data.node_groups['Smooth by Angle']`, verified, even when a local group
+/// of the same name exists); frap keeps the library so that a local and a linked ID with the
+/// same name never share a repr.
 pub fn id_repr(code: IdCode, name: &str, library: Option<&str>) -> String {
     match library {
         None => format!("bpy.data.{}[{}]", code.collection(), py_str_repr(name)),

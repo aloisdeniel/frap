@@ -329,20 +329,18 @@ impl RnaError {
     }
     /// Converts with a context prefix and a code chosen from the kind.
     ///
-    /// Blender's prefixes end in a separator space (`"bpy_struct: item.attr = val: "`); when
-    /// the message body is empty Blender emits the prefix without it
-    /// (`TypeError: bpy_struct: item.attr = val:` for `obj.location = 5`, verified on 5.2.4), so
-    /// trailing whitespace of the prefix is dropped in that case.
+    /// Blender's prefixes end in a separator space (`"bpy_struct: item.attr = val: "`). Blender
+    /// itself stores them without it and lets each message format add `" "`, `", "` or `": "`;
+    /// so when the message body is empty (`TypeError: bpy_struct: item.attr = val:` for
+    /// `obj.location = 5`) or starts with `,` / `:` (`…val:, DecimateModifier.delimit expected a
+    /// set, not a list`, `…properties:: keyword "sizee" unrecognized`), the prefix's trailing
+    /// whitespace is dropped (verified on 5.2.4).
     pub fn into_frap(
         self,
         prefix: &str,
         code_for: impl Fn(RnaErrorKind) -> ErrorCode,
     ) -> FrapError {
-        let message = if self.message.is_empty() {
-            prefix.trim_end().to_owned()
-        } else {
-            format!("{prefix}{}", self.message)
-        };
+        let message = join_prefix(prefix, &self.message);
         FrapError {
             exception: self.exception,
             code: code_for(self.kind),
@@ -351,6 +349,15 @@ impl RnaError {
             detail: self.detail,
             hint: self.hint,
         }
+    }
+}
+
+/// `prefix` + `body` with Blender's separator rule (see [`RnaError::into_frap`]).
+pub fn join_prefix(prefix: &str, body: &str) -> String {
+    if body.is_empty() || body.starts_with(',') || body.starts_with(':') {
+        format!("{}{body}", prefix.trim_end())
+    } else {
+        format!("{prefix}{body}")
     }
 }
 

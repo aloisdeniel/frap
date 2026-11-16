@@ -118,6 +118,10 @@ impl IdCode {
             IdCode::PT => "pointclouds",
         }
     }
+    /// Parses a two-letter code ("OB"); `None` for unknown codes.
+    pub fn from_code(code: &str) -> Option<IdCode> {
+        IdCode::ALL.into_iter().find(|c| c.as_str() == code)
+    }
     /// The two-letter code as a string ("OB").
     pub const fn as_str(self) -> &'static str {
         match self {
@@ -153,7 +157,8 @@ pub trait IdKind: Copy + Send + Sync + 'static {
 }
 
 /// Typed pointer between datablocks. Never a name, never an `Arc`. `Clone/Copy/Eq/Hash/Ord/Debug`
-/// are implemented by hand so they carry no `K:` bounds.
+/// are implemented by hand so they carry no `K:` bounds. `Serialize`/`Deserialize` write the §15
+/// reference form `{"$id": "ME", "name": "Cube"}` through [`crate::serde_id`].
 pub struct IdRef<K: IdKind>(IdKey, PhantomData<fn() -> K>);
 
 impl<K: IdKind> IdRef<K> {

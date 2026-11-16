@@ -12,6 +12,7 @@ pub mod naming;
 pub mod op;
 pub mod ptr;
 pub mod serde_buf;
+pub mod serde_id;
 pub mod testing;
 pub mod traits;
 pub mod value;
