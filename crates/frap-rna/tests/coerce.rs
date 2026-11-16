@@ -482,12 +482,25 @@ fn rna_1_2_hard_range_clamped_silently_frap_reports() {
     );
     assert_eq!(fa(&c.value)[0], f32::MAX);
     assert!(c.clamped);
-    // INT: clamped to the hard range, Python int range checked first.
+    // INT: clamped to the hard range, Python int range checked first. `Object.pass_index`
+    // (hard [0, 32767]) reads back 32767 after `= 1000000000` and 0 after `= -5` in Blender
+    // 5.2.4. (`Scene.frame_current` is not a valid example: its custom setter stores values
+    // beyond its hard range, which WP 1.10's hook must reproduce.)
+    let pi = prop(&OBJECT, "pass_index");
+    let c = ok(pi, Input::Int(1_000_000_000), &cx);
+    assert_eq!((c.value, c.clamped), (Value::Int(32_767), true));
+    let c = ok(pi, Input::Int(-5), &cx);
+    assert_eq!((c.value, c.clamped), (Value::Int(0), true));
+    let c = ok(pi, Input::Int(7), &cx);
+    assert_eq!((c.value, c.clamped), (Value::Int(7), false));
+    assert_eq!(
+        fail(pi, Input::Int(1_000_000_000_000), &cx),
+        format!(
+            "ValueError: {P} Object.pass_index value not in 'int' range ((-2147483647 -1), 2147483647)"
+        )
+    );
     let fc = prop(&SCENE, "frame_current");
     let sc = rna_cx("Scene");
-    let c = ok(fc, Input::Int(1_000_000_000), &sc);
-    assert_eq!(c.value, Value::Int(1_048_574));
-    assert!(c.clamped);
     assert_eq!(
         fail(fc, Input::Int(1_000_000_000_000), &sc),
         format!(
@@ -789,12 +802,31 @@ fn operator_collection_props() {
     let c = ok(&files, Input::List(vec![Input::Dict(d)]), &cx);
     let Value::Structs(v) = c.value else { panic!() };
     assert_eq!(v[0]["name"], Value::Str("a.glb".into()));
+    // A str is a Python sequence: Blender fails on its first character.
     assert_eq!(
         fail(&files, s("a.glb"), &cx),
         format!(
-            "TypeError: {O} IMPORT_SCENE_OT_gltf.files expected a sequence for an RNA collection, not str"
+            "TypeError: {O} IMPORT_SCENE_OT_gltf.files expected a each sequence member to be a dict for an RNA collection, not str"
         )
     );
+    // Dicts, sets and scalars are not sequences.
+    let mut d = IndexMap::new();
+    d.insert("name".to_string(), s("a"));
+    for (input, name) in [
+        (Input::Dict(d), "dict"),
+        (Input::Set(vec![s("a.glb")]), "set"),
+        (Input::Int(5), "int"),
+    ] {
+        assert_eq!(
+            fail(&files, input, &cx),
+            format!(
+                "TypeError: {O} IMPORT_SCENE_OT_gltf.files expected a sequence for an RNA collection, not {name}"
+            )
+        );
+    }
+    // The empty string is an empty sequence.
+    let c = ok(&files, s(""), &cx);
+    assert_eq!(c.value, Value::Structs(vec![]));
     assert_eq!(
         fail(&files, Input::List(vec![s("a.glb")]), &cx),
         format!(

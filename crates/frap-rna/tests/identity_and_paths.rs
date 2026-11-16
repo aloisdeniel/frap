@@ -144,7 +144,7 @@ fn id_and_struct_reprs() {
                 lib_group,
                 (
                     "Smooth by Angle".into(),
-                    Some("geometry_nodes_essentials.blend.001".into()),
+                    Some("//assets/geometry_nodes_essentials.blend".into()),
                 ),
             ),
         ]
@@ -173,10 +173,12 @@ fn id_and_struct_reprs() {
         slot.repr(&names),
         "bpy.data.objects['Cube'].material_slots[0]"
     );
-    // Linked IDs carry their library.
+    // Linked IDs carry their library filepath (IdNames contract). Deviation: Blender 5.2.4
+    // prints `bpy.data.node_groups['Smooth by Angle']` (verified); frap disambiguates it from a
+    // local group of the same name (§9.3).
     assert_eq!(
         RnaPtr::id(lib_group, &NODE_TREE).repr(&names),
-        "bpy.data.node_groups['Smooth by Angle', 'geometry_nodes_essentials.blend.001']"
+        "bpy.data.node_groups['Smooth by Angle', '//assets/geometry_nodes_essentials.blend']"
     );
     // Quoting (verified `repr(objects["a'b\"c"])`).
     assert_eq!(

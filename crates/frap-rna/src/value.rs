@@ -732,8 +732,14 @@ fn coerce_inner(def: &PropDef, input: Input, cx: &CoerceCx) -> Result<Coerced, R
             ))),
         },
         PropKind::Collection { .. } => {
+            // Python's sequence protocol (`PySequence_Check`): tuples, lists, strings and
+            // math types are sequences, so `files='a.glb'` fails on its first member; dicts
+            // and sets are not (verified, Blender 5.2.4).
             let items = match input {
                 Input::Tuple(v) | Input::List(v) => v,
+                seq @ (Input::Str(_) | Input::Bare(_) | Input::Math(_)) => {
+                    sequence_items(&seq).unwrap_or_default()
+                }
                 other => {
                     return Err(type_err(format!(
                         "{qual} expected a sequence for an RNA collection, not {}",

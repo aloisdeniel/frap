@@ -202,7 +202,7 @@ pub static ROTATION_MODES: [EnumItem; 8] = [
 ];
 pub static OBJECT_TYPES: [EnumItem; 3] = [item("MESH", 0), item("EMPTY", 25), item("CAMERA", 11)];
 
-pub static OBJECT_PROPS: [PropDef; 12] = [
+pub static OBJECT_PROPS: [PropDef; 13] = [
     float(
         "location",
         ArrayShape::Fixed(3),
@@ -237,6 +237,8 @@ pub static OBJECT_PROPS: [PropDef; 12] = [
         NONE,
     ),
     string("parent_bone", 64, NN),
+    // `Object.pass_index`: INT (UNSIGNED), hard range [0, 32767].
+    int("pass_index", ArrayShape::Scalar, (0, 32_767), NONE),
     float(
         "rotation_euler",
         ArrayShape::Fixed(3),
