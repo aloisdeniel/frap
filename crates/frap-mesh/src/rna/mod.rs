@@ -4,7 +4,7 @@
 //! `MeshVertex`, `MeshEdge`, `MeshPolygon`, `MeshLoop`, `MeshLoopTriangle`, `MeshNormalValue`,
 //! the attribute layers and their typed `data[i]`, `MeshUVLoopLayer`/`MeshUVLoop` and
 //! `MeshLoopColorLayer`/`MeshLoopColor` are proxies over the struct-of-arrays columns
-//! ([`soa`]); every element collection overrides `foreach_get`/`foreach_set` with column
+//! ([`soa`](mod@soa)); every element collection overrides `foreach_get`/`foreach_set` with column
 //! copies ([`bulk`]). Writes go through `Mesh`'s `&mut` methods, which clear the runtime
 //! caches.
 //!
@@ -21,7 +21,8 @@
 //! `uv_layer_stencil[_index]`, `skin_vertices`, the remesh/symmetry/paint-mask settings,
 //! `MeshUVLoopLayer.active_clone`, and the collection-struct properties
 //! (`uv_layers.active`, `attributes.active_color`, …), which the frozen `RnaColl` cannot
-//! expose.
+//! expose. Reading or writing one of them gives `NotImplementedError` (`RNA_NOT_IMPLEMENTED`,
+//! [`soa::unbound`]), never Blender's "has no attribute" wording.
 
 mod attribute;
 mod attribute_value;
@@ -41,8 +42,7 @@ mod tests;
 
 use frap_rna::testing::{BindingDecl, RnaBindings};
 use frap_rna::traits::{
-    FromRnaValue, IdVecColl, IdVecCollMut, RnaStruct, ToRnaValue, no_attribute, read_only,
-    wrong_access,
+    FromRnaValue, IdVecColl, IdVecCollMut, RnaStruct, ToRnaValue, read_only, wrong_access,
 };
 use frap_rna::*;
 use frap_spec_rna::{self as spec, MESH};
@@ -220,7 +220,7 @@ impl Rna for Mesh {
             "texspace_size" => texspace(self).1.to_rna_value(prop, tag(prop)),
             // Edit-mode selection counts (`em->bm->totvertsel`); 0 outside Edit Mode (verified).
             "total_vert_sel" | "total_edge_sel" | "total_face_sel" => 0i32.to_rna_value(prop, none),
-            _ => return Err(no_attribute(&MESH, prop.identifier)),
+            _ => return Err(soa::unbound(&MESH, prop.identifier)),
         };
         Ok(Field::Value(v))
     }
@@ -233,7 +233,16 @@ impl RnaMut for Mesh {
             "name_full" | "users" => return Ok(SetOutcome::NeedsHook),
             "use_fake_user" => self.header.use_fake_user = bool::from_rna_value(prop, v)?,
             "use_auto_texspace" | "auto_texspace" => {
-                self.texspace.auto = bool::from_rna_value(prop, v)?
+                let auto = bool::from_rna_value(prop, v)?;
+                if self.texspace.auto && !auto {
+                    // Blender keeps the last automatic texture space (`BKE_mesh_texspace_ensure`
+                    // stored it in `me->texspace_*`); verified on 5.2.4: a size-4 cube keeps
+                    // `(0, 0, 0)` / `(2, 2, 2)` after `use_auto_texspace = False`.
+                    let (location, size) = texspace(self);
+                    self.texspace.location = location;
+                    self.texspace.size = size;
+                }
+                self.texspace.auto = auto;
             }
             // Editable only while the texture space is not automatic (verified:
             // `attribute "texspace_location" from "Mesh" is read-only`).
@@ -243,7 +252,7 @@ impl RnaMut for Mesh {
             "texspace_location" => self.texspace.location = <[f32; 3]>::from_rna_value(prop, v)?,
             "texspace_size" => self.texspace.size = <[f32; 3]>::from_rna_value(prop, v)?,
             p if BINDINGS.iter().any(|b| b.prop == p) => return Err(read_only(&MESH, p)),
-            p => return Err(no_attribute(&MESH, p)),
+            p => return Err(soa::unbound(&MESH, p)),
         }
         Ok(SetOutcome::Done)
     }

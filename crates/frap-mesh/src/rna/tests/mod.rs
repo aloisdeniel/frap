@@ -11,8 +11,8 @@ mod fixture;
 use frap_rna::testing::{BindingDecl, BindingKind, RnaBindings, binding_problems, check_bindings};
 use frap_rna::traits::RnaStruct;
 use frap_rna::{
-    Bulk, CoerceCx, Field, Input, Item, PropDef, PyExc, Rna, RnaColl, RnaMut, SetOutcome,
-    StructDef, Value,
+    Bulk, CoerceCx, Field, Input, Item, PropDef, PyExc, Rna, RnaColl, RnaErrorKind, RnaMut,
+    SetOutcome, StructDef, Value,
 };
 use frap_spec_rna::{self as spec, MESH};
 
@@ -406,7 +406,7 @@ fn foreach_set_writes_columns() {
         .unwrap();
         c.foreach_set(
             prop(&spec::MESH_EDGE, "vertices"),
-            &Bulk::I32((0..24).collect()),
+            &Bulk::I32((0..24).map(|v| v % 8).collect()),
         )
         .unwrap();
     }
@@ -438,18 +438,16 @@ fn foreach_errors_follow_blender() {
             (e.exception, e.message.as_str()),
             (PyExc::RuntimeError, internal)
         );
-        // Read-only properties: length checked, then nothing happens (verified).
-        c.foreach_set(
-            prop(&spec::MESH_VERTEX, "normal"),
-            &Bulk::F32(vec![0.0; 24]),
-        )
-        .unwrap();
-        c.foreach_set(prop(&spec::MESH_VERTEX, "index"), &Bulk::I32(vec![5; 8]))
-            .unwrap();
-        let e = c
-            .foreach_set(prop(&spec::MESH_VERTEX, "index"), &Bulk::I32(vec![5; 7]))
-            .unwrap_err();
-        assert_eq!(e.message, internal);
+        // Read-only properties: nothing happens and nothing is raised, whatever the length
+        // (verified on 5.2.4: `index` with 7, 0 and 9 values, `normal` with 5 and 0 values).
+        for n in [24, 5, 0] {
+            c.foreach_set(prop(&spec::MESH_VERTEX, "normal"), &Bulk::F32(vec![0.0; n]))
+                .unwrap();
+        }
+        for n in [8, 7, 0, 9] {
+            c.foreach_set(prop(&spec::MESH_VERTEX, "index"), &Bulk::I32(vec![5; n]))
+                .unwrap();
+        }
         // Collections and other non-numeric properties.
         let e = c
             .foreach_get(prop(&spec::MESH_VERTEX, "groups"), 0..8)
@@ -460,9 +458,44 @@ fn foreach_errors_follow_blender() {
     }
     assert_eq!(m.positions()[0], cube().positions()[0]);
     assert_eq!(elem_value(&m, "vertices", 3, "index"), Value::Int(3));
+    // The same for the other collections' read-only properties (verified:
+    // `polygons.foreach_set('area', [0] * 2)`, `loop_total` with `[1]`, `loop_triangles`
+    // `normal` and `vertex_normals` `vector` with `[1.0]`).
+    for (coll_name, srna, p, data) in [
+        (
+            "polygons",
+            &spec::MESH_POLYGON,
+            "area",
+            Bulk::F32(vec![0.0; 2]),
+        ),
+        (
+            "polygons",
+            &spec::MESH_POLYGON,
+            "loop_total",
+            Bulk::I32(vec![1]),
+        ),
+        (
+            "loop_triangles",
+            &spec::MESH_LOOP_TRIANGLE,
+            "normal",
+            Bulk::F32(vec![1.0]),
+        ),
+        (
+            "vertex_normals",
+            &spec::MESH_NORMAL_VALUE,
+            "vector",
+            Bulk::F32(vec![1.0]),
+        ),
+    ] {
+        let mut c = m.coll_mut(prop(&MESH, coll_name)).unwrap();
+        c.foreach_set(prop(srna, p), &data)
+            .unwrap_or_else(|e| panic!("{coll_name}.{p}: {}", e.message));
+    }
+    assert_eq!(m.face_offsets()[1], 4);
     // Variable-length arrays read and write the concatenated items (verified: a quad, a
     // triangle and a pentagon read 12 values; 11 raise, 13 write the first 12).
     let mut f = fixture_mesh();
+    let nv = f.verts_num() as i32;
     let polys = coll(&f, "polygons");
     let verts = prop(&spec::MESH_POLYGON, "vertices");
     assert_eq!(
@@ -481,10 +514,13 @@ fn foreach_errors_follow_blender() {
             .message,
         internal
     );
-    pm.foreach_set(verts, &Bulk::I32((0..13).collect()))
+    pm.foreach_set(verts, &Bulk::I32((0..13).map(|v| v % nv).collect()))
         .unwrap();
     drop(pm);
-    assert_eq!(f.corner_verts(), &(0..12).collect::<Vec<i32>>()[..]);
+    assert_eq!(
+        f.corner_verts(),
+        &(0..12).map(|v| v % nv).collect::<Vec<i32>>()[..]
+    );
     // A longer buffer is accepted and its tail ignored.
     let mut c = m.coll_mut(prop(&MESH, "vertices")).unwrap();
     c.foreach_set(co, &Bulk::F32(vec![1.0; 25])).unwrap();
@@ -569,6 +605,273 @@ fn loop_start_moves_one_face_offset() {
     drop(p);
     drop(c);
     assert_eq!(m.face_offsets()[1], 0);
+}
+
+/// Every property of `srna` and its bases.
+fn all_props(srna: &'static StructDef) -> Vec<&'static PropDef> {
+    let mut out = Vec::new();
+    let mut s = Some(srna);
+    while let Some(def) = s {
+        out.extend(def.props.iter());
+        s = def.base;
+    }
+    out
+}
+
+/// Reads every property of `t`, recursing into structs and collections (items and
+/// `foreach_get` of every property). Errors are fine; a panic fails the test.
+fn read_all(t: &dyn Rna, depth: usize) {
+    for p in all_props(t.srna()) {
+        match t.get(p) {
+            Ok(Field::Coll(c)) if depth > 0 => read_all_coll(&*c, depth - 1),
+            Ok(Field::Struct(st)) if depth > 0 => read_all(&*st, depth - 1),
+            _ => {}
+        }
+    }
+}
+
+fn read_all_coll(c: &dyn RnaColl, depth: usize) {
+    for p in all_props(c.item_type()) {
+        let _ = c.foreach_get(p, 0..c.len());
+    }
+    for i in 0..c.len() {
+        if let Ok(Item::Struct(s)) = c.item(i) {
+            for p in all_props(s.srna()) {
+                let _ = c.foreach_get(p, 0..c.len());
+            }
+            read_all(&*s, depth);
+        }
+    }
+}
+
+/// Reads the whole mesh through RNA, plus the cached derived data.
+fn read_mesh(m: &Mesh) {
+    read_all(m, 4);
+    let _ = (m.vert_normals(), m.face_normals(), m.corner_normals());
+}
+
+#[test]
+fn read_everything_after_offset_moves() {
+    let mut m = cube();
+    read_mesh(&m);
+    // An accepted move leaves an empty face: still readable.
+    set_elem(&mut m, "polygons", 1, "loop_start", Input::Int(0));
+    read_mesh(&m);
+    // frap deviation: the first offset must stay 0 (Blender 5.2.4 accepts
+    // `polygons[0].loop_start = 2` and leaves two corners no face uses).
+    let mut two = Mesh::new("Two");
+    two.from_pydata(
+        &[
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+            [2.0, 0.0, 0.0],
+            [2.0, 1.0, 0.0],
+        ],
+        &[],
+        &[vec![0, 1, 2, 3], vec![1, 4, 5, 2]],
+        false,
+    );
+    let start = prop(&spec::MESH_POLYGON, "loop_start");
+    {
+        let mut c = two.coll_mut(prop(&MESH, "polygons")).unwrap();
+        let e = c
+            .item_mut(0)
+            .unwrap()
+            .set(start, Value::Int(2))
+            .unwrap_err();
+        assert_eq!(e.exception, PyExc::ValueError);
+        for bad in [vec![2, 4], vec![-5, 4], vec![0, 9]] {
+            let e = c.foreach_set(start, &Bulk::I32(bad)).unwrap_err();
+            assert_eq!(e.exception, PyExc::ValueError);
+        }
+    }
+    assert_eq!(two.face_offsets(), &[0, 4, 8]);
+    read_mesh(&two);
+}
+
+#[test]
+fn out_of_range_indices_are_refused() {
+    fn item_set(
+        m: &mut Mesh,
+        coll: &str,
+        srna: &'static StructDef,
+        p: &str,
+        v: Value,
+    ) -> Result<(), frap_rna::RnaError> {
+        let mut c = m.coll_mut(prop(&MESH, coll)).unwrap();
+        c.item_mut(0)?.set(prop(srna, p), v).map(drop)
+    }
+    fn bulk_set(
+        m: &mut Mesh,
+        coll: &str,
+        srna: &'static StructDef,
+        p: &str,
+        v: Bulk,
+    ) -> Result<(), frap_rna::RnaError> {
+        let mut c = m.coll_mut(prop(&MESH, coll)).unwrap();
+        c.foreach_set(prop(srna, p), &v)
+    }
+    fn attr_set(m: &mut Mesh, attr: &str, v: Value) -> Result<(), frap_rna::RnaError> {
+        let mut c = m.coll_mut(prop(&MESH, "attributes")).unwrap();
+        let k = c.find(attr).unwrap();
+        let mut a = c.item_mut(k).unwrap();
+        let mut d = a.coll_mut(a.srna().find_prop("data").unwrap()).unwrap();
+        let p = d.item(0).ok().and_then(|i| match i {
+            Item::Struct(s) => s.srna().find_prop("value"),
+            _ => None,
+        });
+        d.item_mut(0)?.set(p.unwrap(), v).map(drop)
+    }
+    fn attr_bulk(m: &mut Mesh, attr: &str, v: Bulk) -> Result<(), frap_rna::RnaError> {
+        let mut c = m.coll_mut(prop(&MESH, "attributes")).unwrap();
+        let k = c.find(attr).unwrap();
+        let mut a = c.item_mut(k).unwrap();
+        let mut d = a.coll_mut(a.srna().find_prop("data").unwrap()).unwrap();
+        let p = match d.item(0)? {
+            Item::Struct(s) => s.srna().find_prop("value").unwrap(),
+            Item::Id(_) => unreachable!(),
+        };
+        d.foreach_set(p, &v)
+    }
+    let ints = |v: &[i64]| Value::IntArray(v.iter().copied().collect());
+    // Blender 5.2.4 stores all of these (verified: `polygons[0].vertices = (100, 1, 2, 3)`,
+    // `loops[0].vertex_index = 1000`, `edges.foreach_set('vertices', [-5] * 6)`); frap refuses
+    // them so the mesh stays readable.
+    type Write = Box<dyn Fn(&mut Mesh) -> Result<(), frap_rna::RnaError>>;
+    let writes: Vec<(&str, Write)> = vec![
+        (
+            "polygons[0].vertices",
+            Box::new(move |m| {
+                item_set(
+                    m,
+                    "polygons",
+                    &spec::MESH_POLYGON,
+                    "vertices",
+                    ints(&[100, 1, 2, 3]),
+                )
+            }),
+        ),
+        (
+            "polygons.vertices",
+            Box::new(|m| {
+                bulk_set(
+                    m,
+                    "polygons",
+                    &spec::MESH_POLYGON,
+                    "vertices",
+                    Bulk::I32(vec![-1; 24]),
+                )
+            }),
+        ),
+        (
+            "loops[0].vertex_index",
+            Box::new(|m| {
+                item_set(
+                    m,
+                    "loops",
+                    &spec::MESH_LOOP,
+                    "vertex_index",
+                    Value::Int(1000),
+                )
+            }),
+        ),
+        (
+            "loops[0].edge_index",
+            Box::new(|m| item_set(m, "loops", &spec::MESH_LOOP, "edge_index", Value::Int(12))),
+        ),
+        (
+            "loops.vertex_index",
+            Box::new(|m| {
+                bulk_set(
+                    m,
+                    "loops",
+                    &spec::MESH_LOOP,
+                    "vertex_index",
+                    Bulk::I32(vec![-5; 24]),
+                )
+            }),
+        ),
+        (
+            "loops.edge_index",
+            Box::new(|m| {
+                bulk_set(
+                    m,
+                    "loops",
+                    &spec::MESH_LOOP,
+                    "edge_index",
+                    Bulk::F32(vec![99.0; 24]),
+                )
+            }),
+        ),
+        (
+            "edges[0].vertices",
+            Box::new(move |m| item_set(m, "edges", &spec::MESH_EDGE, "vertices", ints(&[0, 8]))),
+        ),
+        (
+            "edges.vertices",
+            Box::new(|m| {
+                bulk_set(
+                    m,
+                    "edges",
+                    &spec::MESH_EDGE,
+                    "vertices",
+                    Bulk::I32(vec![-5; 24]),
+                )
+            }),
+        ),
+        (
+            ".corner_vert[0]",
+            Box::new(|m| attr_set(m, ".corner_vert", Value::Int(8))),
+        ),
+        (
+            ".corner_edge",
+            Box::new(|m| attr_bulk(m, ".corner_edge", Bulk::I32(vec![12; 24]))),
+        ),
+        (
+            ".edge_verts[0]",
+            Box::new(move |m| attr_set(m, ".edge_verts", ints(&[0, -1]))),
+        ),
+        (
+            ".edge_verts",
+            Box::new(|m| attr_bulk(m, ".edge_verts", Bulk::I32(vec![8; 24]))),
+        ),
+    ];
+    for (what, write) in &writes {
+        let mut m = cube();
+        let before = (
+            m.corner_verts().to_vec(),
+            m.corner_edges().to_vec(),
+            m.edges().to_vec(),
+        );
+        let e = write(&mut m).expect_err(what);
+        assert_eq!(e.exception, PyExc::ValueError, "{what}: {}", e.message);
+        assert!(e.message.contains("out of range"), "{what}: {}", e.message);
+        assert_eq!(
+            (
+                m.corner_verts().to_vec(),
+                m.corner_edges().to_vec(),
+                m.edges().to_vec()
+            ),
+            before,
+            "{what}"
+        );
+        read_mesh(&m);
+    }
+    // In-range writes still go through.
+    let mut m = cube();
+    item_set(
+        &mut m,
+        "loops",
+        &spec::MESH_LOOP,
+        "vertex_index",
+        Value::Int(7),
+    )
+    .unwrap();
+    attr_set(&mut m, ".corner_edge", Value::Int(11)).unwrap();
+    assert_eq!((m.corner_verts()[0], m.corner_edges()[0]), (7, 11));
+    read_mesh(&m);
 }
 
 #[test]
@@ -839,8 +1142,15 @@ fn texspace_is_automatic_until_disabled() {
         e.message,
         "bpy_struct: attribute \"texspace_location\" from \"Mesh\" is read-only"
     );
+    // Disabling keeps the last automatic texture space (verified).
     set(&mut m, "use_auto_texspace", Input::Bool(false));
-    assert_eq!(arr(get_value(&m, "texspace_location")), [0.0; 3]);
+    assert_eq!(arr(get_value(&m, "texspace_location")), [0.5, 0.5, 0.0]);
+    assert_eq!(arr(get_value(&m, "texspace_size")), [0.5, 0.5, 1.0]);
+    // Also when it was never read (verified: a size-4 cube gives (0, 0, 0) / (2, 2, 2)).
+    let mut big = crate::primitives::cube(4.0, true, [1.0; 3]);
+    set(&mut big, "use_auto_texspace", Input::Bool(false));
+    assert_eq!(arr(get_value(&big, "texspace_location")), [0.0; 3]);
+    assert_eq!(arr(get_value(&big, "texspace_size")), [2.0; 3]);
     m.set(loc, v).unwrap();
     assert_eq!(arr(get_value(&m, "texspace_location")), [1.0, 2.0, 3.0]);
     assert_eq!(get_value(&m, "auto_texspace"), Value::Bool(false));
@@ -909,10 +1219,27 @@ fn read_only_and_unknown_properties() {
         e.message,
         "bpy_prop_collection[index]: index 12 out of range, size 12"
     );
-    assert!(matches!(
-        m.get(prop(&MESH, "is_editmode")),
-        Err(e) if e.message == "'Mesh' object has no attribute 'is_editmode'"
-    ));
+    drop(t);
+    drop(c);
+    // A Blender property frap does not bind is not implemented, not missing.
+    for name in [
+        "is_editmode",
+        "use_mirror_x",
+        "remesh_voxel_size",
+        "skin_vertices",
+    ] {
+        let e = m.get(prop(&MESH, name)).err().unwrap();
+        assert_eq!(
+            (e.kind, e.exception),
+            (RnaErrorKind::NotImplemented, PyExc::NotImplementedError),
+            "{name}"
+        );
+        assert!(e.message.contains(&format!("Mesh.{name}")), "{}", e.message);
+    }
+    let e = m
+        .set(prop(&MESH, "use_mirror_x"), Value::Bool(true))
+        .unwrap_err();
+    assert_eq!(e.kind, RnaErrorKind::NotImplemented);
 }
 
 #[test]

@@ -4,6 +4,8 @@
 //! Columns: `.corner_vert` (`vertex_index`), `.corner_edge` (`edge_index`), the cached corner
 //! normals. `tangent`, `bitangent` and `bitangent_sign` read zero until `Mesh.calc_tangents()`
 //! has run (verified on 5.2.4); frap has no tangent layer yet, so they always read zero.
+//! `vertex_index`/`edge_index` refuse indices outside the vertex/edge range (`ValueError`,
+//! frap deviation; Blender stores them for `Mesh.validate()` to repair).
 
 use std::ops::Range;
 
@@ -29,11 +31,17 @@ pub(crate) static BINDINGS: [BindingDecl; 7] = [
     readonly!("bitangent", [f32; 3]),
 ];
 
-/// The column behind an index property.
-fn index_column(prop: &str) -> Option<&'static str> {
+/// The column behind an index property, the property's name for errors, the indexed domain's
+/// size and its name.
+fn index_column(m: &Mesh, prop: &str) -> Option<(&'static str, &'static str, usize, &'static str)> {
     match prop {
-        "vertex_index" => Some(CORNER_VERT),
-        "edge_index" => Some(CORNER_EDGE),
+        "vertex_index" => Some((
+            CORNER_VERT,
+            "MeshLoop.vertex_index",
+            m.verts_num(),
+            "vertices",
+        )),
+        "edge_index" => Some((CORNER_EDGE, "MeshLoop.edge_index", m.edges_num(), "edges")),
         _ => None,
     }
 }
@@ -84,9 +92,10 @@ impl SoaKind for Loops {
         prop: &'static PropDef,
         v: frap_rna::Value,
     ) -> Result<SetOutcome, RnaError> {
-        match index_column(prop.identifier) {
-            Some(name) => {
+        match index_column(m, prop.identifier) {
+            Some((name, what, len, of)) => {
                 let x = i32::from_rna_value(prop, v)?;
+                let x = columns::check_indices(what, [i64::from(x)], len, of)?[0];
                 if let Some(col) = columns::int_col_mut(m, name)
                     && let Some(c) = col.get_mut(i)
                 {
@@ -122,10 +131,10 @@ impl SoaKind for Loops {
         data: &frap_rna::Bulk,
     ) -> Result<(), RnaError> {
         let n = m.corners_num();
-        match index_column(prop.identifier) {
-            Some(name) => {
+        match index_column(m, prop.identifier) {
+            Some((name, what, len, of)) => {
                 let data = &bulk::check_set(prop, data, n, 1)?;
-                let v = bulk::i32s(prop, data);
+                let v = columns::check_indices(what, bulk::raw_i64s(data), len, of)?;
                 if let Some(col) = columns::int_col_mut(m, name)
                     && col.len() == v.len()
                 {

@@ -313,7 +313,7 @@ impl SoaKind for UvLoops {
         match prop.identifier {
             "uv" => {
                 let data = &bulk::check_set(prop, data, n, 2)?;
-                let rows = bulk::rows::<f32, 2>(&bulk::f32s(prop, data));
+                let rows = bulk::rows::<f32, 2>(&bulk::f32s(data));
                 if let Some(AttrData::Float2(c)) = nth_mut(m, pos).map(|a| &mut a.data) {
                     *std::sync::Arc::make_mut(c) = rows;
                 }

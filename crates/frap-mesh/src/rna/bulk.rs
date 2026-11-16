@@ -8,9 +8,15 @@
 //! - a buffer shorter than that, or a property that is not BOOLEAN/INT/FLOAT, raises
 //!   `RuntimeError: internal error setting the array`; `foreach_set` ignores the rest of a
 //!   longer buffer;
-//! - `foreach_set` of a read-only property (`index`, `normal`) checks the length and then does
-//!   nothing;
-//! - Python numbers of any kind are accepted for any numeric property (`[1, 0]` sets `select`).
+//! - `foreach_set` of a read-only numeric property (`index`, `normal`, `area`, `loop_total`)
+//!   does nothing and never raises, whatever the buffer length (verified: `[5] * 7`, `[]` and
+//!   `[5] * 9` for `vertices.foreach_set('index', …)` on 8 vertices all succeed);
+//! - Python numbers of any kind are accepted for any numeric property (`[1, 0]` sets `select`);
+//! - FLOAT values are not clamped (`1e40` reads back `inf`, a FLOAT_COLOR `-3.0` stays `-3.0`,
+//!   verified); INT values are clamped to the hard range like Blender's `material_index`;
+//! - frap deviation: index properties (`MeshEdge.vertices`, `MeshLoop.vertex_index/edge_index`,
+//!   `MeshPolygon.vertices/loop_start`) refuse out-of-range values with `ValueError` instead of
+//!   storing them for `Mesh.validate()` to repair ([`raw_i64s`], `columns::check_indices`).
 
 use std::ops::Range;
 
@@ -154,12 +160,13 @@ pub(crate) fn generic_set<K: SoaKind + ?Sized>(
     prop: &'static PropDef,
     data: &Bulk,
 ) -> Result<(), RnaError> {
-    let n = K::len(m, ctx);
-    let per = item_len::<K>(m, ctx, prop)?;
-    let data = &check_set(prop, data, n, per)?;
+    empty_for(prop)?;
     if prop.is_readonly() {
         return Ok(());
     }
+    let n = K::len(m, ctx);
+    let per = item_len::<K>(m, ctx, prop)?;
+    let data = &check_set(prop, data, n, per)?;
     for i in 0..n {
         K::set(m, ctx, i, prop, value_at(prop, data, i, per))?;
     }
@@ -190,14 +197,22 @@ fn int_at(prop: &PropDef, data: &Bulk, k: usize) -> i64 {
     }
 }
 
-/// Scalar `k` as an `f32`, clamped to the property's hard range.
-fn float_at(prop: &PropDef, data: &Bulk, k: usize) -> f32 {
-    let v = scalar(data, k);
-    let v = match prop.kind {
-        PropKind::Float { hard: (lo, hi), .. } if !v.is_nan() => v.clamp(lo, hi),
-        _ => v,
-    };
-    v as f32
+/// Scalar `k` as an `f32`. Blender's raw `foreach_set` path does not clamp floats (verified on
+/// 5.2.4: `co` `1e40` reads back `inf`, FLOAT_COLOR `-3.0` with `hard_min` 0 stays `-3.0`).
+fn float_at(data: &Bulk, k: usize) -> f32 {
+    scalar(data, k) as f32
+}
+
+/// The whole buffer as unclamped `i64`s (floats truncate toward zero), for index properties
+/// that `columns::check_indices` validates.
+pub(crate) fn raw_i64s(data: &Bulk) -> Vec<i64> {
+    (0..data.len())
+        .map(|k| match data {
+            Bulk::I32(v) => i64::from(v[k]),
+            Bulk::Bool(v) => i64::from(v[k]),
+            _ => scalar(data, k) as i64,
+        })
+        .collect()
 }
 
 /// Scalar `k` as a `bool` (any non-zero number is true).
@@ -213,9 +228,9 @@ pub(crate) fn value_at(prop: &PropDef, data: &Bulk, i: usize, per: usize) -> Val
     let r = i * per..i * per + per;
     let scalar_prop = matches!(prop.array, ArrayShape::Scalar);
     match prop.kind {
-        PropKind::Float { .. } if scalar_prop => Value::Float(float_at(prop, data, r.start)),
+        PropKind::Float { .. } if scalar_prop => Value::Float(float_at(data, r.start)),
         PropKind::Float { .. } => Value::FloatArray {
-            data: r.map(|k| float_at(prop, data, k)).collect(),
+            data: r.map(|k| float_at(data, k)).collect(),
             shape: prop.array,
             tag: MathTag::for_subtype(prop.subtype),
         },
@@ -227,9 +242,9 @@ pub(crate) fn value_at(prop: &PropDef, data: &Bulk, i: usize, per: usize) -> Val
     }
 }
 
-/// The whole buffer as clamped `f32`s.
-pub(crate) fn f32s(prop: &PropDef, data: &Bulk) -> Vec<f32> {
-    (0..data.len()).map(|k| float_at(prop, data, k)).collect()
+/// The whole buffer as `f32`s.
+pub(crate) fn f32s(data: &Bulk) -> Vec<f32> {
+    (0..data.len()).map(|k| float_at(data, k)).collect()
 }
 
 /// The whole buffer as clamped `i32`s.

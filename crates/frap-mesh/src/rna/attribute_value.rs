@@ -9,6 +9,9 @@
 //!   matrix rows (row-major `Value`, like every frap matrix), `foreach_get/set` the raw memory
 //!   (verified: assigning rows `((1,2,3,4), …)` and `foreach_get` gives `1..16`).
 //! - STRING values cannot be bulk-accessed (`RuntimeError`, as in Blender).
+//! - The topology columns `.edge_verts`, `.corner_vert` and `.corner_edge` refuse indices
+//!   outside the vertex/edge range (`ValueError`, frap deviation shared with
+//!   `MeshEdge.vertices` and `MeshLoop.vertex_index/edge_index`).
 
 use std::ops::Range;
 use std::sync::Arc;
@@ -20,6 +23,7 @@ use frap_spec_rna as spec;
 use super::attribute::{nth, nth_mut};
 use super::bulk;
 use super::color;
+use super::columns::{self, CORNER_EDGE, CORNER_VERT, EDGE_VERTS};
 use super::soa::{self, SoaKind};
 use crate::mesh::{AttrData, Mesh};
 
@@ -191,21 +195,15 @@ fn read_bulk(data: &AttrData, prop: &PropDef, range: Range<usize>) -> Option<Bul
 fn write_bulk(data: &mut AttrData, prop: &PropDef, buf: &Bulk) -> bool {
     let p = prop.identifier;
     match data {
-        AttrData::Float(c) if p == "value" => *Arc::make_mut(c) = bulk::f32s(prop, buf),
+        AttrData::Float(c) if p == "value" => *Arc::make_mut(c) = bulk::f32s(buf),
         AttrData::Int(c) if p == "value" => *Arc::make_mut(c) = bulk::i32s(prop, buf),
         AttrData::Int8(c) if p == "value" => {
             *Arc::make_mut(c) = bulk::i32s(prop, buf).into_iter().map(|x| x as i8).collect()
         }
         AttrData::Bool(c) if p == "value" => *Arc::make_mut(c) = bulk::bools(buf),
-        AttrData::Float2(c) if p == "vector" => {
-            *Arc::make_mut(c) = bulk::rows(&bulk::f32s(prop, buf))
-        }
-        AttrData::Float3(c) if p == "vector" => {
-            *Arc::make_mut(c) = bulk::rows(&bulk::f32s(prop, buf))
-        }
-        AttrData::FloatColor(c) if p == "color" => {
-            *Arc::make_mut(c) = bulk::rows(&bulk::f32s(prop, buf))
-        }
+        AttrData::Float2(c) if p == "vector" => *Arc::make_mut(c) = bulk::rows(&bulk::f32s(buf)),
+        AttrData::Float3(c) if p == "vector" => *Arc::make_mut(c) = bulk::rows(&bulk::f32s(buf)),
+        AttrData::FloatColor(c) if p == "color" => *Arc::make_mut(c) = bulk::rows(&bulk::f32s(buf)),
         AttrData::Int16x2(c) if p == "value" => {
             *Arc::make_mut(c) = bulk::rows::<i32, 2>(&bulk::i32s(prop, buf))
                 .into_iter()
@@ -215,11 +213,9 @@ fn write_bulk(data: &mut AttrData, prop: &PropDef, buf: &Bulk) -> bool {
         AttrData::Int32x2(c) if p == "value" => {
             *Arc::make_mut(c) = bulk::rows(&bulk::i32s(prop, buf))
         }
-        AttrData::Quaternion(c) if p == "value" => {
-            *Arc::make_mut(c) = bulk::rows(&bulk::f32s(prop, buf))
-        }
+        AttrData::Quaternion(c) if p == "value" => *Arc::make_mut(c) = bulk::rows(&bulk::f32s(buf)),
         AttrData::Float4x4(c) if p == "value" => {
-            *Arc::make_mut(c) = bulk::rows::<f32, 16>(&bulk::f32s(prop, buf))
+            *Arc::make_mut(c) = bulk::rows::<f32, 16>(&bulk::f32s(buf))
                 .into_iter()
                 .map(|r| {
                     let mut m = [[0.0; 4]; 4];
@@ -233,6 +229,25 @@ fn write_bulk(data: &mut AttrData, prop: &PropDef, buf: &Bulk) -> bool {
         _ => return false,
     }
     true
+}
+
+/// For a topology column, its name for errors, the indexed domain's size and its name.
+fn topology_limit(m: &Mesh, pos: usize) -> Option<(String, usize, &'static str)> {
+    let name = nth(m, pos)?.name.as_str();
+    let (len, of) = match name {
+        EDGE_VERTS | CORNER_VERT => (m.verts_num(), "vertices"),
+        CORNER_EDGE => (m.edges_num(), "edges"),
+        _ => return None,
+    };
+    Some((format!("attributes['{name}'].data"), len, of))
+}
+
+/// Refuses out-of-range indices written to a topology column ([`columns::check_indices`]).
+fn check_topology(m: &Mesh, pos: usize, values: Vec<i64>) -> Result<(), RnaError> {
+    match topology_limit(m, pos) {
+        Some((what, len, of)) => columns::check_indices(&what, values, len, of).map(drop),
+        None => Ok(()),
+    }
 }
 
 /// `attributes[n].data` and `uv_layers[n].uv` (context: the attribute's position in the set).
@@ -271,6 +286,11 @@ impl SoaKind for AttrValues {
         if !known {
             return Err(soa::no_attr::<Self>(m, pos, i, prop));
         }
+        match &v {
+            Value::Int(x) => check_topology(m, pos, vec![*x])?,
+            Value::IntArray(a) => check_topology(m, pos, a.to_vec())?,
+            _ => {}
+        }
         if let Some(a) = nth_mut(m, pos) {
             write(&mut a.data, i, prop, v)?;
         }
@@ -305,6 +325,7 @@ impl SoaKind for AttrValues {
             return bulk::generic_set::<Self>(m, pos, prop, data);
         }
         let data = &bulk::check_set(prop, data, n, prop.array_len())?;
+        check_topology(m, pos, bulk::raw_i64s(data))?;
         if let Some(a) = nth_mut(m, pos) {
             write_bulk(&mut a.data, prop, data);
         }

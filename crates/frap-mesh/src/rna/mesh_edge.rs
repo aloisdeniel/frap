@@ -3,7 +3,8 @@
 //!
 //! Columns: `.edge_verts`, `.select_edge`, `.hide_edge`, `uv_seam` (`use_seam`), `sharp_edge`
 //! (`use_edge_sharp`). `is_loose` is true for an edge no face corner uses
-//! (`Mesh::loose_edges`).
+//! (`Mesh::loose_edges`). `vertices` refuses indices outside the vertex range (`ValueError`,
+//! frap deviation; Blender stores them for `Mesh.validate()` to repair).
 
 use std::ops::Range;
 
@@ -90,6 +91,13 @@ impl SoaKind for Edges {
         match prop.identifier {
             "vertices" => {
                 let e = <[i32; 2]>::from_rna_value(prop, v)?;
+                let e = columns::check_indices(
+                    "MeshEdge.vertices",
+                    e.map(i64::from),
+                    m.verts_num(),
+                    "vertices",
+                )?;
+                let e = [e[0], e[1]];
                 if let Some(col) = columns::edges_mut(m) {
                     col[i] = e;
                 }
@@ -131,7 +139,12 @@ impl SoaKind for Edges {
         match (prop.identifier, flag_column(prop.identifier)) {
             ("vertices", _) => {
                 let data = &bulk::check_set(prop, data, n, 2)?;
-                let rows = bulk::rows::<i32, 2>(&bulk::i32s(prop, data));
+                let rows = bulk::rows::<i32, 2>(&columns::check_indices(
+                    "MeshEdge.vertices",
+                    bulk::raw_i64s(data),
+                    m.verts_num(),
+                    "vertices",
+                )?);
                 if let Some(col) = columns::edges_mut(m) {
                     col.copy_from_slice(&rows);
                 }

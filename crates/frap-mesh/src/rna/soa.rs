@@ -23,8 +23,8 @@ use std::ops::Range;
 
 use frap_rna::traits::{SmolStr, index_out_of_range, no_attribute, wrong_access};
 use frap_rna::{
-    Bulk, Field, Item, PropDef, Rna, RnaColl, RnaCollMut, RnaCollMutGuard, RnaError, RnaMut,
-    RnaMutGuard, SetOutcome, StructDef, StructRef, Value,
+    Bulk, Field, Item, PropDef, PyExc, Rna, RnaColl, RnaCollMut, RnaCollMutGuard, RnaError,
+    RnaErrorKind, RnaMut, RnaMutGuard, SetOutcome, StructDef, StructRef, Value,
 };
 
 use super::bulk;
@@ -102,9 +102,29 @@ pub(crate) trait SoaKind: 'static {
     }
 }
 
-/// `'MeshVertex' object has no attribute 'foo'` for item `i`.
+/// Error for a property item `i` does not bind: `RNA_NOT_IMPLEMENTED` when the item's struct
+/// defines it in Blender 5.2 (see [`unbound`]), else `'MeshVertex' object has no attribute 'foo'`.
 pub(crate) fn no_attr<K: SoaKind>(m: &Mesh, ctx: K::Ctx, i: usize, prop: &PropDef) -> RnaError {
-    no_attribute(K::item_srna(m, ctx, i), prop.identifier)
+    unbound(K::item_srna(m, ctx, i), prop.identifier)
+}
+
+/// Error for a property frap does not bind on `srna`. A property that exists in Blender's
+/// `StructDef` gives `NotImplementedError` (`RNA_NOT_IMPLEMENTED`, §13.4), so an agent is never
+/// told that a real Blender property does not exist; any other name gives Blender's
+/// `AttributeError`.
+pub(crate) fn unbound(srna: &'static StructDef, prop: &str) -> RnaError {
+    if srna.find_prop(prop).is_some() {
+        RnaError::new(
+            RnaErrorKind::NotImplemented,
+            PyExc::NotImplementedError,
+            format!(
+                "frap: {}.{prop} exists in Blender but is not implemented by frap yet",
+                srna.identifier
+            ),
+        )
+    } else {
+        no_attribute(srna, prop)
+    }
 }
 
 /// `bpy_struct: attribute "index" from "MeshVertex" is read-only` for item `i`.

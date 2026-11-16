@@ -131,7 +131,7 @@ impl SoaKind for Vertices {
         match prop.identifier {
             "co" => {
                 let data = &bulk::check_set(prop, data, n, 3)?;
-                let rows = bulk::rows::<f32, 3>(&bulk::f32s(prop, data));
+                let rows = bulk::rows::<f32, 3>(&bulk::f32s(data));
                 m.positions_mut().copy_from_slice(&rows);
             }
             "select" | "hide" => {

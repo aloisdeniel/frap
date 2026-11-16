@@ -9,9 +9,11 @@
 //! face size (`MeshPolygon.vertices: array length cannot be changed to 3 (expected 4)`, verified),
 //! and `foreach_get/set` read and write the concatenated corner vertices (verified on a mesh
 //! with a quad, a triangle and a pentagon). A `loop_start` write moves
-//! one face offset like Blender, but frap refuses offsets that would decrease or leave the
-//! corner range, which would make the mesh unreadable (Blender accepts them and lets
-//! `Mesh.validate()` repair the mesh).
+//! one face offset like Blender, but frap refuses offsets that would decrease, leave the
+//! corner range or not start at 0, and vertex indices outside `0..len(vertices)`
+//! (`ValueError`; Blender accepts them and lets `Mesh.validate()` repair the mesh). Those
+//! writes would leave corners no face uses or dangling indices, which frap's normals and
+//! loop triangles do not support.
 
 use std::ops::Range;
 
@@ -49,13 +51,15 @@ fn tag(prop: &PropDef) -> MathTag {
 /// re-derive `.corner_edge` and create missing topology attributes, so both are restored).
 fn write_offsets(m: &mut Mesh, offsets: Vec<i32>) -> Result<(), RnaError> {
     let corners = m.corners_num() as i32;
-    if offsets.first().is_some_and(|&o| o < 0)
+    // Blender 5.2.4 accepts a first offset above 0 (`polygons[0].loop_start = 2` on two quads
+    // gives `loop_total` (2, 4)); frap refuses it like the other offsets it cannot represent.
+    if offsets.first().is_some_and(|&o| o != 0)
         || offsets.windows(2).any(|w| w[0] > w[1])
         || offsets.last() != Some(&corners)
     {
         return Err(columns::value_error(format!(
-            "frap: MeshPolygon.loop_start: face offsets {offsets:?} would decrease or leave the \
-             corner range 0..{corners}, which frap meshes cannot represent"
+            "frap: MeshPolygon.loop_start: face offsets {offsets:?} would decrease, leave the \
+             corner range 0..{corners} or not start at 0, which frap meshes cannot represent"
         )));
     }
     let had: Vec<bool> = [EDGE_VERTS, CORNER_VERT, CORNER_EDGE]
@@ -135,6 +139,12 @@ impl SoaKind for Polygons {
                         r.len()
                     )));
                 }
+                let verts = columns::check_indices(
+                    "MeshPolygon.vertices",
+                    verts.into_iter().map(i64::from),
+                    m.verts_num(),
+                    "vertices",
+                )?;
                 if let Some(col) = columns::int_col_mut(m, CORNER_VERT) {
                     col[r].copy_from_slice(&verts);
                 }
@@ -207,7 +217,12 @@ impl SoaKind for Polygons {
             "vertices" => {
                 let corners = (0..n).map(|f| columns::face_range(m, f).len()).sum();
                 let data = &bulk::check_set(prop, data, corners, 1)?;
-                let verts = bulk::i32s(prop, data);
+                let verts = columns::check_indices(
+                    "MeshPolygon.vertices",
+                    bulk::raw_i64s(data),
+                    m.verts_num(),
+                    "vertices",
+                )?;
                 if let Some(col) = columns::int_col_mut(m, CORNER_VERT)
                     && col.len() == verts.len()
                 {
@@ -216,7 +231,10 @@ impl SoaKind for Polygons {
             }
             "loop_start" => {
                 let data = &bulk::check_set(prop, data, n, 1)?;
-                let mut offs = bulk::i32s(prop, data);
+                let mut offs: Vec<i32> = bulk::raw_i64s(data)
+                    .into_iter()
+                    .map(|o| o.clamp(i64::from(i32::MIN), i64::from(i32::MAX)) as i32)
+                    .collect();
                 offs.push(m.corners_num() as i32);
                 write_offsets(m, offs)?;
             }

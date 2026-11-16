@@ -237,3 +237,28 @@ pub(crate) fn face_area(m: &Mesh, f: usize) -> f32 {
 pub(crate) fn value_error(msg: impl Into<String>) -> RnaError {
     RnaError::new(RnaErrorKind::Other, PyExc::ValueError, msg)
 }
+
+/// Checks element indices written to a topology column (`what` names the property, `of` the
+/// indexed domain) against `len` and returns them as `i32`s.
+///
+/// frap deviation (listed in `docs/deviations.md` by the integrator): Blender 5.2.4 stores any
+/// value and leaves an invalid mesh for `Mesh.validate()` to repair; frap refuses
+/// out-of-range indices with `ValueError`, so normals, loop triangles and every later read
+/// stay well defined (§21: no panics on user-controlled data).
+pub(crate) fn check_indices(
+    what: &str,
+    values: impl IntoIterator<Item = i64>,
+    len: usize,
+    of: &str,
+) -> Result<Vec<i32>, RnaError> {
+    values
+        .into_iter()
+        .map(|v| match usize::try_from(v) {
+            Ok(u) if u < len => Ok(v as i32),
+            _ => Err(value_error(format!(
+                "frap: {what}: index {v} is out of range for {len} {of} (Blender stores it and \
+                 leaves an invalid mesh for Mesh.validate(); frap refuses it)"
+            ))),
+        })
+        .collect()
+}
