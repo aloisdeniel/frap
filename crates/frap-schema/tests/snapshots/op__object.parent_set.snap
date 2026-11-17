@@ -1,0 +1,180 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.parent_set",
+  "bl_idname": "OBJECT_OT_parent_set",
+  "label": "Make Parent",
+  "description": "Set the object's parenting",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT",
+      "ACTIVE_EDITABLE"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active), the active object is editable (not linked)",
+    "matrix": {
+      "plain": "YNYYY",
+      "view3d": "YNYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Type",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "OBJECT",
+      "enum_items": [
+        {
+          "identifier": "OBJECT",
+          "name": "Object",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "ARMATURE",
+          "name": "Armature Deform",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "ARMATURE_NAME",
+          "name": "   With Empty Groups",
+          "description": "",
+          "value": 2
+        },
+        {
+          "identifier": "ARMATURE_AUTO",
+          "name": "   With Automatic Weights",
+          "description": "",
+          "value": 4
+        },
+        {
+          "identifier": "ARMATURE_ENVELOPE",
+          "name": "   With Envelope Weights",
+          "description": "",
+          "value": 3
+        },
+        {
+          "identifier": "BONE",
+          "name": "Bone",
+          "description": "",
+          "value": 5
+        },
+        {
+          "identifier": "BONE_RELATIVE",
+          "name": "Bone Relative",
+          "description": "",
+          "value": 6
+        },
+        {
+          "identifier": "CURVE",
+          "name": "Curve Deform",
+          "description": "",
+          "value": 7
+        },
+        {
+          "identifier": "FOLLOW",
+          "name": "Follow Path",
+          "description": "",
+          "value": 8
+        },
+        {
+          "identifier": "PATH_CONST",
+          "name": "Path Constraint",
+          "description": "",
+          "value": 9
+        },
+        {
+          "identifier": "LATTICE",
+          "name": "Lattice Deform",
+          "description": "",
+          "value": 10
+        },
+        {
+          "identifier": "VERTEX",
+          "name": "Vertex",
+          "description": "",
+          "value": 11
+        },
+        {
+          "identifier": "VERTEX_TRI",
+          "name": "Vertex (Triangle)",
+          "description": "",
+          "value": 12
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "xmirror",
+      "name": "X Mirror",
+      "description": "Apply weights symmetrically along X axis, for Envelope/Automatic vertex groups creation",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "keep_transform",
+      "name": "Keep Transform",
+      "description": "Apply transformation before parenting",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": "parent_set keeps the child in place through matrix_parent_inverse: its location/rotation/scale values do not change and are now relative to the parent's inverse; read matrix_world for the world transform",
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "type='VERTEX'/'VERTEX_TRI' (Edit Mode, M2) and armature or bone parents (M6) answer NotImplementedError",
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
+    "notes": [
+      "A parent loop (Error: Loop in parents) rolls the whole operator back; Blender keeps the children parented before the loop."
+    ]
+  }
+}

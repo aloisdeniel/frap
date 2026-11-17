@@ -1,0 +1,945 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "transform.resize",
+  "bl_idname": "TRANSFORM_OT_resize",
+  "label": "Resize",
+  "description": "Scale (resize) selected items",
+  "bl_options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "value",
+      "name": "Scale",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "XYZ",
+      "unit": "NONE",
+      "array": [
+        3
+      ],
+      "default": [
+        1,
+        1,
+        1
+      ],
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -340282350000000000000000000000000000000.0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "mouse_dir_constraint",
+      "name": "Mouse Directional Constraint",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "XYZ",
+      "unit": "NONE",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -340282350000000000000000000000000000000.0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 3,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "orient_type",
+      "name": "Orientation",
+      "description": "Transformation orientation",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "GLOBAL",
+      "enum_items": [
+        {
+          "identifier": "GLOBAL",
+          "name": "Global",
+          "description": "Align the transformation axes to world space",
+          "value": 0
+        },
+        {
+          "identifier": "LOCAL",
+          "name": "Local",
+          "description": "Align the transformation axes to the selected objects' local space",
+          "value": 1
+        },
+        {
+          "identifier": "NORMAL",
+          "name": "Normal",
+          "description": "Align the transformation axes to average normal of selected elements (bone Y axis for pose mode)",
+          "value": 2
+        },
+        {
+          "identifier": "GIMBAL",
+          "name": "Gimbal",
+          "description": "Align each axis to the Euler rotation axis as used for input",
+          "value": 4
+        },
+        {
+          "identifier": "VIEW",
+          "name": "View",
+          "description": "Align the transformation axes to the window",
+          "value": 3
+        },
+        {
+          "identifier": "CURSOR",
+          "name": "Cursor",
+          "description": "Align the transformation axes to the 3D cursor",
+          "value": 5
+        },
+        {
+          "identifier": "PARENT",
+          "name": "Parent",
+          "description": "Align the transformation axes to the object's parent space",
+          "value": 6
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": "TRANSFORM_OT_resize.orient_type",
+      "context_rule": "items come from a Blender callback that depends on the context (TRANSFORM_OT_resize.orient_type); enum_items is frap's verified superset (spec/overlay/dynamic_enums.toml)",
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE",
+        "DYNAMIC_ENUM"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "orient_matrix",
+      "name": "Matrix",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "MATRIX",
+      "unit": "NONE",
+      "array": [
+        3,
+        3
+      ],
+      "default": [
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ],
+        [
+          0,
+          0,
+          0
+        ]
+      ],
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 0,
+      "soft_max": 0,
+      "precision": 3,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "orient_matrix_type",
+      "name": "Matrix Orientation",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "GLOBAL",
+      "enum_items": [
+        {
+          "identifier": "GLOBAL",
+          "name": "Global",
+          "description": "Align the transformation axes to world space",
+          "value": 0
+        },
+        {
+          "identifier": "LOCAL",
+          "name": "Local",
+          "description": "Align the transformation axes to the selected objects' local space",
+          "value": 1
+        },
+        {
+          "identifier": "NORMAL",
+          "name": "Normal",
+          "description": "Align the transformation axes to average normal of selected elements (bone Y axis for pose mode)",
+          "value": 2
+        },
+        {
+          "identifier": "GIMBAL",
+          "name": "Gimbal",
+          "description": "Align each axis to the Euler rotation axis as used for input",
+          "value": 4
+        },
+        {
+          "identifier": "VIEW",
+          "name": "View",
+          "description": "Align the transformation axes to the window",
+          "value": 3
+        },
+        {
+          "identifier": "CURSOR",
+          "name": "Cursor",
+          "description": "Align the transformation axes to the 3D cursor",
+          "value": 5
+        },
+        {
+          "identifier": "PARENT",
+          "name": "Parent",
+          "description": "Align the transformation axes to the object's parent space",
+          "value": 6
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": "TRANSFORM_OT_resize.orient_matrix_type",
+      "context_rule": "items come from a Blender callback that depends on the context (TRANSFORM_OT_resize.orient_matrix_type); enum_items is frap's verified superset (spec/overlay/dynamic_enums.toml)",
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "DYNAMIC_ENUM",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "constraint_axis",
+      "name": "Constraint Axis",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "XYZ",
+      "unit": "NONE",
+      "array": [
+        3
+      ],
+      "default": [
+        false,
+        false,
+        false
+      ],
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "mirror",
+      "name": "Mirror Editing",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_proportional_edit",
+      "name": "Proportional Editing",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "proportional_edit_falloff",
+      "name": "Proportional Falloff",
+      "description": "Falloff type for proportional editing mode",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SMOOTH",
+      "enum_items": [
+        {
+          "identifier": "SMOOTH",
+          "name": "Smooth",
+          "description": "Smooth falloff",
+          "value": 0
+        },
+        {
+          "identifier": "SPHERE",
+          "name": "Sphere",
+          "description": "Spherical falloff",
+          "value": 1
+        },
+        {
+          "identifier": "ROOT",
+          "name": "Root",
+          "description": "Root falloff",
+          "value": 2
+        },
+        {
+          "identifier": "INVERSE_SQUARE",
+          "name": "Inverse Square",
+          "description": "Inverse Square falloff",
+          "value": 7
+        },
+        {
+          "identifier": "SHARP",
+          "name": "Sharp",
+          "description": "Sharp falloff",
+          "value": 3
+        },
+        {
+          "identifier": "LINEAR",
+          "name": "Linear",
+          "description": "Linear falloff",
+          "value": 4
+        },
+        {
+          "identifier": "CONSTANT",
+          "name": "Constant",
+          "description": "Constant falloff",
+          "value": 5
+        },
+        {
+          "identifier": "RANDOM",
+          "name": "Random",
+          "description": "Random falloff",
+          "value": 6
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "proportional_size",
+      "name": "Proportional Size",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": 0.000001,
+      "hard_max": 1000000000000,
+      "soft_min": 0.001,
+      "soft_max": 100,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_proportional_connected",
+      "name": "Connected",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_proportional_projected",
+      "name": "Projected (2D)",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "snap",
+      "name": "Use Snapping Options",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "snap_elements",
+      "name": "Snap to Elements",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": [
+        "INCREMENT"
+      ],
+      "enum_items": [
+        {
+          "identifier": "INCREMENT",
+          "name": "Increment",
+          "description": "Snap to increments",
+          "value": 256
+        },
+        {
+          "identifier": "GRID",
+          "name": "Grid",
+          "description": "Snap to grid",
+          "value": 128
+        },
+        {
+          "identifier": "VERTEX",
+          "name": "Vertex",
+          "description": "Snap to vertices",
+          "value": 5
+        },
+        {
+          "identifier": "EDGE",
+          "name": "Edge",
+          "description": "Snap to edges",
+          "value": 16
+        },
+        {
+          "identifier": "FACE",
+          "name": "Face",
+          "description": "Snap by projecting onto faces",
+          "value": 32
+        },
+        {
+          "identifier": "VOLUME",
+          "name": "Volume",
+          "description": "Snap to volume",
+          "value": 64
+        },
+        {
+          "identifier": "EDGE_MIDPOINT",
+          "name": "Edge Center",
+          "description": "Snap to the middle of edges",
+          "value": 2
+        },
+        {
+          "identifier": "EDGE_PERPENDICULAR",
+          "name": "Edge Perpendicular",
+          "description": "Snap to the nearest point on an edge",
+          "value": 8
+        },
+        {
+          "identifier": "FACE_MIDPOINT",
+          "name": "Face Center",
+          "description": "Snap to the middle of faces",
+          "value": 2048
+        },
+        {
+          "identifier": "FACE_PROJECT",
+          "name": "Face Project",
+          "description": "Snap by projecting onto faces",
+          "value": 1024
+        },
+        {
+          "identifier": "FACE_NEAREST",
+          "name": "Face Nearest",
+          "description": "Snap to nearest point on faces",
+          "value": 512
+        }
+      ],
+      "is_enum_flag": true,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ENUM_FLAG",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_snap_project",
+      "name": "Project Individual Elements",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "snap_target",
+      "name": "Snap Base",
+      "description": "Point on source that will snap to target",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "CLOSEST",
+      "enum_items": [
+        {
+          "identifier": "CLOSEST",
+          "name": "Closest",
+          "description": "Snap closest point onto target",
+          "value": 0
+        },
+        {
+          "identifier": "CENTER",
+          "name": "Center",
+          "description": "Snap transformation center onto target",
+          "value": 1
+        },
+        {
+          "identifier": "MEDIAN",
+          "name": "Median",
+          "description": "Snap median onto target",
+          "value": 2
+        },
+        {
+          "identifier": "ACTIVE",
+          "name": "Active",
+          "description": "Snap active onto target",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_snap_self",
+      "name": "Target: Include Active",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_snap_edit",
+      "name": "Target: Include Edit",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_snap_nonedit",
+      "name": "Target: Include Non-Edited",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_snap_selectable",
+      "name": "Target: Exclude Non-Selectable",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "snap_point",
+      "name": "Point",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "XYZ",
+      "unit": "NONE",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -340282350000000000000000000000000000000.0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 3,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "gpencil_strokes",
+      "name": "Edit Grease Pencil",
+      "description": "Edit selected Grease Pencil strokes",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "texture_space",
+      "name": "Edit Texture Space",
+      "description": "Edit object data texture space",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "remove_on_cancel",
+      "name": "Remove on Cancel",
+      "description": "Remove elements on cancel",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_duplicated_keyframes",
+      "name": "Duplicated Keyframes",
+      "description": "Transform duplicated keyframes",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "center_override",
+      "name": "Center Override",
+      "description": "Force using this center value (when set)",
+      "type": "FLOAT",
+      "subtype": "XYZ",
+      "unit": "NONE",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -10000,
+      "soft_max": 10000,
+      "precision": 3,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "release_confirm",
+      "name": "Confirm on Release",
+      "description": "Always confirm operation when releasing button",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_accurate",
+      "name": "Accurate",
+      "description": "Use accurate transformation",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "object mode only (edit mode M2, pose mode M6); texture_space and the Affect Only Origins/Parents tool settings are not implemented; snapping options change nothing (as in a non-interactive Blender call)",
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
+    "notes": [
+      "Resize keeps each object's rotation: a non-uniform resize of a rotated object loses the shear, exactly as in Blender.",
+      "resize() without value scales to zero (Blender's unset value is (0, 0, 0))."
+    ]
+  }
+}

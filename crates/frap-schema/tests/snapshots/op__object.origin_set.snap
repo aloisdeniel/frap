@@ -1,0 +1,127 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.origin_set",
+  "bl_idname": "OBJECT_OT_origin_set",
+  "label": "Set Origin",
+  "description": "Set the object's origin, by either moving the data, or set to center of data, or use 3D cursor",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "SCENE_EDITABLE"
+    ],
+    "text": "requires an editable scene",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Type",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "GEOMETRY_ORIGIN",
+      "enum_items": [
+        {
+          "identifier": "GEOMETRY_ORIGIN",
+          "name": "Geometry to Origin",
+          "description": "Move object geometry to object origin",
+          "value": 0
+        },
+        {
+          "identifier": "ORIGIN_GEOMETRY",
+          "name": "Origin to Geometry",
+          "description": "Calculate the center of geometry based on the current pivot point (median, otherwise bounding box)",
+          "value": 1
+        },
+        {
+          "identifier": "ORIGIN_CURSOR",
+          "name": "Origin to 3D Cursor",
+          "description": "Move object origin to position of the 3D cursor",
+          "value": 2
+        },
+        {
+          "identifier": "ORIGIN_CENTER_OF_MASS",
+          "name": "Origin to Center of Mass (Surface)",
+          "description": "Calculate the center of mass from the surface area",
+          "value": 3
+        },
+        {
+          "identifier": "ORIGIN_CENTER_OF_VOLUME",
+          "name": "Origin to Center of Mass (Volume)",
+          "description": "Calculate the center of mass from the volume (must be manifold geometry with consistent normals)",
+          "value": 4
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "center",
+      "name": "Center",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "MEDIAN",
+      "enum_items": [
+        {
+          "identifier": "MEDIAN",
+          "name": "Median Center",
+          "description": "",
+          "value": 3
+        },
+        {
+          "identifier": "BOUNDS",
+          "name": "Bounds Center",
+          "description": "",
+          "value": 0
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "mesh objects in Object Mode; Edit Mode arrives in M2; frap has no curves, fonts, lattices, metaballs or collection instances to center",
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
+    "notes": []
+  }
+}

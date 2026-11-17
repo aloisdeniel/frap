@@ -1,0 +1,24 @@
+bpy.ops.transform.translate(value=(1, 2, 3), constraint_axis=(True, False, False))
+transform.rotate value=0.5 orient_axis=Z
+bpy.data.objects['Cube'].rotation_euler
+bpy.ops.transform.resize(value=(2, 1, 1), orient_type='LOCAL')
+bpy.data.objects['Light'].select_set(True)
+bpy.context.view_layer.objects.active = bpy.data.objects['Light']
+bpy.ops.object.parent_set()
+bpy.data.objects['Cube'].parent.name
+bpy.ops.object.parent_clear(type='CLEAR_KEEP_TRANSFORM')
+bpy.ops.object.select_all(action='DESELECT')
+bpy.data.objects['Cube'].select_set(True)
+bpy.context.view_layer.objects.active = bpy.data.objects['Cube']
+bpy.ops.object.transform_apply()
+bpy.data.objects['Cube'].scale
+bpy.ops.object.origin_set(type='ORIGIN_CURSOR')
+bpy.ops.object.shade_smooth_by_angle()
+bpy.data.meshes['Cube'].attributes['sharp_edge'].data[0].value
+bpy.data.objects.new('Cube2', bpy.data.meshes['Cube'])
+bpy.context.scene.collection.objects.link(bpy.data.objects['Cube2'])
+bpy.ops.object.transform_apply()
+bpy.ops.view3d.snap_cursor_to_active()
+bpy.ops.object.select_all(action='DESELECT')
+bpy.ops.object.location_clear()
+bpy.ops.transform.translate(value=(1, 0, 0))
