@@ -17,8 +17,8 @@ mod write;
 
 use frap_lang::PathSeg;
 use frap_rna::{
-    ArrayShape, Bulk, EulerOrder, Field, FrapError, FuncDef, IdAny, IdNames, Item, MathTag,
-    PropDef, PropFlags, PropKind, PyExc, RnaPtr, Root, Seg, StructDef, Value,
+    ArrayShape, Bulk, Detached, EulerOrder, Field, FrapError, FuncDef, IdAny, IdNames, Item,
+    MathTag, PropDef, PropFlags, PropKind, PyExc, RnaPtr, Root, Seg, StructDef, Value,
 };
 use frap_scene::HostRead;
 use serde_json::{Value as J, json};
@@ -477,8 +477,91 @@ pub fn resolve(host: &dyn HostRead, path: &frap_lang::PathExpr) -> Result<Target
     Ok(t)
 }
 
-/// One segment.
+/// One segment. Everything reached from a [`Detached`] pointer (an `evaluated_get()` ID, a
+/// `to_mesh()` result) is detached too, so writes through it are refused (`write.rs`); IDs it
+/// reaches read `is_evaluated == False` as in Blender (`Detached::Temporary`). `ID.original`
+/// leads back to the ordinary pointer, and `ID.is_evaluated` reads True on an evaluated ID
+/// (WP 1.22 contract change).
 pub fn step(host: &dyn HostRead, cur: Target, seg: &PathSeg) -> Result<Target, FrapError> {
+    let id_root = match &cur {
+        Target::Struct(p) if p.srna.is_id && p.path.is_empty() => Some(p.root),
+        _ => None,
+    };
+    if let (Some(root), PathSeg::Attr(a)) = (id_root, seg) {
+        match a.as_str() {
+            // `ID.original`: the ID itself for an original, the original for a copy.
+            "original" if matches!(root, Root::Id(_) | Root::Embedded { .. }) => {
+                let Target::Struct(p) = cur else {
+                    unreachable!("id_root is only set on structs")
+                };
+                return Ok(Target::Struct(RnaPtr {
+                    detached: None,
+                    ..p
+                }));
+            }
+            "is_evaluated" if matches!(root, Root::Id(_) | Root::Embedded { .. }) => {
+                let d = target_detached(&cur);
+                return Ok(Target::Value(Value::Bool(d == Some(Detached::Evaluated))));
+            }
+            _ => {}
+        }
+    }
+    let Some(d) = target_detached(&cur) else {
+        return step_inner(host, cur, seg);
+    };
+    let parent_root = match &cur {
+        Target::Struct(p) => Some(p.root),
+        Target::Prop(p) => Some(p.ptr.root),
+        Target::Coll(c) => Some(c.ptr.root),
+        _ => None,
+    };
+    let mut t = step_inner(host, cur, seg)?;
+    mark_detached(&mut t, d, parent_root);
+    Ok(t)
+}
+
+fn target_detached(t: &Target) -> Option<Detached> {
+    match t {
+        Target::Struct(p) => p.detached,
+        Target::Prop(p) => p.ptr.detached,
+        Target::Coll(c) => c.ptr.detached,
+        Target::Func(FuncTarget::Rna { this, .. } | FuncTarget::Struct { this, .. }) => {
+            this.detached
+        }
+        Target::Func(FuncTarget::Coll { coll, .. }) => coll.ptr.detached,
+        Target::List { items, .. } => items.iter().find_map(target_detached),
+        _ => None,
+    }
+}
+
+fn mark_detached(t: &mut Target, d: Detached, parent_root: Option<Root>) {
+    let set = |p: &mut RnaPtr| {
+        if p.detached.is_none() {
+            // A re-rooted pointer is another ID of the copy, which Blender reports as not
+            // evaluated (`ob.evaluated_get(dg).data.is_evaluated == False`, verified on 5.2.4).
+            p.detached = Some(if Some(p.root) == parent_root {
+                d
+            } else {
+                Detached::Temporary
+            });
+        }
+    };
+    match t {
+        Target::Struct(p) => set(p),
+        Target::Prop(p) => set(&mut p.ptr),
+        Target::Coll(c) => set(&mut c.ptr),
+        Target::Func(FuncTarget::Rna { this, .. } | FuncTarget::Struct { this, .. }) => set(this),
+        Target::Func(FuncTarget::Coll { coll, .. }) => set(&mut coll.ptr),
+        Target::List { items, .. } => {
+            for i in items {
+                mark_detached(i, d, parent_root);
+            }
+        }
+        Target::Data | Target::Context | Target::None | Target::Value(_) => {}
+    }
+}
+
+fn step_inner(host: &dyn HostRead, cur: Target, seg: &PathSeg) -> Result<Target, FrapError> {
     match cur {
         Target::Data => step_struct(host, data_ptr(), seg),
         Target::Context => step_struct(host, context_ptr(), seg),

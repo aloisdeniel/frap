@@ -89,6 +89,9 @@ NORMALISE = {
     "D-38": ("cases", "cases write valid face offsets only"),
     "D-39": ("cases", "cases write valid indices only"),
     "D-40": ("cases", "cases stay inside the hard range"),
+    "D-41": None,
+    "D-42": None,
+    "D-43": None,
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

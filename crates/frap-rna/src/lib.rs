@@ -33,7 +33,7 @@ pub use id_kinds::{
 pub use op::{
     BitSet, FromValue, OpArgs, OpOptions, OpProps, OperatorSpec, PollCell, PollMatrix, Prop,
 };
-pub use ptr::{IdNames, Resolved, RnaPtr, Root, Seg};
+pub use ptr::{Detached, IdNames, Resolved, RnaPtr, Root, Seg};
 pub use traits::{
     Bulk, CollRef, Field, Item, Rna, RnaColl, RnaCollMut, RnaCollMutGuard, RnaMut, RnaMutGuard,
     SetOutcome, StructRef,
