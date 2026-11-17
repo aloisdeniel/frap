@@ -1,0 +1,5 @@
+# WP 1.26: the M1 exit transcript (vertical_slice.trycmd) fed on stdin, raw mode (§13.1): the
+# same 19 statements, the same expected responses.
+bin.name = "frap"
+args = []
+fs.sandbox = true

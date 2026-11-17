@@ -1,0 +1,8 @@
+# WP 1.26: the M1 exit transcript (vertical_slice.trycmd) through `frap serve --jsonl`
+# (§13.1, §13.5): one request per statement, so every response echoes its request's id, its
+# `line` is 1 (lines count within a request), `seq` keeps counting across requests, each
+# request ends with its done record, and the scene, the files written and the read/open
+# round trips carry over from request to request.
+bin.name = "frap"
+args = ["serve", "--jsonl"]
+fs.sandbox = true
