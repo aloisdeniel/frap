@@ -1385,7 +1385,11 @@ fn coll_json(host: &dyn HostRead, c: &CollPlace, caps: Caps) -> Result<J, FrapEr
 /// `{"$array": [...], "shape", "dtype", "len", "range", "truncated"}`: flat row-major, capped
 /// at `max_array` scalars (whole items only).
 pub fn bulk_json(bulk: &Bulk, prop: &PropDef, start: usize, max_array: usize) -> J {
-    let k = prop.array_len().max(1);
+    // A variable-length array (`MeshPolygon.vertices`, dumped as `[3]`) answers its
+    // concatenated values; when they do not split into whole items, it is answered flat
+    // instead of being cut to `[n, 3]` (WP 1.19: a plane's quad read as one triangle).
+    let flat = !bulk.len().is_multiple_of(prop.array_len().max(1));
+    let k = if flat { 1 } else { prop.array_len().max(1) };
     let total_items = bulk.len() / k;
     // At least one whole item, so a page always advances (even with `--max-array` below the
     // item width).
@@ -1400,7 +1404,7 @@ pub fn bulk_json(bulk: &Bulk, prop: &PropDef, start: usize, max_array: usize) ->
         Bulk::Bool(v) => (v[..scalars].iter().map(|x| J::from(*x)).collect(), "bool"),
         _ => (Vec::new(), "unknown"),
     };
-    let shape = if matches!(prop.array, ArrayShape::Scalar) {
+    let shape = if flat || matches!(prop.array, ArrayShape::Scalar) {
         json!([kept])
     } else {
         json!([kept, k])
@@ -1492,5 +1496,16 @@ mod tests {
         assert_eq!(j["$array"], json!([1, 2, 3]));
         assert_eq!(j["truncated"], true);
         assert_eq!(j["range"], json!([0, 1]));
+    }
+
+    #[test]
+    fn variable_length_bulk_is_flat() {
+        // A plane's one quad: `polygons.foreach_get('vertices')` gives 4 values, not `[1, 3]`.
+        let prop = frap_spec_rna::MESH_POLYGON
+            .find_prop("vertices")
+            .expect("vertices");
+        let j = bulk_json(&Bulk::I32(vec![0, 1, 3, 2]), prop, 0, 1000);
+        assert_eq!(j["$array"], json!([0, 1, 3, 2]));
+        assert_eq!(j["shape"], json!([4]));
     }
 }

@@ -230,12 +230,15 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T1",
     "support": "partial",
-    "support_note": "align='VIEW'/'CURSOR' and enter_editmode=True arrive in M1/M2",
+    "support_note": "enter_editmode=True and adding into a mesh in Edit Mode arrive in M2 (OP_NOT_IMPLEMENTED)",
     "headless": "native",
     "planned": "M1",
     "extension": false,
     "notes": [
-      "unset location => 3D cursor; unset rotation => from align; scale (0,0,0) => 1"
+      "unset location => 3D cursor location",
+      "unset rotation => from align (WORLD: none, VIEW: the virtual 3D View, CURSOR: the 3D cursor); a set rotation wins over align",
+      "unset scale => (1, 1, 1); the scale is baked into the mesh, object scale stays 1",
+      "enter_editmode=True and adding while a mesh is in Edit Mode answer OP_NOT_IMPLEMENTED until M2"
     ]
   }
 }

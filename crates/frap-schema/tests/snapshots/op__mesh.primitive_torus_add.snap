@@ -1,0 +1,340 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.primitive_torus_add",
+  "bl_idname": "MESH_OT_primitive_torus_add",
+  "label": "Add Torus",
+  "description": "Construct a torus mesh",
+  "bl_options": [
+    "PRESET",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "align",
+      "name": "Align",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "WORLD",
+      "enum_items": [
+        {
+          "identifier": "WORLD",
+          "name": "World",
+          "description": "Align the new object to the world",
+          "value": 0
+        },
+        {
+          "identifier": "VIEW",
+          "name": "View",
+          "description": "Align the new object to the view",
+          "value": 1
+        },
+        {
+          "identifier": "CURSOR",
+          "name": "3D Cursor",
+          "description": "Use the 3D cursor orientation for the new object",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "location",
+      "name": "Location",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "TRANSLATION",
+      "unit": "LENGTH",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -340282350000000000000000000000000000000.0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": "unset: the 3D cursor location (scene.cursor.location)",
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "rotation",
+      "name": "Rotation",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "EULER",
+      "unit": "ROTATION (radians)",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -340282350000000000000000000000000000000.0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": "unset: from align (WORLD: no rotation, VIEW: the 3D view rotation, CURSOR: the 3D cursor rotation); an explicit rotation always wins",
+      "frap_note": "radians; a whole number above 2π gets the ANGLE_LIKELY_DEGREES hint (use radians(90))",
+      "frap_extension": false
+    },
+    {
+      "identifier": "major_segments",
+      "name": "Major Segments",
+      "description": "Number of segments for the main ring of the torus",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 48,
+      "hard_min": 3,
+      "hard_max": 256,
+      "soft_min": 3,
+      "soft_max": 256,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "minor_segments",
+      "name": "Minor Segments",
+      "description": "Number of segments for the minor ring of the torus",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 12,
+      "hard_min": 3,
+      "hard_max": 256,
+      "soft_min": 3,
+      "soft_max": 256,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "mode",
+      "name": "Dimensions Mode",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "MAJOR_MINOR",
+      "enum_items": [
+        {
+          "identifier": "MAJOR_MINOR",
+          "name": "Major/Minor",
+          "description": "Use the major/minor radii for torus dimensions",
+          "value": 0
+        },
+        {
+          "identifier": "EXT_INT",
+          "name": "Exterior/Interior",
+          "description": "Use the exterior/interior radii for torus dimensions",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "major_radius",
+      "name": "Major Radius",
+      "description": "Radius from the origin to the center of the cross sections",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 1,
+      "hard_min": 0,
+      "hard_max": 10000,
+      "soft_min": 0,
+      "soft_max": 100,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "minor_radius",
+      "name": "Minor Radius",
+      "description": "Radius of the torus's cross section",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 0.25,
+      "hard_min": 0,
+      "hard_max": 10000,
+      "soft_min": 0,
+      "soft_max": 100,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "abso_major_rad",
+      "name": "Exterior Radius",
+      "description": "Total Exterior Radius of the torus",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 1.25,
+      "hard_min": 0,
+      "hard_max": 10000,
+      "soft_min": 0,
+      "soft_max": 100,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "abso_minor_rad",
+      "name": "Interior Radius",
+      "description": "Total Interior Radius of the torus",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 0.75,
+      "hard_min": 0,
+      "hard_max": 10000,
+      "soft_min": 0,
+      "soft_max": 100,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "generate_uvs",
+      "name": "Generate UVs",
+      "description": "Generate a default UV map",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "adding into a mesh in Edit Mode (joined into it) arrives in M2 (OP_NOT_IMPLEMENTED)",
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
+    "notes": [
+      "Python operator in Blender: the object is named after the mesh ('Torus', uniquified in bpy.data.meshes)",
+      "unset location => 3D cursor location",
+      "unset rotation => no rotation, whatever align says (object_align preference WORLD); a set rotation is replaced by the view rotation for align='VIEW' and by the cursor rotation for align='CURSOR'",
+      "the object is placed through matrix_world, so rotation and scale come from Blender's matrix decomposition"
+    ]
+  }
+}
