@@ -948,7 +948,8 @@ impl Session {
         // Steps 6–8: transaction + exec.
         let txn = self.transact(|s| {
             let mut cx = OpCtx::new(&mut s.host, &mut s.services, def.spec);
-            let r = (def.exec)(&mut cx, &args);
+            // §10.2 step 7 through the framework: a macro runs its steps (WP 1.20 fix).
+            let r = frap_op::pipeline::execute(def, &mut cx, &args);
             let out = cx.finish();
             match r {
                 Ok(OpStatus::Finished) => Ok((out, false)),

@@ -218,6 +218,35 @@ fn intern_items(items: &[EnumItemOwned]) -> &'static [EnumItem] {
 }
 
 /// A copy of an enum `PropDef` with its items replaced by the dynamic ones.
+/// Without a context, a dynamic enum whose dump has no static items (the superset is empty,
+/// e.g. `object.collection_link.collection`, items = the collection names) accepts the given
+/// identifier; the operator checks it against its context items with Blender's message
+/// (WP 1.20).
+fn open_dynamic(def: &'static PropDef, input: &Input) -> Option<PropDef> {
+    let PropKind::Enum {
+        items,
+        dynamic: Some(_),
+        ..
+    } = &def.kind
+    else {
+        return None;
+    };
+    if !items.is_empty() {
+        return None;
+    }
+    let id = match input {
+        Input::Str(s) => SmolStr::new(s),
+        Input::Bare(s) => s.clone(),
+        _ => return None,
+    };
+    let item = EnumItemOwned {
+        identifier: id.clone(),
+        name: id,
+        description: SmolStr::default(),
+    };
+    with_items(def, intern_items(&[item]))
+}
+
 fn with_items(def: &'static PropDef, items: &'static [EnumItem]) -> Option<PropDef> {
     let PropKind::Enum {
         default, dynamic, ..
@@ -413,6 +442,7 @@ fn convert_struct(
         };
         let dynamic = match (ctx, dyn_enums.iter().find(|(p, _)| *p == def.identifier)) {
             (Some(c), Some((_, f))) => with_items(def, intern_items(&f(c))),
+            (None, _) => open_dynamic(def, &input),
             _ => None,
         };
         let target: &PropDef = dynamic.as_ref().unwrap_or(def);
@@ -519,6 +549,26 @@ pub fn prepare(
 
 // ------------------------------------------------------------------------------- execution
 
+/// Step properties a macro definition sets (`RNA_boolean_set(otmacro->ptr, …)` in
+/// `WM_operatortype_macro_define` callers): they win over the caller's nested arguments
+/// (verified on 5.2.4: `duplicate_move_linked(OBJECT_OT_duplicate={'linked': False})` still
+/// links). `(macro, step, prop, value)`; the operator dumps do not record them (WP 1.20).
+pub const MACRO_STEP_FORCED: &[(&str, &str, &str, bool)] = &[(
+    "OBJECT_OT_duplicate_move_linked",
+    "OBJECT_OT_duplicate",
+    "linked",
+    true,
+)];
+
+/// The boolean step properties `macro` forces on `step` ([`MACRO_STEP_FORCED`]).
+pub fn macro_step_forced(macro_bl: &str, step_bl: &str) -> Vec<(&'static str, bool)> {
+    MACRO_STEP_FORCED
+        .iter()
+        .filter(|(m, s, _, _)| *m == macro_bl && *s == step_bl)
+        .map(|&(_, _, p, v)| (p, v))
+        .collect()
+}
+
 /// §10.2 step 7: runs an operator. A macro runs its steps in order with their nested args
 /// (defaults for steps without one), stops at the first cancelled step and reports `FINISHED`
 /// if an earlier step finished (`wm_macro_exec`/`wm_macro_end`); its own `exec` then runs as a
@@ -538,7 +588,7 @@ pub fn execute(def: &'static OperatorDef, cx: &mut OpCtx, args: &OpArgs) -> OpRe
             )));
         };
         let defaults;
-        let sub = match args.nested.get(step) {
+        let mut sub = match args.nested.get(step) {
             Some(a) => a,
             None => {
                 defaults = convert_kwargs(step_def.spec, &[], None, Vec::new())
@@ -547,6 +597,19 @@ pub fn execute(def: &'static OperatorDef, cx: &mut OpCtx, args: &OpArgs) -> OpRe
                 &defaults
             }
         };
+        let forced_args;
+        let forced = macro_step_forced(def.spec.bl_idname, step);
+        if !forced.is_empty() {
+            let mut a = sub.clone();
+            for (prop, v) in forced {
+                if let Some(i) = a.values.get_index_of(prop) {
+                    a.values.insert(prop, frap_rna::Value::Bool(v));
+                    a.is_set.insert(i);
+                }
+            }
+            forced_args = a;
+            sub = &forced_args;
+        }
         match cx.run_def(step_def, sub, true)? {
             OpStatus::Finished => finished = true,
             OpStatus::Cancelled => {

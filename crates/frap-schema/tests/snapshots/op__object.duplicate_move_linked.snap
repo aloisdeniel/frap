@@ -1,0 +1,84 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.duplicate_move_linked",
+  "bl_idname": "OBJECT_OT_duplicate_move_linked",
+  "label": "Duplicate Linked",
+  "description": "Duplicate the selected objects, but not their object data, and move them",
+  "bl_options": [
+    "MACRO",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "MACRO",
+  "macro_steps": [
+    "OBJECT_OT_duplicate",
+    "TRANSFORM_OT_translate"
+  ],
+  "poll": {
+    "requires": [
+      "SCENE_EDITABLE",
+      "MODE_OBJECT"
+    ],
+    "text": "requires an editable scene, Object Mode (bpy.ops.object.mode_set(mode='OBJECT'))",
+    "matrix": {
+      "plain": "YYNNN",
+      "view3d": "YYNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "OBJECT_OT_duplicate",
+      "name": "Duplicate Objects",
+      "description": "Duplicate selected objects",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "OBJECT_OT_duplicate",
+      "is_id": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "TRANSFORM_OT_translate",
+      "name": "Move",
+      "description": "Move selected items",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "TRANSFORM_OT_translate",
+      "is_id": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "the transform.translate step is not implemented yet (WP 1.21): the macro answers OP_NOT_IMPLEMENTED and changes nothing; use object.duplicate(linked=True), then set location",
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
+    "notes": []
+  }
+}

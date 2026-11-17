@@ -197,8 +197,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `object.posemode_toggle` | M6 | P1 |  |
 | [ ] | `object.mode_set_with_submode` | M8 | P2 |  |
 | [x] | `object.select_all` | M1 | P0 | prereq (WP 1.19) |
-| [ ] | `object.select_by_type` | M1 | P1 |  |
-| [ ] | `object.select_pattern` | M1 | P1 |  |
+| [x] | `object.select_by_type` | M1 | P1 |  |
+| [x] | `object.select_pattern` | M1 | P1 |  |
 | [ ] | `object.select_grouped` | M8 | P2 |  |
 | [ ] | `object.select_hierarchy` | M8 | P2 |  |
 | [ ] | `object.select_linked` | M8 | P2 |  |
@@ -208,18 +208,18 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `object.select_more` | M8 | P2 |  |
 | [ ] | `object.select_less` | M8 | P2 |  |
 | [ ] | `object.select_same_collection` | M8 | P2 |  |
-| [ ] | `object.camera_add` | M1 | P0 | sets scene.camera when None (virtual 3D View); object and data uniquified independently |
-| [ ] | `object.light_add` | M1 | P0 | 10 W (factory Light is 1000 W) |
-| [ ] | `object.empty_add` | M1 | P0 |  |
+| [x] | `object.camera_add` | M1 | P0 | sets scene.camera when None (virtual 3D View); object and data uniquified independently |
+| [x] | `object.light_add` | M1 | P0 | 10 W (factory Light is 1000 W) |
+| [x] | `object.empty_add` | M1 | P0 |  |
 | [ ] | `object.armature_add` | M6 | P0 |  |
 | [ ] | `object.add` | M8 | P2 |  |
 | [ ] | `object.add_named` | M8 | P2 |  |
 | [ ] | `object.collection_instance_add` | M8 | P2 |  |
 | [x] | `object.delete` | M1 | P0 | prereq (WP 1.19); leaves orphan data; re-adding then names data `.001` (T0) |
-| [ ] | `object.duplicate` | M1 | P0 | materials shared (factory prefs) |
+| [x] | `object.duplicate` | M1 | P0 | materials shared (factory prefs) |
 | [ ] | `object.duplicate_move` | M1 | P0 | macro |
 | [ ] | `object.duplicate_move_linked` | M1 | P1 | macro |
-| [ ] | `object.join` | M1 | P0 | CANCELLED with WARNING reports |
+| [x] | `object.join` | M1 | P0 | CANCELLED with WARNING reports |
 | [ ] | `object.convert` | M4 | P1 | apply modifiers to mesh |
 | [ ] | `object.join_shapes` | M6 | P2 |  |
 | [ ] | `object.duplicates_make_real` | M8 | P2 |  |
@@ -254,10 +254,10 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `object.modifier_apply_as_shapekey` | M6 | P2 |  |
 | [ ] | `object.modifier_copy_to_selected` | M8 | P2 |  |
 | [ ] | `object.modifiers_copy_to_selected` | M8 | P2 |  |
-| [ ] | `object.material_slot_add` | M1 | P0 |  |
-| [ ] | `object.material_slot_remove` | M1 | P0 |  |
-| [ ] | `object.material_slot_remove_unused` | M1 | P1 |  |
-| [ ] | `object.material_slot_remove_all` | M1 | P2 |  |
+| [x] | `object.material_slot_add` | M1 | P0 |  |
+| [x] | `object.material_slot_remove` | M1 | P0 |  |
+| [x] | `object.material_slot_remove_unused` | M1 | P1 |  |
+| [x] | `object.material_slot_remove_all` | M1 | P2 |  |
 | [ ] | `object.material_slot_assign` | M2 | P0 | edit-mode face assignment (object mode: no-op as Blender) |
 | [ ] | `object.material_slot_select` | M2 | P1 | edit mode |
 | [ ] | `object.material_slot_deselect` | M2 | P1 | edit mode |
@@ -300,12 +300,12 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `object.shape_key_make_basis` | M8 | P2 |  |
 | [ ] | `object.shape_key_apply_to_basis` | M8 | P2 |  |
 | [ ] | `object.shape_key_transfer` | M8 | P2 |  |
-| [ ] | `object.move_to_collection` | M1 | P1 |  |
-| [ ] | `object.link_to_collection` | M1 | P2 |  |
-| [ ] | `object.collection_add` | M1 | P2 |  |
-| [ ] | `object.collection_remove` | M1 | P2 |  |
-| [ ] | `object.collection_link` | M1 | P2 | dynamic enum |
-| [ ] | `object.collection_unlink` | M1 | P2 |  |
+| [x] | `object.move_to_collection` | M1 | P1 |  |
+| [x] | `object.link_to_collection` | M1 | P2 |  |
+| [x] | `object.collection_add` | M1 | P2 |  |
+| [x] | `object.collection_remove` | M1 | P2 |  |
+| [x] | `object.collection_link` | M1 | P2 | dynamic enum |
+| [x] | `object.collection_unlink` | M1 | P2 |  |
 | [ ] | `object.hide_view_set` | M3 | P1 | virtual 3D View poll |
 | [ ] | `object.hide_view_clear` | M3 | P1 |  |
 | [ ] | `object.make_single_user` | M3 | P1 |  |
@@ -591,7 +591,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `material.new` | M1 | P0 | does not assign to a slot from scripts (as Blender) |
+| [x] | `material.new` | M1 | P0 | does not assign to a slot from scripts (as Blender) |
 | [ ] | `material.copy` | M8 | P2 |  |
 | [ ] | `material.paste` | M8 | P2 |  |
 
