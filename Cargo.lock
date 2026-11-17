@@ -1137,6 +1137,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "frap-ops-render-tests"
+version = "0.1.0"
+dependencies = [
+ "frap-golden",
+ "frap-imbuf",
+ "frap-session",
+ "serde_json",
+]
+
+[[package]]
 name = "frap-ops-transform"
 version = "0.1.0"
 dependencies = [

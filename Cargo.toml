@@ -76,6 +76,7 @@ members = [
     "crates/frap-golden",
     # test-only crates (rule 2.2.11: operator behaviour tests that need a Session)
     "crates/frap-ops-io-tests",
+    "crates/frap-ops-render-tests",
     # tooling (cargo xtask ...)
     "xtask",
 ]
@@ -143,6 +144,7 @@ frap-session = { path = "crates/frap-session", version = "0.1.0" }
 frap-schema = { path = "crates/frap-schema", version = "0.1.0" }
 frap-golden = { path = "crates/frap-golden", version = "0.1.0" }
 frap-ops-io-tests = { path = "crates/frap-ops-io-tests", version = "0.1.0" }
+frap-ops-render-tests = { path = "crates/frap-ops-render-tests", version = "0.1.0" }
 
 # ---------------------------------------------------------------- external (§3.5)
 # Exact patch versions are locked in Cargo.lock. Entries for later milestones are declared

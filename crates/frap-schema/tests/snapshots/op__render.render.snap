@@ -1,0 +1,214 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "render.render",
+  "bl_idname": "RENDER_OT_render",
+  "label": "Render",
+  "description": "(undocumented operator)",
+  "bl_options": [],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "animation",
+      "name": "Animation",
+      "description": "Render files from the animation range of this scene",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "write_still",
+      "name": "Write Image",
+      "description": "Save the rendered image to the output path (used only when animation is disabled)",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": "render.render() writes nothing to disk unless write_still=True (the image goes to bpy.data.images['Render Result']); the path is scene.render.filepath",
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_viewport",
+      "name": "Use 3D Viewport",
+      "description": "When inside a 3D viewport, use layers and camera of the viewport",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_sequencer_scene",
+      "name": "Use Sequencer Scene",
+      "description": "Render the sequencer scene instead of the active scene",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "layer",
+      "name": "Render Layer",
+      "description": "Single render layer to re-render (used only when animation is disabled)",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 266,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "NEVER_NULL",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "scene",
+      "name": "Scene",
+      "description": "Scene to render, current scene if not specified",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 256,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "NEVER_NULL",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "frame_start",
+      "name": "Start Frame",
+      "description": "Frame to start rendering animation at. If not specified, the scene start frame will be assumed. This should only be specified if doing an animation render",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "frame_end",
+      "name": "End Frame",
+      "description": "Frame to end rendering animation at. If not specified, the scene end frame will be assumed. This should only be specified if doing an animation render",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T4",
+    "support": "partial",
+    "support_note": "BLENDER_EEVEE and CYCLES render with BLENDER_WORKBENCH (WARNING) until M5; animation=True renders every frame of the range but animation is evaluated from M6; scene=/layer= other than the context ones and use_sequencer_scene=True are not supported",
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
+    "notes": [
+      "needs a GPU: GPU_UNAVAILABLE without an adapter or in a build without the gpu feature",
+      "the scene is rendered from a copy: nothing changes except bpy.data.images['Render Result']",
+      "output paths follow Blender 5.2: templates ({scene_name}, {resolution_x:####}, ...), // relative to the saved .frap (else the cwd), relative paths against the cwd, # runs for animation frames, use_file_extension",
+      "a path without a directory part ('shot.png') is written to the cwd (Blender 5.2.4 fails to save it)",
+      "file formats: PNG 8/16, JPEG, WEBP, OPEN_EXR, HDR, TARGA, BMP"
+    ]
+  }
+}
