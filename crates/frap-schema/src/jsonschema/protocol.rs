@@ -251,7 +251,7 @@ struct Response {
     hints: Vec<Hint>,
 }
 
-/// `{"event": "ready", …}`: the first line of raw mode (disable with `--no-ready`).
+/// `{"event": "ready", …}`: the first line of raw mode and of `frap serve --jsonl` (disable with `--no-ready`).
 #[derive(JsonSchema)]
 #[schemars(title = "frap ready event")]
 struct Ready {
@@ -275,7 +275,7 @@ struct EndStats {
     cancelled: u64,
 }
 
-/// `{"event": "end", …}` at EOF (disable with `--no-end-event`).
+/// `{"event": "end", …}` at EOF, in raw mode and `frap serve --jsonl` (disable with `--no-end-event`).
 #[derive(JsonSchema)]
 #[schemars(title = "frap end event")]
 struct End {

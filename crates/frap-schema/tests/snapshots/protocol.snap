@@ -637,7 +637,7 @@ source: crates/frap-schema/tests/snapshots.rs
         "startup"
       ],
       "title": "frap ready event",
-      "description": "`{\"event\": \"ready\", …}`: the first line of raw mode (disable with `--no-ready`).",
+      "description": "`{\"event\": \"ready\", …}`: the first line of raw mode and of `frap serve --jsonl` (disable with `--no-ready`).",
       "$schema": "https://json-schema.org/draft/2020-12/schema"
     },
     "end": {
@@ -684,7 +684,7 @@ source: crates/frap-schema/tests/snapshots.rs
         "stats"
       ],
       "title": "frap end event",
-      "description": "`{\"event\": \"end\", …}` at EOF (disable with `--no-end-event`).",
+      "description": "`{\"event\": \"end\", …}` at EOF, in raw mode and `frap serve --jsonl` (disable with `--no-end-event`).",
       "$schema": "https://json-schema.org/draft/2020-12/schema"
     },
     "done": {
