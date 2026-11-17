@@ -1,0 +1,508 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "import_scene.gltf",
+  "bl_idname": "IMPORT_SCENE_OT_gltf",
+  "label": "Import glTF 2.0",
+  "description": "Load a glTF 2.0 file",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "filepath",
+      "name": "File Path",
+      "description": "Filepath used for importing the file",
+      "type": "STRING",
+      "subtype": "FILE_PATH",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 1025,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "NEVER_NULL",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "export_import_convert_lighting_mode",
+      "name": "Lighting Mode",
+      "description": "Optional backwards compatibility for non-standard render engines. Applies to lights",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SPEC",
+      "enum_items": [
+        {
+          "identifier": "SPEC",
+          "name": "Standard",
+          "description": "Physically-based glTF lighting units (cd, lx, nt)",
+          "value": 0
+        },
+        {
+          "identifier": "COMPAT",
+          "name": "Unitless",
+          "description": "Non-physical, unitless lighting. Useful when exposure controls are not available",
+          "value": 1
+        },
+        {
+          "identifier": "RAW",
+          "name": "Raw (Deprecated)",
+          "description": "Blender lighting strengths with no conversion",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "filter_glob",
+      "name": "filter_glob",
+      "description": "",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "*.glb;*.gltf",
+      "length_max": 0,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "NEVER_NULL",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "directory",
+      "name": "directory",
+      "description": "",
+      "type": "STRING",
+      "subtype": "DIR_PATH",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 0,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "NEVER_NULL",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "files",
+      "name": "File Path",
+      "description": "",
+      "type": "COLLECTION",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": [],
+      "item_type": "OperatorFileListElement",
+      "api": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "loglevel",
+      "name": "Log Level",
+      "description": "Log Level",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "import_pack_images",
+      "name": "Pack Images",
+      "description": "Pack all images into .blend file",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "merge_vertices",
+      "name": "Merge Vertices",
+      "description": "The glTF format requires discontinuous normals, UVs, and other vertex attributes to be stored as separate vertices, as required for rendering on typical graphics hardware. This option attempts to combine co-located vertices where possible. Currently cannot combine verts with different normals",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": "imported meshes keep glTF's split vertices (seams at every UV/normal split) unless merge_vertices=True",
+      "frap_extension": false
+    },
+    {
+      "identifier": "import_shading",
+      "name": "Shading",
+      "description": "How normals are computed during import",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "NORMALS",
+      "enum_items": [
+        {
+          "identifier": "NORMALS",
+          "name": "Use Normal Data",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "FLAT",
+          "name": "Flat Shading",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "SMOOTH",
+          "name": "Smooth Shading",
+          "description": "",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "bone_heuristic",
+      "name": "Bone Dir",
+      "description": "Heuristic for placing bones. Tries to make bones pretty",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "BLENDER",
+      "enum_items": [
+        {
+          "identifier": "BLENDER",
+          "name": "Blender (best for import/export round trip)",
+          "description": "Good for re-importing glTFs exported from Blender, and re-exporting glTFs to glTFs after Blender editing. Bone tips are placed on their local +Y axis (in glTF space)",
+          "value": 0
+        },
+        {
+          "identifier": "TEMPERANCE",
+          "name": "Temperance (average)",
+          "description": "Decent all-around strategy. A bone with one child has its tip placed on the local axis closest to its child",
+          "value": 1
+        },
+        {
+          "identifier": "FORTUNE",
+          "name": "Fortune (may look better, less accurate)",
+          "description": "Might look better than Temperance, but also might have errors. A bone with one child has its tip placed at its child's root. Non-uniform scalings may get messed up though, so beware",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "disable_bone_shape",
+      "name": "Disable Bone Shape",
+      "description": "Do not create bone shapes",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "bone_shape_scale_factor",
+      "name": "Bone Shape Scale",
+      "description": "Scale factor for bone shapes",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -340282350000000000000000000000000000000.0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "guess_original_bind_pose",
+      "name": "Guess Original Bind Pose",
+      "description": "Try to guess the original bind pose for skinned meshes from the inverse bind matrices. When off, use default/rest pose as bind pose",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "import_webp_texture",
+      "name": "Import WebP Textures",
+      "description": "If a texture exists in WebP format, loads the WebP texture instead of the fallback PNG/JPEG one",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "import_unused_materials",
+      "name": "Import Unused Materials & Images",
+      "description": "Import materials & Images not assigned to any mesh",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "import_select_created_objects",
+      "name": "Select Imported Objects",
+      "description": "Select created objects at the end of the import",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "import_scene_extras",
+      "name": "Import Scene Extras",
+      "description": "Import scene extras as custom properties. Existing custom properties will be overwritten",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "import_scene_as_collection",
+      "name": "Import Scene as Collection",
+      "description": "Import the scene as a collection",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "import_merge_material_slots",
+      "name": "Merge Material Slot when possible",
+      "description": "Merge material slots when possible",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "import_point_as_pointcloud",
+      "name": "Import Points as Point Cloud",
+      "description": "Import mesh with only POINTS primitives as Point Cloud objects",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T2",
+    "support": "partial",
+    "support_note": "M1: static meshes, hierarchy, cameras, lights, Principled materials and textures; skins, morph targets and animations (M6) and compressed meshes (M7) give a WARNING",
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
+    "notes": [
+      "with files=[{'name': …}] every directory/<name> is imported, else filepath",
+      "result.objects lists the created objects",
+      "'//' resolves relative to bpy.data.filepath"
+    ]
+  }
+}

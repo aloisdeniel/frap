@@ -19,6 +19,12 @@ frap-scene.workspace = true
 frap-rna.workspace = true
 frap-project.workspace = true
 frap-gltf.workspace = true
+frap-nodes.workspace = true
+frap-spec-ops-io.workspace = true
+frap-io-gltf.workspace = true
+# WP 1.23: the glTF round-trip law (allow list, canonical comparison, Blender reference runs).
+frap-golden.workspace = true
+glam.workspace = true
 proptest.workspace = true
 insta.workspace = true
 serde_json.workspace = true

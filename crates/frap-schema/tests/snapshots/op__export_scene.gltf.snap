@@ -442,7 +442,7 @@ source: crates/frap-schema/tests/describe_ops.rs
       ],
       "is_enum_flag": false,
       "dynamic_enum": "EXPORT_SCENE_OT_gltf.export_format",
-      "context_rule": "items come from a Blender callback that depends on the context (EXPORT_SCENE_OT_gltf.export_format); enum_items is frap's verified superset (spec/overlay/dynamic_enums.toml)",
+      "context_rule": "items depend on the context in Blender (EXPORT_SCENE_OT_gltf.export_format); frap narrows them to the live context, enum_items is the superset",
       "hidden": false,
       "skip_save": false,
       "flags": [
@@ -2484,13 +2484,16 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T2",
     "support": "partial",
-    "support_note": "M0 subset: filepath and export_format='GLB'",
+    "support_note": "M1: static meshes, hierarchy, Principled base colour/metallic/roughness and base-colour textures; other props give a WARNING when not at their default",
     "headless": "native",
     "planned": "M1",
     "extension": false,
     "notes": [
-      "M0: static meshes, Principled base factors; other export props arrive in M1/M3",
-      "missing parent directories are created, as Blender's add-on does"
+      "every Blender prop is accepted; props the M1 exporter does not honour give a WARNING naming the prop when set to a non-default value",
+      "the file extension is forced to the format's (.glb / .gltf), as the add-on does",
+      "missing parent directories are created, as Blender's add-on does",
+      "'//' resolves relative to bpy.data.filepath (deviation D-08: the add-on writes it raw)",
+      "GLTF_EMBEDDED needs the add-on preference allow_embedded_format (off in factory settings)"
     ]
   }
 }

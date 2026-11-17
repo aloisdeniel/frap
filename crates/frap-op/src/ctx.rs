@@ -10,7 +10,7 @@ use frap_rna::{IdAny, IdRef, MeshId, ObjectId, OpArgs, OperatorSpec, Report, Rep
 use frap_scene::id::Object;
 use frap_scene::{
     Base, BaseFlag, ChangeLog, Context, EditState, EvalMode, EvaluatedObject, Evaluator, Host,
-    HostRead, Main, Snapshot,
+    HostRead, Main, Snapshot, WindowState,
 };
 use indexmap::IndexMap;
 use smol_str::SmolStr;
@@ -84,6 +84,11 @@ impl<'h> OpCtx<'h> {
     /// `bpy.data` and the change log, for inserts into any `IdMap` (F-OP-9).
     pub fn main_mut(&mut self) -> (&mut Main, &mut ChangeLog) {
         self.host.main_mut()
+    }
+    /// Window state (`window.scene`, `window.view_layer`): `wm.open_mainfile` and
+    /// `wm.read_homefile` replace it with the loaded file's (WP 1.23). Marks the context changed.
+    pub fn win_mut(&mut self) -> &mut WindowState {
+        self.host.win_mut()
     }
     /// Mutable object (COW, generation bump, logged).
     pub fn object_mut(&mut self, r: IdRef<ObjectId>) -> Result<&mut Object, OpError> {
