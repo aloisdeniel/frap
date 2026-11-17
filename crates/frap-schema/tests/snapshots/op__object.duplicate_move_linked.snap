@@ -74,8 +74,8 @@ source: crates/frap-schema/tests/describe_ops.rs
   "frap": {
     "status": "implemented",
     "tier": "T0",
-    "support": "full",
-    "support_note": null,
+    "support": "partial",
+    "support_note": "the transform.translate step is not implemented yet (WP 1.21): the macro answers OP_NOT_IMPLEMENTED and changes nothing; use object.duplicate(linked=True), then set location",
     "headless": "native",
     "planned": "M1",
     "extension": false,

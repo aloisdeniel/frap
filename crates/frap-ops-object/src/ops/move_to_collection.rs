@@ -185,6 +185,12 @@ pub(crate) mod common {
 
     /// `BKE_collection_from_session_uid`: the master collection or a collection below it
     /// whose `session_uid` is `uid`.
+    ///
+    /// Candidate deviation (for docs/deviations.md): frap's master collection has no ID of its
+    /// own, so `scene.collection.session_uid` reads 0 (35 in Blender's factory scene) and
+    /// `collection_uid=0` targets it, where Blender raises `Unexpected error, collection not
+    /// found` for a literal 0. Matching 0 keeps `collection_uid=scene.collection.session_uid`
+    /// working in both.
     pub(crate) fn from_session_uid(main: &Main, scene: IdRef<SceneId>, uid: i64) -> Option<SceneColl> {
         all_scene_collections(main, scene).into_iter().find(|c| {
             get(main, scene, *c).is_some_and(|col| i64::from(col.header.session_uid as i32) == uid)

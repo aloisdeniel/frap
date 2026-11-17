@@ -6,13 +6,20 @@
 //! `TRANSFORM_OT_translate.value=2,0,0`). The framework runs the steps (§10.2,
 //! `frap_op::pipeline::execute`); this exec is the macro's post-step hook and changes nothing.
 //! Verified on 5.2.4: `OBJECT_OT_duplicate={'linked': True}` shares the data; the copies are
-//! translated, the originals stay. The translate step is `transform.translate` (WP 1.21).
+//! translated, the originals stay. The translate step is `transform.translate` (WP 1.21):
+//! until it lands, the step answers `OP_NOT_IMPLEMENTED` and the session rolls the duplicate
+//! back (`support = Partial`, `tests/cli/m1/object_ops/duplicate_move.toml`).
 
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_object::object;
 
-#[operator(poll = poll::OBJECTMODE, tier = T0, kind = Macro)]
+#[operator(
+    poll = poll::OBJECTMODE,
+    tier = T0,
+    kind = Macro,
+    support = Partial("the transform.translate step is not implemented yet (WP 1.21): the macro answers OP_NOT_IMPLEMENTED and changes nothing; use object.duplicate, then set location")
+)]
 fn exec(_cx: &mut OpCtx, _p: object::DuplicateMove) -> OpResult {
     Ok(OpStatus::Finished)
 }
