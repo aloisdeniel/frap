@@ -89,6 +89,74 @@ fn runtime_err(msg: impl Into<String>) -> FrapError {
     FrapError::new(PyExc::RuntimeError, frap_rna::codes::RNA_RUNTIME, msg)
 }
 
+/// CPython's call checks for a method defined in Python (`def from_pydata(self, vertices,
+/// edges, faces, shade_flat=True)`), in CPython's order and wording (verified on 5.2.4):
+/// `Mesh.from_pydata() takes from 4 to 5 positional arguments but 6 were given`,
+/// `… got an unexpected keyword argument 'foo'`, `… got multiple values for argument 'x'`,
+/// `… missing 1 required positional argument: 'faces'`. Counts include `self`.
+fn cpython_arity(
+    fname: &str,
+    params: &[PropDef],
+    args: &[CallArg],
+    npos: usize,
+) -> Result<(), FrapError> {
+    let required = params
+        .iter()
+        .filter(|p| p.flags.contains(PropFlags::REQUIRED))
+        .count();
+    if npos > params.len() {
+        let (lo, hi) = (required + 1, params.len() + 1);
+        let takes = if lo == hi {
+            format!("{hi} positional argument{}", if hi == 1 { "" } else { "s" })
+        } else {
+            format!("from {lo} to {hi} positional arguments")
+        };
+        return Err(type_err(format!(
+            "{fname}() takes {takes} but {} were given",
+            npos + 1
+        )));
+    }
+    for a in args.iter().filter_map(|a| a.name.as_deref()) {
+        match params.iter().position(|p| p.identifier == a) {
+            None => {
+                return Err(type_err(format!(
+                    "{fname}() got an unexpected keyword argument '{a}'"
+                )));
+            }
+            Some(i) if i < npos => {
+                return Err(type_err(format!(
+                    "{fname}() got multiple values for argument '{a}'"
+                )));
+            }
+            Some(_) => {}
+        }
+    }
+    let missing: Vec<String> = params
+        .iter()
+        .enumerate()
+        .filter(|(i, p)| {
+            p.flags.contains(PropFlags::REQUIRED)
+                && *i >= npos
+                && !args.iter().any(|a| a.name.as_deref() == Some(p.identifier))
+        })
+        .map(|(_, p)| format!("'{}'", p.identifier))
+        .collect();
+    if !missing.is_empty() {
+        let list = match missing.as_slice() {
+            [one] => one.clone(),
+            [a, b] => format!("{a} and {b}"),
+            [init @ .., last] => format!("{}, and {last}", init.join(", ")),
+            [] => String::new(),
+        };
+        return Err(type_err(format!(
+            "{fname}() missing {} required positional argument{}: {list}",
+            missing.len(),
+            if missing.len() == 1 { "" } else { "s" }
+        )));
+    }
+    Ok(())
+}
+
 /// Binds positional and keyword arguments against `FuncDef.params` (Blender's
 /// `pyrna_func_call` order of checks), coercing each one.
 pub(crate) fn bind_args(
@@ -111,11 +179,22 @@ pub(crate) fn bind_args(
             "positional argument follows keyword argument",
         ));
     }
-    let fname = if python_only {
+    // A method defined in Python (`Mesh.from_pydata` in `_bpy_types.py`), not a `bpy_struct`
+    // C method: CPython's own argument errors (WP 1.22, verified on 5.2.4).
+    let cpython = python_only
+        && !frap_spec_rna::BPY_STRUCT_FUNCS
+            .iter()
+            .any(|f| std::ptr::eq(f, def));
+    let fname = if cpython {
+        format!("{owner}.{}", def.identifier)
+    } else if python_only {
         format!("bpy_struct.{}()", def.identifier)
     } else {
         format!("{owner}.{}", def.identifier)
     };
+    if cpython {
+        cpython_arity(&fname, params, args, npos)?;
+    }
     if let Some(k) = def.keyword_only_from {
         let k = k as usize;
         if npos > k {
@@ -157,20 +236,27 @@ pub(crate) fn bind_args(
         match found {
             Some(a) => {
                 let input = a.value.to_input()?;
+                // `pyrna_func_call` names keyword arguments by keyword; a Python method's
+                // own checks have no prefix.
+                let prefix = match (cpython, &a.name) {
+                    (true, _) => String::new(),
+                    (false, Some(_)) => format!(
+                        "{fname}(): error with keyword argument \"{}\" -  ",
+                        p.identifier
+                    ),
+                    (false, None) => format!(
+                        "{fname}(): error with argument {}, \"{}\" -  ",
+                        i + 1,
+                        p.identifier
+                    ),
+                };
                 let c = coerce(p, input.clone(), &CoerceCx::RnaSet { owner: "Function" }).map_err(
                     |e| {
-                        e.into_frap(
-                            &format!(
-                                "{fname}(): error with argument {}, \"{}\" -  ",
-                                i + 1,
-                                p.identifier
-                            ),
-                            |k| match k {
-                                RnaErrorKind::Enum => RNA_ENUM,
-                                RnaErrorKind::Length => RNA_LENGTH,
-                                _ => frap_rna::codes::RNA_FUNC_ARGS,
-                            },
-                        )
+                        e.into_frap(&prefix, |k| match k {
+                            RnaErrorKind::Enum => RNA_ENUM,
+                            RnaErrorKind::Length => RNA_LENGTH,
+                            _ => frap_rna::codes::RNA_FUNC_ARGS,
+                        })
                         .with_span(a.span)
                     },
                 )?;

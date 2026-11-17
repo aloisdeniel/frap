@@ -731,6 +731,21 @@ fn coerce_inner(def: &PropDef, input: Input, cx: &CoerceCx) -> Result<Coerced, R
                 other.py_type_name()
             ))),
         },
+        // Python-only functions taking plain Python sequences (`Mesh.from_pydata(vertices,
+        // edges, faces)`, `spec/overlay/python_only.toml`): the items stay untyped; the
+        // function checks them. Python's `len()` is what fails first on a non-sequence.
+        PropKind::Collection {
+            item_type: "AnyType",
+            ..
+        } => match input {
+            Input::Tuple(v) | Input::List(v) => {
+                done(Value::Tuple(v.into_iter().map(untyped_value).collect()))
+            }
+            other => Err(type_err(format!(
+                "object of type '{}' has no len()",
+                other.py_type_name()
+            ))),
+        },
         PropKind::Collection { .. } => {
             // Python's sequence protocol (`PySequence_Check`): tuples, lists, strings and
             // math types are sequences, so `files='a.glb'` fails on its first member; dicts
