@@ -101,6 +101,39 @@ pub struct Saved {
     /// The orphans that were not written, as `bpy.data` keys (`meshes["Cube.001"]`), in
     /// `Main::all_ids` order.
     pub dropped: Vec<String>,
+    /// IDs written by name and header only, because their contents have no serializer yet
+    /// (`actions`, `armatures`, `shape_keys`, `textures`, `pointclouds`; M6+), as `bpy.data`
+    /// keys. No M1 path creates such IDs; the save operator reports them as a WARNING so the
+    /// loss is never silent.
+    pub header_only: Vec<String>,
+}
+
+/// The written IDs of the collections whose contents are not serialized yet (see
+/// [`Saved::header_only`]).
+fn header_only_ids(main: &Main, skip: &BTreeSet<IdAny>) -> Vec<String> {
+    fn go<T: frap_rna::IdType>(
+        map: &frap_scene::IdMap<T>,
+        skip: &BTreeSet<IdAny>,
+        out: &mut Vec<String>,
+    ) {
+        for (r, t) in map.iter() {
+            let a = r.any();
+            if !skip.contains(&a) {
+                out.push(format!(
+                    "{}[{:?}]",
+                    a.code.collection(),
+                    t.header().name.as_str()
+                ));
+            }
+        }
+    }
+    let mut out = Vec::new();
+    go(&main.actions, skip, &mut out);
+    go(&main.armatures, skip, &mut out);
+    go(&main.shape_keys, skip, &mut out);
+    go(&main.textures, skip, &mut out);
+    go(&main.pointclouds, skip, &mut out);
+    out
 }
 
 /// The edit-mode view of a mesh, when it differs from `Main`'s (§6.3); `None` writes the
@@ -153,7 +186,13 @@ pub fn save(
     let scene =
         to_json_pretty(&tree).map_err(|e| MapError::invalid("scene.json", e.to_string()))?;
     let bytes = container::write(&scene, &buffers, &images)?;
-    Ok(Saved { bytes, dropped })
+    let skip: BTreeSet<IdAny> = main.orphans().into_iter().collect();
+    let header_only = header_only_ids(main, &skip);
+    Ok(Saved {
+        bytes,
+        dropped,
+        header_only,
+    })
 }
 
 /// A loaded `.frap`.

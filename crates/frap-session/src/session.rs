@@ -270,6 +270,10 @@ impl Host for HostImpl {
         self.log.context_changed = true;
         &mut self.state.win
     }
+    fn prefs_mut(&mut self) -> Option<&mut Preferences> {
+        self.log.context_changed = true;
+        Some(&mut self.state.prefs)
+    }
     fn eval(&mut self) -> (&dyn HostRead, &mut dyn Evaluator) {
         (&self.state, &mut self.eval)
     }

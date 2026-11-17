@@ -8,6 +8,10 @@
 //! (Blender reports them as ERROR, which `bpy.ops` raises). The importer's WARNING/INFO
 //! messages (features not imported yet, missing images, …) are the operator's reports. `//`
 //! resolves against `bpy.data.filepath`.
+//!
+//! Deviation: with `files`, Blender's `import_gltf2` imports every file it can, reports an ERROR
+//! for each one that fails (so `bpy.ops` raises) and keeps the others; frap stops at the first
+//! failure and rolls the statement back, as every failing statement does (§12).
 
 use std::path::PathBuf;
 
@@ -77,6 +81,7 @@ static DEF: OperatorDef = OperatorDef {
     ),
     notes: &[
         "with files=[{'name': …}] every directory/<name> is imported, else filepath",
+        "with files=[…], the first file that fails raises and the whole statement is rolled back (frap statements are atomic, §12); Blender reports an ERROR per failing file and keeps the files it did import",
         "result.objects lists the created objects",
         "'//' resolves relative to bpy.data.filepath",
     ],

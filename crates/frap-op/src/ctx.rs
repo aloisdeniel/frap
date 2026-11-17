@@ -10,7 +10,7 @@ use frap_rna::{IdAny, IdRef, MeshId, ObjectId, OpArgs, OperatorSpec, Report, Rep
 use frap_scene::id::Object;
 use frap_scene::{
     Base, BaseFlag, ChangeLog, Context, EditState, EvalMode, EvaluatedObject, Evaluator, Host,
-    HostRead, Main, Snapshot, WindowState,
+    HostRead, Main, Preferences, Snapshot, WindowState,
 };
 use indexmap::IndexMap;
 use smol_str::SmolStr;
@@ -89,6 +89,11 @@ impl<'h> OpCtx<'h> {
     /// `wm.read_homefile` replace it with the loaded file's (WP 1.23). Marks the context changed.
     pub fn win_mut(&mut self) -> &mut WindowState {
         self.host.win_mut()
+    }
+    /// Preferences: `wm.open_mainfile` restores the saved glTF add-on preferences,
+    /// `wm.read_factory_settings` resets them (WP 1.23). `None` when the host keeps none.
+    pub fn prefs_mut(&mut self) -> Option<&mut Preferences> {
+        self.host.prefs_mut()
     }
     /// Mutable object (COW, generation bump, logged).
     pub fn object_mut(&mut self, r: IdRef<ObjectId>) -> Result<&mut Object, OpError> {

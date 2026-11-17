@@ -210,3 +210,182 @@ fn import_errors() {
     // A failed import changes nothing.
     assert_eq!(s.main().objects.len(), 3);
 }
+
+/// Blender-made GLBs (`tests/data/gltf-blender/fixtures`, written by Blender 5.2.4's exporter)
+/// imported through the operator give Blender's import: objects (names, types, data, parents,
+/// transforms, empty display sizes), meshes (names, vertex and face counts, material slots) and
+/// materials, compared with Blender's own `import_scene.gltf` dumps (`dumps/<name>.json`, taken
+/// after `read_factory_settings(use_empty=True)`, the same empty startup as here).
+#[test]
+fn blender_made_files_import_like_blender() {
+    const TOL: f64 = 1e-5;
+    let root = repo_root().join("tests/data/gltf-blender");
+    for name in [
+        "cube",
+        "hierarchy",
+        "multi_material",
+        "sphere_smooth",
+        "shared_mesh",
+        "textured",
+        "mixed_shading",
+        "loose",
+    ] {
+        let dump: serde_json::Value = serde_json::from_slice(
+            &std::fs::read(root.join(format!("dumps/{name}.json"))).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(
+            dump["settings"],
+            json!({}),
+            "{name}: default import settings"
+        );
+        let src = root.join(format!("fixtures/{name}.glb"));
+        let d = Scratch::new("blender-import");
+        let mut s = session_in(d.path(), true);
+        ok(
+            &mut s,
+            &format!(
+                "bpy.ops.import_scene.gltf(filepath='{}')",
+                src.to_string_lossy().replace('\\', "\\\\")
+            ),
+        );
+        let main = s.main().clone();
+        let names = |v: &serde_json::Value| -> Vec<String> {
+            v.as_array()
+                .unwrap()
+                .iter()
+                .map(|x| x["name"].as_str().unwrap().to_owned())
+                .collect()
+        };
+        let mut frap_objects: Vec<String> = main
+            .objects
+            .iter()
+            .map(|(_, o)| o.header.name.to_string())
+            .collect();
+        frap_objects.sort();
+        assert_eq!(frap_objects, names(&dump["objects"]), "{name}: objects");
+        let mut frap_materials: Vec<String> = main
+            .materials
+            .iter()
+            .map(|(_, m)| m.header.name.to_string())
+            .collect();
+        frap_materials.sort();
+        assert_eq!(
+            frap_materials,
+            names(&dump["materials"]),
+            "{name}: materials"
+        );
+        let close = |what: &str, frap: &[f32], blender: &serde_json::Value| {
+            let b: Vec<f64> = blender
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|x| x.as_f64().unwrap())
+                .collect();
+            assert_eq!(frap.len(), b.len(), "{name}: {what}");
+            for (f, b) in frap.iter().zip(&b) {
+                assert!(
+                    (f64::from(*f) - b).abs() <= TOL,
+                    "{name}: {what}: frap {frap:?} vs Blender {b:?}"
+                );
+            }
+        };
+        for bo in dump["objects"].as_array().unwrap() {
+            let on = bo["name"].as_str().unwrap();
+            let (_, o) = main
+                .objects
+                .iter()
+                .find(|(_, o)| o.header.name == on)
+                .unwrap();
+            let ty = get(&mut s, &format!("bpy.data.objects['{on}'].type"));
+            assert_eq!(ty, bo["type"], "{name}: {on}.type");
+            let data = o
+                .data
+                .and_then(|a| main.header(a))
+                .map(|h| h.name.to_string());
+            assert_eq!(json!(data), bo["data"], "{name}: {on}.data");
+            let parent = o
+                .parent
+                .and_then(|p| main.objects.get(p))
+                .map(|p| p.header.name.to_string());
+            assert_eq!(json!(parent), bo["parent"], "{name}: {on}.parent");
+            assert_eq!(
+                o.rotation_mode.as_str(),
+                bo["rotation_mode"].as_str().unwrap(),
+                "{name}: {on}.rotation_mode"
+            );
+            close(&format!("{on}.location"), &o.location, &bo["location"]);
+            close(
+                &format!("{on}.rotation_quaternion"),
+                &o.rotation_quaternion,
+                &bo["rotation_quaternion"],
+            );
+            close(&format!("{on}.scale"), &o.scale, &bo["scale"]);
+            close(
+                &format!("{on}.empty_display_size"),
+                &[o.empty_display_size],
+                &json!([bo["empty_display_size"]]),
+            );
+        }
+        let mut frap_meshes: Vec<String> = main
+            .meshes
+            .iter()
+            .map(|(_, m)| m.header.name.to_string())
+            .collect();
+        frap_meshes.sort();
+        assert_eq!(frap_meshes, names(&dump["meshes"]), "{name}: meshes");
+        for bm in dump["meshes"].as_array().unwrap() {
+            let mn = bm["name"].as_str().unwrap();
+            let (_, m) = main
+                .meshes
+                .iter()
+                .find(|(_, m)| m.header.name == mn)
+                .unwrap();
+            assert_eq!(
+                m.verts_num(),
+                bm["positions"].as_array().unwrap().len(),
+                "{name}: {mn} vertices"
+            );
+            assert_eq!(
+                m.faces_num(),
+                bm["faces"].as_array().unwrap().len(),
+                "{name}: {mn} faces"
+            );
+            let slots: Vec<Option<String>> = m
+                .materials
+                .iter()
+                .map(|r| {
+                    r.and_then(|r| main.materials.get(r))
+                        .map(|x| x.header.name.to_string())
+                })
+                .collect();
+            assert_eq!(json!(slots), bm["materials"], "{name}: {mn} materials");
+        }
+    }
+}
+
+/// `files=[…]` with a missing file: frap raises Blender's message and rolls the whole statement
+/// back, including the files imported before it (frap statements are atomic, §12; Blender keeps
+/// them and raises at the end, see the operator's --describe notes).
+#[test]
+fn a_failing_file_rolls_back_the_whole_files_import() {
+    let d = Scratch::new("import-files-rollback");
+    let mut s = session_in(d.path(), false);
+    ok(
+        &mut s,
+        "bpy.ops.export_scene.gltf(filepath='m.glb')\nbpy.ops.wm.read_homefile(use_empty=True)",
+    );
+    let dir = d.path().to_string_lossy().into_owned();
+    let (code, msg) = err_code(
+        &mut s,
+        &format!(
+            "bpy.ops.import_scene.gltf(directory='{dir}', files=[{{'name': 'm.glb'}}, {{'name': 'missing.glb'}}])"
+        ),
+    );
+    assert_eq!(
+        (code.as_str(), msg.as_str()),
+        ("IO_ERROR", "Error: Please select a file")
+    );
+    assert_eq!(s.main().objects.len(), 0);
+    assert_eq!(s.main().meshes.len(), 0);
+}

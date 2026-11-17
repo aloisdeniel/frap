@@ -153,15 +153,6 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
         cx.report(r.level, r.message);
     }
     cx.result("filepath", Value::Str(fixed.as_str().into()));
-    cx.result(
-        "files",
-        Value::Tuple(
-            files
-                .iter()
-                .map(|(f, _)| Value::Str(f.to_string_lossy().as_ref().into()))
-                .collect(),
-        ),
-    );
     cx.result("bytes", Value::Int(out.bytes.len() as i64));
     cx.result("nodes", Value::Int(out.nodes as i64));
     cx.result("meshes", Value::Int(out.meshes as i64));

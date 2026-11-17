@@ -343,3 +343,62 @@ fn view_matrix() -> glam::Mat4 {
         0.6, 0.0, -0.8, 0.0, 0.0, 1.0, 0.0, 0.0, 0.8, 0.0, 0.6, 0.0, 1.0, -2.0, -10.0, 1.0,
     ])
 }
+
+/// §15: the glTF add-on preferences are saved state: `open_mainfile` restores them, a save
+/// writes them back, `read_homefile` keeps them and `read_factory_settings` resets them.
+#[test]
+fn addon_preferences_round_trip_and_reset() {
+    let d = Scratch::new("prefs");
+    let (main, win) = frap_scene::startup::factory();
+    let mut prefs = frap_scene::Preferences::default();
+    prefs.addons.insert(
+        "io_scene_gltf2".into(),
+        [("allow_embedded_format".into(), frap_rna::Value::Bool(true))]
+            .into_iter()
+            .collect(),
+    );
+    let saved = frap_project::scene_map::save(&main, &win, &prefs, None).unwrap();
+    std::fs::write(d.path().join("p.frap"), &saved.bytes).unwrap();
+
+    let mut s = session_in(d.path(), false);
+    assert!(s.host().ctx().prefs.addons.is_empty());
+    ok(&mut s, "bpy.ops.wm.open_mainfile(filepath='p.frap')");
+    assert_eq!(s.host().ctx().prefs.addons, prefs.addons);
+    ok(&mut s, "bpy.ops.wm.save_as_mainfile(filepath='q.frap')");
+    assert_eq!(
+        std::fs::read(d.path().join("q.frap")).unwrap(),
+        saved.bytes,
+        "the restored preferences are saved again"
+    );
+    ok(&mut s, "bpy.ops.wm.read_homefile()");
+    assert_eq!(s.host().ctx().prefs.addons, prefs.addons);
+    ok(&mut s, "bpy.ops.wm.read_factory_settings()");
+    assert!(s.host().ctx().prefs.addons.is_empty());
+    // A failing open leaves the preferences untouched (statement rollback, §12).
+    ok(&mut s, "bpy.ops.wm.open_mainfile(filepath='p.frap')");
+    let _ = err_code(&mut s, "bpy.ops.wm.open_mainfile(filepath='nope.frap')");
+    assert_eq!(s.host().ctx().prefs.addons, prefs.addons);
+}
+
+/// `wm.read_homefile(filepath=…)` errors, as Blender 5.2.4 words them (the path as given).
+#[test]
+fn read_homefile_errors_use_blenders_messages() {
+    let d = Scratch::new("home-errors");
+    let mut s = session_in(d.path(), false);
+    let before = state(&s);
+    let (code, msg) = err_code(&mut s, "bpy.ops.wm.read_homefile(filepath='nope.frap')");
+    assert_eq!(code, "IO_ERROR");
+    assert_eq!(
+        msg,
+        "Error: Cannot read alternative start-up file: \"nope.frap\""
+    );
+    std::fs::write(d.path().join("junk.frap"), b"not a zip").unwrap();
+    let (code, msg) = err_code(&mut s, "bpy.ops.wm.read_homefile(filepath='junk.frap')");
+    assert_eq!(code, "IO_UNSUPPORTED_FORMAT");
+    assert_eq!(msg, "Error: Could not read \"junk.frap\"");
+    std::fs::write(d.path().join("y.blend"), b"BLENDER-v502").unwrap();
+    let (code, msg) = err_code(&mut s, "bpy.ops.wm.read_homefile(filepath='y.blend')");
+    assert_eq!(code, "IO_UNSUPPORTED_FORMAT");
+    assert_eq!(msg, "Error: Could not read \"y.blend\"");
+    assert_same_state(&state(&s), &before, "failed read_homefile");
+}

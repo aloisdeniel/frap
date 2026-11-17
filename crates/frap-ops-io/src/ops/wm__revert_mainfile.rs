@@ -50,5 +50,8 @@ static DEF: OperatorDef = OperatorDef {
     dyn_enums: &[],
     tier: Tier::T1,
     support: Support::Full,
-    notes: &["reloads bpy.data.filepath (a .frap); the poll fails while the file is unsaved"],
+    notes: &[
+        "reloads bpy.data.filepath (a .frap)",
+        "poll: needs a saved file (bpy.data.filepath set); it fails with OP_POLL_FAILED while the file is unsaved (not expressible in `requires` yet)",
+    ],
 };

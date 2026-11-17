@@ -3,7 +3,10 @@
 //! `use_empty=True` the empty one (the factory scene without objects, collections, camera or
 //! world, verified on 5.2.4). `bpy.data.filepath` becomes empty. frap has no user startup
 //! file, so the home file is always the factory one; `filepath` names a `.frap` to load as the
-//! startup state (`bpy.data.filepath` stays empty, as for Blender's startup file).
+//! startup state (`bpy.data.filepath` stays empty, as for Blender's startup file). Errors use
+//! Blender's messages: `Cannot read alternative start-up file: "<filepath>"` for a missing file
+//! (`IO_ERROR`), `Could not read "<filepath>"` for a file that is not a `.frap`
+//! (`IO_UNSUPPORTED_FORMAT`; Blender says it for any non-`.blend` file).
 
 use frap_op::prelude::*;
 use frap_project::scene_map;
@@ -15,11 +18,22 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
     let p = P::from_args(a);
     common::report_ignored(cx, a, &["filepath", "use_empty", "use_factory_startup"]);
     if p.filepath.value.is_empty() {
-        return common::read_home(cx, p.use_empty.value);
+        return common::read_home(cx, p.use_empty.value, false);
     }
-    let path = common::resolve(cx, &p.filepath.value);
-    let opened = scene_map::open_file(&path, false)
-        .map_err(|e| OpError::Io(format!("Cannot read file \"{}\": {e}", path.display())))?;
+    let given = p.filepath.value.as_str();
+    let path = common::resolve(cx, given);
+    // Blender's messages name the path as given (verified on 5.2.4).
+    if !path.is_file() {
+        return Err(OpError::Io(format!(
+            "Cannot read alternative start-up file: \"{given}\""
+        )));
+    }
+    let opened = scene_map::open_file(&path, false).map_err(|e| match e {
+        scene_map::MapError::Project(frap_project::container::ProjectError::NotFrap(_)) => {
+            OpError::UnsupportedFormat(format!("Could not read \"{given}\""))
+        }
+        e => OpError::Io(format!("Could not read \"{given}\": {e}")),
+    })?;
     let mut main = opened.main;
     main.filepath = None;
     main.is_dirty = false;

@@ -18,7 +18,11 @@ pub(crate) fn blend_dir(cx: &mut OpCtx) -> Option<PathBuf> {
 }
 
 /// Absolute path of a user path: `//` relative to the saved `.frap` (or the cwd when unsaved),
-/// other relative paths against the cwd (`docs/deviations.md` D-08 for `export_scene.gltf`).
+/// other relative paths against the cwd (ARCHITECTURE §15). Blender 5.2.4 resolves `//` in
+/// none of the operators using this: `export_scene.gltf` writes it raw (deviation D-08), and
+/// `wm.save_as_mainfile`/`open_mainfile`/`read_homefile`/`revert_mainfile` and
+/// `import_scene.gltf` treat it as the absolute `/…` (verified: `Cannot read file "/p.frap"`);
+/// the deviation entry for those is pending with the integrator.
 pub(crate) fn resolve(cx: &mut OpCtx, p: &str) -> PathBuf {
     if let Some(rest) = p.strip_prefix("//")
         && let Some(dir) = blend_dir(cx)
@@ -160,6 +164,16 @@ pub(crate) fn save(cx: &mut OpCtx, path: &Path, kind: SaveKind) -> OpResult {
             ),
         );
     }
+    if !saved.header_only.is_empty() {
+        cx.report(
+            ReportType::Warning,
+            format!(
+                "frap: the contents of {} data-block(s) cannot be saved yet, only their names: {}",
+                saved.header_only.len(),
+                saved.header_only.join(", ")
+            ),
+        );
+    }
     if kind != SaveKind::Copy {
         let (main, _) = cx.main_mut();
         main.filepath = Some(path.to_string_lossy().into_owned());
@@ -218,6 +232,10 @@ pub(crate) fn open(cx: &mut OpCtx, path: &Path) -> OpResult {
     main.filepath = Some(path.to_string_lossy().into_owned());
     main.is_dirty = false;
     replace_state(cx, main, opened.win);
+    // The glTF add-on preferences are saved state in frap (§15).
+    if let Some(p) = cx.prefs_mut() {
+        *p = opened.prefs;
+    }
     for w in opened.warnings {
         cx.report(ReportType::Warning, w);
     }
@@ -232,7 +250,8 @@ pub(crate) fn open(cx: &mut OpCtx, path: &Path) -> OpResult {
 }
 
 /// `wm.read_homefile` / `wm.read_factory_settings`: the factory or empty startup state, unsaved.
-pub(crate) fn read_home(cx: &mut OpCtx, use_empty: bool) -> OpResult {
+/// `reset_prefs` (`read_factory_settings`) also restores the factory preferences.
+pub(crate) fn read_home(cx: &mut OpCtx, use_empty: bool, reset_prefs: bool) -> OpResult {
     let (mut main, win) = if use_empty {
         frap_scene::startup::empty()
     } else {
@@ -241,5 +260,8 @@ pub(crate) fn read_home(cx: &mut OpCtx, use_empty: bool) -> OpResult {
     main.filepath = None;
     main.is_dirty = false;
     replace_state(cx, main, win);
+    if reset_prefs && let Some(p) = cx.prefs_mut() {
+        *p = frap_scene::Preferences::default();
+    }
     Ok(OpStatus::Finished)
 }

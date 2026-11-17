@@ -533,3 +533,30 @@ fn shortest_float_spelling() {
     let v: J = json::f32j(-f32::INFINITY);
     assert_eq!(json::num(&v, "x").unwrap(), f32::NEG_INFINITY);
 }
+
+#[test]
+fn header_only_ids_are_reported() {
+    // M1 creates none of these IDs: the factory and the rich state report nothing.
+    let (main, win) = frap_scene::startup::factory();
+    let saved = save(&main, &win, &Preferences::default(), None).unwrap();
+    assert!(saved.header_only.is_empty(), "{:?}", saved.header_only);
+    let (main, win, prefs) = rich();
+    assert!(
+        save(&main, &win, &prefs, None)
+            .unwrap()
+            .header_only
+            .is_empty()
+    );
+    // An action kept by a fake user is written by name only, and named in `header_only`; an
+    // orphan action is dropped and not named.
+    let (mut main, win) = frap_scene::startup::factory();
+    let mut log = ChangeLog::default();
+    let mut kept = frap_anim::Action::new("Kept");
+    kept.header.use_fake_user = true;
+    main.actions.insert("Kept", kept, &mut log);
+    main.actions
+        .insert("Loose", frap_anim::Action::new("Loose"), &mut log);
+    let saved = save(&main, &win, &Preferences::default(), None).unwrap();
+    assert_eq!(saved.header_only, vec!["actions[\"Kept\"]".to_owned()]);
+    assert_eq!(saved.dropped, vec!["actions[\"Loose\"]".to_owned()]);
+}

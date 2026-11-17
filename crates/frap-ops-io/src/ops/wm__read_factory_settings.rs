@@ -11,7 +11,7 @@ use super::wm__save_as_mainfile::common;
 fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
     let p = P::from_args(a);
     common::report_ignored(cx, a, &["use_empty"]);
-    common::read_home(cx, p.use_empty.value)
+    common::read_home(cx, p.use_empty.value, true)
 }
 
 #[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
@@ -24,5 +24,7 @@ static DEF: OperatorDef = OperatorDef {
     dyn_enums: &[],
     tier: Tier::T1,
     support: Support::Full,
-    notes: &["resets the scene to the factory startup; frap has no user preferences to reset"],
+    notes: &[
+        "resets the scene to the factory startup and the glTF add-on preferences to their defaults (frap has no other user preferences)",
+    ],
 };
