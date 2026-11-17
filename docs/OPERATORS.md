@@ -14,16 +14,16 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `mesh.primitive_plane_add` | M1 | P0 | T1 vs dumps; edit-mode merge in M2 |
-| [ ] | `mesh.primitive_cube_add` | M1 | P0 | worked example (ARCHITECTURE §10.4) |
-| [ ] | `mesh.primitive_circle_add` | M1 | P0 |  |
-| [ ] | `mesh.primitive_uv_sphere_add` | M1 | P0 |  |
-| [ ] | `mesh.primitive_ico_sphere_add` | M1 | P0 |  |
-| [ ] | `mesh.primitive_cylinder_add` | M1 | P0 |  |
-| [ ] | `mesh.primitive_cone_add` | M1 | P0 |  |
-| [ ] | `mesh.primitive_torus_add` | M1 | P0 |  |
-| [ ] | `mesh.primitive_grid_add` | M1 | P0 |  |
-| [ ] | `mesh.primitive_monkey_add` | M1 | P0 | depends on licence decision D1 |
+| [x] | `mesh.primitive_plane_add` | M1 | P0 | T1 vs dumps; edit-mode merge in M2 |
+| [x] | `mesh.primitive_cube_add` | M1 | P0 | worked example (ARCHITECTURE §10.4) |
+| [x] | `mesh.primitive_circle_add` | M1 | P0 |  |
+| [x] | `mesh.primitive_uv_sphere_add` | M1 | P0 |  |
+| [x] | `mesh.primitive_ico_sphere_add` | M1 | P0 |  |
+| [x] | `mesh.primitive_cylinder_add` | M1 | P0 |  |
+| [x] | `mesh.primitive_cone_add` | M1 | P0 |  |
+| [x] | `mesh.primitive_torus_add` | M1 | P0 |  |
+| [x] | `mesh.primitive_grid_add` | M1 | P0 |  |
+| [x] | `mesh.primitive_monkey_add` | M1 | P0 | depends on licence decision D1 |
 | [ ] | `mesh.select_all` | M2 | P0 | prereq (WP 2.2) |
 | [ ] | `mesh.select_mode` | M2 | P0 | prereq (WP 2.2); conversion table [MESH §3.3] |
 | [ ] | `mesh.select_linked` | M2 | P0 | default delimit SEAM |
@@ -192,11 +192,11 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `object.mode_set` | M1 | P0 | prereq (WP 1.19); dispatcher + `modes/object.rs` M1; `modes/edit_mesh.rs` M2 (WP 2.2); `modes/{edit_armature,pose}.rs` M6 (WP 6.2) |
+| [x] | `object.mode_set` | M1 | P0 | prereq (WP 1.19); dispatcher + `modes/object.rs` M1; `modes/edit_mesh.rs` M2 (WP 2.2); `modes/{edit_armature,pose}.rs` M6 (WP 6.2) |
 | [ ] | `object.editmode_toggle` | M2 | P1 |  |
 | [ ] | `object.posemode_toggle` | M6 | P1 |  |
 | [ ] | `object.mode_set_with_submode` | M8 | P2 |  |
-| [ ] | `object.select_all` | M1 | P0 | prereq (WP 1.19) |
+| [x] | `object.select_all` | M1 | P0 | prereq (WP 1.19) |
 | [ ] | `object.select_by_type` | M1 | P1 |  |
 | [ ] | `object.select_pattern` | M1 | P1 |  |
 | [ ] | `object.select_grouped` | M8 | P2 |  |
@@ -215,7 +215,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `object.add` | M8 | P2 |  |
 | [ ] | `object.add_named` | M8 | P2 |  |
 | [ ] | `object.collection_instance_add` | M8 | P2 |  |
-| [ ] | `object.delete` | M1 | P0 | prereq (WP 1.19); leaves orphan data; re-adding then names data `.001` (T0) |
+| [x] | `object.delete` | M1 | P0 | prereq (WP 1.19); leaves orphan data; re-adding then names data `.001` (T0) |
 | [ ] | `object.duplicate` | M1 | P0 | materials shared (factory prefs) |
 | [ ] | `object.duplicate_move` | M1 | P0 | macro |
 | [ ] | `object.duplicate_move_linked` | M1 | P1 | macro |

@@ -1,0 +1,15 @@
+bpy.ops.object.delete()
+bpy.data.meshes['Cube'].users
+bpy.ops.mesh.primitive_cube_add()
+bpy.data.objects['Cube'].data.name
+bpy.data.meshes['Cube.001'].users
+bpy.ops.object.mode_set(mode='EDIT')
+object.mode_set mode=SCULPT
+bpy.ops.mesh.primitive_plane_add(enter_editmode=True)
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.object.select_all(action='DESELECT')
+bpy.ops.object.delete()
+bpy.ops.object.select_all(action='INVERT')
+bpy.ops.object.delete(use_global=True)
+bpy.data.meshes['Cube.001'].users
+bpy.context.mode
