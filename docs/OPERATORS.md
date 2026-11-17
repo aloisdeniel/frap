@@ -217,29 +217,29 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `object.collection_instance_add` | M8 | P2 |  |
 | [x] | `object.delete` | M1 | P0 | prereq (WP 1.19); leaves orphan data; re-adding then names data `.001` (T0) |
 | [x] | `object.duplicate` | M1 | P0 | materials shared (factory prefs) |
-| [ ] | `object.duplicate_move` | M1 | P0 | macro |
-| [ ] | `object.duplicate_move_linked` | M1 | P1 | macro |
+| [x] | `object.duplicate_move` | M1 | P0 | macro |
+| [x] | `object.duplicate_move_linked` | M1 | P1 | macro |
 | [x] | `object.join` | M1 | P0 | CANCELLED with WARNING reports |
 | [ ] | `object.convert` | M4 | P1 | apply modifiers to mesh |
 | [ ] | `object.join_shapes` | M6 | P2 |  |
 | [ ] | `object.duplicates_make_real` | M8 | P2 |  |
-| [ ] | `object.parent_set` | M1 | P0 | OBJECT/KEEP types M1; ARMATURE_* M6 |
-| [ ] | `object.parent_clear` | M1 | P0 |  |
-| [ ] | `object.parent_no_inverse_set` | M1 | P1 |  |
+| [x] | `object.parent_set` | M1 | P0 | OBJECT/KEEP types M1; ARMATURE_* M6 |
+| [x] | `object.parent_clear` | M1 | P0 |  |
+| [x] | `object.parent_no_inverse_set` | M1 | P1 |  |
 | [ ] | `object.parent_inverse_apply` | M8 | P2 |  |
-| [ ] | `object.origin_set` | M1 | P0 | all types |
-| [ ] | `object.transform_apply` | M1 | P0 | multi-user error as Blender |
-| [ ] | `object.location_clear` | M1 | P0 |  |
-| [ ] | `object.rotation_clear` | M1 | P0 |  |
-| [ ] | `object.scale_clear` | M1 | P0 |  |
+| [x] | `object.origin_set` | M1 | P0 | all types |
+| [x] | `object.transform_apply` | M1 | P0 | multi-user error as Blender |
+| [x] | `object.location_clear` | M1 | P0 |  |
+| [x] | `object.rotation_clear` | M1 | P0 |  |
+| [x] | `object.scale_clear` | M1 | P0 |  |
 | [ ] | `object.origin_clear` | M8 | P2 |  |
 | [ ] | `object.visual_transform_apply` | M8 | P2 |  |
 | [ ] | `object.transforms_to_deltas` | M8 | P2 |  |
 | [ ] | `object.randomize_transform` | M8 | P2 | BliRng |
 | [ ] | `object.align` | M8 | P2 |  |
-| [ ] | `object.shade_smooth` | M1 | P0 | removes sharp_face |
-| [ ] | `object.shade_flat` | M1 | P0 |  |
-| [ ] | `object.shade_smooth_by_angle` | M1 | P0 | destructive, writes sharp_edge |
+| [x] | `object.shade_smooth` | M1 | P0 | removes sharp_face |
+| [x] | `object.shade_flat` | M1 | P0 |  |
+| [x] | `object.shade_smooth_by_angle` | M1 | P0 | destructive, writes sharp_edge |
 | [ ] | `object.shade_auto_smooth` | M4 | P1 | adds "Smooth by Angle" NODES modifier; links the group from a `Library` (2 `bpy.data.libraries` entries, as Blender) |
 | [ ] | `object.modifier_add` | M4 | P0 | dynamic enum by object type |
 | [ ] | `object.modifier_remove` | M4 | P0 |  |
@@ -346,9 +346,9 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `transform.translate` | M1 | P0 | object mode M1; edit M2; pose M6 (mode handlers, dispatcher owned by WP 1.21) |
-| [ ] | `transform.rotate` | M1 | P0 | +θ about axis (verified) |
-| [ ] | `transform.resize` | M1 | P0 | decomposes matrices, loses shear (as Blender) |
+| [x] | `transform.translate` | M1 | P0 | object mode M1; edit M2; pose M6 (mode handlers, dispatcher owned by WP 1.21) |
+| [x] | `transform.rotate` | M1 | P0 | +θ about axis (verified) |
+| [x] | `transform.resize` | M1 | P0 | decomposes matrices, loses shear (as Blender) |
 | [ ] | `transform.mirror` | M2 | P1 |  |
 | [ ] | `transform.transform` | M2 | P1 | generic `mode` dispatcher |
 | [ ] | `transform.shrink_fatten` | M2 | P1 |  |
@@ -378,13 +378,13 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `view3d.snap_cursor_to_active` | M1 | P0 | virtual 3D View poll |
-| [ ] | `view3d.snap_cursor_to_center` | M1 | P0 |  |
-| [ ] | `view3d.snap_cursor_to_selected` | M1 | P0 |  |
-| [ ] | `view3d.snap_selected_to_cursor` | M1 | P0 |  |
-| [ ] | `view3d.snap_cursor_to_grid` | M1 | P1 |  |
-| [ ] | `view3d.snap_selected_to_active` | M1 | P1 |  |
-| [ ] | `view3d.snap_selected_to_grid` | M1 | P2 |  |
+| [x] | `view3d.snap_cursor_to_active` | M1 | P0 | virtual 3D View poll |
+| [x] | `view3d.snap_cursor_to_center` | M1 | P0 |  |
+| [x] | `view3d.snap_cursor_to_selected` | M1 | P0 |  |
+| [x] | `view3d.snap_selected_to_cursor` | M1 | P0 |  |
+| [x] | `view3d.snap_cursor_to_grid` | M1 | P1 |  |
+| [x] | `view3d.snap_selected_to_active` | M1 | P1 |  |
+| [x] | `view3d.snap_selected_to_grid` | M1 | P2 |  |
 | [ ] | `view3d.camera_to_view_selected` | M3 | P0 | frames selected objects with scene.camera |
 | [ ] | `view3d.object_as_camera` | M3 | P1 |  |
 
@@ -558,19 +558,19 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `render.render` | M1 | P0 | still M1 (Workbench); EEVEE M5; animation=True M6 |
+| [x] | `render.render` | M1 | P0 | still M1 (Workbench); EEVEE M5; animation=True M6 |
 | [ ] | `render.opengl` | M8 | P2 | maps to Workbench from scene camera |
 
 ### `wm.* (files)`
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `wm.open_mainfile` | M1 | P0 | .frap only |
-| [ ] | `wm.save_as_mainfile` | M1 | P0 | .frap only |
-| [ ] | `wm.save_mainfile` | M1 | P0 |  |
-| [ ] | `wm.read_homefile` | M1 | P0 | use_empty |
-| [ ] | `wm.read_factory_settings` | M1 | P1 |  |
-| [ ] | `wm.revert_mainfile` | M1 | P2 |  |
+| [x] | `wm.open_mainfile` | M1 | P0 | .frap only |
+| [x] | `wm.save_as_mainfile` | M1 | P0 | .frap only |
+| [x] | `wm.save_mainfile` | M1 | P0 |  |
+| [x] | `wm.read_homefile` | M1 | P0 | use_empty |
+| [x] | `wm.read_factory_settings` | M1 | P1 |  |
+| [x] | `wm.revert_mainfile` | M1 | P2 |  |
 | — | `wm.obj_import` | OUT | — | import is glTF/GLB only |
 | — | `wm.fbx_import` | OUT | — |  |
 | — | `wm.usd_import` | OUT | — |  |
@@ -627,14 +627,14 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `import_scene.gltf` | M1 | P0 | static M1; materials/cameras/lights, scenes, strips/fans/lines/points, `import_point_as_pointcloud` M3; anim/skin/morph M6; Draco/meshopt/KTX2 M7 |
+| [x] | `import_scene.gltf` | M1 | P0 | static M1; materials/cameras/lights, scenes, strips/fans/lines/points, `import_point_as_pointcloud` M3; anim/skin/morph M6; Draco/meshopt/KTX2 M7 |
 | — | `import_scene.fbx` | OUT | — | import is glTF/GLB only |
 
 ### `export_scene.*`
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `export_scene.gltf` | M1 | P0 | Blender's 110 props + frap_* options (only where Blender has no prop); feature milestones as import; `//` resolved (deviation) |
+| [x] | `export_scene.gltf` | M1 | P0 | Blender's 110 props + frap_* options (only where Blender has no prop); feature milestones as import; `//` resolved (deviation) |
 | — | `export_scene.fbx` | OUT | — |  |
 
 ### `frap.*` (frap extensions, namespaced)

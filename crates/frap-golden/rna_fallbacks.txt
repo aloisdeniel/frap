@@ -8,18 +8,3 @@
 # never add a line for a property that is bound.
 #
 # Format: <case id> <datablock key>
-harness/cube_add context
-harness/cube_add meshes["Cube.001"]
-harness/cube_add objects["Camera"]
-harness/cube_add objects["Cube"]
-harness/cube_add objects["Cube.001"]
-harness/cube_add objects["Light"]
-harness/errors context
-harness/errors objects["Camera"]
-harness/errors objects["Cube"]
-harness/errors objects["Light"]
-harness/factory context
-harness/factory meshes["Cube"]
-harness/factory objects["Camera"]
-harness/factory objects["Cube"]
-harness/factory objects["Light"]

@@ -1,9 +1,9 @@
 # WP 1.20: the duplicate macros run through the session's §10.2 pipeline
-# (frap_op::pipeline::execute): object.duplicate runs, then the transform.translate step answers
-# OP_NOT_IMPLEMENTED until WP 1.21 lands, and the transaction rolls the duplicate back (no
-# Cube.001, the active object stays Cube). Blender 5.2.4 creates Cube.001 (at (2, 0, 0) with
-# TRANSFORM_OT_translate={'value': (2, 0, 0)}); replace the expected output when translate lands.
-# The plain object.duplicate path still works afterwards. Both syntaxes.
+# (frap_op::pipeline::execute): object.duplicate, then transform.translate (WP 1.21) with the
+# nested TRANSFORM_OT_translate arguments. duplicate_move_linked forces the step's linked=True
+# even when OBJECT_OT_duplicate={'linked': False} is given (MACRO_STEP_FORCED). Every value
+# below (names, locations, shared mesh names) was checked against Blender 5.2.4 running the
+# same statements. Both syntaxes.
 bin.name = "frap"
 args = []
 fs.sandbox = true

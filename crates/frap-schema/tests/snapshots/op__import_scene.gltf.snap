@@ -501,6 +501,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "extension": false,
     "notes": [
       "with files=[{'name': …}] every directory/<name> is imported, else filepath",
+      "with files=[…], the first file that fails raises and the whole statement is rolled back (frap statements are atomic, §12); Blender reports an ERROR per failing file and keeps the files it did import",
       "result.objects lists the created objects",
       "'//' resolves relative to bpy.data.filepath"
     ]

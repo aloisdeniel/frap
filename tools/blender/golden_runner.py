@@ -92,6 +92,14 @@ NORMALISE = {
     "D-41": None,
     "D-42": None,
     "D-43": None,
+    "D-44": ("cases", "cases read collection_uid from scene.collection.session_uid"),
+    "D-45": None,
+    "D-46": None,
+    "D-47": ("dumper", "modifier persistent_uid is not part of GoldenState"),
+    "D-48": None,
+    "D-49": None,
+    "D-50": None,
+    "D-51": ("comparator", "reports are not part of GoldenState, so they are never compared"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

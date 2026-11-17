@@ -5,9 +5,7 @@
 //! `linked=True` then `transform.translate`. The macro definition sets the step's `linked`
 //! (`RNA_boolean_set(otmacro->ptr, "linked", true)`), so the copies always share the object
 //! data, even with `OBJECT_OT_duplicate={'linked': False}` (verified on 5.2.4); frap applies
-//! it through `frap_op::pipeline::MACRO_STEP_FORCED`. This exec is the post-step hook. Until
-//! `transform.translate` lands (WP 1.21) the macro answers `OP_NOT_IMPLEMENTED` and the
-//! session rolls the duplicate back (`support = Partial`).
+//! it through `frap_op::pipeline::MACRO_STEP_FORCED`. This exec is the post-step hook.
 
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -17,7 +15,6 @@ use frap_spec_ops_object::object;
     poll = poll::OBJECTMODE,
     tier = T0,
     kind = Macro,
-    support = Partial("the transform.translate step is not implemented yet (WP 1.21): the macro answers OP_NOT_IMPLEMENTED and changes nothing; use object.duplicate(linked=True), then set location")
 )]
 fn exec(_cx: &mut OpCtx, _p: object::DuplicateMoveLinked) -> OpResult {
     Ok(OpStatus::Finished)

@@ -1,8 +1,15 @@
 bpy.ops.object.duplicate_move()
+bpy.context.object.location
 bpy.ops.object.duplicate_move(TRANSFORM_OT_translate={'value': (2, 0, 0)})
+bpy.context.object.location
+bpy.context.object.data.name
 object.duplicate_move_linked TRANSFORM_OT_translate.value=2,0,0
+bpy.context.object.location
+bpy.context.object.data.name
 bpy.ops.object.duplicate_move_linked(OBJECT_OT_duplicate={'linked': False})
+bpy.context.object.location
+bpy.context.object.data.name
 bpy.data.objects
-bpy.context.object.name
+bpy.data.objects['Cube'].location
 bpy.ops.object.duplicate()
-bpy.context.object.name
+bpy.context.object.data.name

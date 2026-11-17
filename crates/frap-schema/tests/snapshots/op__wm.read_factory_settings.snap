@@ -95,7 +95,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "planned": "M1",
     "extension": false,
     "notes": [
-      "resets the scene to the factory startup; frap has no user preferences to reset"
+      "resets the scene to the factory startup and the glTF add-on preferences to their defaults (frap has no other user preferences)"
     ]
   }
 }

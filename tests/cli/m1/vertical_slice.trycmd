@@ -12,13 +12,8 @@ The same statements run in the other two transports:
 - `vertical_slice_serve.toml`: `frap serve --jsonl`, one request per statement, so the session
   state crosses requests (§13.1, §13.5).
 
-**Gate until WP 1.20, 1.23 and 1.24 are merged.** The exit transcript needs `object.camera_add`
-(1.20), the IO operators (1.23) and `render.render` (1.24). Until they land, the blocks that
-use them are fenced `console,ignore` here and the two `.toml` cases carry `status = "skipped"`,
-so the workspace suite stays green. Their expected output was produced and checked by running
-this file and both `.toml` cases on a merge of wp/1.26 with wp/1.20 (2cfce09), wp/1.23
-(2459997) and wp/1.24 (a0e38be). **When merging those WPs, remove `,ignore` from the two fences
-below and the `status` line from both `.toml` files.**
+The exit transcript needs `object.camera_add` (WP 1.20), the IO operators (1.23) and
+`render.render` (1.24); it was gated until those WPs merged in the M1 W4 integration.
 
 Every statement must finish (`"ok":true`). Each round trip is proven by the statement that
 performs it, not only by the value read afterwards: `wm.read_homefile` removes the cylinder
@@ -42,7 +37,7 @@ that the code, span, detail and hint are pinned too, including the frap-only cod
 no counterpart for (`UNSUPPORTED_SYNTAX`, `OP_NOT_IMPLEMENTED`, `NOT_IMPLEMENTED`,
 `OP_ARG_POSITIONAL` D-01, `ZERO_DIVISION` D-25, `RNA_NOT_IMPLEMENTED`, `LIMIT_EXCEEDED`).
 `IO_ERROR` (line 26) is pinned here by class and code only; its message is pinned, and checked
-against Blender, in the gated section at the end. `REQUEST_INVALID` and `DESCRIBE_TARGET` are
+against Blender, in the section at the end. `REQUEST_INVALID` and `DESCRIBE_TARGET` are
 pinned by the WP 1.25 transcripts under `cli/`; `RNA_EDITMODE_WRITE` needs Edit Mode (M2);
 `GPU_UNAVAILABLE` needs a build without `gpu`. (snapbox turns backslashes into `/`, so `\"` reads `/"` below.)
 
@@ -171,9 +166,9 @@ $ frap --empty run --no-ready --verbosity minimal poll_empty_scene.py
 
 ```
 
-## The exit transcript (gated: needs WP 1.20, 1.23, 1.24)
+## The exit transcript
 
-```console,ignore
+```console
 $ frap run vertical_slice.py
 {"event":"ready","frap":"0.1.0","protocol":1,"blender_api":"5.2","startup":"factory"}
 {"seq":1,"line":1,"kind":"op","op":"object.select_all","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"context":{"mode":"OBJECT","active_object":"Cube","selected_objects":["Cube","Light","Camera"],"frame_current":1},"hints":[]}
@@ -199,7 +194,7 @@ $ frap run vertical_slice.py
 
 ```
 
-## Operator errors and polls of WP 1.20, 1.23, 1.24 (gated)
+## Operator errors and polls of WP 1.20, 1.23, 1.24
 
 `IO_ERROR` and the real `OP_EXEC_ERROR` (a `RuntimeError` raised by `execute`, not the
 `TypeError` of the dynamic `mode_set` enum above) need the IO operators and the render
@@ -217,7 +212,7 @@ message because it changes when WP 1.23 lands (`Error: filepath not set` before)
 with no active object, with nothing selected, and with a camera active; each value was checked
 against Blender 5.2.4 by running the same script there.
 
-```console,ignore
+```console
 $ frap run --no-ready --verbosity minimal ops_errors.py
 {"seq":1,"line":1,"kind":"op","op":"export_scene.gltf","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"IO_ERROR","message":"Error: No such file or directory: ''","span":{"line":1,"col":1,"col_chars":1,"len":38},"detail":{},"hint":null},"hints":[]}
 {"seq":2,"line":2,"kind":"op","op":"import_scene.gltf","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"IO_ERROR","message":"Error: Please select a file","span":{"line":2,"col":1,"col_chars":1,"len":49},"detail":{},"hint":null},"hints":[]}
