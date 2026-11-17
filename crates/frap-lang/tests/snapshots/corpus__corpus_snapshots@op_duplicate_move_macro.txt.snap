@@ -1,0 +1,22 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_duplicate_move_macro.txt
+---
+> bpy.ops.object.duplicate_move(OBJECT_OT_duplicate={"linked": False}, TRANSFORM_OT_translate={"value": (2, 0, 0)})
+---
+stmt 1 Bpy line 1 @1:1/1+113
+  Invoke object.duplicate_move
+    arg OBJECT_OT_duplicate @1:31/31+37
+      Dict @1:51/51+17
+        entry
+          Str "linked" @1:52/52+8
+          Bool false @1:62/62+5
+    arg TRANSFORM_OT_translate @1:70/70+43
+      Dict @1:93/93+20
+        entry
+          Str "value" @1:94/94+7
+          Tuple @1:103/103+9
+            Int 2 @1:104/104+1
+            Int 0 @1:107/107+1
+            Int 0 @1:110/110+1

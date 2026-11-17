@@ -1,0 +1,219 @@
+{
+ "bl_idname": "ShaderNodeVolumePrincipled",
+ "srna": "ShaderNodeVolumePrincipled",
+ "name": "Principled Volume",
+ "label": "",
+ "width": 240.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.5,
+    0.5,
+    0.5,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Color Attribute",
+   "identifier": "Color Attribute",
+   "bl_idname": "NodeSocketString",
+   "type": "STRING",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": "",
+   "default_value_type": "STRING",
+   "default_value_subtype": "NONE"
+  },
+  {
+   "name": "Density",
+   "identifier": "Density",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Density Attribute",
+   "identifier": "Density Attribute",
+   "bl_idname": "NodeSocketString",
+   "type": "STRING",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": "density",
+   "default_value_type": "STRING",
+   "default_value_subtype": "NONE"
+  },
+  {
+   "name": "Anisotropy",
+   "identifier": "Anisotropy",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Absorption Color",
+   "identifier": "Absorption Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Emission Strength",
+   "identifier": "Emission Strength",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Emission Color",
+   "identifier": "Emission Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Blackbody Intensity",
+   "identifier": "Blackbody Intensity",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Blackbody Tint",
+   "identifier": "Blackbody Tint",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Temperature",
+   "identifier": "Temperature",
+   "bl_idname": "NodeSocketFloatColorTemperature",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1000.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR_TEMPERATURE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Temperature Attribute",
+   "identifier": "Temperature Attribute",
+   "bl_idname": "NodeSocketString",
+   "type": "STRING",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": "temperature",
+   "default_value_type": "STRING",
+   "default_value_subtype": "NONE"
+  },
+  {
+   "name": "Weight",
+   "identifier": "Weight",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Volume",
+   "identifier": "Volume",
+   "bl_idname": "NodeSocketShader",
+   "type": "SHADER",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  }
+ ],
+ "props": {}
+}

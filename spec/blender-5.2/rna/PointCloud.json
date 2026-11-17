@@ -1,0 +1,119 @@
+{
+ "identifier": "PointCloud",
+ "name": "Point Cloud",
+ "description": "Point cloud data-block",
+ "base": "ID",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "points",
+   "name": "Points",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Point",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "materials",
+   "name": "Materials",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "api": "IDMaterials",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "attributes",
+   "name": "Attributes",
+   "description": "Geometry attributes",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Attribute",
+   "is_id": false,
+   "api": "AttributeGroupPointCloud",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "color_attributes",
+   "name": "Color Attributes",
+   "description": "Geometry color attributes",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Attribute",
+   "is_id": false,
+   "api": "AttributeGroupPointCloud",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "animation_data",
+   "name": "Animation Data",
+   "description": "Animation data for this data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AnimData",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "resize",
+   "description": "resize",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "size",
+     "name": "Size",
+     "description": "New number of points",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.pointclouds.new('PointCloud')",
+  "differs_from_default": {
+   "id_type": "POINTCLOUD",
+   "is_editable": true
+  }
+ }
+}

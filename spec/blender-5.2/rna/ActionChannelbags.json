@@ -1,0 +1,79 @@
+{
+ "identifier": "ActionChannelbags",
+ "name": "Animation Channels for Slots",
+ "description": "For each action slot, a list of animation channels that are meant for that slot",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add a new channelbag to the strip, to contain animation channels for a specific slot",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "slot",
+     "name": "Action Slot",
+     "description": "The slot that should be animated by this channelbag",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ActionSlot",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "channelbag",
+     "name": "",
+     "description": "Newly created channelbag",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ActionChannelbag",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove the channelbag from the strip",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "channelbag",
+     "name": "",
+     "description": "The channelbag to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ActionChannelbag",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

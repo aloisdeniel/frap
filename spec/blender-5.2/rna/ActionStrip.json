@@ -1,0 +1,35 @@
+{
+ "identifier": "ActionStrip",
+ "name": "Action Strip",
+ "description": "",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "type",
+   "name": "type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "KEYFRAME",
+     "name": "Keyframe",
+     "description": "Strip with a set of F-Curves for each action slot",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "KEYFRAME",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

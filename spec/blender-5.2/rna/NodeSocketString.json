@@ -1,0 +1,26 @@
+{
+ "identifier": "NodeSocketString",
+ "name": "String Node Socket",
+ "description": "String socket of a node",
+ "base": "NodeSocketStandard",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "default_value",
+   "name": "default_value",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 1024,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

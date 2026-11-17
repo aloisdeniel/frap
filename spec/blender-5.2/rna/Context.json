@@ -1,0 +1,834 @@
+{
+ "identifier": "Context",
+ "name": "Context",
+ "description": "Current windowmanager and data context",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "window_manager",
+   "name": "window_manager",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "WindowManager",
+   "is_id": true,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "window",
+   "name": "window",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Window",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "workspace",
+   "name": "workspace",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "WorkSpace",
+   "is_id": true,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "screen",
+   "name": "screen",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Screen",
+   "is_id": true,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "area",
+   "name": "area",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Area",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "space_data",
+   "name": "",
+   "description": "The current space, may be None in background-mode, when the cursor is outside the window or when using menu-search",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Space",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "region",
+   "name": "region",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Region",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "region_popup",
+   "name": "Popup Region",
+   "description": "The temporary region for pop-ups (including menus and pop-overs)",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Region",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "region_data",
+   "name": "region_data",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "RegionView3D",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "gizmo_group",
+   "name": "gizmo_group",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "GizmoGroup",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "asset",
+   "name": "asset",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AssetRepresentation",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "blend_data",
+   "name": "blend_data",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "BlendData",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "scene",
+   "name": "scene",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Scene",
+   "is_id": true,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "view_layer",
+   "name": "view_layer",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ViewLayer",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "engine",
+   "name": "engine",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "collection",
+   "name": "collection",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Collection",
+   "is_id": true,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "layer_collection",
+   "name": "layer_collection",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "LayerCollection",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "tool_settings",
+   "name": "tool_settings",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ToolSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "preferences",
+   "name": "preferences",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Preferences",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "mode",
+   "name": "mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "EDIT_MESH",
+     "name": "Mesh Edit",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "EDIT_CURVE",
+     "name": "Curve Edit",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "EDIT_CURVES",
+     "name": "Curves Edit",
+     "description": "",
+     "icon": "NONE",
+     "value": 7
+    },
+    {
+     "identifier": "EDIT_SURFACE",
+     "name": "Surface Edit",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "EDIT_TEXT",
+     "name": "Text Edit",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "EDIT_ARMATURE",
+     "name": "Armature Edit",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "EDIT_METABALL",
+     "name": "Metaball Edit",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "EDIT_LATTICE",
+     "name": "Lattice Edit",
+     "description": "",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "EDIT_GREASE_PENCIL",
+     "name": "Grease Pencil Edit",
+     "description": "",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "EDIT_POINTCLOUD",
+     "name": "Point Cloud Edit",
+     "description": "",
+     "icon": "NONE",
+     "value": 9
+    },
+    {
+     "identifier": "POSE",
+     "name": "Pose",
+     "description": "",
+     "icon": "NONE",
+     "value": 10
+    },
+    {
+     "identifier": "SCULPT",
+     "name": "Sculpt",
+     "description": "",
+     "icon": "NONE",
+     "value": 11
+    },
+    {
+     "identifier": "PAINT_WEIGHT",
+     "name": "Weight Paint",
+     "description": "",
+     "icon": "NONE",
+     "value": 12
+    },
+    {
+     "identifier": "PAINT_VERTEX",
+     "name": "Vertex Paint",
+     "description": "",
+     "icon": "NONE",
+     "value": 13
+    },
+    {
+     "identifier": "PAINT_TEXTURE",
+     "name": "Texture Paint",
+     "description": "",
+     "icon": "NONE",
+     "value": 14
+    },
+    {
+     "identifier": "PARTICLE",
+     "name": "Particle",
+     "description": "",
+     "icon": "NONE",
+     "value": 15
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "PAINT_GPENCIL",
+     "name": "Grease Pencil Paint",
+     "description": "",
+     "icon": "NONE",
+     "value": 17
+    },
+    {
+     "identifier": "EDIT_GPENCIL",
+     "name": "Grease Pencil Edit",
+     "description": "",
+     "icon": "NONE",
+     "value": 18
+    },
+    {
+     "identifier": "SCULPT_GPENCIL",
+     "name": "Grease Pencil Sculpt",
+     "description": "",
+     "icon": "NONE",
+     "value": 19
+    },
+    {
+     "identifier": "WEIGHT_GPENCIL",
+     "name": "Grease Pencil Weight Paint",
+     "description": "",
+     "icon": "NONE",
+     "value": 20
+    },
+    {
+     "identifier": "VERTEX_GPENCIL",
+     "name": "Grease Pencil Vertex Paint",
+     "description": "",
+     "icon": "NONE",
+     "value": 21
+    },
+    {
+     "identifier": "SCULPT_CURVES",
+     "name": "Curves Sculpt",
+     "description": "",
+     "icon": "NONE",
+     "value": 22
+    },
+    {
+     "identifier": "PAINT_GREASE_PENCIL",
+     "name": "Grease Pencil Paint",
+     "description": "",
+     "icon": "NONE",
+     "value": 23
+    },
+    {
+     "identifier": "SCULPT_GREASE_PENCIL",
+     "name": "Grease Pencil Sculpt",
+     "description": "",
+     "icon": "NONE",
+     "value": 24
+    },
+    {
+     "identifier": "WEIGHT_GREASE_PENCIL",
+     "name": "Grease Pencil Weight Paint",
+     "description": "",
+     "icon": "NONE",
+     "value": 25
+    },
+    {
+     "identifier": "VERTEX_GREASE_PENCIL",
+     "name": "Grease Pencil Vertex Paint",
+     "description": "",
+     "icon": "NONE",
+     "value": 26
+    }
+   ],
+   "default": "EDIT_MESH",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "evaluated_depsgraph_get",
+   "description": "Get the dependency graph for the current scene and view layer, to access to data-blocks with animation and modifiers applied. If any data-blocks have been edited, the dependency graph will be updated. This invalidates all references to evaluated data-blocks from the dependency graph.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "depsgraph",
+     "name": "",
+     "description": "Evaluated dependency graph",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Depsgraph",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true,
+ "context_members": [
+  {
+   "identifier": "active_action",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "active_annotation_layer",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "active_bone",
+   "kind": "pointer",
+   "types": [
+    "Bone",
+    "EditBone"
+   ],
+   "seen_none": true
+  },
+  {
+   "identifier": "active_editable_fcurve",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "active_nla_strip",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "active_nla_track",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "active_object",
+   "kind": "pointer",
+   "types": [
+    "Object"
+   ],
+   "seen_none": false
+  },
+  {
+   "identifier": "active_operator",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "active_pose_bone",
+   "kind": "pointer",
+   "types": [
+    "PoseBone"
+   ],
+   "seen_none": true
+  },
+  {
+   "identifier": "active_strip",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "annotation_data",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "annotation_data_owner",
+   "kind": "pointer",
+   "types": [
+    "Scene"
+   ],
+   "seen_none": false
+  },
+  {
+   "identifier": "asset_library_reference",
+   "kind": "pointer",
+   "types": [
+    "AssetLibraryReference"
+   ],
+   "seen_none": false
+  },
+  {
+   "identifier": "edit_object",
+   "kind": "pointer",
+   "types": [
+    "Object"
+   ],
+   "seen_none": true
+  },
+  {
+   "identifier": "editable_bones",
+   "kind": "collection",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "editable_fcurves",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "editable_objects",
+   "kind": "collection",
+   "types": [
+    "Object"
+   ],
+   "seen_none": false
+  },
+  {
+   "identifier": "grease_pencil",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "image_paint_object",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "object",
+   "kind": "pointer",
+   "types": [
+    "Object"
+   ],
+   "seen_none": false
+  },
+  {
+   "identifier": "objects_in_mode",
+   "kind": "collection",
+   "types": [
+    "Object"
+   ],
+   "seen_none": false
+  },
+  {
+   "identifier": "objects_in_mode_unique_data",
+   "kind": "collection",
+   "types": [
+    "Object"
+   ],
+   "seen_none": false
+  },
+  {
+   "identifier": "particle_edit_object",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "pose_object",
+   "kind": "pointer",
+   "types": [
+    "Object"
+   ],
+   "seen_none": true
+  },
+  {
+   "identifier": "property",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "sculpt_object",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selectable_objects",
+   "kind": "collection",
+   "types": [
+    "Object"
+   ],
+   "seen_none": false
+  },
+  {
+   "identifier": "selected_bones",
+   "kind": "collection",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selected_editable_actions",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selected_editable_bones",
+   "kind": "collection",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selected_editable_fcurves",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selected_editable_keyframes",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selected_editable_objects",
+   "kind": "collection",
+   "types": [
+    "Object"
+   ],
+   "seen_none": false
+  },
+  {
+   "identifier": "selected_editable_strips",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selected_movieclip_tracks",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selected_nla_strips",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selected_objects",
+   "kind": "collection",
+   "types": [
+    "Object"
+   ],
+   "seen_none": false
+  },
+  {
+   "identifier": "selected_pose_bones",
+   "kind": "collection",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selected_pose_bones_from_active_object",
+   "kind": "collection",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selected_strips",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selected_visible_actions",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "selected_visible_fcurves",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "sequencer_scene",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "strips",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "ui_list",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "vertex_paint_object",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "visible_bones",
+   "kind": "collection",
+   "types": [
+    "EditBone"
+   ],
+   "seen_none": true
+  },
+  {
+   "identifier": "visible_fcurves",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  },
+  {
+   "identifier": "visible_objects",
+   "kind": "collection",
+   "types": [
+    "Object"
+   ],
+   "seen_none": false
+  },
+  {
+   "identifier": "visible_pose_bones",
+   "kind": "collection",
+   "types": [
+    "PoseBone"
+   ],
+   "seen_none": true
+  },
+  {
+   "identifier": "weight_paint_object",
+   "kind": "unknown",
+   "types": [],
+   "seen_none": true
+  }
+ ]
+}

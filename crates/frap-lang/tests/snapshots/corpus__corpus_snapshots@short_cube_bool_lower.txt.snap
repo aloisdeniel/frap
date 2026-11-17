@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_cube_bool_lower.txt
+---
+> mesh.primitive_cube_add enter_editmode=true calc_uvs=false
+---
+stmt 1 Short line 1 @1:1/1+58
+  Invoke mesh.primitive_cube_add
+    arg enter_editmode @1:25/25+19
+      Bool true @1:40/40+4
+    arg calc_uvs @1:45/45+14
+      Bool false @1:54/54+5

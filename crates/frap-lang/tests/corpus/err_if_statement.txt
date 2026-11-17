@@ -1,0 +1,1 @@
+if bpy.context.object: pass

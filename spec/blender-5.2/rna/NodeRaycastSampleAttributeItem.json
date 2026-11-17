@@ -1,0 +1,163 @@
+{
+ "identifier": "NodeRaycastSampleAttributeItem",
+ "name": "Raycast Sample Attribute Item",
+ "description": "",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "color",
+   "name": "Color",
+   "description": "Color of the corresponding socket type in the node editor",
+   "type": "FLOAT",
+   "subtype": "COLOR_GAMMA",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "data_type",
+   "name": "Data Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FLOAT",
+     "name": "Float",
+     "description": "Floating-point value",
+     "icon": "NONE",
+     "value": 10
+    },
+    {
+     "identifier": "INT",
+     "name": "Integer",
+     "description": "32-bit integer",
+     "icon": "NONE",
+     "value": 11
+    },
+    {
+     "identifier": "BOOLEAN",
+     "name": "Boolean",
+     "description": "True or false",
+     "icon": "NONE",
+     "value": 50
+    },
+    {
+     "identifier": "FLOAT_VECTOR",
+     "name": "Vector",
+     "description": "3D vector with floating-point values",
+     "icon": "NONE",
+     "value": 48
+    },
+    {
+     "identifier": "FLOAT_COLOR",
+     "name": "Color",
+     "description": "RGBA color with 32-bit floating-point values",
+     "icon": "NONE",
+     "value": 47
+    },
+    {
+     "identifier": "QUATERNION",
+     "name": "Quaternion",
+     "description": "Floating point quaternion rotation",
+     "icon": "NONE",
+     "value": 52
+    },
+    {
+     "identifier": "FLOAT4X4",
+     "name": "4x4 Matrix",
+     "description": "Floating point matrix",
+     "icon": "NONE",
+     "value": 20
+    },
+    {
+     "identifier": "STRING",
+     "name": "String",
+     "description": "Text string",
+     "icon": "NONE",
+     "value": 12
+    },
+    {
+     "identifier": "INT8",
+     "name": "8-Bit Integer",
+     "description": "Smaller integer with a range from -128 to 127",
+     "icon": "NONE",
+     "value": 45
+    },
+    {
+     "identifier": "INT16_2D",
+     "name": "2D 16-Bit Integer Vector",
+     "description": "16-bit signed integer vector",
+     "icon": "NONE",
+     "value": 22
+    },
+    {
+     "identifier": "INT32_2D",
+     "name": "2D Integer Vector",
+     "description": "32-bit signed integer vector",
+     "icon": "NONE",
+     "value": 46
+    },
+    {
+     "identifier": "FLOAT2",
+     "name": "2D Vector",
+     "description": "2D vector with floating-point values",
+     "icon": "NONE",
+     "value": 49
+    },
+    {
+     "identifier": "FLOAT4",
+     "name": "4D Vector",
+     "description": "4D vector with floating-point values",
+     "icon": "NONE",
+     "value": 24
+    },
+    {
+     "identifier": "BYTE_COLOR",
+     "name": "Byte Color",
+     "description": "RGBA color with 8-bit positive integer values",
+     "icon": "NONE",
+     "value": 17
+    }
+   ],
+   "default": "FLOAT",
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

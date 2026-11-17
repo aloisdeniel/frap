@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_scalar_float.txt
+---
+> bpy.data.objects['Cube'].modifiers['Bevel'].width = 0.25
+---
+stmt 1 Bpy line 1 @1:1/1+56
+  Set Assign
+    Path bpy.data @1:1/1+49
+      .objects
+      ["Cube"]
+      .modifiers
+      ["Bevel"]
+      .width
+    Float 0.25 @1:53/53+4

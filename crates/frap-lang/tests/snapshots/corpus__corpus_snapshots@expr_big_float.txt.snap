@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_big_float.txt
+---
+> print(1e309)
+---
+stmt 1 Bpy line 1 @1:1/1+12
+  Print
+    Float inf @1:7/7+5

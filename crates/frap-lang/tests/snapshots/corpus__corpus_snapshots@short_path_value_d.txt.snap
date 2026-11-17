@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_path_value_d.txt
+---
+> object.parent_set target=D.objects['Empty']
+---
+stmt 1 Short line 1 @1:1/1+43
+  Invoke object.parent_set
+    arg target @1:19/19+25
+            Path bpy.data @1:26/26+18
+        .objects
+        ["Empty"]

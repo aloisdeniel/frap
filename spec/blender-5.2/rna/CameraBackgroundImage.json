@@ -1,0 +1,317 @@
+{
+ "identifier": "CameraBackgroundImage",
+ "name": "Background Image",
+ "description": "Image and settings for display in the 3D View background",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "is_override_data",
+   "name": "Override Background Image",
+   "description": "In a local override camera, whether this background image comes from the linked reference camera, or is local to the override",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "source",
+   "name": "Background Source",
+   "description": "Data source used for background",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "IMAGE",
+     "name": "Image",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "MOVIE_CLIP",
+     "name": "Movie Clip",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "IMAGE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "image",
+   "name": "Image",
+   "description": "Image displayed and edited in this space",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Image",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "clip",
+   "name": "MovieClip",
+   "description": "Movie clip displayed and edited in this space",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MovieClip",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "image_user",
+   "name": "Image User",
+   "description": "Parameters defining which layer, pass and frame of the image is displayed",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ImageUser",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "clip_user",
+   "name": "Clip User",
+   "description": "Parameters defining which frame of the movie clip is displayed",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MovieClipUser",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "offset",
+   "name": "Offset",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 0.10000000149011612,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "scale",
+   "name": "Scale",
+   "description": "Scale the background image",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 10.0,
+   "step": 0.10000000149011612,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "rotation",
+   "name": "Rotation",
+   "description": "Rotation for the background image (ortho view only)",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_flip_x",
+   "name": "Flip Horizontally",
+   "description": "Flip the background image horizontally",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_flip_y",
+   "name": "Flip Vertically",
+   "description": "Flip the background image vertically",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "alpha",
+   "name": "Opacity",
+   "description": "Image opacity to blend the image against the background color",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_expanded",
+   "name": "Show Expanded",
+   "description": "Show the details in the user interface",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_camera_clip",
+   "name": "Camera Clip",
+   "description": "Use movie clip from active scene camera",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_background_image",
+   "name": "Show Background Image",
+   "description": "Show this image as background",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_on_foreground",
+   "name": "Show On Foreground",
+   "description": "Show this image in front of objects in viewport",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "display_depth",
+   "name": "Depth",
+   "description": "Display under or over everything",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BACK",
+     "name": "Back",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FRONT",
+     "name": "Front",
+     "description": "",
+     "icon": "NONE",
+     "value": 16
+    }
+   ],
+   "default": "BACK",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_method",
+   "name": "Frame Method",
+   "description": "How the image fits in the camera frame",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "STRETCH",
+     "name": "Stretch",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FIT",
+     "name": "Fit",
+     "description": "",
+     "icon": "NONE",
+     "value": 32
+    },
+    {
+     "identifier": "CROP",
+     "name": "Crop",
+     "description": "",
+     "icon": "NONE",
+     "value": 96
+    }
+   ],
+   "default": "FIT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_indented_unicode_error.txt
+---
+>   bpy.data.objects['é'] = )
+---
+error 1 SyntaxError SYNTAX @1:28/27+1
+  message: unmatched ')'

@@ -1,0 +1,12 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_objects_nope.txt
+---
+> bpy.data.objects['Nope']
+---
+stmt 1 Bpy line 1 @1:1/1+24
+  Get
+    Path bpy.data @1:1/1+24
+      .objects
+      ["Nope"]

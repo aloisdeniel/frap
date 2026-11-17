@@ -1,0 +1,1 @@
+data.objects['Cube'].location[0] = 4

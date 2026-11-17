@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_bytes_literal.txt
+---
+> print(b'abc')
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:7/7+6
+  message: frap: bytes literals are not supported

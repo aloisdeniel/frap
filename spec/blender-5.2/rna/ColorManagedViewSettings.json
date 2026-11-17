@@ -1,0 +1,228 @@
+{
+ "identifier": "ColorManagedViewSettings",
+ "name": "ColorManagedViewSettings",
+ "description": "Color management settings used for displaying images on the display",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "look",
+   "name": "Look",
+   "description": "Additional transform applied before view transform for artistic needs",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "Do not modify image in an artistic manner",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "NONE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "view_transform",
+   "name": "View",
+   "description": "View used when converting image to a display space",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "Do not perform any color transform on display, use old non-color managed technique for display",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "NONE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "exposure",
+   "name": "Exposure",
+   "description": "Exposure (stops) applied before display transform, multiplying by 2^exposure",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -32.0,
+   "hard_max": 32.0,
+   "soft_min": -10.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "gamma",
+   "name": "Gamma",
+   "description": "Additional gamma encoding after display transform, for output with custom gamma",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 5.0,
+   "soft_min": 0.0,
+   "soft_max": 5.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "curve_mapping",
+   "name": "Curve",
+   "description": "Color curve mapping applied before display transform",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CurveMapping",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_curve_mapping",
+   "name": "Use Curves",
+   "description": "Use RGB curved for pre-display transformation",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_white_balance",
+   "name": "Use White Balance",
+   "description": "Perform chromatic adaption from a different white point",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "white_balance_temperature",
+   "name": "Temperature",
+   "description": "Color temperature of the scene's white point",
+   "type": "FLOAT",
+   "subtype": "COLOR_TEMPERATURE",
+   "unit": "COLOR_TEMPERATURE",
+   "default": 6500.0,
+   "hard_min": 1800.0,
+   "hard_max": 100000.0,
+   "soft_min": 2000.0,
+   "soft_max": 11000.0,
+   "step": 100.0,
+   "precision": 0,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "white_balance_tint",
+   "name": "Tint",
+   "description": "Color tint of the scene's white point (the default of 10 matches daylight)",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 10.0,
+   "hard_min": -500.0,
+   "hard_max": 500.0,
+   "soft_min": -150.0,
+   "soft_max": 150.0,
+   "step": 1.0,
+   "precision": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "white_balance_whitepoint",
+   "name": "White Point",
+   "description": "The color which gets mapped to white (automatically converted to/from temperature and tint)",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_hdr",
+   "name": "Is HDR",
+   "description": "The display and view transform supports high dynamic range colors",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "support_emulation",
+   "name": "Support Emulation",
+   "description": "The display and view transform supports automatic emulation for another display device, using the display color spaces mechanism in OpenColorIO v2 configurations",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.scenes.new('Scene').view_settings",
+  "differs_from_default": {
+   "look": "None",
+   "view_transform": "AgX",
+   "white_balance_whitepoint": [
+    0.9993047714233398,
+    1.0003489255905151,
+    0.9985780119895935
+   ],
+   "support_emulation": true
+  }
+ }
+}

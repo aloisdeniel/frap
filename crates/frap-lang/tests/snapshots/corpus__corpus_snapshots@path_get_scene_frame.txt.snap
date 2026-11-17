@@ -1,0 +1,12 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_get_scene_frame.txt
+---
+> bpy.context.scene.frame_current
+---
+stmt 1 Bpy line 1 @1:1/1+31
+  Get
+    Path bpy.context @1:1/1+31
+      .scene
+      .frame_current

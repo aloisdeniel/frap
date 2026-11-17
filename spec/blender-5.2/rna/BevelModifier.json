@@ -1,0 +1,541 @@
+{
+ "identifier": "BevelModifier",
+ "name": "Bevel Modifier",
+ "description": "Bevel modifier to make edges and vertices more rounded",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "width",
+   "name": "Width",
+   "description": "Bevel amount",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.10000000149011612,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 0.10000000149011612,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "width_pct",
+   "name": "Width Percent",
+   "description": "Bevel amount for percentage method",
+   "type": "FLOAT",
+   "subtype": "PERCENTAGE",
+   "unit": "NONE",
+   "default": 0.10000000149011612,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 5.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "segments",
+   "name": "Segments",
+   "description": "Number of segments for round edges/verts",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 1,
+   "hard_max": 1000,
+   "soft_min": 1,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "affect",
+   "name": "Affect",
+   "description": "Affect edges or vertices",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "VERTICES",
+     "name": "Vertices",
+     "description": "Affect only vertices",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "EDGES",
+     "name": "Edges",
+     "description": "Affect only edges",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "EDGES",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "limit_method",
+   "name": "Limit Method",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "Bevel the entire mesh by a constant amount",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "ANGLE",
+     "name": "Angle",
+     "description": "Only bevel edges with sharp enough angles between faces",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "WEIGHT",
+     "name": "Weight",
+     "description": "Use bevel weights to determine how much bevel is applied in edge mode",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "VGROUP",
+     "name": "Vertex Group",
+     "description": "Use vertex group weights to select whether vertex or edge is beveled",
+     "icon": "NONE",
+     "value": 32
+    }
+   ],
+   "default": "ANGLE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "edge_weight",
+   "name": "Edge Weight",
+   "description": "Attribute name for edge weight",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "bevel_weight_edge",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "vertex_weight",
+   "name": "Vertex Weight",
+   "description": "Attribute name for vertex weight",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "bevel_weight_vert",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "angle_limit",
+   "name": "Angle",
+   "description": "Angle above which to bevel edges",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.5235987901687622,
+   "hard_min": 0.0,
+   "hard_max": 3.1415927410125732,
+   "soft_min": 0.0,
+   "soft_max": 3.1415927410125732,
+   "step": 10.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_clamp_overlap",
+   "name": "Clamp Overlap",
+   "description": "Clamp the width to avoid overlap",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "offset_type",
+   "name": "Width Type",
+   "description": "What distance Width measures",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OFFSET",
+     "name": "Offset",
+     "description": "Amount is offset of new edges from original",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "WIDTH",
+     "name": "Width",
+     "description": "Amount is width of new face",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "DEPTH",
+     "name": "Depth",
+     "description": "Amount is perpendicular distance from original edge to bevel face",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "PERCENT",
+     "name": "Percent",
+     "description": "Amount is percent of adjacent edge length",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "ABSOLUTE",
+     "name": "Absolute",
+     "description": "Amount is absolute distance along adjacent edge",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "OFFSET",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "profile_type",
+   "name": "Profile Type",
+   "description": "The type of shape used to rebuild a beveled section",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SUPERELLIPSE",
+     "name": "Superellipse",
+     "description": "The profile can be a concave or convex curve",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CUSTOM",
+     "name": "Custom",
+     "description": "The profile can be any arbitrary path between its endpoints",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "SUPERELLIPSE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "profile",
+   "name": "Profile",
+   "description": "The profile shape (0.5 = round)",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.05000000074505806,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material",
+   "name": "Material Index",
+   "description": "Material index of generated faces, -1 for automatic",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": -1,
+   "hard_min": -1,
+   "hard_max": 32767,
+   "soft_min": -1,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "loop_slide",
+   "name": "Loop Slide",
+   "description": "Prefer sliding along edges to having even widths",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mark_seam",
+   "name": "Mark Seams",
+   "description": "Mark Seams along beveled edges",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mark_sharp",
+   "name": "Mark Sharp",
+   "description": "Mark beveled edges as sharp",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "harden_normals",
+   "name": "Harden Normals",
+   "description": "Match normals of new faces to adjacent faces",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "face_strength_mode",
+   "name": "Face Strength",
+   "description": "Whether to set face strength, and which faces to set it on",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FSTR_NONE",
+     "name": "None",
+     "description": "Do not set face strength",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FSTR_NEW",
+     "name": "New",
+     "description": "Set face strength on new faces only",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FSTR_AFFECTED",
+     "name": "Affected",
+     "description": "Set face strength on new and affected faces only",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "FSTR_ALL",
+     "name": "All",
+     "description": "Set face strength on all faces",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "FSTR_NONE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "miter_outer",
+   "name": "Outer Miter",
+   "description": "Pattern to use for outside of miters",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "MITER_SHARP",
+     "name": "Sharp",
+     "description": "Outside of miter is sharp",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "MITER_PATCH",
+     "name": "Patch",
+     "description": "Outside of miter is squared-off patch",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "MITER_ARC",
+     "name": "Arc",
+     "description": "Outside of miter is arc",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "MITER_SHARP",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "miter_inner",
+   "name": "Inner Miter",
+   "description": "Pattern to use for inside of miters",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "MITER_SHARP",
+     "name": "Sharp",
+     "description": "Inside of miter is sharp",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "MITER_ARC",
+     "name": "Arc",
+     "description": "Inside of miter is arc",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "MITER_SHARP",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "spread",
+   "name": "Spread",
+   "description": "Spread distance for inner miter arcs",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.10000000149011612,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 0.10000000149011612,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "custom_profile",
+   "name": "Custom Profile Path",
+   "description": "The path for the custom profile",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CurveProfile",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "vmesh_method",
+   "name": "Vertex Mesh Method",
+   "description": "The method to use to create the mesh at intersections",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ADJ",
+     "name": "Grid Fill",
+     "description": "Default patterned fill",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CUTOFF",
+     "name": "Cutoff",
+     "description": "A cut-off at the end of each profile before the intersection",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "ADJ",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

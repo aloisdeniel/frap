@@ -1,0 +1,1 @@
+bpy.data.meshes['Mesh'].from_pydata([(0, 0, 0), (1, 0, 0), (0, 1, 0)], [], [(0, 1, 2)])

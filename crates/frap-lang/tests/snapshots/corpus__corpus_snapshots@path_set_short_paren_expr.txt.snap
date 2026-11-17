@@ -1,0 +1,19 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_short_paren_expr.txt
+---
+> data.objects['Cube'].rotation_euler = (0, 0, radians(90))
+---
+stmt 1 Short line 1 @1:1/1+57
+  Set Assign
+    Path bpy.data @1:1/1+35
+      .objects
+      ["Cube"]
+      .rotation_euler
+    Tuple @1:39/39+19
+      Int 0 @1:40/40+1
+      Int 0 @1:43/43+1
+      Builtin Radians @1:46/46+11
+        arg (positional) @1:54/54+2
+          Int 90 @1:54/54+2

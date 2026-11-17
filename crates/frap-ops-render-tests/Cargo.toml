@@ -1,0 +1,25 @@
+[package]
+name = "frap-ops-render-tests"
+description = "frap test-only crate (rule 2.2.11): behaviour tests of render.render through a real Session, and the Workbench render self-goldens of tests/golden/cases/render/m1 (WP 1.24)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+# Test-only: nothing depends on this crate, so it may depend on frap-session (L11) and
+# frap-golden (L12) without a dev-dependency cycle (`frap-ops-render` itself must not, rule
+# 2.2.11). The render tests need the GPU service, so `gpu` is on here; machines without an
+# adapter skip them with a notice under FRAP_GPU_OPTIONAL=1 (ci.yml), and gpu.yml runs them on
+# Metal, lavapipe and WARP.
+[dependencies]
+
+[dev-dependencies]
+frap-session = { workspace = true, features = ["gpu"] }
+frap-golden.workspace = true
+frap-imbuf.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

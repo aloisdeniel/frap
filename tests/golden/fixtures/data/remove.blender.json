@@ -1,0 +1,212 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 6,
+      "ok": true
+    },
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Object 'Light' must have zero users to be removed, found 1 (try with do_unlink=True parameter)\n"
+    },
+    {
+      "line": 10,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Light 'Light' must have zero users to be removed, found 1 (try with do_unlink=True parameter)\n"
+    },
+    {
+      "line": 11,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Camera 'Camera' must have zero users to be removed, found 1 (try with do_unlink=True parameter)\n"
+    },
+    {
+      "line": 12,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Mesh 'Cube' must have zero users to be removed, found 1 (try with do_unlink=True parameter)\n"
+    },
+    {
+      "line": 13,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Material 'Material' must have zero users to be removed, found 1 (try with do_unlink=True parameter)\n"
+    },
+    {
+      "line": 14,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Collection 'Collection' must have zero users to be removed, found 1 (try with do_unlink=True parameter)\n"
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "BlendDataObjects.remove(): error with argument 1, \"object\" -  Function.object does not support a 'None' assignment Object type"
+    },
+    {
+      "line": 23,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "BlendDataObjects.remove(): error with argument 1, \"object\" -  Function.object expected a Object type, not Mesh"
+    },
+    {
+      "line": 24,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "BlendDataMeshes.remove(): error with argument 1, \"mesh\" -  Function.mesh expected a Mesh type, not Object"
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Holder\" not found"
+    },
+    {
+      "line": 39,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 1.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [null],
+      "mode": "OBJECT"
+    },
+    "Twin": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [null],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": null,
+    "selected": [],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_render_contact_sheet_short.txt
+---
+> frap.render_contact_sheet filepath='//sheet.png' views={FRONT,RIGHT,TOP,ISO}
+---
+stmt 1 Short line 1 @1:1/1+76
+  Invoke frap.render_contact_sheet
+    arg filepath @1:27/27+22
+      Str "//sheet.png" @1:36/36+13
+    arg views @1:50/50+27
+      Set @1:56/56+21
+        Bare FRONT @1:57/57+5
+        Bare RIGHT @1:63/63+5
+        Bare TOP @1:69/69+3
+        Bare ISO @1:73/73+3

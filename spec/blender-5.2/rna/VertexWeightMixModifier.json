@@ -1,0 +1,440 @@
+{
+ "identifier": "VertexWeightMixModifier",
+ "name": "WeightVG Mix Modifier",
+ "description": "Mix the weights of two vertex groups",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "vertex_group_a",
+   "name": "Vertex Group A",
+   "description": "First vertex group name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "vertex_group_b",
+   "name": "Vertex Group B",
+   "description": "Second vertex group name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group_a",
+   "name": "Invert Weights A",
+   "description": "Invert the influence of vertex group A",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group_b",
+   "name": "Invert Weights B",
+   "description": "Invert the influence of vertex group B",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "default_weight_a",
+   "name": "Default Weight A",
+   "description": "Default weight a vertex will have if it is not in the first A vgroup",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": -1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "default_weight_b",
+   "name": "Default Weight B",
+   "description": "Default weight a vertex will have if it is not in the second B vgroup",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": -1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mix_mode",
+   "name": "Mix Mode",
+   "description": "How weights from vgroup B affect weights of vgroup A",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SET",
+     "name": "Replace",
+     "description": "Replace VGroup A's weights by VGroup B's ones",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "ADD",
+     "name": "Add",
+     "description": "Add VGroup B's weights to VGroup A's ones",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "SUB",
+     "name": "Subtract",
+     "description": "Subtract VGroup B's weights from VGroup A's ones",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "MUL",
+     "name": "Multiply",
+     "description": "Multiply VGroup A's weights by VGroup B's ones",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "DIV",
+     "name": "Divide",
+     "description": "Divide VGroup A's weights by VGroup B's ones",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "DIF",
+     "name": "Difference",
+     "description": "Difference between VGroup A's and VGroup B's weights",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "AVG",
+     "name": "Average",
+     "description": "Average value of VGroup A's and VGroup B's weights",
+     "icon": "NONE",
+     "value": 7
+    },
+    {
+     "identifier": "MIN",
+     "name": "Minimum",
+     "description": "Minimum of VGroup A's and VGroup B's weights",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "MAX",
+     "name": "Maximum",
+     "description": "Maximum of VGroup A's and VGroup B's weights",
+     "icon": "NONE",
+     "value": 9
+    }
+   ],
+   "default": "SET",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mix_set",
+   "name": "Vertex Set",
+   "description": "Which vertices should be affected",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ALL",
+     "name": "All",
+     "description": "Affect all vertices (might add some to VGroup A)",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "A",
+     "name": "VGroup A",
+     "description": "Affect vertices in VGroup A",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "B",
+     "name": "VGroup B",
+     "description": "Affect vertices in VGroup B (might add some to VGroup A)",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "OR",
+     "name": "VGroup A or B",
+     "description": "Affect vertices in at least one of both VGroups (might add some to VGroup A)",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "AND",
+     "name": "VGroup A and B",
+     "description": "Affect vertices in both groups",
+     "icon": "NONE",
+     "value": 5
+    }
+   ],
+   "default": "AND",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "normalize",
+   "name": "Normalize Weights",
+   "description": "Normalize the resulting weights (otherwise they are only clamped within 0.0 to 1.0 range)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mask_constant",
+   "name": "Influence",
+   "description": "Global influence of current modifications on vgroup",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": -1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mask_vertex_group",
+   "name": "Mask Vertex Group",
+   "description": "Masking vertex group name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_mask_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group mask influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mask_texture",
+   "name": "Masking Tex",
+   "description": "Masking texture",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Texture",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "mask_tex_use_channel",
+   "name": "Use Channel",
+   "description": "Which texture channel to use for masking",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "INT",
+     "name": "Intensity",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "RED",
+     "name": "Red",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "GREEN",
+     "name": "Green",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "BLUE",
+     "name": "Blue",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "HUE",
+     "name": "Hue",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "SAT",
+     "name": "Saturation",
+     "description": "",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "VAL",
+     "name": "Value",
+     "description": "",
+     "icon": "NONE",
+     "value": 7
+    },
+    {
+     "identifier": "ALPHA",
+     "name": "Alpha",
+     "description": "",
+     "icon": "NONE",
+     "value": 8
+    }
+   ],
+   "default": "INT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mask_tex_mapping",
+   "name": "Texture Coordinates",
+   "description": "Which texture coordinates to use for mapping",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LOCAL",
+     "name": "Local",
+     "description": "Use local generated coordinates",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "GLOBAL",
+     "name": "Global",
+     "description": "Use global coordinates",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "Use local generated coordinates of another object",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "UV",
+     "name": "UV",
+     "description": "Use coordinates from a UV layer",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "LOCAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mask_tex_uv_layer",
+   "name": "UV Map",
+   "description": "UV map name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 68,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "mask_tex_map_object",
+   "name": "Texture Coordinate Object",
+   "description": "Which object to take texture coordinates from",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "mask_tex_map_bone",
+   "name": "Texture Coordinate Bone",
+   "description": "Which bone to take texture coordinates from",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

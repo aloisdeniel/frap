@@ -1,0 +1,1 @@
+object.parent_set target=data.objects['Empty']

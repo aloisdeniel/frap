@@ -1,0 +1,124 @@
+{
+ "identifier": "MeshUVLoopLayer",
+ "name": "MeshUVLoopLayer",
+ "description": "",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "data",
+   "name": "MeshUVLoop (Deprecated)",
+   "description": "Deprecated, use 'uv', 'vertex_select', 'edge_select' or 'pin' properties instead",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MeshUVLoop",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "Name of UV map",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "active",
+   "name": "Active",
+   "description": "Set the map as active for display and editing",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "active_render",
+   "name": "Active Render",
+   "description": "Set the UV map as active for rendering",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "active_clone",
+   "name": "Active Clone",
+   "description": "Set the map as active for cloning",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "uv",
+   "name": "UV",
+   "description": "UV coordinates on face corners",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Float2AttributeValue",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "pin",
+   "name": "UV Pin",
+   "description": "UV pinned state in the UV editor",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "BoolAttributeValue",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "pin_ensure",
+   "description": "pin_ensure",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "layer",
+     "name": "",
+     "description": "The boolean attribute",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "BoolAttribute",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

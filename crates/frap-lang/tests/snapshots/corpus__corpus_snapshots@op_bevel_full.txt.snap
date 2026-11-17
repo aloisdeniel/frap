@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_bevel_full.txt
+---
+> bpy.ops.mesh.bevel(offset=0.1, segments=3, affect='EDGES', profile=0.5)
+---
+stmt 1 Bpy line 1 @1:1/1+71
+  Invoke mesh.bevel
+    arg offset @1:20/20+10
+      Float 0.1 @1:27/27+3
+    arg segments @1:32/32+10
+      Int 3 @1:41/41+1
+    arg affect @1:44/44+14
+      Str "EDGES" @1:51/51+7
+    arg profile @1:60/60+11
+      Float 0.5 @1:68/68+3

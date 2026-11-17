@@ -1,0 +1,763 @@
+{
+ "identifier": "Material",
+ "name": "Material",
+ "description": "Material data-block to define the appearance of geometric objects for rendering",
+ "base": "ID",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "surface_render_method",
+   "name": "Surface Render Method",
+   "description": "Controls the blending and the compatibility with certain features",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "DITHERED",
+     "name": "Dithered",
+     "description": "Allows for grayscale hashed transparency, and compatible with render passes and raytracing. Also known as deferred rendering.",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "BLENDED",
+     "name": "Blended",
+     "description": "Allows for colored transparency, but incompatible with render passes and raytracing. Also known as forward rendering.",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "DITHERED",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "displacement_method",
+   "name": "Displacement Method",
+   "description": "Method to use for the displacement",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BUMP",
+     "name": "Bump Only",
+     "description": "Bump mapping to simulate the appearance of displacement",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "DISPLACEMENT",
+     "name": "Displacement Only",
+     "description": "Use true displacement of surface only, requires fine subdivision",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "BOTH",
+     "name": "Displacement and Bump",
+     "description": "Combination of true displacement and bump mapping for finer detail",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "BUMP",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "blend_method",
+   "name": "Blend Mode",
+   "description": "Blend Mode for Transparent Faces (Deprecated: use 'surface_render_method')",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OPAQUE",
+     "name": "Opaque",
+     "description": "Render surface without transparency",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CLIP",
+     "name": "Alpha Clip",
+     "description": "Use the alpha threshold to clip the visibility (binary visibility)",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "HASHED",
+     "name": "Alpha Hashed",
+     "description": "Use noise to dither the binary visibility (works well with multi-samples)",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "BLEND",
+     "name": "Alpha Blend",
+     "description": "Render polygon transparent, depending on alpha channel of the texture",
+     "icon": "NONE",
+     "value": 5
+    }
+   ],
+   "default": "OPAQUE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "alpha_threshold",
+   "name": "Clip Threshold",
+   "description": "A pixel is rendered only if its alpha value is above this threshold",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_transparency_overlap",
+   "name": "Use Transparency Overlap",
+   "description": "Render multiple transparent layers (may introduce transparency sorting problems)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_transparent_back",
+   "name": "Show Backface",
+   "description": "Render multiple transparent layers (may introduce transparency sorting problems) (Deprecated: use 'use_tranparency_overlap')",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_backface_culling",
+   "name": "Backface Culling",
+   "description": "Use back face culling to hide the back side of faces",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_backface_culling_shadow",
+   "name": "Shadow Backface Culling",
+   "description": "Use back face culling when casting shadows",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_backface_culling_lightprobe_volume",
+   "name": "Light Probe Volume Backface Culling",
+   "description": "Consider material single sided for light probe volume capture. Additionally helps rejecting probes inside the object to avoid light leaks.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_transparent_shadow",
+   "name": "Transparent Shadows",
+   "description": "Use transparent shadows for this material if it contains a Transparent BSDF, disabling will render faster but not give accurate shadows",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_raytrace_refraction",
+   "name": "Raytrace Transmission",
+   "description": "Use raytracing to determine transmitted color instead of using only light probes. This prevents the surface from contributing to the lighting of surfaces not using this setting.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_screen_refraction",
+   "name": "Raytrace Transmission",
+   "description": "Use raytracing to determine transmitted color instead of using only light probes. This prevents the surface from contributing to the lighting of surfaces not using this setting. Deprecated: use 'use_raytrace_refraction'.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_sss_translucency",
+   "name": "Subsurface Translucency",
+   "description": "Add translucency effect to subsurface (Deprecated)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "refraction_depth",
+   "name": "Refraction Depth",
+   "description": "Approximate the thickness of the object to compute two refraction events (0 is disabled) (Deprecated)",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "thickness_mode",
+   "name": "Thickness Mode",
+   "description": "Approximation used to model the light interactions inside the object",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SPHERE",
+     "name": "Sphere",
+     "description": "Approximate the object as a sphere whose diameter is equal to the thickness defined by the node tree",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "SLAB",
+     "name": "Slab",
+     "description": "Approximate the object as an infinite slab of thickness defined by the node tree",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "SPHERE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_thickness_from_shadow",
+   "name": "Thickness From Shadow",
+   "description": "Use the shadow maps from shadow casting lights to refine the thickness defined by the material node tree",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "volume_intersection_method",
+   "name": "Volume Intersection Method",
+   "description": "Determines which inner part of the mesh will produce volumetric effect",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FAST",
+     "name": "Fast",
+     "description": "Each face is considered as a medium interface. Gives correct results for manifold geometry that contains no inner parts.",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "ACCURATE",
+     "name": "Accurate",
+     "description": "Faces are considered as medium interface only when they have different consecutive facing. Gives correct results as long as the max ray depth is not exceeded. Have significant memory overhead compared to the fast method.",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "FAST",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "max_vertex_displacement",
+   "name": "Max Vertex Displacement",
+   "description": "The max distance a vertex can be displaced. Displacements over this threshold may cause visibility issues.",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "preview_render_type",
+   "name": "Preview Render Type",
+   "description": "Type of preview render",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FLAT",
+     "name": "Flat",
+     "description": "Flat XY plane",
+     "icon": "MATPLANE",
+     "value": 0
+    },
+    {
+     "identifier": "SPHERE",
+     "name": "Sphere",
+     "description": "Sphere",
+     "icon": "MATSPHERE",
+     "value": 1
+    },
+    {
+     "identifier": "CUBE",
+     "name": "Cube",
+     "description": "Cube",
+     "icon": "MATCUBE",
+     "value": 2
+    },
+    {
+     "identifier": "HAIR",
+     "name": "Hair",
+     "description": "Hair strands",
+     "icon": "CURVES",
+     "value": 10
+    },
+    {
+     "identifier": "SHADERBALL",
+     "name": "Shader Ball",
+     "description": "Shader ball",
+     "icon": "MATSHADERBALL",
+     "value": 3
+    },
+    {
+     "identifier": "CLOTH",
+     "name": "Cloth",
+     "description": "Cloth",
+     "icon": "MATCLOTH",
+     "value": 12
+    },
+    {
+     "identifier": "FLUID",
+     "name": "Fluid",
+     "description": "Fluid",
+     "icon": "MATFLUID",
+     "value": 13
+    }
+   ],
+   "default": "SPHERE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_preview_world",
+   "name": "Preview World",
+   "description": "Use the current world background to light the preview render",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "pass_index",
+   "name": "Pass Index",
+   "description": "Index number for the \"Material Index\" render pass",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "node_tree",
+   "name": "Node Tree",
+   "description": "Node tree for node based materials",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeTree",
+   "is_id": true,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_nodes",
+   "name": "Use Nodes",
+   "description": "Use shader nodes to render the material",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "DEPRECATED"
+   ],
+   "deprecated": {
+    "note": "Unused but kept for compatibility reasons. Setting the property has no effect, and getting it always returns True.",
+    "version": [
+     5,
+     0,
+     0
+    ],
+    "removal_version": [
+     6,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "identifier": "animation_data",
+   "name": "Animation Data",
+   "description": "Animation data for this data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AnimData",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "texture_paint_images",
+   "name": "Texture Slot Images",
+   "description": "Texture images used for texture painting",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Image",
+   "is_id": true,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "texture_paint_slots",
+   "name": "Texture Slots",
+   "description": "Texture slots defining the mapping and influence of textures",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "TexPaintSlot",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "paint_active_slot",
+   "name": "Active Paint Texture Index",
+   "description": "Index of active texture paint slot",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "paint_clone_slot",
+   "name": "Clone Paint Texture Index",
+   "description": "Index of clone texture paint slot",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "diffuse_color",
+   "name": "Diffuse Color",
+   "description": "Diffuse color of the material",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "specular_color",
+   "name": "Specular Color",
+   "description": "Specular color of the material",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "roughness",
+   "name": "Roughness",
+   "description": "Roughness of the material",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.4000000059604645,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "specular_intensity",
+   "name": "Specular",
+   "description": "How intense (bright) the specular reflection is",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "metallic",
+   "name": "Metallic",
+   "description": "Amount of mirror reflection for raytrace",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "line_color",
+   "name": "Line Color",
+   "description": "Line color used for Freestyle line rendering",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "line_priority",
+   "name": "Line Priority",
+   "description": "The line color of a higher priority is used at material boundaries",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "grease_pencil",
+   "name": "Grease Pencil Settings",
+   "description": "Grease Pencil color settings for material",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MaterialGPencilStyle",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "is_grease_pencil",
+   "name": "Is Grease Pencil",
+   "description": "True if this material has Grease Pencil data",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lineart",
+   "name": "Line Art Settings",
+   "description": "Line Art settings for material",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MaterialLineArt",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "cycles",
+   "name": "Cycles Material Settings",
+   "description": "Cycles material settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CyclesMaterialSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.materials.new('Material')",
+  "differs_from_default": {
+   "id_type": "MATERIAL",
+   "is_editable": true,
+   "blend_method": "HASHED",
+   "use_nodes": true
+  }
+ }
+}

@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_triple_quoted.txt
+---
+> print('''multi
+> line''')
+---
+stmt 1 Bpy line 1 @1:1/1+23
+  Print
+    Str "multi\nline" @1:7/7+16

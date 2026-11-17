@@ -1,0 +1,1917 @@
+{
+ "namespace": "nla",
+ "count": 39,
+ "operators": [
+  {
+   "idname": "nla.action_pushdown",
+   "bl_idname": "NLA_OT_action_pushdown",
+   "label": "Push Down Action",
+   "description": "Push action down onto the top of the NLA stack as a new strip",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "track_index",
+     "name": "Track Index",
+     "description": "Index of NLA action track to perform pushdown operation on",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -1,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.action_sync_length",
+   "bl_idname": "NLA_OT_action_sync_length",
+   "label": "Sync Action Length",
+   "description": "Synchronize the length of the referenced Action with the length used in the strip",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "active",
+     "name": "Active Strip Only",
+     "description": "Only sync the active length for the active strip",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.action_unlink",
+   "bl_idname": "NLA_OT_action_unlink",
+   "label": "Unlink Action",
+   "description": "Unlink this action from the active action slot (and/or exit Tweak Mode)",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "force_delete",
+     "name": "Force Delete",
+     "description": "Clear Fake User and remove copy stashed in this data-block's NLA stack",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.actionclip_add",
+   "bl_idname": "NLA_OT_actionclip_add",
+   "label": "Add Action Strip",
+   "description": "Add an Action-Clip strip (i.e. an NLA Strip referencing an Action) to the active track",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "action",
+     "name": "Action",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [],
+     "default": "",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.apply_scale",
+   "bl_idname": "NLA_OT_apply_scale",
+   "label": "Apply Scale",
+   "description": "Apply scaling of selected strips to their referenced Actions",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.bake",
+   "bl_idname": "NLA_OT_bake",
+   "label": "Bake Action",
+   "description": "Bake all selected objects location/scale/rotation animation to an action",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "frame_start",
+     "name": "Start Frame",
+     "description": "Start frame for baking",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 0,
+     "hard_max": 300000,
+     "soft_min": 0,
+     "soft_max": 300000,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "frame_end",
+     "name": "End Frame",
+     "description": "End frame for baking",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 250,
+     "hard_min": 1,
+     "hard_max": 300000,
+     "soft_min": 1,
+     "soft_max": 300000,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "step",
+     "name": "Frame Step",
+     "description": "Number of frames to skip forward while baking each frame",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 1,
+     "hard_max": 120,
+     "soft_min": 1,
+     "soft_max": 120,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "only_selected",
+     "name": "Only Selected Bones",
+     "description": "Only key selected bones (Pose baking only)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "visual_keying",
+     "name": "Visual Keying",
+     "description": "Keyframe from the final transformations (with constraints applied)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "clear_constraints",
+     "name": "Clear Local Constraints",
+     "description": "Remove all constraints from keyed object/bones. To get a correct bake with this setting Visual Keying should be enabled",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "clear_parents",
+     "name": "Clear Parents",
+     "description": "Bake animation onto the object then clear parents (objects only)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_current_action",
+     "name": "Overwrite Current Action",
+     "description": "Bake animation into current action, instead of creating a new one (useful for baking only part of bones in an armature)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "clean_curves",
+     "name": "Clean Curves",
+     "description": "After baking curves, remove redundant keys",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bake_types",
+     "name": "Bake Data",
+     "description": "Which data's transformations to bake",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "POSE",
+       "name": "Pose",
+       "description": "Bake bones transformations",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "OBJECT",
+       "name": "Object",
+       "description": "Bake object transformations",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": [
+      "POSE"
+     ],
+     "flags": [
+      "ENUM_FLAG",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "channel_types",
+     "name": "Channels",
+     "description": "Which channels to bake",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "LOCATION",
+       "name": "Location",
+       "description": "Bake location channels",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ROTATION",
+       "name": "Rotation",
+       "description": "Bake rotation channels",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "SCALE",
+       "name": "Scale",
+       "description": "Bake scale channels",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "BBONE",
+       "name": "B-Bone",
+       "description": "Bake B-Bone channels",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "PROPS",
+       "name": "Custom Properties",
+       "description": "Bake custom properties",
+       "icon": "NONE",
+       "value": 16
+      }
+     ],
+     "default": [
+      "BBONE",
+      "LOCATION",
+      "PROPS",
+      "ROTATION",
+      "SCALE"
+     ],
+     "flags": [
+      "ENUM_FLAG",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "nla.channels_click",
+   "bl_idname": "NLA_OT_channels_click",
+   "label": "Mouse Click on NLA Tracks",
+   "description": "Handle clicks to select NLA tracks",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend Select",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.clear_scale",
+   "bl_idname": "NLA_OT_clear_scale",
+   "label": "Clear Scale",
+   "description": "Reset scaling of selected strips",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.click_select",
+   "bl_idname": "NLA_OT_click_select",
+   "label": "Select",
+   "description": "Handle clicks to select NLA Strips",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "wait_to_deselect_others",
+     "name": "Wait to Deselect Others",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_select_on_click",
+     "name": "Act on Click",
+     "description": "Instead of selecting on mouse press, wait to see if there's drag event. Otherwise select on mouse release",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mouse_x",
+     "name": "Mouse X",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mouse_y",
+     "name": "Mouse Y",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extend",
+     "name": "Extend Select",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "deselect_all",
+     "name": "Deselect On Nothing",
+     "description": "Deselect all when nothing under the cursor",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.delete",
+   "bl_idname": "NLA_OT_delete",
+   "label": "Delete Strips",
+   "description": "Delete selected strips",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.duplicate",
+   "bl_idname": "NLA_OT_duplicate",
+   "label": "Duplicate Strips",
+   "description": "Duplicate selected NLA-Strips, adding the new strips to new track(s)",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "linked",
+     "name": "Linked",
+     "description": "When duplicating strips, assign new copies of the actions they use",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.duplicate_linked_move",
+   "bl_idname": "NLA_OT_duplicate_linked_move",
+   "label": "Duplicate Linked",
+   "description": "Duplicate Linked selected NLA-Strips, adding the new strips to new track(s)",
+   "options": [
+    "MACRO",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [
+    "NLA_OT_duplicate",
+    "TRANSFORM_OT_translate"
+   ],
+   "props": [
+    {
+     "identifier": "NLA_OT_duplicate",
+     "name": "Duplicate Strips",
+     "description": "Duplicate selected NLA-Strips, adding the new strips to new track(s)",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NLA_OT_duplicate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "TRANSFORM_OT_translate",
+     "name": "Move",
+     "description": "Move selected items",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "TRANSFORM_OT_translate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.duplicate_move",
+   "bl_idname": "NLA_OT_duplicate_move",
+   "label": "Duplicate",
+   "description": "Duplicate selected NLA-Strips, adding the new strips to new track(s)",
+   "options": [
+    "MACRO",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [
+    "NLA_OT_duplicate",
+    "TRANSFORM_OT_translate"
+   ],
+   "props": [
+    {
+     "identifier": "NLA_OT_duplicate",
+     "name": "Duplicate Strips",
+     "description": "Duplicate selected NLA-Strips, adding the new strips to new track(s)",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NLA_OT_duplicate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "TRANSFORM_OT_translate",
+     "name": "Move",
+     "description": "Move selected items",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "TRANSFORM_OT_translate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.fmodifier_add",
+   "bl_idname": "NLA_OT_fmodifier_add",
+   "label": "Add F-Modifier",
+   "description": "Add F-Modifier to the active/selected NLA-Strips",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NULL",
+       "name": "Invalid",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "GENERATOR",
+       "name": "Generator",
+       "description": "Generate a curve using a factorized or expanded polynomial",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "FNGENERATOR",
+       "name": "Built-In Function",
+       "description": "Generate a curve using standard math functions such as sin and cos",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "ENVELOPE",
+       "name": "Envelope",
+       "description": "Reshape F-Curve values, e.g. change amplitude of movements",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "CYCLES",
+       "name": "Cycles",
+       "description": "Cyclic extend/repeat keyframe sequence",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "NOISE",
+       "name": "Noise",
+       "description": "Add pseudo-random noise on top of F-Curves",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "LIMITS",
+       "name": "Limits",
+       "description": "Restrict maximum and minimum values of F-Curve",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "STEPPED",
+       "name": "Stepped Interpolation",
+       "description": "Snap values to nearest grid step, e.g. for a stop-motion look",
+       "icon": "NONE",
+       "value": 9
+      },
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth (Gaussian)",
+       "description": "Smooth curve using Gaussian smoothing",
+       "icon": "NONE",
+       "value": 10
+      }
+     ],
+     "default": "NULL",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "only_active",
+     "name": "Only Active",
+     "description": "Only add a F-Modifier of the specified type to the active strip",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.fmodifier_copy",
+   "bl_idname": "NLA_OT_fmodifier_copy",
+   "label": "Copy F-Modifiers",
+   "description": "Copy the F-Modifier(s) of the active NLA-Strip",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.fmodifier_paste",
+   "bl_idname": "NLA_OT_fmodifier_paste",
+   "label": "Paste F-Modifiers",
+   "description": "Add copied F-Modifiers to the selected NLA-Strips",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "only_active",
+     "name": "Only Active",
+     "description": "Only paste F-Modifiers on active strip",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "replace",
+     "name": "Replace Existing",
+     "description": "Replace existing F-Modifiers, instead of just appending to the end of the existing list",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.make_single_user",
+   "bl_idname": "NLA_OT_make_single_user",
+   "label": "Make Single User",
+   "description": "Make linked action local to each strip",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "confirm",
+     "name": "Confirm",
+     "description": "Prompt for confirmation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.meta_add",
+   "bl_idname": "NLA_OT_meta_add",
+   "label": "Add Meta-Strips",
+   "description": "Add new meta-strips incorporating the selected strips",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.meta_remove",
+   "bl_idname": "NLA_OT_meta_remove",
+   "label": "Remove Meta-Strips",
+   "description": "Separate out the strips held by the selected meta-strips",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.move_down",
+   "bl_idname": "NLA_OT_move_down",
+   "label": "Move Strips Down",
+   "description": "Move selected strips down a track if there's room",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.move_up",
+   "bl_idname": "NLA_OT_move_up",
+   "label": "Move Strips Up",
+   "description": "Move selected strips up a track if there's room",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.mute_toggle",
+   "bl_idname": "NLA_OT_mute_toggle",
+   "label": "Toggle Muting",
+   "description": "Mute or un-mute selected strips",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.previewrange_set",
+   "bl_idname": "NLA_OT_previewrange_set",
+   "label": "Set Preview Range to Selected",
+   "description": "Set Preview Range based on extents of selected strips",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.select_all",
+   "bl_idname": "NLA_OT_select_all",
+   "label": "(De)select All",
+   "description": "Select or deselect all NLA-Strips",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "action",
+     "name": "Action",
+     "description": "Selection action to execute",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "TOGGLE",
+       "name": "Toggle",
+       "description": "Toggle selection for all elements",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SELECT",
+       "name": "Select",
+       "description": "Select all elements",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "DESELECT",
+       "name": "Deselect",
+       "description": "Deselect all elements",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERT",
+       "name": "Invert",
+       "description": "Invert selection of all elements",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "TOGGLE",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.select_box",
+   "bl_idname": "NLA_OT_select_box",
+   "label": "Box Select",
+   "description": "Use box selection to grab NLA-Strips",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "axis_range",
+     "name": "Axis Range",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "tweak",
+     "name": "Tweak",
+     "description": "Operator has been activated using a click-drag event",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmin",
+     "name": "X Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmax",
+     "name": "X Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymin",
+     "name": "Y Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymax",
+     "name": "Y Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SET",
+       "name": "Set",
+       "description": "Set a new selection",
+       "icon": "SELECT_SET",
+       "value": 3
+      },
+      {
+       "identifier": "ADD",
+       "name": "Extend",
+       "description": "Extend existing selection",
+       "icon": "SELECT_EXTEND",
+       "value": 1
+      },
+      {
+       "identifier": "SUB",
+       "name": "Subtract",
+       "description": "Subtract existing selection",
+       "icon": "SELECT_SUBTRACT",
+       "value": 2
+      }
+     ],
+     "default": "SET",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.select_leftright",
+   "bl_idname": "NLA_OT_select_leftright",
+   "label": "Select Left/Right",
+   "description": "Select strips to the left or the right of the current frame",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CHECK",
+       "name": "Based on Mouse Position",
+       "description": "",
+       "icon": "NONE",
+       "value": -1
+      },
+      {
+       "identifier": "LEFT",
+       "name": "Before Current Frame",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "RIGHT",
+       "name": "After Current Frame",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "CHECK",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extend",
+     "name": "Extend Select",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.selected_objects_add",
+   "bl_idname": "NLA_OT_selected_objects_add",
+   "label": "Include Selected Objects",
+   "description": "Make selected objects appear in NLA Editor by adding Animation Data",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.snap",
+   "bl_idname": "NLA_OT_snap",
+   "label": "Snap Strips",
+   "description": "Move start of strips to specified time",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CFRA",
+       "name": "Selection to Current Frame",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "NEAREST_FRAME",
+       "name": "Selection to Nearest Frame",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "NEAREST_SECOND",
+       "name": "Selection to Nearest Second",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "NEAREST_MARKER",
+       "name": "Selection to Nearest Marker",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      }
+     ],
+     "default": "CFRA",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.soundclip_add",
+   "bl_idname": "NLA_OT_soundclip_add",
+   "label": "Add Sound Clip",
+   "description": "Add a strip for controlling when speaker plays its sound clip",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.split",
+   "bl_idname": "NLA_OT_split",
+   "label": "Split Strips",
+   "description": "Split selected strips at their midpoints",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.swap",
+   "bl_idname": "NLA_OT_swap",
+   "label": "Swap Strips",
+   "description": "Swap order of selected strips within tracks",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.tracks_add",
+   "bl_idname": "NLA_OT_tracks_add",
+   "label": "Add Tracks",
+   "description": "Add NLA-Tracks above/after the selected tracks",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "above_selected",
+     "name": "Above Selected",
+     "description": "Add a new NLA Track above every existing selected one",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.tracks_delete",
+   "bl_idname": "NLA_OT_tracks_delete",
+   "label": "Delete Tracks",
+   "description": "Delete selected NLA-Tracks and the strips they contain",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.transition_add",
+   "bl_idname": "NLA_OT_transition_add",
+   "label": "Add Transition",
+   "description": "Add a transition strip between two adjacent selected strips",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.tweakmode_enter",
+   "bl_idname": "NLA_OT_tweakmode_enter",
+   "label": "Enter Tweak Mode",
+   "description": "Enter tweaking mode for the action referenced by the active strip to edit its keyframes",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "isolate_action",
+     "name": "Isolate Action",
+     "description": "Enable 'solo' on the NLA Track containing the active strip, to edit it without seeing the effects of the NLA stack",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_upper_stack_evaluation",
+     "name": "Evaluate Upper Stack",
+     "description": "In tweak mode, display the effects of the tracks above the tweak strip",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.tweakmode_exit",
+   "bl_idname": "NLA_OT_tweakmode_exit",
+   "label": "Exit Tweak Mode",
+   "description": "Exit tweaking mode for the action referenced by the active strip",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "isolate_action",
+     "name": "Isolate Action",
+     "description": "Disable 'solo' on any of the NLA Tracks after exiting tweak mode to get things back to normal",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.view_all",
+   "bl_idname": "NLA_OT_view_all",
+   "label": "Frame All",
+   "description": "Reset viewable area to show full strips range",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.view_frame",
+   "bl_idname": "NLA_OT_view_frame",
+   "label": "Go to Current Frame",
+   "description": "Move the view to the current frame",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "nla.view_selected",
+   "bl_idname": "NLA_OT_view_selected",
+   "label": "Frame Selected",
+   "description": "Reset viewable area to show selected strips range",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  }
+ ]
+}

@@ -1,0 +1,200 @@
+{
+ "bl_idname": "ShaderNodeVolumeScatter",
+ "srna": "ShaderNodeVolumeScatter",
+ "name": "Volume Scatter",
+ "label": "",
+ "width": 160.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Density",
+   "identifier": "Density",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Anisotropy",
+   "identifier": "Anisotropy",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "IOR",
+   "identifier": "IOR",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.3300000429153442,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Backscatter",
+   "identifier": "Backscatter",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.10000000149011612,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Alpha",
+   "identifier": "Alpha",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Diameter",
+   "identifier": "Diameter",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 20.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Weight",
+   "identifier": "Weight",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Volume",
+   "identifier": "Volume",
+   "bl_idname": "NodeSocketShader",
+   "type": "SHADER",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  }
+ ],
+ "props": {
+  "phase": "HENYEY_GREENSTEIN"
+ },
+ "availability": {
+  "phase": {
+   "default": "HENYEY_GREENSTEIN",
+   "by_value": {
+    "HENYEY_GREENSTEIN": {
+     "inputs": [
+      "Color",
+      "Density",
+      "Anisotropy"
+     ],
+     "outputs": [
+      "Volume"
+     ]
+    },
+    "FOURNIER_FORAND": {
+     "inputs": [
+      "Color",
+      "Density",
+      "IOR",
+      "Backscatter"
+     ],
+     "outputs": [
+      "Volume"
+     ]
+    },
+    "DRAINE": {
+     "inputs": [
+      "Color",
+      "Density",
+      "Anisotropy",
+      "Alpha"
+     ],
+     "outputs": [
+      "Volume"
+     ]
+    },
+    "RAYLEIGH": {
+     "inputs": [
+      "Color",
+      "Density"
+     ],
+     "outputs": [
+      "Volume"
+     ]
+    },
+    "MIE": {
+     "inputs": [
+      "Color",
+      "Density",
+      "Diameter"
+     ],
+     "outputs": [
+      "Volume"
+     ]
+    }
+   }
+  }
+ }
+}

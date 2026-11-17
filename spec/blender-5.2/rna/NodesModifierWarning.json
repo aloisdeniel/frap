@@ -1,0 +1,63 @@
+{
+ "identifier": "NodesModifierWarning",
+ "name": "Nodes Modifier Warning",
+ "description": "Warning created during evaluation of a geometry nodes modifier",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "message",
+   "name": "Message",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "type",
+   "name": "Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ERROR",
+     "name": "Error",
+     "description": "",
+     "icon": "CANCEL",
+     "value": 0
+    },
+    {
+     "identifier": "WARNING",
+     "name": "Warning",
+     "description": "",
+     "icon": "ERROR",
+     "value": 1
+    },
+    {
+     "identifier": "INFO",
+     "name": "Info",
+     "description": "",
+     "icon": "INFO",
+     "value": 2
+    }
+   ],
+   "default": "ERROR",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

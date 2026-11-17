@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_semicolon_after_newline.txt
+---
+> bpy.ops.object.shade_smooth()
+> ;bpy.ops.object.shade_smooth()
+---
+stmt 1 Bpy line 1 @1:1/1+29
+  Invoke object.shade_smooth
+error 2 SyntaxError SYNTAX @2:1/1+1
+  message: invalid syntax
+stmt 3 Bpy line 2 @2:2/2+29
+  Invoke object.shade_smooth

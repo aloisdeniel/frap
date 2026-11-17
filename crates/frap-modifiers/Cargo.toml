@@ -1,0 +1,12 @@
+[package]
+name = "frap-modifiers"
+description = "frap L7: ModifierTypeInfo registry, one evaluator per file (ARCHITECTURE §7.2). Empty until M4"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true

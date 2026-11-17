@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_ellipsis.txt
+---
+> ...
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:1/1+3
+  message: frap: Ellipsis (...) is not supported

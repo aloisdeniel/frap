@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_dict_trailing_comma.txt
+---
+> print({'a': 1,})
+---
+stmt 1 Bpy line 1 @1:1/1+16
+  Print
+    Dict @1:7/7+9
+      entry
+        Str "a" @1:8/8+3
+        Int 1 @1:13/13+1

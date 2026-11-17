@@ -1,0 +1,442 @@
+{
+ "identifier": "SolidifyModifier",
+ "name": "Solidify Modifier",
+ "description": "Create a solid skin, compensating for sharp angles",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "solidify_mode",
+   "name": "Mode",
+   "description": "Selects the used algorithm",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "EXTRUDE",
+     "name": "Simple",
+     "description": "Output a solidified version of a mesh by simple extrusion",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "NON_MANIFOLD",
+     "name": "Complex",
+     "description": "Output a manifold mesh even if the base mesh is non-manifold, where edges have 3 or more connecting faces. This method is slower.",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "EXTRUDE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "thickness",
+   "name": "Thickness",
+   "description": "Thickness of the shell",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.009999999776482582,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10.0,
+   "soft_max": 10.0,
+   "step": 0.10000000149011612,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "thickness_clamp",
+   "name": "Clamp",
+   "description": "Offset clamp based on geometry scale",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 100.0,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 0.10000000149011612,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_thickness_angle_clamp",
+   "name": "Angle Clamp",
+   "description": "Clamp thickness based on angles",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "thickness_vertex_group",
+   "name": "Vertex Group Factor",
+   "description": "Thickness factor to use for zero vertex group influence",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "offset",
+   "name": "Offset",
+   "description": "Offset the thickness from the center",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": -1.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "edge_crease_inner",
+   "name": "Inner Crease",
+   "description": "Assign a crease to inner edges",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "edge_crease_outer",
+   "name": "Outer Crease",
+   "description": "Assign a crease to outer edges",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "edge_crease_rim",
+   "name": "Rim Crease",
+   "description": "Assign a crease to the edges making up the rim",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_offset",
+   "name": "Material Offset",
+   "description": "Offset material index of generated faces",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -32768,
+   "hard_max": 32767,
+   "soft_min": -32768,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_offset_rim",
+   "name": "Rim Material Offset",
+   "description": "Offset material index of generated rim faces",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -32768,
+   "hard_max": 32767,
+   "soft_min": -32768,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "shell_vertex_group",
+   "name": "Shell Vertex Group",
+   "description": "Vertex group that the generated shell geometry will be weighted to",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "rim_vertex_group",
+   "name": "Rim Vertex Group",
+   "description": "Vertex group that the generated rim geometry will be weighted to",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "use_rim",
+   "name": "Fill Rim",
+   "description": "Create edge loops between the inner and outer surfaces on face edges (slow, disable when not needed)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_even_offset",
+   "name": "Even Thickness",
+   "description": "Maintain thickness by adjusting for sharp corners (slow, disable when not needed)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_quality_normals",
+   "name": "High Quality Normals",
+   "description": "Calculate normals which result in more even thickness (slow, disable when not needed)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Vertex Group Invert",
+   "description": "Invert the vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_flat_faces",
+   "name": "Flat Faces",
+   "description": "Make faces use the minimal vertex weight assigned to their vertices (ensures new faces remain parallel to their original ones, slow, disable when not needed)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_flip_normals",
+   "name": "Flip Normals",
+   "description": "Invert the face direction",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_rim_only",
+   "name": "Only Rim",
+   "description": "Only add the rim to the original data",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "nonmanifold_thickness_mode",
+   "name": "Thickness Mode",
+   "description": "Selects the used thickness algorithm",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FIXED",
+     "name": "Fixed",
+     "description": "Most basic thickness calculation",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "EVEN",
+     "name": "Even",
+     "description": "Even thickness calculation which takes the angle between faces into account",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "CONSTRAINTS",
+     "name": "Constraints",
+     "description": "Thickness calculation using constraints, most advanced",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "CONSTRAINTS",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "nonmanifold_boundary_mode",
+   "name": "Boundary Shape",
+   "description": "Selects the boundary adjustment algorithm",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "No shape correction",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "ROUND",
+     "name": "Round",
+     "description": "Round open perimeter shape",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FLAT",
+     "name": "Flat",
+     "description": "Flat open perimeter shape",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "NONE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "nonmanifold_merge_threshold",
+   "name": "Merge Threshold",
+   "description": "Distance within which degenerated geometry is merged",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 9.999999747378752e-05,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bevel_convex",
+   "name": "Bevel Convex",
+   "description": "Edge bevel weight to be added to outside edges",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -1.0,
+   "hard_max": 1.0,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

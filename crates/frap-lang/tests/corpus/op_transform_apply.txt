@@ -1,0 +1,1 @@
+bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)

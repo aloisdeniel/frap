@@ -1,0 +1,30 @@
+{
+ "identifier": "NodeSocketIntPercentage",
+ "name": "Integer Node Socket",
+ "description": "Integer number socket of a node",
+ "base": "NodeSocketStandard",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "default_value",
+   "name": "default_value",
+   "description": "",
+   "type": "INT",
+   "subtype": "PERCENTAGE",
+   "unit": "NONE",
+   "default": 100,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

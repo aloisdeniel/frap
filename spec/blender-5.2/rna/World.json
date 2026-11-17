@@ -1,0 +1,346 @@
+{
+ "identifier": "World",
+ "name": "World",
+ "description": "World data-block describing the environment and ambient lighting of a scene",
+ "base": "ID",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "animation_data",
+   "name": "Animation Data",
+   "description": "Animation data for this data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AnimData",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_eevee_finite_volume",
+   "name": "Finite Volume",
+   "description": "The world's volume used to be rendered by EEVEE Legacy. Conversion is needed for it to render properly.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "color",
+   "name": "Color",
+   "description": "Color of the background",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.05000000074505806,
+    0.05000000074505806,
+    0.05000000074505806
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "light_settings",
+   "name": "Lighting",
+   "description": "World lighting settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "WorldLighting",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "mist_settings",
+   "name": "Mist",
+   "description": "World mist settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "WorldMistSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "node_tree",
+   "name": "Node Tree",
+   "description": "Node tree for node based worlds",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeTree",
+   "is_id": true,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_nodes",
+   "name": "Use Nodes",
+   "description": "Use shader nodes to render the world",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "DEPRECATED"
+   ],
+   "deprecated": {
+    "note": "Unused but kept for compatibility reasons. Setting the property has no effect, and getting it always returns True.",
+    "version": [
+     5,
+     0,
+     0
+    ],
+    "removal_version": [
+     6,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "identifier": "lightgroup",
+   "name": "Lightgroup",
+   "description": "Lightgroup that the world belongs to",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "probe_resolution",
+   "name": "Resolution",
+   "description": "Resolution when baked to a texture",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "128",
+     "name": "128",
+     "description": "",
+     "icon": "NONE",
+     "value": 7
+    },
+    {
+     "identifier": "256",
+     "name": "256",
+     "description": "",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "512",
+     "name": "512",
+     "description": "",
+     "icon": "NONE",
+     "value": 9
+    },
+    {
+     "identifier": "1024",
+     "name": "1024",
+     "description": "",
+     "icon": "NONE",
+     "value": 10
+    },
+    {
+     "identifier": "2048",
+     "name": "2048",
+     "description": "",
+     "icon": "NONE",
+     "value": 11
+    },
+    {
+     "identifier": "4096",
+     "name": "4096",
+     "description": "",
+     "icon": "NONE",
+     "value": 12
+    }
+   ],
+   "default": "1024",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sun_threshold",
+   "name": "Sun Threshold",
+   "description": "If non-zero, the maximum value for world contribution that will be recorded inside the world light probe. The excess contribution is converted to a sun light. This reduces the light bleeding caused by very bright light sources.",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 10.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sun_angle",
+   "name": "Sun Angle",
+   "description": "Angular diameter of the Sun as seen from the Earth",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.009180432185530663,
+   "hard_min": 0.0,
+   "hard_max": 3.1415927410125732,
+   "soft_min": 0.0,
+   "soft_max": 3.1415927410125732,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_sun_shadow",
+   "name": "Use Shadow",
+   "description": "Enable sun shadow casting",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sun_shadow_maximum_resolution",
+   "name": "Shadows Resolution Limit",
+   "description": "Maximum size of a shadow map pixel. Higher values use less memory at the cost of shadow quality.",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0010000000474974513,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 9.999999747378752e-05,
+   "soft_max": 0.019999999552965164,
+   "step": 0.05000000074505806,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sun_shadow_filter_radius",
+   "name": "Shadow Filter Radius",
+   "description": "Blur shadow aliasing using Percentage Closer Filtering",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 5.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_sun_shadow_jitter",
+   "name": "Shadow Jitter",
+   "description": "Enable jittered soft shadows to increase shadow precision (disabled in viewport unless enabled in the render settings). Has a high performance impact.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "sun_shadow_jitter_overblur",
+   "name": "Shadow Jitter Overblur",
+   "description": "Apply shadow tracing to each jittered sample to reduce under-sampling artifacts",
+   "type": "FLOAT",
+   "subtype": "PERCENTAGE",
+   "unit": "NONE",
+   "default": 10.0,
+   "hard_min": 0.0,
+   "hard_max": 100.0,
+   "soft_min": 0.0,
+   "soft_max": 20.0,
+   "step": 10.0,
+   "precision": 0,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "cycles",
+   "name": "Cycles World Settings",
+   "description": "Cycles world settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CyclesWorldSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "cycles_visibility",
+   "name": "Cycles Visibility Settings",
+   "description": "Cycles visibility settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CyclesVisibilitySettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.worlds.new('World')",
+  "differs_from_default": {
+   "id_type": "WORLD",
+   "is_editable": true,
+   "use_nodes": true
+  }
+ }
+}

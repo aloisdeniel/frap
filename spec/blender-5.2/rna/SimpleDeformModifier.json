@@ -1,0 +1,222 @@
+{
+ "identifier": "SimpleDeformModifier",
+ "name": "SimpleDeform Modifier",
+ "description": "Simple deformation modifier to apply effects such as twisting and bending",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "deform_method",
+   "name": "Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "TWIST",
+     "name": "Twist",
+     "description": "Rotate around the Z axis of the modifier space",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "BEND",
+     "name": "Bend",
+     "description": "Bend the mesh over the Z axis of the modifier space",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "TAPER",
+     "name": "Taper",
+     "description": "Linearly scale along Z axis of the modifier space",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "STRETCH",
+     "name": "Stretch",
+     "description": "Stretch the object along the Z axis of the modifier space",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "TWIST",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "deform_axis",
+   "name": "Axis",
+   "description": "Deform around local axis",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "X",
+     "name": "X",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "Y",
+     "name": "Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Z",
+     "name": "Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "X",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "origin",
+   "name": "Origin",
+   "description": "Offset the origin and orientation of the deformation",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "factor",
+   "name": "Factor",
+   "description": "Amount to deform object",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.7853981852531433,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "angle",
+   "name": "Angle",
+   "description": "Angle of deformation",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.7853981852531433,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -6.2831854820251465,
+   "soft_max": 6.2831854820251465,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "limits",
+   "name": "Limits",
+   "description": "Lower/Upper limits for deform",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    1.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 5.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock_x",
+   "name": "X",
+   "description": "Do not allow deformation along the X axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock_y",
+   "name": "Y",
+   "description": "Do not allow deformation along the Y axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock_z",
+   "name": "Z",
+   "description": "Do not allow deformation along the Z axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

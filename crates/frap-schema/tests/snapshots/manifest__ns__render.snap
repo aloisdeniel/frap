@@ -1,0 +1,21 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  "render.clear_texture_cache | planned OUT | poll YYYYY/YYYYY | ",
+  "render.color_management_white_balance_preset_add | planned OUT | poll YYYYY/YYYYY | name,remove_name,remove_active",
+  "render.cycles_integrator_preset_add | planned OUT | poll YYYYY/YYYYY | name,remove_name,remove_active",
+  "render.cycles_performance_preset_add | planned OUT | poll YYYYY/YYYYY | name,remove_name,remove_active",
+  "render.cycles_sampling_preset_add | planned OUT | poll YYYYY/YYYYY | name,remove_name,remove_active",
+  "render.cycles_viewport_sampling_preset_add | planned OUT | poll YYYYY/YYYYY | name,remove_name,remove_active",
+  "render.eevee_raytracing_preset_add | planned OUT | poll YYYYY/YYYYY | name,remove_name,remove_active",
+  "render.generate_texture_cache | planned OUT | poll YYYYY/YYYYY | generate_sequences",
+  "render.opengl | planned M8 | poll YYYYY/YYYYY | animation,render_keyed_only,sequencer,write_still,view_context",
+  "render.play_rendered_anim | planned OUT | poll YYYYY/YYYYY | ",
+  "render.preset_add | planned OUT | poll YYYYY/YYYYY | name,remove_name,remove_active",
+  "render.render | planned M1 | poll YYYYY/YYYYY | animation,write_still,use_viewport,use_sequencer_scene,layer,scene,frame_start,frame_end",
+  "render.shutter_curve_preset | planned OUT | poll YYYYY/YYYYY | shape",
+  "render.swap_dimensions | planned OUT | poll YYYYY/YYYYY | ",
+  "render.view_cancel | planned OUT | poll NNNNN/NNNNN | ",
+  "render.view_show | planned OUT | poll YYYYY/YYYYY | "
+]

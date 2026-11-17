@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_nested_tuples.txt
+---
+> print(((1, 2), (3, 4)))
+---
+stmt 1 Bpy line 1 @1:1/1+23
+  Print
+    Tuple @1:7/7+16
+      Tuple @1:8/8+6
+        Int 1 @1:9/9+1
+        Int 2 @1:12/12+1
+      Tuple @1:16/16+6
+        Int 3 @1:17/17+1
+        Int 4 @1:20/20+1

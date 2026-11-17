@@ -1,0 +1,1 @@
+frap.describe target=Object.location,Object.rotation_euler

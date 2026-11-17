@@ -1,0 +1,1475 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "identifier": "Camera",
+  "name": "Camera",
+  "description": "Camera data-block for storing camera settings",
+  "base": "ID",
+  "is_id": true,
+  "name_property": "name",
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Type",
+      "description": "Camera types",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "PERSP",
+      "enum_items": [
+        {
+          "identifier": "PERSP",
+          "name": "Perspective",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "ORTHO",
+          "name": "Orthographic",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "PANO",
+          "name": "Panoramic",
+          "description": "",
+          "value": 2
+        },
+        {
+          "identifier": "CUSTOM",
+          "name": "Custom",
+          "description": "",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "sensor_fit",
+      "name": "Sensor Fit",
+      "description": "Method to fit image and field of view angle inside the sensor",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "AUTO",
+      "enum_items": [
+        {
+          "identifier": "AUTO",
+          "name": "Auto",
+          "description": "Fit to the sensor width or height depending on image resolution",
+          "value": 0
+        },
+        {
+          "identifier": "HORIZONTAL",
+          "name": "Horizontal",
+          "description": "Fit to the sensor width",
+          "value": 1
+        },
+        {
+          "identifier": "VERTICAL",
+          "name": "Vertical",
+          "description": "Fit to the sensor height",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "passepartout_alpha",
+      "name": "Passepartout Alpha",
+      "description": "Opacity (alpha) of the darkened overlay in Camera view",
+      "type": "FLOAT",
+      "subtype": "FACTOR",
+      "unit": "NONE",
+      "array": null,
+      "default": 0.5,
+      "hard_min": 0,
+      "hard_max": 1,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "angle_x",
+      "name": "Horizontal FOV",
+      "description": "Camera lens horizontal field of view",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": 0,
+      "hard_min": 0.006405358,
+      "hard_max": 3.0167491,
+      "soft_min": 0.006405358,
+      "soft_max": 3.0167491,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "angle_y",
+      "name": "Vertical FOV",
+      "description": "Camera lens vertical field of view",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": 0,
+      "hard_min": 0.006405358,
+      "hard_max": 3.0167491,
+      "soft_min": 0.006405358,
+      "soft_max": 3.0167491,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "angle",
+      "name": "Field of View",
+      "description": "Camera lens field of view",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": 0.6911504,
+      "hard_min": 0.006405358,
+      "hard_max": 3.0167491,
+      "soft_min": 0.006405358,
+      "soft_max": 3.0167491,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "clip_start",
+      "name": "Clip Start",
+      "description": "Camera near clipping distance",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 0.1,
+      "hard_min": 0.000001,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 0.001,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "clip_end",
+      "name": "Clip End",
+      "description": "Camera far clipping distance",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 1000,
+      "hard_min": 0.000001,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 0.001,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "lens",
+      "name": "Focal Length",
+      "description": "Perspective Camera focal length value in millimeters",
+      "type": "FLOAT",
+      "subtype": "DISTANCE_CAMERA",
+      "unit": "CAMERA",
+      "array": null,
+      "default": 50,
+      "hard_min": 1,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 1,
+      "soft_max": 5000,
+      "precision": 4,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "sensor_width",
+      "name": "Sensor Width",
+      "description": "Horizontal size of the image sensor area in millimeters",
+      "type": "FLOAT",
+      "subtype": "DISTANCE_CAMERA",
+      "unit": "CAMERA",
+      "array": null,
+      "default": 36,
+      "hard_min": 1,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 1,
+      "soft_max": 100,
+      "precision": 4,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "sensor_height",
+      "name": "Sensor Height",
+      "description": "Vertical size of the image sensor area in millimeters",
+      "type": "FLOAT",
+      "subtype": "DISTANCE_CAMERA",
+      "unit": "CAMERA",
+      "array": null,
+      "default": 24,
+      "hard_min": 1,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 1,
+      "soft_max": 100,
+      "precision": 4,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "ortho_scale",
+      "name": "Orthographic Scale",
+      "description": "Orthographic Camera scale (similar to zoom)",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 6,
+      "hard_min": 0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 0.001,
+      "soft_max": 10000,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "display_size",
+      "name": "Display Size",
+      "description": "Apparent size of the Camera object in the 3D View",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 1,
+      "hard_min": 0.01,
+      "hard_max": 1000,
+      "soft_min": 0.01,
+      "soft_max": 100,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "shift_x",
+      "name": "Shift X",
+      "description": "Camera horizontal shift",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -2,
+      "soft_max": 2,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "shift_y",
+      "name": "Shift Y",
+      "description": "Camera vertical shift",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -2,
+      "soft_max": 2,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "stereo",
+      "name": "Stereo",
+      "description": "",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "CameraStereoData",
+      "is_id": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY",
+        "NEVER_NULL"
+      ],
+      "readonly": true,
+      "python_only": false
+    },
+    {
+      "identifier": "show_limits",
+      "name": "Show Limits",
+      "description": "Display the clipping range and focus point on the camera",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_mist",
+      "name": "Show Mist",
+      "description": "Display a line from the Camera to indicate the mist area",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_passepartout",
+      "name": "Show Passepartout",
+      "description": "Show a darkened overlay outside the image area in Camera view",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_safe_areas",
+      "name": "Show Safe Areas",
+      "description": "Show TV title safe and action safe areas in Camera view",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_safe_center",
+      "name": "Show Center-Cut Safe Areas",
+      "description": "Show safe areas to fit content in a different aspect ratio",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_name",
+      "name": "Show Name",
+      "description": "Show the active Camera's name in Camera view",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_sensor",
+      "name": "Show Sensor Size",
+      "description": "Show sensor size (film gate) in Camera view",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_background_images",
+      "name": "Display Background Images",
+      "description": "Display reference images behind objects in the 3D View",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "lens_unit",
+      "name": "Lens Unit",
+      "description": "Unit to edit lens in for the user interface",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "MILLIMETERS",
+      "enum_items": [
+        {
+          "identifier": "MILLIMETERS",
+          "name": "Millimeters",
+          "description": "Specify focal length of the lens in millimeters",
+          "value": 0
+        },
+        {
+          "identifier": "FOV",
+          "name": "Field of View",
+          "description": "Specify the lens as the field of view's angle",
+          "value": 32
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "composition_guide_color",
+      "name": "Composition Guide Color",
+      "description": "Color and alpha for compositional guide overlays",
+      "type": "FLOAT",
+      "subtype": "COLOR",
+      "unit": "NONE",
+      "array": [
+        4
+      ],
+      "default": [
+        0.5,
+        0.5,
+        0.5,
+        1
+      ],
+      "hard_min": 0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_composition_center",
+      "name": "Center",
+      "description": "Display center composition guide inside the camera view",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_composition_center_diagonal",
+      "name": "Center Diagonal",
+      "description": "Display diagonal center composition guide inside the camera view",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_composition_thirds",
+      "name": "Thirds",
+      "description": "Display rule of thirds composition guide inside the camera view",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_composition_golden",
+      "name": "Golden Ratio",
+      "description": "Display golden ratio composition guide inside the camera view",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_composition_golden_tria_a",
+      "name": "Golden Triangle A",
+      "description": "Display golden triangle A composition guide inside the camera view",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_composition_golden_tria_b",
+      "name": "Golden Triangle B",
+      "description": "Display golden triangle B composition guide inside the camera view",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_composition_harmony_tri_a",
+      "name": "Harmonious Triangle A",
+      "description": "Display harmony A composition guide inside the camera view",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "show_composition_harmony_tri_b",
+      "name": "Harmonious Triangle B",
+      "description": "Display harmony B composition guide inside the camera view",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "panorama_type",
+      "name": "Panorama Type",
+      "description": "Distortion to use for the calculation",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "FISHEYE_EQUISOLID",
+      "enum_items": [
+        {
+          "identifier": "EQUIRECTANGULAR",
+          "name": "Equirectangular",
+          "description": "Spherical camera for environment maps, also known as Lat Long panorama",
+          "value": 0
+        },
+        {
+          "identifier": "EQUIANGULAR_CUBEMAP_FACE",
+          "name": "Equiangular Cubemap Face",
+          "description": "Single face of an equiangular cubemap",
+          "value": 5
+        },
+        {
+          "identifier": "MIRRORBALL",
+          "name": "Mirror Ball",
+          "description": "Mirror ball mapping for environment maps",
+          "value": 3
+        },
+        {
+          "identifier": "FISHEYE_EQUIDISTANT",
+          "name": "Fisheye Equidistant",
+          "description": "Ideal for fulldomes, ignore the sensor dimensions",
+          "value": 1
+        },
+        {
+          "identifier": "FISHEYE_EQUISOLID",
+          "name": "Fisheye Equisolid",
+          "description": "Similar to most fisheye modern lens, takes sensor dimensions into consideration",
+          "value": 2
+        },
+        {
+          "identifier": "FISHEYE_LENS_POLYNOMIAL",
+          "name": "Fisheye Lens Polynomial",
+          "description": "Defines the lens projection as polynomial to allow real world camera lenses to be mimicked",
+          "value": 4
+        },
+        {
+          "identifier": "CENTRAL_CYLINDRICAL",
+          "name": "Central Cylindrical",
+          "description": "Projection onto a virtual cylinder from its center, similar as a rotating panoramic camera",
+          "value": 6
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "fisheye_fov",
+      "name": "Field of View",
+      "description": "Field of view for the fisheye lens",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": 3.1415927,
+      "hard_min": 0.1745,
+      "hard_max": 31.415926,
+      "soft_min": 0.1745,
+      "soft_max": 6.2831855,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "fisheye_lens",
+      "name": "Fisheye Lens",
+      "description": "Lens focal length (mm)",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 10.5,
+      "hard_min": 0.01,
+      "hard_max": 100,
+      "soft_min": 0.01,
+      "soft_max": 15,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "latitude_min",
+      "name": "Min Latitude",
+      "description": "Minimum latitude (vertical angle) for the equirectangular lens",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": -1.5707964,
+      "hard_min": -1.5707964,
+      "hard_max": 1.5707964,
+      "soft_min": -1.5707964,
+      "soft_max": 1.5707964,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "latitude_max",
+      "name": "Max Latitude",
+      "description": "Maximum latitude (vertical angle) for the equirectangular lens",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": 1.5707964,
+      "hard_min": -1.5707964,
+      "hard_max": 1.5707964,
+      "soft_min": -1.5707964,
+      "soft_max": 1.5707964,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "longitude_min",
+      "name": "Min Longitude",
+      "description": "Minimum longitude (horizontal angle) for the equirectangular lens",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": -3.1415927,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -3.1415927,
+      "soft_max": 3.1415927,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "longitude_max",
+      "name": "Max Longitude",
+      "description": "Maximum longitude (horizontal angle) for the equirectangular lens",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": 3.1415927,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -3.1415927,
+      "soft_max": 3.1415927,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "fisheye_polynomial_k0",
+      "name": "Fisheye Polynomial K0",
+      "description": "Coefficient K0 of the lens polynomial",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": -0.0000117351,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -340282350000000000000000000000000000000.0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 6,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "fisheye_polynomial_k1",
+      "name": "Fisheye Polynomial K1",
+      "description": "Coefficient K1 of the lens polynomial",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": -0.019988736,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -340282350000000000000000000000000000000.0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 6,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "fisheye_polynomial_k2",
+      "name": "Fisheye Polynomial K2",
+      "description": "Coefficient K2 of the lens polynomial",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": -0.0000033525,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -340282350000000000000000000000000000000.0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 6,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "fisheye_polynomial_k3",
+      "name": "Fisheye Polynomial K3",
+      "description": "Coefficient K3 of the lens polynomial",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": 0.0000030993,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -340282350000000000000000000000000000000.0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 6,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "fisheye_polynomial_k4",
+      "name": "Fisheye Polynomial K4",
+      "description": "Coefficient K4 of the lens polynomial",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": -0.0000000261,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -340282350000000000000000000000000000000.0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 6,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "central_cylindrical_range_u_min",
+      "name": "Min Longitude",
+      "description": "Minimum Longitude value for the central cylindrical lens",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": -3.1415927,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -3.1415927,
+      "soft_max": 3.1415927,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "central_cylindrical_range_u_max",
+      "name": "Max Longitude",
+      "description": "Maximum Longitude value for the central cylindrical lens",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": 3.1415927,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -3.1415927,
+      "soft_max": 3.1415927,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "central_cylindrical_range_v_min",
+      "name": "Min Height",
+      "description": "Minimum Height value for the central cylindrical lens",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": -1,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -10,
+      "soft_max": 10,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "central_cylindrical_range_v_max",
+      "name": "Max Height",
+      "description": "Maximum Height value for the central cylindrical lens",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 1,
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -10,
+      "soft_max": 10,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "central_cylindrical_radius",
+      "name": "Cylinder Radius",
+      "description": "Radius of the virtual cylinder",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 1,
+      "hard_min": 0.00001,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 0.00001,
+      "soft_max": 10,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "custom_filepath",
+      "name": "Custom File Path",
+      "description": "Path to the shader defining the custom camera",
+      "type": "STRING",
+      "subtype": "FILE_PATH",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 1024,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "custom_shader",
+      "name": "Custom Shader",
+      "description": "Shader defining the custom camera",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "Text",
+      "is_id": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "custom_mode",
+      "name": "Custom shader source",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "INTERNAL",
+      "enum_items": [
+        {
+          "identifier": "INTERNAL",
+          "name": "Internal",
+          "description": "Use internal text data-block",
+          "value": 0
+        },
+        {
+          "identifier": "EXTERNAL",
+          "name": "External",
+          "description": "Use external file",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "custom_bytecode",
+      "name": "Custom Bytecode",
+      "description": "Compiled bytecode of the custom shader",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 0,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "custom_bytecode_hash",
+      "name": "Custom Bytecode Hash",
+      "description": "Hash of the compiled bytecode of the custom shader, for quick equality checking",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 64,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "readonly": false,
+      "python_only": false
+    },
+    {
+      "identifier": "dof",
+      "name": "Depth Of Field",
+      "description": "",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "CameraDOFSettings",
+      "is_id": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "readonly": true,
+      "python_only": false
+    },
+    {
+      "identifier": "background_images",
+      "name": "Background Images",
+      "description": "List of background images",
+      "type": "COLLECTION",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": [],
+      "item_type": "CameraBackgroundImage",
+      "api": "CameraBackgroundImages",
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "readonly": true,
+      "python_only": false
+    },
+    {
+      "identifier": "animation_data",
+      "name": "Animation Data",
+      "description": "Animation data for this data-block",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "AnimData",
+      "is_id": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "readonly": true,
+      "python_only": false
+    },
+    {
+      "identifier": "cycles_custom",
+      "name": "Cycles Custom Camera Settings",
+      "description": "Parameters for custom (OSL-based) cameras",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "CyclesCustomCameraSettings",
+      "is_id": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "readonly": true,
+      "python_only": false
+    }
+  ],
+  "functions": [
+    {
+      "identifier": "view_frame",
+      "description": "Return 4 points for the cameras frame (before object transformation)",
+      "parameters": [
+        {
+          "identifier": "scene",
+          "name": "",
+          "description": "Scene to use for aspect calculation, when omitted 1:1 aspect is used",
+          "type": "POINTER",
+          "subtype": "NONE",
+          "unit": "NONE",
+          "array": null,
+          "default": null,
+          "fixed_type": "Scene",
+          "is_id": true,
+          "hidden": false,
+          "skip_save": false,
+          "flags": [
+            "READONLY"
+          ],
+          "optional": false
+        }
+      ],
+      "returns": [
+        {
+          "identifier": "result_1",
+          "name": "Result",
+          "description": "",
+          "type": "FLOAT",
+          "subtype": "XYZ",
+          "unit": "NONE",
+          "array": [
+            3
+          ],
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "hard_min": -340282350000000000000000000000000000000.0,
+          "hard_max": 340282350000000000000000000000000000000.0,
+          "soft_min": -10000,
+          "soft_max": 10000,
+          "precision": 3,
+          "hidden": false,
+          "skip_save": false,
+          "flags": [
+            "OUTPUT",
+            "ANIMATABLE"
+          ],
+          "optional": false
+        },
+        {
+          "identifier": "result_2",
+          "name": "Result",
+          "description": "",
+          "type": "FLOAT",
+          "subtype": "XYZ",
+          "unit": "NONE",
+          "array": [
+            3
+          ],
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "hard_min": -340282350000000000000000000000000000000.0,
+          "hard_max": 340282350000000000000000000000000000000.0,
+          "soft_min": -10000,
+          "soft_max": 10000,
+          "precision": 3,
+          "hidden": false,
+          "skip_save": false,
+          "flags": [
+            "OUTPUT",
+            "ANIMATABLE"
+          ],
+          "optional": false
+        },
+        {
+          "identifier": "result_3",
+          "name": "Result",
+          "description": "",
+          "type": "FLOAT",
+          "subtype": "XYZ",
+          "unit": "NONE",
+          "array": [
+            3
+          ],
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "hard_min": -340282350000000000000000000000000000000.0,
+          "hard_max": 340282350000000000000000000000000000000.0,
+          "soft_min": -10000,
+          "soft_max": 10000,
+          "precision": 3,
+          "hidden": false,
+          "skip_save": false,
+          "flags": [
+            "OUTPUT",
+            "ANIMATABLE"
+          ],
+          "optional": false
+        },
+        {
+          "identifier": "result_4",
+          "name": "Result",
+          "description": "",
+          "type": "FLOAT",
+          "subtype": "XYZ",
+          "unit": "NONE",
+          "array": [
+            3
+          ],
+          "default": [
+            0,
+            0,
+            0
+          ],
+          "hard_min": -340282350000000000000000000000000000000.0,
+          "hard_max": 340282350000000000000000000000000000000.0,
+          "soft_min": -10000,
+          "soft_max": 10000,
+          "precision": 3,
+          "hidden": false,
+          "skip_save": false,
+          "flags": [
+            "OUTPUT",
+            "ANIMATABLE"
+          ],
+          "optional": false
+        }
+      ],
+      "keyword_only_from": null,
+      "flags": [],
+      "python_only": false
+    }
+  ],
+  "python_only_members": []
+}

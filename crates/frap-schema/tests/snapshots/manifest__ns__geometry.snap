@@ -1,0 +1,14 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  "geometry.attribute_add | planned M2 | poll YNYNN/YNYNN | name,domain,data_type",
+  "geometry.attribute_convert | planned M2 | poll YNNNN/YNNNN | mode,domain,data_type",
+  "geometry.attribute_remove | planned M2 | poll YNNNN/YNNNN | ",
+  "geometry.color_attribute_add | planned M2 | poll YNYNN/YNYNN | name,domain,data_type,color",
+  "geometry.color_attribute_convert | planned M2 | poll NNNNN/NNNNN | domain,data_type",
+  "geometry.color_attribute_duplicate | planned M2 | poll NNNNN/NNNNN | ",
+  "geometry.color_attribute_remove | planned M2 | poll NNNNN/NNNNN | ",
+  "geometry.color_attribute_render_set | planned M2 | poll YNYNN/YNYNN | name",
+  "geometry.geometry_randomization | planned OUT | poll YYYYY/YYYYY | value"
+]

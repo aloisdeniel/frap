@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_export_all_options.txt
+---
+> bpy.ops.export_scene.gltf(filepath='out/a.glb', export_format='GLB', use_selection=True, export_apply=False)
+---
+stmt 1 Bpy line 1 @1:1/1+108
+  Invoke export_scene.gltf
+    arg filepath @1:27/27+20
+      Str "out/a.glb" @1:36/36+11
+    arg export_format @1:49/49+19
+      Str "GLB" @1:63/63+5
+    arg use_selection @1:70/70+18
+      Bool true @1:84/84+4
+    arg export_apply @1:90/90+18
+      Bool false @1:103/103+5

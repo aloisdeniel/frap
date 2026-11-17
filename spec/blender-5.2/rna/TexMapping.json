@@ -1,0 +1,372 @@
+{
+ "identifier": "TexMapping",
+ "name": "Texture Mapping",
+ "description": "Texture coordinate mapping settings",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "vector_type",
+   "name": "Type",
+   "description": "Type of vector that the mapping transforms",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "POINT",
+     "name": "Point",
+     "description": "Transform a point",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "TEXTURE",
+     "name": "Texture",
+     "description": "Transform a texture by inverse mapping the texture coordinate",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "VECTOR",
+     "name": "Vector",
+     "description": "Transform a direction vector (Location is ignored)",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "NORMAL",
+     "name": "Normal",
+     "description": "Transform a unit normal vector (Location is ignored)",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "POINT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "translation",
+   "name": "Location",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "rotation",
+   "name": "Rotation",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "EULER",
+   "unit": "ROTATION",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 100.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "scale",
+   "name": "Scale",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "min",
+   "name": "Minimum",
+   "description": "Minimum value for clipping",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "max",
+   "name": "Maximum",
+   "description": "Maximum value for clipping",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_min",
+   "name": "Has Minimum",
+   "description": "Whether to use minimum clipping value",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_max",
+   "name": "Has Maximum",
+   "description": "Whether to use maximum clipping value",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mapping_x",
+   "name": "X Mapping",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "X",
+     "name": "X",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Y",
+     "name": "Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "Z",
+     "name": "Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "NONE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mapping_y",
+   "name": "Y Mapping",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "X",
+     "name": "X",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Y",
+     "name": "Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "Z",
+     "name": "Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "NONE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mapping_z",
+   "name": "Z Mapping",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "X",
+     "name": "X",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Y",
+     "name": "Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "Z",
+     "name": "Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "NONE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mapping",
+   "name": "Mapping",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FLAT",
+     "name": "Flat",
+     "description": "Map X and Y coordinates directly",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CUBE",
+     "name": "Cube",
+     "description": "Map using the normal vector",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "TUBE",
+     "name": "Tube",
+     "description": "Map with Z as central axis",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "SPHERE",
+     "name": "Sphere",
+     "description": "Map with Z as central axis",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "FLAT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

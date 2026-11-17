@@ -1,0 +1,80 @@
+{
+ "namespace": "material",
+ "count": 3,
+ "operators": [
+  {
+   "idname": "material.copy",
+   "bl_idname": "MATERIAL_OT_copy",
+   "label": "Copy Material",
+   "description": "Copy the material settings and nodes",
+   "options": [
+    "INTERNAL",
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "material.new",
+   "bl_idname": "MATERIAL_OT_new",
+   "label": "New Material",
+   "description": "Add a new material",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "material.paste",
+   "bl_idname": "MATERIAL_OT_paste",
+   "label": "Paste Material",
+   "description": "Paste the material settings and nodes",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  }
+ ]
+}

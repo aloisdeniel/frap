@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_temp_override.txt
+---
+> bpy.context.temp_override(window, area=<VIEW_3D>, region=<WINDOW>)
+---
+error 1 NameError NAME @1:27/27+6
+  message: name 'window' is not defined
+  hint: frap has no variables: quote strings ('Cube') and use full paths such as bpy.data.objects['Cube']
+  detail: name="window"

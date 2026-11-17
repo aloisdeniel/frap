@@ -1,0 +1,2 @@
+# Scratch probe crate: generated files are excluded via #[rustfmt::skip] on `mod generated`.
+max_width = 140

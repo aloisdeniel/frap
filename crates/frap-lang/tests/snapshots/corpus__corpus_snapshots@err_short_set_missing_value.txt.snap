@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_set_missing_value.txt
+---
+> data.objects['Cube'].location =
+---
+error 1 SyntaxError SYNTAX @1:32/32+0
+  message: invalid syntax

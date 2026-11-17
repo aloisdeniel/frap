@@ -1,0 +1,87 @@
+{
+ "identifier": "MaterialSlot",
+ "name": "Material Slot",
+ "description": "Material slot in an object",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "link",
+   "name": "Link",
+   "description": "Link material to object or the object's data",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "",
+     "icon": "OBJECT_DATAMODE",
+     "value": 1
+    },
+    {
+     "identifier": "DATA",
+     "name": "Data",
+     "description": "",
+     "icon": "MESH_DATA",
+     "value": 0
+    }
+   ],
+   "default": "DATA",
+   "flags": []
+  },
+  {
+   "identifier": "material",
+   "name": "Material",
+   "description": "Material data-block used by this material slot",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "slot_index",
+   "name": "slot_index",
+   "description": "",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "Material slot name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "me = bpy.data.meshes.new('Mesh'); me.materials.append(bpy.data.materials.new('FreshSlotMat')); bpy.data.objects.new('O', me).material_slots[0]",
+  "differs_from_default": {
+   "name": "FreshSlotMat"
+  }
+ }
+}

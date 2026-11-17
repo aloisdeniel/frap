@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_op_meta.txt
+---
+> mesh.bevel.poll()
+---
+error 1 SyntaxError SYNTAX @1:11/11+1
+  message: invalid syntax
+  hint: operator metadata uses the bpy form: bpy.ops.mesh.bevel.poll()

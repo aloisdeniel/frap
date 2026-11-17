@@ -1,0 +1,1 @@
+bpy.data.node_groups['Smooth by Angle', None]

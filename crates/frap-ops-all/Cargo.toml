@@ -1,0 +1,64 @@
+[package]
+name = "frap-ops-all"
+description = "frap L10: Aggregator of every frap-ops-* crate; link() keeps every linkme entry (ARCHITECTURE §10.5)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-ops-object.workspace = true
+frap-ops-transform.workspace = true
+frap-ops-mesh.workspace = true
+frap-ops-uv.workspace = true
+frap-ops-anim.workspace = true
+frap-ops-data.workspace = true
+frap-ops-io.workspace = true
+frap-ops-render.workspace = true
+frap-ops-frap.workspace = true
+frap-imbuf.workspace = true
+
+[dev-dependencies]
+frap-op.workspace = true
+frap-rna.workspace = true
+frap-scene.workspace = true
+frap-mesh.workspace = true
+frap-nodes.workspace = true
+frap-bmesh.workspace = true
+frap-anim.workspace = true
+frap-material.workspace = true
+frap-eval.workspace = true
+frap-render-scene.workspace = true
+frap-render.workspace = true
+frap-io-gltf.workspace = true
+frap-gltf.workspace = true
+frap-lang.workspace = true
+frap-spec-rna.workspace = true
+frap-spec-ops-mesh.workspace = true
+frap-spec-ops-io.workspace = true
+glam.workspace = true
+smol_str.workspace = true
+indexmap.workspace = true
+smallvec.workspace = true
+linkme.workspace = true
+serde_json.workspace = true
+
+[features]
+# §3.6. The GPU device itself is created by frap-session (feature `gpu` there); this flag is
+# forwarded so `--no-default-features` on frap-cli reaches every crate that cares.
+default = []
+gpu = []
+webp-lossy = ["frap-imbuf/webp-lossy"]
+# Wired by the W0 of the milestone that adds the backend (M4: subdiv/boolean, M3: basisu, M7: codecs).
+meshopt = []
+draco = []
+draco-sys = []
+basisu = []
+basisu-encode = []
+subdiv-osd = []
+boolean-manifold = []
+
+[lints]
+workspace = true

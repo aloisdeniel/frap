@@ -1,0 +1,826 @@
+{
+ "identifier": "ViewLayer",
+ "name": "View Layer",
+ "description": "View layer",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "View layer name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "material_override",
+   "name": "Material Override",
+   "description": "Material to override all other materials in this view layer",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "world_override",
+   "name": "World Override",
+   "description": "Override world in this view layer",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "World",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "samples",
+   "name": "Samples",
+   "description": "Override number of render samples for this view layer, 0 will use the scene setting",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "pass_alpha_threshold",
+   "name": "Alpha Threshold",
+   "description": "Z, Index, normal, UV and vector passes are only affected by surfaces with alpha transparency equal to or higher than this threshold",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.5,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "eevee",
+   "name": "EEVEE Settings",
+   "description": "View layer settings for EEVEE",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ViewLayerEEVEE",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "aovs",
+   "name": "Shader AOV",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AOV",
+   "is_id": false,
+   "api": "AOVs",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "active_aov",
+   "name": "Shader AOV",
+   "description": "Active AOV",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AOV",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "active_aov_index",
+   "name": "Active AOV Index",
+   "description": "Index of active AOV",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lightgroups",
+   "name": "Light Groups",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Lightgroup",
+   "is_id": false,
+   "api": "Lightgroups",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "active_lightgroup",
+   "name": "Light Groups",
+   "description": "Active Lightgroup",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Lightgroup",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "active_lightgroup_index",
+   "name": "Active Lightgroup Index",
+   "description": "Index of active lightgroup",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_cryptomatte_object",
+   "name": "Cryptomatte Object",
+   "description": "Render cryptomatte object pass, for isolating objects in compositing",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_cryptomatte_material",
+   "name": "Cryptomatte Material",
+   "description": "Render cryptomatte material pass, for isolating materials in compositing",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_cryptomatte_asset",
+   "name": "Cryptomatte Asset",
+   "description": "Render cryptomatte asset pass, for isolating groups of objects with the same parent",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "pass_cryptomatte_depth",
+   "name": "Cryptomatte Levels",
+   "description": "Sets how many unique objects can be distinguished per pixel",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 6,
+   "hard_min": 2,
+   "hard_max": 16,
+   "soft_min": 2,
+   "soft_max": 16,
+   "step": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_cryptomatte_accurate",
+   "name": "Cryptomatte Accurate",
+   "description": "Generate a more accurate cryptomatte pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_solid",
+   "name": "Solid",
+   "description": "Render Solid faces in this Layer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_sky",
+   "name": "Sky",
+   "description": "Render Sky in this Layer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_ao",
+   "name": "Ambient Occlusion",
+   "description": "Render Ambient Occlusion in this Layer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_strand",
+   "name": "Strand",
+   "description": "Render Strands in this Layer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_volumes",
+   "name": "Volumes",
+   "description": "Render volumes in this Layer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_motion_blur",
+   "name": "Motion Blur",
+   "description": "Render motion blur in this Layer, if enabled in the scene",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_grease_pencil",
+   "name": "Grease Pencil",
+   "description": "Render Grease Pencil on this layer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_combined",
+   "name": "Combined",
+   "description": "Deliver full combined RGBA buffer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_z",
+   "name": "Depth",
+   "description": "Deliver depth values pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_vector",
+   "name": "Vector",
+   "description": "Deliver speed vector pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_position",
+   "name": "Position",
+   "description": "Deliver position pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_normal",
+   "name": "Normal",
+   "description": "Deliver normal pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_uv",
+   "name": "UV",
+   "description": "Deliver texture UV pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_mist",
+   "name": "Mist",
+   "description": "Deliver mist factor pass (0.0 to 1.0)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_object_index",
+   "name": "Object Index",
+   "description": "Deliver object index pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_material_index",
+   "name": "Material Index",
+   "description": "Deliver material index pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_shadow",
+   "name": "Shadow",
+   "description": "Deliver shadow pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_ambient_occlusion",
+   "name": "Ambient Occlusion",
+   "description": "Deliver Ambient Occlusion pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_emit",
+   "name": "Emission",
+   "description": "Deliver emission pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_environment",
+   "name": "Environment",
+   "description": "Deliver environment lighting pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_diffuse_direct",
+   "name": "Diffuse Direct",
+   "description": "Deliver diffuse direct pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_diffuse_indirect",
+   "name": "Diffuse Indirect",
+   "description": "Deliver diffuse indirect pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_diffuse_color",
+   "name": "Diffuse Color",
+   "description": "Deliver diffuse color pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_glossy_direct",
+   "name": "Glossy Direct",
+   "description": "Deliver glossy direct pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_glossy_indirect",
+   "name": "Glossy Indirect",
+   "description": "Deliver glossy indirect pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_glossy_color",
+   "name": "Glossy Color",
+   "description": "Deliver glossy color pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_transmission_direct",
+   "name": "Transmission Direct",
+   "description": "Deliver transmission direct pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_transmission_indirect",
+   "name": "Transmission Indirect",
+   "description": "Deliver transmission indirect pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_transmission_color",
+   "name": "Transmission Color",
+   "description": "Deliver transmission color pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_subsurface_direct",
+   "name": "Subsurface Direct",
+   "description": "Deliver subsurface direct pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_subsurface_indirect",
+   "name": "Subsurface Indirect",
+   "description": "Deliver subsurface indirect pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pass_subsurface_color",
+   "name": "Subsurface Color",
+   "description": "Deliver subsurface color pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "layer_collection",
+   "name": "Layer Collection",
+   "description": "Root of collections hierarchy of this view layer, its 'collection' pointer property is the same as the scene's master collection",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "LayerCollection",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "active_layer_collection",
+   "name": "Active Layer Collection",
+   "description": "Active layer collection in this view layer's hierarchy",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "LayerCollection",
+   "is_id": false,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "objects",
+   "name": "Objects",
+   "description": "All the objects in this layer",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "api": "LayerObjects",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use",
+   "name": "Enabled",
+   "description": "Enable or disable rendering of this View Layer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "has_export_collections",
+   "name": "Has export collections",
+   "description": "At least one Collection in this View Layer has an exporter",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_freestyle",
+   "name": "Freestyle",
+   "description": "Render stylized strokes in this Layer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "freestyle_settings",
+   "name": "Freestyle Settings",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FreestyleSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "use_pass_grease_pencil",
+   "name": "Grease Pencil",
+   "description": "Deliver Grease Pencil render result in a separate pass",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "depsgraph",
+   "name": "Dependency Graph",
+   "description": "Dependencies in the scene data",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Depsgraph",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "HIDDEN",
+    "SKIP_PRESET"
+   ]
+  },
+  {
+   "identifier": "cycles",
+   "name": "Cycles ViewLayer Settings",
+   "description": "Cycles ViewLayer Settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CyclesRenderLayerSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "bl_system_properties_get",
+   "description": "DEBUG ONLY. Internal access to runtime-defined RNA data storage, intended solely for testing and debugging purposes. Do not access it in regular scripting work, and in particular, do not assume that it contains writable data",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "do_create",
+     "name": "",
+     "description": "Ensure that system properties are created if they do not exist yet",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "system_properties",
+     "name": "",
+     "description": "The system properties root container, or None if there are no system properties stored in this data yet, and its creation was not requested",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "PropertyGroup",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "update_render_passes",
+   "description": "Requery the enabled render passes from the render engine",
+   "use_self": false,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "update",
+   "description": "Update data tagged to be updated from previous access to data or operators",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  }
+ ],
+ "root": true
+}

@@ -1,0 +1,38 @@
+{
+ "identifier": "FloatVectorAttributeValue",
+ "name": "Float Vector Attribute Value",
+ "description": "Vector value in geometry attribute",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "vector",
+   "name": "Vector",
+   "description": "3D vector",
+   "type": "FLOAT",
+   "subtype": "DIRECTION",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

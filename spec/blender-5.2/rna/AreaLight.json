@@ -1,0 +1,255 @@
+{
+ "identifier": "AreaLight",
+ "name": "Area Light",
+ "description": "Directional area Light",
+ "base": "Light",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "energy",
+   "name": "Power",
+   "description": "Light energy emitted over the entire area of the light in all directions, in units of radiant power (W)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 10.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1000000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_buffer_clip_start",
+   "name": "Shadow Buffer Clip Start",
+   "description": "Shadow map clip start, below which objects will not generate shadows",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.05000000074505806,
+   "hard_min": 9.999999974752427e-07,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_soft_size",
+   "name": "Shadow Soft Size",
+   "description": "Light size for ray shadow sampling (Raytraced shadows)",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_filter_radius",
+   "name": "Shadow Filter Radius",
+   "description": "Blur shadow aliasing using Percentage Closer Filtering",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 5.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_maximum_resolution",
+   "name": "Shadows Resolution Limit",
+   "description": "Minimum size of a shadow map pixel. Higher values use less memory at the cost of shadow quality.",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0010000000474974513,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 9.999999747378752e-05,
+   "soft_max": 0.019999999552965164,
+   "step": 0.05000000074505806,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_shadow_jitter",
+   "name": "Shadow Jitter",
+   "description": "Enable jittered soft shadows to increase shadow precision (disabled in viewport unless enabled in the render settings). Has a high performance impact.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shadow_jitter_overblur",
+   "name": "Shadow Jitter Overblur",
+   "description": "Apply shadow tracing to each jittered sample to reduce under-sampling artifacts",
+   "type": "FLOAT",
+   "subtype": "PERCENTAGE",
+   "unit": "NONE",
+   "default": 10.0,
+   "hard_min": 0.0,
+   "hard_max": 100.0,
+   "soft_min": 0.0,
+   "soft_max": 20.0,
+   "step": 10.0,
+   "precision": 0,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_absolute_resolution",
+   "name": "Absolute Resolution Limit",
+   "description": "Limit the resolution at 1 unit from the light origin instead of relative to the shadowed pixel",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "shape",
+   "name": "Shape",
+   "description": "Shape of the area Light",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SQUARE",
+     "name": "Square",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "RECTANGLE",
+     "name": "Rectangle",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "DISK",
+     "name": "Disk",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "ELLIPSE",
+     "name": "Ellipse",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    }
+   ],
+   "default": "SQUARE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "size",
+   "name": "Size",
+   "description": "Size of the area of the area light, X direction size for rectangle shapes",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.25,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "size_y",
+   "name": "Size Y",
+   "description": "Size of the area of the area light in the Y direction for rectangle shapes",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.25,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 0.10000000149011612,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "spread",
+   "name": "Spread",
+   "description": "How widely the emitted light fans out, as in the case of a gridded softbox",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 3.1415927410125732,
+   "hard_min": 0.0,
+   "hard_max": 3.1415927410125732,
+   "soft_min": 0.0,
+   "soft_max": 3.1415927410125732,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.lights.new('Light', 'AREA')",
+  "differs_from_default": {
+   "id_type": "LIGHT",
+   "is_editable": true,
+   "type": "AREA",
+   "temperature_color": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "use_nodes": true
+  }
+ }
+}

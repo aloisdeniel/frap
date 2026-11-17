@@ -1,0 +1,10 @@
+# Expected RNA fallbacks of the frap golden dumper (ARCHITECTURE §20.3, WP 1.8).
+#
+# The frap side dumps every datablock through frap's RNA. A datablock whose read fails because
+# a property is not bound yet (RNA_NO_ATTRIBUTE, NOT_IMPLEMENTED, RNA_NOT_IMPLEMENTED) is dumped
+# natively from Main instead; any other failure fails the case. A fallback that is NOT listed
+# here also fails the case (`cargo test -p frap-golden --test golden fixtures`), so this list
+# is a ratchet: when a binding lands, delete its lines (the fixtures test prints stale ones);
+# never add a line for a property that is bound.
+#
+# Format: <case id> <datablock key>

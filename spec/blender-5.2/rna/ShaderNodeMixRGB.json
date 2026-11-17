@@ -1,0 +1,273 @@
+{
+ "identifier": "ShaderNodeMixRGB",
+ "name": "Mix (Legacy)",
+ "description": "Mix two input colors",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "blend_type",
+   "name": "Blending Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "MIX",
+     "name": "Mix",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "DARKEN",
+     "name": "Darken",
+     "description": "",
+     "icon": "NONE",
+     "value": 7
+    },
+    {
+     "identifier": "MULTIPLY",
+     "name": "Multiply",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "BURN",
+     "name": "Color Burn",
+     "description": "",
+     "icon": "NONE",
+     "value": 11
+    },
+    {
+     "identifier": "LIGHTEN",
+     "name": "Lighten",
+     "description": "",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "SCREEN",
+     "name": "Screen",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "DODGE",
+     "name": "Color Dodge",
+     "description": "",
+     "icon": "NONE",
+     "value": 10
+    },
+    {
+     "identifier": "ADD",
+     "name": "Add",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "OVERLAY",
+     "name": "Overlay",
+     "description": "",
+     "icon": "NONE",
+     "value": 9
+    },
+    {
+     "identifier": "SOFT_LIGHT",
+     "name": "Soft Light",
+     "description": "",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "LINEAR_LIGHT",
+     "name": "Linear Light",
+     "description": "",
+     "icon": "NONE",
+     "value": 17
+    },
+    {
+     "identifier": "DIFFERENCE",
+     "name": "Difference",
+     "description": "",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "EXCLUSION",
+     "name": "Exclusion",
+     "description": "",
+     "icon": "NONE",
+     "value": 18
+    },
+    {
+     "identifier": "SUBTRACT",
+     "name": "Subtract",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "DIVIDE",
+     "name": "Divide",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "HUE",
+     "name": "Hue",
+     "description": "",
+     "icon": "NONE",
+     "value": 12
+    },
+    {
+     "identifier": "SATURATION",
+     "name": "Saturation",
+     "description": "",
+     "icon": "NONE",
+     "value": 13
+    },
+    {
+     "identifier": "COLOR",
+     "name": "Color",
+     "description": "",
+     "icon": "NONE",
+     "value": 15
+    },
+    {
+     "identifier": "VALUE",
+     "name": "Value",
+     "description": "",
+     "icon": "NONE",
+     "value": 14
+    }
+   ],
+   "default": "MIX",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_alpha",
+   "name": "Alpha",
+   "description": "Include alpha of second input in this operation",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_clamp",
+   "name": "Clamp",
+   "description": "Clamp result of the node to 0.0 to 1.0 range",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

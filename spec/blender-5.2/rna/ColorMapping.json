@@ -1,0 +1,261 @@
+{
+ "identifier": "ColorMapping",
+ "name": "Color Mapping",
+ "description": "Color mapping settings",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "use_color_ramp",
+   "name": "Use Color Ramp",
+   "description": "Toggle color ramp operations",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "color_ramp",
+   "name": "Color Ramp",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "",
+   "unit": "MASS",
+   "fixed_type": "ColorRamp",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "brightness",
+   "name": "Brightness",
+   "description": "Adjust the brightness of the texture",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 2.0,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "contrast",
+   "name": "Contrast",
+   "description": "Adjust the contrast of the texture",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 5.0,
+   "soft_min": 0.0,
+   "soft_max": 5.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "saturation",
+   "name": "Saturation",
+   "description": "Adjust the saturation of colors in the texture",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 2.0,
+   "soft_min": 0.0,
+   "soft_max": 2.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "blend_type",
+   "name": "Blend Type",
+   "description": "Mode used to mix with texture output color",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "MIX",
+     "name": "Mix",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "DARKEN",
+     "name": "Darken",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "MULTIPLY",
+     "name": "Multiply",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "LIGHTEN",
+     "name": "Lighten",
+     "description": "",
+     "icon": "NONE",
+     "value": 7
+    },
+    {
+     "identifier": "SCREEN",
+     "name": "Screen",
+     "description": "",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "ADD",
+     "name": "Add",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "OVERLAY",
+     "name": "Overlay",
+     "description": "",
+     "icon": "NONE",
+     "value": 9
+    },
+    {
+     "identifier": "SOFT_LIGHT",
+     "name": "Soft Light",
+     "description": "",
+     "icon": "NONE",
+     "value": 15
+    },
+    {
+     "identifier": "LINEAR_LIGHT",
+     "name": "Linear Light",
+     "description": "",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "DIFFERENCE",
+     "name": "Difference",
+     "description": "",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "SUBTRACT",
+     "name": "Subtract",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "DIVIDE",
+     "name": "Divide",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "HUE",
+     "name": "Hue",
+     "description": "",
+     "icon": "NONE",
+     "value": 10
+    },
+    {
+     "identifier": "SATURATION",
+     "name": "Saturation",
+     "description": "",
+     "icon": "NONE",
+     "value": 11
+    },
+    {
+     "identifier": "COLOR",
+     "name": "Color",
+     "description": "",
+     "icon": "NONE",
+     "value": 13
+    },
+    {
+     "identifier": "VALUE",
+     "name": "Value",
+     "description": "",
+     "icon": "NONE",
+     "value": 12
+    }
+   ],
+   "default": "MIX",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "blend_color",
+   "name": "Color",
+   "description": "Blend color to mix with texture output color",
+   "type": "FLOAT",
+   "subtype": "COLOR",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "blend_factor",
+   "name": "Blend Factor",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

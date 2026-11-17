@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# `cargo xtask <cmd>` (ARCHITECTURE §3.1): codegen [--check] | check-deps | budgets | golden ...
+[alias]
+xtask = "run --quiet --package xtask --"

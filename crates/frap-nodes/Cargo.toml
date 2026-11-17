@@ -1,0 +1,27 @@
+[package]
+name = "frap-nodes"
+description = "frap L4: NodeTree/Node/Socket/Link, node-type table, socket availability, built-in groups, RNA bindings (ARCHITECTURE §16.1)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-spec-rna.workspace = true
+frap-anim.workspace = true
+automod.workspace = true
+smol_str.workspace = true
+smallvec.workspace = true
+indexmap.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+proptest.workspace = true
+serde_json.workspace = true
+
+[lints]
+workspace = true

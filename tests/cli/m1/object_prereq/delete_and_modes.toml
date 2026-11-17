@@ -1,0 +1,8 @@
+# WP 1.19: `object.delete` leaves orphan data (`users == 0`) and the next cube's mesh is
+# `Cube.001`; `object.mode_set` answers OP_NOT_IMPLEMENTED for a mode without a handler (EDIT
+# until M2, SCULPT) and leaves the state unchanged, also through `enter_editmode=True`;
+# `select_all` / `delete` CANCELLED with a frap WARNING when nothing changes; Blender's INFO
+# report `Deleted N object(s)`. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

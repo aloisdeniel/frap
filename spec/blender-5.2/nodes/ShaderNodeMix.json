@@ -1,0 +1,519 @@
+{
+ "bl_idname": "ShaderNodeMix",
+ "srna": "ShaderNodeMix",
+ "name": "Mix",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Factor",
+   "identifier": "Factor_Float",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Factor",
+   "identifier": "Factor_Vector",
+   "bl_idname": "NodeSocketVectorFactor",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.5,
+    0.5,
+    0.5
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "A",
+   "identifier": "A_Float",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "B",
+   "identifier": "B_Float",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "A",
+   "identifier": "A_Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "B",
+   "identifier": "B_Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "A",
+   "identifier": "A_Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.5,
+    0.5,
+    0.5,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "B",
+   "identifier": "B_Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.5,
+    0.5,
+    0.5,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "A",
+   "identifier": "A_Rotation",
+   "bl_idname": "NodeSocketRotation",
+   "type": "ROTATION",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "EULER",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "B",
+   "identifier": "B_Rotation",
+   "bl_idname": "NodeSocketRotation",
+   "type": "ROTATION",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "EULER",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Result",
+   "identifier": "Result_Float",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Result",
+   "identifier": "Result_Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Result",
+   "identifier": "Result_Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Result",
+   "identifier": "Result_Rotation",
+   "bl_idname": "NodeSocketRotation",
+   "type": "ROTATION",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "EULER",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "data_type": "FLOAT",
+  "factor_mode": "UNIFORM",
+  "blend_type": "MIX",
+  "clamp_factor": true,
+  "clamp_result": false
+ },
+ "availability": {
+  "data_type": {
+   "default": "FLOAT",
+   "by_value": {
+    "FLOAT": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "VECTOR": {
+     "inputs": [
+      "Factor_Float",
+      "A_Vector",
+      "B_Vector"
+     ],
+     "outputs": [
+      "Result_Vector"
+     ]
+    },
+    "RGBA": {
+     "inputs": [
+      "Factor_Float",
+      "A_Color",
+      "B_Color"
+     ],
+     "outputs": [
+      "Result_Color"
+     ]
+    },
+    "ROTATION": {
+     "$error": "TypeError: bpy_struct: item.attr = val: enum \"ROTATION\" not found in ('FLOAT', 'VECTOR', 'RGBA')"
+    }
+   }
+  },
+  "factor_mode": {
+   "default": "UNIFORM",
+   "by_value": {
+    "UNIFORM": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "NON_UNIFORM": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    }
+   }
+  },
+  "blend_type": {
+   "default": "MIX",
+   "by_value": {
+    "MIX": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "DARKEN": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "MULTIPLY": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "BURN": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "LIGHTEN": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "SCREEN": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "DODGE": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "ADD": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "OVERLAY": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "SOFT_LIGHT": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "LINEAR_LIGHT": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "DIFFERENCE": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "EXCLUSION": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "SUBTRACT": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "DIVIDE": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "HUE": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "SATURATION": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "COLOR": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    },
+    "VALUE": {
+     "inputs": [
+      "Factor_Float",
+      "A_Float",
+      "B_Float"
+     ],
+     "outputs": [
+      "Result_Float"
+     ]
+    }
+   }
+  }
+ }
+}

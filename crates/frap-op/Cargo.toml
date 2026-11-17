@@ -1,0 +1,46 @@
+[package]
+name = "frap-op"
+description = "frap L9: Operator framework: OperatorDef, registry, invocation pipeline, OpCtx, Services, declarative poll, helpers, extension-point slices (ARCHITECTURE §10)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-macros.workspace = true
+frap-scene.workspace = true
+frap-mesh.workspace = true
+frap-bmesh.workspace = true
+frap-render-scene.workspace = true
+frap-imbuf.workspace = true
+frap-math.workspace = true
+glam.workspace = true
+linkme.workspace = true
+indexmap.workspace = true
+smallvec.workspace = true
+smol_str.workspace = true
+serde_json.workspace = true
+# Registry (§10.1): dumped operators without an implementation are `KnownNotImplemented`, from
+# the catalog and from the typed specs of the current milestone (WP 1.12).
+frap-spec-catalog.workspace = true
+frap-spec-ops-object.workspace = true
+frap-spec-ops-transform.workspace = true
+frap-spec-ops-mesh.workspace = true
+frap-spec-ops-uv.workspace = true
+frap-spec-ops-anim.workspace = true
+frap-spec-ops-data.workspace = true
+frap-spec-ops-io.workspace = true
+frap-spec-ops-render.workspace = true
+frap-spec-ops-frap.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+insta.workspace = true
+approx.workspace = true
+frap-spec-rna.workspace = true
+
+[lints]
+workspace = true

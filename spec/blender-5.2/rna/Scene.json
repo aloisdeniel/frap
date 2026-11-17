@@ -1,0 +1,1453 @@
+{
+ "identifier": "Scene",
+ "name": "Scene",
+ "description": "Scene data-block, consisting in objects and defining time and render related settings",
+ "base": "ID",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "camera",
+   "name": "Camera",
+   "description": "Active camera, used for rendering the scene",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "background_set",
+   "name": "Background Scene",
+   "description": "Background set scene",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Scene",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "world",
+   "name": "World",
+   "description": "World used for rendering the scene",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "World",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "objects",
+   "name": "Objects",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "api": "SceneObjects",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "frame_current",
+   "name": "Current Frame",
+   "description": "Current frame, to update animation data from Python frame_set() instead",
+   "type": "INT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 1,
+   "hard_min": -1048574,
+   "hard_max": 1048574,
+   "soft_min": -1048574,
+   "soft_max": 1048574,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "frame_subframe",
+   "name": "Current Subframe",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.009999999776482582,
+   "precision": 2,
+   "flags": []
+  },
+  {
+   "identifier": "frame_float",
+   "name": "Current Subframe",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -1048574.0,
+   "hard_max": 1048574.0,
+   "soft_min": -1048574.0,
+   "soft_max": 1048574.0,
+   "step": 0.10000000149011612,
+   "precision": 2,
+   "flags": []
+  },
+  {
+   "identifier": "frame_start",
+   "name": "Start Frame",
+   "description": "First frame of the playback/rendering range",
+   "type": "INT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 1,
+   "hard_min": 0,
+   "hard_max": 1048574,
+   "soft_min": 0,
+   "soft_max": 1048574,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "frame_end",
+   "name": "End Frame",
+   "description": "Final frame of the playback/rendering range",
+   "type": "INT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 250,
+   "hard_min": 0,
+   "hard_max": 1048574,
+   "soft_min": 0,
+   "soft_max": 1048574,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "frame_step",
+   "name": "Frame Step",
+   "description": "Number of frames to skip forward while rendering/playing back each frame",
+   "type": "INT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 1,
+   "hard_min": 0,
+   "hard_max": 1048574,
+   "soft_min": 1,
+   "soft_max": 100,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "time_jump_unit",
+   "name": "Time Jump Unit",
+   "description": "Which unit to use for time jumps in the timeline",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FRAME",
+     "name": "Frame",
+     "description": "Jump by frames",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "SECOND",
+     "name": "Second",
+     "description": "Jump by seconds",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "SECOND",
+   "flags": []
+  },
+  {
+   "identifier": "time_jump_delta",
+   "name": "Time Jump Delta",
+   "description": "Number of frames or seconds to jump forward or backward",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 1.0,
+   "hard_min": 0.10000000149011612,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.10000000149011612,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "frame_current_final",
+   "name": "Current Frame Final",
+   "description": "Current frame with subframe and time remapping applied",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -1048574.0,
+   "hard_max": 1048574.0,
+   "soft_min": -1048574.0,
+   "soft_max": 1048574.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "lock_frame_selection_to_range",
+   "name": "Lock Frame Selection",
+   "description": "Don't allow frame to be selected with mouse outside of frame range",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "allow_preroll",
+   "name": "Allow Preroll",
+   "description": "Allows playing back frames before the playback start frame",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_preview_range",
+   "name": "Use Preview Range",
+   "description": "Use an alternative start/end frame range for animation playback and view renders",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "frame_preview_start",
+   "name": "Preview Range Start Frame",
+   "description": "Alternative start frame for UI playback",
+   "type": "INT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "frame_preview_end",
+   "name": "Preview Range End Frame",
+   "description": "Alternative end frame for UI playback",
+   "type": "INT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "show_subframe",
+   "name": "Show Subframe",
+   "description": "Display and allow setting fractional frame values for the current frame",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "show_keys_from_selected_only",
+   "name": "Only Show Selected",
+   "description": "Only include channels relating to selected objects and data",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_stamp_note",
+   "name": "Stamp Note",
+   "description": "User defined note for the render stamping",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 768,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "animation_data",
+   "name": "Animation Data",
+   "description": "Animation data for this data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AnimData",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "is_nla_tweakmode",
+   "name": "NLA Tweak Mode",
+   "description": "Whether there is any action referenced by NLA being edited (strictly read-only)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_custom_simulation_range",
+   "name": "Custom Simulation Range",
+   "description": "Use a simulation range that is different from the scene range for simulation nodes that don't override the frame range themselves",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "simulation_frame_start",
+   "name": "Simulation Frame Start",
+   "description": "Frame at which simulations start",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "simulation_frame_end",
+   "name": "Simulation Frame End",
+   "description": "Frame at which simulations end",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 250,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "sync_mode",
+   "name": "Sync Mode",
+   "description": "How to sync playback",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "Play Every Frame",
+     "description": "Do not sync, play every frame",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FRAME_DROP",
+     "name": "Frame Dropping",
+     "description": "Drop frames if playback is too slow",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "AUDIO_SYNC",
+     "name": "Sync to Audio",
+     "description": "Sync to audio playback, dropping frames",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "AUDIO_SYNC",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "playback_loop_mode",
+   "name": "Loop Mode",
+   "description": "What to do when playback reaches the last frame",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "INFINITE",
+     "name": "Infinite",
+     "description": "After the last frame, jump back to the first and keep playing, infinitely",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "STOP_END_FRAME",
+     "name": "Stop at End Frame",
+     "description": "Stop playback at the last frame, without looping",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "STOP_START_FRAME",
+     "name": "Stop at Start Frame",
+     "description": "After the last frame, jump back to the first and stop playback",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "RESTORE",
+     "name": "Restore Frame",
+     "description": "After the last frame, stop at the frame the playback started from",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "BOUNCE",
+     "name": "Bounce",
+     "description": "At the last frame, reverse playback",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "INFINITE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "compositing_node_group",
+   "name": "Node Tree",
+   "description": "Compositor Nodes",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodeTree",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_nodes",
+   "name": "Use Nodes",
+   "description": "Enable the compositing node group.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "DEPRECATED"
+   ],
+   "deprecated": {
+    "note": "Unused but kept for compatibility reasons. Setting the property has no effect, and getting it always returns True. Use #scene.render.use_compositing to turn compositing to enable or disable compositing.",
+    "version": [
+     5,
+     0,
+     0
+    ],
+    "removal_version": [
+     6,
+     0,
+     0
+    ]
+   }
+  },
+  {
+   "identifier": "sequence_editor",
+   "name": "Sequence Editor",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "SequenceEditor",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "keying_sets",
+   "name": "Absolute Keying Sets",
+   "description": "Absolute Keying Sets for this Scene",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "KeyingSet",
+   "is_id": false,
+   "api": "KeyingSets",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "keying_sets_all",
+   "name": "All Keying Sets",
+   "description": "All Keying Sets available for use (Builtins and Absolute Keying Sets for this Scene)",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "KeyingSet",
+   "is_id": false,
+   "api": "KeyingSetsAll",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "rigidbody_world",
+   "name": "Rigid Body World",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "RigidBodyWorld",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "tool_settings",
+   "name": "Tool Settings",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ToolSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "unit_settings",
+   "name": "Unit Settings",
+   "description": "Unit editing settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "UnitSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "gravity",
+   "name": "Gravity",
+   "description": "Constant acceleration in a given direction",
+   "type": "FLOAT",
+   "subtype": "ACCELERATION",
+   "unit": "ACCELERATION",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    -9.8100004196167
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -200.0,
+   "soft_max": 200.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_gravity",
+   "name": "Global Gravity",
+   "description": "Use global gravity for all dynamics",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "render",
+   "name": "Render Data",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "RenderSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "safe_areas",
+   "name": "Safe Areas",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "DisplaySafeAreas",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "timeline_markers",
+   "name": "Timeline Markers",
+   "description": "Markers used in all timelines for the current scene",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "TimelineMarker",
+   "is_id": false,
+   "api": "TimelineMarkers",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "transform_orientation_slots",
+   "name": "Transform Orientation Slots",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "TransformOrientationSlot",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "cursor",
+   "name": "3D Cursor",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "View3DCursor",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "use_audio",
+   "name": "Play Audio",
+   "description": "Play back of audio from Sequence Editor, otherwise mute audio",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_audio_scrub",
+   "name": "Audio Scrubbing",
+   "description": "Play audio from Sequence Editor while scrubbing",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "audio_doppler_speed",
+   "name": "Speed of Sound",
+   "description": "Speed of sound for Doppler effect calculation",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 343.29998779296875,
+   "hard_min": 0.009999999776482582,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.009999999776482582,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "audio_doppler_factor",
+   "name": "Doppler Factor",
+   "description": "Pitch factor for Doppler effect calculation",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "audio_distance_model",
+   "name": "Distance Model",
+   "description": "Distance model for distance attenuation calculation",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "No distance attenuation",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "INVERSE",
+     "name": "Inverse",
+     "description": "Inverse distance model",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "INVERSE_CLAMPED",
+     "name": "Inverse Clamped",
+     "description": "Inverse distance model with clamping",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "LINEAR",
+     "name": "Linear",
+     "description": "Linear distance model",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "LINEAR_CLAMPED",
+     "name": "Linear Clamped",
+     "description": "Linear distance model with clamping",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "EXPONENT",
+     "name": "Exponential",
+     "description": "Exponential distance model",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "EXPONENT_CLAMPED",
+     "name": "Exponential Clamped",
+     "description": "Exponential distance model with clamping",
+     "icon": "NONE",
+     "value": 6
+    }
+   ],
+   "default": "INVERSE_CLAMPED",
+   "flags": []
+  },
+  {
+   "identifier": "audio_volume",
+   "name": "Volume",
+   "description": "Audio volume",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 100.0,
+   "soft_min": 0.0,
+   "soft_max": 100.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "annotation",
+   "name": "Annotations",
+   "description": "Data-block used for annotations in the 3D view",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Annotation",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "active_clip",
+   "name": "Active Movie Clip",
+   "description": "Active Movie Clip that can be used by motion tracking constraints or as a camera's background image",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MovieClip",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "view_settings",
+   "name": "View Settings",
+   "description": "Color management settings applied on image before saving",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorManagedViewSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "display_settings",
+   "name": "Display Settings",
+   "description": "Settings of device saved image would be displayed on",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorManagedDisplaySettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "sequencer_colorspace_settings",
+   "name": "Sequencer Color Space Settings",
+   "description": "Settings of color space sequencer is working in",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorManagedSequencerColorspaceSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "view_layers",
+   "name": "View Layers",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ViewLayer",
+   "is_id": false,
+   "api": "ViewLayers",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "collection",
+   "name": "Collection",
+   "description": "Scene root collection that owns all the objects and other collections instantiated in the scene",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Collection",
+   "is_id": true,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "display",
+   "name": "Scene Display",
+   "description": "Scene display settings for 3D viewport",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "SceneDisplay",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "eevee",
+   "name": "EEVEE",
+   "description": "EEVEE settings for the scene",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "SceneEEVEE",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "grease_pencil_settings",
+   "name": "Grease Pencil",
+   "description": "Grease Pencil settings for the scene",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "SceneGpencil",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "hydra",
+   "name": "Hydra",
+   "description": "Hydra settings for the scene",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "SceneHydra",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "cycles",
+   "name": "Cycles Render Settings",
+   "description": "Cycles render settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CyclesRenderSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "cycles_curves",
+   "name": "Cycles Curves Rendering Settings",
+   "description": "Cycles curves rendering settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CyclesCurveRenderSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "gltf2_KHR_materials_variants_variants",
+   "name": "gltf2_KHR_materials_variants_variants",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "gltf2_KHR_materials_variants_variant",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "gltf2_active_variant",
+   "name": "gltf2_active_variant",
+   "description": "",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -2147483648,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE",
+    "RUNTIME"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "update_render_engine",
+   "description": "Trigger a render engine update",
+   "use_self": false,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "statistics",
+   "description": "statistics",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "view_layer",
+     "name": "View Layer",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ViewLayer",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "statistics",
+     "name": "Statistics",
+     "description": "",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "OUTPUT",
+      "NEVER_NULL"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "frame_set",
+   "description": "Set scene frame updating all objects and view layers immediately",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "frame",
+     "name": "",
+     "description": "Frame number to set",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -1048574,
+     "hard_max": 1048574,
+     "soft_min": -1048574,
+     "soft_max": 1048574,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "subframe",
+     "name": "",
+     "description": "Subframe time, between 0.0 and 1.0",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "uvedit_aspect",
+   "description": "Get uv aspect for current object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "object",
+     "name": "",
+     "description": "Object",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Object",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "aspect",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0.0,
+      0.0
+     ],
+     "hard_min": 0.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "ray_cast",
+   "description": "Cast a ray onto evaluated geometry in world-space",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "depsgraph",
+     "name": "",
+     "description": "The current dependency graph",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Depsgraph",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "origin",
+     "name": "",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "direction",
+     "name": "",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "distance",
+     "name": "",
+     "description": "Maximum distance",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.7014117331926443e+38,
+     "hard_min": 0.0,
+     "hard_max": 1.7014117331926443e+38,
+     "soft_min": 0.0,
+     "soft_max": 1.7014117331926443e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "location",
+     "name": "Location",
+     "description": "The hit location of this ray cast",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "normal",
+     "name": "Normal",
+     "description": "The face normal at the ray cast hit location",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "index",
+     "name": "",
+     "description": "The face index, -1 when original data isn't available",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 0,
+     "step": 1,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "object",
+     "name": "",
+     "description": "The original (un-evaluated) object that was hit. Note that ``location``, ``normal``, and ``index`` correspond to the evaluated object's mesh.",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Object",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    },
+    {
+     "identifier": "matrix",
+     "name": "",
+     "description": "Matrix",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      4,
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "sequence_editor_create",
+   "description": "Ensure sequence editor is valid in this scene",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "sequence_editor",
+     "name": "",
+     "description": "New sequence editor data or None",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "SequenceEditor",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "sequence_editor_clear",
+   "description": "Clear sequence editor in this scene",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  }
+ ],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.scenes.new('Scene')",
+  "differs_from_default": {
+   "id_type": "SCENE",
+   "users": 1,
+   "use_extra_user": true,
+   "is_editable": true,
+   "frame_float": 1.0,
+   "frame_current_final": 1.0,
+   "use_nodes": true,
+   "use_audio": true
+  }
+ }
+}

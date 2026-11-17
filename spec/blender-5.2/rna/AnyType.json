@@ -1,0 +1,12 @@
+{
+ "identifier": "AnyType",
+ "name": "Any Type",
+ "description": "RNA type used for pointers to any possible data",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [],
+ "root": false
+}

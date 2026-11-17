@@ -1,0 +1,23 @@
+{
+ "identifier": "ObjectDisplay",
+ "name": "Object Display",
+ "description": "Object display settings for 3D viewport",
+ "base": null,
+ "name_property": null,
+ "nested": "Object",
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "show_shadows",
+   "name": "Shadow",
+   "description": "Object cast shadows in the 3D viewport",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

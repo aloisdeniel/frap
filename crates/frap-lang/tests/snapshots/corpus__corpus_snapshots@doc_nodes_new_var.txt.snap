@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_nodes_new_var.txt
+---
+> nodes.new(type="ShaderNodeTexImage")
+---
+error 1 SyntaxError SYNTAX @1:10/10+1
+  message: invalid syntax
+  hint: call an operator as bpy.ops.nodes.new(key=value, ...) or, in the short form, nodes.new key=value ...; an RNA function needs a full path such as bpy.data.objects['Cube'].select_set(True)

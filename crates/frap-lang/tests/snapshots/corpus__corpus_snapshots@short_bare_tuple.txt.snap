@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_bare_tuple.txt
+---
+> frap.describe target=Object.location,Object.rotation_euler
+---
+stmt 1 Short line 1 @1:1/1+58
+  Invoke frap.describe
+    arg target @1:15/15+44
+      Tuple @1:22/22+37
+        Bare Object.location @1:22/22+15
+        Bare Object.rotation_euler @1:38/38+21

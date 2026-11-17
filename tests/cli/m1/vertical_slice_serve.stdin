@@ -1,0 +1,19 @@
+{"id": 1, "src": "bpy.ops.object.select_all(action='SELECT')"}
+{"id": 2, "src": "bpy.ops.object.delete()"}
+{"id": 3, "src": "mesh.primitive_cylinder_add vertices=16 radius=0.5 depth=2 location=0,0,1"}
+{"id": 4, "src": "bpy.data.materials.new(\"Steel\")"}
+{"id": 5, "src": "bpy.data.materials['Steel'].node_tree.nodes['Principled BSDF'].inputs['Metallic'].default_value = 1.0"}
+{"id": 6, "src": "bpy.data.materials['Steel'].diffuse_color = (0.6, 0.6, 0.7, 1.0)"}
+{"id": 7, "src": "bpy.context.object.data.materials.append(bpy.data.materials['Steel'])"}
+{"id": 8, "src": "bpy.ops.object.camera_add(location=(4, -4, 3), rotation=(1.1, 0, 0.785))"}
+{"id": 9, "src": "bpy.context.scene.camera = bpy.data.objects['Camera']"}
+{"id": 10, "src": "data.scenes['Scene'].render.engine = BLENDER_WORKBENCH"}
+{"id": 11, "src": "bpy.context.scene.render.filepath = 'out/part.png'"}
+{"id": 12, "src": "bpy.ops.render.render(write_still=True)"}
+{"id": 13, "src": "bpy.ops.export_scene.gltf(filepath='out/part.glb')"}
+{"id": 14, "src": "bpy.ops.wm.save_as_mainfile(filepath='out/part.frap')"}
+{"id": 15, "src": "bpy.ops.wm.read_homefile(use_empty=True)"}
+{"id": 16, "src": "bpy.ops.import_scene.gltf(filepath='out/part.glb')"}
+{"id": 17, "src": "bpy.data.objects['Cylinder'].data.materials[0].node_tree.nodes['Principled BSDF'].inputs['Metallic'].default_value"}
+{"id": 18, "src": "bpy.ops.wm.open_mainfile(filepath='out/part.frap')"}
+{"id": 19, "src": "bpy.data.objects['Cylinder'].location"}

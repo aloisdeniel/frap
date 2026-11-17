@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_location_set_bpy.txt
+---
+> bpy.data.objects['Cube'].location = (1, 2, 3)
+---
+stmt 1 Bpy line 1 @1:1/1+45
+  Set Assign
+    Path bpy.data @1:1/1+33
+      .objects
+      ["Cube"]
+      .location
+    Tuple @1:37/37+9
+      Int 1 @1:38/38+1
+      Int 2 @1:41/41+1
+      Int 3 @1:44/44+1

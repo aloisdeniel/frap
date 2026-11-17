@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Float storage width (RFC 0001 F-DEF-2, decision W0-6). bpy exposes no storage width: every RNA
+# FLOAT is a Python float. Codegen emits `FloatStorage::F32` for every float property except the
+# ones listed here, which are backed by a `double` in Blender's DNA and keep full precision on a
+# round trip (`Value::Double`, f64 fields in generated plain structs).
+#
+# Key: "<Struct>.<prop>" (RNA) or "<BL_IDNAME>.<prop>" (operators). Seeded empty in M1: no M1
+# property needs f64 (Scene frame/time values frap reads are f32/int in RNA). Add an entry only
+# with the DNA field it comes from.
+
+f64 = []

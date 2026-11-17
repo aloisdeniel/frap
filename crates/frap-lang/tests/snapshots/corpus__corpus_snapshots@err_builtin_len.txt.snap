@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_builtin_len.txt
+---
+> len(bpy.data.objects)
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:1/1+3
+  message: frap: the built-in 'len' is not supported
+  hint: read a path to get its value (collections report len and item names), or use print(...)

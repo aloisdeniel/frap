@@ -1,0 +1,72 @@
+{
+ "identifier": "ActionChannelbag",
+ "name": "Animation Channel Bag",
+ "description": "Collection of animation channels, typically associated with an action slot",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "slot_handle",
+   "name": "slot_handle",
+   "description": "",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "slot",
+   "name": "Slot",
+   "description": "The Slot that the Channelbag's animation data is for",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ActionSlot",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "fcurves",
+   "name": "F-Curves",
+   "description": "The individual F-Curves that animate the slot",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FCurve",
+   "is_id": false,
+   "api": "ActionChannelbagFCurves",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "groups",
+   "name": "F-Curve Groups",
+   "description": "Groupings of F-Curves for display purposes, in e.g. the dopesheet and graph editor",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ActionGroup",
+   "is_id": false,
+   "api": "ActionChannelbagGroups",
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

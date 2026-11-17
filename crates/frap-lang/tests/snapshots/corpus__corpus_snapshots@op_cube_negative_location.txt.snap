@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_cube_negative_location.txt
+---
+> bpy.ops.mesh.primitive_cube_add(location=(-1, -2.5, -3e-1))
+---
+stmt 1 Bpy line 1 @1:1/1+59
+  Invoke mesh.primitive_cube_add
+    arg location @1:33/33+26
+      Tuple @1:42/42+17
+        Neg @1:43/43+2
+          Int 1 @1:44/44+1
+        Neg @1:47/47+4
+          Float 2.5 @1:48/48+3
+        Neg @1:53/53+5
+          Float 0.3 @1:54/54+4

@@ -1,0 +1,137 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 5,
+      "ok": true
+    },
+    {
+      "line": 6,
+      "ok": true
+    },
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "bpy_struct: attribute \"bound_box\" from \"Object\" is read-only"
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_array[index]: index 8 out of range"
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [-1.1031598, -1.4198117, -0.8758841, 0.0],
+        [0.7014551, 0.5579549, -1.7879169, 0.0],
+        [1.5136046, -1.2933757, 0.19021039, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [8.0, 3.9999998, 12.0],
+      "scale": [2.0, 2.0, 2.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": "Camera",
+      "matrix_world": [
+        [-1.5610148, 7.8542795, 0.0, 0.0],
+        [1.640752, 0.050575256, 0.0, 0.0],
+        [1.9675275, 6.189324, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.3, 0.2, 0.1],
+      "scale": [1.5, -5.0, 0.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 3.9999998],
+        [0.0, 0.0, 0.0, 2.0],
+        [0.0, 0.0, 0.0, 6.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [3.9999998, 2.0, 6.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, 1.0, 1.0],
+      "scale": [0.0, 0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

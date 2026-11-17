@@ -1,0 +1,179 @@
+{
+ "bl_idname": "ShaderNodeVectorRotate",
+ "srna": "ShaderNodeVectorRotate",
+ "name": "Vector Rotate",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": true,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Center",
+   "identifier": "Center",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Axis",
+   "identifier": "Axis",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Angle",
+   "identifier": "Angle",
+   "bl_idname": "NodeSocketFloatAngle",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "ANGLE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Rotation",
+   "identifier": "Rotation",
+   "bl_idname": "NodeSocketVectorEuler",
+   "type": "VECTOR",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "EULER",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "rotation_type": "AXIS_ANGLE",
+  "invert": false
+ },
+ "availability": {
+  "rotation_type": {
+   "default": "AXIS_ANGLE",
+   "by_value": {
+    "AXIS_ANGLE": {
+     "inputs": [
+      "Vector",
+      "Center",
+      "Axis",
+      "Angle"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "X_AXIS": {
+     "inputs": [
+      "Vector",
+      "Center",
+      "Angle"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "Y_AXIS": {
+     "inputs": [
+      "Vector",
+      "Center",
+      "Angle"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "Z_AXIS": {
+     "inputs": [
+      "Vector",
+      "Center",
+      "Angle"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    },
+    "EULER_XYZ": {
+     "inputs": [
+      "Vector",
+      "Center",
+      "Rotation"
+     ],
+     "outputs": [
+      "Vector"
+     ]
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,286 @@
+{
+ "bl_idname": "ShaderNodeMixRGB",
+ "srna": "ShaderNodeMixRGB",
+ "name": "Mix (Legacy)",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Factor",
+   "identifier": "Fac",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Color1",
+   "identifier": "Color1",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.5,
+    0.5,
+    0.5,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Color2",
+   "identifier": "Color2",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.5,
+    0.5,
+    0.5,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "blend_type": "MIX",
+  "use_alpha": false,
+  "use_clamp": false
+ },
+ "availability": {
+  "blend_type": {
+   "default": "MIX",
+   "by_value": {
+    "MIX": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "DARKEN": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "MULTIPLY": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "BURN": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "LIGHTEN": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "SCREEN": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "DODGE": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "ADD": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "OVERLAY": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "SOFT_LIGHT": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "LINEAR_LIGHT": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "DIFFERENCE": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "EXCLUSION": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "SUBTRACT": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "DIVIDE": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "HUE": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "SATURATION": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "COLOR": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    },
+    "VALUE": {
+     "inputs": [
+      "Fac",
+      "Color1",
+      "Color2"
+     ],
+     "outputs": [
+      "Color"
+     ]
+    }
+   }
+  }
+ }
+}

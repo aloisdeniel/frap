@@ -1,0 +1,79 @@
+{
+ "identifier": "GLTF_AddonPreferences",
+ "name": "GLTF_AddonPreferences",
+ "description": "",
+ "base": "AddonPreferences",
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "settings_node_ui",
+   "name": "settings_node_ui",
+   "description": "Displays glTF Material Output node in Shader Editor (Menu Add > Output)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "KHR_materials_variants_ui",
+   "name": "KHR_materials_variants_ui",
+   "description": "Displays glTF UI to manage material variants",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "animation_ui",
+   "name": "animation_ui",
+   "description": "Display glTF UI to manage animations",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "gltfpack_path_ui",
+   "name": "glTFpack file path",
+   "description": "Path to gltfpack binary",
+   "type": "STRING",
+   "subtype": "FILE_PATH",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "allow_embedded_format",
+   "name": "Allow glTF Embedded format",
+   "description": "Allow glTF Embedded format",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE",
+    "RUNTIME"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

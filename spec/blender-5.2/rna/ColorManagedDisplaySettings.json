@@ -1,0 +1,68 @@
+{
+ "identifier": "ColorManagedDisplaySettings",
+ "name": "ColorManagedDisplaySettings",
+ "description": "Color management specific to display device",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "display_device",
+   "name": "Display",
+   "description": "Display name. For viewing, this is the display device that will be emulated by limiting the gamut and HDR colors. For image and video output, this is the display space used for writing.",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "NONE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "emulation",
+   "name": "Display Emulation",
+   "description": "Control how images in the chosen display are mapped to the physical display",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OFF",
+     "name": "Off",
+     "description": "Directly output image as produced by OpenColorIO. This is not correct in general, but may be used when the system configuration and actual display device is known to match the chosen display",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "AUTO",
+     "name": "Automatic",
+     "description": "Display images consistent with most other applications, to preview images and video for export. A best effort is made to emulate the chosen display on the actual display device.",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "AUTO",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.scenes.new('Scene').display_settings",
+  "differs_from_default": {
+   "display_device": "sRGB"
+  }
+ }
+}

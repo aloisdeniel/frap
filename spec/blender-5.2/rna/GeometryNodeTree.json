@@ -1,0 +1,146 @@
+{
+ "identifier": "GeometryNodeTree",
+ "name": "Geometry Node Tree",
+ "description": "Node tree consisting of linked nodes used for geometries",
+ "base": "NodeTree",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "is_tool",
+   "name": "Tool",
+   "description": "The node group is used as a tool",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "node_tool_idname",
+   "name": "Node Tool Identifier",
+   "description": "Unique operator identifier for the node tool",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "is_modifier",
+   "name": "Modifier",
+   "description": "The node group is used as a geometry modifier",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "is_mode_object",
+   "name": "Edit",
+   "description": "The node group is used in object mode",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "is_mode_edit",
+   "name": "Edit",
+   "description": "The node group is used in edit mode",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "is_mode_sculpt",
+   "name": "Sculpt",
+   "description": "The node group is used in sculpt mode",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "is_mode_paint",
+   "name": "Paint",
+   "description": "The node group is used in paint mode",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "is_type_mesh",
+   "name": "Mesh",
+   "description": "The node group is used for meshes",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "is_type_curve",
+   "name": "Curves",
+   "description": "The node group is used for curves",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "is_type_pointcloud",
+   "name": "Point Cloud",
+   "description": "The node group is used for point clouds",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_wait_for_click",
+   "name": "Wait for Click",
+   "description": "Wait for mouse click input before running the operator from a menu",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "is_type_grease_pencil",
+   "name": "Grease Pencil",
+   "description": "The node group is used for Grease Pencil",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "show_modifier_manage_panel",
+   "name": "Show Manage Panel",
+   "description": "Turn on the option to display the manage panel when creating a modifier",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

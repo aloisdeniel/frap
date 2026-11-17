@@ -1,0 +1,63 @@
+# glTF round-trip law (ARCHITECTURE §17.2, WP 1.23): for every file listed here,
+#   gltf_canonical(frap import → frap export) == gltf_canonical(Blender import → Blender export)
+# with default options. Paths are relative to tests/data/. Blender's re-exports are committed
+# under tests/golden/fixtures/gltf/m1/roundtrip/ (re-bless with FRAP_ROUNDTRIP_BLESS=1, see
+# crates/frap-ops-io-tests/tests/gltf_roundtrip.rs). Files with content M1 does not import or
+# export yet (skins, morph targets, animation, vertex colours, texture transforms, instancing,
+# lights and cameras) are not listed.
+
+[[file]]
+path = "gltf-blender/fixtures/cube.glb"
+note = "Blender-exported factory cube"
+
+[[file]]
+path = "gltf-blender/fixtures/sphere_smooth.glb"
+note = "smooth normals: shared vertices"
+
+[[file]]
+path = "gltf-blender/fixtures/hierarchy.glb"
+note = "empty parent, quaternion-rotated child"
+
+[[file]]
+path = "gltf-blender/fixtures/multi_material.glb"
+note = "one primitive per material slot"
+
+[[file]]
+path = "gltf-blender/fixtures/mixed_shading.glb"
+note = "smooth sides, flat caps"
+
+[[file]]
+path = "gltf-blender/fixtures/shared_mesh.glb"
+note = "two nodes, one mesh"
+
+[[file]]
+path = "gltf-blender/fixtures/textured.glb"
+note = "base-colour texture"
+
+[[file]]
+path = "gltf-samples/Box/glTF-Binary/Box.glb"
+note = "Khronos: matrix node, Y-up root"
+
+[[file]]
+path = "gltf-samples/BoxInterleaved/glTF-Binary/BoxInterleaved.glb"
+note = "Khronos: interleaved (strided) accessors re-encoded"
+
+[[file]]
+path = "gltf-samples/SimpleMeshes/glTF-Embedded/SimpleMeshes.gltf"
+note = "Khronos: one mesh on two nodes, embedded buffer"
+
+[[file]]
+path = "gltf-samples/SimpleMaterial/glTF-Embedded/SimpleMaterial.gltf"
+note = "Khronos: base colour factor"
+
+[[file]]
+path = "gltf-samples/Triangle/glTF/Triangle.gltf"
+note = "Khronos: external .bin, no normals"
+
+[[file]]
+path = "gltf-samples/TriangleWithoutIndices/glTF-Embedded/TriangleWithoutIndices.gltf"
+note = "Khronos: non-indexed primitive"
+
+[[file]]
+path = "gltf-samples/SimpleSparseAccessor/glTF-Embedded/SimpleSparseAccessor.gltf"
+note = "Khronos: sparse accessor decoded on import, dense on export"

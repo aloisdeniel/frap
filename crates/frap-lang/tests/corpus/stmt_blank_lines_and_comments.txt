@@ -1,0 +1,8 @@
+
+
+# comment
+   
+bpy.data.objects
+
+# end
+

@@ -1,0 +1,29 @@
+[package]
+name = "frap-rna"
+description = "frap L1: Identity, RNA metadata, values and coercion, property paths, data-access traits, errors (ARCHITECTURE §5.1, §9, §13.4)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-macros.workspace = true
+frap-math.workspace = true
+smallvec.workspace = true
+indexmap.workspace = true
+smol_str.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+bitflags.workspace = true
+linkme.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+insta.workspace = true
+approx.workspace = true
+
+[lints]
+workspace = true

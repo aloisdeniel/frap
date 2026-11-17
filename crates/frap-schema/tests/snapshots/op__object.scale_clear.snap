@@ -1,0 +1,56 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.scale_clear",
+  "bl_idname": "OBJECT_OT_scale_clear",
+  "label": "Clear Scale",
+  "description": "Clear the object's scale",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "SCENE_EDITABLE"
+    ],
+    "text": "requires an editable scene",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "clear_delta",
+      "name": "Clear Delta",
+      "description": "Clear delta scale in addition to clearing the normal scale transform",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "tool_settings.use_transform_data_origin and use_transform_skip_children are not implemented (NotImplementedError)",
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
+    "notes": []
+  }
+}

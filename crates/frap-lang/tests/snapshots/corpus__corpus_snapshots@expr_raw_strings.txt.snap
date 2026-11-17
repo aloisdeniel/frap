@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_raw_strings.txt
+---
+> print(r'\n', R'\d')
+---
+stmt 1 Bpy line 1 @1:1/1+19
+  Print
+    Str "\\n" @1:7/7+5
+    Str "\\d" @1:14/14+5

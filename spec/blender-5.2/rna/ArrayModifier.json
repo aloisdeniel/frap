@@ -1,0 +1,291 @@
+{
+ "identifier": "ArrayModifier",
+ "name": "Array Modifier",
+ "description": "Array duplication modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "fit_type",
+   "name": "Fit Type",
+   "description": "Array length calculation method",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FIXED_COUNT",
+     "name": "Fixed Count",
+     "description": "Duplicate the object a certain number of times",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FIT_LENGTH",
+     "name": "Fit Length",
+     "description": "Duplicate the object as many times as fits in a certain length",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FIT_CURVE",
+     "name": "Fit Curve",
+     "description": "Fit the duplicated objects to a curve",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "FIXED_COUNT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "count",
+   "name": "Count",
+   "description": "Number of duplicates to make",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 2,
+   "hard_min": 1,
+   "hard_max": 2147483647,
+   "soft_min": 1,
+   "soft_max": 1000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "fit_length",
+   "name": "Length",
+   "description": "Length to fit array within",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 2147483648.0,
+   "soft_min": 0.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "curve",
+   "name": "Curve",
+   "description": "Curve object to fit array length to",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "use_constant_offset",
+   "name": "Constant Offset",
+   "description": "Add a constant offset",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "constant_offset_displace",
+   "name": "Constant Offset Displacement",
+   "description": "Value for the distance between arrayed items",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    1.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_relative_offset",
+   "name": "Relative Offset",
+   "description": "Add an offset relative to the object's bounding box",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "relative_offset_displace",
+   "name": "Relative Offset Displacement",
+   "description": "The size of the geometry will determine the distance between arrayed items",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    1.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_merge_vertices",
+   "name": "Merge Vertices",
+   "description": "Merge vertices in adjacent duplicates",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_merge_vertices_cap",
+   "name": "Merge End Vertices",
+   "description": "Merge vertices in first and last duplicates",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "merge_threshold",
+   "name": "Merge Distance",
+   "description": "Limit below which to merge vertices",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.009999999776482582,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_object_offset",
+   "name": "Object Offset",
+   "description": "Add another object's transformation to the total offset",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "offset_object",
+   "name": "Object Offset",
+   "description": "Use the location and rotation of another object to determine the distance and rotational change between arrayed items",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "start_cap",
+   "name": "Start Cap",
+   "description": "Mesh object to use as a start cap",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "end_cap",
+   "name": "End Cap",
+   "description": "Mesh object to use as an end cap",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "offset_u",
+   "name": "U Offset",
+   "description": "Amount to offset array UVs on the U axis",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -1.0,
+   "hard_max": 1.0,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 2.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "offset_v",
+   "name": "V Offset",
+   "description": "Amount to offset array UVs on the V axis",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -1.0,
+   "hard_max": 1.0,
+   "soft_min": -1.0,
+   "soft_max": 1.0,
+   "step": 2.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

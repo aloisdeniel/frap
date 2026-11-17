@@ -1,0 +1,30 @@
+{
+ "type": "REMESH",
+ "ui_name": "Remesh",
+ "srna": "RemeshModifier",
+ "values": {
+  "name": "M",
+  "type": "REMESH",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": false,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 1879751496,
+  "mode": "VOXEL",
+  "scale": 0.8999999761581421,
+  "threshold": 1.0,
+  "octree_depth": 4,
+  "sharpness": 1.0,
+  "voxel_size": 0.10000000149011612,
+  "adaptivity": 0.0,
+  "use_remove_disconnected": true,
+  "use_smooth_shade": false
+ },
+ "default_name": "Remesh"
+}

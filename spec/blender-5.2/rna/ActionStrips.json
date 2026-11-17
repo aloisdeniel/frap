@@ -1,0 +1,85 @@
+{
+ "identifier": "ActionStrips",
+ "name": "Action Strips",
+ "description": "Collection of animation strips",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add a new strip to the layer. Currently a layer can only have one strip, with infinite boundaries.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "The type of strip to create",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "KEYFRAME",
+       "name": "Keyframe",
+       "description": "Strip containing keyframes on F-Curves",
+       "icon": "NONE",
+       "value": 0
+      }
+     ],
+     "default": "KEYFRAME",
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "strip",
+     "name": "",
+     "description": "Newly created animation strip",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ActionStrip",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove the strip from the animation layer",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "anim_strip",
+     "name": "Animation Strip",
+     "description": "The strip to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ActionStrip",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": false
+}

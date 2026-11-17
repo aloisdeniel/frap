@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/stmt_from_paren_names.txt
+---
+> from math import (radians,
+>     pi,)
+---
+stmt 1 Bpy line 1 @1:1/1+35
+  Noop Import

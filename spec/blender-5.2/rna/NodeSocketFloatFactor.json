@@ -1,0 +1,31 @@
+{
+ "identifier": "NodeSocketFloatFactor",
+ "name": "Float Node Socket",
+ "description": "Floating-point number socket of a node",
+ "base": "NodeSocketStandard",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "default_value",
+   "name": "default_value",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

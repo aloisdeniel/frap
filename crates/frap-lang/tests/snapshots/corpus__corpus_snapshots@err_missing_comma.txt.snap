@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_missing_comma.txt
+---
+> bpy.ops.mesh.primitive_cube_add(size=2 location=(0, 0, 1))
+---
+error 1 SyntaxError SYNTAX @1:40/40+8
+  message: invalid syntax. Perhaps you forgot a comma?

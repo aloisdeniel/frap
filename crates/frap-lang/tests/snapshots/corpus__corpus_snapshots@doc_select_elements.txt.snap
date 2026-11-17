@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_select_elements.txt
+---
+> bpy.ops.frap.select_elements(type='FACE', indices=[5])
+---
+stmt 1 Bpy line 1 @1:1/1+54
+  Invoke frap.select_elements
+    arg type @1:30/30+11
+      Str "FACE" @1:35/35+6
+    arg indices @1:43/43+11
+      List @1:51/51+3
+        Int 5 @1:52/52+1

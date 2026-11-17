@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_neg_power.txt
+---
+> print(-2 ** 2)
+---
+stmt 1 Bpy line 1 @1:1/1+14
+  Print
+    Neg @1:7/7+7
+      Pow @1:8/8+6
+        Int 2 @1:8/8+1
+        Int 2 @1:13/13+1

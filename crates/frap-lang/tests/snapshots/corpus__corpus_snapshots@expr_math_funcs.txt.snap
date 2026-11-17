@@ -1,0 +1,21 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_math_funcs.txt
+---
+> print(math.sqrt(2), math.sin(0), math.cos(0), math.tan(0))
+---
+stmt 1 Bpy line 1 @1:1/1+58
+  Print
+    Builtin Sqrt @1:7/7+12
+      arg (positional) @1:17/17+1
+        Int 2 @1:17/17+1
+    Builtin Sin @1:21/21+11
+      arg (positional) @1:30/30+1
+        Int 0 @1:30/30+1
+    Builtin Cos @1:34/34+11
+      arg (positional) @1:43/43+1
+        Int 0 @1:43/43+1
+    Builtin Tan @1:47/47+11
+      arg (positional) @1:56/56+1
+        Int 0 @1:56/56+1

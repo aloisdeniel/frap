@@ -1,0 +1,49 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "tools": [
+    {
+      "name": "frap_exec",
+      "description": "Run statements against the persistent frap scene (headless Blender 5.2 bpy API; the scene stays alive between calls). Call this to create or edit 3D models, read scene data, or export/render. One statement per line (or separated by ';'), bpy-style Python one-liners:\n- operator: bpy.ops.mesh.primitive_cube_add(size=2, location=(0, 0, 1))\n- read: bpy.data.objects['Cube'].location\n- write: bpy.data.objects['Cube'].location = (1, 2, 3)\n- RNA function: bpy.data.objects['Cube'].select_set(True)\n- check before calling: bpy.ops.mesh.bevel.poll()\n- bulk read: bpy.data.meshes['Cube'].vertices.foreach_get('co') (slices page: vertices[0:1000])\nThe short form also works: mesh.primitive_cube_add size=2 location=0,0,1 ; data.objects['Cube'].location = 1,2,3. D and C are bpy.data and bpy.context. No variables, loops or imports: use full paths. Angles are radians. Returns one JSON response per statement (status FINISHED, CANCELLED, ERROR or SKIPPED; value, changes, context; on ERROR an error with Blender's message, code, detail.did_you_mean and a hint naming the fix) and a final done record. A failing statement leaves the scene unchanged.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "statements": {
+            "type": "string",
+            "description": "One or more frap statements, newline- or ';'-separated."
+          },
+          "on_error": {
+            "type": "string",
+            "enum": [
+              "skip_rest",
+              "continue"
+            ],
+            "description": "What happens to the remaining statements of this call after one fails: 'skip_rest' (default) answers them with status SKIPPED without running them, so a batch cannot cascade into misleading errors; 'continue' runs them."
+          }
+        },
+        "required": [
+          "statements"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "frap_describe",
+      "description": "Describe the frap/Blender 5.2 API before using it: operator properties with types, defaults, ranges, enum items, units (angles are radians), poll requirements and whether frap implements it. Call this when unsure of an operator's or property's exact name, arguments or preconditions.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "What to describe: an operator ('op:mesh.bevel' or 'mesh.bevel'), an RNA struct ('struct:Object' or 'Object'), a struct member ('Object.location', 'Object.select_set'), or 'errors' for every error code."
+          }
+        },
+        "required": [
+          "target"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}

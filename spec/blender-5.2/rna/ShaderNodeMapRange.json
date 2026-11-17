@@ -1,0 +1,184 @@
+{
+ "identifier": "ShaderNodeMapRange",
+ "name": "Map Range",
+ "description": "Remap a value from a range to a target range",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "clamp",
+   "name": "Clamp",
+   "description": "Clamp the result to the target range [To Min, To Max]",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "interpolation_type",
+   "name": "Interpolation Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LINEAR",
+     "name": "Linear",
+     "description": "Linear interpolation between From Min and From Max values",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "STEPPED",
+     "name": "Stepped Linear",
+     "description": "Stepped linear interpolation between From Min and From Max values",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "SMOOTHSTEP",
+     "name": "Smooth Step",
+     "description": "Smooth Hermite edge interpolation between From Min and From Max values",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "SMOOTHERSTEP",
+     "name": "Smoother Step",
+     "description": "Smoother Hermite edge interpolation between From Min and From Max values",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "LINEAR",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "data_type",
+   "name": "Data Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FLOAT",
+     "name": "Float",
+     "description": "Floating-point value",
+     "icon": "NODE_SOCKET_FLOAT",
+     "value": 10
+    },
+    {
+     "identifier": "FLOAT_VECTOR",
+     "name": "Vector",
+     "description": "3D vector with floating-point values",
+     "icon": "NODE_SOCKET_VECTOR",
+     "value": 48
+    }
+   ],
+   "default": "FLOAT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

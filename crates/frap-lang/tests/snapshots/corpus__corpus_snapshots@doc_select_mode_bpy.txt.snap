@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_select_mode_bpy.txt
+---
+> bpy.ops.mesh.select_mode(type='FACE')
+---
+stmt 1 Bpy line 1 @1:1/1+37
+  Invoke mesh.select_mode
+    arg type @1:26/26+11
+      Str "FACE" @1:31/31+6

@@ -1,0 +1,99 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  {
+    "target": "export_scene.gltf.export_apply",
+    "kind": "operator_property",
+    "default": false,
+    "why": "modifiers are NOT applied on export; pass export_apply=True to export the evaluated mesh"
+  },
+  {
+    "target": "export_scene.gltf.export_cameras",
+    "kind": "operator_property",
+    "default": false,
+    "why": "cameras are not exported unless export_cameras=True"
+  },
+  {
+    "target": "export_scene.gltf.export_lights",
+    "kind": "operator_property",
+    "default": false,
+    "why": "lights are not exported unless export_lights=True (KHR_lights_punctual)"
+  },
+  {
+    "target": "export_scene.gltf.use_selection",
+    "kind": "operator_property",
+    "default": false,
+    "why": "the whole scene is exported, not only the selection; pass use_selection=True to limit it"
+  },
+  {
+    "target": "import_scene.gltf.merge_vertices",
+    "kind": "operator_property",
+    "default": false,
+    "why": "imported meshes keep glTF's split vertices (seams at every UV/normal split) unless merge_vertices=True"
+  },
+  {
+    "target": "render.render.write_still",
+    "kind": "operator_property",
+    "default": false,
+    "why": "render.render() writes nothing to disk unless write_still=True (the image goes to bpy.data.images['Render Result']); the path is scene.render.filepath"
+  },
+  {
+    "target": "mesh.bevel.offset",
+    "kind": "operator_property",
+    "default": 0,
+    "why": "bevel with the default offset=0 changes nothing; always pass offset (and segments)"
+  },
+  {
+    "target": "mesh.vertices_smooth.factor",
+    "kind": "operator_property",
+    "default": 0,
+    "why": "vertices_smooth with the default factor=0 changes nothing; pass factor (e.g. 0.5)"
+  },
+  {
+    "target": "mesh.primitive_cube_add.scale",
+    "kind": "operator_property",
+    "default": [
+      0,
+      0,
+      0
+    ],
+    "why": "the (0, 0, 0) default is a placeholder: unset means (1, 1, 1); scale is applied to the mesh data and the new object's scale stays 1. Only cube, cone, cylinder, uv_sphere and ico_sphere apply scale: plane, grid, circle, monkey and the curve.*/surface.* primitives ignore it (set object.scale or use transform.resize afterwards)"
+  },
+  {
+    "target": "export_scene.gltf.export_current_frame",
+    "kind": "operator_property",
+    "default": false,
+    "why": "objects are exported at their frame-0 rest transforms, not at scene.frame_current; pass export_current_frame=True to export the pose of the current frame"
+  },
+  {
+    "target": "transform.rotate.value",
+    "kind": "operator_property",
+    "default": 0,
+    "why": "angles are in radians everywhere (operators and RNA): value=90 is 90 rad; use radians(90) or math.pi/2"
+  },
+  {
+    "target": "object.shade_smooth.keep_sharp_edges",
+    "kind": "operator_property",
+    "default": true,
+    "why": "edges marked sharp stay sharp after shade_smooth; pass keep_sharp_edges=False to smooth everything"
+  },
+  {
+    "target": "object.parent_set.keep_transform",
+    "kind": "operator_property",
+    "default": false,
+    "why": "parent_set keeps the child in place through matrix_parent_inverse: its location/rotation/scale values do not change and are now relative to the parent's inverse; read matrix_world for the world transform"
+  },
+  {
+    "target": "Light.energy",
+    "kind": "data",
+    "default": 10,
+    "why": "object.light_add(type='POINT') and bpy.data.lights.new() create a 10 W light (the factory scene's 'Light' has 1000 W); a 10 W point light is nearly invisible at scene scale, set energy"
+  },
+  {
+    "target": "Scene.frame_current",
+    "kind": "data",
+    "default": 1,
+    "why": "the factory scene starts at frame 1 (frame_start=1); keyframes and evaluation use frame_current, not frame 0"
+  }
+]

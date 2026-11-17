@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_bare_expression_short_root.txt
+---
+> D.objects['Cube'].location + D.objects['Cube'].location
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:28/28+1
+  message: frap: an expression is not a statement; read or assign a path, call an operator or function, or print(...) the value
+  hint: print(D.objects['Cube'].location + D.objects['Cube'].location)

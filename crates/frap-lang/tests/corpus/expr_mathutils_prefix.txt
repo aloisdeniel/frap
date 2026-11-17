@@ -1,0 +1,1 @@
+print(mathutils.Vector((0, 0, 1)))

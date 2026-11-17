@@ -1,0 +1,1 @@
+bpy.data.meshes.new('Mesh')

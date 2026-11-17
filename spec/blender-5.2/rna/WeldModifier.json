@@ -1,0 +1,96 @@
+{
+ "identifier": "WeldModifier",
+ "name": "Weld Modifier",
+ "description": "Weld modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "mode",
+   "name": "Mode",
+   "description": "Mode defines the merge rule",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ALL",
+     "name": "All",
+     "description": "Full merge by distance",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CONNECTED",
+     "name": "Connected",
+     "description": "Only merge along the edges",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "ALL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "merge_threshold",
+   "name": "Merge Distance",
+   "description": "Limit below which to merge vertices",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0010000000474974513,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 0.0010000000474974513,
+   "precision": 6,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name for selecting the affected areas",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "loose_edges",
+   "name": "Only Loose Edges",
+   "description": "Collapse edges without faces, cloth sewing edges",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

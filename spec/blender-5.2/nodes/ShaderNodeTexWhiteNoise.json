@@ -1,0 +1,125 @@
+{
+ "bl_idname": "ShaderNodeTexWhiteNoise",
+ "srna": "ShaderNodeTexWhiteNoise",
+ "name": "White Noise Texture",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": true,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "W",
+   "identifier": "W",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Value",
+   "identifier": "Value",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "noise_dimensions": "3D"
+ },
+ "availability": {
+  "noise_dimensions": {
+   "default": "3D",
+   "by_value": {
+    "1D": {
+     "inputs": [
+      "W"
+     ],
+     "outputs": [
+      "Value",
+      "Color"
+     ]
+    },
+    "2D": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Value",
+      "Color"
+     ]
+    },
+    "3D": {
+     "inputs": [
+      "Vector"
+     ],
+     "outputs": [
+      "Value",
+      "Color"
+     ]
+    },
+    "4D": {
+     "inputs": [
+      "Vector",
+      "W"
+     ],
+     "outputs": [
+      "Value",
+      "Color"
+     ]
+    }
+   }
+  }
+ }
+}

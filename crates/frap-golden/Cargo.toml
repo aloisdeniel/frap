@@ -1,0 +1,35 @@
+[package]
+name = "frap-golden"
+description = "frap L12: GoldenState schema, frap-side and Blender runners, comparators, fixtures, bless. Dev only (ARCHITECTURE §20)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-lang.workspace = true
+frap-session.workspace = true
+frap-scene.workspace = true
+frap-mesh.workspace = true
+# WP 1.8: the frap-side dumper's fallback reads node trees (socket values) natively.
+frap-nodes.workspace = true
+frap-gltf.workspace = true
+frap-imbuf.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+toml.workspace = true
+indexmap.workspace = true
+image-compare.workspace = true
+# WP 1.8: PNG decoding of image fixtures and glTF images (the judge does not use frap-imbuf's codecs).
+png.workspace = true
+automod.workspace = true
+
+[dev-dependencies]
+insta.workspace = true
+smol_str.workspace = true
+
+[lints]
+workspace = true

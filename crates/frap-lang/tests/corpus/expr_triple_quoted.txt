@@ -1,0 +1,2 @@
+print('''multi
+line''')

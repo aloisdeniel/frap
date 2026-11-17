@@ -1,0 +1,12 @@
+{
+ "identifier": "SurfaceModifier",
+ "name": "Surface Modifier",
+ "description": "Surface modifier defining modifier stack position used for surface fields",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [],
+ "root": true
+}

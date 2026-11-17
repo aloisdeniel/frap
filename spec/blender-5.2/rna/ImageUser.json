@@ -1,0 +1,166 @@
+{
+ "identifier": "ImageUser",
+ "name": "Image User",
+ "description": "Parameters defining how an Image data-block is used by another data-block",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "use_auto_refresh",
+   "name": "Auto Refresh",
+   "description": "Always refresh image on frame changes",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "frame_current",
+   "name": "Current Frame",
+   "description": "Current frame number in image sequence or movie",
+   "type": "INT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0,
+   "hard_min": -1048574,
+   "hard_max": 1048574,
+   "soft_min": -1048574,
+   "soft_max": 1048574,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_cyclic",
+   "name": "Cyclic",
+   "description": "Cycle the images in the movie",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "frame_duration",
+   "name": "Frames",
+   "description": "Number of images of a movie to use",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 1048574,
+   "soft_min": 0,
+   "soft_max": 1048574,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "frame_offset",
+   "name": "Offset",
+   "description": "Offset the number of the frame to use in the animation",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_start",
+   "name": "Start Frame",
+   "description": "Global starting frame of the movie/sequence, assuming first picture has a #1",
+   "type": "INT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0,
+   "hard_min": -1048574,
+   "hard_max": 1048574,
+   "soft_min": -1048574,
+   "soft_max": 1048574,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "multilayer_layer",
+   "name": "Layer",
+   "description": "Layer in multilayer image",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "multilayer_pass",
+   "name": "Pass",
+   "description": "Pass in multilayer image",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "multilayer_view",
+   "name": "View",
+   "description": "View in multilayer image",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "tile",
+   "name": "Tile",
+   "description": "Tile in tiled image",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": []
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

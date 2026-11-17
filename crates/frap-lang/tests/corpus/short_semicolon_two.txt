@@ -1,0 +1,1 @@
+object.select_all action=DESELECT; mesh.primitive_cube_add size=1

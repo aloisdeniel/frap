@@ -1,0 +1,147 @@
+{
+ "op": "mesh.primitive_circle_add",
+ "kwargs": {
+  "vertices": 5,
+  "radius": 2.0,
+  "fill_type": "NGON"
+ },
+ "object": {
+  "name": "Circle",
+  "data": "Circle",
+  "location": [0.0,0.0,0.0],
+  "rotation_euler": [0.0,0.0,0.0],
+  "scale": [1.0,1.0,1.0]
+ },
+ "mesh": {
+  "name": "Circle",
+  "positions": [
+   [0.0,2.0,0.0],
+   [-1.9021130800247192,0.6180340051651001,0.0],
+   [-1.1755704879760742,-1.6180340051651,0.0],
+   [1.1755704879760742,-1.6180340051651,0.0],
+   [1.9021130800247192,0.6180340051651001,0.0]
+  ],
+  "edges": [
+   [1,0],
+   [2,1],
+   [3,2],
+   [4,3],
+   [0,4]
+  ],
+  "faces": [
+   [0,1,2,3,4]
+  ],
+  "corner_edges": [0,1,2,3,4],
+  "attributes": [
+   {
+    "name": "UVMap",
+    "domain": "CORNER",
+    "data_type": "FLOAT2",
+    "data": [
+     [0.5,1.0],
+     [0.02447172999382019,0.6545084714889526],
+     [0.20610737800598145,0.09549149870872498],
+     [0.7938926219940186,0.09549149870872498],
+     [0.9755282402038574,0.6545084714889526]
+    ]
+   },
+   {
+    "name": ".select_vert",
+    "domain": "POINT",
+    "data_type": "BOOLEAN",
+    "data": [true,true,true,true,true]
+   },
+   {
+    "name": ".select_edge",
+    "domain": "EDGE",
+    "data_type": "BOOLEAN",
+    "data": [true,true,true,true,true]
+   },
+   {
+    "name": ".select_poly",
+    "domain": "FACE",
+    "data_type": "BOOLEAN",
+    "data": [true]
+   },
+   {
+    "name": "sharp_face",
+    "domain": "FACE",
+    "data_type": "BOOLEAN",
+    "data": [true]
+   },
+   {
+    "name": ".uv_select_vert",
+    "domain": "CORNER",
+    "data_type": "BOOLEAN",
+    "data": [false,false,false,false,false]
+   },
+   {
+    "name": ".uv_select_edge",
+    "domain": "CORNER",
+    "data_type": "BOOLEAN",
+    "data": [false,false,false,false,false]
+   },
+   {
+    "name": ".uv_select_face",
+    "domain": "FACE",
+    "data_type": "BOOLEAN",
+    "data": [false]
+   },
+   {
+    "name": "position",
+    "domain": "POINT",
+    "data_type": "FLOAT_VECTOR",
+    "data": null
+   },
+   {
+    "name": ".edge_verts",
+    "domain": "EDGE",
+    "data_type": "INT32_2D",
+    "data": null
+   },
+   {
+    "name": ".corner_vert",
+    "domain": "CORNER",
+    "data_type": "INT",
+    "data": null
+   },
+   {
+    "name": ".corner_edge",
+    "domain": "CORNER",
+    "data_type": "INT",
+    "data": null
+   }
+  ],
+  "uv_layers": [
+   {
+    "name": "UVMap",
+    "active": true,
+    "active_render": true
+   }
+  ],
+  "normals_domain": "FACE",
+  "vertex_normals": [
+   [0.0,0.0,1.0],
+   [0.0,0.0,1.0],
+   [0.0,0.0,1.0],
+   [0.0,0.0,1.0],
+   [0.0,0.0,1.0]
+  ],
+  "face_normals": [
+   [0.0,0.0,1.0]
+  ],
+  "corner_normals": [
+   [0.0,0.0,1.0],
+   [0.0,0.0,1.0],
+   [0.0,0.0,1.0],
+   [0.0,0.0,1.0],
+   [0.0,0.0,1.0]
+  ],
+  "loop_triangles": [
+   [4,0,1],
+   [1,2,3],
+   [1,3,4]
+  ],
+  "loop_triangle_polygons": [0,0,0]
+ }
+}

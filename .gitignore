@@ -1,0 +1,11 @@
+/target/
+**/*.rs.bk
+# Local outputs of transcripts and ad-hoc runs
+/out/
+*.glb.tmp
+.DS_Store
+# cargo-fuzz (fuzz/ is its own workspace)
+/fuzz/target/
+/fuzz/corpus/
+/fuzz/artifacts/
+/fuzz/coverage/

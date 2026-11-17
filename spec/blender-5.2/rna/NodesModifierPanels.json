@@ -1,0 +1,12 @@
+{
+ "identifier": "NodesModifierPanels",
+ "name": "Panels",
+ "description": "State of all panels defined by the node group",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [],
+ "root": false
+}

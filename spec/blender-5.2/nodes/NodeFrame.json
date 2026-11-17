@@ -1,0 +1,16 @@
+{
+ "bl_idname": "NodeFrame",
+ "srna": "NodeFrame",
+ "name": "Frame",
+ "label": "",
+ "width": 160.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [],
+ "outputs": [],
+ "props": {
+  "text": null,
+  "shrink": true,
+  "label_size": 20
+ }
+}

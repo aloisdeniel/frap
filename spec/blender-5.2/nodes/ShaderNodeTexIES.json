@@ -1,0 +1,89 @@
+{
+ "bl_idname": "ShaderNodeTexIES",
+ "srna": "ShaderNodeTexIES",
+ "name": "IES Texture",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": true,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Strength",
+   "identifier": "Strength",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Factor",
+   "identifier": "Fac",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "ies": null,
+  "filepath": "",
+  "mode": "INTERNAL"
+ },
+ "availability": {
+  "mode": {
+   "default": "INTERNAL",
+   "by_value": {
+    "INTERNAL": {
+     "inputs": [
+      "Vector",
+      "Strength"
+     ],
+     "outputs": [
+      "Fac"
+     ]
+    },
+    "EXTERNAL": {
+     "inputs": [
+      "Vector",
+      "Strength"
+     ],
+     "outputs": [
+      "Fac"
+     ]
+    }
+   }
+  }
+ }
+}

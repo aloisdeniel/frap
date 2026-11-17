@@ -1,0 +1,186 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//! One generator per primitive (ARCHITECTURE §6.1, rule 2.2.1): `primitives/<name>.rs`, included
+//! with `automod`, so adding a generator needs no `mod` edit. Callers name the file module
+//! (`primitives::uv_sphere::uv_sphere(…)`); the M0 re-export of `cube` below stays for the
+//! existing call sites.
+//!
+//! Every generator takes the **operator's** properties (Blender's names, defaults in
+//! `Default`) plus the creation matrix the operator passes to its `bmesh.ops.create_*` call
+//! (`matrix`, Blender layout `m[col][row]`), and returns the mesh exactly as
+//! `mesh.primitive_*_add` leaves it in object mode: Blender's vertex, edge, face and corner
+//! order, positions computed with Blender's float operations, a `UVMap` when `calc_uvs`, every
+//! element selected (`.select_*`), flat faces (`sharp_face`), and the 5.x UV-selection
+//! attributes. Verified against `spec/blender-5.2/primitives/*.json`
+//! (`tests/primitives_vs_blender.rs`).
+//!
+//! **The creation matrix** (WP 1.19): in object mode Blender adds the object at
+//! `location`/`rotation` and passes `ED_object_new_primitive_matrix(…)`: the inverse of the new
+//! object's rotation applied to the operator rotation (≈ identity up to float noise) with the
+//! operator `scale` folded in (`rescale_m4`) for the operators that pass a scale (cube,
+//! cylinder, cone, UV sphere, ico sphere). Plane, circle, grid and monkey ignore `scale`
+//! (monkey multiplies the 3×3 part by `size / 2` itself); the torus is a Python operator whose
+//! mesh never sees the matrix. [`creation_matrix`] computes it.
+
+automod::dir!(pub "src/primitives");
+
+pub(crate) mod bm;
+
+pub use cube::cube;
+
+/// Default UV map name (`DATA_("UVMap")`).
+pub const UV_MAP_NAME: &str = "UVMap";
+
+/// A Blender `float[4][4]` (`m[col][row]`, translation in `m[3]`).
+pub type Matrix4 = [[f32; 4]; 4];
+
+/// The identity matrix.
+pub const IDENTITY: Matrix4 = [
+    [1.0, 0.0, 0.0, 0.0],
+    [0.0, 1.0, 0.0, 0.0],
+    [0.0, 0.0, 1.0, 0.0],
+    [0.0, 0.0, 0.0, 1.0],
+];
+
+/// `rescale_m4(unit, scale)`: the creation matrix of an object-mode add with no rotation.
+pub fn scale_matrix(scale: [f32; 3]) -> Matrix4 {
+    let mut m = IDENTITY;
+    for (col, s) in m.iter_mut().zip(scale) {
+        for x in col.iter_mut().take(3) {
+            *x *= s;
+        }
+    }
+    m
+}
+
+/// Euler XYZ (radians) → 3×3, `eul_to_mat3` (`blender/source/blender/blenlib/intern/
+/// math_rotation_c.cc`), as `m[col][row]`.
+fn eul_to_mat3(eul: [f32; 3]) -> [[f32; 3]; 3] {
+    let (ci, cj, ch) = (
+        libm::cos(eul[0] as f64),
+        libm::cos(eul[1] as f64),
+        libm::cos(eul[2] as f64),
+    );
+    let (si, sj, sh) = (
+        libm::sin(eul[0] as f64),
+        libm::sin(eul[1] as f64),
+        libm::sin(eul[2] as f64),
+    );
+    let (cc, cs) = (ci * ch, ci * sh);
+    let (sc, ss) = (si * ch, si * sh);
+    [
+        [(cj * ch) as f32, (cj * sh) as f32, (-sj) as f32],
+        [
+            (sj * sc - cs) as f32,
+            (sj * ss + cc) as f32,
+            (cj * si) as f32,
+        ],
+        [
+            (sj * cc + ss) as f32,
+            (sj * cs - sc) as f32,
+            (cj * ci) as f32,
+        ],
+    ]
+}
+
+fn mul_m3_m3m3(a: &[[f32; 3]; 3], b: &[[f32; 3]; 3]) -> [[f32; 3]; 3] {
+    let mut r = [[0.0f32; 3]; 3];
+    for j in 0..3 {
+        for k in 0..3 {
+            r[j][k] = b[j][0] * a[0][k] + b[j][1] * a[1][k] + b[j][2] * a[2][k];
+        }
+    }
+    r
+}
+
+/// `invert_m3_m3` (adjoint / determinant, Blender's order; zero matrix when singular).
+fn invert_m3(m: &[[f32; 3]; 3]) -> [[f32; 3]; 3] {
+    let adj = [
+        [
+            m[1][1] * m[2][2] - m[1][2] * m[2][1],
+            -m[0][1] * m[2][2] + m[0][2] * m[2][1],
+            m[0][1] * m[1][2] - m[0][2] * m[1][1],
+        ],
+        [
+            -m[1][0] * m[2][2] + m[1][2] * m[2][0],
+            m[0][0] * m[2][2] - m[0][2] * m[2][0],
+            -m[0][0] * m[1][2] + m[0][2] * m[1][0],
+        ],
+        [
+            m[1][0] * m[2][1] - m[1][1] * m[2][0],
+            -m[0][0] * m[2][1] + m[0][1] * m[2][0],
+            m[0][0] * m[1][1] - m[0][1] * m[1][0],
+        ],
+    ];
+    let det = m[0][0] * adj[0][0] + m[1][0] * adj[0][1] + m[2][0] * adj[0][2];
+    if det == 0.0 {
+        return [[0.0; 3]; 3];
+    }
+    let mut r = adj;
+    for row in r.iter_mut() {
+        for x in row.iter_mut() {
+            *x /= det;
+        }
+    }
+    r
+}
+
+/// `ED_object_new_primitive_matrix(C, obedit, loc, rot, scale, r_primmat)` for an object just
+/// added at `loc`/`rot` (`obmat` = its `object_to_world`): the matrix the `create_*` ops get.
+/// `scale` is `None` for operators that do not pass one.
+pub fn creation_matrix(
+    obmat: &Matrix4,
+    loc: [f32; 3],
+    rot: [f32; 3],
+    scale: Option<[f32; 3]>,
+) -> Matrix4 {
+    let mut rmat = eul_to_mat3(rot);
+    rmat = invert_m3(&rmat);
+    let mat: [[f32; 3]; 3] = [
+        [obmat[0][0], obmat[0][1], obmat[0][2]],
+        [obmat[1][0], obmat[1][1], obmat[1][2]],
+        [obmat[2][0], obmat[2][1], obmat[2][2]],
+    ];
+    let cmat = mul_m3_m3m3(&rmat, &mat);
+    let imat = invert_m3(&cmat);
+    let mut r = IDENTITY;
+    for c in 0..3 {
+        for k in 0..3 {
+            r[c][k] = imat[c][k];
+        }
+    }
+    let mut t = [
+        loc[0] - obmat[3][0],
+        loc[1] - obmat[3][1],
+        loc[2] - obmat[3][2],
+    ];
+    let imat2 = invert_m3(&mat);
+    t = [
+        imat2[0][0] * t[0] + imat2[1][0] * t[1] + imat2[2][0] * t[2],
+        imat2[0][1] * t[0] + imat2[1][1] * t[1] + imat2[2][1] * t[2],
+        imat2[0][2] * t[0] + imat2[1][2] * t[1] + imat2[2][2] * t[2],
+    ];
+    r[3][0] = t[0];
+    r[3][1] = t[1];
+    r[3][2] = t[2];
+    if let Some(s) = scale {
+        for (col, sc) in r.iter_mut().zip(s) {
+            for x in col.iter_mut().take(3) {
+                *x *= sc;
+            }
+        }
+    }
+    r
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn creation_matrix_identity_without_rotation() {
+        let mut ob = IDENTITY;
+        ob[3] = [1.0, 2.0, 3.0, 1.0];
+        let m = creation_matrix(&ob, [1.0, 2.0, 3.0], [0.0; 3], Some([1.0, 2.0, 3.0]));
+        assert_eq!(m, scale_matrix([1.0, 2.0, 3.0]));
+    }
+}

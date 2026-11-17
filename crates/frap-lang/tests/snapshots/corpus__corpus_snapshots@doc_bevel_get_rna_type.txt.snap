@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_bevel_get_rna_type.txt
+---
+> bpy.ops.mesh.bevel.get_rna_type()
+---
+stmt 1 Bpy line 1 @1:1/1+33
+  OpMeta mesh.bevel GetRnaType

@@ -1,0 +1,1 @@
+bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='BOUNDS')

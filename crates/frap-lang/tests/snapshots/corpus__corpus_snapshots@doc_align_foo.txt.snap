@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_align_foo.txt
+---
+> bpy.ops.mesh.primitive_cube_add(align='FOO')
+---
+stmt 1 Bpy line 1 @1:1/1+44
+  Invoke mesh.primitive_cube_add
+    arg align @1:33/33+11
+      Str "FOO" @1:39/39+5

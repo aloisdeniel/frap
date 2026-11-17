@@ -1,0 +1,2 @@
+bpy.ops.object.shade_smooth()
+;bpy.ops.object.shade_smooth()

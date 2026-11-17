@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_augassign_to_call.txt
+---
+> bpy.data.objects.new('a') += 1
+---
+error 1 SyntaxError SYNTAX @1:1/1+25
+  message: 'function call' is an illegal expression for augmented assignment

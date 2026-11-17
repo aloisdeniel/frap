@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_assign_to_call.txt
+---
+> bpy.data.objects['Cube'].select_get() = True
+---
+error 1 SyntaxError SYNTAX @1:1/1+37
+  message: cannot assign to function call here. Maybe you meant '==' instead of '='?

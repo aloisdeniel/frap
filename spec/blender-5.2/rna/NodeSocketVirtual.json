@@ -1,0 +1,12 @@
+{
+ "identifier": "NodeSocketVirtual",
+ "name": "Virtual Node Socket",
+ "description": "Virtual socket of a node",
+ "base": "NodeSocketStandard",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [],
+ "root": true
+}

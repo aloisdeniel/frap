@@ -1,0 +1,8 @@
+{"event":"ready","frap":"0.1.0","protocol":1,"blender_api":"5.2","startup":"scene.frap"}
+{"id":1,"seq":1,"line":1,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.objects['Saved'].location","value":[1,2,3],"rna":{"type":"FLOAT","subtype":"TRANSLATION","array":[3],"math":"Vector"},"reports":[],"hints":[]}
+{"id":1,"seq":2,"line":2,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.is_dirty","value":false,"rna":{"type":"BOOLEAN","subtype":"NONE"},"reports":[],"hints":[]}
+{"id":1,"event":"done","ok":true,"counts":{"finished":2,"error":0,"cancelled":0,"skipped":0}}
+{"id":2,"seq":3,"line":1,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.objects['Saved'].location.x","value":4,"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.objects['Saved']"],"renamed":[]},"hints":[]}
+{"id":2,"seq":4,"line":2,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.is_dirty","value":false,"rna":{"type":"BOOLEAN","subtype":"NONE"},"reports":[],"hints":[]}
+{"id":2,"event":"done","ok":true,"counts":{"finished":2,"error":0,"cancelled":0,"skipped":0}}
+{"event":"end","ok":true,"stats":{"statements":4,"errors":0,"cancelled":0}}

@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_select_mode_set_quoted.txt
+---
+> mesh.select_mode type='FACE'
+---
+stmt 1 Short line 1 @1:1/1+28
+  Invoke mesh.select_mode
+    arg type @1:18/18+11
+      Str "FACE" @1:23/23+6

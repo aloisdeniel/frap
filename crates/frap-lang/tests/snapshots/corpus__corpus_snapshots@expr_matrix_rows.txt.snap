@@ -1,0 +1,24 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_matrix_rows.txt
+---
+> print(Matrix(((1, 0, 0), (0, 1, 0), (0, 0, 1))))
+---
+stmt 1 Bpy line 1 @1:1/1+48
+  Print
+    Builtin Matrix @1:7/7+41
+      arg (positional) @1:14/14+33
+        Tuple @1:14/14+33
+          Tuple @1:15/15+9
+            Int 1 @1:16/16+1
+            Int 0 @1:19/19+1
+            Int 0 @1:22/22+1
+          Tuple @1:26/26+9
+            Int 0 @1:27/27+1
+            Int 1 @1:30/30+1
+            Int 0 @1:33/33+1
+          Tuple @1:37/37+9
+            Int 0 @1:38/38+1
+            Int 0 @1:41/41+1
+            Int 1 @1:44/44+1

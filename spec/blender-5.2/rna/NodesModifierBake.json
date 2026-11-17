@@ -1,0 +1,193 @@
+{
+ "identifier": "NodesModifierBake",
+ "name": "Nodes Modifier Bake",
+ "description": "",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "directory",
+   "name": "Directory",
+   "description": "Location on disk where the bake data is stored",
+   "type": "STRING",
+   "subtype": "DIR_PATH",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL",
+    "PATH_SUPPORTS_BLEND_RELATIVE"
+   ]
+  },
+  {
+   "identifier": "frame_start",
+   "name": "Start Frame",
+   "description": "Frame where the baking starts",
+   "type": "INT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_end",
+   "name": "End Frame",
+   "description": "Frame where the baking ends",
+   "type": "INT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_custom_simulation_frame_range",
+   "name": "Custom Simulation Frame Range",
+   "description": "Override the simulation frame range from the scene",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_custom_path",
+   "name": "Custom Path",
+   "description": "Specify a path where the baked data should be stored manually",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bake_target",
+   "name": "Bake Target",
+   "description": "Where to store the baked data",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "INHERIT",
+     "name": "Inherit from Modifier",
+     "description": "Use setting from the modifier",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "PACKED",
+     "name": "Packed",
+     "description": "Pack the baked data into the .blend file",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "DISK",
+     "name": "Disk",
+     "description": "Store the baked data in a directory on disk",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "INHERIT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bake_mode",
+   "name": "Bake Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ANIMATION",
+     "name": "Animation",
+     "description": "Bake a frame range",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "STILL",
+     "name": "Still",
+     "description": "Bake a single frame",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "ANIMATION",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bake_id",
+   "name": "Bake ID",
+   "description": "Identifier for this bake which remains unchanged even when the bake node is renamed, grouped or ungrouped",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "node",
+   "name": "Node",
+   "description": "Bake node or simulation output node that corresponds to this bake. This node may be deeply nested in the modifier node group. It can be none in some cases like missing linked data blocks.",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Node",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "data_blocks",
+   "name": "data_blocks",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NodesModifierDataBlock",
+   "is_id": false,
+   "api": "NodesModifierBakeDataBlocks",
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

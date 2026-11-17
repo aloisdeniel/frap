@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_int_forms.txt
+---
+> print(0x1F, 0o17, 0b101, 1_000, 00)
+---
+stmt 1 Bpy line 1 @1:1/1+35
+  Print
+    Int 31 @1:7/7+4
+    Int 15 @1:13/13+4
+    Int 5 @1:19/19+5
+    Int 1000 @1:26/26+5
+    Int 0 @1:33/33+2

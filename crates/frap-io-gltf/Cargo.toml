@@ -1,0 +1,39 @@
+[package]
+name = "frap-io-gltf"
+description = "frap L9: Scene <-> glTF with io_scene_gltf2 5.2.41 semantics; module structure mirrors the add-on (ARCHITECTURE §17.2)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-gltf.workspace = true
+frap-scene.workspace = true
+frap-mesh.workspace = true
+# WP 1.17 `merge_vertices` welding uses the spatial hash of §3.2 directly.
+frap-geom.workspace = true
+frap-nodes.workspace = true
+frap-material.workspace = true
+frap-imbuf.workspace = true
+frap-math.workspace = true
+frap-spec-ops-io.workspace = true
+glam.workspace = true
+linkme.workspace = true
+automod.workspace = true
+indexmap.workspace = true
+smol_str.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+libm.workspace = true
+
+[dev-dependencies]
+gltf.workspace = true
+insta.workspace = true
+proptest.workspace = true
+approx.workspace = true
+
+[lints]
+workspace = true

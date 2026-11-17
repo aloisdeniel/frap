@@ -1,0 +1,27 @@
+{
+ "identifier": "QuaternionAttribute",
+ "name": "Quaternion Attribute",
+ "description": "Geometry attribute that stores rotation",
+ "base": "Attribute",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "data",
+   "name": "data",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "QuaternionAttributeValue",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

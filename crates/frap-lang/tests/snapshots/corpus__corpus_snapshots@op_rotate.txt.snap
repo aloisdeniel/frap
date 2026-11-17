@@ -1,0 +1,15 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_rotate.txt
+---
+> bpy.ops.transform.rotate(value=radians(90), orient_axis='Z')
+---
+stmt 1 Bpy line 1 @1:1/1+60
+  Invoke transform.rotate
+    arg value @1:26/26+17
+      Builtin Radians @1:32/32+11
+        arg (positional) @1:40/40+2
+          Int 90 @1:40/40+2
+    arg orient_axis @1:45/45+15
+      Str "Z" @1:57/57+3

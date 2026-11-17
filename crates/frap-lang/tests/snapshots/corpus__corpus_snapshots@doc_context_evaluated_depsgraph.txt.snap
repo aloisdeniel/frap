@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_context_evaluated_depsgraph.txt
+---
+> context.evaluated_depsgraph_get()
+---
+stmt 1 Short line 1 @1:1/1+33
+  Call
+    Path bpy.context @1:1/1+31
+      .evaluated_depsgraph_get

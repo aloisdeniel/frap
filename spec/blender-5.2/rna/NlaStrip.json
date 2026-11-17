@@ -1,0 +1,622 @@
+{
+ "identifier": "NlaStrip",
+ "name": "NLA Strip",
+ "description": "A container referencing an existing Action",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "type",
+   "name": "Type",
+   "description": "Type of NLA Strip",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "CLIP",
+     "name": "Action Clip",
+     "description": "NLA Strip references some Action",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "TRANSITION",
+     "name": "Transition",
+     "description": "NLA Strip 'transitions' between adjacent strips",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "META",
+     "name": "Meta",
+     "description": "NLA Strip acts as a container for adjacent strips",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "SOUND",
+     "name": "Sound Clip",
+     "description": "NLA Strip representing a sound event for speakers",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "CLIP",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "extrapolation",
+   "name": "Extrapolation",
+   "description": "Action to take for gaps past the strip extents",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NOTHING",
+     "name": "Nothing",
+     "description": "Strip has no influence past its extents",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "HOLD",
+     "name": "Hold",
+     "description": "Hold the first frame if no previous strips in track, and always hold last frame",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "HOLD_FORWARD",
+     "name": "Hold Forward",
+     "description": "Only hold last frame",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "HOLD",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "blend_type",
+   "name": "Blending",
+   "description": "Method used for combining strip's result with accumulated result",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "REPLACE",
+     "name": "Replace",
+     "description": "The strip values replace the accumulated results by amount specified by influence",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "COMBINE",
+     "name": "Combine",
+     "description": "The strip values are combined with accumulated results by appropriately using addition, multiplication, or quaternion math, based on channel type",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "ADD",
+     "name": "Add",
+     "description": "Weighted result of strip is added to the accumulated results",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "SUBTRACT",
+     "name": "Subtract",
+     "description": "Weighted result of strip is removed from the accumulated results",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "MULTIPLY",
+     "name": "Multiply",
+     "description": "Weighted result of strip is multiplied with the accumulated results",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "REPLACE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_start",
+   "name": "Start Frame",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_end",
+   "name": "End Frame",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_start_raw",
+   "name": "Start Frame (raw value)",
+   "description": "Same as frame_start, except that any value can be set, including ones that create an invalid state",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_end_raw",
+   "name": "End Frame (raw value)",
+   "description": "Same as frame_end, except that any value can be set, including ones that create an invalid state",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_start_ui",
+   "name": "Start Frame (manipulated from UI)",
+   "description": "Start frame of the NLA strip. Note: changing this value also updates the value of the strip's end frame. If only the start frame should be changed, see the \"frame_start\" property instead.",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_end_ui",
+   "name": "End Frame (manipulated from UI)",
+   "description": "End frame of the NLA strip. Note: changing this value also updates the value of the strip's repeats or its action's end frame. If only the end frame should be changed, see the \"frame_end\" property instead.",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "blend_in",
+   "name": "Blend In",
+   "description": "Number of frames at start of strip to fade in influence",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "blend_out",
+   "name": "Blend Out",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_auto_blend",
+   "name": "Auto Blend In/Out",
+   "description": "Number of frames for Blending In/Out is automatically determined from overlapping strips",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "action",
+   "name": "Action",
+   "description": "Action referenced by this strip",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Action",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "action_slot_handle",
+   "name": "Action Slot Handle",
+   "description": "A number that identifies which sub-set of the Action is considered to be for this NLA strip",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "last_slot_identifier",
+   "name": "Last Action Slot Identifier",
+   "description": "The identifier of the most recently assigned action slot. The slot identifies which sub-set of the Action is considered to be for this strip, and its identifier is used to find the right slot when assigning an Action.",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 258,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "action_slot",
+   "name": "Action Slot",
+   "description": "The slot identifies which sub-set of the Action is considered to be for this strip, and its name is used to find the right slot when assigning another Action",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ActionSlot",
+   "is_id": false,
+   "flags": []
+  },
+  {
+   "identifier": "action_suitable_slots",
+   "name": "Action Slots",
+   "description": "The list of action slots suitable for this NLA strip",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ActionSlot",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "action_frame_start",
+   "name": "Action Start Frame",
+   "description": "First frame from action to use",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "action_frame_end",
+   "name": "Action End Frame",
+   "description": "Last frame from action to use",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "repeat",
+   "name": "Repeat",
+   "description": "Number of times to repeat the action range",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.10000000149011612,
+   "hard_max": 1000.0,
+   "soft_min": 0.10000000149011612,
+   "soft_max": 1000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "scale",
+   "name": "Scale",
+   "description": "Scaling factor for action",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 9.999999747378752e-05,
+   "hard_max": 1000.0,
+   "soft_min": 9.999999747378752e-05,
+   "soft_max": 1000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "fcurves",
+   "name": "F-Curves",
+   "description": "F-Curves for controlling the strip's influence and timing",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FCurve",
+   "is_id": false,
+   "api": "NlaStripFCurves",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "modifiers",
+   "name": "Modifiers",
+   "description": "Modifiers affecting all the F-Curves in the referenced Action",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FModifier",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "strips",
+   "name": "NLA Strips",
+   "description": "NLA Strips that this strip acts as a container for (if it is of type Meta)",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "NlaStrip",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "influence",
+   "name": "Influence",
+   "description": "Amount the strip contributes to the current result",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "strip_time",
+   "name": "Strip Time",
+   "description": "Frame of referenced Action to evaluate",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_animated_influence",
+   "name": "Animated Influence",
+   "description": "Influence setting is controlled by an F-Curve rather than automatically determined",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_animated_time",
+   "name": "Animated Strip Time",
+   "description": "Strip time is controlled by an F-Curve rather than automatically determined",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_animated_time_cyclic",
+   "name": "Cyclic Strip Time",
+   "description": "Cycle the animated time within the action start and end",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "active",
+   "name": "Active",
+   "description": "NLA Strip is active",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "select",
+   "name": "Select",
+   "description": "NLA Strip is selected",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mute",
+   "name": "Mute",
+   "description": "Disable NLA Strip evaluation",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_reverse",
+   "name": "Reversed",
+   "description": "NLA Strip is played back in reverse order (only when timing is automatically determined)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_sync_length",
+   "name": "Sync Action Length",
+   "description": "Update range of frames referenced from action after tweaking strip and its keyframes",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

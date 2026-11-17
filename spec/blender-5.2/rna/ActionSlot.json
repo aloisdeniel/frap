@@ -1,0 +1,462 @@
+{
+ "identifier": "ActionSlot",
+ "name": "Action slot",
+ "description": "Identifier for a set of channels in this Action, that can be used by a data-block to specify what it gets animated by",
+ "base": null,
+ "name_property": "identifier",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "identifier",
+   "name": "Slot Identifier",
+   "description": "Used when connecting an Action to a data-block, to find the correct slot handle. This is the display name, prefixed by two characters determined by the slot's ID type",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 258,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "target_id_type",
+   "name": "Target ID Type",
+   "description": "Type of data-block that this slot is intended to animate; can be set when 'UNSPECIFIED' but is otherwise read-only",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ACTION",
+     "name": "Action",
+     "description": "",
+     "icon": "ACTION",
+     "value": 17217
+    },
+    {
+     "identifier": "ARMATURE",
+     "name": "Armature",
+     "description": "",
+     "icon": "ARMATURE_DATA",
+     "value": 21057
+    },
+    {
+     "identifier": "BRUSH",
+     "name": "Brush",
+     "description": "",
+     "icon": "BRUSH_DATA",
+     "value": 21058
+    },
+    {
+     "identifier": "CACHEFILE",
+     "name": "Cache File",
+     "description": "",
+     "icon": "FILE",
+     "value": 17987
+    },
+    {
+     "identifier": "CAMERA",
+     "name": "Camera",
+     "description": "",
+     "icon": "CAMERA_DATA",
+     "value": 16707
+    },
+    {
+     "identifier": "COLLECTION",
+     "name": "Collection",
+     "description": "",
+     "icon": "OUTLINER_COLLECTION",
+     "value": 21063
+    },
+    {
+     "identifier": "CURVE",
+     "name": "Curve",
+     "description": "",
+     "icon": "CURVE_DATA",
+     "value": 21827
+    },
+    {
+     "identifier": "CURVES",
+     "name": "Curves",
+     "description": "",
+     "icon": "CURVES_DATA",
+     "value": 22083
+    },
+    {
+     "identifier": "FONT",
+     "name": "Font",
+     "description": "",
+     "icon": "FONT_DATA",
+     "value": 18006
+    },
+    {
+     "identifier": "GREASEPENCIL",
+     "name": "Grease Pencil",
+     "description": "",
+     "icon": "GREASEPENCIL",
+     "value": 17479
+    },
+    {
+     "identifier": "GREASEPENCIL_V3",
+     "name": "Grease Pencil v3",
+     "description": "",
+     "icon": "GREASEPENCIL",
+     "value": 20551
+    },
+    {
+     "identifier": "IMAGE",
+     "name": "Image",
+     "description": "",
+     "icon": "IMAGE_DATA",
+     "value": 19785
+    },
+    {
+     "identifier": "KEY",
+     "name": "Key",
+     "description": "",
+     "icon": "SHAPEKEY_DATA",
+     "value": 17739
+    },
+    {
+     "identifier": "LATTICE",
+     "name": "Lattice",
+     "description": "",
+     "icon": "LATTICE_DATA",
+     "value": 21580
+    },
+    {
+     "identifier": "LIBRARY",
+     "name": "Library",
+     "description": "",
+     "icon": "LIBRARY_DATA_DIRECT",
+     "value": 18764
+    },
+    {
+     "identifier": "LIGHT",
+     "name": "Light",
+     "description": "",
+     "icon": "LIGHT_DATA",
+     "value": 16716
+    },
+    {
+     "identifier": "LIGHT_PROBE",
+     "name": "Light Probe",
+     "description": "",
+     "icon": "LIGHTPROBE_SPHERE",
+     "value": 20556
+    },
+    {
+     "identifier": "LINESTYLE",
+     "name": "Line Style",
+     "description": "",
+     "icon": "LINE_DATA",
+     "value": 21324
+    },
+    {
+     "identifier": "MASK",
+     "name": "Mask",
+     "description": "",
+     "icon": "MOD_MASK",
+     "value": 21325
+    },
+    {
+     "identifier": "MATERIAL",
+     "name": "Material",
+     "description": "",
+     "icon": "MATERIAL_DATA",
+     "value": 16717
+    },
+    {
+     "identifier": "MESH",
+     "name": "Mesh",
+     "description": "",
+     "icon": "MESH_DATA",
+     "value": 17741
+    },
+    {
+     "identifier": "META",
+     "name": "Metaball",
+     "description": "",
+     "icon": "META_DATA",
+     "value": 16973
+    },
+    {
+     "identifier": "MOVIECLIP",
+     "name": "Movie Clip",
+     "description": "",
+     "icon": "TRACKER",
+     "value": 17229
+    },
+    {
+     "identifier": "NODETREE",
+     "name": "Node Tree",
+     "description": "",
+     "icon": "NODETREE",
+     "value": 21582
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "",
+     "icon": "OBJECT_DATA",
+     "value": 16975
+    },
+    {
+     "identifier": "PAINTCURVE",
+     "name": "Paint Curve",
+     "description": "",
+     "icon": "CURVE_BEZCURVE",
+     "value": 17232
+    },
+    {
+     "identifier": "PALETTE",
+     "name": "Palette",
+     "description": "",
+     "icon": "COLOR",
+     "value": 19536
+    },
+    {
+     "identifier": "PARTICLE",
+     "name": "Particle",
+     "description": "",
+     "icon": "PARTICLE_DATA",
+     "value": 16720
+    },
+    {
+     "identifier": "POINTCLOUD",
+     "name": "Point Cloud",
+     "description": "",
+     "icon": "POINTCLOUD_DATA",
+     "value": 21584
+    },
+    {
+     "identifier": "SCENE",
+     "name": "Scene",
+     "description": "",
+     "icon": "SCENE_DATA",
+     "value": 17235
+    },
+    {
+     "identifier": "SCREEN",
+     "name": "Screen",
+     "description": "",
+     "icon": "WORKSPACE",
+     "value": 21075
+    },
+    {
+     "identifier": "SOUND",
+     "name": "Sound",
+     "description": "",
+     "icon": "SOUND",
+     "value": 20307
+    },
+    {
+     "identifier": "SPEAKER",
+     "name": "Speaker",
+     "description": "",
+     "icon": "SPEAKER",
+     "value": 19283
+    },
+    {
+     "identifier": "TEXT",
+     "name": "Text",
+     "description": "",
+     "icon": "TEXT",
+     "value": 22612
+    },
+    {
+     "identifier": "TEXTURE",
+     "name": "Texture",
+     "description": "",
+     "icon": "TEXTURE_DATA",
+     "value": 17748
+    },
+    {
+     "identifier": "VOLUME",
+     "name": "Volume",
+     "description": "",
+     "icon": "VOLUME_DATA",
+     "value": 20310
+    },
+    {
+     "identifier": "WINDOWMANAGER",
+     "name": "Window Manager",
+     "description": "",
+     "icon": "WINDOW",
+     "value": 19799
+    },
+    {
+     "identifier": "WORKSPACE",
+     "name": "Workspace",
+     "description": "",
+     "icon": "WORKSPACE",
+     "value": 21335
+    },
+    {
+     "identifier": "WORLD",
+     "name": "World",
+     "description": "",
+     "icon": "WORLD_DATA",
+     "value": 20311
+    },
+    {
+     "identifier": "UNSPECIFIED",
+     "name": "Unspecified",
+     "description": "Not yet specified. When this slot is first assigned to a data-block, this will be set to the type of that data-block",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "items_static": [
+    {
+     "identifier": "UNSPECIFIED",
+     "name": "Unspecified",
+     "description": "Not yet specified. When this slot is first assigned to a data-block, this will be set to the type of that data-block",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "UNSPECIFIED",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "target_id_type_icon",
+   "name": "target_id_type_icon",
+   "description": "",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "name_display",
+   "name": "Slot Display Name",
+   "description": "Name of the slot, for display in the user interface. This name combined with the slot's data-block type is unique within its Action",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 256,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "handle",
+   "name": "Slot Handle",
+   "description": "Number specific to this Slot, unique within the Action.\nThis is used, for example, on a ActionKeyframeStrip to look up the ActionChannelbag for this Slot",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "active",
+   "name": "Active",
+   "description": "Whether this is the active slot, can be set by assigning to action.slots.active",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "select",
+   "name": "Select",
+   "description": "Selection state of the slot",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "show_expanded",
+   "name": "Show Expanded",
+   "description": "Expanded state of the slot",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "users",
+   "description": "Return the data-blocks that are animated by this slot of this action",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "users",
+     "name": "users",
+     "description": "",
+     "type": "COLLECTION",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ID",
+     "is_id": true,
+     "api": null,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "duplicate",
+   "description": "Duplicate this slot, including all the animation data associated with it",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "slot",
+     "name": "Duplicated Slot",
+     "description": "The slot created by duplicating this one",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ActionSlot",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

@@ -1,0 +1,4 @@
+bpy.data.objects.new(
+    'Empty',
+    None,
+)

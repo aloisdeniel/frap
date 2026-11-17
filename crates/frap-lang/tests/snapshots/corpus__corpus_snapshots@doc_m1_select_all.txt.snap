@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_m1_select_all.txt
+---
+> bpy.ops.object.select_all(action='SELECT')
+---
+stmt 1 Bpy line 1 @1:1/1+42
+  Invoke object.select_all
+    arg action @1:27/27+15
+      Str "SELECT" @1:34/34+8

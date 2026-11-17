@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_unquoted_path.txt
+---
+> export_scene.gltf filepath=out/part.glb
+---
+error 1 SyntaxError SYNTAX @1:31/31+1
+  message: invalid syntax
+  hint: quote values that contain other characters, e.g. filepath='out/part.glb'; tuples have no spaces: 0,0,1

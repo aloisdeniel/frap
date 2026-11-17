@@ -1,0 +1,239 @@
+{
+ "identifier": "BooleanModifier",
+ "name": "Boolean Modifier",
+ "description": "Boolean operations modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "object",
+   "name": "Object",
+   "description": "Mesh object to use for Boolean operation",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "collection",
+   "name": "Collection",
+   "description": "Use mesh objects in this collection for Boolean operation",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Collection",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "operation",
+   "name": "Operation",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "INTERSECT",
+     "name": "Intersect",
+     "description": "Keep the part of the mesh that is common between all operands",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "UNION",
+     "name": "Union",
+     "description": "Combine meshes in an additive way",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "DIFFERENCE",
+     "name": "Difference",
+     "description": "Combine meshes in a subtractive way",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "DIFFERENCE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "operand_type",
+   "name": "Operand Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "Use a mesh object as the operand for the Boolean operation",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "COLLECTION",
+     "name": "Collection",
+     "description": "Use a collection of mesh objects as the operand for the Boolean operation",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "OBJECT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "double_threshold",
+   "name": "Overlap Threshold",
+   "description": "Threshold for checking overlapping geometry",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 9.999999974752427e-07,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 6,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "solver",
+   "name": "Solver",
+   "description": "Method for calculating booleans",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FLOAT",
+     "name": "Float",
+     "description": "Simple solver with good performance, without support for overlapping geometry",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "EXACT",
+     "name": "Exact",
+     "description": "Slower solver with the best results for coplanar faces",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "MANIFOLD",
+     "name": "Manifold",
+     "description": "Fastest solver that works only on manifold meshes but gives better results",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "EXACT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_self",
+   "name": "Self Intersection",
+   "description": "Allow self-intersection in operands",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_hole_tolerant",
+   "name": "Hole Tolerant",
+   "description": "Better results when there are holes (slower)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "material_mode",
+   "name": "Material Mode",
+   "description": "Method for setting materials on the new faces",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "INDEX",
+     "name": "Index Based",
+     "description": "Set the material on new faces based on the order of the material slot lists. If a material does not exist on the modifier object, the face will use the same material slot or the first if the object does not have enough slots.",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "TRANSFER",
+     "name": "Transfer",
+     "description": "Transfer materials from non-empty slots to the result mesh, adding new materials as necessary. For empty slots, fall back to using the same material index as the operand mesh.",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "INDEX",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "debug_options",
+   "name": "Debug",
+   "description": "Debugging options, only when started with '-d'",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "SEPARATE",
+     "name": "Separate",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "NO_DISSOLVE",
+     "name": "No Dissolve",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "NO_CONNECT_REGIONS",
+     "name": "No Connect Regions",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": [],
+   "flags": [
+    "ENUM_FLAG",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_translate.txt
+---
+> bpy.ops.transform.translate(value=(1, 0, 0), orient_type='GLOBAL')
+---
+stmt 1 Bpy line 1 @1:1/1+66
+  Invoke transform.translate
+    arg value @1:29/29+15
+      Tuple @1:35/35+9
+        Int 1 @1:36/36+1
+        Int 0 @1:39/39+1
+        Int 0 @1:42/42+1
+    arg orient_type @1:46/46+20
+      Str "GLOBAL" @1:58/58+8

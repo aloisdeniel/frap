@@ -1,0 +1,12 @@
+[package]
+name = "frap-probe-render-scene"
+description = "WP 0.2 probe of frap-render-scene types (§19.2): RenderScene, Film, RenderService"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-probe-rna.workspace = true
+frap-probe-scene.workspace = true

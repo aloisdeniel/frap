@@ -1,0 +1,823 @@
+{
+ "namespace": "geometry",
+ "count": 9,
+ "operators": [
+  {
+   "idname": "geometry.attribute_add",
+   "bl_idname": "GEOMETRY_OT_attribute_add",
+   "label": "Add Attribute",
+   "description": "Add attribute to geometry",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of new attribute",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "SKIP_SAVE",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "domain",
+     "name": "Domain",
+     "description": "Type of element that attribute is stored on",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "POINT",
+       "name": "Point",
+       "description": "Attribute on point",
+       "icon": "VERTEXSEL",
+       "value": 0
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Attribute on mesh edge",
+       "icon": "EDGESEL",
+       "value": 1
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Attribute on mesh faces",
+       "icon": "FACESEL",
+       "value": 2
+      },
+      {
+       "identifier": "CORNER",
+       "name": "Face Corner",
+       "description": "Attribute on mesh face corner",
+       "icon": "FACE_CORNER",
+       "value": 3
+      },
+      {
+       "identifier": "CURVE",
+       "name": "Spline",
+       "description": "Attribute on spline",
+       "icon": "CURVE_DATA",
+       "value": 4
+      },
+      {
+       "identifier": "INSTANCE",
+       "name": "Instance",
+       "description": "Attribute on instance",
+       "icon": "EMPTY_AXIS",
+       "value": 5
+      },
+      {
+       "identifier": "LAYER",
+       "name": "Layer",
+       "description": "Attribute on Grease Pencil layer",
+       "icon": "OUTLINER_DATA_GP_LAYER",
+       "value": 6
+      }
+     ],
+     "default": "POINT",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "data_type",
+     "name": "Data Type",
+     "description": "Type of data stored in attribute",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FLOAT",
+       "name": "Float",
+       "description": "Floating-point value",
+       "icon": "NONE",
+       "value": 10
+      },
+      {
+       "identifier": "INT",
+       "name": "Integer",
+       "description": "32-bit integer",
+       "icon": "NONE",
+       "value": 11
+      },
+      {
+       "identifier": "BOOLEAN",
+       "name": "Boolean",
+       "description": "True or false",
+       "icon": "NONE",
+       "value": 50
+      },
+      {
+       "identifier": "FLOAT_VECTOR",
+       "name": "Vector",
+       "description": "3D vector with floating-point values",
+       "icon": "NONE",
+       "value": 48
+      },
+      {
+       "identifier": "FLOAT_COLOR",
+       "name": "Color",
+       "description": "RGBA color with 32-bit floating-point values",
+       "icon": "NONE",
+       "value": 47
+      },
+      {
+       "identifier": "QUATERNION",
+       "name": "Quaternion",
+       "description": "Floating point quaternion rotation",
+       "icon": "NONE",
+       "value": 52
+      },
+      {
+       "identifier": "FLOAT4X4",
+       "name": "4x4 Matrix",
+       "description": "Floating point matrix",
+       "icon": "NONE",
+       "value": 20
+      },
+      {
+       "identifier": "STRING",
+       "name": "String",
+       "description": "Text string",
+       "icon": "NONE",
+       "value": 12
+      },
+      {
+       "identifier": "INT8",
+       "name": "8-Bit Integer",
+       "description": "Smaller integer with a range from -128 to 127",
+       "icon": "NONE",
+       "value": 45
+      },
+      {
+       "identifier": "INT16_2D",
+       "name": "2D 16-Bit Integer Vector",
+       "description": "16-bit signed integer vector",
+       "icon": "NONE",
+       "value": 22
+      },
+      {
+       "identifier": "INT32_2D",
+       "name": "2D Integer Vector",
+       "description": "32-bit signed integer vector",
+       "icon": "NONE",
+       "value": 46
+      },
+      {
+       "identifier": "FLOAT2",
+       "name": "2D Vector",
+       "description": "2D vector with floating-point values",
+       "icon": "NONE",
+       "value": 49
+      },
+      {
+       "identifier": "FLOAT4",
+       "name": "4D Vector",
+       "description": "4D vector with floating-point values",
+       "icon": "NONE",
+       "value": 24
+      },
+      {
+       "identifier": "BYTE_COLOR",
+       "name": "Byte Color",
+       "description": "RGBA color with 8-bit positive integer values",
+       "icon": "NONE",
+       "value": 17
+      }
+     ],
+     "default": "FLOAT",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "geometry.attribute_convert",
+   "bl_idname": "GEOMETRY_OT_attribute_convert",
+   "label": "Convert Attribute",
+   "description": "Change how the attribute is stored",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "GENERIC",
+       "name": "Generic",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "VERTEX_GROUP",
+       "name": "Vertex Group",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "GENERIC",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "domain",
+     "name": "Domain",
+     "description": "Which geometry element to move the attribute to",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "POINT",
+       "name": "Point",
+       "description": "Attribute on point",
+       "icon": "VERTEXSEL",
+       "value": 0
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Attribute on mesh edge",
+       "icon": "EDGESEL",
+       "value": 1
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Attribute on mesh faces",
+       "icon": "FACESEL",
+       "value": 2
+      },
+      {
+       "identifier": "CORNER",
+       "name": "Face Corner",
+       "description": "Attribute on mesh face corner",
+       "icon": "FACE_CORNER",
+       "value": 3
+      },
+      {
+       "identifier": "CURVE",
+       "name": "Spline",
+       "description": "Attribute on spline",
+       "icon": "CURVE_DATA",
+       "value": 4
+      },
+      {
+       "identifier": "INSTANCE",
+       "name": "Instance",
+       "description": "Attribute on instance",
+       "icon": "EMPTY_AXIS",
+       "value": 5
+      },
+      {
+       "identifier": "LAYER",
+       "name": "Layer",
+       "description": "Attribute on Grease Pencil layer",
+       "icon": "OUTLINER_DATA_GP_LAYER",
+       "value": 6
+      }
+     ],
+     "default": "POINT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "data_type",
+     "name": "Data Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FLOAT",
+       "name": "Float",
+       "description": "Floating-point value",
+       "icon": "NONE",
+       "value": 10
+      },
+      {
+       "identifier": "INT",
+       "name": "Integer",
+       "description": "32-bit integer",
+       "icon": "NONE",
+       "value": 11
+      },
+      {
+       "identifier": "BOOLEAN",
+       "name": "Boolean",
+       "description": "True or false",
+       "icon": "NONE",
+       "value": 50
+      },
+      {
+       "identifier": "FLOAT_VECTOR",
+       "name": "Vector",
+       "description": "3D vector with floating-point values",
+       "icon": "NONE",
+       "value": 48
+      },
+      {
+       "identifier": "FLOAT_COLOR",
+       "name": "Color",
+       "description": "RGBA color with 32-bit floating-point values",
+       "icon": "NONE",
+       "value": 47
+      },
+      {
+       "identifier": "QUATERNION",
+       "name": "Quaternion",
+       "description": "Floating point quaternion rotation",
+       "icon": "NONE",
+       "value": 52
+      },
+      {
+       "identifier": "FLOAT4X4",
+       "name": "4x4 Matrix",
+       "description": "Floating point matrix",
+       "icon": "NONE",
+       "value": 20
+      },
+      {
+       "identifier": "STRING",
+       "name": "String",
+       "description": "Text string",
+       "icon": "NONE",
+       "value": 12
+      },
+      {
+       "identifier": "INT8",
+       "name": "8-Bit Integer",
+       "description": "Smaller integer with a range from -128 to 127",
+       "icon": "NONE",
+       "value": 45
+      },
+      {
+       "identifier": "INT16_2D",
+       "name": "2D 16-Bit Integer Vector",
+       "description": "16-bit signed integer vector",
+       "icon": "NONE",
+       "value": 22
+      },
+      {
+       "identifier": "INT32_2D",
+       "name": "2D Integer Vector",
+       "description": "32-bit signed integer vector",
+       "icon": "NONE",
+       "value": 46
+      },
+      {
+       "identifier": "FLOAT2",
+       "name": "2D Vector",
+       "description": "2D vector with floating-point values",
+       "icon": "NONE",
+       "value": 49
+      },
+      {
+       "identifier": "FLOAT4",
+       "name": "4D Vector",
+       "description": "4D vector with floating-point values",
+       "icon": "NONE",
+       "value": 24
+      },
+      {
+       "identifier": "BYTE_COLOR",
+       "name": "Byte Color",
+       "description": "RGBA color with 8-bit positive integer values",
+       "icon": "NONE",
+       "value": 17
+      }
+     ],
+     "default": "FLOAT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "geometry.attribute_remove",
+   "bl_idname": "GEOMETRY_OT_attribute_remove",
+   "label": "Remove Attribute",
+   "description": "Remove attribute from geometry",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "geometry.color_attribute_add",
+   "bl_idname": "GEOMETRY_OT_color_attribute_add",
+   "label": "Add Color Attribute",
+   "description": "Add color attribute to geometry",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of new color attribute",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "SKIP_SAVE",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "domain",
+     "name": "Domain",
+     "description": "Type of element that attribute is stored on",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "POINT",
+       "name": "Vertex",
+       "description": "",
+       "icon": "VERTEXSEL",
+       "value": 0
+      },
+      {
+       "identifier": "CORNER",
+       "name": "Face Corner",
+       "description": "",
+       "icon": "FACE_CORNER",
+       "value": 3
+      }
+     ],
+     "default": "POINT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "data_type",
+     "name": "Data Type",
+     "description": "Type of data stored in attribute",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FLOAT_COLOR",
+       "name": "Color",
+       "description": "RGBA color 32-bit floating-point values",
+       "icon": "NONE",
+       "value": 47
+      },
+      {
+       "identifier": "BYTE_COLOR",
+       "name": "Byte Color",
+       "description": "RGBA color with 8-bit positive integer values",
+       "icon": "NONE",
+       "value": 17
+      }
+     ],
+     "default": "FLOAT_COLOR",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "color",
+     "name": "Color",
+     "description": "Default fill color",
+     "type": "FLOAT",
+     "subtype": "COLOR",
+     "unit": "NONE",
+     "array": [
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ],
+     "hard_min": 0.0,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "geometry.color_attribute_convert",
+   "bl_idname": "GEOMETRY_OT_color_attribute_convert",
+   "label": "Convert Color Attribute",
+   "description": "Change how the color attribute is stored",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "domain",
+     "name": "Domain",
+     "description": "Type of element that attribute is stored on",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "POINT",
+       "name": "Vertex",
+       "description": "",
+       "icon": "VERTEXSEL",
+       "value": 0
+      },
+      {
+       "identifier": "CORNER",
+       "name": "Face Corner",
+       "description": "",
+       "icon": "FACE_CORNER",
+       "value": 3
+      }
+     ],
+     "default": "POINT",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "data_type",
+     "name": "Data Type",
+     "description": "Type of data stored in attribute",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FLOAT_COLOR",
+       "name": "Color",
+       "description": "RGBA color 32-bit floating-point values",
+       "icon": "NONE",
+       "value": 47
+      },
+      {
+       "identifier": "BYTE_COLOR",
+       "name": "Byte Color",
+       "description": "RGBA color with 8-bit positive integer values",
+       "icon": "NONE",
+       "value": 17
+      }
+     ],
+     "default": "FLOAT_COLOR",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "geometry.color_attribute_duplicate",
+   "bl_idname": "GEOMETRY_OT_color_attribute_duplicate",
+   "label": "Duplicate Color Attribute",
+   "description": "Duplicate color attribute",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "geometry.color_attribute_remove",
+   "bl_idname": "GEOMETRY_OT_color_attribute_remove",
+   "label": "Remove Color Attribute",
+   "description": "Remove color attribute from geometry",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "geometry.color_attribute_render_set",
+   "bl_idname": "GEOMETRY_OT_color_attribute_render_set",
+   "label": "Set Render Color",
+   "description": "Set default color attribute used for rendering",
+   "options": [
+    "INTERNAL",
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of color attribute",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Color",
+     "length_max": 64,
+     "flags": [
+      "SKIP_SAVE",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "geometry.geometry_randomization",
+   "bl_idname": "GEOMETRY_OT_geometry_randomization",
+   "label": "Set Geometry Randomization",
+   "description": "Toggle geometry randomization for debugging purposes",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "value",
+     "name": "Value",
+     "description": "Randomize the order of geometry elements (e.g. vertices or edges) after some operations where there are no guarantees about the order. This avoids accidentally depending on something that may change in the future",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  }
+ ]
+}

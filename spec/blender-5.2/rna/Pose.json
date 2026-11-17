@@ -1,0 +1,282 @@
+{
+ "identifier": "Pose",
+ "name": "Pose",
+ "description": "A collection of pose channels, including settings for animating bones",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "bones",
+   "name": "Pose Bones",
+   "description": "Individual pose bones for the armature",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PoseBone",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "ik_solver",
+   "name": "IK Solver",
+   "description": "Selection of IK solver for IK chain",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LEGACY",
+     "name": "Standard",
+     "description": "Original IK solver",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "ITASC",
+     "name": "iTaSC",
+     "description": "Multi constraint, stateful IK solver",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "LEGACY",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_param",
+   "name": "IK Param",
+   "description": "Parameters for IK solver",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "IKParam",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_mirror_x",
+   "name": "X-Axis Mirror",
+   "description": "Apply changes to matching bone on opposite side of X-Axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_mirror_relative",
+   "name": "Relative Mirror",
+   "description": "Apply relative transformations in X-mirror mode (not supported with Auto IK)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_auto_ik",
+   "name": "Auto IK",
+   "description": "Add temporary IK constraints while grabbing bones in Pose Mode",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "animation_visualization",
+   "name": "Animation Visualization",
+   "description": "Animation data for this data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AnimViz",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "apply_pose_from_action",
+   "description": "Apply the given action to this pose by evaluating it at a specific time. Only updates the pose of selected bones, or all bones if none are selected.",
+   "use_self": false,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "action",
+     "name": "Action",
+     "description": "The Action containing the pose",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Action",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    },
+    {
+     "identifier": "evaluation_time",
+     "name": "Evaluation Time",
+     "description": "Time at which the given action is evaluated to obtain the pose",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "blend_pose_from_action",
+   "description": "Blend the given action into this pose by evaluating it at a specific time. Only updates the pose of selected bones, or all bones if none are selected.",
+   "use_self": false,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "action",
+     "name": "Action",
+     "description": "The Action containing the pose",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Action",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    },
+    {
+     "identifier": "blend_factor",
+     "name": "Blend Factor",
+     "description": "How much the given Action affects the final pose",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "evaluation_time",
+     "name": "Evaluation Time",
+     "description": "Time at which the given action is evaluated to obtain the pose",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "backup_create",
+   "description": "Create a backup of the current pose. Only those bones that are animated in the Action are backed up. The object owns the backup, and each object can have only one backup at a time. When you no longer need it, it must be freed use ``backup_clear()``.",
+   "use_self": false,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "action",
+     "name": "Action",
+     "description": "An Action with animation data for the bones. Only the animated bones will be included in the backup.",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Action",
+     "is_id": true,
+     "flags": [
+      "READONLY",
+      "REQUIRED"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "backup_restore",
+   "description": "Restore the previously made pose backup. This can be called multiple times. See ``Pose.backup_create()`` for more info.",
+   "use_self": false,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "success",
+     "name": "",
+     "description": "``True`` when the backup was restored, ``False`` if there was no backup to restore",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "backup_clear",
+   "description": "Free a previously made pose backup. See ``Pose.backup_create()`` for more info.",
+   "use_self": false,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  }
+ ],
+ "root": true
+}

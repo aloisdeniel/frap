@@ -1,0 +1,283 @@
+{
+ "identifier": "DecimateModifier",
+ "name": "Decimate Modifier",
+ "description": "Decimation modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "decimate_type",
+   "name": "Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "COLLAPSE",
+     "name": "Collapse",
+     "description": "Use edge collapsing",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "UNSUBDIV",
+     "name": "Un-Subdivide",
+     "description": "Use un-subdivide face reduction",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "DISSOLVE",
+     "name": "Planar",
+     "description": "Dissolve geometry to form planar polygons",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "COLLAPSE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ratio",
+   "name": "Ratio",
+   "description": "Ratio of triangles to reduce to (collapse only)",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 1.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "iterations",
+   "name": "Iterations",
+   "description": "Number of times reduce the geometry (unsubdivide only)",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 32767,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "angle_limit",
+   "name": "Angle Limit",
+   "description": "Only dissolve angles below this (planar only)",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0872664600610733,
+   "hard_min": 0.0,
+   "hard_max": 3.1415927410125732,
+   "soft_min": 0.0,
+   "soft_max": 3.1415927410125732,
+   "step": 10.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name (collapse only)",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence (collapse only)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_collapse_triangulate",
+   "name": "Triangulate",
+   "description": "Keep triangulated faces resulting from decimation (collapse only)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_symmetry",
+   "name": "Symmetry",
+   "description": "Maintain symmetry on an axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "symmetry_axis",
+   "name": "Axis",
+   "description": "Axis of symmetry",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "X",
+     "name": "X",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "Y",
+     "name": "Y",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "Z",
+     "name": "Z",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "X",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group_factor",
+   "name": "Factor",
+   "description": "Vertex group strength",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 1000.0,
+   "soft_min": 0.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 4,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_dissolve_boundaries",
+   "name": "All Boundaries",
+   "description": "Dissolve all vertices in between face boundaries (planar only)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "delimit",
+   "name": "Delimit",
+   "description": "Limit merging geometry",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NORMAL",
+     "name": "Normal",
+     "description": "Delimit by face directions",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "MATERIAL",
+     "name": "Material",
+     "description": "Delimit by face material",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "SEAM",
+     "name": "Seam",
+     "description": "Delimit by edge seams",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "SHARP",
+     "name": "Sharp",
+     "description": "Delimit by sharp edges",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "UV",
+     "name": "UVs",
+     "description": "Delimit by UV coordinates",
+     "icon": "NONE",
+     "value": 16
+    }
+   ],
+   "default": [],
+   "flags": [
+    "ENUM_FLAG",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "face_count",
+   "name": "Face Count",
+   "description": "The current number of faces in the decimated mesh",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

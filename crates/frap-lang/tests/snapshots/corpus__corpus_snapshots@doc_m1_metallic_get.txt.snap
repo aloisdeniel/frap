@@ -1,0 +1,21 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_m1_metallic_get.txt
+---
+> bpy.data.objects['Cylinder'].data.materials[0].node_tree.nodes['Principled BSDF'].inputs['Metallic'].default_value
+---
+stmt 1 Bpy line 1 @1:1/1+114
+  Get
+    Path bpy.data @1:1/1+114
+      .objects
+      ["Cylinder"]
+      .data
+      .materials
+      [0]
+      .node_tree
+      .nodes
+      ["Principled BSDF"]
+      .inputs
+      ["Metallic"]
+      .default_value

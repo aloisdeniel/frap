@@ -1,0 +1,179 @@
+{
+ "identifier": "CameraStereoData",
+ "name": "Stereo",
+ "description": "Stereoscopy settings for a Camera data-block",
+ "base": null,
+ "name_property": null,
+ "nested": "Camera",
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "convergence_mode",
+   "name": "Mode",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OFFAXIS",
+     "name": "Off-Axis",
+     "description": "Off-axis frustums converging in a plane",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "PARALLEL",
+     "name": "Parallel",
+     "description": "Parallel cameras with no convergence",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "TOE",
+     "name": "Toe-in",
+     "description": "Rotated cameras, looking at the same point at the convergence distance",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "OFFAXIS",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "pivot",
+   "name": "Pivot",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "LEFT",
+     "name": "Left",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "RIGHT",
+     "name": "Right",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "CENTER",
+     "name": "Center",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "LEFT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "interocular_distance",
+   "name": "Interocular Distance",
+   "description": "Set the distance between the eyes - the stereo plane distance / 30 should be fine",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.06499999761581421,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 10000.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "convergence_distance",
+   "name": "Convergence Plane Distance",
+   "description": "The converge point for the stereo cameras (often the distance between a projector and the projection screen)",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 1.9499999284744263,
+   "hard_min": 9.999999747378752e-06,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 9.999999747378752e-06,
+   "soft_max": 15.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_spherical_stereo",
+   "name": "Spherical Stereo",
+   "description": "Render every pixel rotating the camera around the middle of the interocular distance",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pole_merge",
+   "name": "Use Pole Merge",
+   "description": "Fade interocular distance to 0 after the given cutoff angle",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "pole_merge_angle_from",
+   "name": "Pole Merge Start Angle",
+   "description": "Angle at which interocular distance starts to fade to 0",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 1.0471975803375244,
+   "hard_min": 0.0,
+   "hard_max": 1.5707963705062866,
+   "soft_min": 0.0,
+   "soft_max": 1.5707963705062866,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "pole_merge_angle_to",
+   "name": "Pole Merge End Angle",
+   "description": "Angle at which interocular distance is 0",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 1.3089969158172607,
+   "hard_min": 0.0,
+   "hard_max": 1.5707963705062866,
+   "soft_min": 0.0,
+   "soft_max": 1.5707963705062866,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

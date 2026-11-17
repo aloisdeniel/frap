@@ -1,0 +1,335 @@
+{
+ "identifier": "Armature",
+ "name": "Armature",
+ "description": "Armature data-block containing a hierarchy of bones, usually used for rigging characters",
+ "base": "ID",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "animation_data",
+   "name": "Animation Data",
+   "description": "Animation data for this data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "AnimData",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "bones",
+   "name": "Bones",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Bone",
+   "is_id": false,
+   "api": "ArmatureBones",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "edit_bones",
+   "name": "Edit Bones",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "EditBone",
+   "is_id": false,
+   "api": "ArmatureEditBones",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "collections",
+   "name": "Bone Collections (Roots)",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "BoneCollection",
+   "is_id": false,
+   "api": "BoneCollections",
+   "flags": []
+  },
+  {
+   "identifier": "collections_all",
+   "name": "Bone Collections (All)",
+   "description": "List of all bone collections of the armature",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "BoneCollection",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "pose_position",
+   "name": "Pose Position",
+   "description": "Show armature in binding pose or final posed state",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "POSE",
+     "name": "Pose Position",
+     "description": "Show armature in posed state",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "REST",
+     "name": "Rest Position",
+     "description": "Show Armature in binding pose state (no posing possible)",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "POSE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "display_type",
+   "name": "Display Type",
+   "description": "",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OCTAHEDRAL",
+     "name": "Octahedral",
+     "description": "Display bones as octahedral shape (default)",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "STICK",
+     "name": "Stick",
+     "description": "Display bones as simple 2D lines with dots",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "BBONE",
+     "name": "B-Bone",
+     "description": "Display bones as boxes, showing subdivision and B-Splines",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "ENVELOPE",
+     "name": "Envelope",
+     "description": "Display bones as extruded spheres, showing deformation influence volume",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "WIRE",
+     "name": "Wire",
+     "description": "Display bones as thin wires, showing subdivision and B-Splines",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "OCTAHEDRAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_axes",
+   "name": "Display Axes",
+   "description": "Display bone axes",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "axes_position",
+   "name": "Axes Position",
+   "description": "The position for the axes on the bone. Increasing the value moves it closer to the tip; decreasing moves it closer to the root.",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "relation_line_position",
+   "name": "Relation Line Position",
+   "description": "The start position of the relation lines from parent to child bones",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "TAIL",
+     "name": "Tail",
+     "description": "Draw the relationship line from the parent tail to the child head",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "HEAD",
+     "name": "Head",
+     "description": "Draw the relationship line from the parent head to the child head",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "TAIL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_names",
+   "name": "Display Names",
+   "description": "Display bone names",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_mirror_x",
+   "name": "X-Axis Mirror",
+   "description": "Apply changes to matching bone on opposite side of X-Axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_bone_custom_shapes",
+   "name": "Display Custom Bone Shapes",
+   "description": "Display bones with their custom shapes",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_bone_colors",
+   "name": "Display Bone Colors",
+   "description": "Display bone colors",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_editmode",
+   "name": "Is Editmode",
+   "description": "True when used in editmode",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "transform",
+   "description": "Transform armature bones by a matrix",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "matrix",
+     "name": "",
+     "description": "Matrix",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      4,
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 0.0,
+     "soft_max": 0.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.armatures.new('Armature')",
+  "differs_from_default": {
+   "id_type": "ARMATURE",
+   "is_editable": true
+  }
+ }
+}

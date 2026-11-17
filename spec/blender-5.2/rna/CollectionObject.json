@@ -1,0 +1,27 @@
+{
+ "identifier": "CollectionObject",
+ "name": "Collection Object",
+ "description": "Object of a collection with its collection related settings",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "light_linking",
+   "name": "Light Linking",
+   "description": "Light linking settings of the collection",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CollectionLightLinking",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

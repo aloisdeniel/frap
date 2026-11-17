@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/stmt_from_mathutils.txt
+---
+> from mathutils import Vector, Matrix, Euler
+---
+stmt 1 Bpy line 1 @1:1/1+43
+  Noop Import

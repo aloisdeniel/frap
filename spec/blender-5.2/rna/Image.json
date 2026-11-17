@@ -1,0 +1,1428 @@
+{
+ "identifier": "Image",
+ "name": "Image",
+ "description": "Image data-block referencing an external or packed image",
+ "base": "ID",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [
+  {
+   "identifier": "filepath",
+   "name": "File Name",
+   "description": "Image/Movie file name",
+   "type": "STRING",
+   "subtype": "FILE_PATH",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 1024,
+   "flags": [
+    "NEVER_NULL",
+    "PATH_SUPPORTS_BLEND_RELATIVE"
+   ]
+  },
+  {
+   "identifier": "filepath_raw",
+   "name": "File Name",
+   "description": "Image/Movie file name (without data refreshing)",
+   "type": "STRING",
+   "subtype": "FILE_PATH",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 1024,
+   "flags": [
+    "NEVER_NULL",
+    "PATH_SUPPORTS_BLEND_RELATIVE"
+   ]
+  },
+  {
+   "identifier": "file_format",
+   "name": "File Format",
+   "description": "Format used for re-saving this file",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "AVIF",
+     "name": "AVIF (.avif)",
+     "description": "Output image in AVIF format",
+     "icon": "NONE",
+     "value": 37
+    },
+    {
+     "identifier": "JPEG",
+     "name": "JPEG (.jpg)",
+     "description": "Output image in JPEG format",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "OPEN_EXR",
+     "name": "OpenEXR (.exr)",
+     "description": "Output image in OpenEXR format",
+     "icon": "NONE",
+     "value": 23
+    },
+    {
+     "identifier": "PNG",
+     "name": "PNG (.png)",
+     "description": "Output image in PNG format",
+     "icon": "NONE",
+     "value": 17
+    },
+    {
+     "identifier": "WEBP",
+     "name": "WebP (.webp)",
+     "description": "Output image in WebP format",
+     "icon": "NONE",
+     "value": 35
+    },
+    {
+     "identifier": "BMP",
+     "name": "Bitmap (.bmp)",
+     "description": "Output image in bitmap format",
+     "icon": "NONE",
+     "value": 20
+    },
+    {
+     "identifier": "CINEON",
+     "name": "Cineon (.cin)",
+     "description": "Output image in Cineon format",
+     "icon": "NONE",
+     "value": 26
+    },
+    {
+     "identifier": "DPX",
+     "name": "DPX (.dpx)",
+     "description": "Output image in DPX format",
+     "icon": "NONE",
+     "value": 27
+    },
+    {
+     "identifier": "IRIS",
+     "name": "Iris (.rgb)",
+     "description": "Output image in SGI IRIS format",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "JPEG2000",
+     "name": "JPEG 2000 (.jp2)",
+     "description": "Output image in JPEG 2000 format",
+     "icon": "NONE",
+     "value": 30
+    },
+    {
+     "identifier": "HDR",
+     "name": "Radiance HDR (.hdr)",
+     "description": "Output image in Radiance HDR format",
+     "icon": "NONE",
+     "value": 21
+    },
+    {
+     "identifier": "TARGA",
+     "name": "Targa (.tga)",
+     "description": "Output image in Targa format",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "TARGA_RAW",
+     "name": "Targa Raw (.tga)",
+     "description": "Output image in uncompressed Targa format",
+     "icon": "NONE",
+     "value": 14
+    },
+    {
+     "identifier": "TIFF",
+     "name": "TIFF (.tif)",
+     "description": "Output image in TIFF format",
+     "icon": "NONE",
+     "value": 22
+    },
+    {
+     "identifier": "OPEN_EXR_MULTILAYER",
+     "name": "OpenEXR MultiLayer (.exr)",
+     "description": "Output image in multilayer OpenEXR format",
+     "icon": "NONE",
+     "value": 28
+    },
+    {
+     "identifier": "FFMPEG",
+     "name": "FFmpeg Video",
+     "description": "",
+     "icon": "FILE_MOVIE",
+     "value": 24
+    }
+   ],
+   "default": "TARGA",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "source",
+   "name": "Source",
+   "description": "Where the image comes from",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FILE",
+     "name": "Single Image",
+     "description": "Single image file",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "SEQUENCE",
+     "name": "Image Sequence",
+     "description": "Multiple image files, as a sequence",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "MOVIE",
+     "name": "Movie",
+     "description": "Movie file",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "GENERATED",
+     "name": "Generated",
+     "description": "Generated image",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "VIEWER",
+     "name": "Viewer",
+     "description": "Compositing node viewer",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "TILED",
+     "name": "UDIM Tiles",
+     "description": "Tiled UDIM image texture",
+     "icon": "NONE",
+     "value": 6
+    }
+   ],
+   "default": "FILE",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "type",
+   "name": "Type",
+   "description": "How to generate the image",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "IMAGE",
+     "name": "Image",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "MULTILAYER",
+     "name": "Multilayer",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "UV_TEST",
+     "name": "UV Test",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "RENDER_RESULT",
+     "name": "Render Result",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "COMPOSITING",
+     "name": "Compositing",
+     "description": "",
+     "icon": "NONE",
+     "value": 5
+    }
+   ],
+   "default": "IMAGE",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "packed_file",
+   "name": "Packed File",
+   "description": "First packed file of the image",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PackedFile",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "packed_files",
+   "name": "Packed Files",
+   "description": "Collection of packed images",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ImagePackedFile",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "use_view_as_render",
+   "name": "View as Render",
+   "description": "Apply render part of display transformation when displaying this image on the screen",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_deinterlace",
+   "name": "Deinterlace",
+   "description": "Deinterlace movie file on load",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_multiview",
+   "name": "Use Multi-View",
+   "description": "Use Multiple Views (when available)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_stereo_3d",
+   "name": "Stereo 3D",
+   "description": "Image has left and right views",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_multiview",
+   "name": "Multiple Views",
+   "description": "Image has more than one view",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_dirty",
+   "name": "Dirty",
+   "description": "Image has changed and is not saved",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "generated_type",
+   "name": "Generated Type",
+   "description": "Generated image type",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BLANK",
+     "name": "Blank",
+     "description": "Generate a blank image",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "UV_GRID",
+     "name": "UV Grid",
+     "description": "Generated grid to test UV mappings",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "COLOR_GRID",
+     "name": "Color Grid",
+     "description": "Generated improved UV grid to test UV mappings",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "UV_GRID",
+   "flags": []
+  },
+  {
+   "identifier": "generated_width",
+   "name": "Generated Width",
+   "description": "Generated image width",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 1024,
+   "hard_min": 1,
+   "hard_max": 65536,
+   "soft_min": 1,
+   "soft_max": 65536,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "generated_height",
+   "name": "Generated Height",
+   "description": "Generated image height",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 1024,
+   "hard_min": 1,
+   "hard_max": 65536,
+   "soft_min": 1,
+   "soft_max": 65536,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "use_generated_float",
+   "name": "Float Buffer",
+   "description": "Generate floating-point buffer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "generated_color",
+   "name": "Color",
+   "description": "Fill color for the generated image",
+   "type": "FLOAT",
+   "subtype": "COLOR_GAMMA",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "display_aspect",
+   "name": "Display Aspect",
+   "description": "Display Aspect for this image, does not affect rendering",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    1.0,
+    1.0
+   ],
+   "hard_min": 0.10000000149011612,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.10000000149011612,
+   "soft_max": 5000.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "render_slots",
+   "name": "Render Slots",
+   "description": "Render slots of the image",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "RenderSlot",
+   "is_id": false,
+   "api": "RenderSlots",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "tiles",
+   "name": "Image Tiles",
+   "description": "Tiles of the image",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "UDIMTile",
+   "is_id": false,
+   "api": "UDIMTiles",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "has_data",
+   "name": "Has Data",
+   "description": "True if the image data is loaded into memory",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "depth",
+   "name": "Depth",
+   "description": "Image bit depth",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "size",
+   "name": "Size",
+   "description": "Width and height of the image buffer in pixels, zero when image data cannot be loaded",
+   "type": "INT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0,
+    0
+   ],
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 0,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "resolution",
+   "name": "Resolution",
+   "description": "X/Y pixels per meter, for the image buffer",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 0.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame_duration",
+   "name": "Duration",
+   "description": "Duration (in frames) of the image (1 when not a video/sequence)",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "pixels",
+   "name": "Pixels",
+   "description": "Image buffer pixels in floating-point values",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    "dynamic"
+   ],
+   "default": [],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "channels",
+   "name": "Channels",
+   "description": "Number of channels in pixels buffer",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 2147483647,
+   "soft_min": 0,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_float",
+   "name": "Is Float",
+   "description": "True if this image is stored in floating-point buffer",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "colorspace_settings",
+   "name": "Color Space Settings",
+   "description": "Input color space settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorManagedInputColorspaceSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "alpha_mode",
+   "name": "Alpha Mode",
+   "description": "Representation of alpha in the image file, to convert to and from when saving and loading the image",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "STRAIGHT",
+     "name": "Straight",
+     "description": "Store RGB and alpha channels separately with alpha acting as a mask, also known as unassociated alpha. Commonly used by image editing applications and file formats like PNG.",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "PREMUL",
+     "name": "Premultiplied",
+     "description": "Store RGB channels with alpha multiplied in, also known as associated alpha. The natural format for renders and used by file formats like OpenEXR.",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "CHANNEL_PACKED",
+     "name": "Channel Packed",
+     "description": "Different images are packed in the RGB and alpha channels, and they should not affect each other. Channel packing is commonly used by game engines to save memory.",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "Ignore alpha channel from the file and make image fully opaque",
+     "icon": "NONE",
+     "value": 3
+    }
+   ],
+   "default": "STRAIGHT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_half_precision",
+   "name": "Half Float Precision",
+   "description": "Use 16 bits per channel to lower the memory usage during rendering.\nNote: Not supported by Cycles",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "seam_margin",
+   "name": "Seam Margin",
+   "description": "Margin to take into account when fixing UV seams during painting. Higher number would improve seam-fixes for mipmaps, but decreases performance.",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 8,
+   "hard_min": -32768,
+   "hard_max": 32767,
+   "soft_min": 1,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "views_format",
+   "name": "Views Format",
+   "description": "Mode to load image views",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "INDIVIDUAL",
+     "name": "Individual",
+     "description": "Individual files for each view with the prefix as defined by the scene views",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "STEREO_3D",
+     "name": "Stereo 3D",
+     "description": "Single file with an encoded stereo pair",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "INDIVIDUAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "stereo_3d_format",
+   "name": "Stereo 3D Format",
+   "description": "Settings for stereo 3d",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Stereo3dFormat",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "save_render",
+   "description": "Save image to a specific path using a scenes render settings",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "filepath",
+     "name": "",
+     "description": "Output path",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "scene",
+     "name": "",
+     "description": "Scene to take image parameters from",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Scene",
+     "is_id": true,
+     "flags": [
+      "READONLY"
+     ]
+    },
+    {
+     "identifier": "quality",
+     "name": "Quality",
+     "description": "Quality for image formats that support lossy compression, uses default quality if not specified",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 100,
+     "soft_min": 0,
+     "soft_max": 100,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "save",
+   "description": "Save image",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "filepath",
+     "name": "",
+     "description": "Output path, uses image data-block filepath if not specified",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "quality",
+     "name": "Quality",
+     "description": "Quality for image formats that support lossy compression, uses default quality if not specified",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 100,
+     "soft_min": 0,
+     "soft_max": 100,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "save_copy",
+     "name": "Save Copy",
+     "description": "Save the image as a copy, without updating current image's filepath",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "pack",
+   "description": "Pack an image as embedded data into the .blend file",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "data",
+     "name": "data",
+     "description": "Raw data (bytes, exact content of the embedded file)",
+     "type": "STRING",
+     "subtype": "BYTE_STRING",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "data_len",
+     "name": "data_len",
+     "description": "length of given data (mandatory if data is provided)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "unpack",
+   "description": "Save an image packed in the .blend file to disk",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "method",
+     "name": "method",
+     "description": "How to unpack",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "REMOVE",
+       "name": "Remove Pack",
+       "description": "",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "USE_LOCAL",
+       "name": "Use Local File",
+       "description": "",
+       "icon": "NONE",
+       "value": 5
+      },
+      {
+       "identifier": "WRITE_LOCAL",
+       "name": "Write Local File (overwrite existing)",
+       "description": "",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "USE_ORIGINAL",
+       "name": "Use Original File",
+       "description": "",
+       "icon": "NONE",
+       "value": 6
+      },
+      {
+       "identifier": "WRITE_ORIGINAL",
+       "name": "Write Original File (overwrite existing)",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "USE_LOCAL",
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "reload",
+   "description": "Reload the image from its source path",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "update",
+   "description": "Update the display image from the floating-point buffer",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "scale",
+   "description": "Scale the buffer of the image, in pixels",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "width",
+     "name": "",
+     "description": "Width",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "height",
+     "name": "",
+     "description": "Height",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1,
+     "hard_min": 1,
+     "hard_max": 2147483647,
+     "soft_min": 1,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "frame",
+     "name": "Frame",
+     "description": "Frame (for image sequences)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "tile_index",
+     "name": "Tile",
+     "description": "Tile index (for tiled images)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "gl_touch",
+   "description": "Delay the image from being cleaned from the cache due inactivity",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "frame",
+     "name": "Frame",
+     "description": "Frame of image sequence or movie",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "layer_index",
+     "name": "Layer",
+     "description": "Index of layer that should be loaded",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "pass_index",
+     "name": "Pass",
+     "description": "Index of pass that should be loaded",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "error",
+     "name": "Error",
+     "description": "OpenGL error value",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "gl_load",
+   "description": "Load the image into an OpenGL texture. On success, image.bindcode will contain the OpenGL texture bindcode. Colors read from the texture will be in scene linear color space and have premultiplied or straight alpha matching the image alpha mode.",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "frame",
+     "name": "Frame",
+     "description": "Frame of image sequence or movie",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "layer_index",
+     "name": "Layer",
+     "description": "Index of layer that should be loaded",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "pass_index",
+     "name": "Pass",
+     "description": "Index of pass that should be loaded",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "error",
+     "name": "Error",
+     "description": "OpenGL error value",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "gl_free",
+   "description": "Free the image from OpenGL graphics memory",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "filepath_from_user",
+   "description": "Return the absolute path to the filepath of an image frame specified by the image user",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "image_user",
+     "name": "",
+     "description": "Image user of the image to get filepath for",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ImageUser",
+     "is_id": false,
+     "flags": [
+      "READONLY"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "filepath",
+     "name": "File Path",
+     "description": "The resulting filepath from the image and its user",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 1024,
+     "flags": [
+      "OUTPUT",
+      "NEVER_NULL"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "buffers_free",
+   "description": "Free the image buffers from memory",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  }
+ ],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.images.new('Image', 4, 4)",
+  "differs_from_default": {
+   "id_type": "IMAGE",
+   "is_editable": true,
+   "file_format": "PNG",
+   "source": "GENERATED",
+   "type": "UV_TEST",
+   "generated_type": "BLANK",
+   "generated_width": 4,
+   "generated_height": 4,
+   "generated_color": [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "has_data": true,
+   "depth": 24,
+   "size": [
+    4,
+    4
+   ],
+   "resolution": [
+    2834.645751953125,
+    2834.645751953125
+   ],
+   "frame_duration": 1,
+   "pixels": [
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0,
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ],
+   "channels": 4
+  }
+ }
+}

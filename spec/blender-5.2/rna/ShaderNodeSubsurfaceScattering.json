@@ -1,0 +1,144 @@
+{
+ "identifier": "ShaderNodeSubsurfaceScattering",
+ "name": "Subsurface Scattering",
+ "description": "Subsurface multiple scattering shader to simulate light entering the surface and bouncing internally.\nTypically used for materials such as skin, wax, marble or milk",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "falloff",
+   "name": "Method",
+   "description": "Method for rendering subsurface scattering",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BURLEY",
+     "name": "Christensen-Burley",
+     "description": "Approximation to physically based volume scattering",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "RANDOM_WALK",
+     "name": "Random Walk",
+     "description": "Volumetric approximation to physically based volume scattering, using the scattering radius as specified",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "RANDOM_WALK_SKIN",
+     "name": "Random Walk (Skin)",
+     "description": "Volumetric approximation to physically based volume scattering, with scattering radius automatically adjusted to match color textures. Designed for skin shading.",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "RANDOM_WALK_LEGACY",
+     "name": "Random Walk (Legacy)",
+     "description": "Volumetric approximation to physically based volume scattering, using the scattering radius as specified",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "BURLEY",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

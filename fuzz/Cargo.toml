@@ -1,0 +1,49 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# cargo-fuzz targets (ARCHITECTURE §20.1). Owned by the integrator (M1 W0: WP 1.0) except the
+# target files: WP 1.3 owns `fuzz_targets/lang_*.rs`.
+#
+# Not a member of the root workspace (root `Cargo.toml`: `exclude = ["fuzz"]`): it has its own
+# `[workspace]`, lockfile and target dir, so `cargo test --workspace` never builds libFuzzer.
+#   run   : cargo +nightly fuzz run lang_parse -- -max_total_time=600      (needs cargo-fuzz)
+#   check : cargo check --manifest-path fuzz/Cargo.toml                      (stable; CI `checks`)
+#
+# One `[[bin]]` per target, no glob: cargo-fuzz lists targets from this file. A new target is a
+# new `[[bin]]` here (integrator, next W0) or a new file under one of the names below.
+
+[package]
+name = "frap-fuzz"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.97"
+license = "GPL-3.0-or-later"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[workspace]
+
+[dependencies]
+# External dependency outside the root workspace table (cannot inherit, see root Cargo.toml).
+libfuzzer-sys = "0.4"
+frap-lang = { path = "../crates/frap-lang" }
+
+# `parse_complete` on arbitrary UTF-8: never panics, every error has a span (WP 1.3).
+[[bin]]
+name = "lang_parse"
+path = "fuzz_targets/lang_parse.rs"
+test = false
+doc = false
+bench = false
+
+# Raw-mode statement splitter and `is_complete`: never panics, never waits (WP 1.3).
+[[bin]]
+name = "lang_split"
+path = "fuzz_targets/lang_split.rs"
+test = false
+doc = false
+bench = false
+
+[profile.release]
+debug = 1

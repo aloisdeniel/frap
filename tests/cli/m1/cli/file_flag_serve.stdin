@@ -1,0 +1,2 @@
+{"id": 1, "src": "bpy.data.objects['Saved'].location\nbpy.data.is_dirty"}
+{"id": 2, "src": "bpy.data.objects['Saved'].location.x = 4\nbpy.data.is_dirty"}

@@ -1,0 +1,121 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Python-only members (ARCHITECTURE §9.5, RFC 0001 F-DEF-4): defined in Blender's
+# `bpy_types.py` / `bpy_struct` C methods, so `bl_rna` does not list them. Codegen appends them
+# to the struct's generated `StructDef` (props with `PYTHON_ONLY | READONLY`, functions with
+# `FuncFlags::PYTHON_ONLY`); frap implements them as hooks / RNA functions. `bpy_struct.*`
+# methods go to `frap_spec_rna::BPY_STRUCT_FUNCS` (they apply to every struct).
+#
+# Verified on Blender 5.2.4 with `inspect.signature` / `__doc__` (Appendix A of
+# ARCHITECTURE.md): `Mesh.from_pydata(self, vertices, edges, faces, shade_flat=True)`,
+# `Mesh.shade_smooth(self)`, `Mesh.shade_flat(self)`, `keyframe_insert(data_path, *, index=-1,
+# frame=None, group="", options=set(), keytype='KEYFRAME')`, `keyframe_delete(data_path, *,
+# index=-1, frame=None, group="")`; `Object.children` (tuple), `children_recursive` (list),
+# `users_collection` (tuple), `users_scene` (tuple).
+#
+# Schema:
+#   [[prop]]  struct, identifier, description, type ("COLLECTION" | "POINTER"), fixed_type
+#   [[func]]  struct ("bpy_struct" for every struct), identifier, description,
+#             keyword_only_from (index of the first keyword-only param), positional_only
+#             (Python `/`: no keyword arguments; documentation only), params, returns
+#   params/returns: [{identifier, type, default?, fixed_type?, array?, required?, items?}]
+
+[[prop]]
+struct = "Object"
+identifier = "children"
+description = "All the children of this object"
+type = "COLLECTION"
+fixed_type = "Object"
+
+[[prop]]
+struct = "Object"
+identifier = "children_recursive"
+description = "A list of all children from this object"
+type = "COLLECTION"
+fixed_type = "Object"
+
+[[prop]]
+struct = "Object"
+identifier = "users_collection"
+description = "The collections this object is in"
+type = "COLLECTION"
+fixed_type = "Collection"
+
+[[prop]]
+struct = "Object"
+identifier = "users_scene"
+description = "The scenes this object is in"
+type = "COLLECTION"
+fixed_type = "Scene"
+
+[[func]]
+struct = "Mesh"
+identifier = "from_pydata"
+description = "Make a mesh from a list of vertices/edges/faces"
+params = [
+  { identifier = "vertices", type = "COLLECTION", fixed_type = "AnyType", required = true },
+  { identifier = "edges", type = "COLLECTION", fixed_type = "AnyType", required = true },
+  { identifier = "faces", type = "COLLECTION", fixed_type = "AnyType", required = true },
+  { identifier = "shade_flat", type = "BOOLEAN", default = true },
+]
+
+[[func]]
+struct = "Mesh"
+identifier = "shade_smooth"
+description = "Render and display faces smooth, using interpolated vertex normals, removing the \"sharp_face\" attribute"
+params = []
+
+[[func]]
+struct = "Mesh"
+identifier = "shade_flat"
+description = "Render and display faces uniform, using face normals, setting the \"sharp_face\" attribute true for every face"
+params = []
+
+[[func]]
+struct = "bpy_struct"
+identifier = "keyframe_insert"
+description = "Insert a keyframe on the property given, adding fcurves and animation data when necessary"
+keyword_only_from = 1
+params = [
+  { identifier = "data_path", type = "STRING", required = true },
+  { identifier = "index", type = "INT", default = -1 },
+  { identifier = "frame", type = "FLOAT", default = 0.0, optional_none = true },
+  { identifier = "group", type = "STRING", default = "" },
+  { identifier = "options", type = "ENUM", flag = true, default = [], items = ["INSERTKEY_NEEDED", "INSERTKEY_VISUAL", "INSERTKEY_REPLACE", "INSERTKEY_AVAILABLE", "INSERTKEY_CYCLE_AWARE"] },
+  { identifier = "keytype", type = "ENUM", default = "KEYFRAME", items = ["KEYFRAME", "BREAKDOWN", "MOVING_HOLD", "EXTREME", "JITTER", "GENERATED"] },
+]
+returns = [{ identifier = "result", type = "BOOLEAN", default = false }]
+
+[[func]]
+struct = "bpy_struct"
+identifier = "keyframe_delete"
+description = "Remove a keyframe from this properties fcurve"
+keyword_only_from = 1
+params = [
+  { identifier = "data_path", type = "STRING", required = true },
+  { identifier = "index", type = "INT", default = -1 },
+  { identifier = "frame", type = "FLOAT", default = 0.0, optional_none = true },
+  { identifier = "group", type = "STRING", default = "" },
+]
+returns = [{ identifier = "result", type = "BOOLEAN", default = false }]
+
+[[func]]
+struct = "bpy_struct"
+identifier = "path_resolve"
+description = "Returns the property from the path, raise an exception when not found"
+positional_only = true
+params = [
+  { identifier = "path", type = "STRING", required = true },
+  { identifier = "coerce", type = "BOOLEAN", default = true },
+]
+returns = [{ identifier = "result", type = "POINTER", fixed_type = "AnyType" }]
+
+[[func]]
+struct = "bpy_struct"
+identifier = "path_from_id"
+description = "Returns the data path from the ID to this object (string)"
+positional_only = true
+params = [
+  { identifier = "property", type = "STRING", default = "" },
+]
+returns = [{ identifier = "result", type = "STRING", default = "" }]

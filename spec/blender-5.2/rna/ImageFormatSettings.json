@@ -1,0 +1,669 @@
+{
+ "identifier": "ImageFormatSettings",
+ "name": "Image Format",
+ "description": "Settings for image formats",
+ "base": null,
+ "name_property": null,
+ "nested": "Scene",
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "media_type",
+   "name": "Media Type",
+   "description": "The type of media to save",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "IMAGE",
+     "name": "Image",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "MULTI_LAYER_IMAGE",
+     "name": "Multi-Layer EXR",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "VIDEO",
+     "name": "Video",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "IMAGE",
+   "flags": []
+  },
+  {
+   "identifier": "file_format",
+   "name": "File Format",
+   "description": "File format to save the rendered images as",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "AVIF",
+     "name": "AVIF (.avif)",
+     "description": "Output image in AVIF format",
+     "icon": "NONE",
+     "value": 37
+    },
+    {
+     "identifier": "JPEG",
+     "name": "JPEG (.jpg)",
+     "description": "Output image in JPEG format",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "OPEN_EXR",
+     "name": "OpenEXR (.exr)",
+     "description": "Output image in OpenEXR format",
+     "icon": "NONE",
+     "value": 23
+    },
+    {
+     "identifier": "PNG",
+     "name": "PNG (.png)",
+     "description": "Output image in PNG format",
+     "icon": "NONE",
+     "value": 17
+    },
+    {
+     "identifier": "WEBP",
+     "name": "WebP (.webp)",
+     "description": "Output image in WebP format",
+     "icon": "NONE",
+     "value": 35
+    },
+    {
+     "identifier": "BMP",
+     "name": "Bitmap (.bmp)",
+     "description": "Output image in bitmap format",
+     "icon": "NONE",
+     "value": 20
+    },
+    {
+     "identifier": "CINEON",
+     "name": "Cineon (.cin)",
+     "description": "Output image in Cineon format",
+     "icon": "NONE",
+     "value": 26
+    },
+    {
+     "identifier": "DPX",
+     "name": "DPX (.dpx)",
+     "description": "Output image in DPX format",
+     "icon": "NONE",
+     "value": 27
+    },
+    {
+     "identifier": "IRIS",
+     "name": "Iris (.rgb)",
+     "description": "Output image in SGI IRIS format",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "JPEG2000",
+     "name": "JPEG 2000 (.jp2)",
+     "description": "Output image in JPEG 2000 format",
+     "icon": "NONE",
+     "value": 30
+    },
+    {
+     "identifier": "HDR",
+     "name": "Radiance HDR (.hdr)",
+     "description": "Output image in Radiance HDR format",
+     "icon": "NONE",
+     "value": 21
+    },
+    {
+     "identifier": "TARGA",
+     "name": "Targa (.tga)",
+     "description": "Output image in Targa format",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "TARGA_RAW",
+     "name": "Targa Raw (.tga)",
+     "description": "Output image in uncompressed Targa format",
+     "icon": "NONE",
+     "value": 14
+    },
+    {
+     "identifier": "TIFF",
+     "name": "TIFF (.tif)",
+     "description": "Output image in TIFF format",
+     "icon": "NONE",
+     "value": 22
+    },
+    {
+     "identifier": "OPEN_EXR_MULTILAYER",
+     "name": "OpenEXR MultiLayer (.exr)",
+     "description": "Output image in multilayer OpenEXR format",
+     "icon": "NONE",
+     "value": 28
+    },
+    {
+     "identifier": "FFMPEG",
+     "name": "FFmpeg Video",
+     "description": "",
+     "icon": "FILE_MOVIE",
+     "value": 24
+    }
+   ],
+   "default": "PNG",
+   "flags": []
+  },
+  {
+   "identifier": "color_mode",
+   "name": "Color Mode",
+   "description": "Choose BW for saving grayscale images, RGB for saving red, green and blue channels, and RGBA for saving red, green, blue and alpha channels",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BW",
+     "name": "BW",
+     "description": "Images get saved in 8-bit grayscale (only PNG, JPEG, TGA, TIF)",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "RGB",
+     "name": "RGB",
+     "description": "Images are saved with RGB (color) data",
+     "icon": "NONE",
+     "value": 24
+    },
+    {
+     "identifier": "RGBA",
+     "name": "RGBA",
+     "description": "Images are saved with RGB and Alpha data (if supported)",
+     "icon": "NONE",
+     "value": 32
+    }
+   ],
+   "default": "RGBA",
+   "flags": []
+  },
+  {
+   "identifier": "color_depth",
+   "name": "Color Depth",
+   "description": "Bit depth per channel",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "8",
+     "name": "8",
+     "description": "8-bit color channels",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "10",
+     "name": "10",
+     "description": "10-bit color channels",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "12",
+     "name": "12",
+     "description": "12-bit color channels",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "16",
+     "name": "16",
+     "description": "16-bit color channels",
+     "icon": "NONE",
+     "value": 16
+    },
+    {
+     "identifier": "32",
+     "name": "32",
+     "description": "32-bit color channels",
+     "icon": "NONE",
+     "value": 64
+    }
+   ],
+   "default": "8",
+   "flags": []
+  },
+  {
+   "identifier": "quality",
+   "name": "Quality",
+   "description": "Quality for image formats that support lossy compression",
+   "type": "INT",
+   "subtype": "PERCENTAGE",
+   "unit": "NONE",
+   "default": 90,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "compression",
+   "name": "Compression",
+   "description": "Amount of time to determine best compression: 0 = no compression with fast file output, 100 = maximum lossless compression with slow file output",
+   "type": "INT",
+   "subtype": "PERCENTAGE",
+   "unit": "NONE",
+   "default": 15,
+   "hard_min": 0,
+   "hard_max": 100,
+   "soft_min": 0,
+   "soft_max": 100,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "use_preview",
+   "name": "Preview",
+   "description": "When rendering animations, save JPG preview images in same directory",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "exr_codec",
+   "name": "Codec",
+   "description": "Compression codec settings for OpenEXR",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "No compression",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "ZIP",
+     "name": "ZIP",
+     "description": "Lossless zip compression of 16 row image blocks",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "PIZ",
+     "name": "PIZ",
+     "description": "Lossless wavelet compression, effective for noisy/grainy images",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "DWAA",
+     "name": "DWAA (lossy)",
+     "description": "JPEG-like lossy compression on 32 row image blocks",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "DWAB",
+     "name": "DWAB (lossy)",
+     "description": "JPEG-like lossy compression on 256 row image blocks",
+     "icon": "NONE",
+     "value": 9
+    },
+    {
+     "identifier": "HTJ2K",
+     "name": "HTJ2K",
+     "description": "Lossless compression based on high throughput JPEG 2000 encoding. It produces smaller files, but it is new and not widely supported by other software yet.",
+     "icon": "NONE",
+     "value": 10
+    },
+    {
+     "identifier": "ZIPS",
+     "name": "ZIPS",
+     "description": "Lossless zip compression, each image row compressed separately",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "RLE",
+     "name": "RLE",
+     "description": "Lossless run length encoding compression",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "PXR24",
+     "name": "Pxr24 (lossy)",
+     "description": "Lossy compression for 32 bit float images (stores 24 bits of each float)",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "B44",
+     "name": "B44 (lossy)",
+     "description": "Lossy compression for 16 bit float images, at fixed 2.3:1 ratio",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "B44A",
+     "name": "B44A (lossy)",
+     "description": "Lossy compression for 16 bit float images, at fixed 2.3:1 ratio",
+     "icon": "NONE",
+     "value": 7
+    }
+   ],
+   "default": "NONE",
+   "flags": []
+  },
+  {
+   "identifier": "use_exr_interleave",
+   "name": "Interleave",
+   "description": "Use legacy interleaved storage of views, layers and passes for compatibility with applications that do not support more efficient multi-part OpenEXR files.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_jpeg2k_ycc",
+   "name": "YCC",
+   "description": "Save luminance-chrominance-chrominance channels instead of RGB colors",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_jpeg2k_cinema_preset",
+   "name": "Cinema",
+   "description": "Use OpenJPEG Cinema Preset",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "use_jpeg2k_cinema_48",
+   "name": "Cinema (48)",
+   "description": "Use OpenJPEG Cinema Preset (48fps)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "jpeg2k_codec",
+   "name": "Codec",
+   "description": "Codec settings for JPEG 2000",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "JP2",
+     "name": "JP2",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "J2K",
+     "name": "J2K",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "JP2",
+   "flags": []
+  },
+  {
+   "identifier": "tiff_codec",
+   "name": "Compression",
+   "description": "Compression mode for TIFF",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "DEFLATE",
+     "name": "Deflate",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "LZW",
+     "name": "LZW",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "PACKBITS",
+     "name": "Pack Bits",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "DEFLATE",
+   "flags": []
+  },
+  {
+   "identifier": "use_cineon_log",
+   "name": "Log",
+   "description": "Convert to logarithmic color space",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "cineon_black",
+   "name": "Black",
+   "description": "Log conversion reference blackpoint",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 1024,
+   "soft_min": 0,
+   "soft_max": 1024,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "cineon_white",
+   "name": "White",
+   "description": "Log conversion reference whitepoint",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": 0,
+   "hard_max": 1024,
+   "soft_min": 0,
+   "soft_max": 1024,
+   "step": 1,
+   "flags": []
+  },
+  {
+   "identifier": "cineon_gamma",
+   "name": "Gamma",
+   "description": "Log conversion gamma",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 10.0,
+   "soft_min": 0.0,
+   "soft_max": 10.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "views_format",
+   "name": "Views Format",
+   "description": "Format of multiview media",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "INDIVIDUAL",
+     "name": "Individual",
+     "description": "Individual files for each view with the prefix as defined by the scene views",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "STEREO_3D",
+     "name": "Stereo 3D",
+     "description": "Single file with an encoded stereo pair",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "MULTIVIEW",
+     "name": "Multi-View",
+     "description": "Single file with all the views",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "INDIVIDUAL",
+   "flags": []
+  },
+  {
+   "identifier": "stereo_3d_format",
+   "name": "Stereo 3D Format",
+   "description": "Settings for stereo 3D",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Stereo3dFormat",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "color_management",
+   "name": "Color Management",
+   "description": "Which color management settings to use for file saving",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FOLLOW_SCENE",
+     "name": "Follow Scene",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "OVERRIDE",
+     "name": "Override",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "FOLLOW_SCENE",
+   "flags": []
+  },
+  {
+   "identifier": "view_settings",
+   "name": "View Settings",
+   "description": "Color management settings applied on image before saving",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorManagedViewSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "display_settings",
+   "name": "Display Settings",
+   "description": "Settings of device saved image would be displayed on",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorManagedDisplaySettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "linear_colorspace_settings",
+   "name": "Color Space Settings",
+   "description": "Output color space settings",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ColorManagedInputColorspaceSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "has_linear_colorspace",
+   "name": "Has Linear Color Space",
+   "description": "File format expects linear color space",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.scenes.new('Scene').render.image_settings",
+  "differs_from_default": {}
+ }
+}

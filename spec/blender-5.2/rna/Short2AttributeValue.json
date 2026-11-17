@@ -1,0 +1,36 @@
+{
+ "identifier": "Short2AttributeValue",
+ "name": "2D 16-Bit Integer Vector Attribute Value",
+ "description": "2D value in geometry attribute",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "value",
+   "name": "Vector",
+   "description": "2D vector",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    2
+   ],
+   "default": [
+    0,
+    0
+   ],
+   "hard_min": -32768,
+   "hard_max": 32767,
+   "soft_min": -32768,
+   "soft_max": 32767,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

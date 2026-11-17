@@ -1,0 +1,16 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_float_inf_arg.txt
+---
+> bpy.ops.transform.translate(value=(float('inf'), 0, 0))
+---
+stmt 1 Bpy line 1 @1:1/1+55
+  Invoke transform.translate
+    arg value @1:29/29+26
+      Tuple @1:35/35+20
+        Builtin Float @1:36/36+12
+          arg (positional) @1:42/42+5
+            Str "inf" @1:42/42+5
+        Int 0 @1:50/50+1
+        Int 0 @1:53/53+1

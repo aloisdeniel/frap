@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_describe_op.txt
+---
+> bpy.ops.frap.describe(target='mesh.bevel')
+---
+stmt 1 Bpy line 1 @1:1/1+42
+  Invoke frap.describe
+    arg target @1:23/23+19
+      Str "mesh.bevel" @1:30/30+12

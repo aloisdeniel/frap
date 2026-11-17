@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_backslash_junk.txt
+---
+> bpy.data.objects \ x
+---
+error 1 SyntaxError SYNTAX @1:18/18+1
+  message: unexpected character after line continuation character

@@ -1,0 +1,223 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 6,
+      "ok": true
+    },
+    {
+      "line": 7,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: expected sequence items of type float, not str"
+    },
+    {
+      "line": 8,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: expected sequence items of type float, not str"
+    },
+    {
+      "line": 9,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val:"
+    },
+    {
+      "line": 10,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "vector[index] = x: assigned value not a number"
+    },
+    {
+      "line": 11,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "vector[index] = x: assigned value not a number"
+    },
+    {
+      "line": 12,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val:"
+    },
+    {
+      "line": 13,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Object.name expected a string type, not int"
+    },
+    {
+      "line": 14,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Object.name doesn't support None from string types"
+    },
+    {
+      "line": 15,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Object.hide_render expected True/False or 0/1, not str"
+    },
+    {
+      "line": 16,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Object.hide_render expected True/False or 0/1, not int"
+    },
+    {
+      "line": 17,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Object.hide_render expected True/False or 0/1, not float"
+    },
+    {
+      "line": 18,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Object.hide_render expected True/False or 0/1, not NoneType"
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Object.parent expected a Object type, not Mesh"
+    },
+    {
+      "line": 21,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Object.parent expected a Object type, not str"
+    },
+    {
+      "line": 22,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Object.parent ID type does not support assignment to itself"
+    },
+    {
+      "line": 23,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Object.pass_index expected an int type, not float"
+    },
+    {
+      "line": 24,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Object.pass_index expected an int type, not str"
+    },
+    {
+      "line": 25,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: expected a string enum, not int"
+    },
+    {
+      "line": 26,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Scene.frame_start expected an int type, not float"
+    },
+    {
+      "line": 27,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Scene.camera expected a Object type, not Mesh"
+    },
+    {
+      "line": 28,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: RenderSettings.filepath expected a string type, not int"
+    },
+    {
+      "line": 29,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: NodeSocketFloatFactor.default_value expected a float type, not str"
+    },
+    {
+      "line": 30,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "vector indices must be integers, not str"
+    },
+    {
+      "line": 31,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.68592066, -0.32401347, 0.6515582, 7.3588915],
+        [0.72767633, 0.30542085, -0.6141704, -6.925791],
+        [0.0, 0.89539564, 0.4452714, 4.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.3588915, -6.925791, 4.958309],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 2.0, 0.0, 0.0],
+        [0.0, 0.0, 3.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 2.0, 3.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086465, -0.7711008, 0.5663932, 4.0762453],
+        [0.95517117, -0.19988336, 0.2183912, 1.005454],
+        [-0.05518906, 0.60452473, 0.79467225, 5.903862],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0762453, 1.005454, 5.903862],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

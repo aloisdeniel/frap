@@ -1,0 +1,165 @@
+{
+ "identifier": "ShaderNodeBsdfMetallic",
+ "name": "Metallic BSDF",
+ "description": "Metallic reflection with microfacet distribution, and metallic fresnel",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "distribution",
+   "name": "Distribution",
+   "description": "Light scattering distribution on rough surface",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BECKMANN",
+     "name": "Beckmann",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "GGX",
+     "name": "GGX",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "MULTI_GGX",
+     "name": "Multiscatter GGX",
+     "description": "GGX with additional correction to account for multiple scattering, preserve energy and prevent unexpected darkening at high roughness",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "BECKMANN",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "fresnel_type",
+   "name": "Fresnel Type",
+   "description": "Fresnel method used to tint the metal",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "PHYSICAL_CONDUCTOR",
+     "name": "Physical Conductor",
+     "description": "Fresnel conductor based on the complex refractive index per color channel",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "F82",
+     "name": "F82 Tint",
+     "description": "An approximation of the Fresnel conductor curve based on the colors at perpendicular and near-grazing (roughly 82°) angles",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "PHYSICAL_CONDUCTOR",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

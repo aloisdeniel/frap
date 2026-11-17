@@ -1,0 +1,62 @@
+{
+ "identifier": "DepsgraphUpdate",
+ "name": "Dependency Graph Update",
+ "description": "Information about ID that was updated",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "id",
+   "name": "ID",
+   "description": "Updated data-block",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ID",
+   "is_id": true,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "is_updated_transform",
+   "name": "Transform",
+   "description": "Object transformation is updated",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "is_updated_geometry",
+   "name": "Geometry",
+   "description": "Object geometry is updated",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "is_updated_shading",
+   "name": "Shading",
+   "description": "Object shading is updated",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

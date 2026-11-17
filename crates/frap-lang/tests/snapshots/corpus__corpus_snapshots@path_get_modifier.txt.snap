@@ -1,0 +1,15 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_get_modifier.txt
+---
+> bpy.data.objects['Cube'].modifiers['Bevel'].width
+---
+stmt 1 Bpy line 1 @1:1/1+49
+  Get
+    Path bpy.data @1:1/1+49
+      .objects
+      ["Cube"]
+      .modifiers
+      ["Bevel"]
+      .width

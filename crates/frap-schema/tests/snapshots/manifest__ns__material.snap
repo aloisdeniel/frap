@@ -1,0 +1,8 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  "material.copy | planned M8 | poll YNYNN/YNYNN | ",
+  "material.new | planned M1 | poll YNYNN/YNYNN | ",
+  "material.paste | planned M8 | poll YNYNN/YNYNN | "
+]

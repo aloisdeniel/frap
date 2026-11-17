@@ -1,0 +1,15 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_vector_component.txt
+---
+> bpy.data.objects['Cube'].location.z = 1.5
+---
+stmt 1 Bpy line 1 @1:1/1+41
+  Set Assign
+    Path bpy.data @1:1/1+35
+      .objects
+      ["Cube"]
+      .location
+      .z
+    Float 1.5 @1:39/39+3

@@ -1,0 +1,7 @@
+import bpy
+bpy.ops.mesh.primitive_cube_add()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+#@frap    bpy.ops.frap.select_elements(type='FACE', indices=[5])
+bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value": (0, 0, 1)})
+bpy.ops.object.mode_set(mode='OBJECT')

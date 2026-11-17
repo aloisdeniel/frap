@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_exec_undo_positional.txt
+---
+> bpy.ops.object.delete('EXEC_DEFAULT', True)
+---
+stmt 1 Bpy line 1 @1:1/1+43
+  Invoke object.delete
+    positional
+      Str "EXEC_DEFAULT" @1:23/23+14
+    positional
+      Bool true @1:39/39+4

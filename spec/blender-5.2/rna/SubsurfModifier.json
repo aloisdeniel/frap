@@ -1,0 +1,324 @@
+{
+ "identifier": "SubsurfModifier",
+ "name": "Subdivision Surface Modifier",
+ "description": "Subdivision surface modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "uv_smooth",
+   "name": "UV Smooth",
+   "description": "Controls how smoothing is applied to UVs",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "NONE",
+     "name": "None",
+     "description": "UVs are not smoothed, boundaries are kept sharp",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "PRESERVE_CORNERS",
+     "name": "Keep Corners",
+     "description": "UVs are smoothed, corners on discontinuous boundary are kept sharp",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "PRESERVE_CORNERS_AND_JUNCTIONS",
+     "name": "Keep Corners, Junctions",
+     "description": "UVs are smoothed, corners on discontinuous boundary and junctions of 3 or more regions are kept sharp",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "PRESERVE_CORNERS_JUNCTIONS_AND_CONCAVE",
+     "name": "Keep Corners, Junctions, Concave",
+     "description": "UVs are smoothed, corners on discontinuous boundary, junctions of 3 or more regions and darts and concave corners are kept sharp",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "PRESERVE_BOUNDARIES",
+     "name": "Keep Boundaries",
+     "description": "UVs are smoothed, boundaries are kept sharp",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "SMOOTH_ALL",
+     "name": "All",
+     "description": "UVs and boundaries are smoothed",
+     "icon": "NONE",
+     "value": 5
+    }
+   ],
+   "default": "PRESERVE_BOUNDARIES",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "quality",
+   "name": "Quality",
+   "description": "Accuracy of vertex positions, lower value is faster but less precise",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 3,
+   "hard_min": 1,
+   "hard_max": 10,
+   "soft_min": 1,
+   "soft_max": 6,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "boundary_smooth",
+   "name": "Boundary Smooth",
+   "description": "Controls how open boundaries are smoothed",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "PRESERVE_CORNERS",
+     "name": "Keep Corners",
+     "description": "Smooth boundaries, but corners are kept sharp",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "ALL",
+     "name": "All",
+     "description": "Smooth boundaries, including corners",
+     "icon": "NONE",
+     "value": 0
+    }
+   ],
+   "default": "ALL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "subdivision_type",
+   "name": "Subdivision Type",
+   "description": "Select type of subdivision algorithm",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "CATMULL_CLARK",
+     "name": "Catmull-Clark",
+     "description": "Create a smooth curved surface using the Catmull-Clark subdivision scheme",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "SIMPLE",
+     "name": "Simple",
+     "description": "Subdivide faces without changing shape",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "CATMULL_CLARK",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "levels",
+   "name": "Levels",
+   "description": "Number of subdivisions to perform in the 3D viewport",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 1,
+   "hard_min": 0,
+   "hard_max": 11,
+   "soft_min": 0,
+   "soft_max": 6,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "render_levels",
+   "name": "Render Levels",
+   "description": "Number of subdivisions to perform when rendering",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 2,
+   "hard_min": 0,
+   "hard_max": 11,
+   "soft_min": 0,
+   "soft_max": 6,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_only_control_edges",
+   "name": "Optimal Display",
+   "description": "Skip displaying interior subdivided edges",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_creases",
+   "name": "Use Creases",
+   "description": "Use mesh crease information to sharpen edges or corners",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_custom_normals",
+   "name": "Use Custom Normals",
+   "description": "Interpolates existing custom normals to resulting mesh",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_limit_surface",
+   "name": "Use Limit Surface",
+   "description": "Place vertices at the surface that would be produced with infinite levels of subdivision (smoothest possible shape)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_adaptive_subdivision",
+   "name": "Use Adaptive Subdivision",
+   "description": "Adaptively subdivide mesh based on camera distance",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "adaptive_space",
+   "name": "Adaptive Space",
+   "description": "How to adaptively subdivide the mesh",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "PIXEL",
+     "name": "Pixel",
+     "description": "Subdivide polygons to reach a specified pixel size on screen",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object",
+     "description": "Subdivide to reach a specified edge length in object space. This is required to use adaptive subdivision for instanced meshes",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "PIXEL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "adaptive_pixel_size",
+   "name": "Pixel Size",
+   "description": "Target polygon pixel size for adaptive subdivision",
+   "type": "FLOAT",
+   "subtype": "PIXEL",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.10000000149011612,
+   "hard_max": 1000.0,
+   "soft_min": 0.5,
+   "soft_max": 1000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "adaptive_object_edge_length",
+   "name": "Edge Length",
+   "description": "Target object space edge length for adaptive subdivision",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.009999999776482582,
+   "hard_min": 9.999999747378752e-05,
+   "hard_max": 1000.0,
+   "soft_min": 0.0010000000474974513,
+   "soft_max": 1000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_adaptive_subdivision_panel",
+   "name": "open_adaptive_subdivision_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "open_advanced_panel",
+   "name": "open_advanced_panel",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

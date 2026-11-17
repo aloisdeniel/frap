@@ -1,0 +1,14 @@
+{
+ "bl_idname": "ShaderNodeGroup",
+ "srna": "ShaderNodeGroup",
+ "name": "Group",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [],
+ "outputs": [],
+ "props": {
+  "node_tree": null
+ }
+}

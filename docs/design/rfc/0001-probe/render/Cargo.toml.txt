@@ -1,0 +1,13 @@
+[package]
+name = "frap-probe-render"
+description = "WP 0.2 probe of frap-render (§19.2): wgpu device, offscreen clear-and-readback, RenderService impl"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-probe-render-scene.workspace = true
+wgpu.workspace = true
+pollster.workspace = true

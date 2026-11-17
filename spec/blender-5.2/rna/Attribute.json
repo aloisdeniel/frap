@@ -1,0 +1,258 @@
+{
+ "identifier": "Attribute",
+ "name": "Attribute",
+ "description": "Geometry attribute",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "Name of the Attribute",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 0,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "data_type",
+   "name": "Data Type",
+   "description": "Type of data stored in attribute",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FLOAT",
+     "name": "Float",
+     "description": "Floating-point value",
+     "icon": "NONE",
+     "value": 10
+    },
+    {
+     "identifier": "INT",
+     "name": "Integer",
+     "description": "32-bit integer",
+     "icon": "NONE",
+     "value": 11
+    },
+    {
+     "identifier": "BOOLEAN",
+     "name": "Boolean",
+     "description": "True or false",
+     "icon": "NONE",
+     "value": 50
+    },
+    {
+     "identifier": "FLOAT_VECTOR",
+     "name": "Vector",
+     "description": "3D vector with floating-point values",
+     "icon": "NONE",
+     "value": 48
+    },
+    {
+     "identifier": "FLOAT_COLOR",
+     "name": "Color",
+     "description": "RGBA color with 32-bit floating-point values",
+     "icon": "NONE",
+     "value": 47
+    },
+    {
+     "identifier": "QUATERNION",
+     "name": "Quaternion",
+     "description": "Floating point quaternion rotation",
+     "icon": "NONE",
+     "value": 52
+    },
+    {
+     "identifier": "FLOAT4X4",
+     "name": "4x4 Matrix",
+     "description": "Floating point matrix",
+     "icon": "NONE",
+     "value": 20
+    },
+    {
+     "identifier": "STRING",
+     "name": "String",
+     "description": "Text string",
+     "icon": "NONE",
+     "value": 12
+    },
+    {
+     "identifier": "INT8",
+     "name": "8-Bit Integer",
+     "description": "Smaller integer with a range from -128 to 127",
+     "icon": "NONE",
+     "value": 45
+    },
+    {
+     "identifier": "INT16_2D",
+     "name": "2D 16-Bit Integer Vector",
+     "description": "16-bit signed integer vector",
+     "icon": "NONE",
+     "value": 22
+    },
+    {
+     "identifier": "INT32_2D",
+     "name": "2D Integer Vector",
+     "description": "32-bit signed integer vector",
+     "icon": "NONE",
+     "value": 46
+    },
+    {
+     "identifier": "FLOAT2",
+     "name": "2D Vector",
+     "description": "2D vector with floating-point values",
+     "icon": "NONE",
+     "value": 49
+    },
+    {
+     "identifier": "FLOAT4",
+     "name": "4D Vector",
+     "description": "4D vector with floating-point values",
+     "icon": "NONE",
+     "value": 24
+    },
+    {
+     "identifier": "BYTE_COLOR",
+     "name": "Byte Color",
+     "description": "RGBA color with 8-bit positive integer values",
+     "icon": "NONE",
+     "value": 17
+    }
+   ],
+   "default": "FLOAT",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "storage_type",
+   "name": "Storage Type",
+   "description": "Method used to store the data",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ARRAY",
+     "name": "Array",
+     "description": "Store a value for every element",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "SINGLE",
+     "name": "Single",
+     "description": "Store a single value for the entire domain",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "ARRAY",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "domain",
+   "name": "Domain",
+   "description": "Domain of the Attribute",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "POINT",
+     "name": "Point",
+     "description": "Attribute on point",
+     "icon": "VERTEXSEL",
+     "value": 0
+    },
+    {
+     "identifier": "EDGE",
+     "name": "Edge",
+     "description": "Attribute on mesh edge",
+     "icon": "EDGESEL",
+     "value": 1
+    },
+    {
+     "identifier": "FACE",
+     "name": "Face",
+     "description": "Attribute on mesh faces",
+     "icon": "FACESEL",
+     "value": 2
+    },
+    {
+     "identifier": "CORNER",
+     "name": "Face Corner",
+     "description": "Attribute on mesh face corner",
+     "icon": "FACE_CORNER",
+     "value": 3
+    },
+    {
+     "identifier": "CURVE",
+     "name": "Spline",
+     "description": "Attribute on spline",
+     "icon": "CURVE_DATA",
+     "value": 4
+    },
+    {
+     "identifier": "INSTANCE",
+     "name": "Instance",
+     "description": "Attribute on instance",
+     "icon": "EMPTY_AXIS",
+     "value": 5
+    },
+    {
+     "identifier": "LAYER",
+     "name": "Layer",
+     "description": "Attribute on Grease Pencil layer",
+     "icon": "OUTLINER_DATA_GP_LAYER",
+     "value": 6
+    }
+   ],
+   "default": "POINT",
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_internal",
+   "name": "Is Internal",
+   "description": "The attribute is meant for internal use by Blender",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_required",
+   "name": "Is Required",
+   "description": "Whether the attribute can be removed or renamed",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

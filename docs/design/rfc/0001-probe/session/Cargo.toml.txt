@@ -1,0 +1,27 @@
+[package]
+name = "frap-probe-session"
+description = "WP 0.2 probe of frap-session: Host/Services impl, resolver, ops (end-to-end tests)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = ["gpu"]
+# §3.6: off -> render.render reports GPU_UNAVAILABLE; frap-render (wgpu) is not built.
+gpu = ["dep:frap-probe-render"]
+
+[dependencies]
+frap-probe-rna.workspace = true
+frap-probe-spec.workspace = true
+frap-probe-mesh.workspace = true
+frap-probe-nodes.workspace = true
+frap-probe-scene.workspace = true
+frap-probe-render-scene.workspace = true
+frap-probe-op.workspace = true
+frap-probe-render = { workspace = true, optional = true }
+smallvec.workspace = true
+smol_str.workspace = true
+indexmap.workspace = true
+linkme.workspace = true

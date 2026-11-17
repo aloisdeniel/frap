@@ -1,0 +1,2915 @@
+{
+ "namespace": "anim",
+ "count": 64,
+ "operators": [
+  {
+   "idname": "anim.change_frame",
+   "bl_idname": "ANIM_OT_change_frame",
+   "label": "Change Frame",
+   "description": "Interactively change the current frame number",
+   "options": [
+    "BLOCKING",
+    "GRAB_CURSOR_X",
+    "UNDO_GROUPED"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "frame",
+     "name": "Frame",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -1048574.0,
+     "hard_max": 1048574.0,
+     "soft_min": -1048574.0,
+     "soft_max": 1048574.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "snap",
+     "name": "Snap",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "seq_solo_preview",
+     "name": "Strip Preview",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "pass_through_on_strip_handles",
+     "name": "Pass Through on Strip Handles",
+     "description": "Allow another operator to operate on strip handles",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channel_select_keys",
+   "bl_idname": "ANIM_OT_channel_select_keys",
+   "label": "Select Channel Keyframes",
+   "description": "Select all keyframes of channel under mouse",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channel_view_pick",
+   "bl_idname": "ANIM_OT_channel_view_pick",
+   "label": "Frame Channel Under Cursor",
+   "description": "Reset viewable area to show the channel under the cursor",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "include_handles",
+     "name": "Include Handles",
+     "description": "Include handles of keyframes when calculating extents",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_preview_range",
+     "name": "Use Preview Range",
+     "description": "Ignore frames outside of the preview range",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_bake",
+   "bl_idname": "ANIM_OT_channels_bake",
+   "label": "Bake Channels",
+   "description": "Create keyframes following the current shape of F-Curves of selected channels",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "use_scene_range",
+     "name": "Use Scene Range",
+     "description": "If enabled, the scene start and end frame will be used to determine the bake range",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "range",
+     "name": "Frame Range",
+     "description": "The custom range in which to create new keys. Only used when not using the scene range",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      2
+     ],
+     "default": [
+      0,
+      0
+     ],
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "step",
+     "name": "Frame Step",
+     "description": "At which interval to add keys",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 1.0,
+     "hard_min": 0.009999999776482582,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": 1.0,
+     "soft_max": 16.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "remove_outside_range",
+     "name": "Remove Outside Range",
+     "description": "Removes keys outside the given range, leaving only the newly baked",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "interpolation_type",
+     "name": "Interpolation Type",
+     "description": "Choose the interpolation type with which new keys will be added",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "BEZIER",
+       "name": "Bézier",
+       "description": "New keys will be Bézier",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "LIN",
+       "name": "Linear",
+       "description": "New keys will be linear",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "CONST",
+       "name": "Constant",
+       "description": "New keys will be constant",
+       "icon": "NONE",
+       "value": 0
+      }
+     ],
+     "default": "BEZIER",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "bake_modifiers",
+     "name": "Bake Modifiers",
+     "description": "Bake Modifiers into keyframes and delete them after",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_clean_empty",
+   "bl_idname": "ANIM_OT_channels_clean_empty",
+   "label": "Remove Empty Animation Data",
+   "description": "Delete all empty animation data containers from visible data-blocks",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_click",
+   "bl_idname": "ANIM_OT_channels_click",
+   "label": "Mouse Click on Channels",
+   "description": "Handle mouse clicks over animation channels",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "extend",
+     "name": "Extend Select",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extend_range",
+     "name": "Extend Range",
+     "description": "Selection of active channel to clicked channel",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "children_only",
+     "name": "Select Children Only",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_collapse",
+   "bl_idname": "ANIM_OT_channels_collapse",
+   "label": "Collapse Channels",
+   "description": "Collapse (close) all selected expandable animation channels",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "all",
+     "name": "All",
+     "description": "Collapse all channels (not just selected ones)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_delete",
+   "bl_idname": "ANIM_OT_channels_delete",
+   "label": "Delete Channels",
+   "description": "Delete all selected animation channels",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_editable_toggle",
+   "bl_idname": "ANIM_OT_channels_editable_toggle",
+   "label": "Toggle Channel Editability",
+   "description": "Toggle editability of selected channels",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "TOGGLE",
+       "name": "Toggle",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "DISABLE",
+       "name": "Disable",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ENABLE",
+       "name": "Enable",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "INVERT",
+       "name": "Invert",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "TOGGLE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PROTECT",
+       "name": "Protect",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MUTE",
+       "name": "Mute",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "PROTECT",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_expand",
+   "bl_idname": "ANIM_OT_channels_expand",
+   "label": "Expand Channels",
+   "description": "Expand (open) all selected expandable animation channels",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "all",
+     "name": "All",
+     "description": "Expand all channels (not just selected ones)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_fcurves_enable",
+   "bl_idname": "ANIM_OT_channels_fcurves_enable",
+   "label": "Revive Disabled F-Curves",
+   "description": "Clear 'disabled' tag from all F-Curves to get broken F-Curves working again",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_group",
+   "bl_idname": "ANIM_OT_channels_group",
+   "label": "Group Channels",
+   "description": "Add selected F-Curves to a new group",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of newly created group",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_move",
+   "bl_idname": "ANIM_OT_channels_move",
+   "label": "Move Channels",
+   "description": "Rearrange selected animation channels",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "direction",
+     "name": "Direction",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "TOP",
+       "name": "To Top",
+       "description": "",
+       "icon": "NONE",
+       "value": -2
+      },
+      {
+       "identifier": "UP",
+       "name": "Up",
+       "description": "",
+       "icon": "NONE",
+       "value": -1
+      },
+      {
+       "identifier": "DOWN",
+       "name": "Down",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "BOTTOM",
+       "name": "To Bottom",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "DOWN",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_rename",
+   "bl_idname": "ANIM_OT_channels_rename",
+   "label": "Rename Channel",
+   "description": "Rename animation channel under mouse",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_select_all",
+   "bl_idname": "ANIM_OT_channels_select_all",
+   "label": "Select All",
+   "description": "Toggle selection of all animation channels",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "action",
+     "name": "Action",
+     "description": "Selection action to execute",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "TOGGLE",
+       "name": "Toggle",
+       "description": "Toggle selection for all elements",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SELECT",
+       "name": "Select",
+       "description": "Select all elements",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "DESELECT",
+       "name": "Deselect",
+       "description": "Deselect all elements",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "INVERT",
+       "name": "Invert",
+       "description": "Invert selection of all elements",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "TOGGLE",
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_select_box",
+   "bl_idname": "ANIM_OT_channels_select_box",
+   "label": "Box Select",
+   "description": "Select all animation channels within the specified region",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "xmin",
+     "name": "X Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmax",
+     "name": "X Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymin",
+     "name": "Y Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymax",
+     "name": "Y Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "deselect",
+     "name": "Deselect",
+     "description": "Deselect rather than select items",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Extend selection instead of deselecting everything first",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_select_filter",
+   "bl_idname": "ANIM_OT_channels_select_filter",
+   "label": "Filter Channels",
+   "description": "Start entering text which filters the set of channels shown to only include those with matching names",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_setting_disable",
+   "bl_idname": "ANIM_OT_channels_setting_disable",
+   "label": "Disable Channel Setting",
+   "description": "Disable specified setting on all selected animation channels",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "TOGGLE",
+       "name": "Toggle",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "DISABLE",
+       "name": "Disable",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ENABLE",
+       "name": "Enable",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "INVERT",
+       "name": "Invert",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "DISABLE",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PROTECT",
+       "name": "Protect",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MUTE",
+       "name": "Mute",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "PROTECT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_setting_enable",
+   "bl_idname": "ANIM_OT_channels_setting_enable",
+   "label": "Enable Channel Setting",
+   "description": "Enable specified setting on all selected animation channels",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "TOGGLE",
+       "name": "Toggle",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "DISABLE",
+       "name": "Disable",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ENABLE",
+       "name": "Enable",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "INVERT",
+       "name": "Invert",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "ENABLE",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PROTECT",
+       "name": "Protect",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MUTE",
+       "name": "Mute",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "PROTECT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_setting_toggle",
+   "bl_idname": "ANIM_OT_channels_setting_toggle",
+   "label": "Toggle Channel Setting",
+   "description": "Toggle specified setting on all selected animation channels",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "mode",
+     "name": "Mode",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "TOGGLE",
+       "name": "Toggle",
+       "description": "",
+       "icon": "NONE",
+       "value": 3
+      },
+      {
+       "identifier": "DISABLE",
+       "name": "Disable",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ENABLE",
+       "name": "Enable",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "INVERT",
+       "name": "Invert",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "TOGGLE",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "PROTECT",
+       "name": "Protect",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "MUTE",
+       "name": "Mute",
+       "description": "",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "PROTECT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_ungroup",
+   "bl_idname": "ANIM_OT_channels_ungroup",
+   "label": "Ungroup Channels",
+   "description": "Remove selected F-Curves from their current groups",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.channels_view_selected",
+   "bl_idname": "ANIM_OT_channels_view_selected",
+   "label": "Frame Selected Channels",
+   "description": "Reset viewable area to show the selected channels",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "include_handles",
+     "name": "Include Handles",
+     "description": "Include handles of keyframes when calculating extents",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_preview_range",
+     "name": "Use Preview Range",
+     "description": "Ignore frames outside of the preview range",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.clear_useless_actions",
+   "bl_idname": "ANIM_OT_clear_useless_actions",
+   "label": "Clear Useless Actions",
+   "description": "Mark actions with no F-Curves for deletion after save and reload of file preserving \"action libraries\"",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "only_unused",
+     "name": "Only Unused",
+     "description": "Only unused (Fake User only) actions get considered",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.copy_driver_button",
+   "bl_idname": "ANIM_OT_copy_driver_button",
+   "label": "Copy Driver",
+   "description": "Copy the driver for the highlighted button",
+   "options": [
+    "INTERNAL",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.driver_button_add",
+   "bl_idname": "ANIM_OT_driver_button_add",
+   "label": "Add Driver",
+   "description": "Add driver for the property under the cursor",
+   "options": [
+    "INTERNAL",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.driver_button_edit",
+   "bl_idname": "ANIM_OT_driver_button_edit",
+   "label": "Edit Driver",
+   "description": "Edit the drivers for the connected property represented by the highlighted button",
+   "options": [
+    "INTERNAL",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.driver_button_remove",
+   "bl_idname": "ANIM_OT_driver_button_remove",
+   "label": "Remove Driver",
+   "description": "Remove the driver(s) for the connected property(s) represented by the highlighted button",
+   "options": [
+    "INTERNAL",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "all",
+     "name": "All",
+     "description": "Delete drivers for all elements of the array",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.end_frame_set",
+   "bl_idname": "ANIM_OT_end_frame_set",
+   "label": "Set End Frame",
+   "description": "Set the current frame as the preview or scene end frame",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.keyframe_clear_button",
+   "bl_idname": "ANIM_OT_keyframe_clear_button",
+   "label": "Clear Keyframe (Buttons)",
+   "description": "Clear all keyframes on the currently active property",
+   "options": [
+    "INTERNAL",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "all",
+     "name": "All",
+     "description": "Clear keyframes from all elements of the array",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keyframe_clear_v3d",
+   "bl_idname": "ANIM_OT_keyframe_clear_v3d",
+   "label": "Remove Animation",
+   "description": "Remove all keyframe animation for selected objects",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "confirm",
+     "name": "Confirm",
+     "description": "Prompt for confirmation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keyframe_clear_vse",
+   "bl_idname": "ANIM_OT_keyframe_clear_vse",
+   "label": "Remove Animation",
+   "description": "Remove all keyframe animation for selected strips",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "confirm",
+     "name": "Confirm",
+     "description": "Prompt for confirmation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.keyframe_delete",
+   "bl_idname": "ANIM_OT_keyframe_delete",
+   "label": "Delete Keying-Set Keyframe",
+   "description": "Delete keyframes on the current frame for all properties in the specified Keying Set",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Keying Set",
+     "description": "The Keying Set to use",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DEFAULT",
+       "name": "Default",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      }
+     ],
+     "default": "DEFAULT",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keyframe_delete_button",
+   "bl_idname": "ANIM_OT_keyframe_delete_button",
+   "label": "Delete Keyframe (Buttons)",
+   "description": "Delete current keyframe of current UI-active property",
+   "options": [
+    "INTERNAL",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "all",
+     "name": "All",
+     "description": "Delete keyframes from all elements of the array",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keyframe_delete_by_name",
+   "bl_idname": "ANIM_OT_keyframe_delete_by_name",
+   "label": "Delete Keying-Set Keyframe (by name)",
+   "description": "Alternate access to 'Delete Keyframe' for keymaps to use",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Keying Set",
+     "description": "The Keying Set to use",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 256,
+     "flags": [
+      "HIDDEN",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keyframe_delete_v3d",
+   "bl_idname": "ANIM_OT_keyframe_delete_v3d",
+   "label": "Delete Keyframe",
+   "description": "Remove keyframes on current frame for selected objects and bones",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "confirm",
+     "name": "Confirm",
+     "description": "Prompt for confirmation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keyframe_delete_vse",
+   "bl_idname": "ANIM_OT_keyframe_delete_vse",
+   "label": "Delete Keyframe",
+   "description": "Remove keyframes on current frame for selected strips",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "confirm",
+     "name": "Confirm",
+     "description": "Prompt for confirmation",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.keyframe_insert",
+   "bl_idname": "ANIM_OT_keyframe_insert",
+   "label": "Insert Keyframe",
+   "description": "Insert keyframes on the current frame using either the active keying set, or the user preferences if no keying set is active",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Keying Set",
+     "description": "The Keying Set to use",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DEFAULT",
+       "name": "Default",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      }
+     ],
+     "default": "DEFAULT",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keyframe_insert_button",
+   "bl_idname": "ANIM_OT_keyframe_insert_button",
+   "label": "Insert Keyframe (Buttons)",
+   "description": "Insert a keyframe for current UI-active property",
+   "options": [
+    "INTERNAL",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "all",
+     "name": "All",
+     "description": "Insert a keyframe for all element of the array",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keyframe_insert_by_name",
+   "bl_idname": "ANIM_OT_keyframe_insert_by_name",
+   "label": "Insert Keyframe (by name)",
+   "description": "Alternate access to 'Insert Keyframe' for keymaps to use",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Keying Set",
+     "description": "The Keying Set to use",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 256,
+     "flags": [
+      "HIDDEN",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keyframe_insert_menu",
+   "bl_idname": "ANIM_OT_keyframe_insert_menu",
+   "label": "Insert Keyframe Menu",
+   "description": "Insert Keyframes for specified Keying Set, with menu of available Keying Sets if undefined",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Keying Set",
+     "description": "The Keying Set to use",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DEFAULT",
+       "name": "Default",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      }
+     ],
+     "default": "DEFAULT",
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "always_prompt",
+     "name": "Always Show Menu",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keying_set_active_set",
+   "bl_idname": "ANIM_OT_keying_set_active_set",
+   "label": "Set Active Keying Set",
+   "description": "Set a new active keying set",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Keying Set",
+     "description": "The Keying Set to use",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "DEFAULT",
+       "name": "Default",
+       "description": "",
+       "icon": "NONE",
+       "value": 0
+      }
+     ],
+     "default": "DEFAULT",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "Y",
+    "B": "N",
+    "BV": "Y",
+    "C": "N",
+    "CV": "Y",
+    "D": "N",
+    "DV": "Y",
+    "E": "N",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keying_set_add",
+   "bl_idname": "ANIM_OT_keying_set_add",
+   "label": "Add Empty Keying Set",
+   "description": "Add a new (empty) keying set to the active Scene",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keying_set_export",
+   "bl_idname": "ANIM_OT_keying_set_export",
+   "label": "Export Keying Set...",
+   "description": "Export Keying Set to a Python script",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "filepath",
+     "name": "filepath",
+     "description": "",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_folder",
+     "name": "Filter folders",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_text",
+     "name": "Filter text",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "filter_python",
+     "name": "Filter Python",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keying_set_path_add",
+   "bl_idname": "ANIM_OT_keying_set_path_add",
+   "label": "Add Empty Keying Set Path",
+   "description": "Add empty path to active keying set",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.keying_set_path_remove",
+   "bl_idname": "ANIM_OT_keying_set_path_remove",
+   "label": "Remove Active Keying Set Path",
+   "description": "Remove active Path from active keying set",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.keying_set_remove",
+   "bl_idname": "ANIM_OT_keying_set_remove",
+   "label": "Remove Active Keying Set",
+   "description": "Remove the active keying set",
+   "options": [],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.keyingset_button_add",
+   "bl_idname": "ANIM_OT_keyingset_button_add",
+   "label": "Add to Keying Set",
+   "description": "Add current UI-active property to current keying set",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "all",
+     "name": "All",
+     "description": "Add all elements of the array to a Keying Set",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.keyingset_button_remove",
+   "bl_idname": "ANIM_OT_keyingset_button_remove",
+   "label": "Remove from Keying Set",
+   "description": "Remove current UI-active property from current keying set",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.merge_animation",
+   "bl_idname": "ANIM_OT_merge_animation",
+   "label": "Merge Animation",
+   "description": "Merge the animation of the selected objects into the action of the active object. Actions are not deleted by this, but might end up with zero users",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.paste_driver_button",
+   "bl_idname": "ANIM_OT_paste_driver_button",
+   "label": "Paste Driver",
+   "description": "Paste the driver in the internal clipboard to the highlighted button",
+   "options": [
+    "INTERNAL",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.previewrange_clear",
+   "bl_idname": "ANIM_OT_previewrange_clear",
+   "label": "Clear Preview Range",
+   "description": "Clear preview range",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.previewrange_set",
+   "bl_idname": "ANIM_OT_previewrange_set",
+   "label": "Set Preview Range",
+   "description": "Interactively define frame range used for playback",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "xmin",
+     "name": "X Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "xmax",
+     "name": "X Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymin",
+     "name": "Y Min",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "ymax",
+     "name": "Y Max",
+     "description": "",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "wait_for_input",
+     "name": "Wait for Input",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.replace_action",
+   "bl_idname": "ANIM_OT_replace_action",
+   "label": "Replace Action",
+   "description": "Swap all users of one action to another one. The normal action slot assignment rules apply. This ignores the NLA and Action Constraints",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "old_session_uid",
+     "name": "Old Action",
+     "description": "Old Action's session uid to replace",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 0,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "new_session_uid",
+     "name": "Replacement Action",
+     "description": "The replacement Action's session uid to remap all selected Action's users to",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 0,
+     "step": 1,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.replace_action_new",
+   "bl_idname": "ANIM_OT_replace_action_new",
+   "label": "Replace with New Action",
+   "description": "Swap all users of one action to a new action. This ignores the NLA and Action Constraints",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "old_session_uid",
+     "name": "Old Action",
+     "description": "Old Action's session uid to replace",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 0,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.scene_range_frame",
+   "bl_idname": "ANIM_OT_scene_range_frame",
+   "label": "Frame Scene/Preview Range",
+   "description": "Reset the horizontal view to the current scene frame range, taking the preview range into account if it is active",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.separate_slots",
+   "bl_idname": "ANIM_OT_separate_slots",
+   "label": "Separate Slots",
+   "description": "Move all slots of the action on the active object into newly created, separate actions. All users of those slots will be reassigned to the new actions. The current action won't be deleted but will be empty and might end up having zero users",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.slot_channels_move_to_new_action",
+   "bl_idname": "ANIM_OT_slot_channels_move_to_new_action",
+   "label": "Move Slots to new Action",
+   "description": "Move the selected slots into a newly created action",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.slot_new_for_id",
+   "bl_idname": "ANIM_OT_slot_new_for_id",
+   "label": "New Slot",
+   "description": "Create a new action slot for this data-block, to hold its animation",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.slot_unassign_from_constraint",
+   "bl_idname": "ANIM_OT_slot_unassign_from_constraint",
+   "label": "Unassign Slot",
+   "description": "Un-assign the action slot from this constraint",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.slot_unassign_from_id",
+   "bl_idname": "ANIM_OT_slot_unassign_from_id",
+   "label": "Unassign Slot",
+   "description": "Un-assign the action slot, effectively making this data-block non-animated",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.slot_unassign_from_nla_strip",
+   "bl_idname": "ANIM_OT_slot_unassign_from_nla_strip",
+   "label": "Unassign Slot",
+   "description": "Un-assign the action slot from this NLA strip, effectively making it non-animated",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.start_frame_set",
+   "bl_idname": "ANIM_OT_start_frame_set",
+   "label": "Set Start Frame",
+   "description": "Set the current frame as the preview or scene start frame",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "anim.version_bone_hide_property",
+   "bl_idname": "ANIM_OT_version_bone_hide_property",
+   "label": "Version Bone Hide Property",
+   "description": "Moves any F-Curves for the `hide` property of selected armatures into the action of the object. This will only operate on the first layer and strip of the action",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "anim.view_curve_in_graph_editor",
+   "bl_idname": "ANIM_OT_view_curve_in_graph_editor",
+   "label": "View In Graph Editor",
+   "description": "Frame the property under the cursor in the Graph Editor",
+   "options": [],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "all",
+     "name": "Show All",
+     "description": "Frame the whole array property instead of only the index under the cursor",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "isolate",
+     "name": "Isolate",
+     "description": "Hides all F-Curves other than the ones being framed",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  }
+ ]
+}

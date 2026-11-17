@@ -1,0 +1,2 @@
+bpy.ops.mesh.primitive_cube_add(  # a cube
+    size=2)  # done

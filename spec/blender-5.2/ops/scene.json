@@ -1,0 +1,1977 @@
+{
+ "namespace": "scene",
+ "count": 48,
+ "operators": [
+  {
+   "idname": "scene.delete",
+   "bl_idname": "SCENE_OT_delete",
+   "label": "Delete Scene",
+   "description": "Delete active scene",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.drop_scene_asset",
+   "bl_idname": "SCENE_OT_drop_scene_asset",
+   "label": "Drop Scene",
+   "description": "Import scene and set it as the active one in the window",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "session_uid",
+     "name": "Session UID",
+     "description": "Session UID of the data-block to use by the operator",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_add_edge_marks_to_keying_set",
+   "bl_idname": "SCENE_OT_freestyle_add_edge_marks_to_keying_set",
+   "label": "Add Edge Marks to Keying Set",
+   "description": "Add the data paths to the Freestyle Edge Mark property of selected edges to the active keying set",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.freestyle_add_face_marks_to_keying_set",
+   "bl_idname": "SCENE_OT_freestyle_add_face_marks_to_keying_set",
+   "label": "Add Face Marks to Keying Set",
+   "description": "Add the data paths to the Freestyle Face Mark property of selected polygons to the active keying set",
+   "options": [
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.freestyle_alpha_modifier_add",
+   "bl_idname": "SCENE_OT_freestyle_alpha_modifier_add",
+   "label": "Add Alpha Transparency Modifier",
+   "description": "Add an alpha transparency modifier to the line style associated with the active lineset",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ALONG_STROKE",
+       "name": "Along Stroke",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 1
+      },
+      {
+       "identifier": "CREASE_ANGLE",
+       "name": "Crease Angle",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 21
+      },
+      {
+       "identifier": "CURVATURE_3D",
+       "name": "Curvature 3D",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 23
+      },
+      {
+       "identifier": "DISTANCE_FROM_CAMERA",
+       "name": "Distance from Camera",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 2
+      },
+      {
+       "identifier": "DISTANCE_FROM_OBJECT",
+       "name": "Distance from Object",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 3
+      },
+      {
+       "identifier": "MATERIAL",
+       "name": "Material",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 4
+      },
+      {
+       "identifier": "NOISE",
+       "name": "Noise",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 20
+      },
+      {
+       "identifier": "TANGENT",
+       "name": "Tangent",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 19
+      }
+     ],
+     "default": "ALONG_STROKE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_color_modifier_add",
+   "bl_idname": "SCENE_OT_freestyle_color_modifier_add",
+   "label": "Add Line Color Modifier",
+   "description": "Add a line color modifier to the line style associated with the active lineset",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ALONG_STROKE",
+       "name": "Along Stroke",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 1
+      },
+      {
+       "identifier": "CREASE_ANGLE",
+       "name": "Crease Angle",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 21
+      },
+      {
+       "identifier": "CURVATURE_3D",
+       "name": "Curvature 3D",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 23
+      },
+      {
+       "identifier": "DISTANCE_FROM_CAMERA",
+       "name": "Distance from Camera",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 2
+      },
+      {
+       "identifier": "DISTANCE_FROM_OBJECT",
+       "name": "Distance from Object",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 3
+      },
+      {
+       "identifier": "MATERIAL",
+       "name": "Material",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 4
+      },
+      {
+       "identifier": "NOISE",
+       "name": "Noise",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 20
+      },
+      {
+       "identifier": "TANGENT",
+       "name": "Tangent",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 19
+      }
+     ],
+     "default": "ALONG_STROKE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_fill_range_by_selection",
+   "bl_idname": "SCENE_OT_freestyle_fill_range_by_selection",
+   "label": "Fill Range by Selection",
+   "description": "Fill the Range Min/Max entries by the min/max distance between selected mesh objects and the source object (either a user-specified object or the active camera)",
+   "options": [
+    "INTERNAL"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "Type of the modifier to work on",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "COLOR",
+       "name": "Color",
+       "description": "Color modifier type",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ALPHA",
+       "name": "Alpha",
+       "description": "Alpha modifier type",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "THICKNESS",
+       "name": "Thickness",
+       "description": "Thickness modifier type",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "COLOR",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of the modifier to work on",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_geometry_modifier_add",
+   "bl_idname": "SCENE_OT_freestyle_geometry_modifier_add",
+   "label": "Add Stroke Geometry Modifier",
+   "description": "Add a stroke geometry modifier to the line style associated with the active lineset",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "2D_OFFSET",
+       "name": "2D Offset",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 17
+      },
+      {
+       "identifier": "2D_TRANSFORM",
+       "name": "2D Transform",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 18
+      },
+      {
+       "identifier": "BACKBONE_STRETCHER",
+       "name": "Backbone Stretcher",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 11
+      },
+      {
+       "identifier": "BEZIER_CURVE",
+       "name": "Bézier Curve",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 6
+      },
+      {
+       "identifier": "BLUEPRINT",
+       "name": "Blueprint",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 16
+      },
+      {
+       "identifier": "GUIDING_LINES",
+       "name": "Guiding Lines",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 15
+      },
+      {
+       "identifier": "PERLIN_NOISE_1D",
+       "name": "Perlin Noise 1D",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 9
+      },
+      {
+       "identifier": "PERLIN_NOISE_2D",
+       "name": "Perlin Noise 2D",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 10
+      },
+      {
+       "identifier": "POLYGONIZATION",
+       "name": "Polygonization",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 14
+      },
+      {
+       "identifier": "SAMPLING",
+       "name": "Sampling",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 5
+      },
+      {
+       "identifier": "SIMPLIFICATION",
+       "name": "Simplification",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 22
+      },
+      {
+       "identifier": "SINUS_DISPLACEMENT",
+       "name": "Sinus Displacement",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 7
+      },
+      {
+       "identifier": "SPATIAL_NOISE",
+       "name": "Spatial Noise",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 8
+      },
+      {
+       "identifier": "TIP_REMOVER",
+       "name": "Tip Remover",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 12
+      }
+     ],
+     "default": "2D_OFFSET",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_lineset_add",
+   "bl_idname": "SCENE_OT_freestyle_lineset_add",
+   "label": "Add Line Set",
+   "description": "Add a line set into the list of line sets",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_lineset_copy",
+   "bl_idname": "SCENE_OT_freestyle_lineset_copy",
+   "label": "Copy Line Set",
+   "description": "Copy the active line set to the internal clipboard",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_lineset_move",
+   "bl_idname": "SCENE_OT_freestyle_lineset_move",
+   "label": "Move Line Set",
+   "description": "Change the position of the active line set within the list of line sets",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "direction",
+     "name": "Direction",
+     "description": "Direction to move the active line set towards",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "UP",
+       "name": "Up",
+       "description": "",
+       "icon": "NONE",
+       "value": -1
+      },
+      {
+       "identifier": "DOWN",
+       "name": "Down",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "UP",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_lineset_paste",
+   "bl_idname": "SCENE_OT_freestyle_lineset_paste",
+   "label": "Paste Line Set",
+   "description": "Paste the internal clipboard content to the active line set",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_lineset_remove",
+   "bl_idname": "SCENE_OT_freestyle_lineset_remove",
+   "label": "Remove Line Set",
+   "description": "Remove the active line set from the list of line sets",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_linestyle_new",
+   "bl_idname": "SCENE_OT_freestyle_linestyle_new",
+   "label": "New Line Style",
+   "description": "Create a new line style, reusable by multiple line sets",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_modifier_copy",
+   "bl_idname": "SCENE_OT_freestyle_modifier_copy",
+   "label": "Copy Modifier",
+   "description": "Duplicate the modifier within the list of modifiers",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_modifier_move",
+   "bl_idname": "SCENE_OT_freestyle_modifier_move",
+   "label": "Move Modifier",
+   "description": "Move the modifier within the list of modifiers",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "direction",
+     "name": "Direction",
+     "description": "Direction to move the chosen modifier towards",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "UP",
+       "name": "Up",
+       "description": "",
+       "icon": "NONE",
+       "value": -1
+      },
+      {
+       "identifier": "DOWN",
+       "name": "Down",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "UP",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_modifier_remove",
+   "bl_idname": "SCENE_OT_freestyle_modifier_remove",
+   "label": "Remove Modifier",
+   "description": "Remove the modifier from the list of modifiers",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_module_add",
+   "bl_idname": "SCENE_OT_freestyle_module_add",
+   "label": "Add Freestyle Module",
+   "description": "Add a style module into the list of modules",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_module_move",
+   "bl_idname": "SCENE_OT_freestyle_module_move",
+   "label": "Move Freestyle Module",
+   "description": "Change the position of the style module within in the list of style modules",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "direction",
+     "name": "Direction",
+     "description": "Direction to move the chosen style module towards",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "UP",
+       "name": "Up",
+       "description": "",
+       "icon": "NONE",
+       "value": -1
+      },
+      {
+       "identifier": "DOWN",
+       "name": "Down",
+       "description": "",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "UP",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.freestyle_module_open",
+   "bl_idname": "SCENE_OT_freestyle_module_open",
+   "label": "Open Style Module File",
+   "description": "Open a style module file",
+   "options": [
+    "INTERNAL"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "filepath",
+     "name": "filepath",
+     "description": "",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "make_internal",
+     "name": "Make internal",
+     "description": "Make module file internal after loading",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.freestyle_module_remove",
+   "bl_idname": "SCENE_OT_freestyle_module_remove",
+   "label": "Remove Freestyle Module",
+   "description": "Remove the style module from the stack",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.freestyle_stroke_material_create",
+   "bl_idname": "SCENE_OT_freestyle_stroke_material_create",
+   "label": "Create Freestyle Stroke Material",
+   "description": "Create Freestyle stroke material for testing",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.freestyle_thickness_modifier_add",
+   "bl_idname": "SCENE_OT_freestyle_thickness_modifier_add",
+   "label": "Add Line Thickness Modifier",
+   "description": "Add a line thickness modifier to the line style associated with the active lineset",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ALONG_STROKE",
+       "name": "Along Stroke",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 1
+      },
+      {
+       "identifier": "CALLIGRAPHY",
+       "name": "Calligraphy",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 13
+      },
+      {
+       "identifier": "CREASE_ANGLE",
+       "name": "Crease Angle",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 21
+      },
+      {
+       "identifier": "CURVATURE_3D",
+       "name": "Curvature 3D",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 23
+      },
+      {
+       "identifier": "DISTANCE_FROM_CAMERA",
+       "name": "Distance from Camera",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 2
+      },
+      {
+       "identifier": "DISTANCE_FROM_OBJECT",
+       "name": "Distance from Object",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 3
+      },
+      {
+       "identifier": "MATERIAL",
+       "name": "Material",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 4
+      },
+      {
+       "identifier": "NOISE",
+       "name": "Noise",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 20
+      },
+      {
+       "identifier": "TANGENT",
+       "name": "Tangent",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 19
+      }
+     ],
+     "default": "ALONG_STROKE",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.gltf2_action_filter_refresh",
+   "bl_idname": "SCENE_OT_gltf2_action_filter_refresh",
+   "label": "Refresh action list",
+   "description": "Refresh list of actions",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.gltf2_assign_as_original",
+   "bl_idname": "SCENE_OT_gltf2_assign_as_original",
+   "label": "Assign as Original",
+   "description": "(undocumented operator)",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.gltf2_assign_to_variant",
+   "bl_idname": "SCENE_OT_gltf2_assign_to_variant",
+   "label": "Assign To Variant",
+   "description": "(undocumented operator)",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.gltf2_display_variant",
+   "bl_idname": "SCENE_OT_gltf2_display_variant",
+   "label": "Display Variant",
+   "description": "(undocumented operator)",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.gltf2_material_to_variant",
+   "bl_idname": "SCENE_OT_gltf2_material_to_variant",
+   "label": "Assign Material To Variant",
+   "description": "Assign Variant to Slot",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.gltf2_remove_material_variant",
+   "bl_idname": "SCENE_OT_gltf2_remove_material_variant",
+   "label": "Remove a variant Slot",
+   "description": "Remove a variant Slot",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.gltf2_reset_to_original",
+   "bl_idname": "SCENE_OT_gltf2_reset_to_original",
+   "label": "Reset to Original",
+   "description": "(undocumented operator)",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.gltf2_variant_add",
+   "bl_idname": "SCENE_OT_gltf2_variant_add",
+   "label": "Add Material Variant",
+   "description": "Add a new Material Variant",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.gltf2_variant_remove",
+   "bl_idname": "SCENE_OT_gltf2_variant_remove",
+   "label": "Remove Variant",
+   "description": "Add a new Material Variant",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.gltf2_variants_slot_add",
+   "bl_idname": "SCENE_OT_gltf2_variants_slot_add",
+   "label": "Add new Slot",
+   "description": "Add a new Slot",
+   "options": [
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "N",
+    "BV": "N",
+    "C": "Y",
+    "CV": "Y",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.gpencil_brush_preset_add",
+   "bl_idname": "SCENE_OT_gpencil_brush_preset_add",
+   "label": "Add Grease Pencil Brush Preset",
+   "description": "Add or remove Grease Pencil brush preset",
+   "options": [
+    "INTERNAL",
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of the preset, used to make the path name",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 65,
+     "flags": [
+      "SKIP_SAVE",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "remove_name",
+     "name": "remove_name",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "remove_active",
+     "name": "remove_active",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.gpencil_material_preset_add",
+   "bl_idname": "SCENE_OT_gpencil_material_preset_add",
+   "label": "Add Grease Pencil Material Preset",
+   "description": "Add or remove Grease Pencil material preset",
+   "options": [
+    "INTERNAL",
+    "REGISTER"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of the preset, used to make the path name",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 65,
+     "flags": [
+      "SKIP_SAVE",
+      "NEVER_NULL",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "remove_name",
+     "name": "remove_name",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "remove_active",
+     "name": "remove_active",
+     "description": "",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "HIDDEN",
+      "SKIP_SAVE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.new",
+   "bl_idname": "SCENE_OT_new",
+   "label": "New Scene",
+   "description": "Add new scene by type",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NEW",
+       "name": "New",
+       "description": "Add a new, empty scene with default settings",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "EMPTY",
+       "name": "Copy Settings",
+       "description": "Add a new, empty scene, and copy settings from the current scene",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "LINK_COPY",
+       "name": "Linked Copy",
+       "description": "Link in the collections from the current scene (shallow copy)",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "FULL_COPY",
+       "name": "Full Copy",
+       "description": "Make a full copy of the current scene",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "NEW",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.new_sequencer",
+   "bl_idname": "SCENE_OT_new_sequencer",
+   "label": "New Scene",
+   "description": "Add new scene by type in the sequence editor and assign to active strip",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NEW",
+       "name": "New",
+       "description": "Add a new, empty scene with default settings",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "EMPTY",
+       "name": "Copy Settings",
+       "description": "Add a new, empty scene, and copy settings from the current scene",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "LINK_COPY",
+       "name": "Linked Copy",
+       "description": "Link in the collections from the current scene (shallow copy)",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "FULL_COPY",
+       "name": "Full Copy",
+       "description": "Make a full copy of the current scene",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "NEW",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.new_sequencer_scene",
+   "bl_idname": "SCENE_OT_new_sequencer_scene",
+   "label": "New Sequencer Scene",
+   "description": "Add new scene to be used by the sequencer",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NEW",
+       "name": "New",
+       "description": "Add a new, empty scene with default settings",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "EMPTY",
+       "name": "Copy Settings",
+       "description": "Add a new, empty scene, and copy settings from the current scene",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "LINK_COPY",
+       "name": "Linked Copy",
+       "description": "Link in the collections from the current scene (shallow copy)",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "FULL_COPY",
+       "name": "Full Copy",
+       "description": "Make a full copy of the current scene",
+       "icon": "NONE",
+       "value": 3
+      }
+     ],
+     "default": "NEW",
+     "flags": [
+      "SKIP_SAVE",
+      "ANIMATABLE",
+      "SKIP_PRESET",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.render_view_add",
+   "bl_idname": "SCENE_OT_render_view_add",
+   "label": "Add Render View",
+   "description": "Add a render view",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.render_view_remove",
+   "bl_idname": "SCENE_OT_render_view_remove",
+   "label": "Remove Render View",
+   "description": "Remove the selected render view",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.view_layer_add",
+   "bl_idname": "SCENE_OT_view_layer_add",
+   "label": "Add View Layer",
+   "description": "Add a view layer",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "NEW",
+       "name": "New",
+       "description": "Add a new view layer",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "COPY",
+       "name": "Copy Settings",
+       "description": "Copy settings of current view layer",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "EMPTY",
+       "name": "Blank",
+       "description": "Add a new view layer with all collections disabled",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "NEW",
+     "flags": [
+      "ANIMATABLE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.view_layer_add_aov",
+   "bl_idname": "SCENE_OT_view_layer_add_aov",
+   "label": "Add AOV",
+   "description": "Add a Shader AOV",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.view_layer_add_lightgroup",
+   "bl_idname": "SCENE_OT_view_layer_add_lightgroup",
+   "label": "Add Lightgroup",
+   "description": "Add a Light Group",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "name",
+     "name": "Name",
+     "description": "Name of newly created lightgroup",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 64,
+     "flags": [
+      "NEVER_NULL",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.view_layer_add_used_lightgroups",
+   "bl_idname": "SCENE_OT_view_layer_add_used_lightgroups",
+   "label": "Add Used Lightgroups",
+   "description": "Add all used Light Groups",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.view_layer_remove",
+   "bl_idname": "SCENE_OT_view_layer_remove",
+   "label": "Remove View Layer",
+   "description": "Remove the selected view layer",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "N",
+    "AV": "N",
+    "B": "N",
+    "BV": "N",
+    "C": "N",
+    "CV": "N",
+    "D": "N",
+    "DV": "N",
+    "E": "N",
+    "EV": "N"
+   }
+  },
+  {
+   "idname": "scene.view_layer_remove_aov",
+   "bl_idname": "SCENE_OT_view_layer_remove_aov",
+   "label": "Remove AOV",
+   "description": "Remove Active AOV",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.view_layer_remove_lightgroup",
+   "bl_idname": "SCENE_OT_view_layer_remove_lightgroup",
+   "label": "Remove Lightgroup",
+   "description": "Remove Active Lightgroup",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  },
+  {
+   "idname": "scene.view_layer_remove_unused_lightgroups",
+   "bl_idname": "SCENE_OT_view_layer_remove_unused_lightgroups",
+   "label": "Remove Unused Lightgroups",
+   "description": "Remove all unused Light Groups",
+   "options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [],
+   "poll": {
+    "A": "Y",
+    "AV": "Y",
+    "B": "Y",
+    "BV": "Y",
+    "C": "Y",
+    "CV": "Y",
+    "D": "Y",
+    "DV": "Y",
+    "E": "Y",
+    "EV": "Y"
+   }
+  }
+ ]
+}

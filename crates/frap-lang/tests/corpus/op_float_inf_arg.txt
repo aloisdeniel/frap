@@ -1,0 +1,1 @@
+bpy.ops.transform.translate(value=(float('inf'), 0, 0))

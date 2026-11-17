@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_shift.txt
+---
+> bpy.data.objects['Cube'].pass_index = 1 << 2
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:41/41+2
+  message: frap: shift operators are not supported

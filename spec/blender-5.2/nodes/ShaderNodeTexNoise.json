@@ -1,0 +1,333 @@
+{
+ "bl_idname": "ShaderNodeTexNoise",
+ "srna": "ShaderNodeTexNoise",
+ "name": "Noise Texture",
+ "label": "",
+ "width": 160.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Vector",
+   "identifier": "Vector",
+   "bl_idname": "NodeSocketVector",
+   "type": "VECTOR",
+   "enabled": true,
+   "hide": false,
+   "hide_value": true,
+   "default_value": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "W",
+   "identifier": "W",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Scale",
+   "identifier": "Scale",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 5.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Detail",
+   "identifier": "Detail",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 2.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Roughness",
+   "identifier": "Roughness",
+   "bl_idname": "NodeSocketFloatFactor",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.5,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "FACTOR",
+   "min": 0.0,
+   "max": 1.0
+  },
+  {
+   "name": "Lacunarity",
+   "identifier": "Lacunarity",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 2.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Offset",
+   "identifier": "Offset",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Gain",
+   "identifier": "Gain",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": false,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 1.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Distortion",
+   "identifier": "Distortion",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "outputs": [
+  {
+   "name": "Factor",
+   "identifier": "Fac",
+   "bl_idname": "NodeSocketFloat",
+   "type": "VALUE",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": 0.0,
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "NONE",
+   "min": -3.4028234663852886e+38,
+   "max": 3.4028234663852886e+38
+  },
+  {
+   "name": "Color",
+   "identifier": "Color",
+   "bl_idname": "NodeSocketColor",
+   "type": "RGBA",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false,
+   "default_value": [
+    0.800000011920929,
+    0.800000011920929,
+    0.800000011920929,
+    1.0
+   ],
+   "default_value_type": "FLOAT",
+   "default_value_subtype": "COLOR",
+   "min": 0.0,
+   "max": 3.4028234663852886e+38
+  }
+ ],
+ "props": {
+  "texture_mapping": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree",
+   "type": "TexMapping"
+  },
+  "color_mapping": {
+   "$ptr": "bpy.data.materials['DumpNodes'].node_tree",
+   "type": "ColorMapping"
+  },
+  "noise_dimensions": "3D",
+  "noise_type": "FBM",
+  "normalize": true
+ },
+ "availability": {
+  "noise_dimensions": {
+   "default": "3D",
+   "by_value": {
+    "1D": {
+     "inputs": [
+      "W",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Distortion"
+     ],
+     "outputs": [
+      "Fac",
+      "Color"
+     ]
+    },
+    "2D": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Distortion"
+     ],
+     "outputs": [
+      "Fac",
+      "Color"
+     ]
+    },
+    "3D": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Distortion"
+     ],
+     "outputs": [
+      "Fac",
+      "Color"
+     ]
+    },
+    "4D": {
+     "inputs": [
+      "Vector",
+      "W",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Distortion"
+     ],
+     "outputs": [
+      "Fac",
+      "Color"
+     ]
+    }
+   }
+  },
+  "noise_type": {
+   "default": "FBM",
+   "by_value": {
+    "MULTIFRACTAL": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Distortion"
+     ],
+     "outputs": [
+      "Fac",
+      "Color"
+     ]
+    },
+    "RIDGED_MULTIFRACTAL": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Offset",
+      "Gain",
+      "Distortion"
+     ],
+     "outputs": [
+      "Fac",
+      "Color"
+     ]
+    },
+    "HYBRID_MULTIFRACTAL": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Offset",
+      "Gain",
+      "Distortion"
+     ],
+     "outputs": [
+      "Fac",
+      "Color"
+     ]
+    },
+    "FBM": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Distortion"
+     ],
+     "outputs": [
+      "Fac",
+      "Color"
+     ]
+    },
+    "HETERO_TERRAIN": {
+     "inputs": [
+      "Vector",
+      "Scale",
+      "Detail",
+      "Roughness",
+      "Lacunarity",
+      "Offset",
+      "Distortion"
+     ],
+     "outputs": [
+      "Fac",
+      "Color"
+     ]
+    }
+   }
+  }
+ }
+}

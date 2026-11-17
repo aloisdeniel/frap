@@ -1,0 +1,10 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Transcripts, fixtures and dumps are compared byte for byte on every OS (§21.4): LF everywhere.
+* text=auto eol=lf
+*.glb binary
+*.png binary
+*.exr binary
+*.hdr binary
+*.bin binary
+*.frap binary
+*.deflate binary

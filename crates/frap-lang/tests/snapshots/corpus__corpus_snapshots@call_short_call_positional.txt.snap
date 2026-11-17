@@ -1,0 +1,15 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_short_call_positional.txt
+---
+> data.objects['Cube'].select_set True
+---
+stmt 1 Short line 1 @1:1/1+36
+  Call
+    Path bpy.data @1:1/1+31
+      .objects
+      ["Cube"]
+      .select_set
+    arg (positional) @1:33/33+4
+      Bool true @1:33/33+4

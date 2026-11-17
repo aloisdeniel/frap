@@ -1,0 +1,43 @@
+{
+ "identifier": "NodePanelState",
+ "name": "Node Panel State",
+ "description": "Expansion state of a panel in a node",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "identifier",
+   "name": "Identifier",
+   "description": "Unique identifier matching the panel's persistent_uid",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -10000,
+   "soft_max": 10000,
+   "step": 1,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_collapsed",
+   "name": "Is Collapsed",
+   "description": "Whether the panel is collapsed",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

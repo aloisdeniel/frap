@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_pi_alone.txt
+---
+> print(pi)
+---
+stmt 1 Bpy line 1 @1:1/1+9
+  Print
+    Builtin Pi @1:7/7+2

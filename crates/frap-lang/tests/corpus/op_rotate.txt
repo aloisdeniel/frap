@@ -1,0 +1,1 @@
+bpy.ops.transform.rotate(value=radians(90), orient_axis='Z')

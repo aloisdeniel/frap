@@ -1,0 +1,49 @@
+{
+ "bl_idname": "ShaderNodeOutputLight",
+ "srna": "ShaderNodeOutputLight",
+ "name": "Light Output",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [
+  {
+   "name": "Surface",
+   "identifier": "Surface",
+   "bl_idname": "NodeSocketShader",
+   "type": "SHADER",
+   "enabled": true,
+   "hide": false,
+   "hide_value": false
+  }
+ ],
+ "outputs": [],
+ "props": {
+  "target": "ALL"
+ },
+ "availability": {
+  "target": {
+   "default": "ALL",
+   "by_value": {
+    "ALL": {
+     "inputs": [
+      "Surface"
+     ],
+     "outputs": []
+    },
+    "EEVEE": {
+     "inputs": [
+      "Surface"
+     ],
+     "outputs": []
+    },
+    "CYCLES": {
+     "inputs": [
+      "Surface"
+     ],
+     "outputs": []
+    }
+   }
+  }
+ }
+}

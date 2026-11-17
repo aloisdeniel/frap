@@ -1,0 +1,1 @@
+bpy.data.objects['Cube'].matrix_world = Matrix.Translation((1, 2, 3))

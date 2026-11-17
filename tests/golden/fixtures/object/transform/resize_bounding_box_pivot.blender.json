@@ -1,0 +1,89 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 3,
+      "ok": true
+    },
+    {
+      "line": 4,
+      "ok": true
+    },
+    {
+      "line": 5,
+      "ok": true
+    },
+    {
+      "line": 6,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.34296033, -0.16200674, 0.3257791, 5.519169],
+        [0.36383817, 0.15271042, -0.3070852, -4.94298],
+        [0.0, 0.44769782, 0.2226357, 3.95512],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [5.519169, -4.94298, 3.95512],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [0.5, 0.5, 0.5],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [0.5, 0.0, 0.0, 1.8397229],
+        [0.0, 0.5, 0.0, -1.4800842],
+        [0.0, 0.0, 0.5, 1.4759655],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.8397229, -1.4800842, 1.4759655],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.5, 0.5, 0.5],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.14543232, -0.38555047, 0.2831966, 3.8778455],
+        [0.47758558, -0.09994169, 0.1091956, -0.97735715],
+        [-0.02759453, 0.3022624, 0.39733613, 4.4278965],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [3.8778455, -0.97735715, 4.4278965],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [0.5, 0.50000006, 0.5],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube", "Light", "Camera"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

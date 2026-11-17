@@ -1,0 +1,34 @@
+{
+ "bl_idname": "ShaderNodeScript",
+ "srna": "ShaderNodeScript",
+ "name": "Script",
+ "label": "",
+ "width": 140.0,
+ "height": 100.0,
+ "hide": false,
+ "inputs": [],
+ "outputs": [],
+ "props": {
+  "script": null,
+  "filepath": "",
+  "mode": "INTERNAL",
+  "use_auto_update": false,
+  "bytecode": "",
+  "bytecode_hash": ""
+ },
+ "availability": {
+  "mode": {
+   "default": "INTERNAL",
+   "by_value": {
+    "INTERNAL": {
+     "inputs": [],
+     "outputs": []
+    },
+    "EXTERNAL": {
+     "inputs": [],
+     "outputs": []
+    }
+   }
+  }
+ }
+}

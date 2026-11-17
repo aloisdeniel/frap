@@ -1,0 +1,5 @@
+mesh.primitive_cube_add size=1
+bpy.data.objects['Cube'].location = (0, 0, 2)
+data.objects['Cube'].scale = 2,2,2
+D.objects['Cube'].select_set True
+print(C.object.name)

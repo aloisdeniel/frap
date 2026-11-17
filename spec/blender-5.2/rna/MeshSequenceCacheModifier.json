@@ -1,0 +1,123 @@
+{
+ "identifier": "MeshSequenceCacheModifier",
+ "name": "Cache Modifier",
+ "description": "Cache Mesh",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "cache_file",
+   "name": "Cache File",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CacheFile",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "object_path",
+   "name": "Object Path",
+   "description": "Path to the object in the Alembic archive used to lookup geometric data",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 1024,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "read_data",
+   "name": "Read Data",
+   "description": "Data to read from the cache",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "VERT",
+     "name": "Vertex",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "POLY",
+     "name": "Faces",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "UV",
+     "name": "UV",
+     "description": "",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "COLOR",
+     "name": "Color",
+     "description": "",
+     "icon": "NONE",
+     "value": 8
+    },
+    {
+     "identifier": "ATTRIBUTES",
+     "name": "Attributes",
+     "description": "",
+     "icon": "NONE",
+     "value": 32
+    }
+   ],
+   "default": [
+    "ATTRIBUTES",
+    "COLOR",
+    "POLY",
+    "UV",
+    "VERT"
+   ],
+   "flags": [
+    "ENUM_FLAG",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_vertex_interpolation",
+   "name": "Vertex Interpolation",
+   "description": "Allow interpolation of vertex positions",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "velocity_scale",
+   "name": "Velocity Scale",
+   "description": "Multiplier used to control the magnitude of the velocity vectors for time effects",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": 0.0,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

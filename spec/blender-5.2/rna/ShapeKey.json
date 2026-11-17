@@ -1,0 +1,331 @@
+{
+ "identifier": "ShapeKey",
+ "name": "Shape Key",
+ "description": "Shape key in a shape keys data-block",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "Name of Shape Key",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "select",
+   "name": "Select",
+   "description": "Shape key selection state",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "frame",
+   "name": "Frame",
+   "description": "Frame for absolute keys",
+   "type": "FLOAT",
+   "subtype": "TIME",
+   "unit": "TIME",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "value",
+   "name": "Value",
+   "description": "Value of shape key at the current frame",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": -10.0,
+   "soft_max": 10.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "interpolation",
+   "name": "Interpolation",
+   "description": "Interpolation type for absolute shape keys",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "KEY_LINEAR",
+     "name": "Linear",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "KEY_CARDINAL",
+     "name": "Cardinal",
+     "description": "",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "KEY_CATMULL_ROM",
+     "name": "Catmull-Rom",
+     "description": "",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "KEY_BSPLINE",
+     "name": "BSpline",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "KEY_LINEAR",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex weight group, to blend with basis shape",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "relative_key",
+   "name": "Relative Key",
+   "description": "Shape used as a relative key",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ShapeKey",
+   "is_id": false,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "mute",
+   "name": "Mute",
+   "description": "Toggle this shape key",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock_shape",
+   "name": "Lock Shape",
+   "description": "Protect the shape key from accidental sculpting and editing",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "slider_min",
+   "name": "Slider Min",
+   "description": "Minimum for slider",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -10.0,
+   "hard_max": 10.0,
+   "soft_min": -10.0,
+   "soft_max": 10.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "slider_max",
+   "name": "Slider Max",
+   "description": "Maximum for slider",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 1.0,
+   "hard_min": -10.0,
+   "hard_max": 10.0,
+   "soft_min": -10.0,
+   "soft_max": 10.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "data",
+   "name": "Data",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "UnknownType",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "points",
+   "name": "Points",
+   "description": "Optimized access to shape keys point data, when using foreach_get/foreach_set accessors. Warning: Does not support legacy Curve shape keys.",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ShapeKeyPoint",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "normals_vertex_get",
+   "description": "Compute local space vertices' normals for this shape key",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "normals",
+     "name": "normals",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      "dynamic"
+     ],
+     "default": [],
+     "hard_min": -1.0,
+     "hard_max": 1.0,
+     "soft_min": -1.0,
+     "soft_max": 1.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "normals_polygon_get",
+   "description": "Compute local space faces' normals for this shape key",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "normals",
+     "name": "normals",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      "dynamic"
+     ],
+     "default": [],
+     "hard_min": -1.0,
+     "hard_max": 1.0,
+     "soft_min": -1.0,
+     "soft_max": 1.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "normals_split_get",
+   "description": "Compute local space face corners' normals for this shape key",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": [
+    {
+     "identifier": "normals",
+     "name": "normals",
+     "description": "",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      "dynamic"
+     ],
+     "default": [],
+     "hard_min": -1.0,
+     "hard_max": 1.0,
+     "soft_min": -1.0,
+     "soft_max": 1.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

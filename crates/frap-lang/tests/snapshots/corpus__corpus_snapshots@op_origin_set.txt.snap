@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_origin_set.txt
+---
+> bpy.ops.object.origin_set(type='ORIGIN_GEOMETRY', center='BOUNDS')
+---
+stmt 1 Bpy line 1 @1:1/1+66
+  Invoke object.origin_set
+    arg type @1:27/27+22
+      Str "ORIGIN_GEOMETRY" @1:32/32+17
+    arg center @1:51/51+15
+      Str "BOUNDS" @1:58/58+8

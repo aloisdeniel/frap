@@ -1,0 +1,12 @@
+{
+ "identifier": "NodeInternal",
+ "name": "NodeInternal",
+ "description": "",
+ "base": "Node",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [],
+ "funcs": [],
+ "root": false
+}

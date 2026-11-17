@@ -1,0 +1,49 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_m0_transcript.txt
+---
+> bpy.ops.mesh.primitive_cube_add(size=2, location=(0, 0, 1))
+> mesh.primitive_cube_add size=2 location=0,0,1
+> bpy.data.objects['Cube'].location = (1, 2, 3)
+> bpy.data.objects['Cube'].location
+> bpy.ops.export_scene.gltf(filepath='out/m0.glb')
+---
+stmt 1 Bpy line 1 @1:1/1+59
+  Invoke mesh.primitive_cube_add
+    arg size @1:33/33+6
+      Int 2 @1:38/38+1
+    arg location @1:41/41+18
+      Tuple @1:50/50+9
+        Int 0 @1:51/51+1
+        Int 0 @1:54/54+1
+        Int 1 @1:57/57+1
+stmt 2 Short line 2 @2:1/1+45
+  Invoke mesh.primitive_cube_add
+    arg size @2:25/25+6
+      Int 2 @2:30/30+1
+    arg location @2:32/32+14
+      Tuple @2:41/41+5
+        Int 0 @2:41/41+1
+        Int 0 @2:43/43+1
+        Int 1 @2:45/45+1
+stmt 3 Bpy line 3 @3:1/1+45
+  Set Assign
+    Path bpy.data @3:1/1+33
+      .objects
+      ["Cube"]
+      .location
+    Tuple @3:37/37+9
+      Int 1 @3:38/38+1
+      Int 2 @3:41/41+1
+      Int 3 @3:44/44+1
+stmt 4 Bpy line 4 @4:1/1+33
+  Get
+    Path bpy.data @4:1/1+33
+      .objects
+      ["Cube"]
+      .location
+stmt 5 Bpy line 5 @5:1/1+48
+  Invoke export_scene.gltf
+    arg filepath @5:27/27+21
+      Str "out/m0.glb" @5:36/36+12

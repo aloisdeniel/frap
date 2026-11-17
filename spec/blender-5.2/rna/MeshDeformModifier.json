@@ -1,0 +1,91 @@
+{
+ "identifier": "MeshDeformModifier",
+ "name": "MeshDeform Modifier",
+ "description": "Mesh deformation modifier to deform with other meshes",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "object",
+   "name": "Object",
+   "description": "Mesh object to deform with",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "is_bound",
+   "name": "Bound",
+   "description": "Whether geometry has been bound to control cage",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "precision",
+   "name": "Precision",
+   "description": "The grid size for binding",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 5,
+   "hard_min": 2,
+   "hard_max": 10,
+   "soft_min": 2,
+   "soft_max": 10,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_dynamic_bind",
+   "name": "Dynamic",
+   "description": "Recompute binding dynamically on top of other deformers (slower and more memory consuming)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

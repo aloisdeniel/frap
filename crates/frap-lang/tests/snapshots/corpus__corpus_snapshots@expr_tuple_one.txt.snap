@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/expr_tuple_one.txt
+---
+> print((1,))
+---
+stmt 1 Bpy line 1 @1:1/1+11
+  Print
+    Tuple @1:7/7+4
+      Int 1 @1:8/8+1

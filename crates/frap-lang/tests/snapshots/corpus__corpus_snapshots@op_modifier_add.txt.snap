@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_modifier_add.txt
+---
+> bpy.ops.object.modifier_add(type='SUBSURF')
+---
+stmt 1 Bpy line 1 @1:1/1+43
+  Invoke object.modifier_add
+    arg type @1:29/29+14
+      Str "SUBSURF" @1:34/34+9

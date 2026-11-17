@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_cube_paren_tuple.txt
+---
+> mesh.primitive_cube_add location=(0, 0, 1)
+---
+stmt 1 Short line 1 @1:1/1+42
+  Invoke mesh.primitive_cube_add
+    arg location @1:25/25+18
+      Tuple @1:34/34+9
+        Int 0 @1:35/35+1
+        Int 0 @1:38/38+1
+        Int 1 @1:41/41+1

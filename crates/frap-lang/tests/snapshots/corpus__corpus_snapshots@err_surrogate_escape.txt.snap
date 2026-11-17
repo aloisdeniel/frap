@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_surrogate_escape.txt
+---
+> bpy.data.objects['Cube'].name = '\ud800'
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:33/33+8
+  message: frap: lone surrogate escapes (\ud800-\udfff) are not supported

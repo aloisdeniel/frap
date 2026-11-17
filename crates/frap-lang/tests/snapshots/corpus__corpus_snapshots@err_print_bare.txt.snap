@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_print_bare.txt
+---
+> print
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:6/6+0
+  message: frap: 'print' must be called: print(value, ...)

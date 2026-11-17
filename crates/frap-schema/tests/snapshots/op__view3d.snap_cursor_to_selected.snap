@@ -1,0 +1,33 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "view3d.snap_cursor_to_selected",
+  "bl_idname": "VIEW3D_OT_snap_cursor_to_selected",
+  "label": "Snap Cursor to Selected",
+  "description": "Snap 3D cursor to the middle of the selected item(s)",
+  "bl_options": [
+    "REGISTER"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "Object Mode only (Edit Mode M2, Pose Mode M6)",
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
+    "notes": []
+  }
+}

@@ -1,0 +1,307 @@
+{
+ "identifier": "ActionGroup",
+ "name": "Action Group",
+ "description": "Groups of F-Curves",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "channels",
+   "name": "Channels",
+   "description": "F-Curves in this group",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "FCurve",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "select",
+   "name": "Select",
+   "description": "Action group is selected",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock",
+   "name": "Lock",
+   "description": "Action group is locked",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mute",
+   "name": "Mute",
+   "description": "Action group is muted",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_expanded",
+   "name": "Expanded",
+   "description": "Action group is expanded except in graph editor",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "show_expanded_graph",
+   "name": "Expanded in Graph Editor",
+   "description": "Action group is expanded in graph editor",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_pin",
+   "name": "Pin in Graph Editor",
+   "description": "",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "color_set",
+   "name": "Color Set",
+   "description": "Custom color set to use",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "DEFAULT",
+     "name": "Default Colors",
+     "description": "",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "THEME01",
+     "name": "01 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_01_VEC",
+     "value": 1
+    },
+    {
+     "identifier": "THEME02",
+     "name": "02 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_02_VEC",
+     "value": 2
+    },
+    {
+     "identifier": "THEME03",
+     "name": "03 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_03_VEC",
+     "value": 3
+    },
+    {
+     "identifier": "THEME04",
+     "name": "04 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_04_VEC",
+     "value": 4
+    },
+    {
+     "identifier": "THEME05",
+     "name": "05 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_05_VEC",
+     "value": 5
+    },
+    {
+     "identifier": "THEME06",
+     "name": "06 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_06_VEC",
+     "value": 6
+    },
+    {
+     "identifier": "THEME07",
+     "name": "07 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_07_VEC",
+     "value": 7
+    },
+    {
+     "identifier": "THEME08",
+     "name": "08 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_08_VEC",
+     "value": 8
+    },
+    {
+     "identifier": "THEME09",
+     "name": "09 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_09_VEC",
+     "value": 9
+    },
+    {
+     "identifier": "THEME10",
+     "name": "10 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_10_VEC",
+     "value": 10
+    },
+    {
+     "identifier": "THEME11",
+     "name": "11 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_11_VEC",
+     "value": 11
+    },
+    {
+     "identifier": "THEME12",
+     "name": "12 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_12_VEC",
+     "value": 12
+    },
+    {
+     "identifier": "THEME13",
+     "name": "13 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_13_VEC",
+     "value": 13
+    },
+    {
+     "identifier": "THEME14",
+     "name": "14 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_14_VEC",
+     "value": 14
+    },
+    {
+     "identifier": "THEME15",
+     "name": "15 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_15_VEC",
+     "value": 15
+    },
+    {
+     "identifier": "THEME16",
+     "name": "16 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_16_VEC",
+     "value": 16
+    },
+    {
+     "identifier": "THEME17",
+     "name": "17 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_17_VEC",
+     "value": 17
+    },
+    {
+     "identifier": "THEME18",
+     "name": "18 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_18_VEC",
+     "value": 18
+    },
+    {
+     "identifier": "THEME19",
+     "name": "19 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_19_VEC",
+     "value": 19
+    },
+    {
+     "identifier": "THEME20",
+     "name": "20 - Theme Color Set",
+     "description": "",
+     "icon": "COLORSET_20_VEC",
+     "value": 20
+    },
+    {
+     "identifier": "CUSTOM",
+     "name": "Custom Color Set",
+     "description": "",
+     "icon": "NONE",
+     "value": -1
+    }
+   ],
+   "default": "DEFAULT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_custom_color_set",
+   "name": "Custom Color Set",
+   "description": "Color set is user-defined instead of a fixed theme color set",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "colors",
+   "name": "Colors",
+   "description": "Copy of the colors associated with the group's color set",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ThemeBoneColorSet",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

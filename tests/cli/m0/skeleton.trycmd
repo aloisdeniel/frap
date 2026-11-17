@@ -1,0 +1,18 @@
+# M0 exit transcript (ARCHITECTURE §22.2)
+
+The five statements of `skeleton.in/skeleton.py` (both syntaxes mixed) produce one JSON
+response per statement (§13.2 envelope). `skeleton.out/out/m0.glb` is the expected GLB,
+byte for byte (its JSON and BIN chunks equal what Blender 5.2.4 writes for the same
+scene, except `asset.generator`). `skeleton_stdin.toml` feeds the same statements on stdin.
+
+```console
+$ frap run skeleton.py
+{"event":"ready","frap":"0.1.0","protocol":1,"blender_api":"5.2","startup":"factory"}
+{"seq":1,"line":1,"kind":"op","op":"mesh.primitive_cube_add","ok":true,"status":"FINISHED","reports":[],"result":{"object":{"$ref":"bpy.data.objects['Cube.001']"}},"changes":{"added":["bpy.data.objects['Cube.001']","bpy.data.meshes['Cube.001']"],"removed":[],"modified":["bpy.data.collections['Collection']","bpy.data.scenes['Scene']"],"renamed":[]},"context":{"mode":"OBJECT","active_object":"Cube.001","selected_objects":["Cube.001"],"frame_current":1},"hints":[]}
+{"seq":2,"line":2,"kind":"op","op":"mesh.primitive_cube_add","ok":true,"status":"FINISHED","reports":[],"result":{"object":{"$ref":"bpy.data.objects['Cube.002']"}},"changes":{"added":["bpy.data.objects['Cube.002']","bpy.data.meshes['Cube.002']"],"removed":[],"modified":["bpy.data.collections['Collection']","bpy.data.scenes['Scene']"],"renamed":[]},"context":{"mode":"OBJECT","active_object":"Cube.002","selected_objects":["Cube.002"],"frame_current":1},"hints":[]}
+{"seq":3,"line":3,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.objects['Cube'].location","value":[1,2,3],"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.objects['Cube']"],"renamed":[]},"context":{"mode":"OBJECT","active_object":"Cube.002","selected_objects":["Cube.002"],"frame_current":1},"hints":[]}
+{"seq":4,"line":4,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.objects['Cube'].location","value":[1,2,3],"rna":{"type":"FLOAT","subtype":"TRANSLATION","array":[3],"math":"Vector"},"reports":[],"context":{"mode":"OBJECT","active_object":"Cube.002","selected_objects":["Cube.002"],"frame_current":1},"hints":[]}
+{"seq":5,"line":5,"kind":"op","op":"export_scene.gltf","ok":true,"status":"FINISHED","reports":[],"result":{"filepath":"out/m0.glb","bytes":4808,"nodes":3,"meshes":3,"extensions_used":[]},"changes":{"added":[],"removed":[],"modified":[],"renamed":[]},"context":{"mode":"OBJECT","active_object":"Cube.002","selected_objects":["Cube.002"],"frame_current":1},"hints":[]}
+{"event":"end","ok":true,"stats":{"statements":5,"errors":0,"cancelled":0}}
+
+```

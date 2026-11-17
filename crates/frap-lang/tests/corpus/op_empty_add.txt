@@ -1,0 +1,1 @@
+bpy.ops.object.empty_add(type='PLAIN_AXES', align='WORLD')

@@ -1,0 +1,51 @@
+{
+ "input": {
+  "vertices": [
+   [0.0,0.0,0.0],
+   [1.0,2.0,3.0]
+  ],
+  "edges": [],
+  "faces": [],
+  "shade_flat": true
+ },
+ "mesh": {
+  "name": "pydata__verts_only",
+  "positions": [
+   [0.0,0.0,0.0],
+   [1.0,2.0,3.0]
+  ],
+  "edges": [],
+  "faces": [],
+  "corner_edges": [],
+  "attributes": [
+   {
+    "name": ".select_vert",
+    "domain": "POINT",
+    "data_type": "BOOLEAN",
+    "data": [true,true]
+   },
+   {
+    "name": "position",
+    "domain": "POINT",
+    "data_type": "FLOAT_VECTOR",
+    "data": null
+   },
+   {
+    "name": "sharp_face",
+    "domain": "FACE",
+    "data_type": "BOOLEAN",
+    "data": []
+   }
+  ],
+  "uv_layers": [],
+  "normals_domain": "POINT",
+  "vertex_normals": [
+   [0.0,0.0,0.0],
+   [0.26726123690605164,0.5345224738121033,0.8017836809158325]
+  ],
+  "face_normals": [],
+  "corner_normals": [],
+  "loop_triangles": [],
+  "loop_triangle_polygons": []
+ }
+}

@@ -1,0 +1,1 @@
+bpy.data.objects['Cube'].matrix_world = Matrix.Translation((0, 0, 1)) @ Matrix.Rotation(radians(45), 4, 'Z')

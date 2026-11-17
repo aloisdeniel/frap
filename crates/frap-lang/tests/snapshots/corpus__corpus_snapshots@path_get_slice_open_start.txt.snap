@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_get_slice_open_start.txt
+---
+> bpy.data.meshes['Cube'].vertices[:10]
+---
+stmt 1 Bpy line 1 @1:1/1+37
+  Get
+    Path bpy.data @1:1/1+37
+      .meshes
+      ["Cube"]
+      .vertices
+      [None:Some(10)]

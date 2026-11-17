@@ -1,0 +1,11 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_name_error_lower_true.txt
+---
+> bpy.data.objects['Cube'].hide_render = true
+---
+error 1 NameError NAME @1:40/40+4
+  message: name 'true' is not defined
+  hint: Python spells these True, False and None (the short form accepts both)
+  detail: name="true"

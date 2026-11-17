@@ -1,0 +1,29 @@
+{
+ "_comment": "Hand-written specs of frap's own operators (namespace `frap`, OPERATORS.md §A `frap.*`), in the dump schema of spec/blender-5.2/ops/<ns>.json. There is no Blender dump: `poll` is null (OperatorSpec.poll_matrix = None, RFC 0001 F-OP-3). Each later frap.* operator is added here by the WP that implements it.",
+ "namespace": "frap",
+ "count": 1,
+ "operators": [
+  {
+   "idname": "frap.describe",
+   "bl_idname": "FRAP_OT_describe",
+   "label": "Describe",
+   "description": "Describe an operator (op:<idname>), a struct (struct:<Struct>) or a property (<Struct>.<prop>) as a --describe manifest fragment (frap extension)",
+   "options": ["REGISTER"],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "target",
+     "name": "Target",
+     "description": "What to describe: op:<idname>, struct:<Struct> or <Struct>.<prop>",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 0,
+     "flags": ["REQUIRED"]
+    }
+   ],
+   "poll": null
+  }
+ ]
+}

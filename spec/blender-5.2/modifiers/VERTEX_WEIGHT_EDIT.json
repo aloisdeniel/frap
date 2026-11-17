@@ -1,0 +1,43 @@
+{
+ "type": "VERTEX_WEIGHT_EDIT",
+ "ui_name": "Vertex Weight Edit",
+ "srna": "VertexWeightEditModifier",
+ "values": {
+  "name": "M",
+  "type": "VERTEX_WEIGHT_EDIT",
+  "show_viewport": true,
+  "show_render": true,
+  "show_in_editmode": false,
+  "show_on_cage": false,
+  "show_expanded": true,
+  "is_active": true,
+  "use_pin_to_last": false,
+  "is_override_data": false,
+  "use_apply_on_spline": false,
+  "execution_time": 0.0,
+  "persistent_uid": 1300223564,
+  "vertex_group": "",
+  "falloff_type": "LINEAR",
+  "invert_falloff": false,
+  "normalize": false,
+  "map_curve": {
+   "$ptr": "bpy.data.objects['Cube']...CurveMapping",
+   "type": "CurveMapping"
+  },
+  "use_add": false,
+  "use_remove": false,
+  "default_weight": 0.0,
+  "add_threshold": 0.009999999776482582,
+  "remove_threshold": 0.009999999776482582,
+  "mask_constant": 1.0,
+  "mask_vertex_group": "",
+  "invert_mask_vertex_group": false,
+  "mask_texture": null,
+  "mask_tex_use_channel": "INT",
+  "mask_tex_mapping": "LOCAL",
+  "mask_tex_uv_layer": "",
+  "mask_tex_map_object": null,
+  "mask_tex_map_bone": ""
+ },
+ "default_name": "VertexWeightEdit"
+}

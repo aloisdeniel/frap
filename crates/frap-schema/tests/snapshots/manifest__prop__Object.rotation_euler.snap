@@ -1,0 +1,32 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "identifier": "rotation_euler",
+  "name": "Euler Rotation",
+  "description": "Rotation in Eulers",
+  "type": "FLOAT",
+  "subtype": "EULER",
+  "unit": "ROTATION (radians)",
+  "array": [
+    3
+  ],
+  "default": [
+    0,
+    0,
+    0
+  ],
+  "hard_min": -340282350000000000000000000000000000000.0,
+  "hard_max": 340282350000000000000000000000000000000.0,
+  "soft_min": -340282350000000000000000000000000000000.0,
+  "soft_max": 340282350000000000000000000000000000000.0,
+  "precision": 5,
+  "hidden": false,
+  "skip_save": false,
+  "flags": [
+    "ANIMATABLE"
+  ],
+  "readonly": false,
+  "python_only": false,
+  "struct": "Object"
+}

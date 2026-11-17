@@ -1,0 +1,210 @@
+{
+ "identifier": "ShaderNodeBsdfPrincipled",
+ "name": "Principled BSDF",
+ "description": "Physically-based, easy-to-use shader for rendering surface materials, based on the OpenPBR model",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "distribution",
+   "name": "Distribution",
+   "description": "Light scattering distribution on rough surface",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "GGX",
+     "name": "GGX",
+     "description": "",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "MULTI_GGX",
+     "name": "Multiscatter GGX",
+     "description": "GGX with additional correction to account for multiple scattering, preserve energy and prevent unexpected darkening at high roughness",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "GGX",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "subsurface_method",
+   "name": "Subsurface Method",
+   "description": "Method for rendering subsurface scattering",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BURLEY",
+     "name": "Christensen-Burley",
+     "description": "Approximation to physically based volume scattering",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "RANDOM_WALK",
+     "name": "Random Walk",
+     "description": "Volumetric approximation to physically based volume scattering, using the scattering radius as specified",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "RANDOM_WALK_SKIN",
+     "name": "Random Walk (Skin)",
+     "description": "Volumetric approximation to physically based volume scattering, with scattering radius automatically adjusted to match color textures. Designed for skin shading.",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "RANDOM_WALK_LEGACY",
+     "name": "Random Walk (Legacy)",
+     "description": "Volumetric approximation to physically based volume scattering, using the scattering radius as specified",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "BURLEY",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.materials.new('Material').node_tree.nodes['Principled BSDF']",
+  "differs_from_default": {
+   "type": "BSDF_PRINCIPLED",
+   "location": [
+    -200.0,
+    100.0
+   ],
+   "location_absolute": [
+    -200.0,
+    100.0
+   ],
+   "width": 240.0,
+   "height": 100.0,
+   "name": "Principled BSDF",
+   "color": [
+    0.6079999804496765,
+    0.6079999804496765,
+    0.6079999804496765
+   ],
+   "color_tag": "SHADER",
+   "select": true,
+   "show_options": true,
+   "bl_idname": "ShaderNodeBsdfPrincipled",
+   "bl_label": "Principled BSDF",
+   "bl_description": "Physically-based, easy-to-use shader for rendering surface materials, based on the OpenPBR model",
+   "bl_icon": "NONE",
+   "bl_static_type": "BSDF_PRINCIPLED",
+   "bl_width_default": 240.0,
+   "bl_width_min": 100.0,
+   "bl_width_max": 700.0,
+   "bl_height_default": 100.0,
+   "bl_height_min": 30.0,
+   "bl_height_max": 3.4028234663852886e+38,
+   "distribution": "MULTI_GGX",
+   "subsurface_method": "RANDOM_WALK"
+  }
+ }
+}

@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_shade_auto_smooth.txt
+---
+> bpy.ops.object.shade_auto_smooth()
+---
+stmt 1 Bpy line 1 @1:1/1+34
+  Invoke object.shade_auto_smooth

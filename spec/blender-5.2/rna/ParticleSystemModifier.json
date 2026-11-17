@@ -1,0 +1,27 @@
+{
+ "identifier": "ParticleSystemModifier",
+ "name": "ParticleSystem Modifier",
+ "description": "Particle system simulation modifier",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "particle_system",
+   "name": "Particle System",
+   "description": "Particle System that this modifier controls",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "ParticleSystem",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

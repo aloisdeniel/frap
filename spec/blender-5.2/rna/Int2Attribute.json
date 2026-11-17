@@ -1,0 +1,27 @@
+{
+ "identifier": "Int2Attribute",
+ "name": "2D Integer Vector Attribute",
+ "description": "Geometry attribute that stores 2D integer vectors",
+ "base": "Attribute",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "data",
+   "name": "data",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Int2AttributeValue",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

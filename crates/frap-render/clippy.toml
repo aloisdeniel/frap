@@ -1,0 +1,24 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+# §3.2: frap-render sees only `frap_render_scene::types` (flat RenderScene) and never names a
+# frap-scene type, so the GPU code cannot grow a dependency on the data model. frap-scene is a
+# transitive dependency (through frap-render-scene), so these paths resolve; `cargo xtask
+# check-deps` separately forbids a direct frap-render -> frap-scene edge. Owned by the integrator.
+disallowed-types = [
+    { path = "frap_scene::Main", reason = "§3.2: frap-render uses frap_render_scene::types only" },
+    { path = "frap_scene::Context", reason = "§3.2: frap-render uses frap_render_scene::types only" },
+    { path = "frap_scene::WindowState", reason = "§3.2: frap-render uses frap_render_scene::types only" },
+    { path = "frap_scene::Host", reason = "§3.2: frap-render uses frap_render_scene::types only" },
+    { path = "frap_scene::HostRead", reason = "§3.2: frap-render uses frap_render_scene::types only" },
+    { path = "frap_scene::Snapshot", reason = "§3.2: frap-render uses frap_render_scene::types only" },
+    { path = "frap_scene::IdMap", reason = "§3.2: frap-render uses frap_render_scene::types only" },
+    { path = "frap_scene::ViewLayer", reason = "§3.2: frap-render uses frap_render_scene::types only" },
+    { path = "frap_scene::EvaluatedObject", reason = "§3.2: frap-render uses frap_render_scene::types only" },
+    { path = "frap_scene::id::Object", reason = "§3.2: use frap_render_scene::types::RObject" },
+    { path = "frap_scene::id::Scene", reason = "§3.2: use frap_render_scene::types::RSettings" },
+    { path = "frap_scene::id::Camera", reason = "§3.2: use frap_render_scene::types::RCamera" },
+    { path = "frap_scene::id::Light", reason = "§3.2: use frap_render_scene::types::RLight" },
+    { path = "frap_scene::id::World", reason = "§3.2: use frap_render_scene::types::RWorld" },
+    { path = "frap_scene::id::Material", reason = "§3.2: frap-render uses frap_render_scene::types only" },
+    { path = "frap_scene::id::Image", reason = "§3.2: frap-render uses frap_render_scene::types only" },
+    { path = "frap_mesh::Mesh", reason = "§3.2: meshes reach the renderer as frap_render_scene::types" },
+]

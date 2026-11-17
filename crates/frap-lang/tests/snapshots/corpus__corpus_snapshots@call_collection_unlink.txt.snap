@@ -1,0 +1,18 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_collection_unlink.txt
+---
+> bpy.data.collections['Collection'].objects.unlink(bpy.data.objects['Cube'])
+---
+stmt 1 Bpy line 1 @1:1/1+75
+  Call
+    Path bpy.data @1:1/1+49
+      .collections
+      ["Collection"]
+      .objects
+      .unlink
+    arg (positional) @1:51/51+24
+            Path bpy.data @1:51/51+24
+        .objects
+        ["Cube"]

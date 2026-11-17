@@ -1,0 +1,9 @@
+# WP 1.20: the duplicate macros run through the session's §10.2 pipeline
+# (frap_op::pipeline::execute): object.duplicate, then transform.translate (WP 1.21) with the
+# nested TRANSFORM_OT_translate arguments. duplicate_move_linked forces the step's linked=True
+# even when OBJECT_OT_duplicate={'linked': False} is given (MACRO_STEP_FORCED). Every value
+# below (names, locations, shared mesh names) was checked against Blender 5.2.4 running the
+# same statements. Both syntaxes.
+bin.name = "frap"
+args = []
+fs.sandbox = true

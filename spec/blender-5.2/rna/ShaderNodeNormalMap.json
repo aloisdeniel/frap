@@ -1,0 +1,220 @@
+{
+ "identifier": "ShaderNodeNormalMap",
+ "name": "Normal Map",
+ "description": "Generate a perturbed normal from an RGB normal map image. Typically used for faking highly detailed surfaces",
+ "base": "ShaderNode",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "space",
+   "name": "Space",
+   "description": "Space of the input normal",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "TANGENT",
+     "name": "Tangent Space",
+     "description": "Tangent space normal mapping",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "OBJECT",
+     "name": "Object Space",
+     "description": "Object space normal mapping",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "WORLD",
+     "name": "World Space",
+     "description": "World space normal mapping",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "BLENDER_OBJECT",
+     "name": "Blender Object Space",
+     "description": "Object space normal mapping, compatible with Blender render baking",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "BLENDER_WORLD",
+     "name": "Blender World Space",
+     "description": "World space normal mapping, compatible with Blender render baking",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "TANGENT",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "uv_map",
+   "name": "UV Map",
+   "description": "UV Map for tangent space maps",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "convention",
+   "name": "Mode",
+   "description": "OpenGL or DirectX",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "OPENGL",
+     "name": "OpenGL",
+     "description": "Normal map uses OpenGL convention, with Y axis in the green channel pointing up",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "DIRECTX",
+     "name": "DirectX",
+     "description": "Normal map uses DirectX convention, with Y axis in the green channel pointing down",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "OPENGL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "base",
+   "name": "Base",
+   "description": "Base surface that the normal map is applied relative to, when displacement is used",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "ORIGINAL",
+     "name": "Original Base",
+     "description": "Apply normal map relative to the smooth undisplaced surface, for normal maps that match the displacement map",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "DISPLACED",
+     "name": "Displaced Base",
+     "description": "Apply normal map relative to the displaced surface, for normal maps that are to be applied in addition to the displacement map",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "DISPLACED",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "input_template",
+   "description": "Input socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "output_template",
+   "description": "Output socket template",
+   "use_self": false,
+   "use_self_type": true,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "Index",
+     "description": "",
+     "type": "INT",
+     "subtype": "UNSIGNED",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "result",
+     "name": "result",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "NodeInternalSocketTemplate",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

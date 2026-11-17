@@ -1,0 +1,27 @@
+{
+ "identifier": "CollisionModifier",
+ "name": "Collision Modifier",
+ "description": "Collision modifier defining modifier stack position used for collision",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "settings",
+   "name": "Settings",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "CollisionSettings",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

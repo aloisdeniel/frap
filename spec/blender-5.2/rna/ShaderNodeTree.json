@@ -1,0 +1,88 @@
+{
+ "identifier": "ShaderNodeTree",
+ "name": "Shader Node Tree",
+ "description": "Node tree consisting of linked nodes used for materials (and other shading data-blocks)",
+ "base": "NodeTree",
+ "name_property": "name",
+ "nested": null,
+ "is_id": true,
+ "props": [],
+ "funcs": [
+  {
+   "identifier": "get_output_node",
+   "description": "Return active shader output node for the specified target",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "target",
+     "name": "Target",
+     "description": "",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ALL",
+       "name": "All",
+       "description": "Use shaders for all renderers and viewports, unless there exists a more specific output",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "EEVEE",
+       "name": "EEVEE",
+       "description": "Use shaders for EEVEE renderer",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "CYCLES",
+       "name": "Cycles",
+       "description": "Use shaders for Cycles renderer",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "ALL",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "node",
+     "name": "Node",
+     "description": "",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "ShaderNode",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true,
+ "fresh": {
+  "recipe": "bpy.data.materials.new('Material').node_tree",
+  "differs_from_default": {
+   "id_type": "NODETREE",
+   "users": 1,
+   "is_embedded_data": true,
+   "is_editable": true,
+   "bl_idname": "ShaderNodeTree",
+   "bl_label": "Shader Editor",
+   "bl_description": "Edit materials, lights, and world shading using nodes",
+   "bl_icon": "NODE_MATERIAL"
+  }
+ }
+}

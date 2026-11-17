@@ -1,0 +1,132 @@
+{
+ "identifier": "WeightedNormalModifier",
+ "name": "WeightedNormal Modifier",
+ "description": "",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "weight",
+   "name": "Weight",
+   "description": "Corrective factor applied to faces' weights, 50 is neutral, lower values increase weight of weak faces, higher values increase weight of strong faces",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 50,
+   "hard_min": 1,
+   "hard_max": 100,
+   "soft_min": 1,
+   "soft_max": 100,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "mode",
+   "name": "Weighting Mode",
+   "description": "Weighted vertex normal mode to use",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "FACE_AREA",
+     "name": "Face Area",
+     "description": "Generate face area weighted normals",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CORNER_ANGLE",
+     "name": "Corner Angle",
+     "description": "Generate corner angle weighted normals",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FACE_AREA_WITH_ANGLE",
+     "name": "Face Area & Angle",
+     "description": "Generated normals weighted by both face area and angle",
+     "icon": "NONE",
+     "value": 2
+    }
+   ],
+   "default": "FACE_AREA",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "thresh",
+   "name": "Threshold",
+   "description": "Threshold value for different weights to be considered equal",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.009999999776482582,
+   "hard_min": 0.0,
+   "hard_max": 10.0,
+   "soft_min": 0.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "keep_sharp",
+   "name": "Keep Sharp",
+   "description": "Keep sharp edges as computed for default custom normals, instead of setting a single weighted normal for each vertex",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "vertex_group",
+   "name": "Vertex Group",
+   "description": "Vertex group name for modifying the selected areas",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "invert_vertex_group",
+   "name": "Invert",
+   "description": "Invert vertex group influence",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_face_influence",
+   "name": "Face Influence",
+   "description": "Use influence of face for weighting",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

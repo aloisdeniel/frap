@@ -1,0 +1,2 @@
+bpy.data.objects['Würfel'].location = (1, 2, 3)
+data.objects['Würfel'].scale = 2,2,2

@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/short_set_braces_spaced.txt
+---
+> frap.render_contact_sheet views={FRONT, TOP}
+---
+stmt 1 Short line 1 @1:1/1+44
+  Invoke frap.render_contact_sheet
+    arg views @1:27/27+18
+      Set @1:33/33+12
+        Bare FRONT @1:34/34+5
+        Bare TOP @1:41/41+3

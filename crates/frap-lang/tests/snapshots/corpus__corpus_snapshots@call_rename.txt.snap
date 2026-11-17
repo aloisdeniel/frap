@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/call_rename.txt
+---
+> bpy.data.objects['Cube'].rename('Box', mode='ALWAYS')
+---
+stmt 1 Bpy line 1 @1:1/1+53
+  Call
+    Path bpy.data @1:1/1+31
+      .objects
+      ["Cube"]
+      .rename
+    arg (positional) @1:33/33+5
+      Str "Box" @1:33/33+5
+    arg mode @1:40/40+13
+      Str "ALWAYS" @1:45/45+8

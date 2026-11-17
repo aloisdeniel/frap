@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_invoke_default_kw.txt
+---
+> bpy.ops.object.delete('INVOKE_DEFAULT', use_global=False)
+---
+stmt 1 Bpy line 1 @1:1/1+57
+  Invoke object.delete
+    positional
+      Str "INVOKE_DEFAULT" @1:23/23+16
+    arg use_global @1:41/41+16
+      Bool false @1:52/52+5

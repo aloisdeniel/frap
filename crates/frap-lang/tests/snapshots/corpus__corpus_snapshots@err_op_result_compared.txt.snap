@@ -1,0 +1,9 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_op_result_compared.txt
+---
+> bpy.ops.mesh.primitive_cube_add() == {'FINISHED'}
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:35/35+2
+  message: frap: comparisons are not supported

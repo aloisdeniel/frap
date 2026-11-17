@@ -1,0 +1,393 @@
+{
+ "identifier": "ObjectConstraints",
+ "name": "Object Constraints",
+ "description": "Collection of object constraints",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "active",
+   "name": "Active Constraint",
+   "description": "Active Object constraint",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Constraint",
+   "is_id": false,
+   "flags": []
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add a new constraint to this object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "type",
+     "name": "",
+     "description": "Constraint type to add",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "CAMERA_SOLVER",
+       "name": "Camera Solver",
+       "description": "",
+       "icon": "CON_CAMERASOLVER",
+       "value": 27
+      },
+      {
+       "identifier": "FOLLOW_TRACK",
+       "name": "Follow Track",
+       "description": "",
+       "icon": "CON_FOLLOWTRACK",
+       "value": 26
+      },
+      {
+       "identifier": "OBJECT_SOLVER",
+       "name": "Object Solver",
+       "description": "",
+       "icon": "CON_OBJECTSOLVER",
+       "value": 28
+      },
+      {
+       "identifier": "COPY_LOCATION",
+       "name": "Copy Location",
+       "description": "Copy the location of a target (with an optional offset), so that they move together",
+       "icon": "CON_LOCLIKE",
+       "value": 9
+      },
+      {
+       "identifier": "COPY_ROTATION",
+       "name": "Copy Rotation",
+       "description": "Copy the rotation of a target (with an optional offset), so that they rotate together",
+       "icon": "CON_ROTLIKE",
+       "value": 8
+      },
+      {
+       "identifier": "COPY_SCALE",
+       "name": "Copy Scale",
+       "description": "Copy the scale factors of a target (with an optional offset), so that they are scaled by the same amount",
+       "icon": "CON_SIZELIKE",
+       "value": 10
+      },
+      {
+       "identifier": "COPY_TRANSFORMS",
+       "name": "Copy Transforms",
+       "description": "Copy all the transformations of a target, so that they move together",
+       "icon": "CON_TRANSLIKE",
+       "value": 23
+      },
+      {
+       "identifier": "LIMIT_DISTANCE",
+       "name": "Limit Distance",
+       "description": "Restrict movements to within a certain distance of a target (at the time of constraint evaluation only)",
+       "icon": "CON_DISTLIMIT",
+       "value": 14
+      },
+      {
+       "identifier": "LIMIT_LOCATION",
+       "name": "Limit Location",
+       "description": "Restrict movement along each axis within given ranges",
+       "icon": "CON_LOCLIMIT",
+       "value": 6
+      },
+      {
+       "identifier": "LIMIT_ROTATION",
+       "name": "Limit Rotation",
+       "description": "Restrict rotation along each axis within given ranges",
+       "icon": "CON_ROTLIMIT",
+       "value": 5
+      },
+      {
+       "identifier": "LIMIT_SCALE",
+       "name": "Limit Scale",
+       "description": "Restrict scaling along each axis with given ranges",
+       "icon": "CON_SIZELIMIT",
+       "value": 7
+      },
+      {
+       "identifier": "MAINTAIN_VOLUME",
+       "name": "Maintain Volume",
+       "description": "Compensate for scaling one axis by applying suitable scaling to the other two axes",
+       "icon": "CON_SAMEVOL",
+       "value": 24
+      },
+      {
+       "identifier": "TRANSFORM",
+       "name": "Transformation",
+       "description": "Use one transform property from target to control another (or same) property on owner",
+       "icon": "CON_TRANSFORM",
+       "value": 19
+      },
+      {
+       "identifier": "TRANSFORM_CACHE",
+       "name": "Transform Cache",
+       "description": "Look up the transformation matrix from an external file",
+       "icon": "CON_TRANSFORM_CACHE",
+       "value": 29
+      },
+      {
+       "identifier": "CLAMP_TO",
+       "name": "Clamp To",
+       "description": "Restrict movements to lie along a curve by remapping location along curve's longest axis",
+       "icon": "CON_CLAMPTO",
+       "value": 18
+      },
+      {
+       "identifier": "DAMPED_TRACK",
+       "name": "Damped Track",
+       "description": "Point towards a target by performing the smallest rotation necessary",
+       "icon": "CON_TRACKTO",
+       "value": 21
+      },
+      {
+       "identifier": "IK",
+       "name": "Inverse Kinematics",
+       "description": "Control a chain of bones by specifying the endpoint target (Bones only)",
+       "icon": "CON_KINEMATIC",
+       "value": 3
+      },
+      {
+       "identifier": "LOCKED_TRACK",
+       "name": "Locked Track",
+       "description": "Rotate around the specified ('locked') axis to point towards a target",
+       "icon": "CON_LOCKTRACK",
+       "value": 13
+      },
+      {
+       "identifier": "SPLINE_IK",
+       "name": "Spline IK",
+       "description": "Align chain of bones along a curve (Bones only)",
+       "icon": "CON_SPLINEIK",
+       "value": 22
+      },
+      {
+       "identifier": "STRETCH_TO",
+       "name": "Stretch To",
+       "description": "Stretch along Y-Axis to point towards a target",
+       "icon": "CON_STRETCHTO",
+       "value": 15
+      },
+      {
+       "identifier": "TRACK_TO",
+       "name": "Track To",
+       "description": "Legacy tracking constraint prone to twisting artifacts",
+       "icon": "CON_TRACKTO",
+       "value": 2
+      },
+      {
+       "identifier": "ACTION",
+       "name": "Action",
+       "description": "Use transform property of target to look up pose for owner from an Action",
+       "icon": "ACTION",
+       "value": 12
+      },
+      {
+       "identifier": "ARMATURE",
+       "name": "Armature",
+       "description": "Apply weight-blended transformation from multiple bones like the Armature modifier",
+       "icon": "CON_ARMATURE",
+       "value": 30
+      },
+      {
+       "identifier": "CHILD_OF",
+       "name": "Child Of",
+       "description": "Make target the 'detachable' parent of owner",
+       "icon": "CON_CHILDOF",
+       "value": 1
+      },
+      {
+       "identifier": "FLOOR",
+       "name": "Floor",
+       "description": "Use position (and optionally rotation) of target to define a 'wall' or 'floor' that the owner cannot cross",
+       "icon": "CON_FLOOR",
+       "value": 16
+      },
+      {
+       "identifier": "FOLLOW_PATH",
+       "name": "Follow Path",
+       "description": "Use to animate an object/bone following a path",
+       "icon": "CON_FOLLOWPATH",
+       "value": 4
+      },
+      {
+       "identifier": "GEOMETRY_ATTRIBUTE",
+       "name": "Geometry Attribute",
+       "description": "Retrieve transform from target geometry attribute data",
+       "icon": "CON_GEOMETRYATTRIBUTE",
+       "value": 31
+      },
+      {
+       "identifier": "PIVOT",
+       "name": "Pivot",
+       "description": "Change pivot point for transforms (buggy)",
+       "icon": "CON_PIVOT",
+       "value": 25
+      },
+      {
+       "identifier": "SHRINKWRAP",
+       "name": "Shrinkwrap",
+       "description": "Restrict movements to surface of target mesh",
+       "icon": "CON_SHRINKWRAP",
+       "value": 20
+      }
+     ],
+     "default": "CHILD_OF",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "constraint",
+     "name": "",
+     "description": "New constraint",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Constraint",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove a constraint from this object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "constraint",
+     "name": "",
+     "description": "Removed constraint",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Constraint",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "clear",
+   "description": "Remove all constraint from this object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "move",
+   "description": "Move a constraint to a different position",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "from_index",
+     "name": "From Index",
+     "description": "Index to move",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "to_index",
+     "name": "To Index",
+     "description": "Target index",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "copy",
+   "description": "Add a new constraint that is a copy of the given one",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "constraint",
+     "name": "",
+     "description": "Constraint to copy - may belong to a different object",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Constraint",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "new_constraint",
+     "name": "",
+     "description": "New constraint",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Constraint",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": false
+}

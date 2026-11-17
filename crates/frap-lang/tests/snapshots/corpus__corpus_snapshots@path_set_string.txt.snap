@@ -1,0 +1,14 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/path_set_string.txt
+---
+> bpy.data.objects['Cube'].name = 'Box'
+---
+stmt 1 Bpy line 1 @1:1/1+37
+  Set Assign
+    Path bpy.data @1:1/1+29
+      .objects
+      ["Cube"]
+      .name
+    Str "Box" @1:33/33+5

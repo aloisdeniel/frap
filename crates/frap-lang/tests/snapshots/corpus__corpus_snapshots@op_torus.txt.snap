@@ -1,0 +1,13 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/op_torus.txt
+---
+> bpy.ops.mesh.primitive_torus_add(major_radius=1, minor_radius=0.25)
+---
+stmt 1 Bpy line 1 @1:1/1+67
+  Invoke mesh.primitive_torus_add
+    arg major_radius @1:34/34+14
+      Int 1 @1:47/47+1
+    arg minor_radius @1:50/50+17
+      Float 0.25 @1:63/63+4

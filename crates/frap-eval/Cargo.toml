@@ -1,0 +1,28 @@
+[package]
+name = "frap-eval"
+description = "frap L8: Depsgraph-lite: evaluated objects and meshes, world matrices, bounds, animation at evaluation boundaries (ARCHITECTURE §7.3)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-scene.workspace = true
+frap-mesh.workspace = true
+frap-math.workspace = true
+glam.workspace = true
+libm.workspace = true
+rustc-hash.workspace = true
+smol_str.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+approx.workspace = true
+serde_json.workspace = true
+insta.workspace = true
+
+[lints]
+workspace = true

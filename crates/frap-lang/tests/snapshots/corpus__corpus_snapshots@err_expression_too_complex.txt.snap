@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_expression_too_complex.txt
+---
+> bpy.data.objects['Cube'].location.x = ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------1
+---
+error 1 SyntaxError UNSUPPORTED_SYNTAX @1:289/289+1
+  message: frap: expression too complex to parse (more than 250 nested levels)
+  hint: split the value into simpler statements

@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_space_after_eq.txt
+---
+> mesh.primitive_cube_add size= 2
+---
+error 1 SyntaxError SYNTAX @1:31/31+1
+  message: expected argument value expression
+  hint: no space after '=' in key=value

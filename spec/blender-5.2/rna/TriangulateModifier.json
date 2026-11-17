@@ -1,0 +1,119 @@
+{
+ "identifier": "TriangulateModifier",
+ "name": "Triangulate Modifier",
+ "description": "Triangulate Mesh",
+ "base": "Modifier",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "quad_method",
+   "name": "Quad Method",
+   "description": "Method for splitting the quads into triangles",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BEAUTY",
+     "name": "Beauty",
+     "description": "Split the quads in nice triangles, slower method",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "FIXED",
+     "name": "Fixed",
+     "description": "Split the quads on the first and third vertices",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "FIXED_ALTERNATE",
+     "name": "Fixed Alternate",
+     "description": "Split the quads on the 2nd and 4th vertices",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "SHORTEST_DIAGONAL",
+     "name": "Shortest Diagonal",
+     "description": "Split the quads along their shortest diagonal",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "LONGEST_DIAGONAL",
+     "name": "Longest Diagonal",
+     "description": "Split the quads along their longest diagonal",
+     "icon": "NONE",
+     "value": 4
+    }
+   ],
+   "default": "SHORTEST_DIAGONAL",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ngon_method",
+   "name": "N-gon Method",
+   "description": "Method for splitting the n-gons into triangles",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "BEAUTY",
+     "name": "Beauty",
+     "description": "Arrange the new triangles evenly (slow)",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "CLIP",
+     "name": "Clip",
+     "description": "Split the polygons with an ear clipping algorithm",
+     "icon": "NONE",
+     "value": 1
+    }
+   ],
+   "default": "BEAUTY",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "min_vertices",
+   "name": "Minimum Vertices",
+   "description": "Triangulate only polygons with vertex count greater than or equal to this number",
+   "type": "INT",
+   "subtype": "UNSIGNED",
+   "unit": "NONE",
+   "default": 4,
+   "hard_min": 4,
+   "hard_max": 2147483647,
+   "soft_min": 4,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "keep_custom_normals",
+   "name": "Keep Normals",
+   "description": "Try to preserve custom normals.\nWarning: Depending on chosen triangulation method, shading may not be fully preserved, \"Fixed\" method usually gives the best result here",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": true
+}

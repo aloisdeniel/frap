@@ -1,0 +1,12 @@
+# WP 1.20: values the object goldens cannot read (they compare outcomes and objects): camera_add
+# uses the view rotation and sets scene.camera only when the scene has none; light_add gives a
+# Sun 1.0 strength and an Area light a size equal to the radius; empty_add's radius becomes the
+# display size; duplicate copies the mesh but shares the material (users 2), linked=True
+# shares the mesh; join merges the selected meshes (a linked copy too) into the active one and
+# leaves their meshes as orphans, then CANCELLED with Blender's WARNING ('No mesh data to
+# join'); move/link_to_collection INFO reports and 'No collection selected'; the slot
+# operators' reports; material.new does not assign a slot; collection_link's dynamic items.
+# Statements on stdin (raw mode, §13.1), both syntaxes.
+bin.name = "frap"
+args = []
+fs.sandbox = true

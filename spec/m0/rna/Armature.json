@@ -1,0 +1,12 @@
+{
+ "identifier": "Armature",
+ "base": "ID",
+ "name": "Armature",
+ "description": "Armature data-block containing a hierarchy of bones, usually used for rigging characters",
+ "name_property": "name",
+ "props": [],
+ "_stamp": {
+  "blender": "5.2.4 LTS",
+  "build_hash": "cd5dc428cce1"
+ }
+}

@@ -1,0 +1,17 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/doc_serve_request_src.txt
+---
+> bpy.ops.mesh.primitive_cube_add()
+> bpy.ops.mesh.bevel(offset=0.1)
+> bpy.ops.object.shade_smooth()
+---
+stmt 1 Bpy line 1 @1:1/1+33
+  Invoke mesh.primitive_cube_add
+stmt 2 Bpy line 2 @2:1/1+30
+  Invoke mesh.bevel
+    arg offset @2:20/20+10
+      Float 0.1 @2:27/27+3
+stmt 3 Bpy line 3 @3:1/1+29
+  Invoke object.shade_smooth

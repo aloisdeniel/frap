@@ -1,0 +1,1 @@
+frap.select_elements type=VERT indices=[0, 1, 2]

@@ -1,0 +1,744 @@
+{
+ "identifier": "ObjectModifiers",
+ "name": "Object Modifiers",
+ "description": "Collection of object modifiers",
+ "base": null,
+ "name_property": null,
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "active",
+   "name": "Active Modifier",
+   "description": "The active modifier in the list",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Modifier",
+   "is_id": false,
+   "flags": []
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "new",
+   "description": "Add a new modifier",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "name",
+     "name": "",
+     "description": "New name for the modifier",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "Name",
+     "length_max": 0,
+     "flags": [
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    },
+    {
+     "identifier": "type",
+     "name": "",
+     "description": "Modifier type to add",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "GREASE_PENCIL_VERTEX_WEIGHT_PROXIMITY",
+       "name": "Vertex Weight Proximity",
+       "description": "Generate vertex weights based on distance to object",
+       "icon": "MOD_VERTEX_WEIGHT",
+       "value": 76
+      },
+      {
+       "identifier": "DATA_TRANSFER",
+       "name": "Data Transfer",
+       "description": "Transfer several types of data (vertex groups, UV maps, vertex colors, custom normals) from one mesh to another",
+       "icon": "MOD_DATA_TRANSFER",
+       "value": 49
+      },
+      {
+       "identifier": "MESH_CACHE",
+       "name": "Mesh Cache",
+       "description": "Deform the mesh using an external frame-by-frame vertex transform cache",
+       "icon": "MOD_MESHDEFORM",
+       "value": 46
+      },
+      {
+       "identifier": "MESH_SEQUENCE_CACHE",
+       "name": "Mesh Sequence Cache",
+       "description": "Deform the mesh or curve using an external mesh cache in Alembic format",
+       "icon": "MOD_MESHDEFORM",
+       "value": 52
+      },
+      {
+       "identifier": "NORMAL_EDIT",
+       "name": "Normal Edit",
+       "description": "Modify the direction of the surface normals",
+       "icon": "MOD_NORMALEDIT",
+       "value": 50
+      },
+      {
+       "identifier": "WEIGHTED_NORMAL",
+       "name": "Weighted Normal",
+       "description": "Modify the direction of the surface normals using a weighting method",
+       "icon": "MOD_NORMALEDIT",
+       "value": 54
+      },
+      {
+       "identifier": "UV_PROJECT",
+       "name": "UV Project",
+       "description": "Project the UV map coordinates from the negative Z axis of another object",
+       "icon": "MOD_UVPROJECT",
+       "value": 15
+      },
+      {
+       "identifier": "UV_WARP",
+       "name": "UV Warp",
+       "description": "Transform the UV map using the difference between two objects",
+       "icon": "MOD_UVPROJECT",
+       "value": 45
+      },
+      {
+       "identifier": "VERTEX_WEIGHT_EDIT",
+       "name": "Vertex Weight Edit",
+       "description": "Modify of the weights of a vertex group",
+       "icon": "MOD_VERTEX_WEIGHT",
+       "value": 36
+      },
+      {
+       "identifier": "VERTEX_WEIGHT_MIX",
+       "name": "Vertex Weight Mix",
+       "description": "Mix the weights of two vertex groups",
+       "icon": "MOD_VERTEX_WEIGHT",
+       "value": 37
+      },
+      {
+       "identifier": "VERTEX_WEIGHT_PROXIMITY",
+       "name": "Vertex Weight Proximity",
+       "description": "Set the vertex group weights based on the distance to another target object",
+       "icon": "MOD_VERTEX_WEIGHT",
+       "value": 38
+      },
+      {
+       "identifier": "GREASE_PENCIL_COLOR",
+       "name": "Hue/Saturation",
+       "description": "Change hue/saturation/value of the strokes",
+       "icon": "MOD_HUE_SATURATION",
+       "value": 63
+      },
+      {
+       "identifier": "GREASE_PENCIL_TINT",
+       "name": "Tint",
+       "description": "Tint the color of the strokes",
+       "icon": "MOD_TINT",
+       "value": 64
+      },
+      {
+       "identifier": "GREASE_PENCIL_OPACITY",
+       "name": "Opacity",
+       "description": "Change the opacity of the strokes",
+       "icon": "MOD_OPACITY",
+       "value": 61
+      },
+      {
+       "identifier": "GREASE_PENCIL_VERTEX_WEIGHT_ANGLE",
+       "name": "Vertex Weight Angle",
+       "description": "Generate vertex weights based on stroke angle",
+       "icon": "MOD_VERTEX_WEIGHT",
+       "value": 74
+      },
+      {
+       "identifier": "GREASE_PENCIL_TIME",
+       "name": "Time Offset",
+       "description": "Offset keyframes",
+       "icon": "MOD_TIME",
+       "value": 80
+      },
+      {
+       "identifier": "GREASE_PENCIL_TEXTURE",
+       "name": "Texture Mapping",
+       "description": "Change stroke UV texture values",
+       "icon": "MOD_UVPROJECT",
+       "value": 86
+      },
+      {
+       "identifier": "ARRAY",
+       "name": "Array",
+       "description": "Create copies of the shape with offsets",
+       "icon": "MOD_ARRAY",
+       "value": 12
+      },
+      {
+       "identifier": "BEVEL",
+       "name": "Bevel",
+       "description": "Generate sloped corners by adding geometry to the mesh's edges or vertices",
+       "icon": "MOD_BEVEL",
+       "value": 24
+      },
+      {
+       "identifier": "BOOLEAN",
+       "name": "Boolean",
+       "description": "Use another shape to cut, combine or perform a difference operation",
+       "icon": "MOD_BOOLEAN",
+       "value": 11
+      },
+      {
+       "identifier": "BUILD",
+       "name": "Build",
+       "description": "Cause the faces of the mesh object to appear or disappear one after the other over time",
+       "icon": "MOD_BUILD",
+       "value": 4
+      },
+      {
+       "identifier": "DECIMATE",
+       "name": "Decimate",
+       "description": "Reduce the geometry density",
+       "icon": "MOD_DECIM",
+       "value": 6
+      },
+      {
+       "identifier": "EDGE_SPLIT",
+       "name": "Edge Split",
+       "description": "Split away joined faces at the edges",
+       "icon": "MOD_EDGESPLIT",
+       "value": 13
+      },
+      {
+       "identifier": "NODES",
+       "name": "Geometry Nodes",
+       "description": "",
+       "icon": "GEOMETRY_NODES",
+       "value": 57
+      },
+      {
+       "identifier": "MASK",
+       "name": "Mask",
+       "description": "Dynamically hide vertices based on a vertex group or armature",
+       "icon": "MOD_MASK",
+       "value": 27
+      },
+      {
+       "identifier": "MIRROR",
+       "name": "Mirror",
+       "description": "Mirror along the local X, Y and/or Z axes, over the object origin",
+       "icon": "MOD_MIRROR",
+       "value": 5
+      },
+      {
+       "identifier": "MESH_TO_VOLUME",
+       "name": "Mesh to Volume",
+       "description": "",
+       "icon": "VOLUME_DATA",
+       "value": 58
+      },
+      {
+       "identifier": "MULTIRES",
+       "name": "Multiresolution",
+       "description": "Subdivide the mesh in a way that allows editing the higher subdivision levels",
+       "icon": "MOD_MULTIRES",
+       "value": 29
+      },
+      {
+       "identifier": "REMESH",
+       "name": "Remesh",
+       "description": "Generate new mesh topology based on the current shape",
+       "icon": "MOD_REMESH",
+       "value": 41
+      },
+      {
+       "identifier": "SCREW",
+       "name": "Screw",
+       "description": "Lathe around an axis, treating the input mesh as a profile",
+       "icon": "MOD_SCREW",
+       "value": 34
+      },
+      {
+       "identifier": "SKIN",
+       "name": "Skin",
+       "description": "Create a solid shape from vertices and edges, using the vertex radius to define the thickness",
+       "icon": "MOD_SKIN",
+       "value": 42
+      },
+      {
+       "identifier": "SOLIDIFY",
+       "name": "Solidify",
+       "description": "Make the surface thick",
+       "icon": "MOD_SOLIDIFY",
+       "value": 33
+      },
+      {
+       "identifier": "SUBSURF",
+       "name": "Subdivision Surface",
+       "description": "Split the faces into smaller parts, giving it a smoother appearance",
+       "icon": "MOD_SUBSURF",
+       "value": 1
+      },
+      {
+       "identifier": "TRIANGULATE",
+       "name": "Triangulate",
+       "description": "Convert all polygons to triangles",
+       "icon": "MOD_TRIANGULATE",
+       "value": 44
+      },
+      {
+       "identifier": "VOLUME_TO_MESH",
+       "name": "Volume to Mesh",
+       "description": "",
+       "icon": "VOLUME_DATA",
+       "value": 60
+      },
+      {
+       "identifier": "WELD",
+       "name": "Weld",
+       "description": "Find groups of vertices closer than dist and merge them together",
+       "icon": "AUTOMERGE_OFF",
+       "value": 55
+      },
+      {
+       "identifier": "WIREFRAME",
+       "name": "Wireframe",
+       "description": "Convert faces into thickened edges",
+       "icon": "MOD_WIREFRAME",
+       "value": 48
+      },
+      {
+       "identifier": "GREASE_PENCIL_ARRAY",
+       "name": "Array",
+       "description": "Duplicate strokes into an array",
+       "icon": "MOD_ARRAY",
+       "value": 75
+      },
+      {
+       "identifier": "GREASE_PENCIL_BUILD",
+       "name": "Build",
+       "description": "Grease Pencil build modifier",
+       "icon": "MOD_BUILD",
+       "value": 84
+      },
+      {
+       "identifier": "GREASE_PENCIL_LENGTH",
+       "name": "Length",
+       "description": "Grease Pencil length modifier",
+       "icon": "MOD_LENGTH",
+       "value": 73
+      },
+      {
+       "identifier": "LINEART",
+       "name": "Line Art",
+       "description": "Generate Line Art from scene geometries",
+       "icon": "MOD_LINEART",
+       "value": 78
+      },
+      {
+       "identifier": "GREASE_PENCIL_MIRROR",
+       "name": "Mirror",
+       "description": "Duplicate strokes like a mirror",
+       "icon": "MOD_MIRROR",
+       "value": 68
+      },
+      {
+       "identifier": "GREASE_PENCIL_MULTIPLY",
+       "name": "Multiple Strokes",
+       "description": "Generate multiple strokes around original strokes",
+       "icon": "GP_MULTIFRAME_EDITING",
+       "value": 72
+      },
+      {
+       "identifier": "GREASE_PENCIL_SIMPLIFY",
+       "name": "Simplify",
+       "description": "Simplify stroke reducing number of points",
+       "icon": "MOD_SIMPLIFY",
+       "value": 85
+      },
+      {
+       "identifier": "GREASE_PENCIL_SUBDIV",
+       "name": "Subdivide",
+       "description": "Grease Pencil subdivide modifier",
+       "icon": "MOD_SUBSURF",
+       "value": 62
+      },
+      {
+       "identifier": "GREASE_PENCIL_ENVELOPE",
+       "name": "Envelope",
+       "description": "Create an envelope shape",
+       "icon": "MOD_ENVELOPE",
+       "value": 81
+      },
+      {
+       "identifier": "GREASE_PENCIL_OUTLINE",
+       "name": "Outline",
+       "description": "Convert stroke to outline",
+       "icon": "MOD_OUTLINE",
+       "value": 82
+      },
+      {
+       "identifier": "ARMATURE",
+       "name": "Armature",
+       "description": "Deform the shape using an armature object",
+       "icon": "MOD_ARMATURE",
+       "value": 8
+      },
+      {
+       "identifier": "CAST",
+       "name": "Cast",
+       "description": "Shift the shape towards a predefined primitive",
+       "icon": "MOD_CAST",
+       "value": 17
+      },
+      {
+       "identifier": "CURVE",
+       "name": "Curve",
+       "description": "Bend the mesh using a curve object",
+       "icon": "MOD_CURVE",
+       "value": 3
+      },
+      {
+       "identifier": "DISPLACE",
+       "name": "Displace",
+       "description": "Offset vertices based on a texture",
+       "icon": "MOD_DISPLACE",
+       "value": 14
+      },
+      {
+       "identifier": "HOOK",
+       "name": "Hook",
+       "description": "Deform specific points using another object",
+       "icon": "HOOK",
+       "value": 9
+      },
+      {
+       "identifier": "LAPLACIANDEFORM",
+       "name": "Laplacian Deform",
+       "description": "Deform based a series of anchor points",
+       "icon": "MOD_MESHDEFORM",
+       "value": 47
+      },
+      {
+       "identifier": "LATTICE",
+       "name": "Lattice",
+       "description": "Deform using the shape of a lattice object",
+       "icon": "MOD_LATTICE",
+       "value": 2
+      },
+      {
+       "identifier": "MESH_DEFORM",
+       "name": "Mesh Deform",
+       "description": "Deform using a different mesh, which acts as a deformation cage",
+       "icon": "MOD_MESHDEFORM",
+       "value": 18
+      },
+      {
+       "identifier": "SHRINKWRAP",
+       "name": "Shrinkwrap",
+       "description": "Project the shape onto another object",
+       "icon": "MOD_SHRINKWRAP",
+       "value": 25
+      },
+      {
+       "identifier": "SIMPLE_DEFORM",
+       "name": "Simple Deform",
+       "description": "Deform the shape by twisting, bending, tapering or stretching",
+       "icon": "MOD_SIMPLEDEFORM",
+       "value": 28
+      },
+      {
+       "identifier": "SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth the mesh by flattening the angles between adjacent faces",
+       "icon": "MOD_SMOOTH",
+       "value": 16
+      },
+      {
+       "identifier": "CORRECTIVE_SMOOTH",
+       "name": "Smooth Corrective",
+       "description": "Smooth the mesh while still preserving the volume",
+       "icon": "MOD_SMOOTH",
+       "value": 51
+      },
+      {
+       "identifier": "LAPLACIANSMOOTH",
+       "name": "Smooth Laplacian",
+       "description": "Reduce the noise on a mesh surface with minimal changes to its shape",
+       "icon": "MOD_SMOOTH",
+       "value": 43
+      },
+      {
+       "identifier": "SURFACE_DEFORM",
+       "name": "Surface Deform",
+       "description": "Transfer motion from another mesh",
+       "icon": "MOD_MESHDEFORM",
+       "value": 53
+      },
+      {
+       "identifier": "WARP",
+       "name": "Warp",
+       "description": "Warp parts of a mesh to a new location in a very flexible way thanks to 2 specified objects",
+       "icon": "MOD_WARP",
+       "value": 35
+      },
+      {
+       "identifier": "WAVE",
+       "name": "Wave",
+       "description": "Adds a ripple-like motion to an object's geometry",
+       "icon": "MOD_WAVE",
+       "value": 7
+      },
+      {
+       "identifier": "VOLUME_DISPLACE",
+       "name": "Volume Displace",
+       "description": "Deform volume based on noise or other vector fields",
+       "icon": "VOLUME_DATA",
+       "value": 59
+      },
+      {
+       "identifier": "GREASE_PENCIL_HOOK",
+       "name": "Hook",
+       "description": "Deform stroke points using objects",
+       "icon": "HOOK",
+       "value": 77
+      },
+      {
+       "identifier": "GREASE_PENCIL_NOISE",
+       "name": "Noise",
+       "description": "Generate noise wobble in Grease Pencil strokes",
+       "icon": "MOD_NOISE",
+       "value": 67
+      },
+      {
+       "identifier": "GREASE_PENCIL_OFFSET",
+       "name": "Offset",
+       "description": "Change stroke location, rotation, or scale",
+       "icon": "MOD_OFFSET",
+       "value": 66
+      },
+      {
+       "identifier": "GREASE_PENCIL_SMOOTH",
+       "name": "Smooth",
+       "description": "Smooth Grease Pencil strokes",
+       "icon": "SMOOTHCURVE",
+       "value": 65
+      },
+      {
+       "identifier": "GREASE_PENCIL_THICKNESS",
+       "name": "Thickness",
+       "description": "Change stroke thickness",
+       "icon": "MOD_THICKNESS",
+       "value": 69
+      },
+      {
+       "identifier": "GREASE_PENCIL_LATTICE",
+       "name": "Lattice",
+       "description": "Deform strokes using a lattice object",
+       "icon": "MOD_LATTICE",
+       "value": 70
+      },
+      {
+       "identifier": "GREASE_PENCIL_DASH",
+       "name": "Dot Dash",
+       "description": "Generate dot-dash styled strokes",
+       "icon": "MOD_DASH",
+       "value": 71
+      },
+      {
+       "identifier": "GREASE_PENCIL_ARMATURE",
+       "name": "Armature",
+       "description": "Deform stroke points using armature object",
+       "icon": "MOD_ARMATURE",
+       "value": 79
+      },
+      {
+       "identifier": "GREASE_PENCIL_SHRINKWRAP",
+       "name": "Shrinkwrap",
+       "description": "Project the shape onto another object",
+       "icon": "MOD_SHRINKWRAP",
+       "value": 83
+      },
+      {
+       "identifier": "CLOTH",
+       "name": "Cloth",
+       "description": "Physic simulation for cloth",
+       "icon": "MOD_CLOTH",
+       "value": 22
+      },
+      {
+       "identifier": "COLLISION",
+       "name": "Collision",
+       "description": "For colliders participating in physics simulation, control which level in the modifier stack is used as the collision surface",
+       "icon": "MOD_PHYSICS",
+       "value": 23
+      },
+      {
+       "identifier": "DYNAMIC_PAINT",
+       "name": "Dynamic Paint",
+       "description": "Turn objects into paint canvases and brushes, creating color attributes, image sequences, or displacement",
+       "icon": "MOD_DYNAMICPAINT",
+       "value": 40
+      },
+      {
+       "identifier": "EXPLODE",
+       "name": "Explode",
+       "description": "Break apart the mesh faces and let them follow particles",
+       "icon": "MOD_EXPLODE",
+       "value": 21
+      },
+      {
+       "identifier": "FLUID",
+       "name": "Fluid",
+       "description": "Physics simulation for fluids, like water, oil and smoke",
+       "icon": "MOD_FLUIDSIM",
+       "value": 56
+      },
+      {
+       "identifier": "OCEAN",
+       "name": "Ocean",
+       "description": "Generate a moving ocean surface",
+       "icon": "MOD_OCEAN",
+       "value": 39
+      },
+      {
+       "identifier": "PARTICLE_INSTANCE",
+       "name": "Particle Instance",
+       "description": "Duplicate mesh at the location of particles",
+       "icon": "MOD_PARTICLE_INSTANCE",
+       "value": 20
+      },
+      {
+       "identifier": "PARTICLE_SYSTEM",
+       "name": "Particle System",
+       "description": "Spawn particles from the shape",
+       "icon": "MOD_PARTICLES",
+       "value": 19
+      },
+      {
+       "identifier": "SOFT_BODY",
+       "name": "Soft Body",
+       "description": "Simulate soft deformable objects",
+       "icon": "MOD_SOFT",
+       "value": 10
+      },
+      {
+       "identifier": "SURFACE",
+       "name": "Surface",
+       "description": "",
+       "icon": "MODIFIER",
+       "value": 30
+      }
+     ],
+     "default": "SUBSURF",
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "modifier",
+     "name": "",
+     "description": "Newly created modifier",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Modifier",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "remove",
+   "description": "Remove an existing modifier from the object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "modifier",
+     "name": "",
+     "description": "Modifier to remove",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "Modifier",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "REQUIRED",
+      "NEVER_NULL"
+     ]
+    }
+   ],
+   "returns": []
+  },
+  {
+   "identifier": "clear",
+   "description": "Remove all modifiers from the object",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [],
+   "returns": []
+  },
+  {
+   "identifier": "move",
+   "description": "Move a modifier to a different position",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "from_index",
+     "name": "From Index",
+     "description": "Index to move",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "to_index",
+     "name": "To Index",
+     "description": "Target index",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": -1,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": []
+  }
+ ],
+ "root": true
+}

@@ -1,0 +1,1680 @@
+{
+ "identifier": "PoseBone",
+ "name": "Pose Bone",
+ "description": "Channel defining pose data for a bone in a Pose",
+ "base": null,
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "constraints",
+   "name": "Constraints",
+   "description": "Constraints that act on this pose channel",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Constraint",
+   "is_id": false,
+   "api": "PoseBoneConstraints",
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "name",
+   "name": "Name",
+   "description": "",
+   "type": "STRING",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": "",
+   "length_max": 64,
+   "flags": [
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "motion_path",
+   "name": "Motion Path",
+   "description": "Motion Path for this element",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "MotionPath",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "bone",
+   "name": "Bone",
+   "description": "Bone associated with this PoseBone",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Bone",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "NEVER_NULL"
+   ]
+  },
+  {
+   "identifier": "parent",
+   "name": "Parent",
+   "description": "Parent of this pose bone",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PoseBone",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "child",
+   "name": "Child",
+   "description": "Child of this pose bone",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PoseBone",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "location",
+   "name": "Location",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "scale",
+   "name": "Scale",
+   "description": "",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "rotation_quaternion",
+   "name": "Quaternion Rotation",
+   "description": "Rotation in Quaternions",
+   "type": "FLOAT",
+   "subtype": "QUATERNION",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    1.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "rotation_axis_angle",
+   "name": "Axis-Angle Rotation",
+   "description": "Angle of Rotation for Axis-Angle rotation representation",
+   "type": "FLOAT",
+   "subtype": "AXISANGLE",
+   "unit": "NONE",
+   "array": [
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "rotation_euler",
+   "name": "Euler Rotation",
+   "description": "Rotation in Eulers",
+   "type": "FLOAT",
+   "subtype": "EULER",
+   "unit": "ROTATION",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 100.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "rotation_mode",
+   "name": "Rotation Mode",
+   "description": "The kind of rotation to apply, values from other rotation modes are not used",
+   "type": "ENUM",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "items": [
+    {
+     "identifier": "QUATERNION",
+     "name": "Quaternion (WXYZ)",
+     "description": "No Gimbal Lock",
+     "icon": "NONE",
+     "value": 0
+    },
+    {
+     "identifier": "XYZ",
+     "name": "XYZ Euler",
+     "description": "XYZ Rotation Order - prone to Gimbal Lock (default)",
+     "icon": "NONE",
+     "value": 1
+    },
+    {
+     "identifier": "XZY",
+     "name": "XZY Euler",
+     "description": "XZY Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 2
+    },
+    {
+     "identifier": "YXZ",
+     "name": "YXZ Euler",
+     "description": "YXZ Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 3
+    },
+    {
+     "identifier": "YZX",
+     "name": "YZX Euler",
+     "description": "YZX Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 4
+    },
+    {
+     "identifier": "ZXY",
+     "name": "ZXY Euler",
+     "description": "ZXY Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 5
+    },
+    {
+     "identifier": "ZYX",
+     "name": "ZYX Euler",
+     "description": "ZYX Rotation Order - prone to Gimbal Lock",
+     "icon": "NONE",
+     "value": 6
+    },
+    {
+     "identifier": "AXIS_ANGLE",
+     "name": "Axis Angle",
+     "description": "Axis Angle (W+XYZ), defines a rotation around some axis defined by 3D-Vector",
+     "icon": "NONE",
+     "value": -1
+    }
+   ],
+   "default": "QUATERNION",
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bbone_rollin",
+   "name": "Roll In",
+   "description": "Roll offset for the start of the B-Bone, adjusts twist",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -6.2831854820251465,
+   "soft_max": 6.2831854820251465,
+   "step": 10.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bbone_rollout",
+   "name": "Roll Out",
+   "description": "Roll offset for the end of the B-Bone, adjusts twist",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -6.2831854820251465,
+   "soft_max": 6.2831854820251465,
+   "step": 10.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bbone_curveinx",
+   "name": "In X",
+   "description": "X-axis handle offset for start of the B-Bone's curve, adjusts curvature",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bbone_curveinz",
+   "name": "In Z",
+   "description": "Z-axis handle offset for start of the B-Bone's curve, adjusts curvature",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bbone_curveoutx",
+   "name": "Out X",
+   "description": "X-axis handle offset for end of the B-Bone's curve, adjusts curvature",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bbone_curveoutz",
+   "name": "Out Z",
+   "description": "Z-axis handle offset for end of the B-Bone's curve, adjusts curvature",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bbone_easein",
+   "name": "Ease In",
+   "description": "Length of first Bézier Handle (for B-Bones only)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -5.0,
+   "soft_max": 5.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bbone_easeout",
+   "name": "Ease Out",
+   "description": "Length of second Bézier Handle (for B-Bones only)",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -5.0,
+   "soft_max": 5.0,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bbone_scalein",
+   "name": "Scale In",
+   "description": "Scale factors for the start of the B-Bone, adjusts thickness (for tapering effects)",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bbone_scaleout",
+   "name": "Scale Out",
+   "description": "Scale factors for the end of the B-Bone, adjusts thickness (for tapering effects)",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": 0.0,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "bbone_custom_handle_start",
+   "name": "B-Bone Start Handle",
+   "description": "Bone that serves as the start handle for the B-Bone curve",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PoseBone",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "bbone_custom_handle_end",
+   "name": "B-Bone End Handle",
+   "description": "Bone that serves as the end handle for the B-Bone curve",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PoseBone",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "matrix_channel",
+   "name": "Channel Matrix",
+   "description": "4×4 matrix of the bone's location/rotation/scale channels (including animation and drivers) and the effect of bone constraints",
+   "type": "FLOAT",
+   "subtype": "MATRIX",
+   "unit": "NONE",
+   "array": [
+    4,
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "matrix_basis",
+   "name": "Basis Matrix",
+   "description": "Alternative access to location/scale/rotation relative to the parent and own rest bone",
+   "type": "FLOAT",
+   "subtype": "MATRIX",
+   "unit": "NONE",
+   "array": [
+    4,
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": []
+  },
+  {
+   "identifier": "matrix",
+   "name": "Pose Matrix",
+   "description": "Final 4×4 matrix after constraints and drivers are applied, in the armature object space",
+   "type": "FLOAT",
+   "subtype": "MATRIX",
+   "unit": "NONE",
+   "array": [
+    4,
+    4
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "head",
+   "name": "Pose Head Position",
+   "description": "Location of head of the channel's bone",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "tail",
+   "name": "Pose Tail Position",
+   "description": "Location of tail of the channel's bone",
+   "type": "FLOAT",
+   "subtype": "TRANSLATION",
+   "unit": "LENGTH",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "length",
+   "name": "Length",
+   "description": "Length of the bone",
+   "type": "FLOAT",
+   "subtype": "DISTANCE",
+   "unit": "LENGTH",
+   "default": 0.0,
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "is_in_ik_chain",
+   "name": "Has IK",
+   "description": "Is part of an IK chain",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "READONLY",
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock_ik_x",
+   "name": "IK X Lock",
+   "description": "Disallow movement around the X axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock_ik_y",
+   "name": "IK Y Lock",
+   "description": "Disallow movement around the Y axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock_ik_z",
+   "name": "IK Z Lock",
+   "description": "Disallow movement around the Z axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_ik_limit_x",
+   "name": "IK X Limit",
+   "description": "Limit movement around the X axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_ik_limit_y",
+   "name": "IK Y Limit",
+   "description": "Limit movement around the Y axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_ik_limit_z",
+   "name": "IK Z Limit",
+   "description": "Limit movement around the Z axis",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_ik_rotation_control",
+   "name": "IK Rotation Control",
+   "description": "Apply channel rotation as IK constraint",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_ik_linear_control",
+   "name": "IK Linear Control",
+   "description": "Apply channel size as IK constraint if stretching is enabled",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_min_x",
+   "name": "IK X Minimum",
+   "description": "Minimum angles for IK Limit",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": -3.1415927410125732,
+   "hard_max": 0.0,
+   "soft_min": -3.1415927410125732,
+   "soft_max": 0.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_max_x",
+   "name": "IK X Maximum",
+   "description": "Maximum angles for IK Limit",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.1415927410125732,
+   "soft_min": 0.0,
+   "soft_max": 3.1415927410125732,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_min_y",
+   "name": "IK Y Minimum",
+   "description": "Minimum angles for IK Limit",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": -3.1415927410125732,
+   "hard_max": 0.0,
+   "soft_min": -3.1415927410125732,
+   "soft_max": 0.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_max_y",
+   "name": "IK Y Maximum",
+   "description": "Maximum angles for IK Limit",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.1415927410125732,
+   "soft_min": 0.0,
+   "soft_max": 3.1415927410125732,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_min_z",
+   "name": "IK Z Minimum",
+   "description": "Minimum angles for IK Limit",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": -3.1415927410125732,
+   "hard_max": 0.0,
+   "soft_min": -3.1415927410125732,
+   "soft_max": 0.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_max_z",
+   "name": "IK Z Maximum",
+   "description": "Maximum angles for IK Limit",
+   "type": "FLOAT",
+   "subtype": "ANGLE",
+   "unit": "ROTATION",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 3.1415927410125732,
+   "soft_min": 0.0,
+   "soft_max": 3.1415927410125732,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_stiffness_x",
+   "name": "IK X Stiffness",
+   "description": "IK stiffness around the X axis",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 0.9900000095367432,
+   "soft_min": 0.0,
+   "soft_max": 0.9900000095367432,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_stiffness_y",
+   "name": "IK Y Stiffness",
+   "description": "IK stiffness around the Y axis",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 0.9900000095367432,
+   "soft_min": 0.0,
+   "soft_max": 0.9900000095367432,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_stiffness_z",
+   "name": "IK Z Stiffness",
+   "description": "IK stiffness around the Z axis",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 0.9900000095367432,
+   "soft_min": 0.0,
+   "soft_max": 0.9900000095367432,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_stretch",
+   "name": "IK Stretch",
+   "description": "Allow scaling of the bone for IK",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_rotation_weight",
+   "name": "IK Rotation Weight",
+   "description": "Weight of rotation constraint for IK",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "ik_linear_weight",
+   "name": "IK Lin Weight",
+   "description": "Weight of scale constraint for IK",
+   "type": "FLOAT",
+   "subtype": "FACTOR",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 0.0,
+   "hard_max": 1.0,
+   "soft_min": 0.0,
+   "soft_max": 1.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "custom_shape",
+   "name": "Custom Object",
+   "description": "Object that defines custom display shape for this bone",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Object",
+   "is_id": true,
+   "flags": []
+  },
+  {
+   "identifier": "custom_shape_scale_xyz",
+   "name": "Custom Shape Scale",
+   "description": "Adjust the size of the custom shape",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    1.0,
+    1.0,
+    1.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -10000.0,
+   "soft_max": 10000.0,
+   "step": 10.0,
+   "precision": 3,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "custom_shape_translation",
+   "name": "Custom Shape Translation",
+   "description": "Adjust the location of the custom shape",
+   "type": "FLOAT",
+   "subtype": "XYZ",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 1.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "custom_shape_rotation_euler",
+   "name": "Custom Shape Rotation",
+   "description": "Adjust the rotation of the custom shape",
+   "type": "FLOAT",
+   "subtype": "EULER",
+   "unit": "ROTATION",
+   "array": [
+    3
+   ],
+   "default": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "hard_min": -3.4028234663852886e+38,
+   "hard_max": 3.4028234663852886e+38,
+   "soft_min": -3.4028234663852886e+38,
+   "soft_max": 3.4028234663852886e+38,
+   "step": 100.0,
+   "precision": 5,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_transform_at_custom_shape",
+   "name": "Affect Gizmo",
+   "description": "The location and orientation of the Custom Shape Transform bone will be used for transform gizmos and for other transform operators in the 3D Viewport. When disabled, the 3D Viewport will still use the actual bone transform for these, even when the custom bone shape transform is overridden.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_transform_around_custom_shape",
+   "name": "Use As Pivot",
+   "description": "Transform the bone as if it was a child of the Custom Shape Transform bone. This can be useful when combining shape-key and armature deformations.",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "use_custom_shape_bone_size",
+   "name": "Scale to Bone Length",
+   "description": "Scale the custom object by the bone length",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": true,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "hide",
+   "name": "Hide",
+   "description": "Bone is not visible except for Edit Mode",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "select",
+   "name": "Select",
+   "description": "Bone is selected in Pose Mode",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": []
+  },
+  {
+   "identifier": "custom_shape_transform",
+   "name": "Custom Shape Transform",
+   "description": "Bone that defines the display transform of this custom shape",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "PoseBone",
+   "is_id": false,
+   "flags": []
+  },
+  {
+   "identifier": "custom_shape_wire_width",
+   "name": "Wire Width",
+   "description": "Adjust the line thickness of custom shapes",
+   "type": "FLOAT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0.0,
+   "hard_min": 1.0,
+   "hard_max": 16.0,
+   "soft_min": 1.0,
+   "soft_max": 10.0,
+   "step": 1.0,
+   "precision": 2,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "color",
+   "name": "color",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "BoneColor",
+   "is_id": false,
+   "flags": [
+    "READONLY"
+   ]
+  },
+  {
+   "identifier": "lock_location",
+   "name": "Lock Location",
+   "description": "Lock editing of location when transforming",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    false,
+    false,
+    false
+   ],
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock_rotation",
+   "name": "Lock Rotation",
+   "description": "Lock editing of rotation when transforming",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    false,
+    false,
+    false
+   ],
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock_rotation_w",
+   "name": "Lock Rotation (4D Angle)",
+   "description": "Lock editing of 'angle' component of four-component rotations when transforming",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock_rotations_4d",
+   "name": "Lock Rotations (4D)",
+   "description": "Lock editing of four component rotations by components (instead of as Eulers)",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": false,
+   "flags": [
+    "ANIMATABLE"
+   ]
+  },
+  {
+   "identifier": "lock_scale",
+   "name": "Lock Scale",
+   "description": "Lock editing of scale when transforming",
+   "type": "BOOLEAN",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "array": [
+    3
+   ],
+   "default": [
+    false,
+    false,
+    false
+   ],
+   "flags": [
+    "ANIMATABLE"
+   ]
+  }
+ ],
+ "funcs": [
+  {
+   "identifier": "bl_system_properties_get",
+   "description": "DEBUG ONLY. Internal access to runtime-defined RNA data storage, intended solely for testing and debugging purposes. Do not access it in regular scripting work, and in particular, do not assume that it contains writable data",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "do_create",
+     "name": "",
+     "description": "Ensure that system properties are created if they do not exist yet",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "system_properties",
+     "name": "",
+     "description": "The system properties root container, or None if there are no system properties stored in this data yet, and its creation was not requested",
+     "type": "POINTER",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "fixed_type": "PropertyGroup",
+     "is_id": false,
+     "flags": [
+      "READONLY",
+      "OUTPUT"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "evaluate_envelope",
+   "description": "Calculate bone envelope at given point",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "point",
+     "name": "Point",
+     "description": "Position in 3d space to evaluate",
+     "type": "FLOAT",
+     "subtype": "XYZ_LENGTH",
+     "unit": "LENGTH",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "factor",
+     "name": "Factor",
+     "description": "Envelope factor",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "bbone_segment_index",
+   "description": "Retrieve the index and blend factor of the B-Bone segments based on vertex position",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "point",
+     "name": "Point",
+     "description": "Vertex position in armature pose space",
+     "type": "FLOAT",
+     "subtype": "XYZ_LENGTH",
+     "unit": "LENGTH",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "index",
+     "name": "",
+     "description": "The index of the first segment joint affecting the point",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -10000,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "blend_next",
+     "name": "",
+     "description": "The blend factor between the given and the following joint",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "bbone_segment_matrix",
+   "description": "Retrieve the matrix of the joint between B-Bone segments if available",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "index",
+     "name": "",
+     "description": "Index of the segment endpoint",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 10000,
+     "step": 1,
+     "flags": [
+      "REQUIRED",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "rest",
+     "name": "",
+     "description": "Return the rest pose matrix",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "matrix_return",
+     "name": "",
+     "description": "The resulting matrix in bone local space",
+     "type": "FLOAT",
+     "subtype": "MATRIX",
+     "unit": "NONE",
+     "array": [
+      4,
+      4
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  },
+  {
+   "identifier": "compute_bbone_handles",
+   "description": "Retrieve the vectors and rolls coming from B-Bone custom handles",
+   "use_self": true,
+   "use_self_type": false,
+   "is_registered": false,
+   "is_registered_optional": false,
+   "params": [
+    {
+     "identifier": "rest",
+     "name": "",
+     "description": "Return the rest pose state",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "ease",
+     "name": "",
+     "description": "Apply scale from ease values",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "offsets",
+     "name": "",
+     "description": "Apply roll and curve offsets from bone properties",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "ANIMATABLE"
+     ]
+    }
+   ],
+   "returns": [
+    {
+     "identifier": "handle1",
+     "name": "",
+     "description": "The direction vector of the start handle in bone local space",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "roll1",
+     "name": "",
+     "description": "Roll of the start handle",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "handle2",
+     "name": "",
+     "description": "The direction vector of the end handle in bone local space",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -10000.0,
+     "soft_max": 10000.0,
+     "step": 10.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    },
+    {
+     "identifier": "roll2",
+     "name": "",
+     "description": "Roll of the end handle",
+     "type": "FLOAT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0.0,
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -3.4028234663852886e+38,
+     "soft_max": 3.4028234663852886e+38,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "OUTPUT",
+      "ANIMATABLE"
+     ]
+    }
+   ]
+  }
+ ],
+ "root": true
+}

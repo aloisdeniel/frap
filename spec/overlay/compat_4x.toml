@@ -1,0 +1,155 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Removed 4.x members (ARCHITECTURE §9.3 step 6): accessing one answers Blender's
+# `AttributeError: '<Struct>' object has no attribute '<member>'` plus the 5.x replacement as
+# `hint` (frap extension). Every entry is checked by `cargo test -p xtask` to be ABSENT from the
+# Blender 5.2.4 dumps (verified with `hasattr` on 5.2.4 when this file was seeded).
+#
+# Schema: [[member]] struct, identifier, kind ("prop" | "func"), removed_in, hint
+
+[[member]]
+struct = "Action"
+identifier = "fcurves"
+kind = "prop"
+removed_in = "5.0"
+hint = "slotted actions: action.layers[0].strips[0].channelbag(slot).fcurves (slot = obj.animation_data.action_slot)"
+
+[[member]]
+struct = "Action"
+identifier = "groups"
+kind = "prop"
+removed_in = "5.0"
+hint = "slotted actions: action.layers[0].strips[0].channelbag(slot).groups"
+
+[[member]]
+struct = "Mesh"
+identifier = "use_auto_smooth"
+kind = "prop"
+removed_in = "4.1"
+hint = "bpy.ops.object.shade_smooth_by_angle() or bpy.ops.object.shade_auto_smooth() (\"Smooth by Angle\" modifier)"
+
+[[member]]
+struct = "Mesh"
+identifier = "auto_smooth_angle"
+kind = "prop"
+removed_in = "4.1"
+hint = "bpy.ops.object.shade_smooth_by_angle(angle=...) or the \"Smooth by Angle\" modifier input"
+
+[[member]]
+struct = "Mesh"
+identifier = "calc_normals"
+kind = "func"
+removed_in = "4.0"
+hint = "normals are always up to date: read mesh.vertex_normals / mesh.polygon_normals"
+
+[[member]]
+struct = "Mesh"
+identifier = "calc_normals_split"
+kind = "func"
+removed_in = "4.1"
+hint = "read mesh.corner_normals"
+
+[[member]]
+struct = "Mesh"
+identifier = "free_normals_split"
+kind = "func"
+removed_in = "4.1"
+hint = "not needed: corner normals are computed on demand"
+
+[[member]]
+struct = "Mesh"
+identifier = "create_normals_split"
+kind = "func"
+removed_in = "4.1"
+hint = "not needed: corner normals are computed on demand"
+
+[[member]]
+struct = "Mesh"
+identifier = "polygon_layers_int"
+kind = "prop"
+removed_in = "4.0"
+hint = "mesh.attributes.new(name, 'INT', 'FACE')"
+
+[[member]]
+struct = "Object"
+identifier = "face_maps"
+kind = "prop"
+removed_in = "4.0"
+hint = "use a boolean FACE attribute: mesh.attributes.new(name, 'BOOLEAN', 'FACE')"
+
+[[member]]
+struct = "Object"
+identifier = "proxy"
+kind = "prop"
+removed_in = "3.2"
+hint = "library overrides"
+
+[[member]]
+struct = "Material"
+identifier = "shadow_method"
+kind = "prop"
+removed_in = "4.2"
+hint = "material.use_transparent_shadow (EEVEE Next)"
+
+[[member]]
+struct = "SceneEEVEE"
+identifier = "use_ssr"
+kind = "prop"
+removed_in = "4.2"
+hint = "screen-space reflections are always on in EEVEE Next (scene.eevee.use_raytracing)"
+
+[[member]]
+struct = "SceneEEVEE"
+identifier = "use_gtao"
+kind = "prop"
+removed_in = "4.2"
+hint = "ambient occlusion is a render pass in EEVEE Next (view_layer.use_pass_ambient_occlusion)"
+
+[[member]]
+struct = "SceneEEVEE"
+identifier = "use_bloom"
+kind = "prop"
+removed_in = "4.2"
+hint = "use the compositor Glare node"
+
+[[member]]
+struct = "SceneEEVEE"
+identifier = "use_soft_shadows"
+kind = "prop"
+removed_in = "4.2"
+hint = "light.use_soft_falloff / shadow settings per light"
+
+[[member]]
+struct = "Light"
+identifier = "shadow_buffer_bias"
+kind = "prop"
+removed_in = "4.2"
+hint = "EEVEE Next has no shadow bias (light.shadow_filter_radius)"
+
+[[member]]
+struct = "Armature"
+identifier = "layers"
+kind = "prop"
+removed_in = "4.0"
+hint = "armature.collections (bone collections)"
+
+[[member]]
+struct = "Bone"
+identifier = "layers"
+kind = "prop"
+removed_in = "4.0"
+hint = "bone.collections (bone collections)"
+
+[[member]]
+struct = "Pose"
+identifier = "bone_groups"
+kind = "prop"
+removed_in = "4.0"
+hint = "armature.collections (bone collections) and bone.color"
+
+[[member]]
+struct = "PoseBone"
+identifier = "bone_group"
+kind = "prop"
+removed_in = "4.0"
+hint = "bone collections and pose_bone.color"

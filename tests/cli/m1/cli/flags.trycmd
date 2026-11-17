@@ -1,0 +1,75 @@
+# frap command-line flags and exit codes (ARCHITECTURE §13.1, §14)
+
+Exit code 0 normally (errors are reported in-band), 1 when `--fail-fast` stopped after a
+failed statement, 2 on usage errors or failure to start (nothing on stdout, the reason on
+stderr). `--no-ready` / `--no-end-event` drop the events; `--verbosity minimal` drops
+`context`; `--empty` starts from `wm.read_homefile(use_empty=True)`; `--max-items` caps the
+names of a collection value. (snapbox normalizes backslashes in the output to `/`, so
+escaped quotes are elided with `[..]`.)
+
+```console
+$ frap --no-ready --no-end-event --verbosity minimal -c "print(1); print('a', 2.5)"
+{"seq":1,"line":1,"kind":"print","ok":true,"status":"FINISHED","value":[1],"reports":[],"hints":[]}
+{"seq":2,"line":1,"kind":"print","ok":true,"status":"FINISHED","value":["a",2.5],"reports":[],"hints":[]}
+
+$ frap --verbosity minimal -c "print(1); bpy.ops.mesh.nope(); print(3)"
+{"event":"ready","frap":"0.1.0","protocol":1,"blender_api":"5.2","startup":"factory"}
+{"seq":1,"line":1,"kind":"print","ok":true,"status":"FINISHED","value":[1],"reports":[],"hints":[]}
+{"seq":2,"line":1,"kind":"op","op":"mesh.nope","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"AttributeError","code":"OP_UNKNOWN","message":"Calling operator [..] error, could not be found","span":{"line":1,"col":11,"col_chars":11,"len":19},"detail":{"operator":"mesh.nope","did_you_mean":["mesh.poke","mesh.hide","mesh.rip"]},"hint":"did you mean bpy.ops.mesh.poke?"},"hints":[]}
+{"seq":3,"line":1,"kind":"print","ok":true,"status":"FINISHED","value":[3],"reports":[],"hints":[]}
+{"event":"end","ok":false,"stats":{"statements":3,"errors":1,"cancelled":0}}
+
+$ frap --verbosity minimal --fail-fast -c "print(1); bpy.ops.mesh.nope(); print(3)"
+? 1
+{"event":"ready","frap":"0.1.0","protocol":1,"blender_api":"5.2","startup":"factory"}
+{"seq":1,"line":1,"kind":"print","ok":true,"status":"FINISHED","value":[1],"reports":[],"hints":[]}
+{"seq":2,"line":1,"kind":"op","op":"mesh.nope","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"AttributeError","code":"OP_UNKNOWN","message":"Calling operator [..] error, could not be found","span":{"line":1,"col":11,"col_chars":11,"len":19},"detail":{"operator":"mesh.nope","did_you_mean":["mesh.poke","mesh.hide","mesh.rip"]},"hint":"did you mean bpy.ops.mesh.poke?"},"hints":[]}
+{"event":"end","ok":false,"stats":{"statements":2,"errors":1,"cancelled":0}}
+
+$ frap --empty --no-end-event -c "bpy.data.objects"
+{"event":"ready","frap":"0.1.0","protocol":1,"blender_api":"5.2","startup":"empty"}
+{"seq":1,"line":1,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.objects","value":{"$coll":"bpy.data.objects","item_type":"Object","len":0,"items":[]},"rna":{"type":"COLLECTION","subtype":"NONE"},"reports":[],"context":{"mode":"OBJECT","active_object":null,"selected_objects":[],"frame_current":1},"hints":[]}
+
+$ frap --max-items 1 --no-ready --no-end-event --verbosity minimal -c "bpy.data.objects"
+{"seq":1,"line":1,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.objects","value":{"$coll":"bpy.data.objects","item_type":"Object","len":3,"items":["Camera"],"truncated":true},"rna":{"type":"COLLECTION","subtype":"NONE"},"reports":[],"hints":[]}
+
+$ frap --bogus
+? 2
+error: unexpected argument '--bogus' found
+
+Usage: frap [OPTIONS] [COMMAND]
+
+For more information, try '--help'.
+
+$ frap --verbosity loud -c "print(1)"
+? 2
+error: invalid value 'loud' for '--verbosity <VERBOSITY>'
+  [possible values: minimal, normal, full]
+
+For more information, try '--help'.
+
+$ frap -c "print(1)" run script.py
+? 2
+frap: -c cannot be combined with run, serve or mcp
+
+For more information, try '--help'.
+
+$ frap mcp --fail-fast
+? 2
+frap: --fail-fast has no effect with frap mcp (every tools/call reports its own outcome)
+
+For more information, try '--help'.
+
+$ frap --describe op:mesh.bevl
+? 2
+frap: --describe: operator "bpy.ops.mesh.bevl" does not exist in Blender 5.2 or frap (did you mean: mesh.bevel, mesh.fill, mesh.reveal)
+
+$ frap run missing-script.py
+? 2
+frap: cannot read missing-script.py: [..]
+
+$ frap --file missing-scene.frap -c "print(1)"
+? 2
+frap: cannot read --file missing-scene.frap: [..]
+
+```
