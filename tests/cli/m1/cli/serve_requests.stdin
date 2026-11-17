@@ -1,0 +1,9 @@
+{"id": 1, "src": "bpy.ops.mesh.primitive_cube_add(size=2, location=(0, 0, 1))\nbpy.ops.mesh.nope()\nbpy.data.objects['Cube.001'].location = (5, 5, 5)"}
+{"id": "two", "src": "bpy.ops.mesh.nope()\nbpy.data.objects['Cube.001'].location", "on_error": "continue"}
+
+{"id": 3, "src": "print(1,"}
+{"id": 4, "src": "data.objects['Cube'].location = 1,2,3; D.objects['Cube'].location", "on_error": null}
+not json
+{"id": 6}
+{"id": 7, "src": "print(7)", "onerror": "continue"}
+{"id": 8, "src": ""}

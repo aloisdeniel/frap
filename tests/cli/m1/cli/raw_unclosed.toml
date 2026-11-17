@@ -1,0 +1,6 @@
+# Raw mode never hangs on an unclosed bracket (§11.1, §13.1): a blank line or EOF ends the
+# continuation with `SyntaxError: '(' was never closed`; the state is unchanged and the
+# stream goes on. Input: raw_unclosed.stdin (no trailing newline: EOF ends the last
+# statement). Expected output: raw_unclosed.stdout.
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
