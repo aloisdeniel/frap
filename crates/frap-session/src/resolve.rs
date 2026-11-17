@@ -993,43 +993,19 @@ fn step_key_lib(
             "bpy_prop_collection[key]: invalid key, must be a string or an int, not tuple",
         ));
     }
-    let code = frap_scene::Main::code_of(c.prop.identifier)
-        .ok_or_else(|| not_bound(&frap_spec_rna::BLEND_DATA, c.prop))?;
-    let library = match lib {
-        None => None,
-        Some(path) => Some(
-            main.libraries
-                .iter()
-                .find(|(_, l)| l.filepath == path)
-                .map(|(r, _)| r)
-                .ok_or_else(|| {
-                    FrapError::new(
-                        PyExc::KeyError,
-                        RNA_KEY_NOT_FOUND,
-                        format!(
-                            "\"bpy_prop_collection[id, lib]: lib filepath '{path}' does not reference a valid library\""
-                        ),
-                    )
-                })?,
-        ),
-    };
-    let lib_key = library.map(|l| l.key());
-    let (ids, _) = main
-        .collection(c.prop.identifier)
-        .ok_or_else(|| not_bound(&frap_spec_rna::BLEND_DATA, c.prop))?;
-    let found = ids.into_iter().find(|id| {
-        id.code == code
-            && main
-                .header(*id)
-                .is_some_and(|h| h.name == name && h.library.map(|l| l.key()) == lib_key)
-    });
-    match found {
-        Some(id) => Ok(Target::Struct(RnaPtr::id(id, id_srna(host, id)?))),
-        None => Err(FrapError::new(
-            PyExc::KeyError,
-            RNA_KEY_NOT_FOUND,
-            format!("'bpy_prop_collection[id, lib]: key \"{name}\" not found'"),
-        )),
+    if frap_scene::Main::code_of(c.prop.identifier).is_none() {
+        return Err(not_bound(&frap_spec_rna::BLEND_DATA, c.prop));
+    }
+    // WP 1.10's lookup (first library with that filepath, local before linked); Python's
+    // `str(KeyError)` quotes the message.
+    match main.find_key_lib(c.prop.identifier, name, lib) {
+        Ok(Some(id)) => Ok(Target::Struct(RnaPtr::id(id, id_srna(host, id)?))),
+        Ok(None) => Err(not_bound(&frap_spec_rna::BLEND_DATA, c.prop)),
+        Err(e) => {
+            let mut e = FrapError::from(e);
+            e.message = frap_rna::ptr::py_str_repr(&e.message);
+            Err(e)
+        }
     }
 }
 

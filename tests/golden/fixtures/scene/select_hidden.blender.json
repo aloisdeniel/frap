@@ -5,10 +5,6 @@
   },
   "lines": [
     {
-      "line": 5,
-      "ok": true
-    },
-    {
       "line": 6,
       "ok": true
     },
@@ -38,15 +34,19 @@
     },
     {
       "line": 13,
-      "ok": false,
-      "exception": "RuntimeError",
-      "message": "Error: Object 'Orphan' cannot be selected because it is not in View Layer 'ViewLayer'!\n"
+      "ok": true
     },
     {
       "line": 14,
       "ok": false,
       "exception": "RuntimeError",
-      "message": "Error: Object 'Orphan' cannot be hidden because it is not in View Layer 'ViewLayer'!\n"
+      "message": "Error: Object 'Cube' cannot be selected because it is not in View Layer 'ViewLayer'!\n"
+    },
+    {
+      "line": 15,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Object 'Cube' cannot be hidden because it is not in View Layer 'ViewLayer'!\n"
     }
   ],
   "objects": {
@@ -100,23 +100,6 @@
       "modifiers": [],
       "materials": [],
       "mode": "OBJECT"
-    },
-    "Orphan": {
-      "type": "EMPTY",
-      "parent": null,
-      "matrix_world": [
-        [1.0, 0.0, 0.0, 0.0],
-        [0.0, 1.0, 0.0, 0.0],
-        [0.0, 0.0, 1.0, 0.0],
-        [0.0, 0.0, 0.0, 1.0]
-      ],
-      "location": [0.0, 0.0, 0.0],
-      "rotation_mode": "XYZ",
-      "rotation": [0.0, 0.0, 0.0],
-      "scale": [1.0, 1.0, 1.0],
-      "modifiers": [],
-      "materials": [],
-      "mode": "OBJECT"
     }
   },
   "meshes": {},
@@ -124,8 +107,8 @@
   "materials": {},
   "actions": {},
   "context": {
-    "active": "Cube",
-    "selected": ["Light"],
+    "active": null,
+    "selected": [],
     "mode": "OBJECT",
     "select_mode": null,
     "cursor": [0.0, 0.0, 0.0]

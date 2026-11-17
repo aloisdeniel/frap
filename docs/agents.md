@@ -98,7 +98,7 @@ The full schemas of the request, response, error, ready/end events and done reco
 
 ## 5. Ask before calling: `poll()` and `--describe`
 
-- `bpy.ops.mesh.bevel.poll()` returns `False` (a `get`-kind response) without changing anything. On failure `detail.unmet` lists the unmet requirements. Use it to check the mode before an edit-mode operator. (In this build `detail.requires`/`unmet` of `OP_POLL_FAILED` still spell requirements as `ModeEditMesh` rather than the manifest's `MODE_EDIT_MESH`; compare them ignoring case and underscores.)
+- `bpy.ops.mesh.bevel.poll()` returns `False` (a `get`-kind response) without changing anything. On failure `detail.unmet` lists the unmet requirements. Use it to check the mode before an edit-mode operator. `detail.requires`/`unmet` of `OP_POLL_FAILED` use the manifest's requirement codes (`MODE_EDIT_MESH`).
 - Every operator's manifest entry has `poll.requires`, the declarative requirements frap checks (`MODE_OBJECT`, `MODE_EDIT_MESH`, `ACTIVE_OBJECT`, `ACTIVE_TYPE(MESH)`, `HAS_SELECTED_OBJECTS`, …), plus `poll.text` in words. `poll.matrix` is Blender's dumped poll result in contexts A–E (legend in `poll_contexts`). An operator frap does not implement has `requires: null` and only the dumped matrix.
 - `bpy.ops.mesh.bevel.idname()` returns `"MESH_OT_bevel"`. `bpy.ops.mesh.bevel.get_rna_type()` will return the operator's describe fragment once it is wired (later milestone); until then use `frap --describe op:mesh.bevel`.
 

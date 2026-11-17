@@ -137,6 +137,17 @@ fn read_only(owner: &str, prop: &str) -> FrapError {
 
 const SET_PREFIX: &str = "bpy_struct: item.attr = val: ";
 
+/// A set hook's `TypeError` mirrors a `pyrna_py_to_prop` check (`PROP_ID_SELF_CHECK`, the
+/// pointer type, a `None` refusal), which Blender reports under the assignment prefix
+/// (verified on 5.2.4: `bpy_struct: item.attr = val: Object.data expected a Mesh type, not
+/// Camera`).
+fn set_hook_prefix(mut e: FrapError) -> FrapError {
+    if e.exception == PyExc::TypeError && e.code == RNA_TYPE && !e.message.starts_with(SET_PREFIX) {
+        e.message = frap_rna::error::join_prefix(SET_PREFIX, &e.message);
+    }
+    e
+}
+
 fn set_code(k: RnaErrorKind) -> frap_rna::ErrorCode {
     match k {
         RnaErrorKind::Enum => RNA_ENUM,
@@ -593,7 +604,8 @@ impl Session {
             if c.clamped {
                 reports.push(info(frap_rna::clamp_report(prop, &input)));
             }
-            resolve::set_prop(&mut self.host, &p.ptr, prop, c.value.clone())?;
+            resolve::set_prop(&mut self.host, &p.ptr, prop, c.value.clone())
+                .map_err(set_hook_prefix)?;
             return Ok((value_json(&c.value, &self.host.state.main), reports, hints));
         }
         // One element (or a slice) of an array: read, replace, write the whole array back.

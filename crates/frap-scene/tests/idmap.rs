@@ -52,7 +52,7 @@ fn embedded_ids_mutate_through_the_owner() {
     let tree = main
         .embedded_mut(mat.any(), EmbeddedSlot::NodeTree, &mut log)
         .unwrap();
-    assert_eq!(tree.srna().identifier, "NodeTree");
+    assert_eq!(tree.srna().identifier, "ShaderNodeTree");
     assert!(main.materials.get(mat).unwrap().header.generation > g0);
     assert_eq!(
         log.modified.iter().copied().collect::<Vec<_>>(),

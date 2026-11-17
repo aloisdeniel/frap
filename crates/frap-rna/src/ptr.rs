@@ -57,10 +57,12 @@ impl PartialEq for RnaPtr {
     }
 }
 
-/// Name lookup for `repr` (implemented by `Main`): the ID's name and, for linked IDs, its
-/// library **filepath** (`Library.filepath` as stored, e.g. `//lib.blend` or an absolute path),
-/// the second element of the `['Name', '<library filepath>']` repr. `.frap` references use the
-/// library *name* instead, through [`crate::serde_id::IdRefNamer`].
+/// Name lookup for `repr` (implemented by `Main`): the ID's name and, for a linked ID that a
+/// plain `['Name']` lookup would not find (a local ID of the same name shadows it), its library
+/// **filepath** (`Library.filepath` as stored, e.g. `//lib.blend` or an absolute path), the
+/// second element of the `['Name', '<library filepath>']` repr (D-15). Other linked IDs return
+/// `None` and repr like Blender's. `.frap` references use the library *name* instead, through
+/// [`crate::serde_id::IdRefNamer`].
 pub trait IdNames {
     /// `(name, library)`; `None` if the ID does not exist.
     fn id_name(&self, id: IdAny) -> Option<(SmolStr, Option<SmolStr>)>;
@@ -129,13 +131,12 @@ pub fn rna_key_repr(s: &str) -> String {
     format!("[\"{}\"]", s.replace('\\', "\\\\").replace('"', "\\\""))
 }
 
-/// `bpy.data.objects['Cube']`, or `bpy.data.node_groups['Name', '<library filepath>']` for
-/// linked IDs (§9.3 contract, the `bpy_prop_collection[name, lib]` key form).
+/// `bpy.data.objects['Cube']`, or `bpy.data.node_groups['Name', '<library filepath>']` when the
+/// caller passes a library (§9.3 contract, the `bpy_prop_collection[name, lib]` key form).
 ///
-/// Deviation (pending a `docs/deviations.md` entry): Blender 5.2.4 prints linked IDs without
-/// their library (`bpy.data.node_groups['Smooth by Angle']`, verified, even when a local group
-/// of the same name exists); frap keeps the library so that a local and a linked ID with the
-/// same name never share a repr.
+/// [`IdNames`] passes a library only for a linked ID shadowed by a local ID of the same name.
+/// Blender 5.2.4 prints every linked ID without its library (verified); frap keeps it in that
+/// one case so that a local and a linked ID never share a repr (deviation D-15).
 pub fn id_repr(code: IdCode, name: &str, library: Option<&str>) -> String {
     match library {
         None => format!("bpy.data.{}[{}]", code.collection(), py_str_repr(name)),

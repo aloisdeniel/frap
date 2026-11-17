@@ -341,20 +341,16 @@ fn select_hidden_case() {
     call(&mut h, &cube, "select_set", &f()).unwrap();
     call(&mut h, &light, "select_set", &t()).unwrap();
     write(&mut h, &lc, "hide_viewport", Input::Bool(false)).unwrap();
-    let mut log = frap_scene::ChangeLog::default();
-    let orphan = h
-        .main
-        .objects
-        .insert("Orphan", frap_scene::id::Object::new("", None), &mut log);
-    let op = RnaPtr::id(orphan.any(), &frap_spec_rna::OBJECT);
-    for line in [11, 12] {
+    // Excluding the collection removes the bases: the Cube has none.
+    write(&mut h, &lc, "exclude", Input::Bool(true)).unwrap();
+    for line in [12, 13] {
         assert!(outcome(&fx, line).is_none());
     }
-    call(&mut h, &op, "select_set", &f()).unwrap();
-    call(&mut h, &op, "hide_set", &f()).unwrap();
-    let e = call(&mut h, &op, "select_set", &t()).unwrap_err();
-    assert_eq!(e.message, outcome(&fx, 13).unwrap());
-    let e = call(&mut h, &op, "hide_set", &t()).unwrap_err();
+    call(&mut h, &cube, "select_set", &f()).unwrap();
+    call(&mut h, &cube, "hide_set", &f()).unwrap();
+    let e = call(&mut h, &cube, "select_set", &t()).unwrap_err();
     assert_eq!(e.message, outcome(&fx, 14).unwrap());
+    let e = call(&mut h, &cube, "hide_set", &t()).unwrap_err();
+    assert_eq!(e.message, outcome(&fx, 15).unwrap());
     compare_context(&h, &fx);
 }
