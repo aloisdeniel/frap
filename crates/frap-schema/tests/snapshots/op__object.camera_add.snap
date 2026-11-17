@@ -1,0 +1,204 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.camera_add",
+  "bl_idname": "OBJECT_OT_camera_add",
+  "label": "Add Camera",
+  "description": "Add a camera object to the scene",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "SCENE_EDITABLE",
+      "MODE_OBJECT"
+    ],
+    "text": "requires an editable scene, Object Mode (bpy.ops.object.mode_set(mode='OBJECT'))",
+    "matrix": {
+      "plain": "YYNNN",
+      "view3d": "YYNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "enter_editmode",
+      "name": "Enter Edit Mode",
+      "description": "Enter edit mode when adding this object",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "align",
+      "name": "Align",
+      "description": "The alignment of the new object",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "WORLD",
+      "enum_items": [
+        {
+          "identifier": "WORLD",
+          "name": "World",
+          "description": "Align the new object to the world",
+          "value": 0
+        },
+        {
+          "identifier": "VIEW",
+          "name": "View",
+          "description": "Align the new object to the view",
+          "value": 1
+        },
+        {
+          "identifier": "CURSOR",
+          "name": "3D Cursor",
+          "description": "Use the 3D cursor orientation for the new object",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "location",
+      "name": "Location",
+      "description": "Location for the newly added object",
+      "type": "FLOAT",
+      "subtype": "XYZ_LENGTH",
+      "unit": "LENGTH",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -1000000000000,
+      "hard_max": 1000000000000,
+      "soft_min": -1000,
+      "soft_max": 1000,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": "unset: the 3D cursor location (scene.cursor.location)",
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "rotation",
+      "name": "Rotation",
+      "description": "Rotation for the newly added object",
+      "type": "FLOAT",
+      "subtype": "EULER",
+      "unit": "ROTATION (radians)",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -1000000000000,
+      "hard_max": 1000000000000,
+      "soft_min": -6.2831855,
+      "soft_max": 6.2831855,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": "unset: from align (WORLD: no rotation, VIEW: the 3D view rotation, CURSOR: the 3D cursor rotation); an explicit rotation always wins",
+      "frap_note": "radians; a whole number above 2π gets the ANGLE_LIKELY_DEGREES hint (use radians(90))",
+      "frap_extension": false
+    },
+    {
+      "identifier": "scale",
+      "name": "Scale",
+      "description": "Scale for the newly added object",
+      "type": "FLOAT",
+      "subtype": "XYZ_LENGTH",
+      "unit": "LENGTH",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -1000000000000,
+      "hard_max": 1000000000000,
+      "soft_min": -1000,
+      "soft_max": 1000,
+      "precision": 3,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
+    "notes": [
+      "align is forced to VIEW (Blender's camera_add): an unset rotation is the view rotation",
+      "sets scene.camera when the scene has none (frap's virtual 3D View, D-10)"
+    ]
+  }
+}
