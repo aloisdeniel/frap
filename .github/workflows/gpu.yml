@@ -94,6 +94,13 @@ jobs:
           FRAP_RENDER_TIMINGS: ${{ github.workspace }}/render-timings.jsonl
         run: cargo test --locked -p frap-render -- --nocapture
 
+      # WP 1.24: Workbench self-goldens (SSIM >= 0.995 against the frap-blessed PNGs, gating on
+      # every adapter; SSIM against Blender is printed) and render.render through a session.
+      - name: Render goldens and render.render (${{ matrix.backend }})
+        env:
+          FRAP_WGPU_BACKEND: ${{ matrix.backend }}
+        run: cargo test --locked -p frap-ops-render-tests -- --nocapture
+
       - name: Upload render timings
         if: always()
         uses: actions/upload-artifact@v4
