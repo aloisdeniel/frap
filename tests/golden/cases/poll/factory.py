@@ -1,7 +1,7 @@
 # WP 1.26: `bpy.ops.<op>.poll()` in the factory scene (Object Mode, Cube active and selected).
-# Line outcomes do not carry values, so each poll is pinned twice: a `#@blender` assert states
-# Blender's result (blessing fails if Blender disagrees), and the operator called right after
-# succeeds on both sides exactly when its poll passes (a failing poll raises RuntimeError).
+# Line outcomes carry no values: a `#@blender` assert pins Blender's result (blessing fails if
+# Blender disagrees), and tests/cli/m1/vertical_slice.trycmd runs a copy of this file through
+# frap and pins frap's `"value"` of every poll() line (keep both copies identical).
 # golden: startup=factory tier=T0 compare=objects,context
 import bpy
 bpy.ops.mesh.primitive_cube_add.poll()

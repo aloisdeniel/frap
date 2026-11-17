@@ -6,3 +6,6 @@
 bin.name = "frap"
 args = ["serve", "--jsonl"]
 fs.sandbox = true
+# GATE: skipped until WP 1.20, 1.23 and 1.24 are merged (camera_add, render, IO operators);
+# delete the next line when merging them (see vertical_slice.trycmd).
+status = "skipped"

@@ -12,15 +12,26 @@ The same statements run in the other two transports:
 - `vertical_slice_serve.toml`: `frap serve --jsonl`, one request per statement, so the session
   state crosses requests (§13.1, §13.5).
 
-Every statement must finish (`"ok":true`). The values that prove the round trips are pinned
-(the imported `Metallic` is `1`, the reopened cylinder is at `[0,0,1]`); the rest of each
-response (the `result` of render/export/import, `changes`, `context`) is elided with `[..]` so
-that the exit criterion does not freeze details owned by the operator WPs (1.20, 1.23, 1.24),
-which have their own goldens and transcripts. The render needs a GPU adapter (Metal, lavapipe,
-WARP on the CI matrix).
+**Gate until WP 1.20, 1.23 and 1.24 are merged.** The exit transcript needs `object.camera_add`
+(1.20), the IO operators (1.23) and `render.render` (1.24). Until they land, the blocks that
+use them are fenced `console,ignore` here and the two `.toml` cases carry `status = "skipped"`,
+so the workspace suite stays green. Their expected output was produced and checked by running
+this file and both `.toml` cases on a merge of wp/1.26 with wp/1.20 (2cfce09), wp/1.23
+(2459997) and wp/1.24 (a0e38be). **When merging those WPs, remove `,ignore` from the two fences
+below and the `status` line from both `.toml` files.**
 
-The error-code section below runs first, so that a failing exit transcript does not hide it
-(trycmd skips the remaining steps of a file after a failure).
+Every statement must finish (`"ok":true`). Each round trip is proven by the statement that
+performs it, not only by the value read afterwards: `wm.read_homefile` removes the cylinder
+and the `Steel` material and leaves no active object; `import_scene.gltf` adds exactly the
+`Cylinder` object, its mesh and `Steel` (so the `Metallic` of `1` read next comes from the
+GLB); `wm.open_mainfile` adds the camera back and makes it active again, which only the saved
+`.frap` can do (the GLB has no camera), so the cylinder read at `[0,0,1]` is the reopened one.
+Details owned by the operator WPs (1.20, 1.23, 1.24: byte counts, absolute paths, the full
+`changes` of the file operators) are elided with `[..]`; those WPs have their own goldens and
+transcripts. The render needs a GPU adapter (Metal, lavapipe, WARP on the CI matrix).
+
+The error-code and `poll()` sections run first, so that a failing exit transcript does not
+hide them (trycmd skips the remaining steps of a file after a failure).
 
 ## Error codes (runs first)
 
@@ -29,10 +40,11 @@ exception class and message with Blender 5.2.4 (fixtures blessed from Blender); 
 see frap's `code`. `vertical_slice.in/error_codes.py` raises each M1-reachable code once so
 that the code, span, detail and hint are pinned too, including the frap-only codes Blender has
 no counterpart for (`UNSUPPORTED_SYNTAX`, `OP_NOT_IMPLEMENTED`, `NOT_IMPLEMENTED`,
-`OP_ARG_POSITIONAL` D-01, `ZERO_DIVISION` D-25, `RNA_NOT_IMPLEMENTED`, `IO_ERROR`,
-`LIMIT_EXCEEDED`). `REQUEST_INVALID` and `DESCRIBE_TARGET` are pinned by the WP 1.25
-transcripts under `cli/`; `RNA_EDITMODE_WRITE` needs Edit Mode (M2); `GPU_UNAVAILABLE` needs a
-build without `gpu`. (snapbox turns backslashes into `/`, so `\"` reads `/"` below.)
+`OP_ARG_POSITIONAL` D-01, `ZERO_DIVISION` D-25, `RNA_NOT_IMPLEMENTED`, `LIMIT_EXCEEDED`).
+`IO_ERROR` (line 26) is pinned here by class and code only; its message is pinned, and checked
+against Blender, in the gated section at the end. `REQUEST_INVALID` and `DESCRIBE_TARGET` are
+pinned by the WP 1.25 transcripts under `cli/`; `RNA_EDITMODE_WRITE` needs Edit Mode (M2);
+`GPU_UNAVAILABLE` needs a build without `gpu`. (snapbox turns backslashes into `/`, so `\"` reads `/"` below.)
 
 ```console
 $ frap run --no-ready --verbosity minimal error_codes.py
@@ -61,7 +73,7 @@ $ frap run --no-ready --verbosity minimal error_codes.py
 {"seq":23,"line":23,"kind":"set","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"ValueError","code":"RNA_LENGTH","message":"bpy_struct: item.attr = val: sequences of dimension 0 should contain 3 items, not 2","span":{"line":23,"col":1,"col_chars":1,"len":33},"detail":{},"hint":null},"hints":[]}
 {"seq":24,"line":24,"kind":"get","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"NotImplementedError","code":"RNA_NOT_IMPLEMENTED","message":"frap: Object.pass_index exists in Blender 5.2 but is not bound by frap yet","span":{"line":24,"col":1,"col_chars":1,"len":35},"detail":{},"hint":null},"hints":[]}
 {"seq":25,"line":25,"kind":"call","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"RNA_RUNTIME","message":"Error: Object 'Cube' must have zero users to be removed, found 1 (try with do_unlink=True parameter)/n","span":{"line":25,"col":1,"col_chars":1,"len":23},"detail":{},"hint":null},"hints":[]}
-{"seq":26,"line":26,"kind":"op","op":"export_scene.gltf","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"IO_ERROR","message":"Error: filepath not set","span":{"line":26,"col":1,"col_chars":1,"len":38},"detail":{},"hint":null},"hints":[]}
+{"seq":26,"line":26,"kind":"op","op":"export_scene.gltf","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"IO_ERROR","message":"Error: [..]","span":{"line":26,"col":1,"col_chars":1,"len":38},"detail":{},"hint":null},"hints":[]}
 {"seq":27,"line":27,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].view_layers[/"ViewLayer/"].objects.active","value":null,"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
 {"seq":28,"line":28,"kind":"op","op":"object.mode_set","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"OP_POLL_FAILED","message":"Operator bpy.ops.object.mode_set.poll() Context missing active object","span":{"line":28,"col":1,"col_chars":1,"len":38},"detail":{"operator":"object.mode_set","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE"],"unmet":["ACTIVE_OBJECT"]},"hint":"bpy.context.view_layer.objects.active = bpy.data.objects['Cube']"},"hints":[]}
 {"event":"end","ok":false,"stats":{"statements":28,"errors":27,"cancelled":0}}
@@ -72,9 +84,96 @@ $ frap --no-ready --verbosity minimal --max-elements 100 -c "bpy.ops.mesh.primit
 
 ```
 
-## The exit transcript
+## `bpy.ops.<op>.poll()` values
+
+Golden line outcomes carry no values, so the poll goldens `tests/golden/cases/poll/*.py` pin
+Blender's results with `#@blender assert … is True/False` lines (blessing fails if Blender
+disagrees). `vertical_slice.in/poll_*.py` are byte-identical copies of those four cases; running
+them through frap pins frap's `"value"` of every `poll()` line (`"kind":"op_meta"`), so a poll
+that always answered `true` (or `false`) fails here. Every `"value"` below equals the
+`#@blender assert` on the line after it in the case file. A failing poll answers `"ok":true`
+with `"value":false` and the reason in `result` (Blender's `poll()` returns `False`, it does
+not raise).
 
 ```console
+$ frap run --no-ready --verbosity minimal poll_factory.py
+{"seq":1,"line":6,"kind":"noop","ok":true,"status":"FINISHED","reports":[],"hints":[]}
+{"seq":2,"line":7,"kind":"op_meta","op":"mesh.primitive_cube_add","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":3,"line":9,"kind":"op_meta","op":"mesh.primitive_monkey_add","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":4,"line":11,"kind":"op_meta","op":"object.select_all","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":5,"line":13,"kind":"op_meta","op":"object.delete","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":6,"line":15,"kind":"op_meta","op":"object.mode_set","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":7,"line":17,"kind":"op_meta","op":"export_scene.gltf","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":8,"line":19,"kind":"op","op":"object.mode_set","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":[],"renamed":[]},"hints":[]}
+{"seq":9,"line":20,"kind":"op","op":"object.select_all","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":10,"line":21,"kind":"op","op":"mesh.primitive_monkey_add","ok":true,"status":"FINISHED","reports":[],"result":{"object":{"$ref":"bpy.data.objects['Suzanne']"}},"changes":{"added":["bpy.data.objects['Suzanne']","bpy.data.meshes['Suzanne']"],"removed":[],"modified":["bpy.data.collections['Collection']","bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":11,"line":22,"kind":"op","op":"object.delete","ok":true,"status":"FINISHED","reports":[{"type":"INFO","message":"Deleted 1 object(s)"}],"result":{},"changes":{"added":[],"removed":["bpy.data.objects['Suzanne']"],"modified":["bpy.data.collections['Collection']","bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"event":"end","ok":true,"stats":{"statements":11,"errors":0,"cancelled":0}}
+
+$ frap run --no-ready --verbosity minimal poll_active_object.py
+{"seq":1,"line":6,"kind":"noop","ok":true,"status":"FINISHED","reports":[],"hints":[]}
+{"seq":2,"line":7,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].view_layers[/"ViewLayer/"].objects.active","value":null,"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":3,"line":8,"kind":"op_meta","op":"object.mode_set","ok":true,"status":"FINISHED","value":false,"reports":[],"result":{"message":"Operator bpy.ops.object.mode_set.poll() Context missing active object","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE"],"unmet":["ACTIVE_OBJECT"],"hint":"bpy.context.view_layer.objects.active = bpy.data.objects['Cube']"},"hints":[]}
+{"seq":4,"line":10,"kind":"op","op":"object.mode_set","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"OP_POLL_FAILED","message":"Operator bpy.ops.object.mode_set.poll() Context missing active object","span":{"line":10,"col":1,"col_chars":1,"len":38},"detail":{"operator":"object.mode_set","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE"],"unmet":["ACTIVE_OBJECT"]},"hint":"bpy.context.view_layer.objects.active = bpy.data.objects['Cube']"},"hints":[]}
+{"seq":5,"line":11,"kind":"op_meta","op":"object.select_all","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":6,"line":13,"kind":"op_meta","op":"object.delete","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":7,"line":15,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].view_layers[/"ViewLayer/"].objects.active","value":{"$ref":"bpy.data.objects['Camera']"},"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":8,"line":16,"kind":"op_meta","op":"object.mode_set","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":9,"line":18,"kind":"op","op":"object.mode_set","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":[],"renamed":[]},"hints":[]}
+{"seq":10,"line":19,"kind":"call","ok":true,"status":"FINISHED","func":"bpy.data.objects['Camera'].hide_set","value":null,"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":11,"line":20,"kind":"op_meta","op":"object.mode_set","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":12,"line":22,"kind":"op","op":"object.mode_set","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":[],"renamed":[]},"hints":[]}
+{"seq":13,"line":23,"kind":"call","ok":true,"status":"FINISHED","func":"bpy.data.objects['Camera'].hide_set","value":null,"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":14,"line":24,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.objects['Camera'].hide_viewport","value":true,"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.objects['Camera']"],"renamed":[]},"hints":[]}
+{"seq":15,"line":25,"kind":"op_meta","op":"object.mode_set","ok":true,"status":"FINISHED","value":false,"reports":[],"result":{"message":"Operator bpy.ops.object.mode_set.poll() Cannot edit hidden object","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE"],"unmet":["ACTIVE_OBJECT"],"hint":"bpy.data.objects['Camera'].hide_viewport = False"},"hints":[]}
+{"seq":16,"line":27,"kind":"op","op":"object.mode_set","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"OP_POLL_FAILED","message":"Operator bpy.ops.object.mode_set.poll() Cannot edit hidden object","span":{"line":27,"col":1,"col_chars":1,"len":38},"detail":{"operator":"object.mode_set","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE"],"unmet":["ACTIVE_OBJECT"]},"hint":"bpy.data.objects['Camera'].hide_viewport = False"},"hints":[]}
+{"seq":17,"line":28,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.objects['Camera'].hide_viewport","value":false,"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.objects['Camera']"],"renamed":[]},"hints":[]}
+{"seq":18,"line":29,"kind":"op_meta","op":"object.mode_set","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":19,"line":31,"kind":"op","op":"object.mode_set","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":[],"renamed":[]},"hints":[]}
+{"event":"end","ok":false,"stats":{"statements":19,"errors":2,"cancelled":0}}
+
+$ frap run --no-ready --verbosity minimal poll_selection.py
+{"seq":1,"line":6,"kind":"noop","ok":true,"status":"FINISHED","reports":[],"hints":[]}
+{"seq":2,"line":7,"kind":"op","op":"object.select_all","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":3,"line":8,"kind":"op_meta","op":"object.delete","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":4,"line":10,"kind":"op","op":"object.delete","ok":false,"status":"CANCELLED","reports":[{"type":"WARNING","message":"frap: nothing deleted: no visible object is selected"}],"state":"unchanged","hints":[]}
+{"seq":5,"line":11,"kind":"op_meta","op":"object.select_all","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":6,"line":13,"kind":"op_meta","op":"mesh.primitive_cylinder_add","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":7,"line":15,"kind":"op_meta","op":"mesh.primitive_cone_add","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":8,"line":17,"kind":"op_meta","op":"mesh.primitive_torus_add","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":9,"line":19,"kind":"op_meta","op":"mesh.primitive_grid_add","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":10,"line":21,"kind":"op_meta","op":"mesh.primitive_ico_sphere_add","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":11,"line":23,"kind":"op_meta","op":"mesh.primitive_uv_sphere_add","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":12,"line":25,"kind":"op_meta","op":"mesh.primitive_circle_add","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":13,"line":27,"kind":"op","op":"mesh.primitive_torus_add","ok":true,"status":"FINISHED","reports":[],"result":{"object":{"$ref":"bpy.data.objects['Torus']"}},"changes":{"added":["bpy.data.objects['Torus']","bpy.data.meshes['Torus']"],"removed":[],"modified":["bpy.data.collections['Collection']","bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":14,"line":28,"kind":"op","op":"object.delete","ok":true,"status":"FINISHED","reports":[{"type":"INFO","message":"Deleted 1 object(s)"}],"result":{},"changes":{"added":[],"removed":["bpy.data.objects['Torus']"],"modified":["bpy.data.collections['Collection']","bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"event":"end","ok":false,"stats":{"statements":14,"errors":0,"cancelled":1}}
+
+$ frap --empty run --no-ready --verbosity minimal poll_empty_scene.py
+{"seq":1,"line":6,"kind":"noop","ok":true,"status":"FINISHED","reports":[],"hints":[]}
+{"seq":2,"line":7,"kind":"op_meta","op":"mesh.primitive_plane_add","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":3,"line":9,"kind":"op_meta","op":"object.select_all","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":4,"line":11,"kind":"op_meta","op":"object.delete","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":5,"line":13,"kind":"op_meta","op":"object.mode_set","ok":true,"status":"FINISHED","value":false,"reports":[],"result":{"message":"Operator bpy.ops.object.mode_set.poll() Context missing active object","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE"],"unmet":["ACTIVE_OBJECT"],"hint":"add one first, e.g. bpy.ops.mesh.primitive_cube_add()"},"hints":[]}
+{"seq":6,"line":15,"kind":"op_meta","op":"export_scene.gltf","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":7,"line":17,"kind":"op","op":"object.mode_set","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"OP_POLL_FAILED","message":"Operator bpy.ops.object.mode_set.poll() Context missing active object","span":{"line":17,"col":1,"col_chars":1,"len":38},"detail":{"operator":"object.mode_set","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE"],"unmet":["ACTIVE_OBJECT"]},"hint":"add one first, e.g. bpy.ops.mesh.primitive_cube_add()"},"hints":[]}
+{"seq":8,"line":18,"kind":"op","op":"object.select_all","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":[],"renamed":[]},"hints":[]}
+{"seq":9,"line":19,"kind":"op","op":"object.delete","ok":false,"status":"CANCELLED","reports":[{"type":"WARNING","message":"frap: nothing deleted: no visible object is selected"}],"state":"unchanged","hints":[]}
+{"seq":10,"line":20,"kind":"op","op":"mesh.primitive_plane_add","ok":true,"status":"FINISHED","reports":[],"result":{"object":{"$ref":"bpy.data.objects['Plane']"}},"changes":{"added":["bpy.data.objects['Plane']","bpy.data.meshes['Plane']"],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":11,"line":21,"kind":"op_meta","op":"object.mode_set","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":12,"line":23,"kind":"op","op":"object.mode_set","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":[],"renamed":[]},"hints":[]}
+{"seq":13,"line":24,"kind":"op","op":"object.select_all","ok":false,"status":"CANCELLED","reports":[{"type":"WARNING","message":"frap: nothing to change: select_all(action='SELECT') leaves the selection as it is"}],"state":"unchanged","hints":[]}
+{"seq":14,"line":25,"kind":"op","op":"object.delete","ok":true,"status":"FINISHED","reports":[{"type":"INFO","message":"Deleted 1 object(s)"}],"result":{},"changes":{"added":[],"removed":["bpy.data.objects['Plane']"],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":15,"line":26,"kind":"op_meta","op":"object.mode_set","ok":true,"status":"FINISHED","value":false,"reports":[],"result":{"message":"Operator bpy.ops.object.mode_set.poll() Context missing active object","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE"],"unmet":["ACTIVE_OBJECT"],"hint":"add one first, e.g. bpy.ops.mesh.primitive_cube_add()"},"hints":[]}
+{"seq":16,"line":28,"kind":"op","op":"object.mode_set","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"OP_POLL_FAILED","message":"Operator bpy.ops.object.mode_set.poll() Context missing active object","span":{"line":28,"col":1,"col_chars":1,"len":38},"detail":{"operator":"object.mode_set","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE"],"unmet":["ACTIVE_OBJECT"]},"hint":"add one first, e.g. bpy.ops.mesh.primitive_cube_add()"},"hints":[]}
+{"seq":17,"line":29,"kind":"op_meta","op":"object.delete","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"event":"end","ok":false,"stats":{"statements":17,"errors":2,"cancelled":2}}
+
+```
+
+## The exit transcript (gated: needs WP 1.20, 1.23, 1.24)
+
+```console,ignore
 $ frap run vertical_slice.py
 {"event":"ready","frap":"0.1.0","protocol":1,"blender_api":"5.2","startup":"factory"}
 {"seq":1,"line":1,"kind":"op","op":"object.select_all","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"context":{"mode":"OBJECT","active_object":"Cube","selected_objects":["Cube","Light","Camera"],"frame_current":1},"hints":[]}
@@ -84,18 +183,74 @@ $ frap run vertical_slice.py
 {"seq":5,"line":5,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.materials['Steel'].node_tree.nodes[..]Principled BSDF[..]].inputs[1].default_value","value":1,"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.materials['Steel']"],"renamed":[]},"context":{"mode":"OBJECT","active_object":"Cylinder","selected_objects":["Cylinder"],"frame_current":1},"hints":[]}
 {"seq":6,"line":6,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.materials['Steel'].diffuse_color","value":[0.6,0.6,0.7,1],"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.materials['Steel']"],"renamed":[]},"context":{"mode":"OBJECT","active_object":"Cylinder","selected_objects":["Cylinder"],"frame_current":1},"hints":[]}
 {"seq":7,"line":7,"kind":"call","ok":true,"status":"FINISHED","func":"bpy.data.meshes['Cylinder'].materials.append","value":null,"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.meshes['Cylinder']"],"renamed":[]},"context":{"mode":"OBJECT","active_object":"Cylinder","selected_objects":["Cylinder"],"frame_current":1},"hints":[]}
-{"seq":8,"line":8,"kind":"op","op":"object.camera_add","ok":true,"status":"FINISHED",[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
-{"seq":9,"line":9,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].camera","value":{"$ref":"bpy.data.objects['Camera']"},[..]}
-{"seq":10,"line":10,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].render.engine","value":"BLENDER_WORKBENCH",[..]}
-{"seq":11,"line":11,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].render.filepath","value":"out/part.png",[..]}
-{"seq":12,"line":12,"kind":"op","op":"render.render","ok":true,"status":"FINISHED",[..]}
-{"seq":13,"line":13,"kind":"op","op":"export_scene.gltf","ok":true,"status":"FINISHED",[..]"result":{"filepath":"out/part.glb",[..]}
-{"seq":14,"line":14,"kind":"op","op":"wm.save_as_mainfile","ok":true,"status":"FINISHED",[..]}
-{"seq":15,"line":15,"kind":"op","op":"wm.read_homefile","ok":true,"status":"FINISHED",[..]}
-{"seq":16,"line":16,"kind":"op","op":"import_scene.gltf","ok":true,"status":"FINISHED",[..]}
-{"seq":17,"line":17,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.materials['Steel'][..]","value":1,[..]}
-{"seq":18,"line":18,"kind":"op","op":"wm.open_mainfile","ok":true,"status":"FINISHED",[..]}
-{"seq":19,"line":19,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.objects['Cylinder'].location","value":[0,0,1],"rna":{"type":"FLOAT","subtype":"TRANSLATION","array":[3],"math":"Vector"},[..]}
+{"seq":8,"line":8,"kind":"op","op":"object.camera_add","ok":true,"status":"FINISHED","reports":[],"result":{"object":{"$ref":"bpy.data.objects['Camera']"}},"changes":{"added":["bpy.data.objects['Camera']",[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
+{"seq":9,"line":9,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].camera","value":{"$ref":"bpy.data.objects['Camera']"},[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
+{"seq":10,"line":10,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].render.engine","value":"BLENDER_WORKBENCH",[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
+{"seq":11,"line":11,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].render.filepath","value":"out/part.png",[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
+{"seq":12,"line":12,"kind":"op","op":"render.render","ok":true,"status":"FINISHED",[..]"result":{"engine":"BLENDER_WORKBENCH",[..]"files":["out/part.png"]},[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
+{"seq":13,"line":13,"kind":"op","op":"export_scene.gltf","ok":true,"status":"FINISHED",[..]"result":{"filepath":"out/part.glb",[..]"nodes":1,"meshes":1,[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
+{"seq":14,"line":14,"kind":"op","op":"wm.save_as_mainfile","ok":true,"status":"FINISHED",[..]"result":{"filepath":"[..]/out/part.frap",[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
+{"seq":15,"line":15,"kind":"op","op":"wm.read_homefile","ok":true,"status":"FINISHED",[..]"changes":{"added":["bpy.data.scenes['Scene']"],"removed":["bpy.data.objects['Camera']","bpy.data.objects['Cylinder']",[..]"bpy.data.materials['Steel']",[..]"context":{"mode":"OBJECT","active_object":null,"selected_objects":[],"frame_current":1},"hints":[]}
+{"seq":16,"line":16,"kind":"op","op":"import_scene.gltf","ok":true,"status":"FINISHED",[..]"result":{"objects":["Cylinder"]},"changes":{"added":["bpy.data.objects['Cylinder']","bpy.data.meshes['Cylinder']","bpy.data.materials['Steel']"],[..]"context":{"mode":"OBJECT","active_object":"Cylinder","selected_objects":["Cylinder"],"frame_current":1},"hints":[]}
+{"seq":17,"line":17,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.materials['Steel'].node_tree.nodes[..]Principled BSDF[..]].inputs[1].default_value","value":1,[..]"context":{"mode":"OBJECT","active_object":"Cylinder","selected_objects":["Cylinder"],"frame_current":1},"hints":[]}
+{"seq":18,"line":18,"kind":"op","op":"wm.open_mainfile","ok":true,"status":"FINISHED",[..]"result":{"filepath":"[..]/out/part.frap"},"changes":{"added":["bpy.data.objects['Camera']","bpy.data.objects['Cylinder']",[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
+{"seq":19,"line":19,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.objects['Cylinder'].location","value":[0,0,1],"rna":{"type":"FLOAT","subtype":"TRANSLATION","array":[3],"math":"Vector"},[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
 {"event":"end","ok":true,"stats":{"statements":19,"errors":0,"cancelled":0}}
+
+```
+
+## Operator errors and polls of WP 1.20, 1.23, 1.24 (gated)
+
+`IO_ERROR` and the real `OP_EXEC_ERROR` (a `RuntimeError` raised by `execute`, not the
+`TypeError` of the dynamic `mode_set` enum above) need the IO operators and the render
+operator. The messages of `import_scene.gltf(filepath='missing.glb')` (`Error: Please select a
+file`), `wm.open_mainfile` of a missing file (`Error: Cannot read file "<abs path>": No such
+file or directory`) and `render.render()` without a camera (`Error: Cannot render, no camera`)
+were checked against Blender 5.2.4 (cd5dc428cce1): class and message are identical.
+`export_scene.gltf(filepath='')` differs: Blender raises `RuntimeError` with the add-on's whole
+Python traceback (`Error: Python: Traceback (most recent call last): … FileNotFoundError:
+[Errno 2] No such file or directory: ''`); frap keeps the last line only. That difference has
+no deviations.md entry yet (WP 1.23 or the integrator). The error-code block above elides this
+message because it changes when WP 1.23 lands (`Error: filepath not set` before).
+
+`ops_polls.py` pins `poll()` of the operators WP 1.20, 1.23 and 1.24 add, in the factory scene,
+with no active object, with nothing selected, and with a camera active; each value was checked
+against Blender 5.2.4 by running the same script there.
+
+```console,ignore
+$ frap run --no-ready --verbosity minimal ops_errors.py
+{"seq":1,"line":1,"kind":"op","op":"export_scene.gltf","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"IO_ERROR","message":"Error: No such file or directory: ''","span":{"line":1,"col":1,"col_chars":1,"len":38},"detail":{},"hint":null},"hints":[]}
+{"seq":2,"line":2,"kind":"op","op":"import_scene.gltf","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"IO_ERROR","message":"Error: Please select a file","span":{"line":2,"col":1,"col_chars":1,"len":49},"detail":{},"hint":null},"hints":[]}
+{"seq":3,"line":3,"kind":"op","op":"wm.open_mainfile","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"IO_ERROR","message":"Error: Cannot read file /"[..]/missing.frap/": No such file or directory","span":{"line":3,"col":1,"col_chars":1,"len":49},"detail":{},"hint":null},"hints":[]}
+{"seq":4,"line":4,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].camera","value":null,"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":5,"line":5,"kind":"op","op":"render.render","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"OP_EXEC_ERROR","message":"Error: Cannot render, no camera","span":{"line":5,"col":1,"col_chars":1,"len":23},"detail":{},"hint":null},"hints":[]}
+{"event":"end","ok":false,"stats":{"statements":5,"errors":4,"cancelled":0}}
+
+$ frap run --no-ready --verbosity minimal ops_polls.py
+{"seq":1,"line":1,"kind":"op_meta","op":"object.camera_add","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":2,"line":2,"kind":"op_meta","op":"object.join","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":3,"line":3,"kind":"op_meta","op":"object.duplicate","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":4,"line":4,"kind":"op_meta","op":"object.material_slot_add","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":5,"line":5,"kind":"op_meta","op":"object.move_to_collection","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":6,"line":6,"kind":"op_meta","op":"render.render","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":7,"line":7,"kind":"op_meta","op":"wm.save_as_mainfile","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":8,"line":8,"kind":"op_meta","op":"wm.read_homefile","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":9,"line":9,"kind":"op_meta","op":"wm.open_mainfile","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":10,"line":10,"kind":"op_meta","op":"import_scene.gltf","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":11,"line":11,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].view_layers[/"ViewLayer/"].objects.active","value":null,"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":12,"line":12,"kind":"op_meta","op":"object.join","ok":true,"status":"FINISHED","value":false,"reports":[],"result":{"message":"Operator bpy.ops.object.join.poll() failed, context is incorrect","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE","ACTIVE_TYPE_MESH"],"unmet":["ACTIVE_OBJECT"],"hint":"make the mesh to join into active: bpy.context.view_layer.objects.active = bpy.data.objects['Name']"},"hints":[]}
+{"seq":13,"line":13,"kind":"op_meta","op":"object.duplicate","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":14,"line":14,"kind":"op_meta","op":"object.material_slot_add","ok":true,"status":"FINISHED","value":false,"reports":[],"result":{"message":"Operator bpy.ops.object.material_slot_add.poll() Context missing active object","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE","ACTIVE_TYPE_MESH"],"unmet":["ACTIVE_OBJECT"],"hint":"bpy.context.view_layer.objects.active = bpy.data.objects['Cube']"},"hints":[]}
+{"seq":15,"line":15,"kind":"op_meta","op":"object.move_to_collection","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":16,"line":16,"kind":"op","op":"object.select_all","ok":true,"status":"FINISHED","reports":[],"result":{},"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":17,"line":17,"kind":"op_meta","op":"object.duplicate","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":18,"line":18,"kind":"op_meta","op":"object.move_to_collection","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"seq":19,"line":19,"kind":"op_meta","op":"object.join","ok":true,"status":"FINISHED","value":false,"reports":[],"result":{"message":"Operator bpy.ops.object.join.poll() failed, context is incorrect","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE","ACTIVE_TYPE_MESH"],"unmet":["ACTIVE_OBJECT"],"hint":"make the mesh to join into active: bpy.context.view_layer.objects.active = bpy.data.objects['Name']"},"hints":[]}
+{"seq":20,"line":20,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].view_layers[/"ViewLayer/"].objects.active","value":{"$ref":"bpy.data.objects['Camera']"},"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":21,"line":21,"kind":"op_meta","op":"object.join","ok":true,"status":"FINISHED","value":false,"reports":[],"result":{"message":"Operator bpy.ops.object.join.poll() failed, context is incorrect","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE","ACTIVE_TYPE_MESH"],"unmet":["ACTIVE_TYPE_MESH"],"hint":"make the mesh to join into active: bpy.context.view_layer.objects.active = bpy.data.objects['Name']"},"hints":[]}
+{"seq":22,"line":22,"kind":"op_meta","op":"object.material_slot_add","ok":true,"status":"FINISHED","value":false,"reports":[],"result":{"message":"Operator bpy.ops.object.material_slot_add.poll() failed, context is incorrect","requires":["ACTIVE_OBJECT","ACTIVE_EDITABLE","ACTIVE_TYPE_MESH"],"unmet":["ACTIVE_TYPE_MESH"],"hint":"make a mesh object active: bpy.context.view_layer.objects.active = bpy.data.objects['Name']"},"hints":[]}
+{"seq":23,"line":23,"kind":"set","ok":true,"status":"FINISHED","path":"bpy.data.scenes['Scene'].camera","value":null,"reports":[],"changes":{"added":[],"removed":[],"modified":["bpy.data.scenes['Scene']"],"renamed":[]},"hints":[]}
+{"seq":24,"line":24,"kind":"op_meta","op":"render.render","ok":true,"status":"FINISHED","value":true,"reports":[],"hints":[]}
+{"event":"end","ok":true,"stats":{"statements":24,"errors":0,"cancelled":0}}
 
 ```
