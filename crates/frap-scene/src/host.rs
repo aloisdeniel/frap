@@ -14,7 +14,7 @@ use frap_rna::{
 };
 use indexmap::IndexMap;
 
-use crate::context::{Context, EditState, WindowState};
+use crate::context::{Context, EditState, Preferences, WindowState};
 use crate::data::{ChangeLog, Main};
 use crate::eval::EvaluatedObject;
 
@@ -42,6 +42,12 @@ pub trait Host: HostRead {
     fn split_edit(&mut self) -> (Context<'_>, &mut EditState);
     /// Window state.
     fn win_mut(&mut self) -> &mut WindowState;
+    /// Preferences (`bpy.context.preferences`): `wm.open_mainfile` restores the glTF add-on
+    /// preferences saved in a `.frap` and `wm.read_factory_settings` resets them (§15, WP 1.23).
+    /// `None` (the default) for hosts without preferences of their own (test hosts).
+    fn prefs_mut(&mut self) -> Option<&mut Preferences> {
+        None
+    }
     /// Split borrow: the state (read) and the evaluator.
     fn eval(&mut self) -> (&dyn HostRead, &mut dyn Evaluator);
     /// COW clone of the state with pending animation applied at `frame` (scene frame if

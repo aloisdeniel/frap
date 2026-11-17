@@ -254,8 +254,11 @@ fn export_writes_a_glb_and_creates_directories() {
         &mut s,
         "bpy.ops.export_scene.gltf(filepath='y.gltf', export_format='GLTF_SEPARATE')",
     );
-    assert_eq!(r[0]["error"]["exception"], "NotImplementedError");
-    assert!(!d.join("y.gltf").exists());
+    // WP 1.23: GLTF_SEPARATE writes the .gltf and its .bin (it was NotImplementedError in M0).
+    assert_eq!(r[0]["ok"], true, "{}", r[0]);
+    assert_eq!(r[0]["result"]["filepath"], "y.gltf");
+    assert!(d.join("y.gltf").is_file());
+    assert!(d.join("y.bin").is_file());
 }
 
 #[test]

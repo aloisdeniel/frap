@@ -9,7 +9,10 @@ use smallvec::SmallVec;
 use smol_str::SmolStr;
 
 use crate::ctx::OpCtx;
-use crate::errors::{GPU_UNAVAILABLE, IO_ERROR, LIMIT_EXCEEDED, OP_EXEC_ERROR, OP_NOT_IMPLEMENTED};
+use crate::errors::{
+    GPU_UNAVAILABLE, IO_ERROR, IO_UNSUPPORTED_FORMAT, LIMIT_EXCEEDED, OP_EXEC_ERROR,
+    OP_NOT_IMPLEMENTED,
+};
 pub use frap_rna::{OpArgs, Report, ReportType};
 
 /// The invocation pipeline (§10.2): argument conversion with Blender's messages, frap hints,
@@ -164,6 +167,9 @@ pub enum OpError {
     NotImplemented(String),
     /// File I/O.
     Io(String),
+    /// A file format frap does not read or write (`IO_UNSUPPORTED_FORMAT`, e.g. a `.blend`
+    /// path given to `wm.save_as_mainfile`; WP 1.23).
+    UnsupportedFormat(String),
     /// GPU unavailable or failed (`GPU_UNAVAILABLE`).
     Gpu(String),
     /// `--max-elements` / `--stmt-timeout` (`LIMIT_EXCEEDED`).
@@ -188,6 +194,11 @@ impl OpError {
                 FrapError::new(PyExc::NotImplementedError, OP_NOT_IMPLEMENTED, m)
             }
             OpError::Io(m) => FrapError::new(PyExc::RuntimeError, IO_ERROR, format!("Error: {m}")),
+            OpError::UnsupportedFormat(m) => FrapError::new(
+                PyExc::RuntimeError,
+                IO_UNSUPPORTED_FORMAT,
+                format!("Error: {m}"),
+            ),
             OpError::Gpu(m) => {
                 FrapError::new(PyExc::RuntimeError, GPU_UNAVAILABLE, format!("Error: {m}"))
             }
