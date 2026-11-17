@@ -8,7 +8,7 @@ use frap_lang::{
 use frap_op::{OpCtx, OpStatus};
 use frap_rna::value::coerce_element;
 use frap_rna::{
-    ArrayShape, CoerceCx, FrapError, MathTag, PropDef, PropFlags, PropKind, PyExc, Report,
+    ArrayShape, CoerceCx, FrapError, Input, MathTag, PropDef, PropFlags, PropKind, PyExc, Report,
     ReportType, RnaErrorKind, Root, Span, Unit, Value, coerce,
 };
 use frap_scene::HostRead;
@@ -137,15 +137,31 @@ fn read_only(owner: &str, prop: &str) -> FrapError {
 
 const SET_PREFIX: &str = "bpy_struct: item.attr = val: ";
 
+/// Prefix of assignment errors on a property of a collection's API struct
+/// (`view_layer.objects.active = 'Cube'`): Python sets it through the `bpy_prop_collection`
+/// (`pyrna_prop_collection_setattro`), verified on 5.2.4.
+const API_SET_PREFIX: &str = "BPy_PropertyRNA - Attribute (setattr): ";
+
+/// The assignment error prefix for a property of `owner`.
+fn set_prefix(owner: &frap_rna::RnaPtr) -> &'static str {
+    if resolve::is_api_ptr(owner) {
+        API_SET_PREFIX
+    } else {
+        SET_PREFIX
+    }
+}
+
 /// A set hook's `TypeError` mirrors a `pyrna_py_to_prop` check (`PROP_ID_SELF_CHECK`, the
 /// pointer type, a `None` refusal), which Blender reports under the assignment prefix
 /// (verified on 5.2.4: `bpy_struct: item.attr = val: Object.data expected a Mesh type, not
 /// Camera`).
-fn set_hook_prefix(mut e: FrapError) -> FrapError {
-    if e.exception == PyExc::TypeError && e.code == RNA_TYPE && !e.message.starts_with(SET_PREFIX) {
-        e.message = frap_rna::error::join_prefix(SET_PREFIX, &e.message);
+fn set_hook_prefix(prefix: &'static str) -> impl Fn(FrapError) -> FrapError {
+    move |mut e| {
+        if e.exception == PyExc::TypeError && e.code == RNA_TYPE && !e.message.starts_with(prefix) {
+            e.message = frap_rna::error::join_prefix(prefix, &e.message);
+        }
+        e
     }
-    e
 }
 
 fn set_code(k: RnaErrorKind) -> frap_rna::ErrorCode {
@@ -599,13 +615,22 @@ impl Session {
         }
         if p.elem == Elem::Whole {
             let input = v.to_input()?;
-            let c = coerce(prop, input.clone(), &CoerceCx::RnaSet { owner })
-                .map_err(|e| e.into_frap(SET_PREFIX, set_code))?;
+            let mut c = coerce(prop, input.clone(), &CoerceCx::RnaSet { owner })
+                .map_err(|e| e.into_frap(set_prefix(&p.ptr), set_code))?;
+            // Setters that apply their own range get the raw integer (`Scene.frame_current`:
+            // Blender 5.2.4 keeps `= 1000000000`, the hook clamps negatives to 0).
+            if c.clamped
+                && frap_scene::id::Scene::UNCLAMPED.contains(&(owner, prop.identifier))
+                && let Input::Int(i) = input
+            {
+                c.value = Value::Int(i);
+                c.clamped = false;
+            }
             if c.clamped {
                 reports.push(info(frap_rna::clamp_report(prop, &input)));
             }
             resolve::set_prop(&mut self.host, &p.ptr, prop, c.value.clone())
-                .map_err(set_hook_prefix)?;
+                .map_err(set_hook_prefix(set_prefix(&p.ptr)))?;
             return Ok((value_json(&c.value, &self.host.state.main), reports, hints));
         }
         // One element (or a slice) of an array: read, replace, write the whole array back.
@@ -920,7 +945,7 @@ impl Session {
         for (k, v, _) in kwargs {
             kw.push((k, v.to_input().map_err(fail)?));
         }
-        let (args, mut reports) = frap_op::convert_args(def.spec, pos, kw).map_err(|e| {
+        let (args, mut reports, hints) = frap_op::convert_args(def.spec, pos, kw).map_err(|e| {
             let arg_span = e
                 .detail
                 .get("argument")
@@ -982,6 +1007,7 @@ impl Session {
         let mut r = self.base("op", line, status);
         r.op = op;
         r.reports = reports;
+        r.hints = hints.iter().map(frap_op::pipeline::Hint::to_json).collect();
         if status == Status::Finished {
             let names = &self.host.state.main;
             let mut res = Map::new();

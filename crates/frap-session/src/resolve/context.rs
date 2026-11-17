@@ -92,6 +92,18 @@ pub fn member(host: &dyn HostRead, prop: &'static PropDef) -> Result<Member, Fra
                 .map(|o| o.any())
                 .collect(),
         )?,
+        "visible_objects" => id_list(
+            host,
+            ctx.visible_objects().iter().map(|o| o.any()).collect(),
+        )?,
+        "selectable_objects" => id_list(
+            host,
+            ctx.selectable_objects().iter().map(|o| o.any()).collect(),
+        )?,
+        "editable_objects" => id_list(
+            host,
+            ctx.editable_objects().iter().map(|o| o.any()).collect(),
+        )?,
         "objects_in_mode" | "objects_in_mode_unique_data" => {
             // Only the active object can be in a mode in M1 (multi-object editing is M2).
             id_list(

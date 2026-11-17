@@ -1,0 +1,20 @@
+# `--file scene.frap` (ARCHITECTURE §13.1, §14)
+
+The session starts by opening the file as `bpy.ops.wm.open_mainfile(filepath=…)` would:
+`file_flag.in/scene.frap` holds the factory scene plus an 8-vertex cylinder named `Saved` at
+`(1, 2, 3)`, active and selected. `bpy.data.filepath` is the file's absolute path and the
+state is clean. `file_flag_serve.toml` and `file_flag_mcp.toml` start the other transports
+from the same file. A file that is not a `.frap` fails to start (exit 2, nothing on stdout).
+
+```console
+$ frap --file scene.frap --no-ready --no-end-event --verbosity minimal -c "bpy.data.objects; bpy.context.object.location; bpy.data.is_dirty; bpy.data.filepath"
+{"seq":1,"line":1,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.objects","value":{"$coll":"bpy.data.objects","item_type":"Object","len":4,"items":["Camera","Cube","Light","Saved"]},"rna":{"type":"COLLECTION","subtype":"NONE"},"reports":[],"hints":[]}
+{"seq":2,"line":1,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.objects['Saved'].location","value":[1,2,3],"rna":{"type":"FLOAT","subtype":"TRANSLATION","array":[3],"math":"Vector"},"reports":[],"hints":[]}
+{"seq":3,"line":1,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.is_dirty","value":false,"rna":{"type":"BOOLEAN","subtype":"NONE"},"reports":[],"hints":[]}
+{"seq":4,"line":1,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.filepath","value":"[..]scene.frap","rna":{"type":"STRING","subtype":"FILE_PATH"},"reports":[],"hints":[]}
+
+$ frap --file file_flag.trycmd -c "print(1)"
+? 2
+frap: cannot read --file file_flag.trycmd: No such file or directory (os error 2)
+
+```

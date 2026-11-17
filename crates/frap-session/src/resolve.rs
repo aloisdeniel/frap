@@ -697,13 +697,17 @@ fn step_struct(_host: &dyn HostRead, ptr: RnaPtr, seg: &PathSeg) -> Result<Targe
             }
             if let Some(prop) = srna.find_prop(a) {
                 // `bpy.context` members are computed (lists, re-rooted pointers), never RNA
-                // collections.
+                // collections; Python-only collection members (`Object.children`,
+                // `users_collection`, …) are tuples in Blender, served by their get hook.
+                let python_only = prop.flags.contains(PropFlags::PYTHON_ONLY);
                 return Ok(match prop.kind {
-                    PropKind::Collection { .. } if !context => Target::Coll(CollPlace {
-                        ptr,
-                        prop,
-                        range: None,
-                    }),
+                    PropKind::Collection { .. } if !context && !python_only => {
+                        Target::Coll(CollPlace {
+                            ptr,
+                            prop,
+                            range: None,
+                        })
+                    }
                     _ => Target::Prop(PropPlace {
                         ptr,
                         prop,
@@ -778,8 +782,11 @@ fn value_target(host: &dyn HostRead, v: Value) -> Result<Target, FrapError> {
 fn step_prop(host: &dyn HostRead, p: PropPlace, seg: &PathSeg) -> Result<Target, FrapError> {
     let prop = p.prop;
     if p.elem == Elem::Whole && !is_array(prop) {
-        let derefs =
-            matches!(prop.kind, PropKind::Pointer { .. }) || matches!(p.ptr.root, Root::Context);
+        // Pointers, context members and Python-only collection members (tuples/lists).
+        let derefs = matches!(
+            prop.kind,
+            PropKind::Pointer { .. } | PropKind::Collection { .. }
+        ) || matches!(p.ptr.root, Root::Context);
         if derefs {
             let t = deref(host, &p)?;
             return step(host, t, seg);
@@ -789,6 +796,45 @@ fn step_prop(host: &dyn HostRead, p: PropPlace, seg: &PathSeg) -> Result<Target,
     }
     let kind = ArrayKind::of(prop);
     match (p.elem, seg) {
+        (Elem::Whole, PathSeg::Index(i))
+            if kind == ArrayKind::PropArray
+                && matches!(prop.kind, PropKind::Float { .. })
+                && let ArrayShape::Matrix(r, c) = prop.array =>
+        {
+            // A multi-dimensional `bpy_prop_array` (`Object.bound_box`): an index reads one
+            // row, itself a `bpy_prop_array` (verified on 5.2.4).
+            let (r, c) = (r as usize, c as usize);
+            let j = norm_index(*i, r).ok_or_else(|| kind.read_index_error(*i, r))?;
+            let Value::FloatArray { data, .. } = read_value(host, &p)? else {
+                return Err(stale("multi-dimensional array is not a float array"));
+            };
+            Ok(Target::Value(Value::FloatArray {
+                data: data[j * c..(j + 1) * c].iter().copied().collect(),
+                shape: ArrayShape::Fixed(c as u16),
+                tag: MathTag::None,
+            }))
+        }
+        (Elem::Whole, PathSeg::Slice(a, b))
+            if kind == ArrayKind::PropArray
+                && matches!(prop.kind, PropKind::Float { .. })
+                && let ArrayShape::Matrix(r, c) = prop.array =>
+        {
+            // A slice of a multi-dimensional `bpy_prop_array`: a tuple of rows.
+            let (r, c) = (r as usize, c as usize);
+            let (st, e) = norm_slice(*a, *b, r);
+            let Value::FloatArray { data, .. } = read_value(host, &p)? else {
+                return Err(stale("multi-dimensional array is not a float array"));
+            };
+            Ok(Target::Value(Value::Tuple(
+                (st..e)
+                    .map(|j| Value::FloatArray {
+                        data: data[j * c..(j + 1) * c].iter().copied().collect(),
+                        shape: ArrayShape::Fixed(c as u16),
+                        tag: MathTag::None,
+                    })
+                    .collect(),
+            )))
+        }
         (Elem::Whole, PathSeg::Index(i)) => {
             if let ArrayKind::Matrix(r, _) = kind
                 && let Some(row) = norm_index(*i, r)

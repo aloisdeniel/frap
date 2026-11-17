@@ -30,7 +30,6 @@ use indexmap::IndexMap;
 use serde_json::{Value as J, json};
 use smol_str::SmolStr;
 
-use crate::errors::*;
 use crate::resolve::{Caps, id_repr};
 use crate::response::{Response, Status};
 
@@ -355,14 +354,6 @@ pub(crate) struct Txn<R> {
     pub(crate) reports: Vec<Report>,
 }
 
-fn not_yet(what: &str) -> FrapError {
-    FrapError::new(
-        PyExc::NotImplementedError,
-        NOT_IMPLEMENTED,
-        format!("frap: {what} is not supported yet"),
-    )
-}
-
 impl Session {
     /// Starts a session (factory startup by default, §5.7).
     pub fn new(opts: SessionOptions) -> Result<Session, FrapError> {
@@ -373,9 +364,10 @@ impl Session {
             Startup::Empty => {
                 catch_unwind(frap_scene::startup::empty).map_err(FrapError::internal_panic)?
             }
-            Startup::File(_) => return Err(not_yet("opening a .frap file at startup (WP 1.23)")),
+            // `--file`: the factory state, then `wm.open_mainfile` (WP 1.23) below.
+            Startup::File(_) => frap_scene::startup::factory(),
         };
-        Ok(Session {
+        let mut session = Session {
             host: HostImpl {
                 state: State {
                     main,
@@ -401,7 +393,21 @@ impl Session {
             opts,
             seq: 0,
             txn_depth: 0,
-        })
+        };
+        if let Startup::File(path) = &session.opts.startup {
+            // §13.1/§14: `--file scene.frap` opens the file exactly as
+            // `bpy.ops.wm.open_mainfile(filepath=…)` would (`bpy.data.filepath`, clean state).
+            let filepath = eval::Py::Str(path.to_string_lossy().into_owned());
+            session
+                .invoke_values(
+                    0,
+                    "wm.open_mainfile",
+                    vec![],
+                    vec![("filepath".to_owned(), filepath, Span::default())],
+                )
+                .map_err(|f| f.err)?;
+        }
+        Ok(session)
     }
 
     /// The options this session was started with.

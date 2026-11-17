@@ -209,6 +209,9 @@ crate::id::id_rna! { Object as frap_spec_rna::OBJECT, "OBJECT" {
     delta_rotation_quaternion => delta_rotation_quaternion,
     delta_scale => delta_scale,
     matrix_world => hook,
+    // Evaluated bounds (D-04): the hooks live in frap-ops-data, which can evaluate.
+    dimensions => hook,
+    bound_box => hook,
     matrix_local => get(|o| o.matrix_local()) set(|o, m: Mat4| o.set_matrix_local(&m)),
     matrix_basis => get(|o| o.matrix_basis()) set(|o, m: Mat4| o.set_matrix_basis(&m)),
     matrix_parent_inverse => matrix_parent_inverse,

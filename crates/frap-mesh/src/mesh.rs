@@ -9,7 +9,10 @@
 //! position.
 
 mod calc_edges;
+mod layers;
 mod lookup;
+
+pub use layers::{AttributeError, MAX_UV_MAPS, default_column};
 
 use std::borrow::Cow;
 use std::collections::HashMap;

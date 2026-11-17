@@ -31,7 +31,8 @@ fn typed_and_catalog_partition_the_dumps() {
     let typed: BTreeSet<String> = TYPED_IDNAMES.iter().map(|s| s.to_string()).collect();
     assert!(cat.is_disjoint(&typed));
     assert_eq!(cat.union(&typed).cloned().collect::<BTreeSet<_>>(), all);
-    assert_eq!(typed.len(), 64, "OPERATORS.md: 64 M1 operators");
+    // 63 since the M1 stabilization moved `frap.describe` to M2 (decision log S1-1).
+    assert_eq!(typed.len(), 63, "OPERATORS.md: 63 M1 operators");
     assert!(is_typed("mesh.primitive_cube_add") && !contains("mesh.primitive_cube_add"));
     assert!(contains("mesh.bevel") && !is_typed("mesh.bevel"));
     assert!(TYPED_IDNAMES.windows(2).all(|w| w[0] < w[1]));

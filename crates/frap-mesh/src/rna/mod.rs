@@ -58,6 +58,12 @@ use self::mesh_vertex::Vertices;
 use self::soa::{coll_field, coll_mut_guard};
 use crate::mesh::{CUSTOM_NORMAL, Mesh};
 
+/// The refined RNA struct of an attribute (`FloatAttribute`, `ByteColorAttribute`, …), for
+/// the pointers `attributes.new()` returns.
+pub fn attribute_srna(data: &crate::AttrData) -> &'static StructDef {
+    attribute::refined_srna(data)
+}
+
 /// `Mesh` bindings (`ID` base properties first, as WP 1.10 binds them for every datablock).
 static BINDINGS: [BindingDecl; 37] = [
     other!("name", SetHook),

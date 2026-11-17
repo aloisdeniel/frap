@@ -19,6 +19,12 @@ mod funcs {
     automod::dir!("src/funcs");
 }
 
+/// RNA get/set hooks that need the evaluator (`Object.dimensions`, `Object.bound_box`), one
+/// file each (`hooks/<struct>_<prop>.rs`), registered in `frap_scene::RNA_HOOKS`.
+mod hooks {
+    automod::dir!("src/hooks");
+}
+
 /// Referenced by `frap_ops_all::link()` so the linker keeps this crate's `linkme` entries (§10.5).
 #[inline(never)]
 pub fn link() {}

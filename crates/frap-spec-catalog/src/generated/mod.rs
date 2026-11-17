@@ -6,9 +6,9 @@
 /// Deflate-compressed JSON array of the catalog operators (schema: `decode.rs`).
 pub static CATALOG_DEFLATE: &[u8] = include_bytes!("catalog.json.deflate");
 /// Number of operators in the blob.
-pub const CATALOG_LEN: usize = 1010;
+pub const CATALOG_LEN: usize = 1011;
 /// Their idnames, sorted (membership tests without decoding).
-pub static CATALOG_IDNAMES: [&str; 1010] = [
+pub static CATALOG_IDNAMES: [&str; 1011] = [
     "anim.change_frame",
     "anim.channel_select_keys",
     "anim.channel_view_pick",
@@ -135,6 +135,7 @@ pub static CATALOG_IDNAMES: [&str; 1010] = [
     "collection.objects_remove_active",
     "collection.objects_remove_all",
     "export_scene.fbx",
+    "frap.describe",
     "geometry.attribute_add",
     "geometry.attribute_convert",
     "geometry.attribute_remove",
@@ -1022,9 +1023,8 @@ pub static CATALOG_IDNAMES: [&str; 1010] = [
 ];
 /// Operators with a typed props struct in `frap-spec-ops-<group>` (milestone ≤ 1), sorted;
 /// their specs are NOT in the blob.
-pub static TYPED_IDNAMES: [&str; 64] = [
+pub static TYPED_IDNAMES: [&str; 63] = [
     "export_scene.gltf",
-    "frap.describe",
     "import_scene.gltf",
     "material.new",
     "mesh.primitive_circle_add",

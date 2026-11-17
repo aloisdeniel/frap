@@ -290,16 +290,17 @@ pub fn lookup(idname: &str) -> Result<&'static OperatorDef, FrapError> {
 /// §10.2 steps 2–3 without a context: positional arguments and keyword conversion. Dynamic
 /// enums are checked against their static superset (use [`crate::def::pipeline::prepare`] or
 /// [`crate::def::pipeline::convert`] to validate them against the context). Returns the converted
-/// arguments plus INFO reports for clamped values.
+/// arguments plus INFO reports for clamped values and the frap hints for the response
+/// (`ANGLE_LIKELY_DEGREES`, §13.2).
 pub fn convert_args(
     spec: &'static OperatorSpec,
     positional: Vec<Input>,
     kwargs: Vec<(String, Input)>,
-) -> Result<(OpArgs, Vec<Report>), FrapError> {
+) -> Result<(OpArgs, Vec<Report>, Vec<crate::def::pipeline::Hint>), FrapError> {
     let mut reports = crate::def::pipeline::check_positional(spec, &positional)?;
     let c = crate::def::pipeline::convert_kwargs(spec, &[], None, kwargs)?;
     reports.extend(c.reports);
-    Ok((c.args, reports))
+    Ok((c.args, reports, c.hints))
 }
 
 /// §10.2 step 5: poll, with Blender's message and frap's structured help

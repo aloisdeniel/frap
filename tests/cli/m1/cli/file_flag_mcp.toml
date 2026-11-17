@@ -1,0 +1,5 @@
+# `frap mcp --file scene.frap` (§13.1): `frap_exec` sees the saved file
+# (`file_flag.in/scene.frap`, see file_flag.trycmd).
+bin.name = "frap"
+args = ["mcp", "--verbosity", "minimal", "--file", "scene.frap"]
+fs.base = "file_flag.in"

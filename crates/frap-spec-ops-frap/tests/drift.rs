@@ -10,7 +10,8 @@ mod common;
 #[test]
 fn typed_specs_match_dumps() {
     let all = frap_spec_ops_frap::ALL_OPS;
-    assert_eq!(all.len(), 1, "typed operators of the `frap` group in M1");
+    // None since the M1 stabilization moved `frap.describe` to M2 (decision log S1-1).
+    assert_eq!(all.len(), 0, "typed operators of the `frap` group in M1");
     for s in all {
         common::check_op(s);
     }

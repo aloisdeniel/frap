@@ -1,0 +1,5 @@
+# `frap serve --jsonl --file scene.frap` (§13.1): the session starts from the saved file
+# (`file_flag.in/scene.frap`, see file_flag.trycmd) and keeps it across requests.
+bin.name = "frap"
+args = ["serve", "--jsonl", "--verbosity", "minimal", "--file", "scene.frap"]
+fs.base = "file_flag.in"

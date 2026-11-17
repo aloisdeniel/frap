@@ -95,6 +95,10 @@ what to avoid.
 | `object.join` of meshes with shape keys, or with one attribute name stored with two domains/types, raises `OP_NOT_IMPLEMENTED` (armatures M6) | M2 | WP 1.20 follow-up |
 | `Object.modifiers.active` has no RNA get hook (`NOT_IMPLEMENTED`); `deformed_by` ignores virtual (armature-parent, shape-key) modifiers | M4 (modifiers), M6 (armatures) | WP 4.x, WP 6.x |
 | `.frap` save: objects in Edit Mode are saved and reopened in Object Mode with a WARNING; actions, armatures, shape keys, textures and point clouds are saved by name only (header), with a WARNING | M2 (edit mode), M3/M6 (data) | WP 1.23 follow-ups |
+| `bpy.ops.frap.describe` raises `OP_NOT_IMPLEMENTED` (the manifest lives in `frap-schema`, above the ops crates); use `frap --describe <target>` | M2 | WP 2.x (frap ops) |
+| `bpy.context.preferences` and `bpy.context.space_data` raise `NOT_IMPLEMENTED` (no `Preferences`/`SpaceView3D` binding); the glTF add-on preferences are restored by `wm.open_mainfile` but not readable | M2 | WP 2.x (context) |
+| `Mesh.set_sharp_from_angle`, `flip_normals`, `split_faces`, `uv_layers.remove` and `vertex_colors.new` raise `RNA_NOT_IMPLEMENTED`; `Mesh.validate()` answers `False` for a valid mesh but does not repair an invalid one (`RNA_NOT_IMPLEMENTED` naming the problem); `Mesh.transform(shape_keys=True)` transforms the base mesh only | M2 (M6 shape keys) | WP 2.x (mesh data API) |
+| Multi-dimensional `bpy_prop_array` properties (`Object.bound_box`) are read-only views in frap: whole reads, `[i]`, `[i][j]` and slices work; assigning one row or element of a writable one is not supported | M2 | WP 1.14 follow-up |
 | `wm.revert_mainfile`'s "file must have been saved" requirement is not expressible in `poll.requires`; it is only a `--describe` note (the poll still fails with `OP_POLL_FAILED` while the file is unsaved, but `detail.unmet` cannot name it) | M2 | WP 1.12 follow-up (new `PollReq`) |
 
 ## 3. Protocol notes (frap envelope, not Blender behaviour)

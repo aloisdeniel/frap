@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//! `Mesh.validate(verbose=False, clean_customdata=True)` → `bool` (`BKE_mesh_validate`):
+//! `True` when the mesh had to be changed. frap's mesh builders (`from_pydata`, primitives,
+//! operators) never produce an invalid mesh, so a valid mesh answers `False` like Blender
+//! (verified on 5.2.4: the factory cube, `verbose=True` too). A mesh made invalid through
+//! low-level writes (`foreach_set` of out-of-range indices) is not repaired yet: frap raises
+//! `NotImplementedError` (`RNA_NOT_IMPLEMENTED`) naming the first problem rather than
+//! answering `False` for a broken mesh (deviations.md §2).
+
+use frap_rna::{RnaError, RnaPtr, Value, rna_func};
+use frap_scene::{FuncArgs, Host};
+
+use super::_common::{internal, mesh_of, not_implemented};
+
+#[rna_func(srna = "Mesh", func = "validate")]
+fn mesh_validate(h: &mut dyn Host, this: &RnaPtr, _args: &mut FuncArgs) -> Result<Value, RnaError> {
+    let me = mesh_of(this)?;
+    let mesh = h
+        .main()
+        .meshes
+        .get(me)
+        .ok_or_else(|| internal("validate(): the mesh was removed"))?;
+    match mesh.validate_report() {
+        None => Ok(Value::Bool(false)),
+        Some(problem) => Err(not_implemented(format!(
+            "Mesh.validate() cannot repair this mesh yet ({problem})"
+        ))),
+    }
+}

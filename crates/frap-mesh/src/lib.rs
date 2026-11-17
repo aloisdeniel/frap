@@ -14,6 +14,9 @@ mod rna;
 pub mod split;
 
 pub use mesh::{AttrData, Attribute, AttributeSet, DeformVert, Domain, Mesh, SHARP_FACE, TexSpace};
+// Data-API helpers (`attributes.new/remove`, `uv_layers.new`, M1 stabilization).
+pub use mesh::{AttributeError, MAX_UV_MAPS, default_column};
+pub use rna::attribute_srna;
 // WP 1.4 additions (Mesh API: normals domain, flag attributes, internal attribute names).
 pub use mesh::{
     CUSTOM_NORMAL, NormalsDomain, REMOVED_WHEN_ALL_FALSE, SELECT_EDGE, SELECT_POLY, SELECT_VERT,

@@ -995,6 +995,7 @@ version = "0.1.0"
 dependencies = [
  "approx",
  "automod",
+ "frap-eval",
  "frap-material",
  "frap-mesh",
  "frap-nodes",
@@ -1003,6 +1004,7 @@ dependencies = [
  "frap-scene",
  "frap-spec-ops-data",
  "frap-spec-rna",
+ "glam",
  "indexmap",
  "insta",
  "linkme",

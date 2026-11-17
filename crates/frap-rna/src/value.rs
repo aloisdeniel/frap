@@ -611,6 +611,17 @@ pub fn coerce(def: &PropDef, input: Input, cx: &CoerceCx) -> Result<Coerced, Rna
     r
 }
 
+/// True for the scalar `default_value` of a standard node socket (`NodeSocketFloatFactor`,
+/// `NodeSocketIntPercentage`, …) assigned from Python: `rna_NodeSocketStandard_float_range`
+/// and `rna_NodeSocketStandard_int_range` make its hard range unbounded (from 0 for unsigned
+/// subtypes) and use the socket declaration's range as the soft range only (verified on
+/// 5.2.4: Principled `inputs['Metallic'].default_value = 2` reads back 2.0, `Roughness = -0.5`
+/// reads back -0.5). The dump records the declaration range as the static hard range.
+fn socket_standard_value(def: &PropDef, cx: &CoerceCx) -> bool {
+    matches!(cx, CoerceCx::RnaSet { owner } if owner.starts_with("NodeSocket"))
+        && def.identifier == "default_value"
+}
+
 fn coerce_inner(def: &PropDef, input: Input, cx: &CoerceCx) -> Result<Coerced, RnaError> {
     let qual = format!("{}.{}", cx.owner(), def.identifier);
     let done = |value: Value| {
@@ -632,7 +643,12 @@ fn coerce_inner(def: &PropDef, input: Input, cx: &CoerceCx) -> Result<Coerced, R
             ))),
         },
         PropKind::Int { hard, .. } => {
-            let (v, clamped) = coerce_int(&qual, *hard, &input)?;
+            let hard = match socket_standard_value(def, cx) {
+                true if def.subtype == Subtype::Unsigned => (0, i64::from(i32::MAX)),
+                true => (i64::from(i32::MIN), i64::from(i32::MAX)),
+                false => *hard,
+            };
+            let (v, clamped) = coerce_int(&qual, hard, &input)?;
             Ok(Coerced {
                 value: Value::Int(v),
                 clamped,
@@ -645,7 +661,12 @@ fn coerce_inner(def: &PropDef, input: Input, cx: &CoerceCx) -> Result<Coerced, R
                     input.py_type_name()
                 )));
             };
-            let (c, clamped) = clamp_f32(v, *hard);
+            let hard = match socket_standard_value(def, cx) {
+                true if def.subtype == Subtype::Unsigned => (0.0, f64::from(f32::MAX)),
+                true => (-f64::from(f32::MAX), f64::from(f32::MAX)),
+                false => *hard,
+            };
+            let (c, clamped) = clamp_f32(v, hard);
             let value = match storage {
                 FloatStorage::F32 => Value::Float(c),
                 // Python assignment goes through a C `float` even for double storage.
