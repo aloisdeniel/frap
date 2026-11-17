@@ -1,0 +1,7 @@
+# WP 1.21: object transforms in both syntaxes (translate with an ignored constraint, rotate about
+# the negated axis without a constraint, resize keeping rotation), parenting with the inverse,
+# transform_apply (incl. the multi-user error), origin_set, shading attributes and snapping;
+# CANCELLED with a frap WARNING when nothing is selected. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

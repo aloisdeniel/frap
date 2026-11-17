@@ -1,0 +1,155 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.transform_apply",
+  "bl_idname": "OBJECT_OT_transform_apply",
+  "label": "Apply Object Transform",
+  "description": "Apply the object's transformation to its data",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "SCENE_EDITABLE",
+      "MODE_OBJECT"
+    ],
+    "text": "requires an editable scene, Object Mode (bpy.ops.object.mode_set(mode='OBJECT'))",
+    "matrix": {
+      "plain": "YYNNN",
+      "view3d": "YYNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "location",
+      "name": "Location",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "rotation",
+      "name": "Rotation",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "scale",
+      "name": "Scale",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "properties",
+      "name": "Apply Properties",
+      "description": "Modify properties such as curve vertex radius, font size and bone envelope",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "corrective_flip_normals",
+      "name": "Corrective Flip Normals",
+      "description": "Invert normals for negative scaled objects.",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "isolate_users",
+      "name": "Isolate Multi User Data",
+      "description": "Create new object-data users if needed",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "armatures arrive in M6 (NotImplementedError); properties=True has nothing to scale in M1 (curves, fonts and bone envelopes); shape keys are not transformed until M6",
+    "headless": "native",
+    "planned": "M1",
+    "extension": false,
+    "notes": []
+  }
+}
