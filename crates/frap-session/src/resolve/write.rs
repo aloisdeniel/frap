@@ -5,8 +5,8 @@
 //! binding answers `NeedsHook` (§9.5).
 
 use frap_rna::{
-    FrapError, PropDef, PyExc, RnaCollMut, RnaError, RnaErrorKind, RnaMut, RnaPtr, Root, Seg,
-    SetOutcome, StructDef, Value,
+    Detached, FrapError, IdNames, PropDef, PyExc, RnaCollMut, RnaError, RnaErrorKind, RnaMut,
+    RnaPtr, Root, Seg, SetOutcome, StructDef, Value,
 };
 use frap_scene::{ChangeLog, Host, Main, find_hook};
 
@@ -31,6 +31,7 @@ pub fn with_struct_mut<R>(
     ptr: &RnaPtr,
     f: &mut dyn FnMut(&mut dyn RnaMut) -> Result<R, FrapError>,
 ) -> Result<R, FrapError> {
+    refuse_detached(main, ptr)?;
     match ptr.root {
         Root::Id(id) => {
             let r = main
@@ -115,6 +116,7 @@ pub fn set_prop(
     prop: &'static PropDef,
     v: Value,
 ) -> Result<(), FrapError> {
+    refuse_detached(host.main(), ptr)?;
     if let Some(set) = find_hook(ptr.srna, prop.identifier).and_then(|h| h.set) {
         return set(host, ptr, prop, v).map_err(rna_err);
     }
@@ -131,6 +133,32 @@ pub fn set_prop(
         SetOutcome::Done => Ok(()),
         SetOutcome::NeedsHook => Err(needs_hook(ptr, prop)),
     }
+}
+
+/// Writes through a [`frap_rna::Detached`] pointer would change the original data, which
+/// Blender's evaluated / temporary copy keeps untouched: frap refuses them (WP 1.22,
+/// deviations.md) until it has copies of its own (M4).
+pub fn refuse_detached(names: &dyn IdNames, ptr: &RnaPtr) -> Result<(), FrapError> {
+    let Some(d) = ptr.detached else {
+        return Ok(());
+    };
+    let what = match d {
+        Detached::Evaluated => "an evaluated datablock (evaluated_get())",
+        Detached::Temporary => {
+            "part of a temporary or evaluated copy (to_mesh(), or reached from evaluated_get())"
+        }
+    };
+    let root = RnaPtr::new(ptr.root, ptr.srna).repr(names);
+    Err(FrapError::new(
+        PyExc::NotImplementedError,
+        NOT_IMPLEMENTED,
+        format!(
+            "frap: {} is {what}; frap has no separate copies yet and reads the original data \
+             through it, so writing would change the original: write to {root} instead",
+            ptr.repr(names)
+        ),
+    )
+    .with_hint("use the original datablock (bpy.data.<collection>['Name'], or .original) for edits; evaluated copies arrive with M4"))
 }
 
 fn needs_hook(ptr: &RnaPtr, prop: &PropDef) -> FrapError {

@@ -22,7 +22,7 @@
 use frap_mesh::{AttrData, Domain, Mesh};
 use frap_nodes::{NodeTree, SocketAddr};
 use frap_rna::{
-    CollectionId, EmbeddedSlot, IdAny, IdCode, IdRef, IdType, MeshId, ObjectId, PyExc, RnaError,
+    CollectionId, Detached, EmbeddedSlot, IdAny, IdCode, IdRef, IdType, MeshId, ObjectId, PyExc, RnaError,
     RnaErrorKind, RnaPtr, Root, SceneId, Seg, StructDef, Value,
 };
 use frap_scene::id::Collection;
@@ -114,6 +114,60 @@ pub(crate) fn arg_int(args: &FuncArgs, name: &str, default: i64) -> i64 {
         Some(Value::Int(i)) => *i,
         _ => default,
     }
+}
+
+// ---------------------------------------------------------------------- detached pointers
+
+/// Refuses a mutating RNA function called on a [`Detached`] pointer (an `evaluated_get()` ID,
+/// a `to_mesh()` result, or a struct reached from one): frap reads the original data through
+/// it, so the call would change the original, which Blender's copy keeps untouched (WP 1.22
+/// deviation, deviations.md). Property writes are refused by the session the same way.
+pub(crate) fn refuse_detached(this: &RnaPtr, func: &str) -> Result<(), RnaError> {
+    if this.detached.is_none() {
+        return Ok(());
+    }
+    Err(not_implemented(format!(
+        "{}.{func}() called on an evaluated or temporary copy (evaluated_get(), to_mesh()); \
+         frap has no separate copies yet (M4) and would change the original data: call it \
+         on the original datablock (bpy.data.<collection>['Name'], or .original)",
+        this.srna.identifier
+    )))
+}
+
+/// `this` marked as standing for a Blender copy outside `bpy.data`.
+pub(crate) fn detached(this: RnaPtr, kind: Detached) -> RnaPtr {
+    RnaPtr {
+        detached: Some(kind),
+        ..this
+    }
+}
+
+/// Whether the depsgraph of `scene` evaluates `a`: the scene and every ID it reaches through
+/// user references (collections, objects, their data, materials, world, actions), plus
+/// object parents. Verified on 5.2.4: `evaluated_get()` of an unused material, mesh or an
+/// object linked to no scene returns the original (`is_evaluated == False`).
+pub(crate) fn in_depsgraph(main: &Main, scene: IdRef<SceneId>, a: IdAny) -> bool {
+    let mut edges: Vec<(IdAny, IdAny)> = Vec::new();
+    main.for_each_user_ref(&mut |user, used| edges.push((user, used)));
+    for (r, ob) in main.objects.iter() {
+        if let Some(p) = ob.parent {
+            edges.push((r.any(), p.any()));
+        }
+    }
+    let mut seen = vec![scene.any()];
+    let mut stack = vec![scene.any()];
+    while let Some(x) = stack.pop() {
+        if x == a {
+            return true;
+        }
+        for &(u, v) in &edges {
+            if u == x && !seen.contains(&v) {
+                seen.push(v);
+                stack.push(v);
+            }
+        }
+    }
+    false
 }
 
 // ---------------------------------------------------------------------------------- IDs
@@ -480,7 +534,11 @@ pub(crate) fn reaches(main: &Main, c: IdRef<CollectionId>, ancestor: IdRef<Colle
 // ---------------------------------------------------------------------------------- materials
 
 /// Resizes the slot overrides of every object using `data` after its material count changed
-/// from `old_len` to `new_len` (see the module notes).
+/// from `old_len` to `new_len` (see the module notes), and clamps each object's
+/// `active_material_index` to the new slots like `BKE_object_material_resize` clamps
+/// `ob->actcol` (`actcol > totcol → totcol`; the 0-based index reads `max(totcol - 1, 0)`).
+/// Verified on 5.2.4: Cube with 3 slots and `active_material_index = 2`, `pop()` → 1,
+/// `clear()` → 0.
 pub(crate) fn resize_object_slots(
     main: &mut Main,
     data: IdAny,
@@ -488,13 +546,16 @@ pub(crate) fn resize_object_slots(
     new_len: usize,
     log: &mut ChangeLog,
 ) {
+    let max_index = new_len.saturating_sub(1) as i32;
     let obs: Vec<IdRef<ObjectId>> = main
         .objects
         .iter()
         .filter(|(_, o)| o.data == Some(data))
         .filter(|(_, o)| {
             let n = o.material_slot_overrides.len();
-            (new_len == 0 && n > 0) || (new_len > old_len && n > old_len)
+            (new_len == 0 && n > 0)
+                || (new_len > old_len && n > old_len)
+                || o.active_material_index > max_index
         })
         .map(|(r, _)| r)
         .collect();
@@ -502,8 +563,11 @@ pub(crate) fn resize_object_slots(
         if let Some(o) = main.objects.get_mut(r, log) {
             if new_len == 0 {
                 o.material_slot_overrides.clear();
-            } else {
+            } else if new_len > old_len {
                 o.material_slot_overrides.truncate(old_len);
+            }
+            if o.active_material_index > max_index {
+                o.active_material_index = max_index;
             }
         }
     }

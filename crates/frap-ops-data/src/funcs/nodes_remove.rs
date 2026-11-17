@@ -11,6 +11,7 @@ use super::_common::{arg_ptr, internal, node_of, report_error, tree, tree_mut};
 
 #[rna_func(srna = "Nodes", func = "remove")]
 fn nodes_remove(h: &mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "remove")?;
     let root = this.root;
     let p = arg_ptr(args, "node").ok_or_else(|| internal("nodes.remove(): no node argument"))?;
     let (main, log) = h.main_mut();

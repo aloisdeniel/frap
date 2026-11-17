@@ -3,10 +3,16 @@
 //! `bpy.data` collection, named with the lowest free `.NNN` (`Material.002` when
 //! `Material.001` exists), `use_fake_user` cleared, with no users. Verified on 5.2.4: an object
 //! copy shares the data, keeps parent, transform, modifiers and slot overrides, is linked to
-//! no collection, is unselected and in Object Mode; a mesh copy keeps its materials; a
+//! no collection and in Object Mode; a mesh copy keeps its materials; a
 //! material copy has its own node tree; a collection copy links the same objects; a copy of a
 //! linked ID is local. Copies of scenes and libraries, and of embedded IDs (Blender returns an
 //! unowned copy of `material.node_tree`), are not implemented.
+//!
+//! Selection: Blender copies `ob->base_flag`, so a copy of a selected object becomes selected
+//! once it is linked to a collection of the view layer (verified on 5.2.4:
+//! `Cube.copy()` linked to the scene collection reads `select_get() == True` after
+//! `view_layer.update()`). frap stores no per-object base flags (WP 1.10), so the copy's new
+//! base is unselected (deviation, deviations.md D-43; the goldens deselect first).
 
 use frap_rna::{RnaError, RnaPtr, Root, Value, rna_func};
 use frap_scene::{FuncArgs, Host};

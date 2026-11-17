@@ -20,6 +20,7 @@ fn collection_children_link(
     this: &RnaPtr,
     args: &mut FuncArgs,
 ) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "link")?;
     let target = CollTarget::of(this)?;
     let (main, log) = h.main_mut();
     let parent_name = target.get(main)?.header.name.clone();

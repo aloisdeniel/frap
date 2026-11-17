@@ -13,6 +13,7 @@ use super::_common::{arg_str, as_report, node_ptr, tree, tree_mut};
 
 #[rna_func(srna = "Nodes", func = "new")]
 fn nodes_new(h: &mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "new")?;
     let root = this.root;
     let ty = arg_str(args, "type").to_owned();
     let (main, log) = h.main_mut();

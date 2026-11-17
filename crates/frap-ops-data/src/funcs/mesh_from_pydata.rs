@@ -96,6 +96,7 @@ fn mesh_from_pydata(
     this: &RnaPtr,
     args: &mut FuncArgs,
 ) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "from_pydata")?;
     let me = mesh_of(this)?;
     let shade_flat = arg_bool(args, "shade_flat", true);
     let mut verts = Vec::new();

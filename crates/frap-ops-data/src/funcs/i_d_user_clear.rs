@@ -18,6 +18,7 @@ fn i_d_user_clear(
     this: &RnaPtr,
     _args: &mut FuncArgs,
 ) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "user_clear")?;
     let a = match this.root {
         Root::Id(a) => a,
         // Embedded IDs have no user count of their own.

@@ -9,6 +9,7 @@ use super::_common::tree_mut;
 
 #[rna_func(srna = "Nodes", func = "clear")]
 fn nodes_clear(h: &mut dyn Host, this: &RnaPtr, _args: &mut FuncArgs) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "clear")?;
     let (main, log) = h.main_mut();
     let t = tree_mut(main, this.root, log)?;
     t.links.clear();

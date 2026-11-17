@@ -14,6 +14,7 @@ fn mesh_shade_flat(
     this: &RnaPtr,
     _args: &mut FuncArgs,
 ) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "shade_flat")?;
     let me = mesh_of(this)?;
     let (main, log) = h.main_mut();
     main.meshes

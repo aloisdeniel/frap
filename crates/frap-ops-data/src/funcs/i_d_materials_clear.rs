@@ -14,6 +14,7 @@ fn i_d_materials_clear(
     this: &RnaPtr,
     _args: &mut FuncArgs,
 ) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "clear")?;
     let me = mesh_of(this)?;
     let (main, log) = h.main_mut();
     let mesh = main

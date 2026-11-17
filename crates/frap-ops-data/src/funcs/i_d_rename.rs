@@ -65,6 +65,7 @@ fn rename_embedded(
 
 #[rna_func(srna = "ID", func = "rename")]
 fn i_d_rename(h: &mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "rename")?;
     let name = arg_str(args, "name").to_owned();
     let mode = match arg_str(args, "mode") {
         "ALWAYS" => RenameMode::Always,

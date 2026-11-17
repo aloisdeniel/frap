@@ -14,6 +14,7 @@ fn node_links_remove(
     this: &RnaPtr,
     args: &mut FuncArgs,
 ) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "remove")?;
     let root = this.root;
     let p = arg_ptr(args, "link").ok_or_else(|| internal("links.remove(): no link argument"))?;
     let (main, log) = h.main_mut();

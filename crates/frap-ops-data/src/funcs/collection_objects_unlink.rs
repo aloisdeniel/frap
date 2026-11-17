@@ -20,6 +20,7 @@ fn collection_objects_unlink(
     this: &RnaPtr,
     args: &mut FuncArgs,
 ) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "unlink")?;
     let target = CollTarget::of(this)?;
     let ob: IdRef<ObjectId> = arg_id(args, "object")
         .and_then(|a| a.typed())

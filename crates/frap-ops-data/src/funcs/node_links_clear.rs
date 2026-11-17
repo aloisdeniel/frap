@@ -12,6 +12,7 @@ fn node_links_clear(
     this: &RnaPtr,
     _args: &mut FuncArgs,
 ) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "clear")?;
     let (main, log) = h.main_mut();
     tree_mut(main, this.root, log)?.links.clear();
     Ok(Value::None)

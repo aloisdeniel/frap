@@ -20,6 +20,7 @@ fn node_links_new(
     this: &RnaPtr,
     args: &mut FuncArgs,
 ) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "new")?;
     let root = this.root;
     let a = arg_ptr(args, "input").ok_or_else(|| internal("links.new(): no input socket"))?;
     let b = arg_ptr(args, "output").ok_or_else(|| internal("links.new(): no output socket"))?;

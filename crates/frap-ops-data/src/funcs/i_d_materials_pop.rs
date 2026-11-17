@@ -19,6 +19,7 @@ fn i_d_materials_pop(
     this: &RnaPtr,
     args: &mut FuncArgs,
 ) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "pop")?;
     let me = mesh_of(this)?;
     let (main, log) = h.main_mut();
     let old = main

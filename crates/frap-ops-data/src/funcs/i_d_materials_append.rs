@@ -15,6 +15,7 @@ fn i_d_materials_append(
     this: &RnaPtr,
     args: &mut FuncArgs,
 ) -> Result<Value, RnaError> {
+    super::_common::refuse_detached(this, "append")?;
     let me = mesh_of(this)?;
     let ma: Option<IdRef<MaterialId>> = arg_id(args, "material").and_then(|a| a.typed());
     let (main, log) = h.main_mut();

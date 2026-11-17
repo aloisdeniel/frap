@@ -6,19 +6,28 @@
 //! `bpy.data.meshes`): the evaluated geometry for an evaluated object, the undeformed data for
 //! an original one.
 //!
-//! frap has no evaluated IDs (`evaluated_get` returns the original, see `i_d_evaluated_get.rs`),
-//! so it returns the object's mesh datablock itself when the evaluated mesh *is* that data
+//! Verified: writes to the result leave the object's mesh untouched
+//! (`ob.to_mesh().vertices[0].co.x = 42` keeps `ob.data.vertices[0].co.x`), and the result
+//! reads `is_evaluated == False` (also from an evaluated object).
+//!
+//! frap has no temporary or evaluated meshes of its own (M4), so it returns the object's mesh
+//! datablock behind a [`Detached::Temporary`] pointer when the evaluated mesh *is* that data
 //! (no modifier, shape key or edit-mode change: the depsgraph-lite shares the original `Arc`).
+//! Reads see the mesh; the session refuses writes through the pointer, which would change
+//! the original (deviation: Blender accepts them on the copy; `users` reads the original's
+//! count instead of 0, and the result survives `to_mesh_clear()`; deviations.md).
 //! When the evaluated geometry differs, a separate result pointer is needed (M4, with the
 //! modifier evaluators) and frap raises `NotImplementedError` (`RNA_NOT_IMPLEMENTED`) instead
 //! of returning wrong data.
 
 use std::sync::Arc;
 
-use frap_rna::{IdCode, IdRef, MeshId, ObjectId, RnaError, RnaPtr, Value, rna_func};
+use frap_rna::{
+    Detached, IdCode, IdRef, MeshId, ObjectId, RnaError, RnaPtr, Value, rna_func,
+};
 use frap_scene::{EvalMode, FuncArgs, Host};
 
-use super::_common::{internal, not_implemented, report_error, root_id};
+use super::_common::{detached, internal, not_implemented, report_error, root_id};
 
 #[rna_func(srna = "Object", func = "to_mesh")]
 fn object_to_mesh(h: &mut dyn Host, this: &RnaPtr, _args: &mut FuncArgs) -> Result<Value, RnaError> {
@@ -45,7 +54,10 @@ fn object_to_mesh(h: &mut dyn Host, this: &RnaPtr, _args: &mut FuncArgs) -> Resu
         .object(host, ob, EvalMode::Viewport)
         .map_err(|e| report_error(e.message))?;
     match &evaluated.mesh {
-        Some(m) if Arc::ptr_eq(m, &original) => Ok(me.into()),
+        Some(m) if Arc::ptr_eq(m, &original) => Ok(Value::Ptr(Box::new(detached(
+            RnaPtr::id(me.any(), &frap_spec_rna::MESH),
+            Detached::Temporary,
+        )))),
         _ => Err(not_implemented(
             "to_mesh() of an object whose evaluated mesh differs from its data (modifiers, \
              shape keys, Edit Mode) needs evaluated-mesh pointers, which arrive with M4",

@@ -49,11 +49,29 @@ pub struct RnaPtr {
     pub path: SmallVec<[Seg; 6]>,
     /// Struct type at the end of the path.
     pub srna: &'static StructDef,
+    /// `Some` when the pointer stands for a Blender copy outside `bpy.data` (an evaluated ID,
+    /// a `to_mesh()` temporary): frap has no such copies yet (M4), so the pointer reads the
+    /// original data and the session refuses writes through it (WP 1.22 contract change,
+    /// deviations.md). `None` for every ordinary pointer.
+    pub detached: Option<Detached>,
+}
+
+/// What a [`RnaPtr::detached`] pointer stands for in Blender.
+#[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
+pub enum Detached {
+    /// `ID.evaluated_get(depsgraph)`: the evaluated ID (`is_evaluated == True`).
+    Evaluated,
+    /// Reached from a detached pointer, or `Object.to_mesh()`: a copy that reads
+    /// `is_evaluated == False` in Blender but is not the original either.
+    Temporary,
 }
 
 impl PartialEq for RnaPtr {
     fn eq(&self, o: &Self) -> bool {
-        self.root == o.root && self.path == o.path && std::ptr::eq(self.srna, o.srna)
+        self.root == o.root
+            && self.path == o.path
+            && std::ptr::eq(self.srna, o.srna)
+            && self.detached == o.detached
     }
 }
 
@@ -156,6 +174,7 @@ impl RnaPtr {
             root,
             path: SmallVec::new(),
             srna,
+            detached: None,
         }
     }
     /// Pointer to an ID.
