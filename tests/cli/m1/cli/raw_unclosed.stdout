@@ -1,0 +1,9 @@
+{"event":"ready","frap":"0.1.0","protocol":1,"blender_api":"5.2","startup":"factory"}
+{"seq":1,"line":3,"kind":"invalid","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"SyntaxError","code":"SYNTAX","message":"'(' was never closed","span":{"line":3,"col":32,"col_chars":32,"len":1},"detail":{},"hint":null},"hints":[]}
+{"seq":2,"line":5,"kind":"print","ok":true,"status":"FINISHED","value":[1,2],"reports":[],"hints":[]}
+{"seq":3,"line":7,"kind":"print","ok":true,"status":"FINISHED","value":[3],"reports":[],"hints":[]}
+{"seq":4,"line":7,"kind":"print","ok":true,"status":"FINISHED","value":[4],"reports":[],"hints":[]}
+{"seq":5,"line":8,"kind":"invalid","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"SyntaxError","code":"SYNTAX","message":"'(' was never closed","span":{"line":8,"col":37,"col_chars":37,"len":1},"detail":{},"hint":null},"hints":[]}
+{"seq":6,"line":10,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.objects['Cube'].location","value":[0,0,0],"rna":{"type":"FLOAT","subtype":"TRANSLATION","array":[3],"math":"Vector"},"reports":[],"hints":[]}
+{"seq":7,"line":11,"kind":"invalid","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"SyntaxError","code":"SYNTAX","message":"'(' was never closed","span":{"line":11,"col":6,"col_chars":6,"len":1},"detail":{},"hint":null},"hints":[]}
+{"event":"end","ok":false,"stats":{"statements":7,"errors":3,"cancelled":0}}

@@ -1,0 +1,9 @@
+# `frap mcp` (§13.1): stdio JSON-RPC 2.0. Handshake (version negotiation, tools capability,
+# the initialized notification gets no answer), ping, `tools/call` of frap_exec keeping one
+# Session across calls (the cube added by call 3 is read by call "four"), on_error inside a
+# call, frap_describe with an unknown target (DESCRIBE_TARGET, isError), bad tool arguments
+# (isError), an unknown tool (-32602), an unknown method (-32601) and a parse error (-32700).
+# stdout carries JSON-RPC messages only (no ready/end events). `tools/list` is compared with
+# `--describe=tools-anthropic` in crates/frap-cli/tests/m1_cli.rs.
+bin.name = "frap"
+args = ["mcp", "--verbosity", "minimal"]

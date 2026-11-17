@@ -1,0 +1,7 @@
+# `frap serve --jsonl` (§13.1, §13.5): ids echoed on every response and on the done record,
+# `on_error` skip_rest (default, also for null) vs continue, `src` parsed as one complete unit
+# (an unclosed bracket is an immediate SyntaxError), state kept across requests, blank lines
+# ignored, lines that are not requests answered in-band (ValueError REQUEST_INVALID, then a done
+# record when the id could be read) without ending the session, and an empty request.
+bin.name = "frap"
+args = ["serve", "--jsonl", "--verbosity", "minimal"]

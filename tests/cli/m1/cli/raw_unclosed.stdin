@@ -1,0 +1,11 @@
+# Raw stdin (§11.1): a statement continues while a bracket is open; a blank line or EOF
+# ends a pending continuation with SyntaxError instead of waiting.
+bpy.ops.mesh.primitive_cube_add(size=2,
+
+print(1,
+      2)
+print(3); print(4)
+bpy.data.objects["Cube"].location = (1,
+
+bpy.data.objects["Cube"].location
+print("never closed"
