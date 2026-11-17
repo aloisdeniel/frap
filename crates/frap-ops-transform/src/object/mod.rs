@@ -92,6 +92,7 @@ pub fn orient_source(c: &Context) -> OrientSource {
             gimbal_axis_object(
                 o.rotation_mode_enum(),
                 o.rotation_euler,
+                o.rotation_axis_angle,
                 parent_world.as_ref(),
             )
         }),
@@ -334,18 +335,21 @@ fn setup(c: &Context, p: &TransformParams, tds: &[ObjectTd]) -> Setup {
     }
 }
 
-/// Proportional factors (`set_prop_dist` + `calculatePropRatio`): the world distance of each
-/// unselected element to the nearest selected one.
+/// Proportional factors (`set_prop_dist` + `calculatePropRatio`): the distance of each
+/// unselected element to the nearest selected one, both centers first mapped by their own
+/// `td->mtx` as `set_prop_dist` does for every mode (`mul_v3_m3v3(vec, td->mtx, td->center)`).
+/// For an object `td->mtx` is the parent's world 3×3 (identity without a parent) while the
+/// center is already global, so a child is measured from a displaced point (verified: a cube
+/// at local (0, 3, 0) under a parent at (1, 0, 0) turned 90° about Z sits at (-2, 0, 0) but is
+/// measured from (0, -2, 0); with the parent scaled 2 from twice its world location).
 fn set_factors(tds: &mut [ObjectTd], prop: &mut Proportional) {
-    let sel: Vec<Vec3> = tds
-        .iter()
-        .filter(|t| t.selected)
-        .map(|t| t.center)
-        .collect();
+    let point = |t: &ObjectTd| t.mtx * t.center;
+    let sel: Vec<Vec3> = tds.iter().filter(|t| t.selected).map(point).collect();
     for td in tds.iter_mut().filter(|t| !t.selected) {
+        let p = point(td);
         let rdist = sel
             .iter()
-            .map(|c| (*c - td.center).length())
+            .map(|c| (*c - p).length())
             .fold(f32::MAX, f32::min);
         td.factor = prop.factor(rdist);
     }

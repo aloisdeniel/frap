@@ -9,7 +9,13 @@
 //! follows its parent, except for a rotation about individual origins, where it rotates in
 //! place (`BA_TRANSFORM_CHILD`: its location is left alone and it does not count for the
 //! center); with proportional editing every other visible, selectable, editable object takes
-//! part with a factor, children of the selection included.
+//! part with a factor, children of the selection included (they then also follow their
+//! parent), but **not the ancestors** of a selected object (`count_proportional_objects`
+//! flags them `BA_TRANSFORM_PARENT`): with Light → Cube (selected) → Camera, a proportional
+//! translate leaves Light (and a grandparent) in place and moves Camera twice, by its parent
+//! and by its own factor. Blender's `mark_children` (`BA_TRANSFORM_CHILD`) reads the legacy
+//! object `SELECT` flag, which 5.2 no longer sets, so it never excludes a child. A rotation
+//! about individual origins skips that marking and takes the ancestors too (verified).
 
 use frap_math::matrix::RotationMode;
 use frap_math::quat::QuatWxyz;
@@ -41,7 +47,7 @@ pub struct ObjectTd {
     pub center: Vec3,
     /// Normalized world axes (`td->axismtx`).
     pub axismtx: Mat3,
-    /// World gimbal axes (`td->ext->axismtx_gimbal`; `axismtx` without Euler rotation).
+    /// World gimbal axes (`td->ext->axismtx_gimbal`; `axismtx` for a quaternion, verified).
     pub gimbal: Mat3,
     /// Local data space to global (`td->mtx`).
     pub mtx: Mat3,
@@ -116,6 +122,7 @@ pub fn object_td(c: &Context, ob: IdRef<ObjectId>, o: &Object) -> ObjectTd {
     let gimbal = gimbal_axis_object(
         o.rotation_mode_enum(),
         o.rotation_euler,
+        o.rotation_axis_angle,
         parent_world.as_ref(),
     )
     .unwrap_or(axismtx);
@@ -165,7 +172,8 @@ fn has_ancestor_in(c: &Context, o: &Object, set: &[IdRef<ObjectId>]) -> bool {
 
 /// `createTransObject`: the selected visible objects in base order (minus those following a
 /// selected ancestor, or flagged to rotate in place when `children_in_place`), then, with
-/// proportional editing, every other visible, selectable and editable object.
+/// proportional editing, every other visible, selectable and editable object that is not an
+/// ancestor of the selection (ancestors included when `children_in_place`).
 pub fn create(c: &Context, children_in_place: bool, proportional: bool) -> Vec<ObjectTd> {
     let selected = c.selected_objects();
     // `set_trans_object_base_flags` looks at selected editable bases only.
@@ -187,8 +195,28 @@ pub fn create(c: &Context, children_in_place: bool, proportional: bool) -> Vec<O
     }
     if proportional {
         let vis = c.base_visibility();
+        // `BA_TRANSFORM_PARENT`: every ancestor of a selected, editable, visible and
+        // selectable object, except for a rotation about individual origins, which takes
+        // every object.
+        let mut parents = Vec::new();
+        for &ob in editable.iter().filter(|_| !children_in_place) {
+            let v = vis.get(&ob).copied().unwrap_or_default();
+            if !v.visible || !v.selectable {
+                continue;
+            }
+            let mut cur = c.main.objects.get(ob).and_then(|o| o.parent);
+            let mut n = 0;
+            while let Some(p) = cur {
+                if parents.contains(&p) || n > frap_scene::id::transform::MAX_PARENT_DEPTH {
+                    break;
+                }
+                parents.push(p);
+                n += 1;
+                cur = c.main.objects.get(p).and_then(|o| o.parent);
+            }
+        }
         for b in &c.view_layer().bases {
-            if b.selected() {
+            if b.selected() || parents.contains(&b.object) {
                 continue;
             }
             let v = vis.get(&b.object).copied().unwrap_or_default();

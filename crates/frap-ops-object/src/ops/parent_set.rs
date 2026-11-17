@@ -14,8 +14,10 @@
 //!   the operator);
 //! - a parent loop: `RuntimeError: Error: Loop in parents` (Blender stops at that child;
 //!   frap rolls the whole operator back, D-44 candidate);
-//! - `CURVE`, `LATTICE` and the `ARMATURE*` types act as `OBJECT` when the parent is not a
-//!   curve, lattice or armature (frap has no curves or lattices); `BONE`/`BONE_RELATIVE`
+//! - `CURVE`, `LATTICE` and the `ARMATURE*` types parent like `OBJECT` (`parent_type` stays
+//!   `'OBJECT'` when the parent is not a curve, lattice or armature) and also add a `Curve`,
+//!   `Lattice` or `Armature` modifier pointing at the parent to every child that can have
+//!   modifiers (a mesh), whatever the parent's type (`support::deform`); `BONE`/`BONE_RELATIVE`
 //!   without an armature parent: `Error: No active bone`; `FOLLOW`/`PATH_CONST` without a
 //!   curve parent: `CANCELLED`, nothing changes;
 //! - poll `ED_operator_object_active_editable` (no active object: `poll() failed, context is
@@ -30,6 +32,7 @@ use frap_rna::IdCode;
 use frap_scene::id::transform::would_cycle;
 use frap_spec_ops_object::object::{self, parent_set::Type};
 
+use crate::support::deform;
 use crate::support::xform::{self, Worlds};
 
 #[operator(
@@ -104,6 +107,13 @@ fn exec(cx: &mut OpCtx, p: object::ParentSet) -> OpResult {
         }
         _ => {}
     }
+    let modifier = deform::parent_type_modifier(ty.identifier());
+    let selected: Vec<frap_rna::IdAny> = cx
+        .ctx()
+        .selected_objects()
+        .into_iter()
+        .map(Into::into)
+        .collect();
     let worlds = Worlds::of(cx.main());
     let (main, log) = cx.main_mut();
     let par_world = worlds.get(par);
@@ -122,6 +132,9 @@ fn exec(cx: &mut OpCtx, p: object::ParentSet) -> OpResult {
         o.parent_type = "OBJECT".into();
         o.parent_bone = Default::default();
         o.matrix_parent_inverse = inv;
+        if let Some(mt) = modifier {
+            deform::add_parent_deform(o, mt, par.into(), &|t| selected.contains(&t));
+        }
     }
     log.context_changed = true;
     Ok(OpStatus::Finished)

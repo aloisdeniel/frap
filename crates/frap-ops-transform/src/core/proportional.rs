@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Proportional editing falloff (`proportional_edit_falloff`, `proportional_size`). Port of
 //! `calculatePropRatio` (`editors/transform/transform_generics.cc`, Blender 5.2.4,
-//! GPL-2.0-or-later). Distances are computed by the mode handler (objects: world distance to
-//! the nearest selected center; edit mode adds connectivity in M2).
+//! GPL-2.0-or-later). Distances are computed by the mode handler (objects: distance to the
+//! nearest selected center, each center mapped by its `td->mtx` as `set_prop_dist` does; edit
+//! mode adds connectivity in M2).
 //!
 //! `RANDOM` multiplies by a random number: Blender seeds it from the clock, frap from a fixed
 //! seed (deterministic output, rule §21.4).

@@ -7,11 +7,16 @@
 //! (`transform_generics.cc`), Blender 5.2.4, GPL-2.0-or-later.
 //!
 //! Verified on 5.2.4 (object mode): LOCAL and NORMAL use the active object's normalized world
-//! axes; PARENT the active object's parent's axes and GLOBAL without a parent; GIMBAL the
-//! active object's Euler gimbal axes and GLOBAL for a quaternion or axis-angle object; VIEW the
-//! inverse of the 3D View's view matrix (frap's virtual view stores Blender's `-b` value, so
-//! the axes match); CURSOR the 3D cursor's rotation. An `orient_matrix` replaces the computed
-//! matrix when `orient_type` (or the scene default GLOBAL) equals `orient_matrix_type`.
+//! axes; PARENT the active object's parent's axes; GIMBAL the active object's gimbal axes
+//! (Euler: `eulO_to_gimbal_axis`; axis-angle: `axis_angle_to_gimbal_axis`); VIEW the inverse of
+//! the 3D View's view matrix (frap's virtual view stores Blender's `-b` value, so the axes
+//! match); CURSOR the 3D cursor's rotation. Where these have nothing to use (no active object,
+//! an active object without a parent, a quaternion active object for GIMBAL) the matrix is the
+//! identity but the **requested type is kept**: a LOCAL or GIMBAL transform of several objects
+//! then still constrains each object along its own axes (`translate(value=(1, 0, 0),
+//! orient_type='LOCAL')` with no active object moves a cube turned (0.3, 0.4, 0.5) by
+//! (0.8083, 0.4416, -0.3894)). An `orient_matrix` replaces the computed matrix when
+//! `orient_type` (or the scene default GLOBAL) equals `orient_matrix_type`.
 
 use frap_math::EulerOrder;
 use frap_math::euler::eul_o_to_mat3;
@@ -73,8 +78,8 @@ pub struct OrientSource {
     pub view: Mat3,
 }
 
-/// A resolved orientation: the type actually used (falling back to GLOBAL where Blender does)
-/// and its axes as matrix columns.
+/// A resolved orientation: the requested type (kept even when its matrix falls back to the
+/// identity, as `t->orient[…].type` is) and its axes as matrix columns.
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct Orientation {
     /// The orientation type in effect (`t->orient[…].type`).
@@ -93,28 +98,29 @@ impl Orientation {
     pub fn inverse(&self) -> Mat3 {
         invert_m3_or_identity(&self.matrix)
     }
-    /// `ED_transform_calc_orientation_from_type_ex` (object mode).
+    /// `ED_transform_calc_orientation_from_type_ex` (object mode). The fallbacks give the
+    /// identity matrix and keep `kind` (verified: with Cube and Light selected and no active
+    /// object, LOCAL moves each along its own X; with a quaternion active object, GIMBAL still
+    /// turns an Euler object about its own gimbal axis).
     pub fn calc(kind: OrientType, src: &OrientSource, custom: Mat3) -> Orientation {
-        let global = Orientation::GLOBAL;
-        let with = |matrix: Mat3| Orientation { kind, matrix };
-        match kind {
-            OrientType::Global => global,
-            // Gimbal without Euler rotation and parent without a parent fall through to global
-            // (verified: a quaternion object or an unparented one moves along world X).
-            OrientType::Gimbal => src.active_gimbal.map_or(global, with),
+        let matrix = match kind {
+            OrientType::Global => Mat3::IDENTITY,
+            // Quaternion rotation (no gimbal axes) and no active object: the identity
+            // (verified: a single quaternion object moves along world X).
+            OrientType::Gimbal => src.active_gimbal.unwrap_or(Mat3::IDENTITY),
             OrientType::Parent => src
                 .active_parent_world
-                .map(|m| axes_of(&m))
-                .map_or(global, with),
+                .map_or(Mat3::IDENTITY, |m| axes_of(&m)),
             // In Object Mode NORMAL is LOCAL (but keeps its type: its constraint is not
             // per-object).
             OrientType::Local | OrientType::Normal => {
-                src.active_world.map(|m| axes_of(&m)).map_or(global, with)
+                src.active_world.map_or(Mat3::IDENTITY, |m| axes_of(&m))
             }
-            OrientType::View => with(axes_of(&invert_m3_or_identity(&src.view))),
-            OrientType::Cursor => with(src.cursor),
-            OrientType::CustomMatrix => with(custom),
-        }
+            OrientType::View => axes_of(&invert_m3_or_identity(&src.view)),
+            OrientType::Cursor => src.cursor,
+            OrientType::CustomMatrix => custom,
+        };
+        Orientation { kind, matrix }
     }
     /// The orientation of an operator call (`initTransInfo`): `orient_type` when set, else the
     /// scene's (GLOBAL); a set `orient_matrix` is used as is when `orient_matrix_type` (default
@@ -157,17 +163,35 @@ pub fn order_axes(order: EulerOrder) -> [usize; 3] {
     [idx(s[0]), idx(s[1]), idx(s[2])]
 }
 
-/// `gimbal_axis_object`: the gimbal axes of an object rotating with Euler angles, in world
-/// space (rotated by its parent's normalized axes); `None` for quaternion and axis-angle.
+/// `axis_angle_to_gimbal_axis`: Z is the axis; X is the axis crossed with its cyclic
+/// permutation, turned by the angle about the axis; Y completes the frame. Reproduced from
+/// Blender 5.2.4's results (translating along each GIMBAL axis of axis-angle objects): X is
+/// `normalize((ay, az, ax) × a)` rotated by `angle` (zero when the axis is along (1, 1, 1), as
+/// in Blender).
+pub fn axis_angle_gimbal_axes(axis: [f32; 3], angle: f32) -> Mat3 {
+    let z = Vec3::from_array(axis).normalize_or_zero();
+    let x0 = Vec3::new(z.y, z.z, z.x).cross(z).normalize_or_zero();
+    let x = crate::core::math::axis_angle_normalized_to_mat3(z, angle) * x0;
+    let y = z.cross(x);
+    Mat3::from_cols(x, y, z)
+}
+
+/// `gimbal_axis_object`: the gimbal axes of an object rotating with Euler angles or an axis
+/// and angle, in world space (rotated by its parent's normalized axes); `None` for a
+/// quaternion. `axis_angle` is `rotation_axis_angle` (angle first).
 pub fn gimbal_axis_object(
     mode: RotationMode,
     euler: [f32; 3],
+    axis_angle: [f32; 4],
     parent_world: Option<&Mat3>,
 ) -> Option<Mat3> {
-    let RotationMode::Euler(order) = mode else {
-        return None;
+    let g = match mode {
+        RotationMode::Euler(order) => euler_gimbal_axes(euler, order),
+        RotationMode::AxisAngle => {
+            axis_angle_gimbal_axes([axis_angle[1], axis_angle[2], axis_angle[3]], axis_angle[0])
+        }
+        RotationMode::Quaternion => return None,
     };
-    let g = euler_gimbal_axes(euler, order);
     Some(match parent_world {
         Some(p) => crate::core::math::normalize_m3(p) * g,
         None => g,
@@ -187,13 +211,43 @@ mod tests {
     }
 
     #[test]
-    fn local_without_active_is_global() {
-        let o = Orientation::calc(OrientType::Local, &src(), Mat3::IDENTITY);
-        assert_eq!(o, Orientation::GLOBAL);
-        let o = Orientation::calc(OrientType::Parent, &src(), Mat3::IDENTITY);
-        assert_eq!(o.kind, OrientType::Global);
-        let o = Orientation::calc(OrientType::Gimbal, &src(), Mat3::IDENTITY);
-        assert_eq!(o.kind, OrientType::Global);
+    fn fallbacks_keep_the_type_with_identity_axes() {
+        for kind in [
+            OrientType::Local,
+            OrientType::Normal,
+            OrientType::Parent,
+            OrientType::Gimbal,
+        ] {
+            let o = Orientation::calc(kind, &src(), Mat3::IDENTITY);
+            assert_eq!(o.kind, kind);
+            assert_eq!(o.matrix, Mat3::IDENTITY);
+        }
+    }
+
+    #[test]
+    fn axis_angle_gimbal_matches_blender() {
+        // translate along each GIMBAL axis of a cube with rotation_axis_angle (0.7, 0.3, 0.2,
+        // 0.9), and X for other axes and angles (verified on 5.2.4).
+        let g = axis_angle_gimbal_axes([0.3, 0.2, 0.9], 0.7);
+        assert!(
+            g.x_axis
+                .abs_diff_eq(Vec3::new(0.7559, 0.5389, -0.3717), 1e-4)
+        );
+        assert!(
+            g.y_axis
+                .abs_diff_eq(Vec3::new(-0.5769, 0.8167, 0.0108), 1e-4)
+        );
+        assert!(
+            g.z_axis
+                .abs_diff_eq(Vec3::new(0.3094, 0.2063, 0.9283), 1e-4)
+        );
+        let x = |a: [f32; 3], angle: f32| axis_angle_gimbal_axes(a, angle).x_axis;
+        assert!(x([0.3, 0.2, 0.9], 1.5).abs_diff_eq(Vec3::new(0.1128, 0.9613, -0.2512), 1e-4));
+        assert!(x([0.0, 1.0, 0.0], 0.5).abs_diff_eq(Vec3::new(0.4794, 0.0, 0.8776), 1e-4));
+        assert!(x([1.0, 1.0, 0.0], 0.0).abs_diff_eq(Vec3::new(-1.0, 1.0, 1.0) / 3f32.sqrt(), 1e-4));
+        assert!(x([0.3, 0.2, -0.9], 0.0).abs_diff_eq(Vec3::new(0.8769, 0.3157, 0.3625), 1e-4));
+        assert!(x([-1.0, 0.0, 0.0], 0.0).abs_diff_eq(Vec3::Y, 1e-6));
+        assert_eq!(x([1.0, 1.0, 1.0], 0.3), Vec3::ZERO);
     }
 
     #[test]
@@ -213,14 +267,19 @@ mod tests {
     fn gimbal_axes_of_xyz() {
         // Translate (1, 1, 1) GIMBAL on a cube with rotation (0.3, 0.4, 0.5) XYZ moves it to
         // (0.3289, 1.3192, 0.6106) (verified on 5.2.4).
-        let g = gimbal_axis_object(RotationMode::Euler(EulerOrder::XYZ), [0.3, 0.4, 0.5], None)
-            .expect("euler");
+        let g = gimbal_axis_object(
+            RotationMode::Euler(EulerOrder::XYZ),
+            [0.3, 0.4, 0.5],
+            [0.0; 4],
+            None,
+        )
+        .expect("euler");
         let d = g * Vec3::ONE;
         assert!(
             d.abs_diff_eq(Vec3::new(0.3289, 1.3192, 0.6106), 1e-4),
             "{d:?}"
         );
-        assert!(gimbal_axis_object(RotationMode::Quaternion, [0.0; 3], None).is_none());
+        assert!(gimbal_axis_object(RotationMode::Quaternion, [0.0; 3], [0.0; 4], None).is_none());
         assert_eq!(order_axes(EulerOrder::ZXY), [2, 0, 1]);
     }
 
@@ -231,7 +290,8 @@ mod tests {
         assert_eq!(o.kind, OrientType::CustomMatrix);
         assert_eq!(o.matrix, m);
         let o = Orientation::from_props(Some("LOCAL"), Some(m), "GLOBAL", &src());
-        assert_eq!(o.kind, OrientType::Global);
+        assert_eq!(o.kind, OrientType::Local);
+        assert_eq!(o.matrix, Mat3::IDENTITY);
         assert_eq!(
             OrientType::from_identifier("MyOrientation"),
             OrientType::Global
