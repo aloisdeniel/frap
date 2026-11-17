@@ -1,0 +1,8 @@
+# WP 1.26: the M1 exit transcript (vertical_slice.trycmd) fed on stdin, raw mode (§13.1): the
+# same 19 statements, the same expected responses.
+bin.name = "frap"
+args = []
+fs.sandbox = true
+# GATE: skipped until WP 1.20, 1.23 and 1.24 are merged (camera_add, render, IO operators);
+# delete the next line when merging them (see vertical_slice.trycmd).
+status = "skipped"
