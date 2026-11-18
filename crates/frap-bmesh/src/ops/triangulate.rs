@@ -28,6 +28,8 @@
 pub mod beautify;
 pub(crate) mod heap;
 pub(crate) mod math;
+#[cfg(test)]
+mod tests;
 
 use crate::query::geom::V3;
 use crate::types::{CreateFlag, OpTypeFlag};
@@ -310,6 +312,7 @@ fn len_squared_v3v3(a: V3, b: V3) -> f32 {
 // the `slot_facemap_out` branch).
 /// `BM_mesh_triangulate(bm, quad_method, ngon_method, min_vertices, tag_only, …)` with the
 /// face maps; returns `(face_map, face_map_double)`.
+#[allow(clippy::type_complexity)]
 pub fn mesh_triangulate(
     bm: &mut BMesh,
     quad_method: QuadMethod,

@@ -2,10 +2,10 @@
 source: crates/frap-schema/tests/snapshots.rs
 ---
 {
-  "idname": "mesh.spin",
-  "bl_idname": "MESH_OT_spin",
-  "label": "Spin",
-  "description": "Extrude selected vertices in a circle around the cursor in indicated viewport",
+  "idname": "mesh.decimate",
+  "bl_idname": "MESH_OT_decimate",
+  "label": "Decimate Geometry",
+  "description": "Simplify geometry by collapsing edges",
   "bl_options": [
     "REGISTER",
     "UNDO"
@@ -22,161 +22,142 @@ source: crates/frap-schema/tests/snapshots.rs
   },
   "properties": [
     {
-      "identifier": "steps",
-      "name": "Steps",
-      "description": "Steps",
-      "type": "INT",
+      "identifier": "ratio",
+      "name": "Ratio",
+      "description": "",
+      "type": "FLOAT",
       "subtype": "NONE",
       "unit": "NONE",
       "array": null,
-      "default": 12,
+      "default": 1,
       "hard_min": 0,
-      "hard_max": 1000000,
-      "soft_min": 0,
-      "soft_max": 1000,
-      "hidden": false,
-      "skip_save": false,
-      "flags": [
-        "ANIMATABLE"
-      ],
-      "required": false,
-      "unset_semantics": null,
-      "frap_note": null,
-      "frap_extension": false
-    },
-    {
-      "identifier": "dupli",
-      "name": "Use Duplicates",
-      "description": "",
-      "type": "BOOLEAN",
-      "subtype": "NONE",
-      "unit": "NONE",
-      "array": null,
-      "default": false,
-      "hidden": false,
-      "skip_save": true,
-      "flags": [
-        "SKIP_SAVE",
-        "ANIMATABLE",
-        "SKIP_PRESET"
-      ],
-      "required": false,
-      "unset_semantics": null,
-      "frap_note": null,
-      "frap_extension": false
-    },
-    {
-      "identifier": "angle",
-      "name": "Angle",
-      "description": "Rotation for each step",
-      "type": "FLOAT",
-      "subtype": "ANGLE",
-      "unit": "ROTATION (radians)",
-      "array": null,
-      "default": 1.5707964,
-      "hard_min": -1000000000000,
-      "hard_max": 1000000000000,
-      "soft_min": -6.2831855,
-      "soft_max": 6.2831855,
-      "precision": 3,
-      "hidden": false,
-      "skip_save": false,
-      "flags": [
-        "ANIMATABLE"
-      ],
-      "required": false,
-      "unset_semantics": null,
-      "frap_note": "radians; a whole number above 2π gets the ANGLE_LIKELY_DEGREES hint (use radians(90))",
-      "frap_extension": false
-    },
-    {
-      "identifier": "use_auto_merge",
-      "name": "Auto Merge",
-      "description": "Merge first/last when the angle is a full revolution",
-      "type": "BOOLEAN",
-      "subtype": "NONE",
-      "unit": "NONE",
-      "array": null,
-      "default": true,
-      "hidden": false,
-      "skip_save": false,
-      "flags": [
-        "ANIMATABLE"
-      ],
-      "required": false,
-      "unset_semantics": null,
-      "frap_note": null,
-      "frap_extension": false
-    },
-    {
-      "identifier": "use_normal_flip",
-      "name": "Flip Normals",
-      "description": "",
-      "type": "BOOLEAN",
-      "subtype": "NONE",
-      "unit": "NONE",
-      "array": null,
-      "default": false,
-      "hidden": false,
-      "skip_save": false,
-      "flags": [
-        "ANIMATABLE"
-      ],
-      "required": false,
-      "unset_semantics": null,
-      "frap_note": null,
-      "frap_extension": false
-    },
-    {
-      "identifier": "center",
-      "name": "Center",
-      "description": "Center in global view space",
-      "type": "FLOAT",
-      "subtype": "XYZ_LENGTH",
-      "unit": "LENGTH",
-      "array": [
-        3
-      ],
-      "default": [
-        0,
-        0,
-        0
-      ],
-      "hard_min": -1000000000000,
-      "hard_max": 1000000000000,
-      "soft_min": -10000,
-      "soft_max": 10000,
-      "precision": 3,
-      "hidden": false,
-      "skip_save": false,
-      "flags": [
-        "ANIMATABLE"
-      ],
-      "required": false,
-      "unset_semantics": null,
-      "frap_note": null,
-      "frap_extension": false
-    },
-    {
-      "identifier": "axis",
-      "name": "Axis",
-      "description": "Axis in global view space",
-      "type": "FLOAT",
-      "subtype": "XYZ",
-      "unit": "NONE",
-      "array": [
-        3
-      ],
-      "default": [
-        0,
-        0,
-        0
-      ],
-      "hard_min": -1,
       "hard_max": 1,
-      "soft_min": -1,
+      "soft_min": 0,
       "soft_max": 1,
       "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_vertex_group",
+      "name": "Vertex Group",
+      "description": "Use active vertex group as an influence",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "vertex_group_factor",
+      "name": "Weight",
+      "description": "Vertex group strength",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": 0,
+      "hard_max": 1000,
+      "soft_min": 0,
+      "soft_max": 10,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "invert_vertex_group",
+      "name": "Invert",
+      "description": "Invert vertex group influence",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_symmetry",
+      "name": "Symmetry",
+      "description": "Maintain symmetry on an axis",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "symmetry_axis",
+      "name": "Axis",
+      "description": "Axis of symmetry",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "Y",
+      "enum_items": [
+        {
+          "identifier": "X",
+          "name": "X",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "Y",
+          "name": "Y",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "Z",
+          "name": "Z",
+          "description": "",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
       "hidden": false,
       "skip_save": false,
       "flags": [
@@ -194,10 +175,10 @@ source: crates/frap-schema/tests/snapshots.rs
     "support": null,
     "support_note": null,
     "headless": null,
-    "planned": "M2",
+    "planned": "M4",
     "extension": false,
     "notes": [
-      "mesh.spin exists in Blender 5.2; frap implements it in M2 (OP_NOT_IMPLEMENTED until then)"
+      "mesh.decimate exists in Blender 5.2; frap implements it in M4 (OP_NOT_IMPLEMENTED until then)"
     ]
   }
 }

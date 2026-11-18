@@ -1,0 +1,129 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.quads_convert_to_tris",
+  "bl_idname": "MESH_OT_quads_convert_to_tris",
+  "label": "Triangulate Faces",
+  "description": "Triangulate selected faces",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "quad_method",
+      "name": "Quad Method",
+      "description": "Method for splitting the quads into triangles",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "BEAUTY",
+      "enum_items": [
+        {
+          "identifier": "BEAUTY",
+          "name": "Beauty",
+          "description": "Split the quads in nice triangles, slower method",
+          "value": 0
+        },
+        {
+          "identifier": "FIXED",
+          "name": "Fixed",
+          "description": "Split the quads on the first and third vertices",
+          "value": 1
+        },
+        {
+          "identifier": "FIXED_ALTERNATE",
+          "name": "Fixed Alternate",
+          "description": "Split the quads on the 2nd and 4th vertices",
+          "value": 2
+        },
+        {
+          "identifier": "SHORTEST_DIAGONAL",
+          "name": "Shortest Diagonal",
+          "description": "Split the quads along their shortest diagonal",
+          "value": 3
+        },
+        {
+          "identifier": "LONGEST_DIAGONAL",
+          "name": "Longest Diagonal",
+          "description": "Split the quads along their longest diagonal",
+          "value": 4
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "ngon_method",
+      "name": "N-gon Method",
+      "description": "Method for splitting the n-gons into triangles",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "BEAUTY",
+      "enum_items": [
+        {
+          "identifier": "BEAUTY",
+          "name": "Beauty",
+          "description": "Arrange the new triangles evenly (slow)",
+          "value": 0
+        },
+        {
+          "identifier": "CLIP",
+          "name": "Clip",
+          "description": "Split the polygons with an ear clipping algorithm",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M2",
+    "extension": false,
+    "notes": [
+      "FIXED, FIXED_ALTERNATE and the diagonal methods are index-exact (T1); BEAUTY is compared canonically (T2)"
+    ]
+  }
+}

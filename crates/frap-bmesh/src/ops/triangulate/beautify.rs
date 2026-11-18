@@ -256,14 +256,12 @@ pub(crate) fn polyfill_beautify(coords: &[[f32; 2]], tris: &mut [[u32; 3]]) {
             .then(a.verts[1].cmp(&b.verts[1]))
             .then(a.e_half.cmp(&b.e_half))
     });
-    let mut base_index = 0u32;
-    for pair in order_edges.chunks_exact(2) {
+    for (base_index, pair) in order_edges.chunks_exact(2).enumerate() {
         let (a, b) = (pair[0], pair[1]);
         half_edges[a.e_half as usize].e_radial = b.e_half;
         half_edges[b.e_half as usize].e_radial = a.e_half;
-        half_edges[a.e_half as usize].base_index = base_index;
-        half_edges[b.e_half as usize].base_index = base_index;
-        base_index += 1;
+        half_edges[a.e_half as usize].base_index = base_index as u32;
+        half_edges[b.e_half as usize].base_index = base_index as u32;
     }
 
     let mut heap: Heap<usize> = Heap::new();
