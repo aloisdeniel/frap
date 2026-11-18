@@ -166,8 +166,8 @@ fn exec(cx: &mut OpCtx, p: object::ModeSet) -> OpResult {
     let requested = p.mode.value.as_str();
     if !compatible(ty, requested) {
         // Blender validates `mode` against `object_mode_set_itemf` while converting the
-        // arguments. The session converts them without a context (static superset), so the
-        // check is repeated here with Blender's message.
+        // arguments (the session does too, with the context). A caller that converts without
+        // a context (static superset) gets the same check here, with Blender's message.
         let items = mode_items(&cx.ctx());
         let list = items
             .iter()

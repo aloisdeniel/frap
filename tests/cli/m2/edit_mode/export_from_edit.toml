@@ -1,0 +1,10 @@
+# M2 stabilization: `export_scene.gltf` while the Cube is in Edit Mode leaves Edit Mode first,
+# as the glTF add-on does (`object.mode_set(mode='OBJECT')` in `export.save`): the extruded
+# geometry is written back and exported (12 vertices, top at z=2), the Cube is listed as
+# modified and `context.mode` reads OBJECT afterwards. Enum arguments are checked after poll
+# with the items of the current context: a mesh operator in Object Mode fails its poll even
+# with an invalid enum, `mesh.merge(type='FIRST')` without a selection history and
+# `mode_set(mode='EDIT')` on a Camera are `OP_ARG_ENUM` errors listing the available items.
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

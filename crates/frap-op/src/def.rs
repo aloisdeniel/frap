@@ -10,7 +10,7 @@ use smol_str::SmolStr;
 
 use crate::ctx::OpCtx;
 use crate::errors::{
-    GPU_UNAVAILABLE, IO_ERROR, IO_UNSUPPORTED_FORMAT, LIMIT_EXCEEDED, OP_EXEC_ERROR,
+    GPU_UNAVAILABLE, IO_ERROR, IO_UNSUPPORTED_FORMAT, LIMIT_EXCEEDED, OP_ARG_ENUM, OP_EXEC_ERROR,
     OP_NOT_IMPLEMENTED,
 };
 pub use frap_rna::{OpArgs, Report, ReportType};
@@ -192,7 +192,12 @@ impl OpError {
             OpError::Runtime(m) => {
                 FrapError::new(PyExc::RuntimeError, OP_EXEC_ERROR, format!("Error: {m}"))
             }
-            OpError::Rna(e) => e.into_frap("", |_| OP_EXEC_ERROR),
+            // An enum value an operator re-checks against its dynamic items in exec is the
+            // conversion `TypeError` Blender raises (`OP_ARG_ENUM`, as at conversion).
+            OpError::Rna(e) => e.into_frap("", |k| match k {
+                frap_rna::RnaErrorKind::Enum => OP_ARG_ENUM,
+                _ => OP_EXEC_ERROR,
+            }),
             OpError::NotImplemented(m) => {
                 FrapError::new(PyExc::NotImplementedError, OP_NOT_IMPLEMENTED, m)
             }

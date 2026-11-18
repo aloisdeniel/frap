@@ -42,8 +42,8 @@ fn collection_items(c: &Context) -> Vec<EnumItemOwned> {
     notes = ["collection items: the names of the local bpy.data.collections"]
 )]
 fn exec(cx: &mut OpCtx, p: object::CollectionLink) -> OpResult {
-    // The session converts the arguments without a context, so the dynamic items are checked
-    // here, with Blender's conversion message.
+    // The session converts the arguments with the context; a caller converting without one
+    // gets the dynamic items checked here, with Blender's conversion message.
     let items = collection_items(&cx.ctx());
     // Unset: `RNA_enum_get` gives value 0, the first collection (`BLI_findlink(…, 0)`).
     let wanted = if p.collection.is_set {

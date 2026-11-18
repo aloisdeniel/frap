@@ -58,7 +58,7 @@ pub(crate) fn mesh_domain_items(_c: &frap_scene::Context) -> Vec<frap_op::EnumIt
 }
 
 /// The `TypeError` Blender raises while converting the arguments when `domain` is not one of
-/// [`mesh_domain_items`] (the session converts without a context, so `exec` repeats it).
+/// [`mesh_domain_items`] (`exec` repeats the check for callers converting without a context).
 pub(crate) fn domain_enum_error(requested: &str) -> OpError {
     let items = ["POINT", "EDGE", "FACE", "CORNER"];
     let list = items

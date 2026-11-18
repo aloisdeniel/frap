@@ -159,6 +159,39 @@ fn exit_edit_mode(cx: &mut OpCtx) -> Result<(), OpError> {
     handler_status((h.exit)(cx, &objects), "leave Edit Mode")
 }
 
+/// `bpy.ops.object.mode_set(mode='OBJECT')` as an operator body calls it (the glTF exporter's
+/// `if bpy.context.active_object.mode != 'OBJECT'`): when the active object is in another mode,
+/// that mode's handler leaves it for the active object and every other object of its type in
+/// the same mode (base order), which writes edit data back, then the Object Mode handler enters.
+/// Returns whether the mode changed. Without an active object, or already in Object Mode,
+/// nothing happens.
+pub fn mode_set_object(cx: &mut OpCtx) -> Result<bool, OpError> {
+    let (objects, ty, current) = {
+        let c = cx.ctx();
+        let Some((active, ob)) = poll::active(&c) else {
+            return Ok(false);
+        };
+        let (ty, current) = (ob.object_type(), ob.mode);
+        if current == ObjectMode::Object {
+            return Ok(false);
+        }
+        let mut objects = vec![active];
+        objects.extend(c.view_layer().bases.iter().map(|b| b.object).filter(|&r| {
+            r != active
+                && c.main
+                    .objects
+                    .get(r)
+                    .is_some_and(|o| o.mode == current && o.object_type() == ty)
+        }));
+        (objects, ty, current)
+    };
+    let leave = mode_handler(current, ty)?;
+    let enter = mode_handler(ObjectMode::Object, ty)?;
+    handler_status((leave.exit)(cx, &objects), "leave the current mode")?;
+    handler_status((enter.enter)(cx, &objects), "enter Object Mode")?;
+    Ok(true)
+}
+
 fn enter_edit_mode(cx: &mut OpCtx, ob: IdRef<ObjectId>) -> Result<(), OpError> {
     let ty = cx
         .main()

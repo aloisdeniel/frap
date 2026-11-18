@@ -1,0 +1,16 @@
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_mode(type='FACE')
+bpy.ops.frap.select_by_normal(direction=(0, 0, 1), threshold=0.1)
+bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value": (0, 0, 1)})
+bpy.ops.export_scene.gltf(filepath='out/edit.glb')
+bpy.context.mode
+bpy.data.meshes['Cube'].vertices[11].co
+bpy.ops.mesh.merge(type='NOPE')
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_mode(type='VERT')
+bpy.ops.mesh.merge(type='FIRST')
+bpy.ops.mesh.select_mode(type='EDGE')
+bpy.ops.mesh.merge(type='NOPE')
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.context.view_layer.objects.active = bpy.data.objects['Camera']
+bpy.ops.object.mode_set(mode='EDIT')

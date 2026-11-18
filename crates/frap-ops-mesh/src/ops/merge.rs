@@ -28,9 +28,11 @@ use frap_bmesh::ops::pointmerge::{
 };
 use frap_bmesh::{BMElem, BMesh, ElemFlag, SelectMode, VertId};
 use frap_math::glam::Vec3;
+use frap_op::EnumItemOwned;
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_rna::{PyExc, RnaError, RnaErrorKind};
+use frap_rna::{PropKind, PyExc, RnaError, RnaErrorKind};
+use frap_scene::Context;
 use frap_scene::id::transform::world_matrix;
 use frap_spec_ops_mesh::mesh::{self, merge::Type};
 
@@ -55,6 +57,30 @@ pub(crate) fn merge_items(bm: Option<&BMesh>) -> Vec<Type> {
     items
 }
 
+/// `merge_type_itemf` as far as the context shows it, for the argument conversion (§10.2): the
+/// edit BMesh's selection history is not part of `Context` (RFC 0001 F-OP-5), so in vertex
+/// select mode `FIRST` and `LAST` are both offered and `exec` checks them against the history
+/// (with the same `TypeError`, `OP_ARG_ENUM`). Outside vertex select mode the list is exact.
+fn type_items(c: &Context) -> Vec<EnumItemOwned> {
+    let vert_mode = poll::edit_object(c).is_none() || c.tool_settings().mesh_select_mode[0];
+    let items: Vec<Type> = if vert_mode {
+        Type::ALL.to_vec()
+    } else {
+        vec![Type::Center, Type::Cursor, Type::Collapse]
+    };
+    let PropKind::Enum { items: all, .. } = &mesh::MERGE_PROPS[0].kind else {
+        return Vec::new();
+    };
+    all.iter()
+        .filter(|i| items.iter().any(|t| t.identifier() == i.identifier))
+        .map(|i| EnumItemOwned {
+            identifier: i.identifier.into(),
+            name: i.name.into(),
+            description: i.description.into(),
+        })
+        .collect()
+}
+
 /// `merge_firstlast`: the merge vertex, when the history end is a selected vertex.
 fn merge_vert(bm: &BMesh, use_first: bool) -> Option<VertId> {
     let ese = if use_first {
@@ -71,6 +97,7 @@ fn merge_vert(bm: &BMesh, use_first: bool) -> Option<VertId> {
 #[operator(
     poll = poll::EDITMESH,
     tier = T1,
+    dyn_enums = [("type", type_items)],
     notes = [
         "type is a dynamic enum: FIRST/LAST exist only in vertex select mode when the selection history starts/ends with a vertex (use frap.select_elements to build it)",
         "CENTER/CURSOR keep the lowest-index selected vertex; FIRST/LAST keep the history vertex and merge the active mesh only",
@@ -81,8 +108,8 @@ fn exec(cx: &mut OpCtx, p: mesh::Merge) -> OpResult {
     let meshes = helpers::iter_edit_meshes(cx);
     let ty = p.r#type.value;
     if p.r#type.is_set {
-        // The session converts the arguments without a context, so the dynamic items are
-        // checked here, with Blender's conversion message.
+        // The conversion cannot see the selection history (`type_items`), so `FIRST`/`LAST`
+        // are checked here against it, with Blender's conversion message.
         let active = meshes.first().map(|&(_, me)| me);
         let items = match active {
             Some(me) => merge_items(edit_bm(cx, me)),

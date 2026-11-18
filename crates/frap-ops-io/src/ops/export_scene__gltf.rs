@@ -116,6 +116,11 @@ pub(crate) fn unsupported_props(a: &OpArgs) -> Vec<&'static str> {
 }
 
 fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
+    // `export.save`: `if bpy.context.active_object.mode != 'OBJECT':
+    // bpy.ops.object.mode_set(mode='OBJECT')`, before anything else (an empty path still
+    // leaves Edit Mode, verified on 5.2.4). Leaving Edit Mode writes every edit mesh back, so
+    // the export sees the edited geometry, and the session stays in Object Mode.
+    helpers::mode_set_object(cx)?;
     let p = P::from_args(a);
     let mut settings = ExportSettings::from_props(&p);
     if p.filepath.value.is_empty() {
@@ -186,6 +191,7 @@ static DEF: OperatorDef = OperatorDef {
         "missing parent directories are created, as Blender's add-on does",
         "'//' resolves relative to bpy.data.filepath (deviation D-08: the add-on writes it raw)",
         "GLTF_EMBEDDED needs the add-on preference allow_embedded_format (off in factory settings)",
+        "an active object in another mode (Edit Mode) goes back to Object Mode first, writing its edits back, as the add-on does",
     ],
 };
 

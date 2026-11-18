@@ -126,8 +126,12 @@ NORMALISE = {
     "D-74": ("cases", "cases set attributes.active before attribute_convert"),
     "D-75": ("cases", "cases do not read attributes.active in Edit Mode after activating a flag attribute"),
     "D-76": ("cases", "cases read active_index in Object Mode only"),
-    "D-77": ("comparator", "n-gon triangulation cases of regular n-gons compare at T2 (canonical order)"),
-    "D-78": ("cases", "cases do not pass invalid enum values to operators whose poll fails"),
+    "D-77": (
+        "comparator",
+        "n-gon triangulation cases of regular n-gons compare at T2 (canonical order) and "
+        "triangulate them before float-accumulating edits",
+    ),
+    "D-78": ("cases", "cases do not pass unknown mesh.merge types in vertex select mode"),
     "D-79": ("cases", "cases do not set harden_normals or Auto Merge with bevel"),
     "D-80": ("comparator", "the two-bevel cases compare at T2 (canonical order)"),
     "D-81": None,

@@ -934,7 +934,9 @@ impl Session {
         };
         // §10.2 step 1: lookup.
         let def = frap_op::lookup(idname).map_err(fail)?;
-        // Steps 2–3: arguments, before poll.
+        // Steps 2, 5, 3 in Blender's order: the positionals (`_BPyOpsSubModOp._parse_args`, in
+        // Python), poll (`pyop_call`), then the keywords with the context, so dynamic enums
+        // list the items of the current context (`pyrna_pydict_to_props` after the poll).
         let spans: Vec<(String, Span)> = kwargs.iter().map(|(k, _, s)| (k.clone(), *s)).collect();
         let pos = positional
             .iter()
@@ -945,31 +947,35 @@ impl Session {
         for (k, v, _) in kwargs {
             kw.push((k, v.to_input().map_err(fail)?));
         }
-        let (args, mut reports, hints) = frap_op::convert_args(def.spec, pos, kw).map_err(|e| {
-            let arg_span = e
-                .detail
-                .get("argument")
-                .and_then(|a| a.as_str())
-                .and_then(|a| spans.iter().find(|(k, _)| k == a))
-                .map(|(_, s)| *s);
-            fail(match arg_span {
-                Some(mut s) if s != Span::default() => {
-                    // An unknown keyword points at the keyword itself (§13.5).
-                    if e.code == frap_op::errors::OP_ARG_UNKNOWN {
-                        s.len = e
-                            .detail
-                            .get("argument")
-                            .and_then(|a| a.as_str())
-                            .map_or(s.len, |a| a.len() as u32);
-                    }
-                    e.with_span(s)
-                }
-                _ => e,
-            })
-        })?;
+        let mut reports = frap_op::pipeline::check_positional(def.spec, &pos).map_err(fail)?;
         // Step 4 (ensure evaluated) happens inside the operators that read evaluated data.
         // Step 5: poll.
         frap_op::check_poll(def, &self.host.state.ctx()).map_err(fail)?;
+        let converted =
+            frap_op::pipeline::convert(def, &self.host.state.ctx(), kw).map_err(|e| {
+                let arg_span = e
+                    .detail
+                    .get("argument")
+                    .and_then(|a| a.as_str())
+                    .and_then(|a| spans.iter().find(|(k, _)| k == a))
+                    .map(|(_, s)| *s);
+                fail(match arg_span {
+                    Some(mut s) if s != Span::default() => {
+                        // An unknown keyword points at the keyword itself (§13.5).
+                        if e.code == frap_op::errors::OP_ARG_UNKNOWN {
+                            s.len = e
+                                .detail
+                                .get("argument")
+                                .and_then(|a| a.as_str())
+                                .map_or(s.len, |a| a.len() as u32);
+                        }
+                        e.with_span(s)
+                    }
+                    _ => e,
+                })
+            })?;
+        reports.extend(converted.reports);
+        let (args, hints) = (converted.args, converted.hints);
         // Steps 6–8: transaction + exec.
         let txn = self.transact(|s| {
             let mut cx = OpCtx::new(&mut s.host, &mut s.services, def.spec);
