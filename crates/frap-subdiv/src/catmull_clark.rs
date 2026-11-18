@@ -12,17 +12,25 @@
 //!    (`BUGGY_SIMPLE_SCHEME_WORKAROUND`). UV maps become face-varying channels whose values
 //!    are the corners Blender's UV vertex map welds (`BKE_mesh_uv_vert_map_create`, winding
 //!    aware, 1e-4 limit).
-//! 2. The mesh is refined uniformly ([`crate::vtr`], [`crate::primvar`]).
+//! 2. The mesh is refined uniformly (`vtr`, `primvar`).
 //! 3. With `use_limit_surface` Blender evaluates bicubic patches of an adaptive refinement
 //!    isolated to `quality` levels. At level `L ≤ quality` every output point is a vertex of
 //!    the refined mesh at level `L`, and the patches place it at that vertex's limit position
 //!    (regular B-spline patches interpolate it, Gregory end caps are built from it), so the
 //!    output is the limit mask applied to the refined vertex — after refining further until
 //!    semi-sharp creases have decayed (at most to `quality`; what is left then is ignored like
-//!    OpenSubdiv's end caps ignore it). Without `use_limit_surface` the points are the refined
-//!    vertices themselves (`SIMPLE`: bilinear inside level-1 faces). Deviation D-4.4-1: with
-//!    `levels > quality` (or `SIMPLE` with `levels > 1`) points inside end-cap patches are the
-//!    exact limit rather than the Gregory approximation.
+//!    OpenSubdiv's end caps ignore it). Two patch-table rules are reproduced at the isolation
+//!    level: a smooth boundary corner with one face is a sharp corner patch
+//!    (`generateLegacySharpCornerPatches`), so it keeps its isolation-level position, and an
+//!    interior valence-2 vertex uses the end caps' `n / (n + 5)` weights (Suzanne's nose).
+//!    Without `use_limit_surface` the points are the refined vertices themselves (`SIMPLE`:
+//!    bilinear inside level-1 faces, Blender's uniform linear patches).
+//!
+//!    Known difference: with `levels > quality` (or `SIMPLE` with `levels > 1` on faces other
+//!    than quads) the points between isolation-level vertices inside Gregory end caps are the
+//!    exact limit here, Blender's Gregory approximation there (up to `3e-3` on the unit cube at
+//!    level 4, `quality` 3; `tests/blender_dumps.rs` `APPROXIMATE`). The `osd` backend evaluates
+//!    those patches like Blender.
 //! 4. The output follows Blender's layout ([`crate::layout`]), so indices match (T1).
 
 use smallvec::SmallVec;

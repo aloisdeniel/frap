@@ -6,7 +6,7 @@
 //!
 //! The result has Blender's element order (`subdiv_foreach.cc`) and Blender's attribute
 //! propagation (`subdiv_mesh.cc`): vertex and corner attributes interpolated in their own
-//! types ([`mix`]), edge attributes copied along coarse edges and defaulted on inner edges,
+//! types (`mix`), edge attributes copied along coarse edges and defaulted on inner edges,
 //! face attributes copied to the child faces, UV maps evaluated as face-varying data,
 //! vertex-group weights mixed like `mix_deform_verts`; string attributes and custom normals
 //! are not carried.

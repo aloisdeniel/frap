@@ -147,7 +147,7 @@ fn modifiers_pass_through_with_a_warning_until_m4() {
         no_render.show_render = false;
         o.modifiers = vec![
             pinned,
-            modifier("Subdivision", ModifierType::Subsurf),
+            modifier("Subdivision", ModifierType::Skin),
             hidden,
             no_render,
         ];
@@ -176,7 +176,7 @@ fn modifiers_pass_through_with_a_warning_until_m4() {
     assert_eq!(
         msgs,
         [
-            "Modifier 'Subdivision' (SUBSURF) is not evaluated by frap; passed through",
+            "Modifier 'Subdivision' (SKIN) is not evaluated by frap; passed through",
             "Modifier 'NoRender' (MIRROR) is not evaluated by frap; passed through",
             "Modifier 'Pinned' (TRIANGULATE) is not evaluated by frap; passed through",
         ]

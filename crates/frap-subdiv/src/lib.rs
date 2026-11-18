@@ -16,7 +16,7 @@
 //! attribute interpolation, which flattened weights cannot reproduce for integer and boolean
 //! attributes) and [`SubdivResult::identity`].
 //!
-//! Internals: [`sdc`](crate::sdc) (Catmull-Clark masks and creasing rules), `vtr` (levels and
+//! Internals: `sdc` (Catmull-Clark masks and creasing rules), `vtr` (levels and
 //! uniform refinement), `fvar` (face-varying channels), `primvar` (interpolation and limit),
 //! all ported from OpenSubdiv as Blender links it.
 #![deny(unsafe_code)]
