@@ -19,7 +19,7 @@ pub(crate) struct Csr {
 impl Csr {
     /// Builds an `n × n` matrix from `(row, col, value)` triplets, summing duplicates.
     pub fn from_triplets(n: usize, mut t: Vec<(usize, usize, f64)>) -> Csr {
-        t.sort_by(|a, b| (a.0, a.1).cmp(&(b.0, b.1)));
+        t.sort_by_key(|a| (a.0, a.1));
         let mut offsets = vec![0usize; n + 1];
         let mut cols: Vec<usize> = Vec::with_capacity(t.len());
         let mut vals: Vec<f64> = Vec::with_capacity(t.len());

@@ -18,7 +18,7 @@ use std::sync::Arc;
 use frap_mesh::{AttrData, Attribute, DeformVert};
 use frap_rna::{IdAny, IdRef, ObjectId};
 use frap_scene::generated::modifier_settings::NormalEditSettings;
-use glam::{Mat4, Vec3};
+use glam::Mat4;
 use smallvec::SmallVec;
 
 use self::custom_normals::{
@@ -394,7 +394,7 @@ pub(crate) fn normal_edit(
             // generate_vert_coordinates without r_size: centred on the target.
             let p = ob_world
                 .inverse()
-                .transform_point3(Vec3::from(t.world.w_axis.truncate()));
+                .transform_point3(t.world.w_axis.truncate());
             let mut cos: Vec<V3> = positions
                 .iter()
                 .map(|q| [q[0] - p.x, q[1] - p.y, q[2] - p.z])

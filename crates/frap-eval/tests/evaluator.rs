@@ -139,7 +139,7 @@ fn modifiers_pass_through_with_a_warning_until_m4() {
     let (mut h, [_, mid, _, _]) = scene();
     let me = h.main.meshes.find("Box").unwrap();
     h.edit_obj(mid, |o| {
-        let mut pinned = modifier("Pinned", ModifierType::Triangulate);
+        let mut pinned = modifier("Pinned", ModifierType::Remesh);
         pinned.use_pin_to_last = true;
         let mut hidden = modifier("Hidden", ModifierType::Bevel);
         hidden.show_viewport = false;
@@ -178,7 +178,7 @@ fn modifiers_pass_through_with_a_warning_until_m4() {
         [
             "Modifier 'Subdivision' (SUBSURF) is not evaluated by frap; passed through",
             "Modifier 'NoRender' (MIRROR) is not evaluated by frap; passed through",
-            "Modifier 'Pinned' (TRIANGULATE) is not evaluated by frap; passed through",
+            "Modifier 'Pinned' (REMESH) is not evaluated by frap; passed through",
         ]
     );
     assert!(e.warnings.iter().all(|r| r.level == ReportType::Warning));

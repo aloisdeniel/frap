@@ -247,8 +247,8 @@ pub(crate) fn laplacian_smooth_do(s: &LaplacianSmoothSettings, mesh: &Mesh, cos:
         frap_math::budget::check();
         if iter == 0 {
             for p in cos.iter() {
-                for k in 0..3 {
-                    sys.vert_centroid[k] += p[k];
+                for (c, v) in sys.vert_centroid.iter_mut().zip(p) {
+                    *c += v;
                 }
             }
             let f = 1.0 / n as f32;

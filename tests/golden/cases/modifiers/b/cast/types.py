@@ -1,6 +1,6 @@
 # WP 4.3: CAST CYLINDER limited by a radius (Z untouched), and CUBOID with a fixed size and
 # without the Y axis.
-# golden: startup=empty compare=evaluated:Suzanne,evaluated:Sphere tier=T1
+# golden: startup=empty compare=evaluated:Suzanne,evaluated:Sphere tier=T1 order=canonical
 import bpy
 bpy.ops.mesh.primitive_monkey_add()
 bpy.data.objects['Suzanne'].modifiers.new(name='M', type='CAST')

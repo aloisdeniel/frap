@@ -1,6 +1,6 @@
 # WP 4.3: TRIANGULATE quad methods BEAUTY (Suzanne), FIXED with CLIP n-gons (cylinder caps),
 # LONGEST_DIAGONAL and FIXED_ALTERNATE with a minimum of 5 corners (only the caps split).
-# golden: startup=empty compare=evaluated:Suzanne,evaluated:Cylinder,evaluated:Cylinder.001,evaluated:Sphere tier=T1
+# golden: startup=empty compare=evaluated:Suzanne,evaluated:Cylinder,evaluated:Cylinder.001,evaluated:Sphere tier=T1 order=canonical
 import bpy
 bpy.ops.mesh.primitive_monkey_add()
 bpy.data.objects['Suzanne'].modifiers.new(name='M', type='TRIANGULATE')

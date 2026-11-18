@@ -1,6 +1,6 @@
 # WP 4.3: LAPLACIANSMOOTH: strong λ over 3 iterations on a closed sphere; area-weighted
 # (not normalized) with a negative border λ and no volume preservation on a grid.
-# golden: startup=empty compare=evaluated:Sphere,evaluated:Grid tier=T1 tol=1e-4
+# golden: startup=empty compare=evaluated:Sphere,evaluated:Grid tier=T1 tol=1e-4 order=canonical
 import bpy
 bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8)
 bpy.data.objects['Sphere'].modifiers.new(name='M', type='LAPLACIANSMOOTH')

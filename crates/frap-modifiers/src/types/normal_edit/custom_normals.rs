@@ -434,9 +434,7 @@ pub(crate) fn normals_corner_custom_set(
     let mut done = vec![false; ncorners];
     let mut corner_to_face = vec![0usize; ncorners];
     for f in 0..m.face_offsets.len().saturating_sub(1) {
-        for c in m.face_offsets[f] as usize..m.face_offsets[f + 1] as usize {
-            corner_to_face[c] = f;
-        }
+        corner_to_face[m.face_offsets[f] as usize..m.face_offsets[f + 1] as usize].fill(f);
     }
     let (corner_normals, mut spaces) =
         calc_corners_with_spaces(m, Some(sharp_edges), Some(clnors));

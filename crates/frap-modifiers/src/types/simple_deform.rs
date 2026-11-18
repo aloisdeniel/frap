@@ -22,7 +22,7 @@ use crate::prelude::*;
 
 const BEND_EPS: f32 = 0.000001;
 /// `DEG2RADF(45.0f)`: the DNA default of `factor` (= `angle`).
-const DEFAULT_FACTOR: f32 = 0.785_398_2;
+const DEFAULT_FACTOR: f32 = std::f32::consts::FRAC_PI_4;
 
 fn deps(s: &ModifierSettings) -> SmallVec<[IdAny; 2]> {
     let mut v = SmallVec::new();

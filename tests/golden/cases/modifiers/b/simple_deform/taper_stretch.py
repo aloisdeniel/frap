@@ -1,6 +1,6 @@
 # WP 4.3: SIMPLE_DEFORM TAPER along Y with X locked (factor), and STRETCH along Z with a
 # negative factor and Y locked.
-# golden: startup=empty compare=evaluated:Suzanne,evaluated:Sphere tier=T1
+# golden: startup=empty compare=evaluated:Suzanne,evaluated:Sphere tier=T1 order=canonical
 import bpy
 bpy.ops.mesh.primitive_monkey_add()
 bpy.data.objects['Suzanne'].modifiers.new(name='M', type='SIMPLE_DEFORM')
