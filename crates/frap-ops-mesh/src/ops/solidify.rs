@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.solidify(thickness=0.01)`, tier T1 (`tests/golden/cases/edit/misc/
-//! solidify_*.py`). Port of `edbm_solidify_exec` (`editors/mesh/editmesh_tools.cc`, Blender
+//! `bpy.ops.mesh.solidify(thickness=0.01)`, tier T2 (`tests/golden/cases/edit/misc/
+//! solidify.py`). Port of `edbm_solidify_exec` (`editors/mesh/editmesh_tools.cc`, Blender
 //! 5.2.4, GPL-2.0-or-later). Edit-mode solidify, not the SOLIDIFY modifier.
 //!
 //! For every mesh in Edit Mode with a selected face: the selected faces are deselected
@@ -17,7 +17,7 @@ use frap_spec_ops_mesh::mesh;
 
 use super::split::edbm;
 
-#[operator(poll = poll::EDITMESH, tier = T1)]
+#[operator(poll = poll::EDITMESH, tier = T2)]
 fn exec(cx: &mut OpCtx, p: mesh::Solidify) -> OpResult {
     for (_, me) in helpers::iter_edit_meshes(cx) {
         let (_, _, f) = edbm::read(cx, me, edbm::sel_counts).unwrap_or_default();

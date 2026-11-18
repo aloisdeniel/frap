@@ -609,7 +609,12 @@ fn run(
     }
 }
 
-#[operator(poll = poll::SCENE_EDITABLE, tier = T1)]
+#[operator(
+    poll = poll::SCENE_EDITABLE,
+    tier = T1,
+    support = Partial("shape keys are not carried into the new meshes (M6)"),
+    notes = ["the new objects are copies of the edit object (mesh copied, materials shared), selected but not in Edit Mode; the edit object stays active"]
+)]
 fn exec(cx: &mut OpCtx, p: mesh::Separate) -> OpResult {
     let ty = p.r#type.value;
     let mut changed_multi = false;

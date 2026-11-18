@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.duplicate(mode=1)`, tier T1 (`tests/golden/cases/edit/misc/duplicate_*.py`).
+//! `bpy.ops.mesh.duplicate(mode=1)`, tier T1 (`tests/golden/cases/edit/misc/duplicate_face.py`).
 //! Port of `edbm_duplicate_exec` (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4,
 //! GPL-2.0-or-later).
 //!

@@ -1,6 +1,6 @@
 # WP 2.10: mesh.duplicate_move (needs the edit-mode translate of WP 2.12): the copy of the top
-# face is appended, selected and moved up by 1; the originals stay and are deselected; the
-# short form flattens the macro arguments.
+# face is appended, selected and moved up by 1; the originals stay and are deselected; then
+# two edges are duplicated and moved without the MESH_OT_duplicate argument.
 # golden: startup=factory compare=objects,context,mesh:Cube tier=T1
 import bpy
 bpy.ops.object.mode_set(mode='EDIT')

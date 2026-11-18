@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.wireframe(use_boundary=True, use_even_offset=True, use_relative_offset=False,
 //! use_replace=True, thickness=0.01, offset=0.01, use_crease=False, crease_weight=0.01)`,
-//! tier T1 (`tests/golden/cases/edit/misc/wireframe_*.py`). Port of `edbm_wireframe_exec`
+//! tier T1 (`tests/golden/cases/edit/misc/wireframe.py`). Port of `edbm_wireframe_exec`
 //! (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4, GPL-2.0-or-later).
 //!
 //! For every mesh in Edit Mode with a selected face: `bmesh.ops.wireframe` of the selected

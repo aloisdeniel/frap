@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.spin(steps=12, dupli=False, angle=90°, use_auto_merge=True,
-//! use_normal_flip=False, center=(0, 0, 0), axis=(0, 0, 0))`, tier T1
-//! (`tests/golden/cases/edit/misc/spin_*.py`). Port of `edbm_spin_exec`
+//! use_normal_flip=False, center=(0, 0, 0), axis=(0, 0, 0))`, tier T2
+//! (`tests/golden/cases/edit/misc/spin*.py`). Port of `edbm_spin_exec`
 //! (`editors/mesh/editmesh_extrude_spin.cc`, Blender 5.2.4, GPL-2.0-or-later).
 //!
 //! **`axis` is required**: Blender's invoke fills it from the view, `exec` does not, so a zero
@@ -22,7 +22,14 @@ use frap_spec_ops_mesh::mesh;
 
 use super::split::edbm;
 
-#[operator(poll = poll::EDITMESH, tier = T1, notes = ["axis is required (no view to take it from), as in blender -b"])]
+#[operator(
+    poll = poll::EDITMESH,
+    tier = T2,
+    notes = [
+        "axis is required (no view to take it from), as in blender -b",
+        "the side faces of each step are created in iteration order, one of the orders Blender produces (its order changes from run to run)"
+    ]
+)]
 fn exec(cx: &mut OpCtx, p: mesh::Spin) -> OpResult {
     let cent = p.center.value;
     let axis = p.axis.value;

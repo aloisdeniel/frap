@@ -110,9 +110,9 @@ source: crates/frap-schema/tests/describe_ops.rs
   ],
   "frap": {
     "status": "implemented",
-    "tier": "T1",
-    "support": "full",
-    "support_note": null,
+    "tier": "T2",
+    "support": "partial",
+    "support_note": "tool_settings.use_mesh_automerge is not applied afterwards",
     "headless": "native",
     "planned": "M2",
     "extension": false,

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.poke(offset=0, use_relative_offset=False, center_mode='MEDIAN_WEIGHTED')`,
-//! tier T1 (`tests/golden/cases/edit/misc/poke_*.py`). Port of `edbm_poke_face_exec`
+//! tier T1 (`tests/golden/cases/edit/misc/poke.py`). Port of `edbm_poke_face_exec`
 //! (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4, GPL-2.0-or-later).
 //!
 //! For every mesh in Edit Mode with a selected face (multi-object edit): `bmesh.ops.poke` of

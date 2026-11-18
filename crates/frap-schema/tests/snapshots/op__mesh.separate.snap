@@ -68,11 +68,13 @@ source: crates/frap-schema/tests/describe_ops.rs
   "frap": {
     "status": "implemented",
     "tier": "T1",
-    "support": "full",
-    "support_note": null,
+    "support": "partial",
+    "support_note": "shape keys are not carried into the new meshes (M6)",
     "headless": "native",
     "planned": "M2",
     "extension": false,
-    "notes": []
+    "notes": [
+      "the new objects are copies of the edit object (mesh copied, materials shared), selected but not in Edit Mode; the edit object stays active"
+    ]
   }
 }

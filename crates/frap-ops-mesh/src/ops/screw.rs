@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.screw(steps=9, turns=1, center=(0, 0, 0), axis=(0, 0, 0))`, tier T1
-//! (`tests/golden/cases/edit/misc/screw_*.py`). Port of `edbm_screw_exec`
+//! `bpy.ops.mesh.screw(steps=9, turns=1, center=(0, 0, 0), axis=(0, 0, 0))`, tier T2
+//! (`tests/golden/cases/edit/misc/screw.py`). Port of `edbm_screw_exec`
 //! (`editors/mesh/editmesh_extrude_screw.cc`, Blender 5.2.4, GPL-2.0-or-later).
 //!
 //! For every mesh in Edit Mode with at least two selected vertices: the selection must be an
@@ -23,7 +23,7 @@ use frap_spec_ops_mesh::mesh;
 
 use super::split::edbm;
 
-#[operator(poll = poll::EDITMESH, tier = T1)]
+#[operator(poll = poll::EDITMESH, tier = T2)]
 fn exec(cx: &mut OpCtx, p: mesh::Screw) -> OpResult {
     let turns = p.turns.value;
     let steps = p.steps.value;

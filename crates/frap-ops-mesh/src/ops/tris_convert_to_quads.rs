@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.tris_convert_to_quads(face_threshold=40°, shape_threshold=40°,
 //! topology_influence=0, uvs=False, vcols=False, seam=False, sharp=False, materials=False,
-//! deselect_joined=False)`, tier T2 (`tests/golden/cases/edit/misc/tris_convert_to_quads_*.py`).
+//! deselect_joined=False)`, tier T2 (`tests/golden/cases/edit/misc/tris_convert_to_quads.py`).
 //! Port of `edbm_tris_convert_to_quads_exec` (`editors/mesh/editmesh_tools.cc`, Blender
 //! 5.2.4, GPL-2.0-or-later).
 //!

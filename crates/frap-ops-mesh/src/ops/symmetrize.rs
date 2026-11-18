@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.symmetrize(direction='NEGATIVE_X', threshold=1e-4)`, tier T1
-//! (`tests/golden/cases/edit/misc/symmetrize_*.py`). Port of `mesh_symmetrize_exec`
+//! `bpy.ops.mesh.symmetrize(direction='NEGATIVE_X', threshold=1e-4)`, tier T2
+//! (`tests/golden/cases/edit/misc/symmetrize.py`). Port of `mesh_symmetrize_exec`
 //! (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4, GPL-2.0-or-later).
 //!
 //! For every mesh in Edit Mode with a selected vertex: `bmesh.ops.symmetrize` of the
@@ -21,7 +21,11 @@ use frap_spec_ops_mesh::mesh::{self, symmetrize::Direction};
 
 use super::split::edbm;
 
-#[operator(poll = poll::EDITMESH, tier = T1)]
+#[operator(
+    poll = poll::EDITMESH,
+    tier = T2,
+    support = Partial("tool_settings.use_mesh_automerge is not applied afterwards")
+)]
 fn exec(cx: &mut OpCtx, p: mesh::Symmetrize) -> OpResult {
     let direction = match p.direction.value {
         Direction::NegativeX => "-X",

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.vertices_smooth(factor=0.0, repeat=1, xaxis=True, yaxis=True, zaxis=True)`,
-//! tier T1 (`tests/golden/cases/edit/misc/vertices_smooth_*.py`). Port of
+//! tier T1 (`tests/golden/cases/edit/misc/vertices_smooth.py`). Port of
 //! `edbm_do_smooth_vertex_exec` (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4,
 //! GPL-2.0-or-later).
 //!
