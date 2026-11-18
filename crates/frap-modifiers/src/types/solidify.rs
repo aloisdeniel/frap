@@ -25,10 +25,10 @@ fn eval(md: &Modifier, mesh: Mesh, _cx: &mut dyn ModEvalCx) -> Result<Mesh, ModE
     };
     // `ctx->object->totcol`: the object's material slots, the mesh's material count.
     let totcol = mesh.materials.len();
-    Ok(match s.solidify_mode.as_str() {
+    match s.solidify_mode.as_str() {
         "NON_MANIFOLD" => nonmanifold::solidify_nonmanifold(s, &mesh, totcol),
-        _ => extrude::solidify_extrude(s, &mesh, totcol),
-    })
+        _ => Ok(extrude::solidify_extrude(s, &mesh, totcol)),
+    }
 }
 
 /// Shared helpers of the two modes (`BLI_math` ports).
