@@ -1,0 +1,27 @@
+# WP 2.4: mesh.select_linked on a mesh with two islands (a cube merged into the edit mesh),
+# in vertex, edge and face mode, with the default delimit (none in vertex mode, SEAM in face
+# mode) and explicit delimiters (SEAM on marked edges, NORMAL, MATERIAL, SHARP, none).
+# golden: startup=factory compare=objects,context,mesh:Cube tier=T1
+import bpy
+bpy.data.meshes['Cube'].edges[0].use_seam = True
+bpy.data.meshes['Cube'].edges[3].use_seam = True
+bpy.data.meshes['Cube'].edges[5].use_seam = True
+bpy.data.meshes['Cube'].edges[10].use_seam = True
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.primitive_cube_add(size=1, location=(3, 0, 0))
+bpy.ops.frap.select_elements(type='VERT', indices=[0])
+bpy.ops.mesh.select_linked()
+bpy.ops.frap.select_elements(type='VERT', indices=[9])
+bpy.ops.mesh.select_linked(delimit={'SEAM'})
+bpy.ops.frap.select_elements(type='VERT', indices=[1])
+bpy.ops.mesh.select_linked(delimit={'SEAM'})
+bpy.ops.mesh.select_mode(type='EDGE')
+bpy.ops.frap.select_elements(type='EDGE', indices=[1])
+bpy.ops.mesh.select_linked(delimit={'SEAM', 'NORMAL'})
+bpy.ops.mesh.select_mode(type='FACE')
+bpy.ops.frap.select_elements(type='FACE', indices=[0])
+bpy.ops.mesh.select_linked()
+bpy.ops.frap.select_elements(type='FACE', indices=[2])
+bpy.ops.mesh.select_linked(delimit=set())
+bpy.ops.frap.select_elements(type='FACE', indices=[7])
+bpy.ops.mesh.select_linked(delimit={'MATERIAL', 'SHARP'})

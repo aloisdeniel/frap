@@ -1,0 +1,261 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.edgering_select",
+  "bl_idname": "MESH_OT_edgering_select",
+  "label": "Edge Ring Select",
+  "description": "Select an edge ring",
+  "bl_options": [
+    "DEPENDS_ON_CURSOR",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "delimit_edge_ring",
+      "name": "Edge Ring Delimit",
+      "description": "Delimit edge ring selection",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": [
+        "NGONS"
+      ],
+      "enum_items": [
+        {
+          "identifier": "SEAM",
+          "name": "Seam",
+          "description": "Delimit edge ring selection at seams",
+          "value": 16
+        },
+        {
+          "identifier": "SHARP",
+          "name": "Sharp",
+          "description": "Delimit edge ring selection at sharp edges",
+          "value": 32
+        },
+        {
+          "identifier": "MATERIAL",
+          "name": "Material",
+          "description": "Delimit edge ring selection at material boundaries",
+          "value": 64
+        },
+        {
+          "identifier": "NGONS",
+          "name": "N-gons",
+          "description": "Allow edge ring selection to step over n-gons with an even number of sides",
+          "value": 8
+        }
+      ],
+      "is_enum_flag": true,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ENUM_FLAG",
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "extend",
+      "name": "Extend Select",
+      "description": "Extend the selection",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "deselect",
+      "name": "Deselect",
+      "description": "Remove from the selection",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "toggle",
+      "name": "Toggle Select",
+      "description": "Toggle the selection",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "object_index",
+      "name": "",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": -1,
+      "hard_min": -1,
+      "hard_max": 2147483647,
+      "soft_min": 0,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "edge_index",
+      "name": "",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": -1,
+      "hard_min": -1,
+      "hard_max": 2147483647,
+      "soft_min": 0,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "vert_index",
+      "name": "",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": -1,
+      "hard_min": -1,
+      "hard_max": 2147483647,
+      "soft_min": 0,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "face_index",
+      "name": "",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": -1,
+      "hard_min": -1,
+      "hard_max": 2147483647,
+      "soft_min": 0,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M2",
+    "extension": false,
+    "notes": [
+      "select by index like Blender's redo path: object_index (objects in Edit Mode, active first) and edge_index (mesh.edges order) are required; without them the operator is CANCELLED"
+    ]
+  }
+}

@@ -70,6 +70,88 @@ def select_elements(type="VERT", indices=(), action="SET", object=""):
     return {"FINISHED"}
 
 
+def select_by_normal(direction=(0.0, 0.0, 1.0), threshold=0.5235987901687622,
+                     orientation="GLOBAL", extend=False):
+    """`frap.select_by_normal` (WP 2.4): select the visible faces facing `direction`.
+
+    Mirrors crates/frap-ops-frap/src/ops/select_by_normal.rs step by step: the direction is
+    normalised (zero or non-finite raises ValueError); every mesh in Edit Mode (each mesh once) is deselected
+    unless `extend`; a visible face is selected when its normal (GLOBAL: world space through
+    the inverse transpose of the 3x3 world matrix, a singular matrix matches nothing; LOCAL:
+    the local normal) has `dot(n, direction) >= cos(threshold)`; then the selection is
+    flushed. Components are clamped to +-FLT_MAX like the property; a NaN component raises
+    ValueError too; the length is computed in double precision from the single-precision
+    components."""
+    import ctypes
+    import math
+
+    import bmesh
+    from mathutils import Vector
+
+    if orientation not in ("GLOBAL", "LOCAL"):
+        raise TypeError(
+            "Converting py args to operator properties: enum \"%s\" not found in ('GLOBAL', 'LOCAL')"
+            % orientation
+        )
+    ob = bpy.context.edit_object
+    if ob is None or ob.type != "MESH":
+        raise RuntimeError("Operator bpy.ops.frap.select_by_normal.poll() failed, context is incorrect")
+    # The FLOAT property clamps to its hard range (+-FLT_MAX) and stores single precision;
+    # normalise in double like frap.
+    flt_max = 3.4028234663852886e38
+    comps = [ctypes.c_float(c if math.isnan(c) else min(max(c, -flt_max), flt_max)).value
+             for c in map(float, direction)]
+    if not all(math.isfinite(c) for c in comps):
+        raise ValueError("frap.select_by_normal: direction must be finite")
+    length = math.sqrt(sum(c * c for c in comps))
+    if length == 0.0:
+        raise ValueError("frap.select_by_normal: direction must not be a zero vector")
+    d = Vector([c / length for c in comps])
+    limit = math.cos(threshold)
+    seen = set()
+    for o in bpy.context.objects_in_mode_unique_data:
+        if o.type != "MESH" or o.data.name in seen:
+            continue
+        seen.add(o.data.name)
+        bm = bmesh.from_edit_mesh(o.data)
+        if not extend:
+            for elems in (bm.verts, bm.edges, bm.faces):
+                for e in elems:
+                    e.select = False
+            bm.select_history.clear()
+        if orientation == "LOCAL":
+            m = None
+            usable = True
+        else:
+            m3 = o.matrix_world.to_3x3()
+            usable = m3.determinant() != 0.0
+            m = m3.inverted().transposed() if usable else None
+        if usable:
+            for f in bm.faces:
+                if f.hide:
+                    continue
+                n = f.normal.copy() if m is None else m @ f.normal
+                if n.length == 0.0:
+                    continue
+                n.normalize()
+                if n.dot(d) >= limit:
+                    f.select_set(True)
+        bm.select_flush_mode()
+        bmesh.update_edit_mesh(o.data)
+    return {"FINISHED"}
+
+
+def scene_summary(objects="ALL", evaluated=True):
+    """`frap.scene_summary` (WP 2.4) only answers in `result` and changes nothing: a no-op that
+    succeeds (the enum is checked like the operator's)."""
+    if objects not in ("ALL", "VISIBLE", "SELECTED"):
+        raise TypeError(
+            "Converting py args to operator properties: enum \"%s\" not found in "
+            "('ALL', 'VISIBLE', 'SELECTED')" % objects
+        )
+    return {"FINISHED"}
+
+
 def render_contact_sheet(**_kwargs):
     """`frap.render_contact_sheet` has no Blender equivalent: a no-op that succeeds."""
     return {"FINISHED"}
@@ -78,6 +160,8 @@ def render_contact_sheet(**_kwargs):
 # frap operator name (in `bpy.ops.frap.*`) -> emulation.
 EMULATED = {
     "select_elements": select_elements,
+    "select_by_normal": select_by_normal,
+    "scene_summary": scene_summary,
     "render_contact_sheet": render_contact_sheet,
 }
 
