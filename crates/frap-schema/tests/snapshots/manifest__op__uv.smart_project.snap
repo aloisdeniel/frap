@@ -1,0 +1,231 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "idname": "uv.smart_project",
+  "bl_idname": "UV_OT_smart_project",
+  "label": "Smart UV Project",
+  "description": "Projection unwraps the selected faces of mesh objects",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": null,
+    "text": "Blender 5.2's poll passes in: C (Edit Mode on a mesh)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "angle_limit",
+      "name": "Angle Limit",
+      "description": "Lower for more projection groups, higher for less distortion",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": 1.1519173,
+      "hard_min": 0,
+      "hard_max": 1.5707964,
+      "soft_min": 0,
+      "soft_max": 1.553343,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": "radians; a whole number above 2π gets the ANGLE_LIKELY_DEGREES hint (use radians(90))",
+      "frap_extension": false
+    },
+    {
+      "identifier": "margin_method",
+      "name": "Margin Method",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SCALED",
+      "enum_items": [
+        {
+          "identifier": "SCALED",
+          "name": "Scaled",
+          "description": "Use scale of existing UVs to multiply margin",
+          "value": 0
+        },
+        {
+          "identifier": "ADD",
+          "name": "Add",
+          "description": "Just add the margin, ignoring any UV scale",
+          "value": 1
+        },
+        {
+          "identifier": "FRACTION",
+          "name": "Fraction",
+          "description": "Specify a precise fraction of final UV output",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "rotate_method",
+      "name": "Rotation Method",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "AXIS_ALIGNED_Y",
+      "enum_items": [
+        {
+          "identifier": "AXIS_ALIGNED",
+          "name": "Axis-aligned",
+          "description": "Rotated to a minimal rectangle, either vertical or horizontal",
+          "value": 1
+        },
+        {
+          "identifier": "AXIS_ALIGNED_X",
+          "name": "Axis-aligned (Horizontal)",
+          "description": "Rotate islands to be aligned horizontally",
+          "value": 2
+        },
+        {
+          "identifier": "AXIS_ALIGNED_Y",
+          "name": "Axis-aligned (Vertical)",
+          "description": "Rotate islands to be aligned vertically",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "island_margin",
+      "name": "Island Margin",
+      "description": "Margin to reduce bleed from adjacent islands",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": 0,
+      "hard_max": 1,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "area_weight",
+      "name": "Area Weight",
+      "description": "Weight projection's vector by faces with larger areas",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": 0,
+      "hard_max": 1,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "correct_aspect",
+      "name": "Correct Aspect",
+      "description": "Map UVs taking aspect ratio of the image associated with the material into account",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "scale_to_bounds",
+      "name": "Scale to Bounds",
+      "description": "Scale UV coordinates to bounds after unwrapping",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "not_implemented",
+    "tier": null,
+    "support": null,
+    "support_note": null,
+    "headless": null,
+    "planned": "M3",
+    "extension": false,
+    "notes": [
+      "uv.smart_project exists in Blender 5.2; frap implements it in M3 (OP_NOT_IMPLEMENTED until then)"
+    ]
+  }
+}

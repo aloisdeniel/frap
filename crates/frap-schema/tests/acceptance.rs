@@ -125,15 +125,16 @@ fn angles_are_shown_as_rotation_radians() {
 fn unimplemented_operators_are_listed_as_not_implemented() {
     link();
     let opts = DescribeOptions::default();
-    let bevel = describe(&Target::Op("mesh.bevel".into()), &opts).unwrap();
-    assert_eq!(bevel["frap"]["status"], "not_implemented");
-    assert_eq!(bevel["frap"]["planned"], "M2");
+    // mesh.bevel was the example until WP 2.11 implemented it.
+    let unwrap = describe(&Target::Op("uv.smart_project".into()), &opts).unwrap();
+    assert_eq!(unwrap["frap"]["status"], "not_implemented");
+    assert_eq!(unwrap["frap"]["planned"], "M3");
     assert!(
-        bevel["properties"]
+        unwrap["properties"]
             .as_array()
             .unwrap()
             .iter()
-            .any(|p| p["identifier"] == "offset")
+            .any(|p| p["identifier"] == "island_margin")
     );
     let cube = describe(&Target::Op("mesh.primitive_cube_add".into()), &opts).unwrap();
     assert_eq!(cube["frap"]["status"], "implemented");

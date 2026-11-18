@@ -1,5 +1,5 @@
 ---
-source: crates/frap-schema/tests/snapshots.rs
+source: crates/frap-schema/tests/describe_ops.rs
 ---
 {
   "idname": "mesh.bevel",
@@ -15,8 +15,10 @@ source: crates/frap-schema/tests/snapshots.rs
   "kind": "NORMAL",
   "macro_steps": [],
   "poll": {
-    "requires": null,
-    "text": "Blender 5.2's poll passes in: C (Edit Mode on a mesh)",
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
     "matrix": {
       "plain": "NNYNN",
       "view3d": "NNYNN"
@@ -572,15 +574,18 @@ source: crates/frap-schema/tests/snapshots.rs
     }
   ],
   "frap": {
-    "status": "not_implemented",
-    "tier": null,
-    "support": null,
-    "support_note": null,
-    "headless": null,
+    "status": "implemented",
+    "tier": "T2",
+    "support": "partial",
+    "support_note": "profile_type='CUSTOM' answers OP_NOT_IMPLEMENTED; harden_normals and Auto Merge are not applied (WARNING)",
+    "headless": "native",
     "planned": "M2",
     "extension": false,
     "notes": [
-      "mesh.bevel exists in Blender 5.2; frap implements it in M2 (OP_NOT_IMPLEMENTED until then)"
+      "offset defaults to 0, which bevels nothing: pass offset (or offset_pct with offset_type='PERCENT'); frap answers the hint NO_OP_DEFAULT",
+      "segments=1 matches Blender at T1; more segments match within 1e-5 in Blender's element order (T2)",
+      "selection after: the new bevel faces (vertex bevel: also the new vertices and edges); the selection history is cleared",
+      "nothing selected cancels (Blender is silent; frap adds a WARNING)"
     ]
   }
 }

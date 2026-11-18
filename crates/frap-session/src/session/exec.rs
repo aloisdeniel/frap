@@ -1007,7 +1007,12 @@ impl Session {
         let mut r = self.base("op", line, status);
         r.op = op;
         r.reports = reports;
-        r.hints = hints.iter().map(frap_op::pipeline::Hint::to_json).collect();
+        // Conversion hints, then the operator's own (`OpCtx::hint`).
+        r.hints = hints
+            .iter()
+            .chain(&out.hints)
+            .map(frap_op::pipeline::Hint::to_json)
+            .collect();
         if status == Status::Finished {
             let names = &self.host.state.main;
             let mut res = Map::new();
