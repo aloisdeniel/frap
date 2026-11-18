@@ -5,12 +5,8 @@
   },
   "lines": [
     {
-      "line": 8,
-      "ok": true
-    },
-    {
       "line": 9,
-      "ok": false
+      "ok": true
     },
     {
       "line": 10,
@@ -18,17 +14,17 @@
     },
     {
       "line": 11,
-      "ok": true
+      "ok": false
     },
     {
       "line": 12,
-      "ok": false,
-      "exception": "RuntimeError",
-      "message": "Error: Modifier is disabled, skipping apply\n"
+      "ok": true
     },
     {
       "line": 13,
-      "ok": true
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Modifier is disabled, skipping apply\n"
     },
     {
       "line": 14,
@@ -36,13 +32,13 @@
     },
     {
       "line": 15,
-      "ok": false,
-      "exception": "RuntimeError",
-      "message": "Error: Modifiers cannot be applied to multi-user data\n"
+      "ok": true
     },
     {
       "line": 16,
-      "ok": true
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Modifiers cannot be applied to multi-user data\n"
     },
     {
       "line": 17,
@@ -50,13 +46,13 @@
     },
     {
       "line": 18,
-      "ok": false,
-      "exception": "KeyError",
-      "message": "bpy_prop_collection[key]: key \"Smooth by Angle\" not found"
+      "ok": true
     },
     {
       "line": 19,
-      "ok": true
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Smooth by Angle\" not found"
     },
     {
       "line": 20,
@@ -84,13 +80,13 @@
     },
     {
       "line": 26,
-      "ok": false,
-      "exception": "RuntimeError",
-      "message": "Operator bpy.ops.object.modifier_apply.poll() This modifier operation is not allowed from Edit mode"
+      "ok": true
     },
     {
       "line": 27,
-      "ok": true
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.object.modifier_apply.poll() This modifier operation is not allowed from Edit mode"
     },
     {
       "line": 28,
@@ -102,13 +98,13 @@
     },
     {
       "line": 30,
-      "ok": false,
-      "exception": "RuntimeError",
-      "message": "Error: Modifier is disabled, skipping apply\n"
+      "ok": true
     },
     {
       "line": 31,
-      "ok": true
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Modifier is disabled, skipping apply\n"
     },
     {
       "line": 32,
@@ -120,9 +116,37 @@
     },
     {
       "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
       "ok": false,
       "exception": "RuntimeError",
       "message": "Operator bpy.ops.object.modifier_apply.poll() Modifiers cannot be applied on empty object type"
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
     }
   ],
   "objects": {
@@ -138,6 +162,23 @@
       "location": [7.3588915, -6.925791, 4.958309],
       "rotation_mode": "XYZ",
       "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cone": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 3.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 3.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
       "scale": [1.0, 1.0, 1.0],
       "modifiers": [],
       "materials": [],
@@ -232,6 +273,128 @@
     }
   },
   "meshes": {
+    "Cone": {
+      "positions": [
+        [0.0, 1.0, -1.0],
+        [0.70710677, 0.70710677, -1.0],
+        [1.0, 0.0, -1.0],
+        [0.70710677, -0.70710677, -1.0],
+        [0.0, -1.0, -1.0],
+        [-0.70710677, -0.70710677, -1.0],
+        [-1.0, 0.0, -1.0],
+        [-0.70710677, 0.70710677, -1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "edges": [
+        [0, 1],
+        [0, 8],
+        [8, 1],
+        [1, 2],
+        [8, 2],
+        [2, 3],
+        [8, 3],
+        [3, 4],
+        [8, 4],
+        [4, 5],
+        [8, 5],
+        [5, 6],
+        [8, 6],
+        [6, 7],
+        [8, 7],
+        [7, 0]
+      ],
+      "faces": [
+        [0, 8, 1],
+        [1, 8, 2],
+        [2, 8, 3],
+        [3, 8, 4],
+        [4, 8, 5],
+        [5, 8, 6],
+        [0, 1, 2, 3, 4, 5, 6, 7],
+        [6, 8, 7],
+        [7, 8, 0]
+      ],
+      "corner_normals": [
+        [0.347408, 0.83871704, 0.41935855],
+        [0.347408, 0.83871704, 0.41935855],
+        [0.347408, 0.83871704, 0.41935855],
+        [0.83871704, 0.347408, 0.41935852],
+        [0.83871704, 0.347408, 0.41935852],
+        [0.83871704, 0.347408, 0.41935852],
+        [0.83871704, -0.347408, 0.41935852],
+        [0.83871704, -0.347408, 0.41935852],
+        [0.83871704, -0.347408, 0.41935852],
+        [0.347408, -0.83871704, 0.41935855],
+        [0.347408, -0.83871704, 0.41935855],
+        [0.347408, -0.83871704, 0.41935855],
+        [-0.347408, -0.83871704, 0.41935855],
+        [-0.347408, -0.83871704, 0.41935855],
+        [-0.347408, -0.83871704, 0.41935855],
+        [-0.83871704, -0.347408, 0.41935852],
+        [-0.83871704, -0.347408, 0.41935852],
+        [-0.83871704, -0.347408, 0.41935852],
+        [-0.00000004214685, 0.0, -0.99999994],
+        [-0.00000004214685, 0.0, -0.99999994],
+        [-0.00000004214685, 0.0, -0.99999994],
+        [-0.00000004214685, 0.0, -0.99999994],
+        [-0.00000004214685, 0.0, -0.99999994],
+        [-0.00000004214685, 0.0, -0.99999994],
+        [-0.00000004214685, 0.0, -0.99999994],
+        [-0.00000004214685, 0.0, -0.99999994],
+        [-0.83871704, 0.347408, 0.41935852],
+        [-0.83871704, 0.347408, 0.41935852],
+        [-0.83871704, 0.347408, 0.41935852],
+        [-0.347408, 0.83871704, 0.41935855],
+        [-0.347408, 0.83871704, 0.41935855],
+        [-0.347408, 0.83871704, 0.41935855]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.25, 0.49],
+          [0.25, 0.25],
+          [0.41970563, 0.41970563],
+          [0.41970563, 0.41970563],
+          [0.25, 0.25],
+          [0.49, 0.25],
+          [0.49, 0.25],
+          [0.25, 0.25],
+          [0.41970563, 0.080294386],
+          [0.41970563, 0.080294386],
+          [0.25, 0.25],
+          [0.25, 0.010000005],
+          [0.25, 0.010000005],
+          [0.25, 0.25],
+          [0.080294386, 0.080294386],
+          [0.080294386, 0.080294386],
+          [0.25, 0.25],
+          [0.010000005, 0.25],
+          [0.75, 0.49],
+          [0.9197056, 0.41970563],
+          [0.99, 0.25],
+          [0.9197056, 0.080294386],
+          [0.75, 0.010000005],
+          [0.5802944, 0.080294386],
+          [0.51, 0.25],
+          [0.5802944, 0.41970563],
+          [0.010000005, 0.25],
+          [0.25, 0.25],
+          [0.080294386, 0.41970563],
+          [0.080294386, 0.41970563],
+          [0.25, 0.25],
+          [0.25, 0.49]
+        ]
+      },
+      "attributes": {
+        "sharp_edge": {
+          "data": [true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true],
+          "data_type": "BOOLEAN",
+          "domain": "EDGE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
     "Cube": {
       "positions": [
         [1.0, 1.0, 1.0],
@@ -741,8 +904,8 @@
   "materials": {},
   "actions": {},
   "context": {
-    "active": "Empty",
-    "selected": ["Cylinder"],
+    "active": "Cone",
+    "selected": ["Cone"],
     "mode": "OBJECT",
     "select_mode": null,
     "cursor": [0.0, 0.0, 0.0]

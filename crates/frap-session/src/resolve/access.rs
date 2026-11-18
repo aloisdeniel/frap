@@ -93,6 +93,36 @@ pub fn not_bound(srna: &'static StructDef, prop: &PropDef) -> FrapError {
     )
 }
 
+thread_local! {
+    /// Evaluated objects of the reads of this thread (`with_struct` sees only `&dyn HostRead`,
+    /// not the session's evaluator). Keyed like the session cache by object and generation
+    /// fingerprint; IDs and generations are process-unique (`frap_rna::id`), so states of
+    /// several sessions (and their snapshots, which share generations with identical data)
+    /// never collide.
+    static READ_EVAL: std::cell::RefCell<frap_eval::EvalCache> =
+        std::cell::RefCell::new(frap_eval::EvalCache::new());
+}
+
+/// Bound on [`READ_EVAL`]: one entry per object read evaluated; a session that removes and
+/// adds many objects does not keep the removed ones' meshes alive for ever.
+const READ_EVAL_MAX: usize = 64;
+
+/// The evaluated object (viewport), from the cache of this thread's reads.
+fn evaluated_for_read(
+    host: &dyn HostRead,
+    ob: frap_rna::IdRef<frap_rna::ObjectId>,
+) -> Result<std::sync::Arc<frap_scene::EvaluatedObject>, FrapError> {
+    READ_EVAL
+        .with(|c| {
+            let mut c = c.borrow_mut();
+            if c.len() > READ_EVAL_MAX {
+                c.clear();
+            }
+            frap_scene::Evaluator::object(&mut *c, host, ob, frap_scene::EvalMode::Viewport)
+        })
+        .map_err(|e| stale(e.message))
+}
+
 /// Runs `f` on the struct at `ptr` (an ID, an embedded ID or a struct below one).
 pub fn with_struct<R>(
     host: &dyn HostRead,
@@ -101,9 +131,9 @@ pub fn with_struct<R>(
 ) -> Result<R, FrapError> {
     let main = host.main();
     match ptr.root {
-        // WP 4.1: `Object.to_mesh()` of an object whose evaluated mesh differs from its data
-        // (modifiers) is `objects['X'].data` (a path through an ID pointer never occurs
-        // otherwise, the resolver re-roots there): it reads the evaluated mesh, always fresh.
+        // WP 4.1: `Object.to_mesh()` and `ob.evaluated_get(dg).data` of an object with
+        // modifiers are `objects['X'].data` (a path through an ID pointer never occurs
+        // otherwise, the resolver re-roots there): they read the evaluated mesh, always fresh.
         Root::Id(id)
             if id.code == frap_rna::IdCode::OB
                 && matches!(ptr.path.first(), Some(Seg::Prop("data"))) =>
@@ -111,13 +141,7 @@ pub fn with_struct<R>(
             let ob = id
                 .typed()
                 .ok_or_else(|| stale("an object pointer of another type"))?;
-            let eo = frap_scene::Evaluator::object(
-                &mut frap_eval::EvalCache::new(),
-                host,
-                ob,
-                frap_scene::EvalMode::Viewport,
-            )
-            .map_err(|e| stale(e.message))?;
+            let eo = evaluated_for_read(host, ob)?;
             let mesh = eo
                 .mesh
                 .clone()

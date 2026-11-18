@@ -1,5 +1,5 @@
-# WP 4.1 (T1): evaluated_get(depsgraph).to_mesh() and Object.to_mesh() read the evaluated
-# mesh (modifiers applied, always fresh) while the data keeps the original; show_viewport off
+# WP 4.1 (T1): evaluated_get(depsgraph).to_mesh(), evaluated_get(depsgraph).data and
+# Object.to_mesh() read the evaluated mesh (modifiers applied, always fresh) while the data keeps the original; show_viewport off
 # skips a modifier; show_in_editmode decides in Edit Mode; a linked duplicate without
 # modifiers evaluates to the shared data.
 # golden: startup=factory compare=objects,mesh:Cube,evaluated:Cube,evaluated:Cube2,evaluated:Cylinder,evaluated:Cone tier=T1
@@ -10,6 +10,10 @@ bpy.context.scene.collection.objects.link(bpy.data.objects['Cube2'])
 bpy.data.objects['Cube'].to_mesh().attributes['sharp_edge'].data[0].value
 bpy.data.objects['Cube'].evaluated_get(bpy.context.evaluated_depsgraph_get()).to_mesh().attributes['sharp_edge'].data[0].value
 bpy.data.meshes['Cube'].attributes['sharp_edge']
+bpy.data.objects['Cube'].evaluated_get(bpy.context.evaluated_depsgraph_get()).data.attributes['sharp_edge']
+bpy.data.objects['Cube2'].location.x = bpy.data.objects['Cube'].evaluated_get(bpy.context.evaluated_depsgraph_get()).data.attributes['sharp_edge'].data[3].value
+bpy.data.objects['Cube2'].location.y = bpy.data.objects['Cube'].evaluated_get(bpy.context.evaluated_depsgraph_get()).data.is_evaluated
+bpy.data.objects['Cube'].evaluated_get(bpy.context.evaluated_depsgraph_get()).data.original.attributes['sharp_edge']
 bpy.data.objects['Cube'].to_mesh().name
 bpy.data.objects['Cube'].to_mesh_clear()
 bpy.ops.mesh.primitive_cone_add(vertices=6, location=(6, 0, 0))

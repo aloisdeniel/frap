@@ -16,10 +16,37 @@
 //! leads back, and through which the session refuses writes (deviation: Blender accepts them
 //! and changes only the copy; deviations.md).
 
-use frap_rna::{Detached, IdCode, RnaError, RnaPtr, Root, Value, rna_func};
-use frap_scene::{FuncArgs, Host};
+use frap_rna::{
+    Detached, IdAny, IdCode, ObjectId, Report, ReportType, RnaError, RnaPtr, Root, Value, rna_func,
+};
+use frap_scene::{EvalMode, FuncArgs, Host};
 
 use super::_common::{arg_ptr, detached, in_depsgraph, internal};
+
+/// WP 4.1: every evaluated read (`to_mesh()`, `.data`, …) starts here, so the warnings of a
+/// mesh object's modifier stack (a type frap does not evaluate yet, a modifier error) reach the
+/// response as WARNING reports.
+fn report_stack_warnings(h: &mut dyn Host, id: IdAny) {
+    let Some(ob) = id.typed::<ObjectId>() else {
+        return;
+    };
+    if h
+        .main()
+        .objects
+        .get(ob)
+        .is_none_or(|o| o.modifiers.is_empty())
+    {
+        return;
+    }
+    let (host, ev) = h.eval();
+    let warnings = match ev.object(host, ob, EvalMode::Viewport) {
+        Ok(eo) => eo.warnings.clone(),
+        Err(e) => vec![Report::new(ReportType::Warning, e.message)],
+    };
+    for w in warnings {
+        h.report(w);
+    }
+}
 
 #[rna_func(srna = "ID", func = "evaluated_get")]
 fn i_d_evaluated_get(
@@ -46,6 +73,7 @@ fn i_d_evaluated_get(
         ..this.clone()
     };
     if this.detached == Some(Detached::Evaluated) || in_depsgraph(h.main(), scene, id) {
+        report_stack_warnings(h, id);
         Ok(Value::Ptr(Box::new(detached(
             original,
             Detached::Evaluated,

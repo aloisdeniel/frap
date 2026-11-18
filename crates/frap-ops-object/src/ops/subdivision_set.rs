@@ -10,7 +10,10 @@
 //! `Modifiers cannot be added to object: Camera` and the operator still finishes; no selected
 //! editable object is `CANCELLED` with `No selected editable objects to operate on`;
 //! `relative` with `level=0` is `CANCELLED`; `ensure_modifier=False` without any SUBSURF is
-//! `CANCELLED` with `No Subdivision Surface modifiers found`.
+//! `CANCELLED` with `No Subdivision Surface modifiers found`, where only objects in Object Mode
+//! count (in Edit Mode it is `CANCELLED` even with a SUBSURF modifier; with
+//! `ensure_modifier=True` the levels are set in any mode). frap has no Sculpt or paint modes,
+//! where Blender acts on the active object only.
 //!
 //! Multires (sculpt mode, `object.multires_subdivide`) is not implemented: a MULTIRES modifier
 //! found first raises `OP_NOT_IMPLEMENTED`.
@@ -18,6 +21,7 @@
 use frap_modifiers::{ModifierType, stack::edit};
 use frap_op::operator;
 use frap_op::prelude::*;
+use frap_scene::ObjectMode;
 use frap_scene::id::ModifierSettings;
 use frap_spec_ops_object::object;
 
@@ -53,12 +57,15 @@ fn exec(cx: &mut OpCtx, p: object::SubdivisionSet) -> OpResult {
             })
         })
     };
+    // `any_object_has_relevant_modifier`: SUBSURF counts for an object in Object Mode only
+    // (MULTIRES in Sculpt Mode, which frap does not have); an object in Edit Mode has none.
     if !p.ensure_modifier.value
         && !objects.iter().any(|&ob| {
             cx.main().objects.get(ob).is_some_and(|o| {
-                o.modifiers
-                    .iter()
-                    .any(|m| m.settings.type_identifier() == "SUBSURF")
+                o.mode == ObjectMode::Object
+                    && o.modifiers
+                        .iter()
+                        .any(|m| m.settings.type_identifier() == "SUBSURF")
             })
         })
     {

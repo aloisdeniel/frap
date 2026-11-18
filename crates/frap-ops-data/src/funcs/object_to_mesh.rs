@@ -15,7 +15,9 @@
 //! object's mesh datablock behind a [`Detached::Temporary`] pointer (reads see the mesh, or
 //! its edit mesh in Edit Mode). For an evaluated object with modifiers (WP 4.1) it returns
 //! `bpy.data.objects['X'].data` behind a [`Detached::Temporary`] pointer, which
-//! frap-session's `with_struct` reads as the object's evaluated mesh, always fresh. The
+//! frap-session's `with_struct` reads as the object's evaluated mesh, always fresh (the same
+//! pointer `ob.evaluated_get(dg).data` resolves to). The stack's warnings were reported by
+//! `evaluated_get()`, where every evaluated read starts. The
 //! session refuses writes through either pointer, which would change the original
 //! (deviation: Blender accepts them on the copy; `users` reads the original's count instead
 //! of 0, and the result survives `to_mesh_clear()`; deviations.md D-41).

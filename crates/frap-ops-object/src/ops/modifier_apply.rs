@@ -12,7 +12,8 @@
 //!   adds the INFO `Applied modifier was not first, result may not be as expected`;
 //! - data used by several objects: `RuntimeError: Error: Modifiers cannot be applied to
 //!   multi-user data` (nothing changes); `single_user=True` first gives the object its own copy
-//!   (`Cube.001`);
+//!   (`Cube.001`); users are `ID_REAL_USERS`: a fake user does not make the data multi-user
+//!   (it applies, and `single_user` makes no copy);
 //! - a disabled modifier (a NODES modifier without a group): `RuntimeError: Error: Modifier is
 //!   disabled, skipping apply`, the modifier stays;
 //! - in Edit Mode the poll fails: `This modifier operation is not allowed from Edit mode`; an
@@ -23,10 +24,15 @@
 //!   applied to a mesh with shape keys`);
 //! - `merge_customdata` merges, per vertex, UVs that a constructive modifier left within 12
 //!   ULPs of each other.
+//!
+//! A modifier frap cannot evaluate (no evaluator for its type, a node group other than Smooth
+//! by Angle, an unsupported input) answers `OP_NOT_IMPLEMENTED`. With several objects
+//! (`use_selected_objects`) a failure rolls the whole statement back (deviations.md D-85).
 
 use frap_eval::EvalCache;
 use frap_mesh::{AttrData, Domain, Mesh};
-use frap_modifiers::{ModKind, ModifierType, registry, stack::edit};
+use frap_modifiers::stack::{self, edit};
+use frap_modifiers::{ModKind, ModifierType, registry};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_op::{Poll, PollFail, PollReq};
@@ -183,6 +189,12 @@ fn single_user(main: &mut Main, log: &mut ChangeLog, ob: IdRef<ObjectId>, me: Id
     }
 }
 
+/// `ID_REAL_USERS`: the users of `me`, the fake user not counted.
+fn real_users(main: &Main, me: IdRef<MeshId>) -> u32 {
+    let fake = main.meshes.get(me).is_some_and(|m| m.header.use_fake_user);
+    main.users(me.any()).saturating_sub(u32::from(fake))
+}
+
 /// The object's mesh, when its data is a mesh.
 fn mesh_of(main: &Main, ob: IdRef<ObjectId>) -> Option<IdRef<MeshId>> {
     let d: IdAny = main.objects.get(ob)?.data?;
@@ -219,7 +231,7 @@ fn exec(cx: &mut OpCtx, p: object::ModifierApply) -> OpResult {
         // `single_user`: make the data single-user first.
         if p.single_user.value
             && let Some(me) = mesh_of(cx.main(), ob)
-            && cx.main().users(me.any()) > 1
+            && real_users(cx.main(), me) > 1
         {
             let (main, log) = cx.main_mut();
             single_user(main, log, ob, me);
@@ -234,7 +246,7 @@ fn exec(cx: &mut OpCtx, p: object::ModifierApply) -> OpResult {
             changed = true;
             continue;
         };
-        if cx.main().users(me.any()) > 1 {
+        if real_users(cx.main(), me) > 1 {
             errors.push("Modifiers cannot be applied to multi-user data".into());
             continue;
         }
@@ -273,8 +285,14 @@ fn exec(cx: &mut OpCtx, p: object::ModifierApply) -> OpResult {
         };
         let applied = match applied {
             Ok(a) => a,
-            Err(frap_modifiers::ModError::Error(m)) if m.starts_with("frap: modifier type") => {
-                return Err(OpError::NotImplemented(m));
+            // A frap limitation (no evaluator, a node group frap cannot evaluate, an input it
+            // does not support) is not Blender's error.
+            Err(frap_modifiers::ModError::Error(m)) if stack::is_frap_limitation(&m) => {
+                return Err(OpError::NotImplemented(if m.starts_with("frap:") {
+                    m
+                } else {
+                    format!("frap: {m}; it cannot be applied")
+                }));
             }
             Err(e) => return Err(OpError::Runtime(e.to_string())),
         };

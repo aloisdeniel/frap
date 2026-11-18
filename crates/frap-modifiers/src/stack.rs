@@ -137,6 +137,24 @@ pub fn evaluate(base: Arc<Mesh>, in_edit_mode: bool, cx: &mut dyn ModEvalCx) -> 
     }
 }
 
+/// Whether a modifier error is a frap limitation rather than one Blender would report too: a
+/// type without an evaluator, a node group frap cannot evaluate, an unsupported input
+/// (messages starting with `frap:`). Front ends answer these with `NotImplementedError`
+/// (`OP_NOT_IMPLEMENTED`) instead of Blender's error.
+pub fn is_frap_limitation(message: &str) -> bool {
+    message.starts_with("frap:") || message.starts_with("Unsupported node group")
+}
+
+/// Whether a stack status means the evaluated mesh is not what Blender computes: a type
+/// without an evaluator, or an error that is a frap limitation ([`is_frap_limitation`]).
+pub fn status_is_frap_limitation(status: &ModifierStatus) -> bool {
+    match status {
+        ModifierStatus::PassedThrough => true,
+        ModifierStatus::Error(m) => is_frap_limitation(m),
+        _ => false,
+    }
+}
+
 /// The WARNING of a type without an evaluator (§7.2).
 pub fn pass_through_message(m: &Modifier) -> String {
     format!(

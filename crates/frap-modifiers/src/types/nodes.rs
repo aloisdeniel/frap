@@ -21,7 +21,8 @@
 //!    `Ignore Sharpness`; on the selected edges `sharp_edge = !(edge angle <= Angle and
 //!    (no adjacent face sharp or Ignore Sharpness))`, the other edges keep their value (new
 //!    attributes start false and are appended; an existing BOOLEAN EDGE `sharp_edge` keeps its
-//!    position). The edge angle is the angle between the `face_normal_calc` normals of the two
+//!    position; one of another type or domain is read converted (nonzero is sharp, verified on
+//!    5.2.4 with an INT EDGE `sharp_edge`) and replaced by a BOOLEAN EDGE one at the end). The edge angle is the angle between the `face_normal_calc` normals of the two
 //!    faces of a manifold edge, 0 for any other edge;
 //! 2. on the faces (when there are any), every face smooth: `sharp_face` is removed.
 
@@ -94,7 +95,7 @@ fn eval(md: &Modifier, mut mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, M
     let tree = group
         .typed::<NodeTreeId>()
         .and_then(|r| main.node_groups.get(r))
-        .ok_or_else(|| ModError::Error("frap: the node group no longer exists".into()))?;
+        .ok_or_else(|| ModError::Error("frap internal: the node group no longer exists".into()))?;
     let library = tree
         .header
         .library
@@ -188,7 +189,12 @@ fn unsigned_edge_angles(mesh: &Mesh) -> Vec<f32> {
 pub fn smooth_by_angle(mesh: &mut Mesh, angle: f32, ignore_sharpness: bool) {
     let edges_num = mesh.edges_num();
     if edges_num > 0 {
-        let edge_smooth: Vec<bool> = match mesh.sharp_edge_flags() {
+        // `sharp_edge` read as a boolean on the edges (`lookup<bool>`: any type converted,
+        // nonzero is true, and any domain adapted), the "Is Edge Smooth" input and, for an
+        // attribute stored with another type or domain, the initial value of the edges that
+        // are not selected (`initialize_new_data`).
+        let sharp_before: Option<Vec<bool>> = mesh.sharp_edge_flags().map(|c| c.into_owned());
+        let edge_smooth: Vec<bool> = match &sharp_before {
             Some(sharp) => sharp.iter().map(|s| !s).collect(),
             None => vec![true; edges_num],
         };
@@ -212,7 +218,9 @@ pub fn smooth_by_angle(mesh: &mut Mesh, angle: f32, ignore_sharpness: bool) {
         let angles = unsigned_edge_angles(mesh);
         let existing = mesh.sharp_edges().map(<[bool]>::to_vec);
         let in_place = existing.is_some();
-        let mut sharp = existing.unwrap_or_else(|| vec![false; edges_num]);
+        let mut sharp = existing
+            .or(sharp_before)
+            .unwrap_or_else(|| vec![false; edges_num]);
         for e in 0..edges_num {
             if edge_smooth[e] || ignore_sharpness {
                 let smooth = angles[e] <= angle && (edge_face_smooth[e] || ignore_sharpness);
@@ -272,6 +280,27 @@ mod tests {
         let sharp = m.sharp_edges().unwrap();
         assert!(sharp[3]);
         assert_eq!(sharp.iter().filter(|s| **s).count(), 1);
+    }
+
+    #[test]
+    fn a_sharp_edge_of_another_type_is_read_converted() {
+        // Verified on 5.2.4: an INT EDGE `sharp_edge` with edge 2 = 1, Smooth by Angle at
+        // 1.6 rad on the smooth cube: edge 2 stays sharp, the attribute becomes BOOLEAN EDGE
+        // and moves to the end.
+        let mut m = cube();
+        m.shade_smooth();
+        let mut v = vec![0i32; 12];
+        v[2] = 1;
+        m.attributes_mut().insert(Attribute {
+            name: SHARP_EDGE.into(),
+            domain: Domain::Edge,
+            data: AttrData::Int(std::sync::Arc::new(v)),
+        });
+        smooth_by_angle(&mut m, 1.6, false);
+        let mut expected = vec![false; 12];
+        expected[2] = true;
+        assert_eq!(m.sharp_edges().unwrap(), expected.as_slice());
+        assert_eq!(m.attributes().iter().last().map(|a| a.name.as_str()), Some(SHARP_EDGE));
     }
 
     #[test]

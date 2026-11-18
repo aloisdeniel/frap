@@ -181,4 +181,6 @@ pub mod prelude {
         ModifierTypeInfo, modifier, never_disabled, no_deps,
     };
     pub use frap_mesh::Mesh;
+    /// The return type of `depends_on`.
+    pub use smallvec::SmallVec;
 }

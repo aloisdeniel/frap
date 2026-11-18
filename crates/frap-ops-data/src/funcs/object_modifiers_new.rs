@@ -8,6 +8,9 @@
 //! `GREASE_PENCIL_TINT` on a mesh) or a second modifier of a single-instance type (`CLOTH`)
 //! returns `None` (Blender's WARNING report is kept in the response); an unknown type is the
 //! argument `TypeError`; `type` is required.
+//!
+//! A type frap has no evaluator for yet is added like any other, with the WARNING
+//! `Modifier 'X' (TYPE) is not evaluated by frap; passed through` (§7.2).
 
 use frap_modifiers::ModifierType;
 use frap_modifiers::stack::edit;
@@ -39,6 +42,13 @@ fn object_modifiers_new(
     match edit::add(&mut o, Some(&name), ty) {
         Ok(i) => {
             let p = o.modifiers[i].ptr(ob.any());
+            if frap_modifiers::registry::find(ty).is_none() {
+                // §7.2: the modifier is added, but frap passes the mesh through.
+                h.report(Report::new(
+                    ReportType::Warning,
+                    frap_modifiers::stack::pass_through_message(&o.modifiers[i]),
+                ));
+            }
             let (main, log) = h.main_mut();
             if let Some(dst) = main.objects.get_mut(ob, log) {
                 *dst = o;

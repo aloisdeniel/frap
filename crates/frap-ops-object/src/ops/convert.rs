@@ -17,17 +17,25 @@
 //! in Edit Mode: `RuntimeError: Error: Cannot convert selected objects while they are in edit
 //! mode`. The poll needs the active object (if any) in Object Mode.
 //!
-//! Other targets (curves, point clouds, grease pencil) answer `OP_NOT_IMPLEMENTED`.
+//! Other targets (curves, point clouds, grease pencil) answer `OP_NOT_IMPLEMENTED`, and so does
+//! a mesh whose stack holds a modifier frap cannot evaluate (no evaluator for its type, a node
+//! group other than Smooth by Angle): converting it would drop the modifier without applying
+//! it. Blender's own modifier errors (a modifier it skips too) are WARNING reports.
 
 use std::collections::HashSet;
+use std::sync::Arc;
 
 use frap_eval::EvalCache;
+use frap_mesh::Mesh;
+use frap_modifiers::stack;
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_op::{Poll, PollFail, PollReq};
 use frap_rna::{IdAny, IdCode, IdRef, MeshId, ObjectId};
 use frap_scene::id::layers;
-use frap_scene::{BaseFlag, Context, EvalMode, Evaluator, ObjectMode};
+use frap_scene::{
+    BaseFlag, Context, EvalError, EvalMode, EvaluatedObject, Evaluator, ModifierStatus, ObjectMode,
+};
 use frap_spec_ops_object::object;
 
 use super::modifier_apply::merge_customdata_for_apply_modifier;
@@ -102,6 +110,40 @@ fn duplicate_for_convert(cx: &mut OpCtx, ob: IdRef<ObjectId>) -> Option<IdRef<Ob
     Some(new)
 }
 
+/// The evaluated mesh to write into the data: a modifier frap cannot evaluate (no evaluator,
+/// a node group it does not support) answers `OP_NOT_IMPLEMENTED` rather than dropping it
+/// (as `object.modifier_apply` does); the stack's other warnings (Blender's modifier errors,
+/// which Blender also skips) are WARNING reports; an evaluation failure is an error.
+fn evaluated_mesh(
+    cx: &mut OpCtx,
+    name: &str,
+    evaluated: &Result<Arc<EvaluatedObject>, EvalError>,
+) -> Result<Mesh, OpError> {
+    let eo = evaluated
+        .as_ref()
+        .map_err(|e| OpError::Runtime(format!("Object '{name}': {e}")))?;
+    if let Some((m, st)) = eo
+        .modifier_status
+        .iter()
+        .find(|(_, st)| stack::status_is_frap_limitation(st))
+    {
+        let why = match st {
+            ModifierStatus::Error(e) => e.clone(),
+            _ => "its type has no frap evaluator".to_owned(),
+        };
+        return Err(OpError::NotImplemented(format!(
+            "frap: object.convert cannot apply modifier '{m}' of object '{name}' ({why})"
+        )));
+    }
+    for w in &eo.warnings {
+        cx.report(w.level, w.message.clone());
+    }
+    eo.mesh
+        .as_deref()
+        .cloned()
+        .ok_or_else(|| OpError::Runtime(format!("Object '{name}' has no evaluated Mesh data")))
+}
+
 #[operator(
     poll = CONVERT_POLL,
     tier = T2,
@@ -134,16 +176,12 @@ fn exec(cx: &mut OpCtx, p: object::Convert) -> OpResult {
         ));
     }
     // The evaluated meshes, before anything changes (`BKE_scene_graph_update_tagged`).
-    let evaluated: Vec<Option<std::sync::Arc<frap_mesh::Mesh>>> = {
+    let evaluated: Vec<Result<Arc<EvaluatedObject>, EvalError>> = {
         let (host, _) = cx.split_eval();
         let mut ev = EvalCache::new();
         objects
             .iter()
-            .map(|&ob| {
-                ev.object(host, ob, EvalMode::Viewport)
-                    .ok()
-                    .and_then(|r| r.mesh.clone())
-            })
+            .map(|&ob| ev.object(host, ob, EvalMode::Viewport))
             .collect()
     };
     let mut converted_data: HashSet<IdAny> = HashSet::new();
@@ -153,7 +191,7 @@ fn exec(cx: &mut OpCtx, p: object::Convert) -> OpResult {
         let Some(o) = cx.main().objects.get(ob) else {
             continue;
         };
-        let (ty, data) = (o.object_type(), o.data);
+        let (ty, data, o_name) = (o.object_type(), o.data, o.header.name.clone());
         if let Some(d) = data
             && !keep_original
             && converted_data.contains(&d)
@@ -189,10 +227,7 @@ fn exec(cx: &mut OpCtx, p: object::Convert) -> OpResult {
                 else {
                     continue;
                 };
-                let mut new_mesh = match &evaluated[k] {
-                    Some(m) => (**m).clone(),
-                    None => frap_mesh::Mesh::new(""),
-                };
+                let mut new_mesh = evaluated_mesh(cx, &o_name, &evaluated[k])?;
                 if p.merge_customdata.value {
                     merge_customdata_for_apply_modifier(&mut new_mesh);
                 }

@@ -247,3 +247,109 @@ fn apply_modifier_evaluates_one_modifier_on_the_original_mesh() {
     });
     assert!(EvalCache::new().apply_modifier(&h, ob, 1).is_err());
 }
+
+/// Test-only evaluator with an **object** `depends_on` (no M4 type has one before WP 4.6's
+/// Boolean lands): PARTICLE_INSTANCE (not an M4 type, so no WP registers it in this binary)
+/// reads its operand's evaluated mesh and adds its vertex count to the first position's x.
+mod object_operand {
+    use frap_modifiers::prelude::*;
+    use frap_rna::{IdAny, ObjectId};
+
+    fn deps(s: &ModifierSettings) -> SmallVec<[IdAny; 2]> {
+        match s {
+            ModifierSettings::ParticleInstance(p) => p.object.into_iter().collect(),
+            _ => SmallVec::new(),
+        }
+    }
+
+    #[modifier(PARTICLE_INSTANCE, kind = Constructive, flags = ACCEPTS_MESH, depends_on = deps)]
+    fn eval(md: &Modifier, mut mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModError> {
+        let ModifierSettings::ParticleInstance(p) = &md.settings else {
+            return Ok(mesh);
+        };
+        let Some(ob) = p.object.and_then(|o| o.typed::<ObjectId>()) else {
+            return Ok(mesh);
+        };
+        let n = cx.evaluated_mesh(ob)?.verts_num() as f32;
+        let mut pos = mesh.positions().to_vec();
+        pos[0][0] += n;
+        mesh.set_positions(pos);
+        Ok(mesh)
+    }
+}
+
+/// Adds the test-only object-operand modifier to `ob`, operand `target`.
+fn add_operand(h: &mut TestHost, ob: IdRef<ObjectId>, target: IdRef<ObjectId>) {
+    h.edit_obj(ob, |o| {
+        let i = edit::add(o, None, ModifierType::ParticleInstance).unwrap();
+        if let ModifierSettings::ParticleInstance(s) = &mut o.modifiers[i].settings {
+            s.object = Some(target.any());
+        }
+    });
+}
+
+#[test]
+fn object_operands_are_part_of_the_fingerprint() {
+    let (mut h, ob, _) = host();
+    let me = h.main.meshes.find("Box").unwrap();
+    let other = h.add_object("Other", Some(me.any()));
+    add_operand(&mut h, ob, other);
+    let fp = |h: &TestHost| EvalCache::fingerprint(h, ob, EvalMode::Viewport).unwrap();
+    let a = fp(&h);
+    // Moving the operand (its own generation only) invalidates the object.
+    h.edit_obj(other, |o| o.location = [1.0, 0.0, 0.0]);
+    let b = fp(&h);
+    assert_ne!(a, b, "the operand's fingerprint is part of the object's");
+    // So does a change of the operand's own dependency (transitively).
+    let third = h.add_object("Third", Some(me.any()));
+    add_operand(&mut h, other, third);
+    let c = fp(&h);
+    h.edit_obj(third, |o| o.location = [0.0, 2.0, 0.0]);
+    assert_ne!(c, fp(&h), "operands of operands count");
+    // The evaluator sees the operand's evaluated mesh, and the cache follows the operand.
+    let mut ev = EvalCache::new();
+    let x0 = ev
+        .object(&h, ob, EvalMode::Viewport)
+        .unwrap()
+        .mesh
+        .as_ref()
+        .unwrap()
+        .positions()[0][0];
+    assert_eq!(x0, CUBE[0][0] + 8.0);
+    h.edit_obj(other, |o| o.location = [5.0, 0.0, 0.0]);
+    let r = ev.object(&h, ob, EvalMode::Viewport).unwrap();
+    assert_eq!(r.modifier_status[0].1, ModifierStatus::Evaluated);
+}
+
+#[test]
+fn object_operand_cycles_terminate() {
+    let (mut h, a, _) = host();
+    let me = h.main.meshes.find("Box").unwrap();
+    let b = h.add_object("B", Some(me.any()));
+    add_operand(&mut h, a, b);
+    add_operand(&mut h, b, a);
+    // The fingerprints resolve (the member being resolved contributes its shallow hash) and
+    // still follow both members.
+    let fa = EvalCache::fingerprint(&h, a, EvalMode::Viewport).unwrap();
+    let fb = EvalCache::fingerprint(&h, b, EvalMode::Viewport).unwrap();
+    h.edit_obj(b, |o| o.location = [1.0, 0.0, 0.0]);
+    assert_ne!(
+        fa,
+        EvalCache::fingerprint(&h, a, EvalMode::Viewport).unwrap()
+    );
+    h.edit_obj(a, |o| o.location = [1.0, 0.0, 0.0]);
+    assert_ne!(
+        fb,
+        EvalCache::fingerprint(&h, b, EvalMode::Viewport).unwrap()
+    );
+    // Evaluation terminates: the inner request of the cycle is a dependency error (the
+    // modifier's error, WARNING), the outer one evaluates.
+    let e = EvalCache::new().object(&h, a, EvalMode::Viewport).unwrap();
+    assert!(
+        e.modifier_status
+            .iter()
+            .all(|(_, s)| matches!(s, ModifierStatus::Evaluated | ModifierStatus::Error(_))),
+        "{:?}",
+        e.modifier_status
+    );
+}

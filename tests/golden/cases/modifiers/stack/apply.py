@@ -3,8 +3,9 @@
 # removed; multi-user data is refused (RuntimeError) unless single_user=True, which copies
 # the data first; a disabled modifier (NODES without a group) raises "Modifier is disabled,
 # skipping apply" and stays; Edit Mode and an active empty fail the poll; an unknown or empty
-# name is CANCELLED.
-# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001,mesh:Cylinder tier=T1
+# name is CANCELLED. The fake user is not a user (ID_REAL_USERS): data with a fake user
+# applies, and single_user=True does not copy it.
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001,mesh:Cylinder,mesh:Cone tier=T1
 import bpy
 bpy.ops.object.modifier_apply(modifier='Nope')
 bpy.ops.object.modifier_apply()
@@ -32,3 +33,9 @@ bpy.data.objects.new('Empty', None)
 bpy.context.scene.collection.objects.link(bpy.data.objects['Empty'])
 bpy.context.view_layer.objects.active = bpy.data.objects['Empty']
 bpy.ops.object.modifier_apply(modifier='GeometryNodes')
+bpy.ops.mesh.primitive_cone_add(vertices=8, location=(0, 3, 0))
+bpy.data.meshes['Cone'].use_fake_user = True
+bpy.ops.object.shade_auto_smooth(angle=0.7)
+bpy.ops.object.modifier_apply(modifier='Smooth by Angle')
+bpy.ops.object.shade_auto_smooth(angle=0.2)
+bpy.ops.object.modifier_apply(modifier='Smooth by Angle', single_user=True)

@@ -138,6 +138,7 @@ NORMALISE = {
     "D-82": None,
     "D-83": ("cases", "cases pass correct_uv explicitly when an earlier slide in the same scene set it"),
     "D-84": ("cases", "cases do not call them in Object Mode"),
+    "D-85": None,
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

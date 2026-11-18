@@ -11,10 +11,14 @@
 //! is `CANCELLED` with the WARNING `Only one modifier of this type is allowed`; without an active
 //! object the poll fails with `Context missing active object`.
 //!
+//! A type frap has no evaluator for yet is added, with the WARNING `Modifier 'X' (TYPE) is not
+//! evaluated by frap; passed through` (§7.2).
+//!
 //! This file also holds the helpers the `object.modifier_*` operators share ([`shared`]).
 
 use frap_modifiers::ModifierType;
-use frap_modifiers::{registry, stack::edit};
+use frap_modifiers::registry;
+use frap_modifiers::stack::{self, edit};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_op::{EnumItemOwned, Poll, PollFail, PollReq};
@@ -173,7 +177,14 @@ fn exec(cx: &mut OpCtx, p: object::ModifierAdd) -> OpResult {
             continue;
         };
         match edit::add(&mut o, None, ty) {
-            Ok(_) => {
+            Ok(i) => {
+                if registry::find(ty).is_none() {
+                    // §7.2: added, but frap passes the mesh through.
+                    cx.report(
+                        ReportType::Warning,
+                        stack::pass_through_message(&o.modifiers[i]),
+                    );
+                }
                 *cx.object_mut(ob)? = o;
                 changed = true;
             }
