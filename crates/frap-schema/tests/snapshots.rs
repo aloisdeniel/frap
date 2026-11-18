@@ -61,7 +61,7 @@ fn manifest_selected_operators() {
     for idname in [
         "uv.smart_project",
         "armature.extrude_move",
-        "object.modifier_add",
+        "object.modifier_apply_as_shapekey",
         "mesh.decimate",
     ] {
         let e = find_op(idname).unwrap();

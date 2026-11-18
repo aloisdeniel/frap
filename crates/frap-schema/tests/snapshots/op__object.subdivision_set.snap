@@ -1,0 +1,97 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.subdivision_set",
+  "bl_idname": "OBJECT_OT_subdivision_set",
+  "label": "Subdivision Set",
+  "description": "Sets a Subdivision Surface level (1 to 5)",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "level",
+      "name": "Level",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": -100,
+      "hard_max": 100,
+      "soft_min": -6,
+      "soft_max": 6,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "relative",
+      "name": "Relative",
+      "description": "Apply the subdivision surface level as an offset relative to the current level",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "ensure_modifier",
+      "name": "Ensure Modifier",
+      "description": "Create the corresponding modifier if it does not exist",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "MULTIRES (sculpt-mode subdivision) answers OP_NOT_IMPLEMENTED",
+    "headless": "native",
+    "planned": "M4",
+    "extension": false,
+    "notes": []
+  }
+}

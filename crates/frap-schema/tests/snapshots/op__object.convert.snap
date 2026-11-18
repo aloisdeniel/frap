@@ -1,0 +1,196 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.convert",
+  "bl_idname": "OBJECT_OT_convert",
+  "label": "Convert To",
+  "description": "Convert selected objects to another type",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "SCENE_EDITABLE",
+      "MODE_OBJECT"
+    ],
+    "text": "requires an editable scene, Object Mode (bpy.ops.object.mode_set(mode='OBJECT'))",
+    "matrix": {
+      "plain": "YYNNN",
+      "view3d": "YYNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "target",
+      "name": "Target",
+      "description": "Type of object to convert to",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "MESH",
+      "enum_items": [
+        {
+          "identifier": "CURVE",
+          "name": "Curve",
+          "description": "Curve from Mesh or Text objects",
+          "value": 2
+        },
+        {
+          "identifier": "MESH",
+          "name": "Mesh",
+          "description": "Mesh from Curve, Surface, Metaball, Text, or Point Cloud objects",
+          "value": 1
+        },
+        {
+          "identifier": "POINTCLOUD",
+          "name": "Point Cloud",
+          "description": "Point Cloud from Mesh objects",
+          "value": 28
+        },
+        {
+          "identifier": "CURVES",
+          "name": "Curves",
+          "description": "Curves from evaluated curve data",
+          "value": 27
+        },
+        {
+          "identifier": "GREASEPENCIL",
+          "name": "Grease Pencil",
+          "description": "Grease Pencil from Curve or Mesh objects",
+          "value": 30
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "keep_original",
+      "name": "Keep Original",
+      "description": "Keep original objects instead of replacing them",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "merge_customdata",
+      "name": "Merge UVs",
+      "description": "Merge UV coordinates that share a vertex to account for imprecision in some modifiers",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "thickness",
+      "name": "Thickness",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 5,
+      "hard_min": 1,
+      "hard_max": 100,
+      "soft_min": 1,
+      "soft_max": 100,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "faces",
+      "name": "Export Faces",
+      "description": "Export faces as filled strokes",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "offset",
+      "name": "Stroke Offset",
+      "description": "Offset strokes from fill",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 0.01,
+      "hard_min": 0,
+      "hard_max": 1000000000000,
+      "soft_min": 0,
+      "soft_max": 100,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T2",
+    "support": "partial",
+    "support_note": "target='MESH' only; other targets answer OP_NOT_IMPLEMENTED",
+    "headless": "native",
+    "planned": "M4",
+    "extension": false,
+    "notes": []
+  }
+}

@@ -3,7 +3,8 @@
 //! original otherwise) → shape-key mix (M6) → modifiers in stack order with `use_pin_to_last`
 //! last (`crate::geometry` → `frap_modifiers::stack`, M4 W0): a type without an evaluator
 //! passes the mesh through with Blender-style WARNING (§7.2); without modifiers the evaluated
-//! mesh is the base mesh's own `Arc`.
+//! mesh is the base mesh's own `Arc`. In Edit Mode only the modifiers shown in Edit Mode whose
+//! type supports it take part (`editbmesh_calc_modifiers`, WP 4.1, `stack::enabled`).
 
 use std::sync::Arc;
 

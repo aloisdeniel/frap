@@ -220,7 +220,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.duplicate_move` | M1 | P0 | macro |
 | [x] | `object.duplicate_move_linked` | M1 | P1 | macro |
 | [x] | `object.join` | M1 | P0 | CANCELLED with WARNING reports |
-| [ ] | `object.convert` | M4 | P1 | apply modifiers to mesh |
+| [x] | `object.convert` | M4 | P1 | apply modifiers to mesh |
 | [ ] | `object.join_shapes` | M6 | P2 |  |
 | [ ] | `object.duplicates_make_real` | M8 | P2 |  |
 | [x] | `object.parent_set` | M1 | P0 | OBJECT/KEEP types M1; ARMATURE_* M6 |
@@ -240,17 +240,17 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.shade_smooth` | M1 | P0 | removes sharp_face |
 | [x] | `object.shade_flat` | M1 | P0 |  |
 | [x] | `object.shade_smooth_by_angle` | M1 | P0 | destructive, writes sharp_edge |
-| [ ] | `object.shade_auto_smooth` | M4 | P1 | adds "Smooth by Angle" NODES modifier; links the group from a `Library` (2 `bpy.data.libraries` entries, as Blender) |
-| [ ] | `object.modifier_add` | M4 | P0 | dynamic enum by object type |
-| [ ] | `object.modifier_remove` | M4 | P0 |  |
-| [ ] | `object.modifier_apply` | M4 | P0 |  |
-| [ ] | `object.modifier_move_up` | M4 | P0 |  |
-| [ ] | `object.modifier_move_down` | M4 | P0 |  |
-| [ ] | `object.modifier_move_to_index` | M4 | P0 |  |
-| [ ] | `object.modifier_copy` | M4 | P1 |  |
-| [ ] | `object.modifier_set_active` | M4 | P1 |  |
-| [ ] | `object.modifiers_clear` | M4 | P1 |  |
-| [ ] | `object.subdivision_set` | M4 | P1 |  |
+| [x] | `object.shade_auto_smooth` | M4 | P1 | adds "Smooth by Angle" NODES modifier; links the group from a `Library` (2 `bpy.data.libraries` entries, as Blender) |
+| [x] | `object.modifier_add` | M4 | P0 | dynamic enum by object type |
+| [x] | `object.modifier_remove` | M4 | P0 |  |
+| [x] | `object.modifier_apply` | M4 | P0 |  |
+| [x] | `object.modifier_move_up` | M4 | P0 |  |
+| [x] | `object.modifier_move_down` | M4 | P0 |  |
+| [x] | `object.modifier_move_to_index` | M4 | P0 |  |
+| [x] | `object.modifier_copy` | M4 | P1 |  |
+| [x] | `object.modifier_set_active` | M4 | P1 |  |
+| [x] | `object.modifiers_clear` | M4 | P1 |  |
+| [x] | `object.subdivision_set` | M4 | P1 |  |
 | [ ] | `object.modifier_apply_as_shapekey` | M6 | P2 |  |
 | [ ] | `object.modifier_copy_to_selected` | M8 | P2 |  |
 | [ ] | `object.modifiers_copy_to_selected` | M8 | P2 |  |
@@ -672,7 +672,7 @@ All types exist as data from M1 (settings generated from dumps, round-trip in `.
 | [ ] | `DECIMATE` | `DecimateModifier` | M4 | P0 | COLLAPSE/UNSUBDIV/DISSOLVE |
 | [ ] | `WELD` | `WeldModifier` | M4 | P0 |  |
 | [ ] | `DISPLACE` | `DisplaceModifier` | M4 | P0 | Texture IMAGE/NONE |
-| [ ] | `NODES` | `NodesModifier` | M4 | P0 | "Smooth by Angle" only; inputs at properties.inputs.Input_1.value |
+| [x] | `NODES` | `NodesModifier` | M4 | P0 | "Smooth by Angle" only; inputs at properties.inputs.Input_1.value |
 | [ ] | `EDGE_SPLIT` | `EdgeSplitModifier` | M4 | P1 |  |
 | [ ] | `WEIGHTED_NORMAL` | `WeightedNormalModifier` | M4 | P1 |  |
 | [ ] | `SMOOTH` | `SmoothModifier` | M4 | P1 |  |
@@ -805,7 +805,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | `mesh.attributes.new/remove, mesh.uv_layers.new, mesh.color_attributes.new/remove` | M1 | colour attributes default to white and become active/default when none is |
 | [x] | `mesh.uv_layers.remove, mesh.vertex_colors.new` | M2 | moved from M1 (M1 stabilization); `attributes.remove` removes a UV map meanwhile; vertex_colors creates "Col" BYTE_COLOR CORNER; WP 2.9 (`funcs/{u_v_loop_layers_remove,loop_colors_new}.rs`, M2 W0 assignment) |
 | [ ] | `node_tree.nodes.new/remove, node_tree.links.new/remove` | M1 | links.new replaces existing input link |
-| [ ] | `obj.modifiers.new(name, type)/remove/move/clear` | M4 (data from M1) | WP 4.1 (`funcs/object_modifiers_*.rs`); M4 golden prerequisite |
+| [x] | `obj.modifiers.new(name, type)/remove/move/clear` | M4 (data from M1) | WP 4.1 (`funcs/object_modifiers_*.rs`); M4 golden prerequisite |
 | [ ] | `Image.pack/unpack/save/save_render/scale/reload, bpy.data.images.load` | M3 |  |
 | [ ] | `Scene.frame_set(frame, subframe=0.0)` | M6 | writes animated values to originals |
 | [ ] | `bpy_struct.keyframe_insert(data_path, *, index=-1, frame=None, group="", options=set(), keytype='KEYFRAME')` | M6 | keyword-only after data_path |

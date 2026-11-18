@@ -101,6 +101,32 @@ pub fn with_struct<R>(
 ) -> Result<R, FrapError> {
     let main = host.main();
     match ptr.root {
+        // WP 4.1: `Object.to_mesh()` of an object whose evaluated mesh differs from its data
+        // (modifiers) is `objects['X'].data` (a path through an ID pointer never occurs
+        // otherwise, the resolver re-roots there): it reads the evaluated mesh, always fresh.
+        Root::Id(id)
+            if id.code == frap_rna::IdCode::OB
+                && matches!(ptr.path.first(), Some(Seg::Prop("data"))) =>
+        {
+            let ob = id
+                .typed()
+                .ok_or_else(|| stale("an object pointer of another type"))?;
+            let eo = frap_scene::Evaluator::object(
+                &mut frap_eval::EvalCache::new(),
+                host,
+                ob,
+                frap_scene::EvalMode::Viewport,
+            )
+            .map_err(|e| stale(e.message))?;
+            let mesh = eo
+                .mesh
+                .clone()
+                .ok_or_else(|| stale("the object has no evaluated mesh"))?;
+            let mut root =
+                RnaPtr::id(id, &frap_spec_rna::OBJECT).child(Seg::Prop("data"), mesh.srna());
+            root.detached = ptr.detached;
+            walk(host, &*mesh, &root, &ptr.path[1..], f)
+        }
         Root::Id(id) => {
             // §6.3: a mesh in Edit Mode reads through the cached view of its BMesh (WP 2.2).
             if let Some(view) = crate::edit::edit_view(host, id) {
