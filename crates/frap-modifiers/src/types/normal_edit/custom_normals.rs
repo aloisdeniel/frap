@@ -472,7 +472,7 @@ pub(crate) fn normals_corner_custom_set(
             }
             let mut prev_corner: Option<usize> = None;
             let mut org_nor: Option<V3> = None;
-            let mut tag = |corner: usize, prev: usize, sharp_edges: &mut [bool]| {
+            let tag = |corner: usize, prev: usize, sharp_edges: &mut [bool]| {
                 let f = corner_to_face[corner];
                 let (s, e) = (m.face_offsets[f] as usize, m.face_offsets[f + 1] as usize);
                 let corner_prev = if corner == s { e - 1 } else { corner - 1 };
