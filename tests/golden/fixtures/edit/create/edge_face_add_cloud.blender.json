@@ -1,0 +1,225 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 6,
+      "ok": true
+    },
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": false
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Chain": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "EDIT"
+    },
+    "Cloud": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {
+    "Chain": {
+      "positions": [
+        [0.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [2.0, 0.5, 0.0],
+        [2.0, 1.5, 0.0],
+        [0.5, 2.0, 0.0]
+      ],
+      "edges": [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [4, 0],
+        [4, 3]
+      ],
+      "faces": [
+        [0, 4, 3, 2, 1]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0]
+      ],
+      "uv_layers": {},
+      "attributes": {
+        "sharp_face": {
+          "data": [true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": {
+        "edge": [0, 1, 2, 3, 4],
+        "face": [0],
+        "vert": [0, 1, 2, 3, 4]
+      },
+      "active": null,
+      "select_history": []
+    },
+    "Cloud": {
+      "positions": [
+        [0.0, 0.0, 0.0],
+        [2.0, 0.1, 0.0],
+        [2.2, 1.9, 0.1],
+        [0.1, 2.0, 0.0],
+        [1.0, -0.8, 0.0],
+        [3.0, 3.0, 0.0],
+        [4.0, 3.0, 0.2],
+        [3.5, 4.0, 0.0]
+      ],
+      "edges": [
+        [3, 2],
+        [2, 1],
+        [1, 4],
+        [4, 0],
+        [0, 3],
+        [5, 7],
+        [7, 6],
+        [6, 5]
+      ],
+      "faces": [
+        [3, 2, 1, 4, 0],
+        [5, 7, 6]
+      ],
+      "corner_normals": [
+        [0.020013051, 0.020013051, -0.99959934],
+        [0.020013051, 0.020013051, -0.99959934],
+        [0.020013051, 0.020013051, -0.99959934],
+        [0.020013051, 0.020013051, -0.99959934],
+        [0.020013051, 0.020013051, -0.99959934],
+        [0.19518003, -0.09759004, -0.9759001],
+        [0.19518003, -0.09759004, -0.9759001],
+        [0.19518003, -0.09759004, -0.9759001]
+      ],
+      "uv_layers": {},
+      "attributes": {
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    }
+  },
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Chain",
+    "selected": [],
+    "mode": "EDIT_MESH",
+    "select_mode": [true, false, false],
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}
