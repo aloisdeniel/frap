@@ -457,14 +457,22 @@ pub(crate) fn read(
         l,
         |_, _, _| Ok(()),
     )?;
-    fill(
-        &mut main.textures,
-        root,
-        "textures",
-        cx,
-        l,
-        |_, _, _| Ok(()),
-    )?;
+    fill(&mut main.textures, root, "textures", cx, l, |t, o, cx| {
+        // Files written before M4 W0 have no texture fields: keep the fresh values.
+        if o.opt("type").is_none() {
+            return Ok(());
+        }
+        o.smol("type", &mut t.r#type)?;
+        cx.anim(o, &mut t.animation_data)?;
+        let image = match o.opt("image") {
+            Some(v) => cx.idref(v, &o.sub("image"))?,
+            None => None,
+        };
+        let rest = rest(o);
+        t.fields = de(&J::Object(rest), &o.path, cx.strict)?;
+        t.fields.image = image;
+        Ok(())
+    })?;
     fill(
         &mut main.pointclouds,
         root,
@@ -731,7 +739,7 @@ fn object(ob: &mut Object, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
         ob.modifiers = array(v, &p)?
             .iter()
             .enumerate()
-            .map(|(i, m)| modifier(m, &format!("{p}[{i}]"), cx.strict))
+            .map(|(i, m)| modifier(m, &format!("{p}[{i}]"), cx))
             .collect::<Result<_, _>>()?;
     }
     if let Some(v) = o.opt("material_slots") {
@@ -799,7 +807,8 @@ const MODIFIER_BASE: [&str; 10] = [
     "persistent_uid",
 ];
 
-fn modifier(v: &J, path: &str, strict: bool) -> Result<Modifier, MapError> {
+fn modifier(v: &J, path: &str, cx: &Cx) -> Result<Modifier, MapError> {
+    let strict = cx.strict;
     let mut o = Obj::new(v, path, strict)?;
     let ty = string(o.req("type")?, path)?;
     let mt = ModifierType::from_identifier(ty)
@@ -825,6 +834,13 @@ fn modifier(v: &J, path: &str, strict: bool) -> Result<Modifier, MapError> {
     o.bool("is_active", &mut md.is_active)?;
     o.bool("use_pin_to_last", &mut md.use_pin_to_last)?;
     o.u32("persistent_uid", &mut md.persistent_uid)?;
+    // The settings' ID pointers (M4 W0; files written before have none).
+    let mut ids = Vec::new();
+    for (k, _) in md.settings.id_refs() {
+        if let Some(v) = o.opt(k) {
+            ids.push((k, cx.idref(v, &o.sub(k))?));
+        }
+    }
     let rest = o.rest();
     // Re-tag the flattened settings ({"Bevel": {…}}) on top of the type's fresh values.
     let mut tagged = json::ser(&md.settings)?;
@@ -842,6 +858,9 @@ fn modifier(v: &J, path: &str, strict: bool) -> Result<Modifier, MapError> {
         }
     }
     md.settings = de(&tagged, path, strict)?;
+    for (k, r) in ids {
+        md.settings.set_id_ref(k, r);
+    }
     o.finish()?;
     Ok(md)
 }

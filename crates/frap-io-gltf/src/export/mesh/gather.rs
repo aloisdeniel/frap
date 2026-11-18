@@ -159,9 +159,11 @@ pub fn gather_mesh(g: &mut Gather, ob: &Object) -> Result<Option<Index>, ExportE
         ));
         None
     } else {
+        let extras = crate::export::extras::mesh(g, mesh);
         g.doc.meshes.push(GMesh {
             name: Some(mesh.header.name.to_string()),
             primitives: out,
+            extras,
             ..GMesh::default()
         });
         Some((g.doc.meshes.len() - 1) as Index)

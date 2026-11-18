@@ -22,6 +22,11 @@ mod extras;
 mod images;
 mod lights;
 mod materials;
+/// `KHR_materials_*` importers, one file per extension (`materials_ext/<name>.rs`, WP 3.6),
+/// each registering a [`crate::material_ext::MaterialExtImporter`] (M3 W0 extension point).
+pub mod materials_ext {
+    automod::dir!(pub "src/import/materials_ext");
+}
 mod mesh;
 mod nodes;
 mod scenes;

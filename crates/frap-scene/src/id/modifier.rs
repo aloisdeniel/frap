@@ -10,9 +10,52 @@ use frap_rna::{
     Field, PropDef, Rna, RnaCollMutGuard, RnaError, RnaMut, RnaMutGuard, SetOutcome, StructDef,
     Value,
 };
+use indexmap::IndexMap;
+use serde::{Deserialize, Serialize};
 use smol_str::SmolStr;
 
 pub use crate::generated::modifier_settings::ModifierSettings;
+
+/// `NodesModifier.properties.inputs` (Blender 5.2: runtime-defined RNA, path
+/// `mod.properties.inputs.Input_1.value`; `mod["Input_1"]` raises `TypeError: this type doesn't
+/// support IDProperties`, ARCHITECTURE §7.1). Stored on the generated `NodesSettings` (field
+/// `inputs`, M4 W0); the RNA binding is WP 4.1's.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[serde(transparent)]
+pub struct GnInputs(pub IndexMap<SmolStr, GnInput>);
+
+/// One group input of a NODES modifier (`NodesModifierProperties.inputs.<identifier>`).
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+pub struct GnInput {
+    /// `name`: the interface socket's display name ("Angle").
+    pub name: SmolStr,
+    /// `value`
+    pub value: GnValue,
+    /// `type`: how the input is driven (`'VALUE'`, `'ATTRIBUTE'`).
+    pub r#type: SmolStr,
+    /// `attribute_name` (with `type == 'ATTRIBUTE'`).
+    pub attribute_name: SmolStr,
+}
+
+/// The value of a group input, typed by the interface socket.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub enum GnValue {
+    /// `NodeSocketFloat` (incl. angle/factor subtypes)
+    Float(f32),
+    /// `NodeSocketInt`
+    Int(i32),
+    /// `NodeSocketBool`
+    Bool(bool),
+    /// `NodeSocketVector`
+    Vector([f32; 3]),
+    /// `NodeSocketColor`
+    Color([f32; 4]),
+    /// `NodeSocketString`
+    String(String),
+    /// `NodeSocketMenu` (item index)
+    Menu(i32),
+}
 
 /// One entry of `Object.modifiers`.
 #[derive(Clone, Debug, PartialEq)]

@@ -138,11 +138,112 @@ pub enum AlphaMode {
     Blend,
 }
 
-/// Extension parameters (clearcoat, sheen, transmission, volume, ior, specular, iridescence,
-/// anisotropy, dispersion, diffuse_transmission): fields arrive additively in M3.
+/// `KHR_materials_clearcoat` (Principled `Coat Weight` R, `Coat Roughness` G, `Coat Normal`).
+#[derive(Clone, Debug, PartialEq)]
+pub struct Clearcoat {
+    /// `clearcoatFactor` / `clearcoatTexture`
+    pub factor: Channel<f32>,
+    /// `clearcoatRoughnessFactor` / `clearcoatRoughnessTexture`
+    pub roughness: Channel<f32>,
+    /// `clearcoatNormalTexture`
+    pub normal: Option<NormalMap>,
+}
+
+/// `KHR_materials_sheen` (`Sheen Tint` RGB, `Sheen Roughness` A; enabled by `Sheen Weight`).
+#[derive(Clone, Debug, PartialEq)]
+pub struct Sheen {
+    /// `sheenColorFactor` / `sheenColorTexture`
+    pub color: Channel<[f32; 3]>,
+    /// `sheenRoughnessFactor` / `sheenRoughnessTexture`
+    pub roughness: Channel<f32>,
+}
+
+/// `KHR_materials_transmission` (`Transmission Weight`, R).
+#[derive(Clone, Debug, PartialEq)]
+pub struct Transmission {
+    /// `transmissionFactor` / `transmissionTexture`
+    pub factor: Channel<f32>,
+}
+
+/// `KHR_materials_volume` (glTF Material Output `Thickness` G + Volume Absorption).
+#[derive(Clone, Debug, PartialEq)]
+pub struct Volume {
+    /// `thicknessFactor` / `thicknessTexture`
+    pub thickness: Channel<f32>,
+    /// `attenuationDistance` (`1 / Density`; `f32::INFINITY` when absent)
+    pub attenuation_distance: f32,
+    /// `attenuationColor`
+    pub attenuation_color: [f32; 3],
+}
+
+/// `KHR_materials_specular` (`Specular IOR Level` × 2 in A, `Specular Tint` RGB).
+#[derive(Clone, Debug, PartialEq)]
+pub struct Specular {
+    /// `specularFactor` / `specularTexture`
+    pub factor: Channel<f32>,
+    /// `specularColorFactor` / `specularColorTexture`
+    pub color: Channel<[f32; 3]>,
+}
+
+/// `KHR_materials_iridescence` (`Thin Film *` sockets + glTF Material Output inputs).
+#[derive(Clone, Debug, PartialEq)]
+pub struct Iridescence {
+    /// `iridescenceFactor` / `iridescenceTexture` (R)
+    pub factor: Channel<f32>,
+    /// `iridescenceIor`
+    pub ior: f32,
+    /// `iridescenceThicknessMinimum` (nm)
+    pub thickness_min: f32,
+    /// `iridescenceThicknessMaximum` (nm) / `iridescenceThicknessTexture` (G)
+    pub thickness_max: Channel<f32>,
+}
+
+/// `KHR_materials_anisotropy` (`Anisotropic`, `Anisotropic Rotation` × 2π, tangent pattern).
+#[derive(Clone, Debug, PartialEq)]
+pub struct Anisotropy {
+    /// `anisotropyStrength`
+    pub strength: f32,
+    /// `anisotropyRotation` (radians)
+    pub rotation: f32,
+    /// `anisotropyTexture` (RG direction, B strength)
+    pub texture: Option<TexRef>,
+}
+
+/// `KHR_materials_diffuse_transmission` (frap option, M7).
+#[derive(Clone, Debug, PartialEq)]
+pub struct DiffuseTransmission {
+    /// `diffuseTransmissionFactor` / `diffuseTransmissionTexture` (A)
+    pub factor: Channel<f32>,
+    /// `diffuseTransmissionColorFactor` / `diffuseTransmissionColorTexture` (RGB)
+    pub color: Channel<[f32; 3]>,
+}
+
+/// Extension parameters, `None` when the material does not use the extension (M3 W0 fields;
+/// patterns of WP 3.6 fill them, the exporter writes them, the renderer reads them in M5).
 #[derive(Clone, Debug, Default, PartialEq)]
 #[non_exhaustive]
-pub struct MaterialExts {}
+pub struct MaterialExts {
+    /// `KHR_materials_clearcoat`
+    pub clearcoat: Option<Clearcoat>,
+    /// `KHR_materials_sheen`
+    pub sheen: Option<Sheen>,
+    /// `KHR_materials_transmission`
+    pub transmission: Option<Transmission>,
+    /// `KHR_materials_volume`
+    pub volume: Option<Volume>,
+    /// `KHR_materials_ior` (`IOR`; written only with transmission, volume or specular)
+    pub ior: Option<f32>,
+    /// `KHR_materials_specular`
+    pub specular: Option<Specular>,
+    /// `KHR_materials_iridescence`
+    pub iridescence: Option<Iridescence>,
+    /// `KHR_materials_anisotropy`
+    pub anisotropy: Option<Anisotropy>,
+    /// `KHR_materials_dispersion` (`dispersion`, only with volume)
+    pub dispersion: Option<f32>,
+    /// `KHR_materials_diffuse_transmission`
+    pub diffuse_transmission: Option<DiffuseTransmission>,
+}
 
 /// How a colour attribute feeds the material (glTF `COLOR_0`).
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -166,6 +267,9 @@ pub struct LoweredMaterial {
     pub normal: Option<NormalMap>,
     /// occlusionTexture
     pub occlusion: Option<TexRef>,
+    /// `occlusionTexture.strength` (a Mix with white before the glTF Material Output's
+    /// `Occlusion`; 1 when absent). M3 W0.
+    pub occlusion_strength: f32,
     /// emissiveFactor / emissiveTexture
     pub emissive: Channel<[f32; 3]>,
     /// KHR_materials_emissive_strength
@@ -205,6 +309,7 @@ impl LoweredMaterial {
             },
             normal: None,
             occlusion: None,
+            occlusion_strength: 1.0,
             emissive: Channel {
                 factor: [0.0; 3],
                 texture: None,

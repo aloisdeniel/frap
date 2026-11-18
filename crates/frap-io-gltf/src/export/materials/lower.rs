@@ -46,6 +46,7 @@ pub fn defaults(mat: &Material) -> LoweredMaterial {
         },
         normal: None,
         occlusion: None,
+        occlusion_strength: 1.0,
         emissive: Channel {
             factor: [0.0; 3],
             texture: None,

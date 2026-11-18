@@ -148,6 +148,20 @@ impl Default for View3DShading {
 impl View3DShading {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 38] = ["type", "light", "show_object_outline", "studio_light", "use_world_space_lighting", "show_backface_culling", "show_cavity", "cavity_type", "curvature_ridge_factor", "curvature_valley_factor", "cavity_ridge_factor", "cavity_valley_factor", "studiolight_rotate_z", "studiolight_intensity", "studiolight_background_alpha", "studiolight_background_blur", "use_studiolight_view_rotation", "color_type", "wireframe_color_type", "single_color", "background_type", "background_color", "show_shadows", "show_xray", "show_xray_wireframe", "xray_alpha", "xray_alpha_wireframe", "use_dof", "use_scene_lights", "use_scene_world", "use_scene_lights_render", "use_scene_world_render", "show_specular_highlight", "object_outline_color", "shadow_intensity", "render_pass", "aov_name", "use_compositor"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {

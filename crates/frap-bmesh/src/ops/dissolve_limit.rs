@@ -64,14 +64,19 @@ pub const TYPE_FLAG: OpTypeFlag = OpTypeFlag::NORMALS_CALC
 const FACE_NEW: u16 = 4;
 const COST_INVALID: f32 = f32::MAX;
 
-/// `BMO_Delimit`.
+/// `BMO_Delimit` (public since M4 W0 for `decimate_dissolve.rs`, WP 4.5).
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
-struct Delimit {
-    normal: bool,
-    material: bool,
-    seam: bool,
-    sharp: bool,
-    uv: bool,
+pub struct Delimit {
+    /// `BMO_DELIM_NORMAL`
+    pub normal: bool,
+    /// `BMO_DELIM_MATERIAL`
+    pub material: bool,
+    /// `BMO_DELIM_SEAM`
+    pub seam: bool,
+    /// `BMO_DELIM_SHARP`
+    pub sharp: bool,
+    /// `BMO_DELIM_UV`
+    pub uv: bool,
 }
 
 impl Delimit {
@@ -352,8 +357,9 @@ fn vert_collapse_is_degenerate(bm: &BMesh, v: VertId) -> bool {
     false
 }
 
-/// `BM_mesh_decimate_dissolve_ex`.
-fn decimate_dissolve_ex(
+/// `BM_mesh_decimate_dissolve_ex` (public since M4 W0 for `decimate_dissolve.rs`, WP 4.5):
+/// `oflag_out` marks the faces created by joins (0: none).
+pub fn decimate_dissolve_ex(
     bm: &mut BMesh,
     angle_limit: f32,
     do_dissolve_boundaries: bool,

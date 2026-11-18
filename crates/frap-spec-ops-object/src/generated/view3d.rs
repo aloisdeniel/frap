@@ -13,6 +13,68 @@ pub mod enums {
     use frap_rna::EnumItem;
 }
 
+// ---------------------------------------------------------------- view3d.camera_to_view_selected
+/// Props of `view3d.camera_to_view_selected`, RNA order.
+pub static CAMERA_TO_VIEW_SELECTED_PROPS: [PropDef; 0] = [
+];
+/// `VIEW3D_OT_camera_to_view_selected`
+pub static OPSPEC_VIEW3D_OT_CAMERA_TO_VIEW_SELECTED: OperatorSpec = OperatorSpec {
+    idname: "view3d.camera_to_view_selected",
+    bl_idname: "VIEW3D_OT_camera_to_view_selected",
+    label: "Camera Fit Frame to Selected",
+    description: "Move the camera so selected objects are framed",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &CAMERA_TO_VIEW_SELECTED_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `view3d.camera_to_view_selected` (Camera Fit Frame to Selected).
+#[derive(Debug, Clone)]
+pub struct CameraToViewSelected {
+}
+impl OpProps for CameraToViewSelected {
+    const IDNAME: &'static str = "view3d.camera_to_view_selected";
+    const BL_IDNAME: &'static str = "VIEW3D_OT_camera_to_view_selected";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_VIEW3D_OT_CAMERA_TO_VIEW_SELECTED
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        CameraToViewSelected {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- view3d.object_as_camera
+/// Props of `view3d.object_as_camera`, RNA order.
+pub static OBJECT_AS_CAMERA_PROPS: [PropDef; 0] = [
+];
+/// `VIEW3D_OT_object_as_camera`
+pub static OPSPEC_VIEW3D_OT_OBJECT_AS_CAMERA: OperatorSpec = OperatorSpec {
+    idname: "view3d.object_as_camera",
+    bl_idname: "VIEW3D_OT_object_as_camera",
+    label: "Set Active Object as Camera",
+    description: "Set the active object as the active camera for this view or scene",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &OBJECT_AS_CAMERA_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `view3d.object_as_camera` (Set Active Object as Camera).
+#[derive(Debug, Clone)]
+pub struct ObjectAsCamera {
+}
+impl OpProps for ObjectAsCamera {
+    const IDNAME: &'static str = "view3d.object_as_camera";
+    const BL_IDNAME: &'static str = "VIEW3D_OT_object_as_camera";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_VIEW3D_OT_OBJECT_AS_CAMERA
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ObjectAsCamera {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- view3d.snap_cursor_to_active
 /// Props of `view3d.snap_cursor_to_active`, RNA order.
 pub static SNAP_CURSOR_TO_ACTIVE_PROPS: [PropDef; 0] = [

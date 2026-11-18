@@ -5,9 +5,19 @@
 
 use frap_rna::OperatorSpec;
 
+pub mod image;
 pub mod material;
+pub mod world;
 
 /// Every typed operator spec of this group, sorted by idname.
-pub static ALL_OPS: [&OperatorSpec; 1] = [
+pub static ALL_OPS: [&OperatorSpec; 9] = [
+    &image::OPSPEC_IMAGE_OT_NEW,
+    &image::OPSPEC_IMAGE_OT_OPEN,
+    &image::OPSPEC_IMAGE_OT_PACK,
+    &image::OPSPEC_IMAGE_OT_RELOAD,
+    &image::OPSPEC_IMAGE_OT_SAVE,
+    &image::OPSPEC_IMAGE_OT_SAVE_AS,
+    &image::OPSPEC_IMAGE_OT_UNPACK,
     &material::OPSPEC_MATERIAL_OT_NEW,
+    &world::OPSPEC_WORLD_OT_NEW,
 ];

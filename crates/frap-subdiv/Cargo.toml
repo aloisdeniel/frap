@@ -1,12 +1,33 @@
 [package]
 name = "frap-subdiv"
-description = "frap L3: Subdivider trait, own Catmull-Clark (ARCHITECTURE §3.2). Empty until M4"
+description = "frap L3: Subdivider trait, own Catmull-Clark, optional opensubdiv-rs backend (ARCHITECTURE §3.2)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 publish.workspace = true
+
+[dependencies]
+frap-math.workspace = true
+glam.workspace = true
+libm.workspace = true
+smallvec.workspace = true
+rustc-hash.workspace = true
+thiserror.workspace = true
+
+[dependencies.opensubdiv-rs]
+workspace = true
+optional = true
+
+[dev-dependencies]
+approx.workspace = true
+proptest.workspace = true
+serde_json.workspace = true
+
+[features]
+# §3.6 `subdiv-osd` (off until the M4 gate, WP 4.4): the OpenSubdiv backend.
+osd = ["dep:opensubdiv-rs"]
 
 [lints]
 workspace = true

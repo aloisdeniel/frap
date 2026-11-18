@@ -1,12 +1,41 @@
 [package]
 name = "frap-modifiers"
-description = "frap L7: ModifierTypeInfo registry, one evaluator per file (ARCHITECTURE §7.2). Empty until M4"
+description = "frap L7: ModifierTypeInfo registry, one evaluator per file (ARCHITECTURE §7.2)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 publish.workspace = true
+
+[dependencies]
+frap-rna.workspace = true
+frap-math.workspace = true
+frap-macros.workspace = true
+frap-geom.workspace = true
+frap-mesh.workspace = true
+frap-nodes.workspace = true
+frap-bmesh.workspace = true
+frap-scene.workspace = true
+frap-imbuf.workspace = true
+frap-subdiv.workspace = true
+frap-boolean.workspace = true
+glam.workspace = true
+libm.workspace = true
+linkme.workspace = true
+automod.workspace = true
+bitflags.workspace = true
+smallvec.workspace = true
+smol_str.workspace = true
+indexmap.workspace = true
+rustc-hash.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+approx.workspace = true
+proptest.workspace = true
+insta.workspace = true
+serde_json.workspace = true
 
 [lints]
 workspace = true

@@ -28,7 +28,7 @@ const fn def(spec: &'static OperatorSpec) -> OperatorDef {
 
 static ADD: OperatorDef = def(&dummy::OPSPEC_DUMMY_OT_ADD);
 static ADD_AGAIN: OperatorDef = def(&dummy::OPSPEC_DUMMY_OT_ADD);
-static FAKE_BEVEL_SPEC: OperatorSpec = spec("mesh.decimate", "MESH_OT_decimate", &[], &[]);
+static FAKE_BEVEL_SPEC: OperatorSpec = spec("mesh.select_nth", "MESH_OT_select_nth", &[], &[]);
 static FAKE_BEVEL: OperatorDef = def(&FAKE_BEVEL_SPEC);
 static COPY_CUBE_SPEC: OperatorSpec = spec(
     "mesh.primitive_cube_add",
@@ -102,7 +102,7 @@ fn implemented_operator_needs_a_typed_spec() {
         .err()
         .unwrap();
     assert!(
-        e.starts_with("operator mesh.decimate is implemented but has no typed spec"),
+        e.starts_with("operator mesh.select_nth is implemented but has no typed spec"),
         "{e}"
     );
     let e = Registry::build([&COPY_CUBE], Registry::typed_specs(), catalog())

@@ -513,7 +513,8 @@ fn nothing_to_frame_warns() {
 }
 
 /// Cavity and depth of field are not rendered yet: both `render.render` and the sheet say so
-/// (WARNING), and say nothing when X-ray disables them (Blender ignores them there too).
+/// (WARNING), also when EEVEE or CYCLES fall back to Workbench, and say nothing when X-ray
+/// disables them (Blender ignores them there too).
 #[test]
 fn unrendered_workbench_effects_warn_in_both_ops() {
     let mut e = Env::new("cs_cavity");
@@ -536,9 +537,21 @@ bpy.context.scene.display.shading.show_cavity = True");
     e.ok("bpy.context.scene.display.shading.show_xray = True");
     let j = e.render("bpy.ops.render.render(write_still=True)").unwrap();
     assert!(!warned(&j, "cavity"), "X-ray disables cavity: {j}");
-    // Other engines do not read the Workbench shading.
-    e.ok("bpy.context.scene.display.shading.show_xray = False
-bpy.context.scene.render.engine = 'CYCLES'");
-    let j = e.render("bpy.ops.render.render(write_still=True)").unwrap();
-    assert!(!warned(&j, "cavity"), "{j}");
+    // EEVEE and CYCLES render with Workbench until M5 (WARNING), with the scene's display
+    // shading: the unrendered cavity is reported for them too (M2 leftover, M4 W0).
+    for engine in ["BLENDER_EEVEE", "CYCLES"] {
+        e.ok(&format!(
+            "bpy.context.scene.display.shading.show_xray = False
+bpy.context.scene.render.engine = '{engine}'"
+        ));
+        let j = e.render("bpy.ops.render.render(write_still=True)").unwrap();
+        assert!(
+            warned(&j, "rendered with BLENDER_WORKBENCH"),
+            "{engine}: {j}"
+        );
+        assert!(
+            warned(&j, "Workbench cavity is not rendered"),
+            "{engine}: {j}"
+        );
+    }
 }

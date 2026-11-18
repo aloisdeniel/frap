@@ -13,7 +13,11 @@ mod data;
 mod eval;
 mod host;
 pub mod id;
+/// Multiple scenes (M3, WP 3.10).
+pub mod scenes;
 pub mod startup;
+/// The window's scene (M3, WP 3.10).
+pub mod window;
 
 /// Generated plain structs (`cargo xtask codegen`, WP 1.1).
 #[rustfmt::skip]

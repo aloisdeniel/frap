@@ -904,6 +904,16 @@ impl Main {
             if let Some(a) = ob.animation_data.as_ref().and_then(|a| a.action) {
                 f(me, a.any());
             }
+            // Modifier pointers (M4 W0): node groups, textures, collections are users
+            // (`IDWALK_CB_USER` in every `MOD_*.cc` `foreach_ID_link`); objects are not
+            // (`IDWALK_CB_NOP`: Boolean operands, mirror objects, …).
+            for m in &ob.modifiers {
+                for (_, x) in m.settings.id_refs() {
+                    if let Some(x) = x.filter(|x| x.code != IdCode::OB) {
+                        f(me, x);
+                    }
+                }
+            }
         }
         for (r, sc) in self.scenes.iter() {
             let me = r.any();

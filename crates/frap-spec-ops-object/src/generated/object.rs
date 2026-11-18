@@ -16,7 +16,14 @@ pub static E0: [EnumItem; 3] = [
     EnumItem { identifier: "VIEW", name: "View", description: "Align the new object to the view", value: 1 },
     EnumItem { identifier: "CURSOR", name: "3D Cursor", description: "Use the 3D cursor orientation for the new object", value: 2 },
 ];
-pub static E1: [EnumItem; 32] = [
+pub static E1: [EnumItem; 5] = [
+    EnumItem { identifier: "CURVE", name: "Curve", description: "Curve from Mesh or Text objects", value: 2 },
+    EnumItem { identifier: "MESH", name: "Mesh", description: "Mesh from Curve, Surface, Metaball, Text, or Point Cloud objects", value: 1 },
+    EnumItem { identifier: "POINTCLOUD", name: "Point Cloud", description: "Point Cloud from Mesh objects", value: 28 },
+    EnumItem { identifier: "CURVES", name: "Curves", description: "Curves from evaluated curve data", value: 27 },
+    EnumItem { identifier: "GREASEPENCIL", name: "Grease Pencil", description: "Grease Pencil from Curve or Mesh objects", value: 30 },
+];
+pub static E2: [EnumItem; 32] = [
     EnumItem { identifier: "INIT", name: "Init", description: "", value: -1 },
     EnumItem { identifier: "DUMMY", name: "Dummy", description: "", value: 0 },
     EnumItem { identifier: "TRANSLATION", name: "Translation", description: "", value: 1 },
@@ -50,7 +57,7 @@ pub static E1: [EnumItem; 32] = [
     EnumItem { identifier: "SEQSLIDE", name: "Sequence Slide", description: "", value: 32 },
     EnumItem { identifier: "GPENCIL_OPACITY", name: "Grease Pencil Opacity", description: "", value: 35 },
 ];
-pub static E2: [EnumItem; 8] = [
+pub static E3: [EnumItem; 8] = [
     EnumItem { identifier: "PLAIN_AXES", name: "Plain Axes", description: "", value: 2 },
     EnumItem { identifier: "ARROWS", name: "Arrows", description: "", value: 1 },
     EnumItem { identifier: "SINGLE_ARROW", name: "Single Arrow", description: "", value: 4 },
@@ -60,13 +67,34 @@ pub static E2: [EnumItem; 8] = [
     EnumItem { identifier: "CONE", name: "Cone", description: "", value: 7 },
     EnumItem { identifier: "IMAGE", name: "Image", description: "", value: 8 },
 ];
-pub static E3: [EnumItem; 4] = [
+pub static E4: [EnumItem; 4] = [
     EnumItem { identifier: "POINT", name: "Point", description: "Omnidirectional point light source", value: 0 },
     EnumItem { identifier: "SUN", name: "Sun", description: "Constant direction parallel ray light source", value: 1 },
     EnumItem { identifier: "SPOT", name: "Spot", description: "Directional cone light source", value: 2 },
     EnumItem { identifier: "AREA", name: "Area", description: "Directional area light source", value: 4 },
 ];
-pub static E4: [EnumItem; 14] = [
+pub static E5: [EnumItem; 11] = [
+    EnumItem { identifier: "OBDATA", name: "Link Object Data", description: "Replace assigned Object Data", value: 1 },
+    EnumItem { identifier: "MATERIAL", name: "Link Materials", description: "Replace assigned Materials", value: 2 },
+    EnumItem { identifier: "ANIMATION", name: "Link Animation Data", description: "Replace assigned Animation Data", value: 3 },
+    EnumItem { identifier: "GROUPS", name: "Link Collections", description: "Replace assigned Collections", value: 4 },
+    EnumItem { identifier: "DUPLICOLLECTION", name: "Link Instance Collection", description: "Replace assigned Collection Instance", value: 5 },
+    EnumItem { identifier: "FONTS", name: "Link Fonts to Text", description: "Replace Text object Fonts", value: 8 },
+    EnumItem { identifier: "MODIFIERS", name: "Copy Modifiers", description: "Replace Modifiers", value: 6 },
+    EnumItem { identifier: "CONSTRAINTS", name: "Copy Constraints", description: "Replace Constraints", value: 7 },
+    EnumItem { identifier: "EFFECTS", name: "Copy Grease Pencil Effects", description: "Replace Grease Pencil Effects", value: 9 },
+    EnumItem { identifier: "LIGHT_LINKING", name: "Copy Light Linking", description: "Replace assigned Light Linking collection", value: 10 },
+    EnumItem { identifier: "SHADOW_LINKING", name: "Copy Shadow Linking", description: "Replace assigned Shadow Linking collection", value: 11 },
+];
+pub static E6: [EnumItem; 2] = [
+    EnumItem { identifier: "SELECTED_OBJECTS", name: "Selected Objects", description: "", value: 2 },
+    EnumItem { identifier: "ALL", name: "All", description: "", value: 1 },
+];
+pub static E7: [EnumItem; 2] = [
+    EnumItem { identifier: "UP", name: "Up", description: "", value: 1 },
+    EnumItem { identifier: "DOWN", name: "Down", description: "", value: -1 },
+];
+pub static E8: [EnumItem; 14] = [
     EnumItem { identifier: "OBJECT", name: "Object Mode", description: "", value: 0 },
     EnumItem { identifier: "EDIT", name: "Edit Mode", description: "", value: 1 },
     EnumItem { identifier: "POSE", name: "Pose Mode", description: "", value: 64 },
@@ -82,23 +110,108 @@ pub static E4: [EnumItem; 14] = [
     EnumItem { identifier: "VERTEX_GREASE_PENCIL", name: "Vertex Paint", description: "Grease Pencil Vertex Paint Strokes", value: 2048 },
     EnumItem { identifier: "SCULPT_CURVES", name: "Sculpt Mode", description: "", value: 4096 },
 ];
-pub static E5: [EnumItem; 5] = [
+pub static E9: [EnumItem; 83] = [
+    EnumItem { identifier: "GREASE_PENCIL_VERTEX_WEIGHT_PROXIMITY", name: "Vertex Weight Proximity", description: "Generate vertex weights based on distance to object", value: 76 },
+    EnumItem { identifier: "DATA_TRANSFER", name: "Data Transfer", description: "Transfer several types of data (vertex groups, UV maps, vertex colors, custom normals) from one mesh to another", value: 49 },
+    EnumItem { identifier: "MESH_CACHE", name: "Mesh Cache", description: "Deform the mesh using an external frame-by-frame vertex transform cache", value: 46 },
+    EnumItem { identifier: "MESH_SEQUENCE_CACHE", name: "Mesh Sequence Cache", description: "Deform the mesh or curve using an external mesh cache in Alembic format", value: 52 },
+    EnumItem { identifier: "NORMAL_EDIT", name: "Normal Edit", description: "Modify the direction of the surface normals", value: 50 },
+    EnumItem { identifier: "WEIGHTED_NORMAL", name: "Weighted Normal", description: "Modify the direction of the surface normals using a weighting method", value: 54 },
+    EnumItem { identifier: "UV_PROJECT", name: "UV Project", description: "Project the UV map coordinates from the negative Z axis of another object", value: 15 },
+    EnumItem { identifier: "UV_WARP", name: "UV Warp", description: "Transform the UV map using the difference between two objects", value: 45 },
+    EnumItem { identifier: "VERTEX_WEIGHT_EDIT", name: "Vertex Weight Edit", description: "Modify of the weights of a vertex group", value: 36 },
+    EnumItem { identifier: "VERTEX_WEIGHT_MIX", name: "Vertex Weight Mix", description: "Mix the weights of two vertex groups", value: 37 },
+    EnumItem { identifier: "VERTEX_WEIGHT_PROXIMITY", name: "Vertex Weight Proximity", description: "Set the vertex group weights based on the distance to another target object", value: 38 },
+    EnumItem { identifier: "GREASE_PENCIL_COLOR", name: "Hue/Saturation", description: "Change hue/saturation/value of the strokes", value: 63 },
+    EnumItem { identifier: "GREASE_PENCIL_TINT", name: "Tint", description: "Tint the color of the strokes", value: 64 },
+    EnumItem { identifier: "GREASE_PENCIL_OPACITY", name: "Opacity", description: "Change the opacity of the strokes", value: 61 },
+    EnumItem { identifier: "GREASE_PENCIL_VERTEX_WEIGHT_ANGLE", name: "Vertex Weight Angle", description: "Generate vertex weights based on stroke angle", value: 74 },
+    EnumItem { identifier: "GREASE_PENCIL_TIME", name: "Time Offset", description: "Offset keyframes", value: 80 },
+    EnumItem { identifier: "GREASE_PENCIL_TEXTURE", name: "Texture Mapping", description: "Change stroke UV texture values", value: 86 },
+    EnumItem { identifier: "ARRAY", name: "Array", description: "Create copies of the shape with offsets", value: 12 },
+    EnumItem { identifier: "BEVEL", name: "Bevel", description: "Generate sloped corners by adding geometry to the mesh's edges or vertices", value: 24 },
+    EnumItem { identifier: "BOOLEAN", name: "Boolean", description: "Use another shape to cut, combine or perform a difference operation", value: 11 },
+    EnumItem { identifier: "BUILD", name: "Build", description: "Cause the faces of the mesh object to appear or disappear one after the other over time", value: 4 },
+    EnumItem { identifier: "DECIMATE", name: "Decimate", description: "Reduce the geometry density", value: 6 },
+    EnumItem { identifier: "EDGE_SPLIT", name: "Edge Split", description: "Split away joined faces at the edges", value: 13 },
+    EnumItem { identifier: "NODES", name: "Geometry Nodes", description: "", value: 57 },
+    EnumItem { identifier: "MASK", name: "Mask", description: "Dynamically hide vertices based on a vertex group or armature", value: 27 },
+    EnumItem { identifier: "MIRROR", name: "Mirror", description: "Mirror along the local X, Y and/or Z axes, over the object origin", value: 5 },
+    EnumItem { identifier: "MESH_TO_VOLUME", name: "Mesh to Volume", description: "", value: 58 },
+    EnumItem { identifier: "MULTIRES", name: "Multiresolution", description: "Subdivide the mesh in a way that allows editing the higher subdivision levels", value: 29 },
+    EnumItem { identifier: "REMESH", name: "Remesh", description: "Generate new mesh topology based on the current shape", value: 41 },
+    EnumItem { identifier: "SCREW", name: "Screw", description: "Lathe around an axis, treating the input mesh as a profile", value: 34 },
+    EnumItem { identifier: "SKIN", name: "Skin", description: "Create a solid shape from vertices and edges, using the vertex radius to define the thickness", value: 42 },
+    EnumItem { identifier: "SOLIDIFY", name: "Solidify", description: "Make the surface thick", value: 33 },
+    EnumItem { identifier: "SUBSURF", name: "Subdivision Surface", description: "Split the faces into smaller parts, giving it a smoother appearance", value: 1 },
+    EnumItem { identifier: "TRIANGULATE", name: "Triangulate", description: "Convert all polygons to triangles", value: 44 },
+    EnumItem { identifier: "VOLUME_TO_MESH", name: "Volume to Mesh", description: "", value: 60 },
+    EnumItem { identifier: "WELD", name: "Weld", description: "Find groups of vertices closer than dist and merge them together", value: 55 },
+    EnumItem { identifier: "WIREFRAME", name: "Wireframe", description: "Convert faces into thickened edges", value: 48 },
+    EnumItem { identifier: "GREASE_PENCIL_ARRAY", name: "Array", description: "Duplicate strokes into an array", value: 75 },
+    EnumItem { identifier: "GREASE_PENCIL_BUILD", name: "Build", description: "Grease Pencil build modifier", value: 84 },
+    EnumItem { identifier: "GREASE_PENCIL_LENGTH", name: "Length", description: "Grease Pencil length modifier", value: 73 },
+    EnumItem { identifier: "LINEART", name: "Line Art", description: "Generate Line Art from scene geometries", value: 78 },
+    EnumItem { identifier: "GREASE_PENCIL_MIRROR", name: "Mirror", description: "Duplicate strokes like a mirror", value: 68 },
+    EnumItem { identifier: "GREASE_PENCIL_MULTIPLY", name: "Multiple Strokes", description: "Generate multiple strokes around original strokes", value: 72 },
+    EnumItem { identifier: "GREASE_PENCIL_SIMPLIFY", name: "Simplify", description: "Simplify stroke reducing number of points", value: 85 },
+    EnumItem { identifier: "GREASE_PENCIL_SUBDIV", name: "Subdivide", description: "Grease Pencil subdivide modifier", value: 62 },
+    EnumItem { identifier: "GREASE_PENCIL_ENVELOPE", name: "Envelope", description: "Create an envelope shape", value: 81 },
+    EnumItem { identifier: "GREASE_PENCIL_OUTLINE", name: "Outline", description: "Convert stroke to outline", value: 82 },
+    EnumItem { identifier: "ARMATURE", name: "Armature", description: "Deform the shape using an armature object", value: 8 },
+    EnumItem { identifier: "CAST", name: "Cast", description: "Shift the shape towards a predefined primitive", value: 17 },
+    EnumItem { identifier: "CURVE", name: "Curve", description: "Bend the mesh using a curve object", value: 3 },
+    EnumItem { identifier: "DISPLACE", name: "Displace", description: "Offset vertices based on a texture", value: 14 },
+    EnumItem { identifier: "HOOK", name: "Hook", description: "Deform specific points using another object", value: 9 },
+    EnumItem { identifier: "LAPLACIANDEFORM", name: "Laplacian Deform", description: "Deform based a series of anchor points", value: 47 },
+    EnumItem { identifier: "LATTICE", name: "Lattice", description: "Deform using the shape of a lattice object", value: 2 },
+    EnumItem { identifier: "MESH_DEFORM", name: "Mesh Deform", description: "Deform using a different mesh, which acts as a deformation cage", value: 18 },
+    EnumItem { identifier: "SHRINKWRAP", name: "Shrinkwrap", description: "Project the shape onto another object", value: 25 },
+    EnumItem { identifier: "SIMPLE_DEFORM", name: "Simple Deform", description: "Deform the shape by twisting, bending, tapering or stretching", value: 28 },
+    EnumItem { identifier: "SMOOTH", name: "Smooth", description: "Smooth the mesh by flattening the angles between adjacent faces", value: 16 },
+    EnumItem { identifier: "CORRECTIVE_SMOOTH", name: "Smooth Corrective", description: "Smooth the mesh while still preserving the volume", value: 51 },
+    EnumItem { identifier: "LAPLACIANSMOOTH", name: "Smooth Laplacian", description: "Reduce the noise on a mesh surface with minimal changes to its shape", value: 43 },
+    EnumItem { identifier: "SURFACE_DEFORM", name: "Surface Deform", description: "Transfer motion from another mesh", value: 53 },
+    EnumItem { identifier: "WARP", name: "Warp", description: "Warp parts of a mesh to a new location in a very flexible way thanks to 2 specified objects", value: 35 },
+    EnumItem { identifier: "WAVE", name: "Wave", description: "Adds a ripple-like motion to an object's geometry", value: 7 },
+    EnumItem { identifier: "VOLUME_DISPLACE", name: "Volume Displace", description: "Deform volume based on noise or other vector fields", value: 59 },
+    EnumItem { identifier: "GREASE_PENCIL_HOOK", name: "Hook", description: "Deform stroke points using objects", value: 77 },
+    EnumItem { identifier: "GREASE_PENCIL_NOISE", name: "Noise", description: "Generate noise wobble in Grease Pencil strokes", value: 67 },
+    EnumItem { identifier: "GREASE_PENCIL_OFFSET", name: "Offset", description: "Change stroke location, rotation, or scale", value: 66 },
+    EnumItem { identifier: "GREASE_PENCIL_SMOOTH", name: "Smooth", description: "Smooth Grease Pencil strokes", value: 65 },
+    EnumItem { identifier: "GREASE_PENCIL_THICKNESS", name: "Thickness", description: "Change stroke thickness", value: 69 },
+    EnumItem { identifier: "GREASE_PENCIL_LATTICE", name: "Lattice", description: "Deform strokes using a lattice object", value: 70 },
+    EnumItem { identifier: "GREASE_PENCIL_DASH", name: "Dot Dash", description: "Generate dot-dash styled strokes", value: 71 },
+    EnumItem { identifier: "GREASE_PENCIL_ARMATURE", name: "Armature", description: "Deform stroke points using armature object", value: 79 },
+    EnumItem { identifier: "GREASE_PENCIL_SHRINKWRAP", name: "Shrinkwrap", description: "Project the shape onto another object", value: 83 },
+    EnumItem { identifier: "CLOTH", name: "Cloth", description: "Physic simulation for cloth", value: 22 },
+    EnumItem { identifier: "COLLISION", name: "Collision", description: "For colliders participating in physics simulation, control which level in the modifier stack is used as the collision surface", value: 23 },
+    EnumItem { identifier: "DYNAMIC_PAINT", name: "Dynamic Paint", description: "Turn objects into paint canvases and brushes, creating color attributes, image sequences, or displacement", value: 40 },
+    EnumItem { identifier: "EXPLODE", name: "Explode", description: "Break apart the mesh faces and let them follow particles", value: 21 },
+    EnumItem { identifier: "FLUID", name: "Fluid", description: "Physics simulation for fluids, like water, oil and smoke", value: 56 },
+    EnumItem { identifier: "OCEAN", name: "Ocean", description: "Generate a moving ocean surface", value: 39 },
+    EnumItem { identifier: "PARTICLE_INSTANCE", name: "Particle Instance", description: "Duplicate mesh at the location of particles", value: 20 },
+    EnumItem { identifier: "PARTICLE_SYSTEM", name: "Particle System", description: "Spawn particles from the shape", value: 19 },
+    EnumItem { identifier: "SOFT_BODY", name: "Soft Body", description: "Simulate soft deformable objects", value: 10 },
+    EnumItem { identifier: "SURFACE", name: "Surface", description: "", value: 30 },
+];
+pub static E10: [EnumItem; 5] = [
     EnumItem { identifier: "GEOMETRY_ORIGIN", name: "Geometry to Origin", description: "Move object geometry to object origin", value: 0 },
     EnumItem { identifier: "ORIGIN_GEOMETRY", name: "Origin to Geometry", description: "Calculate the center of geometry based on the current pivot point (median, otherwise bounding box)", value: 1 },
     EnumItem { identifier: "ORIGIN_CURSOR", name: "Origin to 3D Cursor", description: "Move object origin to position of the 3D cursor", value: 2 },
     EnumItem { identifier: "ORIGIN_CENTER_OF_MASS", name: "Origin to Center of Mass (Surface)", description: "Calculate the center of mass from the surface area", value: 3 },
     EnumItem { identifier: "ORIGIN_CENTER_OF_VOLUME", name: "Origin to Center of Mass (Volume)", description: "Calculate the center of mass from the volume (must be manifold geometry with consistent normals)", value: 4 },
 ];
-pub static E6: [EnumItem; 2] = [
+pub static E11: [EnumItem; 2] = [
     EnumItem { identifier: "MEDIAN", name: "Median Center", description: "", value: 3 },
     EnumItem { identifier: "BOUNDS", name: "Bounds Center", description: "", value: 0 },
 ];
-pub static E7: [EnumItem; 3] = [
+pub static E12: [EnumItem; 3] = [
     EnumItem { identifier: "CLEAR", name: "Clear Parent", description: "Completely clear the parenting relationship, including involved modifiers if any", value: 0 },
     EnumItem { identifier: "CLEAR_KEEP_TRANSFORM", name: "Clear and Keep Transformation", description: "As 'Clear Parent', but keep the current visual transformations of the object", value: 1 },
     EnumItem { identifier: "CLEAR_INVERSE", name: "Clear Parent Inverse", description: "Reset the transform corrections applied to the parenting relationship, does not remove parenting itself", value: 2 },
 ];
-pub static E8: [EnumItem; 13] = [
+pub static E13: [EnumItem; 13] = [
     EnumItem { identifier: "OBJECT", name: "Object", description: "", value: 0 },
     EnumItem { identifier: "ARMATURE", name: "Armature Deform", description: "", value: 1 },
     EnumItem { identifier: "ARMATURE_NAME", name: "   With Empty Groups", description: "", value: 2 },
@@ -113,13 +226,13 @@ pub static E8: [EnumItem; 13] = [
     EnumItem { identifier: "VERTEX", name: "Vertex", description: "", value: 11 },
     EnumItem { identifier: "VERTEX_TRI", name: "Vertex (Triangle)", description: "", value: 12 },
 ];
-pub static E9: [EnumItem; 4] = [
+pub static E14: [EnumItem; 4] = [
     EnumItem { identifier: "TOGGLE", name: "Toggle", description: "Toggle selection for all elements", value: 0 },
     EnumItem { identifier: "SELECT", name: "Select", description: "Select all elements", value: 1 },
     EnumItem { identifier: "DESELECT", name: "Deselect", description: "Deselect all elements", value: 2 },
     EnumItem { identifier: "INVERT", name: "Invert", description: "Invert selection of all elements", value: 3 },
 ];
-pub static E10: [EnumItem; 16] = [
+pub static E15: [EnumItem; 16] = [
     EnumItem { identifier: "MESH", name: "Mesh", description: "", value: 1 },
     EnumItem { identifier: "CURVE", name: "Curve", description: "", value: 2 },
     EnumItem { identifier: "SURFACE", name: "Surface", description: "", value: 3 },
@@ -363,6 +476,114 @@ impl OpProps for CollectionUnlink {
     }
 }
 
+// ---------------------------------------------------------------- object.convert
+/// Props of `object.convert`, RNA order.
+pub static CONVERT_PROPS: [PropDef; 6] = [
+    PropDef { identifier: "target", name: "Target", description: "Type of object to convert to", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("MESH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "keep_original", name: "Keep Original", description: "Keep original objects instead of replacing them", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "merge_customdata", name: "Merge UVs", description: "Merge UV coordinates that share a vertex to account for imprecision in some modifiers", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "thickness", name: "Thickness", description: "", kind: PropKind::Int { default: Defaults::Scalar(5), hard: (1, 100), soft: (1, 100) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "faces", name: "Export Faces", description: "Export faces as filled strokes", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "offset", name: "Stroke Offset", description: "Offset strokes from fill", kind: PropKind::Float { default: Defaults::Scalar(0.009999999776482582), hard: (0.0, 999999995904.0), soft: (0.0, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `OBJECT_OT_convert`
+pub static OPSPEC_OBJECT_OT_CONVERT: OperatorSpec = OperatorSpec {
+    idname: "object.convert",
+    bl_idname: "OBJECT_OT_convert",
+    label: "Convert To",
+    description: "Convert selected objects to another type",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &CONVERT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::Y, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Enums of `object.convert`.
+pub mod convert {
+    /// `Target`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Target {
+        /// "CURVE"
+        Curve,
+        /// "MESH"
+        Mesh,
+        /// "POINTCLOUD"
+        Pointcloud,
+        /// "CURVES"
+        Curves,
+        /// "GREASEPENCIL"
+        Greasepencil,
+    }
+    impl Target {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Target; 5] = [Target::Curve, Target::Mesh, Target::Pointcloud, Target::Curves, Target::Greasepencil];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Target::Curve => "CURVE",
+                Target::Mesh => "MESH",
+                Target::Pointcloud => "POINTCLOUD",
+                Target::Curves => "CURVES",
+                Target::Greasepencil => "GREASEPENCIL",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "CURVE" => Some(Target::Curve),
+                "MESH" => Some(Target::Mesh),
+                "POINTCLOUD" => Some(Target::Pointcloud),
+                "CURVES" => Some(Target::Curves),
+                "GREASEPENCIL" => Some(Target::Greasepencil),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Target {
+        fn default() -> Self {
+            Target::Mesh
+        }
+    }
+    impl frap_rna::FromValue for Target {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `object.convert` (Convert To).
+#[derive(Debug, Clone)]
+pub struct Convert {
+    /// Type of object to convert to; default "MESH": CURVE | MESH | POINTCLOUD | CURVES | GREASEPENCIL [ANIMATABLE]
+    pub target: Prop<convert::Target>,
+    /// Keep original objects instead of replacing them; default false [ANIMATABLE]
+    pub keep_original: Prop<bool>,
+    /// Merge UV coordinates that share a vertex to account for imprecision in some modifiers; default true [ANIMATABLE]
+    pub merge_customdata: Prop<bool>,
+    /// default 5 [ANIMATABLE]
+    pub thickness: Prop<i32>,
+    /// Export faces as filled strokes; default true [ANIMATABLE]
+    pub faces: Prop<bool>,
+    /// Offset strokes from fill; default 0.009999999776482582 [ANIMATABLE]
+    pub offset: Prop<f32>,
+}
+impl OpProps for Convert {
+    const IDNAME: &'static str = "object.convert";
+    const BL_IDNAME: &'static str = "OBJECT_OT_convert";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_CONVERT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Convert {
+            target: a.prop(0, "target"),
+            keep_original: a.prop(1, "keep_original"),
+            merge_customdata: a.prop(2, "merge_customdata"),
+            thickness: a.prop(3, "thickness"),
+            faces: a.prop(4, "faces"),
+            offset: a.prop(5, "offset"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- object.delete
 /// Props of `object.delete`, RNA order.
 pub static DELETE_PROPS: [PropDef; 2] = [
@@ -406,7 +627,7 @@ impl OpProps for ObjectDelete {
 /// Props of `object.duplicate`, RNA order.
 pub static DUPLICATE_PROPS: [PropDef; 2] = [
     PropDef { identifier: "linked", name: "Linked", description: "Duplicate object but not object data, linking to the original data", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "mode", name: "Mode", description: "", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("TRANSLATION"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "mode", name: "Mode", description: "", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("TRANSLATION"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `OBJECT_OT_duplicate`
 pub static OPSPEC_OBJECT_OT_DUPLICATE: OperatorSpec = OperatorSpec {
@@ -714,7 +935,7 @@ impl OpProps for EditmodeToggle {
 // ---------------------------------------------------------------- object.empty_add
 /// Props of `object.empty_add`, RNA order.
 pub static EMPTY_ADD_PROPS: [PropDef; 6] = [
-    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("PLAIN_AXES"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("PLAIN_AXES"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "radius", name: "Radius", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -873,6 +1094,76 @@ impl OpProps for EmptyAdd {
     }
 }
 
+// ---------------------------------------------------------------- object.hide_view_clear
+/// Props of `object.hide_view_clear`, RNA order.
+pub static HIDE_VIEW_CLEAR_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "select", name: "Select", description: "Select revealed objects", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `OBJECT_OT_hide_view_clear`
+pub static OPSPEC_OBJECT_OT_HIDE_VIEW_CLEAR: OperatorSpec = OperatorSpec {
+    idname: "object.hide_view_clear",
+    bl_idname: "OBJECT_OT_hide_view_clear",
+    label: "Show Hidden Objects",
+    description: "Reveal temporarily hidden objects",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &HIDE_VIEW_CLEAR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.hide_view_clear` (Show Hidden Objects).
+#[derive(Debug, Clone)]
+pub struct HideViewClear {
+    /// Select revealed objects; default true [ANIMATABLE]
+    pub select: Prop<bool>,
+}
+impl OpProps for HideViewClear {
+    const IDNAME: &'static str = "object.hide_view_clear";
+    const BL_IDNAME: &'static str = "OBJECT_OT_hide_view_clear";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_HIDE_VIEW_CLEAR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        HideViewClear {
+            select: a.prop(0, "select"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.hide_view_set
+/// Props of `object.hide_view_set`, RNA order.
+pub static HIDE_VIEW_SET_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "unselected", name: "Unselected", description: "Hide unselected rather than selected objects", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_hide_view_set`
+pub static OPSPEC_OBJECT_OT_HIDE_VIEW_SET: OperatorSpec = OperatorSpec {
+    idname: "object.hide_view_set",
+    bl_idname: "OBJECT_OT_hide_view_set",
+    label: "Hide Objects",
+    description: "Temporarily hide objects from the viewport",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &HIDE_VIEW_SET_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.hide_view_set` (Hide Objects).
+#[derive(Debug, Clone)]
+pub struct HideViewSet {
+    /// Hide unselected rather than selected objects; default false [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub unselected: Prop<bool>,
+}
+impl OpProps for HideViewSet {
+    const IDNAME: &'static str = "object.hide_view_set";
+    const BL_IDNAME: &'static str = "OBJECT_OT_hide_view_set";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_HIDE_VIEW_SET
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        HideViewSet {
+            unselected: a.prop(0, "unselected"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- object.join
 /// Props of `object.join`, RNA order.
 pub static JOIN_PROPS: [PropDef; 0] = [
@@ -907,7 +1198,7 @@ impl OpProps for Join {
 // ---------------------------------------------------------------- object.light_add
 /// Props of `object.light_add`, RNA order.
 pub static LIGHT_ADD_PROPS: [PropDef; 6] = [
-    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E3, default: EnumDefault::Item("POINT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("POINT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "radius", name: "Radius", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -1128,6 +1419,214 @@ impl OpProps for LocationClear {
     }
 }
 
+// ---------------------------------------------------------------- object.make_links_data
+/// Props of `object.make_links_data`, RNA order.
+pub static MAKE_LINKS_DATA_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E5, default: EnumDefault::Item("OBDATA"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `OBJECT_OT_make_links_data`
+pub static OPSPEC_OBJECT_OT_MAKE_LINKS_DATA: OperatorSpec = OperatorSpec {
+    idname: "object.make_links_data",
+    bl_idname: "OBJECT_OT_make_links_data",
+    label: "Link/Transfer Data",
+    description: "Transfer data from active object to selected objects",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &MAKE_LINKS_DATA_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Enums of `object.make_links_data`.
+pub mod make_links_data {
+    /// `Type`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Type {
+        /// "OBDATA"
+        Obdata,
+        /// "MATERIAL"
+        Material,
+        /// "ANIMATION"
+        Animation,
+        /// "GROUPS"
+        Groups,
+        /// "DUPLICOLLECTION"
+        Duplicollection,
+        /// "FONTS"
+        Fonts,
+        /// "MODIFIERS"
+        Modifiers,
+        /// "CONSTRAINTS"
+        Constraints,
+        /// "EFFECTS"
+        Effects,
+        /// "LIGHT_LINKING"
+        LightLinking,
+        /// "SHADOW_LINKING"
+        ShadowLinking,
+    }
+    impl Type {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Type; 11] = [Type::Obdata, Type::Material, Type::Animation, Type::Groups, Type::Duplicollection, Type::Fonts, Type::Modifiers, Type::Constraints, Type::Effects, Type::LightLinking, Type::ShadowLinking];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Type::Obdata => "OBDATA",
+                Type::Material => "MATERIAL",
+                Type::Animation => "ANIMATION",
+                Type::Groups => "GROUPS",
+                Type::Duplicollection => "DUPLICOLLECTION",
+                Type::Fonts => "FONTS",
+                Type::Modifiers => "MODIFIERS",
+                Type::Constraints => "CONSTRAINTS",
+                Type::Effects => "EFFECTS",
+                Type::LightLinking => "LIGHT_LINKING",
+                Type::ShadowLinking => "SHADOW_LINKING",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "OBDATA" => Some(Type::Obdata),
+                "MATERIAL" => Some(Type::Material),
+                "ANIMATION" => Some(Type::Animation),
+                "GROUPS" => Some(Type::Groups),
+                "DUPLICOLLECTION" => Some(Type::Duplicollection),
+                "FONTS" => Some(Type::Fonts),
+                "MODIFIERS" => Some(Type::Modifiers),
+                "CONSTRAINTS" => Some(Type::Constraints),
+                "EFFECTS" => Some(Type::Effects),
+                "LIGHT_LINKING" => Some(Type::LightLinking),
+                "SHADOW_LINKING" => Some(Type::ShadowLinking),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Type {
+        fn default() -> Self {
+            Type::Obdata
+        }
+    }
+    impl frap_rna::FromValue for Type {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `object.make_links_data` (Link/Transfer Data).
+#[derive(Debug, Clone)]
+pub struct MakeLinksData {
+    /// default "OBDATA": OBDATA | MATERIAL | ANIMATION | GROUPS | DUPLICOLLECTION | FONTS | MODIFIERS | CONSTRAINTS | … [ANIMATABLE]
+    pub r#type: Prop<make_links_data::Type>,
+}
+impl OpProps for MakeLinksData {
+    const IDNAME: &'static str = "object.make_links_data";
+    const BL_IDNAME: &'static str = "OBJECT_OT_make_links_data";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MAKE_LINKS_DATA
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        MakeLinksData {
+            r#type: a.prop(0, "type"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.make_single_user
+/// Props of `object.make_single_user`, RNA order.
+pub static MAKE_SINGLE_USER_PROPS: [PropDef; 6] = [
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E6, default: EnumDefault::Item("SELECTED_OBJECTS"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "object", name: "Object", description: "Make single user objects", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "obdata", name: "Object Data", description: "Make single user object data", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "material", name: "Materials", description: "Make materials local to each data-block", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "animation", name: "Object Animation", description: "Make object animation data local to each object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "obdata_animation", name: "Object Data Animation", description: "Make object data (mesh, curve etc.) animation data local to each object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `OBJECT_OT_make_single_user`
+pub static OPSPEC_OBJECT_OT_MAKE_SINGLE_USER: OperatorSpec = OperatorSpec {
+    idname: "object.make_single_user",
+    bl_idname: "OBJECT_OT_make_single_user",
+    label: "Make Single User",
+    description: "Make linked data local to each object",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &MAKE_SINGLE_USER_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::Y, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Enums of `object.make_single_user`.
+pub mod make_single_user {
+    /// `Type`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Type {
+        /// "SELECTED_OBJECTS"
+        SelectedObjects,
+        /// "ALL"
+        All,
+    }
+    impl Type {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Type; 2] = [Type::SelectedObjects, Type::All];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Type::SelectedObjects => "SELECTED_OBJECTS",
+                Type::All => "ALL",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "SELECTED_OBJECTS" => Some(Type::SelectedObjects),
+                "ALL" => Some(Type::All),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Type {
+        fn default() -> Self {
+            Type::SelectedObjects
+        }
+    }
+    impl frap_rna::FromValue for Type {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `object.make_single_user` (Make Single User).
+#[derive(Debug, Clone)]
+pub struct MakeSingleUser {
+    /// default "SELECTED_OBJECTS": SELECTED_OBJECTS | ALL [ANIMATABLE]
+    pub r#type: Prop<make_single_user::Type>,
+    /// Make single user objects; default false [ANIMATABLE]
+    pub object: Prop<bool>,
+    /// Make single user object data; default false [ANIMATABLE]
+    pub obdata: Prop<bool>,
+    /// Make materials local to each data-block; default false [ANIMATABLE]
+    pub material: Prop<bool>,
+    /// Make object animation data local to each object; default false [ANIMATABLE]
+    pub animation: Prop<bool>,
+    /// Make object data (mesh, curve etc.) animation data local to each object; default false [ANIMATABLE]
+    pub obdata_animation: Prop<bool>,
+}
+impl OpProps for MakeSingleUser {
+    const IDNAME: &'static str = "object.make_single_user";
+    const BL_IDNAME: &'static str = "OBJECT_OT_make_single_user";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MAKE_SINGLE_USER
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        MakeSingleUser {
+            r#type: a.prop(0, "type"),
+            object: a.prop(1, "object"),
+            obdata: a.prop(2, "obdata"),
+            material: a.prop(3, "material"),
+            animation: a.prop(4, "animation"),
+            obdata_animation: a.prop(5, "obdata_animation"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- object.material_slot_add
 /// Props of `object.material_slot_add`, RNA order.
 pub static MATERIAL_SLOT_ADD_PROPS: [PropDef; 0] = [
@@ -1217,6 +1716,82 @@ impl OpProps for MaterialSlotDeselect {
     }
     fn from_args(a: &OpArgs) -> Self {
         MaterialSlotDeselect {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.material_slot_move
+/// Props of `object.material_slot_move`, RNA order.
+pub static MATERIAL_SLOT_MOVE_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "direction", name: "Direction", description: "Direction to move the active material towards", kind: PropKind::Enum { items: &enums::E7, default: EnumDefault::Item("UP"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `OBJECT_OT_material_slot_move`
+pub static OPSPEC_OBJECT_OT_MATERIAL_SLOT_MOVE: OperatorSpec = OperatorSpec {
+    idname: "object.material_slot_move",
+    bl_idname: "OBJECT_OT_material_slot_move",
+    label: "Move Material",
+    description: "Move the active material up/down in the list",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &MATERIAL_SLOT_MOVE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `object.material_slot_move`.
+pub mod material_slot_move {
+    /// `Direction`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Direction {
+        /// "UP"
+        Up,
+        /// "DOWN"
+        Down,
+    }
+    impl Direction {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Direction; 2] = [Direction::Up, Direction::Down];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Direction::Up => "UP",
+                Direction::Down => "DOWN",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "UP" => Some(Direction::Up),
+                "DOWN" => Some(Direction::Down),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Direction {
+        fn default() -> Self {
+            Direction::Up
+        }
+    }
+    impl frap_rna::FromValue for Direction {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `object.material_slot_move` (Move Material).
+#[derive(Debug, Clone)]
+pub struct MaterialSlotMove {
+    /// Direction to move the active material towards; default "UP": UP | DOWN [ANIMATABLE]
+    pub direction: Prop<material_slot_move::Direction>,
+}
+impl OpProps for MaterialSlotMove {
+    const IDNAME: &'static str = "object.material_slot_move";
+    const BL_IDNAME: &'static str = "OBJECT_OT_material_slot_move";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MATERIAL_SLOT_MOVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        MaterialSlotMove {
+            direction: a.prop(0, "direction"),
         }
     }
 }
@@ -1348,7 +1923,7 @@ impl OpProps for MaterialSlotSelect {
 // ---------------------------------------------------------------- object.mode_set
 /// Props of `object.mode_set`, RNA order.
 pub static MODE_SET_PROPS: [PropDef; 2] = [
-    PropDef { identifier: "mode", name: "Mode", description: "", kind: PropKind::Enum { items: &enums::E4, default: EnumDefault::Item("OBJECT"), dynamic: Some("OBJECT_OT_mode_set.mode") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "mode", name: "Mode", description: "", kind: PropKind::Enum { items: &enums::E8, default: EnumDefault::Item("OBJECT"), dynamic: Some("OBJECT_OT_mode_set.mode") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "toggle", name: "Toggle", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `OBJECT_OT_mode_set`
@@ -1380,6 +1955,361 @@ impl OpProps for ModeSet {
         ModeSet {
             mode: a.prop(0, "mode"),
             toggle: a.prop(1, "toggle"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.modifier_add
+/// Props of `object.modifier_add`, RNA order.
+pub static MODIFIER_ADD_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E9, default: EnumDefault::Item("SUBSURF"), dynamic: Some("OBJECT_OT_modifier_add.type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+    PropDef { identifier: "use_selected_objects", name: "Selected Objects", description: "Affect all selected objects instead of just the active object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_modifier_add`
+pub static OPSPEC_OBJECT_OT_MODIFIER_ADD: OperatorSpec = OperatorSpec {
+    idname: "object.modifier_add",
+    bl_idname: "OBJECT_OT_modifier_add",
+    label: "Add Modifier",
+    description: "Add a procedural operation/effect to the active object",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &MODIFIER_ADD_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.modifier_add` (Add Modifier).
+#[derive(Debug, Clone)]
+pub struct ModifierAdd {
+    /// default "SUBSURF", dynamic: GREASE_PENCIL_VERTEX_WEIGHT_PROXIMITY | DATA_TRANSFER | MESH_CACHE | MESH_SEQUENCE_CACHE | NORMAL_EDIT | WEIGHTED_NORMAL | UV_PROJECT | UV_WARP | … [ANIMATABLE, DYNAMIC_ENUM]
+    pub r#type: Prop<SmolStr>,
+    /// Affect all selected objects instead of just the active object; default false [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub use_selected_objects: Prop<bool>,
+}
+impl OpProps for ModifierAdd {
+    const IDNAME: &'static str = "object.modifier_add";
+    const BL_IDNAME: &'static str = "OBJECT_OT_modifier_add";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MODIFIER_ADD
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ModifierAdd {
+            r#type: a.prop(0, "type"),
+            use_selected_objects: a.prop(1, "use_selected_objects"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.modifier_apply
+/// Props of `object.modifier_apply`, RNA order.
+pub static MODIFIER_APPLY_PROPS: [PropDef; 6] = [
+    PropDef { identifier: "modifier", name: "Modifier", description: "Name of the modifier to edit", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::NEVER_NULL).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "report", name: "Report", description: "Create a notification after the operation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "merge_customdata", name: "Merge UVs", description: "For mesh objects, merge UV coordinates that share a vertex to account for imprecision in some modifiers", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "single_user", name: "Make Data Single User", description: "Make the object's data single user if needed", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "all_keyframes", name: "Apply to all keyframes", description: "For Grease Pencil objects, apply the modifier to all the keyframes", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "use_selected_objects", name: "Selected Objects", description: "Affect all selected objects instead of just the active object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_modifier_apply`
+pub static OPSPEC_OBJECT_OT_MODIFIER_APPLY: OperatorSpec = OperatorSpec {
+    idname: "object.modifier_apply",
+    bl_idname: "OBJECT_OT_modifier_apply",
+    label: "Apply Modifier",
+    description: "Apply modifier and remove from the stack",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &MODIFIER_APPLY_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `object.modifier_apply` (Apply Modifier).
+#[derive(Debug, Clone)]
+pub struct ModifierApply {
+    /// Name of the modifier to edit; default "" [HIDDEN, NEVER_NULL, SKIP_PRESET]
+    pub modifier: Prop<SmolStr>,
+    /// Create a notification after the operation; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub report: Prop<bool>,
+    /// For mesh objects, merge UV coordinates that share a vertex to account for imprecision in some modifiers; default true [ANIMATABLE]
+    pub merge_customdata: Prop<bool>,
+    /// Make the object's data single user if needed; default false [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub single_user: Prop<bool>,
+    /// For Grease Pencil objects, apply the modifier to all the keyframes; default false [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub all_keyframes: Prop<bool>,
+    /// Affect all selected objects instead of just the active object; default false [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub use_selected_objects: Prop<bool>,
+}
+impl OpProps for ModifierApply {
+    const IDNAME: &'static str = "object.modifier_apply";
+    const BL_IDNAME: &'static str = "OBJECT_OT_modifier_apply";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MODIFIER_APPLY
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ModifierApply {
+            modifier: a.prop(0, "modifier"),
+            report: a.prop(1, "report"),
+            merge_customdata: a.prop(2, "merge_customdata"),
+            single_user: a.prop(3, "single_user"),
+            all_keyframes: a.prop(4, "all_keyframes"),
+            use_selected_objects: a.prop(5, "use_selected_objects"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.modifier_copy
+/// Props of `object.modifier_copy`, RNA order.
+pub static MODIFIER_COPY_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "modifier", name: "Modifier", description: "Name of the modifier to edit", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::NEVER_NULL).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "use_selected_objects", name: "Selected Objects", description: "Affect all selected objects instead of just the active object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_modifier_copy`
+pub static OPSPEC_OBJECT_OT_MODIFIER_COPY: OperatorSpec = OperatorSpec {
+    idname: "object.modifier_copy",
+    bl_idname: "OBJECT_OT_modifier_copy",
+    label: "Copy Modifier",
+    description: "Duplicate modifier at the same position in the stack",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &MODIFIER_COPY_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.modifier_copy` (Copy Modifier).
+#[derive(Debug, Clone)]
+pub struct ModifierCopy {
+    /// Name of the modifier to edit; default "" [HIDDEN, NEVER_NULL, SKIP_PRESET]
+    pub modifier: Prop<SmolStr>,
+    /// Affect all selected objects instead of just the active object; default false [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub use_selected_objects: Prop<bool>,
+}
+impl OpProps for ModifierCopy {
+    const IDNAME: &'static str = "object.modifier_copy";
+    const BL_IDNAME: &'static str = "OBJECT_OT_modifier_copy";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MODIFIER_COPY
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ModifierCopy {
+            modifier: a.prop(0, "modifier"),
+            use_selected_objects: a.prop(1, "use_selected_objects"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.modifier_move_down
+/// Props of `object.modifier_move_down`, RNA order.
+pub static MODIFIER_MOVE_DOWN_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "modifier", name: "Modifier", description: "Name of the modifier to edit", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::NEVER_NULL).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_modifier_move_down`
+pub static OPSPEC_OBJECT_OT_MODIFIER_MOVE_DOWN: OperatorSpec = OperatorSpec {
+    idname: "object.modifier_move_down",
+    bl_idname: "OBJECT_OT_modifier_move_down",
+    label: "Move Down Modifier",
+    description: "Move modifier down in the stack",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &MODIFIER_MOVE_DOWN_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.modifier_move_down` (Move Down Modifier).
+#[derive(Debug, Clone)]
+pub struct ModifierMoveDown {
+    /// Name of the modifier to edit; default "" [HIDDEN, NEVER_NULL, SKIP_PRESET]
+    pub modifier: Prop<SmolStr>,
+}
+impl OpProps for ModifierMoveDown {
+    const IDNAME: &'static str = "object.modifier_move_down";
+    const BL_IDNAME: &'static str = "OBJECT_OT_modifier_move_down";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MODIFIER_MOVE_DOWN
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ModifierMoveDown {
+            modifier: a.prop(0, "modifier"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.modifier_move_to_index
+/// Props of `object.modifier_move_to_index`, RNA order.
+pub static MODIFIER_MOVE_TO_INDEX_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "modifier", name: "Modifier", description: "Name of the modifier to edit", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::NEVER_NULL).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "index", name: "Index", description: "The index to move the modifier to", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 2147483647), soft: (0, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_selected_objects", name: "Selected Objects", description: "Affect all selected objects instead of just the active object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_modifier_move_to_index`
+pub static OPSPEC_OBJECT_OT_MODIFIER_MOVE_TO_INDEX: OperatorSpec = OperatorSpec {
+    idname: "object.modifier_move_to_index",
+    bl_idname: "OBJECT_OT_modifier_move_to_index",
+    label: "Move Active Modifier to Index",
+    description: "Change the modifier's index in the stack so it evaluates after the set number of others",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &MODIFIER_MOVE_TO_INDEX_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.modifier_move_to_index` (Move Active Modifier to Index).
+#[derive(Debug, Clone)]
+pub struct ModifierMoveToIndex {
+    /// Name of the modifier to edit; default "" [HIDDEN, NEVER_NULL, SKIP_PRESET]
+    pub modifier: Prop<SmolStr>,
+    /// The index to move the modifier to; default 0 [ANIMATABLE]
+    pub index: Prop<i32>,
+    /// Affect all selected objects instead of just the active object; default false [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub use_selected_objects: Prop<bool>,
+}
+impl OpProps for ModifierMoveToIndex {
+    const IDNAME: &'static str = "object.modifier_move_to_index";
+    const BL_IDNAME: &'static str = "OBJECT_OT_modifier_move_to_index";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MODIFIER_MOVE_TO_INDEX
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ModifierMoveToIndex {
+            modifier: a.prop(0, "modifier"),
+            index: a.prop(1, "index"),
+            use_selected_objects: a.prop(2, "use_selected_objects"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.modifier_move_up
+/// Props of `object.modifier_move_up`, RNA order.
+pub static MODIFIER_MOVE_UP_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "modifier", name: "Modifier", description: "Name of the modifier to edit", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::NEVER_NULL).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_modifier_move_up`
+pub static OPSPEC_OBJECT_OT_MODIFIER_MOVE_UP: OperatorSpec = OperatorSpec {
+    idname: "object.modifier_move_up",
+    bl_idname: "OBJECT_OT_modifier_move_up",
+    label: "Move Up Modifier",
+    description: "Move modifier up in the stack",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &MODIFIER_MOVE_UP_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.modifier_move_up` (Move Up Modifier).
+#[derive(Debug, Clone)]
+pub struct ModifierMoveUp {
+    /// Name of the modifier to edit; default "" [HIDDEN, NEVER_NULL, SKIP_PRESET]
+    pub modifier: Prop<SmolStr>,
+}
+impl OpProps for ModifierMoveUp {
+    const IDNAME: &'static str = "object.modifier_move_up";
+    const BL_IDNAME: &'static str = "OBJECT_OT_modifier_move_up";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MODIFIER_MOVE_UP
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ModifierMoveUp {
+            modifier: a.prop(0, "modifier"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.modifier_remove
+/// Props of `object.modifier_remove`, RNA order.
+pub static MODIFIER_REMOVE_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "modifier", name: "Modifier", description: "Name of the modifier to edit", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::NEVER_NULL).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "report", name: "Report", description: "Create a notification after the operation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "use_selected_objects", name: "Selected Objects", description: "Affect all selected objects instead of just the active object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_modifier_remove`
+pub static OPSPEC_OBJECT_OT_MODIFIER_REMOVE: OperatorSpec = OperatorSpec {
+    idname: "object.modifier_remove",
+    bl_idname: "OBJECT_OT_modifier_remove",
+    label: "Remove Modifier",
+    description: "Remove a modifier from the active object",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &MODIFIER_REMOVE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.modifier_remove` (Remove Modifier).
+#[derive(Debug, Clone)]
+pub struct ModifierRemove {
+    /// Name of the modifier to edit; default "" [HIDDEN, NEVER_NULL, SKIP_PRESET]
+    pub modifier: Prop<SmolStr>,
+    /// Create a notification after the operation; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub report: Prop<bool>,
+    /// Affect all selected objects instead of just the active object; default false [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub use_selected_objects: Prop<bool>,
+}
+impl OpProps for ModifierRemove {
+    const IDNAME: &'static str = "object.modifier_remove";
+    const BL_IDNAME: &'static str = "OBJECT_OT_modifier_remove";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MODIFIER_REMOVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ModifierRemove {
+            modifier: a.prop(0, "modifier"),
+            report: a.prop(1, "report"),
+            use_selected_objects: a.prop(2, "use_selected_objects"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.modifier_set_active
+/// Props of `object.modifier_set_active`, RNA order.
+pub static MODIFIER_SET_ACTIVE_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "modifier", name: "Modifier", description: "Name of the modifier to edit", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::NEVER_NULL).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_modifier_set_active`
+pub static OPSPEC_OBJECT_OT_MODIFIER_SET_ACTIVE: OperatorSpec = OperatorSpec {
+    idname: "object.modifier_set_active",
+    bl_idname: "OBJECT_OT_modifier_set_active",
+    label: "Set Active Modifier",
+    description: "Activate the modifier to use as the context",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &MODIFIER_SET_ACTIVE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.modifier_set_active` (Set Active Modifier).
+#[derive(Debug, Clone)]
+pub struct ModifierSetActive {
+    /// Name of the modifier to edit; default "" [HIDDEN, NEVER_NULL, SKIP_PRESET]
+    pub modifier: Prop<SmolStr>,
+}
+impl OpProps for ModifierSetActive {
+    const IDNAME: &'static str = "object.modifier_set_active";
+    const BL_IDNAME: &'static str = "OBJECT_OT_modifier_set_active";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MODIFIER_SET_ACTIVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ModifierSetActive {
+            modifier: a.prop(0, "modifier"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.modifiers_clear
+/// Props of `object.modifiers_clear`, RNA order.
+pub static MODIFIERS_CLEAR_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_modifiers_clear`
+pub static OPSPEC_OBJECT_OT_MODIFIERS_CLEAR: OperatorSpec = OperatorSpec {
+    idname: "object.modifiers_clear",
+    bl_idname: "OBJECT_OT_modifiers_clear",
+    label: "Clear Object Modifiers",
+    description: "Clear all modifiers from the selected objects",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &MODIFIERS_CLEAR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.modifiers_clear` (Clear Object Modifiers).
+#[derive(Debug, Clone)]
+pub struct ModifiersClear {
+}
+impl OpProps for ModifiersClear {
+    const IDNAME: &'static str = "object.modifiers_clear";
+    const BL_IDNAME: &'static str = "OBJECT_OT_modifiers_clear";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MODIFIERS_CLEAR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ModifiersClear {
         }
     }
 }
@@ -1430,8 +2360,8 @@ impl OpProps for MoveToCollection {
 // ---------------------------------------------------------------- object.origin_set
 /// Props of `object.origin_set`, RNA order.
 pub static ORIGIN_SET_PROPS: [PropDef; 2] = [
-    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E5, default: EnumDefault::Item("GEOMETRY_ORIGIN"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "center", name: "Center", description: "", kind: PropKind::Enum { items: &enums::E6, default: EnumDefault::Item("MEDIAN"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E10, default: EnumDefault::Item("GEOMETRY_ORIGIN"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "center", name: "Center", description: "", kind: PropKind::Enum { items: &enums::E11, default: EnumDefault::Item("MEDIAN"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `OBJECT_OT_origin_set`
 pub static OPSPEC_OBJECT_OT_ORIGIN_SET: OperatorSpec = OperatorSpec {
@@ -1560,7 +2490,7 @@ impl OpProps for OriginSet {
 // ---------------------------------------------------------------- object.parent_clear
 /// Props of `object.parent_clear`, RNA order.
 pub static PARENT_CLEAR_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E7, default: EnumDefault::Item("CLEAR"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E12, default: EnumDefault::Item("CLEAR"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `OBJECT_OT_parent_clear`
 pub static OPSPEC_OBJECT_OT_PARENT_CLEAR: OperatorSpec = OperatorSpec {
@@ -1675,7 +2605,7 @@ impl OpProps for ParentNoInverseSet {
 // ---------------------------------------------------------------- object.parent_set
 /// Props of `object.parent_set`, RNA order.
 pub static PARENT_SET_PROPS: [PropDef; 3] = [
-    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E8, default: EnumDefault::Item("OBJECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E13, default: EnumDefault::Item("OBJECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "xmirror", name: "X Mirror", description: "Apply weights symmetrically along X axis, for Envelope/Automatic vertex groups creation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "keep_transform", name: "Keep Transform", description: "Apply transformation before parenting", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
@@ -1873,7 +2803,7 @@ impl OpProps for ScaleClear {
 // ---------------------------------------------------------------- object.select_all
 /// Props of `object.select_all`, RNA order.
 pub static SELECT_ALL_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E9, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E14, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `OBJECT_OT_select_all`
 pub static OPSPEC_OBJECT_OT_SELECT_ALL: OperatorSpec = OperatorSpec {
@@ -1958,7 +2888,7 @@ impl OpProps for SelectAll {
 /// Props of `object.select_by_type`, RNA order.
 pub static SELECT_BY_TYPE_PROPS: [PropDef; 2] = [
     PropDef { identifier: "extend", name: "Extend", description: "Extend selection instead of deselecting everything first", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E10, default: EnumDefault::Item("MESH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E15, default: EnumDefault::Item("MESH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `OBJECT_OT_select_by_type`
 pub static OPSPEC_OBJECT_OT_SELECT_BY_TYPE: OperatorSpec = OperatorSpec {
@@ -2133,6 +3063,45 @@ impl OpProps for SelectPattern {
     }
 }
 
+// ---------------------------------------------------------------- object.shade_auto_smooth
+/// Props of `object.shade_auto_smooth`, RNA order.
+pub static SHADE_AUTO_SMOOTH_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "use_auto_smooth", name: "Auto Smooth", description: "Add modifier to set edge sharpness automatically", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "angle", name: "Angle", description: "Maximum angle between face normals that will be considered as smooth", kind: PropKind::Float { default: Defaults::Scalar(0.5235987901687622), hard: (0.0, 3.1415927410125732), soft: (0.0, 3.1415927410125732), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Angle, unit: Unit::Rotation, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `OBJECT_OT_shade_auto_smooth`
+pub static OPSPEC_OBJECT_OT_SHADE_AUTO_SMOOTH: OperatorSpec = OperatorSpec {
+    idname: "object.shade_auto_smooth",
+    bl_idname: "OBJECT_OT_shade_auto_smooth",
+    label: "Shade Auto Smooth",
+    description: "Add modifier to automatically set the sharpness of mesh edges based on the angle between the neighboring faces",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SHADE_AUTO_SMOOTH_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::Y, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `object.shade_auto_smooth` (Shade Auto Smooth).
+#[derive(Debug, Clone)]
+pub struct ShadeAutoSmooth {
+    /// Add modifier to set edge sharpness automatically; default true [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub use_auto_smooth: Prop<bool>,
+    /// Maximum angle between face normals that will be considered as smooth; default 0.5235987901687622 [ANIMATABLE]
+    pub angle: Prop<f32>,
+}
+impl OpProps for ShadeAutoSmooth {
+    const IDNAME: &'static str = "object.shade_auto_smooth";
+    const BL_IDNAME: &'static str = "OBJECT_OT_shade_auto_smooth";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_SHADE_AUTO_SMOOTH
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ShadeAutoSmooth {
+            use_auto_smooth: a.prop(0, "use_auto_smooth"),
+            angle: a.prop(1, "angle"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- object.shade_flat
 /// Props of `object.shade_flat`, RNA order.
 pub static SHADE_FLAT_PROPS: [PropDef; 1] = [
@@ -2238,6 +3207,49 @@ impl OpProps for ShadeSmoothByAngle {
         ShadeSmoothByAngle {
             angle: a.prop(0, "angle"),
             keep_sharp_edges: a.prop(1, "keep_sharp_edges"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.subdivision_set
+/// Props of `object.subdivision_set`, RNA order.
+pub static SUBDIVISION_SET_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "level", name: "Level", description: "", kind: PropKind::Int { default: Defaults::Scalar(1), hard: (-100, 100), soft: (-6, 6) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "relative", name: "Relative", description: "Apply the subdivision surface level as an offset relative to the current level", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "ensure_modifier", name: "Ensure Modifier", description: "Create the corresponding modifier if it does not exist", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_subdivision_set`
+pub static OPSPEC_OBJECT_OT_SUBDIVISION_SET: OperatorSpec = OperatorSpec {
+    idname: "object.subdivision_set",
+    bl_idname: "OBJECT_OT_subdivision_set",
+    label: "Subdivision Set",
+    description: "Sets a Subdivision Surface level (1 to 5)",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SUBDIVISION_SET_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.subdivision_set` (Subdivision Set).
+#[derive(Debug, Clone)]
+pub struct SubdivisionSet {
+    /// default 1 [ANIMATABLE]
+    pub level: Prop<i32>,
+    /// Apply the subdivision surface level as an offset relative to the current level; default false [ANIMATABLE]
+    pub relative: Prop<bool>,
+    /// Create the corresponding modifier if it does not exist; default true [HIDDEN, SKIP_PRESET]
+    pub ensure_modifier: Prop<bool>,
+}
+impl OpProps for SubdivisionSet {
+    const IDNAME: &'static str = "object.subdivision_set";
+    const BL_IDNAME: &'static str = "OBJECT_OT_subdivision_set";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_SUBDIVISION_SET
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        SubdivisionSet {
+            level: a.prop(0, "level"),
+            relative: a.prop(1, "relative"),
+            ensure_modifier: a.prop(2, "ensure_modifier"),
         }
     }
 }

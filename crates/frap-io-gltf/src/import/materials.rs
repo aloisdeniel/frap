@@ -223,7 +223,7 @@ fn lowered(
         .map_or(1.0, |e| e.emissive_strength_or_default() as f32);
     let f4 = pbr.base_color_factor.unwrap_or([1.0; 4]).map(|x| x as f32);
     let e3 = m.emissive_factor.unwrap_or([0.0; 3]).map(|x| x as f32);
-    Ok(LoweredMaterial {
+    let mut lm = LoweredMaterial {
         base_color: Channel {
             factor: f4,
             texture: base_tex,
@@ -237,6 +237,11 @@ fn lowered(
             texture: rough_tex,
         },
         normal,
+        occlusion_strength: m
+            .occlusion_texture
+            .as_ref()
+            .and_then(|o| o.strength)
+            .map_or(1.0, |s| s as f32),
         occlusion,
         emissive: Channel {
             factor: e3,
@@ -252,7 +257,45 @@ fn lowered(
             multiply: true,
         }),
         diagnostics: Vec::new(),
-    })
+    };
+    // `KHR_materials_*` (M3 W0 extension point, `crate::material_ext`; WP 3.6 registers the
+    // importers).
+    let mut host = ExtHost { cx, main, log };
+    for imp in crate::material_ext::importers() {
+        (imp.run)(&mut host, m, &mut lm)?;
+    }
+    Ok(lm)
+}
+
+/// [`crate::material_ext::ExtImportHost`] over the importer state.
+struct ExtHost<'x, 'a> {
+    cx: &'x mut Gltf<'a>,
+    main: &'x mut Main,
+    log: &'x mut ChangeLog,
+}
+
+impl crate::material_ext::ExtImportHost for ExtHost<'_, '_> {
+    fn texture(
+        &mut self,
+        index: u32,
+        tex_coord: Option<u32>,
+        extensions: &Extensions,
+        channel: ChannelSel,
+        is_data: bool,
+    ) -> Result<Option<TexRef>, ImportError> {
+        tex_ref(
+            self.cx, self.main, self.log, index, tex_coord, extensions, channel, is_data,
+        )
+    }
+
+    fn report(&mut self, level: frap_rna::ReportType, message: String) {
+        if level == frap_rna::ReportType::Warning {
+            let key = message.clone();
+            self.cx.warn_once(&key, message);
+        } else {
+            self.cx.report(level, message);
+        }
+    }
 }
 
 /// `set_filtering` and the wrap-mode part of `texture()`.

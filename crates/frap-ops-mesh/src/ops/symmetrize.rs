@@ -11,8 +11,8 @@
 //! selection is flushed for the select mode. `NEGATIVE_X` copies −X onto +X
 //! (`-X` of the bmesh op), `POSITIVE_X` +X onto −X (`X`), likewise for Y and Z; `threshold`
 //! snaps vertices that close to the plane onto it. Monkey `+X` → V507 F500 ([MESH §4.14]).
-//! With `tool_settings.use_mesh_automerge` Blender also welds the selection by distance
-//! afterwards; frap does not (deviations §2).
+//! With `tool_settings.use_mesh_automerge` the selection is then welded to connected
+//! unselected vertices within `double_threshold` (`EDBM_automerge_connected`, M4 W0).
 
 use frap_bmesh::ops::symmetrize::{SymmetrizeIn, symmetrize};
 use frap_op::operator;
@@ -21,11 +21,7 @@ use frap_spec_ops_mesh::mesh::{self, symmetrize::Direction};
 
 use super::split::edbm;
 
-#[operator(
-    poll = poll::EDITMESH,
-    tier = T2,
-    support = Partial("tool_settings.use_mesh_automerge is not applied afterwards")
-)]
+#[operator(poll = poll::EDITMESH, tier = T2)]
 fn exec(cx: &mut OpCtx, p: mesh::Symmetrize) -> OpResult {
     let direction = match p.direction.value {
         Direction::NegativeX => "-X",
@@ -35,6 +31,7 @@ fn exec(cx: &mut OpCtx, p: mesh::Symmetrize) -> OpResult {
         Direction::PositiveY => "Y",
         Direction::PositiveZ => "Z",
     };
+    let automerge = super::_automerge::threshold(cx);
     for (_, me) in helpers::iter_edit_meshes(cx) {
         let (v, _, _) = edbm::read(cx, me, edbm::sel_counts).unwrap_or_default();
         if v == 0 {
@@ -57,6 +54,9 @@ fn exec(cx: &mut OpCtx, p: mesh::Symmetrize) -> OpResult {
         let bm = cx.bmesh_mut(me)?;
         edbm::deselect_all(bm);
         edbm::select_elems(bm, &out.geom);
+        if let Some(dist) = automerge {
+            super::_automerge::automerge_connected(bm, dist)?;
+        }
         bm.select_flush_mode();
     }
     Ok(OpStatus::Finished)

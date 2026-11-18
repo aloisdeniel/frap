@@ -8,6 +8,8 @@
 #![deny(unsafe_code)]
 
 pub mod kdtree;
+/// MikkTSpace tangents (M3, WP 3.7; stub created by M3 W0).
+pub mod mikktspace;
 pub mod normals;
 pub mod polyfill;
 pub mod spatial_hash;

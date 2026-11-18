@@ -304,6 +304,20 @@ impl Default for RenderSettings {
 impl RenderSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 92] = ["image_settings", "resolution_x", "resolution_y", "resolution_percentage", "preview_pixel_size", "pixel_aspect_x", "pixel_aspect_y", "ppm_factor", "ppm_base", "fps", "fps_base", "frame_map_old", "frame_map_new", "dither_intensity", "filter_size", "film_transparent", "use_freestyle", "threads", "threads_mode", "use_motion_blur", "motion_blur_shutter", "motion_blur_position", "hair_type", "hair_subdiv", "use_high_quality_normals", "anisotropic_filter", "use_border", "border_min_x", "border_min_y", "border_max_x", "border_max_y", "use_crop_to_border", "use_placeholder", "use_overwrite", "save_output", "use_compositing", "use_sequencer", "use_file_extension", "use_lock_interface", "filepath", "use_render_cache", "use_stamp_time", "use_stamp_date", "use_stamp_frame", "use_stamp_frame_range", "use_stamp_camera", "use_stamp_lens", "use_stamp_scene", "use_stamp_note", "use_stamp_marker", "use_stamp_filename", "use_stamp_sequencer_strip", "use_stamp_render_time", "stamp_note_text", "use_stamp", "use_stamp_labels", "metadata_input", "use_stamp_memory", "use_stamp_hostname", "stamp_font_size", "stamp_foreground", "stamp_background", "sequencer_gl_preview", "use_sequencer_override_scene_strip", "use_single_layer", "use_multiview", "views_format", "engine", "use_simplify", "simplify_subdivision", "simplify_child_particles", "simplify_subdivision_render", "simplify_child_particles_render", "simplify_volumes", "use_simplify_normals", "use_texture_cache", "use_auto_generate_texture_cache", "simplify_gpencil", "simplify_gpencil_onplay", "simplify_gpencil_antialiasing", "simplify_gpencil_view_fill", "simplify_gpencil_modifier", "simplify_gpencil_shader_fx", "simplify_gpencil_tint", "use_persistent_data", "line_thickness_mode", "line_thickness", "compositor_device", "compositor_precision", "compositor_denoise_device", "compositor_denoise_preview_quality", "compositor_denoise_final_quality"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {

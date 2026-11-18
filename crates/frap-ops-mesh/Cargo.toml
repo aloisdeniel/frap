@@ -27,6 +27,8 @@ libm.workspace = true
 rustc-hash.workspace = true
 smallvec.workspace = true
 bitflags.workspace = true
+frap-boolean.workspace = true
+frap-modifiers.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

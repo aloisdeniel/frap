@@ -60,6 +60,11 @@ pub enum TextureSlot {
     BaseColor,
     /// `metallicRoughnessTexture` (Metallic and Roughness).
     MetallicRoughness,
+    /// `occlusionTexture` (glTF Material Output `Occlusion`; M3 W0).
+    Occlusion,
+    /// A `KHR_materials_*` texture by its glTF member name (`"clearcoatTexture"`; M3 W0,
+    /// `crate::material_ext`).
+    Ext(&'static str),
 }
 
 /// A texture's identity: the material and the feature using it.

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Writing (ARCHITECTURE §17.2): the asset, the scene, the buffer, then the file in the
-//! requested format.
+//! Writing (ARCHITECTURE §17.2): the asset, the buffer, then the file in the requested format
+//! (the scenes are gathered by `scenes.rs` since M3 W0).
 //!
 //! Ported from blender/scripts/addons_core/io_scene_gltf2/io/exp/export.py (`save_gltf`:
 //! top-level key order, compact JSON for GLB, tab-indented JSON with `,`/`:` separators and a
@@ -11,32 +11,21 @@
 //! numbers as integers (`__fix_json`).
 
 use frap_gltf::accessor::encode_data_uri;
-use frap_gltf::json::{Asset, Index, Scene};
+use frap_gltf::json::Asset;
 use frap_gltf::{Glb, WriteOpts, write_glb};
 
 use crate::export::gather::Gather;
 use crate::export::images::path_to_uri;
 use crate::export::{ExportError, ExportFormat, ExportOutput};
 
-/// Finishes the document whose scene roots are `roots` and serializes it.
-pub fn finish(mut g: Gather, roots: Vec<Index>) -> Result<ExportOutput, ExportError> {
+/// Finishes the document (its scenes were gathered by `scenes.rs`) and serializes it.
+pub fn finish(mut g: Gather) -> Result<ExportOutput, ExportError> {
     let s = g.settings;
     g.doc.asset = Asset {
         generator: Some(s.generator.clone()),
         copyright: (!s.export_copyright.is_empty()).then(|| s.export_copyright.clone()),
         ..Asset::default()
     };
-    let scene_name = if s.collection.is_empty() {
-        g.ctx.scene().header.name.to_string()
-    } else {
-        s.collection.clone()
-    };
-    g.doc.scenes.push(Scene {
-        name: Some(scene_name),
-        nodes: roots,
-        ..Scene::default()
-    });
-    g.doc.scene = Some(0);
 
     let buf = std::mem::take(&mut g.buf);
     let mut files = std::mem::take(&mut g.files);

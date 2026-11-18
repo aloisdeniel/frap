@@ -137,6 +137,20 @@ impl Default for LightFields {
 impl LightFields {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 35] = ["use_temperature", "color", "temperature", "specular_factor", "diffuse_factor", "transmission_factor", "volume_factor", "use_custom_distance", "cutoff_distance", "use_shadow", "exposure", "normalize", "use_nodes", "use_soft_falloff", "energy", "shadow_buffer_clip_start", "shadow_soft_size", "shadow_filter_radius", "shadow_maximum_resolution", "use_shadow_jitter", "shadow_jitter_overblur", "use_absolute_resolution", "angle", "shadow_cascade_max_distance", "shadow_cascade_count", "shadow_cascade_exponent", "shadow_cascade_fade", "use_square", "spot_blend", "spot_size", "show_cone", "shape", "size", "size_y", "spread"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {

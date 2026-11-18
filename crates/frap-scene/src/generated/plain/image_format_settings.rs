@@ -97,6 +97,20 @@ impl Default for ImageFormatSettings {
 impl ImageFormatSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 23] = ["media_type", "file_format", "color_mode", "color_depth", "quality", "compression", "use_preview", "exr_codec", "use_exr_interleave", "use_jpeg2k_ycc", "use_jpeg2k_cinema_preset", "use_jpeg2k_cinema_48", "jpeg2k_codec", "tiff_codec", "use_cineon_log", "cineon_black", "cineon_white", "cineon_gamma", "views_format", "color_management", "view_settings", "display_settings", "linear_colorspace_settings"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {

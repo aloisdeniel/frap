@@ -35,7 +35,7 @@ pub use key::Key;
 pub use library::Library;
 pub use light::Light;
 pub use material::{Material, SHADER_NODETREE_NAME};
-pub use modifier::{Modifier, ModifierSettings};
+pub use modifier::{GnInput, GnInputs, GnValue, Modifier, ModifierSettings};
 pub use object::{Object, SlotLink, SlotOverride};
 pub use pointcloud::PointCloud;
 pub use scene::Scene;

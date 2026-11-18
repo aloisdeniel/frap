@@ -12,6 +12,8 @@
 //! hashes (materials, images), see [`keys`].
 
 pub mod camera;
+/// Evaluated geometry in renders (M4, WP 4.7; stub created by M4 W0).
+pub mod evaluated;
 pub mod images;
 pub mod keys;
 pub mod lights;

@@ -44,7 +44,9 @@ pub fn operator(attr: TokenStream, item: TokenStream) -> TokenStream {
     operator::expand(attr, item)
 }
 
-/// `#[modifier(MIRROR, kind = Constructive, flags = …)]` (§7.2, M4).
+/// `#[modifier(MIRROR, kind = Constructive, flags = …)]` on
+/// `fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModError>` (§7.2,
+/// M4 W0): emits the `ModifierTypeInfo` into `frap_modifiers::MODIFIER_TYPES`.
 #[proc_macro_attribute]
 pub fn modifier(attr: TokenStream, item: TokenStream) -> TokenStream {
     modifier::expand(attr, item)

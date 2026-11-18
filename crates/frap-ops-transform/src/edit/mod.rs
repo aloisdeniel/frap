@@ -24,6 +24,8 @@
 //! split (`use_automerge_and_split=True`, forced by `mesh.extrude_manifold`) is refused
 //! (`NotImplementedError` with a hint).
 
+/// Auto Merge with split (`EDBM_automerge_and_split`; M2 leftover, WP 4.6, M4 W0 stub).
+pub mod automerge;
 pub mod bmq;
 pub mod islands;
 pub mod mathx;
@@ -164,6 +166,7 @@ pub fn request_from_args(op: TransformOp, args: &OpArgs) -> Request {
                 p.use_proportional_connected.value,
                 p.use_proportional_projected.value,
             );
+            r.use_automerge_and_split = set(&p.use_automerge_and_split);
             r
         }
     }
@@ -197,7 +200,10 @@ fn unsupported(op: TransformOp, args: &OpArgs) -> Result<(), OpError> {
             let p = Translate::from_args(args);
             if p.texture_space.value {
                 Some("texture_space=True")
-            } else if p.use_automerge_and_split.is_set && p.use_automerge_and_split.value {
+            } else if p.use_automerge_and_split.is_set
+                && p.use_automerge_and_split.value
+                && !automerge::IMPLEMENTED
+            {
                 return Err(automerge_and_split_not_implemented());
             } else {
                 None

@@ -63,111 +63,138 @@ pub static E9: [EnumItem; 6] = [
     EnumItem { identifier: "SHARP", name: "Sharp", description: "Sharp falloff", value: 3 },
     EnumItem { identifier: "LINEAR", name: "Linear", description: "Linear falloff", value: 4 },
 ];
-pub static E10: [EnumItem; 5] = [
+pub static E10: [EnumItem; 3] = [
+    EnumItem { identifier: "X", name: "X", description: "", value: 0 },
+    EnumItem { identifier: "Y", name: "Y", description: "", value: 1 },
+    EnumItem { identifier: "Z", name: "Z", description: "", value: 2 },
+];
+pub static E11: [EnumItem; 5] = [
     EnumItem { identifier: "VERT", name: "Vertices", description: "", value: 0 },
     EnumItem { identifier: "EDGE", name: "Edges", description: "", value: 1 },
     EnumItem { identifier: "FACE", name: "Faces", description: "", value: 2 },
     EnumItem { identifier: "EDGE_FACE", name: "Only Edges & Faces", description: "", value: 3 },
     EnumItem { identifier: "ONLY_FACE", name: "Only Faces", description: "", value: 4 },
 ];
-pub static E11: [EnumItem; 5] = [
+pub static E12: [EnumItem; 5] = [
     EnumItem { identifier: "NORMAL", name: "Normal", description: "Delimit by face directions", value: 1 },
     EnumItem { identifier: "MATERIAL", name: "Material", description: "Delimit by face material", value: 2 },
     EnumItem { identifier: "SEAM", name: "Seam", description: "Delimit by edge seams", value: 4 },
     EnumItem { identifier: "SHARP", name: "Sharp", description: "Delimit by sharp edges", value: 8 },
     EnumItem { identifier: "UV", name: "UVs", description: "Delimit by UV coordinates", value: 16 },
 ];
-pub static E12: [EnumItem; 2] = [
+pub static E13: [EnumItem; 2] = [
     EnumItem { identifier: "EDGE", name: "Faces by Edges", description: "Split faces along selected edges", value: 2 },
     EnumItem { identifier: "VERT", name: "Faces & Edges by Vertices", description: "Split faces and edges connected to selected vertices", value: 1 },
 ];
-pub static E13: [EnumItem; 4] = [
+pub static E14: [EnumItem; 4] = [
     EnumItem { identifier: "SEAM", name: "Seam", description: "Delimit edge ring selection at seams", value: 16 },
     EnumItem { identifier: "SHARP", name: "Sharp", description: "Delimit edge ring selection at sharp edges", value: 32 },
     EnumItem { identifier: "MATERIAL", name: "Material", description: "Delimit edge ring selection at material boundaries", value: 64 },
     EnumItem { identifier: "NGONS", name: "N-gons", description: "Allow edge ring selection to step over n-gons with an even number of sides", value: 8 },
 ];
-pub static E14: [EnumItem; 5] = [
+pub static E15: [EnumItem; 2] = [
+    EnumItem { identifier: "SELECT", name: "Self Intersect", description: "Self intersect selected faces", value: 0 },
+    EnumItem { identifier: "SELECT_UNSELECT", name: "Selected/Unselected", description: "Intersect selected with unselected faces", value: 1 },
+];
+pub static E16: [EnumItem; 3] = [
+    EnumItem { identifier: "ALL", name: "All", description: "Separate all geometry from intersections", value: 0 },
+    EnumItem { identifier: "CUT", name: "Cut", description: "Cut into geometry keeping each side separate (Selected/Unselected only)", value: 1 },
+    EnumItem { identifier: "NONE", name: "Merge", description: "Merge all geometry from the intersection", value: 2 },
+];
+pub static E17: [EnumItem; 2] = [
+    EnumItem { identifier: "FLOAT", name: "Float", description: "Simple solver with good performance, without support for overlapping geometry", value: 0 },
+    EnumItem { identifier: "EXACT", name: "Exact", description: "Slower solver with the best results for coplanar faces", value: 1 },
+];
+pub static E18: [EnumItem; 3] = [
+    EnumItem { identifier: "INTERSECT", name: "Intersect", description: "", value: 0 },
+    EnumItem { identifier: "UNION", name: "Union", description: "", value: 1 },
+    EnumItem { identifier: "DIFFERENCE", name: "Difference", description: "", value: 2 },
+];
+pub static E19: [EnumItem; 2] = [
+    EnumItem { identifier: "FLOAT", name: "Float", description: "Faster solver, some limitations", value: 0 },
+    EnumItem { identifier: "EXACT", name: "Exact", description: "Exact solver, slower, handles more cases", value: 1 },
+];
+pub static E20: [EnumItem; 5] = [
     EnumItem { identifier: "SEAM", name: "Seam", description: "Delimit edge loop selection at seams", value: 16 },
     EnumItem { identifier: "SHARP", name: "Sharp", description: "Delimit edge loop selection at sharp edges", value: 32 },
     EnumItem { identifier: "NGONS", name: "N-gons", description: "Stop boundary selection at n-gons", value: 4 },
     EnumItem { identifier: "INNER_CORNERS", name: "Inner Corners", description: "Stop boundary selection at vertices with more than three edges", value: 1 },
     EnumItem { identifier: "OUTER_CORNERS", name: "Outer Corners", description: "Stop boundary selection at vertices with two edges when they share a face that is not an n-gon", value: 2 },
 ];
-pub static E15: [EnumItem; 3] = [
+pub static E21: [EnumItem; 3] = [
     EnumItem { identifier: "SEAM", name: "Seam", description: "Delimit face loop selection at seams", value: 16 },
     EnumItem { identifier: "SHARP", name: "Sharp", description: "Delimit face loop selection at sharp edges", value: 32 },
     EnumItem { identifier: "MATERIAL", name: "Material", description: "Delimit face loop selection at material boundaries", value: 64 },
 ];
-pub static E16: [EnumItem; 5] = [
+pub static E22: [EnumItem; 5] = [
     EnumItem { identifier: "CENTER", name: "At Center", description: "", value: 3 },
     EnumItem { identifier: "CURSOR", name: "At Cursor", description: "", value: 4 },
     EnumItem { identifier: "COLLAPSE", name: "Collapse", description: "", value: 5 },
     EnumItem { identifier: "FIRST", name: "At First", description: "", value: 6 },
     EnumItem { identifier: "LAST", name: "At Last", description: "", value: 1 },
 ];
-pub static E17: [EnumItem; 3] = [
+pub static E23: [EnumItem; 3] = [
     EnumItem { identifier: "MEDIAN_WEIGHTED", name: "Weighted Median", description: "Weighted median face center", value: 0 },
     EnumItem { identifier: "MEDIAN", name: "Median", description: "Median face center", value: 1 },
     EnumItem { identifier: "BOUNDS", name: "Bounds", description: "Face bounds center", value: 2 },
 ];
-pub static E18: [EnumItem; 3] = [
+pub static E24: [EnumItem; 3] = [
     EnumItem { identifier: "NOTHING", name: "Nothing", description: "Don't fill at all", value: 0 },
     EnumItem { identifier: "NGON", name: "N-Gon", description: "Use n-gons", value: 1 },
     EnumItem { identifier: "TRIFAN", name: "Triangle Fan", description: "Use triangle fans", value: 2 },
 ];
-pub static E19: [EnumItem; 3] = [
+pub static E25: [EnumItem; 3] = [
     EnumItem { identifier: "WORLD", name: "World", description: "Align the new object to the world", value: 0 },
     EnumItem { identifier: "VIEW", name: "View", description: "Align the new object to the view", value: 1 },
     EnumItem { identifier: "CURSOR", name: "3D Cursor", description: "Use the 3D cursor orientation for the new object", value: 2 },
 ];
-pub static E20: [EnumItem; 2] = [
+pub static E26: [EnumItem; 2] = [
     EnumItem { identifier: "MAJOR_MINOR", name: "Major/Minor", description: "Use the major/minor radii for torus dimensions", value: 0 },
     EnumItem { identifier: "EXT_INT", name: "Exterior/Interior", description: "Use the exterior/interior radii for torus dimensions", value: 1 },
 ];
-pub static E21: [EnumItem; 5] = [
+pub static E27: [EnumItem; 5] = [
     EnumItem { identifier: "BEAUTY", name: "Beauty", description: "Split the quads in nice triangles, slower method", value: 0 },
     EnumItem { identifier: "FIXED", name: "Fixed", description: "Split the quads on the first and third vertices", value: 1 },
     EnumItem { identifier: "FIXED_ALTERNATE", name: "Fixed Alternate", description: "Split the quads on the 2nd and 4th vertices", value: 2 },
     EnumItem { identifier: "SHORTEST_DIAGONAL", name: "Shortest Diagonal", description: "Split the quads along their shortest diagonal", value: 3 },
     EnumItem { identifier: "LONGEST_DIAGONAL", name: "Longest Diagonal", description: "Split the quads along their longest diagonal", value: 4 },
 ];
-pub static E22: [EnumItem; 2] = [
+pub static E28: [EnumItem; 2] = [
     EnumItem { identifier: "BEAUTY", name: "Beauty", description: "Arrange the new triangles evenly (slow)", value: 0 },
     EnumItem { identifier: "CLIP", name: "Clip", description: "Split the polygons with an ear clipping algorithm", value: 1 },
 ];
-pub static E23: [EnumItem; 4] = [
+pub static E29: [EnumItem; 4] = [
     EnumItem { identifier: "TOGGLE", name: "Toggle", description: "Toggle selection for all elements", value: 0 },
     EnumItem { identifier: "SELECT", name: "Select", description: "Select all elements", value: 1 },
     EnumItem { identifier: "DESELECT", name: "Deselect", description: "Deselect all elements", value: 2 },
     EnumItem { identifier: "INVERT", name: "Invert", description: "Invert selection of all elements", value: 3 },
 ];
-pub static E24: [EnumItem; 4] = [
+pub static E30: [EnumItem; 4] = [
     EnumItem { identifier: "LESS", name: "Less Than", description: "", value: 0 },
     EnumItem { identifier: "EQUAL", name: "Equal To", description: "", value: 1 },
     EnumItem { identifier: "GREATER", name: "Greater Than", description: "", value: 2 },
     EnumItem { identifier: "NOTEQUAL", name: "Not Equal To", description: "", value: 3 },
 ];
-pub static E25: [EnumItem; 3] = [
+pub static E31: [EnumItem; 3] = [
     EnumItem { identifier: "VERT", name: "Vertex", description: "Vertex selection mode", value: 1 },
     EnumItem { identifier: "EDGE", name: "Edge", description: "Edge selection mode", value: 2 },
     EnumItem { identifier: "FACE", name: "Face", description: "Face selection mode", value: 4 },
 ];
-pub static E26: [EnumItem; 3] = [
+pub static E32: [EnumItem; 3] = [
     EnumItem { identifier: "DISABLE", name: "Disable", description: "Disable the selection mode", value: 0 },
     EnumItem { identifier: "ENABLE", name: "Enable", description: "Enable the selection mode", value: 1 },
     EnumItem { identifier: "TOGGLE", name: "Toggle", description: "Toggle the selection mode", value: 2 },
 ];
-pub static E27: [EnumItem; 2] = [
+pub static E33: [EnumItem; 2] = [
     EnumItem { identifier: "SELECT", name: "Select", description: "Select all elements", value: 1 },
     EnumItem { identifier: "DESELECT", name: "Deselect", description: "Deselect all elements", value: 2 },
 ];
-pub static E28: [EnumItem; 3] = [
+pub static E34: [EnumItem; 3] = [
     EnumItem { identifier: "SELECTED", name: "Selection", description: "", value: 0 },
     EnumItem { identifier: "MATERIAL", name: "By Material", description: "", value: 1 },
     EnumItem { identifier: "LOOSE", name: "By Loose Parts", description: "", value: 2 },
 ];
-pub static E29: [EnumItem; 6] = [
+pub static E35: [EnumItem; 6] = [
     EnumItem { identifier: "SELECT", name: "Select", description: "", value: 0 },
     EnumItem { identifier: "SEAM", name: "Tag Seam", description: "", value: 1 },
     EnumItem { identifier: "SHARP", name: "Tag Sharp", description: "", value: 2 },
@@ -175,13 +202,13 @@ pub static E29: [EnumItem; 6] = [
     EnumItem { identifier: "BEVEL", name: "Tag Bevel", description: "", value: 4 },
     EnumItem { identifier: "FREESTYLE", name: "Tag Freestyle Edge Mark", description: "", value: 5 },
 ];
-pub static E30: [EnumItem; 4] = [
+pub static E36: [EnumItem; 4] = [
     EnumItem { identifier: "INNERVERT", name: "Inner Vert", description: "", value: 0 },
     EnumItem { identifier: "PATH", name: "Path", description: "", value: 1 },
     EnumItem { identifier: "STRAIGHT_CUT", name: "Straight Cut", description: "", value: 3 },
     EnumItem { identifier: "FAN", name: "Fan", description: "", value: 2 },
 ];
-pub static E31: [EnumItem; 6] = [
+pub static E37: [EnumItem; 6] = [
     EnumItem { identifier: "NEGATIVE_X", name: "-X to +X", description: "", value: 0 },
     EnumItem { identifier: "POSITIVE_X", name: "+X to -X", description: "", value: 3 },
     EnumItem { identifier: "NEGATIVE_Y", name: "-Y to +Y", description: "", value: 1 },
@@ -1121,10 +1148,110 @@ impl OpProps for CustomdataCustomSplitnormalsClear {
     }
 }
 
+// ---------------------------------------------------------------- mesh.decimate
+/// Props of `mesh.decimate`, RNA order.
+pub static DECIMATE_PROPS: [PropDef; 6] = [
+    PropDef { identifier: "ratio", name: "Ratio", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_vertex_group", name: "Vertex Group", description: "Use active vertex group as an influence", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "vertex_group_factor", name: "Weight", description: "Vertex group strength", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 1000.0), soft: (0.0, 10.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "invert_vertex_group", name: "Invert", description: "Invert vertex group influence", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_symmetry", name: "Symmetry", description: "Maintain symmetry on an axis", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "symmetry_axis", name: "Axis", description: "Axis of symmetry", kind: PropKind::Enum { items: &enums::E10, default: EnumDefault::Item("Y"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_decimate`
+pub static OPSPEC_MESH_OT_DECIMATE: OperatorSpec = OperatorSpec {
+    idname: "mesh.decimate",
+    bl_idname: "MESH_OT_decimate",
+    label: "Decimate Geometry",
+    description: "Simplify geometry by collapsing edges",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &DECIMATE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.decimate`.
+pub mod decimate {
+    /// `SymmetryAxis`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum SymmetryAxis {
+        /// "X"
+        X,
+        /// "Y"
+        Y,
+        /// "Z"
+        Z,
+    }
+    impl SymmetryAxis {
+        /// Every variant, in RNA item order.
+        pub const ALL: [SymmetryAxis; 3] = [SymmetryAxis::X, SymmetryAxis::Y, SymmetryAxis::Z];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                SymmetryAxis::X => "X",
+                SymmetryAxis::Y => "Y",
+                SymmetryAxis::Z => "Z",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "X" => Some(SymmetryAxis::X),
+                "Y" => Some(SymmetryAxis::Y),
+                "Z" => Some(SymmetryAxis::Z),
+                _ => None,
+            }
+        }
+    }
+    impl Default for SymmetryAxis {
+        fn default() -> Self {
+            SymmetryAxis::Y
+        }
+    }
+    impl frap_rna::FromValue for SymmetryAxis {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.decimate` (Decimate Geometry).
+#[derive(Debug, Clone)]
+pub struct Decimate {
+    /// default 1 [ANIMATABLE]
+    pub ratio: Prop<f32>,
+    /// Use active vertex group as an influence; default false [ANIMATABLE]
+    pub use_vertex_group: Prop<bool>,
+    /// Vertex group strength; default 1 [ANIMATABLE]
+    pub vertex_group_factor: Prop<f32>,
+    /// Invert vertex group influence; default false [ANIMATABLE]
+    pub invert_vertex_group: Prop<bool>,
+    /// Maintain symmetry on an axis; default false [ANIMATABLE]
+    pub use_symmetry: Prop<bool>,
+    /// Axis of symmetry; default "Y": X | Y | Z [ANIMATABLE]
+    pub symmetry_axis: Prop<decimate::SymmetryAxis>,
+}
+impl OpProps for Decimate {
+    const IDNAME: &'static str = "mesh.decimate";
+    const BL_IDNAME: &'static str = "MESH_OT_decimate";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_DECIMATE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Decimate {
+            ratio: a.prop(0, "ratio"),
+            use_vertex_group: a.prop(1, "use_vertex_group"),
+            vertex_group_factor: a.prop(2, "vertex_group_factor"),
+            invert_vertex_group: a.prop(3, "invert_vertex_group"),
+            use_symmetry: a.prop(4, "use_symmetry"),
+            symmetry_axis: a.prop(5, "symmetry_axis"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.delete
 /// Props of `mesh.delete`, RNA order.
 pub static DELETE_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Type", description: "Method used for deleting mesh data", kind: PropKind::Enum { items: &enums::E10, default: EnumDefault::Item("VERT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "Method used for deleting mesh data", kind: PropKind::Enum { items: &enums::E11, default: EnumDefault::Item("VERT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `MESH_OT_delete`
 pub static OPSPEC_MESH_OT_DELETE: OperatorSpec = OperatorSpec {
@@ -1409,7 +1536,7 @@ impl OpProps for DissolveFaces {
 pub static DISSOLVE_LIMITED_PROPS: [PropDef; 3] = [
     PropDef { identifier: "angle_limit", name: "Max Angle", description: "Angle limit", kind: PropKind::Float { default: Defaults::Scalar(0.0872664600610733), hard: (0.0, 3.1415927410125732), soft: (0.0, 3.1415927410125732), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Angle, unit: Unit::Rotation, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_dissolve_boundaries", name: "All Boundaries", description: "Dissolve all vertices in between face boundaries", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "delimit", name: "Delimit", description: "Delimit dissolve operation", kind: PropKind::Enum { items: &enums::E11, default: EnumDefault::Flags(&["NORMAL"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "delimit", name: "Delimit", description: "Delimit dissolve operation", kind: PropKind::Enum { items: &enums::E12, default: EnumDefault::Flags(&["NORMAL"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
 ];
 /// `MESH_OT_dissolve_limited`
 pub static OPSPEC_MESH_OT_DISSOLVE_LIMITED: OperatorSpec = OperatorSpec {
@@ -1711,7 +1838,7 @@ impl OpProps for EdgeRotate {
 // ---------------------------------------------------------------- mesh.edge_split
 /// Props of `mesh.edge_split`, RNA order.
 pub static EDGE_SPLIT_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Type", description: "Method to use for splitting", kind: PropKind::Enum { items: &enums::E12, default: EnumDefault::Item("EDGE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "Method to use for splitting", kind: PropKind::Enum { items: &enums::E13, default: EnumDefault::Item("EDGE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_edge_split`
 pub static OPSPEC_MESH_OT_EDGE_SPLIT: OperatorSpec = OperatorSpec {
@@ -1787,7 +1914,7 @@ impl OpProps for EdgeSplit {
 // ---------------------------------------------------------------- mesh.edgering_select
 /// Props of `mesh.edgering_select`, RNA order.
 pub static EDGERING_SELECT_PROPS: [PropDef; 8] = [
-    PropDef { identifier: "delimit_edge_ring", name: "Edge Ring Delimit", description: "Delimit edge ring selection", kind: PropKind::Enum { items: &enums::E13, default: EnumDefault::Flags(&["NGONS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "delimit_edge_ring", name: "Edge Ring Delimit", description: "Delimit edge ring selection", kind: PropKind::Enum { items: &enums::E14, default: EnumDefault::Flags(&["NGONS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
     PropDef { identifier: "extend", name: "Extend Select", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "deselect", name: "Deselect", description: "Remove from the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "toggle", name: "Toggle Select", description: "Toggle the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -2810,11 +2937,313 @@ impl OpProps for Inset {
     }
 }
 
+// ---------------------------------------------------------------- mesh.intersect
+/// Props of `mesh.intersect`, RNA order.
+pub static INTERSECT_PROPS: [PropDef; 4] = [
+    PropDef { identifier: "mode", name: "Source", description: "", kind: PropKind::Enum { items: &enums::E15, default: EnumDefault::Item("SELECT_UNSELECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "separate_mode", name: "Separate Mode", description: "", kind: PropKind::Enum { items: &enums::E16, default: EnumDefault::Item("CUT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "threshold", name: "Merge Threshold", description: "", kind: PropKind::Float { default: Defaults::Scalar(9.999999974752427e-7), hard: (0.0, 0.009999999776482582), soft: (0.0, 0.0010000000474974513), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "solver", name: "Solver", description: "Which Intersect solver to use", kind: PropKind::Enum { items: &enums::E17, default: EnumDefault::Item("EXACT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_intersect`
+pub static OPSPEC_MESH_OT_INTERSECT: OperatorSpec = OperatorSpec {
+    idname: "mesh.intersect",
+    bl_idname: "MESH_OT_intersect",
+    label: "Intersect (Knife)",
+    description: "Cut an intersection into faces",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &INTERSECT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.intersect`.
+pub mod intersect {
+    /// `Mode`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Mode {
+        /// "SELECT"
+        Select,
+        /// "SELECT_UNSELECT"
+        SelectUnselect,
+    }
+    impl Mode {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Mode; 2] = [Mode::Select, Mode::SelectUnselect];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Mode::Select => "SELECT",
+                Mode::SelectUnselect => "SELECT_UNSELECT",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "SELECT" => Some(Mode::Select),
+                "SELECT_UNSELECT" => Some(Mode::SelectUnselect),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Mode {
+        fn default() -> Self {
+            Mode::SelectUnselect
+        }
+    }
+    impl frap_rna::FromValue for Mode {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `SeparateMode`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum SeparateMode {
+        /// "ALL"
+        All,
+        /// "CUT"
+        Cut,
+        /// "NONE"
+        None,
+    }
+    impl SeparateMode {
+        /// Every variant, in RNA item order.
+        pub const ALL: [SeparateMode; 3] = [SeparateMode::All, SeparateMode::Cut, SeparateMode::None];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                SeparateMode::All => "ALL",
+                SeparateMode::Cut => "CUT",
+                SeparateMode::None => "NONE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "ALL" => Some(SeparateMode::All),
+                "CUT" => Some(SeparateMode::Cut),
+                "NONE" => Some(SeparateMode::None),
+                _ => None,
+            }
+        }
+    }
+    impl Default for SeparateMode {
+        fn default() -> Self {
+            SeparateMode::Cut
+        }
+    }
+    impl frap_rna::FromValue for SeparateMode {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `Solver`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Solver {
+        /// "FLOAT"
+        Float,
+        /// "EXACT"
+        Exact,
+    }
+    impl Solver {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Solver; 2] = [Solver::Float, Solver::Exact];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Solver::Float => "FLOAT",
+                Solver::Exact => "EXACT",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "FLOAT" => Some(Solver::Float),
+                "EXACT" => Some(Solver::Exact),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Solver {
+        fn default() -> Self {
+            Solver::Exact
+        }
+    }
+    impl frap_rna::FromValue for Solver {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.intersect` (Intersect (Knife)).
+#[derive(Debug, Clone)]
+pub struct Intersect {
+    /// default "SELECT_UNSELECT": SELECT | SELECT_UNSELECT [ANIMATABLE]
+    pub mode: Prop<intersect::Mode>,
+    /// default "CUT": ALL | CUT | NONE [ANIMATABLE]
+    pub separate_mode: Prop<intersect::SeparateMode>,
+    /// default 0.0000009999999974752427 [ANIMATABLE]
+    pub threshold: Prop<f32>,
+    /// Which Intersect solver to use; default "EXACT": FLOAT | EXACT [ANIMATABLE]
+    pub solver: Prop<intersect::Solver>,
+}
+impl OpProps for Intersect {
+    const IDNAME: &'static str = "mesh.intersect";
+    const BL_IDNAME: &'static str = "MESH_OT_intersect";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_INTERSECT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        Intersect {
+            mode: a.prop(0, "mode"),
+            separate_mode: a.prop(1, "separate_mode"),
+            threshold: a.prop(2, "threshold"),
+            solver: a.prop(3, "solver"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.intersect_boolean
+/// Props of `mesh.intersect_boolean`, RNA order.
+pub static INTERSECT_BOOLEAN_PROPS: [PropDef; 5] = [
+    PropDef { identifier: "operation", name: "Boolean Operation", description: "Which boolean operation to apply", kind: PropKind::Enum { items: &enums::E18, default: EnumDefault::Item("DIFFERENCE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_swap", name: "Swap", description: "Use with difference intersection to swap which side is kept", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "use_self", name: "Self Intersection", description: "Do self-union or self-intersection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "threshold", name: "Merge Threshold", description: "", kind: PropKind::Float { default: Defaults::Scalar(9.999999974752427e-7), hard: (0.0, 0.009999999776482582), soft: (0.0, 0.0010000000474974513), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "solver", name: "Solver", description: "Which Boolean solver to use", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("EXACT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_intersect_boolean`
+pub static OPSPEC_MESH_OT_INTERSECT_BOOLEAN: OperatorSpec = OperatorSpec {
+    idname: "mesh.intersect_boolean",
+    bl_idname: "MESH_OT_intersect_boolean",
+    label: "Intersect (Boolean)",
+    description: "Cut solid geometry from selected to unselected",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &INTERSECT_BOOLEAN_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Enums of `mesh.intersect_boolean`.
+pub mod intersect_boolean {
+    /// `Operation`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Operation {
+        /// "INTERSECT"
+        Intersect,
+        /// "UNION"
+        Union,
+        /// "DIFFERENCE"
+        Difference,
+    }
+    impl Operation {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Operation; 3] = [Operation::Intersect, Operation::Union, Operation::Difference];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Operation::Intersect => "INTERSECT",
+                Operation::Union => "UNION",
+                Operation::Difference => "DIFFERENCE",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "INTERSECT" => Some(Operation::Intersect),
+                "UNION" => Some(Operation::Union),
+                "DIFFERENCE" => Some(Operation::Difference),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Operation {
+        fn default() -> Self {
+            Operation::Difference
+        }
+    }
+    impl frap_rna::FromValue for Operation {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `Solver`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Solver {
+        /// "FLOAT"
+        Float,
+        /// "EXACT"
+        Exact,
+    }
+    impl Solver {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Solver; 2] = [Solver::Float, Solver::Exact];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Solver::Float => "FLOAT",
+                Solver::Exact => "EXACT",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "FLOAT" => Some(Solver::Float),
+                "EXACT" => Some(Solver::Exact),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Solver {
+        fn default() -> Self {
+            Solver::Exact
+        }
+    }
+    impl frap_rna::FromValue for Solver {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `mesh.intersect_boolean` (Intersect (Boolean)).
+#[derive(Debug, Clone)]
+pub struct IntersectBoolean {
+    /// Which boolean operation to apply; default "DIFFERENCE": INTERSECT | UNION | DIFFERENCE [ANIMATABLE]
+    pub operation: Prop<intersect_boolean::Operation>,
+    /// Use with difference intersection to swap which side is kept; default false [ANIMATABLE]
+    pub use_swap: Prop<bool>,
+    /// Do self-union or self-intersection; default false [ANIMATABLE]
+    pub use_self: Prop<bool>,
+    /// default 0.0000009999999974752427 [ANIMATABLE]
+    pub threshold: Prop<f32>,
+    /// Which Boolean solver to use; default "EXACT": FLOAT | EXACT [ANIMATABLE]
+    pub solver: Prop<intersect_boolean::Solver>,
+}
+impl OpProps for IntersectBoolean {
+    const IDNAME: &'static str = "mesh.intersect_boolean";
+    const BL_IDNAME: &'static str = "MESH_OT_intersect_boolean";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_INTERSECT_BOOLEAN
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        IntersectBoolean {
+            operation: a.prop(0, "operation"),
+            use_swap: a.prop(1, "use_swap"),
+            use_self: a.prop(2, "use_self"),
+            threshold: a.prop(3, "threshold"),
+            solver: a.prop(4, "solver"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.loop_select
 /// Props of `mesh.loop_select`, RNA order.
 pub static LOOP_SELECT_PROPS: [PropDef; 9] = [
-    PropDef { identifier: "delimit_edge_loop", name: "Delimit", description: "Delimit edge loop selection", kind: PropKind::Enum { items: &enums::E14, default: EnumDefault::Flags(&["NGONS", "OUTER_CORNERS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
-    PropDef { identifier: "delimit_face_loop", name: "Face Loop Delimit", description: "Delimit face loop selection", kind: PropKind::Enum { items: &enums::E15, default: EnumDefault::Flags(&[]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "delimit_edge_loop", name: "Delimit", description: "Delimit edge loop selection", kind: PropKind::Enum { items: &enums::E20, default: EnumDefault::Flags(&["NGONS", "OUTER_CORNERS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "delimit_face_loop", name: "Face Loop Delimit", description: "Delimit face loop selection", kind: PropKind::Enum { items: &enums::E21, default: EnumDefault::Flags(&[]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
     PropDef { identifier: "extend", name: "Extend Select", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "deselect", name: "Deselect", description: "Remove from the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "toggle", name: "Toggle Select", description: "Toggle the selection", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -3140,7 +3569,7 @@ impl OpProps for MarkSharp {
 // ---------------------------------------------------------------- mesh.merge
 /// Props of `mesh.merge`, RNA order.
 pub static MERGE_PROPS: [PropDef; 2] = [
-    PropDef { identifier: "type", name: "Type", description: "Merge method to use", kind: PropKind::Enum { items: &enums::E16, default: EnumDefault::Item("CENTER"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "Merge method to use", kind: PropKind::Enum { items: &enums::E22, default: EnumDefault::Item("CENTER"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "uvs", name: "UVs", description: "Move UVs according to merge", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_merge`
@@ -3343,7 +3772,7 @@ impl OpProps for OffsetEdgeLoopsSlide {
 pub static POKE_PROPS: [PropDef; 3] = [
     PropDef { identifier: "offset", name: "Poke Offset", description: "Poke Offset", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (-1000.0, 1000.0), soft: (-10.0, 10.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_relative_offset", name: "Offset Relative", description: "Scale the offset by surrounding geometry", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "center_mode", name: "Poke Center", description: "Poke face center calculation", kind: PropKind::Enum { items: &enums::E17, default: EnumDefault::Item("MEDIAN_WEIGHTED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "center_mode", name: "Poke Center", description: "Poke face center calculation", kind: PropKind::Enum { items: &enums::E23, default: EnumDefault::Item("MEDIAN_WEIGHTED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_poke`
 pub static OPSPEC_MESH_OT_POKE: OperatorSpec = OperatorSpec {
@@ -3431,10 +3860,10 @@ impl OpProps for Poke {
 pub static PRIMITIVE_CIRCLE_ADD_PROPS: [PropDef; 9] = [
     PropDef { identifier: "vertices", name: "Vertices", description: "", kind: PropKind::Int { default: Defaults::Scalar(32), hard: (3, 10000000), soft: (3, 500) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "radius", name: "Radius", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "fill_type", name: "Fill Type", description: "", kind: PropKind::Enum { items: &enums::E18, default: EnumDefault::Item("NOTHING"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "fill_type", name: "Fill Type", description: "", kind: PropKind::Enum { items: &enums::E24, default: EnumDefault::Item("NOTHING"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -3587,10 +4016,10 @@ pub static PRIMITIVE_CONE_ADD_PROPS: [PropDef; 11] = [
     PropDef { identifier: "radius1", name: "Radius 1", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "radius2", name: "Radius 2", description: "", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 999999995904.0), soft: (0.0, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "depth", name: "Depth", description: "", kind: PropKind::Float { default: Defaults::Scalar(2.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "end_fill_type", name: "Base Fill Type", description: "", kind: PropKind::Enum { items: &enums::E18, default: EnumDefault::Item("NGON"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "end_fill_type", name: "Base Fill Type", description: "", kind: PropKind::Enum { items: &enums::E24, default: EnumDefault::Item("NGON"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -3748,7 +4177,7 @@ pub static PRIMITIVE_CUBE_ADD_PROPS: [PropDef; 7] = [
     PropDef { identifier: "size", name: "Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(2.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -3852,10 +4281,10 @@ pub static PRIMITIVE_CYLINDER_ADD_PROPS: [PropDef; 10] = [
     PropDef { identifier: "vertices", name: "Vertices", description: "", kind: PropKind::Int { default: Defaults::Scalar(32), hard: (3, 10000000), soft: (3, 500) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "radius", name: "Radius", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "depth", name: "Depth", description: "", kind: PropKind::Float { default: Defaults::Scalar(2.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "end_fill_type", name: "Cap Fill Type", description: "", kind: PropKind::Enum { items: &enums::E18, default: EnumDefault::Item("NGON"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "end_fill_type", name: "Cap Fill Type", description: "", kind: PropKind::Enum { items: &enums::E24, default: EnumDefault::Item("NGON"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4012,7 +4441,7 @@ pub static PRIMITIVE_GRID_ADD_PROPS: [PropDef; 9] = [
     PropDef { identifier: "size", name: "Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(2.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4123,7 +4552,7 @@ pub static PRIMITIVE_ICO_SPHERE_ADD_PROPS: [PropDef; 8] = [
     PropDef { identifier: "radius", name: "Radius", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4230,7 +4659,7 @@ pub static PRIMITIVE_MONKEY_ADD_PROPS: [PropDef; 7] = [
     PropDef { identifier: "size", name: "Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(2.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4334,7 +4763,7 @@ pub static PRIMITIVE_PLANE_ADD_PROPS: [PropDef; 7] = [
     PropDef { identifier: "size", name: "Size", description: "", kind: PropKind::Float { default: Defaults::Scalar(2.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4435,12 +4864,12 @@ impl OpProps for PrimitivePlaneAdd {
 // ---------------------------------------------------------------- mesh.primitive_torus_add
 /// Props of `mesh.primitive_torus_add`, RNA order.
 pub static PRIMITIVE_TORUS_ADD_PROPS: [PropDef; 11] = [
-    PropDef { identifier: "align", name: "Align", description: "", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::Translation, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "major_segments", name: "Major Segments", description: "Number of segments for the main ring of the torus", kind: PropKind::Int { default: Defaults::Scalar(48), hard: (3, 256), soft: (3, 256) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "minor_segments", name: "Minor Segments", description: "Number of segments for the minor ring of the torus", kind: PropKind::Int { default: Defaults::Scalar(12), hard: (3, 256), soft: (3, 256) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "mode", name: "Dimensions Mode", description: "", kind: PropKind::Enum { items: &enums::E20, default: EnumDefault::Item("MAJOR_MINOR"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "mode", name: "Dimensions Mode", description: "", kind: PropKind::Enum { items: &enums::E26, default: EnumDefault::Item("MAJOR_MINOR"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "major_radius", name: "Major Radius", description: "Radius from the origin to the center of the cross sections", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 10000.0), soft: (0.0, 100.0), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "minor_radius", name: "Minor Radius", description: "Radius of the torus's cross section", kind: PropKind::Float { default: Defaults::Scalar(0.25), hard: (0.0, 10000.0), soft: (0.0, 100.0), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "abso_major_rad", name: "Exterior Radius", description: "Total Exterior Radius of the torus", kind: PropKind::Float { default: Defaults::Scalar(1.25), hard: (0.0, 10000.0), soft: (0.0, 100.0), precision: 2, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -4598,7 +5027,7 @@ pub static PRIMITIVE_UV_SPHERE_ADD_PROPS: [PropDef; 9] = [
     PropDef { identifier: "radius", name: "Radius", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "calc_uvs", name: "Generate UVs", description: "Generate a default UV map", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E19, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
@@ -4705,8 +5134,8 @@ impl OpProps for PrimitiveUvSphereAdd {
 // ---------------------------------------------------------------- mesh.quads_convert_to_tris
 /// Props of `mesh.quads_convert_to_tris`, RNA order.
 pub static QUADS_CONVERT_TO_TRIS_PROPS: [PropDef; 2] = [
-    PropDef { identifier: "quad_method", name: "Quad Method", description: "Method for splitting the quads into triangles", kind: PropKind::Enum { items: &enums::E21, default: EnumDefault::Item("BEAUTY"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "ngon_method", name: "N-gon Method", description: "Method for splitting the n-gons into triangles", kind: PropKind::Enum { items: &enums::E22, default: EnumDefault::Item("BEAUTY"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "quad_method", name: "Quad Method", description: "Method for splitting the quads into triangles", kind: PropKind::Enum { items: &enums::E27, default: EnumDefault::Item("BEAUTY"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "ngon_method", name: "N-gon Method", description: "Method for splitting the n-gons into triangles", kind: PropKind::Enum { items: &enums::E28, default: EnumDefault::Item("BEAUTY"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_quads_convert_to_tris`
 pub static OPSPEC_MESH_OT_QUADS_CONVERT_TO_TRIS: OperatorSpec = OperatorSpec {
@@ -4995,7 +5424,7 @@ impl OpProps for Screw {
 // ---------------------------------------------------------------- mesh.select_all
 /// Props of `mesh.select_all`, RNA order.
 pub static SELECT_ALL_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E23, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E29, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `MESH_OT_select_all`
 pub static OPSPEC_MESH_OT_SELECT_ALL: OperatorSpec = OperatorSpec {
@@ -5110,7 +5539,7 @@ impl OpProps for SelectByAttribute {
 // ---------------------------------------------------------------- mesh.select_edge_loop_multi
 /// Props of `mesh.select_edge_loop_multi`, RNA order.
 pub static SELECT_EDGE_LOOP_MULTI_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "delimit_edge_loop", name: "Delimit", description: "Delimit edge loop selection", kind: PropKind::Enum { items: &enums::E14, default: EnumDefault::Flags(&["NGONS", "OUTER_CORNERS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "delimit_edge_loop", name: "Delimit", description: "Delimit edge loop selection", kind: PropKind::Enum { items: &enums::E20, default: EnumDefault::Flags(&["NGONS", "OUTER_CORNERS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
 ];
 /// `MESH_OT_select_edge_loop_multi`
 pub static OPSPEC_MESH_OT_SELECT_EDGE_LOOP_MULTI: OperatorSpec = OperatorSpec {
@@ -5145,7 +5574,7 @@ impl OpProps for SelectEdgeLoopMulti {
 // ---------------------------------------------------------------- mesh.select_edge_ring_multi
 /// Props of `mesh.select_edge_ring_multi`, RNA order.
 pub static SELECT_EDGE_RING_MULTI_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "delimit_edge_ring", name: "Edge Ring Delimit", description: "Delimit edge ring selection", kind: PropKind::Enum { items: &enums::E13, default: EnumDefault::Flags(&["NGONS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "delimit_edge_ring", name: "Edge Ring Delimit", description: "Delimit edge ring selection", kind: PropKind::Enum { items: &enums::E14, default: EnumDefault::Flags(&["NGONS"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ENUM_FLAG.union(PropFlags::ANIMATABLE), deprecated: None },
 ];
 /// `MESH_OT_select_edge_ring_multi`
 pub static OPSPEC_MESH_OT_SELECT_EDGE_RING_MULTI: OperatorSpec = OperatorSpec {
@@ -5181,7 +5610,7 @@ impl OpProps for SelectEdgeRingMulti {
 /// Props of `mesh.select_face_by_sides`, RNA order.
 pub static SELECT_FACE_BY_SIDES_PROPS: [PropDef; 3] = [
     PropDef { identifier: "number", name: "Number of Vertices", description: "", kind: PropKind::Int { default: Defaults::Scalar(4), hard: (3, 2147483647), soft: (3, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "type", name: "Type", description: "Type of comparison to make", kind: PropKind::Enum { items: &enums::E24, default: EnumDefault::Item("EQUAL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "Type of comparison to make", kind: PropKind::Enum { items: &enums::E30, default: EnumDefault::Item("EQUAL"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "extend", name: "Extend", description: "Extend the selection", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_select_face_by_sides`
@@ -5307,7 +5736,7 @@ impl OpProps for SelectLess {
 // ---------------------------------------------------------------- mesh.select_linked
 /// Props of `mesh.select_linked`, RNA order.
 pub static SELECT_LINKED_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "delimit", name: "Delimit", description: "Delimit selected region", kind: PropKind::Enum { items: &enums::E11, default: EnumDefault::Flags(&["SEAM"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "delimit", name: "Delimit", description: "Delimit selected region", kind: PropKind::Enum { items: &enums::E12, default: EnumDefault::Flags(&["SEAM"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ENUM_FLAG).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `MESH_OT_select_linked`
 pub static OPSPEC_MESH_OT_SELECT_LINKED: OperatorSpec = OperatorSpec {
@@ -5379,8 +5808,8 @@ impl OpProps for SelectLoose {
 pub static SELECT_MODE_PROPS: [PropDef; 4] = [
     PropDef { identifier: "use_extend", name: "Extend", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "use_expand", name: "Expand", description: "", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E25, default: EnumDefault::Item("VERT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
-    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E26, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("VERT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E32, default: EnumDefault::Item("TOGGLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `MESH_OT_select_mode`
 pub static OPSPEC_MESH_OT_SELECT_MODE: OperatorSpec = OperatorSpec {
@@ -5603,7 +6032,7 @@ impl OpProps for SelectNonManifold {
 pub static SELECT_RANDOM_PROPS: [PropDef; 3] = [
     PropDef { identifier: "ratio", name: "Ratio", description: "Portion of items to select randomly", kind: PropKind::Float { default: Defaults::Scalar(0.5), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Factor, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "seed", name: "Random Seed", description: "Seed for the random number generator", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 2147483647), soft: (0, 255) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E27, default: EnumDefault::Item("SELECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "action", name: "Action", description: "Selection action to execute", kind: PropKind::Enum { items: &enums::E33, default: EnumDefault::Item("SELECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_select_random`
 pub static OPSPEC_MESH_OT_SELECT_RANDOM: OperatorSpec = OperatorSpec {
@@ -5685,7 +6114,7 @@ impl OpProps for SelectRandom {
 // ---------------------------------------------------------------- mesh.separate
 /// Props of `mesh.separate`, RNA order.
 pub static SEPARATE_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E28, default: EnumDefault::Item("SELECTED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E34, default: EnumDefault::Item("SELECTED"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_separate`
 pub static OPSPEC_MESH_OT_SEPARATE: OperatorSpec = OperatorSpec {
@@ -5839,7 +6268,7 @@ impl OpProps for SetSharpnessByAngle {
 // ---------------------------------------------------------------- mesh.shortest_path_select
 /// Props of `mesh.shortest_path_select`, RNA order.
 pub static SHORTEST_PATH_SELECT_PROPS: [PropDef; 7] = [
-    PropDef { identifier: "edge_mode", name: "Edge Tag", description: "The edge flag to tag when selecting the shortest path", kind: PropKind::Enum { items: &enums::E29, default: EnumDefault::Item("SELECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "edge_mode", name: "Edge Tag", description: "The edge flag to tag when selecting the shortest path", kind: PropKind::Enum { items: &enums::E35, default: EnumDefault::Item("SELECT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_face_step", name: "Face Stepping", description: "Traverse connected faces (includes diagonals and edge-rings)", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_topology_distance", name: "Topology Distance", description: "Find the minimum number of steps, ignoring spatial distance", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "use_fill", name: "Fill Region", description: "Select all paths between the source/destination elements", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -6083,7 +6512,7 @@ pub static SUBDIVIDE_PROPS: [PropDef; 7] = [
     PropDef { identifier: "number_cuts", name: "Number of Cuts", description: "", kind: PropKind::Int { default: Defaults::Scalar(1), hard: (1, 100), soft: (1, 10) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "smoothness", name: "Smoothness", description: "Smoothness factor", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1000.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "ngon", name: "Create N-Gons", description: "When disabled, newly created faces are limited to 3 and 4 sided faces", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
-    PropDef { identifier: "quadcorner", name: "Quad Corner Type", description: "How to subdivide quad corners (anything other than Straight Cut will prevent n-gons)", kind: PropKind::Enum { items: &enums::E30, default: EnumDefault::Item("STRAIGHT_CUT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "quadcorner", name: "Quad Corner Type", description: "How to subdivide quad corners (anything other than Straight Cut will prevent n-gons)", kind: PropKind::Enum { items: &enums::E36, default: EnumDefault::Item("STRAIGHT_CUT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "fractal", name: "Fractal", description: "Fractal randomness factor", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1000000.0), soft: (0.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "fractal_along_normal", name: "Along Normal", description: "Apply fractal displacement along normal only", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "seed", name: "Random Seed", description: "Seed for the random number generator", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 2147483647), soft: (0, 255) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -6338,7 +6767,7 @@ impl OpProps for SubdivideEdgering {
 // ---------------------------------------------------------------- mesh.symmetrize
 /// Props of `mesh.symmetrize`, RNA order.
 pub static SYMMETRIZE_PROPS: [PropDef; 2] = [
-    PropDef { identifier: "direction", name: "Direction", description: "Which sides to copy from and to", kind: PropKind::Enum { items: &enums::E31, default: EnumDefault::Item("NEGATIVE_X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "direction", name: "Direction", description: "Which sides to copy from and to", kind: PropKind::Enum { items: &enums::E37, default: EnumDefault::Item("NEGATIVE_X"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "threshold", name: "Threshold", description: "Limit for snap middle vertices to the axis center", kind: PropKind::Float { default: Defaults::Scalar(9.999999747378752e-5), hard: (0.0, 10.0), soft: (9.999999747378752e-6, 0.10000000149011612), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
 ];
 /// `MESH_OT_symmetrize`

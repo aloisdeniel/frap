@@ -5,6 +5,22 @@
 
 use frap_rna::OperatorSpec;
 
+pub mod uv;
 
 /// Every typed operator spec of this group, sorted by idname.
-pub static ALL_OPS: [&OperatorSpec; 0] = [];
+pub static ALL_OPS: [&OperatorSpec; 14] = [
+    &uv::OPSPEC_UV_OT_AVERAGE_ISLANDS_SCALE,
+    &uv::OPSPEC_UV_OT_CUBE_PROJECT,
+    &uv::OPSPEC_UV_OT_CYLINDER_PROJECT,
+    &uv::OPSPEC_UV_OT_FOLLOW_ACTIVE_QUADS,
+    &uv::OPSPEC_UV_OT_LIGHTMAP_PACK,
+    &uv::OPSPEC_UV_OT_MARK_SEAM,
+    &uv::OPSPEC_UV_OT_PACK_ISLANDS,
+    &uv::OPSPEC_UV_OT_PIN,
+    &uv::OPSPEC_UV_OT_PROJECT_FROM_VIEW,
+    &uv::OPSPEC_UV_OT_RESET,
+    &uv::OPSPEC_UV_OT_SEAMS_FROM_ISLANDS,
+    &uv::OPSPEC_UV_OT_SMART_PROJECT,
+    &uv::OPSPEC_UV_OT_SPHERE_PROJECT,
+    &uv::OPSPEC_UV_OT_UNWRAP,
+];

@@ -10,7 +10,7 @@ mod common;
 #[test]
 fn typed_specs_match_dumps() {
     let all = frap_spec_ops_data::ALL_OPS;
-    assert_eq!(all.len(), 1, "typed operators of the `data` group in M2");
+    assert_eq!(all.len(), 9, "typed operators of the `data` group in M4 (M3+M4 W0)");
     for s in all {
         common::check_op(s);
     }

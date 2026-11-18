@@ -53,6 +53,26 @@ impl Default for CameraDOFSettings {
 impl CameraDOFSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 8] = ["use_dof", "focus_object", "focus_subtarget", "focus_distance", "aperture_fstop", "aperture_blades", "aperture_rotation", "aperture_ratio"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("focus_object", self.focus_object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "focus_object" => {
+                self.focus_object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {

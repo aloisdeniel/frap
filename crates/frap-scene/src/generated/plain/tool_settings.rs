@@ -40,6 +40,8 @@ pub struct ToolSettings {
     pub use_transform_skip_children: bool,
     /// `use_mesh_automerge`: Automatically merge vertices moved to the same location
     pub use_mesh_automerge: bool,
+    /// `use_mesh_automerge_and_split`: Automatically split edges and faces
+    pub use_mesh_automerge_and_split: bool,
     /// `use_snap`: Snap during transform
     pub use_snap: bool,
     /// `snap_elements`: Type of element to snap to
@@ -73,6 +75,7 @@ impl Default for ToolSettings {
             use_transform_data_origin: false,
             use_transform_skip_children: false,
             use_mesh_automerge: false,
+            use_mesh_automerge_and_split: false,
             use_snap: false,
             snap_elements: BTreeSet::from([SmolStr::new_static("INCREMENT")]),
             snap_target: SmolStr::new_static("CLOSEST"),
@@ -87,7 +90,21 @@ impl Default for ToolSettings {
 
 impl ToolSettings {
     /// Names of the stored RNA properties, in field order.
-    pub const STORED: [&'static str; 20] = ["use_proportional_edit", "use_proportional_edit_objects", "use_proportional_projected", "use_proportional_connected", "proportional_edit_falloff", "proportional_size", "double_threshold", "transform_pivot_point", "use_transform_pivot_point_align", "use_transform_data_origin", "use_transform_skip_children", "use_mesh_automerge", "use_snap", "snap_elements", "snap_target", "use_keyframe_insert_auto", "keyframe_type", "use_uv_select_sync", "mesh_select_mode", "vertex_group_weight"];
+    pub const STORED: [&'static str; 21] = ["use_proportional_edit", "use_proportional_edit_objects", "use_proportional_projected", "use_proportional_connected", "proportional_edit_falloff", "proportional_size", "double_threshold", "transform_pivot_point", "use_transform_pivot_point_align", "use_transform_data_origin", "use_transform_skip_children", "use_mesh_automerge", "use_mesh_automerge_and_split", "use_snap", "snap_elements", "snap_target", "use_keyframe_insert_auto", "keyframe_type", "use_uv_select_sync", "mesh_select_mode", "vertex_group_weight"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -103,6 +120,7 @@ impl ToolSettings {
             "use_transform_data_origin" => Field::Value(Value::Bool(self.use_transform_data_origin)),
             "use_transform_skip_children" => Field::Value(Value::Bool(self.use_transform_skip_children)),
             "use_mesh_automerge" => Field::Value(Value::Bool(self.use_mesh_automerge)),
+            "use_mesh_automerge_and_split" => Field::Value(Value::Bool(self.use_mesh_automerge_and_split)),
             "use_snap" => Field::Value(Value::Bool(self.use_snap)),
             "snap_elements" => Field::Value(Value::EnumSet(self.snap_elements.clone())),
             "snap_target" => Field::Value(Value::Enum(self.snap_target.clone())),
@@ -130,6 +148,7 @@ impl ToolSettings {
             "use_transform_data_origin" => self.use_transform_data_origin = FromValue::from_value(&v),
             "use_transform_skip_children" => self.use_transform_skip_children = FromValue::from_value(&v),
             "use_mesh_automerge" => self.use_mesh_automerge = FromValue::from_value(&v),
+            "use_mesh_automerge_and_split" => self.use_mesh_automerge_and_split = FromValue::from_value(&v),
             "use_snap" => self.use_snap = FromValue::from_value(&v),
             "snap_elements" => self.snap_elements = FromValue::from_value(&v),
             "snap_target" => self.snap_target = FromValue::from_value(&v),

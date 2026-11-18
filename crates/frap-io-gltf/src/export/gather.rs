@@ -9,6 +9,7 @@
 //! `children` before `mesh`, a primitive's `attributes` before `indices` before `material`,
 //! a texture's `sampler` before `source`, an image's bytes where its material is first used.
 
+use std::any::{Any, TypeId};
 use std::collections::HashMap;
 
 use frap_gltf::json::Index;
@@ -51,6 +52,9 @@ pub struct Gather<'a> {
     pub(crate) materials: MaterialCache,
     /// Textures, samplers and images.
     pub(crate) images: ImageCache,
+    /// Per-feature state of later milestones' files (camera/light caches, extras, …), one
+    /// value per type ([`Gather::state`]; M3+M4 W0), so they never add fields here.
+    states: HashMap<TypeId, Box<dyn Any>>,
 }
 
 impl<'a> Gather<'a> {
@@ -69,7 +73,18 @@ impl<'a> Gather<'a> {
             index_accessors: HashMap::new(),
             materials: MaterialCache::default(),
             images: ImageCache::default(),
+            states: HashMap::new(),
         }
+    }
+
+    /// The export-wide state of type `T` of a feature file (created on first use with
+    /// `T::default()`).
+    pub fn state<T: Any + Default>(&mut self) -> &mut T {
+        self.states
+            .entry(TypeId::of::<T>())
+            .or_insert_with(|| Box::new(T::default()))
+            .downcast_mut::<T>()
+            .expect("invariant: one state per TypeId")
     }
 
     /// Adds a WARNING report (once per distinct message).

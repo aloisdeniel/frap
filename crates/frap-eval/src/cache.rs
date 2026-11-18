@@ -33,6 +33,8 @@ struct CacheEntry {
 #[derive(Clone, Debug, Default)]
 pub struct EvalCache {
     objects: FxHashMap<(IdKey, EvalMode), CacheEntry>,
+    /// Objects whose modifier stacks are being evaluated (operand cycle guard, `geometry.rs`).
+    pub(crate) in_progress: crate::geometry::InProgress,
 }
 
 /// `Dependency cycle detected` report of a parent cycle, worded like Blender's depsgraph log.
@@ -130,7 +132,7 @@ impl EvalCache {
                 }
                 _ => world_matrix(o, None),
             };
-            let geo = mesh::evaluate(host, o, mode);
+            let geo = mesh::evaluate(self, host, c, o, mode);
             let bounds = geo.mesh.as_ref().and_then(|m| m.bounds());
             let mut warnings = geo.warnings;
             if let Some(cycle) = &node.cycle {

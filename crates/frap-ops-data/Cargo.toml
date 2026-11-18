@@ -24,6 +24,13 @@ automod.workspace = true
 smol_str.workspace = true
 indexmap.workspace = true
 libm.workspace = true
+frap-imbuf.workspace = true
+frap-color.workspace = true
+frap-modifiers.workspace = true
+frap-bmesh.workspace = true
+frap-geom.workspace = true
+frap-math.workspace = true
+smallvec.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

@@ -9,6 +9,7 @@
 pub mod export;
 pub mod glb;
 pub mod import;
+pub mod material_ext;
 
 pub use export::mesh::ext::{
     AttrColumn, AttrValues, KeyColumn, KeyFn, MeshExportCx, PRIMITIVE_ATTRIBUTE_WRITERS,
@@ -16,3 +17,7 @@ pub use export::mesh::ext::{
     PrimitiveExtractor, PrimitivePostProcess, SplitKey,
 };
 pub use export::{ExportError, ExportFormat, ExportOutput, ExportSettings, export};
+pub use material_ext::{
+    ExtExportCx, ExtImportHost, MATERIAL_EXT_EXPORTERS, MATERIAL_EXT_IMPORTERS,
+    MaterialExtExporter, MaterialExtImporter,
+};

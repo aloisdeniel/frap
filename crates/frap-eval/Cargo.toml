@@ -17,6 +17,10 @@ glam.workspace = true
 libm.workspace = true
 rustc-hash.workspace = true
 smol_str.workspace = true
+frap-modifiers.workspace = true
+frap-subdiv.workspace = true
+frap-boolean.workspace = true
+frap-imbuf.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

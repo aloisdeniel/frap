@@ -261,7 +261,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.material_slot_assign` | M2 | P0 | edit-mode face assignment (object mode: no-op as Blender); WP 2.9 (M2 W0 assignment) |
 | [x] | `object.material_slot_select` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
 | [x] | `object.material_slot_deselect` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
-| [ ] | `object.material_slot_move` | M3 | P2 |  |
+| [ ] | `object.material_slot_move` | M3 | P2 | WP 3.1 (M3+M4 W0 assignment) |
 | [ ] | `object.material_slot_copy` | M8 | P2 |  |
 | [ ] | `object.vertex_group_add` | M6 | P0 |  |
 | [ ] | `object.vertex_group_remove` | M6 | P0 |  |
@@ -306,10 +306,10 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.collection_remove` | M1 | P2 |  |
 | [x] | `object.collection_link` | M1 | P2 | dynamic enum |
 | [x] | `object.collection_unlink` | M1 | P2 |  |
-| [ ] | `object.hide_view_set` | M3 | P1 | virtual 3D View poll |
-| [ ] | `object.hide_view_clear` | M3 | P1 |  |
-| [ ] | `object.make_single_user` | M3 | P1 |  |
-| [ ] | `object.make_links_data` | M3 | P1 |  |
+| [ ] | `object.hide_view_set` | M3 | P1 | virtual 3D View poll; WP 3.10 (M3+M4 W0 assignment) |
+| [ ] | `object.hide_view_clear` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
+| [ ] | `object.make_single_user` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
+| [ ] | `object.make_links_data` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
 | [ ] | `object.hide_render_clear_all` | M8 | P2 |  |
 | [ ] | `object.track_set` | M8 | P2 |  |
 | [ ] | `object.track_clear` | M8 | P2 |  |
@@ -386,7 +386,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `view3d.snap_selected_to_active` | M1 | P1 |  |
 | [x] | `view3d.snap_selected_to_grid` | M1 | P2 |  |
 | [ ] | `view3d.camera_to_view_selected` | M3 | P0 | frames selected objects with scene.camera |
-| [ ] | `view3d.object_as_camera` | M3 | P1 |  |
+| [ ] | `view3d.object_as_camera` | M3 | P1 | WP 3.4 (M3+M4 W0 assignment) |
 
 ### `uv.*`
 
@@ -778,7 +778,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | Collection, CollectionObjects, CollectionChildren | M1 | link/unlink |
 | [ ] | Depsgraph, DepsgraphObjectInstance (evaluated_get, to_mesh) | M1 | always fresh |
 | [ ] | Image, ImagePackedFile | M1 meta / M3 full | pixels, pack, save, save_render |
-| [ ] | Texture, ImageTexture | M4 | DISPLACE only |
+| [ ] | Texture, ImageTexture | M4 | DISPLACE only; field set frozen by M3+M4 W0 (`TextureFields`), bindings and `bpy.data.textures.new` WP 4.2 |
 | [ ] | VertexGroup, VertexGroups, VertexGroupElement | M6 | names on Mesh, RNA on Object |
 | [ ] | Key, ShapeKey | M6 |  |
 | [ ] | Armature, Bone, EditBone, ArmatureEditBones, Pose, PoseBone, BoneCollection | M6 |  |
@@ -800,12 +800,12 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | `Mesh.from_pydata(vertices, edges, faces), Mesh.shade_smooth()/shade_flat() (Python-only)` | M1 |  |
 | [ ] | `Mesh.update(), validate(), calc_loop_triangles(), transform(matrix), clear_geometry()` | M1 | `validate()` answers `False` for a valid mesh and refuses to repair (`RNA_NOT_IMPLEMENTED`); `transform` ignores `shape_keys` (M6) |
 | [x] | `Mesh.set_sharp_from_angle(angle), flip_normals(), split_faces()` | M2 | moved from M1 (M1 stabilization); `object.shade_smooth_by_angle` covers sharp-from-angle meanwhile; WP 2.9 (`frap-ops-data/src/funcs/mesh_*.rs`, M2 W0 assignment) |
-| [ ] | `Mesh.calc_tangents(uvmap)` | M3 | bevy_mikktspace |
+| [ ] | `Mesh.calc_tangents(uvmap)` | M3 | bevy_mikktspace (`frap-geom/src/mikktspace.rs`); WP 3.7 (M3+M4 W0 assignment) |
 | [ ] | `mesh.materials.append/pop/clear, MaterialSlot.material/link` | M1 |  |
 | [ ] | `mesh.attributes.new/remove, mesh.uv_layers.new, mesh.color_attributes.new/remove` | M1 | colour attributes default to white and become active/default when none is |
 | [x] | `mesh.uv_layers.remove, mesh.vertex_colors.new` | M2 | moved from M1 (M1 stabilization); `attributes.remove` removes a UV map meanwhile; vertex_colors creates "Col" BYTE_COLOR CORNER; WP 2.9 (`funcs/{u_v_loop_layers_remove,loop_colors_new}.rs`, M2 W0 assignment) |
 | [ ] | `node_tree.nodes.new/remove, node_tree.links.new/remove` | M1 | links.new replaces existing input link |
-| [ ] | `obj.modifiers.new(name, type)/remove/move/clear` | M4 (data from M1) |  |
+| [ ] | `obj.modifiers.new(name, type)/remove/move/clear` | M4 (data from M1) | WP 4.1 (`funcs/object_modifiers_*.rs`); M4 golden prerequisite |
 | [ ] | `Image.pack/unpack/save/save_render/scale/reload, bpy.data.images.load` | M3 |  |
 | [ ] | `Scene.frame_set(frame, subframe=0.0)` | M6 | writes animated values to originals |
 | [ ] | `bpy_struct.keyframe_insert(data_path, *, index=-1, frame=None, group="", options=set(), keytype='KEYFRAME')` | M6 | keyword-only after data_path |

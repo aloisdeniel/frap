@@ -1430,3 +1430,199 @@ fn m2_contract_delta_cheap_parts_run() {
         m2_extension_points as fn(),
     );
 }
+
+// ---------------------------------------------------------------- M3+M4 W0 contract delta
+
+/// §7.2 modifier plugins (`frap-modifiers`, frozen at M4 W0) and the backends they reach.
+fn modifier_contract(cx: &mut dyn frap_modifiers::ModEvalCx, md: &frap_modifiers::Modifier) {
+    use frap_modifiers::{ModError, ModKind, ModTypeFlags, ModifierType, ModifierTypeInfo};
+    let _: &[ModifierTypeInfo] = &frap_modifiers::MODIFIER_TYPES;
+    let _ = |i: &ModifierTypeInfo| -> (
+        ModifierType,
+        ModKind,
+        ModTypeFlags,
+        fn(&frap_modifiers::ModifierSettings) -> SmallVec<[IdAny; 2]>,
+        fn(&frap_modifiers::ModifierSettings) -> Option<&'static str>,
+        fn(
+            &frap_modifiers::Modifier,
+            Mesh,
+            &mut dyn frap_modifiers::ModEvalCx,
+        ) -> Result<Mesh, ModError>,
+    ) { (i.ty, i.kind, i.flags, i.depends_on, i.is_disabled, i.eval) };
+    let _: &Main = cx.main();
+    let _: &Object = cx.object();
+    let _: IdRef<ObjectId> = cx.object_ref();
+    let _: Result<Arc<Mesh>, ModError> = cx.evaluated_mesh(cx.object_ref());
+    let _: glam::Mat4 = cx.object_matrix_world(cx.object_ref());
+    let _: Result<Arc<frap_scene::EvaluatedPose>, ModError> = cx.pose(cx.object_ref());
+    let _: EvalMode = cx.mode();
+    let _: f32 = cx.frame();
+    cx.report(Report::new(ReportType::Warning, "x"));
+    let _: &dyn frap_subdiv::Subdivider = cx.subdivider();
+    let _: &dyn frap_boolean::BooleanSolver = cx.boolean_solver();
+    let _: fn(frap_modifiers::ModifierType) -> Option<&'static ModifierTypeInfo> =
+        frap_modifiers::registry::find;
+    let _: fn(
+        Arc<Mesh>,
+        bool,
+        &mut dyn frap_modifiers::ModEvalCx,
+    ) -> frap_modifiers::stack::StackResult = frap_modifiers::stack::evaluate;
+    let _ = md;
+}
+
+/// `frap-subdiv`, `frap-boolean`, `frap-uv` (M3+M4 W0 contracts).
+fn backends() {
+    let _: fn() -> &'static dyn frap_subdiv::Subdivider = frap_subdiv::default_subdivider;
+    let _ = |s: &dyn frap_subdiv::Subdivider,
+             t: &frap_subdiv::SubdivTopology<'_>,
+             p: &frap_subdiv::SubdivSettings|
+     -> Result<frap_subdiv::SubdivResult, frap_subdiv::SubdivError> {
+        s.subdivide(t, p)
+    };
+    let _: fn() -> &'static dyn frap_boolean::BooleanSolver = frap_boolean::default_solver;
+    let _ = |s: &dyn frap_boolean::BooleanSolver,
+             m: &[frap_boolean::BoolMesh<'_>],
+             o: &frap_boolean::BoolOptions|
+     -> Result<frap_boolean::BoolResult, frap_boolean::BoolError> { s.run(m, o) };
+    let _: fn() -> frap_uv::ParamMesh = frap_uv::ParamMesh::new;
+    let _: fn(&mut frap_uv::ParamMesh, &frap_uv::ParamFace<'_>) = frap_uv::ParamMesh::face_add;
+    let _: fn(&mut frap_uv::ParamMesh, [frap_uv::ParamKey; 2]) = frap_uv::ParamMesh::edge_set_seam;
+    let _: fn(&mut frap_uv::ParamMesh, frap_uv::ConstructOpts) -> u32 =
+        frap_uv::ParamMesh::construct_end;
+    let _: fn(&mut frap_uv::ParamMesh, bool, bool, bool) = frap_uv::ParamMesh::lscm_begin;
+    let _: fn(&mut frap_uv::ParamMesh) -> frap_uv::SolveCount = frap_uv::ParamMesh::lscm_solve;
+    let _: fn(&mut frap_uv::ParamMesh, &frap_uv::PackParams) = frap_uv::ParamMesh::pack;
+    let _: fn(&mut frap_uv::ParamMesh, bool, bool, bool) = frap_uv::ParamMesh::average;
+    let _: fn(&frap_uv::ParamMesh, &mut [[f32; 2]]) = frap_uv::ParamMesh::flush;
+    let _: fn(&mut [frap_uv::PackIsland], &frap_uv::PackParams) -> f32 =
+        frap_uv::pack::pack_islands;
+    let _: fn(&[[f32; 3]], &[f32], f32, f32) -> Vec<frap_uv::smart::SmartGroup> =
+        frap_uv::smart::project_groups;
+    let _: fn([f32; 3]) -> [f32; 2] = frap_uv::project::map_to_tube;
+    let _: fn([f32; 3]) -> [f32; 2] = frap_uv::project::map_to_sphere;
+    let _: fn(&[[f32; 3]], &[[f32; 3]], &[[f32; 2]], &[&[u32]]) -> Vec<[f32; 4]> =
+        frap_geom::mikktspace::corner_tangents;
+    use frap_bmesh::ops::{decimate_collapse, decimate_dissolve, decimate_unsubdivide};
+    let _: fn(&mut BMesh, &decimate_collapse::DecimateCollapseIn) =
+        decimate_collapse::decimate_collapse;
+    let _: fn(&mut BMesh, f32, bool, frap_bmesh::ops::dissolve_limit::Delimit) =
+        decimate_dissolve::decimate_dissolve;
+    let _: fn(&mut BMesh, i32) = decimate_unsubdivide::decimate_unsubdivide;
+    let _: fn(
+        &mut BMesh,
+        bool,
+        f32,
+        bool,
+        &mut Vec<(frap_bmesh::VertId, frap_bmesh::VertId)>,
+    ) -> bool = frap_bmesh::ops::intersect_edges::intersect_edges;
+}
+
+/// M3 data and extension points: `LoweredMaterial` extension fields, multiple scenes,
+/// textures, NODES inputs, modifier ID pointers, glTF material-extension and export slices.
+fn m3_m4_data(main: &mut Main, win: &mut WindowState, log: &mut ChangeLog) {
+    let lm = LoweredMaterial::gltf_default();
+    let e: &MaterialExts = &lm.ext;
+    let _: (
+        &Option<frap_material::Clearcoat>,
+        &Option<frap_material::Sheen>,
+        &Option<frap_material::Transmission>,
+        &Option<frap_material::Volume>,
+        &Option<f32>,
+        &Option<frap_material::Specular>,
+        &Option<frap_material::Iridescence>,
+        &Option<frap_material::Anisotropy>,
+        &Option<f32>,
+        &Option<frap_material::DiffuseTransmission>,
+    ) = (
+        &e.clearcoat,
+        &e.sheen,
+        &e.transmission,
+        &e.volume,
+        &e.ior,
+        &e.specular,
+        &e.iridescence,
+        &e.anisotropy,
+        &e.dispersion,
+        &e.diffuse_transmission,
+    );
+    let _: f32 = lm.occlusion_strength;
+    let _: fn(&mut Main, &str, &mut ChangeLog) -> IdRef<SceneId> = frap_scene::scenes::new_scene;
+    let _: fn(
+        &mut Main,
+        IdRef<SceneId>,
+        frap_scene::scenes::SceneCopy,
+        &mut ChangeLog,
+    ) -> IdRef<SceneId> = frap_scene::scenes::copy_scene;
+    let _: fn(&mut Main, &mut WindowState, IdRef<SceneId>, &mut ChangeLog) -> Result<(), String> =
+        frap_scene::scenes::remove_scene;
+    let _: fn(&Main, &mut WindowState, IdRef<SceneId>) -> Result<(), String> =
+        frap_scene::window::set_scene;
+    let t = frap_scene::id::Texture::with_type("Tex", "IMAGE");
+    let _: (
+        &SmolStr,
+        &frap_scene::generated::plain::TextureFields,
+        Option<IdAny>,
+    ) = (&t.r#type, &t.fields, t.fields.image);
+    let n = frap_scene::generated::modifier_settings::NodesSettings::default();
+    let _: &IndexMap<SmolStr, frap_scene::id::GnInput> = &n.inputs.0;
+    let s = frap_scene::id::ModifierSettings::new(
+        frap_scene::generated::modifier_settings::ModifierType::Boolean,
+    );
+    let _: SmallVec<[(&'static str, Option<IdAny>); 2]> = s.id_refs();
+    let _ = (main, win, log);
+    use frap_io_gltf::{ExtExportCx, ExtImportHost, MaterialExtExporter, MaterialExtImporter};
+    let _: &[MaterialExtExporter] = &frap_io_gltf::MATERIAL_EXT_EXPORTERS;
+    let _: &[MaterialExtImporter] = &frap_io_gltf::MATERIAL_EXT_IMPORTERS;
+    let _ = |x: &MaterialExtExporter| -> fn(
+        &mut ExtExportCx<'_, '_>,
+        &LoweredMaterial,
+        &mut frap_gltf::json::Material,
+    ) -> Result<(), frap_io_gltf::ExportError> { x.run };
+    let _ = |x: &MaterialExtImporter| -> fn(
+        &mut dyn ExtImportHost,
+        &frap_gltf::json::Material,
+        &mut LoweredMaterial,
+    ) -> Result<(), frap_io_gltf::import::ImportError> { x.run };
+    let _: &[&'static [&'static str]] = &frap_io_gltf::export::SUPPORTED_EXPORT_PROPS;
+    let _: fn(&str) -> bool = frap_io_gltf::export::is_supported;
+    let st = frap_io_gltf::ExportSettings::default();
+    let _: (&frap_spec_ops_io::export_scene::ExportSceneGltf, &Option<_>) =
+        (&*st.props, &st.evaluated_meshes);
+}
+
+#[test]
+fn m3_m4_contract_delta_cheap_parts_run() {
+    // Defaults that WPs rely on.
+    let lm = LoweredMaterial::gltf_default();
+    assert_eq!(lm.ext, MaterialExts::default());
+    assert!(lm.ext.clearcoat.is_none() && lm.ext.ior.is_none());
+    assert_eq!(lm.occlusion_strength, 1.0);
+    assert_eq!(frap_subdiv::SubdivSettings::default().level, 1);
+    assert_eq!(
+        frap_boolean::BoolOptions::default().solver,
+        frap_boolean::SolverKind::Exact
+    );
+    assert_eq!(frap_uv::PackParams::default().margin, 0.001);
+    assert!(frap_modifiers::registry::duplicates().is_empty());
+    let t = frap_scene::id::Texture::new("Texture");
+    assert_eq!(t.r#type, "IMAGE");
+    let st = frap_io_gltf::ExportSettings::default();
+    assert!(!st.props.export_apply.value && !st.props.export_cameras.value);
+    assert!(frap_io_gltf::export::is_supported("export_format"));
+    // Modifier ID pointers are visible to user counting and remapping.
+    let mut s = frap_scene::id::ModifierSettings::new(
+        frap_scene::generated::modifier_settings::ModifierType::Nodes,
+    );
+    assert_eq!(
+        s.id_refs().iter().map(|(k, _)| *k).collect::<Vec<_>>(),
+        ["node_group"]
+    );
+    assert!(s.set_id_ref("node_group", None));
+    assert!(!s.set_id_ref("object", None));
+    // The stack passes a mesh through untouched without modifiers (frap-modifiers stack walk).
+    let _ = (
+        modifier_contract as fn(&mut dyn frap_modifiers::ModEvalCx, &frap_modifiers::Modifier),
+        backends as fn(),
+        m3_m4_data as fn(&mut Main, &mut WindowState, &mut ChangeLog),
+    );
+}

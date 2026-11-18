@@ -144,6 +144,10 @@ pub struct Request {
     pub proportional: Option<PropEdit>,
     /// Slide options (edge/vertex slide).
     pub slide: super::slide::SlideParams,
+    /// `use_automerge_and_split`, when the operator has it and it was set (M2 leftover wired
+    /// by M4 W0: `T_AUTOMERGE | T_AUTOSPLIT` when true, neither when false; `None` follows
+    /// `tool_settings.use_mesh_automerge[_and_split]`).
+    pub use_automerge_and_split: Option<bool>,
 }
 
 impl Request {
@@ -162,6 +166,7 @@ impl Request {
             center_override: None,
             proportional: None,
             slide: super::slide::SlideParams::default(),
+            use_automerge_and_split: None,
         }
     }
 }
@@ -1032,14 +1037,20 @@ pub fn run(cx: &mut OpCtx, req: Request) -> OpResult {
     }
     let meshes = helpers::iter_edit_meshes(cx);
     let mut cd_targets: Vec<(IdRef<MeshId>, CdTarget)> = Vec::new();
-    // `T_AUTOMERGE` (`initTransInfo`: `tool_settings.use_mesh_automerge`; frap does not bind
-    // `use_mesh_automerge_and_split`, so `T_AUTOSPLIT` comes only from the operator property,
-    // refused before this point). Only the vertex conversions run
-    // `special_aftertrans_update__mesh`.
+    // `T_AUTOMERGE` / `T_AUTOSPLIT` (`initTransInfo`): the operator's `use_automerge_and_split`
+    // when set (true: both; false: neither), else `tool_settings.use_mesh_automerge` and
+    // `use_mesh_automerge_and_split`. Only the vertex conversions run
+    // `special_aftertrans_update__mesh`; Auto Merge with split is `automerge.rs` (WP 4.6).
     let automerge = {
         let ts = cx.ctx().tool_settings();
-        (ts.use_mesh_automerge && req.mode.data_kind() == DataKind::Verts)
-            .then_some(ts.double_threshold)
+        let (merge, split) = match req.use_automerge_and_split {
+            Some(v) => (v, v),
+            None => (
+                ts.use_mesh_automerge,
+                ts.use_mesh_automerge && ts.use_mesh_automerge_and_split,
+            ),
+        };
+        (merge && req.mode.data_kind() == DataKind::Verts).then_some((ts.double_threshold, split))
     };
     let (mut t, view_matrix) = {
         let (c, edit) = cx.split_edit();
@@ -1174,9 +1185,14 @@ pub fn run(cx: &mut OpCtx, req: Request) -> OpResult {
             write_back(cx, &t)?
         }
     };
-    if let (Some(dist), OpStatus::Finished) = (automerge, &status) {
+    if let (Some((dist, split)), OpStatus::Finished) = (automerge, &status) {
         for me in mes {
-            auto_merge(cx.bmesh_mut(me)?, dist)?;
+            let bm = cx.bmesh_mut(me)?;
+            if split {
+                super::automerge::automerge_and_split(bm, dist)?;
+            } else {
+                auto_merge(bm, dist)?;
+            }
         }
     }
     Ok(status)

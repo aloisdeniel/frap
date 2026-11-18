@@ -8,6 +8,8 @@
 
 pub mod animate;
 mod cache;
+/// The modifier stack (M4 W0; WP 4.1).
+mod geometry;
 pub mod pose;
 
 pub use cache::{

@@ -262,7 +262,14 @@ impl IdType for Object {
         if let Some(a) = self.animation_data.as_ref().and_then(|a| a.action) {
             f(a.any());
         }
-        // WP 1.10 / M4 / M6: modifier settings (objects, node groups, textures), pose.
+        // Modifier settings: operand objects, node groups, textures (M4 W0); pose: M6.
+        for m in &self.modifiers {
+            for (_, r) in m.settings.id_refs() {
+                if let Some(r) = r {
+                    f(r);
+                }
+            }
+        }
     }
     fn remap_ref(&mut self, from: IdAny, to: Option<IdAny>) {
         if self.data == Some(from) {
@@ -281,6 +288,18 @@ impl IdType for Object {
         {
             ad.action = to.and_then(IdRef::from_any);
         }
-        // M4 / M6: modifier settings (objects, node groups, textures), pose.
+        // Modifier settings (M4 W0); pose: M6.
+        for m in &mut self.modifiers {
+            let hits: Vec<&'static str> = m
+                .settings
+                .id_refs()
+                .into_iter()
+                .filter(|(_, r)| *r == Some(from))
+                .map(|(k, _)| k)
+                .collect();
+            for k in hits {
+                m.settings.set_id_ref(k, to);
+            }
+        }
     }
 }

@@ -18,10 +18,10 @@ use frap_math::glam::Mat4;
 use frap_math::matrix::decompose_wxyz;
 use frap_math::quat::normalize_qt;
 
-use crate::export::ExportError;
 use crate::export::gather::Gather;
 use crate::export::mesh::gather::gather_mesh;
 use crate::export::vtree::VTree;
+use crate::export::{ExportError, cameras, extras, lights};
 
 /// `round_if_near(value, target)`.
 pub fn round_if_near(value: f32, target: f32) -> f32 {
@@ -67,28 +67,33 @@ pub fn trs(m: &Mat4, export_yup: bool) -> (Option<[f64; 3]>, Option<[f64; 4]>, O
 
 /// Gathers vtree node `i` and its kept subtree; returns the node's index.
 pub fn gather_node(g: &mut Gather, tree: &VTree, i: usize) -> Result<Index, ExportError> {
-    // Alphabetical members: `children` (post-order), then `mesh`, then the node itself.
+    let r = tree.nodes[i].object;
+    let main = g.main;
+    let ob = main
+        .objects
+        .get(r)
+        .ok_or_else(|| ExportError::Invalid("vtree object vanished".into()))?;
+    // Alphabetical members: `camera`, `children` (post-order), `extensions` (lights), `extras`,
+    // then `mesh`, then the node itself.
+    let camera = cameras::gather(g, ob)?;
     let mut children = Vec::with_capacity(tree.nodes[i].children.len());
     for &c in &tree.nodes[i].children {
         children.push(gather_node(g, tree, c)?);
     }
-    let r = tree.nodes[i].object;
-    let ob = g
-        .main
-        .objects
-        .get(r)
-        .ok_or_else(|| ExportError::Invalid("vtree object vanished".into()))?;
-    let mesh = gather_mesh(g, ob)?;
-    let (translation, rotation, scale) = trs(&tree.local_matrix(i), g.settings.export_yup);
-    g.doc.nodes.push(Node {
+    let mut node = Node {
+        camera,
         children,
-        mesh,
         name: Some(ob.header.name.to_string()),
-        rotation,
-        scale,
-        translation,
         ..Node::default()
-    });
+    };
+    lights::apply(g, ob, &mut node)?;
+    node.extras = extras::object(g, ob);
+    node.mesh = gather_mesh(g, ob)?;
+    let (translation, rotation, scale) = trs(&tree.local_matrix(i), g.settings.export_yup);
+    node.rotation = rotation;
+    node.scale = scale;
+    node.translation = translation;
+    g.doc.nodes.push(node);
     Ok((g.doc.nodes.len() - 1) as Index)
 }
 

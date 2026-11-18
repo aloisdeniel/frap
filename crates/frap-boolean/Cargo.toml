@@ -1,12 +1,34 @@
 [package]
 name = "frap-boolean"
-description = "frap L3: BooleanSolver trait, manifold-rust backend (ARCHITECTURE §3.2). Empty until M4"
+description = "frap L3: BooleanSolver trait, manifold-rust backend (ARCHITECTURE §3.2)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 publish.workspace = true
+
+[dependencies]
+frap-math.workspace = true
+glam.workspace = true
+libm.workspace = true
+smallvec.workspace = true
+rustc-hash.workspace = true
+thiserror.workspace = true
+
+[dependencies.manifold-rust]
+workspace = true
+optional = true
+
+[dev-dependencies]
+approx.workspace = true
+proptest.workspace = true
+serde_json.workspace = true
+
+[features]
+# §3.6 `boolean-manifold` (on): the manifold-rust backend.
+default = ["manifold"]
+manifold = ["dep:manifold-rust"]
 
 [lints]
 workspace = true

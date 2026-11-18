@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.export_scene.gltf` (ARCHITECTURE §17.2): the operator around
 //! `frap_io_gltf::export`. All of Blender's props are accepted; the ones the M1 exporter does
-//! not honour (`frap_io_gltf::export::SUPPORTED_PROPS` lists those it does) give one WARNING
+//! not honour (`frap_io_gltf::export::is_supported` says which it does) give one WARNING
 //! naming the prop when they differ from Blender's default, and the export proceeds as if they
 //! had their default.
 //!
@@ -14,7 +14,7 @@
 //! `//` resolves against `bpy.data.filepath`, a deliberate deviation (D-08). Files are written
 //! to temporary siblings and renamed after every fallible step (§12).
 
-use frap_io_gltf::export::settings::{ExportFormat, ExportSettings, SUPPORTED_PROPS};
+use frap_io_gltf::export::settings::{ExportFormat, ExportSettings, is_supported};
 use frap_op::prelude::*;
 use frap_op::{EnumItemOwned, Support as S};
 use frap_scene::Context;
@@ -105,7 +105,7 @@ pub(crate) fn unsupported_props(a: &OpArgs) -> Vec<&'static str> {
     OPSPEC_EXPORT_SCENE_OT_GLTF
         .props
         .iter()
-        .filter(|d| !SUPPORTED_PROPS.contains(&d.identifier))
+        .filter(|d| !is_supported(d.identifier))
         .filter(|d| {
             a.values
                 .get(d.identifier)
@@ -113,6 +113,32 @@ pub(crate) fn unsupported_props(a: &OpArgs) -> Vec<&'static str> {
         })
         .map(|d| d.identifier)
         .collect()
+}
+
+/// `export_apply=True`: the viewport-evaluated mesh of every MESH object (the add-on's
+/// `blender_object.evaluated_get(depsgraph).to_mesh()`), read by the exporter's `apply.rs`
+/// (M4 W0 plumbing; WP 4.7 implements the export side). Objects whose evaluation fails are left
+/// out (the exporter then uses the original mesh).
+fn evaluated_meshes(
+    cx: &mut OpCtx,
+) -> std::collections::HashMap<frap_rna::IdRef<frap_rna::ObjectId>, std::sync::Arc<frap_mesh::Mesh>>
+{
+    let obs: Vec<_> = cx
+        .main()
+        .objects
+        .iter()
+        .filter(|(_, o)| o.object_type() == "MESH")
+        .map(|(r, _)| r)
+        .collect();
+    let mut out = std::collections::HashMap::new();
+    for ob in obs {
+        if let Ok(ev) = cx.evaluated(ob)
+            && let Some(me) = ev.mesh.clone()
+        {
+            out.insert(ob, me);
+        }
+    }
+    out
 }
 
 fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
@@ -133,6 +159,9 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
         .map(|s| s.to_string_lossy().into_owned())
         .unwrap_or_else(|| "scene".into());
     settings.blend_dir = common::blend_dir(cx);
+    if p.export_apply.value {
+        settings.evaluated_meshes = Some(std::sync::Arc::new(evaluated_meshes(cx)));
+    }
     for prop in unsupported_props(a) {
         cx.report(
             ReportType::Warning,

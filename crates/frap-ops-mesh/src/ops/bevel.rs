@@ -18,9 +18,10 @@
 //! **`offset=0` (the default) bevels nothing** and the operator still finishes, as in
 //! Blender: frap adds the response hint `NO_OP_DEFAULT` naming `offset` (`offset_pct` for
 //! `PERCENT`). Not supported: `profile_type='CUSTOM'`
-//! (`OP_NOT_IMPLEMENTED`), `harden_normals` (the bevel is made, normals are not hardened, a
-//! WARNING says so), and Auto Merge after the bevel (`tool_settings.use_mesh_automerge`, a
-//! WARNING).
+//! (`OP_NOT_IMPLEMENTED`) and `harden_normals` (the bevel is made, normals are not hardened, a
+//! WARNING says so). With `tool_settings.use_mesh_automerge` the selection is welded to
+//! connected unselected vertices within `double_threshold` after the bevel
+//! (`EDBM_automerge_connected`, M4 W0).
 
 use frap_bmesh::ops::bevel::{BevelIn, bevel};
 use frap_bmesh::{BMElem, BmError, ElemFlag, SelectMode};
@@ -96,7 +97,7 @@ fn bm_error(e: BmError) -> OpError {
 #[operator(
     poll = poll::EDITMESH,
     tier = T2,
-    support = Partial("profile_type='CUSTOM' answers OP_NOT_IMPLEMENTED; harden_normals and Auto Merge are not applied (WARNING)"),
+    support = Partial("profile_type='CUSTOM' answers OP_NOT_IMPLEMENTED; harden_normals is not applied (WARNING)"),
     notes = [
         "offset defaults to 0, which bevels nothing: pass offset (or offset_pct with offset_type='PERCENT'); frap answers the hint NO_OP_DEFAULT",
         "segments=1 matches Blender at T1; more segments match within 1e-5 in Blender's element order (T2)",
@@ -147,13 +148,8 @@ fn exec(cx: &mut OpCtx, p: mesh::Bevel) -> OpResult {
         super::_growth::bevel_corners(bm, segments, affect_vertices)
     })?;
 
-    let automerge = {
-        let ctx = cx.ctx();
-        ctx.main
-            .scenes
-            .get(ctx.win.scene)
-            .is_some_and(|s| s.tool_settings.use_mesh_automerge)
-    };
+    // `opdata->use_automerge` / `automerge_threshold` (`edbm_bevel_init`).
+    let automerge = super::_automerge::threshold(cx);
 
     for (ob, me) in stores {
         let totcol = cx
@@ -203,6 +199,9 @@ fn exec(cx: &mut OpCtx, p: mesh::Bevel) -> OpResult {
                 }
             }
         }
+        if let Some(dist) = automerge {
+            super::_automerge::automerge_connected(bm, dist)?;
+        }
         // `edbm_bevel_exit`: without this, faces surrounded by selected edges/verts would be
         // unselected.
         if !bm.select_mode.contains(SelectMode::FACE) {
@@ -219,12 +218,6 @@ fn exec(cx: &mut OpCtx, p: mesh::Bevel) -> OpResult {
             ReportType::Warning,
             "frap: harden_normals is not supported yet: the bevel was made without hardening \
              the normals",
-        );
-    }
-    if automerge {
-        cx.report(
-            ReportType::Warning,
-            "frap: Auto Merge (tool_settings.use_mesh_automerge) is not applied after mesh.bevel",
         );
     }
     Ok(OpStatus::Finished)

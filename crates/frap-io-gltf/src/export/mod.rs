@@ -8,15 +8,24 @@
 //! (`blender/exp/tree.py`), [`nodes`] (`nodes.py`), [`mesh`] (`primitive_extract.py`,
 //! `primitives.py`, `obj_data.py`, with the extension-point slices of [`mesh::ext`]),
 //! [`materials`] (`material/*`), [`images`] (`sampler.py`, `material/{texture,image}.py`) and
-//! [`mod@write`] (`io/exp/export.py`). [`gather`] holds the shared state; the gatherers call each
+//! [`mod@write`] (`io/exp/export.py`), plus the M3/M4 feature files created by M3+M4 W0:
+//! [`scenes`], [`cameras`], [`lights`], [`extras`], [`filters`], [`formats`], [`apply`].
+//! [`gather`] holds the shared state; the gatherers call each
 //! other in the add-on's traversal order so array order and BIN layout follow Blender's.
 //! Byte identity with Blender is a non-goal (goldens compare canonically, WP 1.23).
 
+pub mod apply;
+pub mod cameras;
+pub mod extras;
+pub mod filters;
+pub mod formats;
 pub mod gather;
 pub mod images;
+pub mod lights;
 pub mod materials;
 pub mod mesh;
 pub mod nodes;
+pub mod scenes;
 pub mod settings;
 pub mod vtree;
 pub mod write;
@@ -26,7 +35,8 @@ use frap_rna::Report;
 use frap_scene::{Context, Main};
 
 pub use settings::{
-    ExportFormat, ExportImageFormat, ExportMaterials, ExportSettings, SUPPORTED_PROPS,
+    ExportFormat, ExportImageFormat, ExportMaterials, ExportSettings, SUPPORTED_EXPORT_PROPS,
+    SUPPORTED_PROPS, is_supported,
 };
 
 /// Exporter errors.
@@ -67,11 +77,7 @@ pub fn export(
     ctx: &Context,
     settings: &ExportSettings,
 ) -> Result<ExportOutput, ExportError> {
-    let tree = vtree::build(main, ctx, settings);
     let mut g = gather::Gather::new(main, ctx, settings);
-    let mut roots = Vec::with_capacity(tree.roots.len());
-    for &r in &tree.roots {
-        roots.push(nodes::gather_node(&mut g, &tree, r)?);
-    }
-    write::finish(g, roots)
+    scenes::gather(&mut g)?;
+    write::finish(g)
 }

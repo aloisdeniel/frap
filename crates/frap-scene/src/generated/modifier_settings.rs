@@ -120,6 +120,26 @@ impl Default for DataTransferSettings {
 impl DataTransferSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 30] = ["object", "use_object_transform", "use_vert_data", "use_edge_data", "use_loop_data", "use_poly_data", "data_types_verts", "data_types_edges", "data_types_loops", "data_types_polys", "vert_mapping", "edge_mapping", "loop_mapping", "poly_mapping", "use_max_distance", "max_distance", "ray_radius", "islands_precision", "layers_vgroup_select_src", "layers_vcol_vert_select_src", "layers_vcol_loop_select_src", "layers_uv_select_src", "layers_vgroup_select_dst", "layers_vcol_vert_select_dst", "layers_vcol_loop_select_dst", "layers_uv_select_dst", "mix_mode", "mix_factor", "vertex_group", "invert_vertex_group"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object", self.object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object" => {
+                self.object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -298,6 +318,20 @@ impl Default for MeshCacheSettings {
 impl MeshCacheSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 17] = ["cache_format", "interpolation", "time_mode", "play_mode", "deform_mode", "filepath", "factor", "vertex_group", "invert_vertex_group", "forward_axis", "up_axis", "flip_axis", "frame_start", "frame_scale", "eval_frame", "eval_time", "eval_factor"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -415,6 +449,26 @@ impl Default for MeshSequenceCacheSettings {
 impl MeshSequenceCacheSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 5] = ["cache_file", "object_path", "read_data", "use_vertex_interpolation", "velocity_scale"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("cache_file", self.cache_file));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "cache_file" => {
+                self.cache_file = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -523,6 +577,26 @@ impl Default for NormalEditSettings {
 impl NormalEditSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 10] = ["mode", "offset", "mix_mode", "mix_factor", "mix_limit", "no_polynors_fix", "vertex_group", "invert_vertex_group", "target", "use_direction_parallel"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("target", self.target));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "target" => {
+                self.target = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -631,6 +705,20 @@ impl Default for WeightedNormalSettings {
 impl WeightedNormalSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 7] = ["weight", "mode", "thresh", "keep_sharp", "vertex_group", "invert_vertex_group", "use_face_influence"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -730,6 +818,20 @@ impl Default for UVProjectSettings {
 impl UVProjectSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 6] = ["uv_layer", "projector_count", "aspect_x", "aspect_y", "scale_x", "scale_y"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -850,6 +952,31 @@ impl Default for UVWarpSettings {
 impl UVWarpSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 13] = ["axis_u", "axis_v", "center", "offset", "scale", "rotation", "object_from", "bone_from", "object_to", "bone_to", "vertex_group", "invert_vertex_group", "uv_layer"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object_from", self.object_from));
+        v.push(("object_to", self.object_to));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object_from" => {
+                self.object_from = v;
+                true
+            }
+            "object_to" => {
+                self.object_to = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -999,6 +1126,31 @@ impl Default for VertexWeightEditSettings {
 impl VertexWeightEditSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 18] = ["vertex_group", "falloff_type", "invert_falloff", "normalize", "use_add", "use_remove", "default_weight", "add_threshold", "remove_threshold", "mask_constant", "mask_vertex_group", "invert_mask_vertex_group", "mask_texture", "mask_tex_use_channel", "mask_tex_mapping", "mask_tex_uv_layer", "mask_tex_map_object", "mask_tex_map_bone"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("mask_texture", self.mask_texture));
+        v.push(("mask_tex_map_object", self.mask_tex_map_object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "mask_texture" => {
+                self.mask_texture = v;
+                true
+            }
+            "mask_tex_map_object" => {
+                self.mask_tex_map_object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -1158,6 +1310,31 @@ impl Default for VertexWeightMixSettings {
 impl VertexWeightMixSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 18] = ["vertex_group_a", "vertex_group_b", "invert_vertex_group_a", "invert_vertex_group_b", "default_weight_a", "default_weight_b", "mix_mode", "mix_set", "normalize", "mask_constant", "mask_vertex_group", "invert_mask_vertex_group", "mask_texture", "mask_tex_use_channel", "mask_tex_mapping", "mask_tex_uv_layer", "mask_tex_map_object", "mask_tex_map_bone"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("mask_texture", self.mask_texture));
+        v.push(("mask_tex_map_object", self.mask_tex_map_object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "mask_texture" => {
+                self.mask_texture = v;
+                true
+            }
+            "mask_tex_map_object" => {
+                self.mask_tex_map_object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -1318,6 +1495,36 @@ impl Default for VertexWeightProximitySettings {
 impl VertexWeightProximitySettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 18] = ["vertex_group", "proximity_mode", "proximity_geometry", "target", "min_dist", "max_dist", "falloff_type", "invert_falloff", "normalize", "mask_constant", "mask_vertex_group", "invert_mask_vertex_group", "mask_texture", "mask_tex_use_channel", "mask_tex_mapping", "mask_tex_uv_layer", "mask_tex_map_object", "mask_tex_map_bone"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("target", self.target));
+        v.push(("mask_texture", self.mask_texture));
+        v.push(("mask_tex_map_object", self.mask_tex_map_object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "target" => {
+                self.target = v;
+                true
+            }
+            "mask_texture" => {
+                self.mask_texture = v;
+                true
+            }
+            "mask_tex_map_object" => {
+                self.mask_tex_map_object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -1476,6 +1683,41 @@ impl Default for ArraySettings {
 impl ArraySettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 17] = ["fit_type", "count", "fit_length", "curve", "use_constant_offset", "constant_offset_displace", "use_relative_offset", "relative_offset_displace", "use_merge_vertices", "use_merge_vertices_cap", "merge_threshold", "use_object_offset", "offset_object", "start_cap", "end_cap", "offset_u", "offset_v"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("curve", self.curve));
+        v.push(("offset_object", self.offset_object));
+        v.push(("start_cap", self.start_cap));
+        v.push(("end_cap", self.end_cap));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "curve" => {
+                self.curve = v;
+                true
+            }
+            "offset_object" => {
+                self.offset_object = v;
+                true
+            }
+            "start_cap" => {
+                self.start_cap = v;
+                true
+            }
+            "end_cap" => {
+                self.end_cap = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -1649,6 +1891,20 @@ impl Default for BevelSettings {
 impl BevelSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 24] = ["width", "width_pct", "segments", "affect", "limit_method", "edge_weight", "vertex_weight", "angle_limit", "vertex_group", "invert_vertex_group", "use_clamp_overlap", "offset_type", "profile_type", "profile", "material", "loop_slide", "mark_seam", "mark_sharp", "harden_normals", "face_strength_mode", "miter_outer", "miter_inner", "spread", "vmesh_method"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -1796,6 +2052,31 @@ impl Default for BooleanSettings {
 impl BooleanSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 10] = ["object", "collection", "operation", "operand_type", "double_threshold", "solver", "use_self", "use_hole_tolerant", "material_mode", "debug_options"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object", self.object));
+        v.push(("collection", self.collection));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object" => {
+                self.object = v;
+                true
+            }
+            "collection" => {
+                self.collection = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -1898,6 +2179,20 @@ impl Default for BuildSettings {
 impl BuildSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 5] = ["frame_start", "frame_duration", "use_reverse", "use_random_order", "seed"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -2011,6 +2306,20 @@ impl Default for DecimateSettings {
 impl DecimateSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 12] = ["decimate_type", "ratio", "iterations", "angle_limit", "vertex_group", "invert_vertex_group", "use_collapse_triangulate", "use_symmetry", "symmetry_axis", "vertex_group_factor", "use_dissolve_boundaries", "delimit"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -2111,6 +2420,20 @@ impl Default for EdgeSplitSettings {
 impl EdgeSplitSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 3] = ["split_angle", "use_edge_angle", "use_edge_sharp"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -2195,6 +2518,8 @@ pub struct NodesSettings {
     pub open_bake_data_blocks_panel: bool,
     /// `open_warnings_panel`: open_warnings_panel
     pub open_warnings_panel: bool,
+    /// `properties.inputs`: the group inputs by identifier (5.2 runtime-defined RNA `NodesModifierProperties`, bound by `frap-scene/src/id/modifier.rs`, WP 4.1)
+    pub inputs: crate::id::GnInputs,
 }
 
 impl Default for NodesSettings {
@@ -2211,6 +2536,7 @@ impl Default for NodesSettings {
             open_named_attributes_panel: false,
             open_bake_data_blocks_panel: false,
             open_warnings_panel: true,
+            inputs: Default::default(),
         }
     }
 }
@@ -2218,6 +2544,26 @@ impl Default for NodesSettings {
 impl NodesSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 11] = ["node_group", "bake_directory", "bake_target", "show_group_selector", "show_manage_panel", "open_output_attributes_panel", "open_manage_panel", "open_bake_panel", "open_named_attributes_panel", "open_bake_data_blocks_panel", "open_warnings_panel"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("node_group", self.node_group));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "node_group" => {
+                self.node_group = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -2326,6 +2672,26 @@ impl Default for MaskSettings {
 impl MaskSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 6] = ["mode", "armature", "vertex_group", "invert_vertex_group", "use_smooth", "threshold"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("armature", self.armature));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "armature" => {
+                self.armature = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -2454,6 +2820,26 @@ impl Default for MirrorSettings {
 impl MirrorSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 16] = ["use_axis", "use_bisect_axis", "use_bisect_flip_axis", "use_clip", "use_mirror_vertex_groups", "use_mirror_merge", "use_mirror_u", "use_mirror_v", "use_mirror_udim", "mirror_offset_u", "mirror_offset_v", "offset_u", "offset_v", "merge_threshold", "bisect_threshold", "mirror_object"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("mirror_object", self.mirror_object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "mirror_object" => {
+                self.mirror_object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -2586,6 +2972,20 @@ impl Default for MultiresSettings {
 impl MultiresSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 11] = ["uv_smooth", "quality", "boundary_smooth", "levels", "sculpt_levels", "render_levels", "filepath", "show_only_control_edges", "use_creases", "use_custom_normals", "use_sculpt_base_mesh"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -2702,6 +3102,20 @@ impl Default for RemeshSettings {
 impl RemeshSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 9] = ["mode", "scale", "threshold", "octree_depth", "sharpness", "voxel_size", "adaptivity", "use_remove_disconnected", "use_smooth_shade"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -2833,6 +3247,26 @@ impl Default for ScrewSettings {
 impl ScrewSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 15] = ["object", "steps", "render_steps", "iterations", "axis", "angle", "screw_offset", "merge_threshold", "use_normal_flip", "use_normal_calculate", "use_object_screw_offset", "use_merge_vertices", "use_smooth_shade", "use_stretch_u", "use_stretch_v"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object", self.object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object" => {
+                self.object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -2945,6 +3379,20 @@ impl Default for SkinSettings {
 impl SkinSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 5] = ["branch_smoothing", "use_smooth_shade", "use_x_symmetry", "use_y_symmetry", "use_z_symmetry"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -3097,6 +3545,20 @@ impl Default for SolidifySettings {
 impl SolidifySettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 25] = ["solidify_mode", "thickness", "thickness_clamp", "use_thickness_angle_clamp", "thickness_vertex_group", "offset", "edge_crease_inner", "edge_crease_outer", "edge_crease_rim", "material_offset", "material_offset_rim", "vertex_group", "shell_vertex_group", "rim_vertex_group", "use_rim", "use_even_offset", "use_quality_normals", "invert_vertex_group", "use_flat_faces", "use_flip_normals", "use_rim_only", "nonmanifold_thickness_mode", "nonmanifold_boundary_mode", "nonmanifold_merge_threshold", "bevel_convex"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -3262,6 +3724,20 @@ impl Default for SubsurfSettings {
 impl SubsurfSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 16] = ["uv_smooth", "quality", "boundary_smooth", "subdivision_type", "levels", "render_levels", "show_only_control_edges", "use_creases", "use_custom_normals", "use_limit_surface", "use_adaptive_subdivision", "adaptive_space", "adaptive_pixel_size", "adaptive_object_edge_length", "open_adaptive_subdivision_panel", "open_advanced_panel"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -3373,6 +3849,20 @@ impl Default for TriangulateSettings {
 impl TriangulateSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 4] = ["quad_method", "ngon_method", "min_vertices", "keep_custom_normals"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -3473,6 +3963,26 @@ impl Default for VolumeToMeshSettings {
 impl VolumeToMeshSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 8] = ["object", "threshold", "adaptivity", "use_smooth_shade", "grid_name", "resolution_mode", "voxel_size", "voxel_amount"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object", self.object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object" => {
+                self.object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -3571,6 +4081,20 @@ impl Default for WeldSettings {
 impl WeldSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 5] = ["mode", "merge_threshold", "vertex_group", "invert_vertex_group", "loose_edges"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -3684,6 +4208,20 @@ impl Default for WireframeSettings {
 impl WireframeSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 12] = ["thickness", "thickness_vertex_group", "offset", "use_replace", "use_boundary", "use_even_offset", "use_relative_offset", "use_crease", "crease_weight", "material_offset", "vertex_group", "invert_vertex_group"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -3797,6 +4335,26 @@ impl Default for ArmatureSettings {
 impl ArmatureSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 7] = ["object", "use_bone_envelopes", "use_vertex_groups", "use_deform_preserve_volume", "use_multi_modifier", "vertex_group", "invert_vertex_group"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object", self.object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object" => {
+                self.object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -3915,6 +4473,26 @@ impl Default for CastSettings {
 impl CastSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 12] = ["cast_type", "object", "invert_vertex_group", "use_x", "use_y", "use_z", "use_radius_as_size", "use_transform", "factor", "radius", "size", "vertex_group"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object", self.object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object" => {
+                self.object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -4019,6 +4597,26 @@ impl Default for CurveSettings {
 impl CurveSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 4] = ["object", "vertex_group", "invert_vertex_group", "deform_axis"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object", self.object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object" => {
+                self.object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -4129,6 +4727,31 @@ impl Default for DisplaceSettings {
 impl DisplaceSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 11] = ["vertex_group", "mid_level", "strength", "direction", "space", "invert_vertex_group", "texture", "texture_coords", "uv_layer", "texture_coords_object", "texture_coords_bone"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("texture", self.texture));
+        v.push(("texture_coords_object", self.texture_coords_object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "texture" => {
+                self.texture = v;
+                true
+            }
+            "texture_coords_object" => {
+                self.texture_coords_object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -4249,6 +4872,26 @@ impl Default for HookSettings {
 impl HookSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 10] = ["strength", "falloff_type", "falloff_radius", "center", "matrix_inverse", "object", "subtarget", "use_falloff_uniform", "vertex_group", "invert_vertex_group"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object", self.object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object" => {
+                self.object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -4345,6 +4988,20 @@ impl Default for LaplacianDeformSettings {
 impl LaplacianDeformSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 3] = ["vertex_group", "iterations", "invert_vertex_group"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -4431,6 +5088,26 @@ impl Default for LatticeSettings {
 impl LatticeSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 4] = ["object", "vertex_group", "invert_vertex_group", "strength"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object", self.object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object" => {
+                self.object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -4522,6 +5199,26 @@ impl Default for MeshDeformSettings {
 impl MeshDeformSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 5] = ["object", "invert_vertex_group", "vertex_group", "precision", "use_dynamic_bind"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object", self.object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object" => {
+                self.object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -4649,6 +5346,31 @@ impl Default for ShrinkwrapSettings {
 impl ShrinkwrapSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 16] = ["wrap_method", "wrap_mode", "cull_face", "target", "auxiliary_target", "vertex_group", "offset", "project_limit", "use_project_x", "use_project_y", "use_project_z", "subsurf_levels", "use_negative_direction", "use_positive_direction", "use_invert_cull", "invert_vertex_group"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("target", self.target));
+        v.push(("auxiliary_target", self.auxiliary_target));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "target" => {
+                self.target = v;
+                true
+            }
+            "auxiliary_target" => {
+                self.auxiliary_target = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -4782,6 +5504,26 @@ impl Default for SimpleDeformSettings {
 impl SimpleDeformSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 11] = ["deform_method", "vertex_group", "deform_axis", "origin", "factor", "angle", "limits", "lock_x", "lock_y", "lock_z", "invert_vertex_group"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("origin", self.origin));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "origin" => {
+                self.origin = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -4892,6 +5634,20 @@ impl Default for SmoothSettings {
 impl SmoothSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 7] = ["use_x", "use_y", "use_z", "factor", "iterations", "vertex_group", "invert_vertex_group"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -5000,6 +5756,20 @@ impl Default for CorrectiveSmoothSettings {
 impl CorrectiveSmoothSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 9] = ["factor", "iterations", "scale", "rest_source", "smooth_type", "invert_vertex_group", "vertex_group", "use_only_smooth", "use_pin_boundary"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -5115,6 +5885,20 @@ impl Default for LaplacianSmoothSettings {
 impl LaplacianSmoothSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 10] = ["use_x", "use_y", "use_z", "use_volume_preserve", "use_normalized", "lambda_factor", "lambda_border", "iterations", "vertex_group", "invert_vertex_group"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -5221,6 +6005,26 @@ impl Default for SurfaceDeformSettings {
 impl SurfaceDeformSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 6] = ["target", "falloff", "vertex_group", "invert_vertex_group", "use_sparse_bind", "strength"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("target", self.target));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "target" => {
+                self.target = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -5349,6 +6153,41 @@ impl Default for WarpSettings {
 impl WarpSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 15] = ["object_from", "bone_from", "object_to", "bone_to", "strength", "falloff_type", "falloff_radius", "use_volume_preserve", "vertex_group", "invert_vertex_group", "texture", "texture_coords", "uv_layer", "texture_coords_object", "texture_coords_bone"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object_from", self.object_from));
+        v.push(("object_to", self.object_to));
+        v.push(("texture", self.texture));
+        v.push(("texture_coords_object", self.texture_coords_object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object_from" => {
+                self.object_from = v;
+                true
+            }
+            "object_to" => {
+                self.object_to = v;
+                true
+            }
+            "texture" => {
+                self.texture = v;
+                true
+            }
+            "texture_coords_object" => {
+                self.texture_coords_object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -5524,6 +6363,36 @@ impl Default for WaveSettings {
 impl WaveSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 25] = ["use_x", "use_y", "use_cyclic", "use_normal", "use_normal_x", "use_normal_y", "use_normal_z", "time_offset", "lifetime", "damping_time", "falloff_radius", "start_position_x", "start_position_y", "start_position_object", "vertex_group", "invert_vertex_group", "speed", "height", "width", "narrowness", "texture", "texture_coords", "uv_layer", "texture_coords_object", "texture_coords_bone"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("start_position_object", self.start_position_object));
+        v.push(("texture", self.texture));
+        v.push(("texture_coords_object", self.texture_coords_object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "start_position_object" => {
+                self.start_position_object = v;
+                true
+            }
+            "texture" => {
+                self.texture = v;
+                true
+            }
+            "texture_coords_object" => {
+                self.texture_coords_object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -5641,6 +6510,20 @@ impl Default for ClothSettings {
 impl ClothSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 0] = [];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -5708,6 +6591,20 @@ impl Default for CollisionSettings {
 impl CollisionSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 0] = [];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -5778,6 +6675,20 @@ impl Default for DynamicPaintSettings {
 impl DynamicPaintSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 1] = ["ui_type"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -5874,6 +6785,20 @@ impl Default for ExplodeSettings {
 impl ExplodeSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 9] = ["vertex_group", "protect", "use_edge_cut", "show_unborn", "show_alive", "show_dead", "use_size", "particle_uv", "invert_vertex_group"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -5962,6 +6887,20 @@ impl Default for FluidSettings {
 impl FluidSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 1] = ["fluid_type"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -6124,6 +7063,20 @@ impl Default for OceanSettings {
 impl OceanSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 31] = ["geometry_mode", "size", "repeat_x", "repeat_y", "use_normals", "use_foam", "use_spray", "invert_spray", "spray_layer_name", "resolution", "viewport_resolution", "spatial_size", "wind_velocity", "damping", "wave_scale_min", "wave_alignment", "wave_direction", "wave_scale", "depth", "foam_coverage", "bake_foam_fade", "foam_layer_name", "choppiness", "time", "spectrum", "fetch_jonswap", "sharpen_peak_jonswap", "random_seed", "frame_start", "frame_end", "filepath"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -6314,6 +7267,26 @@ impl Default for ParticleInstanceSettings {
 impl ParticleInstanceSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 20] = ["object", "particle_system_index", "axis", "space", "use_normal", "use_children", "use_path", "show_unborn", "show_alive", "show_dead", "use_preserve_shape", "use_size", "position", "random_position", "rotation", "random_rotation", "particle_amount", "particle_offset", "index_layer_name", "value_layer_name"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("object", self.object));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "object" => {
+                self.object = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -6421,6 +7394,20 @@ impl Default for ParticleSystemSettings {
 impl ParticleSystemSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 0] = [];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -6488,6 +7475,20 @@ impl Default for SoftBodySettings {
 impl SoftBodySettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 0] = [];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -6555,6 +7556,20 @@ impl Default for SurfaceSettings {
 impl SurfaceSettings {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 0] = [];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        SmallVec::new()
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
@@ -7534,6 +8549,129 @@ impl ModifierSettings {
             ModifierSettings::ParticleSystem(s) => s.rna_set(prop, v),
             ModifierSettings::SoftBody(s) => s.rna_set(prop, v),
             ModifierSettings::Surface(s) => s.rna_set(prop, v),
+        }
+    }
+    /// The ID pointers of the settings (operand objects, textures, node groups), as
+    /// `(property, value)` (M4 W0).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        match self {
+            ModifierSettings::Untyped { .. } => SmallVec::new(),
+            ModifierSettings::DataTransfer(s) => s.id_refs(),
+            ModifierSettings::MeshCache(s) => s.id_refs(),
+            ModifierSettings::MeshSequenceCache(s) => s.id_refs(),
+            ModifierSettings::NormalEdit(s) => s.id_refs(),
+            ModifierSettings::WeightedNormal(s) => s.id_refs(),
+            ModifierSettings::UvProject(s) => s.id_refs(),
+            ModifierSettings::UvWarp(s) => s.id_refs(),
+            ModifierSettings::VertexWeightEdit(s) => s.id_refs(),
+            ModifierSettings::VertexWeightMix(s) => s.id_refs(),
+            ModifierSettings::VertexWeightProximity(s) => s.id_refs(),
+            ModifierSettings::Array(s) => s.id_refs(),
+            ModifierSettings::Bevel(s) => s.id_refs(),
+            ModifierSettings::Boolean(s) => s.id_refs(),
+            ModifierSettings::Build(s) => s.id_refs(),
+            ModifierSettings::Decimate(s) => s.id_refs(),
+            ModifierSettings::EdgeSplit(s) => s.id_refs(),
+            ModifierSettings::Nodes(s) => s.id_refs(),
+            ModifierSettings::Mask(s) => s.id_refs(),
+            ModifierSettings::Mirror(s) => s.id_refs(),
+            ModifierSettings::Multires(s) => s.id_refs(),
+            ModifierSettings::Remesh(s) => s.id_refs(),
+            ModifierSettings::Screw(s) => s.id_refs(),
+            ModifierSettings::Skin(s) => s.id_refs(),
+            ModifierSettings::Solidify(s) => s.id_refs(),
+            ModifierSettings::Subsurf(s) => s.id_refs(),
+            ModifierSettings::Triangulate(s) => s.id_refs(),
+            ModifierSettings::VolumeToMesh(s) => s.id_refs(),
+            ModifierSettings::Weld(s) => s.id_refs(),
+            ModifierSettings::Wireframe(s) => s.id_refs(),
+            ModifierSettings::Armature(s) => s.id_refs(),
+            ModifierSettings::Cast(s) => s.id_refs(),
+            ModifierSettings::Curve(s) => s.id_refs(),
+            ModifierSettings::Displace(s) => s.id_refs(),
+            ModifierSettings::Hook(s) => s.id_refs(),
+            ModifierSettings::Laplaciandeform(s) => s.id_refs(),
+            ModifierSettings::Lattice(s) => s.id_refs(),
+            ModifierSettings::MeshDeform(s) => s.id_refs(),
+            ModifierSettings::Shrinkwrap(s) => s.id_refs(),
+            ModifierSettings::SimpleDeform(s) => s.id_refs(),
+            ModifierSettings::Smooth(s) => s.id_refs(),
+            ModifierSettings::CorrectiveSmooth(s) => s.id_refs(),
+            ModifierSettings::Laplaciansmooth(s) => s.id_refs(),
+            ModifierSettings::SurfaceDeform(s) => s.id_refs(),
+            ModifierSettings::Warp(s) => s.id_refs(),
+            ModifierSettings::Wave(s) => s.id_refs(),
+            ModifierSettings::Cloth(s) => s.id_refs(),
+            ModifierSettings::Collision(s) => s.id_refs(),
+            ModifierSettings::DynamicPaint(s) => s.id_refs(),
+            ModifierSettings::Explode(s) => s.id_refs(),
+            ModifierSettings::Fluid(s) => s.id_refs(),
+            ModifierSettings::Ocean(s) => s.id_refs(),
+            ModifierSettings::ParticleInstance(s) => s.id_refs(),
+            ModifierSettings::ParticleSystem(s) => s.id_refs(),
+            ModifierSettings::SoftBody(s) => s.id_refs(),
+            ModifierSettings::Surface(s) => s.id_refs(),
+        }
+    }
+    /// Sets an ID pointer of the settings by property name (`false`: none of that name).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match self {
+            ModifierSettings::Untyped { .. } => false,
+            ModifierSettings::DataTransfer(s) => s.set_id_ref(prop, v),
+            ModifierSettings::MeshCache(s) => s.set_id_ref(prop, v),
+            ModifierSettings::MeshSequenceCache(s) => s.set_id_ref(prop, v),
+            ModifierSettings::NormalEdit(s) => s.set_id_ref(prop, v),
+            ModifierSettings::WeightedNormal(s) => s.set_id_ref(prop, v),
+            ModifierSettings::UvProject(s) => s.set_id_ref(prop, v),
+            ModifierSettings::UvWarp(s) => s.set_id_ref(prop, v),
+            ModifierSettings::VertexWeightEdit(s) => s.set_id_ref(prop, v),
+            ModifierSettings::VertexWeightMix(s) => s.set_id_ref(prop, v),
+            ModifierSettings::VertexWeightProximity(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Array(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Bevel(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Boolean(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Build(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Decimate(s) => s.set_id_ref(prop, v),
+            ModifierSettings::EdgeSplit(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Nodes(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Mask(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Mirror(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Multires(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Remesh(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Screw(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Skin(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Solidify(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Subsurf(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Triangulate(s) => s.set_id_ref(prop, v),
+            ModifierSettings::VolumeToMesh(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Weld(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Wireframe(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Armature(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Cast(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Curve(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Displace(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Hook(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Laplaciandeform(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Lattice(s) => s.set_id_ref(prop, v),
+            ModifierSettings::MeshDeform(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Shrinkwrap(s) => s.set_id_ref(prop, v),
+            ModifierSettings::SimpleDeform(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Smooth(s) => s.set_id_ref(prop, v),
+            ModifierSettings::CorrectiveSmooth(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Laplaciansmooth(s) => s.set_id_ref(prop, v),
+            ModifierSettings::SurfaceDeform(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Warp(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Wave(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Cloth(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Collision(s) => s.set_id_ref(prop, v),
+            ModifierSettings::DynamicPaint(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Explode(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Fluid(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Ocean(s) => s.set_id_ref(prop, v),
+            ModifierSettings::ParticleInstance(s) => s.set_id_ref(prop, v),
+            ModifierSettings::ParticleSystem(s) => s.set_id_ref(prop, v),
+            ModifierSettings::SoftBody(s) => s.set_id_ref(prop, v),
+            ModifierSettings::Surface(s) => s.set_id_ref(prop, v),
         }
     }
 }

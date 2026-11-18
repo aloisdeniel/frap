@@ -19,6 +19,8 @@ frap-ops-io.workspace = true
 frap-ops-render.workspace = true
 frap-ops-frap.workspace = true
 frap-imbuf.workspace = true
+frap-subdiv.workspace = true
+frap-boolean.workspace = true
 
 [dev-dependencies]
 frap-op.workspace = true
@@ -45,6 +47,9 @@ indexmap.workspace = true
 smallvec.workspace = true
 linkme.workspace = true
 serde_json.workspace = true
+frap-modifiers.workspace = true
+frap-uv.workspace = true
+frap-geom.workspace = true
 
 [features]
 # §3.6. The GPU device itself is created by frap-session (feature `gpu` there); this flag is
@@ -52,14 +57,17 @@ serde_json.workspace = true
 default = []
 gpu = []
 webp-lossy = ["frap-imbuf/webp-lossy"]
-# Wired by the W0 of the milestone that adds the backend (M4: subdiv/boolean, M3: basisu, M7: codecs).
+# Wired by the W0 of the milestone that adds the backend (M7: codecs and basisu, §22.9).
 meshopt = []
 draco = []
 draco-sys = []
 basisu = []
 basisu-encode = []
-subdiv-osd = []
-boolean-manifold = []
+# M4 W0: the OpenSubdiv backend of `Subdivider` (off until the M4 gate, WP 4.4).
+subdiv-osd = ["frap-subdiv/osd"]
+# M4 W0: the manifold-rust backend of `BooleanSolver`. frap-boolean enables it by default (so
+# per-crate test builds have a solver); the flag stays for the feature matrix of §3.6.
+boolean-manifold = ["frap-boolean/manifold"]
 
 [lints]
 workspace = true

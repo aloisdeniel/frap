@@ -10,7 +10,8 @@ use frap_mesh::{AttrData, Mesh};
 use frap_nodes::{InOut, Node, NodeTree, NodeTreeType, Socket, SocketType, SocketValue};
 use frap_rna::{IdAny, IdHeader, IdRef, IdType, MeshId, Value};
 use frap_scene::id::{
-    Camera, Collection, Image, Library, Light, Material, Modifier, Object, Scene, SlotLink, World,
+    Camera, Collection, Image, Library, Light, Material, Modifier, Object, Scene, SlotLink,
+    Texture, World,
 };
 use frap_scene::{IdMap, LayerCollection, Main, Preferences, ViewLayer, WindowState};
 use serde_json::{Map, Value as J, json};
@@ -206,7 +207,7 @@ impl<'a> Writer<'a> {
         );
         root.insert(
             "textures".into(),
-            self.coll(&main.textures, |_, _, _| Ok(Map::new()))?,
+            self.coll(&main.textures, |w, _, t| w.texture(t))?,
         );
         root.insert(
             "pointclouds".into(),
@@ -359,7 +360,7 @@ impl<'a> Writer<'a> {
             J::Array(
                 o.modifiers
                     .iter()
-                    .map(modifier_j)
+                    .map(|md| modifier_j(md, &|a| self.idref(a)))
                     .collect::<Result<_, _>>()?,
             ),
         );
@@ -701,6 +702,18 @@ impl<'a> Writer<'a> {
         Ok(m)
     }
 
+    fn texture(&mut self, t: &Texture) -> Result<Map<String, J>, MapError> {
+        let mut m = Map::new();
+        m.insert("type".into(), json!(t.r#type.as_str()));
+        if let J::Object(f) = ser(&t.fields)? {
+            m.extend(f);
+        }
+        // `#[serde(skip)]` ID pointer of the generated struct.
+        m.insert("image".into(), self.idref(t.fields.image));
+        m.insert("animation_data".into(), self.anim(&t.animation_data));
+        Ok(m)
+    }
+
     fn light(&mut self, l: &Light) -> Result<Map<String, J>, MapError> {
         let mut m = Map::new();
         m.insert("type".into(), json!(l.r#type.as_str()));
@@ -762,7 +775,9 @@ fn ext_of_mime(mime: &str, file_format: &str) -> &'static str {
 }
 
 /// `Modifier` → `{"name", "type", show flags, "persistent_uid", <settings…>}` (§15).
-fn modifier_j(md: &Modifier) -> Result<J, MapError> {
+/// One modifier: the base properties, the settings flattened, and the settings' ID pointers
+/// (operand objects, node groups, textures; M4 W0) through `idref`.
+fn modifier_j(md: &Modifier, idref: &dyn Fn(Option<IdAny>) -> J) -> Result<J, MapError> {
     let mut m = Map::new();
     m.insert("name".into(), json!(md.name.as_str()));
     m.insert("type".into(), json!(md.settings.type_identifier()));
@@ -783,6 +798,9 @@ fn modifier_j(md: &Modifier) -> Result<J, MapError> {
                 m.insert(k, v);
             }
         }
+    }
+    for (k, r) in md.settings.id_refs() {
+        m.insert(k.into(), idref(r));
     }
     Ok(J::Object(m))
 }

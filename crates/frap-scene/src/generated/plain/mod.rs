@@ -29,5 +29,7 @@ mod camera_dof_settings;
 pub use camera_dof_settings::CameraDOFSettings;
 mod camera_fields;
 pub use camera_fields::CameraFields;
+mod texture_fields;
+pub use texture_fields::TextureFields;
 mod light_fields;
 pub use light_fields::LightFields;

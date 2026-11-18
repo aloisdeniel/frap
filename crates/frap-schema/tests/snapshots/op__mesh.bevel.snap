@@ -577,7 +577,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T2",
     "support": "partial",
-    "support_note": "profile_type='CUSTOM' answers OP_NOT_IMPLEMENTED; harden_normals and Auto Merge are not applied (WARNING)",
+    "support_note": "profile_type='CUSTOM' answers OP_NOT_IMPLEMENTED; harden_normals is not applied (WARNING)",
     "headless": "native",
     "planned": "M2",
     "extension": false,

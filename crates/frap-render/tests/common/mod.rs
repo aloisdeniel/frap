@@ -121,6 +121,7 @@ pub fn material(rgba: [f32; 4], metallic: f32, roughness: f32) -> LoweredMateria
         },
         normal: None,
         occlusion: None,
+        occlusion_strength: 1.0,
         emissive: Channel {
             factor: [0.0; 3],
             texture: None,

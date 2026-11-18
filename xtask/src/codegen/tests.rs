@@ -48,9 +48,10 @@ fn typed_ops_match_operators_md() {
         .map(|o| o.idname.as_str())
         .collect();
     assert_eq!(typed, want);
-    assert_eq!(s.milestone, 2, "spec/current_milestone");
-    // 63 M1 operators (decision log S1-1) plus the 125 M2 operators (M2 W0).
-    assert_eq!(typed.len(), 188, "OPERATORS.md: operators with M <= 2");
+    assert_eq!(s.milestone, 4, "spec/current_milestone");
+    // 63 M1 operators (decision log S1-1), the 125 M2 operators (M2 W0), and the 31 M3 and 15
+    // M4 operators (M3 and M4 run together after one W0, decision log M34W0).
+    assert_eq!(typed.len(), 234, "OPERATORS.md: operators with M <= 4");
     // Every typed op has a generated struct in its group's namespace file.
     let files = generate(&s.root).unwrap();
     for op in s.ops.iter().filter(|o| s.is_typed(o)) {

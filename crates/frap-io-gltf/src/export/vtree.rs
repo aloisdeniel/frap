@@ -408,8 +408,13 @@ impl<'a> Filters<'a> {
 
     /// `node_filter_not_inheritable_is_kept`.
     fn not_inheritable(&self, ob: &Object) -> bool {
-        // export_cameras / export_lights: M3 (WP 3.4); both default to False.
-        !matches!(ob.object_type(), "CAMERA" | "LIGHT")
+        // export_cameras / export_lights (WP 3.4, `cameras.rs` / `lights.rs`; both default to
+        // False).
+        match ob.object_type() {
+            "CAMERA" => crate::export::cameras::exported(self.s),
+            "LIGHT" => crate::export::lights::exported(self.s),
+            _ => true,
+        }
     }
 
     /// `node_filter_inheritable_is_kept`.

@@ -10,9 +10,20 @@
 //! Effective coupling rules of the add-on's `execute()` that apply to these props are applied
 //! by [`ExportSettings::from_props`] (e.g. `use_active_collection_with_nested` only matters with
 //! `use_active_collection`), so the exporter reads plain values.
+//!
+//! M3+M4 W0 (decision log M34W0): [`ExportSettings::props`] carries every typed prop, so a
+//! feature file reads the props it implements (`settings.props.export_cameras.value`) without
+//! editing this file, and declares them honoured by registering into
+//! [`SUPPORTED_EXPORT_PROPS`]; [`is_supported`] is what the operator's WARNING checks.
+//! [`ExportSettings::evaluated_meshes`] carries the meshes of `export_apply=True` (filled by the
+//! operator from the session's evaluator, read by `apply.rs`, WP 4.7).
 
+use std::collections::HashMap;
 use std::path::PathBuf;
+use std::sync::Arc;
 
+use frap_mesh::Mesh;
+use frap_rna::{IdRef, ObjectId, OpArgs, OpProps, Value};
 use frap_spec_ops_io::export_scene::{ExportSceneGltf, gltf};
 
 /// `export_format`.
@@ -121,6 +132,21 @@ pub struct ExportSettings {
     /// frap: directory of the saved project (`bpy.data.filepath`'s folder), used to resolve
     /// `//`-relative image paths; relative paths without `//` resolve against the cwd.
     pub blend_dir: Option<PathBuf>,
+    /// Every operator prop as given (M3+M4 W0); defaults when built with `Default`.
+    pub props: Arc<ExportSceneGltf>,
+    /// frap: `export_apply=True`: the viewport-evaluated mesh of every MESH object of the scene
+    /// (`evaluated_get(depsgraph).to_mesh()`), filled by the operator (M4 W0, read by
+    /// `apply.rs`, WP 4.7); `None` otherwise.
+    pub evaluated_meshes: Option<Arc<HashMap<IdRef<ObjectId>, Arc<Mesh>>>>,
+}
+
+/// The operator props with nothing set (every prop at its RNA default).
+pub fn default_props() -> ExportSceneGltf {
+    let mut a = OpArgs::default();
+    for def in ExportSceneGltf::spec().props {
+        a.values.insert(def.identifier, Value::default_for(def));
+    }
+    ExportSceneGltf::from_args(&a)
 }
 
 impl Default for ExportSettings {
@@ -145,12 +171,15 @@ impl Default for ExportSettings {
             export_hierarchy_flatten_objs: false,
             file_stem: "scene".to_owned(),
             blend_dir: None,
+            props: Arc::new(default_props()),
+            evaluated_meshes: None,
         }
     }
 }
 
-/// The `export_scene.gltf` props that [`ExportSettings::from_props`] honours. Every other prop
-/// is accepted and ignored by the library (bookkeeping props such as `filepath`,
+/// The `export_scene.gltf` props that [`ExportSettings::from_props`] honours (M1); feature files
+/// add theirs through [`SUPPORTED_EXPORT_PROPS`]. Every other prop is accepted and ignored by
+/// the library (bookkeeping props such as `filepath`,
 /// `check_existing`, `ui_tab`, `filter_glob`, `will_save_settings`, `export_loglevel` have no
 /// effect in Blender either).
 pub const SUPPORTED_PROPS: &[&str] = &[
@@ -178,6 +207,19 @@ pub const SUPPORTED_PROPS: &[&str] = &[
     "export_loglevel",
     "filter_glob",
 ];
+
+/// Props honoured by a feature file of a later milestone: each file registers the props it
+/// implements (`static P: &[&str] = &["export_cameras"];`), so the operator stops warning about
+/// them without anyone editing [`SUPPORTED_PROPS`] (M3+M4 W0 extension point).
+#[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
+#[linkme::distributed_slice]
+pub static SUPPORTED_EXPORT_PROPS: [&'static [&'static str]];
+
+/// Whether the exporter honours `prop` ([`SUPPORTED_PROPS`] or a [`SUPPORTED_EXPORT_PROPS`]
+/// entry).
+pub fn is_supported(prop: &str) -> bool {
+    SUPPORTED_PROPS.contains(&prop) || SUPPORTED_EXPORT_PROPS.iter().any(|l| l.contains(&prop))
+}
 
 impl ExportSettings {
     /// Settings from the operator's typed props (unknown `export_format` items fall back to
@@ -224,6 +266,7 @@ impl ExportSettings {
                 && p.use_active_collection_with_nested.value,
             collection: p.collection.value.to_string(),
             export_hierarchy_flatten_objs: p.export_hierarchy_flatten_objs.value,
+            props: Arc::new(p.clone()),
             ..d
         }
     }
@@ -237,7 +280,6 @@ impl ExportSettings {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use frap_rna::{OpArgs, OpProps, Value};
 
     /// The operator's arguments with nothing set (every prop at its RNA default).
     fn default_args() -> OpArgs {

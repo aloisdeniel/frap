@@ -190,6 +190,26 @@ impl Default for CameraFields {
 impl CameraFields {
     /// Names of the stored RNA properties, in field order.
     pub const STORED: [&'static str; 53] = ["type", "sensor_fit", "passepartout_alpha", "clip_start", "clip_end", "lens", "sensor_width", "sensor_height", "ortho_scale", "display_size", "shift_x", "shift_y", "show_limits", "show_mist", "show_passepartout", "show_safe_areas", "show_safe_center", "show_name", "show_sensor", "show_background_images", "lens_unit", "composition_guide_color", "show_composition_center", "show_composition_center_diagonal", "show_composition_thirds", "show_composition_golden", "show_composition_golden_tria_a", "show_composition_golden_tria_b", "show_composition_harmony_tri_a", "show_composition_harmony_tri_b", "panorama_type", "fisheye_fov", "fisheye_lens", "latitude_min", "latitude_max", "longitude_min", "longitude_max", "fisheye_polynomial_k0", "fisheye_polynomial_k1", "fisheye_polynomial_k2", "fisheye_polynomial_k3", "fisheye_polynomial_k4", "central_cylindrical_range_u_min", "central_cylindrical_range_u_max", "central_cylindrical_range_v_min", "central_cylindrical_range_v_max", "central_cylindrical_radius", "custom_filepath", "custom_shader", "custom_mode", "custom_bytecode", "custom_bytecode_hash", "dof"];
+    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
+    /// `.frap`; serde skips them).
+    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
+        let mut v = SmallVec::new();
+        v.push(("custom_shader", self.custom_shader));
+        v
+    }
+    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
+    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
+        match prop {
+            "custom_shader" => {
+                self.custom_shader = v;
+                true
+            }
+            _ => {
+                let _ = v;
+                false
+            }
+        }
+    }
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {

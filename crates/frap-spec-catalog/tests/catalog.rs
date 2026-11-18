@@ -16,7 +16,7 @@ use frap_spec_catalog::generated::{
 fn every_catalog_operator_decodes_and_matches_its_dump() {
     let c = catalog();
     assert_eq!(c.len(), CATALOG_LEN);
-    assert!(c.len() > 850, "≈ 890 catalog operators in M2");
+    assert!(c.len() > 800, "≈ 850 catalog operators in M4");
     let ids: Vec<&str> = c.iter().map(|s| s.idname).collect();
     assert_eq!(ids, CATALOG_IDNAMES.to_vec());
     for s in c {
@@ -31,10 +31,12 @@ fn typed_and_catalog_partition_the_dumps() {
     let typed: BTreeSet<String> = TYPED_IDNAMES.iter().map(|s| s.to_string()).collect();
     assert!(cat.is_disjoint(&typed));
     assert_eq!(cat.union(&typed).cloned().collect::<BTreeSet<_>>(), all);
-    // M1 (63, decision log S1-1) plus every M2 operator of OPERATORS.md (M2 W0).
-    assert_eq!(typed.len(), 188, "OPERATORS.md: operators with M <= 2");
+    // M1 (63, decision log S1-1), every M2 operator of OPERATORS.md (M2 W0) and the 31 M3 and
+    // 15 M4 operators (M3+M4 W0).
+    assert_eq!(typed.len(), 234, "OPERATORS.md: operators with M <= 4");
     assert!(is_typed("mesh.primitive_cube_add") && !contains("mesh.primitive_cube_add"));
-    assert!(contains("mesh.decimate") && !is_typed("mesh.decimate"));
+    assert!(contains("mesh.select_nth") && !is_typed("mesh.select_nth"));
+    assert!(is_typed("mesh.decimate") && is_typed("uv.unwrap"));
     assert!(is_typed("mesh.bevel") && !contains("mesh.bevel"));
     assert!(TYPED_IDNAMES.windows(2).all(|w| w[0] < w[1]));
 }
@@ -44,10 +46,10 @@ fn addresses_are_stable() {
     let a = catalog();
     let b = catalog();
     assert!(std::ptr::eq(a, b));
-    let bevel = find("mesh.decimate").unwrap();
-    assert!(std::ptr::eq(bevel, find("mesh.decimate").unwrap()));
+    let bevel = find("mesh.select_nth").unwrap();
+    assert!(std::ptr::eq(bevel, find("mesh.select_nth").unwrap()));
     assert!(a.iter().any(|s| std::ptr::eq(*s, bevel)));
-    let t = std::thread::spawn(|| find("mesh.decimate").unwrap() as *const _ as usize)
+    let t = std::thread::spawn(|| find("mesh.select_nth").unwrap() as *const _ as usize)
         .join()
         .unwrap();
     assert_eq!(t, bevel as *const _ as usize);
@@ -57,11 +59,13 @@ fn addresses_are_stable() {
 
 #[test]
 fn bevel_spec() {
-    // `mesh.bevel` is typed since M2; `uv.unwrap` (M3) stays in the catalog.
-    let s = find("uv.unwrap").unwrap();
-    assert_eq!(s.bl_idname, "UV_OT_unwrap");
-    assert!(s.prop("method").is_some());
-    assert!(s.prop("margin").is_some());
+    // `mesh.bevel` is typed since M2, `uv.unwrap` since M3 W0; `uv.minimize_stretch` (M8) stays
+    // in the catalog.
+    assert!(find("uv.unwrap").is_none());
+    let s = find("uv.minimize_stretch").unwrap();
+    assert_eq!(s.bl_idname, "UV_OT_minimize_stretch");
+    assert!(s.prop("iterations").is_some());
+    assert!(s.prop("blend").is_some());
     assert!(s.poll_matrix.is_some());
     // A macro: steps decoded in order (an M8 macro).
     let m = find("mesh.rip_move").unwrap();

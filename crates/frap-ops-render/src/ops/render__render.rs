@@ -327,8 +327,9 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
         cx.report(ReportType::Warning, w.clone());
     }
     // Workbench effects frap does not render yet, as `frap.render_contact_sheet` reports them
-    // (WP 2.3).
-    if plan.engine == WORKBENCH {
+    // (WP 2.3). Every engine renders with Workbench until M5 (the fallback above), so the
+    // warning applies to EEVEE and CYCLES too (M2 leftover, M4 W0).
+    {
         let shading = frap_render_scene::build::workbench::shading(cx.ctx().scene());
         for effect in super::frap__render_contact_sheet::workbench_left_out(&shading) {
             cx.report(

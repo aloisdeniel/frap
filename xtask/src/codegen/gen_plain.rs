@@ -46,12 +46,26 @@ struct PlainSpec {
     doc: &'static str,
 }
 
-/// A stored `SmolStr` field without an RNA property.
+/// A stored field without an RNA property: a `SmolStr` (`ty: None`, default `default`), or a
+/// hand-written type of `frap-scene` (`ty: Some(path)`, `Default::default()`; M4 W0: the
+/// `NodesModifier.properties.inputs` storage).
 struct Extra {
     name: &'static str,
     doc: &'static str,
     default: &'static str,
+    ty: Option<&'static str>,
 }
+
+/// Stored fields of generated modifier settings structs that are no RNA property, by struct.
+const MODIFIER_EXTRAS: &[(&str, &[Extra])] = &[(
+    "NodesModifier",
+    &[Extra {
+        name: "inputs",
+        doc: "`properties.inputs`: the group inputs by identifier (5.2 runtime-defined RNA `NodesModifierProperties`, bound by `frap-scene/src/id/modifier.rs`, WP 4.1)",
+        default: "",
+        ty: Some("crate::id::GnInputs"),
+    }],
+)];
 
 const PLAIN: &[PlainSpec] = &[
     PlainSpec {
@@ -87,6 +101,8 @@ const PLAIN: &[PlainSpec] = &[
             "snap_elements",
             "snap_target",
             "use_mesh_automerge",
+            // M4 W0 (M2 leftover): `T_AUTOSPLIT` of edit-mode transforms.
+            "use_mesh_automerge_and_split",
             "use_keyframe_insert_auto",
             "keyframe_type",
         ]),
@@ -112,11 +128,13 @@ const PLAIN: &[PlainSpec] = &[
                 name: "matcap",
                 doc: "DNA `matcap`: the MatCap `studio_light` shows when `type == 'SOLID'` and `light == 'MATCAP'` (no RNA property; empty = Blender's default matcap)",
                 default: "",
+                ty: None,
             },
             Extra {
                 name: "lookdev_light",
                 doc: "DNA `lookdev_light`: the HDRI `studio_light` shows when `type != 'SOLID'` (no RNA property; empty = `forest.exr`)",
                 default: "",
+                ty: None,
             },
         ],
         doc: "`bpy.types.View3DShading` (`scene.display.shading`, the virtual 3D View's shading).",
@@ -230,6 +248,17 @@ const PLAIN: &[PlainSpec] = &[
         hooked: &[],
         extra: &[],
         doc: "The plain fields of `bpy.types.Camera` (`Default` = `bpy.data.cameras.new()`). The\n/// derived `angle`/`angle_x`/`angle_y` are hooks over `lens` and the sensor (§5.6); the ID\n/// binding (`frap-scene/src/id/camera.rs`) delegates the other props to `rna_get`/`rna_set`.",
+    },
+    PlainSpec {
+        rust: "TextureFields",
+        srnas: &["Texture", "ImageTexture"],
+        include: None,
+        exclude: &["type", "node_tree"],
+        own_only: true,
+        rna_impl: false,
+        hooked: &[],
+        extra: &[],
+        doc: "The plain fields of `bpy.types.Texture` and `ImageTexture` (M4 W0: what DISPLACE reads;\n/// `Default` = `bpy.data.textures.new(name, 'IMAGE')`). One struct holds the union, as for\n/// `LightFields`; the ID binding (`frap-scene/src/id/texture.rs`, WP 4.2) exposes the fields of\n/// the current `type` and delegates to `rna_get`/`rna_set`.",
     },
     PlainSpec {
         rust: "LightFields",
@@ -622,9 +651,10 @@ fn emit_struct(
     for e in extra {
         let _ = writeln!(
             out,
-            "    /// {}\n    pub {}: SmolStr,",
+            "    /// {}\n    pub {}: {},",
             e.doc,
-            ident(e.name)
+            ident(e.name),
+            e.ty.unwrap_or("SmolStr")
         );
     }
     out.push_str("}\n\n");
@@ -641,12 +671,16 @@ fn emit_struct(
         );
     }
     for e in extra {
-        let _ = writeln!(
-            out,
-            "            {}: SmolStr::new_static({}),",
-            ident(e.name),
-            lit_str(e.default)
-        );
+        if e.ty.is_some() {
+            let _ = writeln!(out, "            {}: Default::default(),", ident(e.name));
+        } else {
+            let _ = writeln!(
+                out,
+                "            {}: SmolStr::new_static({}),",
+                ident(e.name),
+                lit_str(e.default)
+            );
+        }
     }
     out.push_str("        }\n    }\n}\n\n");
 
@@ -661,6 +695,34 @@ fn emit_struct(
             .collect::<Vec<_>>()
             .join(", ")
     );
+    // M4 W0: the stored ID pointers by name (user counting and remapping in `IdType`, `.frap`
+    // pointers), since serde skips them.
+    let ids: Vec<&Field> = fields.iter().filter(|f| matches!(f.ty, FTy::Id)).collect();
+    out.push_str("    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,\n    /// `.frap`; serde skips them).\n    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {\n");
+    if ids.is_empty() {
+        out.push_str("        SmallVec::new()\n");
+    } else {
+        out.push_str("        let mut v = SmallVec::new();\n");
+        for f in &ids {
+            let _ = writeln!(
+                out,
+                "        v.push(({}, self.{}));",
+                lit_str(&f.prop.identifier),
+                ident(&f.prop.identifier)
+            );
+        }
+        out.push_str("        v\n");
+    }
+    out.push_str("    }\n    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).\n    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {\n        match prop {\n");
+    for f in &ids {
+        let _ = writeln!(
+            out,
+            "            {} => {{\n                self.{} = v;\n                true\n            }}",
+            lit_str(&f.prop.identifier),
+            ident(&f.prop.identifier)
+        );
+    }
+    out.push_str("            _ => {\n                let _ = v;\n                false\n            }\n        }\n    }\n");
     out.push_str("    /// Reads a stored property (`None`: not stored in this struct).\n    pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {\n        Some(match prop.identifier {\n");
     for f in fields {
         let get = if hooked.contains(&f.prop.identifier.as_str()) {
@@ -833,6 +895,10 @@ pub fn generate(spec: &Spec, files: &mut Files) -> Res<()> {
             }
         }
         let values = md["values"].clone();
+        let extras: &[Extra] = MODIFIER_EXTRAS
+            .iter()
+            .find(|(s, _)| *s == srna)
+            .map_or(&[], |(_, e)| e);
         emit_struct(
             &mut ms,
             &rust,
@@ -841,7 +907,7 @@ pub fn generate(spec: &Spec, files: &mut Files) -> Res<()> {
             &fields,
             true,
             &[],
-            &[],
+            extras,
             &|f: &Field| {
                 values
                     .get(&f.prop.identifier)
@@ -952,6 +1018,17 @@ pub fn generate(spec: &Spec, files: &mut Files) -> Res<()> {
         let _ = writeln!(
             ms,
             "            ModifierSettings::{v}(s) => s.rna_set(prop, v),"
+        );
+    }
+    ms.push_str("        }\n    }\n    /// The ID pointers of the settings (operand objects, textures, node groups), as\n    /// `(property, value)` (M4 W0).\n    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {\n        match self {\n            ModifierSettings::Untyped { .. } => SmallVec::new(),\n");
+    for (v, _, _, _, _) in &variants {
+        let _ = writeln!(ms, "            ModifierSettings::{v}(s) => s.id_refs(),");
+    }
+    ms.push_str("        }\n    }\n    /// Sets an ID pointer of the settings by property name (`false`: none of that name).\n    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {\n        match self {\n            ModifierSettings::Untyped { .. } => false,\n");
+    for (v, _, _, _, _) in &variants {
+        let _ = writeln!(
+            ms,
+            "            ModifierSettings::{v}(s) => s.set_id_ref(prop, v),"
         );
     }
     ms.push_str("        }\n    }\n}\n");

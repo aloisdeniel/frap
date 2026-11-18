@@ -23,6 +23,10 @@ automod.workspace = true
 smol_str.workspace = true
 indexmap.workspace = true
 frap-bmesh.workspace = true
+frap-modifiers.workspace = true
+frap-eval.workspace = true
+frap-nodes.workspace = true
+smallvec.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

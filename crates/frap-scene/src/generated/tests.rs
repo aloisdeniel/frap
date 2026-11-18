@@ -125,6 +125,7 @@ fn default_equals_fresh_tool_settings() {
     check("ToolSettings", "use_transform_data_origin", |p| v.rna_get(p));
     check("ToolSettings", "use_transform_skip_children", |p| v.rna_get(p));
     check("ToolSettings", "use_mesh_automerge", |p| v.rna_get(p));
+    check("ToolSettings", "use_mesh_automerge_and_split", |p| v.rna_get(p));
     check("ToolSettings", "use_snap", |p| v.rna_get(p));
     check("ToolSettings", "snap_elements", |p| v.rna_get(p));
     check("ToolSettings", "snap_target", |p| v.rna_get(p));
@@ -495,6 +496,42 @@ fn default_equals_fresh_camera_fields() {
     check("Camera", "custom_bytecode_hash", |p| v.rna_get(p));
     check("Camera", "dof", |p| v.rna_get(p));
     let _ = ["Camera"];
+}
+
+#[test]
+fn default_equals_fresh_texture_fields() {
+    let v = TextureFields::default();
+    check("Texture", "use_clamp", |p| v.rna_get(p));
+    check("Texture", "use_color_ramp", |p| v.rna_get(p));
+    check("Texture", "intensity", |p| v.rna_get(p));
+    check("Texture", "contrast", |p| v.rna_get(p));
+    check("Texture", "saturation", |p| v.rna_get(p));
+    check("Texture", "factor_red", |p| v.rna_get(p));
+    check("Texture", "factor_green", |p| v.rna_get(p));
+    check("Texture", "factor_blue", |p| v.rna_get(p));
+    check("Texture", "use_preview_alpha", |p| v.rna_get(p));
+    check("Texture", "use_nodes", |p| v.rna_get(p));
+    check("ImageTexture", "use_interpolation", |p| v.rna_get(p));
+    check("ImageTexture", "use_flip_axis", |p| v.rna_get(p));
+    check("ImageTexture", "use_alpha", |p| v.rna_get(p));
+    check("ImageTexture", "use_calculate_alpha", |p| v.rna_get(p));
+    check("ImageTexture", "invert_alpha", |p| v.rna_get(p));
+    check("ImageTexture", "filter_size", |p| v.rna_get(p));
+    check("ImageTexture", "extension", |p| v.rna_get(p));
+    check("ImageTexture", "repeat_x", |p| v.rna_get(p));
+    check("ImageTexture", "repeat_y", |p| v.rna_get(p));
+    check("ImageTexture", "use_mirror_x", |p| v.rna_get(p));
+    check("ImageTexture", "use_mirror_y", |p| v.rna_get(p));
+    check("ImageTexture", "use_checker_odd", |p| v.rna_get(p));
+    check("ImageTexture", "use_checker_even", |p| v.rna_get(p));
+    check("ImageTexture", "checker_distance", |p| v.rna_get(p));
+    check("ImageTexture", "crop_min_x", |p| v.rna_get(p));
+    check("ImageTexture", "crop_min_y", |p| v.rna_get(p));
+    check("ImageTexture", "crop_max_x", |p| v.rna_get(p));
+    check("ImageTexture", "crop_max_y", |p| v.rna_get(p));
+    check("ImageTexture", "image", |p| v.rna_get(p));
+    check("ImageTexture", "use_normal_map", |p| v.rna_get(p));
+    let _ = ["Texture", "ImageTexture"];
 }
 
 #[test]

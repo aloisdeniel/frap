@@ -86,7 +86,7 @@ fn every_export_prop_is_accepted_and_unsupported_ones_warn() {
             x.message.contains(&format!("'{}'", p.identifier))
                 && x.message.contains("not supported")
         });
-        let supported = frap_io_gltf::export::SUPPORTED_PROPS.contains(&p.identifier);
+        let supported = frap_io_gltf::export::is_supported(p.identifier);
         assert_eq!(warned, !supported, "{stmt}: {:?}", r.reports);
     }
     assert!(tried >= 100, "only {tried} props tried");

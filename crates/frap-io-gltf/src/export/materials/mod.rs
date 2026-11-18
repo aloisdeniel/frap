@@ -19,6 +19,12 @@ pub mod core_emissive;
 pub mod core_pbr;
 pub mod lower;
 
+/// `KHR_materials_*` exporters, one file per extension (`ext/<name>.rs`, WP 3.6), each
+/// registering a [`crate::material_ext::MaterialExtExporter`] (M3 W0 extension point).
+pub mod ext {
+    automod::dir!(pub "src/export/materials/ext");
+}
+
 use std::collections::HashMap;
 
 use frap_gltf::json::{Index, Material as GMaterial, NormalTextureInfo, PbrMetallicRoughness};
@@ -136,6 +142,7 @@ fn build(
         name: Some(name.clone()),
         ..GMaterial::default()
     };
+    m.extras = crate::export::extras::material(g, mat);
     core_alpha::apply(lm, &mut m);
     // `use_backface_culling` is read on the original material, as the add-on does.
     m.double_sided = (!mat.use_backface_culling).then_some(true);
@@ -162,5 +169,14 @@ fn build(
         ));
     }
     core_pbr::apply(g, r, lm, mesh, &mut m)?;
+    // `KHR_materials_*` (M3 W0 extension point; WP 3.6 registers the exporters).
+    let mut cx = crate::material_ext::ExtExportCx {
+        g,
+        material: r,
+        mesh,
+    };
+    for e in crate::material_ext::exporters() {
+        (e.run)(&mut cx, lm, &mut m)?;
+    }
     Ok(m)
 }
