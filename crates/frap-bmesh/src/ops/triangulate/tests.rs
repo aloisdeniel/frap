@@ -302,6 +302,33 @@ fn smooth_vert_half_factor_on_cube() {
 }
 
 #[test]
+fn smooth_vert_mirror_clip_and_axes() {
+    // A vertex near the X mirror plane is clipped onto it; Z is not written.
+    let mut bm = BMesh::new();
+    let v: Vec<VertId> = [[0.05, 0.0, 0.0], [1.0, 1.0, 1.0], [1.0, -1.0, 1.0]]
+        .iter()
+        .map(|&c| bm.vert_create(c, None, CreateFlag::empty()))
+        .collect();
+    bm.edge_create(v[0], v[1], None, CreateFlag::empty());
+    bm.edge_create(v[0], v[2], None, CreateFlag::empty());
+    smooth_vert(
+        &mut bm,
+        &SmoothVertIn {
+            verts: vec![v[0]],
+            factor: 1.0,
+            mirror_clip_x: true,
+            clip_dist: 0.1,
+            use_axis_x: true,
+            use_axis_y: true,
+            use_axis_z: false,
+            ..SmoothVertIn::default()
+        },
+    )
+    .unwrap();
+    assert_eq!(bm.vert(v[0]).co, [0.0, 0.0, 0.0]);
+}
+
+#[test]
 fn wireframe_cube_counts() {
     let mut bm = cube();
     let faces = bm.face_ids();
