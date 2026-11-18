@@ -8,9 +8,7 @@ bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='DESELECT')
 bpy.ops.mesh.select_mode(type='EDGE')
 bpy.ops.mesh.select_random(ratio=0.05, seed=2)
-bpy.data.meshes['Grid'].total_edge_sel
 bpy.ops.mesh.shortest_path_select()
-bpy.data.meshes['Grid'].total_edge_sel
 bpy.ops.frap.select_elements(type='EDGE', indices=[1, 30])
 bpy.ops.mesh.shortest_path_select(edge_mode='SEAM')
 bpy.ops.frap.select_elements(type='EDGE', indices=[2, 25])
@@ -19,4 +17,3 @@ bpy.ops.frap.select_elements(type='EDGE', indices=[1, 30])
 bpy.ops.mesh.shortest_path_select(edge_mode='SEAM')
 bpy.ops.mesh.shortest_path_select()
 bpy.ops.mesh.shortest_path_select()
-bpy.data.meshes['Grid'].total_edge_sel

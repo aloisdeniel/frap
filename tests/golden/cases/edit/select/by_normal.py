@@ -8,12 +8,8 @@ bpy.ops.mesh.primitive_grid_add(x_subdivisions=3, y_subdivisions=3, location=(3,
 bpy.data.objects['Cube'].select_set(True)
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.frap.select_by_normal()
-bpy.data.meshes['Cube'].total_face_sel
-bpy.data.meshes['Grid'].total_face_sel
 bpy.ops.frap.select_by_normal(direction=(0, 0, 1), orientation='LOCAL')
-bpy.data.meshes['Cube'].total_face_sel
 bpy.ops.frap.select_by_normal(direction=(1, 0, 0), threshold=1.2, extend=True)
-bpy.data.meshes['Cube'].total_face_sel
 bpy.ops.mesh.select_mode(type='FACE')
 bpy.ops.frap.select_by_normal(direction=(0, 0, -2), threshold=0.1)
 bpy.ops.frap.select_by_normal(direction=(0, 0, 0))

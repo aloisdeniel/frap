@@ -42,16 +42,30 @@ pub(crate) struct Interval {
     offset: i32,
 }
 
+/// C's `int` `%` as compiled for Blender's arm64/x86-64 builds, total over all inputs:
+/// `INT_MIN % -1` is 0 and (never reached by the property ranges) `i % 0` is `i`, as arm64's
+/// `sdiv`/`msub` pair gives.
+fn c_rem(i: i32, n: i32) -> i32 {
+    if n == 0 { i } else { i.wrapping_rem(n) }
+}
+
+/// `mod_i` (`blenlib/intern/math_base_inline.cc`): `(i % n + n) % n` in wrapping `int`
+/// arithmetic.
+fn mod_i(i: i32, n: i32) -> i32 {
+    c_rem(c_rem(i, n).wrapping_add(n), n)
+}
+
 impl Interval {
     /// `WM_operator_properties_checker_interval_from_op`: `offset = mod_i(offset, nth + skip)`.
+    /// The properties allow `nth + skip` past `INT_MAX`; it wraps like Blender's `int` sum.
     pub(crate) fn new(nth: i32, skip: i32, offset: i32) -> Self {
-        let n = nth + skip;
-        let offset = if n != 0 { offset.rem_euclid(n) } else { 0 };
+        let offset = mod_i(offset, nth.wrapping_add(skip));
         Interval { nth, skip, offset }
     }
-    /// `WM_operator_properties_checker_interval_test`.
+    /// `WM_operator_properties_checker_interval_test`, with Blender's `int` sums wrapping.
     pub(crate) fn test(&self, depth: i32) -> bool {
-        self.skip == 0 || (self.offset + depth) % (self.skip + self.nth) >= self.skip
+        self.skip == 0
+            || c_rem(self.offset.wrapping_add(depth), self.skip.wrapping_add(self.nth)) >= self.skip
     }
 }
 
@@ -352,5 +366,33 @@ mod tests {
         assert_eq!(got, vec![false, false, true, false, true, false]);
         // A negative offset wraps like `mod_i`.
         assert_eq!(Interval::new(2, 1, -1).offset, 2);
+    }
+
+    #[test]
+    fn checker_interval_extremes_wrap_like_c_int() {
+        const MAX: i32 = i32::MAX;
+        // `nth + skip` wraps past INT_MAX; no panic, and the C results.
+        let a = Interval::new(1, MAX, 0);
+        assert_eq!(a.offset, mod_i(0, i32::MIN));
+        let b = Interval::new(MAX, 1, 0);
+        let c = Interval::new(MAX, MAX, MAX);
+        let d = Interval::new(MAX, MAX, -MAX);
+        let e = Interval::new(1, 1, MAX);
+        for iv in [a, b, c, d, e] {
+            for depth in [-1, 0, 1, 2, MAX] {
+                let _ = iv.test(depth);
+            }
+        }
+        // skip = INT_MAX: n = INT_MIN, offset 0; (0 + d) % INT_MIN = d >= INT_MAX only at INT_MAX.
+        assert!(!a.test(-1) && !a.test(0) && !a.test(5));
+        assert!(a.test(MAX));
+        // nth = INT_MAX, skip = 1: n wraps to INT_MIN, offset = 0.
+        assert_eq!(b.offset, 0);
+        assert!(!b.test(-1) && !b.test(0) && b.test(1) && b.test(2));
+        // INT_MIN % -1 and the never-reached `% 0` are total.
+        assert_eq!(c_rem(i32::MIN, -1), 0);
+        assert_eq!(c_rem(7, 0), 7);
+        assert_eq!(mod_i(-1, 3), 2);
+        assert_eq!(mod_i(5, -3), -1);
     }
 }

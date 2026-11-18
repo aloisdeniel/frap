@@ -8,9 +8,7 @@ bpy.data.objects['Cube'].select_set(True)
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='DESELECT')
 bpy.ops.mesh.select_random(seed=3)
-bpy.data.meshes['Grid'].total_vert_sel
 bpy.ops.mesh.select_random(ratio=0.25, seed=7, action='DESELECT')
-bpy.data.meshes['Grid'].total_vert_sel
 bpy.ops.mesh.select_mode(type='EDGE')
 bpy.ops.mesh.select_all(action='DESELECT')
 bpy.ops.mesh.select_random(ratio=0.3, seed=11)

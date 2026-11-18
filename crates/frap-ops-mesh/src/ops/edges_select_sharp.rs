@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.edges_select_sharp(sharpness=0.523599)`, tier T1 (`tests/golden/cases/edit/
-//! select/sharp_flat.py`). Port of `edbm_select_sharp_edges_exec`
+//! select/sharp_*.py`). Port of `edbm_select_sharp_edges_exec`
 //! (`editors/mesh/editmesh_select.cc`, Blender 5.2.4, GPL-2.0-or-later).
 //!
 //! Per mesh in Edit Mode, every visible edge with exactly two faces whose normals differ by

@@ -8,17 +8,14 @@ bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.frap.select_elements(type='VERT', indices=[5, 6])
 bpy.ops.mesh.hide()
 bpy.ops.mesh.select_all(action='SELECT')
-bpy.data.meshes['Grid'].total_vert_sel
 bpy.ops.mesh.select_all(action='DESELECT')
 bpy.ops.mesh.hide()
 bpy.ops.mesh.reveal(select=False)
-bpy.data.meshes['Grid'].total_vert_sel
 bpy.ops.mesh.select_mode(type='EDGE')
 bpy.ops.frap.select_elements(type='EDGE', indices=[4, 5])
 bpy.ops.mesh.hide(unselected=True)
 bpy.ops.mesh.select_more()
 bpy.ops.mesh.reveal()
-bpy.data.meshes['Grid'].total_edge_sel
 bpy.ops.mesh.select_mode(type='FACE')
 bpy.ops.frap.select_elements(type='FACE', indices=[4])
 bpy.ops.mesh.hide()

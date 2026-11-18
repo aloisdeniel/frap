@@ -7,13 +7,9 @@ bpy.ops.mesh.primitive_grid_add(x_subdivisions=6, y_subdivisions=6)
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.frap.select_elements(type='VERT', indices=[14])
 bpy.ops.mesh.select_more(use_face_step=False)
-bpy.data.meshes['Grid'].total_vert_sel
 bpy.ops.mesh.select_more()
-bpy.data.meshes['Grid'].total_vert_sel
 bpy.ops.mesh.select_less(use_face_step=False)
-bpy.data.meshes['Grid'].total_vert_sel
 bpy.ops.mesh.select_less()
-bpy.data.meshes['Grid'].total_vert_sel
 bpy.ops.frap.select_elements(type='VERT', indices=[0])
 bpy.ops.mesh.select_more()
 bpy.ops.mesh.select_more()

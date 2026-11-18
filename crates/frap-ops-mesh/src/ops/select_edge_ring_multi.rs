@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.select_edge_ring_multi(delimit_edge_ring={'NGONS'})`, tier T1
-//! (`tests/golden/cases/edit/select/loop_multi*.py`). Port of
+//! (`tests/golden/cases/edit/select/{ring_multi*,loop_ring_multi*}.py`). Port of
 //! `edbm_edge_ring_multiselect_exec` (`editors/mesh/editmesh_select.cc`, Blender 5.2.4,
 //! GPL-2.0-or-later).
 //!

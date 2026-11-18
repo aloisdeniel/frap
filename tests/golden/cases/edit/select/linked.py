@@ -11,23 +11,17 @@ bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.primitive_cube_add(size=1, location=(3, 0, 0))
 bpy.ops.frap.select_elements(type='VERT', indices=[0])
 bpy.ops.mesh.select_linked()
-bpy.data.meshes['Cube'].total_vert_sel
 bpy.ops.frap.select_elements(type='VERT', indices=[9])
 bpy.ops.mesh.select_linked(delimit={'SEAM'})
-bpy.data.meshes['Cube'].total_vert_sel
 bpy.ops.frap.select_elements(type='VERT', indices=[1])
 bpy.ops.mesh.select_linked(delimit={'SEAM'})
-bpy.data.meshes['Cube'].total_vert_sel
 bpy.ops.mesh.select_mode(type='EDGE')
 bpy.ops.frap.select_elements(type='EDGE', indices=[1])
 bpy.ops.mesh.select_linked(delimit={'SEAM', 'NORMAL'})
-bpy.data.meshes['Cube'].total_edge_sel
 bpy.ops.mesh.select_mode(type='FACE')
 bpy.ops.frap.select_elements(type='FACE', indices=[0])
 bpy.ops.mesh.select_linked()
-bpy.data.meshes['Cube'].total_face_sel
 bpy.ops.frap.select_elements(type='FACE', indices=[2])
 bpy.ops.mesh.select_linked(delimit=set())
-bpy.data.meshes['Cube'].total_face_sel
 bpy.ops.frap.select_elements(type='FACE', indices=[7])
 bpy.ops.mesh.select_linked(delimit={'MATERIAL', 'SHARP'})

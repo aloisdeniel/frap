@@ -34,11 +34,11 @@
     },
     {
       "line": 12,
-      "ok": true
+      "ok": false
     },
     {
       "line": 13,
-      "ok": false
+      "ok": true
     },
     {
       "line": 14,
@@ -86,22 +86,10 @@
     },
     {
       "line": 25,
-      "ok": true
-    },
-    {
-      "line": 26,
-      "ok": true
-    },
-    {
-      "line": 27,
-      "ok": true
-    },
-    {
-      "line": 28,
       "ok": false
     },
     {
-      "line": 29,
+      "line": 26,
       "ok": true
     }
   ],

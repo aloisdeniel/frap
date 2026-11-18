@@ -5,7 +5,8 @@
 //! (ARCHITECTURE §22.4, OPERATORS.md; spec `spec/frap/ops/frap.select_by_normal.json`).
 //! Blender has no such operator: goldens run `tools/blender/emulations.py::select_by_normal`
 //! on the Blender side, which this operator follows step by step:
-//! 1. `direction` is normalised; a zero vector raises `ValueError`;
+//! 1. `direction` is normalised in double precision; a NaN or infinite component or the zero
+//!    vector raises `ValueError`;
 //! 2. for every mesh in Edit Mode (each mesh once, active object first): without `extend`
 //!    every element is deselected and the selection history cleared;
 //! 3. each visible face whose normal `n` satisfies `dot(n, direction) >= cos(threshold)` is
@@ -24,11 +25,36 @@ use frap_rna::{PyExc, RnaError, RnaErrorKind};
 use frap_spec_ops_frap::frap::{self, select_by_normal::Orientation};
 use glam::{Mat3, Mat4, Vec3};
 
-/// Normalises `v` (`None` for a zero vector).
-fn normalized(v: [f32; 3]) -> Option<Vec3> {
-    let v = Vec3::from(v);
-    let len = v.length();
-    (len > 0.0).then(|| v / len)
+/// Why a `direction` cannot be normalised.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+enum BadDirection {
+    /// A NaN or infinite component.
+    NotFinite,
+    /// All components zero.
+    Zero,
+}
+
+impl BadDirection {
+    fn message(self) -> &'static str {
+        match self {
+            BadDirection::NotFinite => "frap.select_by_normal: direction must be finite",
+            BadDirection::Zero => "frap.select_by_normal: direction must not be a zero vector",
+        }
+    }
+}
+
+/// Normalises `v` in `f64` (so huge or tiny finite components neither overflow nor underflow
+/// the length), rejecting non-finite components and the exact zero vector.
+fn normalized(v: [f32; 3]) -> Result<Vec3, BadDirection> {
+    if !v.iter().all(|c| c.is_finite()) {
+        return Err(BadDirection::NotFinite);
+    }
+    let d = v.map(f64::from);
+    let len = d.iter().map(|c| c * c).sum::<f64>().sqrt();
+    if len == 0.0 {
+        return Err(BadDirection::Zero);
+    }
+    Ok(Vec3::from(d.map(|c| (c / len) as f32)))
 }
 
 /// The matrix taking local face normals to world space (`None` when the object's 3x3 world
@@ -83,13 +109,13 @@ pub(crate) fn select_facing(
     ]
 )]
 fn exec(cx: &mut OpCtx, p: frap::SelectByNormal) -> OpResult {
-    let Some(dir) = normalized(p.direction.value) else {
-        return Err(OpError::Rna(RnaError::new(
+    let dir = normalized(p.direction.value).map_err(|bad| {
+        OpError::Rna(RnaError::new(
             RnaErrorKind::Other,
             PyExc::ValueError,
-            "frap.select_by_normal: direction must not be a zero vector",
-        )));
-    };
+            bad.message(),
+        ))
+    })?;
     let limit = p.threshold.value.cos();
     for (ob, me) in helpers::iter_edit_meshes(cx) {
         let space = match p.orientation.value {
@@ -140,7 +166,18 @@ mod tests {
 
     #[test]
     fn zero_direction_is_rejected() {
-        assert!(normalized([0.0; 3]).is_none());
-        assert_eq!(normalized([0.0, 0.0, 2.0]), Some(Vec3::Z));
+        assert_eq!(normalized([0.0; 3]), Err(BadDirection::Zero));
+        assert_eq!(normalized([0.0, 0.0, 2.0]), Ok(Vec3::Z));
+    }
+
+    #[test]
+    fn non_finite_and_extreme_directions() {
+        assert_eq!(normalized([f32::NAN, 0.0, 1.0]), Err(BadDirection::NotFinite));
+        assert_eq!(normalized([0.0, f32::INFINITY, 0.0]), Err(BadDirection::NotFinite));
+        // f32 would overflow (1e20^2) or underflow (1e-30^2) the squared length.
+        assert_eq!(normalized([0.0, 0.0, 1e20]), Ok(Vec3::Z));
+        assert_eq!(normalized([0.0, 0.0, -f32::MAX]), Ok(Vec3::NEG_Z));
+        assert_eq!(normalized([1e-30, 0.0, 0.0]), Ok(Vec3::X));
+        assert_eq!(normalized([f32::from_bits(1), 0.0, 0.0]), Ok(Vec3::X));
     }
 }

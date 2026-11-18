@@ -67,15 +67,16 @@ pub(crate) fn select_linked(bm: &mut BMesh, delimit: WalkDelimit) {
     let ok = |e: EdgeId| walk_ok.get(e.slot()).copied().unwrap_or(true);
     let mode = common::primary_mode(bm.select_mode);
     if mode == SelectMode::VERT {
-        let mut tag: Vec<VertId> = bm
+        let tag: Vec<VertId> = bm
             .vert_ids()
             .into_iter()
             .filter(|&v| common::selected(bm, v))
             .collect();
+        let mut tagged: rustc_hash::FxHashSet<VertId> = tag.iter().copied().collect();
         if any {
             // Exclude delimited vertices next to selected faces (this supports stepping off
-            // isolated vertices which would otherwise be ignored).
-            let mut untag: Vec<VertId> = Vec::new();
+            // isolated vertices which would otherwise be ignored). The walks below skip every
+            // vertex no longer in `tagged`.
             for e in bm.edge_ids() {
                 if !ok(e)
                     && bm
@@ -83,12 +84,12 @@ pub(crate) fn select_linked(bm: &mut BMesh, delimit: WalkDelimit) {
                         .into_iter()
                         .any(|f| common::selected(bm, f))
                 {
-                    untag.extend(bm.edge(e).v);
+                    for v in bm.edge(e).v {
+                        tagged.remove(&v);
+                    }
                 }
             }
-            tag.retain(|v| !untag.contains(v));
         }
-        let mut tagged: rustc_hash::FxHashSet<VertId> = tag.iter().copied().collect();
         if any {
             let mask = |e: EdgeId| ok(e);
             let mut w = LoopShellWire::new(&mask);

@@ -16,10 +16,7 @@ bpy.context.object.active_material_index = 1
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='DESELECT')
 bpy.ops.object.material_slot_select()
-bpy.data.meshes['Cube'].total_face_sel
-bpy.data.meshes['Plane'].total_face_sel
 bpy.ops.object.material_slot_deselect()
-bpy.data.meshes['Cube'].total_vert_sel
 bpy.ops.object.material_slot_deselect()
 bpy.context.object.active_material_index = 0
 bpy.ops.mesh.select_mode(type='FACE')

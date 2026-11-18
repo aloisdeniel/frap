@@ -50,7 +50,9 @@
     },
     {
       "line": 15,
-      "ok": true
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.mesh.select_non_manifold.poll() An edit-mesh with vertex or edge selection mode is required"
     },
     {
       "line": 16,
@@ -62,20 +64,6 @@
     },
     {
       "line": 18,
-      "ok": false,
-      "exception": "RuntimeError",
-      "message": "Operator bpy.ops.mesh.select_non_manifold.poll() An edit-mesh with vertex or edge selection mode is required"
-    },
-    {
-      "line": 19,
-      "ok": true
-    },
-    {
-      "line": 20,
-      "ok": true
-    },
-    {
-      "line": 21,
       "ok": false,
       "exception": "RuntimeError",
       "message": "Operator bpy.ops.mesh.select_non_manifold.poll() An edit-mesh with vertex or edge selection mode is required"

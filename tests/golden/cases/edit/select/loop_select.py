@@ -10,11 +10,8 @@ bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='DESELECT')
 bpy.ops.mesh.loop_select(edge_index=7)
 bpy.ops.mesh.loop_select(object_index=0, edge_index=7)
-bpy.data.meshes['Grid'].total_edge_sel
 bpy.ops.mesh.loop_select(object_index=0, edge_index=7, vert_index=3)
-bpy.data.meshes['Grid'].total_edge_sel
 bpy.ops.mesh.edgering_select(object_index=0, edge_index=7, extend=True)
-bpy.data.meshes['Grid'].total_edge_sel
 bpy.ops.mesh.loop_select(object_index=0, edge_index=0, toggle=True)
 bpy.ops.mesh.loop_select(object_index=0, edge_index=30, deselect=True)
 bpy.ops.mesh.loop_select(object_index=0, edge_index=999)

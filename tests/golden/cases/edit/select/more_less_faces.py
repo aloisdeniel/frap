@@ -7,11 +7,8 @@ bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_mode(type='FACE')
 bpy.ops.frap.select_elements(type='FACE', indices=[12])
 bpy.ops.mesh.select_more(use_face_step=False)
-bpy.data.meshes['Grid'].total_face_sel
 bpy.ops.mesh.select_more()
-bpy.data.meshes['Grid'].total_face_sel
 bpy.ops.mesh.select_less()
-bpy.data.meshes['Grid'].total_face_sel
 bpy.ops.mesh.select_less(use_face_step=False)
 bpy.ops.mesh.select_mode(type='EDGE')
 bpy.ops.frap.select_elements(type='EDGE', indices=[20, 21])

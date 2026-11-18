@@ -75,11 +75,14 @@ def select_by_normal(direction=(0.0, 0.0, 1.0), threshold=0.5235987901687622,
     """`frap.select_by_normal` (WP 2.4): select the visible faces facing `direction`.
 
     Mirrors crates/frap-ops-frap/src/ops/select_by_normal.rs step by step: the direction is
-    normalised (zero raises ValueError); every mesh in Edit Mode (each mesh once) is deselected
+    normalised (zero or non-finite raises ValueError); every mesh in Edit Mode (each mesh once) is deselected
     unless `extend`; a visible face is selected when its normal (GLOBAL: world space through
     the inverse transpose of the 3x3 world matrix, a singular matrix matches nothing; LOCAL:
     the local normal) has `dot(n, direction) >= cos(threshold)`; then the selection is
-    flushed."""
+    flushed. Components are clamped to +-FLT_MAX like the property; a NaN component raises
+    ValueError too; the length is computed in double precision from the single-precision
+    components."""
+    import ctypes
     import math
 
     import bmesh
@@ -93,10 +96,17 @@ def select_by_normal(direction=(0.0, 0.0, 1.0), threshold=0.5235987901687622,
     ob = bpy.context.edit_object
     if ob is None or ob.type != "MESH":
         raise RuntimeError("Operator bpy.ops.frap.select_by_normal.poll() failed, context is incorrect")
-    d = Vector(direction)
-    if d.length == 0.0:
+    # The FLOAT property clamps to its hard range (+-FLT_MAX) and stores single precision;
+    # normalise in double like frap.
+    flt_max = 3.4028234663852886e38
+    comps = [ctypes.c_float(c if math.isnan(c) else min(max(c, -flt_max), flt_max)).value
+             for c in map(float, direction)]
+    if not all(math.isfinite(c) for c in comps):
+        raise ValueError("frap.select_by_normal: direction must be finite")
+    length = math.sqrt(sum(c * c for c in comps))
+    if length == 0.0:
         raise ValueError("frap.select_by_normal: direction must not be a zero vector")
-    d.normalize()
+    d = Vector([c / length for c in comps])
     limit = math.cos(threshold)
     seen = set()
     for o in bpy.context.objects_in_mode_unique_data:

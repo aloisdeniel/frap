@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.loop_to_region(select_bigger=False)`, tier T1 (`tests/golden/cases/edit/
-//! select/region_loop.py`). Port of `edbm_loop_to_region_exec`, `loop_find_regions`,
+//! select/loop_to_region*.py`). Port of `edbm_loop_to_region_exec`, `loop_find_regions`,
 //! `loop_find_region` and `verg_radial` (`editors/mesh/editmesh_select.cc`, Blender 5.2.4,
 //! GPL-2.0-or-later).
 //!

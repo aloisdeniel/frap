@@ -54,7 +54,7 @@
     },
     {
       "line": 18,
-      "ok": true
+      "ok": false
     },
     {
       "line": 19,
@@ -66,7 +66,7 @@
     },
     {
       "line": 21,
-      "ok": false
+      "ok": true
     },
     {
       "line": 22,
@@ -106,30 +106,6 @@
     },
     {
       "line": 31,
-      "ok": true
-    },
-    {
-      "line": 32,
-      "ok": true
-    },
-    {
-      "line": 33,
-      "ok": true
-    },
-    {
-      "line": 34,
-      "ok": true
-    },
-    {
-      "line": 35,
-      "ok": true
-    },
-    {
-      "line": 36,
-      "ok": true
-    },
-    {
-      "line": 37,
       "ok": true
     }
   ],

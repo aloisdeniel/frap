@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.select_face_by_sides(number=4, type='EQUAL', extend=True)`, tier T1
-//! (`tests/golden/cases/edit/select/loose_sides.py`). Port of `edbm_select_face_by_sides_exec`
+//! (`tests/golden/cases/edit/select/face_sides_*.py`). Port of `edbm_select_face_by_sides_exec`
 //! and `is_count_a_match` (`editors/mesh/editmesh_select.cc`, Blender 5.2.4,
 //! GPL-2.0-or-later).
 //!

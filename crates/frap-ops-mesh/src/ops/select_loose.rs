@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.select_loose(extend=False)`, tier T1 (`tests/golden/cases/edit/select/
-//! loose_sides.py`). Port of `edbm_select_loose_exec` (`editors/mesh/editmesh_select.cc`,
+//! loose_*.py`). Port of `edbm_select_loose_exec` (`editors/mesh/editmesh_select.cc`,
 //! Blender 5.2.4, GPL-2.0-or-later).
 //!
 //! Per mesh in Edit Mode (after deselecting all unless `extend`), for each enabled select mode:

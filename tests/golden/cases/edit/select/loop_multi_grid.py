@@ -6,10 +6,8 @@ bpy.ops.mesh.primitive_grid_add(x_subdivisions=5, y_subdivisions=4)
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.frap.select_elements(type='EDGE', indices=[0])
 bpy.ops.mesh.select_edge_loop_multi()
-bpy.data.meshes['Grid'].total_edge_sel
 bpy.ops.frap.select_elements(type='EDGE', indices=[0])
 bpy.ops.mesh.select_edge_loop_multi(delimit_edge_loop=set())
-bpy.data.meshes['Grid'].total_edge_sel
 bpy.ops.frap.select_elements(type='EDGE', indices=[9, 14])
 bpy.ops.mesh.select_edge_loop_multi()
 bpy.ops.mesh.select_edge_ring_multi()

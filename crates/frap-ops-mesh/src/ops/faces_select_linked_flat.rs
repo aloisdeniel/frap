@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.faces_select_linked_flat(sharpness=0.0174533)`, tier T1
-//! (`tests/golden/cases/edit/select/sharp_flat.py`). Port of
+//! (`tests/golden/cases/edit/select/flat_*.py`). Port of
 //! `edbm_select_linked_flat_faces_exec` (`editors/mesh/editmesh_select.cc`, Blender 5.2.4,
 //! GPL-2.0-or-later).
 //!
