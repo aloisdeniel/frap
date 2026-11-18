@@ -53,7 +53,7 @@
     {
      "identifier": "indices",
      "name": "Indices",
-     "description": "Element indices (as in mesh.vertices/edges/polygons of the object leaving Edit Mode now)",
+     "description": "Element indices (as in mesh.vertices/edges/polygons of the object leaving Edit Mode now); an index outside 0..len-1 raises IndexError",
      "type": "INT",
      "subtype": "NONE",
      "unit": "NONE",
@@ -61,9 +61,9 @@
       "dynamic"
      ],
      "default": [],
-     "hard_min": 0,
+     "hard_min": -2147483648,
      "hard_max": 2147483647,
-     "soft_min": 0,
+     "soft_min": -2147483648,
      "soft_max": 2147483647,
      "step": 1,
      "flags": [

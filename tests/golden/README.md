@@ -91,9 +91,11 @@ Both dumpers read the properties listed in `props.toml`:
   fallbacks are listed in `crates/frap-golden/rna_fallbacks.txt` (`<case id> <datablock key>`):
   an unlisted fallback fails its case, and the fixtures test prints entries that became stale
   (delete them when a binding lands). `FRAP_GOLDEN_STRICT_RNA=1` makes every fallback a failure.
-- Edit-mode selection, active element and select history of `mesh:` dumps are `null` on the frap
-  side until the M2 edit-mode WP binds them (deviations.md §2): do not end a `mesh:` case in
-  Edit Mode yet; the frap run rejects a `mesh:` compare whose case ends in `EDIT_MESH`.
+- A `mesh:` dump of a mesh in Edit Mode (M2, WP 2.2): frap reads the geometry through the
+  edit-mode view (D-05), the selection through `vertices/select` etc., and the active element
+  and select history from the response's `edit_mesh` block; Blender dumps the geometry from a
+  copy of the mesh written by `update_from_editmode()` (in Edit Mode its RNA lists the BMesh
+  layers as `attributes` and gives UV maps no data) and the edit state from `bmesh`.
 
 ## Comparators (`crates/frap-golden/src/compare/`)
 

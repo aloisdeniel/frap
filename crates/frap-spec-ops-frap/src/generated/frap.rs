@@ -420,7 +420,7 @@ impl OpProps for SelectByNormal {
 /// Props of `frap.select_elements`, RNA order.
 pub static SELECT_ELEMENTS_PROPS: [PropDef; 4] = [
     PropDef { identifier: "type", name: "Type", description: "Element type the indices refer to", kind: PropKind::Enum { items: &enums::E5, default: EnumDefault::Item("VERT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
-    PropDef { identifier: "indices", name: "Indices", description: "Element indices (as in mesh.vertices/edges/polygons of the object leaving Edit Mode now)", kind: PropKind::Int { default: Defaults::Array(&[]), hard: (0, 2147483647), soft: (0, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Dynamic, flags: PropFlags::SKIP_SAVE, deprecated: None },
+    PropDef { identifier: "indices", name: "Indices", description: "Element indices (as in mesh.vertices/edges/polygons of the object leaving Edit Mode now); an index outside 0..len-1 raises IndexError", kind: PropKind::Int { default: Defaults::Array(&[]), hard: (-2147483648, 2147483647), soft: (-2147483648, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Dynamic, flags: PropFlags::SKIP_SAVE, deprecated: None },
     PropDef { identifier: "action", name: "Action", description: "How the indices change the selection", kind: PropKind::Enum { items: &enums::E6, default: EnumDefault::Item("SET"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
     PropDef { identifier: "object", name: "Object", description: "Name of the edit object the indices refer to (default: the active object)", kind: PropKind::String { default: "", max_bytes: 258 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
 ];
@@ -527,7 +527,7 @@ pub mod select_elements {
 pub struct SelectElements {
     /// Element type the indices refer to; default "VERT": VERT | EDGE | FACE [SKIP_SAVE]
     pub r#type: Prop<select_elements::Type>,
-    /// Element indices (as in mesh.vertices/edges/polygons of the object leaving Edit Mode now); INT [SKIP_SAVE]
+    /// Element indices (as in mesh.vertices/edges/polygons of the object leaving Edit Mode now); an index outside 0..len-1 raises IndexError; INT [SKIP_SAVE]
     pub indices: Prop<Value>,
     /// How the indices change the selection; default "SET": SET | ADD | REMOVE [SKIP_SAVE]
     pub action: Prop<select_elements::Action>,

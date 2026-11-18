@@ -333,13 +333,14 @@ fn enter_editmode_dispatches_to_the_mode_handler() {
     })
     .unwrap();
     assert_eq!(h.state.main.objects.get(ob).unwrap().mode, ObjectMode::Edit);
-    // Adding a primitive while a mesh is in Edit Mode merges into it in Blender (M2).
+    // Adding a primitive while a mesh is in Edit Mode merges into its edit BMesh
+    // (`edit_merge`, WP 2.2), which this test handler does not build.
     let e = with_cx(&mut h, |cx| {
         helpers::add_primitive_or_merge(cx, "Cube", cube_mesh(), at(), false)
     })
     .unwrap_err();
     assert!(
-        matches!(&e, OpError::NotImplemented(m) if m.contains("Edit Mode")),
+        matches!(&e, OpError::Runtime(m) if m.contains("Edit Mode")),
         "{e:?}"
     );
     // Adding another type leaves Edit Mode first (through the handler's exit).

@@ -102,6 +102,11 @@ pub fn with_struct<R>(
     let main = host.main();
     match ptr.root {
         Root::Id(id) => {
+            // §6.3: a mesh in Edit Mode reads through the cached view of its BMesh (WP 2.2).
+            if let Some(view) = crate::edit::edit_view(host, id) {
+                let root = RnaPtr::id(id, view.srna());
+                return walk(host, &*view, &root, &ptr.path, f);
+            }
             let r = main
                 .id(id)
                 .ok_or_else(|| stale(format!("{:?} no longer exists", id.code)))?;

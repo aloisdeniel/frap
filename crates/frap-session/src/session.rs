@@ -572,7 +572,7 @@ impl Session {
             edit_mesh: if self.opts.verbosity == Verbosity::Minimal {
                 None
             } else {
-                crate::edit::edit_mesh_block(&self.host)
+                crate::edit::edit_mesh_block(&self.host, self.opts.verbosity == Verbosity::Full)
             },
             hints: vec![],
         }

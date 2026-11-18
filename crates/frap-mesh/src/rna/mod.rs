@@ -224,8 +224,9 @@ impl Rna for Mesh {
             "use_auto_texspace" | "auto_texspace" => Value::Bool(self.texspace.auto),
             "texspace_location" => texspace(self).0.to_rna_value(prop, tag(prop)),
             "texspace_size" => texspace(self).1.to_rna_value(prop, tag(prop)),
-            // Edit-mode selection counts (`em->bm->totvertsel`); 0 outside Edit Mode (verified).
-            "total_vert_sel" | "total_edge_sel" | "total_face_sel" => 0i32.to_rna_value(prop, none),
+            // Edit-mode selection counts (`em->bm->totvertsel`), 0 outside Edit Mode (verified):
+            // the edit BMesh lives in the session, whose hook reads it (WP 2.2).
+            "total_vert_sel" | "total_edge_sel" | "total_face_sel" => return Ok(Field::NeedsHook),
             _ => return Err(soa::unbound(&MESH, prop.identifier)),
         };
         Ok(Field::Value(v))

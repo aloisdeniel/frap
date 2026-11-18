@@ -94,6 +94,7 @@ pub fn cube_mesh(p: &Cube) -> Mesh {
             (0.125, 0.5),
             (0.625, 0.5),
         ];
+        bm.uvs_follow_face_order = true;
         for (slot, (x, y)) in bm.faces.slots.iter_mut().zip(starts) {
             let f = slot.as_mut().expect("no kills");
             f.uvs = vec![[x, y], [x + W, y], [x + W, y + W], [x, y + W]];
