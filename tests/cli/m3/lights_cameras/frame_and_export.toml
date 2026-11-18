@@ -1,0 +1,9 @@
+# WP 3.4: an agent frames the selected cube with the scene camera
+# (`view3d.camera_to_view_selected`: the camera moves, its rotation is kept), adds an AREA
+# light and exports cameras and lights: the export finishes with the WARNING
+# `Unsupported light source AREA` (the area light stays a node without a light). Without a
+# scene camera the fit is `RuntimeError: Error: No active camera`; `view3d.object_as_camera`
+# makes the active camera the scene camera again. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

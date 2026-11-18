@@ -411,6 +411,7 @@ fn build(j: &J, empty: bool) -> (Main, WindowState) {
         }
         for jl in list("lights") {
             let mut l = Light::new("", s(&jl["type"]));
+            l.set_factory_startup_hidden_fields();
             let _ = load_rna(&mut l, &jl, &[]);
             main.lights.insert(s(&jl["name"]), l, &mut log);
         }
