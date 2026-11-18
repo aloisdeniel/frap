@@ -122,6 +122,10 @@ pub fn set_prop(
     if let Some(set) = find_hook(ptr.srna, prop.identifier).and_then(|h| h.set) {
         return set(host, ptr, prop, v).map_err(rna_err);
     }
+    if ptr.root == Root::Context && !ptr.path.is_empty() {
+        // `bpy.context.space_data.shading.*`, glTF add-on preferences (WP 2.3).
+        return super::context::ui::set_prop(host, ptr, prop, v);
+    }
     if is_api_ptr(ptr) || matches!(ptr.root, Root::Data | Root::Context) {
         return Err(needs_hook(ptr, prop));
     }

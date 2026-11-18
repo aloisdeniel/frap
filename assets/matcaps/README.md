@@ -23,6 +23,7 @@ What the bake does, and why:
   pass is reduced to 256 x 256 with a 2 x 2 box average in linear float and written as a
   single-layer RGB half-float ZIP EXR. Blender renders with the reduced matcaps (loaded as user
   matcaps) differ from renders with the shipped ones by at most 2/255 per channel at 640 x 360
-  (basic_bright, check_rim_light, metal_carpaint); recorded in `docs/deviations.md`.
+  (basic_bright, check_rim_light, metal_carpaint). This is a deviation from Blender; WP 2.3 hands it
+  to the integrator for `docs/deviations.md` (owned by the integrator, not this package).
 - The factory `shading.studio_light` in MATCAP mode is `basic_bright.exr` (DNA default
   `basic_1.exr` no longer ships, so Blender falls back to the first matcap; verified on 5.2.4).

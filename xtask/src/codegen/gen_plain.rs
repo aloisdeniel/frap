@@ -38,7 +38,19 @@ struct PlainSpec {
     own_only: bool,
     /// Implements `Rna`/`RnaMut` (`false` for the field sets of an ID, which its binding wraps).
     rna_impl: bool,
+    /// Stored props whose RNA get/set go through registered hooks (`Field::NeedsHook`): the
+    /// field is DNA-like storage the hook routes to (`View3DShading.studio_light`).
+    hooked: &'static [&'static str],
+    /// Stored `SmolStr` fields that are no RNA property (DNA storage only a hook reads).
+    extra: &'static [Extra],
     doc: &'static str,
+}
+
+/// A stored `SmolStr` field without an RNA property.
+struct Extra {
+    name: &'static str,
+    doc: &'static str,
+    default: &'static str,
 }
 
 const PLAIN: &[PlainSpec] = &[
@@ -49,6 +61,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        hooked: &[],
+        extra: &[],
         doc: "`bpy.types.View3DCursor` (`scene.cursor`).",
     },
     PlainSpec {
@@ -79,6 +93,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        hooked: &[],
+        extra: &[],
         doc: "`bpy.types.ToolSettings` (`scene.tool_settings`; the OPERATORS.md §D subset).",
     },
     PlainSpec {
@@ -88,6 +104,21 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        // `rna_View3DShading_studio_light_get/set`: one enum over three DNA names, routed by
+        // `type` and `light` (frap-scene `hooks/view3_d_shading_studio_light.rs`, WP 2.3).
+        hooked: &["studio_light"],
+        extra: &[
+            Extra {
+                name: "matcap",
+                doc: "DNA `matcap`: the MatCap `studio_light` shows when `type == 'SOLID'` and `light == 'MATCAP'` (no RNA property; empty = Blender's default matcap)",
+                default: "",
+            },
+            Extra {
+                name: "lookdev_light",
+                doc: "DNA `lookdev_light`: the HDRI `studio_light` shows when `type != 'SOLID'` (no RNA property; empty = `forest.exr`)",
+                default: "",
+            },
+        ],
         doc: "`bpy.types.View3DShading` (`scene.display.shading`, the virtual 3D View's shading).",
     },
     PlainSpec {
@@ -97,6 +128,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        hooked: &[],
+        extra: &[],
         doc: "`bpy.types.ColorManagedViewSettings` (`scene.view_settings`).",
     },
     PlainSpec {
@@ -106,6 +139,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        hooked: &[],
+        extra: &[],
         doc: "`bpy.types.ColorManagedDisplaySettings` (`scene.display_settings`).",
     },
     PlainSpec {
@@ -115,6 +150,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        hooked: &[],
+        extra: &[],
         doc: "`bpy.types.ColorManagedInputColorspaceSettings` (`image.colorspace_settings`).",
     },
     PlainSpec {
@@ -124,6 +161,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        hooked: &[],
+        extra: &[],
         doc: "`bpy.types.ImageFormatSettings` (`scene.render.image_settings`).",
     },
     PlainSpec {
@@ -133,6 +172,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        hooked: &[],
+        extra: &[],
         doc: "`bpy.types.RenderSettings` (`scene.render`).",
     },
     PlainSpec {
@@ -142,6 +183,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        hooked: &[],
+        extra: &[],
         doc: "`bpy.types.SceneDisplay` (`scene.display`: Workbench render settings, incl. `shading`).",
     },
     PlainSpec {
@@ -151,6 +194,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        hooked: &[],
+        extra: &[],
         doc: "`bpy.types.SceneEEVEE` (`scene.eevee`).",
     },
     PlainSpec {
@@ -160,6 +205,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        hooked: &[],
+        extra: &[],
         doc: "`bpy.types.UnitSettings` (`scene.unit_settings`).",
     },
     PlainSpec {
@@ -169,6 +216,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        hooked: &[],
+        extra: &[],
         doc: "`bpy.types.CameraDOFSettings` (`camera.dof`).",
     },
     PlainSpec {
@@ -178,6 +227,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &["angle", "angle_x", "angle_y"],
         own_only: true,
         rna_impl: false,
+        hooked: &[],
+        extra: &[],
         doc: "The plain fields of `bpy.types.Camera` (`Default` = `bpy.data.cameras.new()`). The\n/// derived `angle`/`angle_x`/`angle_y` are hooks over `lens` and the sensor (§5.6); the ID\n/// binding (`frap-scene/src/id/camera.rs`) delegates the other props to `rna_get`/`rna_set`.",
     },
     PlainSpec {
@@ -187,6 +238,8 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &["type"],
         own_only: true,
         rna_impl: false,
+        hooked: &[],
+        extra: &[],
         doc: "The plain fields of `bpy.types.Light` and its subclasses (`PointLight`, `SunLight`,\n/// `SpotLight`, `AreaLight`). One struct holds the union, as Blender's DNA does, so re-typing a\n/// light keeps every value; RNA exposes only the fields of the current type (`Light::srna()`\n/// refines by `type`). `Default` = `lights.new(…, 'POINT')`; each subclass's own fields take\n/// that subclass's fresh value (`lights.new(…, type)`).",
     },
 ];
@@ -533,6 +586,7 @@ fn fields_of(spec: &Spec, ps: &PlainSpec, plain_by_srna: &BTreeMap<&str, &str>) 
 }
 
 /// Emits one struct (definition, Default, accessors, optional Rna impl).
+#[allow(clippy::too_many_arguments)]
 fn emit_struct(
     out: &mut String,
     rust: &str,
@@ -540,6 +594,8 @@ fn emit_struct(
     srna_static: &str,
     fields: &[Field],
     rna_impl: bool,
+    hooked: &[&str],
+    extra: &[Extra],
     fresh: &dyn Fn(&Field) -> Option<J>,
 ) -> Res<()> {
     let _ = writeln!(
@@ -563,6 +619,14 @@ fn emit_struct(
         }
         let _ = writeln!(out, "    pub {}: {},", ident(&p.identifier), f.ty.rust());
     }
+    for e in extra {
+        let _ = writeln!(
+            out,
+            "    /// {}\n    pub {}: SmolStr,",
+            e.doc,
+            ident(e.name)
+        );
+    }
     out.push_str("}\n\n");
     let _ = writeln!(
         out,
@@ -574,6 +638,14 @@ fn emit_struct(
             "            {}: {},",
             ident(&f.prop.identifier),
             default_expr(f, fresh(f).as_ref())?
+        );
+    }
+    for e in extra {
+        let _ = writeln!(
+            out,
+            "            {}: SmolStr::new_static({}),",
+            ident(e.name),
+            lit_str(e.default)
         );
     }
     out.push_str("        }\n    }\n}\n\n");
@@ -591,16 +663,24 @@ fn emit_struct(
     );
     out.push_str("    /// Reads a stored property (`None`: not stored in this struct).\n    pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {\n        Some(match prop.identifier {\n");
     for f in fields {
-        let _ = writeln!(
-            out,
-            "            {} => {},",
-            lit_str(&f.prop.identifier),
+        let get = if hooked.contains(&f.prop.identifier.as_str()) {
+            "Field::NeedsHook".to_owned()
+        } else {
             get_expr(f)
-        );
+        };
+        let _ = writeln!(out, "            {} => {get},", lit_str(&f.prop.identifier));
     }
     out.push_str("            _ => return None,\n        })\n    }\n");
     out.push_str("    /// Writes a stored property; `v` is already coerced against `prop` (§9.2). `None`: not\n    /// stored in this struct (or a nested struct, reached through `rna_struct_mut`).\n    pub fn rna_set(&mut self, prop: &'static PropDef, v: Value) -> Option<Result<SetOutcome, RnaError>> {\n        match prop.identifier {\n");
     for f in fields {
+        if hooked.contains(&f.prop.identifier.as_str()) {
+            let _ = writeln!(
+                out,
+                "            {} => return Some(Ok(SetOutcome::NeedsHook)),",
+                lit_str(&f.prop.identifier)
+            );
+            continue;
+        }
         if let Some(stmt) = set_stmt(f) {
             let _ = writeln!(
                 out,
@@ -696,6 +776,8 @@ pub fn generate(spec: &Spec, files: &mut Files) -> Res<()> {
             &screaming(ps.srnas[0]),
             &fields,
             ps.rna_impl,
+            ps.hooked,
+            ps.extra,
             &|f: &Field| fresh_of(spec, &f.srna, &f.prop.identifier).cloned(),
         )?;
         files.insert(dir.join(format!("plain/{m}.rs")), s.into_bytes());
@@ -705,6 +787,8 @@ pub fn generate(spec: &Spec, files: &mut Files) -> Res<()> {
             ps.srnas.to_vec(),
             fields
                 .iter()
+                // Hooked props read through their hook, not `rna_get`.
+                .filter(|f| !ps.hooked.contains(&f.prop.identifier.as_str()))
                 .map(|f| (f.prop.identifier.clone(), f.srna.clone()))
                 .collect::<Vec<_>>(),
         ));
@@ -756,6 +840,8 @@ pub fn generate(spec: &Spec, files: &mut Files) -> Res<()> {
             &screaming(srna),
             &fields,
             true,
+            &[],
+            &[],
             &|f: &Field| {
                 values
                     .get(&f.prop.identifier)

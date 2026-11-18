@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.frap.render_contact_sheet(filepath='//sheet.png', views={'FRONT','RIGHT','TOP','ISO'},
 //! engine='BLENDER_WORKBENCH', objects='VISIBLE', view_size=512, columns=0, margin=0.05,
-//! show_labels=True, background=(0.2, 0.2, 0.2, 1.0), use_scene_camera=False, frame=None)`:
+//! show_labels=True, background=(0.2, 0.2, 0.2, 1.0), use_scene_camera=False, frame=<unset>)`:
 //! frap's multi-view sheet (ARCHITECTURE §19.6; WP 2.3). A frap extension with no Blender
 //! counterpart; every tile is a real render of the scene (the `RenderScene` pipeline of
 //! `render.render`) seen from a synthetic camera.
@@ -10,8 +10,7 @@
 //!   `use_scene_camera` adds CAMERA): Blender's numpad orientations (`view3d_quat_axis`,
 //!   `editors/space_view3d/view3d_utils.cc`, roll 0: FRONT looks along +Y, RIGHT along −X, TOP
 //!   along −Z, BACK/LEFT/BOTTOM the opposite ways, +Z up in the side views), ISO the rotation of
-//!   the factory viewport (`space_data.region_3d.view_matrix`), CAMERA `scene.camera` at the
-//!   scene's aspect ratio, letterboxed in its square cell.
+//!   the factory viewport (the rotation `align='VIEW'` gives, from `viewquat`: no roll), CAMERA `scene.camera` at the scene's aspect ratio, letterboxed in its square cell.
 //! - **Framing**: one orthographic camera per view, looking at the centre of the evaluated
 //!   world-space bounds of the drawn objects (a 2 m cube around the origin without any);
 //!   `ortho_scale` is the bounds' larger extent across the view × (1 + 2 × `margin`); the clip
@@ -23,22 +22,25 @@
 //!   (`context.selected_objects`) or `ALL` (everything a render sees); only render-visible
 //!   meshes are drawn; lights and the world still light the scene.
 //! - **Engine**: Workbench; `BLENDER_EEVEE` renders with Workbench and a WARNING until M5.
-//! - **Frame**: unset renders the current frame; set, the state is cloned with animation applied
-//!   at that frame, as `render.render` does. The session is never modified (not even
-//!   `Render Result`).
+//! - **Frame**: unset (or `None`) renders the current frame; set, the state is cloned with
+//!   animation applied at that frame, as `render.render` does. The session is never modified
+//!   (not even `Render Result`). The sheet is a still: its path never gets a frame number.
 //! - **Sheet**: `columns` cells per row (0: `ceil(sqrt(tiles))`), square `view_size` cells, no
 //!   gutter, `background` (display space) wherever no tile covers. Each tile is colour-managed
 //!   and dithered on its own (the scene's view settings, `render.dither_intensity`), so it holds
 //!   the pixels of an 8-bit render of its view; labels (view names, `show_labels`) are drawn on
 //!   top. The sheet is an 8-bit RGBA PNG at `filepath` (`//` = next to the saved `.frap`, else
-//!   the working directory; `.png` added when missing; path templates as `render.filepath`).
+//!   the working directory; `.png` added when missing; path templates as `render.filepath`; a
+//!   path without a file name, `''` or `'//'`, is an error). At most [`MAX_SHEET_PIXELS`]
+//!   pixels: larger sheets are refused before anything renders, and tiles are rendered,
+//!   quantised and dropped one at a time.
 //!
 //! `result`: `filepath`, `size` (`[width, height]`), `engine`, `tiles`
 //! (`[{"view", "rect": [x, y, w, h], …camera}]`, rectangles top-left based).
 
 use frap_imbuf::{DecodedImage, EncodeFormat, PixelData};
 use frap_math::EulerOrder;
-use frap_math::euler::mat3_normalized_to_eul_o;
+use frap_math::euler::{eul_o_to_mat3, mat3_normalized_to_eul_o, quat_to_eul_o};
 use frap_math::matrix::loc_eul_o_size_to_mat4;
 use frap_math::quat::quat_to_mat3;
 use frap_op::operator;
@@ -57,6 +59,11 @@ use crate::output::{self, OutputRules, TemplateVars, format};
 
 /// The engine every tile renders with until M5.
 const WORKBENCH: &str = "BLENDER_WORKBENCH";
+
+/// The largest sheet (pixels) frap composites: 4096 × 4096, one tile at the largest
+/// `view_size`. The compositor holds the display tiles and the sheet as float RGBA (16 bytes a
+/// pixel each), so this bounds the op at roughly 0.6 GB.
+pub(crate) const MAX_SHEET_PIXELS: u64 = 4096 * 4096;
 
 /// The views, in tile order.
 const VIEW_ORDER: [&str; 8] = [
@@ -77,18 +84,28 @@ fn axis_quat(view: &str) -> Option<[f32; 4]> {
     })
 }
 
-/// The world → view rotation of a synthetic view (`ISO`: the factory viewport's).
-pub(crate) fn view_rotation(view: &str, viewport: &Mat4) -> Mat3 {
+/// The XYZ Euler rotation of the factory viewport as `align='VIEW'` gives it
+/// (`ED_object_rotation_from_view` over `rv3d->viewquat`; verified on 5.2.4:
+/// `(1.108752, 0, 1.154878)`): `region_3d.view_rotation` of `startup.json`, the view → world
+/// rotation, so a camera with it sees the viewport without roll. The dumped `view_matrix` is
+/// stale against `viewquat` (0.76° of roll), as `frap-ops-mesh`'s `view_rotation` notes.
+pub(crate) fn iso_euler() -> [f32; 3] {
+    let q = frap_scene::startup::factory_dump()
+        .get("view3d")
+        .and_then(|v| v.get("region_3d"))
+        .and_then(|v| v.get("view_rotation"))
+        .and_then(|v| v.as_array())
+        .filter(|a| a.len() == 4)
+        .map(|a| std::array::from_fn::<f32, 4, _>(|i| a[i].as_f64().unwrap_or(0.0) as f32))
+        .unwrap_or([1.0, 0.0, 0.0, 0.0]);
+    quat_to_eul_o(q, EulerOrder::XYZ)
+}
+
+/// The world → view rotation of a synthetic view. `ISO` takes `iso_euler` ([`iso_euler`]).
+pub(crate) fn view_rotation(view: &str, iso_euler: [f32; 3]) -> Mat3 {
     match axis_quat(view) {
         Some(q) => quat_to_mat3(q),
-        None => {
-            let m = Mat3::from_mat4(*viewport);
-            Mat3::from_cols(
-                m.x_axis.normalize_or_zero(),
-                m.y_axis.normalize_or_zero(),
-                m.z_axis.normalize_or_zero(),
-            )
-        }
+        None => eul_o_to_mat3(iso_euler, EulerOrder::XYZ).transpose(),
     }
 }
 
@@ -232,8 +249,8 @@ fn camera_tile(resolution: [i32; 2], aspect: [f32; 2], cell: u32) -> (u32, u32) 
 
 /// Workbench effects the scene asks for and frap does not render (P2; `frap-render`'s
 /// `workbench::cavity::unsupported`): cavity and depth of field, which X-ray mode disables.
-fn workbench_left_out(scene: &RenderScene) -> Vec<&'static str> {
-    let w = &scene.settings.workbench;
+/// `render.render` reports them too (WP 2.3).
+pub(crate) fn workbench_left_out(w: &frap_render_scene::RWorkbenchShading) -> Vec<&'static str> {
     let xray = w.shading_type == "WIREFRAME" || (w.show_xray && w.xray_alpha < 1.0);
     let mut out = vec![];
     if !xray && w.show_cavity {
@@ -256,10 +273,9 @@ fn floats(v: &[f32]) -> Value {
     Value::Tuple(v.iter().map(|f| Value::Float(*f)).collect())
 }
 
-/// One tile to render.
+/// One rendered tile: its view and camera.
 struct TileJob {
     view: &'static str,
-    scene: RenderScene,
     camera: Option<SyntheticCamera>,
     camera_name: Option<SmolStr>,
 }
@@ -295,10 +311,22 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
     }
     let cell = p.view_size.value.clamp(16, 4096) as u32;
     let frame = p.frame.is_set.then_some(p.frame.value);
+    let (cols, rows) = grid(wanted.len(), p.columns.value);
+    let pixels = u64::from(cols * cell) * u64::from(rows * cell);
+    if pixels > MAX_SHEET_PIXELS {
+        return Err(OpError::Runtime(format!(
+            "frap: the contact sheet would be {} x {} pixels ({:.1} Mpx), more than the {:.1} Mpx \
+             frap composites: lower view_size or name fewer views",
+            cols * cell,
+            rows * cell,
+            pixels as f64 / 1e6,
+            MAX_SHEET_PIXELS as f64 / 1e6
+        )));
+    }
 
     // Everything read from the context before rendering.
     let cwd = cx.services().paths().cwd.clone();
-    let (filepath, objects, viewport, cm, dither, resolution, aspect, camera_ref) = {
+    let (filepath, objects, iso, cm, dither, resolution, aspect, camera_ref) = {
         let c = cx.ctx();
         let scene = c.scene();
         let r = &scene.render;
@@ -342,12 +370,21 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
             use_file_extension: true,
             file_format: "PNG",
         };
-        let out = output::output_path(&rules, &cwd, frame).map_err(OpError::Runtime)?;
+        // A still: no frame number, whatever `frame` is (as `render.render(write_still=True)`).
+        let out = output::output_path(&rules, &cwd, None).map_err(OpError::Runtime)?;
+        // `''` and `'//'` resolve to the bare extension (`.png`, a hidden file in the cwd).
+        let name = out.absolute.file_name().map(|s| s.to_string_lossy());
+        if name.is_none_or(|n| n.eq_ignore_ascii_case(".png")) {
+            return Err(OpError::Runtime(format!(
+                "frap: filepath '{}' names no file: give one, e.g. '//sheet.png'",
+                p.filepath.value
+            )));
+        }
         let cm = format::color_management(&scene.view_settings, &scene.display_settings);
         (
             out,
             objects,
-            c.win.view3d.view_matrix,
+            iso_euler(),
             cm,
             r.dither_intensity,
             resolution,
@@ -370,10 +407,15 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
     base.settings.engine = WORKBENCH.into();
     let points = scene_points(&base);
 
-    let mut jobs: Vec<TileJob> = Vec::new();
-    for view in &wanted {
+    // One tile at a time: render, colour-manage and quantise, then drop the float film, so
+    // at most one render film is alive besides the 8-bit display tiles.
+    let service = cx.services().render()?;
+    let mut jobs: Vec<TileJob> = Vec::with_capacity(wanted.len());
+    let mut tiles = Vec::with_capacity(wanted.len());
+    let mut display = Vec::with_capacity(wanted.len());
+    for (i, view) in wanted.iter().copied().enumerate() {
         let mut scene = base.clone();
-        if *view == "CAMERA" {
+        let job = if view == "CAMERA" {
             let cam_ref = camera_ref.expect("invariant: checked above");
             let host = &*snap.host;
             let ob = host
@@ -395,43 +437,26 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
                 aspect[0],
                 aspect[1],
             );
-            jobs.push(TileJob {
+            TileJob {
                 view,
-                scene,
                 camera: None,
                 camera_name: Some(ob.header.name.clone()),
-            });
+            }
         } else {
-            let rot = view_rotation(view, &viewport);
+            let rot = view_rotation(view, iso);
             let cam = frame_points(&points, &rot, p.margin.value);
             scene.camera = cam.render_camera(cell);
-            jobs.push(TileJob {
+            TileJob {
                 view,
-                scene,
                 camera: Some(cam),
                 camera_name: None,
-            });
-        }
-    }
-
-    let scenes: Vec<RenderScene> = jobs.iter().map(|j| j.scene.clone()).collect();
-    let service = cx.services().render()?;
-    let films = service.render_tiles(&scenes).map_err(render_error)?;
-    if films.len() != jobs.len() {
-        return Err(OpError::Gpu(format!(
-            "the renderer returned {} tiles for {}",
-            films.len(),
-            jobs.len()
-        )));
-    }
-
-    // Each tile colour-managed and quantised on its own, then composited in display space.
-    let (cols, rows) = grid(jobs.len(), p.columns.value);
-    let mut tiles = Vec::with_capacity(jobs.len());
-    let mut display = Vec::with_capacity(jobs.len());
-    for (i, (job, film)) in jobs.iter().zip(&films).enumerate() {
+            }
+        };
+        let film = service.render(&scene).map_err(render_error)?;
+        drop(scene);
         let d = format::display_image(&film.rgba, film.width, film.height, &cm);
         let bytes = d.to_rgba8(dither);
+        drop(d);
         display.push(Film {
             width: film.width,
             height: film.height,
@@ -443,6 +468,7 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
         let rect = cell_rect(i, cols, cell, film.width, film.height);
         let label = p.show_labels.value.then(|| SmolStr::new(job.view));
         tiles.push(SheetTile::new(rect, label));
+        jobs.push(job);
     }
     let bg = p.background.value.map(|v| {
         f32::from(frap_color::display::unit_float_to_uchar_clamp(v)) / 255.0
@@ -451,6 +477,7 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
     let sheet = service
         .composite_sheet(&display, &layout)
         .map_err(render_error)?;
+    drop(display);
     let bytes: Vec<u8> = sheet
         .rgba
         .iter()
@@ -477,7 +504,7 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
     for w in &cm.warnings {
         cx.report(ReportType::Warning, w.clone());
     }
-    for effect in workbench_left_out(&base) {
+    for effect in workbench_left_out(&base.settings.workbench) {
         cx.report(
             ReportType::Warning,
             format!("frap: the Workbench {effect} is not rendered yet"),
@@ -531,17 +558,17 @@ mod tests {
 
     #[test]
     fn numpad_views_look_the_right_way() {
-        let id = Mat4::IDENTITY;
+        let id = [0.0; 3];
         let near = |a: Vec3, b: Vec3| (a - b).length() < 1e-6;
-        assert!(near(look_dir(&view_rotation("FRONT", &id)), Vec3::Y));
-        assert!(near(look_dir(&view_rotation("BACK", &id)), -Vec3::Y));
-        assert!(near(look_dir(&view_rotation("RIGHT", &id)), -Vec3::X));
-        assert!(near(look_dir(&view_rotation("LEFT", &id)), Vec3::X));
-        assert!(near(look_dir(&view_rotation("TOP", &id)), -Vec3::Z));
-        assert!(near(look_dir(&view_rotation("BOTTOM", &id)), Vec3::Z));
+        assert!(near(look_dir(&view_rotation("FRONT", id)), Vec3::Y));
+        assert!(near(look_dir(&view_rotation("BACK", id)), -Vec3::Y));
+        assert!(near(look_dir(&view_rotation("RIGHT", id)), -Vec3::X));
+        assert!(near(look_dir(&view_rotation("LEFT", id)), Vec3::X));
+        assert!(near(look_dir(&view_rotation("TOP", id)), -Vec3::Z));
+        assert!(near(look_dir(&view_rotation("BOTTOM", id)), Vec3::Z));
         // Side views keep +Z up.
         for v in ["FRONT", "BACK", "RIGHT", "LEFT"] {
-            let up = view_rotation(v, &id).transpose() * Vec3::Y;
+            let up = view_rotation(v, id).transpose() * Vec3::Y;
             assert!(near(up, Vec3::Z), "{v}: {up}");
         }
     }
@@ -549,7 +576,7 @@ mod tests {
     #[test]
     fn framing_centres_and_scales_the_bounds() {
         let pts = [Vec3::new(-1.0, -2.0, 0.0), Vec3::new(3.0, 2.0, 1.0)];
-        let rot = view_rotation("TOP", &Mat4::IDENTITY);
+        let rot = view_rotation("TOP", [0.0; 3]);
         let cam = frame_points(&pts, &rot, 0.05);
         // Seen from the top: x extent 4, y extent 4 → 4 × 1.1.
         assert!((cam.ortho_scale - 4.4).abs() < 1e-5, "{cam:?}");
@@ -564,6 +591,21 @@ mod tests {
         // No objects: the 2 m cube.
         let empty = frame_points(&[], &rot, 0.0);
         assert!((empty.ortho_scale - 2.0).abs() < 1e-6);
+    }
+
+    #[test]
+    fn iso_tile_camera_has_the_view_rotation() {
+        // The factory viewport rotation `align='VIEW'` gives (verified on 5.2.4:
+        // `camera_add(align='VIEW').rotation_euler == (1.108752, 0, 1.154878)`): the ISO tile
+        // camera has exactly that rotation, so no roll.
+        let iso = [1.108_752, 0.0, 1.154_878];
+        for (a, b) in iso_euler().iter().zip(iso) {
+            assert!((a - b).abs() < 1e-5, "{:?}", iso_euler());
+        }
+        let cam = frame_points(&[], &view_rotation("ISO", iso), 0.05);
+        for (a, b) in cam.rotation_euler.iter().zip(iso) {
+            assert!((a - b).abs() < 1e-5, "{:?}", cam.rotation_euler);
+        }
     }
 
     #[test]

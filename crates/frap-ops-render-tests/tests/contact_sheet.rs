@@ -99,6 +99,76 @@ fn errors_need_no_gpu() {
 }
 
 #[test]
+fn paths_sizes_and_none_need_no_gpu() {
+    let mut e = Env::new("cs_paths");
+    // A file name is required: '' and '//' would write a hidden '.png'.
+    for fp in ["''", "'//'"] {
+        let j = e.run(&format!("bpy.ops.frap.render_contact_sheet(filepath={fp})"));
+        assert_eq!(j["error"]["exception"], "RuntimeError", "{fp}: {j}");
+        assert!(
+            j["error"]["message"]
+                .as_str()
+                .unwrap()
+                .contains("names no file"),
+            "{fp}: {j}"
+        );
+    }
+    assert!(!e.path(".png").exists());
+    // Sheets above 4096 x 4096 are refused before anything renders.
+    let j = e.run(
+        "bpy.ops.frap.render_contact_sheet(views={'FRONT','BACK','RIGHT','LEFT','TOP','BOTTOM','ISO'}, view_size=4096)",
+    );
+    assert_eq!(j["error"]["exception"], "RuntimeError", "{j}");
+    let m = j["error"]["message"].as_str().unwrap();
+    assert!(
+        m.contains("12288 x 12288") && m.contains("view_size"),
+        "{m}"
+    );
+    // `frame=None` is the documented "unset" (§19.6), also in the short form; Blender's own
+    // operators keep rejecting None for numbers.
+    let j = e.run("bpy.ops.frap.render_contact_sheet(frame=None, views=set())");
+    assert!(
+        j["error"]["message"]
+            .as_str()
+            .unwrap()
+            .contains("views is empty"),
+        "frame=None accepted: {j}"
+    );
+    let j = e.run("frap.render_contact_sheet frame=None filepath=''");
+    assert!(
+        j["error"]["message"]
+            .as_str()
+            .unwrap()
+            .contains("names no file"),
+        "short form frame=None accepted: {j}"
+    );
+    let j = e.run("bpy.ops.mesh.primitive_cube_add(size=None)");
+    assert_eq!(j["error"]["exception"], "TypeError", "{j}");
+}
+
+#[test]
+fn a_set_frame_keeps_the_file_name() {
+    let mut e = Env::new("cs_frame_path");
+    e.ok(SCENE);
+    let Some(j) = sheet(
+        &mut e,
+        "frame=10, filepath='//framed.png', views={'TOP'}, view_size=16",
+    ) else {
+        return;
+    };
+    assert_eq!(j["result"]["filepath"], "framed.png", "{j}");
+    assert!(e.path("framed.png").is_file());
+    assert!(!e.path("framed.png0010.png").exists());
+    // Without an extension: still no frame number.
+    let j = sheet(
+        &mut e,
+        "frame=3, filepath='//f', views={'TOP'}, view_size=16",
+    )
+    .unwrap();
+    assert_eq!(j["result"]["filepath"], "f.png", "{j}");
+}
+
+#[test]
 fn tiles_equal_individual_renders() {
     let mut e = Env::new("cs_tiles");
     e.ok(SCENE);
@@ -139,7 +209,44 @@ fn tiles_equal_individual_renders() {
         if view == "CAMERA" {
             assert_eq!(t["camera"], "Camera");
             assert_eq!(r[2..], [96, 54], "1920 x 1080 letterboxed in 96 px");
+            // `render.render` of the scene camera at the tile size gives the tile.
+            e.ok("bpy.context.scene.render.resolution_x = 96
+bpy.context.scene.render.resolution_y = 54
+bpy.context.scene.render.filepath = '//real_CAMERA'");
+            let j = e.render("bpy.ops.render.render(write_still=True)").unwrap();
+            assert_eq!(j["ok"], true, "{j}");
+            let real = rgba8(&load(&e.path("real_CAMERA.png")));
+            assert_eq!(real.len(), tile.len(), "CAMERA: tile size");
+            let max = tile
+                .iter()
+                .zip(&real)
+                .map(|(a, b)| a.abs_diff(*b))
+                .max()
+                .unwrap();
+            assert!(max <= 1, "CAMERA: render.render differs by {max}");
+            e.ok("bpy.context.scene.render.resolution_x = 1920
+bpy.context.scene.render.resolution_y = 1080");
             continue;
+        }
+        if view == "ISO" {
+            // The factory viewport rotation, as `align='VIEW'` gives it (no roll).
+            e.ok("bpy.ops.object.camera_add(align='VIEW')");
+            let j = e.run("bpy.context.active_object.rotation_euler[:]");
+            let want: Vec<f64> = j["value"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|x| x.as_f64().unwrap())
+                .collect();
+            let got = floats(t, "rotation_euler");
+            for (a, b) in got.iter().zip(&want) {
+                assert!(
+                    (a - b).abs() < 1e-5,
+                    "ISO rotation {got:?} vs align='VIEW' {want:?}"
+                );
+            }
+            assert!(got[1].abs() < 1e-6, "ISO tile has no roll: {got:?}");
+            e.ok("bpy.data.objects.remove(bpy.context.active_object)");
         }
         let loc = floats(t, "location");
         let rot = floats(t, "rotation_euler");
@@ -364,4 +471,35 @@ bpy.data.objects['Sphere'].select_set(True)");
     assert!(bg < 0.1);
     let corner = [px[0], px[1], px[2]];
     assert!(corner.iter().all(|c| *c < 80), "{corner:?}");
+}
+
+/// Cavity and depth of field are not rendered yet: both `render.render` and the sheet say so
+/// (WARNING), and say nothing when X-ray disables them (Blender ignores them there too).
+#[test]
+fn unrendered_workbench_effects_warn_in_both_ops() {
+    let mut e = Env::new("cs_cavity");
+    e.ok("bpy.context.scene.render.engine = 'BLENDER_WORKBENCH'
+bpy.context.scene.render.resolution_x = 32
+bpy.context.scene.render.resolution_y = 18
+bpy.context.scene.render.filepath = '//cav'
+bpy.context.scene.display.shading.show_cavity = True");
+    let warned = |j: &J, what: &str| {
+        common::reports(j)
+            .iter()
+            .any(|(t, m)| t == "WARNING" && m.contains(what))
+    };
+    let Some(j) = e.render("bpy.ops.render.render(write_still=True)") else {
+        return;
+    };
+    assert!(warned(&j, "Workbench cavity is not rendered"), "{j}");
+    let j = sheet(&mut e, "filepath='//c.png', views={'TOP'}, view_size=16").unwrap();
+    assert!(warned(&j, "Workbench cavity is not rendered"), "{j}");
+    e.ok("bpy.context.scene.display.shading.show_xray = True");
+    let j = e.render("bpy.ops.render.render(write_still=True)").unwrap();
+    assert!(!warned(&j, "cavity"), "X-ray disables cavity: {j}");
+    // Other engines do not read the Workbench shading.
+    e.ok("bpy.context.scene.display.shading.show_xray = False
+bpy.context.scene.render.engine = 'CYCLES'");
+    let j = e.render("bpy.ops.render.render(write_still=True)").unwrap();
+    assert!(!warned(&j, "cavity"), "{j}");
 }

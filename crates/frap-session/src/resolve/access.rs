@@ -125,6 +125,12 @@ pub fn with_struct<R>(
                 _ => Err(stale("embedded slot is not a struct")),
             }
         }
+        // `bpy.context.window` / `space_data` / `preferences` and below (WP 2.3).
+        Root::Context if !ptr.path.is_empty() => {
+            let root = super::context::ui::root(host);
+            let here = RnaPtr::new(Root::Context, &frap_spec_rna::CONTEXT);
+            walk(host, &root, &here, &ptr.path, f)
+        }
         _ => Err(stale("bpy.data / bpy.context are not RNA structs")),
     }
 }
