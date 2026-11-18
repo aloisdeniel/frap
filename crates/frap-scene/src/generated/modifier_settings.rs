@@ -1809,8 +1809,6 @@ impl RnaMut for ArraySettings {
 pub struct BevelSettings {
     /// `width`: Bevel amount
     pub width: f32,
-    /// `width_pct`: Bevel amount for percentage method
-    pub width_pct: f32,
     /// `segments`: Number of segments for round edges/verts
     pub segments: i32,
     /// `affect`: Affect edges or vertices
@@ -1861,7 +1859,6 @@ impl Default for BevelSettings {
     fn default() -> Self {
         BevelSettings {
             width: 0.1,
-            width_pct: 0.1,
             segments: 1,
             affect: SmolStr::new_static("EDGES"),
             limit_method: SmolStr::new_static("ANGLE"),
@@ -1890,7 +1887,7 @@ impl Default for BevelSettings {
 
 impl BevelSettings {
     /// Names of the stored RNA properties, in field order.
-    pub const STORED: [&'static str; 24] = ["width", "width_pct", "segments", "affect", "limit_method", "edge_weight", "vertex_weight", "angle_limit", "vertex_group", "invert_vertex_group", "use_clamp_overlap", "offset_type", "profile_type", "profile", "material", "loop_slide", "mark_seam", "mark_sharp", "harden_normals", "face_strength_mode", "miter_outer", "miter_inner", "spread", "vmesh_method"];
+    pub const STORED: [&'static str; 23] = ["width", "segments", "affect", "limit_method", "edge_weight", "vertex_weight", "angle_limit", "vertex_group", "invert_vertex_group", "use_clamp_overlap", "offset_type", "profile_type", "profile", "material", "loop_slide", "mark_seam", "mark_sharp", "harden_normals", "face_strength_mode", "miter_outer", "miter_inner", "spread", "vmesh_method"];
     /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
     /// `.frap`; serde skips them).
     pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
@@ -1908,8 +1905,7 @@ impl BevelSettings {
     /// Reads a stored property (`None`: not stored in this struct).
     pub fn rna_get(&self, prop: &'static PropDef) -> Option<Field<'_>> {
         Some(match prop.identifier {
-            "width" => Field::Value(Value::Float(self.width)),
-            "width_pct" => Field::Value(Value::Float(self.width_pct)),
+            "width" | "width_pct" => Field::Value(Value::Float(self.width)),
             "segments" => Field::Value(Value::Int(self.segments as i64)),
             "affect" => Field::Value(Value::Enum(self.affect.clone())),
             "limit_method" => Field::Value(Value::Enum(self.limit_method.clone())),
@@ -1939,8 +1935,7 @@ impl BevelSettings {
     /// stored in this struct (or a nested struct, reached through `rna_struct_mut`).
     pub fn rna_set(&mut self, prop: &'static PropDef, v: Value) -> Option<Result<SetOutcome, RnaError>> {
         match prop.identifier {
-            "width" => self.width = FromValue::from_value(&v),
-            "width_pct" => self.width_pct = FromValue::from_value(&v),
+            "width" | "width_pct" => self.width = FromValue::from_value(&v),
             "segments" => self.segments = FromValue::from_value(&v),
             "affect" => self.affect = FromValue::from_value(&v),
             "limit_method" => self.limit_method = FromValue::from_value(&v),

@@ -52,6 +52,55 @@ impl Mesh {
                 .collect(),
         ))
     }
+
+    /// `attributes.lookup<float>(name, domain)`: the attribute's values interpolated to `domain`
+    /// in their own type (booleans with the all-of/any-of rules, integers rounded), then
+    /// converted to `float` as `type_conversions.cc` does (`bool_to_float`, `int_to_float`,
+    /// `float2/3/4_to_float` component averages, `color_to_float` luminance, byte colours
+    /// decoded first). `None` when it is missing or its type has no conversion to `float`
+    /// (QUATERNION, FLOAT4X4, STRING). Borrowed when the attribute is already FLOAT on `domain`.
+    pub fn lookup_float(&self, name: &str, domain: Domain) -> Option<Cow<'_, [f32]>> {
+        let a = self.attributes.get(name)?;
+        match &a.data {
+            AttrData::Float(v) if a.domain == domain => {
+                return Some(Cow::Borrowed(v.as_slice()));
+            }
+            AttrData::Bool(v) => {
+                let b: Cow<'_, [bool]> = if a.domain == domain {
+                    Cow::Borrowed(v.as_slice())
+                } else {
+                    Cow::Owned(adapt_bool(self, v, a.domain, domain))
+                };
+                return Some(Cow::Owned(
+                    b.iter().map(|&x| f32::from(u8::from(x))).collect(),
+                ));
+            }
+            _ => {}
+        }
+        let col = match &a.data {
+            // `ColorGeometry4bMixer` mixes the encoded bytes in float and stores the result
+            // back as bytes (truncated); `byte_color_to_float` then decodes.
+            AttrData::ByteColor(v) => Column {
+                kind: Kind::ByteRaw,
+                width: 4,
+                integer: false,
+                values: v.iter().flat_map(|c| c.map(f64::from)).collect(),
+            },
+            data => Column::from_data(data)?,
+        };
+        let mixed = if a.domain == domain {
+            col.values.clone()
+        } else {
+            adapt_mixed(self, &col, a.domain, domain)
+        };
+        let n = col.width;
+        Some(Cow::Owned(
+            mixed
+                .chunks(n.max(1))
+                .map(|v| col.kind.to_float(v))
+                .collect(),
+        ))
+    }
 }
 
 /// How a numeric column converts to `bool` and averages.
@@ -65,6 +114,8 @@ enum Kind {
     Color,
     /// BYTE_COLOR: any of r, g, b non-zero (values held as linear floats while mixing).
     ByteColor,
+    /// BYTE_COLOR held as its encoded bytes (`lookup_float` only).
+    ByteRaw,
 }
 
 impl Kind {
@@ -78,6 +129,27 @@ impl Kind {
                 g > 0.0
             }
             Kind::ByteColor => v[..3].iter().any(|c| linear_to_srgb_byte(*c as f32) > 0),
+            Kind::ByteRaw => v[..3].iter().any(|c| *c as f32 as u8 > 0),
+        }
+    }
+
+    /// `*_to_float` of `type_conversions.cc`.
+    fn to_float(self, v: &[f64]) -> f32 {
+        match self {
+            Kind::Positive => v[0] as f32,
+            // float2/3/4_to_float: the component average, in float.
+            Kind::NonZero => v.iter().fold(0.0f32, |s, c| s + *c as f32) / v.len() as f32,
+            // color_to_float: IMB_colormanagement_get_luminance (scene-linear Rec. 709).
+            Kind::Color => luminance(v[0] as f32, v[1] as f32, v[2] as f32),
+            Kind::ByteColor => {
+                let c = |x: f64| srgb_byte_to_linear(linear_to_srgb_byte(x as f32));
+                luminance(c(v[0]), c(v[1]), c(v[2]))
+            }
+            // byte_color_to_float: the (mixed, truncated) bytes decoded.
+            Kind::ByteRaw => {
+                let c = |x: f64| srgb_byte_to_linear(x as f32 as u8);
+                luminance(c(v[0]), c(v[1]), c(v[2]))
+            }
         }
     }
 }
@@ -339,6 +411,11 @@ fn adapt_bool(m: &Mesh, v: &[bool], from: Domain, to: Domain) -> Vec<bool> {
         }
     }
     out
+}
+
+/// `IMB_colormanagement_get_luminance` with the scene-linear Rec. 709 coefficients.
+fn luminance(r: f32, g: f32, b: f32) -> f32 {
+    0.2126f32 * r + 0.7152f32 * g + 0.0722f32 * b
 }
 
 /// `srgb_to_linearrgb` of a byte channel.

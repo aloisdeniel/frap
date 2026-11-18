@@ -67,6 +67,13 @@ const MODIFIER_EXTRAS: &[(&str, &[Extra])] = &[(
     }],
 )];
 
+/// RNA properties of generated modifier settings structs that are another name for a stored
+/// field (Blender defines both on one DNA member), as `(struct, &[(alias, target)])`: the alias
+/// gets no field, and reading or writing it reads or writes the target.
+/// `BevelModifier.width_pct` and `width` are both `BevelModifierData::value` (`rna_modifier.cc`).
+const MODIFIER_ALIASES: &[(&str, &[(&str, &str)])] =
+    &[("BevelModifier", &[("width_pct", "width")])];
+
 const PLAIN: &[PlainSpec] = &[
     PlainSpec {
         rust: "View3DCursor",
@@ -625,8 +632,22 @@ fn emit_struct(
     rna_impl: bool,
     hooked: &[&str],
     extra: &[Extra],
+    aliases: &[(&str, &str)],
     fresh: &dyn Fn(&Field) -> Option<J>,
 ) -> Res<()> {
+    // The match pattern of a field: its identifier and those of its aliases.
+    let pat = |f: &Field| {
+        std::iter::once(f.prop.identifier.as_str())
+            .chain(
+                aliases
+                    .iter()
+                    .filter(|(_, t)| *t == f.prop.identifier)
+                    .map(|(a, _)| *a),
+            )
+            .map(lit_str)
+            .collect::<Vec<_>>()
+            .join(" | ")
+    };
     let _ = writeln!(
         out,
         "/// {doc}\n#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]\n#[serde(default)]\npub struct {rust} {{"
@@ -730,7 +751,7 @@ fn emit_struct(
         } else {
             get_expr(f)
         };
-        let _ = writeln!(out, "            {} => {get},", lit_str(&f.prop.identifier));
+        let _ = writeln!(out, "            {} => {get},", pat(f));
     }
     out.push_str("            _ => return None,\n        })\n    }\n");
     out.push_str("    /// Writes a stored property; `v` is already coerced against `prop` (§9.2). `None`: not\n    /// stored in this struct (or a nested struct, reached through `rna_struct_mut`).\n    pub fn rna_set(&mut self, prop: &'static PropDef, v: Value) -> Option<Result<SetOutcome, RnaError>> {\n        match prop.identifier {\n");
@@ -744,11 +765,7 @@ fn emit_struct(
             continue;
         }
         if let Some(stmt) = set_stmt(f) {
-            let _ = writeln!(
-                out,
-                "            {} => {stmt},",
-                lit_str(&f.prop.identifier)
-            );
+            let _ = writeln!(out, "            {} => {stmt},", pat(f));
         }
     }
     out.push_str(
@@ -840,6 +857,7 @@ pub fn generate(spec: &Spec, files: &mut Files) -> Res<()> {
             ps.rna_impl,
             ps.hooked,
             ps.extra,
+            &[],
             &|f: &Field| fresh_of(spec, &f.srna, &f.prop.identifier).cloned(),
         )?;
         files.insert(dir.join(format!("plain/{m}.rs")), s.into_bytes());
@@ -881,9 +899,13 @@ pub fn generate(spec: &Spec, files: &mut Files) -> Res<()> {
             .get(srna)
             .ok_or_else(|| format!("modifier {ty}: struct {srna} not dumped"))?;
         let rust = format!("{}Settings", srna.strip_suffix("Modifier").unwrap_or(srna));
+        let aliases: &[(&str, &str)] = MODIFIER_ALIASES
+            .iter()
+            .find(|(s, _)| *s == srna)
+            .map_or(&[], |(_, a)| a);
         let mut fields = Vec::new();
         for p in &st.props {
-            if base_ids.contains(&p.identifier) {
+            if base_ids.contains(&p.identifier) || aliases.iter().any(|(a, _)| *a == p.identifier) {
                 continue;
             }
             if let Some(t) = field_type(p, &plain_by_srna) {
@@ -908,6 +930,7 @@ pub fn generate(spec: &Spec, files: &mut Files) -> Res<()> {
             true,
             &[],
             extras,
+            aliases,
             &|f: &Field| {
                 values
                     .get(&f.prop.identifier)

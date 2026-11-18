@@ -16,11 +16,11 @@
 //!   not 0 (offset scaled by it); otherwise every vertex weighing at least 0.5 in the vertex
 //!   group (every vertex without one), its offset scaled by the group weight.
 //!
-//! `width` is the amount (`width_pct` with `offset_type='PERCENT'`: Blender stores both in one
-//! field); a zero amount disables the modifier. A weight attribute of another type or domain
-//! is converted to a temporary FLOAT attribute as Blender does (same domain: BOOLEAN, INT,
-//! INT8; between points and edges: averaged); other layouts are treated as missing (weight 0,
-//! WARNING). `harden_normals` is not applied (WARNING, D-79) and `profile_type='CUSTOM'` is a
+//! `width` is the amount (`width_pct` is the same stored value, as in Blender); a zero amount
+//! disables the modifier. A weight attribute of another type or domain is converted to a
+//! temporary FLOAT attribute as Blender does (`lookup<float>`: domain adaptation in the source
+//! type, then type conversion); QUATERNION, FLOAT4X4 and STRING attributes, which have no
+//! conversion, are treated as missing (weight 0, WARNING). `harden_normals` is not applied (WARNING, D-79) and `profile_type='CUSTOM'` is a
 //! modifier error (no custom profile curve yet).
 
 use frap_bmesh::ops::bevel::{BevelIn, MeshBevelWeights, mesh_bevel_tagged};
@@ -54,13 +54,10 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
     Ok(out.mesh)
 }
 
-/// The amount (`BevelModifierData::value`, which RNA exposes as `width` and as `width_pct`).
+/// The amount (`BevelModifierData::value`, which RNA exposes as `width` and as `width_pct`:
+/// the settings store it once, in `width`).
 fn value(s: &BevelSettings) -> f32 {
-    if s.offset_type == "PERCENT" {
-        s.width_pct
-    } else {
-        s.width
-    }
+    s.width
 }
 
 /// `is_disabled`: a zero amount bevels nothing.
@@ -108,7 +105,10 @@ fn ident(s: &str) -> &'static str {
 
 /// `ensure_weight_attribute_meta_data`: the name of a FLOAT attribute on `domain` holding the
 /// weights of `name` (a converted temporary copy when the attribute has another type or
-/// domain, flagged `true`), or `None` when there is no usable attribute.
+/// domain, flagged `true`), or `None` when there is no usable attribute. The conversion is
+/// `attributes.lookup<float>(name, domain)` ([`Mesh::lookup_float`]): the domain is adapted in
+/// the source type (a BOOLEAN edge is the AND of its vertices, a BOOLEAN vertex the OR of its
+/// edges, integers are mixed with rounding), then the values are converted to float.
 fn ensure_weight_attribute(
     mesh: &mut Mesh,
     name: &str,
@@ -119,51 +119,16 @@ fn ensure_weight_attribute(
     if name.is_empty() || name.starts_with('.') {
         return None;
     }
-    let attr = mesh.attributes().get(name)?.clone();
+    let attr = mesh.attributes().get(name)?;
     if attr.domain == domain && matches!(attr.data, AttrData::Float(_)) {
         return Some((name.to_owned(), false));
     }
-    let src: Vec<f32> = match &attr.data {
-        AttrData::Float(v) => v.to_vec(),
-        AttrData::Bool(v) => v.iter().map(|&b| f32::from(u8::from(b))).collect(),
-        AttrData::Int(v) => v.iter().map(|&i| i as f32).collect(),
-        AttrData::Int8(v) => v.iter().map(|&i| f32::from(i)).collect(),
-        _ => {
-            warnings.push(format!(
-                "the weight attribute \"{name}\" has a type frap cannot read as weights; it is \
-                 treated as missing"
-            ));
-            return None;
-        }
-    };
-    let weights: Vec<f32> = match (attr.domain, domain) {
-        (a, b) if a == b => src,
-        (Domain::Point, Domain::Edge) => mesh
-            .edges()
-            .iter()
-            .map(|e| (src[e[0] as usize] + src[e[1] as usize]) * 0.5)
-            .collect(),
-        (Domain::Edge, Domain::Point) => {
-            let mut sum = vec![0.0f32; mesh.verts_num()];
-            let mut count = vec![0u32; mesh.verts_num()];
-            for (e, &w) in mesh.edges().iter().zip(&src) {
-                for v in e {
-                    sum[*v as usize] += w;
-                    count[*v as usize] += 1;
-                }
-            }
-            sum.iter()
-                .zip(&count)
-                .map(|(&s, &c)| if c > 0 { s / c as f32 } else { 0.0 })
-                .collect()
-        }
-        _ => {
-            warnings.push(format!(
-                "the weight attribute \"{name}\" is on a domain frap cannot adapt; it is treated \
-                 as missing"
-            ));
-            return None;
-        }
+    let Some(weights) = mesh.lookup_float(name, domain).map(|w| w.into_owned()) else {
+        warnings.push(format!(
+            "the weight attribute \"{name}\" has a type that cannot be read as weights; it is \
+             treated as missing"
+        ));
+        return None;
     };
     let new_name = mesh.unique_attribute_name(name);
     mesh.attributes_mut().insert(Attribute {
@@ -337,6 +302,14 @@ pub(crate) fn modify_mesh(
         custom_profile: None,
         vmesh_method: ident(&s.vmesh_method),
     };
+    // The `--max-elements` pre-check (ARCHITECTURE §12), as `mesh.bevel` does: an absurd
+    // request fails at once with LIMIT_EXCEEDED instead of building geometry for minutes.
+    let estimate = bevel_corners(&bm, u64::try_from(s.segments).unwrap_or(1), affect_vertices);
+    if let Err(e) = frap_math::budget::reserve_corners(estimate, estimate) {
+        // The payload `budget::check_corners` unwinds with; the statement turns it into a
+        // rollback and LIMIT_EXCEEDED.
+        std::panic::resume_unwind(Box::new(e));
+    }
     let weights = MeshBevelWeights {
         use_weights: lim_weight,
         bweight_vert,
@@ -365,6 +338,40 @@ pub(crate) fn modify_mesh(
         mesh: result,
         warnings,
     })
+}
+
+/// Face corners after beveling the tagged elements with `segments` (the estimate of
+/// `frap-ops-mesh` `_growth::bevel_corners` over `BM_ELEM_TAG` instead of the selection): a
+/// strip of `segments` quads along every tagged edge, a vertex patch of about
+/// `valence · (segments / 2 + 1)²` quads at every beveled vertex, and `segments + 1` more
+/// corners on each face corner there. `None`: the estimate overflowed.
+fn bevel_corners(bm: &BMesh, segments: u64, affect_vertices: bool) -> Option<u64> {
+    let tagged = |f: ElemFlag| f.contains(ElemFlag::TAG);
+    let mut total = bm.loops_num() as u64;
+    let seg = segments.max(1);
+    let half = seg / 2 + 1;
+    let patch = half.checked_mul(half)?.checked_mul(4)?;
+    let per_vert = patch.checked_add(seg.checked_add(1)?.checked_mul(2)?)?;
+    for v in bm.vert_ids() {
+        let edges = bm.vert_edges(v);
+        let beveled = if affect_vertices {
+            tagged(bm.vert(v).flag)
+        } else {
+            edges.iter().any(|&e| tagged(bm.edge(e).flag))
+        };
+        if beveled {
+            total = total.checked_add((edges.len() as u64).checked_mul(per_vert)?)?;
+        }
+    }
+    if !affect_vertices {
+        let te = bm
+            .edge_ids()
+            .into_iter()
+            .filter(|&e| tagged(bm.edge(e).flag))
+            .count() as u64;
+        total = total.checked_add(te.checked_mul(seg)?.checked_mul(4)?)?;
+    }
+    Some(total)
 }
 
 /// Tags an edge and both its vertices (`BM_ELEM_TAG`).

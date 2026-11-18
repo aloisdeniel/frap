@@ -448,12 +448,7 @@ fn invalid_edge_cost_single(e: EdgeId, d: &mut Decim) {
 }
 
 /// `bm_edge_symmetry_map`: for every edge, the index of its mirror across `axis` (or -1).
-fn edge_symmetry_map(
-    bm: &BMesh,
-    etable: &[EdgeId],
-    axis: usize,
-    limit: f32,
-) -> Vec<i32> {
+fn edge_symmetry_map(bm: &BMesh, etable: &[EdgeId], axis: usize, limit: f32) -> Vec<i32> {
     let limit_sq = limit * limit;
     let mut tree = KdTree::new(etable.len());
     let mut map = vec![-1i32; etable.len()];

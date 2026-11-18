@@ -268,7 +268,7 @@ fn offset_types_clamp_and_material() {
         monkey(&Monkey::default()),
         &settings(|s| {
             s.offset_type = "PERCENT".into();
-            s.width_pct = 20.0;
+            s.width = 20.0;
         }),
         0,
         (
@@ -327,11 +327,12 @@ fn offset_types_clamp_and_material() {
 fn disabled_unsupported_and_reports() {
     let zero = ModifierSettings::Bevel(settings(|s| s.width = 0.0));
     assert!(is_disabled(&zero).is_some());
+    // `width_pct` is the same value as `width`.
     let pct = ModifierSettings::Bevel(settings(|s| {
         s.width = 0.0;
         s.offset_type = "PERCENT".into();
     }));
-    assert!(is_disabled(&pct).is_none(), "PERCENT reads width_pct");
+    assert!(is_disabled(&pct).is_some(), "PERCENT reads the same amount");
     assert!(is_disabled(&ModifierSettings::Bevel(BevelSettings::default())).is_none());
     let custom = settings(|s| s.profile_type = "CUSTOM".into());
     assert!(matches!(
@@ -350,4 +351,213 @@ fn disabled_unsupported_and_reports() {
             .verts_num(),
         0
     );
+}
+
+/// `BevelModifier.width` and `width_pct` are one DNA field (`BevelModifierData::value`):
+/// writing either is read back by both, and the amount the modifier uses is that value.
+#[test]
+fn width_and_width_pct_are_one_value() {
+    use frap_rna::Rna;
+    use frap_rna::{Field, Value};
+    let srna = BevelSettings::default().srna();
+    let (width, pct) = (
+        srna.find_prop("width").unwrap(),
+        srna.find_prop("width_pct").unwrap(),
+    );
+    let read = |s: &BevelSettings, p| match s.rna_get(p) {
+        Some(Field::Value(Value::Float(v))) => v,
+        _ => panic!("width is a stored float"),
+    };
+    let mut s = BevelSettings::default();
+    assert!(s.rna_set(pct, Value::Float(0.25)).is_some());
+    assert_eq!((read(&s, width), read(&s, pct)), (0.25, 0.25));
+    assert_eq!(value(&s), 0.25);
+    assert!(s.rna_set(width, Value::Float(30.0)).is_some());
+    assert_eq!((read(&s, width), read(&s, pct)), (30.0, 30.0));
+    // Blender 5.2.4: `width_pct = 0.25` with the default OFFSET bevels the cube by 0.25.
+    let mut s = BevelSettings::default();
+    assert!(s.rna_set(pct, Value::Float(0.25)).is_some());
+    run(
+        "width_pct offset",
+        cube(),
+        &s,
+        0,
+        ((24, 48, 26), (0.0, 0.0, 0.0, 51.0)),
+    );
+}
+
+fn with_data(mut me: Mesh, name: &str, domain: Domain, data: AttrData) -> Mesh {
+    me.attributes_mut().insert(Attribute {
+        name: name.into(),
+        domain,
+        data,
+    });
+    me
+}
+
+/// Weight attributes on another domain or of another type are read as Blender's
+/// `lookup<float>(name, domain)`: domain adaptation in the source type, then conversion.
+/// Expected values from Blender 5.2.4 (`attributes.new` on the factory cube, defaults: white
+/// for colours, zero otherwise).
+#[test]
+fn weight_domain_and_type_conversions_match_blender() {
+    let weight = |s: &mut BevelSettings, width: f32, vertices: bool| {
+        s.limit_method = "WEIGHT".into();
+        s.width = width;
+        if vertices {
+            s.affect = "VERTICES".into();
+        }
+    };
+    let mut b = vec![false; 8];
+    b[..3].fill(true);
+    // A BOOLEAN edge is the AND of its two vertices.
+    run(
+        "bool point->edge",
+        with_data(
+            cube(),
+            "bevel_weight_edge",
+            Domain::Point,
+            AttrData::Bool(Arc::new(b)),
+        ),
+        &settings(|s| weight(s, 0.3, false)),
+        0,
+        ((11, 17, 8), (-2.1, -0.4, -0.4, 29.43)),
+    );
+    // A BOOLEAN vertex is the OR of its edges.
+    let mut b = vec![false; 12];
+    b[0] = true;
+    run(
+        "bool edge->point",
+        with_data(
+            cube(),
+            "bevel_weight_vert",
+            Domain::Edge,
+            AttrData::Bool(Arc::new(b)),
+        ),
+        &settings(|s| weight(s, 0.3, true)),
+        0,
+        ((12, 18, 8), (-3.4, 0.0, -3.4, 32.94)),
+    );
+    // Integers mix with rounding (half away from zero), then convert.
+    let mut i = vec![0i32; 8];
+    i[0] = 1;
+    i[1] = 2;
+    run(
+        "int point->edge",
+        with_data(
+            cube(),
+            "bevel_weight_edge",
+            Domain::Point,
+            AttrData::Int(Arc::new(i)),
+        ),
+        &settings(|s| weight(s, 0.2, false)),
+        0,
+        ((16, 27, 13), (-2.4, -2.4, 0.0, 39.68)),
+    );
+    let mut i = vec![0i8; 12];
+    i[0] = 3;
+    i[1] = 1;
+    run(
+        "int8 edge->point",
+        with_data(
+            cube(),
+            "bevel_weight_vert",
+            Domain::Edge,
+            AttrData::Int8(Arc::new(i)),
+        ),
+        &settings(|s| weight(s, 0.2, true)),
+        0,
+        ((12, 18, 8), (-3.6, 0.0, -3.6, 33.84)),
+    );
+    // FLOAT_VECTOR: the component average.
+    let mut v = vec![[0.0f32; 3]; 8];
+    v[0] = [0.3, 0.6, 0.9];
+    run(
+        "vector point",
+        with_data(
+            cube(),
+            "bevel_weight_vert",
+            Domain::Point,
+            AttrData::Float3(Arc::new(v)),
+        ),
+        &settings(|s| weight(s, 0.4, true)),
+        0,
+        ((10, 15, 7), (-1.76, -1.76, -1.76, 28.7328)),
+    );
+    // FLOAT_COLOR: the luminance.
+    let mut c = vec![[1.0f32; 4]; 8];
+    c[0] = [1.0, 0.0, 0.0, 1.0];
+    c[5] = [0.2, 0.9, 0.4, 1.0];
+    run(
+        "color point",
+        with_data(
+            cube(),
+            "bevel_weight_vert",
+            Domain::Point,
+            AttrData::FloatColor(Arc::new(c)),
+        ),
+        &settings(|s| weight(s, 0.4, true)),
+        0,
+        ((24, 36, 14), (-0.20099, -0.42893, -0.20099, 58.52071)),
+    );
+    // BYTE_COLOR on corners: mixed in linear float per edge, stored as bytes, then luminance.
+    let mut c = vec![[255u8; 4]; 24];
+    c[0] = [255, 188, 137, 255];
+    run(
+        "bytecolor corner->edge",
+        with_data(
+            cube(),
+            "bevel_weight_edge",
+            Domain::Corner,
+            AttrData::ByteColor(Arc::new(c)),
+        ),
+        &settings(|s| weight(s, 0.3, false)),
+        0,
+        ((24, 48, 26), (-0.14586, -0.07293, -0.07293, 47.93903)),
+    );
+    let mut f = vec![0.0f32; 6];
+    f[0] = 0.8;
+    run(
+        "float face->edge",
+        with_data(
+            cube(),
+            "bevel_weight_edge",
+            Domain::Face,
+            AttrData::Float(Arc::new(f)),
+        ),
+        &settings(|s| weight(s, 0.3, false)),
+        0,
+        ((12, 20, 10), (-3.52, 0.0, 0.0, 33.2928)),
+    );
+}
+
+/// An absurd request fails at once with the `--max-elements` payload (LIMIT_EXCEEDED), as
+/// `mesh.bevel` does, instead of building geometry for minutes.
+#[test]
+fn absurd_segments_exceed_the_element_budget_at_once() {
+    use std::panic::{AssertUnwindSafe, catch_unwind};
+    let start = std::time::Instant::now();
+    let r = catch_unwind(AssertUnwindSafe(|| {
+        let _b = frap_math::budget::scope(frap_math::budget::Budget {
+            timeout: None,
+            max_elements: 10_000_000,
+        });
+        modify_mesh(
+            &settings(|s| {
+                s.segments = 1000;
+                s.limit_method = "NONE".into();
+            }),
+            monkey(&Monkey::default()),
+            0,
+        )
+    }));
+    let payload = r.expect_err("unwinds");
+    assert!(frap_math::budget::elements_exceeded(&*payload).is_some());
+    assert!(start.elapsed() < std::time::Duration::from_secs(5));
+    // A reasonable request under the same budget runs.
+    let _b = frap_math::budget::scope(frap_math::budget::Budget {
+        timeout: None,
+        max_elements: 10_000_000,
+    });
+    assert!(modify_mesh(&settings(|s| s.segments = 4), cube(), 0).is_ok());
 }
