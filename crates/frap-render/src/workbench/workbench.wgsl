@@ -1,19 +1,45 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 // frap Workbench uber-shader (ARCHITECTURE §19.2: one module, features are uniform flags, no
-// per-material pipeline permutations). Entry points: `vs_geom`/`fs_geom` (opaque surfaces,
-// forward-shaded), `vs_full`/`fs_accum` (Rgba32Float sample accumulation).
+// per-material pipeline permutations). Entry points:
 //
-// Lighting is ported from Blender 5.2.4 `source/blender/draw/engines/workbench/shaders/
-// workbench_world_light.bsl.hh` (`workbench_get_world_lighting`, `workbench_wrapped_lighting`,
-// `workbench_blinn_specular`, `workbench_brdf_approx`, `workbench_fast_rcp`) and
-// `workbench_composite.bsl.hh` (`workbench_resolve_frag`); normals follow
-// `workbench_prepass.bsl.hh` (`normalize(normal_object_to_view(nor))`, flipped on back faces
-// as `workbench_normal_encode(gl_FrontFacing, …)` does). Blender evaluates the lighting in a
-// deferred resolve pass; evaluating it per fragment gives the same value for opaque surfaces.
-// GPL-2.0-or-later (Blender) -> GPL-3.0-or-later (frap).
+// - `vs_geom` + `fs_opaque`: opaque surfaces (forward-shaded G-buffer + resolve), writing the
+//   lit colour, the colour in shadow and the object id;
+// - `vs_geom` + `fs_transparent`: weighted blended order-independent transparency (X-ray and
+//   materials with alpha < 1), `fs_object_id`: the transparent depth/id pass;
+// - `vs_shadow`: stencil shadow volumes (depth-fail), no fragment stage;
+// - `vs_full` + `fs_shadow_resolve` / `fs_transparent_resolve` / `fs_outline` /
+//   `fs_taa_accumulate`: full-screen passes.
+//
+// Ported from Blender 5.2.4 `source/blender/draw/engines/workbench/shaders/`
+// (GPL-2.0-or-later → GPL-3.0-or-later):
+// - lighting: `workbench_world_light.bsl.hh` (`get_world_lighting`, `wrapped_lighting`,
+//   `blinn_specular`, `brdf_approx`, `fast_rcp`, `get_shadow`);
+// - matcaps: `workbench_matcap.bsl.hh` (`matcap_uv_compute`, `get_matcap_lighting`);
+// - G-buffer: `workbench_prepass.bsl.hh` (`frag_opaque`: normals sphere-map encoded into a
+//   half-float target, material into a half-float target), `workbench_common.bsl.hh`
+//   (`normal_encode`/`normal_decode`), `workbench_composite.bsl.hh` (deferred resolve; the
+//   view incident vector is the pixel ray, as `drw_point_screen_to_view(uv, 0.5)` gives);
+// - transparency: `workbench_prepass.bsl.hh` (`frag_transparent`,
+//   `calculate_transparent_weight`, no back-face normal flip),
+//   `workbench_transparent_resolve_frag.glsl`;
+// - outline: `workbench_effect_outline_frag.glsl`;
+// - shadows: `workbench_shadow.bsl.hh` (volumes built on the CPU by `shadow.rs`; the depth bias
+//   of the Metal backend, which Blender 5.2.4 uses on macOS, is applied here);
+// - anti-aliasing: `workbench_effect_taa_frag.glsl` (3 x 3 neighbourhood in `log2(c + 1)`
+//   space, half-float colour and accumulation targets).
+//
+// Blender evaluates the opaque lighting in a deferred resolve pass; evaluating it per fragment
+// on the same quantised G-buffer values gives the same result for opaque surfaces.
 
 const LIGHTING_STUDIO: u32 = 0u;
+const LIGHTING_MATCAP: u32 = 1u;
 const LIGHTING_FLAT: u32 = 2u;
+
+// `Frame.mode.w` flags.
+const FLAG_BACKFACE_CULLING: u32 = 1u;
+const FLAG_MATCAP_FLIP: u32 = 2u;
+const FLAG_TAA: u32 = 4u;
+const FLAG_FIRST_SAMPLE: u32 = 8u;
 
 struct Light {
     // xyz: direction (view space)
@@ -30,25 +56,62 @@ struct Frame {
     proj: mat4x4<f32>,
     lights: array<Light, 4>,
     ambient_color: vec4<f32>,
-    // x: lighting mode, y: use_specular, z: is_perspective
+    // x: lighting mode, y: use_specular, z: is_perspective, w: FLAG_* bits
     mode: vec4<u32>,
-    // x: accumulation weight of this sample
-    accum: vec4<f32>,
+    // x: shadow_shift, y: shadow_focus, z: shadow_mul, w: shadow_add (`ShadowPass::init`)
+    shadow: vec4<f32>,
+    // xyz: `shadow_direction_vs`
+    shadow_direction: vec4<f32>,
+    // x: xray_alpha, y: clip_start, z: clip_end
+    params: vec4<f32>,
+    // rgb: `object_outline_color`, a: 1
+    outline_color: vec4<f32>,
+    // TAA neighbourhood weights (`samplesWeights[9]`, index (x + 1) * 3 + (y + 1)).
+    taa_weights: array<vec4<f32>, 3>,
 };
 
 struct Draw {
     model: mat4x4<f32>,
     // Object -> view normal matrix (upper 3x3 used).
     normal_matrix: mat4x4<f32>,
-    // rgb: base colour, a: alpha
+    // rgb: base colour, a: alpha (8-bit quantised, as `Material::pack_data`)
     base_color: vec4<f32>,
     // x: metallic, y: roughness (both already G-buffer quantised), z: 1 when the object -> view
-    // transform mirrors (front faces wind clockwise)
+    // transform mirrors (front faces wind clockwise), w: unused
     params: vec4<f32>,
+    // x: roughness, y: metallic as the transparent pass sees them (8-bit packed only)
+    params2: vec4<f32>,
+    // x: object id (`resource_id + 1`, 0 is the background)
+    ids: vec4<u32>,
 };
 
 @group(0) @binding(0) var<uniform> frame: Frame;
+@group(0) @binding(1) var matcap_tx: texture_2d_array<f32>;
+@group(0) @binding(2) var matcap_sampler: sampler;
 @group(1) @binding(0) var<uniform> draw: Draw;
+
+// Half-float storage of a value (G-buffer, colour and accumulation targets are half floats in
+// Blender), rounded toward zero: what the Apple GPUs Blender's references were rendered on do
+// when a render target converts to half (verified: the 8-sample TAA alpha of an opaque pixel
+// comes out as 0.998046875, which only truncation gives). Done explicitly so every adapter
+// stores the same values.
+fn rtz16(x: f32) -> f32 {
+    let bits = pack2x16float(vec2<f32>(x, 0.0)) & 0xffffu;
+    let h = unpack2x16float(bits).x;
+    if (abs(h) > abs(x)) {
+        // One step toward zero (also turns a rounded-up infinity into the largest half).
+        return unpack2x16float(bits - 1u).x;
+    }
+    return h;
+}
+
+fn q16(v: vec4<f32>) -> vec4<f32> {
+    return vec4<f32>(rtz16(v.x), rtz16(v.y), rtz16(v.z), rtz16(v.w));
+}
+
+fn q16_2(v: vec2<f32>) -> vec2<f32> {
+    return vec2<f32>(rtz16(v.x), rtz16(v.y));
+}
 
 struct GeomOut {
     @builtin(position) position: vec4<f32>,
@@ -166,23 +229,157 @@ fn get_world_lighting(base_color: vec3<f32>, roughness: f32, metallic: f32, N: v
     return diffuse_light + specular_light;
 }
 
+fn matcap_uv_compute(I: vec3<f32>, N: vec3<f32>, flipped: bool) -> vec2<f32> {
+    // Quick creation of an orthonormal basis.
+    let a = 1.0 / (1.0 + I.z);
+    let b = -I.x * I.y * a;
+    let b1 = vec3<f32>(1.0 - I.x * I.x * a, b, -I.x);
+    let b2 = vec3<f32>(b, 1.0 - I.y * I.y * a, -I.y);
+    var matcap_uv = vec2<f32>(dot(b1, N), dot(b2, N));
+    if (flipped) {
+        matcap_uv.x = -matcap_uv.x;
+    }
+    return matcap_uv * 0.496 + 0.5;
+}
+
+fn get_matcap_lighting(base_color: vec3<f32>, N: vec3<f32>, I: vec3<f32>) -> vec3<f32> {
+    let flipped = (frame.mode.w & FLAG_MATCAP_FLIP) != 0u;
+    let uv = matcap_uv_compute(I, N, flipped);
+    let diffuse = textureSampleLevel(matcap_tx, matcap_sampler, uv, 0, 0.0).rgb;
+    let specular = textureSampleLevel(matcap_tx, matcap_sampler, uv, 1, 0.0).rgb;
+    return diffuse * base_color + specular * f32(frame.mode.y != 0u);
+}
+
+// `get_shadow(N, force_shadow)`: the shading of the shadow pass (1 when shadows are off:
+// `shadow_mul = 0`, `shadow_add = 1`).
+fn get_shadow(N: vec3<f32>, force_shadow: bool) -> f32 {
+    let light_factor = -dot(N, frame.shadow_direction.xyz);
+    var shadow_mix = smoothstep(frame.shadow.x, frame.shadow.y, light_factor);
+    shadow_mix *= select(frame.shadow.z, 0.0, force_shadow);
+    return shadow_mix + frame.shadow.w;
+}
+
+// The view incident vector of a fragment (`drw_view_incident_vector`).
+fn incident(position_vs: vec3<f32>) -> vec3<f32> {
+    if (frame.mode.z != 0u) {
+        return normalize(-position_vs);
+    }
+    return vec3<f32>(0.0, 0.0, 1.0);
+}
+
+fn shade(base_color: vec3<f32>, roughness: f32, metallic: f32, N: vec3<f32>, I: vec3<f32>)
+    -> vec3<f32> {
+    let lighting = frame.mode.x;
+    if (lighting == LIGHTING_STUDIO) {
+        return get_world_lighting(base_color, roughness, metallic, N, I);
+    }
+    if (lighting == LIGHTING_MATCAP) {
+        return get_matcap_lighting(base_color, N, I);
+    }
+    return base_color;
+}
+
+// Front facing in the object's winding (mirrored transforms flip it).
+fn is_front(front_facing: bool) -> bool {
+    return front_facing != (draw.params.z > 0.5);
+}
+
+fn cull(front: bool) {
+    if (!front && (frame.mode.w & FLAG_BACKFACE_CULLING) != 0u) {
+        discard;
+    }
+}
+
+// `normal_encode` (sphere map) into a half-float target, then `normal_decode`.
+fn gbuffer_normal(front: bool, n_in: vec3<f32>) -> vec3<f32> {
+    var n = normalize(select(-n_in, n_in, front));
+    let p = sqrt(n.z * 8.0 + 8.0);
+    let enc = q16_2(clamp(n.xy / p + 0.5, vec2<f32>(0.0), vec2<f32>(1.0)));
+    let fenc = enc * 4.0 - 2.0;
+    let f = dot(fenc, fenc);
+    let g = sqrt(1.0 - f / 4.0);
+    return vec3<f32>(fenc * g, 1.0 - f / 2.0);
+}
+
+struct OpaqueOut {
+    // Lit colour.
+    @location(0) color: vec4<f32>,
+    // Colour in the stencil shadow (`get_shadow(N, true)`).
+    @location(1) shadowed: vec4<f32>,
+    @location(2) object_id: u32,
+};
+
 @fragment
-fn fs_geom(in: GeomOut, @builtin(front_facing) front_facing: bool) -> @location(0) vec4<f32> {
-    let front = front_facing != (draw.params.z > 0.5);
-    var N = normalize(in.normal_vs);
-    if (!front) {
+fn fs_opaque(in: GeomOut, @builtin(front_facing) front_facing: bool) -> OpaqueOut {
+    let front = is_front(front_facing);
+    cull(front);
+    var N = gbuffer_normal(front, in.normal_vs);
+    if (frame.mode.x == LIGHTING_MATCAP && !front) {
+        // With matcaps the G-buffer alpha holds the facing and the resolve flips the normal
+        // back (`N = (mat_data.a > 0.0f) ? N : -N`).
         N = -N;
     }
-    var I = vec3<f32>(0.0, 0.0, 1.0);
-    if (frame.mode.z != 0u) {
-        I = normalize(-in.position_vs);
+    let I = incident(in.position_vs);
+    // `material_tx` is a half-float target.
+    let base_color = q16(vec4<f32>(draw.base_color.rgb, 0.0)).rgb;
+    let color = shade(base_color, draw.params.y, draw.params.x, N, I);
+    var out: OpaqueOut;
+    out.color = q16(vec4<f32>(color * get_shadow(N, false), 1.0));
+    out.shadowed = q16(vec4<f32>(color * get_shadow(N, true), 1.0));
+    out.object_id = draw.ids.x;
+    return out;
+}
+
+// `calculate_transparent_weight` (McGuire and Bavoil 2013, eq. 7) of a fragment at view-space
+// depth `z_vs` (`linear_zdepth`: the view distance in perspective, the distance from the near
+// plane in orthographic projections).
+fn transparent_weight(z_vs: f32) -> f32 {
+    var z = abs(z_vs);
+    if (frame.mode.z == 0u) {
+        z = abs(-z_vs - frame.params.y);
     }
-    let base_color = draw.base_color.rgb;
-    var color = base_color;
-    if (frame.mode.x == LIGHTING_STUDIO) {
-        color = get_world_lighting(base_color, draw.params.y, draw.params.x, N, I);
-    }
-    return vec4<f32>(color, 1.0);
+    let a = z / 5.0;
+    var b = z / 200.0;
+    b *= b;
+    let w = 10.0 / ((1e-5 + a * a) + b * (b * b));
+    return clamp(w, 1e-2, 3e2);
+}
+
+struct TransparentOut {
+    @location(0) accum: vec4<f32>,
+    @location(1) revealage: vec4<f32>,
+};
+
+@fragment
+fn fs_transparent(in: GeomOut, @builtin(front_facing) front_facing: bool) -> TransparentOut {
+    cull(is_front(front_facing));
+    // No back-face flip in the transparent pass.
+    let N = normalize(in.normal_vs);
+    let I = incident(in.position_vs);
+    var shaded = shade(draw.base_color.rgb, draw.params2.x, draw.params2.y, N, I);
+    shaded *= get_shadow(N, false);
+    let alpha = draw.base_color.a * frame.params.x;
+    let weight = transparent_weight(in.position_vs.z) * alpha;
+    var out: TransparentOut;
+    out.accum = vec4<f32>(shaded * weight, alpha);
+    out.revealage = vec4<f32>(weight);
+    return out;
+}
+
+@fragment
+fn fs_object_id(@builtin(front_facing) front_facing: bool) -> @location(0) u32 {
+    cull(is_front(front_facing));
+    return draw.ids.x;
+}
+
+// Shadow volume vertices, already extruded in world space by `shadow.rs`.
+@vertex
+fn vs_shadow(@location(0) pos: vec3<f32>) -> @builtin(position) vec4<f32> {
+    var p = frame.proj * (frame.view * vec4<f32>(pos, 1.0));
+    // Blender's Metal backend biases shadow volumes (`out_pos.z += 0.00005` in OpenGL clip
+    // space, half of it in wgpu's [0, w] depth range) against z-fighting with the caps.
+    p.z += 0.000025;
+    return p;
 }
 
 struct FullOut {
@@ -198,14 +395,79 @@ fn vs_full(@builtin(vertex_index) i: u32) -> FullOut {
     return out;
 }
 
-@group(0) @binding(1) var accum_prev: texture_2d<f32>;
-@group(0) @binding(2) var sample_tex: texture_2d<f32>;
+@group(2) @binding(0) var tex_a: texture_2d<f32>;
+@group(2) @binding(1) var tex_b: texture_2d<f32>;
+@group(2) @binding(2) var tex_ids: texture_2d<u32>;
+
+// Shadowed pixels (stencil != 0, tested by the pipeline) take the shadowed colour.
+@fragment
+fn fs_shadow_resolve(in: FullOut) -> @location(0) vec4<f32> {
+    return textureLoad(tex_a, vec2<i32>(in.position.xy), 0);
+}
 
 @fragment
-fn fs_accum(in: FullOut) -> @location(0) vec4<f32> {
+fn fs_transparent_resolve(in: FullOut) -> @location(0) vec4<f32> {
     let p = vec2<i32>(in.position.xy);
-    let prev = textureLoad(accum_prev, p, 0);
-    let s = textureLoad(sample_tex, p, 0);
-    // Premultiplied accumulation; the CPU un-premultiplies once at the end.
-    return prev + vec4<f32>(s.rgb * s.a, s.a) * frame.accum.x;
+    // Half-float accumulation targets.
+    let trans_accum = q16(textureLoad(tex_a, p, 0));
+    let trans_weight = q16(textureLoad(tex_b, p, 0)).r;
+    let trans_reveal = trans_accum.a;
+    return vec4<f32>(trans_accum.rgb / clamp(trans_weight, 1e-4, 5e4), 1.0 - trans_reveal);
+}
+
+fn object_id_at(p: vec2<i32>) -> u32 {
+    let size = vec2<i32>(textureDimensions(tex_ids));
+    return textureLoad(tex_ids, clamp(p, vec2<i32>(0), size - 1), 0).r;
+}
+
+@fragment
+fn fs_outline(in: FullOut) -> @location(0) vec4<f32> {
+    let p = vec2<i32>(in.position.xy);
+    let center_id = object_id_at(p);
+    let adjacent_ids = vec4<u32>(object_id_at(p + vec2<i32>(0, 1)),
+                                 object_id_at(p - vec2<i32>(0, 1)),
+                                 object_id_at(p + vec2<i32>(1, 0)),
+                                 object_id_at(p - vec2<i32>(1, 0)));
+    let same = vec4<f32>(adjacent_ids == vec4<u32>(center_id));
+    let outline_opacity = 1.0 - dot(same, vec4<f32>(0.25));
+    return frame.outline_color * outline_opacity;
+}
+
+fn color_at(p: vec2<i32>) -> vec4<f32> {
+    let size = vec2<i32>(textureDimensions(tex_b));
+    // The colour target is a half-float texture.
+    return q16(textureLoad(tex_b, clamp(p, vec2<i32>(0), size - 1), 0));
+}
+
+fn taa_weight(i: u32) -> f32 {
+    return frame.taa_weights[i / 4u][i % 4u];
+}
+
+@fragment
+fn fs_taa_accumulate(in: FullOut) -> @location(0) vec4<f32> {
+    let p = vec2<i32>(in.position.xy);
+    var sample_value = vec4<f32>(0.0);
+    if ((frame.mode.w & FLAG_TAA) != 0u) {
+        var i = 0u;
+        for (var x = -1; x <= 1; x++) {
+            for (var y = -1; y <= 1; y++) {
+                // Blender's texel space is bottom-up: its +y neighbour is the row above.
+                var color = color_at(p + vec2<i32>(x, -y));
+                // Clamp infinite inputs (Blender #112211).
+                color = clamp(color, vec4<f32>(0.0), vec4<f32>(1e10));
+                // Use log2 space to avoid highlights creating too much aliasing.
+                color = vec4<f32>(log2(color.rgb + 1.0), color.a);
+                sample_value += color * taa_weight(i);
+                i++;
+            }
+        }
+    } else {
+        // `render_aa = 'OFF'`: the colour target as is.
+        sample_value = color_at(p);
+    }
+    if ((frame.mode.w & FLAG_FIRST_SAMPLE) != 0u) {
+        return q16(sample_value);
+    }
+    // Additive blending into a half-float accumulation target.
+    return q16(textureLoad(tex_a, p, 0) + sample_value);
 }

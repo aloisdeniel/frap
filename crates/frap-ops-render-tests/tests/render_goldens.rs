@@ -213,6 +213,13 @@ fn self_goldens() {
                 continue;
             }
         };
+        if let Ok(keep) = std::env::var("FRAP_RENDER_KEEP") {
+            let _ = std::fs::create_dir_all(&keep);
+            let _ = std::fs::copy(
+                &out,
+                std::path::Path::new(&keep).join(format!("{}.png", case.name)),
+            );
+        }
         let frap = image_ssim::load_png(&out).unwrap();
         if bless {
             let dst = fixture(&repo, &case, "frap");
