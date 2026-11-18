@@ -1,0 +1,36 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.faces_shade_flat",
+  "bl_idname": "MESH_OT_faces_shade_flat",
+  "label": "Shade Flat",
+  "description": "Display faces flat",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M2",
+    "extension": false,
+    "notes": []
+  }
+}
