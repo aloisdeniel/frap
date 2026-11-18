@@ -80,18 +80,18 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `mesh.unsubdivide` | M2 | P2 |  |
 | [ ] | `mesh.offset_edge_loops` | M2 | P2 |  |
 | [ ] | `mesh.offset_edge_loops_slide` | M2 | P2 | macro |
-| [ ] | `mesh.merge` | M2 | P0 | dynamic enum FIRST/LAST |
-| [ ] | `mesh.remove_doubles` | M2 | P0 | "Removed N vertice(s)" |
-| [ ] | `mesh.delete` | M2 | P0 | type is HIDDEN but essential |
-| [ ] | `mesh.dissolve_verts` | M2 | P1 |  |
-| [ ] | `mesh.dissolve_edges` | M2 | P1 |  |
-| [ ] | `mesh.dissolve_faces` | M2 | P1 |  |
-| [ ] | `mesh.dissolve_mode` | M2 | P1 |  |
-| [ ] | `mesh.dissolve_limited` | M2 | P1 | T2 |
-| [ ] | `mesh.delete_loose` | M2 | P2 |  |
-| [ ] | `mesh.delete_edgeloop` | M2 | P2 |  |
-| [ ] | `mesh.dissolve_degenerate` | M2 | P2 |  |
-| [ ] | `mesh.edge_collapse` | M2 | P2 |  |
+| [x] | `mesh.merge` | M2 | P0 | dynamic enum FIRST/LAST (WP 2.7, T1) |
+| [x] | `mesh.remove_doubles` | M2 | P0 | "Removed N vertex/vertices", `result.removed` (WP 2.7, T1) |
+| [x] | `mesh.delete` | M2 | P0 | type is HIDDEN but essential (WP 2.7, T1) |
+| [x] | `mesh.dissolve_verts` | M2 | P1 | WP 2.7, T1 |
+| [x] | `mesh.dissolve_edges` | M2 | P1 | WP 2.7, T1 |
+| [x] | `mesh.dissolve_faces` | M2 | P1 | WP 2.7, T1 |
+| [x] | `mesh.dissolve_mode` | M2 | P1 | WP 2.7, T1 |
+| [x] | `mesh.dissolve_limited` | M2 | P1 | WP 2.7: T1 (BLI_heap port) |
+| [x] | `mesh.delete_loose` | M2 | P2 | WP 2.7, T1 |
+| [x] | `mesh.delete_edgeloop` | M2 | P2 | WP 2.7, T1 |
+| [x] | `mesh.dissolve_degenerate` | M2 | P2 | WP 2.7, T1 |
+| [x] | `mesh.edge_collapse` | M2 | P2 | WP 2.7, T1 |
 | [ ] | `mesh.edge_face_add` | M2 | P0 | contextual create ("F") |
 | [ ] | `mesh.bridge_edge_loops` | M2 | P1 |  |
 | [ ] | `mesh.fill` | M2 | P1 |  |

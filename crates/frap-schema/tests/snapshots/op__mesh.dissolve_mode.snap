@@ -1,0 +1,146 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.dissolve_mode",
+  "bl_idname": "MESH_OT_dissolve_mode",
+  "label": "Dissolve Selection",
+  "description": "Dissolve geometry based on the selection mode",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "use_verts",
+      "name": "Dissolve Vertices",
+      "description": "Dissolve remaining vertices which connect to only two edges",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "angle_threshold",
+      "name": "Angle Threshold",
+      "description": "Remaining vertices which separate edge pairs are preserved if their edge angle exceeds this threshold.",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": 3.1415927,
+      "hard_min": 0,
+      "hard_max": 3.1415927,
+      "soft_min": 0,
+      "soft_max": 3.1415927,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": "radians; a whole number above 2π gets the ANGLE_LIKELY_DEGREES hint (use radians(90))",
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_preserve_quads",
+      "name": "Preserve Quads",
+      "description": "When dissolving the edge between two triangles, don't dissolve vertices",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_face_split",
+      "name": "Face Split",
+      "description": "Split off face corners to maintain surrounding geometry",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_boundary_tear",
+      "name": "Tear Boundary",
+      "description": "Split off face corners instead of merging faces",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M2",
+    "extension": false,
+    "notes": [
+      "dispatches on the active edit mesh's select mode: VERT -> dissolve_verts, EDGE -> dissolve_edges, FACE -> dissolve_faces",
+      "an unset use_verts is True unless face select mode is on"
+    ]
+  }
+}

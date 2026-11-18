@@ -1,0 +1,140 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.dissolve_limited",
+  "bl_idname": "MESH_OT_dissolve_limited",
+  "label": "Limited Dissolve",
+  "description": "Dissolve selected edges and vertices, limited by the angle of surrounding geometry",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "angle_limit",
+      "name": "Max Angle",
+      "description": "Angle limit",
+      "type": "FLOAT",
+      "subtype": "ANGLE",
+      "unit": "ROTATION (radians)",
+      "array": null,
+      "default": 0.08726646,
+      "hard_min": 0,
+      "hard_max": 3.1415927,
+      "soft_min": 0,
+      "soft_max": 3.1415927,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": "radians; a whole number above 2π gets the ANGLE_LIKELY_DEGREES hint (use radians(90))",
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_dissolve_boundaries",
+      "name": "All Boundaries",
+      "description": "Dissolve all vertices in between face boundaries",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "delimit",
+      "name": "Delimit",
+      "description": "Delimit dissolve operation",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": [
+        "NORMAL"
+      ],
+      "enum_items": [
+        {
+          "identifier": "NORMAL",
+          "name": "Normal",
+          "description": "Delimit by face directions",
+          "value": 1
+        },
+        {
+          "identifier": "MATERIAL",
+          "name": "Material",
+          "description": "Delimit by face material",
+          "value": 2
+        },
+        {
+          "identifier": "SEAM",
+          "name": "Seam",
+          "description": "Delimit by edge seams",
+          "value": 4
+        },
+        {
+          "identifier": "SHARP",
+          "name": "Sharp",
+          "description": "Delimit by sharp edges",
+          "value": 8
+        },
+        {
+          "identifier": "UV",
+          "name": "UVs",
+          "description": "Delimit by UV coordinates",
+          "value": 16
+        }
+      ],
+      "is_enum_flag": true,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ENUM_FLAG",
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M2",
+    "extension": false,
+    "notes": [
+      "angle_limit is in radians (default 5 degrees = 0.0873) and is capped at 90 degrees",
+      "the merged faces are selected; faces and vertices are dissolved cheapest first in Blender's heap order"
+    ]
+  }
+}
