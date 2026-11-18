@@ -1,0 +1,11 @@
+# WP 2.7: the reports and `result` counts of the delete/dissolve/merge operators (reports are
+# not compared by the goldens): `Removed 1 vertex` / `Removed 0 vertices` / `Removed 7
+# vertices` with `result.removed`; `mesh.merge(type='FIRST')` refused with Blender's
+# conversion TypeError while the selection history is empty, `LAST` accepted once
+# `frap.select_elements` built one; `mesh.delete` CANCELLED with a frap WARNING when nothing
+# is selected (D-51); `delete_loose`'s `Removed: N vertices, N edges, N faces`;
+# `dissolve_edges`'s `No edges dissolved` and `dissolve_degenerate`'s `No degenerate geometry
+# found`. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true
