@@ -283,8 +283,7 @@ pub fn connectivity_distance(
                                     && !queued[o.slot()]
                                     && !hidden(bm, o)
                                     && (loose[o.slot()]
-                                        || d.dists[d.i(bm.edge_other_vert(o, v_other))]
-                                            != f32::MAX)
+                                        || d.dists[d.i(bm.edge_other_vert(o, v_other))] != f32::MAX)
                                 {
                                     queued[o.slot()] = true;
                                     queue_next.push(o);
@@ -307,4 +306,52 @@ pub fn connectivity_distance(
         }
     }
     (d.dists, d.index)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use frap_bmesh::{BMElem, FromMeshParams};
+
+    fn cube() -> BMesh {
+        let mut bm = BMesh::from_mesh(
+            &frap_mesh::primitives::cube(2.0, false, [1.0; 3]),
+            &FromMeshParams::default(),
+        );
+        bm.deselect_all();
+        bm
+    }
+
+    #[test]
+    fn connected_distance_along_the_cube() {
+        let mut bm = cube();
+        let v0 = bm.vert_ids()[0];
+        bm.select_set(BMElem::Vert(v0), true);
+        let (_, vidx) = crate::edit::bmq::vert_index(&bm);
+        let (d, idx) = connectivity_distance(&bm, &vidx, &Mat3::IDENTITY, true);
+        assert_eq!(d[0], 0.0);
+        // The three edge neighbors at 2, the face diagonals at 2√2, the far corner at √20 (the
+        // geodesic over two unfolded faces).
+        assert!((d[7] - 20f32.sqrt()).abs() < 1e-5, "{d:?}");
+        assert_eq!(d.iter().filter(|x| (**x - 2.0).abs() < 1e-6).count(), 3);
+        assert!(idx.expect("index").iter().all(|i| *i == 0));
+        // Distances are measured through the matrix.
+        let (d2, _) = connectivity_distance(&bm, &vidx, &(Mat3::IDENTITY * 2.0), false);
+        assert_eq!(d2.iter().filter(|x| (**x - 4.0).abs() < 1e-5).count(), 3);
+    }
+
+    #[test]
+    fn islands_of_two_faces() {
+        let mut bm = cube();
+        bm.select_mode = frap_bmesh::SelectMode::FACE;
+        let f = bm.face_ids();
+        bm.select_set(BMElem::Face(f[0]), true);
+        bm.select_set(BMElem::Face(f[2]), true);
+        let (_, vidx) = crate::edit::bmq::vert_index(&bm);
+        let isl = islands_calc(&bm, &vidx, false, true, true);
+        let n = isl.center.as_ref().expect("centers").len();
+        assert!(n == 1 || n == 2);
+        assert_eq!(isl.axismtx.expect("axes").len(), n);
+        assert!(isl.vert_map.iter().filter(|i| **i != -1).count() >= 6);
+    }
 }

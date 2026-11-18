@@ -171,9 +171,7 @@ fn unsupported(op: TransformOp, args: &OpArgs) -> Result<(), OpError> {
     let what = match op {
         TransformOp::Translate => {
             let p = Translate::from_args(args);
-            if p.cursor_transform.value {
-                Some("cursor_transform=True")
-            } else if p.texture_space.value {
+            if p.texture_space.value {
                 Some("texture_space=True")
             } else if p.use_automerge_and_split.is_set && p.use_automerge_and_split.value {
                 Some("use_automerge_and_split=True")
@@ -198,5 +196,8 @@ fn unsupported(op: TransformOp, args: &OpArgs) -> Result<(), OpError> {
 /// The edit-mesh handler.
 fn apply(cx: &mut OpCtx, op: TransformOp, args: &OpArgs) -> OpResult {
     unsupported(op, args)?;
+    if op == TransformOp::Translate && Translate::from_args(args).cursor_transform.value {
+        return trans::translate_cursor(cx, &request_from_args(op, args));
+    }
     trans::run(cx, request_from_args(op, args))
 }

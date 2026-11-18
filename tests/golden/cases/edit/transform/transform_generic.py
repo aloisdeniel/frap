@@ -1,7 +1,7 @@
 # WP 2.12: transform.transform(mode=…): a set value is an array, so it constrains to every axis
-# (ROTATION then scales by cos(angle);
-# PUSHPULL with a value reads an uninitialized axis in Blender, so it is not compared); TRANSLATION/ROTATION/RESIZE also run in Object Mode;
-# the Edit Mode modes TOSPHERE, SHRINKFATTEN, CREASE, VERTEX_CREASE, BWEIGHT, MIRROR.
+# (ROTATION then scales by cos(angle); PUSHPULL with a value reads an uninitialized axis in
+# Blender, so it is not compared); TRANSLATION/ROTATION/RESIZE also run in Object Mode; the Edit
+# Mode modes TOSPHERE, SHRINKFATTEN, CREASE, VERTEX_CREASE, BWEIGHT, MIRROR.
 # golden: startup=factory compare=objects,context,mesh:Cube tier=T1 tol=1e-5
 import bpy
 bpy.ops.transform.transform(mode='TRANSLATION', value=(1, 0, 0.5, 0))

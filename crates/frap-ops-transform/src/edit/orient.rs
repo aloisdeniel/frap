@@ -18,8 +18,8 @@ use super::bmq::{
     face_calc_tangent_pair_auto, fno, has, vert_edge_pair, vert_tri_calc_tangent_from_edge, vno,
 };
 use super::mathx::{
-    create_space_normal, create_space_normal_tangent, cross, invert_m3, is_zero, len_sq,
-    normalize, normalized, ortho, project, project_plane_normalized,
+    create_space_normal, create_space_normal_tangent, cross, invert_m3, is_zero, len_sq, normalize,
+    normalized, ortho, project, project_plane_normalized,
 };
 
 /// `ORIENTATION_*` results.
@@ -249,7 +249,11 @@ fn mesh_normal_plane(bm: &BMesh, active_only: bool) -> (Vec3, Vec3, Kind) {
                 plane = d0 + d1;
             }
         }
-        result = if is_zero(plane) { Kind::Vert } else { Kind::Edge };
+        result = if is_zero(plane) {
+            Kind::Vert
+        } else {
+            Kind::Edge
+        };
     } else if totvertsel > 3 {
         let mut n = Vec3::ZERO;
         for v in bm.vert_ids() {

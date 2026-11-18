@@ -52,7 +52,7 @@ fn sub_args(
                 Some(Value::FloatArray { shape, tag, data }) => Value::FloatArray {
                     data: src_value.iter().take(data.len()).copied().collect(),
                     shape: *shape,
-                    tag: tag.clone(),
+                    tag: *tag,
                 },
                 _ => Value::Float(src_value.first().copied().unwrap_or(0.0)),
             }
@@ -133,18 +133,15 @@ fn exec(cx: &mut OpCtx, args: &OpArgs) -> OpResult {
     r.constraint_axis = set(&p.constraint_axis);
     r.has_constraint_prop = true;
     r.center_override = set(&p.center_override).map(Vec3::from_array);
-    if !matches!(
-        mode,
-        Mode::EdgeCrease | Mode::VertCrease | Mode::BevelWeight | Mode::Mirror | Mode::EdgeSlide
-    ) {
-        r.proportional = proportional(
-            &p.use_proportional_edit,
-            p.proportional_edit_falloff.value.identifier(),
-            p.proportional_size.value,
-            p.use_proportional_connected.value,
-            p.use_proportional_projected.value,
-        );
-    }
+    // Unlike the dedicated operators, `transform.transform` has the proportional properties,
+    // so every mode honors them (custom-data modes included).
+    r.proportional = proportional(
+        &p.use_proportional_edit,
+        p.proportional_edit_falloff.value.identifier(),
+        p.proportional_size.value,
+        p.use_proportional_connected.value,
+        p.use_proportional_projected.value,
+    );
     crate::edit::trans::run(cx, r)
 }
 

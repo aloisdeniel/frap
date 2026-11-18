@@ -123,3 +123,12 @@ fn exec(cx: &mut OpCtx, p: transform::VertexRandom) -> OpResult {
         OpStatus::Cancelled
     })
 }
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn strhash_is_djb2() {
+        assert_eq!(super::strhash(""), 5381);
+        assert_eq!(super::strhash("a"), 5381 * 33 + 97);
+    }
+}

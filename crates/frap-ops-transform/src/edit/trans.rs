@@ -37,8 +37,8 @@ use glam::{Mat3, Mat4, Vec3};
 use super::bmq::{self, co, has, vno};
 use super::islands::{connectivity_distance, islands_calc};
 use super::mathx::{
-    create_space_normal, invert_m3, invert_m4_fallback, len, mid,
-    normalize, normalize_length, normalize_m3, project, pseudoinverse_m3, reflect,
+    create_space_normal, invert_m3, invert_m4_fallback, len, mid, normalize, normalize_length,
+    normalize_m3, project, pseudoinverse_m3, reflect,
 };
 use super::orient::normal_orientation;
 use crate::core::constraint::{Constraint, ConstraintSpace};
@@ -305,9 +305,16 @@ fn create_verts(tc: &mut Tc, bm: &BMesh, req: &Request, around: PivotPoint) {
     let (verts, vidx) = bmq::vert_index(bm);
     let is_island_center = is_local(around);
     let islands = if is_island_center {
-        let calc_single = connected && is_local(around) && bm.select_mode.contains(SelectMode::VERT);
+        let calc_single =
+            connected && is_local(around) && bm.select_mode.contains(SelectMode::VERT);
         let shrink = matches!(req.mode, Mode::ShrinkFatten { .. });
-        islands_calc(bm, &vidx, calc_single, cdata.is_none(), cdata.is_none() && !shrink)
+        islands_calc(
+            bm,
+            &vidx,
+            calc_single,
+            cdata.is_none(),
+            cdata.is_none() && !shrink,
+        )
     } else {
         super::islands::Islands::default()
     };
@@ -474,7 +481,8 @@ fn set_prop_dist(t: &mut TransInfo, with_dist: bool, view_matrix: &Mat4) {
         }
     }
     tree.balance();
-    let mut updates: Vec<(usize, usize, f32, Option<(Vec3, Mat3)>)> = Vec::new();
+    type Update = (usize, usize, f32, Option<(Vec3, Mat3)>);
+    let mut updates: Vec<Update> = Vec::new();
     for (ci, tc) in t.tcs.iter().enumerate() {
         for (di, td) in tc.data.iter().enumerate() {
             if td.selected {
@@ -573,7 +581,8 @@ fn calc_center(t: &mut TransInfo, cursor: Vec3, active_center: Option<Vec3>) {
 
 /// The per-element constraint axes (`applyObjectConstraint*` in Edit Mode).
 fn per_element(t: &TransInfo) -> bool {
-    t.con.is_some_and(|c| c.space == ConstraintSpace::PerElement)
+    t.con
+        .is_some_and(|c| c.space == ConstraintSpace::PerElement)
 }
 
 fn con_axis_index(c: &Constraint) -> Option<usize> {
@@ -765,7 +774,7 @@ fn apply(t: &mut TransInfo) {
             };
             let bits = c.axes.iter().filter(|a| **a).count();
             let special = if bits != 0 && bits != 3 {
-                let want = if bits == 2 { false } else { true };
+                let want = bits != 2;
                 c.axes.iter().position(|a| *a == want)
             } else {
                 None
@@ -834,6 +843,70 @@ fn to_sphere_radius(t: &TransInfo) -> f32 {
         radius /= n as f32;
     }
     radius
+}
+
+/// The orientation of an edit-mode call (`transform_orientation_matrix_get`): the core
+/// orientation, with NORMAL built from the active edit mesh's selection and GIMBAL of a
+/// non-Euler active object falling through to its parent's axes.
+pub fn orientation(
+    c: &frap_scene::Context,
+    edit: &frap_scene::EditState,
+    req: &Request,
+    around: PivotPoint,
+) -> Orientation {
+    let src = crate::object::orient_source(c);
+    let mut orient = Orientation::from_props(
+        req.orient_type.as_deref(),
+        req.orient_matrix,
+        &req.orient_matrix_type,
+        &src,
+    );
+    if orient.kind == OrientType::Normal {
+        orient.matrix = c
+            .active_object()
+            .and_then(|a| {
+                let ob = c.main.objects.get(a)?;
+                let me = ob.data?.typed::<MeshId>()?;
+                let em = edit.meshes.get(&me.key())?;
+                Some(normal_orientation(
+                    &em.bm,
+                    &world_matrix(&c.main.objects, a),
+                    around == PivotPoint::ActiveElement,
+                ))
+            })
+            .unwrap_or(Mat3::IDENTITY);
+    } else if orient.kind == OrientType::Gimbal && src.active_gimbal.is_none() {
+        // Not a gimbal rotation: Blender falls through to the PARENT orientation.
+        orient.matrix = src
+            .active_parent_world
+            .map_or(Mat3::IDENTITY, |m| crate::core::math::axes_of(&m));
+    }
+    orient
+}
+
+/// `transform.translate(cursor_transform=True)` in Edit Mode: moves the 3D cursor by the
+/// value in the edit-mode orientation.
+pub fn translate_cursor(cx: &mut OpCtx, req: &Request) -> OpResult {
+    let (scene, vec) = {
+        let (c, edit) = cx.split_edit();
+        let around = PivotPoint::from_identifier(&c.tool_settings().transform_pivot_point);
+        let orient = orientation(&c, edit, req, around);
+        let values = Vec3::new(req.values[0], req.values[1], req.values[2]);
+        let mut vec = orient.matrix * values;
+        if let Some(con) =
+            Constraint::from_props(req.values_is_array, req.constraint_axis, &orient, 1)
+        {
+            vec = con.apply_vec(&orient, vec);
+        }
+        (c.win.scene, vec)
+    };
+    let (main, log) = cx.main_mut();
+    if let Some(s) = main.scenes.get_mut(scene, log) {
+        let l = Vec3::from_array(s.cursor.location) + vec;
+        s.cursor.location = l.to_array();
+        crate::object::sync_cursor_matrix(&mut s.cursor);
+    }
+    Ok(OpStatus::Finished)
 }
 
 /// Runs one edit-mode transform. `CANCELLED` (with a warning) when nothing can be
@@ -925,51 +998,28 @@ pub fn run(cx: &mut OpCtx, req: Request) -> OpResult {
         let active_center = {
             let tc = &t.tcs[0];
             edit.meshes.get(&tc.me.key()).and_then(|em| {
-                bmq::select_history_active_get(&em.bm)
-                    .map(|ese| tc.mat.transform_point3(bmq::editselection_center(&em.bm, ese)))
+                bmq::select_history_active_get(&em.bm).map(|ese| {
+                    tc.mat
+                        .transform_point3(bmq::editselection_center(&em.bm, ese))
+                })
             })
         };
         calc_center(&mut t, cursor, active_center);
 
-        let src = crate::object::orient_source(&c);
-        let mut orient = Orientation::from_props(
-            t.req.orient_type.as_deref(),
-            t.req.orient_matrix,
-            &t.req.orient_matrix_type,
-            &src,
-        );
-        if orient.kind == OrientType::Normal {
-            orient.matrix = c
-                .active_object()
-                .and_then(|a| {
-                    let ob = c.main.objects.get(a)?;
-                    let me = ob.data?.typed::<MeshId>()?;
-                    let em = edit.meshes.get(&me.key())?;
-                    Some(normal_orientation(
-                        &em.bm,
-                        &world_matrix(&c.main.objects, a),
-                        t.around == PivotPoint::ActiveElement,
-                    ))
-                })
-                .unwrap_or(Mat3::IDENTITY);
-        } else if orient.kind == OrientType::Gimbal && src.active_gimbal.is_none() {
-            // Not a gimbal rotation: Blender falls through to the PARENT orientation.
-            orient.matrix = src
-                .active_parent_world
-                .map_or(Mat3::IDENTITY, |m| crate::core::math::axes_of(&m));
-        }
+        let orient = orientation(&c, edit, &t.req, t.around);
         t.orient = orient;
         if t.req.has_constraint_prop {
             let n = t.tcs.iter().map(|tc| tc.data.len()).sum();
-            t.con = Constraint::from_props(t.req.values_is_array, t.req.constraint_axis, &orient, n)
-                .map(|mut con| {
-                    con.space = if orient.kind == OrientType::Normal && is_local(t.around) {
-                        ConstraintSpace::PerElement
-                    } else {
-                        ConstraintSpace::Orientation
-                    };
-                    con
-                });
+            t.con =
+                Constraint::from_props(t.req.values_is_array, t.req.constraint_axis, &orient, n)
+                    .map(|mut con| {
+                        con.space = if orient.kind == OrientType::Normal && is_local(t.around) {
+                            ConstraintSpace::PerElement
+                        } else {
+                            ConstraintSpace::Orientation
+                        };
+                        con
+                    });
         }
     }
 

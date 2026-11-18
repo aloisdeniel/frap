@@ -28,9 +28,9 @@ use super::bmq::{
     vert_is_boundary, vert_is_edge_pair, vno,
 };
 use super::mathx::{
-    FLT_EPSILON, angle_v3v3v3, cross, dist_signed_squared_to_corner, dot, interp,
-    isect_line_line_epsilon, isect_line_plane, is_zero, len, len_sq, line_point_factor, madd,
-    mid, normalize, normalized, project_plane_normalized,
+    FLT_EPSILON, angle_v3v3v3, cross, dist_signed_squared_to_corner, dot, interp, is_zero,
+    isect_line_line_epsilon, isect_line_plane, len, len_sq, line_point_factor, madd, mid,
+    normalize, normalized, project_plane_normalized,
 };
 use super::trans::{Mode, Tc, TransInfo, write_back};
 
@@ -53,7 +53,7 @@ pub struct SlideParams {
 
 /// The factory Layout viewport's `RegionView3D.winmat` in a background Blender 5.2.4 (rows).
 const VIEW_WINMAT_ROWS: [[f32; 4]; 4] = [
-    [1.388_888_9, 0.0, 0.0, 0.0],
+    [1.388_888_8, 0.0, 0.0, 0.0],
     [0.0, 2.291_521, 0.0, 0.0],
     [0.0, 0.0, -1.000_02, -0.020_000_2],
     [0.0, 0.0, -1.0, 0.0],
@@ -114,7 +114,11 @@ fn dist_sq_to_segment(p: Vec2, l1: Vec2, l2: Vec2) -> f32 {
     let u = l2 - l1;
     let h = p - l1;
     let d = u.x * u.x + u.y * u.y;
-    let lambda = if d > 0.0 { (u.x * h.x + u.y * h.y) / d } else { 0.0 };
+    let lambda = if d > 0.0 {
+        (u.x * h.x + u.y * h.y) / d
+    } else {
+        0.0
+    };
     let c = if lambda <= 0.0 {
         l1
     } else if lambda >= 1.0 {
@@ -349,7 +353,11 @@ impl SlideTemp {
                     best = Some(1);
                     break;
                 }
-                let step = if Some(lo.v) == self.v { lo.prev } else { lo.next };
+                let step = if Some(lo.v) == self.v {
+                    lo.prev
+                } else {
+                    lo.next
+                };
                 l_other = bm.lp(step).radial_next;
             }
             if let Some(b) = best {
@@ -381,7 +389,9 @@ impl SlideTemp {
 /// `transform_mesh_edge_slide_data_create`: the slide vertices (in selected `TransData`
 /// order) and the number of loops, or `None` for an invalid selection.
 fn edge_slide_data_create(bm: &BMesh, tc: &Tc) -> Option<(Vec<EdgeSlideVert>, i32)> {
-    let sel: Vec<usize> = (0..tc.data.len()).filter(|i| tc.data[*i].selected).collect();
+    let sel: Vec<usize> = (0..tc.data.len())
+        .filter(|i| tc.data[*i].selected)
+        .collect();
     for &i in &sel {
         let v = tc.data[i].v?;
         let numsel = bm
@@ -622,16 +632,19 @@ fn create_edge_slide(
     };
     // `calcEdgeSlide_mval_range` with the mouse at the region origin.
     let c = cx.ctx();
-    let occlude = c.main.objects.get(tc.ob).is_some_and(|o| {
-        matches!(o.display_type.as_str(), "SOLID" | "TEXTURED")
-    }) && {
-        let s = &c.win.view3d.shading;
-        !(if s.r#type == "WIREFRAME" {
-            s.show_xray_wireframe
-        } else {
-            s.show_xray
-        })
-    };
+    let occlude = c
+        .main
+        .objects
+        .get(tc.ob)
+        .is_some_and(|o| matches!(o.display_type.as_str(), "SOLID" | "TEXTURED"))
+        && {
+            let s = &c.win.view3d.shading;
+            !(if s.r#type == "WIREFRAME" {
+                s.show_xray_wireframe
+            } else {
+                s.show_xray
+            })
+        };
     let tris = occlude.then(|| Tris::new(bm));
     let origin = tc.imat.transform_point3(view.center_ray_origin());
     let proj = view.proj_mat(&tc.mat);
@@ -756,7 +769,12 @@ struct VertSlideVert {
 }
 
 /// `transform_mesh_vert_slide_data_create` + `update_active_vert/edges`.
-fn create_vert_slide(bm: &BMesh, tc: &Tc, view: &View, dir: Vec3) -> Option<(Vec<VertSlideVert>, usize)> {
+fn create_vert_slide(
+    bm: &BMesh,
+    tc: &Tc,
+    view: &View,
+    dir: Vec3,
+) -> Option<(Vec<VertSlideVert>, usize)> {
     let mut out = Vec::new();
     for (i, td) in tc.data.iter().enumerate() {
         if !td.selected {
@@ -990,6 +1008,7 @@ fn loop_groups(
         };
         let mut accum = 0.0f32;
         // Recursive `bm_loop_walk_data`, written with an explicit stack of pending branches.
+        #[allow(clippy::too_many_arguments)]
         fn walk(
             bm: &BMesh,
             l_walk: LoopId,
@@ -1017,16 +1036,40 @@ fn loop_groups(
                     }
                     if let Some(ko) = pos(l_other)
                         && ctx.0[ko]
-                        && values_equal(kind, data_ref, loop_value(&bm.ldata, layer, l_other.slot()))
+                        && values_equal(
+                            kind,
+                            data_ref,
+                            loop_value(&bm.ldata, layer, l_other.slot()),
+                        )
                     {
-                        walk(bm, l_other, ko, ctx, data_ref, layer, kind, loop_weights, pos);
+                        walk(
+                            bm,
+                            l_other,
+                            ko,
+                            ctx,
+                            data_ref,
+                            layer,
+                            kind,
+                            loop_weights,
+                            pos,
+                        );
                     }
                 }
             }
         }
         {
             let mut ctx = (std::mem::take(&mut tag), &mut g, &mut accum);
-            walk(bm, l, k, &mut ctx, data_ref, layer, kind, loop_weights, &pos);
+            walk(
+                bm,
+                l,
+                k,
+                &mut ctx,
+                data_ref,
+                layer,
+                kind,
+                loop_weights,
+                &pos,
+            );
             tag = ctx.0;
         }
         let n = g.weights.len();
@@ -1067,11 +1110,8 @@ fn correct_init(bm: &BMesh, tc: &Tc, moved: &[usize]) -> Vec<CorrectVert> {
             if let Some(lp) = loop_find_prev_nodouble(bm, l, ll.next, FLT_EPSILON)
                 && let Some(ln) = loop_find_next_nodouble(bm, l, lp, FLT_EPSILON)
             {
-                loop_weights[j] = angle_v3v3v3(
-                    co(bm, bm.lp(lp).v),
-                    co(bm, ll.v),
-                    co(bm, bm.lp(ln).v),
-                );
+                loop_weights[j] =
+                    angle_v3v3v3(co(bm, bm.lp(lp).v), co(bm, ll.v), co(bm, bm.lp(ln).v));
             }
         }
         let groups = if loops.is_empty() {
@@ -1224,7 +1264,7 @@ pub fn run(cx: &mut OpCtx, mut t: TransInfo) -> OpResult {
     let mut datas: Vec<Option<Data>> = Vec::new();
     let origs: Vec<BMesh>;
     {
-        let dir = p.direction.map_or(Vec3::X, |d| normalized(d));
+        let dir = p.direction.map_or(Vec3::X, normalized);
         let (_, edit) = cx.split_edit();
         let bms: Vec<BMesh> = t
             .tcs
@@ -1298,7 +1338,9 @@ pub fn run(cx: &mut OpCtx, mut t: TransInfo) -> OpResult {
             perc = perc.clamp(0.0, 1.0);
         }
         for (tc, d) in t.tcs.iter_mut().zip(&datas) {
-            let Some(Data::Vert(svs, curr)) = d else { continue };
+            let Some(Data::Vert(svs, curr)) = d else {
+                continue;
+            };
             let mut tperc = perc;
             if p.use_even {
                 let s = &svs[*curr];
@@ -1306,7 +1348,8 @@ pub fn run(cx: &mut OpCtx, mut t: TransInfo) -> OpResult {
             }
             for s in svs {
                 let orig = tc.data[s.td].iloc;
-                tc.data[s.td].loc = vert_slide_apply(orig, s.targets[s.curr], tperc, p.use_even, p.flipped);
+                tc.data[s.td].loc =
+                    vert_slide_apply(orig, s.targets[s.curr], tperc, p.use_even, p.flipped);
             }
         }
     }
@@ -1336,4 +1379,71 @@ pub fn run(cx: &mut OpCtx, mut t: TransInfo) -> OpResult {
         }
     }
     Ok(OpStatus::Finished)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn watertight_ray() {
+        let (a, b, c) = (
+            Vec3::new(-1.0, -1.0, 0.0),
+            Vec3::new(1.0, -1.0, 0.0),
+            Vec3::new(0.0, 1.0, 0.0),
+        );
+        let d = isect_ray_tri_watertight(Vec3::new(0.0, 0.0, 2.0), -Vec3::Z, a, b, c);
+        assert!((d.expect("hit") - 2.0).abs() < 1e-6);
+        assert!(isect_ray_tri_watertight(Vec3::new(3.0, 0.0, 2.0), -Vec3::Z, a, b, c).is_none());
+        assert!(isect_ray_tri_watertight(Vec3::new(0.0, 0.0, 2.0), Vec3::Z, a, b, c).is_none());
+    }
+
+    #[test]
+    fn slide_interpolation() {
+        let sv = EdgeSlideVert {
+            td: 0,
+            dir_side: [Vec3::X, -Vec3::Y],
+            edge_len: 2f32.sqrt(),
+            loop_nr: 0,
+        };
+        let o = Vec3::ZERO;
+        let at = |fac: f32, clamp: bool| edge_slide_apply(&sv, o, fac, 0.0, 0, clamp, false, false);
+        assert_eq!(at(0.5, true), Vec3::new(0.5, 0.0, 0.0));
+        assert_eq!(at(-0.5, true), Vec3::new(0.0, -0.5, 0.0));
+        // Unclamped: the side stays the first one.
+        assert_eq!(at(-0.5, false), Vec3::new(-0.5, 0.0, 0.0));
+        let p = interp_line(Vec3::X, Vec3::ZERO, -Vec3::Y, 0.25);
+        assert!(p.abs_diff_eq(Vec3::new(0.5, 0.0, 0.0), 1e-6), "{p:?}");
+        assert_eq!(
+            vert_slide_apply(o, Vec3::X * 2.0, 0.25, false, false),
+            Vec3::new(0.5, 0.0, 0.0)
+        );
+        assert_eq!(
+            vert_slide_apply(o, Vec3::X * 2.0, 0.25, true, true),
+            Vec3::new(1.75, 0.0, 0.0)
+        );
+        assert_eq!(round_uchar(254.6), 255);
+        let a = [0.5, 0.5, 0.0, 0.0];
+        assert!(values_equal(MathCol::Float2, a, [0.5, 0.501, 0.0, 0.0]));
+        assert!(!values_equal(MathCol::Float2, a, [0.5, 0.51, 0.0, 0.0]));
+    }
+
+    #[test]
+    fn factory_view_projects_the_origin_inside_the_region() {
+        // The factory Layout view matrix of a background Blender 5.2.4 (columns).
+        let vm = Mat4::from_cols_array_2d(&[
+            [0.410_028_4, -0.401_742_6, 0.818_828_3, 0.0],
+            [0.911_976_5, 0.193_643_4, -0.361_664_95, 0.0],
+            [-0.013_264_662, 0.895_044_9, 0.445_778_9, 0.0],
+            [0.050_467_845, 0.0, -18.388_048, 1.0],
+        ]);
+        let v = View::new(&vm);
+        let p = project(&v.proj_mat(&Mat4::IDENTITY), Vec3::ZERO);
+        assert!(
+            p.x > 0.0 && p.x < VIEW_WINX && p.y > 0.0 && p.y < VIEW_WINY,
+            "{p:?}"
+        );
+        let o = v.center_ray_origin();
+        assert!((len(o) - 18.388).abs() < 0.1, "{o:?}");
+    }
 }

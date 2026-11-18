@@ -469,7 +469,12 @@ pub fn vert_index(bm: &BMesh) -> (Vec<VertId>, Vec<i32>) {
 }
 
 /// `BM_loop_find_prev_nodouble`.
-pub fn loop_find_prev_nodouble(bm: &BMesh, l: LoopId, l_stop: LoopId, eps_sq: f32) -> Option<LoopId> {
+pub fn loop_find_prev_nodouble(
+    bm: &BMesh,
+    l: LoopId,
+    l_stop: LoopId,
+    eps_sq: f32,
+) -> Option<LoopId> {
     let c = co(bm, bm.lp(l).v);
     let mut s = bm.lp(l).prev;
     while len_sq(c - co(bm, bm.lp(s).v)) < eps_sq {
@@ -482,7 +487,12 @@ pub fn loop_find_prev_nodouble(bm: &BMesh, l: LoopId, l_stop: LoopId, eps_sq: f3
 }
 
 /// `BM_loop_find_next_nodouble`.
-pub fn loop_find_next_nodouble(bm: &BMesh, l: LoopId, l_stop: LoopId, eps_sq: f32) -> Option<LoopId> {
+pub fn loop_find_next_nodouble(
+    bm: &BMesh,
+    l: LoopId,
+    l_stop: LoopId,
+    eps_sq: f32,
+) -> Option<LoopId> {
     let c = co(bm, bm.lp(l).v);
     let mut s = bm.lp(l).next;
     while len_sq(c - co(bm, bm.lp(s).v)) < eps_sq {

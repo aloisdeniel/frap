@@ -706,7 +706,7 @@ fn svd_m4(a_in: &M4) -> (M4, [f32; 4], M4) {
             for i in k..m {
                 u[i][k] = -u[i][k];
             }
-            u[k][k] = 1.0 + u[k][k];
+            u[k][k] += 1.0;
             // `for (i = 0; i < k - 1; i++)` with a signed `k`.
             for i in 0..k.saturating_sub(1) {
                 u[i][k] = 0.0;
@@ -903,16 +903,12 @@ fn svd_m4(a_in: &M4) -> (M4, [f32; 4], M4) {
                     s.swap(k, k + 1);
                     if k < n - 1 {
                         for i in 0..n {
-                            let t = v[i][k + 1];
-                            v[i][k + 1] = v[i][k];
-                            v[i][k] = t;
+                            v[i].swap(k + 1, k);
                         }
                     }
                     if k < m - 1 {
                         for i in 0..m {
-                            let t = u[i][k + 1];
-                            u[i][k + 1] = u[i][k];
-                            u[i][k] = t;
+                            u[i].swap(k + 1, k);
                         }
                     }
                     k += 1;
@@ -971,12 +967,14 @@ mod tests {
     fn space_normal() {
         let m = create_space_normal(Vec3::Z).expect("normal");
         assert!(m.z_axis.abs_diff_eq(Vec3::Z, 1e-6));
-        assert!(m.x_axis.abs_diff_eq(Vec3::X, 1e-6), "{m:?}");
+        // Z × Z is zero, so X = (1, 0, 0) × Z = -Y (`createSpaceNormal`).
+        assert!(m.x_axis.abs_diff_eq(-Vec3::Y, 1e-6), "{m:?}");
         let m = create_space_normal(Vec3::new(0.0, 0.0, 2.0)).expect("normal");
         assert!((m.determinant() - 1.0).abs() < 1e-6);
         assert!(create_space_normal(Vec3::ZERO).is_none());
         let m = create_space_normal_tangent(Vec3::Z, Vec3::Y).expect("tangent");
-        assert!(m.y_axis.abs_diff_eq(-Vec3::Y, 1e-6), "{m:?}");
+        // Y starts as -tangent and is re-made orthogonal as Z × X: (+Y here).
+        assert!(m.abs_diff_eq(Mat3::IDENTITY, 1e-6), "{m:?}");
         assert_eq!(axis_sort_v3([3.0, 1.0, 2.0]), [1, 2, 0]);
         let (n, ok) = create_from_axis(Some(Vec3::X * 2.0), None, Some(Vec3::Z));
         assert!(ok && n.abs_diff_eq(Mat3::IDENTITY, 1e-6), "{n:?}");
