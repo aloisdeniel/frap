@@ -25,7 +25,7 @@
 {"id":12,"event":"done","ok":true,"counts":{"finished":1,"error":0,"cancelled":0,"skipped":0}}
 {"id":13,"seq":13,"line":1,"kind":"op","op":"export_scene.gltf","ok":true,"status":"FINISHED",[..]"result":{"filepath":"out/part.glb",[..]"nodes":1,"meshes":1,[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
 {"id":13,"event":"done","ok":true,"counts":{"finished":1,"error":0,"cancelled":0,"skipped":0}}
-{"id":14,"seq":14,"line":1,"kind":"op","op":"wm.save_as_mainfile","ok":true,"status":"FINISHED",[..]"result":{"filepath":"[..]/out/part.frap",[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
+{"id":14,"seq":14,"line":1,"kind":"op","op":"wm.save_as_mainfile","ok":true,"status":"FINISHED",[..]"result":{"filepath":"[..]out[..]part.frap",[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
 {"id":14,"event":"done","ok":true,"counts":{"finished":1,"error":0,"cancelled":0,"skipped":0}}
 {"id":15,"seq":15,"line":1,"kind":"op","op":"wm.read_homefile","ok":true,"status":"FINISHED",[..]"changes":{"added":["bpy.data.scenes['Scene']"],"removed":["bpy.data.objects['Camera']","bpy.data.objects['Cylinder']",[..]"bpy.data.materials['Steel']",[..]"context":{"mode":"OBJECT","active_object":null,"selected_objects":[],"frame_current":1},"hints":[]}
 {"id":15,"event":"done","ok":true,"counts":{"finished":1,"error":0,"cancelled":0,"skipped":0}}
@@ -33,7 +33,7 @@
 {"id":16,"event":"done","ok":true,"counts":{"finished":1,"error":0,"cancelled":0,"skipped":0}}
 {"id":17,"seq":17,"line":1,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.materials['Steel'].node_tree.nodes[..]Principled BSDF[..]].inputs[1].default_value","value":1,[..]"context":{"mode":"OBJECT","active_object":"Cylinder","selected_objects":["Cylinder"],"frame_current":1},"hints":[]}
 {"id":17,"event":"done","ok":true,"counts":{"finished":1,"error":0,"cancelled":0,"skipped":0}}
-{"id":18,"seq":18,"line":1,"kind":"op","op":"wm.open_mainfile","ok":true,"status":"FINISHED",[..]"result":{"filepath":"[..]/out/part.frap"},"changes":{"added":["bpy.data.objects['Camera']","bpy.data.objects['Cylinder']",[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
+{"id":18,"seq":18,"line":1,"kind":"op","op":"wm.open_mainfile","ok":true,"status":"FINISHED",[..]"result":{"filepath":"[..]out[..]part.frap"},"changes":{"added":["bpy.data.objects['Camera']","bpy.data.objects['Cylinder']",[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
 {"id":18,"event":"done","ok":true,"counts":{"finished":1,"error":0,"cancelled":0,"skipped":0}}
 {"id":19,"seq":19,"line":1,"kind":"get","ok":true,"status":"FINISHED","path":"bpy.data.objects['Cylinder'].location","value":[0,0,1],"rna":{"type":"FLOAT","subtype":"TRANSLATION","array":[3],"math":"Vector"},[..]"context":{"mode":"OBJECT","active_object":"Camera","selected_objects":["Camera"],"frame_current":1},"hints":[]}
 {"id":19,"event":"done","ok":true,"counts":{"finished":1,"error":0,"cancelled":0,"skipped":0}}
