@@ -737,7 +737,11 @@ impl<'a> Writer<'a> {
                     let r = self.images.insert(p.bytes.clone(), ext).map_err(|e| {
                         MapError::invalid(&format!("images[{:?}]", i.header.name), e.to_string())
                     })?;
-                    json!({"data": ser(&r)?, "mime": p.mime.as_str()})
+                    json!({
+                        "data": ser(&r)?,
+                        "mime": p.mime.as_str(),
+                        "filepath": i.packed_filepath,
+                    })
                 }
             },
         );
@@ -747,6 +751,7 @@ impl<'a> Writer<'a> {
         m.insert("generated_height".into(), json!(i.generated_height));
         m.insert("generated_color".into(), f32s(&i.generated_color));
         m.insert("use_generated_float".into(), json!(i.use_generated_float));
+        m.insert("generated_depth".into(), json!(i.generated_depth));
         m.insert("colorspace_settings".into(), ser(&i.colorspace_settings)?);
         m.insert("alpha_mode".into(), json!(i.alpha_mode.as_str()));
         m.insert("size".into(), json!(i.size));

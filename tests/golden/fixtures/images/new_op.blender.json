@@ -1,0 +1,492 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 6,
+      "ok": true
+    },
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": true
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": true
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 53,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 56,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": true
+    },
+    {
+      "line": 58,
+      "ok": true
+    },
+    {
+      "line": 59,
+      "ok": true
+    },
+    {
+      "line": 60,
+      "ok": true
+    },
+    {
+      "line": 61,
+      "ok": true
+    },
+    {
+      "line": 62,
+      "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.image.pack.poll() failed, context is incorrect"
+    },
+    {
+      "line": 65,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.image.unpack.poll() failed, context is incorrect"
+    },
+    {
+      "line": 66,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.image.save.poll() failed, context is incorrect"
+    },
+    {
+      "line": 67,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.image.save_as.poll() failed, context is incorrect"
+    },
+    {
+      "line": 68,
+      "ok": false
+    },
+    {
+      "line": 69,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "Converting py args to operator properties: enum \"STRIPES\" not found in ('BLANK', 'UV_GRID', 'COLOR_GRID')"
+    }
+  ],
+  "objects": {
+    "COLOR_GRID": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.4115072, -0.11432625, 0.1476645, 0.63529414],
+        [0.37663165, 0.1846389, -0.08164271, 0.5372549],
+        [-0.14535739, 0.15475497, 0.20649645, 0.5372549],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.63529414, 0.5372549, 0.5372549],
+      "rotation_mode": "XYZ",
+      "rotation": [0.6431373, 0.25490198, 0.7411765],
+      "scale": [0.5764706, 0.26666668, 0.26666668],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.68592066, -0.32401347, 0.6515582, 7.3588915],
+        [0.72767633, 0.30542085, -0.6141704, -6.925791],
+        [0.0, 0.89539564, 0.4452714, 4.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.3588915, -6.925791, 4.958309],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Float": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.027488476, 0.0060811737, -0.29152587, 0.21404119],
+        [0.0, -0.006944776, -0.36051884, 0.050876107],
+        [-0.042810768, 0.0039046768, -0.1871866, 0.010022828],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.21404119, 0.050876107, 0.010022828],
+      "rotation_mode": "XYZ",
+      "rotation": [128.0, 1.0, 0.0],
+      "scale": [0.050876107, 0.010022828, 0.5],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Grey": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.38658568, -0.10994154, 0.30071416, 0.5019608],
+        [0.21119273, 0.44189948, -0.10994154, 0.5019608],
+        [-0.24065284, 0.21119273, 0.38658568, 0.5019608],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.5019608, 0.5019608, 0.5019608],
+      "rotation_mode": "XYZ",
+      "rotation": [0.5, 0.5, 0.5],
+      "scale": [0.5019608, 0.5019608, 0.5019608],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Grid2": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.8980393, 0.0, 0.0, 0.2509804],
+        [0.0, 0.08627451, 0.0, 0.2509804],
+        [0.0, 0.0, 0.08627451, 0.2509804],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.2509804, 0.2509804, 0.2509804],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.8980393, 0.08627451, 0.08627451],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086465, -0.7711008, 0.5663932, 4.0762453],
+        [0.95517117, -0.19988336, 0.2183912, 1.005454],
+        [-0.05518906, 0.60452473, 0.79467225, 5.903862],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0762453, 1.005454, 5.903862],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Linear Rec.709": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 1.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Opaque": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.25, 0.0, 0.0, 0.2509804],
+        [0.0, 0.042417902, 0.9055784, 0.10196079],
+        [0.0, -0.090557836, 0.42417902, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.2509804, 0.10196079, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [24.0, 0.0, 0.0],
+      "scale": [0.25, 0.1, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "TILED": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 8.0],
+        [0.0, 1.0, 0.0, 32.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [8.0, 32.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "UV_TEST": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.5838678, 0.007909825, 0.07111018, 0.5882353],
+        [0.05049826, 0.36860827, -0.45562997, 0.5882353],
+        [-0.05068678, 0.4583516, 0.36519235, 0.5882353],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.5882353, 0.5882353, 0.5882353],
+      "rotation_mode": "XYZ",
+      "rotation": [0.8980393, 0.08627451, 0.08627451],
+      "scale": [0.5882353, 0.5882353, 0.5882353],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Untitled": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 1024.0],
+        [0.0, 0.0, 0.0, 1024.0],
+        [0.0, 0.0, 0.0, 32.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1024.0, 1024.0, 32.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

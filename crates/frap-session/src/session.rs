@@ -224,6 +224,8 @@ pub(crate) struct HostImpl {
     eval: EvalCache,
     log: ChangeLog,
     reports: Vec<Report>,
+    /// `SessionOptions::cwd`, for the relative paths of RNA functions (`HostRead::cwd`).
+    cwd: PathBuf,
 }
 
 impl HostRead for HostImpl {
@@ -241,6 +243,9 @@ impl HostRead for HostImpl {
     }
     fn mesh_view(&self, mesh: IdRef<MeshId>) -> Arc<Mesh> {
         self.state.mesh_view(mesh)
+    }
+    fn cwd(&self) -> Option<&std::path::Path> {
+        Some(&self.cwd)
     }
 }
 
@@ -376,6 +381,7 @@ impl Session {
                 eval: EvalCache::new(),
                 log: ChangeLog::default(),
                 reports: Vec::new(),
+                cwd: opts.cwd.clone(),
             },
             services: SessionServices {
                 render: None,
