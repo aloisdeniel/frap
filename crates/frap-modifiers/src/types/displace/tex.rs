@@ -371,7 +371,12 @@ fn do_2d_mapping_flat(f: &TextureFields, texvec: &mut [f32; 3]) {
 }
 
 // Ported from blender/source/blender/render/intern/texture_image.cc (imagewrap).
-fn imagewrap(t: &ImageTex<'_>, ibuf: Option<&ImBuf>, texvec: [f32; 3], texres: &mut TexResult) -> i32 {
+fn imagewrap(
+    t: &ImageTex<'_>,
+    ibuf: Option<&ImBuf>,
+    texvec: [f32; 3],
+    texres: &mut TexResult,
+) -> i32 {
     let f = t.fields;
     texres.tin = 0.0;
     texres.trgba = [0.0; 4];

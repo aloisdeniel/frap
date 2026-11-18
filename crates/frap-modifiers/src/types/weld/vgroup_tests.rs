@@ -59,14 +59,22 @@ fn check(case: &str, m: &Mesh) {
     for (i, (p, b)) in m.positions().iter().zip(pos).enumerate() {
         for k in 0..3 {
             let b = b[k].as_f64().unwrap() as f32;
-            assert!((p[k] - b).abs() < 1e-5, "{case}: vertex {i} frap {p:?} blender {b}");
+            assert!(
+                (p[k] - b).abs() < 1e-5,
+                "{case}: vertex {i} frap {p:?} blender {b}"
+            );
         }
     }
     let faces = e["faces"].as_array().unwrap();
     assert_eq!(m.faces_num(), faces.len(), "{case}: face count");
     for (i, f) in faces.iter().enumerate() {
         let a: Vec<i64> = m.face(i).map(|c| i64::from(m.corner_verts()[c])).collect();
-        let b: Vec<i64> = f.as_array().unwrap().iter().map(|v| v.as_i64().unwrap()).collect();
+        let b: Vec<i64> = f
+            .as_array()
+            .unwrap()
+            .iter()
+            .map(|v| v.as_i64().unwrap())
+            .collect();
         assert_eq!(a, b, "{case}: face {i}");
     }
     let dv = m.deform_verts().expect("weights");
@@ -82,9 +90,16 @@ fn check(case: &str, m: &Mesh) {
             .iter()
             .map(|&(g, w)| (m.vertex_group_names[g as usize].to_string(), w))
             .collect();
-        assert_eq!(a.len(), b.len(), "{case}: groups of vertex {i}: {a:?} vs {b:?}");
+        assert_eq!(
+            a.len(),
+            b.len(),
+            "{case}: groups of vertex {i}: {a:?} vs {b:?}"
+        );
         for (k, bw) in &b {
-            assert!((a[k] - bw).abs() < 1e-6, "{case}: vertex {i} {k}: {a:?} vs {b:?}");
+            assert!(
+                (a[k] - bw).abs() < 1e-6,
+                "{case}: vertex {i} {k}: {a:?} vs {b:?}"
+            );
         }
     }
 }
@@ -150,9 +165,15 @@ fn solidify_vertex_groups() {
         ..SolidifySettings::default()
     };
     use crate::types::solidify::{extrude, nonmanifold};
-    check("solidify_simple_vgroups", &extrude::solidify_extrude(&s, &g, 0));
+    check(
+        "solidify_simple_vgroups",
+        &extrude::solidify_extrude(&s, &g, 0),
+    );
     s.use_even_offset = true;
-    check("solidify_even_vgroups", &extrude::solidify_extrude(&s, &g, 0));
+    check(
+        "solidify_even_vgroups",
+        &extrude::solidify_extrude(&s, &g, 0),
+    );
     s.use_even_offset = false;
     s.solidify_mode = "NON_MANIFOLD".into();
     check(

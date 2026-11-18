@@ -48,7 +48,10 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
     let me = cx.object_ref();
     let object = |id: Option<IdAny>| id.and_then(IdRef::<ObjectId>::from_any);
     // `is_disabled`: a cap that is not a mesh object (a placeholder of a missing library).
-    for cap in [object(s.start_cap), object(s.end_cap)].into_iter().flatten() {
+    for cap in [object(s.start_cap), object(s.end_cap)]
+        .into_iter()
+        .flatten()
+    {
         if cx
             .main()
             .objects
@@ -94,6 +97,32 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
         ));
     }
     Ok(out)
+}
+
+/// frap (ARCHITECTURE §12 Limits): the arrayed mesh is checked against `--max-elements` (face
+/// corners) and Blender's `int` index range before it is built. Blender's own cap (about 67
+/// million vertices, above) still allows far more corners than a statement may create; a
+/// request over the limit unwinds with [`frap_math::budget::ElementsExceeded`], which the
+/// session answers as `RuntimeError` code `LIMIT_EXCEEDED`, with rollback.
+fn reserve(chunk: Counts, count: usize, sc: Counts, ec: Counts) {
+    let total = |f: fn(&Counts) -> usize| -> Option<u64> {
+        (f(&chunk) as u64)
+            .checked_mul(count as u64)?
+            .checked_add(f(&sc) as u64)?
+            .checked_add(f(&ec) as u64)
+    };
+    let corners = total(|c| c.loops);
+    let largest = [
+        total(|c| c.verts),
+        total(|c| c.edges),
+        corners,
+        total(|c| c.faces),
+    ]
+    .into_iter()
+    .try_fold(0u64, |m, n| n.map(|n| m.max(n)));
+    if let Err(e) = frap_math::budget::reserve_corners(corners, largest) {
+        std::panic::resume_unwind(Box::new(e));
+    }
 }
 
 /// Element counts of a mesh part.
@@ -152,11 +181,7 @@ pub(crate) fn do_array(
         offset = mul_m4_m4m4(&mul_m4_m4m4(&offset, &obinv), offset_world);
     }
     // Some scaling: the mapping of consecutive copies is not a translation.
-    let scale = [
-        len3(&offset[0]),
-        len3(&offset[1]),
-        len3(&offset[2]),
-    ];
+    let scale = [len3(&offset[0]), len3(&offset[1]), len3(&offset[2])];
     let offset_has_scale = scale != [1.0, 1.0, 1.0];
 
     // About 67 million vertices max.
@@ -197,6 +222,7 @@ pub(crate) fn do_array(
     let result_nedges = chunk.edges * count + sc.edges + ec.edges;
     let result_nloops = chunk.loops * count + sc.loops + ec.loops;
     let result_nfaces = chunk.faces * count + sc.faces + ec.faces;
+    reserve(chunk, count, sc, ec);
 
     let mut positions: Vec<[f32; 3]> = Vec::with_capacity(result_nverts);
     let mut edges: Vec<[i32; 2]> = Vec::with_capacity(result_nedges);
@@ -212,6 +238,7 @@ pub(crate) fn do_array(
     // The chunks.
     let mut current_offset = unit_m4();
     for c in 0..count {
+        frap_math::budget::check_n(u32::try_from(chunk.verts + chunk.loops).unwrap_or(u32::MAX));
         if c > 0 {
             // Recalculate the cumulative offset.
             current_offset = mul_m4_m4m4(&current_offset, &offset);
@@ -235,6 +262,7 @@ pub(crate) fn do_array(
             if !offset_has_scale && c >= 2 {
                 // Mapping chunk 3 to chunk 2 is a translation of mapping 2 to 1.
                 for k in 0..chunk.verts {
+                    frap_math::budget::check();
                     let this_chunk_index = c * chunk.verts + k;
                     let prev_chunk_index = (c - 1) * chunk.verts + k;
                     let mut target = full_doubles_map[prev_chunk_index];
@@ -287,7 +315,11 @@ pub(crate) fn do_array(
 
     // Caps: `mesh_merge_transform`.
     let mut cap_part = |cap: &Mesh, cap_offset: &M4, positions: &mut Vec<[f32; 3]>| {
-        let (vb, eb, lb) = (positions.len() as i32, edges.len() as i32, corner_verts.len() as i32);
+        let (vb, eb, lb) = (
+            positions.len() as i32,
+            edges.len() as i32,
+            corner_verts.len() as i32,
+        );
         positions.extend(cap.positions().iter().map(|&p| mul_m4_v3(cap_offset, p)));
         edges.extend(cap.edges().iter().map(|e| [e[0] + vb, e[1] + vb]));
         face_offsets.extend(cap.face_offsets()[..cap.faces_num()].iter().map(|o| o + lb));
@@ -396,6 +428,7 @@ pub(crate) fn do_array(
     if use_merge {
         let mut tot_doubles = 0usize;
         for i in 0..result_nverts {
+            frap_math::budget::check();
             let mut new_i = full_doubles_map[i];
             if new_i != -1 {
                 // Follow chains of doubles (merging the caps is likely to create some).
@@ -480,7 +513,8 @@ fn copy_cap_attributes(result: &mut Mesh, cap: &Mesh, at: Counts) {
         let dv = result.deform_verts_mut();
         for (i, d) in cap_dv.into_iter().enumerate() {
             let mut d = d;
-            d.weights.retain(|w| remap.get(w.0 as usize).is_some_and(|&m| m != -1));
+            d.weights
+                .retain(|w| remap.get(w.0 as usize).is_some_and(|&m| m != -1));
             for w in d.weights.iter_mut() {
                 w.0 = remap[w.0 as usize] as u32;
             }
@@ -536,6 +570,7 @@ fn map_doubles(
     let mut low_bound = 0usize;
     let mut target_scan_completed = false;
     for &(vi, co, _) in &sources {
+        frap_math::budget::check();
         let mut best_target_vertex: i32 = -1;
         let mut best_dist_sq = dist * dist;
         // Assigned in an earlier call (other chunks).
@@ -559,6 +594,7 @@ fn map_doubles(
         }
         let mut it = low_bound;
         while it < target_verts_num && targets[it].2 <= source_sumco + dist3 {
+            frap_math::budget::check();
             let dist_sq = len_sq(co, targets[it].1);
             if dist_sq <= best_dist_sq {
                 best_dist_sq = dist_sq;
@@ -609,6 +645,75 @@ mod tests {
         assert_eq!(out.positions()[16][0], cube.positions()[0][0] + 4.0);
     }
 
+    /// Runs `f` in a statement budget, returning the unwind payload it ended with.
+    fn in_budget(
+        budget: frap_math::budget::Budget,
+        f: impl FnOnce() -> Mesh,
+    ) -> Result<Mesh, Box<dyn std::any::Any + Send>> {
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let _s = frap_math::budget::scope(budget);
+            f()
+        }))
+    }
+
+    #[test]
+    fn max_elements_refuses_huge_counts_before_building() {
+        let cube = frap_mesh::primitives::cube(2.0, true, [1.0; 3]);
+        // 2M cubes: 16M vertices, below Blender's own cap, but 48M corners.
+        let s = ArraySettings {
+            count: 2_000_000,
+            ..ArraySettings::default()
+        };
+        let t = std::time::Instant::now();
+        let r = in_budget(
+            frap_math::budget::Budget {
+                timeout: None,
+                max_elements: 1_000_000,
+            },
+            || do_array(&s, &cube, None, None, None, &mut Vec::new()),
+        );
+        let e = frap_math::budget::elements_exceeded(&*r.unwrap_err()).expect("ElementsExceeded");
+        assert_eq!(
+            (e.corners, e.limit, e.index_range),
+            (48_000_000, 1_000_000, false)
+        );
+        assert!(t.elapsed() < std::time::Duration::from_secs(1), "pre-check");
+        // Within the limit the array is built.
+        let s = ArraySettings {
+            count: 1000,
+            ..ArraySettings::default()
+        };
+        let out = in_budget(
+            frap_math::budget::Budget {
+                timeout: None,
+                max_elements: 24_000,
+            },
+            || do_array(&s, &cube, None, None, None, &mut Vec::new()),
+        )
+        .unwrap();
+        assert_eq!(out.corners_num(), 24_000);
+    }
+
+    #[test]
+    fn stmt_timeout_cancels_large_arrays() {
+        let cube = frap_mesh::primitives::cube(2.0, true, [1.0; 3]);
+        let s = ArraySettings {
+            count: 300_000,
+            use_merge_vertices: true,
+            ..ArraySettings::default()
+        };
+        let t = std::time::Instant::now();
+        let r = in_budget(
+            frap_math::budget::Budget {
+                timeout: Some(std::time::Duration::from_millis(50)),
+                max_elements: u64::MAX,
+            },
+            || do_array(&s, &cube, None, None, None, &mut Vec::new()),
+        );
+        assert!(frap_math::budget::interrupted(&*r.unwrap_err()).is_some());
+        assert!(t.elapsed() < std::time::Duration::from_secs(5));
+    }
+
     #[test]
     fn fit_length_counts_copies() {
         let cube = frap_mesh::primitives::cube(2.0, true, [1.0; 3]);
@@ -630,13 +735,19 @@ mod tests {
         assert_eq!(errors.len(), 1);
     }
 
-
     /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/array/*.py`.
     #[test]
     fn matches_blender_fixtures() {
         use super::super::weld::util::fixture::assert_evaluated;
         let cube = super::super::weld::util::fixture::factory_cube();
-        let out = do_array(&ArraySettings::default(), &cube, None, None, None, &mut Vec::new());
+        let out = do_array(
+            &ArraySettings::default(),
+            &cube,
+            None,
+            None,
+            None,
+            &mut Vec::new(),
+        );
         assert_evaluated("array/defaults", "Cube", &out, 1e-5);
         let s = ArraySettings {
             count: 4,

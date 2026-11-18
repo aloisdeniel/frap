@@ -96,7 +96,6 @@ mod tests {
         assert!(weld(&m, &s).is_none(), "the touching cubes share no edge");
     }
 
-
     /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/weld/*.py`.
     #[test]
     fn matches_blender_fixtures() {
@@ -112,7 +111,12 @@ mod tests {
             merge_threshold: 0.6,
             ..WeldSettings::default()
         };
-        assert_evaluated("weld/all_grid_collapse", "Grid", &weld(&g, &s).unwrap(), 1e-5);
+        assert_evaluated(
+            "weld/all_grid_collapse",
+            "Grid",
+            &weld(&g, &s).unwrap(),
+            1e-5,
+        );
         let g = grid(&Grid {
             x_subdivisions: 6,
             y_subdivisions: 3,

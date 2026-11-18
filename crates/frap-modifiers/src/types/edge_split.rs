@@ -95,7 +95,6 @@ mod tests {
         assert_eq!(out.verts_num(), 8, "90° is under the split angle");
     }
 
-
     /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/edge_split/angle.py`.
     #[test]
     fn matches_blender_fixtures() {
@@ -113,7 +112,12 @@ mod tests {
             split_angle: 0.349_065_85,
             ..EdgeSplitSettings::default()
         };
-        assert_evaluated("edge_split/angle", "Suzanne", &do_edge_split(&suzanne, &s), 1e-5);
+        assert_evaluated(
+            "edge_split/angle",
+            "Suzanne",
+            &do_edge_split(&suzanne, &s),
+            1e-5,
+        );
         let g = grid(&Grid {
             x_subdivisions: 3,
             y_subdivisions: 2,

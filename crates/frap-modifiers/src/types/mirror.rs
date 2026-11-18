@@ -82,6 +82,9 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
     for axis in 0..3 {
         if s.use_axis[axis] {
             result = mirror_apply_on_axis(s, frame.as_ref(), &result, axis);
+            // frap (ARCHITECTURE §12): each axis doubles the mesh at most; `--max-elements`
+            // backstop (unwinds with `ElementsExceeded`, answered as `LIMIT_EXCEEDED`).
+            frap_math::budget::check_corners(result.corners_num() as u64);
         }
     }
     Ok(result)
@@ -635,7 +638,6 @@ mod tests {
         assert!(out.positions()[..8].iter().all(|p| p[0] >= 0.0));
         assert!(out.positions()[8..].iter().all(|p| p[0] <= 0.0));
     }
-
 
     /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/mirror/*.py`.
     #[test]

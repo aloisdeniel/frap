@@ -25,10 +25,14 @@ fn eval(md: &Modifier, mesh: Mesh, _cx: &mut dyn ModEvalCx) -> Result<Mesh, ModE
     };
     // `ctx->object->totcol`: the object's material slots, the mesh's material count.
     let totcol = mesh.materials.len();
-    match s.solidify_mode.as_str() {
-        "NON_MANIFOLD" => nonmanifold::solidify_nonmanifold(s, &mesh, totcol),
-        _ => Ok(extrude::solidify_extrude(s, &mesh, totcol)),
-    }
+    let result = match s.solidify_mode.as_str() {
+        "NON_MANIFOLD" => nonmanifold::solidify_nonmanifold(s, &mesh, totcol)?,
+        _ => extrude::solidify_extrude(s, &mesh, totcol),
+    };
+    // frap (ARCHITECTURE §12): the shell is a bounded multiple of the input; `--max-elements`
+    // backstop (unwinds with `ElementsExceeded`, answered as `LIMIT_EXCEEDED`).
+    frap_math::budget::check_corners(result.corners_num() as u64);
+    Ok(result)
 }
 
 /// Shared helpers of the two modes (`BLI_math` ports).
@@ -119,7 +123,11 @@ pub(crate) mod math {
     /// `shell_v3v3_normalized_to_dist`.
     pub(crate) fn shell_v3v3_normalized_to_dist(a: V3, b: V3) -> f32 {
         let angle_cos = dot(a, b).abs();
-        if angle_cos < 1.0e-8 { 1.0 } else { 1.0 / angle_cos }
+        if angle_cos < 1.0e-8 {
+            1.0
+        } else {
+            1.0 / angle_cos
+        }
     }
     /// `mid_v3_v3v3_angle_weighted`.
     pub(crate) fn mid_v3_v3v3_angle_weighted(a: V3, b: V3) -> V3 {

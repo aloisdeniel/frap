@@ -151,6 +151,7 @@ impl<'a> LoopIter<'a> {
 fn weld_vert_ctx_alloc_and_setup(vert_dest_map: &mut [i32], vert_kill_len: usize) -> Vec<i32> {
     let mut wvert = Vec::with_capacity((2 * vert_kill_len).min(vert_dest_map.len()));
     for i in 0..vert_dest_map.len() {
+        frap_math::budget::check();
         if vert_dest_map[i] != OUT_OF_CONTEXT {
             let vert_dest = vert_dest_map[i];
             wvert.push(i as i32);
@@ -174,6 +175,7 @@ fn weld_edge_ctx_alloc_and_find_collapsed(
     let mut edge_collapsed_len = 0;
     let mut wedge = Vec::with_capacity(edges.len());
     for (i, e) in edges.iter().enumerate() {
+        frap_math::budget::check();
         let (v1, v2) = (e[0], e[1]);
         let v_dest_1 = vert_dest_map[v1 as usize];
         let v_dest_2 = vert_dest_map[v2 as usize];
@@ -181,8 +183,16 @@ fn weld_edge_ctx_alloc_and_find_collapsed(
             r_edge_dest_map[i] = OUT_OF_CONTEXT;
             continue;
         }
-        let vert_a = if v_dest_1 == OUT_OF_CONTEXT { v1 } else { v_dest_1 };
-        let vert_b = if v_dest_2 == OUT_OF_CONTEXT { v2 } else { v_dest_2 };
+        let vert_a = if v_dest_1 == OUT_OF_CONTEXT {
+            v1
+        } else {
+            v_dest_1
+        };
+        let vert_b = if v_dest_2 == OUT_OF_CONTEXT {
+            v2
+        } else {
+            v_dest_2
+        };
         if vert_a == vert_b {
             r_edge_dest_map[i] = ELEM_COLLAPSED;
             edge_collapsed_len += 1;
@@ -229,6 +239,7 @@ fn weld_edge_find_doubles(
         link_edge_buffer[v_links[we.vert_b as usize] as usize] = i as i32;
     }
     for (i, we) in weld_edges.iter().enumerate() {
+        frap_math::budget::check();
         if r_edge_dest_map[we.edge_orig as usize] != we.edge_orig {
             // Already a duplicate.
             continue;
@@ -290,6 +301,7 @@ fn weld_poly_loop_ctx_alloc(
     let mut wloop: Vec<WeldLoop> = Vec::with_capacity(corner_verts.len());
     let mut wpoly: Vec<WeldPoly> = Vec::with_capacity(faces_num);
     for i in 0..faces_num {
+        frap_math::budget::check();
         let loopstart = face_offsets[i];
         let totloop = face_offsets[i + 1] - loopstart;
         let loop_end = loopstart + totloop - 1;
@@ -511,6 +523,7 @@ fn weld_poly_loop_ctx_setup_collapsed_and_split(
     // `wpoly.len()` may change during the loop: only the original items are walked.
     let original = wm.wpoly.len();
     for i in 0..original {
+        frap_math::budget::check();
         let mut poly_loop_len = wm.wpoly[i].loop_end - wm.wpoly[i].loop_start + 1;
         let mut wl_prev: Option<usize> = None;
         let mut chang_loop_start = false;
@@ -636,6 +649,7 @@ fn poly_find_doubles(
     // Declared outside the face loop, as in Blender.
     let mut doubles_num = 0;
     for face_index in 0..poly_num {
+        frap_math::budget::check();
         if is_double[face_index] {
             continue;
         }
@@ -767,7 +781,13 @@ fn weld_mesh_context_create(
     let edge_double_kill_len =
         weld_edge_find_doubles(&wedge, mesh.verts_num(), &mut wm.edge_dest_map);
     wm.edge_kill_len = edge_collapsed_len + edge_double_kill_len;
-    weld_poly_loop_ctx_alloc(face_offsets, corner_verts, corner_edges, vert_dest_map, &mut wm);
+    weld_poly_loop_ctx_alloc(
+        face_offsets,
+        corner_verts,
+        corner_edges,
+        vert_dest_map,
+        &mut wm,
+    );
     weld_poly_loop_ctx_setup_collapsed_and_split(
         wedge.len() - edge_double_kill_len,
         vert_dest_map,
@@ -842,7 +862,10 @@ fn merge_customdata_all(
         }
     }
     debug_assert_eq!(dest_index, dest_size);
-    (src_groups, final_map.into_iter().map(|x| x as usize).collect())
+    (
+        src_groups,
+        final_map.into_iter().map(|x| x as usize).collect(),
+    )
 }
 
 fn create_merged_mesh(
@@ -864,12 +887,8 @@ fn create_merged_mesh(
     let result_nfaces = mesh.faces_num() - wm.face_kill_len + wm.wpoly_new_len;
 
     // Vertices.
-    let (vert_groups, vert_final_map) = merge_customdata_all(
-        vert_dest_map,
-        &wm.double_verts,
-        result_nverts,
-        do_mix_data,
-    );
+    let (vert_groups, vert_final_map) =
+        merge_customdata_all(vert_dest_map, &wm.double_verts, result_nverts, do_mix_data);
     // Edges.
     let (edge_groups, edge_final_map) = merge_customdata_all(
         &wm.edge_dest_map,
@@ -1304,7 +1323,12 @@ mod tests {
     #[test]
     fn duplicates_fast_marks_targets() {
         let mut t = KdTree::default();
-        let pts = [[0.0, 0.0, 0.0], [0.0005, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 0.0, 0.0]];
+        let pts = [
+            [0.0, 0.0, 0.0],
+            [0.0005, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [0.0, 0.0, 0.0],
+        ];
         for (i, p) in pts.iter().enumerate() {
             t.insert(i as i32, *p);
         }

@@ -471,8 +471,8 @@ pub(crate) fn solidify_nonmanifold(
                     for j in 0..refs[r].faces.len() {
                         let face = refs[r].faces[j] as usize;
                         if !face_singularity[face] {
-                            let is_singularity = face_range(face)
-                                .all(|c| vm[orig_corner_verts[c] as usize] == v1);
+                            let is_singularity =
+                                face_range(face).all(|c| vm[orig_corner_verts[c] as usize] == v1);
                             if is_singularity {
                                 face_singularity[face] = true;
                                 if do_shell {
@@ -626,7 +626,8 @@ pub(crate) fn solidify_nonmanifold(
                     let k_loopstart = kf.start;
                     // The first vertex of the first face in the second face.
                     let mut l = 0;
-                    while l < totloop && vm[orig_corner_verts[k_loopstart + l] as usize] != j_first_v
+                    while l < totloop
+                        && vm[orig_corner_verts[k_loopstart + l] as usize] != j_first_v
                     {
                         l += 1;
                     }
@@ -644,9 +645,7 @@ pub(crate) fn solidify_nonmanifold(
                         }
                         let vert = orig_corner_verts[j_loopstart + m];
                         has_diff = vm[vert as usize]
-                            != vm[orig_corner_verts
-                                [k_loopstart + (n as usize) % totloop]
-                                as usize];
+                            != vm[orig_corner_verts[k_loopstart + (n as usize) % totloop] as usize];
                         n += if reversed { -1 } else { 1 };
                     }
                     if !has_diff {
@@ -805,7 +804,10 @@ pub(crate) fn solidify_nonmanifold(
                     angle = an;
                 } else {
                     // `face ± j`: the side itself, then the other side.
-                    faces = [Some(if j == 0 { sorted[0].1 } else { sorted[0].1 ^ 1 }), None];
+                    faces = [
+                        Some(if j == 0 { sorted[0].1 } else { sorted[0].1 ^ 1 }),
+                        None,
+                    ];
                     angle = 0.0;
                 }
                 let new_edge = if do_shell || (adj_len == 1 && do_rim) {
@@ -1038,7 +1040,11 @@ pub(crate) fn solidify_nonmanifold(
                 while real_k < edges_len
                     || (g.is_orig_closed
                         && ((real_k as i64)
-                            <= (if first_unique_end == -1 { 0 } else { first_unique_end }) + el
+                            <= (if first_unique_end == -1 {
+                                0
+                            } else {
+                                first_unique_end
+                            }) + el
                             || first_split != last_split))
                 {
                     let k = real_k % edges_len;
@@ -1075,8 +1081,8 @@ pub(crate) fn solidify_nonmanifold(
                             let mut ng = EdgeGroup::new(edges, g.topo_group);
                             ng.is_orig_closed = g.is_orig_closed;
                             ng.is_even_split = is_even_split;
-                            ng.split = (add_index - prior_index + 1) as u32
-                                + u32::from(!g.is_orig_closed);
+                            ng.split =
+                                (add_index - prior_index + 1) as u32 + u32::from(!g.is_orig_closed);
                             if edge_groups.len() <= j + add_index + 1 {
                                 edge_groups.resize(j + add_index + 2, EdgeGroup::default());
                             }
@@ -1184,8 +1190,8 @@ pub(crate) fn solidify_nonmanifold(
                         if do_shell && do_rim {
                             new_loops_num = new_loops_num.wrapping_add(new_verts * 2);
                         } else if do_shell {
-                            new_loops_num =
-                                new_loops_num.wrapping_add((new_verts * 2).wrapping_sub(open_edges));
+                            new_loops_num = new_loops_num
+                                .wrapping_add((new_verts * 2).wrapping_sub(open_edges));
                         } else {
                             new_loops_num = new_loops_num.wrapping_add(
                                 (new_verts * 2)
@@ -1195,11 +1201,9 @@ pub(crate) fn solidify_nonmanifold(
                         }
                     } else if new_verts == 2 {
                         new_edges_num = new_edges_num.wrapping_add(1);
-                        new_loops_num = new_loops_num.wrapping_add(
-                            2u32.wrapping_sub(u32::from(
-                                !(do_rim && do_shell) && contains_open_splits,
-                            )),
-                        );
+                        new_loops_num = new_loops_num.wrapping_add(2u32.wrapping_sub(u32::from(
+                            !(do_rim && do_shell) && contains_open_splits,
+                        )));
                     }
                     new_verts = 0;
                     contains_open_splits = false;
@@ -1544,10 +1548,8 @@ pub(crate) fn solidify_nonmanifold(
                                     nor = mul(nor, (1.0 - nor_back_length * q / nor_length) * d);
                                 }
                                 if nor_back_length > f32::EPSILON {
-                                    nor_back = mul(
-                                        nor_back,
-                                        (1.0 - nor_length * q / nor_back_length) * d,
-                                    );
+                                    nor_back =
+                                        mul(nor_back, (1.0 - nor_length * q / nor_back_length) * d);
                                 }
                                 nor = add(nor, nor_back);
                             } else {
@@ -1684,20 +1686,20 @@ pub(crate) fn solidify_nonmanifold(
         }
     }
 
-    let group = |gs: &Vec<Option<Vec<EdgeGroup>>>, link: Option<(usize, usize)>| -> Option<EdgeGroup> {
-        let (v, gi) = link?;
-        gs[v].as_ref().map(|g| g[gi].clone())
-    };
+    let group =
+        |gs: &Vec<Option<Vec<EdgeGroup>>>, link: Option<(usize, usize)>| -> Option<EdgeGroup> {
+            let (v, gi) = link?;
+            gs[v].as_ref().map(|g| g[gi].clone())
+        };
     let link_singular = |gs: &Vec<Option<Vec<EdgeGroup>>>, link: Option<(usize, usize)>| -> bool {
         group(gs, link).is_some_and(|g| g.is_singularity)
     };
     let link_new_vert = |gs: &Vec<Option<Vec<EdgeGroup>>>, link: Option<(usize, usize)>| -> u32 {
         group(gs, link).map_or(EMPTY, |g| g.new_vert)
     };
-    let link_open_face_edge =
-        |gs: &Vec<Option<Vec<EdgeGroup>>>, link: Option<(usize, usize)>| -> u32 {
-            group(gs, link).map_or(EMPTY, |g| g.open_face_edge)
-        };
+    let link_open_face_edge = |gs: &Vec<Option<Vec<EdgeGroup>>>,
+                               link: Option<(usize, usize)>|
+     -> u32 { group(gs, link).map_or(EMPTY, |g| g.open_face_edge) };
 
     // Corrections for adjacent one-sided groups around a vertex (no edge duplicates or null
     // faces).
@@ -1858,7 +1860,8 @@ pub(crate) fn solidify_nonmanifold(
         let mut g2 = 0usize;
         let mut j = 0u32;
         for gi in 0..n_valid {
-            let is_open = |g: &EdgeGroup| (do_rim && !g.is_orig_closed) || (do_shell && g.split != 0);
+            let is_open =
+                |g: &EdgeGroup| (do_rim && !g.is_orig_closed) || (do_shell && g.split != 0);
             if is_open(&gs[gi]) {
                 let g = &gs[gi];
                 let mut max_crease = 0.0f32;
@@ -1956,7 +1959,8 @@ pub(crate) fn solidify_nonmanifold(
                             let g = &gs[g3];
                             if is_open(g) {
                                 // Both far ends (in faces) of the group.
-                                let f0 = face_sides[nedges[g.edges[0]].faces[0].expect("face")].index;
+                                let f0 =
+                                    face_sides[nedges[g.edges[0]].faces[0].expect("face")].index;
                                 if src_mat(f0) == l {
                                     face = f0;
                                     count += 1;
@@ -2323,7 +2327,12 @@ mod tests {
     fn a_plane_gets_a_rim() {
         let mut m = Mesh::new("p");
         m.from_pydata(
-            &[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]],
+            &[
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ],
             &[],
             &[vec![0, 1, 2, 3]],
             false,
@@ -2338,7 +2347,6 @@ mod tests {
         assert_eq!(out.faces_num(), 6);
         assert_eq!(out.edges_num(), 12);
     }
-
 
     /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/solidify/complex_*.py`.
     #[test]

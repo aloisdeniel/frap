@@ -276,12 +276,13 @@ fn texture_coords(
             } else {
                 mesh.uv_active.as_deref()
             };
-            let uvs: Option<&[[f32; 2]]> = name.and_then(|nm| {
-                match mesh.attributes().get(nm).map(|a| (&a.domain, &a.data)) {
-                    Some((Domain::Corner, AttrData::Float2(v))) => Some(v.as_slice()),
-                    _ => None,
-                }
-            });
+            let uvs: Option<&[[f32; 2]]> =
+                name.and_then(
+                    |nm| match mesh.attributes().get(nm).map(|a| (&a.domain, &a.data)) {
+                        Some((Domain::Corner, AttrData::Float2(v))) => Some(v.as_slice()),
+                        _ => None,
+                    },
+                );
             let mut out = vec![[0.0f32; 3]; n];
             let mut done = vec![false; n];
             let cv = mesh.corner_verts();
@@ -324,7 +325,14 @@ mod tests {
     fn without_texture_moves_along_normals() {
         let mut m = cube();
         let s = DisplaceSettings::default();
-        displace(&s, None, None, &super::super::weld::util::unit_m4(), None, &mut m);
+        displace(
+            &s,
+            None,
+            None,
+            &super::super::weld::util::unit_m4(),
+            None,
+            &mut m,
+        );
         // Strength 1 · (1 − 0.5) along the corner's vertex normal (1/√3 per axis).
         let p = m.positions()[0];
         let n = 0.5 / 3f32.sqrt();
@@ -418,7 +426,6 @@ mod tests {
         // Intensity 0: 2 · (0 − 0.5).
         assert_eq!(m.positions()[1][2], before[2] - 1.0);
     }
-
 
     /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/displace/no_texture.py`.
     #[test]

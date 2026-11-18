@@ -109,7 +109,11 @@ pub(crate) fn solidify_extrude(s: &SolidifySettings, mesh: &Mesh, totcol: usize)
 
     // Material offsets only with 2 or more materials.
     let mat_nr_max: i32 = if totcol > 1 { totcol as i32 - 1 } else { 0 };
-    let mat_ofs = if mat_nr_max != 0 { s.material_offset } else { 0 };
+    let mat_ofs = if mat_nr_max != 0 {
+        s.material_offset
+    } else {
+        0
+    };
     let mat_ofs_rim = if mat_nr_max != 0 {
         s.material_offset_rim
     } else {
@@ -295,7 +299,8 @@ pub(crate) fn solidify_extrude(s: &SolidifySettings, mesh: &Mesh, totcol: usize)
         ]);
         emap.push(None);
     }
-    let rim_edge = |v: usize| -> i32 { (edges_num * stride + old_vert_arr[v] as usize + new_edges) as i32 };
+    let rim_edge =
+        |v: usize| -> i32 { (edges_num * stride + old_vert_arr[v] as usize + new_edges) as i32 };
     for i in 0..new_polys {
         let eidx = new_edge_arr[i] as usize;
         let mut pidx = edge_users[eidx] as usize;
@@ -320,7 +325,11 @@ pub(crate) fn solidify_extrude(s: &SolidifySettings, mesh: &Mesh, totcol: usize)
             (edge[0] as usize, edge[1] as usize)
         };
         let copy_of = |v: usize| -> i32 {
-            ((if do_shell { v } else { old_vert_arr[v] as usize }) + verts_num) as i32
+            ((if do_shell {
+                v
+            } else {
+                old_vert_arr[v] as usize
+            }) + verts_num) as i32
         };
         let copy_edge = ((if do_shell { eidx } else { i }) + edges_num) as i32;
         corner_verts.extend([a as i32, b as i32, copy_of(b), copy_of(a)]);
@@ -451,7 +460,14 @@ pub(crate) fn solidify_extrude(s: &SolidifySettings, mesh: &Mesh, totcol: usize)
             }
         }
         if do_bevel_convex && let Some(bw) = bweight.as_mut() {
-            apply_bevel_convex(bw, &edge_users, &edge_angs, bevel_convex, edges_num, do_shell);
+            apply_bevel_convex(
+                bw,
+                &edge_users,
+                &edge_angs,
+                bevel_convex,
+                edges_num,
+                do_shell,
+            );
         }
     } else {
         let check_non_manifold = s.use_quality_normals;
@@ -464,11 +480,15 @@ pub(crate) fn solidify_extrude(s: &SolidifySettings, mesh: &Mesh, totcol: usize)
             let fv = &orig_corner_verts[f.clone()];
             let fe = &orig_corner_edges[f.clone()];
             let mut i_curr = n - 1;
-            let mut nor_prev =
-                normalized(sub(positions[fv[i_curr - 1] as usize], positions[fv[i_curr] as usize]));
+            let mut nor_prev = normalized(sub(
+                positions[fv[i_curr - 1] as usize],
+                positions[fv[i_curr] as usize],
+            ));
             for i_next in 0..n {
-                let nor_next =
-                    normalized(sub(positions[fv[i_curr] as usize], positions[fv[i_next] as usize]));
+                let nor_next = normalized(sub(
+                    positions[fv[i_curr] as usize],
+                    positions[fv[i_next] as usize],
+                ));
                 let angle = angle_normalized_v3v3(nor_prev, nor_next).max(f32::EPSILON);
                 let vidx = fv[i_curr] as usize;
                 vert_accum[vidx] += angle;
@@ -534,7 +554,14 @@ pub(crate) fn solidify_extrude(s: &SolidifySettings, mesh: &Mesh, totcol: usize)
             }
         }
         if do_bevel_convex && let Some(bw) = bweight.as_mut() {
-            apply_bevel_convex(bw, &edge_users, &edge_angs, bevel_convex, edges_num, do_shell);
+            apply_bevel_convex(
+                bw,
+                &edge_users,
+                &edge_angs,
+                bevel_convex,
+                edges_num,
+                do_shell,
+            );
         }
         for (test, ofs) in [(false, ofs_new), (true, ofs_orig)] {
             if ofs == 0.0 {
@@ -783,7 +810,12 @@ mod tests {
     fn a_plane_gets_a_shell_and_a_rim() {
         let mut m = Mesh::new("p");
         m.from_pydata(
-            &[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]],
+            &[
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ],
             &[],
             &[vec![0, 1, 2, 3]],
             false,
@@ -800,7 +832,6 @@ mod tests {
         assert!((out.positions()[4][2] + 0.1).abs() < 1e-6);
         assert!(out.positions()[0][2].abs() < 1e-6);
     }
-
 
     /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/solidify/simple_*.py`.
     #[test]

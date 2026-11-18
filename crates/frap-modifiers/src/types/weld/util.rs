@@ -313,7 +313,10 @@ pub(crate) fn mix_groups(data: &AttrData, groups: &[SmallVec<[usize; 2]>]) -> Op
         }
         AttrData::String(_) => return None,
         other => {
-            let first: Vec<usize> = groups.iter().map(|g| g.first().copied().unwrap_or(0)).collect();
+            let first: Vec<usize> = groups
+                .iter()
+                .map(|g| g.first().copied().unwrap_or(0))
+                .collect();
             other.gather_with_default(&first, first.len())
         }
     })
@@ -474,7 +477,8 @@ pub(crate) fn mul_m4_m4m4(a: &M4, b: &M4) -> M4 {
     let mut r = [[0.0f32; 4]; 4];
     for (j, rj) in r.iter_mut().enumerate() {
         for (k, rjk) in rj.iter_mut().enumerate() {
-            *rjk = (b[j][0] * a[0][k] + b[j][1] * a[1][k]) + (b[j][2] * a[2][k] + b[j][3] * a[3][k]);
+            *rjk =
+                (b[j][0] * a[0][k] + b[j][1] * a[1][k]) + (b[j][2] * a[2][k] + b[j][3] * a[3][k]);
         }
     }
     r
