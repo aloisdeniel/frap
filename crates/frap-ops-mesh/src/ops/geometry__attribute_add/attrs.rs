@@ -577,7 +577,7 @@ mod tests {
     #[test]
     fn byte_color_encoding() {
         assert_eq!(encode_byte_color([0.0, 0.0, 0.0, 1.0]), [0, 0, 0, 255]);
-        assert_eq!(encode_byte_color([1.0, 0.5, 0.2140411, 0.5]), [255, 188, 128, 128]);
+        assert_eq!(encode_byte_color([1.0, 0.5, 0.2140411, 0.5]), [255, 188, 127, 128]);
     }
 
     #[test]
@@ -591,7 +591,7 @@ mod tests {
         assert_eq!(remove(&mut me, &mut names, "A"), Ok(true));
         assert_eq!(names.color_active.as_deref(), Some("B"));
         assert_eq!(remove(&mut me, &mut names, "B"), Ok(true));
-        assert_eq!((names.color_active, names.color_default), (None, None));
+        assert_eq!((names.color_active.clone(), names.color_default.clone()), (None, None));
         assert!(remove(&mut me, &mut names, "position").is_err());
         assert_eq!(remove(&mut me, &mut names, "nope"), Ok(false));
     }

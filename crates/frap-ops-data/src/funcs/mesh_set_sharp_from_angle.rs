@@ -121,7 +121,7 @@ fn mesh_set_sharp_from_angle(
     super::_common::refuse_detached(this, "set_sharp_from_angle")?;
     let me = mesh_of(this)?;
     let angle = match args.get("angle") {
-        Some(Value::Float(f)) => *f as f32,
+        Some(Value::Float(f)) => *f,
         Some(Value::Int(i)) => *i as f32,
         _ => std::f32::consts::PI,
     }

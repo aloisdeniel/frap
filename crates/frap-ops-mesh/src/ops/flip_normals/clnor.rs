@@ -262,7 +262,13 @@ fn co(bm: &BMesh, v: VertId) -> V3 {
 }
 
 /// One call of `bm_mesh_loops_calc_normals_for_loop` with a space array and custom normals.
-fn calc_for_loop(bm: &mut BMesh, out: &mut Spaces, has_clnors: bool, l_curr: LoopId) {
+fn calc_for_loop(
+    bm: &mut BMesh,
+    out: &mut Spaces,
+    has_clnors: bool,
+    average: bool,
+    l_curr: LoopId,
+) {
     let lc = bm.lp(l_curr).clone();
     if etag(bm, lc.e) && (ltag(bm, l_curr) || !check_cyclic_smooth_fan(bm, l_curr)) {
         return;
@@ -348,7 +354,7 @@ fn calc_for_loop(bm: &mut BMesh, out: &mut Spaces, has_clnors: bool, l_curr: Loo
     let mut fan_normal = lnor_n;
     if has_clnors {
         let mut r = clnor_ref.unwrap_or([0; 2]);
-        if clnors_invalid {
+        if clnors_invalid && average {
             let avg = [
                 (clnors_avg[0] / clnors_count) as i16,
                 (clnors_avg[1] / clnors_count) as i16,
@@ -378,9 +384,10 @@ fn calc_for_loop(bm: &mut BMesh, out: &mut Spaces, has_clnors: bool, l_curr: Loo
 // Ported from blender/source/blender/bmesh/intern/bmesh_mesh_normals.cc
 // (bm_mesh_loops_calc_normals__single_threaded with a space array, no split angle).
 /// The loop normals and normal spaces of the BMesh, with its custom normals when the layer
-/// exists (fans whose custom normal values differ are set to their average, as Blender does).
-/// Uses and leaves the edge, loop and vertex `TAG` flags. Face normals must be current.
-pub(crate) fn calc(bm: &mut BMesh) -> Spaces {
+/// exists. With `average`, fans whose custom normal values differ are set to their average, as
+/// Blender does whenever it (re)builds its space array. Uses and leaves the edge, loop and
+/// vertex `TAG` flags. Face normals must be current.
+pub(crate) fn calc(bm: &mut BMesh, average: bool) -> Spaces {
     let has_clnors = has_layer(bm);
     let n = bm.loops.capacity();
     let mut out = Spaces {
@@ -402,19 +409,32 @@ pub(crate) fn calc(bm: &mut BMesh) -> Spaces {
     }
     let loops = out.loops.clone();
     for l in loops {
-        calc_for_loop(bm, &mut out, has_clnors, l);
+        calc_for_loop(bm, &mut out, has_clnors, average, l);
     }
     out
 }
 
-/// `BM_lnorspace_update` from a fresh state (`bm_lnorspace_ensure_from_free_normals` →
-/// `BM_lnorspacearr_store`): ensures the custom normal layer, then computes the spaces.
+/// `BM_lnorspace_update`: ensures the custom normal layer, then computes the spaces. Blender
+/// keeps its space array between operators and rebuilds it only when an operator marked it
+/// dirty, which is when mixed custom normal values in a fan get averaged; frap recomputes the
+/// spaces every time and averages only where Blender rebuilds ([`rebuild`]), so fans an earlier
+/// re-encoding left mixed stay as Blender leaves them.
 pub(crate) fn update(bm: &mut BMesh) -> Spaces {
     ensure_layer(bm);
     for f in bm.face_ids() {
         bm.face_normal_update(f);
     }
-    calc(bm)
+    calc(bm, false)
+}
+
+/// `BM_lnorspace_rebuild` after `BM_SPACEARR_DIRTY_ALL` (the winding changed): the spaces,
+/// with the custom normals of each fan averaged when they differ.
+pub(crate) fn rebuild(bm: &mut BMesh) -> Spaces {
+    ensure_layer(bm);
+    for f in bm.face_ids() {
+        bm.face_normal_update(f);
+    }
+    calc(bm, true)
 }
 
 /// One entry of `BMLoopNorEditDataArray`.
@@ -641,7 +661,7 @@ pub(crate) fn flip_apply(bm: &mut BMesh, old: Option<EditArray>) -> bool {
     if old.data.is_empty() {
         return false;
     }
-    let sp = update(bm);
+    let sp = rebuild(bm);
     let new_full = editdata_array(bm, &sp, true, Mark::Faces);
     for nf in &new_full.data {
         let Some(oi) = old.by_index[nf.loop_index] else {
