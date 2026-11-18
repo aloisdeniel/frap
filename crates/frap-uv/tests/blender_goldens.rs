@@ -9,6 +9,11 @@
 //!   Blender's output (within 2e-6, the last bits of `atan2f` / `cosf` across libms).
 //! * The island packer (every shape, rotation and margin method, overlap merging) on Blender's
 //!   own inputs: equal to Blender, plus the T3 invariants (inside the unit square, no overlap).
+//!   The repacks include axis-aligned rotations of already axis-aligned layouts, where the
+//!   fitted angle is `atan2f(±0, -1)`: frap's `atan2f` follows the reference libm (macOS),
+//!   which rounds it below pi (`param::bli::atan2f`). Elsewhere frap's `atan2f` can still
+//!   differ from Apple's by one ulp (about 3% of random inputs), which only matters for an
+//!   angle on a ±90° boundary.
 //!   The bitmap (`xatlas`) packer cases take seconds optimized and minutes unoptimized (as in
 //!   Blender, where they take seconds too), so they only run in release builds
 //!   (`cargo test --release -p frap-uv`); `cylinder_pack_islands_merge_overlap` keeps the
@@ -471,4 +476,66 @@ fn cylinder_pack_islands_merge_overlap() {
     // The factory tool settings' `uvcalc_margin`.
     pack_islands_op(&mesh, &mut uvs, &kw, 0.001);
     check("cyl8_pack_merge_overlap", &uvs, &want, EXACT_TOL);
+}
+
+// Repacks of axis-aligned layouts with an axis-aligned rotation: the fitted angle of an island
+// that is already aligned is `atan2f(±0, -1)`, which must round below pi as in Blender's libm
+// (above pi, `angle_wrap` crosses ±90° and the island ends up turned by 180°).
+
+#[test]
+fn monkey_pack_islands_axis_aligned_x_aabb() {
+    pack_case("monkey_pack_x_aabb", "monkey_smart_project");
+}
+
+#[test]
+#[cfg_attr(
+    debug_assertions,
+    ignore = "xatlas packer: minutes unoptimized, run with --release"
+)]
+fn monkey_pack_islands_axis_aligned_x_convex() {
+    pack_case("monkey_pack_x_convex", "monkey_smart_project");
+}
+
+#[test]
+#[cfg_attr(
+    debug_assertions,
+    ignore = "xatlas packer: minutes unoptimized, run with --release"
+)]
+fn monkey_pack_islands_axis_aligned_x_concave() {
+    pack_case("monkey_pack_x_concave", "monkey_smart_project");
+}
+
+#[test]
+fn monkey_smart_project_axis_aligned_x() {
+    let (mesh, mut uvs, want) = case("monkey_smart_project_x");
+    smart_project_rotate(&mesh, &mut uvs, frap_uv::RotationMethod::AxisAlignedX);
+    check("monkey_smart_project_x", &uvs, &want, EXACT_TOL);
+}
+
+#[test]
+fn monkey_smart_x_pack_islands_axis_aligned_y_aabb() {
+    pack_case("monkey_smart_x_pack_y_aabb", "monkey_smart_project_x");
+}
+
+#[test]
+#[cfg_attr(
+    debug_assertions,
+    ignore = "xatlas packer: minutes unoptimized, run with --release"
+)]
+fn monkey_smart_x_pack_islands_axis_aligned_y() {
+    pack_case("monkey_smart_x_pack_y", "monkey_smart_project_x");
+}
+
+#[test]
+fn monkey_smart_x_pack_islands_axis_aligned_aabb() {
+    pack_case("monkey_smart_x_pack_aligned_aabb", "monkey_smart_project_x");
+}
+
+#[test]
+#[cfg_attr(
+    debug_assertions,
+    ignore = "xatlas packer: minutes unoptimized, run with --release"
+)]
+fn monkey_smart_x_pack_islands_axis_aligned() {
+    pack_case("monkey_smart_x_pack_aligned", "monkey_smart_project_x");
 }

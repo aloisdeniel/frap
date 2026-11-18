@@ -1451,6 +1451,24 @@ impl ParamMesh {
         }
     }
 
+    /// The number of charts (not skipped by [`ParamMesh::flush`]) holding a non-finite UV.
+    /// Like Blender, the solvers work in single precision and write NaN UVs without failing
+    /// when the coordinates are too large (a 1e15 quad already overflows the area sums of
+    /// `average`; Blender 5.2.4's `uv.unwrap` returns FINISHED with NaN UVs). Not part of
+    /// Blender: a frap extra so that callers can report the NaNs instead of writing them
+    /// silently.
+    pub fn non_finite_charts(&self) -> usize {
+        (0..self.charts.len())
+            .filter(|&c| {
+                !self.charts[c].skip_flush
+                    && self.chart_vert_list(c).iter().any(|&v| {
+                        let uv = self.verts[v as usize].uv;
+                        !(uv[0].is_finite() && uv[1].is_finite())
+                    })
+            })
+            .count()
+    }
+
     /// `uv_parametrizer_flush_restore`: writes back the UVs read at construction.
     pub fn flush_restore(&self, uvs: &mut [[f32; 2]]) {
         for c in 0..self.charts.len() {
@@ -1604,6 +1622,34 @@ mod tests {
         let mut cut = build(&[[0, 3], [1, 3]]);
         assert_eq!(cut.construct_end(ConstructOpts::default()), 0);
         assert_eq!(cut.chart_count(), 1);
+    }
+
+    /// Huge coordinates: like Blender 5.2.4 (`uv.unwrap` FINISHED, every UV NaN), the unwrap
+    /// does not fail, and `non_finite_charts` reports the chart.
+    #[test]
+    fn huge_coordinates_give_nan_uvs_and_are_reported() {
+        for (s, want) in [(1.0f32, 0usize), (1e30, 1)] {
+            let mut pm = ParamMesh::new();
+            let co = [[0.0, 0.0, 0.0], [s, 0.0, 0.0], [s, s, 0.0], [0.0, s, 0.0]];
+            let keys = [0u64, 1, 2, 3];
+            let fl = [false; 4];
+            let init = [[0.0, 0.0]; 4];
+            pm.face_add(&ParamFace::new(
+                0,
+                &keys,
+                &co,
+                &[0, 1, 2, 3],
+                &init,
+                &fl,
+                &fl,
+            ));
+            assert_eq!(pm.construct_end(ConstructOpts::default()), 0);
+            pm.lscm_begin(false, false, false);
+            assert_eq!(pm.lscm_solve().failed, 0);
+            pm.lscm_end();
+            pm.average(true, false, false);
+            assert_eq!(pm.non_finite_charts(), want, "size {s}");
+        }
     }
 
     #[test]

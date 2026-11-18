@@ -10,7 +10,7 @@
 //! Ported from blender/source/blender/editors/uvedit/uvedit_unwrap_ops.cc and
 //! blender/source/blender/blenlib/intern/math_geom.cc (Blender 5.2.4).
 
-use crate::param::bli::{M3, V3, mul_m3_v3};
+use crate::param::bli::{M3, V3, atan2f, mul_m3_v3};
 
 /// `snap_coordinate`: maps `u` into the closed unit interval, snapping values within a quarter
 /// texel of 65536 to the bounds.
@@ -41,7 +41,7 @@ pub fn map_to_tube_ex(co: [f32; 3]) -> ([f32; 2], bool) {
     let (u, regular) = if x * x + y * y < 1e-6 * 1e-6 {
         (0.5, false)
     } else {
-        (snap_coordinate(libm::atan2f(x, -y) / two_pi_f()), true)
+        (snap_coordinate(atan2f(x, -y) / two_pi_f()), true)
     };
     ([u, (z + 1.0) / 2.0], regular)
 }
@@ -59,9 +59,9 @@ pub fn map_to_sphere_ex(co: [f32; 3]) -> ([f32; 2], bool) {
     let (u, regular) = if len_xy <= z.abs() * epsilon {
         (0.5, false)
     } else {
-        (snap_coordinate(libm::atan2f(x, -y) / two_pi_f()), true)
+        (snap_coordinate(atan2f(x, -y) / two_pi_f()), true)
     };
-    let v = snap_coordinate(libm::atan2f(len_xy, -z) / core::f32::consts::PI);
+    let v = snap_coordinate(atan2f(len_xy, -z) / core::f32::consts::PI);
     ([u, v], regular)
 }
 

@@ -429,7 +429,8 @@ fn aabb_fit_hull_2d(points_hull: &[V2]) -> f32 {
         hull_iter.step();
     }
     if area_best != f32::MAX {
-        libm::atan2(f64::from(sincos_best[0]), f64::from(sincos_best[1])) as f32
+        // `atan2(sincos_best[0], sincos_best[1])` on floats: `atan2f`.
+        crate::param::bli::atan2f(sincos_best[0], sincos_best[1])
     } else {
         0.0
     }

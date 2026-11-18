@@ -120,6 +120,19 @@ pub fn normalize2_div(a: V2) -> (V2, f32) {
     }
 }
 
+/// The C `atan2f` Blender calls (also C++ `atan2` on two floats), with the semantics of the
+/// reference build's libm (Blender 5.2.4 on macOS, `libsystem_m`): the result is computed in
+/// double precision and rounded to f32 (which matches Apple's `atan2f` to within one ulp), and
+/// its magnitude never exceeds `0x40490FDA` (3.1415925), the largest float below pi. Apple's
+/// `atan2f(±0, -1)` returns that value and not the correctly rounded 3.1415927 (just above
+/// pi). The difference matters: an angle just above pi wraps across the ±90° boundary of
+/// `angle_wrap` and the island packer then turns an axis-aligned island by 180 degrees.
+#[inline]
+pub fn atan2f(y: f32, x: f32) -> f32 {
+    const PI_BELOW: f32 = f32::from_bits(0x4049_0FDA);
+    (libm::atan2(f64::from(y), f64::from(x)) as f32).clamp(-PI_BELOW, PI_BELOW)
+}
+
 /// `safe_asinf`.
 #[inline]
 pub fn safe_asinf(a: f32) -> f32 {
@@ -393,6 +406,26 @@ pub fn isect_tri_tri_v2(a0: V2, a1: V2, a2: V2, b0: V2, b1: V2, b2: V2) -> bool 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Values of Apple's `atan2f` (Blender 5.2.4's libm on macOS), bit for bit.
+    #[test]
+    fn atan2f_matches_reference_libm() {
+        let below_pi = f32::from_bits(0x4049_0FDA);
+        for (y, x, want) in [
+            (0.0f32, -1.0f32, below_pi),
+            (-0.0, -1.0, -below_pi),
+            (1e-8, -1.0, below_pi),
+            (-1e-8, -1.0, -below_pi),
+            (1e-7, -1.0, below_pi),
+            (1.0, 0.0, f32::from_bits(0x3FC9_0FDB)),
+            (-1.0, 0.0, f32::from_bits(0xBFC9_0FDB)),
+            (1.0, 1.0, f32::from_bits(0x3F49_0FDB)),
+            (0.0, 1.0, 0.0),
+        ] {
+            let got = atan2f(y, x);
+            assert_eq!(got.to_bits(), want.to_bits(), "atan2f({y}, {x}) = {got}");
+        }
+    }
 
     #[test]
     fn angles_match_acos() {

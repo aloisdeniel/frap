@@ -369,6 +369,11 @@ pub fn unwrap(
 /// `smart_project_exec` with the operator defaults (`angle_limit` 66°, `island_margin` 0,
 /// `area_weight` 0, `rotate_method='AXIS_ALIGNED_Y'`, `margin_method='SCALED'`).
 pub fn smart_project(mesh: &Mesh, uvs: &mut [[f32; 2]]) {
+    smart_project_rotate(mesh, uvs, RotationMethod::AxisAlignedY);
+}
+
+/// [`smart_project`] with another `rotate_method`.
+pub fn smart_project_rotate(mesh: &Mesh, uvs: &mut [[f32; 2]], rotate_method: RotationMethod) {
     // `DEG2RADF(66.0f)`.
     let angle_limit = 66.0f32 * (core::f64::consts::PI / 180.0) as f32;
     let groups =
@@ -393,7 +398,7 @@ pub fn smart_project(mesh: &Mesh, uvs: &mut [[f32; 2]]) {
         }
     }
     let mut params = PackParams::default();
-    params.rotate_method = RotationMethod::AxisAlignedY;
+    params.rotate_method = rotate_method;
     params.only_selected_uvs = false;
     params.only_selected_faces = true;
     params.correct_aspect = true;

@@ -230,6 +230,57 @@ CASES = [
             ("pack_islands", {"margin_method": "ADD", "margin": 0.01, "shape_method": "AABB"}),
         ],
     ),
+    # Repacks with an axis-aligned rotation of an already axis-aligned layout: the fitted angle
+    # is `atan2f(0, -1)`, which Blender's libm rounds below pi (an angle above pi would wrap
+    # across +/-90 degrees and turn the island by 180 degrees).
+    (
+        "monkey_pack_x_aabb",
+        "monkey",
+        [("smart_project", {}), ("pack_islands", {"rotate_method": "AXIS_ALIGNED_X", "shape_method": "AABB"})],
+    ),
+    (
+        "monkey_pack_x_convex",
+        "monkey",
+        [("smart_project", {}), ("pack_islands", {"rotate_method": "AXIS_ALIGNED_X", "shape_method": "CONVEX"})],
+    ),
+    (
+        "monkey_pack_x_concave",
+        "monkey",
+        [("smart_project", {}), ("pack_islands", {"rotate_method": "AXIS_ALIGNED_X"})],
+    ),
+    ("monkey_smart_project_x", "monkey", [("smart_project", {"rotate_method": "AXIS_ALIGNED_X"})]),
+    (
+        "monkey_smart_x_pack_y_aabb",
+        "monkey",
+        [
+            ("smart_project", {"rotate_method": "AXIS_ALIGNED_X"}),
+            ("pack_islands", {"rotate_method": "AXIS_ALIGNED_Y", "shape_method": "AABB"}),
+        ],
+    ),
+    (
+        "monkey_smart_x_pack_y",
+        "monkey",
+        [
+            ("smart_project", {"rotate_method": "AXIS_ALIGNED_X"}),
+            ("pack_islands", {"rotate_method": "AXIS_ALIGNED_Y"}),
+        ],
+    ),
+    (
+        "monkey_smart_x_pack_aligned_aabb",
+        "monkey",
+        [
+            ("smart_project", {"rotate_method": "AXIS_ALIGNED_X"}),
+            ("pack_islands", {"rotate_method": "AXIS_ALIGNED", "shape_method": "AABB"}),
+        ],
+    ),
+    (
+        "monkey_smart_x_pack_aligned",
+        "monkey",
+        [
+            ("smart_project", {"rotate_method": "AXIS_ALIGNED_X"}),
+            ("pack_islands", {"rotate_method": "AXIS_ALIGNED"}),
+        ],
+    ),
     ("cyl8_cube_project", "cyl8", [("cube_project", {})]),
     (
         "cyl8_pack_merge_overlap",
