@@ -604,6 +604,19 @@ pub(crate) mod testing {
                 *m.deform_verts_mut() = dv;
             }
         }
+        if let Some(uv) = d.get("uv").and_then(Json::as_array) {
+            let uv: Vec<[f32; 2]> = uv
+                .iter()
+                .map(|p| [p[0].as_f64().unwrap() as f32, p[1].as_f64().unwrap() as f32])
+                .collect();
+            m.attributes_mut().insert(frap_mesh::Attribute {
+                name: "UVMap".into(),
+                domain: frap_mesh::Domain::Corner,
+                data: frap_mesh::AttrData::Float2(Arc::new(uv)),
+            });
+            m.uv_active = Some("UVMap".into());
+            m.uv_active_render = Some("UVMap".into());
+        }
         if let Some(sf) = d.get("sharp_face").and_then(Json::as_array) {
             let v: Vec<bool> = sf.iter().map(|b| b.as_bool().unwrap()).collect();
             m.set_bool_attribute(frap_mesh::SHARP_FACE, frap_mesh::Domain::Face, v);
@@ -655,6 +668,71 @@ pub(crate) mod testing {
             .map(|f| got.face(f).map(|c| got.corner_verts()[c]).collect())
             .collect();
         assert_eq!(got_faces, faces, "faces");
+    }
+
+    /// Asserts the first UV map equals the dump's `uv` within `tol` (when the dump has one).
+    pub(crate) fn assert_uv(got: &Mesh, want: &Json, tol: f32) {
+        let Some(w) = want.get("uv").and_then(Json::as_array) else {
+            return;
+        };
+        let maps = got.uv_maps();
+        let (_, g) = maps.first().expect("a UV map");
+        assert_eq!(g.len(), w.len(), "UV count");
+        for (i, (a, b)) in g.iter().zip(w).enumerate() {
+            let b = [b[0].as_f64().unwrap() as f32, b[1].as_f64().unwrap() as f32];
+            assert!(
+                (a[0] - b[0]).abs() <= tol && (a[1] - b[1]).abs() <= tol,
+                "corner {i}: uv {a:?} vs Blender {b:?}"
+            );
+        }
+    }
+
+    /// Asserts a dumped attribute (`{domain, data_type, data}` under `name`, or null) equals
+    /// frap's, values within `tol`.
+    pub(crate) fn assert_attribute(got: &Mesh, want: &Json, name: &str, tol: f32) {
+        let w = &want[name];
+        let g = got.attributes().get(name);
+        if w.is_null() {
+            assert!(g.is_none(), "{name}: Blender has no such attribute");
+            return;
+        }
+        let g = g.unwrap_or_else(|| panic!("{name}: missing in frap"));
+        assert_eq!(g.domain.identifier(), w["domain"].as_str().unwrap(), "{name}");
+        let data = w["data"].as_array().unwrap();
+        let num = |v: &Json| -> Vec<f64> {
+            match v {
+                Json::Bool(b) => vec![f64::from(u8::from(*b))],
+                Json::Number(n) => vec![n.as_f64().unwrap()],
+                Json::Array(a) => a.iter().map(|x| x.as_f64().unwrap()).collect(),
+                _ => panic!("unexpected value {v}"),
+            }
+        };
+        let got_vals: Vec<Vec<f64>> = match &g.data {
+            frap_mesh::AttrData::Bool(v) => v.iter().map(|b| vec![f64::from(u8::from(*b))]).collect(),
+            frap_mesh::AttrData::Int(v) => v.iter().map(|x| vec![*x as f64]).collect(),
+            frap_mesh::AttrData::Float(v) => v.iter().map(|x| vec![*x as f64]).collect(),
+            frap_mesh::AttrData::Int16x2(v) => {
+                v.iter().map(|x| vec![x[0] as f64, x[1] as f64]).collect()
+            }
+            frap_mesh::AttrData::Float2(v) => {
+                v.iter().map(|x| vec![x[0] as f64, x[1] as f64]).collect()
+            }
+            frap_mesh::AttrData::Float3(v) => v
+                .iter()
+                .map(|x| vec![x[0] as f64, x[1] as f64, x[2] as f64])
+                .collect(),
+            other => panic!("{name}: unsupported type {}", other.data_type()),
+        };
+        assert_eq!(got_vals.len(), data.len(), "{name}: length");
+        for (i, (a, b)) in got_vals.iter().zip(data).enumerate() {
+            let b = num(b);
+            for (x, y) in a.iter().zip(&b) {
+                assert!(
+                    (x - y).abs() <= tol as f64 * y.abs().max(1.0),
+                    "{name}[{i}]: {a:?} vs Blender {b:?}"
+                );
+            }
+        }
     }
 
     /// Asserts corner normals equal the dump's within `tol`.

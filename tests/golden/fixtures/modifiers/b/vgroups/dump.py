@@ -35,6 +35,8 @@ def mesh_dump(me, weights=True, attrs=()):
     if sf is not None:
         d["sharp_face"] = [x.value for x in sf.data]
     d["corner_normals"] = [list(n.vector) for n in me.corner_normals]
+    if me.uv_layers:
+        d["uv"] = [list(x.uv) for x in me.uv_layers[0].data]
     for name in attrs:
         a = me.attributes.get(name)
         if a is None:
@@ -260,8 +262,70 @@ def mask_cases():
     write("mask", cases)
 
 
+def profile():
+    # An open profile from the axis out and back (edges only), plus a loose edge pair.
+    me = bpy.data.meshes.new("Profile")
+    me.from_pydata([(0, 0, 0), (1, 0, 0.5), (1.2, 0, 1.5), (0.0005, 0, 2), (2, 0, 0), (2.5, 0, 0.5)],
+                   [(0, 1), (1, 2), (2, 3), (4, 5)], [])
+    ob = bpy.data.objects.new("Profile", me)
+    bpy.context.scene.collection.objects.link(ob)
+    bpy.context.view_layer.objects.active = ob
+
+
+def ring():
+    # A closed loop in the XZ plane away from the Z axis (edges only, reversed winding).
+    me = bpy.data.meshes.new("Ring")
+    n = 6
+    co = [(2 + 0.5 * math.cos(2 * math.pi * i / n), 0, 0.5 * math.sin(2 * math.pi * i / n))
+          for i in range(n)]
+    me.from_pydata(co, [((i + 1) % n, i) for i in range(n)], [])
+    ob = bpy.data.objects.new("Ring", me)
+    bpy.context.scene.collection.objects.link(ob)
+    bpy.context.view_layer.objects.active = ob
+
+
+def plane_off():
+    bpy.ops.mesh.primitive_plane_add(size=1, location=(0, 0, 0))
+    ob = bpy.context.object
+    for v in ob.data.vertices:
+        v.co.x += 1.5
+
+
+def screw_cases():
+    cases = []
+    base = {"steps": 16, "render_steps": 16, "iterations": 1, "axis": 'Z',
+            "angle": 2 * math.pi, "screw_offset": 0.0, "merge_threshold": 0.01,
+            "use_normal_flip": False, "use_normal_calculate": False,
+            "use_object_screw_offset": False, "use_merge_vertices": False,
+            "use_smooth_shade": True, "use_stretch_u": False, "use_stretch_v": False}
+    for name, prim, extra in [
+        ("profile_defaults", profile, {}),
+        ("profile_merge_calc", profile,
+         {"use_merge_vertices": True, "use_normal_calculate": True, "steps": 12}),
+        ("profile_merge_flip_flat", profile,
+         {"use_merge_vertices": True, "use_normal_flip": True, "use_smooth_shade": False,
+          "steps": 6, "merge_threshold": 0.001}),
+        ("ring_calc_half", ring,
+         {"use_normal_calculate": True, "angle": math.pi, "steps": 5}),
+        ("ring_calc_neg", ring,
+         {"use_normal_calculate": True, "angle": -4.0, "steps": 7, "screw_offset": 1.5,
+          "iterations": 2}),
+        ("plane_uv_full", plane_off, {"steps": 8}),
+        ("plane_uv_stretch_offset", plane_off,
+         {"steps": 6, "angle": 3.0, "screw_offset": 2.0, "use_stretch_u": True,
+          "use_stretch_v": True, "use_normal_flip": True}),
+        ("profile_uv_x", profile, {"axis": 'X', "steps": 4, "angle": 1.0}),
+    ]:
+        props = dict(base)
+        props.update(extra)
+        c = run(prim, [], 'SCREW', props, attrs=("sharp_face", "material_index"))
+        c["name"] = name
+        cases.append(c)
+    write("screw", cases)
+
+
 ALL = [smooth_cases, cast_cases, simple_deform_cases, laplaciansmooth_cases, wireframe_cases,
-       mask_cases]
+       mask_cases, screw_cases]
 
 if __name__ == "__main__":
     for f in ALL:
