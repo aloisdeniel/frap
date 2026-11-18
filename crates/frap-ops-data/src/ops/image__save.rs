@@ -7,6 +7,7 @@
 //! incorrect`; see `image__pack.rs`). `bpy.data.images['X'].save()` does the work.
 
 use frap_op::prelude::*;
+use frap_op::PollReq;
 use frap_op::{Poll, PollFail, operator};
 use frap_scene::Context;
 use frap_scene::id::PathBase;
@@ -24,7 +25,7 @@ fn has_data_poll(c: &Context) -> Result<(), PollFail> {
         blend: c.main.filepath.clone(),
         cwd: None,
     };
-    if im.acquire(&base).is_none() {
+    if im.info(&base).is_none() {
         return Err(no_context_image(alternative));
     }
     Ok(())
@@ -32,7 +33,7 @@ fn has_data_poll(c: &Context) -> Result<(), PollFail> {
 
 /// `image_save_poll` / `image_save_as_poll`
 pub(crate) const HAS_DATA_POLL: Poll = Poll {
-    requires: &[],
+    requires: &[PollReq::ContextImage],
     check: has_data_poll,
 };
 

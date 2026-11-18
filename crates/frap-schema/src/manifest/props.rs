@@ -49,6 +49,7 @@ pub fn poll_req_name(r: &PollReq) -> String {
         PollReq::HasSelectedObjects => "HAS_SELECTED_OBJECTS".into(),
         PollReq::SceneHasCamera => "SCENE_HAS_CAMERA".into(),
         PollReq::SceneEditable => "SCENE_EDITABLE".into(),
+        PollReq::ContextImage => "CONTEXT_IMAGE".into(),
         // `PollReq` is non-exhaustive: later variants get their Debug name in SCREAMING_CASE.
         other => screaming(&format!("{other:?}")),
     }
@@ -69,6 +70,11 @@ pub fn poll_req_text(r: &PollReq) -> String {
         PollReq::HasSelectedObjects => "at least one selected object".into(),
         PollReq::SceneHasCamera => "scene.camera is set".into(),
         PollReq::SceneEditable => "an editable scene".into(),
+        PollReq::ContextImage => {
+            "the Image Editor's image (bpy.context.edit_image), which headless Blender and frap \
+             never have"
+                .into()
+        }
         other => format!("{other:?}"),
     }
 }

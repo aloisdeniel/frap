@@ -13,11 +13,13 @@
 //!   colour mode is the buffer's (24 → RGB, 32 → RGBA), and a modified RGBA buffer whose alpha
 //!   is all opaque is written as RGB (`BKE_imbuf_alpha_test`);
 //! - pixels are encoded to the image's colour space, `sRGB` for a generated image (so a float
-//!   generated image is written sRGB-encoded, also to OpenEXR);
+//!   generated image is written sRGB-encoded, also to OpenEXR); a float buffer's premultiplied
+//!   colours are converted first and divided by alpha afterwards for a 16-bit PNG, divided
+//!   first for 8-bit formats, and written premultiplied to OpenEXR (`write::Unpremul`);
 //! - afterwards (unless `save_copy`): not dirty, a GENERATED image becomes FILE (type
 //!   `IMAGE`), `file_format` is the written format, and when the colour space changed (a float
 //!   generated image becomes `sRGB`) the buffer is freed, which leaves an image without a path
-//!   without data (`size` `(0, 0)`), exactly as Blender;
+//!   without data (`size` `(0, 0)`, `file_format` `TARGA` as for any image without a buffer);
 //! - an image without data: `Error: Image 'X' does not have any image data`.
 
 pub(crate) mod write;
@@ -30,7 +32,9 @@ use frap_scene::id::PathBase;
 use frap_scene::{FuncArgs, Host};
 use smol_str::SmolStr;
 
-use self::write::{Encoding, Reports, alpha_test, image_ref, mode_channels, to_decoded, write_file};
+use self::write::{
+    Encoding, Reports, Unpremul, alpha_test, image_ref, mode_channels, to_decoded, write_file,
+};
 use super::_common::{arg_bool, arg_int, arg_str, not_implemented};
 
 /// The encoder of a `file_format` (`Err`: a format frap does not write).
@@ -93,15 +97,34 @@ pub(crate) fn save(
     if channels == 4 && buf.dirty && !alpha_test(&buf) {
         channels = 3;
     }
-    let encoding = match (buf.is_float(), linear_format(&enc), to_colorspace.as_str()) {
-        (false, _, _) => Encoding::AsIs,
-        (true, _, "Non-Color" | "Linear Rec.709" | "Linear CIE-XYZ D65" | "Linear Rec.2020") => {
-            Encoding::AsIs
+    let is_data = im.is_data_colorspace();
+    let encoding = if !buf.is_float()
+        || is_data
+        || frap_scene::id::imbuf::to_linear_curve(&to_colorspace).is_none()
+    {
+        Encoding::AsIs
+    } else {
+        Encoding::LinearToSrgb
+    };
+    let unpremul = match &enc {
+        _ if !buf.is_float() || linear_format(&enc) => Unpremul::Never,
+        // `prepare_save_png`: a float buffer that was converted (its colour space is set) or
+        // is data is unassociated by OpenImageIO; one left scene linear is written as is.
+        EncodeFormat::Png { bit_depth: 16, .. } => {
+            if encoding == Encoding::LinearToSrgb || is_data {
+                Unpremul::After
+            } else {
+                Unpremul::Never
+            }
         }
-        (true, _, _) => Encoding::LinearToSrgb,
+        // `IMB_byte_from_float`: `predivide` unless the channels are packed.
+        _ if im.source != "GENERATED" && (is_data || im.alpha_mode == "CHANNEL_PACKED") => {
+            Unpremul::Never
+        }
+        _ => Unpremul::Before,
     };
     // `IMB_colormanagement_imbuf_for_write`: a colour mode without alpha composites over black.
-    let img = to_decoded(&buf, channels, encoding, channels != 4);
+    let img = to_decoded(&buf, channels, encoding, unpremul, channels != 4);
     let bytes = frap_imbuf::encode(&img, &enc).map_err(|e| not_implemented(e.to_string()))?;
     if let Err(e) = write_file(&base, &path, &bytes) {
         rep.error(format!("Could not write image: {e}"));
@@ -119,9 +142,14 @@ pub(crate) fn save(
         let ftype = SmolStr::new_static(enc.file_format().identifier());
         im.file_format = ftype.clone();
         if !to_colorspace.is_empty() && im.colorspace_settings.name != to_colorspace {
-            // `IMA_SIGNAL_COLORMANAGE`: the buffer is freed.
+            // `IMA_SIGNAL_COLORMANAGE`: the buffer is freed; `file_format` is then the format
+            // of the buffer loaded again from the image's path, `TARGA` (`IMB_FTYPE_NONE`)
+            // without one.
             im.colorspace_settings.name = to_colorspace;
             im.free_buffers();
+            im.file_format = im
+                .info(&base)
+                .map_or(SmolStr::new_static("TARGA"), |i| i.ftype);
         } else {
             buf.dirty = false;
             buf.ftype = ftype;

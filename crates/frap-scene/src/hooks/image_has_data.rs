@@ -5,7 +5,8 @@
 //! (`BKE_image_has_loaded_ibuf`), so a freshly loaded file reads `False` until something reads
 //! its pixels or size; frap answers whether it can be loaded.
 //!
-//! Like Blender it loads the image's pixels (packed bytes, file or generator) to answer.
+//! Answered from `Image::info` (the stored buffer, the generator settings or the file's header):
+//! no pixels are loaded or generated.
 
 use frap_rna::{Field, PropDef, RnaError, RnaPtr, Value, rna_hook};
 
@@ -19,6 +20,6 @@ fn get<'h>(
     _prop: &'static PropDef,
 ) -> Result<Field<'h>, RnaError> {
     let im = image_of(h, this)?;
-    let buf = im.acquire(&crate::id::PathBase::of(h));
-    Ok(Field::Value(Value::Bool(buf.is_some())))
+    let info = im.info(&crate::id::PathBase::of(h));
+    Ok(Field::Value(Value::Bool(info.is_some())))
 }

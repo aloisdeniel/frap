@@ -39,7 +39,7 @@ pub(crate) fn pack(h: &mut dyn Host, r: IdRef<ImageId>, rep: &mut Reports) -> Re
     }
     if is_dirty {
         // `BKE_image_memorypack`
-        let mut buf = (**im.buffer.as_ref().expect("invariant: dirty images have a buffer")).clone();
+        let mut buf = (**im.live_buffer().expect("invariant: dirty images have a buffer")).clone();
         let (bytes, mime, ff) = memorypack(&buf).map_err(not_implemented)?;
         let packed_filepath = im.filepath.clone();
         let (main, log) = h.main_mut();

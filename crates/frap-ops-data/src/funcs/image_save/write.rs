@@ -5,19 +5,23 @@
 //! the RNA plumbing (the image of `this`, reports).
 //!
 //! Ported rules (Blender 5.2.4, GPL-2.0-or-later):
-//! - decode (`imb_loadpng` & co. + `colormanage_imbuf_make_linear`): 8-bit files give a byte
-//!   buffer in the file's colour space; 16-bit PNG, OpenEXR and HDR give a float buffer,
-//!   scene linear and premultiplied; grey expands to RGB; `planes` is the file's colour mode;
+//! - decode (`imb_loadpng` & co.): 8-bit files give a byte buffer, 16-bit PNG, OpenEXR and
+//!   HDR a float buffer, with straight samples in the file's colour space (`Image::acquire`
+//!   then applies the image's alpha mode and colour space, as `imb_handle_colorspace_and_alpha`
+//!   does); grey expands to RGB; `planes` is the file's colour mode; the header alone is read
+//!   by the registered probe (`Image.size/depth/is_float`, and the budget check before
+//!   decoding);
 //! - `image_memorypack_imbuf` (`image.cc`): a float buffer packs as OpenEXR, a byte buffer as
 //!   PNG, in the buffer's colour mode;
 //! - `BKE_image_format_from_imbuf` + `IMB_colormanagement_imbuf_for_write` +
 //!   `BKE_imbuf_write_as` (`image_format.cc`, `colormanagement.cc`, `writeimage.cc`): `save()`
 //!   writes the image's `file_format`, a float buffer to a display format as 16-bit PNG or
-//!   8-bit otherwise, encoded to the image's colour space (`sRGB` for a generated image).
+//!   8-bit otherwise, encoded to the image's colour space (`sRGB` for a generated image). The
+//!   premultiplied float buffer is unpremultiplied where Blender does it (see [`Unpremul`]).
 
 use frap_imbuf::{DecodedImage, EncodeFormat, FileFormat, PixelData};
 use frap_rna::{IdRef, ImageId, PyExc, Report, ReportType, RnaError, RnaErrorKind, RnaPtr};
-use frap_scene::id::{ImBuf, ImBufData, Image, PathBase};
+use frap_scene::id::{ImBuf, ImBufData, ImInfo, Image, PathBase};
 use frap_scene::Host;
 use smol_str::SmolStr;
 
@@ -28,12 +32,21 @@ use super::super::_common::{internal, root_id};
 #[linkme::distributed_slice(frap_scene::id::IMAGE_DECODERS)]
 static DECODER: frap_scene::id::ImageDecoder = decode;
 
-/// `srgb_to_linearrgb`
-fn srgb_to_linear(c: f32) -> f32 {
-    if c < 0.04045 {
-        return if c < 0.0 { 0.0 } else { c * (1.0 / 12.92) };
-    }
-    ((c + 0.055) * (1.0 / 1.055)).powf(2.4)
+/// The `frap-imbuf` header reader, registered for `Image::info` / `Image::load`.
+#[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
+#[linkme::distributed_slice(frap_scene::id::IMAGE_PROBES)]
+static PROBE: frap_scene::id::ImageProbe = probe;
+
+/// Encoded bytes → buffer description, from the header (what [`decode`] gives).
+pub(crate) fn probe(bytes: &[u8]) -> Result<ImInfo, String> {
+    let i = frap_imbuf::probe(bytes).map_err(|e| e.to_string())?;
+    Ok(ImInfo {
+        x: i.width,
+        y: i.height,
+        planes: i.channels * 8,
+        float: i.bit_depth > 8,
+        ftype: SmolStr::new_static(i.format.identifier()),
+    })
 }
 
 /// `linearrgb_to_srgb`
@@ -68,17 +81,11 @@ pub(crate) fn decode(bytes: &[u8]) -> Result<ImBuf, String> {
             ImBufData::Byte(ImBuf::flip_rows(&out, row))
         }
         PixelData::U16(v) => {
-            // 16-bit PNG: float buffer, sRGB → linear, premultiplied.
+            // 16-bit PNG: float buffer of the file's (straight) samples.
             let mut out = Vec::with_capacity(v.len() / c * 4);
             for s in v.chunks_exact(c) {
                 let f: Vec<f32> = s.iter().map(|&x| f32::from(x) / 65535.0).collect();
-                let [r, g, b, a] = rgba(&f, 1.0);
-                out.extend([
-                    srgb_to_linear(r) * a,
-                    srgb_to_linear(g) * a,
-                    srgb_to_linear(b) * a,
-                    a,
-                ]);
+                out.extend(rgba(&f, 1.0));
             }
             ImBufData::Float(ImBuf::flip_rows(&out, row))
         }
@@ -98,6 +105,7 @@ pub(crate) fn decode(bytes: &[u8]) -> Result<ImBuf, String> {
         data,
         dirty: false,
         ftype: SmolStr::new_static(fmt.identifier()),
+        colorspace: None,
     })
 }
 
@@ -135,21 +143,59 @@ pub(crate) fn alpha_under_black_byte(p: &mut [u8]) {
     p[3] = 255;
 }
 
-/// How pixels are converted on write.
+/// How the colours of a float buffer are converted on write.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Encoding {
     /// Stored values (byte buffers to byte files, linear floats to float files).
     AsIs,
-    /// Linear (premultiplied) float → sRGB straight (a float buffer to a display format).
+    /// Scene linear → sRGB (`IMB_colormanagement_transform_float` /
+    /// `IMB_byte_from_float` to the image's colour space).
     LinearToSrgb,
 }
 
+/// When the premultiplied samples of a float buffer are divided by alpha on write (pixels with
+/// alpha 0 or 1 are left as they are).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum Unpremul {
+    /// Never: float files (OpenEXR, HDR), and a 16-bit PNG written without a colour space
+    /// conversion from a non-data colour space (`prepare_save_png` writes the samples as
+    /// unassociated alpha).
+    Never,
+    /// Before the colour conversion: 8-bit output (`IMB_byte_from_float` with `predivide`).
+    Before,
+    /// After the colour conversion: a 16-bit PNG that was converted to the image's colour
+    /// space, or whose colour space is data (`prepare_save_png` sets
+    /// `oiio:UnassociatedAlpha` 0 and OpenImageIO unpremultiplies).
+    After,
+}
+
 /// The buffer as a top-row-first image with `channels` channels. Alpha is dropped as stored
-/// unless `under_black` composites the colour over black first (`IMB_alpha_under_color_*`).
-pub(crate) fn to_decoded(buf: &ImBuf, channels: u8, enc: Encoding, under_black: bool) -> DecodedImage {
+/// unless `under_black` composites the colour over black first (`IMB_alpha_under_color_*`);
+/// float colours are converted with `enc` and unpremultiplied as `unpremul` says.
+///
+/// Verified on 5.2.4: a float RGBA image with pixels (0.1, 0.2, 0.05, 0.5),
+/// (0.5, 0.04, 0.9, 0.25) saved as 16-bit PNG from a generated image holds
+/// `srgb(c) / a`: (0.69837, 0.96905, 0.4956, 0.5), (1, 0.88367, 1, 0.25); as OpenEXR
+/// `srgb(c)`: (0.34919, 0.48453, 0.2478, 0.5), (0.73536, 0.22092, 0.95469, 0.25).
+pub(crate) fn to_decoded(
+    buf: &ImBuf,
+    channels: u8,
+    enc: Encoding,
+    unpremul: Unpremul,
+    under_black: bool,
+) -> DecodedImage {
     let row = buf.x as usize * 4;
-    let pixels = match (&buf.data, enc) {
-        (ImBufData::Byte(b), _) => {
+    let divide = |p: &mut [f32]| {
+        let a = p[3];
+        if a != 0.0 && a != 1.0 {
+            let inv = 1.0 / a;
+            for c in &mut p[..3] {
+                *c *= inv;
+            }
+        }
+    };
+    let pixels = match &buf.data {
+        ImBufData::Byte(b) => {
             let mut v = ImBuf::flip_rows(b, row);
             if under_black {
                 for p in v.chunks_exact_mut(4) {
@@ -158,25 +204,24 @@ pub(crate) fn to_decoded(buf: &ImBuf, channels: u8, enc: Encoding, under_black: 
             }
             PixelData::U8(v)
         }
-        (ImBufData::Float(f), Encoding::AsIs) => {
-            let mut v = ImBuf::flip_rows(f, row);
-            if under_black {
-                for p in v.chunks_exact_mut(4) {
-                    p[3] = 1.0;
-                }
-            }
-            PixelData::F32(v)
-        }
-        (ImBufData::Float(f), Encoding::LinearToSrgb) => {
+        ImBufData::Float(f) => {
             let mut v = ImBuf::flip_rows(f, row);
             for p in v.chunks_exact_mut(4) {
-                let a = p[3];
-                let un = if under_black || a == 0.0 || a == 1.0 { 1.0 } else { 1.0 / a };
-                for c in &mut p[..3] {
-                    *c = linear_to_srgb(*c * un);
-                }
+                frap_math::budget::check();
+                // `IMB_alpha_under_color_float` over black: the premultiplied colour, opaque.
                 if under_black {
                     p[3] = 1.0;
+                }
+                if unpremul == Unpremul::Before {
+                    divide(p);
+                }
+                if enc == Encoding::LinearToSrgb {
+                    for c in &mut p[..3] {
+                        *c = linear_to_srgb(*c);
+                    }
+                }
+                if unpremul == Unpremul::After {
+                    divide(p);
                 }
             }
             PixelData::F32(v)
@@ -190,12 +235,12 @@ pub(crate) fn to_decoded(buf: &ImBuf, channels: u8, enc: Encoding, under_black: 
 pub(crate) fn memorypack(buf: &ImBuf) -> Result<(Vec<u8>, &'static str, &'static str), String> {
     let channels = mode_channels(buf.planes);
     if buf.is_float() {
-        let img = to_decoded(buf, channels, Encoding::AsIs, false);
+        let img = to_decoded(buf, channels, Encoding::AsIs, Unpremul::Never, false);
         let bytes = frap_imbuf::encode(&img, &EncodeFormat::OpenExr { bit_depth: 32 })
             .map_err(|e| e.to_string())?;
         Ok((bytes, "image/x-exr", "OPEN_EXR"))
     } else {
-        let img = to_decoded(buf, channels, Encoding::AsIs, false);
+        let img = to_decoded(buf, channels, Encoding::AsIs, Unpremul::Never, false);
         let bytes = frap_imbuf::encode(
             &img,
             &EncodeFormat::Png {
@@ -341,7 +386,8 @@ mod tests {
     #[test]
     fn decode_png16_linear_premultiplied() {
         // Verified on 5.2.4: a 16-bit RGBA PNG (65535, 32768, 0, 32768) reads
-        // (0.50002, 0.107024, 0.0, 0.500008) (OCIO's sRGB curve; within 1e-4), depth 128.
+        // (0.50002, 0.107024, 0.0, 0.500008) (OCIO's sRGB curve; within 1e-4), depth 128, in
+        // an sRGB image with alpha mode STRAIGHT; the probe reads the same description.
         let img = DecodedImage::new(1, 1, 4, PixelData::U16(vec![65535, 32768, 0, 32768])).unwrap();
         let bytes = frap_imbuf::encode(
             &img,
@@ -351,12 +397,47 @@ mod tests {
             },
         )
         .unwrap();
-        let b = decode(&bytes).unwrap();
+        let mut b = decode(&bytes).unwrap();
+        assert_eq!(probe(&bytes).unwrap(), ImInfo::of(&b));
+        assert_eq!(b.pixels(), vec![1.0, 32768.0 / 65535.0, 0.0, 32768.0 / 65535.0]);
+        b.handle_colorspace_and_alpha("sRGB", false, "STRAIGHT");
         assert_eq!(b.depth(), 128);
         let p = b.pixels();
         for (g, w) in p.iter().zip([0.50002, 0.107024, 0.0, 0.500008]) {
             assert!((g - w).abs() < 1e-4, "{p:?}");
         }
+    }
+
+    #[test]
+    fn float_alpha_writes() {
+        // Verified on 5.2.4 (see `to_decoded`): float RGBA pixels saved to a 16-bit PNG
+        // (Blender's file holds 45768, 63507, 32479, 32768, 65535, 57911, 65535, 16384) and to
+        // OpenEXR.
+        let mut b = ImBuf::new(2, 1, 32, true);
+        b.data = ImBufData::Float(vec![0.1, 0.2, 0.05, 0.5, 0.5, 0.04, 0.9, 0.25]);
+        let png = to_decoded(&b, 4, Encoding::LinearToSrgb, Unpremul::After, false);
+        let PixelData::F32(v) = &png.pixels else { panic!() };
+        let want = [0.69837, 0.96905, 0.4956, 0.5, 1.0, 0.88367, 1.0, 0.25];
+        for (g, w) in v.iter().zip(want) {
+            assert!((g.min(1.0) - w).abs() < 1e-4, "{v:?}");
+        }
+        let bytes = frap_imbuf::encode(&png, &EncodeFormat::Png { bit_depth: 16, compression: 15 })
+            .unwrap();
+        let PixelData::U16(u) = frap_imbuf::decode(&bytes).unwrap().pixels else { panic!() };
+        let blender = [45768u16, 63507, 32479, 32768, 65535, 57911, 65535, 16384];
+        for (g, w) in u.iter().zip(blender) {
+            assert!((i32::from(*g) - i32::from(w)).abs() <= 8, "{u:?}");
+        }
+        let exr = to_decoded(&b, 4, Encoding::LinearToSrgb, Unpremul::Never, false);
+        let PixelData::F32(v) = &exr.pixels else { panic!() };
+        let want = [0.34919, 0.48453, 0.2478, 0.5, 0.73536, 0.22092, 0.95469, 0.25];
+        for (g, w) in v.iter().zip(want) {
+            assert!((g - w).abs() < 1e-4, "{v:?}");
+        }
+        // 8-bit output unpremultiplies first: srgb(c / a).
+        let jpg = to_decoded(&b, 4, Encoding::LinearToSrgb, Unpremul::Before, false);
+        let PixelData::F32(v) = &jpg.pixels else { panic!() };
+        assert!((v[0] - linear_to_srgb(0.2)).abs() < 1e-6);
     }
 
     #[test]

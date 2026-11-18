@@ -17,7 +17,7 @@
 
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_scene::id::Image;
+use frap_scene::id::{Image, imbuf};
 use frap_spec_ops_data::image;
 use smol_str::SmolStr;
 
@@ -38,6 +38,12 @@ fn exec(cx: &mut OpCtx, p: image::ImageNew) -> OpResult {
     if !p.alpha.value {
         color[3] = 1.0;
     }
+    // Blender allocates the buffer here: an image over the budget fails at once.
+    frap_math::budget::reserve_buffer(
+        imbuf::BUFFER,
+        imbuf::buffer_bytes(width as u32, height as u32, p.float.value),
+    )
+    .map_err(|e| OpError::Limit(e.to_string()))?;
     let mut im = Image::new(&name, width, height);
     im.generated_type = SmolStr::new_static(p.generated_type.value.identifier());
     im.generated_color = color;

@@ -13,8 +13,10 @@ source: crates/frap-schema/tests/describe_ops.rs
   "kind": "NORMAL",
   "macro_steps": [],
   "poll": {
-    "requires": [],
-    "text": "always available",
+    "requires": [
+      "CONTEXT_IMAGE"
+    ],
+    "text": "requires the Image Editor's image (bpy.context.edit_image), which headless Blender and frap never have",
     "matrix": {
       "plain": "NNNNN",
       "view3d": "NNNNN"

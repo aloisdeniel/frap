@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `Image.is_float` (`rna_Image_is_float_get`): the buffer is a float buffer (float generated images, 16-bit PNG, OpenEXR, HDR).
 //!
-//! Like Blender it loads the image's pixels (packed bytes, file or generator) to answer.
+//! Answered from `Image::info` (the stored buffer, the generator settings or the file's header):
+//! no pixels are loaded or generated.
 
 use frap_rna::{Field, PropDef, RnaError, RnaPtr, Value, rna_hook};
 
@@ -15,6 +16,6 @@ fn get<'h>(
     _prop: &'static PropDef,
 ) -> Result<Field<'h>, RnaError> {
     let im = image_of(h, this)?;
-    let buf = im.acquire(&crate::id::PathBase::of(h));
-    Ok(Field::Value(Value::Bool(buf.is_some_and(|b| b.is_float()))))
+    let info = im.info(&crate::id::PathBase::of(h));
+    Ok(Field::Value(Value::Bool(info.is_some_and(|i| i.float))))
 }

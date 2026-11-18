@@ -9,20 +9,29 @@
 //! with its monospace UI font (`checker_board_text`, BLF at 54 px, every 128 pixels from
 //! (33, 44)); frap has no font rasteriser. Every other pixel is Blender's.
 
+use frap_math::budget;
+
 use super::imbuf::{ImBuf, ImBufData, hsv_to_rgb, srgb_to_linearrgb, unit_float_to_uchar_clamp};
 
 /// `BKE_image_buf_fill_color`: every pixel `color` (bytes through `rgba_float_to_uchar`).
 pub fn fill_color(buf: &mut ImBuf, color: [f32; 4]) {
+    let row = (buf.x as usize * 4).max(4);
     match &mut buf.data {
         ImBufData::Float(f) => {
-            for px in f.chunks_exact_mut(4) {
-                px.copy_from_slice(&color);
+            for r in f.chunks_mut(row) {
+                budget::check_n(buf.x);
+                for px in r.chunks_exact_mut(4) {
+                    px.copy_from_slice(&color);
+                }
             }
         }
         ImBufData::Byte(b) => {
             let c = color.map(unit_float_to_uchar_clamp);
-            for px in b.chunks_exact_mut(4) {
-                px.copy_from_slice(&c);
+            for r in b.chunks_mut(row) {
+                budget::check_n(buf.x);
+                for px in r.chunks_exact_mut(4) {
+                    px.copy_from_slice(&c);
+                }
             }
         }
     }
@@ -43,6 +52,7 @@ pub fn fill_checker(buf: &mut ImBuf) {
     let bright_linear = srgb_to_linearrgb(0.58);
     // Checkers.
     for y in 0..height {
+        budget::check_n(width as u32);
         let mut dark: i32 = if (y / CHECKER) % 2 == 0 { 1 } else { -1 };
         for x in 0..width {
             if x % CHECKER == 0 {
@@ -63,6 +73,7 @@ pub fn fill_checker(buf: &mut ImBuf) {
     }
     // Second pass: coloured `+`.
     for y in 0..height {
+        budget::check_n(width as u32);
         let hoffs = 0.125f32 * (y / CHECKER) as f32;
         for x in 0..width {
             let h = 0.125f32 * (x / CHECKER) as f32;
@@ -129,6 +140,7 @@ fn color_fill(buf: &mut ImBuf) {
     let (width, height) = (buf.x as i32, buf.y as i32);
     let hue_step = power_of_2_max_i(width / 8).max(8);
     for y in 0..height {
+        budget::check_n(width as u32);
         // Use a number lower than 1.0 else its too bright.
         let v = (0.1 + (f64::from(y) * (0.4 / f64::from(height)))) as f32;
         for x in 0..width {
@@ -156,6 +168,7 @@ fn color_tint(buf: &mut ImBuf, size: i32, blend: f32) {
     let (width, height) = (buf.x as i32, buf.y as i32);
     let blend_half = blend * 0.5;
     for y in 0..height {
+        budget::check_n(width as u32);
         for x in 0..width {
             let even = ((y / size) % 2 == 1 && (x / size) % 2 == 1)
                 || ((y / size) % 2 == 0 && (x / size) % 2 == 0);
@@ -183,6 +196,7 @@ fn color_tint(buf: &mut ImBuf, size: i32, blend: f32) {
 fn grid_fill(buf: &mut ImBuf, blend: f32) {
     let (width, height) = (buf.x as i32, buf.y as i32);
     for y in 0..height {
+        budget::check_n(width as u32);
         for x in 0..width {
             if y % 32 == 0 || x % 32 == 0 || x == 0 {
                 let i = ((y * width + x) * 4) as usize;
@@ -217,6 +231,7 @@ pub fn fill_checker_color(buf: &mut ImBuf) {
     // `IMB_buffer_float_rgba_srgb_to_linear`: the float buffer was filled in sRGB.
     if let ImBufData::Float(f) = &mut buf.data {
         for px in f.chunks_exact_mut(4) {
+            budget::check();
             for c in &mut px[..3] {
                 *c = srgb_to_linearrgb(*c);
             }
@@ -244,7 +259,9 @@ pub struct GenParams<'a> {
     pub is_data: bool,
 }
 
-/// `add_ibuf_for_tile`: the buffer of a generated image.
+/// `add_ibuf_for_tile`: the buffer of a generated image. The size is checked against the
+/// statement's budget before anything is allocated ([`ImBuf::new`]), and the fills are
+/// cancellation points of `--stmt-timeout`.
 pub fn generate(p: &GenParams<'_>) -> ImBuf {
     let (w, h) = (p.width.max(1) as u32, p.height.max(1) as u32);
     let mut buf = ImBuf::new(w, h, p.depth, p.float);

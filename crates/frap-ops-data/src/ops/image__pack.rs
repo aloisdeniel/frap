@@ -12,6 +12,7 @@
 //! This file also hosts the context lookup shared by the other context-image operators.
 
 use frap_op::prelude::*;
+use frap_op::PollReq;
 use frap_op::{Poll, PollFail, operator};
 use frap_rna::{IdRef, ImageId};
 use frap_scene::Context;
@@ -27,7 +28,7 @@ pub(crate) fn image_from_context(_c: &Context) -> Option<IdRef<ImageId>> {
 pub(crate) fn no_context_image(alternative: &str) -> PollFail {
     PollFail {
         message: None,
-        unmet: SmallVec::new(),
+        unmet: smallvec::smallvec![PollReq::ContextImage],
         hint: Some(format!(
             "this operator works on the Image Editor's image, which headless Blender and frap do \
              not have; use {alternative}"
@@ -64,7 +65,7 @@ fn pack_poll(c: &Context) -> Result<(), PollFail> {
 
 /// `image_pack_poll`
 pub(crate) const PACK_POLL: Poll = Poll {
-    requires: &[],
+    requires: &[PollReq::ContextImage],
     check: pack_poll,
 };
 

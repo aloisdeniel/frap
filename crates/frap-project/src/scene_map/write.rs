@@ -769,11 +769,14 @@ fn ext_of_mime(mime: &str, file_format: &str) -> &'static str {
         "image/ktx2" => "ktx2",
         "image/x-exr" | "image/exr" => "exr",
         "image/vnd.radiance" | "image/x-hdr" => "hdr",
+        "image/bmp" | "image/x-bmp" | "image/x-ms-bmp" => "bmp",
+        "image/x-tga" | "image/x-targa" | "image/tga" => "tga",
         _ => match file_format {
             "JPEG" => "jpg",
             "WEBP" => "webp",
             "OPEN_EXR" | "OPEN_EXR_MULTILAYER" => "exr",
             "HDR" => "hdr",
+            "BMP" => "bmp",
             _ => "png",
         },
     }
@@ -850,4 +853,28 @@ fn prefs_j(p: &Preferences) -> J {
         addons.insert(module.to_string(), J::Object(m));
     }
     json!({ "addons": addons })
+}
+
+#[cfg(test)]
+mod ext_tests {
+    use super::ext_of_mime;
+
+    #[test]
+    fn packed_extensions() {
+        // The MIME types `Image.pack()` records (frap-ops-data `mime_of`).
+        for (mime, ext) in [
+            ("image/png", "png"),
+            ("image/jpeg", "jpg"),
+            ("image/webp", "webp"),
+            ("image/x-exr", "exr"),
+            ("image/vnd.radiance", "hdr"),
+            ("image/bmp", "bmp"),
+            ("image/x-tga", "tga"),
+        ] {
+            assert_eq!(ext_of_mime(mime, "PNG"), ext, "{mime}");
+        }
+        assert_eq!(ext_of_mime("application/octet-stream", "OPEN_EXR"), "exr");
+        assert_eq!(ext_of_mime("application/octet-stream", "BMP"), "bmp");
+        assert_eq!(ext_of_mime("application/octet-stream", "TARGA"), "png");
+    }
 }

@@ -7,9 +7,13 @@
 //! (also with `float_buffer`); `tiled` makes the source `TILED` (type `IMAGE`). `alpha` is
 //! the buffer's colour depth (`gen_depth` 32, else 24: `Image.depth`, and RGBA vs RGB when the
 //! image is packed or saved); `stereo3d` has no stored counterpart in frap.
+//!
+//! Blender allocates the buffer here (`BKE_image_add_generated`); frap generates it when it is
+//! first read, but checks its size against the statement's budget now, so an image larger
+//! than `--max-elements` allows fails at once with `LIMIT_EXCEEDED`.
 
 use frap_rna::{RnaError, RnaPtr, Value, rna_func};
-use frap_scene::id::Image;
+use frap_scene::id::{Image, imbuf};
 use frap_scene::{FuncArgs, Host};
 use smol_str::SmolStr;
 
@@ -24,11 +28,13 @@ fn blend_data_images_new(
     let name = arg_str(args, "name").to_owned();
     let w = arg_int(args, "width", 1024).clamp(1, i32::MAX as i64) as i32;
     let ht = arg_int(args, "height", 1024).clamp(1, i32::MAX as i64) as i32;
+    let float = arg_bool(args, "float_buffer", false);
+    frap_math::budget::check_buffer(imbuf::BUFFER, imbuf::buffer_bytes(w as u32, ht as u32, float));
     let mut img = Image::new(&name, w, ht);
     if arg_bool(args, "alpha", false) {
         img.generated_depth = 32;
     }
-    if arg_bool(args, "float_buffer", false) {
+    if float {
         img.use_generated_float = true;
         img.colorspace_settings.name = SmolStr::new_static("Linear Rec.709");
     }

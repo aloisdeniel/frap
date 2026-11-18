@@ -7,9 +7,17 @@
 //! frap keeps the same model with one difference: the buffer is stored in the datablock
 //! ([`Image::buffer`]) only once it holds something the source cannot reproduce (it was
 //! modified, or it was saved with a different precision); otherwise pixels are derived from the
-//! source on demand (`frap-ops-data`'s `Image` hooks decode packed bytes and files, frap-scene
-//! generates; see [`Image::generated_buffer`]). Decoded pixels of unmodified images are cached
-//! outside the snapshot by `Services::images`.
+//! source on demand by [`Image::acquire`] (packed bytes and files are decoded with the decoder
+//! `frap-ops-data` registers, then converted with the image's `colorspace_settings` and
+//! `alpha_mode` as Blender's loader does; generated images are generated). Nothing caches them:
+//! every `acquire` decodes or generates again, so the RNA reads that do not need pixels
+//! (`size`, `depth`, `channels`, `is_float`, `has_data`) use [`Image::info`] instead, which
+//! reads the generator settings, the stored buffer or the file's header only.
+//!
+//! Limits: every buffer is checked against the statement's budget before it is allocated
+//! (`--max-elements` × `frap_math::budget::BUFFER_BYTES_PER_ELEMENT` bytes, `LIMIT_EXCEEDED`),
+//! and generating, decoding, converting and scaling are cancellation points of
+//! `--stmt-timeout`.
 //!
 //! Verified on 5.2.4 (`-b --factory-startup`):
 //! - `generated_width/height` clamp to 1..=65536, `generated_color` components to ≥ 0; changing
@@ -18,6 +26,11 @@
 //! - `filepath` frees the buffer (`IMA_SIGNAL_RELOAD`), `filepath_raw` does not;
 //! - `source` frees the buffer (`IMA_SIGNAL_SRC_CHANGE`); switching to `GENERATED` clears the
 //!   file path;
+//! - `alpha_mode` frees the buffer of an image that is not GENERATED, `colorspace_settings`
+//!   (`name`, `is_data`) the buffer of any image (`IMA_SIGNAL_COLORMANAGE`). frap drops a
+//!   stored buffer when the colour space settings no longer match the ones it was loaded with
+//!   ([`Image::live_buffer`]): writing the *same* colour space again keeps modified pixels,
+//!   where Blender loses them;
 //! - `size` is the buffer's size (`(0, 0)` when no pixels can be loaded), `type` is `UV_TEST`
 //!   for a generated image and `IMAGE` once it was packed or saved.
 
@@ -34,6 +47,40 @@ use smol_str::SmolStr;
 use crate::generated::plain::ColorManagedInputColorspaceSettings;
 use generate::GenParams;
 pub use imbuf::{ImBuf, ImBufData};
+
+/// What an image's buffer is, or would be once loaded, without its pixels (`Image.size`,
+/// `depth`, `channels`, `is_float`, `has_data`, `file_format`).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ImInfo {
+    /// Width (`ibuf->x`).
+    pub x: u32,
+    /// Height (`ibuf->y`).
+    pub y: u32,
+    /// Colour mode bits (`ibuf->planes`, see [`ImBuf::planes`]).
+    pub planes: u8,
+    /// A float buffer (16-bit PNG, OpenEXR, HDR, float generated images).
+    pub float: bool,
+    /// `ibuf->ftype` as an `Image.file_format` identifier.
+    pub ftype: SmolStr,
+}
+
+impl ImInfo {
+    /// The description of a buffer.
+    pub fn of(b: &ImBuf) -> ImInfo {
+        ImInfo {
+            x: b.x,
+            y: b.y,
+            planes: b.planes,
+            float: b.is_float(),
+            ftype: b.ftype.clone(),
+        }
+    }
+
+    /// `Image.depth` (see [`ImBuf::depth`]).
+    pub fn depth(&self) -> i32 {
+        imbuf::depth_of(self.planes, self.float)
+    }
+}
 
 /// Encoded (file) bytes of a packed image (`image.packed_file`), as read or embedded in a GLB.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -115,7 +162,17 @@ impl Image {
 
     /// `BKE_image_is_dirty` (`Image.is_dirty`).
     pub fn is_dirty(&self) -> bool {
-        self.buffer.as_ref().is_some_and(|b| b.dirty)
+        self.live_buffer().is_some_and(|b| b.dirty)
+    }
+
+    /// The stored buffer while it is valid: a buffer loaded with other colour space settings
+    /// than the image's current ones counts as freed (`IMA_SIGNAL_COLORMANAGE`).
+    pub fn live_buffer(&self) -> Option<&Arc<ImBuf>> {
+        self.buffer.as_ref().filter(|b| {
+            b.colorspace
+                .as_ref()
+                .is_none_or(|c| *c == self.colorspace_settings)
+        })
     }
 
     /// `BKE_image_free_buffers`: drops the in-memory buffer (modified pixels are lost).
@@ -131,6 +188,32 @@ impl Image {
     /// The buffer of a GENERATED image (`add_ibuf_for_tile`); `None` for other sources.
     pub fn generated_buffer(&self) -> Option<ImBuf> {
         (self.source == "GENERATED").then(|| generate::generate(&self.gen_params()))
+    }
+
+    /// The description of the generated buffer (what [`Self::generated_buffer`] gives).
+    fn generated_info(&self) -> ImInfo {
+        ImInfo {
+            x: self.generated_width.max(1) as u32,
+            y: self.generated_height.max(1) as u32,
+            planes: self.generated_depth,
+            float: self.use_generated_float,
+            ftype: SmolStr::new_static("PNG"),
+        }
+    }
+
+    /// The first tile is generated (`IMA_GEN_TILE`): a tiled image made by
+    /// `images.new(tiled=True)` / `image.new(tiled=True)` until it is saved or packed.
+    fn tile_is_generated(&self) -> bool {
+        self.source == "TILED" && self.packed_file.is_none() && self.filepath.is_empty()
+    }
+
+    /// `rna_Image_alpha_mode_update`: frees the buffer (`IMA_SIGNAL_COLORMANAGE`) unless the
+    /// image is GENERATED ("it doesn't impact generated images").
+    fn set_alpha_mode(&mut self, v: SmolStr) {
+        self.alpha_mode = v;
+        if self.source != "GENERATED" {
+            self.free_buffers();
+        }
     }
 
     /// The generator settings of the first tile.
@@ -149,7 +232,7 @@ impl Image {
     /// `Image.size` without decoding: the buffer's size, the generator's for a GENERATED
     /// image, else the size read when the file was loaded.
     pub fn known_size(&self) -> [i32; 2] {
-        if let Some(b) = &self.buffer {
+        if let Some(b) = self.live_buffer() {
             return [b.x as i32, b.y as i32];
         }
         if self.source == "GENERATED" {
@@ -184,9 +267,11 @@ impl Image {
     }
 }
 
-/// A file decoder: encoded bytes → image buffer (bottom row first, four channels), `Err` with
-/// the reason when the bytes are not a readable image. frap-scene has no codecs (layer rule):
-/// `frap-ops-data` registers the `frap-imbuf` decoder here (one entry is used, the first).
+/// A file decoder: encoded bytes → image buffer (bottom row first, four channels, straight
+/// samples in the file's colour space: [`Image::acquire`] applies the image's colour space and
+/// alpha mode), `Err` with the reason when the bytes are not a readable image. frap-scene has
+/// no codecs (layer rule): `frap-ops-data` registers the `frap-imbuf` decoder here (one entry
+/// is used, the first).
 pub type ImageDecoder = fn(&[u8]) -> Result<ImBuf, String>;
 
 /// Registered image decoders (see [`ImageDecoder`]).
@@ -194,11 +279,59 @@ pub type ImageDecoder = fn(&[u8]) -> Result<ImBuf, String>;
 #[linkme::distributed_slice]
 pub static IMAGE_DECODERS: [ImageDecoder];
 
-/// Decodes encoded image bytes with the registered decoder.
+/// A header reader: what [`ImageDecoder`] would give, without decoding the pixels.
+/// `frap-ops-data` registers the `frap-imbuf` one (the first entry is used).
+pub type ImageProbe = fn(&[u8]) -> Result<ImInfo, String>;
+
+/// Registered header readers (see [`ImageProbe`]).
+#[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
+#[linkme::distributed_slice]
+pub static IMAGE_PROBES: [ImageProbe];
+
+/// Reads the header of encoded image bytes (decodes them when no header reader is linked).
+pub fn probe_image(bytes: &[u8]) -> Result<ImInfo, String> {
+    match IMAGE_PROBES.first() {
+        Some(p) => p(bytes),
+        None => decode_raw(bytes).map(|b| ImInfo::of(&b)),
+    }
+}
+
+/// Decodes encoded image bytes with the registered decoder: straight samples in the file's
+/// colour space (see [`ImageDecoder`]). The size read from the header is checked against the
+/// statement's budget first (`LIMIT_EXCEEDED` instead of allocating).
 pub fn decode_image(bytes: &[u8]) -> Result<ImBuf, String> {
+    if !IMAGE_PROBES.is_empty() {
+        let info = probe_image(bytes)?;
+        frap_math::budget::check_buffer(
+            imbuf::BUFFER,
+            imbuf::buffer_bytes(info.x, info.y, info.float),
+        );
+    }
+    decode_raw(bytes)
+}
+
+fn decode_raw(bytes: &[u8]) -> Result<ImBuf, String> {
     match IMAGE_DECODERS.first() {
         Some(d) => d(bytes),
         None => Err("no image decoder is linked".into()),
+    }
+}
+
+/// Reads the header of an image file: the first MiB (enough for the headers of every format
+/// frap reads), the whole file when that is not enough.
+fn probe_file(path: &std::path::Path) -> Option<ImInfo> {
+    use std::io::Read;
+    const HEAD: u64 = 1 << 20;
+    let mut head = Vec::new();
+    std::fs::File::open(path)
+        .ok()?
+        .take(HEAD)
+        .read_to_end(&mut head)
+        .ok()?;
+    match probe_image(&head) {
+        Ok(i) => Some(i),
+        Err(_) if head.len() as u64 == HEAD => probe_image(&std::fs::read(path).ok()?).ok(),
+        Err(_) => None,
     }
 }
 
@@ -255,27 +388,60 @@ pub enum LoadError {
 impl Image {
     /// `BKE_image_acquire_ibuf`: the image's pixels (the buffer, the packed bytes, the file or
     /// the generator); `None` when they cannot be loaded (missing or unreadable file, a VIEWER
-    /// image). Relative paths resolve against `base`.
+    /// image). Relative paths resolve against `base`. Decoded files get the image's colour
+    /// space and alpha mode ([`ImBuf::handle_colorspace_and_alpha`]); the result carries the
+    /// colour space settings it was made with ([`ImBuf::colorspace`]).
+    ///
+    /// Within a statement, a buffer larger than the budget unwinds with `LIMIT_EXCEEDED`.
     pub fn acquire(&self, base: &PathBase) -> Option<ImBuf> {
-        if let Some(b) = &self.buffer {
+        if let Some(b) = self.live_buffer() {
             return Some((**b).clone());
         }
-        match self.source.as_str() {
+        let mut buf = match self.source.as_str() {
             // A generated image ignores its packed file (a packed image switched back to
             // GENERATED keeps it, verified on 5.2.4).
-            "GENERATED" => self.generated_buffer(),
-            // A tiled image made by `images.new(tiled=True)` / `image.new(tiled=True)`: its
-            // first tile is generated (`IMA_GEN_TILE`) until it is saved or packed.
-            "TILED" if self.packed_file.is_none() && self.filepath.is_empty() => {
-                Some(generate::generate(&self.gen_params()))
-            }
+            "GENERATED" => self.generated_buffer()?,
+            "TILED" if self.tile_is_generated() => generate::generate(&self.gen_params()),
             "FILE" | "SEQUENCE" | "MOVIE" | "TILED" if self.packed_file.is_some() => {
                 let p = self.packed_file.as_ref().expect("invariant: checked");
-                decode_image(&p.bytes).ok()
+                self.file_buffer(decode_image(&p.bytes).ok()?)
             }
             "FILE" | "SEQUENCE" | "MOVIE" | "TILED" if !self.filepath.is_empty() => {
                 let bytes = std::fs::read(base.file(&self.filepath)).ok()?;
-                decode_image(&bytes).ok()
+                self.file_buffer(decode_image(&bytes).ok()?)
+            }
+            _ => return None,
+        };
+        buf.colorspace = Some(self.colorspace_settings.clone());
+        Some(buf)
+    }
+
+    /// A decoded file converted with the image's colour space and alpha mode.
+    fn file_buffer(&self, mut buf: ImBuf) -> ImBuf {
+        buf.handle_colorspace_and_alpha(
+            &self.colorspace_settings.name,
+            self.is_data_colorspace(),
+            &self.alpha_mode,
+        );
+        buf
+    }
+
+    /// What [`Self::acquire`] would give, without building the pixels: the stored buffer, the
+    /// generator settings, or the header of the packed bytes or the file. `None` when no
+    /// pixels can be loaded (`Image.has_data` false).
+    pub fn info(&self, base: &PathBase) -> Option<ImInfo> {
+        if let Some(b) = self.live_buffer() {
+            return Some(ImInfo::of(b));
+        }
+        match self.source.as_str() {
+            "GENERATED" => Some(self.generated_info()),
+            "TILED" if self.tile_is_generated() => Some(self.generated_info()),
+            "FILE" | "SEQUENCE" | "MOVIE" | "TILED" if self.packed_file.is_some() => {
+                let p = self.packed_file.as_ref().expect("invariant: checked");
+                probe_image(&p.bytes).ok()
+            }
+            "FILE" | "SEQUENCE" | "MOVIE" | "TILED" if !self.filepath.is_empty() => {
+                probe_file(&base.file(&self.filepath))
             }
             _ => None,
         }
@@ -312,10 +478,10 @@ impl Image {
         {
             im.alpha_mode = SmolStr::new_static("PREMUL");
         }
-        if let Ok(b) = decode_image(&bytes) {
+        if let Ok(b) = probe_image(&bytes) {
             im.size = [b.x as i32, b.y as i32];
             im.file_format = b.ftype.clone();
-            if b.is_float() && matches!(b.ftype.as_str(), "OPEN_EXR" | "HDR") {
+            if b.float && matches!(b.ftype.as_str(), "OPEN_EXR" | "HDR") {
                 im.colorspace_settings.name = SmolStr::new_static("Linear Rec.709");
             }
         }
@@ -396,7 +562,7 @@ crate::id::id_rna! { Image as frap_spec_rna::IMAGE, "IMAGE" {
     channels => hook,
     is_float => hook,
     colorspace_settings => struct(colorspace_settings),
-    alpha_mode => alpha_mode,
+    alpha_mode => get(|i| i.alpha_mode.clone()) set(|i, v: SmolStr| i.set_alpha_mode(v)),
 }}
 
 impl IdType for Image {
@@ -492,6 +658,53 @@ mod tests {
         }));
         assert_eq!(g.acquire(&PathBase::default()).unwrap().x, 2);
         assert_eq!(image_type(&g), "UV_TEST");
+    }
+
+    #[test]
+    fn colour_space_changes_drop_the_buffer() {
+        let base = PathBase::default();
+        let mut i = Image::new("I", 2, 1);
+        let mut b = i.acquire(&base).unwrap();
+        assert_eq!(b.colorspace.as_ref(), Some(&i.colorspace_settings));
+        b.set_pixels(&[0.5; 8]);
+        i.buffer = Some(Arc::new(b));
+        // GENERATED: `alpha_mode` keeps the buffer (verified on 5.2.4: still dirty).
+        i.set_alpha_mode("PREMUL".into());
+        assert!(i.is_dirty());
+        // The colour space frees it (5.2.4: not dirty, pixels generated again).
+        i.colorspace_settings.name = "Non-Color".into();
+        assert!(!i.is_dirty());
+        assert_eq!(i.acquire(&base).unwrap().pixels()[0], 0.0);
+        assert_eq!(i.info(&base).unwrap().x, 2);
+        // Other sources: `alpha_mode` frees the buffer.
+        let mut f = Image::new("F", 1, 1);
+        f.source = "FILE".into();
+        let mut b = ImBuf::new(1, 1, 32, false);
+        b.dirty = true;
+        f.buffer = Some(Arc::new(b));
+        assert!(f.is_dirty());
+        f.set_alpha_mode("STRAIGHT".into());
+        assert!(!f.is_dirty());
+    }
+
+    #[test]
+    fn info_without_pixels() {
+        let base = PathBase::default();
+        let mut i = Image::new("G", 7, 3);
+        i.use_generated_float = true;
+        i.generated_depth = 32;
+        let info = i.info(&base).unwrap();
+        assert_eq!(
+            (info.x, info.y, info.depth(), info.float),
+            (7, 3, 128, true)
+        );
+        let b = i.acquire(&base).unwrap();
+        assert_eq!(ImInfo::of(&b), info);
+        i.source = "FILE".into();
+        i.filepath = "/nonexistent-frap-dir/x.png".into();
+        assert!(i.info(&base).is_none());
+        i.source = "VIEWER".into();
+        assert!(i.info(&base).is_none());
     }
 
     #[test]

@@ -142,6 +142,7 @@ fn scale_box(
     // Horizontal pass: w × h → nw × h.
     let mut tmp = vec![[0.0f32; 4]; nw * h];
     for y in 0..h {
+        frap_math::budget::check_n(nw as u32);
         let sl = Line {
             start: y * w,
             stride: 1,
@@ -159,6 +160,7 @@ fn scale_box(
     // Vertical pass: nw × h → nw × nh.
     let mut out = vec![[0.0f32; 4]; nw * nh];
     for x in 0..nw {
+        frap_math::budget::check_n(nh as u32);
         let sl = Line {
             start: x,
             stride: nw,
@@ -188,6 +190,13 @@ fn scale(buf: &mut ImBuf, width: u32, height: u32) -> bool {
     if width == 0 || height == 0 || (width, height) == (buf.x, buf.y) || buf.is_empty() {
         return false;
     }
+    // The working set (`tmp` and `out` of `scale_box`, four floats per pixel, plus the
+    // result) is checked against the statement's budget before anything is allocated.
+    let work = |w: u32, h: u32| super::imbuf::buffer_bytes(w, h, true);
+    let total = work(width, buf.y)
+        .zip(work(width, height))
+        .and_then(|(a, b)| a.checked_add(b)?.checked_add(b));
+    frap_math::budget::check_buffer(super::imbuf::BUFFER, total);
     let (w, h) = (buf.x as usize, buf.y as usize);
     let (nw, nh) = (width as usize, height as usize);
     match &mut buf.data {

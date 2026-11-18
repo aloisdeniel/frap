@@ -9,6 +9,10 @@
 //! assigning 3 values raises `ValueError: bpy_struct: item.attr = val: Image.pixels: array
 //! length cannot be changed to 3 (expected 32)`; an image without data has no pixels (`[]`)
 //! and ignores writes.
+//!
+//! Limits: reading checks the array against the statement's budget first (`LIMIT_EXCEEDED`);
+//! responses cap long arrays at `--max-array` values (`$array` with `range`/`truncated`, read
+//! further with slices such as `pixels[65536:131072]`), also the echo of an assignment.
 
 use std::sync::Arc;
 
@@ -32,8 +36,17 @@ mod hook {
         prop: &'static PropDef,
     ) -> Result<Field<'h>, RnaError> {
         let im = image_of(h, this)?;
+        let base = crate::id::PathBase::of(h);
+        // The float array is checked against the statement's budget before the pixels are
+        // loaded or generated (a byte buffer reads as four times its size).
+        if let Some(i) = im.info(&base) {
+            frap_math::budget::check_buffer(
+                crate::id::imbuf::BUFFER,
+                crate::id::imbuf::buffer_bytes(i.x, i.y, true),
+            );
+        }
         let px = im
-            .acquire(&crate::id::PathBase::of(h))
+            .acquire(&base)
             .map(|b| b.pixels())
             .unwrap_or_default();
         Ok(Field::Value(px.to_rna_value(prop, MathTag::None)))

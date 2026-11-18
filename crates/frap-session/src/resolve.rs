@@ -1585,6 +1585,9 @@ pub fn encode(host: &dyn HostRead, t: &Target, caps: Caps) -> Result<(J, Option<
             }
             Read::Target(_) => return Err(stale("element of a pointer")),
             Read::Value(whole) => {
+                if let Some(j) = long_array_json(p.prop, &whole, p.elem, caps.max_array) {
+                    return Ok((j, Some(rna_tag(p.prop, None))));
+                }
                 let v = element(p.prop, whole, p.elem)?;
                 let rna = if p.elem == Elem::Whole {
                     rna_tag(p.prop, Some(&v))
@@ -1705,6 +1708,71 @@ pub fn bulk_json(bulk: &Bulk, prop: &PropDef, start: usize, max_array: usize) ->
     })
 }
 
+/// A dynamic array longer than `max_array` (`Image.pixels`: four floats per pixel, 4,194,304
+/// for a 1024 × 1024 image), read whole or as a slice: answered as a `$array` capped at
+/// `max_array` scalars (see [`bulk_json`]; `range` and `truncated` page through it with
+/// slices), instead of the whole list. `None` for anything else (answered as a list).
+pub fn long_array_json(prop: &PropDef, whole: &Value, elem: Elem, max_array: usize) -> Option<J> {
+    if !matches!(prop.array, ArrayShape::Dynamic) {
+        return None;
+    }
+    let len = array_len_of(whole);
+    let (s, e) = match elem {
+        Elem::Whole => (0, len),
+        Elem::Slice(a, b) => norm_slice(a, b, len),
+        _ => return None,
+    };
+    if e.saturating_sub(s) <= max_array {
+        return None;
+    }
+    let bulk = match whole {
+        Value::FloatArray { data, .. } => Bulk::F32(data[s..e].to_vec()),
+        Value::IntArray(a) => Bulk::I32(a[s..e].iter().map(|x| *x as i32).collect()),
+        Value::BoolArray(a) => Bulk::Bool(a[s..e].to_vec()),
+        _ => return None,
+    };
+    Some(bulk_json(&bulk, prop, s, max_array))
+}
+
+/// The echo of an assignment to a dynamic array longer than `max_array` (`Image.pixels = …`):
+/// the `$array` of [`long_array_json`] for the written values (from index `start`), so a
+/// response never repeats millions of values. `None`: echo the value as is.
+pub fn long_value_json(prop: &PropDef, v: &Value, start: usize, max_array: usize) -> Option<J> {
+    if !matches!(prop.array, ArrayShape::Dynamic) {
+        return None;
+    }
+    let bulk = match v {
+        Value::FloatArray { data, .. } if data.len() > max_array => Bulk::F32(data.to_vec()),
+        Value::IntArray(a) if a.len() > max_array => {
+            Bulk::I32(a.iter().map(|x| *x as i32).collect())
+        }
+        Value::BoolArray(a) if a.len() > max_array => Bulk::Bool(a.to_vec()),
+        Value::Tuple(items) if items.len() > max_array => match items.first()? {
+            Value::Float(_) => Bulk::F32(
+                items
+                    .iter()
+                    .map(|x| if let Value::Float(f) = x { *f } else { 0.0 })
+                    .collect(),
+            ),
+            Value::Int(_) => Bulk::I32(
+                items
+                    .iter()
+                    .map(|x| if let Value::Int(i) = x { *i as i32 } else { 0 })
+                    .collect(),
+            ),
+            Value::Bool(_) => Bulk::Bool(
+                items
+                    .iter()
+                    .map(|x| matches!(x, Value::Bool(true)))
+                    .collect(),
+            ),
+            _ => return None,
+        },
+        _ => return None,
+    };
+    Some(bulk_json(&bulk, prop, start, max_array))
+}
+
 /// The ID repr of an `IdAny` (`bpy.data.objects['Cube']`).
 pub fn id_repr(names: &dyn IdNames, id: IdAny) -> String {
     match names.id_name(id) {
@@ -1740,6 +1808,46 @@ mod tests {
                 other => panic!("not a row vector: {other:?}"),
             })
             .collect()
+    }
+
+    #[test]
+    fn long_dynamic_arrays_answer_a_capped_array() {
+        let prop = frap_spec_rna::IMAGE
+            .find_prop("pixels")
+            .expect("Image.pixels");
+        let whole = Value::FloatArray {
+            data: (0..100).map(|x| x as f32).collect(),
+            shape: ArrayShape::Dynamic,
+            tag: MathTag::None,
+        };
+        // Short enough: a plain list.
+        assert!(long_array_json(prop, &whole, Elem::Whole, 100).is_none());
+        let j = long_array_json(prop, &whole, Elem::Whole, 8).unwrap();
+        assert_eq!(j["len"], 8);
+        assert_eq!(j["range"], json!([0, 8]));
+        assert_eq!(j["truncated"], true);
+        assert_eq!(j["$array"][7], 7.0);
+        // A slice pages from its start.
+        let j = long_array_json(prop, &whole, Elem::Slice(Some(40), None), 8).unwrap();
+        assert_eq!(j["range"], json!([40, 48]));
+        assert_eq!(j["$array"][0], 40.0);
+        assert!(long_array_json(prop, &whole, Elem::Slice(Some(40), Some(45)), 8).is_none());
+        assert!(long_array_json(prop, &whole, Elem::Index(3), 8).is_none());
+        // Assignment echoes.
+        let echo = long_value_json(prop, &whole, 0, 8).unwrap();
+        assert_eq!(echo["truncated"], true);
+        let tuple = Value::Tuple((0..10).map(|x| Value::Float(x as f32)).collect());
+        let echo = long_value_json(prop, &tuple, 20, 8).unwrap();
+        assert_eq!(echo["range"], json!([20, 28]));
+        assert!(long_value_json(prop, &tuple, 0, 10).is_none());
+        // Fixed-size arrays are never paged.
+        let loc = frap_spec_rna::OBJECT.find_prop("location").unwrap();
+        let v = Value::FloatArray {
+            data: vec![1.0, 2.0, 3.0].into(),
+            shape: ArrayShape::Fixed(3),
+            tag: MathTag::Vector,
+        };
+        assert!(long_array_json(loc, &v, Elem::Whole, 1).is_none());
     }
 
     #[test]

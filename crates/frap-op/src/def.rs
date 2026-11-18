@@ -80,6 +80,9 @@ pub enum PollReq {
     SceneHasCamera,
     /// The scene is editable.
     SceneEditable,
+    /// An image from the context: `context.edit_image` (set by UI templates) or the Image
+    /// Editor's image. Headless Blender and frap have neither, so this poll never passes.
+    ContextImage,
 }
 
 impl PollReq {
@@ -97,6 +100,7 @@ impl PollReq {
             PollReq::HasSelectedObjects => "HAS_SELECTED_OBJECTS".into(),
             PollReq::SceneHasCamera => "SCENE_HAS_CAMERA".into(),
             PollReq::SceneEditable => "SCENE_EDITABLE".into(),
+            PollReq::ContextImage => "CONTEXT_IMAGE".into(),
         }
     }
     /// Human-readable condition, in Python terms (`--describe` poll text).
@@ -116,6 +120,9 @@ impl PollReq {
             PollReq::HasSelectedObjects => "bpy.context.selected_objects is not empty".into(),
             PollReq::SceneHasCamera => "bpy.context.scene.camera is not None".into(),
             PollReq::SceneEditable => "bpy.context.scene is local (not linked)".into(),
+            PollReq::ContextImage => {
+                "bpy.context.edit_image or an Image Editor image (never available headless)".into()
+            }
         }
     }
 }

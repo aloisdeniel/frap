@@ -631,7 +631,10 @@ impl Session {
             }
             resolve::set_prop(&mut self.host, &p.ptr, prop, c.value.clone())
                 .map_err(set_hook_prefix(set_prefix(&p.ptr)))?;
-            return Ok((value_json(&c.value, &self.host.state.main), reports, hints));
+            // A long dynamic array (`Image.pixels`) echoes a capped `$array`.
+            let echo = resolve::long_value_json(prop, &c.value, 0, self.opts.max_array)
+                .unwrap_or_else(|| value_json(&c.value, &self.host.state.main));
+            return Ok((echo, reports, hints));
         }
         // One element (or a slice) of an array: read, replace, write the whole array back.
         let whole = PropPlace {
@@ -655,6 +658,10 @@ impl Session {
                 reports.push(info(frap_rna::clamp_report(prop, &input)));
             }
             Ok(c.value)
+        };
+        let echo_start = match p.elem {
+            Elem::Slice(a, b) => resolve::norm_slice(a, b, len).0,
+            _ => 0,
         };
         let echo = match p.elem {
             // A matrix row out of range (in-range rows resolve to `Elem::Row`).
@@ -797,7 +804,9 @@ impl Session {
             Elem::Whole => unreachable!("handled above"),
         };
         resolve::set_prop(&mut self.host, &p.ptr, prop, cur)?;
-        Ok((value_json(&echo, &self.host.state.main), reports, hints))
+        let echo = resolve::long_value_json(prop, &echo, echo_start, self.opts.max_array)
+            .unwrap_or_else(|| value_json(&echo, &self.host.state.main));
+        Ok((echo, reports, hints))
     }
 
     // ------------------------------------------------------------------ call

@@ -14,7 +14,7 @@ use super::image_save::write::{Reports, image};
 fn image_update(h: &mut dyn Host, this: &RnaPtr, _args: &mut FuncArgs) -> Result<Value, RnaError> {
     let im = image(h, this)?;
     let mut rep = Reports::default();
-    if im.acquire(&PathBase::of(h)).is_none() {
+    if im.info(&PathBase::of(h)).is_none() {
         rep.error(format!(
             "Image '{}' does not have any image data",
             im.header.name
