@@ -63,6 +63,16 @@ impl Default for Torus {
     }
 }
 
+impl Torus {
+    /// Element counts before building (`--max-elements` pre-check, [`super::Estimate`]).
+    pub fn estimate(&self) -> Option<super::Estimate> {
+        let a = u64::try_from(self.major_segments.max(0)).ok()?;
+        let b = u64::try_from(self.minor_segments.max(0)).ok()?;
+        let f = a.checked_mul(b)?;
+        super::estimate(Some(f), f.checked_mul(2), Some(f), f.checked_mul(4))
+    }
+}
+
 /// Hard minimum of `major_radius` / `minor_radius` (`FloatProperty(min=0.0)`).
 const RADIUS_MIN: f32 = 0.0;
 /// Hard maximum of `major_radius` / `minor_radius` (`FloatProperty(max=10000.0)`).

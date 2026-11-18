@@ -100,6 +100,7 @@ pub fn with_coll_mut<R>(
     prop: &'static PropDef,
     f: &mut dyn FnMut(&mut dyn RnaCollMut) -> Result<R, FrapError>,
 ) -> Result<R, FrapError> {
+    crate::edit::check_write(&*host, owner, prop)?;
     let (main, log) = host.main_mut();
     with_struct_mut(main, log, owner, &mut |s| {
         let srna = s.srna();
@@ -117,6 +118,7 @@ pub fn set_prop(
     v: Value,
 ) -> Result<(), FrapError> {
     refuse_detached(host.main(), ptr)?;
+    crate::edit::check_write(&*host, ptr, prop)?;
     if let Some(set) = find_hook(ptr.srna, prop.identifier).and_then(|h| h.set) {
         return set(host, ptr, prop, v).map_err(rna_err);
     }

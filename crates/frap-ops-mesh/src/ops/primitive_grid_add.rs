@@ -26,12 +26,14 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitiveGridAdd) -> OpResult {
         &p.scale,
         false,
     )?;
-    let mesh = grid(&Grid {
+    let params = Grid {
         x_subdivisions: p.x_subdivisions.value,
         y_subdivisions: p.y_subdivisions.value,
         size: p.size.value,
         calc_uvs: p.calc_uvs.value,
         matrix: prim.matrix,
-    });
+    };
+    common::reserve(params.estimate())?;
+    let mesh = grid(&params);
     common::finish(cx, "Grid", mesh, prim.at, p.enter_editmode.value)
 }

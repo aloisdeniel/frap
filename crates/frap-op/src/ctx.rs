@@ -109,12 +109,22 @@ impl<'h> OpCtx<'h> {
             .get_mut(r, log)
             .ok_or_else(|| OpError::Runtime("mesh no longer exists".into()))
     }
-    /// Mutable edit BMesh (EditState COW, bumps `bm_gen`, resets the view cache). M2.
+    /// Mutable edit BMesh (EditState COW, bumps `bm_gen`, resets the view cache; §6.3). The
+    /// mesh is logged as modified (`changes.modified`) without a `gen` bump: `Main` is untouched
+    /// until Edit Mode is left.
     pub fn bmesh_mut(&mut self, me: IdRef<MeshId>) -> Result<&mut BMesh, OpError> {
-        let _ = me;
-        Err(OpError::NotImplemented(
-            "frap: Edit Mode arrives in M2 (bmesh_mut)".into(),
-        ))
+        {
+            let (_, log) = self.host.main_mut();
+            log.modified.insert(me.any());
+        }
+        let (_, edit) = self.host.split_edit();
+        let em = edit
+            .meshes
+            .get_mut(&me.key())
+            .ok_or_else(|| OpError::Runtime("mesh is not in Edit Mode".into()))?;
+        em.bm_gen += 1;
+        em.view = frap_scene::ViewCache::default();
+        Ok(Arc::make_mut(&mut em.bm))
     }
     /// Read the context (tool settings, cursor, selection) while editing BMeshes (F-OP-5).
     pub fn split_edit(&mut self) -> (Context<'_>, &mut EditState) {

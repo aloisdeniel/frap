@@ -74,7 +74,7 @@ $ frap run --no-ready --verbosity minimal error_codes.py
 {"event":"end","ok":false,"stats":{"statements":28,"errors":27,"cancelled":0}}
 
 $ frap --no-ready --verbosity minimal --max-elements 100 -c "bpy.ops.mesh.primitive_uv_sphere_add()"
-{"seq":1,"line":1,"kind":"op","op":"mesh.primitive_uv_sphere_add","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"LIMIT_EXCEEDED","message":"Error: frap: limit exceeded (max_elements)","span":{"line":1,"col":1,"col_chars":1,"len":38},"detail":{"max_elements":100,"corners":1984},"hint":"raise --max-elements, or build less geometry per statement"},"hints":[]}
+{"seq":1,"line":1,"kind":"op","op":"mesh.primitive_uv_sphere_add","ok":false,"status":"ERROR","reports":[],"state":"unchanged","error":{"exception":"RuntimeError","code":"LIMIT_EXCEEDED","message":"Error: frap: limit exceeded (max_elements): the statement would create 1984 face corners (limit 100)","span":{"line":1,"col":1,"col_chars":1,"len":38},"detail":{"max_elements":100},"hint":"raise --max-elements, or build less geometry per statement"},"hints":[]}
 {"event":"end","ok":false,"stats":{"statements":1,"errors":1,"cancelled":0}}
 
 ```

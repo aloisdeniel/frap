@@ -59,6 +59,9 @@ impl Renderer {
 
 impl RenderService for Renderer {
     fn render(&mut self, scene: &RenderScene) -> Result<Film, RenderError> {
+        // `--stmt-timeout` cancellation point (§12). Never inside the error scopes below: an
+        // unwind there would leave them pushed on the device.
+        frap_math::budget::check_now();
         self.gpu()?;
         let gpu = self.gpu.as_ref().expect("invariant: created above");
         // M1: every engine renders with Workbench. `render.render` reports the EEVEE/CYCLES
@@ -73,7 +76,9 @@ impl RenderService for Renderer {
         if let Some(e) = errors.into_iter().flatten().next() {
             return Err(RenderError::Device(e.to_string()));
         }
-        film
+        let film = film?;
+        frap_math::budget::check_now();
+        Ok(film)
     }
     fn render_tiles(&mut self, scenes: &[RenderScene]) -> Result<Vec<Film>, RenderError> {
         scenes.iter().map(|s| self.render(s)).collect()

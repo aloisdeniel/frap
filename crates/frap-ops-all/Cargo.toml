@@ -27,6 +27,7 @@ frap-scene.workspace = true
 frap-mesh.workspace = true
 frap-nodes.workspace = true
 frap-bmesh.workspace = true
+frap-math.workspace = true
 frap-anim.workspace = true
 frap-material.workspace = true
 frap-eval.workspace = true

@@ -27,8 +27,14 @@
 //!   filtered over a fixed Halton (2, 3) jitter sequence. Blender's Blackman-Harris weighted TAA
 //!   and SMAA are WP 2.3's (the M2 SSIM-vs-Blender gate).
 
+pub mod cavity;
 pub mod color;
+pub mod matcap;
+pub mod outline;
+pub mod shadow;
 pub mod studio_light;
+pub mod wire;
+pub mod xray;
 
 use std::ops::Range;
 
@@ -896,6 +902,7 @@ mod tests {
             materials: vec![Some(MatKey(7)), None],
             color: [1.0; 4],
             random_hash: 0,
+            display_type: "TEXTURED".into(),
         };
         let shading = Shading::from_settings(&sc.settings);
         let gb = |r: f32, m: f32| color::gbuffer_roughness_metallic(r, m);

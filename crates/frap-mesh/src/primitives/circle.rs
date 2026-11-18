@@ -39,6 +39,23 @@ impl Default for Circle {
     }
 }
 
+impl Circle {
+    /// Element counts before building (`--max-elements` pre-check, [`super::Estimate`]).
+    pub fn estimate(&self) -> Option<super::Estimate> {
+        let n = u64::try_from(self.vertices.max(0)).ok()?;
+        if n == 0 {
+            return super::estimate(Some(0), Some(0), Some(0), Some(0));
+        }
+        match self.fill_type {
+            FillType::Nothing => super::estimate(Some(n), Some(n), Some(0), Some(0)),
+            FillType::Ngon => super::estimate(Some(n), Some(n), Some(1), Some(n)),
+            FillType::Trifan => {
+                super::estimate(n.checked_add(1), n.checked_mul(2), Some(n), n.checked_mul(3))
+            }
+        }
+    }
+}
+
 /// The mesh of `mesh.primitive_circle_add(…)`.
 pub fn circle(p: &Circle) -> Mesh {
     let cap_ends = p.fill_type != FillType::Nothing;

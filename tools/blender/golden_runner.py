@@ -100,6 +100,8 @@ NORMALISE = {
     "D-49": None,
     "D-50": None,
     "D-51": ("comparator", "reports are not part of GoldenState, so they are never compared"),
+    "D-52": None,
+    "D-53": None,
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

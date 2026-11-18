@@ -1324,3 +1324,109 @@ fn contract_signatures_compile_and_cheap_ones_run() {
     let _ = NoEngine;
     datablocks();
 }
+
+// ---------------------------------------------------------------- M2 W0 contract delta
+
+/// `frap-bmesh` public API (§6.2, frozen at M2 W0; bodies are WP 2.1's / the W2 WPs').
+fn bmesh_api(bm: &mut BMesh, me: &Mesh) {
+    use frap_bmesh::{
+        BMEdge, BMElem, BMFace, BMLoop, BMVert, BmError, CdLayer, CreateFlag, CustomData, DiskLink,
+        EdgeId, ElemFlag, ElemTypes, FaceId, FromMeshParams, LoopId, Pool, SelectMode, ShapeLayer,
+        ToMeshParams, VertId,
+    };
+    let _: (&Pool<BMVert>, &Pool<BMEdge>, &Pool<BMLoop>, &Pool<BMFace>) =
+        (&bm.verts, &bm.edges, &bm.loops, &bm.faces);
+    let _: (&CustomData, &CustomData, &CustomData, &CustomData) =
+        (&bm.vdata, &bm.edata, &bm.ldata, &bm.pdata);
+    let _: (SelectMode, &Vec<BMElem>, Option<FaceId>, &Vec<ShapeLayer>) = (
+        bm.select_mode,
+        &bm.select_history,
+        bm.act_face,
+        &bm.shape_layers,
+    );
+    let _: fn(&mut Pool<BMVert>, BMVert) -> u32 = Pool::alloc;
+    let _: fn(&mut Pool<BMVert>, u32) = Pool::free;
+    let _: fn(&Pool<BMVert>) -> usize = Pool::live;
+    let v = VertId(0);
+    let e = EdgeId(0);
+    let f = FaceId(0);
+    let l = LoopId(0);
+    let _: fn(&mut BMesh, [f32; 3], Option<VertId>, CreateFlag) -> VertId = BMesh::vert_create;
+    let _: fn(&mut BMesh, VertId, VertId, Option<EdgeId>, CreateFlag) -> EdgeId =
+        BMesh::edge_create;
+    let _: fn(&mut BMesh, &[VertId], &[EdgeId], Option<FaceId>, CreateFlag) -> Option<FaceId> =
+        BMesh::face_create;
+    let _: fn(&mut BMesh, &[VertId], Option<FaceId>, CreateFlag, bool) -> Option<FaceId> =
+        BMesh::face_create_verts;
+    let _: fn(&mut BMesh, VertId, EdgeId) -> (VertId, EdgeId) = BMesh::split_edge_make_vert;
+    let _: fn(
+        &mut BMesh,
+        FaceId,
+        LoopId,
+        LoopId,
+        Option<EdgeId>,
+        bool,
+    ) -> Option<(FaceId, LoopId)> = BMesh::split_face_make_edge;
+    let _: fn(&mut BMesh, FaceId, FaceId, EdgeId) -> Option<FaceId> = BMesh::join_face_kill_edge;
+    let _: fn(&mut BMesh, ElemTypes) = BMesh::elem_index_ensure;
+    let _: fn(&BMesh, VertId) -> Vec<EdgeId> = BMesh::vert_edges;
+    let _: fn(&BMesh, FaceId) -> Vec<LoopId> = BMesh::face_loops;
+    let _: fn(&BMesh, VertId, VertId) -> Option<EdgeId> = BMesh::edge_exists;
+    let _: fn(&mut BMesh, BMElem, bool) = BMesh::select_set;
+    let _: fn(&mut BMesh) = BMesh::select_flush_mode;
+    let _: fn(&mut BMesh, SelectMode, bool) = BMesh::select_mode_convert;
+    let _: fn(&BMesh, EdgeId) -> Vec<EdgeId> = BMesh::walk_edge_loop;
+    let _: fn(&Mesh, &FromMeshParams) -> BMesh = BMesh::from_mesh;
+    let _: fn(&BMesh, &Mesh, &ToMeshParams) -> Mesh = BMesh::to_mesh;
+    let _: fn(&BMesh) -> Vec<String> = BMesh::validate;
+    let _: fn(&mut BMesh, LoopId, FaceId, bool) = BMesh::loop_interp_from_face;
+    let _: (&Vec<CdLayer>, ElemFlag, DiskLink) = (
+        &bm.vdata.layers,
+        ElemFlag::SELECT,
+        DiskLink { next: e, prev: e },
+    );
+    let _ = (v, f, l, me);
+    use frap_bmesh::ops::extrude_face_region::{ExtrudeFaceRegionIn, ExtrudeFaceRegionOut};
+    let _: fn(&mut BMesh, &ExtrudeFaceRegionIn) -> Result<ExtrudeFaceRegionOut, BmError> =
+        frap_bmesh::ops::extrude_face_region::extrude_face_region;
+}
+
+/// Other M2 W0 extension points and helpers.
+fn m2_extension_points() {
+    let _: fn() -> Option<&'static frap_op::DescribeProvider> = frap_op::describe_provider;
+    let _: &[frap_op::DescribeProvider] = &frap_op::DESCRIBE_PROVIDERS;
+    let _: fn(&mut OpCtx, IdRef<ObjectId>, Mesh, Placement) -> Result<IdRef<ObjectId>, OpError> =
+        frap_op::helpers::edit_merge::merge_into_edit_mesh;
+    let _: fn(&mut OpCtx) -> Result<(), OpError> = frap_op::helpers::edit_mode::reenter_after_load;
+    let _: fn(
+        &mut dyn RenderService,
+        &[Film],
+        &frap_render_scene::SheetLayout,
+    ) -> Result<Film, RenderError> = |s, f, l| s.composite_sheet(f, l);
+    let w = frap_render_scene::RWorkbenchShading::default();
+    let _: (&str, bool, f32, [f32; 3]) = (
+        &w.shading_type,
+        w.show_xray,
+        w.xray_alpha,
+        w.light_direction,
+    );
+    let _: fn(Option<u64>, Option<u64>) -> Result<(), frap_math::budget::ElementsExceeded> =
+        frap_math::budget::reserve_corners;
+    let _: fn() = frap_math::budget::check;
+}
+
+#[test]
+fn m2_contract_delta_cheap_parts_run() {
+    let bm = BMesh::new();
+    assert_eq!(bm.select_mode, frap_bmesh::SelectMode::VERT);
+    assert!(bm.select_history_active().is_none());
+    let ws = frap_render_scene::RSettings::default().workbench;
+    assert_eq!(ws.render_aa, "8");
+    assert!(frap_op::describe_provider().is_none() || !frap_op::DESCRIBE_PROVIDERS.is_empty());
+    let i = frap_bmesh::ops::bevel::BevelIn::default();
+    assert_eq!((i.offset_type, i.vmesh_method), ("OFFSET", "ADJ"));
+    let _ = (
+        bmesh_api as fn(&mut BMesh, &Mesh),
+        m2_extension_points as fn(),
+    );
+}

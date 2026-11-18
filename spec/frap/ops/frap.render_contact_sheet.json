@@ -1,0 +1,303 @@
+{
+ "_comment": "Hand-written spec of frap's own operator `frap.render_contact_sheet` (dump schema of spec/blender-5.2/ops/<ns>.json, `poll: null`). Created by M2 W0 (WP 2.0); owned by WP 2.3, which may refine it (re-run `cargo xtask codegen`).",
+ "namespace": "frap",
+ "count": 1,
+ "operators": [
+  {
+   "idname": "frap.render_contact_sheet",
+   "bl_idname": "FRAP_OT_render_contact_sheet",
+   "label": "Render Contact Sheet",
+   "description": "Render the scene from several views into one labelled image (frap extension; synthetic cameras never enter bpy.data)",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "filepath",
+     "name": "File Path",
+     "description": "Output image (// = relative to the .frap file, else the working directory)",
+     "type": "STRING",
+     "subtype": "FILE_PATH",
+     "unit": "NONE",
+     "default": "//sheet.png",
+     "length_max": 1024,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "views",
+     "name": "Views",
+     "description": "Views to render, in this order",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "FRONT",
+       "name": "Front",
+       "description": "Looking along +Y (numpad 1)",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "BACK",
+       "name": "Back",
+       "description": "Looking along -Y (Ctrl numpad 1)",
+       "icon": "NONE",
+       "value": 2
+      },
+      {
+       "identifier": "RIGHT",
+       "name": "Right",
+       "description": "Looking along -X (numpad 3)",
+       "icon": "NONE",
+       "value": 4
+      },
+      {
+       "identifier": "LEFT",
+       "name": "Left",
+       "description": "Looking along +X (Ctrl numpad 3)",
+       "icon": "NONE",
+       "value": 8
+      },
+      {
+       "identifier": "TOP",
+       "name": "Top",
+       "description": "Looking along -Z (numpad 7)",
+       "icon": "NONE",
+       "value": 16
+      },
+      {
+       "identifier": "BOTTOM",
+       "name": "Bottom",
+       "description": "Looking along +Z (Ctrl numpad 7)",
+       "icon": "NONE",
+       "value": 32
+      },
+      {
+       "identifier": "ISO",
+       "name": "Iso",
+       "description": "The factory viewport rotation",
+       "icon": "NONE",
+       "value": 64
+      },
+      {
+       "identifier": "CAMERA",
+       "name": "Camera",
+       "description": "The scene camera",
+       "icon": "NONE",
+       "value": 128
+      }
+     ],
+     "default": [
+      "FRONT",
+      "RIGHT",
+      "TOP",
+      "ISO"
+     ],
+     "flags": [
+      "SKIP_SAVE",
+      "ENUM_FLAG",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "engine",
+     "name": "Engine",
+     "description": "Render engine of the tiles",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "BLENDER_WORKBENCH",
+       "name": "Workbench",
+       "description": "Workbench",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "BLENDER_EEVEE",
+       "name": "EEVEE",
+       "description": "EEVEE (Workbench with a WARNING until M5)",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "BLENDER_WORKBENCH",
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "objects",
+     "name": "Objects",
+     "description": "Objects framed by the synthetic cameras",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "VISIBLE",
+       "name": "Visible",
+       "description": "Visible renderable objects",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "SELECTED",
+       "name": "Selected",
+       "description": "Selected objects",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "ALL",
+       "name": "All",
+       "description": "Every object of the view layer",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "VISIBLE",
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "view_size",
+     "name": "View Size",
+     "description": "Tile size in pixels",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 512,
+     "hard_min": 16,
+     "hard_max": 4096,
+     "soft_min": 64,
+     "soft_max": 2048,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "columns",
+     "name": "Columns",
+     "description": "Tiles per row (0 = automatic)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": 0,
+     "hard_max": 16,
+     "soft_min": 0,
+     "soft_max": 16,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "margin",
+     "name": "Margin",
+     "description": "Framing margin around the bounds, as a fraction of the view",
+     "type": "FLOAT",
+     "subtype": "FACTOR",
+     "unit": "NONE",
+     "default": 0.05,
+     "hard_min": 0.0,
+     "hard_max": 0.5,
+     "soft_min": 0.0,
+     "soft_max": 0.5,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "show_labels",
+     "name": "Show Labels",
+     "description": "Write the view name on each tile",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "background",
+     "name": "Background",
+     "description": "Sheet background",
+     "type": "FLOAT",
+     "subtype": "COLOR_GAMMA",
+     "unit": "NONE",
+     "array": [
+      4
+     ],
+     "default": [
+      0.2,
+      0.2,
+      0.2,
+      1.0
+     ],
+     "hard_min": 0.0,
+     "hard_max": 1.0,
+     "soft_min": 0.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "use_scene_camera",
+     "name": "Use Scene Camera",
+     "description": "Add the scene camera's view (CAMERA) even when not listed",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "frame",
+     "name": "Frame",
+     "description": "Frame to render (unset: the current frame)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": 0,
+     "hard_min": -2147483648,
+     "hard_max": 2147483647,
+     "soft_min": -2147483648,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": null
+  }
+ ]
+}

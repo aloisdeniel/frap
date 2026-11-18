@@ -80,6 +80,7 @@ pub fn corner_split(mesh: &Mesh) -> CornerSplit {
         }
     };
     for (c, &v) in cv.iter().enumerate() {
+        frap_math::budget::check();
         let mut key = Vec::with_capacity(4 + 4 * corner_cols.len());
         key.push(v as u32);
         let n = normals.get(c).copied().unwrap_or([0.0, 0.0, 1.0]);

@@ -81,6 +81,9 @@ pub struct RObject {
     /// renderer applies `BLI_hash_int_01` itself; do not pre-hash. Reference implementation:
     /// `murmur2` in `crates/frap-render/tests/workbench_ref.rs`.
     pub random_hash: u32,
+    /// `Object.display_type` (`TEXTURED`, `SOLID`, `WIRE`, `BOUNDS`): Workbench draws `WIRE`
+    /// objects as wireframes and `BOUNDS` as their bounding box (M2 W0, WP 2.3).
+    pub display_type: SmolStr,
 }
 
 /// Mesh data uploaded to the GPU (corner-split, triangulated).
@@ -215,6 +218,154 @@ pub struct RSettings {
     /// for `background_type = 'VIEWPORT'`, transparent black without a world (verified on
     /// 5.2.4). `None` (synthetic scenes): the colour of [`RenderScene::world`].
     pub workbench_background: Option<[f32; 4]>,
+    /// The rest of `scene.display` / `scene.display.shading` the complete Workbench reads
+    /// (matcap, X-ray, wireframe, outline, shadows, cavity; M2 W0 contract delta, WP 2.3).
+    pub workbench: RWorkbenchShading,
+}
+
+/// `scene.display` and `scene.display.shading` values of the complete Workbench engine
+/// (§19.3; M2 W0, implemented by WP 2.3). Defaults are the factory scene's (verified on 5.2.4,
+/// `spec/blender-5.2/startup.json`). `shading_light`, `shading_color_type` and
+/// `shading_single_color` stay in [`RSettings`].
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
+pub struct RWorkbenchShading {
+    /// `shading.type` (`SOLID`, `WIREFRAME`; `MATERIAL`/`RENDERED` render as `SOLID`).
+    pub shading_type: SmolStr,
+    /// `shading.studio_light`: the studio light, or the matcap when `light == 'MATCAP'`.
+    pub studio_light: SmolStr,
+    /// `shading.studiolight_rotate_z`
+    pub studiolight_rotate_z: f32,
+    /// `shading.use_world_space_lighting`
+    pub use_world_space_lighting: bool,
+    /// `shading.show_backface_culling`
+    pub show_backface_culling: bool,
+    /// `shading.show_xray`
+    pub show_xray: bool,
+    /// `shading.xray_alpha`
+    pub xray_alpha: f32,
+    /// `shading.show_xray_wireframe`
+    pub show_xray_wireframe: bool,
+    /// `shading.xray_alpha_wireframe`
+    pub xray_alpha_wireframe: f32,
+    /// `shading.wireframe_color_type`
+    pub wireframe_color_type: SmolStr,
+    /// `shading.show_object_outline`
+    pub show_object_outline: bool,
+    /// `shading.object_outline_color` (linear RGB)
+    pub object_outline_color: [f32; 3],
+    /// `shading.show_shadows`
+    pub show_shadows: bool,
+    /// `shading.shadow_intensity`
+    pub shadow_intensity: f32,
+    /// `display.light_direction`
+    pub light_direction: [f32; 3],
+    /// `display.shadow_shift`
+    pub shadow_shift: f32,
+    /// `display.shadow_focus`
+    pub shadow_focus: f32,
+    /// `shading.show_cavity`
+    pub show_cavity: bool,
+    /// `shading.cavity_type` (`WORLD`, `SCREEN`, `BOTH`)
+    pub cavity_type: SmolStr,
+    /// `shading.cavity_ridge_factor`
+    pub cavity_ridge_factor: f32,
+    /// `shading.cavity_valley_factor`
+    pub cavity_valley_factor: f32,
+    /// `shading.curvature_ridge_factor`
+    pub curvature_ridge_factor: f32,
+    /// `shading.curvature_valley_factor`
+    pub curvature_valley_factor: f32,
+    /// `display.matcap_ssao_distance`
+    pub matcap_ssao_distance: f32,
+    /// `display.matcap_ssao_attenuation`
+    pub matcap_ssao_attenuation: f32,
+    /// `display.matcap_ssao_samples`
+    pub matcap_ssao_samples: i32,
+    /// `shading.show_specular_highlight`
+    pub show_specular_highlight: bool,
+    /// `shading.use_dof`
+    pub use_dof: bool,
+    /// `display.render_aa` (`OFF`, `FXAA`, `5`, `8`, `11`, `16`, `32`)
+    pub render_aa: SmolStr,
+}
+
+impl Default for RWorkbenchShading {
+    /// The factory scene's `scene.display` (verified on 5.2.4).
+    fn default() -> Self {
+        RWorkbenchShading {
+            shading_type: "SOLID".into(),
+            studio_light: "Default".into(),
+            studiolight_rotate_z: 0.0,
+            use_world_space_lighting: false,
+            show_backface_culling: false,
+            show_xray: false,
+            xray_alpha: 0.5,
+            show_xray_wireframe: false,
+            xray_alpha_wireframe: 0.0,
+            wireframe_color_type: SmolStr::default(),
+            show_object_outline: false,
+            object_outline_color: [0.0, 0.0, 0.0],
+            show_shadows: false,
+            shadow_intensity: 0.5,
+            light_direction: [0.577_350_26, 0.577_350_26, 0.577_350_26],
+            shadow_shift: 0.1,
+            shadow_focus: 0.0,
+            show_cavity: false,
+            cavity_type: "WORLD".into(),
+            cavity_ridge_factor: 1.0,
+            cavity_valley_factor: 1.0,
+            curvature_ridge_factor: 0.0,
+            curvature_valley_factor: 0.0,
+            matcap_ssao_distance: 0.2,
+            matcap_ssao_attenuation: 1.0,
+            matcap_ssao_samples: 16,
+            show_specular_highlight: true,
+            use_dof: false,
+            render_aa: "8".into(),
+        }
+    }
+}
+
+/// How `frap.render_contact_sheet` lays its tiles out on the sheet (§19.6; M2 W0 contract
+/// delta, implemented by WP 2.3). Pixel rectangles are `[x, y, width, height]`, top row first.
+#[derive(Clone, Debug, Default, PartialEq)]
+#[non_exhaustive]
+pub struct SheetLayout {
+    /// Sheet size in pixels.
+    pub size: [u32; 2],
+    /// Background (straight RGBA, scene-linear).
+    pub background: [f32; 4],
+    /// One tile per rendered film, in the order of the films.
+    pub tiles: Vec<SheetTile>,
+}
+
+/// One contact-sheet tile.
+#[derive(Clone, Debug, Default, PartialEq)]
+#[non_exhaustive]
+pub struct SheetTile {
+    /// `[x, y, width, height]` on the sheet.
+    pub rect: [u32; 4],
+    /// Label drawn with the embedded bitmap font (`show_labels`), e.g. `FRONT`.
+    pub label: Option<SmolStr>,
+}
+
+impl SheetLayout {
+    /// A layout from its parts (the struct is `#[non_exhaustive]`).
+    pub fn new(size: [u32; 2], background: [f32; 4], tiles: Vec<SheetTile>) -> Self {
+        SheetLayout {
+            size,
+            background,
+            tiles,
+        }
+    }
+}
+
+impl SheetTile {
+    /// A tile from its parts.
+    pub fn new(rect: [u32; 4], label: Option<SmolStr>) -> Self {
+        SheetTile { rect, label }
+    }
 }
 
 /// A material's viewport display values (`Material.diffuse_color`, `.metallic`, `.roughness`),
@@ -246,6 +397,7 @@ impl Default for RSettings {
             frame: 1,
             workbench_materials: IndexMap::new(),
             workbench_background: None,
+            workbench: RWorkbenchShading::default(),
         }
     }
 }
@@ -329,6 +481,19 @@ pub trait RenderService: Send {
     fn render(&mut self, scene: &RenderScene) -> Result<Film, RenderError>;
     /// Renders several scenes (contact-sheet tiles).
     fn render_tiles(&mut self, scenes: &[RenderScene]) -> Result<Vec<Film>, RenderError>;
+    /// Composites rendered tiles into one contact sheet (§19.6, CPU, labels from the embedded
+    /// bitmap font). M2 W0 contract delta (additive, default body), implemented by
+    /// `frap-render`'s `composite` module (WP 2.3).
+    fn composite_sheet(
+        &mut self,
+        films: &[Film],
+        layout: &SheetLayout,
+    ) -> Result<Film, RenderError> {
+        let _ = (films, layout);
+        Err(RenderError::Unsupported(
+            "contact-sheet compositing is not available in this render service".into(),
+        ))
+    }
     /// The adapter in use.
     fn adapter_info(&self) -> AdapterSummary;
 }

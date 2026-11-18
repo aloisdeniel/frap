@@ -20,6 +20,7 @@ frap-render-scene.workspace = true
 frap-imbuf.workspace = true
 frap-spec-rna.workspace = true
 frap-math.workspace = true
+libm.workspace = true
 indexmap.workspace = true
 smallvec.workspace = true
 smol_str.workspace = true
@@ -27,6 +28,7 @@ serde.workspace = true
 serde_json.workspace = true
 tracing.workspace = true
 toml.workspace = true
+frap-bmesh.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

@@ -10,7 +10,11 @@ no-default-features = false
 [advisories]
 # RustSec database; yanked crates fail too.
 yanked = "deny"
-ignore = []
+ignore = [
+    # humantime (via trycmd -> humantime-serde): unmaintained because chrono is; no safe upgrade
+    # exists. Dev-only (frap-cli transcript tests), never linked into the frap binary.
+    { id = "RUSTSEC-2026-0542", reason = "dev-only via trycmd; no maintained alternative yet" },
+]
 
 [licenses]
 # frap is GPL-3.0-or-later (§24 D1). Every licence below is GPL-3 compatible.

@@ -85,6 +85,8 @@ pub fn column_data(c: &AttrColumn) -> AccessorData {
 
 /// The glTF mesh of a MESH object (`None` for other types and meshes without primitives).
 pub fn gather_mesh(g: &mut Gather, ob: &Object) -> Result<Option<Index>, ExportError> {
+    // `--stmt-timeout` cancellation point, once per exported object (§12).
+    frap_math::budget::check_now();
     if ob.object_type() != "MESH" {
         return Ok(None);
     }

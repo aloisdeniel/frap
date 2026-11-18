@@ -399,6 +399,8 @@ impl<'a> PolyFill<'a> {
         let mut ear_init = self.head;
         let mut reverse = false;
         while self.coords_num > 3 {
+            // O(n²) worst case on huge n-gons: a `--stmt-timeout` cancellation point.
+            frap_math::budget::check();
             let ear = self.ear_tip_find(ear_init, reverse);
             if self.indices[ear].sign != CONVEX {
                 self.coords_num_concave -= 1;

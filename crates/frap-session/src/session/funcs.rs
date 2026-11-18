@@ -336,6 +336,19 @@ impl Session {
             FuncTarget::Rna { this, def } => self.call_rna(this, def, args),
             FuncTarget::Coll { coll, which } => Ok((self.call_coll(coll, which, args)?, None)),
             FuncTarget::Struct { this, which } => Ok((self.call_struct(this, which, args)?, None)),
+            FuncTarget::Math { recv, prop, name } => {
+                let args: Vec<super::eval::ArgVal> = args
+                    .into_iter()
+                    .map(|a| super::eval::ArgVal {
+                        name: a.name,
+                        value: a.value,
+                    })
+                    .collect();
+                Ok((
+                    super::eval::method(super::eval::value_py(prop, recv), name, &args)?,
+                    None,
+                ))
+            }
         }
     }
 
@@ -352,6 +365,7 @@ impl Session {
         };
         let mut reports = Vec::new();
         let mut fa = bind_args(owner, def, &args, &mut reports)?;
+        crate::edit::check_func(&self.host, &this, def)?;
         self.host.reports.extend(reports);
         let imp = if def.flags.contains(FuncFlags::PYTHON_ONLY)
             && frap_spec_rna::BPY_STRUCT_FUNCS

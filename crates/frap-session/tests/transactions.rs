@@ -316,13 +316,27 @@ fn nested_calls_in_operator_arguments_share_the_statement_transaction() {
 fn limit_exceeded_rolls_back() {
     let mut s = session_with(|o| o.limits.max_elements = 10);
     let before = s.state_dump();
+    // Primitives are refused before building (pre-check on the estimated counts)…
     let r = one(&mut s, "bpy.ops.mesh.primitive_cube_add()");
+    assert_eq!(r["status"], "ERROR", "{r}");
+    assert_eq!(r["error"]["code"], "LIMIT_EXCEEDED");
+    assert_eq!(
+        r["error"]["message"],
+        "Error: frap: limit exceeded (max_elements): the statement would create 24 face corners (limit 10)"
+    );
+    assert_eq!(s.state_dump(), before);
+    // …and any other geometry is checked after the statement, then rolled back.
+    let r = one(
+        &mut s,
+        "bpy.data.meshes.new('M').from_pydata([(0,0,0),(1,0,0),(1,1,0),(0,1,0),(0,0,1),(1,0,1),(1,1,1),(0,1,1)], [], [(0,1,2,3),(4,5,6,7),(0,1,5,4)])",
+    );
     assert_eq!(r["status"], "ERROR", "{r}");
     assert_eq!(r["error"]["code"], "LIMIT_EXCEEDED");
     assert_eq!(
         r["error"]["message"],
         "Error: frap: limit exceeded (max_elements)"
     );
+    assert_eq!(r["error"]["detail"]["corners"], 12);
     assert_eq!(s.state_dump(), before);
 }
 

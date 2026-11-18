@@ -119,7 +119,8 @@ fn accessors_reports_results_and_snapshot() {
     assert_eq!(cx.op().idname, "dummy.add");
     assert_eq!(cx.main().objects.len(), 3);
     cx.mesh_mut(me).unwrap();
-    assert!(matches!(cx.bmesh_mut(me), Err(OpError::NotImplemented(_))));
+    // Not in Edit Mode: no edit BMesh (M2 W0 implemented `bmesh_mut`).
+    assert!(matches!(cx.bmesh_mut(me), Err(OpError::Runtime(_))));
     let snap = cx.snapshot_at(None).unwrap();
     cx.object_mut(cube).unwrap().location = [5.0, 0.0, 0.0];
     // The snapshot is a clone: later writes do not reach it.

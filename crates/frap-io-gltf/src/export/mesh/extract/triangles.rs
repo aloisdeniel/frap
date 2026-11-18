@@ -62,6 +62,7 @@ pub fn primitive(
     let mut indices = vec![0u32; corners.len()];
     let mut reps: Vec<usize> = Vec::new();
     for i in order {
+        frap_math::budget::check();
         if reps.last().is_none_or(|&r| rec(r) != rec(i)) {
             reps.push(i);
         }

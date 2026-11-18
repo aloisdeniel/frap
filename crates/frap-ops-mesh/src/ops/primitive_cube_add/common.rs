@@ -145,6 +145,17 @@ pub(crate) fn prim_aligned(
     Ok(Prim { at, matrix })
 }
 
+/// `--max-elements` pre-check (ARCHITECTURE §12): rejects a request whose estimated counts
+/// exceed the statement budget or Blender's `int` range before anything is built, so absurd
+/// values (`x_subdivisions=10**7`) fail in microseconds with `LIMIT_EXCEEDED`.
+pub(crate) fn reserve(estimate: Option<frap_mesh::primitives::Estimate>) -> Result<(), OpError> {
+    frap_math::budget::reserve_corners(
+        estimate.map(|e| e.corners),
+        estimate.map(|e| e.max_domain()),
+    )
+    .map_err(|e| OpError::Limit(e.to_string()))
+}
+
 /// `make_prim_finish` in Object Mode: adds the object and its mesh (both requested as `name`,
 /// uniquified independently), selects and activates it, and answers `result.object`.
 pub(crate) fn finish(

@@ -10,6 +10,7 @@
 
 mod ctx;
 mod def;
+pub mod describe;
 pub mod errors;
 pub mod helpers;
 mod modes;
@@ -19,6 +20,7 @@ mod services;
 
 pub use ctx::{OpCtx, OpOutput, Placement};
 pub use def::*;
+pub use describe::{DESCRIBE_PROVIDERS, DescribeProvider, describe_provider};
 pub use modes::{
     MODE_HANDLERS, ModeHandler, TRANSFORM_MODE_HANDLERS, TransformModeHandler, TransformOp,
 };

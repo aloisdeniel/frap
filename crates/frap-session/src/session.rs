@@ -63,11 +63,8 @@ impl HostRead for State {
         }
     }
     fn mesh_view(&self, mesh: IdRef<MeshId>) -> Arc<Mesh> {
-        // Edit-mode views (§6.3) arrive with M2; in object mode the view is the original.
-        self.main
-            .meshes
-            .get_arc(mesh)
-            .expect("invariant: mesh_view of an existing mesh")
+        // §6.3: the cached edit-mode view while the mesh is in Edit Mode (WP 2.2).
+        crate::edit::mesh_view(&self.main, &self.edit, mesh)
     }
 }
 
@@ -469,12 +466,9 @@ impl Session {
     /// Executes one parsed statement.
     pub fn exec(&mut self, stmt: &Stmt) -> Response {
         self.seq += 1;
-        let r = catch_unwind(AssertUnwindSafe(|| self.dispatch(stmt))).unwrap_or_else(|p| {
-            Err(Fail::new(
-                exec::stmt_kind(&stmt.cmd),
-                FrapError::internal_panic(p),
-            ))
-        });
+        let _budget = frap_math::budget::scope(self.budget());
+        let r = catch_unwind(AssertUnwindSafe(|| self.dispatch(stmt)))
+            .unwrap_or_else(|p| Err(Fail::new(exec::stmt_kind(&stmt.cmd), self.unwind_error(p))));
         r.unwrap_or_else(|mut f| {
             f.err = f.err.with_span(stmt.span);
             self.error_response(f, stmt.line)
@@ -484,6 +478,7 @@ impl Session {
     /// Invokes an operator by idname with keyword inputs (front-end-free entry point, §11.6).
     pub fn invoke(&mut self, idname: &str, kwargs: IndexMap<String, Input>) -> Response {
         self.seq += 1;
+        let _budget = frap_math::budget::scope(self.budget());
         let kw = kwargs
             .into_iter()
             .map(|(k, v)| (k, eval::Py::from_input(v), Span::default()))
@@ -574,7 +569,11 @@ impl Session {
             changes: None,
             error: None,
             context: (self.opts.verbosity != Verbosity::Minimal).then(|| self.context_json()),
-            edit_mesh: None,
+            edit_mesh: if self.opts.verbosity == Verbosity::Minimal {
+                None
+            } else {
+                crate::edit::edit_mesh_block(&self.host)
+            },
             hints: vec![],
         }
     }
@@ -583,7 +582,15 @@ impl Session {
         let mut r = self.base(f.kind, line, Status::Error);
         r.op = f.op;
         r.reports = f.reports;
-        r.error = Some(f.err);
+        let mut err = f.err;
+        // Operator pre-checks (`OpError::Limit`) carry only a message: add the limit and the
+        // hint the post-statement check gives.
+        if err.code == frap_op::errors::LIMIT_EXCEEDED && err.hint.is_none() {
+            err = err
+                .with_detail("max_elements", self.opts.limits.max_elements)
+                .with_hint("raise --max-elements, or build less geometry per statement");
+        }
+        r.error = Some(err);
         r
     }
 
@@ -693,6 +700,7 @@ impl Session {
         &mut self,
         f: impl FnOnce(&mut Self) -> Result<(R, bool), FrapError>,
     ) -> Txn<R> {
+        let _budget = frap_math::budget::scope(self.budget());
         let snapshot = self.host.state.clone();
         if self.txn_depth == 0 {
             self.host.log = ChangeLog::default();
@@ -700,10 +708,15 @@ impl Session {
         }
         self.txn_depth += 1;
         let r = catch_unwind(AssertUnwindSafe(|| f(self)))
-            .unwrap_or_else(|p| Err(FrapError::internal_panic(p)))
+            .unwrap_or_else(|p| Err(self.unwind_error(p)))
             .and_then(|(v, cancelled)| {
                 if !cancelled {
                     self.check_limits()?;
+                    // A real deadline: work that finished after it still fails (and rolls
+                    // back), whether or not a loop reached a cancellation point in time.
+                    if frap_math::budget::expired() {
+                        return Err(self.timeout_error());
+                    }
                 }
                 Ok((v, cancelled))
             });
@@ -729,15 +742,55 @@ impl Session {
         }
     }
 
+    /// The statement budget of `--stmt-timeout` / `--max-elements` (§12, `frap_math::budget`).
+    fn budget(&self) -> frap_math::budget::Budget {
+        frap_math::budget::Budget {
+            timeout: self.opts.limits.stmt_timeout,
+            max_elements: self.opts.limits.max_elements,
+        }
+    }
+
+    /// The error of a caught unwind: `TIMEOUT` for an expired `--stmt-timeout` (a cooperative
+    /// cancellation point unwound), `INTERNAL` for any other panic.
+    fn unwind_error(&self, payload: Box<dyn std::any::Any + Send>) -> FrapError {
+        if frap_math::budget::interrupted(&*payload).is_some() {
+            self.timeout_error()
+        } else {
+            FrapError::internal_panic(payload)
+        }
+    }
+
+    /// `RuntimeError` code `TIMEOUT` (§12, §13.4).
+    fn timeout_error(&self) -> FrapError {
+        let ms = self
+            .opts
+            .limits
+            .stmt_timeout
+            .map_or(0, |d| d.as_millis().min(u64::MAX as u128) as u64);
+        FrapError::new(
+            PyExc::RuntimeError,
+            crate::errors::TIMEOUT,
+            "Error: frap: limit exceeded (stmt_timeout)",
+        )
+        .with_detail("stmt_timeout_ms", ms)
+        .with_hint(
+            "the statement was rolled back; raise --stmt-timeout, or split the work into smaller statements",
+        )
+    }
+
     /// `--max-elements`: corners of the meshes the statement created or modified.
     fn check_limits(&self) -> Result<(), FrapError> {
         let main = &self.host.state.main;
         let log = &self.host.log;
-        let corners: u64 = log
+        // A mesh both added and modified by the statement counts once.
+        let meshes: std::collections::BTreeSet<IdRef<MeshId>> = log
             .added
             .iter()
             .chain(log.modified.iter())
             .filter_map(|id| id.typed::<MeshId>())
+            .collect();
+        let corners: u64 = meshes
+            .into_iter()
             .filter_map(|m| main.meshes.get(m))
             .map(|m| m.corners_num() as u64)
             .sum();

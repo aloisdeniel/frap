@@ -34,12 +34,14 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitiveUvSphereAdd) -> OpResult {
         &p.scale,
         true,
     )?;
-    let mesh = uv_sphere(&UvSphere {
+    let params = UvSphere {
         segments: p.segments.value,
         ring_count: p.ring_count.value,
         radius: p.radius.value,
         calc_uvs: p.calc_uvs.value,
         matrix: prim.matrix,
-    });
+    };
+    common::reserve(params.estimate())?;
+    let mesh = uv_sphere(&params);
     common::finish(cx, "Sphere", mesh, prim.at, p.enter_editmode.value)
 }

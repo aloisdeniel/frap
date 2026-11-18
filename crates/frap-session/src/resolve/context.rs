@@ -11,6 +11,8 @@ use super::Target;
 use super::access::id_srna;
 use crate::errors::*;
 
+mod ui;
+
 fn id_target(host: &dyn HostRead, id: Option<IdAny>) -> Result<Target, FrapError> {
     match id {
         Some(id) => Ok(Target::Struct(RnaPtr::id(id, id_srna(host, id)?))),
@@ -43,7 +45,6 @@ pub fn member(host: &dyn HostRead, prop: &'static PropDef) -> Result<Member, Fra
     let scene = ctx.win.scene.any();
     let scene_ptr =
         || -> Result<RnaPtr, FrapError> { Ok(RnaPtr::id(scene, id_srna(host, scene)?)) };
-    let in_mode = ctx.mode() != ContextMode::Object;
     // `edit_object` is set in the edit modes only (not in Pose Mode).
     let in_edit = matches!(
         ctx.mode(),
@@ -104,17 +105,19 @@ pub fn member(host: &dyn HostRead, prop: &'static PropDef) -> Result<Member, Fra
             host,
             ctx.editable_objects().iter().map(|o| o.any()).collect(),
         )?,
-        "objects_in_mode" | "objects_in_mode_unique_data" => {
-            // Only the active object can be in a mode in M1 (multi-object editing is M2).
-            id_list(
-                host,
-                active
-                    .filter(|_| in_mode)
-                    .map(|o| o.any())
-                    .into_iter()
-                    .collect(),
-            )?
-        }
+        // Multi-object modes (§6.3): the active object first, then every visible object of
+        // its type in the same mode (`Context::objects_in_mode*`).
+        "objects_in_mode" => id_list(
+            host,
+            ctx.objects_in_mode().iter().map(|o| o.any()).collect(),
+        )?,
+        "objects_in_mode_unique_data" => id_list(
+            host,
+            ctx.objects_in_mode_unique_data()
+                .iter()
+                .map(|o| o.any())
+                .collect(),
+        )?,
         "mode" => {
             return Ok(Member::Value(Value::Enum(SmolStr::new(
                 ctx.mode().as_str(),
@@ -122,6 +125,17 @@ pub fn member(host: &dyn HostRead, prop: &'static PropDef) -> Result<Member, Fra
         }
         "engine" => {
             return Ok(Member::Value(Value::Str(ctx.scene().render.engine.clone())));
+        }
+        // UI members of the virtual 3D View (§8: `space_data` stub with `shading` and
+        // `region_3d`, read-only `preferences`), WP 2.3 (`context/ui.rs`).
+        "space_data" | "preferences" | "area" | "region" | "region_data" | "screen" => {
+            return ui::member(host, prop).map_err(|e| {
+                if e.code == NOT_IMPLEMENTED {
+                    not_yet(prop.identifier)
+                } else {
+                    e
+                }
+            });
         }
         other => return Err(not_yet(other)),
     };

@@ -37,14 +37,31 @@ impl Default for Grid {
     }
 }
 
+impl Grid {
+    /// Element counts before building (`--max-elements` pre-check, [`super::Estimate`]).
+    pub fn estimate(&self) -> Option<super::Estimate> {
+        let x = u64::try_from(self.x_subdivisions.max(1)).ok()?;
+        let y = u64::try_from(self.y_subdivisions.max(1)).ok()?;
+        let f = x.checked_mul(y)?;
+        super::estimate(
+            (x + 1).checked_mul(y + 1),
+            x.checked_mul(y + 1)?.checked_add(y.checked_mul(x + 1)?),
+            Some(f),
+            f.checked_mul(4),
+        )
+    }
+}
+
 /// `bmo_create_grid_exec` with `dia = size / 2` (shared with the plane).
 pub(crate) fn create_grid(name: &str, x_segments: i32, y_segments: i32, dia: f32, calc_uvs: bool, matrix: &Matrix4) -> Mesh {
-    let xtot = x_segments.max(1) as u32;
-    let ytot = y_segments.max(1) as u32;
+    // `usize` (not Blender's `uint`) so the vertex count cannot wrap; callers bound the counts
+    // first (`Grid::estimate`, `--max-elements`), the pools refuse more than `u32` elements.
+    let xtot = x_segments.max(1) as usize;
+    let ytot = y_segments.max(1) as usize;
     let xtot_inv2 = 2.0f32 / xtot as f32;
     let ytot_inv2 = 2.0f32 / ytot as f32;
     let mut bm = Bm::new();
-    let mut varr = Vec::with_capacity(((xtot + 1) * (ytot + 1)) as usize);
+    let mut varr = Vec::with_capacity((xtot + 1).saturating_mul(ytot + 1));
     for y in 0..=ytot {
         let vy = ((y as f32 * ytot_inv2) - 1.0) * dia;
         for x in 0..=xtot {
@@ -52,7 +69,7 @@ pub(crate) fn create_grid(name: &str, x_segments: i32, y_segments: i32, dia: f32
             varr.push(bm.vert_create(mul_m4_v3(matrix, [vx, vy, 0.0])));
         }
     }
-    let xy = |x: u32, y: u32| varr[(x + y * (xtot + 1)) as usize];
+    let xy = |x: usize, y: usize| varr[x + y * (xtot + 1)];
     for y in 1..=ytot {
         for x in 1..=xtot {
             bm.face_create(&[xy(x - 1, y - 1), xy(x, y - 1), xy(x, y), xy(x - 1, y)]);
@@ -63,7 +80,6 @@ pub(crate) fn create_grid(name: &str, x_segments: i32, y_segments: i32, dia: f32
         let dy = 1.0f32 / ytot as f32;
         for (face_index, slot) in bm.faces.slots.iter_mut().enumerate() {
             let f = slot.as_mut().expect("no kills");
-            let face_index = face_index as u32;
             let ix = face_index % xtot;
             let iy = face_index / xtot;
             f.uvs[0] = [ix as f32 * dx, iy as f32 * dy];

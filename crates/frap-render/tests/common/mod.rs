@@ -180,6 +180,7 @@ pub fn object(name: &str, mesh: u64, m: Mat4, materials: Vec<Option<MatKey>>) ->
         materials,
         color: [1.0, 1.0, 1.0, 1.0],
         random_hash: 0,
+        display_type: "TEXTURED".into(),
     }
 }
 

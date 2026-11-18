@@ -5,6 +5,13 @@
 
 use frap_rna::OperatorSpec;
 
+pub mod frap;
 
 /// Every typed operator spec of this group, sorted by idname.
-pub static ALL_OPS: [&OperatorSpec; 0] = [];
+pub static ALL_OPS: [&OperatorSpec; 5] = [
+    &frap::OPSPEC_FRAP_OT_DESCRIBE,
+    &frap::OPSPEC_FRAP_OT_RENDER_CONTACT_SHEET,
+    &frap::OPSPEC_FRAP_OT_SCENE_SUMMARY,
+    &frap::OPSPEC_FRAP_OT_SELECT_BY_NORMAL,
+    &frap::OPSPEC_FRAP_OT_SELECT_ELEMENTS,
+];

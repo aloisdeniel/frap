@@ -179,6 +179,16 @@ pub enum FuncTarget {
         /// Which method.
         which: StructFunc,
     },
+    /// A `mathutils` method bound to a value read from RNA (`ob.matrix_world.to_euler`,
+    /// `ob.location.normalized`); the call runs on a copy, as in Blender.
+    Math {
+        /// The receiver (a float array whose shape and tag give its `mathutils` type).
+        recv: Value,
+        /// The property it was read from, when it was (its subtype decides the wrapper).
+        prop: Option<&'static PropDef>,
+        /// Method name.
+        name: &'static str,
+    },
 }
 
 impl FuncTarget {
@@ -191,6 +201,7 @@ impl FuncTarget {
                 StructFunc::PathFromId => "path_from_id",
                 StructFunc::PathResolve => "path_resolve",
             },
+            FuncTarget::Math { name, .. } => name,
         }
     }
     /// Python repr of the owner, plus the function name (`bpy.data.objects['Cube'].select_set`).
@@ -198,6 +209,10 @@ impl FuncTarget {
         let owner = match self {
             FuncTarget::Rna { this, .. } | FuncTarget::Struct { this, .. } => this.repr(names),
             FuncTarget::Coll { coll, .. } => coll_repr(coll, names),
+            FuncTarget::Math { recv, prop, .. } => match prop {
+                Some(p) => ArrayKind::of(p).py_name().to_owned(),
+                None => value_py_name(recv).to_owned(),
+            },
         };
         format!("{owner}.{}", self.name())
     }
@@ -552,6 +567,7 @@ fn mark_detached(t: &mut Target, d: Detached, parent_root: Option<Root>) {
         Target::Coll(c) => set(&mut c.ptr),
         Target::Func(FuncTarget::Rna { this, .. } | FuncTarget::Struct { this, .. }) => set(this),
         Target::Func(FuncTarget::Coll { coll, .. }) => set(&mut coll.ptr),
+        Target::Func(FuncTarget::Math { .. }) => {}
         Target::List { items, .. } => {
             for i in items {
                 mark_detached(i, d, parent_root);
@@ -644,7 +660,17 @@ fn step_value(v: Value, seg: &PathSeg) -> Result<Target, FrapError> {
                     if let Some(i) = kind.component(a)? {
                         return Ok(Target::Value(Value::Float(data[i])));
                     }
-                    let sq = || data.iter().map(|x| (*x as f64) * (*x as f64)).sum::<f64>();
+                    if let Some(name) = math_method(kind, a) {
+                        return Ok(Target::Func(FuncTarget::Math {
+                            recv: Value::FloatArray { data, shape, tag },
+                            prop: None,
+                            name,
+                        }));
+                    }
+                    if let Some(v) = math_attr(kind, &data, a)? {
+                        return Ok(Target::Value(v));
+                    }
+                    let sq = || dot_vn_vn(&data);
                     match (kind, a.as_str()) {
                         (ArrayKind::Euler, "order") => {
                             Ok(Target::Value(Value::Enum(SmolStr::new(match tag {
@@ -865,8 +891,25 @@ fn step_prop(host: &dyn HostRead, p: PropPlace, seg: &PathSeg) -> Result<Target,
                 | (ArrayKind::Vector(_), "length" | "length_squared" | "magnitude") => {
                     read_math_attr(host, &p, a)
                 }
-                (ArrayKind::Vector(_), s) if is_swizzle(s) => {
-                    Err(not_impl(format!("the swizzle Vector.{s}")))
+                (k, a) if let Some(name) = math_method(k, a) => {
+                    Ok(Target::Func(FuncTarget::Math {
+                        recv: read_value(host, &p)?,
+                        prop: Some(p.prop),
+                        name,
+                    }))
+                }
+                (k, a) if k != ArrayKind::PropArray => {
+                    let v = read_value(host, &p)?;
+                    let Value::FloatArray { data, .. } = &v else {
+                        return Err(stale("math property is not a float array"));
+                    };
+                    match math_attr(k, data, a)? {
+                        Some(v) => Ok(Target::Value(v)),
+                        None => Err(attr_error(format!(
+                            "'{}' object has no attribute '{a}'",
+                            k.py_name()
+                        ))),
+                    }
                 }
                 _ => Err(attr_error(format!(
                     "'{}' object has no attribute '{a}'",
@@ -917,6 +960,123 @@ fn is_swizzle(s: &str) -> bool {
     (2..=4).contains(&s.len()) && s.chars().all(|c| "xyzw".contains(c))
 }
 
+/// `mathutils` methods callable on a value read from RNA, per wrapper type (the ones
+/// `session::eval::method` implements).
+fn math_method(kind: ArrayKind, a: &str) -> Option<&'static str> {
+    const VECTOR: &[&str] = &[
+        "copy",
+        "normalized",
+        "to_tuple",
+        "to_2d",
+        "to_3d",
+        "to_4d",
+        "dot",
+        "cross",
+        "angle",
+        "lerp",
+    ];
+    const EULER: &[&str] = &["copy", "to_matrix", "to_quaternion"];
+    const QUAT: &[&str] = &[
+        "copy",
+        "to_matrix",
+        "to_euler",
+        "normalized",
+        "inverted",
+        "conjugated",
+        "to_axis_angle",
+    ];
+    const MATRIX: &[&str] = &[
+        "copy",
+        "to_euler",
+        "to_quaternion",
+        "to_3x3",
+        "to_4x4",
+        "transposed",
+        "inverted",
+        "inverted_safe",
+        "to_translation",
+        "to_scale",
+        "decompose",
+    ];
+    const COLOR: &[&str] = &["copy"];
+    let list = match kind {
+        ArrayKind::Vector(_) => VECTOR,
+        ArrayKind::Euler => EULER,
+        ArrayKind::Quaternion => QUAT,
+        ArrayKind::Matrix(..) => MATRIX,
+        ArrayKind::Color => COLOR,
+        ArrayKind::PropArray => return None,
+    };
+    list.iter().copied().find(|m| *m == a)
+}
+
+/// Read-only `mathutils` attributes computed from the data (row-major for matrices):
+/// `Matrix.translation`/`is_negative`/`median_scale`, `Quaternion.angle`/`axis`/`magnitude`,
+/// `Vector` swizzles (`xy`, `zyx`, …). `None` when `a` is not one of them.
+fn math_attr(kind: ArrayKind, data: &[f32], a: &str) -> Result<Option<Value>, FrapError> {
+    let vector = |d: Vec<f32>| Value::FloatArray {
+        shape: ArrayShape::Fixed(d.len() as u16),
+        data: d.into_iter().collect(),
+        tag: MathTag::Vector,
+    };
+    let m3 = |c: usize| -> [[f32; 3]; 3] {
+        std::array::from_fn(|r| std::array::from_fn(|k| data[r * c + k]))
+    };
+    Ok(Some(match (kind, a) {
+        (ArrayKind::Matrix(r, c), "translation") => {
+            if r != 4 || c != 4 {
+                return Err(attr_error(
+                    "Matrix.translation: inappropriate matrix size, must be 4x4".to_owned(),
+                ));
+            }
+            vector(vec![data[3], data[c + 3], data[2 * c + 3]])
+        }
+        (ArrayKind::Matrix(r, c), "is_negative") if r >= 3 && c >= 3 => {
+            let m = m3(c);
+            let det = m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
+                - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
+                + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+            Value::Bool(det < 0.0)
+        }
+        (ArrayKind::Matrix(r, c), "median_scale") if r >= 3 && c >= 3 => {
+            // `mat3_to_scale`: the length of the matrix applied to (√⅓, √⅓, √⅓), in floats.
+            let m = m3(c);
+            let u = 0.577_350_26_f32; // (float)M_SQRT1_3
+            let v: [f32; 3] = std::array::from_fn(|i| m[i][0] * u + m[i][1] * u + m[i][2] * u);
+            Value::Double((v[0] * v[0] + v[1] * v[1] + v[2] * v[2]).sqrt() as f64)
+        }
+        (ArrayKind::Quaternion, "magnitude") => {
+            // `sqrt(dot_qtqt(q, q))`: a single-precision dot product.
+            let d = data[0] * data[0] + data[1] * data[1] + data[2] * data[2] + data[3] * data[3];
+            Value::Double((d as f64).sqrt())
+        }
+        (ArrayKind::Quaternion, "angle" | "axis") => {
+            // `Quaternion_angle_get` / `_axis_get`: of the normalized quaternion.
+            let (q, _) = frap_math::quat::normalize_qt([data[0], data[1], data[2], data[3]]);
+            let (axis, angle) = frap_math::quat::quat_to_axis_angle(q);
+            if a == "angle" {
+                Value::Double(angle as f64)
+            } else {
+                vector(axis.to_vec())
+            }
+        }
+        (ArrayKind::Vector(n), s) if is_swizzle(s) => {
+            let mut out = Vec::with_capacity(s.len());
+            for ch in s.chars() {
+                let i = "xyzw".find(ch).expect("invariant: swizzle chars");
+                if i >= n {
+                    return Err(attr_error(
+                        "Vector swizzle: specified axis not present".to_owned(),
+                    ));
+                }
+                out.push(data[i]);
+            }
+            vector(out)
+        }
+        _ => return Ok(None),
+    }))
+}
+
 fn read_math_attr(host: &dyn HostRead, p: &PropPlace, a: &str) -> Result<Target, FrapError> {
     let v = read_value(host, p)?;
     let Value::FloatArray { data, tag, .. } = v else {
@@ -927,14 +1087,15 @@ fn read_math_attr(host: &dyn HostRead, p: &PropPlace, a: &str) -> Result<Target,
             MathTag::Euler(o) => Value::Enum(SmolStr::new(o.as_str())),
             _ => Value::Enum(SmolStr::new(EulerOrder::XYZ.as_str())),
         },
-        "length_squared" => Value::Double(data.iter().map(|x| (*x as f64) * (*x as f64)).sum()),
-        _ => Value::Double(
-            data.iter()
-                .map(|x| (*x as f64) * (*x as f64))
-                .sum::<f64>()
-                .sqrt(),
-        ),
+        "length_squared" => Value::Double(dot_vn_vn(&data)),
+        _ => Value::Double(dot_vn_vn(&data).sqrt()),
     }))
+}
+
+/// `dot_vn_vn(v, v)` as `mathutils` computes `Vector.length`/`length_squared`: single-precision
+/// products summed in double precision, last component first.
+fn dot_vn_vn(data: &[f32]) -> f64 {
+    data.iter().rev().fold(0.0f64, |d, x| d + (x * x) as f64)
 }
 
 /// Python index normalisation: `Some(i)` within `0..len`.

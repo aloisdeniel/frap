@@ -8,6 +8,7 @@
 //! Module layout frozen by M1 W0 (WP 1.0); contents owned by WP 1.2.
 #![deny(unsafe_code)]
 
+pub mod budget;
 pub mod euler;
 pub mod fmt;
 pub mod matrix;

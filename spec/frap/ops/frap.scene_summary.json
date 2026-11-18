@@ -1,0 +1,70 @@
+{
+ "_comment": "Hand-written spec of frap's own operator `frap.scene_summary` (dump schema of spec/blender-5.2/ops/<ns>.json, `poll: null`). Created by M2 W0 (WP 2.0); owned by WP 2.4, which may refine it (re-run `cargo xtask codegen`).",
+ "namespace": "frap",
+ "count": 1,
+ "operators": [
+  {
+   "idname": "frap.scene_summary",
+   "bl_idname": "FRAP_OT_scene_summary",
+   "label": "Scene Summary",
+   "description": "Summarize the scene in one result: objects, element counts, bounds, materials, modifiers (frap extension)",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "objects",
+     "name": "Objects",
+     "description": "Which objects to list",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "ALL",
+       "name": "All",
+       "description": "Every object of the view layer",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "VISIBLE",
+       "name": "Visible",
+       "description": "Visible objects",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "SELECTED",
+       "name": "Selected",
+       "description": "Selected objects",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "ALL",
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "evaluated",
+     "name": "Evaluated",
+     "description": "Counts and bounds of the evaluated meshes (modifiers applied)",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": true,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": null
+  }
+ ]
+}

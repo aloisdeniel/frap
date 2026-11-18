@@ -225,12 +225,11 @@ fn create_from_data(
     Ok(Some(main.images.insert(&name, img, log)))
 }
 
-#[cfg(test)]
+#[cfg(all(test, unix))]
 mod tests {
     use super::*;
 
     #[test]
-    #[cfg(unix)]
     fn paths() {
         assert_eq!(
             abspath(Path::new("/a/b/../c/./d.png")),

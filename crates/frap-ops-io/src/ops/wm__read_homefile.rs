@@ -37,7 +37,7 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
     let mut main = opened.main;
     main.filepath = None;
     main.is_dirty = false;
-    common::replace_state(cx, main, opened.win);
+    common::replace_state(cx, main, opened.win)?;
     Ok(OpStatus::Finished)
 }
 

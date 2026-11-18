@@ -9,7 +9,7 @@ pub mod object;
 pub mod view3d;
 
 /// Every typed operator spec of this group, sorted by idname.
-pub static ALL_OPS: [&OperatorSpec; 40] = [
+pub static ALL_OPS: [&OperatorSpec; 44] = [
     &object::OPSPEC_OBJECT_OT_CAMERA_ADD,
     &object::OPSPEC_OBJECT_OT_COLLECTION_ADD,
     &object::OPSPEC_OBJECT_OT_COLLECTION_LINK,
@@ -19,15 +19,19 @@ pub static ALL_OPS: [&OperatorSpec; 40] = [
     &object::OPSPEC_OBJECT_OT_DUPLICATE,
     &object::OPSPEC_OBJECT_OT_DUPLICATE_MOVE,
     &object::OPSPEC_OBJECT_OT_DUPLICATE_MOVE_LINKED,
+    &object::OPSPEC_OBJECT_OT_EDITMODE_TOGGLE,
     &object::OPSPEC_OBJECT_OT_EMPTY_ADD,
     &object::OPSPEC_OBJECT_OT_JOIN,
     &object::OPSPEC_OBJECT_OT_LIGHT_ADD,
     &object::OPSPEC_OBJECT_OT_LINK_TO_COLLECTION,
     &object::OPSPEC_OBJECT_OT_LOCATION_CLEAR,
     &object::OPSPEC_OBJECT_OT_MATERIAL_SLOT_ADD,
+    &object::OPSPEC_OBJECT_OT_MATERIAL_SLOT_ASSIGN,
+    &object::OPSPEC_OBJECT_OT_MATERIAL_SLOT_DESELECT,
     &object::OPSPEC_OBJECT_OT_MATERIAL_SLOT_REMOVE,
     &object::OPSPEC_OBJECT_OT_MATERIAL_SLOT_REMOVE_ALL,
     &object::OPSPEC_OBJECT_OT_MATERIAL_SLOT_REMOVE_UNUSED,
+    &object::OPSPEC_OBJECT_OT_MATERIAL_SLOT_SELECT,
     &object::OPSPEC_OBJECT_OT_MODE_SET,
     &object::OPSPEC_OBJECT_OT_MOVE_TO_COLLECTION,
     &object::OPSPEC_OBJECT_OT_ORIGIN_SET,

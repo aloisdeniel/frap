@@ -1,0 +1,304 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//! Per-statement resource budget (ARCHITECTURE §12 "Limits"): the `--stmt-timeout` deadline and
+//! the `--max-elements` cap, visible to every crate that runs long loops (primitive generation,
+//! mesh and BMesh ops, glTF export, render-scene building, rendering).
+//!
+//! It lives in the lowest layer (L0) because the loops that must observe it are spread over
+//! every layer, including `frap-geom` (polyfill, normals), which depends only on this crate.
+//!
+//! The session (`frap-session`) opens a [`scope`] around every statement. The budget is
+//! **thread-local**: several sessions in one process (tests, `frap serve` workers) never see
+//! each other's deadline, and code that runs outside any scope is unlimited.
+//!
+//! **Cancellation is cooperative.** Long loops call [`check`] (cheap: it reads the clock once
+//! every [`CHECK_EVERY`] calls). When the deadline has passed, `check` unwinds with
+//! [`std::panic::resume_unwind`] carrying an [`Interrupted`] payload; the session's
+//! transaction catches it, restores the snapshot taken before the statement (rollback) and
+//! answers `RuntimeError` code `TIMEOUT`. `resume_unwind` does not run the panic hook, so a
+//! timeout prints nothing on stderr. Code between a `check` and the session must therefore be
+//! unwind-safe in the same sense the transaction already requires for panics: every mutation
+//! happens on state the transaction can drop.
+//!
+//! **Element counts are checked before building.** Operators that can create unbounded
+//! geometry from a few numbers (`mesh.primitive_grid_add(x_subdivisions=10**7, …)`) estimate
+//! the counts from their properties and call [`reserve_corners`] first, so an absurd request
+//! is rejected in microseconds instead of allocating gigabytes.
+
+use std::cell::Cell;
+use std::time::{Duration, Instant};
+
+/// [`check`] reads the clock once every this many calls.
+pub const CHECK_EVERY: u32 = 1024;
+
+/// Largest element count a Blender mesh can index (`int`): vertex, edge, face and corner
+/// counts above it cannot exist in Blender, whatever `--max-elements` says.
+pub const MAX_MESH_ELEMENTS: u64 = i32::MAX as u64;
+
+/// The unwind payload of an expired deadline (see the module docs).
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Interrupted {
+    /// The statement's time limit.
+    pub limit: Duration,
+}
+
+/// Limits of one statement.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Budget {
+    /// `--stmt-timeout` (`None`: no deadline).
+    pub timeout: Option<Duration>,
+    /// `--max-elements`, in face corners (`u64::MAX`: unlimited).
+    pub max_elements: u64,
+}
+
+impl Default for Budget {
+    /// Unlimited.
+    fn default() -> Self {
+        Budget {
+            timeout: None,
+            max_elements: u64::MAX,
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
+struct Active {
+    deadline: Option<(Instant, Duration)>,
+    max_elements: u64,
+}
+
+thread_local! {
+    static ACTIVE: Cell<Option<Active>> = const { Cell::new(None) };
+    static COUNTER: Cell<u32> = const { Cell::new(0) };
+}
+
+/// Restores the previous budget of this thread when dropped.
+#[must_use = "the budget is active only while the guard lives"]
+#[derive(Debug)]
+pub struct Scope {
+    prev: Option<Option<Active>>,
+}
+
+impl Drop for Scope {
+    fn drop(&mut self) {
+        if let Some(prev) = self.prev.take() {
+            ACTIVE.with(|a| a.set(prev));
+        }
+    }
+}
+
+/// Activates `budget` on this thread until the returned guard is dropped. A nested scope
+/// (an operator called inside an operator's arguments) keeps the outer statement's budget:
+/// the deadline is never extended.
+pub fn scope(budget: Budget) -> Scope {
+    ACTIVE.with(|a| {
+        if a.get().is_some() {
+            return Scope { prev: None };
+        }
+        let now = Instant::now();
+        a.set(Some(Active {
+            deadline: budget.timeout.map(|t| {
+                (
+                    now.checked_add(t)
+                        .unwrap_or(now + Duration::from_secs(86_400 * 365)),
+                    t,
+                )
+            }),
+            max_elements: budget.max_elements,
+        }));
+        COUNTER.with(|c| c.set(0));
+        Scope { prev: Some(None) }
+    })
+}
+
+/// Whether a budget is active on this thread.
+pub fn is_active() -> bool {
+    ACTIVE.with(|a| a.get().is_some())
+}
+
+/// The active `--max-elements` (`u64::MAX` outside a scope).
+pub fn max_elements() -> u64 {
+    ACTIVE.with(|a| a.get().map_or(u64::MAX, |b| b.max_elements))
+}
+
+/// The active time limit, if any.
+pub fn timeout() -> Option<Duration> {
+    ACTIVE.with(|a| a.get().and_then(|b| b.deadline.map(|(_, t)| t)))
+}
+
+/// Whether the active deadline has passed (reads the clock).
+pub fn expired() -> bool {
+    ACTIVE.with(|a| {
+        a.get()
+            .and_then(|b| b.deadline)
+            .is_some_and(|(d, _)| Instant::now() >= d)
+    })
+}
+
+/// Cooperative cancellation point for long loops: cheap (the clock is read once every
+/// [`CHECK_EVERY`] calls); unwinds with [`Interrupted`] once the deadline has passed.
+#[inline]
+pub fn check() {
+    let n = COUNTER.with(|c| {
+        let n = c.get().wrapping_add(1);
+        c.set(n);
+        n
+    });
+    if n.is_multiple_of(CHECK_EVERY) {
+        check_now();
+    }
+}
+
+/// Like [`check`], reading the clock every time (between coarse steps: per object, per
+/// render pass, per exported mesh).
+pub fn check_now() {
+    let hit = ACTIVE.with(|a| {
+        a.get()
+            .and_then(|b| b.deadline)
+            .filter(|(d, _)| Instant::now() >= *d)
+            .map(|(_, t)| t)
+    });
+    if let Some(limit) = hit {
+        std::panic::resume_unwind(Box::new(Interrupted { limit }));
+    }
+}
+
+/// The [`Interrupted`] payload of a caught unwind, if it is one.
+pub fn interrupted(payload: &(dyn std::any::Any + Send)) -> Option<Interrupted> {
+    payload.downcast_ref::<Interrupted>().copied()
+}
+
+/// A request that does not fit the budget.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ElementsExceeded {
+    /// Face corners the request would create (saturated at `u64::MAX` on overflow).
+    pub corners: u64,
+    /// The limit it exceeds: `--max-elements`, or [`MAX_MESH_ELEMENTS`].
+    pub limit: u64,
+    /// `true` when the limit is Blender's `int` range rather than `--max-elements`.
+    pub index_range: bool,
+}
+
+impl std::fmt::Display for ElementsExceeded {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        if self.index_range {
+            write!(
+                f,
+                "frap: limit exceeded (max_elements): the mesh would need more than {} elements, \
+                 more than a Blender mesh can index",
+                self.limit
+            )
+        } else {
+            write!(
+                f,
+                "frap: limit exceeded (max_elements): the statement would create {} face corners \
+                 (limit {})",
+                self.corners, self.limit
+            )
+        }
+    }
+}
+
+/// Pre-check before building geometry: `corners` (face corners the request creates) and
+/// `elements` (its largest per-domain count: vertices, edges, faces or corners). `None` means
+/// the estimate itself overflowed. Fails when the request exceeds `--max-elements` or Blender's
+/// `int` index range.
+pub fn reserve_corners(
+    corners: Option<u64>,
+    elements: Option<u64>,
+) -> Result<(), ElementsExceeded> {
+    let (Some(corners), Some(elements)) = (corners, elements) else {
+        return Err(ElementsExceeded {
+            corners: u64::MAX,
+            limit: MAX_MESH_ELEMENTS,
+            index_range: true,
+        });
+    };
+    if elements > MAX_MESH_ELEMENTS || corners > MAX_MESH_ELEMENTS {
+        return Err(ElementsExceeded {
+            corners,
+            limit: MAX_MESH_ELEMENTS,
+            index_range: true,
+        });
+    }
+    let max = max_elements();
+    if corners > max {
+        return Err(ElementsExceeded {
+            corners,
+            limit: max,
+            index_range: false,
+        });
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::panic::{AssertUnwindSafe, catch_unwind};
+
+    #[test]
+    fn unlimited_outside_a_scope() {
+        assert!(!is_active());
+        assert_eq!(max_elements(), u64::MAX);
+        assert!(!expired());
+        for _ in 0..10 * CHECK_EVERY {
+            check();
+        }
+        check_now();
+        assert!(reserve_corners(Some(1 << 30), Some(1 << 30)).is_ok());
+    }
+
+    #[test]
+    fn deadline_unwinds_with_the_payload() {
+        let r = catch_unwind(AssertUnwindSafe(|| {
+            let _s = scope(Budget {
+                timeout: Some(Duration::from_millis(1)),
+                max_elements: 10,
+            });
+            std::thread::sleep(Duration::from_millis(5));
+            assert!(expired());
+            loop {
+                check();
+            }
+        }));
+        let p = r.expect_err("unwinds");
+        assert_eq!(
+            interrupted(&*p),
+            Some(Interrupted {
+                limit: Duration::from_millis(1)
+            })
+        );
+        // The guard was dropped during the unwind.
+        assert!(!is_active());
+    }
+
+    #[test]
+    fn nested_scopes_keep_the_outer_budget() {
+        let _a = scope(Budget {
+            timeout: None,
+            max_elements: 100,
+        });
+        {
+            let _b = scope(Budget {
+                timeout: None,
+                max_elements: 5,
+            });
+            assert_eq!(max_elements(), 100);
+        }
+        assert!(is_active());
+        assert_eq!(max_elements(), 100);
+        let e = reserve_corners(Some(101), Some(101)).unwrap_err();
+        assert!(!e.index_range);
+        assert_eq!(
+            e.to_string(),
+            "frap: limit exceeded (max_elements): the statement would create 101 face corners (limit 100)"
+        );
+        assert!(reserve_corners(Some(100), Some(100)).is_ok());
+        assert!(reserve_corners(None, Some(1)).unwrap_err().index_range);
+        assert!(
+            reserve_corners(Some(1), Some(MAX_MESH_ELEMENTS + 1))
+                .unwrap_err()
+                .index_range
+        );
+    }
+}

@@ -8,6 +8,7 @@
 //! `Response` JSON shape (`response.rs`) and the serve framing (`serve.rs`).
 #![deny(unsafe_code)]
 
+mod edit;
 pub mod errors;
 pub mod resolve;
 pub mod response;

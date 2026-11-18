@@ -109,6 +109,8 @@ pub(crate) fn build_with(
     let mut objects = Vec::new();
     let mut lights: Vec<RLight> = Vec::new();
     for (ob_ref, ob) in visible {
+        // `--stmt-timeout` cancellation point, once per object (§12).
+        frap_math::budget::check_now();
         match ob.object_type() {
             "MESH" => {
                 if req
@@ -155,6 +157,7 @@ pub(crate) fn build_with(
         frame: req.frame.unwrap_or(scene.frame_current),
         workbench_materials: b.workbench_materials,
         workbench_background: Some(workbench::background(scene, world_data)),
+        workbench: workbench::shading(scene),
     };
 
     Ok(RenderScene {
@@ -284,6 +287,7 @@ impl Builder<'_> {
             materials,
             color: ob.color,
             random_hash: workbench::random_hash(main, ob),
+            display_type: ob.display_type.clone(),
         }
     }
 

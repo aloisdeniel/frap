@@ -38,7 +38,11 @@ fn init_logging(cli: &Cli) -> Result<(), String> {
     use tracing_subscriber::EnvFilter;
     let filter = match &cli.log.log_level {
         Some(f) => EnvFilter::try_new(f).map_err(|e| format!("invalid --log-level '{f}': {e}"))?,
-        None => EnvFilter::try_from_env("FRAP_LOG").unwrap_or_else(|_| EnvFilter::new("warn")),
+        // wgpu-hal logs adapter probing failures (e.g. "vkCreateInstance: Found no drivers!")
+        // at ERROR level; the GPU_UNAVAILABLE response already says it, so they are off by
+        // default (`--log-level`/`FRAP_LOG` can turn them back on).
+        None => EnvFilter::try_from_env("FRAP_LOG")
+            .unwrap_or_else(|_| EnvFilter::new("warn,wgpu_hal=off")),
     };
     let b = tracing_subscriber::fmt()
         .with_env_filter(filter)

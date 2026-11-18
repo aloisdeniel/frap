@@ -35,13 +35,15 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitiveCylinderAdd) -> OpResult {
         &p.scale,
         true,
     )?;
-    let mesh = cylinder(&Cylinder {
+    let params = Cylinder {
         vertices: p.vertices.value,
         radius: p.radius.value,
         depth: p.depth.value,
         end_fill_type: fill(p.end_fill_type.value),
         calc_uvs: p.calc_uvs.value,
         matrix: prim.matrix,
-    });
+    };
+    common::reserve(params.estimate())?;
+    let mesh = cylinder(&params);
     common::finish(cx, "Cylinder", mesh, prim.at, p.enter_editmode.value)
 }

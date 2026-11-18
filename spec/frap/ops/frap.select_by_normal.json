@@ -1,0 +1,108 @@
+{
+ "_comment": "Hand-written spec of frap's own operator `frap.select_by_normal` (dump schema of spec/blender-5.2/ops/<ns>.json, `poll: null`). Created by M2 W0 (WP 2.0); owned by WP 2.4, which may refine it (re-run `cargo xtask codegen`).",
+ "namespace": "frap",
+ "count": 1,
+ "operators": [
+  {
+   "idname": "frap.select_by_normal",
+   "bl_idname": "FRAP_OT_select_by_normal",
+   "label": "Select by Normal",
+   "description": "Select the faces whose normal points within an angle of a direction (frap extension)",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "direction",
+     "name": "Direction",
+     "description": "Direction the faces should face",
+     "type": "FLOAT",
+     "subtype": "XYZ",
+     "unit": "NONE",
+     "array": [
+      3
+     ],
+     "default": [
+      0.0,
+      0.0,
+      1.0
+     ],
+     "hard_min": -3.4028234663852886e+38,
+     "hard_max": 3.4028234663852886e+38,
+     "soft_min": -1.0,
+     "soft_max": 1.0,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "threshold",
+     "name": "Threshold",
+     "description": "Largest angle between a face normal and the direction",
+     "type": "FLOAT",
+     "subtype": "ANGLE",
+     "unit": "ROTATION",
+     "default": 0.5235987901687622,
+     "hard_min": 0.0,
+     "hard_max": 3.1415927410125732,
+     "soft_min": 0.0,
+     "soft_max": 3.1415927410125732,
+     "step": 1.0,
+     "precision": 3,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "orientation",
+     "name": "Orientation",
+     "description": "Space of the direction",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "GLOBAL",
+       "name": "Global",
+       "description": "World space",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "LOCAL",
+       "name": "Local",
+       "description": "Each object's local space",
+       "icon": "NONE",
+       "value": 1
+      }
+     ],
+     "default": "GLOBAL",
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "extend",
+     "name": "Extend",
+     "description": "Keep the current selection",
+     "type": "BOOLEAN",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": false,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": null
+  }
+ ]
+}

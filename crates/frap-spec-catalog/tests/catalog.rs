@@ -16,7 +16,7 @@ use frap_spec_catalog::generated::{
 fn every_catalog_operator_decodes_and_matches_its_dump() {
     let c = catalog();
     assert_eq!(c.len(), CATALOG_LEN);
-    assert!(c.len() > 900, "≈ 1,000 catalog operators");
+    assert!(c.len() > 850, "≈ 890 catalog operators in M2");
     let ids: Vec<&str> = c.iter().map(|s| s.idname).collect();
     assert_eq!(ids, CATALOG_IDNAMES.to_vec());
     for s in c {
@@ -31,10 +31,11 @@ fn typed_and_catalog_partition_the_dumps() {
     let typed: BTreeSet<String> = TYPED_IDNAMES.iter().map(|s| s.to_string()).collect();
     assert!(cat.is_disjoint(&typed));
     assert_eq!(cat.union(&typed).cloned().collect::<BTreeSet<_>>(), all);
-    // 63 since the M1 stabilization moved `frap.describe` to M2 (decision log S1-1).
-    assert_eq!(typed.len(), 63, "OPERATORS.md: 63 M1 operators");
+    // M1 (63, decision log S1-1) plus every M2 operator of OPERATORS.md (M2 W0).
+    assert_eq!(typed.len(), 188, "OPERATORS.md: operators with M <= 2");
     assert!(is_typed("mesh.primitive_cube_add") && !contains("mesh.primitive_cube_add"));
-    assert!(contains("mesh.bevel") && !is_typed("mesh.bevel"));
+    assert!(contains("mesh.decimate") && !is_typed("mesh.decimate"));
+    assert!(is_typed("mesh.bevel") && !contains("mesh.bevel"));
     assert!(TYPED_IDNAMES.windows(2).all(|w| w[0] < w[1]));
 }
 
@@ -43,10 +44,10 @@ fn addresses_are_stable() {
     let a = catalog();
     let b = catalog();
     assert!(std::ptr::eq(a, b));
-    let bevel = find("mesh.bevel").unwrap();
-    assert!(std::ptr::eq(bevel, find("mesh.bevel").unwrap()));
+    let bevel = find("mesh.decimate").unwrap();
+    assert!(std::ptr::eq(bevel, find("mesh.decimate").unwrap()));
     assert!(a.iter().any(|s| std::ptr::eq(*s, bevel)));
-    let t = std::thread::spawn(|| find("mesh.bevel").unwrap() as *const _ as usize)
+    let t = std::thread::spawn(|| find("mesh.decimate").unwrap() as *const _ as usize)
         .join()
         .unwrap();
     assert_eq!(t, bevel as *const _ as usize);
@@ -56,17 +57,15 @@ fn addresses_are_stable() {
 
 #[test]
 fn bevel_spec() {
-    let s = find("mesh.bevel").unwrap();
-    assert_eq!(s.bl_idname, "MESH_OT_bevel");
-    assert!(s.prop("offset").is_some());
-    assert!(s.prop("segments").is_some());
+    // `mesh.bevel` is typed since M2; `uv.unwrap` (M3) stays in the catalog.
+    let s = find("uv.unwrap").unwrap();
+    assert_eq!(s.bl_idname, "UV_OT_unwrap");
+    assert!(s.prop("method").is_some());
+    assert!(s.prop("margin").is_some());
     assert!(s.poll_matrix.is_some());
-    // A macro: steps decoded in order.
-    let m = find("mesh.extrude_region_move").unwrap();
-    assert_eq!(
-        m.macro_steps,
-        ["MESH_OT_extrude_region", "TRANSFORM_OT_translate"]
-    );
+    // A macro: steps decoded in order (an M8 macro).
+    let m = find("mesh.rip_move").unwrap();
+    assert_eq!(m.macro_steps, ["MESH_OT_rip", "TRANSFORM_OT_translate"]);
     // A dynamic enum from the overlay: user-data enums are empty and flagged.
     let vg = find("object.vertex_group_set_active")
         .unwrap()

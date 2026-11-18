@@ -8,4 +8,5 @@
 
 pub mod jsonschema;
 pub mod manifest;
+pub mod provider;
 pub mod tools;

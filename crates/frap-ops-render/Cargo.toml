@@ -21,6 +21,11 @@ linkme.workspace = true
 automod.workspace = true
 smol_str.workspace = true
 indexmap.workspace = true
+frap-eval.workspace = true
+frap-mesh.workspace = true
+frap-math.workspace = true
+glam.workspace = true
+libm.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

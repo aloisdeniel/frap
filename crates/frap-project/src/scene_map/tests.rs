@@ -493,17 +493,19 @@ fn the_window_state_round_trips() {
 }
 
 #[test]
-fn edit_mode_objects_load_in_object_mode_with_a_warning() {
+fn edit_mode_objects_load_in_edit_mode() {
+    // M2 W0: the loader keeps `mode: EDIT`; `wm.open_mainfile` re-enters Edit Mode
+    // (`frap_op::helpers::edit_mode::reenter_after_load`, WP 2.2).
     let (main, win) = frap_scene::startup::factory();
     let (mut tree, buffers, images, _) =
         to_json(&main, &win, &Preferences::default(), None).unwrap();
     tree["objects"]["Cube"]["mode"] = json!("EDIT");
     let o = from_json(&tree, &buffers, &images, false).unwrap();
-    assert_eq!(o.warnings.len(), 1);
+    assert!(o.warnings.is_empty(), "{:?}", o.warnings);
     let cube = o.main.objects.find("Cube").unwrap();
     assert_eq!(
         o.main.objects.get(cube).unwrap().mode,
-        frap_scene::ObjectMode::Object
+        frap_scene::ObjectMode::Edit
     );
 }
 

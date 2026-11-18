@@ -720,14 +720,9 @@ fn object(ob: &mut Object, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
         ob.mode = match string(v, &p)? {
             "OBJECT" => ObjectMode::Object,
             "POSE" => ObjectMode::Pose,
-            "EDIT" => {
-                // Re-entering Edit Mode needs the mesh → BMesh conversion (M2).
-                cx.warnings.push(format!(
-                    "frap: {:?} was saved in Edit Mode; it is loaded in Object Mode (Edit Mode arrives in M2)",
-                    ob.header.name
-                ));
-                ObjectMode::Object
-            }
+            // The operator re-enters Edit Mode after loading (the mesh → BMesh conversion is
+            // `frap_op::helpers::edit_mode::reenter_after_load`, WP 2.2).
+            "EDIT" => ObjectMode::Edit,
             other => return Err(MapError::invalid(&p, format!("unknown mode {other:?}"))),
         };
     }

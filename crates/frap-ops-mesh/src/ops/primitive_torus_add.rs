@@ -27,6 +27,8 @@ use frap_op::operator;
 use frap_op::prelude::*;
 use frap_rna::{IdAny, Prop};
 use frap_scene::generated::plain::View3DCursor;
+
+use super::primitive_cube_add::common;
 use frap_spec_ops_mesh::mesh::{self, primitive_torus_add};
 
 /// `scene.cursor.matrix` without its translation (`BKE_scene_cursor_rot_to_mat3`).
@@ -108,7 +110,7 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitiveTorusAdd) -> OpResult {
                 .into(),
         ));
     }
-    let mut mesh = torus(&Torus {
+    let params = Torus {
         major_segments: p.major_segments.value,
         minor_segments: p.minor_segments.value,
         mode: match p.mode.value {
@@ -120,7 +122,9 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitiveTorusAdd) -> OpResult {
         abso_major_rad: p.abso_major_rad.value,
         abso_minor_rad: p.abso_minor_rad.value,
         generate_uvs: p.generate_uvs.value,
-    });
+    };
+    common::reserve(params.estimate())?;
+    let mut mesh = torus(&params);
     let matrix = align_matrix(cx, &p.location, &p.rotation, p.align.value);
     let (main, log) = cx.main_mut();
     mesh.header.name = "Torus".into();

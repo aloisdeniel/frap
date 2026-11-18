@@ -164,7 +164,10 @@ pub fn face_normal_calc(positions: &[V3], face_verts: &[i32]) -> V3 {
 pub fn normals_calc_faces(positions: &[V3], face_offsets: &[i32], corner_verts: &[i32]) -> Vec<V3> {
     face_offsets
         .windows(2)
-        .map(|w| face_normal_newell(positions, &corner_verts[w[0] as usize..w[1] as usize]))
+        .map(|w| {
+            frap_math::budget::check();
+            face_normal_newell(positions, &corner_verts[w[0] as usize..w[1] as usize])
+        })
         .collect()
 }
 
@@ -602,6 +605,7 @@ pub fn normals_calc_corners(inp: &CornerNormalsInput<'_>) -> Vec<V3> {
     let mut visited: Vec<bool> = Vec::new();
     let mut fan: Vec<usize> = Vec::new();
     for (vert, &vert_co) in positions.iter().enumerate() {
+        frap_math::budget::check();
         let vert_faces = vert_to_face.get(vert);
         if vert_faces.is_empty() {
             continue;

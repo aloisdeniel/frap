@@ -680,6 +680,37 @@ impl OpProps for DuplicateMoveLinked {
     }
 }
 
+// ---------------------------------------------------------------- object.editmode_toggle
+/// Props of `object.editmode_toggle`, RNA order.
+pub static EDITMODE_TOGGLE_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_editmode_toggle`
+pub static OPSPEC_OBJECT_OT_EDITMODE_TOGGLE: OperatorSpec = OperatorSpec {
+    idname: "object.editmode_toggle",
+    bl_idname: "OBJECT_OT_editmode_toggle",
+    label: "Edit Mode",
+    description: "Toggle object's edit mode",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &EDITMODE_TOGGLE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.editmode_toggle` (Edit Mode).
+#[derive(Debug, Clone)]
+pub struct EditmodeToggle {
+}
+impl OpProps for EditmodeToggle {
+    const IDNAME: &'static str = "object.editmode_toggle";
+    const BL_IDNAME: &'static str = "OBJECT_OT_editmode_toggle";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_EDITMODE_TOGGLE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        EditmodeToggle {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- object.empty_add
 /// Props of `object.empty_add`, RNA order.
 pub static EMPTY_ADD_PROPS: [PropDef; 6] = [
@@ -1128,6 +1159,68 @@ impl OpProps for MaterialSlotAdd {
     }
 }
 
+// ---------------------------------------------------------------- object.material_slot_assign
+/// Props of `object.material_slot_assign`, RNA order.
+pub static MATERIAL_SLOT_ASSIGN_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_material_slot_assign`
+pub static OPSPEC_OBJECT_OT_MATERIAL_SLOT_ASSIGN: OperatorSpec = OperatorSpec {
+    idname: "object.material_slot_assign",
+    bl_idname: "OBJECT_OT_material_slot_assign",
+    label: "Assign Material Slot",
+    description: "Assign active material slot to selection",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &MATERIAL_SLOT_ASSIGN_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.material_slot_assign` (Assign Material Slot).
+#[derive(Debug, Clone)]
+pub struct MaterialSlotAssign {
+}
+impl OpProps for MaterialSlotAssign {
+    const IDNAME: &'static str = "object.material_slot_assign";
+    const BL_IDNAME: &'static str = "OBJECT_OT_material_slot_assign";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MATERIAL_SLOT_ASSIGN
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        MaterialSlotAssign {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.material_slot_deselect
+/// Props of `object.material_slot_deselect`, RNA order.
+pub static MATERIAL_SLOT_DESELECT_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_material_slot_deselect`
+pub static OPSPEC_OBJECT_OT_MATERIAL_SLOT_DESELECT: OperatorSpec = OperatorSpec {
+    idname: "object.material_slot_deselect",
+    bl_idname: "OBJECT_OT_material_slot_deselect",
+    label: "Deselect Material Slot",
+    description: "Deselect by active material slot",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &MATERIAL_SLOT_DESELECT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.material_slot_deselect` (Deselect Material Slot).
+#[derive(Debug, Clone)]
+pub struct MaterialSlotDeselect {
+}
+impl OpProps for MaterialSlotDeselect {
+    const IDNAME: &'static str = "object.material_slot_deselect";
+    const BL_IDNAME: &'static str = "OBJECT_OT_material_slot_deselect";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MATERIAL_SLOT_DESELECT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        MaterialSlotDeselect {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- object.material_slot_remove
 /// Props of `object.material_slot_remove`, RNA order.
 pub static MATERIAL_SLOT_REMOVE_PROPS: [PropDef; 0] = [
@@ -1217,6 +1310,37 @@ impl OpProps for MaterialSlotRemoveUnused {
     }
     fn from_args(a: &OpArgs) -> Self {
         MaterialSlotRemoveUnused {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.material_slot_select
+/// Props of `object.material_slot_select`, RNA order.
+pub static MATERIAL_SLOT_SELECT_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_material_slot_select`
+pub static OPSPEC_OBJECT_OT_MATERIAL_SLOT_SELECT: OperatorSpec = OperatorSpec {
+    idname: "object.material_slot_select",
+    bl_idname: "OBJECT_OT_material_slot_select",
+    label: "Select Material Slot",
+    description: "Select by active material slot",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &MATERIAL_SLOT_SELECT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.material_slot_select` (Select Material Slot).
+#[derive(Debug, Clone)]
+pub struct MaterialSlotSelect {
+}
+impl OpProps for MaterialSlotSelect {
+    const IDNAME: &'static str = "object.material_slot_select";
+    const BL_IDNAME: &'static str = "OBJECT_OT_material_slot_select";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MATERIAL_SLOT_SELECT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        MaterialSlotSelect {
         }
     }
 }

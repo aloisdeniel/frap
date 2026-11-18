@@ -71,6 +71,7 @@ fn load() -> (RenderScene, Vec<Case>) {
                     materials: vec![],
                     color: [v[16], v[17], v[18], v[19]],
                     random_hash: t[2].parse().unwrap(),
+                    display_type: "TEXTURED".into(),
                 });
                 current = Some(t[1].to_string());
             }

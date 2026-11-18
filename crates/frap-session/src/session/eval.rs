@@ -1025,6 +1025,55 @@ pub fn method(recv: Py, name: &str, args: &[ArgVal]) -> Result<Py, FrapError> {
             })
         }
         (Py::Vector(v), "to_tuple") => Py::Tuple(v.iter().map(|x| Py::Float(*x as f64)).collect()),
+        (Py::Vector(v), "to_2d") => {
+            Py::Vector((0..2).map(|i| v.get(i).copied().unwrap_or(0.0)).collect())
+        }
+        (Py::Vector(v), "angle") => {
+            // `Vector.angle(other, fallback)`: `saacos(dot / (|a| |b|))`, double precision.
+            let o = take_arg(args, 0, "other")
+                .ok_or_else(|| type_err("Vector.angle(other, fallback): expected a vector"))?;
+            let w = floats_arg("Vector.angle", o)?;
+            if w.len() != v.len() {
+                return Err(value_err(
+                    "Vector.angle(other): size mismatch, vector sizes must match",
+                ));
+            }
+            let (mut dot, mut la, mut lb) = (0.0f64, 0.0f64, 0.0f64);
+            for (a, b) in v.iter().zip(&w) {
+                dot += (*a as f64) * (*b as f64);
+                la += (*a as f64) * (*a as f64);
+                lb += (*b as f64) * (*b as f64);
+            }
+            if la == 0.0 || lb == 0.0 {
+                return match take_arg(args, 1, "fallback") {
+                    Some(f) => Ok(f.clone()),
+                    None => Err(value_err(
+                        "Vector.angle(other): zero length vectors have no valid angle",
+                    )),
+                };
+            }
+            // `saacos` of the double-precision cosine, returned as a float (verified on 5.2.4:
+            // `Vector((7.36, -6.93, 4.96)).angle((0, 0, 1))` is the f32 rounding of the double
+            // result); libm (rule 2.2.12).
+            let c = dot / (la.sqrt() * lb.sqrt());
+            Py::Float(if c <= -1.0 {
+                std::f32::consts::PI as f64
+            } else if c >= 1.0 {
+                0.0
+            } else {
+                libm::acos(c) as f32 as f64
+            })
+        }
+        (Py::Vector(v), "lerp") => {
+            let o = take_arg(args, 0, "other")
+                .ok_or_else(|| type_err("Vector.lerp(): expected a vector"))?;
+            let w = floats_arg("Vector.lerp", o)?;
+            let f = num_arg("Vector.lerp", args, 1, "factor")? as f32;
+            if w.len() != v.len() {
+                return Err(value_err("Vector.lerp(): size mismatch"));
+            }
+            Py::Vector(v.iter().zip(&w).map(|(a, b)| a + (b - a) * f).collect())
+        }
         (Py::Vector(v), "to_3d") => {
             Py::Vector((0..3).map(|i| v.get(i).copied().unwrap_or(0.0)).collect())
         }
@@ -1068,6 +1117,10 @@ pub fn method(recv: Py, name: &str, args: &[ArgVal]) -> Result<Py, FrapError> {
         (Py::Quaternion(q), "normalized") => Py::Quaternion(quat::normalize_qt(*q).0),
         (Py::Quaternion(q), "inverted") => Py::Quaternion(quat::invert_qt(*q)),
         (Py::Quaternion(q), "conjugated") => Py::Quaternion(quat::conjugate_qt(*q)),
+        (Py::Quaternion(q), "to_axis_angle") => {
+            let (axis, angle) = quat::quat_to_axis_angle(quat::normalize_qt(*q).0);
+            Py::Tuple(vec![Py::Vector(axis.to_vec()), Py::Float(angle as f64)])
+        }
         (Py::Matrix(m), "to_euler") => {
             let o = order_arg(take_arg(args, 0, "order"))?;
             let m3 = mat3(&resize(m.clone(), 3)).ok_or_else(|| {
@@ -1103,6 +1156,31 @@ pub fn method(recv: Py, name: &str, args: &[ArgVal]) -> Result<Py, FrapError> {
             Py::Matrix(
                 inv.ok_or_else(|| value_err("Matrix.inverted(): matrix does not have an inverse"))?,
             )
+        }
+        (Py::Matrix(m), "inverted_safe") => {
+            let inv = match m.len() {
+                3 => mat3(m)
+                    .filter(|x| x.determinant() != 0.0)
+                    .map(|x| rows3(x.inverse())),
+                4 => mat4(m)
+                    .filter(|x| x.determinant() != 0.0)
+                    .map(|x| rows4(x.inverse())),
+                _ => None,
+            };
+            // A singular matrix falls back to the identity (`invert_m4_m4_safe_ortho` is not
+            // ported; Blender's result differs only for singular input).
+            Py::Matrix(inv.unwrap_or_else(|| identity(m.len())))
+        }
+        (Py::Matrix(m), "decompose") => {
+            let m4 = mat4(&resize(m.clone(), 4)).ok_or_else(|| {
+                value_err("Matrix.decompose(): inappropriate matrix size - expects 4x4 matrix")
+            })?;
+            let (loc, q, size) = frap_math::matrix::decompose_wxyz(&m4);
+            Py::Tuple(vec![
+                Py::Vector(loc.to_array().to_vec()),
+                Py::Quaternion(q),
+                Py::Vector(size.to_array().to_vec()),
+            ])
         }
         (Py::Matrix(m), "to_translation") if m.len() == 4 => {
             Py::Vector(vec![m[0][3], m[1][3], m[2][3]])

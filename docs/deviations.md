@@ -63,6 +63,8 @@ Status: M1 W4 integration (2026-11-17). "Since" is the milestone in which the be
 | D-49 | Main file format | `wm.save_as_mainfile` writes a `.blend` | Writes a `.frap` project (§15); `wm.open_mainfile` reads `.frap` only | `.blend` is out of scope (§1) | none (goldens compare the state, not the file) | M1 | §15, WP 1.23 |
 | D-50 | `export_scene.gltf(filepath='')` | `RuntimeError: Error: Python: Traceback … FileNotFoundError: [Errno 2] No such file or directory: ''` | `RuntimeError`, code `IO_ERROR`, `Error: No such file or directory: ''` (same class, no Python traceback) | frap has no Python add-on to fail | none (no golden case exports to an empty path; the CLI transcript pins frap's message) | M1 | §13.4, WP 1.23 |
 | D-51 | Operators that end `CANCELLED` without a report (`duplicate` with nothing selected, `collection_add` without an active object, `material_slot_remove_unused` with nothing to remove, …) | Silent | A synthesized WARNING `frap: nothing duplicated/added/linked/removed: <reason>` (§10.2 step 8) | Agents need to know why nothing happened | reports are not compared | M1 | §10.2, WP 1.20 |
+| D-52 | Resource limits | None: `primitive_grid_add(x_subdivisions=10**7, y_subdivisions=10**7)` tries to allocate the grid (and overflows Blender's `uint` vertex count); a long statement runs to completion | `--max-elements` refuses a primitive whose estimated corner count exceeds the limit (or Blender's `int` range) **before** building (`LIMIT_EXCEEDED`); `--stmt-timeout` cancels the statement at a cooperative check point, rolls it back and answers `RuntimeError` code `TIMEOUT` | Agents send absurd values; one statement must not hang or exhaust memory (§12) | none (no golden case sets limits) | M2 W0 | §12, decision log M2W0-2/3 |
+| D-53 | `mesh.uv_layers.active_index = -1` | Ignored (the active UV map is unchanged) | The value is first clamped to the property's hard minimum 0, so the first UV map becomes active | frap clamps before calling set hooks (D-03) | none (the layer-active golden avoids negative indices) | M2 W0 | §9.2 |
 
 ## 2. Temporary gaps (not deviations: frap does not implement it yet)
 
@@ -72,10 +74,10 @@ what to avoid.
 
 | Gap | Until | Owner |
 |---|---|---|
-| `enter_editmode=True`, `object.mode_set(mode='EDIT')` (no mode handler) | M2 | WP 2.x (`modes/edit_mesh.rs`) |
+| `enter_editmode=True`, `object.mode_set(mode='EDIT')` (no mode handler) | M2 | WP 2.2 (`modes/edit_mesh.rs`) |
 | `export_scene.gltf` props that frap does not support yet (e.g. `export_apply`, Draco compression) are accepted; a non-default value gives a WARNING `frap: export_scene.gltf: '<prop>' is not supported yet; exported as if it had its default value` | per feature: M3 (materials, UVs), M4 (`export_apply`), M6 (animation), M7 (compression) | WP 1.23 follow-ups |
 | `render.render` with `BLENDER_EEVEE` (renders with Workbench + WARNING until M5) | M5 | WP 5.x |
-| Golden comparison of mesh data for objects in Edit Mode: the golden runner rejects such cases at run time (`tests/golden/README.md`) | M2 (edit-mode BMesh conversion) | WP 2.x (edit mode) |
+| Golden comparison of mesh data for objects in Edit Mode: the golden runner rejects such cases at run time (`tests/golden/README.md`) | M2 (edit-mode BMesh conversion) | WP 2.2 (edit mode) |
 | Workbench anti-aliasing is a box-filtered Halton jitter, not Blender's Blackman-Harris TAA + SMAA; material or object alpha below 1 is drawn opaque | M2 | WP 2.3 |
 | Workbench `studio_light`, `show_specular_highlight` and `render_aa` are fixed at their factory values; the STUDIO specular hotspot on glossy or metallic surfaces differs (Blender's RG16F octahedral normals and half-float G-buffer are not emulated) | M2 | WP 2.3 |
 | Workbench `MATCAP` lighting renders as `STUDIO`; colour types `VERTEX`, `TEXTURE` and `ATTRIBUTE` render as `MATERIAL`; an HDRI world falls back to the factory grey | M3 | WP 3.x (Workbench) |
@@ -86,7 +88,7 @@ what to avoid.
 | `bpy.data.images` lacks Blender's factory `Render Result` and `Viewer Node` images; `Light.node_tree` reads `None` | M3 | WP 3.x (images, light nodes) |
 | Mesh and element-struct properties present in Blender's `StructDef` but not bound raise `RNA_NOT_IMPLEMENTED` (other structs still raise `RNA_NO_ATTRIBUTE`, the `rna_struct!` default); `FLOAT4` attributes have no typed `data` (needs `Float4AttributeValue` in the dump) | M2 | WP 1.1 follow-up, WP 1.27 |
 | `path_resolve(path, coerce=False)` ignores `coerce`; `scene.cursor.matrix` row/slice writes are written back (Blender writes to a copy and drops them); nested-tuple assignment to a matrix property is not filled column by column | M2 | WP 1.14 follow-up |
-| Collection slices other than attribute data are cut at `--max-items` without a `truncated` marker | M2 (§13.3 decision pending) | integrator |
+| Collection slices other than attribute data are cut at `--max-items` without a `truncated` marker | M2 (§13.3 decision pending) | integrator (M2 integration) |
 | Render: dupli and collection instances, `use_border` with crop, multiview; RMesh UV layers carry no names | M8 (instances), M5 | WP 1.15 follow-up |
 | glTF export: image passthrough does not skip dirty images (`Image.is_dirty` is not stored); natural-sort ties follow collection order, not depsgraph order, and only ASCII digits count as digits | M3 | WP 1.16 follow-up |
 | Lowering does not look inside node groups for the Principled BSDF or the active output; the `KHR_materials_unlit` Light Path pattern is not raised on import (imports as Principled) | M3 | WP 3.5 |
@@ -94,12 +96,13 @@ what to avoid.
 | `bpy.ops.<op>.poll()` of a known-but-unimplemented operator (e.g. `object.shade_auto_smooth`, `collection.create`) raises `OP_NOT_IMPLEMENTED` instead of returning Blender's poll result | the operator's milestone (OPERATORS.md) | the implementing WP |
 | `object.join` of meshes with shape keys, or with one attribute name stored with two domains/types, raises `OP_NOT_IMPLEMENTED` (armatures M6) | M2 | WP 1.20 follow-up |
 | `Object.modifiers.active` has no RNA get hook (`NOT_IMPLEMENTED`); `deformed_by` ignores virtual (armature-parent, shape-key) modifiers | M4 (modifiers), M6 (armatures) | WP 4.x, WP 6.x |
-| `.frap` save: objects in Edit Mode are saved and reopened in Object Mode with a WARNING; actions, armatures, shape keys, textures and point clouds are saved by name only (header), with a WARNING | M2 (edit mode), M3/M6 (data) | WP 1.23 follow-ups |
-| `bpy.ops.frap.describe` raises `OP_NOT_IMPLEMENTED` (the manifest lives in `frap-schema`, above the ops crates); use `frap --describe <target>` | M2 | WP 2.x (frap ops) |
-| `bpy.context.preferences` and `bpy.context.space_data` raise `NOT_IMPLEMENTED` (no `Preferences`/`SpaceView3D` binding); the glTF add-on preferences are restored by `wm.open_mainfile` but not readable | M2 | WP 2.x (context) |
-| `Mesh.set_sharp_from_angle`, `flip_normals`, `split_faces`, `uv_layers.remove` and `vertex_colors.new` raise `RNA_NOT_IMPLEMENTED`; `Mesh.validate()` answers `False` for a valid mesh but does not repair an invalid one (`RNA_NOT_IMPLEMENTED` naming the problem); `Mesh.transform(shape_keys=True)` transforms the base mesh only | M2 (M6 shape keys) | WP 2.x (mesh data API) |
+| `.frap` save: objects in Edit Mode are saved and reopened in Object Mode with a WARNING (`frap_op::helpers::edit_mode::reenter_after_load`, wired by M2 W0; WP 2.2 re-enters Edit Mode instead); actions, armatures, shape keys, textures and point clouds are saved by name only (header), with a WARNING | M2 (edit mode), M3/M6 (data) | WP 1.23 follow-ups |
+| `bpy.ops.frap.describe` raises `OP_NOT_IMPLEMENTED` (the manifest lives in `frap-schema`, above the ops crates); use `frap --describe <target>` | M2 | WP 2.13 (`DESCRIBE_PROVIDERS`, M2 W0) |
+| `bpy.context.preferences` and `bpy.context.space_data` raise `NOT_IMPLEMENTED` (no `Preferences`/`SpaceView3D` binding); the glTF add-on preferences are restored by `wm.open_mainfile` but not readable | M2 | WP 2.3 (`resolve/context/ui.rs`, M2 W0) |
+| `Mesh.set_sharp_from_angle`, `flip_normals`, `split_faces`, `uv_layers.remove` and `vertex_colors.new` raise `RNA_NOT_IMPLEMENTED`; `Mesh.validate()` answers `False` for a valid mesh but does not repair an invalid one (`RNA_NOT_IMPLEMENTED` naming the problem); `Mesh.transform(shape_keys=True)` transforms the base mesh only | M2 (M6 shape keys) | WP 2.9 (`frap-ops-data/src/funcs/`, M2 W0) |
 | Multi-dimensional `bpy_prop_array` properties (`Object.bound_box`) are read-only views in frap: whole reads, `[i]`, `[i][j]` and slices work; assigning one row or element of a writable one is not supported | M2 | WP 1.14 follow-up |
 | `wm.revert_mainfile`'s "file must have been saved" requirement is not expressible in `poll.requires`; it is only a `--describe` note (the poll still fails with `OP_POLL_FAILED` while the file is unsaved, but `detail.unmet` cannot name it) | M2 | WP 1.12 follow-up (new `PollReq`) |
+| `mesh.attributes.active` and `active_index` raise `NOT_IMPLEMENTED` (frap's `Mesh` stores no active-attribute index yet; Blender keeps a CustomData-wide index that adding colour attributes changes); `active_color*`, `default_color_name`, `render_color_index` and `uv_layers.active*` work | M2 | WP 2.9 (attributes) |
 
 ## 3. Protocol notes (frap envelope, not Blender behaviour)
 
@@ -111,4 +114,3 @@ what to avoid.
   surprises reviewers.
 - Blender's `RuntimeError` messages raised from C reports end with a newline (`"Error: …!\n"`);
   frap's messages never carry trailing whitespace. The golden line comparator ignores it.
-

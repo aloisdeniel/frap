@@ -2,5 +2,9 @@
 source: crates/frap-schema/tests/snapshots.rs
 ---
 [
-  "frap.describe | planned M2 | poll -/- | target"
+  "frap.describe | planned M2 | poll -/- | target",
+  "frap.render_contact_sheet | planned M2 | poll -/- | filepath,views,engine,objects,view_size,columns,margin,show_labels,background,use_scene_camera,frame",
+  "frap.scene_summary | planned M2 | poll -/- | objects,evaluated",
+  "frap.select_by_normal | planned M2 | poll -/- | direction,threshold,orientation,extend",
+  "frap.select_elements | planned M2 | poll -/- | type,indices,action,object"
 ]

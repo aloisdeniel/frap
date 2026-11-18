@@ -258,9 +258,9 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.material_slot_remove` | M1 | P0 |  |
 | [x] | `object.material_slot_remove_unused` | M1 | P1 |  |
 | [x] | `object.material_slot_remove_all` | M1 | P2 |  |
-| [ ] | `object.material_slot_assign` | M2 | P0 | edit-mode face assignment (object mode: no-op as Blender) |
-| [ ] | `object.material_slot_select` | M2 | P1 | edit mode |
-| [ ] | `object.material_slot_deselect` | M2 | P1 | edit mode |
+| [ ] | `object.material_slot_assign` | M2 | P0 | edit-mode face assignment (object mode: no-op as Blender); WP 2.9 (M2 W0 assignment) |
+| [ ] | `object.material_slot_select` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
+| [ ] | `object.material_slot_deselect` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
 | [ ] | `object.material_slot_move` | M3 | P2 |  |
 | [ ] | `object.material_slot_copy` | M8 | P2 |  |
 | [ ] | `object.vertex_group_add` | M6 | P0 |  |
@@ -350,7 +350,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `transform.rotate` | M1 | P0 | +θ about axis (verified) |
 | [x] | `transform.resize` | M1 | P0 | decomposes matrices, loses shear (as Blender) |
 | [ ] | `transform.mirror` | M2 | P1 |  |
-| [ ] | `transform.transform` | M2 | P1 | generic `mode` dispatcher |
+| [ ] | `transform.transform` | M2 | P1 | generic `mode` dispatcher; WP 2.12 (`ops/transform.rs`, M2 W0 assignment) |
 | [ ] | `transform.shrink_fatten` | M2 | P1 |  |
 | [ ] | `transform.edge_slide` | M2 | P1 |  |
 | [ ] | `transform.edge_crease` | M2 | P1 | writes crease_edge |
@@ -641,7 +641,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Notes |
 |---|---|---|---|
-| [ ] | `frap.describe` | M2 | target (op:<idname>, struct:<Struct>, <Struct>.<prop>) → manifest fragment; moved from M1 (M1 stabilization): the manifest lives in `frap-schema` (L11), above the ops crates, so the operator needs the describe core moved below `frap-op` first; `frap --describe` and `--describe-json` serve agents meanwhile. Owner: WP 2.x (frap ops) |
+| [ ] | `frap.describe` | M2 | target (op:<idname>, struct:<Struct>, <Struct>.<prop>) → manifest fragment; moved from M1 (M1 stabilization): the manifest lives in `frap-schema` (L11), above the ops crates, so the operator needs the describe core moved below `frap-op` first; `frap --describe` and `--describe-json` serve agents meanwhile. M2 W0 added `frap_op::DESCRIBE_PROVIDERS` (frap-schema registers the manifest); owner: WP 2.13 |
 | [ ] | `frap.select_elements` | M2 | prereq (WP 2.2); type VERT/EDGE/FACE, indices, action SET/ADD/REMOVE, object; agent selection by index |
 | [ ] | `frap.select_by_normal` | M2 | direction, threshold, extend; select faces facing a direction |
 | [ ] | `frap.scene_summary` | M2 | objects, counts, bounds, materials, modifiers in one JSON value |
@@ -748,7 +748,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | AddonPreferences for `io_scene_gltf2` (`KHR_materials_variants_ui`, …) | M1 data / M7 variants | via `bpy.context.preferences.addons['io_scene_gltf2'].preferences` |
 | [ ] | BlendData + BlendData<Coll> (objects, meshes, materials, cameras, lights, collections, worlds, scenes, images, node_groups, libraries, pointclouds) | M1 | new/remove/get/find/[i]/['name']; order rule §5.4; `scenes.new` M3 |
 | [ ] | Context (object, active_object, selected_objects, selected_editable_objects, visible_objects, selectable_objects, editable_objects, scene, view_layer, collection, tool_settings, mode, edit_object, objects_in_mode*, blend_data) | M1 | read-only |
-| [ ] | Context (preferences, space_data stub) | M2 | moved from M1 (M1 stabilization): no `Preferences`/`SpaceView3D` RNA binding yet; `NOT_IMPLEMENTED` |
+| [ ] | Context (preferences, space_data stub) | M2 | moved from M1 (M1 stabilization): no `Preferences`/`SpaceView3D` RNA binding yet; `NOT_IMPLEMENTED`; WP 2.3 (`frap-session/src/resolve/context/ui.rs`, M2 W0 assignment) |
 | [ ] | Object | M1 | transforms, parent, matrix_world (fresh), dimensions, data, type, mode, material_slots, hide_*, display; vertex_groups M6; pose M6; animation_data M6 |
 | [ ] | ObjectModifiers, Modifier (+ every <Type>Modifier settings struct) | M1 data / M4 eval | generated settings |
 | [ ] | Mesh, MeshVertex, MeshEdge, MeshPolygon, MeshLoop, MeshLoopTriangle | M1 | SoA proxies (WP 1.27); use_smooth/use_seam/use_edge_sharp proxies; foreach_get/foreach_set; edit-mode reads via cached view (M2) |
@@ -790,11 +790,11 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | `ID.rename(name, mode), ID.copy(), ID.user_clear()` | M1 |  |
 | [ ] | `Mesh.from_pydata(vertices, edges, faces), Mesh.shade_smooth()/shade_flat() (Python-only)` | M1 |  |
 | [ ] | `Mesh.update(), validate(), calc_loop_triangles(), transform(matrix), clear_geometry()` | M1 | `validate()` answers `False` for a valid mesh and refuses to repair (`RNA_NOT_IMPLEMENTED`); `transform` ignores `shape_keys` (M6) |
-| [ ] | `Mesh.set_sharp_from_angle(angle), flip_normals(), split_faces()` | M2 | moved from M1 (M1 stabilization); `object.shade_smooth_by_angle` covers sharp-from-angle meanwhile |
+| [ ] | `Mesh.set_sharp_from_angle(angle), flip_normals(), split_faces()` | M2 | moved from M1 (M1 stabilization); `object.shade_smooth_by_angle` covers sharp-from-angle meanwhile; WP 2.9 (`frap-ops-data/src/funcs/mesh_*.rs`, M2 W0 assignment) |
 | [ ] | `Mesh.calc_tangents(uvmap)` | M3 | bevy_mikktspace |
 | [ ] | `mesh.materials.append/pop/clear, MaterialSlot.material/link` | M1 |  |
 | [ ] | `mesh.attributes.new/remove, mesh.uv_layers.new, mesh.color_attributes.new/remove` | M1 | colour attributes default to white and become active/default when none is |
-| [ ] | `mesh.uv_layers.remove, mesh.vertex_colors.new` | M2 | moved from M1 (M1 stabilization); `attributes.remove` removes a UV map meanwhile; vertex_colors creates "Col" BYTE_COLOR CORNER |
+| [ ] | `mesh.uv_layers.remove, mesh.vertex_colors.new` | M2 | moved from M1 (M1 stabilization); `attributes.remove` removes a UV map meanwhile; vertex_colors creates "Col" BYTE_COLOR CORNER; WP 2.9 (`funcs/{u_v_loop_layers_remove,loop_colors_new}.rs`, M2 W0 assignment) |
 | [ ] | `node_tree.nodes.new/remove, node_tree.links.new/remove` | M1 | links.new replaces existing input link |
 | [ ] | `obj.modifiers.new(name, type)/remove/move/clear` | M4 (data from M1) |  |
 | [ ] | `Image.pack/unpack/save/save_render/scale/reload, bpy.data.images.load` | M3 |  |

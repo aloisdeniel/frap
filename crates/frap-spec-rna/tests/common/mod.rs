@@ -260,18 +260,29 @@ pub fn check_prop(ctx: &str, p: &PropDef, j: &J) {
 /// The raw dump of an operator (Blender namespaces and `spec/frap/ops/`).
 pub fn op_dump(idname: &str) -> J {
     let ns = idname.split('.').next().unwrap();
-    let file = if ns == "frap" {
-        "frap/ops/frap.json".to_owned()
+    let files = if ns == "frap" {
+        frap_spec_files()
     } else {
-        format!("blender-5.2/ops/{ns}.json")
+        vec![format!("blender-5.2/ops/{ns}.json")]
     };
-    load(&file)["operators"]
-        .as_array()
-        .unwrap()
+    files
         .iter()
+        .flat_map(|f| load(f)["operators"].as_array().unwrap().clone())
         .find(|o| o["idname"] == idname)
         .unwrap_or_else(|| panic!("{idname} not dumped"))
-        .clone()
+}
+
+/// `spec/frap/ops/*.json` (one file per frap operator since M2 W0, plus `frap.json`), sorted.
+pub fn frap_spec_files() -> Vec<String> {
+    let mut v: Vec<String> = std::fs::read_dir(spec_dir().join("frap/ops"))
+        .unwrap()
+        .filter_map(|e| e.ok())
+        .map(|e| e.file_name().to_string_lossy().into_owned())
+        .filter(|n| n.ends_with(".json"))
+        .map(|n| format!("frap/ops/{n}"))
+        .collect();
+    v.sort();
+    v
 }
 
 /// Checks an operator spec against its dump (props, options, macro steps, poll matrix).
@@ -347,8 +358,10 @@ pub fn all_dumped_idnames() -> BTreeSet<String> {
             out.insert(o["idname"].as_str().unwrap().to_owned());
         }
     }
-    for o in load("frap/ops/frap.json")["operators"].as_array().unwrap() {
-        out.insert(o["idname"].as_str().unwrap().to_owned());
+    for f in frap_spec_files() {
+        for o in load(&f)["operators"].as_array().unwrap() {
+            out.insert(o["idname"].as_str().unwrap().to_owned());
+        }
     }
     out
 }

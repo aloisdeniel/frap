@@ -10,7 +10,7 @@ mod common;
 #[test]
 fn typed_specs_match_dumps() {
     let all = frap_spec_ops_anim::ALL_OPS;
-    assert_eq!(all.len(), 0, "typed operators of the `anim` group in M1");
+    assert_eq!(all.len(), 0, "typed operators of the `anim` group in M2");
     for s in all {
         common::check_op(s);
     }

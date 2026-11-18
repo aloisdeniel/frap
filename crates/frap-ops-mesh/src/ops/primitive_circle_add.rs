@@ -35,12 +35,14 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitiveCircleAdd) -> OpResult {
         &p.scale,
         false,
     )?;
-    let mesh = circle(&Circle {
+    let params = Circle {
         vertices: p.vertices.value,
         radius: p.radius.value,
         fill_type: fill(p.fill_type.value),
         calc_uvs: p.calc_uvs.value,
         matrix: prim.matrix,
-    });
+    };
+    common::reserve(params.estimate())?;
+    let mesh = circle(&params);
     common::finish(cx, "Circle", mesh, prim.at, p.enter_editmode.value)
 }

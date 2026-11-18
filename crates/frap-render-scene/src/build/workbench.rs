@@ -90,3 +90,41 @@ pub fn background(scene: &Scene, world: Option<&World>) -> [f32; 4] {
         None => [0.0; 4],
     }
 }
+
+/// `scene.display` / `scene.display.shading` values of the complete Workbench (§19.3), plain
+/// data for the engine (M2 W0; WP 2.3 owns the engine side).
+pub fn shading(scene: &Scene) -> crate::types::RWorkbenchShading {
+    let d = &scene.display;
+    let s = &d.shading;
+    crate::types::RWorkbenchShading {
+        shading_type: s.r#type.clone(),
+        studio_light: s.studio_light.clone(),
+        studiolight_rotate_z: s.studiolight_rotate_z,
+        use_world_space_lighting: s.use_world_space_lighting,
+        show_backface_culling: s.show_backface_culling,
+        show_xray: s.show_xray,
+        xray_alpha: s.xray_alpha,
+        show_xray_wireframe: s.show_xray_wireframe,
+        xray_alpha_wireframe: s.xray_alpha_wireframe,
+        wireframe_color_type: s.wireframe_color_type.clone(),
+        show_object_outline: s.show_object_outline,
+        object_outline_color: s.object_outline_color,
+        show_shadows: s.show_shadows,
+        shadow_intensity: s.shadow_intensity,
+        light_direction: d.light_direction,
+        shadow_shift: d.shadow_shift,
+        shadow_focus: d.shadow_focus,
+        show_cavity: s.show_cavity,
+        cavity_type: s.cavity_type.clone(),
+        cavity_ridge_factor: s.cavity_ridge_factor,
+        cavity_valley_factor: s.cavity_valley_factor,
+        curvature_ridge_factor: s.curvature_ridge_factor,
+        curvature_valley_factor: s.curvature_valley_factor,
+        matcap_ssao_distance: d.matcap_ssao_distance,
+        matcap_ssao_attenuation: d.matcap_ssao_attenuation,
+        matcap_ssao_samples: d.matcap_ssao_samples,
+        show_specular_highlight: s.show_specular_highlight,
+        use_dof: s.use_dof,
+        render_aa: d.render_aa.clone(),
+    }
+}

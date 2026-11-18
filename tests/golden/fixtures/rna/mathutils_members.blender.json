@@ -1,0 +1,143 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 6,
+      "ok": true
+    },
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "Vector swizzle: specified axis not present"
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.6407588, -0.06820417, 0.28098434, 12.87806],
+        [0.12286566, -0.26944286, -0.30639017, -12.120134],
+        [0.41537783, 0.18491043, -0.3428165, 8.677041],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.3588915, -6.925791, 4.958309],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [0.44842508, -0.13921665, 0.3046457, 7.3588915],
+        [0.21182594, -0.4651774, -0.25050613, -6.925791],
+        [-0.42596042, -0.37788692, 0.19613814, 4.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.3588915, -6.925791, 4.958309],
+      "rotation_mode": "XYZ",
+      "rotation": [0.9434904, 0.7096367, 0.44130644],
+      "scale": [0.6537565, -0.6152803, 0.4404912],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [3.4010067, 2.2440495, 4.7947464, 18.61521],
+        [3.6080441, -2.115281, -4.5196133, -5.81114],
+        [-0.000000019889423, -6.201323, 3.2767038, 5.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [11.256318, 1.1146506, 0.99999994],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.7804827, 0.48353603, 0.2087036, 0.3368716],
+      "scale": [4.958309, -6.925791, 7.3588915],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

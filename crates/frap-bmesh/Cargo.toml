@@ -1,6 +1,6 @@
 [package]
 name = "frap-bmesh"
-description = "frap L5: BMesh with BLI_mempool-identical pools, kernel Euler ops, CustomData, walkers, bmesh.ops (ARCHITECTURE §6.2). M1: placeholder type only; contract frozen in M2 W0"
+description = "frap L5: BMesh with BLI_mempool-identical pools, kernel Euler ops, CustomData, walkers, bmesh.ops (ARCHITECTURE §6.2)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -11,6 +11,20 @@ publish.workspace = true
 [dependencies]
 frap-rna.workspace = true
 frap-mesh.workspace = true
+frap-geom.workspace = true
+frap-math.workspace = true
+bitflags.workspace = true
+smallvec.workspace = true
+smol_str.workspace = true
+rustc-hash.workspace = true
+libm.workspace = true
+automod.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true
+approx.workspace = true
+serde_json.workspace = true
+insta.workspace = true
 
 [lints]
 workspace = true

@@ -35,6 +35,14 @@ impl Default for Monkey {
     }
 }
 
+impl Monkey {
+    /// Element counts before building (`--max-elements` pre-check, [`super::Estimate`]).
+    pub fn estimate(&self) -> Option<super::Estimate> {
+        // Suzanne: fixed topology.
+        super::estimate(Some(507), Some(1005), Some(500), Some(1968))
+    }
+}
+
 /// The mesh of `mesh.primitive_monkey_add(…)`.
 pub fn monkey(p: &Monkey) -> Mesh {
     // mul_mat3_m4_fl(creation_mat, size / 2)

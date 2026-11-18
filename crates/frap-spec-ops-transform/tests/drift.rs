@@ -12,8 +12,8 @@ fn typed_specs_match_dumps() {
     let all = frap_spec_ops_transform::ALL_OPS;
     assert_eq!(
         all.len(),
-        3,
-        "typed operators of the `transform` group in M1"
+        14,
+        "typed operators of the `transform` group in M2"
     );
     for s in all {
         common::check_op(s);

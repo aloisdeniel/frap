@@ -25,6 +25,8 @@ pub const RNA_ENUM: ErrorCode = codes::RNA_ENUM;
 pub const RNA_LENGTH: ErrorCode = codes::RNA_LENGTH;
 /// Valid in Blender, not implemented by frap in this milestone.
 pub const NOT_IMPLEMENTED: ErrorCode = ErrorCode("NOT_IMPLEMENTED");
+/// `--stmt-timeout` expired: the statement was rolled back (§12).
+pub const TIMEOUT: ErrorCode = ErrorCode("TIMEOUT");
 /// `ZeroDivisionError` (CPython / `mathutils` message). `PyExc` has no such class, so it is
 /// raised as `ValueError` with `detail.python_exception = "ZeroDivisionError"`.
 pub const ZERO_DIVISION: ErrorCode = ErrorCode("ZERO_DIVISION");
@@ -53,6 +55,12 @@ doc!(
     ZERO_DIVISION,
     ValueError,
     "division by zero in an expression (Python's ZeroDivisionError, with its message)"
+);
+doc!(
+    DOC_TIMEOUT,
+    TIMEOUT,
+    RuntimeError,
+    "Error: frap: limit exceeded (stmt_timeout): the statement ran past --stmt-timeout and was rolled back"
 );
 doc!(
     DOC_INTERNAL,

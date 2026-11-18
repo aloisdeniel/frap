@@ -1,0 +1,128 @@
+{
+ "_comment": "Hand-written spec of frap's own operator `frap.select_elements` (dump schema of spec/blender-5.2/ops/<ns>.json, `poll: null`). Created by M2 W0 (WP 2.0); owned by WP 2.2, which may refine it (re-run `cargo xtask codegen`).",
+ "namespace": "frap",
+ "count": 1,
+ "operators": [
+  {
+   "idname": "frap.select_elements",
+   "bl_idname": "FRAP_OT_select_elements",
+   "label": "Select Elements",
+   "description": "Select mesh elements by index in Edit Mode (frap extension: agents cannot click)",
+   "options": [
+    "REGISTER",
+    "UNDO"
+   ],
+   "macro_steps": [],
+   "props": [
+    {
+     "identifier": "type",
+     "name": "Type",
+     "description": "Element type the indices refer to",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "VERT",
+       "name": "Vertex",
+       "description": "Vertices (mesh.vertices order)",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "EDGE",
+       "name": "Edge",
+       "description": "Edges (mesh.edges order)",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "FACE",
+       "name": "Face",
+       "description": "Faces (mesh.polygons order)",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "VERT",
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "indices",
+     "name": "Indices",
+     "description": "Element indices (as in mesh.vertices/edges/polygons of the object leaving Edit Mode now)",
+     "type": "INT",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "array": [
+      "dynamic"
+     ],
+     "default": [],
+     "hard_min": 0,
+     "hard_max": 2147483647,
+     "soft_min": 0,
+     "soft_max": 2147483647,
+     "step": 1,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "action",
+     "name": "Action",
+     "description": "How the indices change the selection",
+     "type": "ENUM",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "items": [
+      {
+       "identifier": "SET",
+       "name": "Set",
+       "description": "Select exactly these elements (everything else is deselected, selection history restarts)",
+       "icon": "NONE",
+       "value": 0
+      },
+      {
+       "identifier": "ADD",
+       "name": "Add",
+       "description": "Select these elements too",
+       "icon": "NONE",
+       "value": 1
+      },
+      {
+       "identifier": "REMOVE",
+       "name": "Remove",
+       "description": "Deselect these elements",
+       "icon": "NONE",
+       "value": 2
+      }
+     ],
+     "default": "SET",
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    },
+    {
+     "identifier": "object",
+     "name": "Object",
+     "description": "Name of the edit object the indices refer to (default: the active object)",
+     "type": "STRING",
+     "subtype": "NONE",
+     "unit": "NONE",
+     "default": "",
+     "length_max": 258,
+     "flags": [
+      "SKIP_SAVE",
+      "RUNTIME"
+     ]
+    }
+   ],
+   "poll": null
+  }
+ ]
+}

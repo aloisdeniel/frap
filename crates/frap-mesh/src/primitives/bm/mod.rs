@@ -51,7 +51,8 @@ impl<T> Pool<T> {
             i
         } else {
             self.slots.push(Some(v));
-            (self.slots.len() - 1) as u32
+            u32::try_from(self.slots.len() - 1)
+                .expect("primitive element count exceeds u32 (callers check `counts()` first)")
         }
     }
     pub fn free(&mut self, i: u32) {
@@ -97,6 +98,7 @@ impl Bm {
 
     /// `BM_vert_create`.
     pub fn vert_create(&mut self, co: V3) -> u32 {
+        frap_math::budget::check();
         self.verts.alloc(co)
     }
 
@@ -131,6 +133,7 @@ impl Bm {
     /// `BM_face_create_verts(…, create_edges=true)` / `BM_face_create_quad_tri`: edges
     /// `(v[n-1], v[0]), (v[0], v[1]), …` ensured in that order; UVs zero.
     pub fn face_create(&mut self, verts: &[u32]) -> u32 {
+        frap_math::budget::check();
         let n = verts.len();
         let mut prev = n - 1;
         for i in 0..n {
@@ -199,6 +202,7 @@ impl Bm {
         let mut corner_edges = Vec::new();
         let mut uvs = Vec::new();
         for (_, f) in self.faces.iter() {
+            frap_math::budget::check();
             let n = f.verts.len();
             for i in 0..n {
                 let a = vindex[f.verts[i] as usize];

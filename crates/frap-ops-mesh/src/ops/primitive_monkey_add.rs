@@ -29,10 +29,12 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitiveMonkeyAdd) -> OpResult {
         false,
         common::ViewAxis::Y,
     )?;
-    let mesh = monkey(&Monkey {
+    let params = Monkey {
         size: p.size.value,
         calc_uvs: p.calc_uvs.value,
         matrix: prim.matrix,
-    });
+    };
+    common::reserve(params.estimate())?;
+    let mesh = monkey(&params);
     common::finish(cx, "Suzanne", mesh, prim.at, p.enter_editmode.value)
 }

@@ -93,6 +93,7 @@ How to react to an error:
 2. `detail.did_you_mean` lists close names for unknown operators, keywords and attributes. `detail.valid` lists every accepted keyword.
 3. `OP_NOT_IMPLEMENTED` means the operator exists in Blender 5.2 but frap does not implement it yet (`frap_describe` gives `frap.status: "not_implemented"` and `frap.planned`). `OP_UNKNOWN` means the operator does not exist in Blender 5.2 either.
 4. `frap --describe=errors` lists every error code with its exception.
+5. `LIMIT_EXCEEDED` means the statement would build more geometry than `--max-elements` allows (primitives are checked before anything is built, e.g. `x_subdivisions=10**7`); `TIMEOUT` means it ran past `--stmt-timeout`. Both roll the statement back (`"state":"unchanged"`): ask for less geometry or raise the limit.
 
 The full schemas of the request, response, error, ready/end events and done record are in `frap --describe=protocol`.
 

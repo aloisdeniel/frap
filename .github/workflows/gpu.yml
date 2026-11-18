@@ -82,7 +82,8 @@ jobs:
           set -euo pipefail
           curl.exe -L --retry 5 "https://www.nuget.org/api/v2/package/Microsoft.Direct3D.WARP/${WARP_VERSION}" -o warp.zip
           mkdir -p warp target/debug/deps
-          tar -xf warp.zip -C warp build/native/bin/x64/d3d10warp.dll
+          # Git Bash's GNU tar cannot read a zip (the .nupkg); Windows' own bsdtar can.
+          /c/Windows/System32/tar.exe -xf warp.zip -C warp build/native/bin/x64/d3d10warp.dll
           cp warp/build/native/bin/x64/d3d10warp.dll target/debug/
           cp warp/build/native/bin/x64/d3d10warp.dll target/debug/deps/
 

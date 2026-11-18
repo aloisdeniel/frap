@@ -14,6 +14,8 @@ mod ops {
 
 /// Shared orientation / pivot / proportional-editing core (WP 1.21).
 pub mod core;
+/// Edit-mode `TRANSFORM_MODE_HANDLERS` entry and edit-only transform data (WP 2.12).
+pub mod edit;
 /// Object-mode `TRANSFORM_MODE_HANDLERS` entry (WP 1.21).
 pub mod object;
 

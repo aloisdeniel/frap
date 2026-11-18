@@ -174,6 +174,7 @@ pub(crate) fn looptris(m: &Mesh) -> Vec<[u32; 3]> {
     let cv = m.corner_verts();
     let mut out = Vec::with_capacity(m.corners_num());
     for f in 0..m.faces_num() {
+        frap_math::budget::check();
         let r = m.face(f);
         let s = r.start as u32;
         match r.len() {

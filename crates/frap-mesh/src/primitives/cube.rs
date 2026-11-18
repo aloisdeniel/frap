@@ -41,6 +41,13 @@ impl Default for Cube {
     }
 }
 
+impl Cube {
+    /// Element counts before building (`--max-elements` pre-check, [`super::Estimate`]).
+    pub fn estimate(&self) -> Option<super::Estimate> {
+        super::estimate(Some(8), Some(12), Some(6), Some(24))
+    }
+}
+
 /// The cube of `mesh.primitive_cube_add(size=…, calc_uvs=…)` with the placement scale baked in
 /// (`scale` = (1,1,1) for the operator's default). M0 signature kept for its call sites.
 pub fn cube(size: f32, calc_uvs: bool, scale: [f32; 3]) -> Mesh {

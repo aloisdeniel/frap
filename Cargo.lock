@@ -663,8 +663,20 @@ dependencies = [
 name = "frap-bmesh"
 version = "0.1.0"
 dependencies = [
+ "approx",
+ "automod",
+ "bitflags",
+ "frap-geom",
+ "frap-math",
  "frap-mesh",
  "frap-rna",
+ "insta",
+ "libm",
+ "proptest",
+ "rustc-hash 2.1.3",
+ "serde_json",
+ "smallvec",
+ "smol_str",
 ]
 
 [[package]]
@@ -958,6 +970,7 @@ dependencies = [
  "frap-io-gltf",
  "frap-lang",
  "frap-material",
+ "frap-math",
  "frap-mesh",
  "frap-nodes",
  "frap-op",
@@ -1007,6 +1020,7 @@ dependencies = [
  "glam",
  "indexmap",
  "insta",
+ "libm",
  "linkme",
  "proptest",
  "serde_json",
@@ -1019,17 +1033,23 @@ version = "0.1.0"
 dependencies = [
  "approx",
  "automod",
+ "frap-bmesh",
+ "frap-eval",
+ "frap-math",
  "frap-mesh",
  "frap-op",
  "frap-rna",
  "frap-scene",
  "frap-spec-ops-frap",
  "frap-spec-rna",
+ "glam",
  "indexmap",
  "insta",
+ "libm",
  "linkme",
  "proptest",
  "serde_json",
+ "smallvec",
  "smol_str",
 ]
 
@@ -1081,7 +1101,9 @@ version = "0.1.0"
 dependencies = [
  "approx",
  "automod",
+ "bitflags",
  "frap-bmesh",
+ "frap-geom",
  "frap-math",
  "frap-mesh",
  "frap-op",
@@ -1092,9 +1114,12 @@ dependencies = [
  "glam",
  "indexmap",
  "insta",
+ "libm",
  "linkme",
  "proptest",
+ "rustc-hash 2.1.3",
  "serde_json",
+ "smallvec",
  "smol_str",
 ]
 
@@ -1104,6 +1129,7 @@ version = "0.1.0"
 dependencies = [
  "approx",
  "automod",
+ "frap-bmesh",
  "frap-math",
  "frap-mesh",
  "frap-op",
@@ -1128,15 +1154,20 @@ dependencies = [
  "approx",
  "automod",
  "frap-color",
+ "frap-eval",
  "frap-imbuf",
+ "frap-math",
+ "frap-mesh",
  "frap-op",
  "frap-render-scene",
  "frap-rna",
  "frap-scene",
  "frap-spec-ops-render",
  "frap-spec-rna",
+ "glam",
  "indexmap",
  "insta",
+ "libm",
  "linkme",
  "proptest",
  "serde_json",
@@ -1159,7 +1190,10 @@ version = "0.1.0"
 dependencies = [
  "approx",
  "automod",
+ "frap-bmesh",
+ "frap-geom",
  "frap-math",
+ "frap-mesh",
  "frap-op",
  "frap-rna",
  "frap-scene",
@@ -1171,7 +1205,9 @@ dependencies = [
  "libm",
  "linkme",
  "proptest",
+ "rustc-hash 2.1.3",
  "serde_json",
+ "smallvec",
  "smol_str",
 ]
 
@@ -1209,10 +1245,12 @@ dependencies = [
  "frap-color",
  "frap-imbuf",
  "frap-material",
+ "frap-math",
  "frap-render-scene",
  "glam",
  "image-compare",
  "pollster",
+ "smol_str",
  "wgpu",
 ]
 
@@ -1307,6 +1345,7 @@ dependencies = [
  "frap-spec-rna",
  "indexmap",
  "insta",
+ "linkme",
  "schemars",
  "serde",
  "serde_json",
@@ -1316,6 +1355,7 @@ dependencies = [
 name = "frap-session"
 version = "0.1.0"
 dependencies = [
+ "frap-bmesh",
  "frap-eval",
  "frap-imbuf",
  "frap-lang",
@@ -1330,6 +1370,7 @@ dependencies = [
  "frap-spec-rna",
  "indexmap",
  "insta",
+ "libm",
  "proptest",
  "serde",
  "serde_json",

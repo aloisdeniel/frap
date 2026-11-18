@@ -185,8 +185,9 @@ pub(crate) fn save(cx: &mut OpCtx, path: &Path, kind: SaveKind) -> OpResult {
     Ok(OpStatus::Finished)
 }
 
-/// Replaces the whole session state (`bpy.data`, window, edit state) with a loaded one.
-pub(crate) fn replace_state(cx: &mut OpCtx, main: Main, win: WindowState) {
+/// Replaces the whole session state (`bpy.data`, window, edit state) with a loaded one; objects
+/// saved in Edit Mode re-enter it (`helpers::edit_mode::reenter_after_load`, WP 2.2).
+pub(crate) fn replace_state(cx: &mut OpCtx, main: Main, win: WindowState) -> Result<(), OpError> {
     {
         let (m, log) = cx.main_mut();
         for a in m.all_ids() {
@@ -202,6 +203,7 @@ pub(crate) fn replace_state(cx: &mut OpCtx, main: Main, win: WindowState) {
     }
     *cx.win_mut() = win;
     *cx.split_edit().1 = EditState::default();
+    frap_op::helpers::edit_mode::reenter_after_load(cx)
 }
 
 /// `wm.open_mainfile` / `wm.revert_mainfile`: loads the `.frap` at `path` (absolute) and makes
@@ -231,7 +233,7 @@ pub(crate) fn open(cx: &mut OpCtx, path: &Path) -> OpResult {
     let mut main = opened.main;
     main.filepath = Some(path.to_string_lossy().into_owned());
     main.is_dirty = false;
-    replace_state(cx, main, opened.win);
+    replace_state(cx, main, opened.win)?;
     // The glTF add-on preferences are saved state in frap (§15).
     if let Some(p) = cx.prefs_mut() {
         *p = opened.prefs;
@@ -259,7 +261,7 @@ pub(crate) fn read_home(cx: &mut OpCtx, use_empty: bool, reset_prefs: bool) -> O
     };
     main.filepath = None;
     main.is_dirty = false;
-    replace_state(cx, main, win);
+    replace_state(cx, main, win)?;
     if reset_prefs && let Some(p) = cx.prefs_mut() {
         *p = frap_scene::Preferences::default();
     }

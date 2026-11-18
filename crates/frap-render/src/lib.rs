@@ -8,6 +8,7 @@
 //! `new_service`, `Engine`, `Gpu`, `Gpu::new` (in `gpu.rs`, `engine.rs`, `service.rs`).
 #![deny(unsafe_code)]
 
+pub mod composite;
 mod engine;
 mod gpu;
 pub mod readback;

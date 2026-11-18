@@ -18,6 +18,9 @@ use frap_scene::{ObjectMode, WindowState};
 
 use crate::ctx::OpCtx;
 pub use crate::ctx::Placement;
+
+pub mod edit_merge;
+pub mod edit_mode;
 use crate::def::{OpError, OpStatus};
 use crate::modes::{MODE_HANDLERS, ModeHandler};
 use crate::poll;
@@ -195,13 +198,11 @@ pub fn add_primitive_or_merge(
     at: Placement,
     enter_editmode: bool,
 ) -> Result<IdRef<ObjectId>, OpError> {
-    if let Some((_, ob)) = poll::edit_object(&cx.ctx())
+    if let Some((edit_ob, ob)) = poll::edit_object(&cx.ctx())
         && ob.object_type() == "MESH"
     {
-        return Err(OpError::NotImplemented(
-            "frap: adding a primitive to a mesh in Edit Mode (merged into the edit mesh) arrives in M2"
-                .into(),
-        ));
+        // Blender merges the new geometry into the edit mesh (WP 2.2, `edit_merge.rs`).
+        return edit_merge::merge_into_edit_mesh(cx, edit_ob, mesh, at);
     }
     exit_edit_mode(cx)?;
     let (main, log) = cx.main_mut();

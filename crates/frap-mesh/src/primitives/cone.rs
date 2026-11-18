@@ -72,6 +72,14 @@ impl Default for Cone {
     }
 }
 
+impl Cone {
+    /// Element counts before building (`--max-elements` pre-check, [`super::Estimate`]).
+    pub fn estimate(&self) -> Option<super::Estimate> {
+        // Upper bound: a zero radius merges its ring into one vertex.
+        super::tube_estimate(self.vertices, self.end_fill_type)
+    }
+}
+
 /// The mesh of `mesh.primitive_cone_add(…)`.
 pub fn cone(p: &Cone) -> Mesh {
     create_cone(

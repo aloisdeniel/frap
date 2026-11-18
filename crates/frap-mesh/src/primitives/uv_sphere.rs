@@ -55,6 +55,26 @@ impl Default for UvSphere {
     }
 }
 
+impl UvSphere {
+    /// Element counts before building (`--max-elements` pre-check, [`super::Estimate`]).
+    pub fn estimate(&self) -> Option<super::Estimate> {
+        let s = u64::try_from(self.segments.max(1)).ok()?;
+        let r = u64::try_from(self.ring_count.max(1)).ok()?;
+        if r < 2 {
+            // A single ring collapses to its two poles.
+            return super::estimate(Some(2), Some(0), Some(0), Some(0));
+        }
+        // `s` quads per inner ring band, a triangle fan at each pole.
+        let quads = s.checked_mul(r - 2)?;
+        super::estimate(
+            s.checked_mul(r - 1)?.checked_add(2),
+            s.checked_mul(2 * r - 1),
+            s.checked_mul(r),
+            quads.checked_mul(4)?.checked_add(s.checked_mul(6)?),
+        )
+    }
+}
+
 /// The mesh of `mesh.primitive_uv_sphere_add(…)`.
 pub fn uv_sphere(p: &UvSphere) -> Mesh {
     let rad = p.radius;

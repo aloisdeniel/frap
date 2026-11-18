@@ -30,6 +30,13 @@ impl Default for Plane {
     }
 }
 
+impl Plane {
+    /// Element counts before building (`--max-elements` pre-check, [`super::Estimate`]).
+    pub fn estimate(&self) -> Option<super::Estimate> {
+        super::estimate(Some(4), Some(4), Some(1), Some(4))
+    }
+}
+
 /// The mesh of `mesh.primitive_plane_add(…)`.
 pub fn plane(p: &Plane) -> Mesh {
     create_grid("Plane", 0, 0, p.size / 2.0, p.calc_uvs, &p.matrix)

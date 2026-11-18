@@ -184,3 +184,191 @@ mod tests {
         assert_eq!(m, scale_matrix([1.0, 2.0, 3.0]));
     }
 }
+
+/// Element counts a primitive will create, computed from its properties before building
+/// (`--max-elements` pre-check, ARCHITECTURE §12; `frap_math::budget::reserve_corners`). Exact
+/// for every primitive except the cone, where it is an upper bound (a zero radius merges a ring
+/// into one vertex). `None` from an `estimate()` means the counts overflow `u64`.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct Estimate {
+    /// Vertices.
+    pub verts: u64,
+    /// Edges.
+    pub edges: u64,
+    /// Faces.
+    pub faces: u64,
+    /// Face corners.
+    pub corners: u64,
+}
+
+impl Estimate {
+    /// The largest per-domain count.
+    pub fn max_domain(&self) -> u64 {
+        self.verts.max(self.edges).max(self.faces).max(self.corners)
+    }
+}
+
+/// `Some(Estimate)` from checked `u64` arithmetic.
+pub(crate) fn estimate(
+    verts: Option<u64>,
+    edges: Option<u64>,
+    faces: Option<u64>,
+    corners: Option<u64>,
+) -> Option<Estimate> {
+    Some(Estimate {
+        verts: verts?,
+        edges: edges?,
+        faces: faces?,
+        corners: corners?,
+    })
+}
+
+/// Counts of the side ring of a cylinder/cone with `n` segments and `fill` caps.
+pub(crate) fn tube_estimate(n: i32, fill: cone::FillType) -> Option<Estimate> {
+    let n = u64::try_from(n.max(0)).ok()?;
+    let (cv, ce, cf, cc) = match fill {
+        cone::FillType::Nothing => (0, 0, 0, 0),
+        cone::FillType::Ngon => (0, 0, 2, n.checked_mul(2)?),
+        cone::FillType::Trifan => (2, n.checked_mul(2)?, n.checked_mul(2)?, n.checked_mul(6)?),
+    };
+    estimate(
+        n.checked_mul(2)?.checked_add(cv),
+        n.checked_mul(3)?.checked_add(ce),
+        n.checked_add(cf),
+        n.checked_mul(4)?.checked_add(cc),
+    )
+}
+
+#[cfg(test)]
+mod estimate_tests {
+    use super::cone::FillType;
+    use super::*;
+
+    fn counts(m: &crate::Mesh) -> Estimate {
+        Estimate {
+            verts: m.verts_num() as u64,
+            edges: m.edges_num() as u64,
+            faces: m.faces_num() as u64,
+            corners: m.corners_num() as u64,
+        }
+    }
+
+    #[test]
+    fn estimates_equal_the_generated_counts() {
+        for (x, y) in [(1, 1), (3, 2), (10, 10), (0, 5)] {
+            let p = grid::Grid {
+                x_subdivisions: x,
+                y_subdivisions: y,
+                ..Default::default()
+            };
+            assert_eq!(p.estimate(), Some(counts(&grid::grid(&p))), "grid {x}x{y}");
+        }
+        for fill in [FillType::Nothing, FillType::Ngon, FillType::Trifan] {
+            for n in [3, 8, 32] {
+                let c = circle::Circle {
+                    vertices: n,
+                    fill_type: fill,
+                    ..Default::default()
+                };
+                assert_eq!(
+                    c.estimate(),
+                    Some(counts(&circle::circle(&c))),
+                    "circle {n} {fill:?}"
+                );
+                let c = cylinder::Cylinder {
+                    vertices: n,
+                    end_fill_type: fill,
+                    ..Default::default()
+                };
+                assert_eq!(
+                    c.estimate(),
+                    Some(counts(&cylinder::cylinder(&c))),
+                    "cyl {n} {fill:?}"
+                );
+                for (r1, r2) in [(1.0, 0.0), (1.0, 0.5), (0.0, 0.0)] {
+                    let c = cone::Cone {
+                        vertices: n,
+                        radius1: r1,
+                        radius2: r2,
+                        end_fill_type: fill,
+                        ..Default::default()
+                    };
+                    let e = c.estimate().expect("small");
+                    let m = counts(&cone::cone(&c));
+                    assert!(
+                        m.verts <= e.verts
+                            && m.edges <= e.edges
+                            && m.faces <= e.faces
+                            && m.corners <= e.corners,
+                        "cone {n} {fill:?} {r1} {r2}: {m:?} > {e:?}"
+                    );
+                }
+            }
+        }
+        for (s, r) in [(3, 3), (32, 16), (5, 7)] {
+            let p = uv_sphere::UvSphere {
+                segments: s,
+                ring_count: r,
+                ..Default::default()
+            };
+            assert_eq!(
+                p.estimate(),
+                Some(counts(&uv_sphere::uv_sphere(&p))),
+                "uv {s}x{r}"
+            );
+        }
+        for k in 1..=4 {
+            let p = ico_sphere::IcoSphere {
+                subdivisions: k,
+                ..Default::default()
+            };
+            assert_eq!(
+                p.estimate(),
+                Some(counts(&ico_sphere::ico_sphere(&p))),
+                "ico {k}"
+            );
+        }
+        for (a, b) in [(3, 3), (48, 12)] {
+            let p = torus::Torus {
+                major_segments: a,
+                minor_segments: b,
+                ..Default::default()
+            };
+            assert_eq!(
+                p.estimate(),
+                Some(counts(&torus::torus(&p))),
+                "torus {a}x{b}"
+            );
+        }
+        let p = plane::Plane::default();
+        assert_eq!(p.estimate(), Some(counts(&plane::plane(&p))));
+        let p = cube::Cube::default();
+        assert_eq!(p.estimate(), Some(counts(&cube::cube_mesh(&p))));
+        let p = monkey::Monkey::default();
+        assert_eq!(p.estimate(), Some(counts(&monkey::monkey(&p))));
+    }
+
+    #[test]
+    fn absurd_requests_do_not_overflow() {
+        let g = grid::Grid {
+            x_subdivisions: 10_000_000,
+            y_subdivisions: 10_000_000,
+            ..Default::default()
+        };
+        let e = g.estimate().expect("fits u64");
+        assert_eq!(e.faces, 100_000_000_000_000);
+        assert_eq!(e.corners, 400_000_000_000_000);
+        let s = uv_sphere::UvSphere {
+            segments: 100_000,
+            ring_count: 100_000,
+            ..Default::default()
+        };
+        assert_eq!(s.estimate().expect("fits").faces, 10_000_000_000);
+        let c = circle::Circle {
+            vertices: i32::MAX,
+            fill_type: FillType::Trifan,
+            ..Default::default()
+        };
+        assert!(c.estimate().expect("fits").corners > u32::MAX as u64);
+    }
+}

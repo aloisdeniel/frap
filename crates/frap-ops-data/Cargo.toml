@@ -23,6 +23,7 @@ linkme.workspace = true
 automod.workspace = true
 smol_str.workspace = true
 indexmap.workspace = true
+libm.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

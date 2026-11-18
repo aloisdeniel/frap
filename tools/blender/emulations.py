@@ -12,7 +12,9 @@ Each emulation returns what the operator would (`{'FINISHED'}` / `{'CANCELLED'}`
 the exception class Blender would raise for bad input.
 
 Later milestones add entries here (for example the `mesh.loopcut(edge_index=…)` recipe of
-[MESH App. B.7] in M2); this file is owned by WP 1.8.
+[MESH App. B.7] in M2). Owned by WP 1.8 in M1; in M2 each WP adds the emulation of the frap
+operator or headless-extended operator it implements (`select_elements`: WP 2.2,
+`select_by_normal`: WP 2.4, `loopcut`: WP 2.6), appending to `EMULATED`.
 """
 
 import bpy
@@ -27,17 +29,31 @@ def _edit_bmesh():
     return ob, bmesh, bmesh.from_edit_mesh(ob.data)
 
 
-def select_elements(type="VERT", indices=(), extend=False, deselect=False):
-    """`frap.select_elements`: select mesh elements by index in Edit Mode (bmesh selection)."""
-    if type not in ("VERT", "EDGE", "FACE"):
-        raise TypeError(
-            "Converting py args to operator properties: enum \"%s\" not found in ('VERT', 'EDGE', 'FACE')"
-            % type
-        )
-    ob, bmesh, bm = _edit_bmesh()
+def select_elements(type="VERT", indices=(), action="SET", object=""):
+    """`frap.select_elements`: select mesh elements by index in Edit Mode (bmesh selection).
+
+    Mirrors spec/frap/ops/frap.select_elements.json (M2 W0): `action` SET (exactly these, the
+    selection history restarts), ADD, REMOVE; `object` names the edit object the indices refer
+    to (default: the active object)."""
+    import bmesh
+
+    for name, value, items in (("type", type, ("VERT", "EDGE", "FACE")),
+                               ("action", action, ("SET", "ADD", "REMOVE"))):
+        if value not in items:
+            raise TypeError(
+                "Converting py args to operator properties: enum \"%s\" not found in %s"
+                % (value, str(items))
+            )
+    if object:
+        ob = bpy.data.objects.get(object)
+        if ob is None or ob.mode != "EDIT" or ob.type != "MESH":
+            raise RuntimeError("Error: frap.select_elements: object \"%s\" is not a mesh in Edit Mode" % object)
+        bm = bmesh.from_edit_mesh(ob.data)
+    else:
+        ob, bmesh, bm = _edit_bmesh()
     seq = {"VERT": bm.verts, "EDGE": bm.edges, "FACE": bm.faces}[type]
     seq.ensure_lookup_table()
-    if not extend and not deselect:
+    if action == "SET":
         for elems in (bm.verts, bm.edges, bm.faces):
             for e in elems:
                 e.select_set(False)
@@ -46,8 +62,8 @@ def select_elements(type="VERT", indices=(), extend=False, deselect=False):
         if i < 0 or i >= len(seq):
             raise IndexError("frap.select_elements: index %d out of range (%d)" % (i, len(seq)))
         e = seq[i]
-        e.select_set(not deselect)
-        if not deselect:
+        e.select_set(action != "REMOVE")
+        if action != "REMOVE":
             bm.select_history.add(e)
     bm.select_flush_mode()
     bmesh.update_edit_mesh(ob.data)

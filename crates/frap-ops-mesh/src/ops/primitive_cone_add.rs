@@ -34,7 +34,7 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitiveConeAdd) -> OpResult {
         &p.scale,
         true,
     )?;
-    let mesh = cone(&Cone {
+    let params = Cone {
         vertices: p.vertices.value,
         radius1: p.radius1.value,
         radius2: p.radius2.value,
@@ -42,6 +42,8 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitiveConeAdd) -> OpResult {
         end_fill_type: fill(p.end_fill_type.value),
         calc_uvs: p.calc_uvs.value,
         matrix: prim.matrix,
-    });
+    };
+    common::reserve(params.estimate())?;
+    let mesh = cone(&params);
     common::finish(cx, "Cone", mesh, prim.at, p.enter_editmode.value)
 }

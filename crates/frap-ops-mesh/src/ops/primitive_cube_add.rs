@@ -28,10 +28,12 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitiveCubeAdd) -> OpResult {
         &p.scale,
         true,
     )?;
-    let mesh = cube_mesh(&Cube {
+    let params = Cube {
         size: p.size.value,
         calc_uvs: p.calc_uvs.value,
         matrix: prim.matrix,
-    });
+    };
+    common::reserve(params.estimate())?;
+    let mesh = cube_mesh(&params);
     common::finish(cx, "Cube", mesh, prim.at, p.enter_editmode.value)
 }

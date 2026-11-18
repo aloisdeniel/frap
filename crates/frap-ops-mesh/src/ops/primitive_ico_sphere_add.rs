@@ -26,11 +26,13 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitiveIcoSphereAdd) -> OpResult {
         &p.scale,
         true,
     )?;
-    let mesh = ico_sphere(&IcoSphere {
+    let params = IcoSphere {
         subdivisions: p.subdivisions.value,
         radius: p.radius.value,
         calc_uvs: p.calc_uvs.value,
         matrix: prim.matrix,
-    });
+    };
+    common::reserve(params.estimate())?;
+    let mesh = ico_sphere(&params);
     common::finish(cx, "Icosphere", mesh, prim.at, p.enter_editmode.value)
 }

@@ -40,6 +40,13 @@ impl Default for Cylinder {
     }
 }
 
+impl Cylinder {
+    /// Element counts before building (`--max-elements` pre-check, [`super::Estimate`]).
+    pub fn estimate(&self) -> Option<super::Estimate> {
+        super::tube_estimate(self.vertices, self.end_fill_type)
+    }
+}
+
 /// The mesh of `mesh.primitive_cylinder_add(…)`.
 pub fn cylinder(p: &Cylinder) -> Mesh {
     create_cone(

@@ -26,10 +26,12 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitivePlaneAdd) -> OpResult {
         &p.scale,
         false,
     )?;
-    let mesh = plane(&Plane {
+    let params = Plane {
         size: p.size.value,
         calc_uvs: p.calc_uvs.value,
         matrix: prim.matrix,
-    });
+    };
+    common::reserve(params.estimate())?;
+    let mesh = plane(&params);
     common::finish(cx, "Plane", mesh, prim.at, p.enter_editmode.value)
 }

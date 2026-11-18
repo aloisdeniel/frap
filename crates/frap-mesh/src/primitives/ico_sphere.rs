@@ -78,6 +78,18 @@ impl Default for IcoSphere {
     }
 }
 
+impl IcoSphere {
+    /// Element counts before building (`--max-elements` pre-check, [`super::Estimate`]).
+    pub fn estimate(&self) -> Option<super::Estimate> {
+        // Each subdivision quadruples the 20 faces (subdivisions is 1..=10 in Blender).
+        let k = u32::try_from(self.subdivisions.max(1) - 1).ok()?;
+        let p = 4u64.checked_pow(k)?;
+        let f = p.checked_mul(20)?;
+        let e = p.checked_mul(30)?;
+        super::estimate(e.checked_sub(f)?.checked_add(2), Some(e), Some(f), f.checked_mul(3))
+    }
+}
+
 /// The mesh of `mesh.primitive_ico_sphere_add(…)`.
 pub fn ico_sphere(p: &IcoSphere) -> Mesh {
     let rad = p.radius;
