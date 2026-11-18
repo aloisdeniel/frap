@@ -3,7 +3,7 @@ x = 1
 cube
 bpy.ops.mesh.foo()
 bpy.ops.mesh.knife_project()
-bpy.context.area
+bpy.context.space_data
 bpy.ops.mesh.primitive_cube_add(sizee=2)
 bpy.ops.mesh.primitive_cube_add(size='x')
 bpy.ops.mesh.primitive_cube_add(align='FOO')
