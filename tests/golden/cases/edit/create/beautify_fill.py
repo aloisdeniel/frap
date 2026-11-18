@@ -1,7 +1,7 @@
 # WP 2.8: mesh.beautify_fill rotates edges between selected triangles towards better shapes
 # (a fan of slivers over a flat strip), then with an angle limit on a folded pair (the edge
 # between faces bent more than the limit stays).
-# golden: startup=empty compare=objects,context,mesh:Strip tier=T2
+# golden: startup=empty compare=objects,context,mesh:Strip tier=T1
 import bpy
 bpy.data.meshes.new('Strip').from_pydata([(0, 0, 0), (1, 0, 0), (2, 0, 0), (3, 0, 0), (4, 0, 0), (0, 1, 0), (4, 1, 0), (0, 0, 2), (1, 0, 2), (0.5, 1, 2), (0.5, -1, 3)], [], [(0, 1, 5), (1, 2, 5), (2, 3, 5), (3, 4, 5), (4, 6, 5), (7, 8, 9), (8, 7, 10)])
 bpy.data.objects.new('Strip', bpy.data.meshes['Strip'])

@@ -1,7 +1,7 @@
 # WP 2.8: mesh.edge_face_add on a closed wire loop (circle without fill) makes one n-gon,
 # oriented by recalc_face_normals (no neighbour faces), selected; then two loose vertices get
 # an edge, and pressing again with the new edge selected extends nothing (CANCELLED).
-# golden: startup=empty compare=objects,context,mesh:Circle tier=T2
+# golden: startup=empty compare=objects,context,mesh:Circle tier=T1
 import bpy
 bpy.ops.mesh.primitive_circle_add(vertices=8, radius=1, fill_type='NOTHING')
 bpy.ops.object.mode_set(mode='EDIT')

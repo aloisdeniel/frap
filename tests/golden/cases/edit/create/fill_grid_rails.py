@@ -1,7 +1,7 @@
 # WP 2.8: mesh.fill_grid between two open chains joined by wire rails (grid_fill finds the
 # rails), with chains of different lengths (the shorter one is padded and the padding edges
 # collapsed afterwards), and next to faces (winding from the attached boundary faces).
-# golden: startup=empty compare=objects,context,mesh:Rails,mesh:Uneven tier=T2
+# golden: startup=empty compare=objects,context,mesh:Rails,mesh:Uneven tier=T1
 import bpy
 bpy.data.meshes.new('Rails').from_pydata([(0, 0, 0), (1, 0, 0), (2, 0, 0), (3, 0, 0), (0, 2, 0.3), (1, 2, 0.3), (2, 2, 0.3), (3, 2, 0.3), (0, 1, 0.1), (3, 1, 0.1), (0, -1, 0), (1, -1, 0)], [(0, 1), (1, 2), (2, 3), (4, 5), (5, 6), (6, 7), (0, 8), (8, 4), (3, 9), (9, 7)], [(10, 11, 1, 0)])
 bpy.data.objects.new('Rails', bpy.data.meshes['Rails'])

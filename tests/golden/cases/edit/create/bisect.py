@@ -2,7 +2,7 @@
 # middle (the cut is selected), a tilted cut on a moved and rotated object filled and with
 # the inner side cleared, a cut through existing vertices (vertices on the plane are reused),
 # and CANCELLED without a selection.
-# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001 tier=T2
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001 tier=T1
 import bpy
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='SELECT')

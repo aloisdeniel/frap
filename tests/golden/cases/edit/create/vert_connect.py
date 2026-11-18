@@ -1,7 +1,7 @@
 # WP 2.8: mesh.vert_connect joins selected vertices of a face (splitting it), connects two
 # vertices across several faces (connect_vert_pair: new vertices where the path crosses
 # edges, the new edges selected), and is CANCELLED with fewer than two vertices.
-# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Grid tier=T2
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Grid tier=T1
 import bpy
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='DESELECT')

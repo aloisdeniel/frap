@@ -2,7 +2,7 @@
 # and attributes from the neighbouring faces (face_attribute_fill); then a single selected
 # boundary vertex extends the selection along the hole and fills a triangle, leaving only the
 # next boundary edge selected (USE_FACE_CREATE_SEL_EXTEND), and pressing again walks on.
-# golden: startup=empty compare=objects,context,mesh:Box,mesh:Box2 tier=T2
+# golden: startup=empty compare=objects,context,mesh:Box,mesh:Box2 tier=T1
 import bpy
 bpy.data.meshes.new('Box').from_pydata([(-1, -1, -1), (1, -1, -1), (1, 1, -1), (-1, 1, -1), (-1, -1, 1), (1, -1, 1), (1, 1, 1), (-1, 1, 1)], [], [(0, 3, 2, 1), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6), (3, 0, 4, 7)])
 bpy.data.objects.new('Box', bpy.data.meshes['Box'])

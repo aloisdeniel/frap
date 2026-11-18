@@ -1,7 +1,7 @@
 # WP 2.8: mesh.bridge_edge_loops between two parallel square wire loops (4 side quads,
 # selected), with a twist offset on closed loops, three loops bridged in order with
 # type='CLOSED', and the INFO error `Select at least two edge loops` (FINISHED, unchanged).
-# golden: startup=empty compare=objects,context,mesh:Loops,mesh:Three tier=T2
+# golden: startup=empty compare=objects,context,mesh:Loops,mesh:Three tier=T1
 import bpy
 bpy.data.meshes.new('Loops').from_pydata([(-1, -1, 0), (1, -1, 0), (1, 1, 0), (-1, 1, 0), (-1, -1, 2), (1, -1, 2), (1, 1, 2), (-1, 1, 2), (4, 0, 0), (5, 0, 0), (5, 1, 0), (4, 1, 0), (4, 0, 1), (5, 0, 1), (5, 1, 1), (4, 1, 1)], [(0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 7), (7, 4), (8, 9), (9, 10), (10, 11), (11, 8), (12, 13), (13, 14), (14, 15), (15, 12)], [])
 bpy.data.objects.new('Loops', bpy.data.meshes['Loops'])

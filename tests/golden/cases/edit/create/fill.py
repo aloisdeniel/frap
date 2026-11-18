@@ -2,7 +2,7 @@
 # circle without fill, an open box's hole (winding from the neighbours), the same without
 # beauty; the new faces and edges are selected. No selected edge raises
 # `RuntimeError: Error: No edges selected`.
-# golden: startup=empty compare=objects,context,mesh:Circle,mesh:Box tier=T2
+# golden: startup=empty compare=objects,context,mesh:Circle,mesh:Box tier=T1
 import bpy
 bpy.ops.mesh.primitive_circle_add(vertices=8, radius=1, fill_type='NOTHING')
 bpy.ops.object.mode_set(mode='EDIT')

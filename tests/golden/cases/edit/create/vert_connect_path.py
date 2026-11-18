@@ -1,7 +1,7 @@
 # WP 2.8: mesh.vert_connect_path connects vertices in selection order (frap.select_elements
 # sets the history): across the faces of a grid, then by plain edges between loose vertices
 # (closing the path when every edge exists), and the error for a face selection.
-# golden: startup=empty compare=objects,context,mesh:Grid,mesh:Loose tier=T2
+# golden: startup=empty compare=objects,context,mesh:Grid,mesh:Loose tier=T1
 import bpy
 bpy.ops.mesh.primitive_grid_add(x_subdivisions=4, y_subdivisions=4, size=2)
 bpy.ops.object.mode_set(mode='EDIT')

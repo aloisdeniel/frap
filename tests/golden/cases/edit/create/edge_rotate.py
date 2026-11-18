@@ -1,7 +1,7 @@
 # WP 2.8: mesh.edge_rotate rotates selected edges between two faces (a cube edge, both
 # directions), several edges sharing faces (rotated longest first from the region boundary),
 # and the errors for no selected edge and for edges that cannot rotate.
-# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Grid tier=T2
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Grid tier=T1
 import bpy
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='DESELECT')

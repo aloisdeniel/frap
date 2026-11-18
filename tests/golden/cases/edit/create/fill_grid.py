@@ -1,7 +1,7 @@
 # WP 2.8: mesh.fill_grid on one closed loop (split into two rails at the sharpest corner,
 # span from the corners or a quarter of the loop), with an explicit span and offset, and on a
 # selection that is not one or two loops (INFO report, FINISHED, nothing changes).
-# golden: startup=empty compare=objects,context,mesh:Circle,mesh:Ring tier=T2
+# golden: startup=empty compare=objects,context,mesh:Circle,mesh:Ring tier=T1
 import bpy
 bpy.ops.mesh.primitive_circle_add(vertices=8, radius=1, fill_type='NOTHING')
 bpy.ops.object.mode_set(mode='EDIT')
