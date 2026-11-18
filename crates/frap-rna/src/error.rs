@@ -367,3 +367,55 @@ impl From<RnaError> for FrapError {
         e.into_frap("", RnaErrorKind::default_code)
     }
 }
+
+/// An OS error as C `strerror(errno)` spells it, the text Blender puts in its file reports
+/// (`BKE_reportf(…, "Cannot open file %s for writing: %s", …, strerror(errno))`): the same
+/// on every OS. Blender's Windows build gets these texts too, since the MSVC CRT maps Win32
+/// errors to `errno` (`ERROR_PATH_NOT_FOUND` → `ENOENT`), while Rust's `Display` would give
+/// the Win32 text (`The system cannot find the path specified.`) and append ` (os error N)`.
+/// Errors without an OS code keep their own text.
+pub fn strerror(e: &std::io::Error) -> String {
+    use std::io::ErrorKind as K;
+    let Some(code) = e.raw_os_error() else {
+        return e.to_string();
+    };
+    // EPERM (1 on Linux and macOS) is also `PermissionDenied`.
+    if cfg!(unix) && code == 1 {
+        return "Operation not permitted".into();
+    }
+    // Texts shared by glibc, the macOS libc and the MSVC CRT.
+    let text = match e.kind() {
+        K::NotFound => "No such file or directory",
+        K::PermissionDenied => "Permission denied",
+        K::AlreadyExists => "File exists",
+        K::NotADirectory => "Not a directory",
+        K::IsADirectory => "Is a directory",
+        K::DirectoryNotEmpty => "Directory not empty",
+        K::ReadOnlyFilesystem => "Read-only file system",
+        K::StorageFull => "No space left on device",
+        K::FileTooLarge => "File too large",
+        K::Interrupted => "Interrupted system call",
+        _ => {
+            let s = e.to_string();
+            return match s.find(" (os error ") {
+                Some(i) => s[..i].to_owned(),
+                None => s,
+            };
+        }
+    };
+    text.into()
+}
+
+#[cfg(test)]
+mod strerror_tests {
+    use super::strerror;
+    use std::io::{Error, ErrorKind};
+
+    #[test]
+    fn os_errors_read_like_c_strerror() {
+        let missing = std::fs::read("/frap-strerror-test/does/not/exist").unwrap_err();
+        assert_eq!(strerror(&missing), "No such file or directory");
+        // Not an OS error: its own text.
+        assert_eq!(strerror(&Error::new(ErrorKind::NotFound, "gone")), "gone");
+    }
+}

@@ -180,7 +180,8 @@ fn export_then_import_through_the_operators() {
     );
     assert_eq!(get(&mut s, "bpy.context.active_object.name"), json!("Cube"));
     // files + directory imports every listed file.
-    let dir = d.path().to_string_lossy().into_owned();
+    // A Python string literal: Windows paths have backslashes.
+    let dir = d.path().to_string_lossy().replace('\\', "\\\\");
     let r = ok(
         &mut s,
         &format!(
@@ -375,7 +376,8 @@ fn a_failing_file_rolls_back_the_whole_files_import() {
         &mut s,
         "bpy.ops.export_scene.gltf(filepath='m.glb')\nbpy.ops.wm.read_homefile(use_empty=True)",
     );
-    let dir = d.path().to_string_lossy().into_owned();
+    // A Python string literal: Windows paths have backslashes.
+    let dir = d.path().to_string_lossy().replace('\\', "\\\\");
     let (code, msg) = err_code(
         &mut s,
         &format!(

@@ -134,7 +134,11 @@ fn errors_use_blenders_messages() {
         msg,
         format!(
             "Error: Cannot open file {}@ for writing: No such file or directory",
-            d.path().join("missing/dir/a.frap").display()
+            d.path()
+                .join("missing")
+                .join("dir")
+                .join("a.frap")
+                .display()
         )
     );
     let (code, msg) = err_code(&mut s, "bpy.ops.wm.open_mainfile(filepath='nope.frap')");
