@@ -21,6 +21,7 @@ frap-ops-frap.workspace = true
 frap-imbuf.workspace = true
 frap-subdiv.workspace = true
 frap-boolean.workspace = true
+frap-modifiers.workspace = true
 
 [dev-dependencies]
 frap-op.workspace = true
@@ -47,7 +48,6 @@ indexmap.workspace = true
 smallvec.workspace = true
 linkme.workspace = true
 serde_json.workspace = true
-frap-modifiers.workspace = true
 frap-uv.workspace = true
 frap-geom.workspace = true
 

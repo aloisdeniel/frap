@@ -129,6 +129,10 @@ pub struct ModifierTypeInfo {
 #[linkme::distributed_slice]
 pub static MODIFIER_TYPES: [ModifierTypeInfo];
 
+/// Keeps every `types/<type>.rs` registration in the final binary (§10.5): `frap-ops-all`
+/// references it next to the ops crates' `link()`, so the linker never drops a type file.
+pub fn link() {}
+
 /// `depends_on` of a type without dependencies.
 pub fn no_deps(_: &ModifierSettings) -> SmallVec<[IdAny; 2]> {
     SmallVec::new()

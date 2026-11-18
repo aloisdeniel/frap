@@ -14,6 +14,9 @@ ignore = [
     # humantime (via trycmd -> humantime-serde): unmaintained because chrono is; no safe upgrade
     # exists. Dev-only (frap-cli transcript tests), never linked into the frap binary.
     { id = "RUSTSEC-2026-0542", reason = "dev-only via trycmd; no maintained alternative yet" },
+    # paste (via faer -> gemm, frap-uv's sparse LSCM solver, M3+M4 W0): unmaintained but finished;
+    # a compile-time proc-macro with no runtime code. No faer release drops it yet.
+    { id = "RUSTSEC-2024-0436", reason = "build-time proc-macro via faer/gemm; no runtime code" },
 ]
 
 [licenses]

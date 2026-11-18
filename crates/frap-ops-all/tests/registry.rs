@@ -164,3 +164,27 @@ fn file_name_mapping_follows_section_21_1() {
     assert_eq!(snake("Object"), "object");
     assert_eq!(snake("BlendDataMaterials"), "blend_data_materials");
 }
+
+/// Every `crates/frap-modifiers/src/types/<type>.rs` registers exactly its type (§7.2: the file
+/// stem is the lower-case Blender identifier, `simple_deform.rs` → `SIMPLE_DEFORM`), once, and
+/// survives linking (`frap_modifiers::link`, M3+M4 W0).
+#[test]
+fn every_modifier_type_file_is_registered_once() {
+    frap_ops_all::link();
+    let expected: BTreeSet<String> = stems(&crates_dir().join("frap-modifiers/src/types"))
+        .into_iter()
+        .map(|s| s.to_ascii_uppercase())
+        .collect();
+    let mut registered = BTreeSet::new();
+    for info in frap_modifiers::MODIFIER_TYPES.iter() {
+        let id = info.ty.identifier().to_owned();
+        assert!(
+            registered.insert(id.clone()),
+            "modifier type {id} registered twice"
+        );
+    }
+    assert_eq!(
+        registered, expected,
+        "registered modifier types differ from the `types/<type>.rs` files"
+    );
+}

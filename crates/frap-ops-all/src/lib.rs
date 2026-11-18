@@ -21,6 +21,8 @@ pub fn link() {
     std::hint::black_box(frap_ops_io::link as fn());
     std::hint::black_box(frap_ops_render::link as fn());
     std::hint::black_box(frap_ops_frap::link as fn());
+    // Modifier evaluators (`MODIFIER_TYPES`, M3+M4 W0) are kept the same way.
+    std::hint::black_box(frap_modifiers::link as fn());
     frap_ops_object::link();
     frap_ops_transform::link();
     frap_ops_mesh::link();
@@ -30,6 +32,7 @@ pub fn link() {
     frap_ops_io::link();
     frap_ops_render::link();
     frap_ops_frap::link();
+    frap_modifiers::link();
 }
 
 /// The ops crates `link()` covers, with their primary namespace (§21.1; `None` = every file
