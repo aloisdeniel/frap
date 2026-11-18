@@ -3,13 +3,15 @@
 //! `rna_AttributeGroup_remove` → `BKE_attribute_remove`) over
 //! `frap_mesh::Mesh::remove_attribute`: a required attribute raises `RuntimeError: Error:
 //! Attribute is required and cannot be removed` (verified on 5.2.4). Blender removes by name
-//! on the called mesh.
+//! on the called mesh. The active attribute keeps its index (`Mesh.attributes_active_index`
+//! is not touched), so removing an earlier attribute makes the next one active.
 
 use frap_mesh::Domain;
 use frap_rna::{MeshId, RnaError, RnaPtr, Root, Seg, Value, rna_func};
 use frap_scene::{FuncArgs, Host};
 
 use super::_common::{arg_ptr, internal, mesh_of, report_error};
+use super::mesh_set_sharp_from_angle::keep_active_index;
 
 #[rna_func(srna = "AttributeGroupMesh", func = "remove")]
 fn attribute_group_mesh_remove(
@@ -54,10 +56,12 @@ fn attribute_group_mesh_remove(
         _ => None,
     }
     .ok_or_else(|| internal("attributes.remove(): cannot name the attribute"))?;
-    main.meshes
+    let mesh = main
+        .meshes
         .get_mut(me, log)
-        .ok_or_else(|| internal("attributes.remove(): the mesh was removed"))?
-        .remove_attribute(&name)
-        .map_err(|e| report_error(e.message()))?;
+        .ok_or_else(|| internal("attributes.remove(): the mesh was removed"))?;
+    let mut removed = Ok(());
+    keep_active_index(mesh, |m| removed = m.remove_attribute(&name));
+    removed.map_err(|e| report_error(e.message()))?;
     Ok(Value::None)
 }

@@ -174,6 +174,8 @@ pub(crate) fn rename(m: &mut Mesh, pos: usize, new: SmolStr) {
         &mut m.uv_active_render,
         &mut m.color_active,
         &mut m.color_default,
+        // `attributes_active_index` does not move: the renamed attribute stays active.
+        &mut m.attributes_active,
     ] {
         if active.as_deref() == Some(old.as_str()) {
             *active = Some(new.clone());

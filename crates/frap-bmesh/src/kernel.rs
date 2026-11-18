@@ -74,6 +74,7 @@ impl BMesh {
             }
         }
         self.index.dirty |= ElemTypes::VERT;
+        self.lnor_spacearr.dirty_all = true;
         VertId(s)
     }
     fn alloc_edge(&mut self, v1: VertId, v2: VertId) -> EdgeId {
@@ -90,6 +91,7 @@ impl BMesh {
         set_index(&mut self.index.edge, i, -1);
         self.oflags.clear_slot(1, i);
         self.index.dirty |= ElemTypes::EDGE;
+        self.lnor_spacearr.dirty_all = true;
         EdgeId(s)
     }
     fn alloc_loop(&mut self, v: VertId, e: EdgeId, f: FaceId) -> LoopId {
@@ -108,6 +110,7 @@ impl BMesh {
         self.ldata.ensure_slots(i + 1);
         set_index(&mut self.index.loops, i, -1);
         self.index.dirty |= ElemTypes::LOOP;
+        self.lnor_spacearr.dirty_all = true;
         LoopId(s)
     }
     /// `bm_face_create__internal`.
@@ -124,6 +127,7 @@ impl BMesh {
         set_index(&mut self.index.face, i, -1);
         self.oflags.clear_slot(2, i);
         self.index.dirty |= ElemTypes::FACE;
+        self.lnor_spacearr.dirty_all = true;
         FaceId(s)
     }
 
@@ -132,12 +136,14 @@ impl BMesh {
         self.select_history_remove(BMElem::Vert(v));
         self.verts.free(v.0);
         self.index.dirty |= ElemTypes::VERT;
+        self.lnor_spacearr.dirty_all = true;
     }
     /// `bm_kill_only_edge`.
     fn kill_only_edge(&mut self, e: EdgeId) {
         self.select_history_remove(BMElem::Edge(e));
         self.edges.free(e.0);
         self.index.dirty |= ElemTypes::EDGE;
+        self.lnor_spacearr.dirty_all = true;
     }
     /// `bm_kill_only_face`.
     fn kill_only_face(&mut self, f: FaceId) {
@@ -147,11 +153,13 @@ impl BMesh {
         self.select_history_remove(BMElem::Face(f));
         self.faces.free(f.0);
         self.index.dirty |= ElemTypes::FACE;
+        self.lnor_spacearr.dirty_all = true;
     }
     /// `bm_kill_only_loop`.
     fn kill_only_loop(&mut self, l: LoopId) {
         self.loops.free(l.0);
         self.index.dirty |= ElemTypes::LOOP;
+        self.lnor_spacearr.dirty_all = true;
     }
 
     // ================================================================ disk / radial cycles
@@ -1610,6 +1618,7 @@ impl BMesh {
     /// `bmesh_edit_end`.
     pub fn bmesh_edit_end(&mut self, type_flag: OpTypeFlag) {
         if type_flag.contains(OpTypeFlag::NORMALS_CALC) {
+            self.lnor_spacearr.dirty_all = true;
             self.normals_update();
         }
         let keep = !type_flag.contains(OpTypeFlag::SELECT_VALIDATE);
@@ -1623,6 +1632,9 @@ impl BMesh {
         }
         if let Some(h) = saved {
             self.select_history = h;
+        }
+        if type_flag.contains(OpTypeFlag::INVALIDATE_CLNOR_ALL) {
+            self.lnor_spacearr.dirty_all = true;
         }
     }
 }

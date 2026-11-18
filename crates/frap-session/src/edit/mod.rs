@@ -96,6 +96,7 @@ fn graft_non_geometry(m: &mut Mesh, original: &Mesh) {
     m.uv_active_render = original.uv_active_render.clone();
     m.color_active = original.color_active.clone();
     m.color_default = original.color_default.clone();
+    m.attributes_active = original.attributes_active.clone();
     m.texspace = original.texspace;
 }
 
