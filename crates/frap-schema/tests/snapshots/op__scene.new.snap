@@ -1,0 +1,85 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "scene.new",
+  "bl_idname": "SCENE_OT_new",
+  "label": "New Scene",
+  "description": "Add new scene by type",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Type",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "NEW",
+      "enum_items": [
+        {
+          "identifier": "NEW",
+          "name": "New",
+          "description": "Add a new, empty scene with default settings",
+          "value": 0
+        },
+        {
+          "identifier": "EMPTY",
+          "name": "Copy Settings",
+          "description": "Add a new, empty scene, and copy settings from the current scene",
+          "value": 1
+        },
+        {
+          "identifier": "LINK_COPY",
+          "name": "Linked Copy",
+          "description": "Link in the collections from the current scene (shallow copy)",
+          "value": 2
+        },
+        {
+          "identifier": "FULL_COPY",
+          "name": "Full Copy",
+          "description": "Make a full copy of the current scene",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M3",
+    "extension": false,
+    "notes": [
+      "the new scene becomes bpy.context.window.scene; result.scene is the new scene"
+    ]
+  }
+}
