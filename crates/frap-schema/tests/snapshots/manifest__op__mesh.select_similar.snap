@@ -1,0 +1,259 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "idname": "mesh.select_similar",
+  "bl_idname": "MESH_OT_select_similar",
+  "label": "Select Similar",
+  "description": "Select similar vertices, edges or faces by property types",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": null,
+    "text": "Blender 5.2's poll passes in: C (Edit Mode on a mesh)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Type",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "VERT_NORMAL",
+      "enum_items": [
+        {
+          "identifier": "VERT_NORMAL",
+          "name": "Normal",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "VERT_FACES",
+          "name": "Amount of Adjacent Faces",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "VERT_GROUPS",
+          "name": "Vertex Groups",
+          "description": "",
+          "value": 2
+        },
+        {
+          "identifier": "VERT_EDGES",
+          "name": "Amount of Connecting Edges",
+          "description": "",
+          "value": 3
+        },
+        {
+          "identifier": "VERT_CREASE",
+          "name": "Vertex Crease",
+          "description": "",
+          "value": 4
+        },
+        {
+          "identifier": "EDGE_LENGTH",
+          "name": "Length",
+          "description": "",
+          "value": 101
+        },
+        {
+          "identifier": "EDGE_DIR",
+          "name": "Direction",
+          "description": "",
+          "value": 102
+        },
+        {
+          "identifier": "EDGE_FACES",
+          "name": "Amount of Faces Around an Edge",
+          "description": "",
+          "value": 103
+        },
+        {
+          "identifier": "EDGE_FACE_ANGLE",
+          "name": "Face Angles",
+          "description": "",
+          "value": 104
+        },
+        {
+          "identifier": "EDGE_CREASE",
+          "name": "Crease",
+          "description": "",
+          "value": 105
+        },
+        {
+          "identifier": "EDGE_BEVEL",
+          "name": "Bevel",
+          "description": "",
+          "value": 106
+        },
+        {
+          "identifier": "EDGE_SEAM",
+          "name": "Seam",
+          "description": "",
+          "value": 107
+        },
+        {
+          "identifier": "EDGE_SHARP",
+          "name": "Sharpness",
+          "description": "",
+          "value": 108
+        },
+        {
+          "identifier": "EDGE_FREESTYLE",
+          "name": "Freestyle Edge Marks",
+          "description": "",
+          "value": 109
+        },
+        {
+          "identifier": "FACE_MATERIAL",
+          "name": "Material",
+          "description": "",
+          "value": 201
+        },
+        {
+          "identifier": "FACE_AREA",
+          "name": "Area",
+          "description": "",
+          "value": 202
+        },
+        {
+          "identifier": "FACE_SIDES",
+          "name": "Polygon Sides",
+          "description": "",
+          "value": 203
+        },
+        {
+          "identifier": "FACE_PERIMETER",
+          "name": "Perimeter",
+          "description": "",
+          "value": 204
+        },
+        {
+          "identifier": "FACE_NORMAL",
+          "name": "Normal",
+          "description": "",
+          "value": 205
+        },
+        {
+          "identifier": "FACE_COPLANAR",
+          "name": "Coplanar",
+          "description": "",
+          "value": 206
+        },
+        {
+          "identifier": "FACE_SMOOTH",
+          "name": "Flat/Smooth",
+          "description": "",
+          "value": 207
+        },
+        {
+          "identifier": "FACE_FREESTYLE",
+          "name": "Freestyle Face Marks",
+          "description": "",
+          "value": 208
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "compare",
+      "name": "Compare",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "EQUAL",
+      "enum_items": [
+        {
+          "identifier": "EQUAL",
+          "name": "Equal",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "GREATER",
+          "name": "Greater",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "LESS",
+          "name": "Less",
+          "description": "",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "threshold",
+      "name": "Threshold",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": 0,
+      "hard_max": 100000,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 5,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "not_implemented",
+    "tier": null,
+    "support": null,
+    "support_note": null,
+    "headless": null,
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "mesh.select_similar exists in Blender 5.2; frap implements it in M8 (OP_NOT_IMPLEMENTED until then)"
+    ]
+  }
+}

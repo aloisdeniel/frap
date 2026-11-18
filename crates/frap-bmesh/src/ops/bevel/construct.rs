@@ -345,8 +345,11 @@ impl Bevel {
 
         let mut vert_axis = [0.0f32; 3];
         if vertices {
-            // Modify the offset by the bevel weight if it is used.
-            if self.use_weights {
+            // Modify the offset by the vertex group or bevel weight if they are specified.
+            if let Some(w) = &self.vertex_group_weights {
+                let weight = w.get(v.slot()).copied().unwrap_or(0.0);
+                self.bev_mut(bv).offset *= weight;
+            } else if self.use_weights {
                 let weight = self
                     .bweight_vert
                     .map_or(0.0, |li| float_at(&bm.vdata, li, v.slot()));
