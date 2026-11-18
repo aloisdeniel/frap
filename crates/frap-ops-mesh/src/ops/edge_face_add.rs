@@ -155,7 +155,16 @@ fn tricky_finalize_sel(bm: &mut BMesh, ele_desel: BMElem, f: FaceId) {
 }
 
 #[operator(poll = poll::EDITMESH, tier = T1)]
-fn exec(cx: &mut OpCtx, _p: mesh::EdgeFaceAdd) -> OpResult {
+fn exec(cx: &mut OpCtx, p: mesh::EdgeFaceAdd) -> OpResult {
+    edbm::with_deps(
+        cx,
+        "mesh.edge_face_add",
+        "bmesh.ops.dissolve_faces (WP 2.7)",
+        move |cx| run(cx, p),
+    )
+}
+
+fn run(cx: &mut OpCtx, _p: mesh::EdgeFaceAdd) -> OpResult {
     let mut changed_multi = false;
     for (ob, me) in helpers::iter_edit_meshes(cx) {
         let any = edbm::with_bm(cx, me, |bm| {

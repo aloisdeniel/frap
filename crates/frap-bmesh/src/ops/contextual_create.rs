@@ -28,9 +28,11 @@
 
 pub mod attribute_fill;
 pub mod bli;
+pub mod connect_islands;
 pub mod construct;
 pub mod edgeloop_fill;
 pub mod edgenet;
+pub mod kdopbvh;
 pub mod split_edgenet;
 
 use rustc_hash::FxHashSet;

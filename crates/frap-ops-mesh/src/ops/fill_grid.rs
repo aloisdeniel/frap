@@ -20,7 +20,7 @@
 use frap_bmesh::ops::bridge_loops::edgeloop;
 use frap_bmesh::ops::contextual_create::{bli, construct};
 use frap_bmesh::ops::grid_fill::{GridFillIn, grid_fill};
-use frap_bmesh::{BMElem, BMesh, EdgeId, ElemFlag, FaceId, VertId};
+use frap_bmesh::{BMElem, BMesh, BmError, EdgeId, ElemFlag, FaceId, VertId};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;
@@ -169,9 +169,9 @@ fn faces_select_to_tag(bm: &mut BMesh) -> bool {
 
 // Ported from blender/source/blender/editors/mesh/editmesh_tools.cc
 // (edbm_fill_grid_split_join_init).
-fn split_join_init(bm: &mut BMesh) -> Option<SplitJoin> {
+fn split_join_init(bm: &mut BMesh) -> Result<Option<SplitJoin>, BmError> {
     if !faces_select_to_tag(bm) {
-        return None;
+        return Ok(None);
     }
     let mut geom: Vec<BMElem> = Vec::new();
     geom.extend(bm.vert_ids().into_iter().filter(|&v| bm.vert(v).flag.contains(ElemFlag::TAG)).map(BMElem::Vert));
@@ -202,8 +202,7 @@ fn split_join_init(bm: &mut BMesh) -> Option<SplitJoin> {
             geom,
             ..Default::default()
         },
-    )
-    .ok()?;
+    )?;
     let new_edges: Vec<EdgeId> = out
         .geom
         .iter()
@@ -250,7 +249,7 @@ fn split_join_init(bm: &mut BMesh) -> Option<SplitJoin> {
         .into_iter()
         .filter(|&f| bm.face(f).flag.contains(ElemFlag::SELECT))
         .collect();
-    Some(SplitJoin { weld, island })
+    Ok(Some(SplitJoin { weld, island }))
 }
 
 // Ported from blender/source/blender/editors/mesh/editmesh_tools.cc
@@ -293,6 +292,15 @@ fn split_join_finish(bm: &mut BMesh, sj: SplitJoin, changed: bool) {
 
 #[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::FillGrid) -> OpResult {
+    edbm::with_deps(
+        cx,
+        "mesh.fill_grid",
+        "bmesh.ops.split (WP 2.10), bmesh.ops.reverse_faces (WP 2.9) or bmesh.ops.weld_verts (WP 2.7)",
+        move |cx| run(cx, p),
+    )
+}
+
+fn run(cx: &mut OpCtx, p: mesh::FillGrid) -> OpResult {
     let use_interp_simple = p.use_interp_simple.value;
     let span_in = p.span.is_set.then_some(p.span.value);
     let offset = p.offset.value;
@@ -309,11 +317,13 @@ fn exec(cx: &mut OpCtx, p: mesh::FillGrid) -> OpResult {
         let use_smooth = edbm::smooth_get(bm);
         let mut split_join = None;
         if tf != 0 {
-            split_join = split_join_init(bm);
-            if split_join.is_none() {
-                continue;
+            let r = split_join_init(bm);
+            match edbm::finish(cx, r)? {
+                Some(Some(sj)) => split_join = Some(sj),
+                _ => continue,
             }
         }
+        let bm = cx.bmesh_mut(me)?;
         let use_prepare = fill_grid_prepare(bm, offset, span_in).is_some();
         let flag = if use_prepare { ElemFlag::TAG } else { ElemFlag::SELECT };
         let edges = edbm::edges_with(bm, flag);

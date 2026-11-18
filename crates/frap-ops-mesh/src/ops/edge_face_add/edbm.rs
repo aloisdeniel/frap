@@ -101,6 +101,35 @@ pub(crate) fn faces_of(g: &[BMElem]) -> Vec<BMElem> {
     g.iter().copied().filter(|e| matches!(e, BMElem::Face(_))).collect()
 }
 
+/// Runs an operator body whose Blender code path calls bmesh ops owned by other M2 work
+/// packages (`deps`, e.g. `bmesh.ops.join_triangles (WP 2.10)`). While one of them is still a
+/// W0 stub (`todo!()`), the statement fails with `NotImplementedError` naming the missing op
+/// (and is rolled back) instead of an `INTERNAL` panic; any other panic propagates.
+pub(crate) fn with_deps<T>(
+    cx: &mut OpCtx,
+    op: &str,
+    deps: &str,
+    body: impl FnOnce(&mut OpCtx) -> Result<T, OpError>,
+) -> Result<T, OpError> {
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| body(cx))) {
+        Ok(r) => r,
+        Err(payload) => {
+            let msg = payload
+                .downcast_ref::<String>()
+                .map(String::as_str)
+                .or_else(|| payload.downcast_ref::<&str>().copied())
+                .unwrap_or("");
+            if msg.contains("not yet implemented") {
+                Err(OpError::NotImplemented(format!(
+                    "{op}: this code path needs {deps}, not implemented in this build yet"
+                )))
+            } else {
+                std::panic::resume_unwind(payload)
+            }
+        }
+    }
+}
+
 
 /// `EDBM_op_finish(do_report = true)` for an op result: `Ok(Some(out))` when it ran,
 /// `Ok(None)` after a `BMO_ERROR_CANCEL` (reported as INFO), `Err` for a fatal error.

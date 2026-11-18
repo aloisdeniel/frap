@@ -5,11 +5,10 @@
 //! Python signature (docs/research/blender-ops-mesh-uv.md, Appendix C):
 //! `bmesh.ops.convex_hull(bmesh, input=[], use_existing_faces=False)`.
 //!
-//! The hull itself comes from an incremental 3D convex hull in `f64` (`hull3d`, in the input
-//! vertex order) instead of Bullet's `btConvexHullComputer`: for points in general position
-//! the hull triangles are the same; where four or more hull points are coplanar Blender fans
-//! Bullet's polygon from its first vertex while frap keeps its own triangulation of that
-//! facet (deviation recorded in `docs/deviations.md`). Everything after the hull is Blender's.
+//! The hull comes from a port of Bullet's `btConvexHullComputer` (`convex_hull/bullet.rs`, what
+//! Blender calls through `plConvexHullCompute`): its planar polygons (two-sided for a planar
+//! input) are fanned from their first vertex into hull triangles, exactly as
+//! `hull_from_bullet` does. Everything after the hull is Blender's.
 //!
 //! **Create/kill order**: one face per hull triangle (`BM_face_create_verts`,
 //! `BM_CREATE_NO_DOUBLE`, edges created in `(v0, v1), (v1, v2), (v2, v0)` order, attributes from
@@ -21,7 +20,7 @@
 //!
 //! Operator type flags: `NORMALS_CALC | SELECT_FLUSH | SELECT_VALIDATE`.
 
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::FxHashSet;
 
 use crate::ops::contextual_create::construct;
 use crate::types::{CreateFlag, OpTypeFlag};
@@ -61,114 +60,7 @@ const HULL_FLAG_OUTPUT_GEOM: u16 = 1 << 2;
 const HULL_FLAG_DEL: u16 = 1 << 3;
 const HULL_FLAG_HOLE: u16 = 1 << 4;
 
-type P = [f64; 3];
-
-fn sub(a: P, b: P) -> P {
-    [a[0] - b[0], a[1] - b[1], a[2] - b[2]]
-}
-fn cross(a: P, b: P) -> P {
-    [
-        a[1] * b[2] - a[2] * b[1],
-        a[2] * b[0] - a[0] * b[2],
-        a[0] * b[1] - a[1] * b[0],
-    ]
-}
-fn dot(a: P, b: P) -> f64 {
-    a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
-}
-
-/// Incremental convex hull: outward-wound triangles over `pts` indices; `None` when the points
-/// do not span a volume.
-pub fn hull3d(pts: &[P]) -> Option<Vec<[usize; 3]>> {
-    let n = pts.len();
-    if n < 4 {
-        return None;
-    }
-    let mut scale = 0.0f64;
-    for p in pts {
-        for c in p {
-            scale = scale.max(c.abs());
-        }
-    }
-    let eps = 1e-9 * scale.max(1.0);
-    // Initial tetrahedron: first point, farthest from it, farthest from that line, farthest
-    // from that plane.
-    let i0 = 0usize;
-    let i1 = (0..n).max_by(|&a, &b| {
-        let da = dot(sub(pts[a], pts[i0]), sub(pts[a], pts[i0]));
-        let db = dot(sub(pts[b], pts[i0]), sub(pts[b], pts[i0]));
-        da.total_cmp(&db).then(b.cmp(&a))
-    })?;
-    let line = sub(pts[i1], pts[i0]);
-    let i2 = (0..n).max_by(|&a, &b| {
-        let ca = cross(line, sub(pts[a], pts[i0]));
-        let cb = cross(line, sub(pts[b], pts[i0]));
-        dot(ca, ca).total_cmp(&dot(cb, cb)).then(b.cmp(&a))
-    })?;
-    let nrm = cross(line, sub(pts[i2], pts[i0]));
-    if dot(nrm, nrm).sqrt() <= eps * eps.max(1e-300) {
-        return None;
-    }
-    let i3 = (0..n).max_by(|&a, &b| {
-        let da = dot(nrm, sub(pts[a], pts[i0])).abs();
-        let db = dot(nrm, sub(pts[b], pts[i0])).abs();
-        da.total_cmp(&db).then(b.cmp(&a))
-    })?;
-    let vol = dot(nrm, sub(pts[i3], pts[i0]));
-    let nl = dot(nrm, nrm).sqrt();
-    if (vol / nl).abs() <= eps {
-        return None;
-    }
-    let mut faces: Vec<[usize; 3]> = if vol < 0.0 {
-        vec![[i0, i1, i2], [i0, i3, i1], [i1, i3, i2], [i2, i3, i0]]
-    } else {
-        vec![[i0, i2, i1], [i0, i1, i3], [i1, i2, i3], [i2, i0, i3]]
-    };
-    let outside = |f: &[usize; 3], p: P| -> f64 {
-        let nn = cross(sub(pts[f[1]], pts[f[0]]), sub(pts[f[2]], pts[f[0]]));
-        let l = dot(nn, nn).sqrt();
-        if l == 0.0 {
-            return 0.0;
-        }
-        dot(nn, sub(p, pts[f[0]])) / l
-    };
-    for (pi, &p) in pts.iter().enumerate() {
-        if [i0, i1, i2, i3].contains(&pi) {
-            continue;
-        }
-        let visible: Vec<bool> = faces.iter().map(|f| outside(f, p) > eps).collect();
-        if !visible.iter().any(|&v| v) {
-            continue;
-        }
-        // Horizon: directed edges of visible faces whose reverse belongs to a hidden face.
-        let mut edge_owner: FxHashMap<(usize, usize), usize> = FxHashMap::default();
-        for (fi, f) in faces.iter().enumerate() {
-            for k in 0..3 {
-                edge_owner.insert((f[k], f[(k + 1) % 3]), fi);
-            }
-        }
-        let mut new_faces: Vec<[usize; 3]> = Vec::new();
-        for (fi, f) in faces.iter().enumerate() {
-            if !visible[fi] {
-                new_faces.push(*f);
-            }
-        }
-        for (fi, f) in faces.iter().enumerate() {
-            if !visible[fi] {
-                continue;
-            }
-            for k in 0..3 {
-                let (a, b) = (f[k], f[(k + 1) % 3]);
-                let other = edge_owner.get(&(b, a)).copied();
-                if other.is_none_or(|o| !visible[o]) {
-                    new_faces.push([a, b, pi]);
-                }
-            }
-        }
-        faces = new_faces;
-    }
-    Some(faces)
-}
+pub mod bullet;
 
 /// Runs `convex_hull` on `bm`. `Requires at least three vertices` is a [`BmError::Cancel`].
 pub fn convex_hull(bm: &mut BMesh, i: &ConvexHullIn) -> Result<ConvexHullOut, BmError> {
@@ -215,19 +107,21 @@ fn exec(bm: &mut BMesh, i: &ConvexHullIn) -> Result<ConvexHullOut, BmError> {
             _ => bm.oflag_enable(g, HULL_FLAG_INPUT),
         }
     }
-    // `hull_from_bullet`.
-    let pts: Vec<P> = in_verts
-        .iter()
-        .map(|&v| bm.vert(v).co.map(f64::from))
-        .collect();
+    // `hull_from_bullet`: Bullet's polygons fanned from their first vertex.
+    let coords: Vec<[f32; 3]> = in_verts.iter().map(|&v| bm.vert(v).co).collect();
+    let hull = bullet::compute(&coords);
+    let hull_verts: Vec<VertId> = hull.original_index.iter().map(|&k| in_verts[k]).collect();
     let mut tris: Vec<HullTriangle> = Vec::new();
-    if let Some(faces) = hull3d(&pts) {
-        for f in faces {
-            let v = f.map(|k| in_verts[k]);
-            for &x in &v {
-                bm.oflag_disable(x, HULL_FLAG_INTERIOR_ELE);
+    for fvi in &hull.faces {
+        if fvi.len() > 2 {
+            for j in 2..fvi.len() {
+                let v = [hull_verts[fvi[0]], hull_verts[fvi[j - 1]], hull_verts[fvi[j]]];
+                // `hull_add_triangle`.
+                for &x in &v {
+                    bm.oflag_disable(x, HULL_FLAG_INTERIOR_ELE);
+                }
+                tris.push(HullTriangle { v, skip: false });
             }
-            tris.push(HullTriangle { v, skip: false });
         }
     }
     // `hull_final_edges`.
@@ -383,25 +277,4 @@ fn exec(bm: &mut BMesh, i: &ConvexHullIn) -> Result<ConvexHullOut, BmError> {
         geom_holes: collect(bm, HULL_FLAG_HOLE),
         geom: collect(bm, HULL_FLAG_OUTPUT_GEOM),
     })
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn cube_points_give_twelve_triangles() {
-        let mut pts = Vec::new();
-        for x in [-1.0, 1.0] {
-            for y in [-1.0, 1.0] {
-                for z in [-1.0, 1.0] {
-                    pts.push([x, y, z]);
-                }
-            }
-        }
-        pts.push([0.0, 0.0, 0.0]);
-        let f = hull3d(&pts).unwrap();
-        assert_eq!(f.len(), 12);
-        assert!(f.iter().all(|t| !t.contains(&8)));
-    }
 }

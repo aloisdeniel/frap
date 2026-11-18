@@ -15,7 +15,16 @@ use frap_spec_ops_mesh::mesh;
 use super::edge_face_add::edbm;
 
 #[operator(poll = poll::EDITMESH, tier = T2)]
-fn exec(cx: &mut OpCtx, _p: mesh::VertConnectConcave) -> OpResult {
+fn exec(cx: &mut OpCtx, p: mesh::VertConnectConcave) -> OpResult {
+    edbm::with_deps(
+        cx,
+        "mesh.vert_connect_concave",
+        "bmesh.ops.triangulate (WP 2.10)",
+        move |cx| run(cx, p),
+    )
+}
+
+fn run(cx: &mut OpCtx, _p: mesh::VertConnectConcave) -> OpResult {
     for (_, me) in helpers::iter_edit_meshes(cx) {
         if edbm::with_bm(cx, me, |bm| bm.selected_counts().2) == Some(0) {
             continue;

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.convex_hull(delete_unused=True, use_existing_faces=True, make_holes=False,
-//! join_triangles=True, face_threshold=40°, shape_threshold=40°, …)`, tier T2
+//! join_triangles=True, face_threshold=40°, shape_threshold=40°, …)`, tier T1
 //! (`tests/golden/cases/edit/create/convex_hull*.py`). Port of `edbm_convex_hull_exec`
 //! (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4, GPL-2.0-or-later) over
 //! `bmesh.ops.convex_hull`.
@@ -17,8 +17,17 @@ use frap_spec_ops_mesh::mesh;
 
 use super::edge_face_add::edbm;
 
-#[operator(poll = poll::EDITMESH, tier = T2)]
+#[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::ConvexHull) -> OpResult {
+    edbm::with_deps(
+        cx,
+        "mesh.convex_hull",
+        "bmesh.ops.join_triangles (WP 2.10)",
+        move |cx| run(cx, p),
+    )
+}
+
+fn run(cx: &mut OpCtx, p: mesh::ConvexHull) -> OpResult {
     for (_, me) in helpers::iter_edit_meshes(cx) {
         if edbm::with_bm(cx, me, |bm| bm.selected_counts().0) == Some(0) {
             continue;

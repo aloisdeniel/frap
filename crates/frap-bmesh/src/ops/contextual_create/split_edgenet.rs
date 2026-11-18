@@ -8,8 +8,8 @@
 //! the first new face's loops (`bmesh_face_swap_data`) and that face is killed, so the
 //! original face id survives as the first piece.
 //!
-//! The island connection of `BM_face_split_edgenet_connect_islands` (nets not touching the
-//! face boundary) is not ported: such nets are left as wire edges.
+//! Nets not touching the face boundary are first linked to it by
+//! `BM_face_split_edgenet_connect_islands` (`connect_islands.rs`), as Blender's callers do.
 
 use rustc_hash::FxHashSet;
 
