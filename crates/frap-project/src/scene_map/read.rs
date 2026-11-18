@@ -966,6 +966,7 @@ fn mesh(me: &mut Mesh, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
     o.opt_smol("uv_active_render", &mut m.uv_active_render)?;
     o.opt_smol("color_active", &mut m.color_active)?;
     o.opt_smol("color_default", &mut m.color_default)?;
+    o.opt_smol("attributes_active", &mut m.attributes_active)?;
     o.bool("use_auto_texspace", &mut m.texspace.auto)?;
     o.arr("texspace_location", &mut m.texspace.location)?;
     o.arr("texspace_size", &mut m.texspace.size)?;

@@ -517,6 +517,9 @@ impl<'a> Writer<'a> {
         m.insert("uv_active_render".into(), o(&me.uv_active_render));
         m.insert("color_active".into(), o(&me.color_active));
         m.insert("color_default".into(), o(&me.color_default));
+        if let Some(a) = &me.attributes_active {
+            m.insert("attributes_active".into(), json!(a.as_str()));
+        }
         m.insert("use_auto_texspace".into(), json!(me.texspace.auto));
         m.insert("texspace_location".into(), f32s(&me.texspace.location));
         m.insert("texspace_size".into(), f32s(&me.texspace.size));

@@ -366,6 +366,10 @@ pub struct Mesh {
     pub color_active: Option<SmolStr>,
     /// `color_attributes.default_color_name`
     pub color_default: Option<SmolStr>,
+    /// `attributes.active`: the active attribute's name (Blender keeps an index,
+    /// `Mesh.attributes_active_index`, and re-resolves it by name across Edit Mode; the
+    /// operators that move it emulate the index arithmetic, WP 2.9). `None`: no active one.
+    pub attributes_active: Option<SmolStr>,
     /// Texture space.
     pub texspace: TexSpace,
     /// OnceLock caches; never persisted, compared or cloned.
@@ -423,6 +427,7 @@ impl Mesh {
             uv_active_render: None,
             color_active: None,
             color_default: None,
+            attributes_active: None,
             texspace: TexSpace::default(),
             runtime: MeshRuntime::default(),
         }

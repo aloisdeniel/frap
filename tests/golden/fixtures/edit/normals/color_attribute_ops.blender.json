@@ -1,0 +1,282 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 6,
+      "ok": true
+    },
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": false
+    },
+    {
+      "line": 12,
+      "ok": false
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.geometry.color_attribute_duplicate.poll() Operation is not allowed in edit mode"
+    },
+    {
+      "line": 25,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.geometry.color_attribute_convert.poll() Operation is not allowed in edit mode"
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.geometry.color_attribute_remove.poll() failed, context is incorrect"
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.68592066, -0.32401347, 0.6515582, 7.3588915],
+        [0.72767633, 0.30542085, -0.6141704, -6.925791],
+        [0.0, 0.89539564, 0.4452714, 4.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.3588915, -6.925791, 4.958309],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086465, -0.7711008, 0.5663932, 4.0762453],
+        [0.95517117, -0.19988336, 0.2183912, 1.005454],
+        [-0.05518906, 0.60452473, 0.79467225, 5.903862],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0762453, 1.005454, 5.903862],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "XA": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "EDIT"
+    }
+  },
+  "meshes": {
+    "Cube": {
+      "positions": [
+        [1.0, 1.0, 1.0],
+        [1.0, 1.0, -1.0],
+        [1.0, -1.0, 1.0],
+        [1.0, -1.0, -1.0],
+        [-1.0, 1.0, 1.0],
+        [-1.0, 1.0, -1.0],
+        [-1.0, -1.0, 1.0],
+        [-1.0, -1.0, -1.0]
+      ],
+      "edges": [
+        [5, 7],
+        [1, 5],
+        [0, 1],
+        [7, 6],
+        [2, 3],
+        [4, 5],
+        [2, 6],
+        [0, 2],
+        [7, 3],
+        [6, 4],
+        [4, 0],
+        [3, 1]
+      ],
+      "faces": [
+        [0, 4, 6, 2],
+        [3, 2, 6, 7],
+        [7, 6, 4, 5],
+        [5, 1, 3, 7],
+        [1, 0, 2, 3],
+        [5, 4, 0, 1]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [-1.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0],
+        [-1.0, 0.0, 0.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 1.0, 0.0]
+      ],
+      "uv_layers": {
+        "UVMap": [
+          [0.625, 0.5],
+          [0.875, 0.5],
+          [0.875, 0.75],
+          [0.625, 0.75],
+          [0.375, 0.75],
+          [0.625, 0.75],
+          [0.625, 1.0],
+          [0.375, 1.0],
+          [0.375, 0.0],
+          [0.625, 0.0],
+          [0.625, 0.25],
+          [0.375, 0.25],
+          [0.125, 0.5],
+          [0.375, 0.5],
+          [0.375, 0.75],
+          [0.125, 0.75],
+          [0.375, 0.5],
+          [0.625, 0.5],
+          [0.625, 0.75],
+          [0.375, 0.75],
+          [0.375, 0.25],
+          [0.625, 0.25],
+          [0.625, 0.5],
+          [0.375, 0.5]
+        ]
+      },
+      "attributes": {
+        "sharp_face": {
+          "data": [true, true, true, true, true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": {
+        "edge": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+        "face": [0, 1, 2, 3, 4, 5],
+        "vert": [0, 1, 2, 3, 4, 5, 6, 7]
+      },
+      "active": null,
+      "select_history": []
+    }
+  },
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "XA",
+    "selected": ["XA"],
+    "mode": "EDIT_MESH",
+    "select_mode": [true, false, false],
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}
