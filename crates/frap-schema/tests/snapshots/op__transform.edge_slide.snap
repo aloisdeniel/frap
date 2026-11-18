@@ -1,0 +1,524 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "transform.edge_slide",
+  "bl_idname": "TRANSFORM_OT_edge_slide",
+  "label": "Edge Slide",
+  "description": "Slide an edge loop along a mesh",
+  "bl_options": [
+    "BLOCKING",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "value",
+      "name": "Factor",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "FACTOR",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -10,
+      "hard_max": 10,
+      "soft_min": -1,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "single_side",
+      "name": "Single Side",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_even",
+      "name": "Even",
+      "description": "Make the edge loop match the shape of the adjacent edge loop",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "flipped",
+      "name": "Flipped",
+      "description": "When Even mode is active, flips between the two adjacent edge loops",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_clamp",
+      "name": "Clamp",
+      "description": "Clamp within the edge extents",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "mirror",
+      "name": "Mirror Editing",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "snap",
+      "name": "Use Snapping Options",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "snap_elements",
+      "name": "Snap to Elements",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": [
+        "INCREMENT"
+      ],
+      "enum_items": [
+        {
+          "identifier": "INCREMENT",
+          "name": "Increment",
+          "description": "Snap to increments",
+          "value": 256
+        },
+        {
+          "identifier": "GRID",
+          "name": "Grid",
+          "description": "Snap to grid",
+          "value": 128
+        },
+        {
+          "identifier": "VERTEX",
+          "name": "Vertex",
+          "description": "Snap to vertices",
+          "value": 5
+        },
+        {
+          "identifier": "EDGE",
+          "name": "Edge",
+          "description": "Snap to edges",
+          "value": 16
+        },
+        {
+          "identifier": "FACE",
+          "name": "Face",
+          "description": "Snap by projecting onto faces",
+          "value": 32
+        },
+        {
+          "identifier": "VOLUME",
+          "name": "Volume",
+          "description": "Snap to volume",
+          "value": 64
+        },
+        {
+          "identifier": "EDGE_MIDPOINT",
+          "name": "Edge Center",
+          "description": "Snap to the middle of edges",
+          "value": 2
+        },
+        {
+          "identifier": "EDGE_PERPENDICULAR",
+          "name": "Edge Perpendicular",
+          "description": "Snap to the nearest point on an edge",
+          "value": 8
+        },
+        {
+          "identifier": "FACE_MIDPOINT",
+          "name": "Face Center",
+          "description": "Snap to the middle of faces",
+          "value": 2048
+        },
+        {
+          "identifier": "FACE_PROJECT",
+          "name": "Face Project",
+          "description": "Snap by projecting onto faces",
+          "value": 1024
+        },
+        {
+          "identifier": "FACE_NEAREST",
+          "name": "Face Nearest",
+          "description": "Snap to nearest point on faces",
+          "value": 512
+        }
+      ],
+      "is_enum_flag": true,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ENUM_FLAG",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_snap_project",
+      "name": "Project Individual Elements",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "snap_target",
+      "name": "Snap Base",
+      "description": "Point on source that will snap to target",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "CLOSEST",
+      "enum_items": [
+        {
+          "identifier": "CLOSEST",
+          "name": "Closest",
+          "description": "Snap closest point onto target",
+          "value": 0
+        },
+        {
+          "identifier": "CENTER",
+          "name": "Center",
+          "description": "Snap transformation center onto target",
+          "value": 1
+        },
+        {
+          "identifier": "MEDIAN",
+          "name": "Median",
+          "description": "Snap median onto target",
+          "value": 2
+        },
+        {
+          "identifier": "ACTIVE",
+          "name": "Active",
+          "description": "Snap active onto target",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_snap_self",
+      "name": "Target: Include Active",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_snap_edit",
+      "name": "Target: Include Edit",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_snap_nonedit",
+      "name": "Target: Include Non-Edited",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_snap_selectable",
+      "name": "Target: Exclude Non-Selectable",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "snap_point",
+      "name": "Point",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "XYZ",
+      "unit": "NONE",
+      "array": [
+        3
+      ],
+      "default": [
+        0,
+        0,
+        0
+      ],
+      "hard_min": -340282350000000000000000000000000000000.0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": -340282350000000000000000000000000000000.0,
+      "soft_max": 340282350000000000000000000000000000000.0,
+      "precision": 3,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "correct_uv",
+      "name": "Correct UVs",
+      "description": "Correct UV coordinates when transforming",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "release_confirm",
+      "name": "Confirm on Release",
+      "description": "Always confirm operation when releasing button",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_accurate",
+      "name": "Accurate",
+      "description": "Use accurate transformation",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "snapping options change nothing; an unset correct_uv always means True (Blender remembers the last explicit value in the scene)",
+    "headless": "native",
+    "planned": "M2",
+    "extension": false,
+    "notes": [
+      "The slide side of value > 0 follows the factory 3D View (as a background Blender): every edge loop is oriented like the one whose slide segment projects closest to the region corner."
+    ]
+  }
+}
