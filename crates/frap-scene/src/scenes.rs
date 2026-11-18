@@ -29,7 +29,7 @@
 //!   modifier objects); copies of objects in Edit Mode are in Object Mode;
 //! - removing the window's scene shows the previous scene in `bpy.data.scenes`, else the next.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::OnceLock;
 
 use frap_rna::{CollectionId, IdAny, IdCode, IdRef, IdType, ObjectId, SceneId};
@@ -226,9 +226,10 @@ fn relink_in<T: IdType>(
         return;
     };
     let mut hits = Vec::new();
+    let mut seen = HashSet::new();
     t.for_each_ref(&mut |x| {
         if let Some(&n) = map.get(&x)
-            && !hits.contains(&(x, n))
+            && seen.insert(x)
         {
             hits.push((x, n));
         }
@@ -239,8 +240,8 @@ fn relink_in<T: IdType>(
         let mut objects: Vec<(IdAny, IdAny)> = map
             .iter()
             .filter(|(o, _)| o.code == IdCode::OB)
+            .filter(|(o, _)| !seen.contains(*o))
             .map(|(&o, &n)| (o, n))
-            .filter(|p| !hits.contains(p))
             .collect();
         objects.sort_by_key(|(o, _)| o.key);
         hits.extend(objects);
@@ -283,12 +284,40 @@ fn relink_layer_collections(
     }
 }
 
+/// `camera.dof.focus_object` is not a user reference (`IDWALK_CB_NOP`, so `Camera::for_each_ref`
+/// leaves it out) but `BKE_libblock_relink_to_newid` relinks it too (verified on 5.2.4: a full
+/// scene copy's camera focuses on the copied object).
+fn relink_camera_focus(
+    main: &mut Main,
+    a: IdAny,
+    map: &HashMap<IdAny, IdAny>,
+    log: &mut ChangeLog,
+) {
+    let Some(r) = a.typed::<frap_rna::CameraId>() else {
+        return;
+    };
+    let Some(to) = main
+        .cameras
+        .get(r)
+        .and_then(|c| c.fields.dof.focus_object)
+        .and_then(|f| map.get(&f).copied())
+    else {
+        return;
+    };
+    if let Some(c) = main.cameras.get_mut(r, log) {
+        c.fields.dof.focus_object = Some(to);
+    }
+}
+
 /// Applies `relink_in` to the ID `a`, whatever its type.
 fn relink_any(main: &mut Main, a: IdAny, map: &HashMap<IdAny, IdAny>, log: &mut ChangeLog) {
     match a.code {
         IdCode::OB => relink_in(&mut main.objects, a, map, log),
         IdCode::ME => relink_in(&mut main.meshes, a, map, log),
-        IdCode::CA => relink_in(&mut main.cameras, a, map, log),
+        IdCode::CA => {
+            relink_in(&mut main.cameras, a, map, log);
+            relink_camera_focus(main, a, map, log);
+        }
         IdCode::LA => relink_in(&mut main.lights, a, map, log),
         IdCode::AR => relink_in(&mut main.armatures, a, map, log),
         IdCode::PT => relink_in(&mut main.pointclouds, a, map, log),
@@ -720,5 +749,64 @@ mod tests {
         assert!(main.objects.find("Cube").is_some());
         remove_scene(&mut main, &mut win, z, &mut log).unwrap();
         assert!(remove_scene(&mut main, &mut win, a, &mut log).is_err());
+    }
+
+    #[test]
+    fn a_full_copy_camera_focuses_on_the_copied_object() {
+        // Verified on 5.2.4: `Camera.001.dof.focus_object` is `Cube.001`.
+        let (mut main, win) = startup::factory();
+        let mut log = ChangeLog::default();
+        let cube = main.objects.find("Cube").unwrap();
+        let ca = main.cameras.find("Camera").unwrap();
+        main.cameras
+            .get_mut(ca, &mut log)
+            .unwrap()
+            .fields
+            .dof
+            .focus_object = Some(cube.any());
+        copy_scene(&mut main, win.scene, SceneCopy::FullCopy, &mut log);
+        let ca1 = main.cameras.find("Camera.001").unwrap();
+        let focus = main.cameras.get(ca1).unwrap().fields.dof.focus_object;
+        assert_eq!(focus, main.objects.find("Cube.001").map(|r| r.any()));
+        // The original keeps its own.
+        let focus = main.cameras.get(ca).unwrap().fields.dof.focus_object;
+        assert_eq!(focus, Some(cube.any()));
+    }
+
+    #[test]
+    fn an_object_linked_into_another_scene_keeps_its_selection() {
+        // Verified on 5.2.4: the factory Cube linked into a new scene is selected there, the
+        // Camera is not; `select_set` on any view layer decides for the next link.
+        let (mut main, win) = startup::factory();
+        let mut log = ChangeLog::default();
+        let s2 = new_scene(&mut main, "S2", &mut log);
+        let s3 = new_scene(&mut main, "S3", &mut log);
+        let cube = main.objects.find("Cube").unwrap();
+        let cam = main.objects.find("Camera").unwrap();
+        let link = |main: &mut Main, s, ob, log: &mut ChangeLog| {
+            main.scenes
+                .get_mut(s, log)
+                .unwrap()
+                .collection
+                .objects
+                .push(ob);
+            layers::sync_all(main, log);
+        };
+        let selected = |main: &Main, s, ob| {
+            main.scenes.get(s).unwrap().view_layers[0]
+                .base(ob)
+                .is_some_and(|b| b.selected())
+        };
+        link(&mut main, s2, cube, &mut log);
+        link(&mut main, s2, cam, &mut log);
+        assert!(selected(&main, s2, cube));
+        assert!(!selected(&main, s2, cam));
+        // Deselected in the window's scene, still selected in S2: the last `select_set` wins.
+        layers::select_set(&mut main, &mut log, win.scene, 0, cube, false).unwrap();
+        link(&mut main, s3, cube, &mut log);
+        assert!(!selected(&main, s3, cube));
+        layers::select_set(&mut main, &mut log, s2, 0, cam, true).unwrap();
+        link(&mut main, s3, cam, &mut log);
+        assert!(selected(&main, s3, cam));
     }
 }

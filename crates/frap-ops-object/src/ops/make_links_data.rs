@@ -131,7 +131,11 @@ fn assign_material(
 
 /// `BKE_object_groups`: the collections holding `ob` (the scene collection first, then
 /// `bpy.data.collections`), in Blender's prepended (reversed) order.
-fn groups(main: &Main, scene: IdRef<SceneId>, ob: IdRef<ObjectId>) -> Vec<Option<IdRef<frap_rna::CollectionId>>> {
+fn groups(
+    main: &Main,
+    scene: IdRef<SceneId>,
+    ob: IdRef<ObjectId>,
+) -> Vec<Option<IdRef<frap_rna::CollectionId>>> {
     let mut out = Vec::new();
     if main
         .scenes
@@ -163,7 +167,12 @@ fn coll_mut<'m>(
 
 /// `BKE_object_link_modifiers`: copies of the source modifiers the target supports
 /// (`BKE_object_support_modifier_type_check`, no Hook or Collision).
-fn link_modifiers(main: &mut Main, src: IdRef<ObjectId>, dst: IdRef<ObjectId>, log: &mut ChangeLog) {
+fn link_modifiers(
+    main: &mut Main,
+    src: IdRef<ObjectId>,
+    dst: IdRef<ObjectId>,
+    log: &mut ChangeLog,
+) {
     use frap_modifiers::{ModTypeFlags, ModifierType};
     let Some(s) = main.objects.get(src) else {
         return;
@@ -229,7 +238,9 @@ fn exec(cx: &mut OpCtx, p: object::MakeLinksData) -> OpResult {
     let ty = p.r#type.value;
     let (scene, src, dsts) = {
         let c = cx.ctx();
-        let src = c.active_object().ok_or_else(|| OpError::Runtime("no active object".into()))?;
+        let src = c
+            .active_object()
+            .ok_or_else(|| OpError::Runtime("no active object".into()))?;
         (c.win.scene, src, c.selected_editable_objects())
     };
     let src_groups = if ty == Type::Groups {
@@ -360,9 +371,19 @@ mod tests {
             o.modifiers = vec![modifier("Old", ModifierType::Array)];
         }
         link_modifiers(&mut main, src, cube, &mut log);
-        let names: Vec<&str> = main.objects.get(cube).unwrap().modifiers.iter().map(|m| m.name.as_str()).collect();
+        let names: Vec<&str> = main
+            .objects
+            .get(cube)
+            .unwrap()
+            .modifiers
+            .iter()
+            .map(|m| m.name.as_str())
+            .collect();
         assert_eq!(names, ["Sub", "GN"]);
-        assert_eq!(main.objects.get(cube).unwrap().modifiers[0].persistent_uid, 7);
+        assert_eq!(
+            main.objects.get(cube).unwrap().modifiers[0].persistent_uid,
+            7
+        );
         // A light takes no modifier.
         link_modifiers(&mut main, src, light, &mut log);
         assert!(main.objects.get(light).unwrap().modifiers.is_empty());

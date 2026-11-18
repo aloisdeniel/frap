@@ -3,9 +3,11 @@
 //! Verified on 5.2.4:
 //! - the last local scene cannot be removed: `RuntimeError: Error: Scene 'Scene' is the last
 //!   local one, cannot be removed` (whatever `do_unlink`);
-//! - otherwise `do_unlink=False` always refuses, since every scene has a user:
-//!   `Error: Scene 'Scene' must have zero users to be removed, found 1 (try with
-//!   do_unlink=True parameter)`;
+//! - otherwise `do_unlink=False` refuses a scene with a real user, and every scene has one
+//!   (`id_us_ensure_real`): `Error: Scene 'Scene' must have zero users to be removed, found 1
+//!   (try with do_unlink=True parameter)`; with `use_fake_user` the ensured user is the fake
+//!   one (`id_us_plus` consumes `ID_TAG_EXTRAUSER_SET`, `users` still reads 1), so an
+//!   otherwise unused scene with a fake user is removed;
 //! - `do_unlink=True` switches a window showing the scene to its neighbour
 //!   (`BKE_scene_find_replacement`: the previous scene in `bpy.data.scenes`, else the next)
 //!   and deletes the scene; its objects and collections stay in `bpy.data`.
@@ -37,12 +39,11 @@ fn blend_data_scenes_remove(
         return Err(report_error(frap_scene::scenes::last_scene_message(&name)));
     }
     if !do_unlink {
-        // `ID_REAL_USERS`: a scene always has its `id_us_ensure_real` user.
+        // `ID_REAL_USERS`: a scene always has its `id_us_ensure_real` user, which a fake user
+        // replaces.
         let fake = main.header(scene.any()).is_some_and(|hd| hd.use_fake_user);
-        let real = main
-            .users(scene.any())
-            .saturating_sub(u32::from(fake))
-            .max(1);
+        let refs = main.users(scene.any()).saturating_sub(u32::from(fake));
+        let real = if fake { refs } else { refs.max(1) };
         if real > 0 {
             return Err(report_error(format!(
                 "Scene '{name}' must have zero users to be removed, found {real} (try with \

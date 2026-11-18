@@ -20,7 +20,7 @@
 //!   and `obdata_animation` copy shared actions;
 //! - poll `ED_operator_objectmode`; always `FINISHED`.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -33,11 +33,7 @@ use frap_spec_ops_object::object::{self, make_single_user::Type};
 /// The collections of a scene in `scene_collections_array` order: `None` (the scene
 /// collection), then every child collection depth first (each once).
 fn scene_collections(main: &Main, scene: IdRef<SceneId>) -> Vec<Option<IdRef<CollectionId>>> {
-    fn walk(
-        main: &Main,
-        c: &Collection,
-        out: &mut Vec<Option<IdRef<CollectionId>>>,
-    ) {
+    fn walk(main: &Main, c: &Collection, out: &mut Vec<Option<IdRef<CollectionId>>>) {
         for &child in &c.children {
             if out.contains(&Some(child)) {
                 continue;
@@ -68,11 +64,12 @@ fn collection(
 
 /// `FOREACH_SCENE_OBJECT`: the objects of a scene, each once, in collection order.
 fn scene_objects(main: &Main, scene: IdRef<SceneId>) -> Vec<IdRef<ObjectId>> {
+    let mut seen = HashSet::new();
     let mut out = Vec::new();
     for c in scene_collections(main, scene) {
         if let Some(c) = collection(main, scene, c) {
             for &ob in &c.objects {
-                if !out.contains(&ob) {
+                if seen.insert(ob) {
                     out.push(ob);
                 }
             }
@@ -81,12 +78,16 @@ fn scene_objects(main: &Main, scene: IdRef<SceneId>) -> Vec<IdRef<ObjectId>> {
     out
 }
 
-/// `BKE_object_scenes_users_get`: the number of scenes whose collections hold `ob`.
-fn scenes_users(main: &Main, ob: IdRef<ObjectId>) -> usize {
-    main.scenes
-        .iter()
-        .filter(|(s, _)| scene_objects(main, *s).contains(&ob))
-        .count()
+/// `BKE_object_scenes_users_get` for every object at once: the number of scenes whose
+/// collections hold it.
+fn scenes_users(main: &Main) -> HashMap<IdRef<ObjectId>, usize> {
+    let mut out: HashMap<IdRef<ObjectId>, usize> = HashMap::new();
+    for (s, _) in main.scenes.iter() {
+        for ob in scene_objects(main, s) {
+            *out.entry(ob).or_default() += 1;
+        }
+    }
+    out
 }
 
 /// `single_data_needs_duplication`: more than one user, or linked.
@@ -98,27 +99,30 @@ fn local(main: &Main, a: IdAny) -> bool {
     main.header(a).is_some_and(|h| h.library.is_none())
 }
 
-/// `single_object_users` (without collection copies).
+/// `single_object_users` (without collection copies). Returns the copies by original (the
+/// `ID.newid` pointers Blender keeps until the end of the operator).
 fn single_object_users(
     main: &mut Main,
     scene: IdRef<SceneId>,
-    tagged: Option<&[IdRef<ObjectId>]>,
+    tagged: Option<&HashSet<IdRef<ObjectId>>>,
     log: &mut ChangeLog,
-) {
+) -> HashMap<IdAny, IdAny> {
     let mut map: HashMap<IdAny, IdAny> = HashMap::new();
+    // Copies are not in any collection, so the counts stay valid through the loop.
+    let users = scenes_users(main);
     for ob in scene_objects(main, scene) {
         if map.contains_key(&ob.any()) || tagged.is_some_and(|t| !t.contains(&ob)) {
             continue;
         }
         if local(main, ob.any())
-            && scenes_users(main, ob) > 1
+            && users.get(&ob).copied().unwrap_or(0) > 1
             && let Some(new) = duplicate_id(main, ob.any(), log)
         {
             map.insert(ob.any(), new);
         }
     }
     if map.is_empty() {
-        return;
+        return map;
     }
     // Other scenes keep their bases' flags under the copies (Blender rebuilds them from the
     // objects' base flags) but lose an active object that was copied (its base is freed).
@@ -136,32 +140,28 @@ fn single_object_users(
         relink_ids(main, &[c.any()], &map, log);
         ids.push(c.any());
     }
-    let mut objects: Vec<IdAny> = Vec::new();
-    for c in scene_collections(main, scene) {
-        if let Some(c) = collection(main, scene, c) {
-            for &ob in &c.objects {
-                if !objects.contains(&ob.any()) {
-                    objects.push(ob.any());
-                }
-            }
-        }
-    }
+    let objects: Vec<IdAny> = scene_objects(main, scene)
+        .into_iter()
+        .map(|ob| ob.any())
+        .collect();
     relink_ids(main, &objects, &map, log);
     for s in others {
-        let still: Vec<IdRef<ObjectId>> = scene_objects(main, s);
+        let still: HashSet<IdRef<ObjectId>> = scene_objects(main, s).into_iter().collect();
         let Some(sc) = main.scenes.get(s) else {
             continue;
         };
         let touched = sc.view_layers.iter().any(|vl| {
-            vl.bases.iter().any(|b| {
-                map.contains_key(&b.object.any()) && !still.contains(&b.object)
-            })
+            vl.bases
+                .iter()
+                .any(|b| map.contains_key(&b.object.any()) && !still.contains(&b.object))
         });
         if !touched {
             continue;
         }
         if let Some(sc) = main.scenes.get_mut(s, log) {
             for vl in &mut sc.view_layers {
+                let mut has_base: HashSet<IdRef<ObjectId>> =
+                    vl.bases.iter().map(|b| b.object).collect();
                 if vl
                     .active
                     .is_some_and(|a| map.contains_key(&a.any()) && !still.contains(&a))
@@ -170,25 +170,30 @@ fn single_object_users(
                 }
                 for i in 0..vl.bases.len() {
                     let old = vl.bases[i].object;
-                    let Some(new) = map.get(&old.any()).and_then(|n| n.typed::<ObjectId>())
-                    else {
+                    let Some(new) = map.get(&old.any()).and_then(|n| n.typed::<ObjectId>()) else {
                         continue;
                     };
-                    if !still.contains(&old)
-                        && still.contains(&new)
-                        && !vl.bases.iter().any(|b| b.object == new)
-                    {
+                    if !still.contains(&old) && still.contains(&new) && !has_base.contains(&new) {
                         vl.bases[i].object = new;
+                        has_base.remove(&old);
+                        has_base.insert(new);
                     }
                 }
             }
         }
     }
     layers::sync_all(main, log);
+    map
 }
 
-/// `single_obdata_users`
-fn single_obdata_users(main: &mut Main, obs: &[IdRef<ObjectId>], log: &mut ChangeLog) {
+/// `single_obdata_users`; a copied camera's `dof.focus_object` follows an object copied by
+/// `object=True` in the same run (`ID_NEW_REMAP`).
+fn single_obdata_users(
+    main: &mut Main,
+    obs: &[IdRef<ObjectId>],
+    new_objects: &HashMap<IdAny, IdAny>,
+    log: &mut ChangeLog,
+) {
     for &ob in obs {
         let Some(data) = main.objects.get(ob).and_then(|o| o.data) else {
             continue;
@@ -200,6 +205,9 @@ fn single_obdata_users(main: &mut Main, obs: &[IdRef<ObjectId>], log: &mut Chang
             && let Some(o) = main.objects.get_mut(ob, log)
         {
             o.data = Some(new);
+            if new.code == IdCode::CA && !new_objects.is_empty() {
+                relink_ids(main, &[new], new_objects, log);
+            }
         }
     }
 }
@@ -211,7 +219,10 @@ fn single_mat_users(main: &mut Main, obs: &[IdRef<ObjectId>], log: &mut ChangeLo
         if !local(main, ob.any()) {
             continue;
         }
-        let n = main.objects.get(ob).map_or(0, |o| slots::slot_count(main, o));
+        let n = main
+            .objects
+            .get(ob)
+            .map_or(0, |o| slots::slot_count(main, o));
         for i in 0..n {
             let Some(ma) = main.objects.get(ob).and_then(|o| slots::slot(main, o, i).1) else {
                 continue;
@@ -266,8 +277,9 @@ fn exec(cx: &mut OpCtx, p: object::MakeSingleUser) -> OpResult {
             scene_objects(c.main, scene)
         }
     };
+    let mut new_objects = HashMap::new();
     if p.object.value {
-        let tagged: Option<Vec<IdRef<ObjectId>>> = selected.then(|| {
+        let tagged: Option<HashSet<IdRef<ObjectId>>> = selected.then(|| {
             cx.ctx()
                 .view_layer()
                 .bases
@@ -277,13 +289,13 @@ fn exec(cx: &mut OpCtx, p: object::MakeSingleUser) -> OpResult {
                 .collect()
         });
         let (main, log) = cx.main_mut();
-        single_object_users(main, scene, tagged.as_deref(), log);
+        new_objects = single_object_users(main, scene, tagged.as_ref(), log);
         log.context_changed = true;
     }
     if p.obdata.value {
         let obs = objects_now(cx);
         let (main, log) = cx.main_mut();
-        single_obdata_users(main, &obs, log);
+        single_obdata_users(main, &obs, &new_objects, log);
     }
     if p.material.value {
         let obs = objects_now(cx);

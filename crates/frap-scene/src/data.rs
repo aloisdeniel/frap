@@ -396,6 +396,10 @@ pub struct Main {
     pub filepath: Option<String>,
     /// `bpy.data.is_dirty`
     pub is_dirty: bool,
+    /// Runtime: the `BASE_SELECTED` bit of each object's `ob->base_flag`, which seeds the
+    /// selection of a new base (`object_base_new`, e.g. an object linked into another scene).
+    /// Kept by `frap_scene::id::layers` (WP 3.10); not saved, rebuilt from the bases.
+    pub base_selected: crate::id::layers::BaseSelectedMemory,
 }
 
 /// Runs `$body` with `$m` bound to the `IdMap` of `$code` (every `IdCode`).

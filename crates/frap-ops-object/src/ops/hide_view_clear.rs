@@ -3,14 +3,17 @@
 //! (`tests/golden/cases/scenes/hide_view.py`; M3 WP 3.10, M34W0-4). Port of
 //! `object_hide_view_clear_exec` and `object_hide_poll` (`editors/object/object_edit.cc`,
 //! Blender 5.2.4, GPL-2.0-or-later): every hidden base of the context view layer
-//! (`hide_get()`) is shown again and, with `select=True`, selected, even when it is not
-//! selectable (`base_select` is bypassed, as in Blender). No hidden base → `CANCELLED`. The poll
+//! (`hide_get()`) is shown again and, with `select=True`, selected (`BASE_SELECTED` is set
+//! directly, bypassing `base_select`), then `BKE_base_eval_flags` deselects the bases that are
+//! still unselectable ("Deselect unselectable objects": `hide_select` on the object or a
+//! collection, `hide_viewport`; verified on 5.2.4). No hidden base → `CANCELLED`. The poll
 //! is `ED_operator_view3d_active`, which frap's virtual 3D View always passes (§8).
 
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_rna::{IdRef, ObjectId};
 use frap_scene::BaseFlag;
+use frap_scene::id::layers;
 use frap_spec_ops_object::object;
 
 #[operator(poll = poll::ALWAYS, tier = T0)]
@@ -45,7 +48,22 @@ fn exec(cx: &mut OpCtx, p: object::HideViewClear) -> OpResult {
         for ob in &shown {
             if let Some(b) = s.view_layers[layer].base_mut(*ob) {
                 b.flag.remove(BaseFlag::HIDDEN);
-                if select {
+            }
+        }
+    }
+    if select {
+        let selectable: Vec<IdRef<ObjectId>> = main.scenes.get(scene).map_or_else(Vec::new, |s| {
+            let vis =
+                layers::visibility(s, &s.view_layers[layer], &main.collections, &main.objects);
+            shown
+                .iter()
+                .copied()
+                .filter(|ob| vis.get(ob).is_some_and(|v| v.selectable))
+                .collect()
+        });
+        if let Some(s) = main.scenes.get_mut(scene, log) {
+            for ob in selectable {
+                if let Some(b) = s.view_layers[layer].base_mut(ob) {
                     b.flag.insert(BaseFlag::SELECTED);
                 }
             }

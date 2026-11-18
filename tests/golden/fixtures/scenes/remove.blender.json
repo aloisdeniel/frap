@@ -5,20 +5,14 @@
   },
   "lines": [
     {
-      "line": 6,
-      "ok": true
-    },
-    {
       "line": 7,
-      "ok": false,
-      "exception": "RuntimeError",
-      "message": "Operator bpy.ops.scene.delete.poll() failed, context is incorrect"
+      "ok": true
     },
     {
       "line": 8,
       "ok": false,
       "exception": "RuntimeError",
-      "message": "Error: Scene 'Scene' is the last local one, cannot be removed\n"
+      "message": "Operator bpy.ops.scene.delete.poll() failed, context is incorrect"
     },
     {
       "line": 9,
@@ -28,7 +22,9 @@
     },
     {
       "line": 10,
-      "ok": true
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Scene 'Scene' is the last local one, cannot be removed\n"
     },
     {
       "line": 11,
@@ -40,13 +36,13 @@
     },
     {
       "line": 13,
-      "ok": false,
-      "exception": "RuntimeError",
-      "message": "Error: Scene 'A' must have zero users to be removed, found 1 (try with do_unlink=True parameter)\n"
+      "ok": true
     },
     {
       "line": 14,
-      "ok": true
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Scene 'A' must have zero users to be removed, found 1 (try with do_unlink=True parameter)\n"
     },
     {
       "line": 15,
@@ -94,17 +90,43 @@
     },
     {
       "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
       "ok": false,
       "exception": "RuntimeError",
       "message": "Operator bpy.ops.scene.delete.poll() failed, context is incorrect"
     },
     {
-      "line": 27,
+      "line": 28,
       "ok": true
     },
     {
-      "line": 28,
+      "line": 29,
       "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"F\" not found"
     }
   ],
   "objects": {

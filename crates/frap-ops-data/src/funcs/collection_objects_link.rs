@@ -3,7 +3,8 @@
 //! `bpy.data.collections` ID or a scene's master collection: appends the object (one more
 //! user). An object already in the collection raises `RuntimeError: Error: Object 'Cube'
 //! already in collection 'Collection'` (verified on 5.2.4). View layers are resynced at once
-//! (Blender syncs lazily, `frap_scene::id::layers`); the new base starts unselected.
+//! (Blender syncs lazily, `frap_scene::id::layers`); a new base is selected when the object's
+//! stored base flag is (`object_base_new`, e.g. a selected object linked into another scene).
 
 use frap_rna::{IdRef, ObjectId, RnaError, RnaPtr, Value, rna_func};
 use frap_scene::id::layers::sync_all;
