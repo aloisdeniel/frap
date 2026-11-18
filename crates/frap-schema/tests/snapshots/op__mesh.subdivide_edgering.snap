@@ -1,0 +1,214 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.subdivide_edgering",
+  "bl_idname": "MESH_OT_subdivide_edgering",
+  "label": "Subdivide Edge-Ring",
+  "description": "Subdivide perpendicular edges to the selected edge-ring",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "number_cuts",
+      "name": "Number of Cuts",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 10,
+      "hard_min": 0,
+      "hard_max": 1000,
+      "soft_min": 1,
+      "soft_max": 64,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "interpolation",
+      "name": "Interpolation",
+      "description": "Interpolation method",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "PATH",
+      "enum_items": [
+        {
+          "identifier": "LINEAR",
+          "name": "Linear",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "PATH",
+          "name": "Blend Path",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "SURFACE",
+          "name": "Blend Surface",
+          "description": "",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "smoothness",
+      "name": "Smoothness",
+      "description": "Smoothness factor",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": 0,
+      "hard_max": 1000,
+      "soft_min": 0,
+      "soft_max": 2,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "profile_shape_factor",
+      "name": "Profile Factor",
+      "description": "How much intermediary new edges are shrunk/expanded",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -1000,
+      "hard_max": 1000,
+      "soft_min": -2,
+      "soft_max": 2,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "profile_shape",
+      "name": "Profile Shape",
+      "description": "Shape of the profile",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SMOOTH",
+      "enum_items": [
+        {
+          "identifier": "SMOOTH",
+          "name": "Smooth",
+          "description": "Smooth falloff",
+          "value": 0
+        },
+        {
+          "identifier": "SPHERE",
+          "name": "Sphere",
+          "description": "Spherical falloff",
+          "value": 1
+        },
+        {
+          "identifier": "ROOT",
+          "name": "Root",
+          "description": "Root falloff",
+          "value": 2
+        },
+        {
+          "identifier": "INVERSE_SQUARE",
+          "name": "Inverse Square",
+          "description": "Inverse Square falloff",
+          "value": 7
+        },
+        {
+          "identifier": "SHARP",
+          "name": "Sharp",
+          "description": "Sharp falloff",
+          "value": 3
+        },
+        {
+          "identifier": "LINEAR",
+          "name": "Linear",
+          "description": "Linear falloff",
+          "value": 4
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M2",
+    "extension": false,
+    "notes": [
+      "a selection that is not an edge ring between two loops reports 'No edge rings found' as INFO and changes nothing"
+    ]
+  }
+}

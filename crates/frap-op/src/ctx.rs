@@ -45,6 +45,7 @@ pub struct OpCtx<'h> {
     reports: Vec<Report>,
     result: IndexMap<SmolStr, Value>,
     op: &'static OperatorSpec,
+    macro_step: bool,
 }
 
 impl<'h> OpCtx<'h> {
@@ -60,7 +61,13 @@ impl<'h> OpCtx<'h> {
             reports: Vec::new(),
             result: IndexMap::new(),
             op,
+            macro_step: false,
         }
+    }
+    /// Whether this exec runs as a step of a macro (`op->opm != nullptr` in Blender), e.g.
+    /// `mesh.loopcut` inside `mesh.loopcut_slide`.
+    pub fn is_macro_step(&self) -> bool {
+        self.macro_step
     }
     /// Reports and results, after exec (F-OP-8).
     pub fn finish(self) -> OpOutput {
@@ -231,6 +238,7 @@ impl<'h> OpCtx<'h> {
         merge_result: bool,
     ) -> OpResult {
         let mut sub = OpCtx::new(&mut *self.host, &mut *self.services, def.spec);
+        sub.macro_step = merge_result;
         let r = crate::def::pipeline::execute(def, &mut sub, args);
         let out = sub.finish();
         self.reports.extend(out.reports);

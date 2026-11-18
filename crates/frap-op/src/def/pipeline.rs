@@ -561,12 +561,21 @@ pub fn prepare(
 /// `WM_operatortype_macro_define` callers): they win over the caller's nested arguments
 /// (verified on 5.2.4: `duplicate_move_linked(OBJECT_OT_duplicate={'linked': False})` still
 /// links). `(macro, step, prop, value)`; the operator dumps do not record them (WP 1.20).
-pub const MACRO_STEP_FORCED: &[(&str, &str, &str, bool)] = &[(
-    "OBJECT_OT_duplicate_move_linked",
-    "OBJECT_OT_duplicate",
-    "linked",
-    true,
-)];
+pub const MACRO_STEP_FORCED: &[(&str, &str, &str, bool)] = &[
+    (
+        "OBJECT_OT_duplicate_move_linked",
+        "OBJECT_OT_duplicate",
+        "linked",
+        true,
+    ),
+    // `mesh_ops.cc`: `RNA_boolean_set(otmacro->ptr, "single_side", true)` (WP 2.6).
+    (
+        "MESH_OT_offset_edge_loops_slide",
+        "TRANSFORM_OT_edge_slide",
+        "single_side",
+        true,
+    ),
+];
 
 /// The boolean step properties `macro` forces on `step` ([`MACRO_STEP_FORCED`]).
 pub fn macro_step_forced(macro_bl: &str, step_bl: &str) -> Vec<(&'static str, bool)> {
