@@ -6,7 +6,6 @@ source: crates/frap-schema/tests/snapshots.rs
   "$id": "urn:frap:op:mesh.bevel",
   "title": "bpy.ops.mesh.bevel",
   "description": "Bevel: Cut into selected items at an angle to create bevel or chamfer",
-  "$comment": "not implemented by frap yet (planned: M2); calling it gives OP_NOT_IMPLEMENTED",
   "type": "object",
   "additionalProperties": false,
   "properties": {

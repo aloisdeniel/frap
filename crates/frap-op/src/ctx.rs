@@ -36,6 +36,9 @@ pub struct OpOutput {
     pub reports: Vec<Report>,
     /// `Response.result`.
     pub result: IndexMap<SmolStr, Value>,
+    /// frap hints raised by the operator itself (`Response.hints`, §13.2), after the
+    /// argument-conversion hints (M2 W2, WP 2.11: `NO_OP_DEFAULT`).
+    pub hints: Vec<crate::def::pipeline::Hint>,
 }
 
 /// What an operator sees while it runs.
@@ -44,6 +47,7 @@ pub struct OpCtx<'h> {
     services: &'h mut dyn Services,
     reports: Vec<Report>,
     result: IndexMap<SmolStr, Value>,
+    hints: Vec<crate::def::pipeline::Hint>,
     op: &'static OperatorSpec,
 }
 
@@ -59,6 +63,7 @@ impl<'h> OpCtx<'h> {
             services,
             reports: Vec::new(),
             result: IndexMap::new(),
+            hints: Vec::new(),
             op,
         }
     }
@@ -67,6 +72,7 @@ impl<'h> OpCtx<'h> {
         OpOutput {
             reports: self.reports,
             result: self.result,
+            hints: self.hints,
         }
     }
     /// The running operator's spec.
@@ -206,6 +212,14 @@ impl<'h> OpCtx<'h> {
     pub fn report(&mut self, level: ReportType, msg: impl Into<String>) {
         self.reports.push(Report::new(level, msg));
     }
+    /// Adds a frap hint (`Response.hints`: `{code, message}`, §13.2), e.g. `NO_OP_DEFAULT`
+    /// when the arguments make the operator do nothing.
+    pub fn hint(&mut self, code: &'static str, message: impl Into<String>) {
+        self.hints.push(crate::def::pipeline::Hint {
+            code,
+            message: message.into(),
+        });
+    }
     /// Sets an entry of `Response.result`.
     pub fn result(&mut self, key: &str, v: impl Into<Value>) {
         self.result.insert(key.into(), v.into());
@@ -234,6 +248,7 @@ impl<'h> OpCtx<'h> {
         let r = crate::def::pipeline::execute(def, &mut sub, args);
         let out = sub.finish();
         self.reports.extend(out.reports);
+        self.hints.extend(out.hints);
         if merge_result {
             self.result.extend(out.result);
         }
