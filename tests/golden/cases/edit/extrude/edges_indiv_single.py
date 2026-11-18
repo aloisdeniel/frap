@@ -1,0 +1,11 @@
+# WP 2.5: mesh.extrude_edges_indiv on one edge: a copy of the edge and a quad wound like the
+# edge's face; the new edge is selected and active.
+# golden: startup=factory compare=objects,context,mesh:Cube tier=T1
+import bpy
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_mode(type='EDGE')
+bpy.ops.frap.select_elements(type='EDGE', indices=[0])
+bpy.ops.mesh.extrude_edges_indiv()
+bpy.data.meshes['Cube'].total_vert_sel
+bpy.data.meshes['Cube'].total_edge_sel
+bpy.data.meshes['Cube'].total_face_sel

@@ -561,12 +561,33 @@ pub fn prepare(
 /// `WM_operatortype_macro_define` callers): they win over the caller's nested arguments
 /// (verified on 5.2.4: `duplicate_move_linked(OBJECT_OT_duplicate={'linked': False})` still
 /// links). `(macro, step, prop, value)`; the operator dumps do not record them (WP 1.20).
-pub const MACRO_STEP_FORCED: &[(&str, &str, &str, bool)] = &[(
-    "OBJECT_OT_duplicate_move_linked",
-    "OBJECT_OT_duplicate",
-    "linked",
-    true,
-)];
+pub const MACRO_STEP_FORCED: &[(&str, &str, &str, bool)] = &[
+    (
+        "OBJECT_OT_duplicate_move_linked",
+        "OBJECT_OT_duplicate",
+        "linked",
+        true,
+    ),
+    // `ED_operatormacros_mesh` (editors/mesh/mesh_ops.cc, WP 2.5): every extrude macro's
+    // transform step runs without proportional editing and mesh mirror; `extrude_manifold`
+    // also dissolves orthogonal edges and auto-merges.
+    ("MESH_OT_extrude_region_move", "TRANSFORM_OT_translate", "use_proportional_edit", false),
+    ("MESH_OT_extrude_region_move", "TRANSFORM_OT_translate", "mirror", false),
+    ("MESH_OT_extrude_manifold", "MESH_OT_extrude_region", "use_dissolve_ortho_edges", true),
+    ("MESH_OT_extrude_manifold", "TRANSFORM_OT_translate", "use_proportional_edit", false),
+    ("MESH_OT_extrude_manifold", "TRANSFORM_OT_translate", "mirror", false),
+    ("MESH_OT_extrude_manifold", "TRANSFORM_OT_translate", "use_automerge_and_split", true),
+    ("MESH_OT_extrude_context_move", "TRANSFORM_OT_translate", "use_proportional_edit", false),
+    ("MESH_OT_extrude_context_move", "TRANSFORM_OT_translate", "mirror", false),
+    ("MESH_OT_extrude_region_shrink_fatten", "TRANSFORM_OT_shrink_fatten", "use_proportional_edit", false),
+    ("MESH_OT_extrude_region_shrink_fatten", "TRANSFORM_OT_shrink_fatten", "mirror", false),
+    ("MESH_OT_extrude_faces_move", "TRANSFORM_OT_shrink_fatten", "use_proportional_edit", false),
+    ("MESH_OT_extrude_faces_move", "TRANSFORM_OT_shrink_fatten", "mirror", false),
+    ("MESH_OT_extrude_edges_move", "TRANSFORM_OT_translate", "use_proportional_edit", false),
+    ("MESH_OT_extrude_edges_move", "TRANSFORM_OT_translate", "mirror", false),
+    ("MESH_OT_extrude_vertices_move", "TRANSFORM_OT_translate", "use_proportional_edit", false),
+    ("MESH_OT_extrude_vertices_move", "TRANSFORM_OT_translate", "mirror", false),
+];
 
 /// The boolean step properties `macro` forces on `step` ([`MACRO_STEP_FORCED`]).
 pub fn macro_step_forced(macro_bl: &str, step_bl: &str) -> Vec<(&'static str, bool)> {
