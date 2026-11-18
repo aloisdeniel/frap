@@ -578,7 +578,7 @@ fn quad_3edge_split(bm: &mut BMesh, verts: &[VertId], params: &Params) {
     let mut add = 0usize;
     for i in 0..numcuts {
         if i == numcuts / 2 {
-            if numcuts % 2 != 0 {
+            if !numcuts.is_multiple_of(2) {
                 connect_smallest_face(bm, verts[numcuts - i - 1 + add], verts[i + numcuts + 1]);
             }
             add = numcuts * 2 + 2;
@@ -1166,7 +1166,10 @@ pub fn mesh_esubdivide(bm: &mut BMesh, a: &ESubdivide) -> Result<SubdivideEdgesO
     let edges: Vec<EdgeId> = bm
         .edge_ids()
         .into_iter()
-        .filter(|&e| bm.edge(e).flag.contains(ElemFlag::SELECT))
+        .filter(|&e| {
+            let f = bm.edge(e).flag;
+            f.contains(ElemFlag::SELECT) && !f.contains(ElemFlag::HIDDEN)
+        })
         .collect();
     let out = subdivide_edges(
         bm,
@@ -1231,7 +1234,287 @@ pub fn mesh_esubdivide(bm: &mut BMesh, a: &ESubdivide) -> Result<SubdivideEdgesO
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
+    use super::*;
+    use crate::FromMeshParams;
+    use frap_mesh::primitives::cube::{Cube, cube_mesh};
+    use frap_mesh::primitives::cylinder::{Cylinder, cylinder};
+    use frap_mesh::primitives::grid::{Grid, grid};
+    use frap_mesh::primitives::ico_sphere::{IcoSphere, ico_sphere};
+
+    /// The default cube as an edit BMesh (everything selected).
+    pub(crate) fn cube() -> BMesh {
+        BMesh::from_mesh(&cube_mesh(&Cube::default()), &FromMeshParams::default())
+    }
+    /// A cylinder with `n` vertices per rim.
+    pub(crate) fn cyl(n: i32) -> BMesh {
+        BMesh::from_mesh(
+            &cylinder(&Cylinder {
+                vertices: n,
+                ..Cylinder::default()
+            }),
+            &FromMeshParams::default(),
+        )
+    }
+    /// A grid of `x` × `y` vertices.
+    pub(crate) fn grid_bm(x: i32, y: i32) -> BMesh {
+        BMesh::from_mesh(
+            &grid(&Grid {
+                x_subdivisions: x,
+                y_subdivisions: y,
+                ..Grid::default()
+            }),
+            &FromMeshParams::default(),
+        )
+    }
+    pub(crate) fn counts(bm: &BMesh) -> (usize, usize, usize) {
+        (bm.verts_num(), bm.edges_num(), bm.faces_num())
+    }
+    pub(crate) fn assert_valid(bm: &BMesh) {
+        let e = bm.validate_strict();
+        assert!(e.is_empty(), "{e:?}");
+    }
+
+    fn all_edges(bm: &mut BMesh, cuts: i32) -> SubdivideEdgesOut {
+        let edges = bm.edge_ids();
+        subdivide_edges(
+            bm,
+            &SubdivideEdgesIn {
+                edges,
+                cuts,
+                use_grid_fill: true,
+                ..SubdivideEdgesIn::default()
+            },
+        )
+        .unwrap()
+    }
+
+    #[test]
+    fn whole_cube_one_cut_reverses_face_centres() {
+        let mut bm = cube();
+        let out = all_edges(&mut bm, 1);
+        assert_eq!(counts(&bm), (26, 48, 24));
+        assert_valid(&bm);
+        // Edge midpoints 8..19 in edge order, then the face centres in reversed face order.
+        let co = |i: u32| bm.vert(VertId(i)).co;
+        assert_eq!(co(20), [0.0, 0.0, 1.0]);
+        assert_eq!(co(21), [0.0, 0.0, -1.0]);
+        assert_eq!(co(25), [-1.0, 0.0, 0.0]);
+        // 18 new vertices, 36 inner edges (12 split + 24 grid), 18 new faces.
+        let n = |k: fn(&BMElem) -> bool| out.geom_inner.iter().filter(|e| k(e)).count();
+        assert_eq!(n(|e| matches!(e, BMElem::Vert(_))), 18);
+        assert_eq!(n(|e| matches!(e, BMElem::Face(_))), 18);
+    }
+
+    #[test]
+    fn grids_and_triangles_stay_valid() {
+        for cuts in 1..=4 {
+            let mut bm = cube();
+            all_edges(&mut bm, cuts);
+            let c = cuts as usize;
+            // Every quad becomes (cuts + 1)^2 quads.
+            assert_eq!(bm.faces_num(), 6 * (c + 1) * (c + 1));
+            assert_valid(&bm);
+            let mut ico = BMesh::from_mesh(
+                &ico_sphere(&IcoSphere {
+                    subdivisions: 1,
+                    ..IcoSphere::default()
+                }),
+                &FromMeshParams::default(),
+            );
+            all_edges(&mut ico, cuts);
+            assert_eq!(ico.faces_num(), 20 * (c + 1) * (c + 1));
+            assert_valid(&ico);
+        }
+    }
+
+    #[test]
+    fn edge_percent_places_a_single_cut() {
+        let mut bm = cube();
+        let e = bm.edge_ids()[0];
+        let [v1, v2] = bm.edge(e).v;
+        let (a, b) = (bm.vert(v1).co, bm.vert(v2).co);
+        subdivide_edges(
+            &mut bm,
+            &SubdivideEdgesIn {
+                edges: vec![e],
+                cuts: 1,
+                edge_percents: vec![(e, 0.25)],
+                ..SubdivideEdgesIn::default()
+            },
+        )
+        .unwrap();
+        let v_new = VertId(8);
+        let want = math::interp_v3_v3v3(a, b, 0.25);
+        assert_eq!(bm.vert(v_new).co, want);
+        // No pattern for one cut edge without `use_single_edge`: the faces gain a corner.
+        assert_eq!(counts(&bm), (9, 13, 6));
+        assert_valid(&bm);
+    }
+
+    #[test]
+    fn single_edge_and_custom_patterns() {
+        let mut bm = cube();
+        let e = bm.edge_ids()[0];
+        subdivide_edges(
+            &mut bm,
+            &SubdivideEdgesIn {
+                edges: vec![e],
+                cuts: 2,
+                use_single_edge: true,
+                ..SubdivideEdgesIn::default()
+            },
+        )
+        .unwrap();
+        // Both quads of the edge are fanned (quad_1edge with an even number of cuts).
+        assert_eq!(counts(&bm), (10, 18, 10));
+        assert_valid(&bm);
+
+        let mut bm = cube();
+        let f = bm.face_ids()[0];
+        let edges = bm.face_edges(f);
+        subdivide_edges(
+            &mut bm,
+            &SubdivideEdgesIn {
+                edges,
+                cuts: 1,
+                custom_patterns: vec![(f, 5)],
+                ..SubdivideEdgesIn::default()
+            },
+        )
+        .unwrap();
+        // The custom grid pattern fills face 0; its neighbours become 5-gons.
+        assert_eq!(counts(&bm), (13, 20, 9));
+        assert_valid(&bm);
+        let bad = subdivide_edges(
+            &mut cube(),
+            &SubdivideEdgesIn {
+                custom_patterns: vec![(f, 99)],
+                ..SubdivideEdgesIn::default()
+            },
+        );
+        assert!(matches!(bad, Err(BmError::Invalid(_))));
+    }
+
+    #[test]
+    fn unknown_enums_are_invalid() {
+        let mut bm = cube();
+        for i in [
+            SubdivideEdgesIn {
+                smooth_falloff: "NOPE",
+                ..SubdivideEdgesIn::default()
+            },
+            SubdivideEdgesIn {
+                quad_corner_type: "NOPE",
+                ..SubdivideEdgesIn::default()
+            },
+            SubdivideEdgesIn {
+                edges: vec![EdgeId(999)],
+                ..SubdivideEdgesIn::default()
+            },
+        ] {
+            assert!(matches!(subdivide_edges(&mut bm, &i), Err(BmError::Invalid(_))));
+        }
+    }
+
+    #[test]
+    fn sphere_and_crease_rules() {
+        let mut bm = cube();
+        bm.vdata.add_layer(crate::CdLayer {
+            name: "crease_vert".into(),
+            data: frap_mesh::AttrData::Float(std::sync::Arc::new(vec![1.0; 8])),
+        });
+        let edges = bm.edge_ids();
+        subdivide_edges(
+            &mut bm,
+            &SubdivideEdgesIn {
+                edges,
+                cuts: 1,
+                smooth: 2.0,
+                use_sphere: true,
+                use_grid_fill: true,
+                ..SubdivideEdgesIn::default()
+            },
+        )
+        .unwrap();
+        // `use_sphere` puts every vertex at distance `smooth` from the origin.
+        for v in bm.vert_ids() {
+            let d = math::len_v3(bm.vert(v).co);
+            assert!((d - 2.0).abs() < 1e-5, "{d}");
+        }
+        // New vertices get no vertex crease; the originals keep theirs.
+        let li = bm.vdata.find("crease_vert").unwrap();
+        let frap_mesh::AttrData::Float(c) = &bm.vdata.layers[li].data else {
+            unreachable!()
+        };
+        assert_eq!(c[0], 1.0);
+        assert_eq!(c[8], 0.0);
+        // The temporary shape layer is gone.
+        assert!(bm.shape_layers.is_empty());
+    }
+
+    #[test]
+    fn esubdivide_selection_modes() {
+        // Loop cut selection: only the new inner edges.
+        let mut bm = cyl(8);
+        let ring: Vec<EdgeId> = [2u32, 3, 6, 9, 12, 15, 18, 21].iter().map(|&i| EdgeId(i)).collect();
+        for e in bm.edge_ids() {
+            bm.edge_select_set(e, false);
+        }
+        for v in bm.vert_ids() {
+            bm.vert_select_set(v, false);
+        }
+        for f in bm.face_ids() {
+            bm.face_mut(f).flag.remove(ElemFlag::SELECT);
+        }
+        for &e in &ring {
+            bm.edge_select_set(e, true);
+        }
+        let args = ESubdivide {
+            smooth: 0.0,
+            smooth_falloff: "INVERSE_SQUARE",
+            use_smooth_even: true,
+            fractal: 0.0,
+            along_normal: 0.0,
+            numcuts: 1,
+            seltype: SubdivSelect::Loopcut,
+            cornertype: "PATH",
+            use_single_edge: false,
+            use_grid_fill: true,
+            use_only_quads: false,
+            seed: 0,
+        };
+        mesh_esubdivide(&mut bm, &args).unwrap();
+        let sel: Vec<EdgeId> = bm
+            .edge_ids()
+            .into_iter()
+            .filter(|&e| bm.edge(e).flag.contains(ElemFlag::SELECT))
+            .collect();
+        assert_eq!(sel.len(), 8);
+        for e in sel {
+            let [a, b] = bm.edge(e).v;
+            assert!(bm.vert(a).co[2].abs() < 1e-6 && bm.vert(b).co[2].abs() < 1e-6);
+        }
+        assert_valid(&bm);
+
+        // Orig selection: the new geometry joins the selection.
+        let mut bm = grid_bm(2, 2);
+        mesh_esubdivide(
+            &mut bm,
+            &ESubdivide {
+                seltype: SubdivSelect::Orig,
+                cornertype: "STRAIGHT_CUT",
+                use_smooth_even: false,
+                ..args
+            },
+        )
+        .unwrap();
+        assert_eq!(bm.selected_counts(), (25, 40, 16));
+    }
+}
+
+#[cfg(test)]
+mod falloff_tests {
     use super::*;
 
     #[test]

@@ -9,7 +9,7 @@
 //! a mesh with nothing selected is skipped. The selection is then flushed for the select mode
 //! (through vertices first when vertex mode is off).
 
-use frap_bmesh::SelectMode;
+use frap_bmesh::{ElemFlag, SelectMode};
 use frap_bmesh::ops::unsubdivide::{UnsubdivideIn, unsubdivide};
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -36,7 +36,10 @@ fn exec(cx: &mut OpCtx, p: mesh::Unsubdivide) -> OpResult {
         let verts = bm
             .vert_ids()
             .into_iter()
-            .filter(|&v| bm.vert(v).flag.contains(frap_bmesh::ElemFlag::SELECT))
+            .filter(|&v| {
+                let f = bm.vert(v).flag;
+                f.contains(ElemFlag::SELECT) && !f.contains(ElemFlag::HIDDEN)
+            })
             .collect();
         unsubdivide(bm, &UnsubdivideIn { verts, iterations })
             .map_err(|e| OpError::Runtime(e.to_string()))?;

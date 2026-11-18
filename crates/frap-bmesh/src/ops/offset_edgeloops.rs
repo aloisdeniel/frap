@@ -245,3 +245,126 @@ fn exec(bm: &mut BMesh, i: &OffsetEdgeloopsIn) -> OffsetEdgeloopsOut {
         edges,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ops::subdivide_edges::tests::{assert_valid, counts, cyl, grid_bm};
+    use crate::ops::subdivide_edges::{ESubdivide, SubdivSelect, mesh_esubdivide};
+
+    /// A cylinder with a loop cut around its middle; returns the loop's edges.
+    fn cut_cylinder() -> (BMesh, Vec<EdgeId>) {
+        let mut bm = cyl(8);
+        for e in bm.edge_ids() {
+            let on = [2u32, 3, 6, 9, 12, 15, 18, 21].contains(&e.0);
+            bm.edge_mut(e).flag.set(ElemFlag::SELECT, on);
+        }
+        let out = mesh_esubdivide(
+            &mut bm,
+            &ESubdivide {
+                smooth: 0.0,
+                smooth_falloff: "INVERSE_SQUARE",
+                use_smooth_even: true,
+                fractal: 0.0,
+                along_normal: 0.0,
+                numcuts: 1,
+                seltype: SubdivSelect::None,
+                cornertype: "PATH",
+                use_single_edge: false,
+                use_grid_fill: true,
+                use_only_quads: false,
+                seed: 0,
+            },
+        )
+        .unwrap();
+        let loop_edges = out
+            .geom_inner
+            .iter()
+            .filter_map(|e| match e {
+                BMElem::Edge(e) => Some(*e),
+                _ => None,
+            })
+            .collect();
+        (bm, loop_edges)
+    }
+
+    #[test]
+    fn closed_loop_is_doubled() {
+        let (mut bm, edges) = cut_cylinder();
+        assert_eq!(edges.len(), 8);
+        let before = counts(&bm);
+        let out = offset_edgeloops(
+            &mut bm,
+            &OffsetEdgeloopsIn {
+                edges,
+                use_cap_endpoint: false,
+            },
+        )
+        .unwrap();
+        // Two new loops: 16 vertices, 16 loop edges and 16 split pieces, 16 faces.
+        assert_eq!(out.edges.len(), 16);
+        assert_eq!(counts(&bm), (before.0 + 16, before.1 + 32, before.2 + 16));
+        assert_valid(&bm);
+    }
+
+    #[test]
+    fn open_loop_caps() {
+        for use_cap_endpoint in [false, true] {
+            let mut bm = grid_bm(4, 4);
+            // A straight inner line across the grid (x = 0).
+            let mid: Vec<EdgeId> = bm
+                .edge_ids()
+                .into_iter()
+                .filter(|&e| {
+                    let [a, b] = bm.edge(e).v;
+                    bm.vert(a).co[0].abs() < 1e-6 && bm.vert(b).co[0].abs() < 1e-6
+                })
+                .collect();
+            assert_eq!(mid.len(), 4);
+            let out = offset_edgeloops(
+                &mut bm,
+                &OffsetEdgeloopsIn {
+                    edges: mid,
+                    use_cap_endpoint,
+                },
+            )
+            .unwrap();
+            assert!(!out.edges.is_empty());
+            assert_valid(&bm);
+        }
+    }
+
+    #[test]
+    fn no_mixed_vertices_does_nothing() {
+        let (mut bm, _) = cut_cylinder();
+        let all = bm.edge_ids();
+        let before = counts(&bm);
+        let out = offset_edgeloops(
+            &mut bm,
+            &OffsetEdgeloopsIn {
+                edges: all,
+                use_cap_endpoint: false,
+            },
+        )
+        .unwrap();
+        assert!(out.edges.is_empty());
+        assert_eq!(counts(&bm), before);
+    }
+
+    #[test]
+    fn edge_pair_and_double_face_checks() {
+        let bm = grid_bm(2, 2);
+        // The four corners of a 2x2 grid have two edges each.
+        let pairs = bm
+            .vert_ids()
+            .into_iter()
+            .filter(|&v| mods::vert_is_edge_pair(&bm, v))
+            .count();
+        assert_eq!(pairs, 4);
+        // Cutting a quad corner off a flat grid duplicates no existing face.
+        let f = bm.face_ids()[0];
+        let l = bm.face(f).l_first;
+        let ll = bm.lp(l);
+        assert!(!mods::face_split_check_double_face(&bm, ll.prev, ll.next, 3));
+    }
+}

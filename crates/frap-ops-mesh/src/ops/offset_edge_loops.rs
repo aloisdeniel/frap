@@ -35,7 +35,10 @@ fn exec(cx: &mut OpCtx, p: mesh::OffsetEdgeLoops) -> OpResult {
         let edges: Vec<EdgeId> = bm
             .edge_ids()
             .into_iter()
-            .filter(|&e| bm.edge(e).flag.contains(ElemFlag::SELECT))
+            .filter(|&e| {
+                let f = bm.edge(e).flag;
+                f.contains(ElemFlag::SELECT) && !f.contains(ElemFlag::HIDDEN)
+            })
             .collect();
         let out = offset_edgeloops(
             bm,

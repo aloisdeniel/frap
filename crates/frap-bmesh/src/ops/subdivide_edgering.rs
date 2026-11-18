@@ -775,3 +775,86 @@ fn exec(
         faces,
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ops::subdivide_edges::tests::{assert_valid, counts, cube, cyl};
+
+    fn ring(
+        bm: &mut BMesh,
+        edges: &[u32],
+        cuts: i32,
+        interp_mode: &'static str,
+        factor: f32,
+    ) -> Result<SubdivideEdgeringOut, BmError> {
+        subdivide_edgering(
+            bm,
+            &SubdivideEdgeringIn {
+                edges: edges.iter().map(|&i| EdgeId(i)).collect(),
+                interp_mode,
+                smooth: 1.0,
+                cuts,
+                profile_shape: "SMOOTH",
+                profile_shape_factor: factor,
+            },
+        )
+    }
+
+    #[test]
+    fn cube_ring_every_mode() {
+        for mode in ["LINEAR", "PATH", "SURFACE"] {
+            for factor in [0.0, 0.5] {
+                let mut bm = cube();
+                let out = ring(&mut bm, &[0, 2, 7, 8], 3, mode, factor).unwrap();
+                // 4 ring edges cut 3 times; the 4 faces between become 16.
+                assert_eq!(counts(&bm), (20, 36, 18), "{mode} {factor}");
+                assert_eq!(out.faces.len(), 16);
+                assert_valid(&bm);
+                for v in bm.vert_ids() {
+                    assert!(bm.vert(v).co.iter().all(|c| c.is_finite()));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn cylinder_closed_rims() {
+        let mut bm = cyl(8);
+        let out = ring(&mut bm, &[2, 3, 6, 9, 12, 15, 18, 21], 2, "PATH", 0.0).unwrap();
+        assert_eq!(out.faces.len(), 24);
+        assert_eq!(counts(&bm), (32, 56, 26));
+        assert_valid(&bm);
+    }
+
+    #[test]
+    fn errors_change_nothing() {
+        let mut bm = cube();
+        let before = counts(&bm);
+        assert_eq!(
+            ring(&mut bm, &[0], 2, "PATH", 0.0),
+            Err(BmError::Cancel("No edge rings found".into()))
+        );
+        assert_eq!(counts(&bm), before);
+        assert!(matches!(
+            ring(&mut bm, &[0], 2, "CUBIC", 0.0),
+            Err(BmError::Invalid(_))
+        ));
+    }
+
+    #[test]
+    fn edge_loop_store() {
+        let bm = cube();
+        let mut el = EdgeLoop::from_verts(vec![VertId(0), VertId(1), VertId(3), VertId(2)], true);
+        assert_eq!(el.edges(&bm).len(), 4);
+        el.calc_center(&bm);
+        assert_eq!(el.co, [-1.0, 0.0, 0.0]);
+        assert!(el.calc_normal(&bm));
+        let no = el.no;
+        el.flip();
+        assert_eq!(el.no, math::negate(no));
+        assert_eq!(el.verts, vec![VertId(2), VertId(3), VertId(1), VertId(0)]);
+        el.rotate_first(VertId(1));
+        assert_eq!(el.verts[0], VertId(1));
+    }
+}

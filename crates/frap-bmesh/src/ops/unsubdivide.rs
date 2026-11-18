@@ -370,3 +370,100 @@ pub fn unsubdivide(bm: &mut BMesh, i: &UnsubdivideIn) -> Result<UnsubdivideOut, 
     });
     Ok(UnsubdivideOut::default())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ops::subdivide_edges::tests::{assert_valid, counts, cube, grid_bm};
+    use crate::ops::subdivide_edges::{SubdivideEdgesIn, subdivide_edges};
+
+    fn subdivide_all(bm: &mut BMesh, cuts: i32) {
+        let edges = bm.edge_ids();
+        subdivide_edges(
+            bm,
+            &SubdivideEdgesIn {
+                edges,
+                cuts,
+                use_grid_fill: true,
+                ..SubdivideEdgesIn::default()
+            },
+        )
+        .unwrap();
+    }
+
+    fn unsub(bm: &mut BMesh, iterations: i32) {
+        let verts = bm.vert_ids();
+        unsubdivide(bm, &UnsubdivideIn { verts, iterations }).unwrap();
+    }
+
+    #[test]
+    fn subdivided_cube_comes_back() {
+        let mut bm = cube();
+        subdivide_all(&mut bm, 1);
+        unsub(&mut bm, 2);
+        assert_eq!(counts(&bm), (8, 12, 6));
+        assert_valid(&bm);
+        // Twice subdivided (counts verified with `bmesh.ops.unsubdivide` on Blender 5.2.4): one
+        // iteration removes every other vertex of the grid, two iterations undo one level.
+        let mut bm = cube();
+        subdivide_all(&mut bm, 1);
+        subdivide_all(&mut bm, 1);
+        assert_eq!(counts(&bm), (98, 192, 96));
+        unsub(&mut bm, 1);
+        assert_eq!(counts(&bm), (50, 96, 48));
+        unsub(&mut bm, 1);
+        assert_eq!(counts(&bm), (26, 48, 24));
+        assert_valid(&bm);
+    }
+
+    #[test]
+    fn untagged_vertices_stay() {
+        let mut bm = grid_bm(4, 4);
+        let before = counts(&bm);
+        unsubdivide(
+            &mut bm,
+            &UnsubdivideIn {
+                verts: Vec::new(),
+                iterations: 3,
+            },
+        )
+        .unwrap();
+        assert_eq!(counts(&bm), before);
+        unsub(&mut bm, 1);
+        assert!(bm.verts_num() < before.0);
+        assert_valid(&bm);
+        assert!(matches!(
+            unsubdivide(
+                &mut bm,
+                &UnsubdivideIn {
+                    verts: vec![VertId(9999)],
+                    iterations: 1
+                }
+            ),
+            Err(BmError::Invalid(_))
+        ));
+    }
+
+    #[test]
+    fn canonical_collapse_detects_doubles() {
+        // Two quads around the same centre that collapse to the same triangle.
+        let mut bm = BMesh::new();
+        let p = |bm: &mut BMesh, co: [f32; 3]| {
+            bm.vert_create(co, None, crate::CreateFlag::empty())
+        };
+        let c = p(&mut bm, [0.0, 0.0, 0.0]);
+        let a = p(&mut bm, [1.0, 0.0, 0.0]);
+        let b = p(&mut bm, [0.0, 1.0, 0.0]);
+        let d = p(&mut bm, [-1.0, 0.0, 0.0]);
+        let f1 = bm
+            .face_create_verts(&[c, a, b, d], None, crate::CreateFlag::empty(), true)
+            .unwrap();
+        let f2 = bm
+            .face_create_verts(&[c, d, b, a], None, crate::CreateFlag::empty(), true)
+            .unwrap();
+        let l1 = bm.face_vert_share_loop(f1, c).unwrap();
+        let l2 = bm.face_vert_share_loop(f2, c).unwrap();
+        assert!(fan_makes_double_with_self(&bm, &[l1, l2]));
+        assert!(!fan_makes_double_with_self(&bm, &[l1]));
+    }
+}
