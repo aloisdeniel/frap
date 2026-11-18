@@ -4,9 +4,20 @@
 //! triplets (duplicates summed, `setFromTriplets`) and Blender solves the normal equations
 //! `MᵀM x = Mᵀb` with Eigen's `SparseLU` in double precision. For the square, non-singular
 //! matrices this modifier builds that is the solution of `M x = b`, which is computed here in
-//! double precision with BiCGSTAB (Jacobi-preconditioned) to a relative residual of 1e-13, and
-//! with a dense partial-pivot LU when the iteration does not converge. A singular matrix
-//! (`SparseLU` failure) returns `None`, as `EIG_linear_solver_solve` returns false.
+//! double precision with BiCGSTAB (Jacobi-preconditioned) to a relative residual of 1e-13. When
+//! BiCGSTAB breaks down, the normal equations themselves are solved with conjugate gradients
+//! (CGNR, which cannot break down on a non-singular system), and small systems finally with a
+//! dense partial-pivot LU.
+//!
+//! This is not a port of Eigen's `SparseLU` (supernodal, COLAMD-ordered), so the rounding
+//! differs: results agree with Blender to ~1e-5 in positions, and corner normals of faces that
+//! a very strong λ (≥ ~100) shrinks to near-degenerate size can differ by a few 1e-4 (listed
+//! deviation). A singular matrix (`SparseLU` failure) or a non-finite matrix or right-hand side
+//! (a NaN vertex position; Blender 5.2.4 then leaves the mesh unsmoothed, verified) returns
+//! `None`, as `EIG_linear_solver_solve` returns false.
+
+/// The largest system [`Csr::dense_solve`] factors (about 0.3 G flops).
+const DENSE_MAX: usize = 1000;
 
 /// A square sparse matrix in compressed rows.
 pub(crate) struct Csr {
@@ -72,16 +83,79 @@ impl Csr {
         d
     }
 
-    /// Solves `M x = b` for every right-hand side; `None` when the matrix is singular.
+    /// Solves `M x = b` for every right-hand side; `None` when the matrix is singular or the
+    /// system is not finite.
     pub fn solve(&self, rhs: &[Vec<f64>]) -> Option<Vec<Vec<f64>>> {
+        if self.vals.iter().chain(rhs.iter().flatten()).any(|v| !v.is_finite()) {
+            return None;
+        }
         let mut out = Vec::with_capacity(rhs.len());
         for b in rhs {
-            match self.bicgstab(b) {
+            match self.bicgstab(b).or_else(|| self.cgnr(b)) {
                 Some(x) => out.push(x),
                 None => return self.dense_solve(rhs),
             }
         }
-        Some(out)
+        out.iter()
+            .flatten()
+            .all(|v| v.is_finite())
+            .then_some(out)
+    }
+
+    /// `out = Mᵀ x`.
+    fn mul_t(&self, x: &[f64], out: &mut [f64]) {
+        out.fill(0.0);
+        for (r, &xr) in x.iter().enumerate() {
+            for k in self.offsets[r]..self.offsets[r + 1] {
+                out[self.cols[k]] += self.vals[k] * xr;
+            }
+        }
+    }
+
+    /// Conjugate gradients on the normal equations `MᵀM x = Mᵀb` (CGNR), Blender's system.
+    /// Accepted only when `M x = b` holds to a relative residual of 1e-9 (a singular `M` has
+    /// least-squares solutions that do not solve the system).
+    fn cgnr(&self, b: &[f64]) -> Option<Vec<f64>> {
+        let n = self.n;
+        let dot = |a: &[f64], c: &[f64]| a.iter().zip(c).map(|(x, y)| x * y).sum::<f64>();
+        let bnorm = dot(b, b).sqrt();
+        if bnorm == 0.0 {
+            return Some(vec![0.0; n]);
+        }
+        let mut x = vec![0.0; n];
+        let mut r = b.to_vec();
+        let mut z = vec![0.0; n];
+        self.mul_t(&r, &mut z);
+        let mut p = z.clone();
+        let mut w = vec![0.0; n];
+        let mut zz = dot(&z, &z);
+        let ztol = zz * 1e-30;
+        for _ in 0..(10 * n + 200) {
+            frap_math::budget::check();
+            if zz <= ztol || dot(&r, &r).sqrt() <= 1e-13 * bnorm {
+                break;
+            }
+            self.mul(&p, &mut w);
+            let ww = dot(&w, &w);
+            if ww == 0.0 || !ww.is_finite() {
+                break;
+            }
+            let alpha = zz / ww;
+            for i in 0..n {
+                x[i] += alpha * p[i];
+                r[i] -= alpha * w[i];
+            }
+            self.mul_t(&r, &mut z);
+            let zz_new = dot(&z, &z);
+            let beta = zz_new / zz;
+            zz = zz_new;
+            for i in 0..n {
+                p[i] = z[i] + beta * p[i];
+            }
+        }
+        self.mul(&x, &mut w);
+        let res = w.iter().zip(b).map(|(a, c)| (a - c) * (a - c)).sum::<f64>().sqrt();
+        (res <= 1e-9 * bnorm && x.iter().all(|v| v.is_finite())).then_some(x)
     }
 
     fn bicgstab(&self, b: &[f64]) -> Option<Vec<f64>> {
@@ -164,10 +238,11 @@ impl Csr {
         None
     }
 
-    /// Dense LU with partial pivoting (fallback for small systems).
+    /// Dense LU with partial pivoting: the last fallback, for small systems only (it is
+    /// `O(n³)`; above [`DENSE_MAX`] unknowns CGNR is final).
     fn dense_solve(&self, rhs: &[Vec<f64>]) -> Option<Vec<Vec<f64>>> {
         let n = self.n;
-        if n > 4000 {
+        if n > DENSE_MAX {
             return None;
         }
         let mut a = vec![0.0f64; n * n];
@@ -251,5 +326,35 @@ mod tests {
     fn singular_is_none() {
         let m = Csr::from_triplets(2, vec![(0, 0, 1.0), (0, 1, 1.0), (1, 0, 1.0), (1, 1, 1.0)]);
         assert!(m.solve(&[vec![1.0, 2.0]]).is_none());
+    }
+
+    /// A system Jacobi-preconditioned BiCGSTAB cannot start on (zero diagonal); CGNR solves it.
+    #[test]
+    fn cgnr_solves_what_bicgstab_breaks_down_on() {
+        // [[0, 1], [-1, 0]] x = (1, 2) → x = (-2, 1).
+        let m = Csr::from_triplets(2, vec![(0, 1, 1.0), (1, 0, -1.0)]);
+        let b = vec![1.0, 2.0];
+        assert!(m.bicgstab(&b).is_none());
+        let x = m.cgnr(&b).unwrap();
+        assert!((x[0] + 2.0).abs() < 1e-9 && (x[1] - 1.0).abs() < 1e-9, "{x:?}");
+        let x = m.solve(&[b]).unwrap();
+        assert!((x[0][0] + 2.0).abs() < 1e-9);
+    }
+
+    /// CGNR rejects the least-squares "solution" of a singular system.
+    #[test]
+    fn cgnr_singular_is_none() {
+        let m = Csr::from_triplets(2, vec![(0, 0, 1.0), (0, 1, 1.0), (1, 0, 1.0), (1, 1, 1.0)]);
+        assert!(m.cgnr(&[1.0, 2.0]).is_none());
+    }
+
+    /// A NaN in the system fails the solve (Blender leaves the mesh unsmoothed).
+    #[test]
+    fn non_finite_is_none() {
+        let m = Csr::from_triplets(2, vec![(0, 0, 2.0), (1, 1, f64::NAN)]);
+        assert!(m.solve(&[vec![1.0, 2.0]]).is_none());
+        let m = Csr::from_triplets(2, vec![(0, 0, 2.0), (1, 1, 2.0)]);
+        assert!(m.solve(&[vec![1.0, f64::NAN]]).is_none());
+        assert!(m.solve(&[vec![1.0, 2.0]]).is_some());
     }
 }

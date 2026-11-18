@@ -66,10 +66,13 @@ pub(crate) struct Control {
 }
 
 fn control(object: Option<IdAny>, cx: &mut dyn ModEvalCx) -> Option<Control> {
+    // Blender refuses to assign the modified object itself ("ID type does not support
+    // assignment to itself"), so a self reference counts as no control object.
+    let own = cx.object_ref();
     let ob = object
         .and_then(IdRef::<ObjectId>::from_any)
-        .filter(|o| cx.main().objects.get(*o).is_some())?;
-    let ob_world = cx.object_matrix_world(cx.object_ref());
+        .filter(|o| *o != own && cx.main().objects.get(*o).is_some())?;
+    let ob_world = cx.object_matrix_world(own);
     let ctrl_world = cx.object_matrix_world(ob);
     // invert_m4_m4(imat, ctrl->object_to_world); mul_m4_m4m4(mat, imat, ob->object_to_world).
     let mat = ctrl_world.inverse() * ob_world;
@@ -352,5 +355,16 @@ mod tests {
             ..CastSettings::default()
         }))
         .contains(&ctrl.any()));
+    }
+
+    /// Blender refuses `object = <the modified object>`; frap treats such a reference as no
+    /// control object (not an identity control frame).
+    #[test]
+    fn self_reference_is_no_control_object() {
+        let mut cx = TestCx::new();
+        cx.matrices
+            .insert(cx.ob, Mat4::from_translation(Vec3::new(1.0, 2.0, 3.0)));
+        let own = cx.ob;
+        assert!(control(Some(own.any()), &mut cx).is_none());
     }
 }

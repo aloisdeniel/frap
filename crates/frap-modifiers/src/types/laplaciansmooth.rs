@@ -403,6 +403,32 @@ mod tests {
         }
     }
 
+    /// Golden fixtures on Suzanne (`tests/golden/cases/modifiers/b/laplaciansmooth/`), run on
+    /// the modifier alone: the defaults, and an extreme λ (1000, 4 iterations) whose
+    /// ill-conditioned system frap does not solve with Eigen's `SparseLU`, so its corner normals
+    /// only agree to 5e-4 (listed deviation) while positions agree to 1e-4.
+    #[test]
+    fn suzanne_matches_blender() {
+        use frap_mesh::primitives::monkey::{Monkey, monkey};
+        for (case, lambda, iterations, normal_tol) in [
+            ("defaults", 0.01, 1, 1e-4),
+            ("strong_lambda", 1000.0, 4, 5e-4),
+        ] {
+            let d = load(&format!("laplaciansmooth/{case}.blender.json"));
+            let want = &d["evaluated"]["Suzanne"];
+            let s = LaplacianSmoothSettings {
+                lambda_factor: lambda,
+                iterations,
+                ..LaplacianSmoothSettings::default()
+            };
+            let out = deform(monkey(&Monkey::default()), |m, cos| {
+                laplacian_smooth_do(&s, m, cos)
+            });
+            assert_positions(&out, want, 1e-4);
+            assert_corner_normals(&out, want, normal_tol);
+        }
+    }
+
     #[test]
     fn helpers() {
         assert_eq!(area_tri([0.0; 3], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]), 0.5);

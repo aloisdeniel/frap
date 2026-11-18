@@ -46,18 +46,20 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
     let ModifierSettings::Screw(s) = &md.settings else {
         return Ok(mesh);
     };
-    // The axis object's matrix relative to this object (`mtx_tx`).
+    // The axis object's matrix relative to this object (`mtx_tx`). Blender refuses to assign
+    // the modified object itself, so a self reference counts as no axis object.
+    let own = cx.object_ref();
     let mtx_tx = s
         .object
         .and_then(IdRef::<ObjectId>::from_any)
-        .filter(|o| cx.main().objects.get(*o).is_some())
+        .filter(|o| *o != own && cx.main().objects.get(*o).is_some())
         .map(|o| {
-            let own = cx.object_matrix_world(cx.object_ref());
+            let own = cx.object_matrix_world(own);
             let axis = cx.object_matrix_world(o);
             m4(own.inverse() * axis)
         });
     let render = cx.mode() == EvalMode::Render;
-    Ok(screw(s, mtx_tx, render, &mesh))
+    screw(s, mtx_tx, render, &mesh)
 }
 
 type V3 = [f32; 3];
@@ -210,13 +212,72 @@ enum UvOp {
     Set(f32, f32),
 }
 
+/// The output sizes of MOD_screw.cc: `(close, step_tot, max_verts, max_edges, max_polys)`.
+///
+/// Blender computes them in `uint` and wraps on overflow; frap computes them in `u64` and
+/// checks them against the element budget (ARCHITECTURE §12, `--max-elements` and Blender's
+/// `int` index range) before anything is allocated, failing with the `LIMIT` message.
+fn screw_sizes(
+    steps: u32,
+    iter: u32,
+    totvert: u32,
+    totedge: u32,
+    screw_ofs: f32,
+    angle: f32,
+) -> Result<(bool, u32, u32, u32, u32), ModError> {
+    let (steps, iter, totvert, totedge) = (
+        u64::from(steps),
+        u64::from(iter),
+        u64::from(totvert),
+        u64::from(totedge),
+    );
+    // `((step_tot + 1) * iter) - (iter - 1)`, which is `step_tot * iter + 1` (also for
+    // `iter == 0`, where Blender's `uint` arithmetic wraps back to 1).
+    let sizes = steps.checked_mul(iter).and_then(|n| n.checked_add(1)).and_then(|step_tot| {
+        let close = screw_ofs.abs() <= f32::EPSILON * 100.0
+            && (angle.abs() - std::f32::consts::PI * 2.0).abs() <= f32::EPSILON * 100.0
+            && step_tot > 3;
+        let (step_tot, verts, edges, polys) = if close {
+            let step_tot = step_tot - 1;
+            let verts = totvert.checked_mul(step_tot)?;
+            (step_tot, verts, verts.checked_add(totedge.checked_mul(step_tot)?)?, totedge.checked_mul(step_tot)?)
+        } else {
+            let step_tot = step_tot.max(2);
+            let verts = totvert.checked_mul(step_tot)?;
+            let edges = totvert
+                .checked_mul(step_tot - 1)?
+                .checked_add(totedge.checked_mul(step_tot)?)?;
+            (step_tot, verts, edges, totedge.checked_mul(step_tot - 1)?)
+        };
+        Some((close, step_tot, verts, edges, polys, polys.checked_mul(4)?))
+    });
+    let reserve = match sizes {
+        Some((.., verts, edges, polys, corners)) => frap_math::budget::reserve_corners(
+            Some(corners),
+            Some(verts.max(edges).max(polys).max(corners)),
+        ),
+        None => frap_math::budget::reserve_corners(None, None),
+    };
+    reserve.map_err(|e| ModError::Error(e.to_string()))?;
+    let (close, step_tot, verts, edges, polys, _) =
+        sizes.expect("reserve_corners rejects an overflowed estimate");
+    // Within Blender's `int` range now (`reserve_corners` checked it).
+    let n = |v: u64| u32::try_from(v).map_err(|_| ModError::Error("frap: limit exceeded".into()));
+    Ok((close, n(step_tot)?, n(verts)?, n(edges)?, n(polys)?))
+}
+
 // Ported from blender/source/blender/modifiers/intern/MOD_screw.cc (modify_mesh).
 /// The SCREW result of `mesh`; `mtx_tx` is the axis object's matrix in object space.
-pub(crate) fn screw(s: &ScrewSettings, mtx_tx: Option<M4>, render: bool, mesh: &Mesh) -> Mesh {
+pub(crate) fn screw(
+    s: &ScrewSettings,
+    mtx_tx: Option<M4>,
+    render: bool,
+    mesh: &Mesh,
+) -> Result<Mesh, ModError> {
     let totvert = mesh.verts_num() as u32;
     let totedge = mesh.edges_num() as u32;
     let faces_num = mesh.faces_num();
-    let mut step_tot = if render { s.render_steps } else { s.steps }.max(0) as u32;
+    let step_tot = if render { s.render_steps } else { s.steps }.max(0) as u32;
     let do_flip = s.use_normal_flip;
     let quad_ord: [usize; 4] = [
         if do_flip { 3 } else { 0 },
@@ -226,7 +287,7 @@ pub(crate) fn screw(s: &ScrewSettings, mtx_tx: Option<M4>, render: bool, mesh: &
     ];
     let quad_ord_ofs: [usize; 4] = [if do_flip { 2 } else { 0 }, 1, if do_flip { 0 } else { 2 }, 3];
     if totvert == 0 {
-        return rebuild(mesh, Topology::default(), &Sources::default());
+        return Ok(rebuild(mesh, Topology::default(), &Sources::default()));
     }
     let axis = match s.axis.as_str() {
         "X" => 0usize,
@@ -264,25 +325,10 @@ pub(crate) fn screw(s: &ScrewSettings, mtx_tx: Option<M4>, render: bool, mesh: &
     angle *= iter as f32;
     screw_ofs *= iter as f32;
     let mut uv_u_scale = 1.0 / step_tot as f32;
-    step_tot = ((step_tot + 1) * iter).wrapping_sub(iter.wrapping_sub(1));
-    let close;
-    let (max_verts, max_edges, max_polys);
-    if screw_ofs.abs() <= f32::EPSILON * 100.0
-        && (angle.abs() - std::f32::consts::PI * 2.0).abs() <= f32::EPSILON * 100.0
-        && step_tot > 3
-    {
-        close = true;
-        step_tot -= 1;
-        max_verts = totvert * step_tot;
-        max_edges = totvert * step_tot + totedge * step_tot;
-        max_polys = totedge * step_tot;
+    let sizes = screw_sizes(step_tot, iter, totvert, totedge, screw_ofs, angle)?;
+    let (close, step_tot, max_verts, max_edges, max_polys) = sizes;
+    if close {
         screw_ofs = 0.0;
-    } else {
-        close = false;
-        step_tot = step_tot.max(2);
-        max_verts = totvert * step_tot;
-        max_edges = totvert * (step_tot - 1) + totedge * step_tot;
-        max_polys = totedge * (step_tot - 1);
     }
     if !s.use_stretch_u {
         uv_u_scale = (uv_u_scale / iter as f32) * (angle / (std::f32::consts::PI * 2.0));
@@ -705,7 +751,7 @@ pub(crate) fn screw(s: &ScrewSettings, mtx_tx: Option<M4>, render: bool, mesh: &
             s.merge_threshold,
         );
     }
-    result
+    Ok(result)
 }
 
 // Ported from blender/source/blender/modifiers/intern/MOD_screw.cc (mesh_remove_doubles_on_axis).
@@ -948,7 +994,7 @@ mod tests {
             eprintln!("screw case {name}");
             let mesh = mesh_from_dump(&case["input"]);
             let s = settings(&case["props"]);
-            let out = screw(&s, None, false, &mesh);
+            let out = screw(&s, None, false, &mesh).unwrap();
             let want = &case["output"];
             assert_topology(&out, want);
             assert_positions(&out, want, 2e-5);
@@ -979,7 +1025,7 @@ mod tests {
             use_merge_vertices: true,
             ..ScrewSettings::default()
         };
-        let out = screw(&s, None, false, &profile());
+        let out = screw(&s, None, false, &profile()).unwrap();
         // 2 axis vertices + 2 ring vertices × 8.
         assert_eq!(out.verts_num(), 2 + 2 * 8);
         // 8 quads + 16 triangles.
@@ -988,9 +1034,67 @@ mod tests {
             steps: 8,
             ..ScrewSettings::default()
         };
-        let out = screw(&s, None, false, &profile());
+        let out = screw(&s, None, false, &profile()).unwrap();
         assert_eq!(out.verts_num(), 4 * 8);
         assert_eq!(out.faces_num(), 3 * 8);
         assert_eq!(out.edges_num(), 4 * 8 + 3 * 8);
+    }
+
+    /// A 32-vertex circle (edges only).
+    fn circle() -> Mesh {
+        let n = 32;
+        let mut m = Mesh::new("C");
+        m.set_positions(
+            (0..n)
+                .map(|i| {
+                    let a = i as f32 / n as f32 * std::f32::consts::TAU;
+                    [libm::cosf(a) + 2.0, 0.0, libm::sinf(a)]
+                })
+                .collect(),
+        );
+        m.set_topology(vec![0], vec![], (0..n).map(|i| [i, (i + 1) % n]).collect());
+        m
+    }
+
+    /// Settings within RNA range whose output does not fit Blender's `int` range fail with the
+    /// `LIMIT` message instead of overflowing (ARCHITECTURE §12).
+    #[test]
+    fn huge_steps_times_iterations_is_a_limit_error() {
+        let s = ScrewSettings {
+            steps: 10000,
+            render_steps: 10000,
+            iterations: 10000,
+            ..ScrewSettings::default()
+        };
+        for render in [false, true] {
+            let Err(ModError::Error(msg)) = screw(&s, None, render, &circle()) else {
+                panic!("expected a limit error");
+            };
+            assert!(msg.contains("limit exceeded (max_elements)"), "{msg}");
+        }
+    }
+
+    /// `--max-elements` rejects a moderate screw before it is built.
+    #[test]
+    fn max_elements_budget_rejects_a_moderate_screw() {
+        let s = ScrewSettings {
+            steps: 100,
+            iterations: 100,
+            ..ScrewSettings::default()
+        };
+        let _scope = frap_math::budget::scope(frap_math::budget::Budget {
+            timeout: None,
+            max_elements: 1000,
+        });
+        let Err(ModError::Error(msg)) = screw(&s, None, false, &circle()) else {
+            panic!("expected a limit error");
+        };
+        assert!(msg.contains("(limit 1000)"), "{msg}");
+        // A small one still fits.
+        let s = ScrewSettings {
+            steps: 4,
+            ..ScrewSettings::default()
+        };
+        assert!(screw(&s, None, false, &circle()).is_ok());
     }
 }

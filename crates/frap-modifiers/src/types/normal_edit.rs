@@ -70,9 +70,13 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
     let ModifierSettings::NormalEdit(s) = &md.settings else {
         return Ok(mesh);
     };
+    // Blender refuses to assign the modified object itself, so a self reference counts as no
+    // target.
+    let own = cx.object_ref();
     let target = s
         .target
         .and_then(IdRef::<ObjectId>::from_any)
+        .filter(|r| *r != own)
         .and_then(|r| cx.main().objects.get(r).map(|o| (r, o.scale)))
         .map(|(r, scale)| Target {
             world: cx.object_matrix_world(r),
@@ -81,7 +85,7 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
     if s.mode == "DIRECTIONAL" && target.is_none() {
         return Err(ModError::Error("Invalid target settings".into()));
     }
-    let ob_world = cx.object_matrix_world(cx.object_ref());
+    let ob_world = cx.object_matrix_world(own);
     Ok(normal_edit(s, ob_world, target.as_ref(), mesh))
 }
 
