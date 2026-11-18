@@ -31,7 +31,8 @@
 //! `UNTAN_MULTIRES`, a no-op without multires).
 //!
 //! `custom_patterns` (internal in Blender, not reachable from Python) maps a face to an index
-//! of [`PATTERN_TABLE`].
+//! of [`PATTERN_TABLE`]; a pattern whose length differs from the face's is ignored (Blender
+//! would read past the face's corners). Negative `cuts` make no cuts (undefined in Blender).
 
 pub(crate) mod blimath;
 mod noise;
@@ -801,7 +802,8 @@ fn exec(
     for &e in &i.edges {
         bm.oflag_enable(e, SUBD_SPLIT);
     }
-    let numcuts = i.cuts;
+    // Negative cuts are undefined in Blender (negative pattern indices); none are made.
+    let numcuts = i.cuts.max(0);
 
     // `patterns[]`: quad single edge, quad corner, tri single edge, quad grid, quad 3 edges,
     // tri grid.
@@ -913,13 +915,17 @@ fn exec(
         if bm.oflag_test(face, FACE_CUSTOMFILL) {
             let pat = custom[&face];
             let len = pat.seledges.len();
+            // A pattern of another length than the face would make Blender read past the
+            // face's corners; frap does not apply it.
+            if len != flen {
+                continue;
+            }
             for r in 0..len {
-                // Blender indexes the face's edges with the pattern length.
-                let matched = (0..len).all(|j| edges.get((j + r) % len).is_some_and(|&e| sel(e)) == pat.seledges[j]);
+                let matched = (0..len).all(|j| sel(edges[(j + r) % len]) == pat.seledges[j]);
                 if matched {
                     bm.oflag_enable(face, SUBD_SPLIT);
                     facedata.push(FaceData {
-                        start: verts.get(r).copied(),
+                        start: Some(verts[r]),
                         pat: Some(pat),
                         totedgesel: totesel,
                         face,
@@ -1394,6 +1400,25 @@ pub(crate) mod tests {
             },
         );
         assert!(matches!(bad, Err(BmError::Invalid(_))));
+    }
+
+    #[test]
+    fn negative_cuts_change_nothing() {
+        let mut bm = cube();
+        let edges = bm.edge_ids();
+        subdivide_edges(
+            &mut bm,
+            &SubdivideEdgesIn {
+                edges,
+                cuts: -3,
+                use_grid_fill: true,
+                use_single_edge: true,
+                ..SubdivideEdgesIn::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(bm.verts_num(), 8);
+        assert_valid(&bm);
     }
 
     #[test]
