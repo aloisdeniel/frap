@@ -66,7 +66,16 @@ fn can_enter(cx: &mut OpCtx, ob: IdRef<ObjectId>) -> Result<IdRef<MeshId>, Skip>
         return Err(Skip::Library(o.header.name.to_string()));
     }
     if edit.meshes.contains_key(&me.key()) {
-        return Err(Skip::AlreadyEditing);
+        // `BKE_object_is_in_editmode`: another object in Edit Mode uses this mesh. An entry no
+        // object in Edit Mode uses any more is stale (cannot happen through the guarded paths)
+        // and is replaced.
+        let users_editing = c.main.objects.iter().any(|(r, x)| {
+            r != ob && x.mode == ObjectMode::Edit && x.data == Some(me.any())
+        });
+        if users_editing {
+            return Err(Skip::AlreadyEditing);
+        }
+        edit.meshes.remove(&me.key());
     }
     Ok(me)
 }
@@ -128,7 +137,30 @@ fn enter(cx: &mut OpCtx, objects: &[IdRef<ObjectId>]) -> OpResult {
     Ok(OpStatus::Finished)
 }
 
+/// `EDBM_mesh_load_ex` + free: writes the edit BMesh of `me` back and drops it.
+fn load(cx: &mut OpCtx, me: IdRef<MeshId>) -> Result<(), OpError> {
+    let em = cx.split_edit().1.meshes.remove(&me.key());
+    if let Some(em) = em
+        && let Some(template) = cx.main().meshes.get(me)
+    {
+        let params = ToMeshParams {
+            calc_object_remap: true,
+            update_shapekey_indices: false,
+        };
+        let loaded = em.bm.to_mesh(template, &params);
+        let m = cx.mesh_mut(me)?;
+        // Keep the header `mesh_mut` just bumped (generation, name).
+        let header = m.header.clone();
+        *m = loaded;
+        m.header = header;
+    }
+    Ok(())
+}
+
 /// Leaves mesh Edit Mode for `objects`: `EDBM_mesh_load_ex` + free, `Object.mode = 'OBJECT'`.
+/// Afterwards no edit BMesh outlives every object in Edit Mode that uses its mesh: an orphan
+/// (its mesh no longer the data of an object in Edit Mode) is written back and dropped too, so
+/// the mesh never stays locked against writes in Object Mode.
 fn exit(cx: &mut OpCtx, objects: &[IdRef<ObjectId>]) -> OpResult {
     for &ob in objects {
         let Some(o) = cx.main().objects.get(ob) else {
@@ -138,24 +170,26 @@ fn exit(cx: &mut OpCtx, objects: &[IdRef<ObjectId>]) -> OpResult {
             continue;
         }
         if let Some(me) = o.data.and_then(|d| d.typed::<MeshId>()) {
-            let em = cx.split_edit().1.meshes.remove(&me.key());
-            if let Some(em) = em
-                && let Some(template) = cx.main().meshes.get(me)
-            {
-                let params = ToMeshParams {
-                    calc_object_remap: true,
-                    update_shapekey_indices: false,
-                };
-                let loaded = em.bm.to_mesh(template, &params);
-                let m = cx.mesh_mut(me)?;
-                // Keep the header `mesh_mut` just bumped (generation, name).
-                let header = m.header.clone();
-                *m = loaded;
-                m.header = header;
-            }
+            load(cx, me)?;
         }
         cx.object_mut(ob)?.mode = ObjectMode::Object;
         cx.main_mut().1.context_changed = true;
+    }
+    let orphans: Vec<IdRef<MeshId>> = {
+        let (c, edit) = cx.split_edit();
+        edit.meshes
+            .keys()
+            .map(|k| IdRef::<MeshId>::from_key(*k))
+            .filter(|me| {
+                !c.main
+                    .objects
+                    .iter()
+                    .any(|(_, o)| o.mode == ObjectMode::Edit && o.data == Some(me.any()))
+            })
+            .collect()
+    };
+    for me in orphans {
+        load(cx, me)?;
     }
     Ok(OpStatus::Finished)
 }

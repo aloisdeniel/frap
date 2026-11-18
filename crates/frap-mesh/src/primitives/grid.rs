@@ -78,6 +78,7 @@ pub(crate) fn create_grid(name: &str, x_segments: i32, y_segments: i32, dia: f32
     if calc_uvs {
         let dx = 1.0f32 / xtot as f32;
         let dy = 1.0f32 / ytot as f32;
+        bm.uvs_follow_face_order = true;
         for (face_index, slot) in bm.faces.slots.iter_mut().enumerate() {
             let f = slot.as_mut().expect("no kills");
             let ix = face_index % xtot;

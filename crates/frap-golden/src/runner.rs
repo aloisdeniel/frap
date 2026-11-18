@@ -779,9 +779,6 @@ struct Dumper<'a> {
     props: &'a Props,
     fallbacks: Vec<String>,
     context: Option<J>,
-    /// The `edit_mesh` block of the last read (§13.2): active element and selection history
-    /// per object in Edit Mode (M2, WP 2.2).
-    edit_mesh: Option<J>,
 }
 
 impl Dumper<'_> {
@@ -796,7 +793,6 @@ impl Dumper<'_> {
         if let Some(c) = &r.context {
             self.context = Some(c.clone());
         }
-        self.edit_mesh = r.edit_mesh.clone();
         if r.ok() {
             Ok(r.value.ok_or_else(|| format!("{expr}: no value"))?)
         } else {
@@ -843,7 +839,7 @@ impl Dumper<'_> {
     /// Edit-mode state of a `mesh:` dump (M2, WP 2.2; mirrors `dump_state.py::dump_mesh`
     /// with `edit=True`): when an object in Edit Mode uses the mesh, the selected indices read
     /// through RNA (the edit-mode view) and the active element and selection history of the
-    /// response's `edit_mesh` block.
+    /// session's full `edit_mesh` block.
     fn edit_state(&mut self, mesh: &str, m: &mut GMesh) -> Result<(), ReadErr> {
         let editor = {
             let main = self.session.main();
@@ -877,8 +873,10 @@ impl Dumper<'_> {
             sel.insert((*key).to_owned(), J::Array(picked));
         }
         m.selection = J::Object(sel);
+        // The whole selection history (responses cap it outside `--verbosity full`).
         let entry = self
-            .edit_mesh
+            .session
+            .edit_mesh_block(true)
             .as_ref()
             .and_then(|b| b.get(&editor))
             .cloned()
@@ -1167,7 +1165,6 @@ pub fn run_frap(case: &Case, props: &Props, opts: &RunOptions) -> Result<FrapRun
         props,
         fallbacks: Vec::new(),
         context: None,
-        edit_mesh: None,
     };
 
     // 1. The statements.
@@ -1731,7 +1728,6 @@ mod tests {
             props: &props,
             fallbacks: Vec::new(),
             context: None,
-            edit_mesh: None,
         };
         let case = Case::parse(Path::new("y.py"), "# golden: tier=T0\nbpy.data\n").unwrap();
         // Not bound: fallback.

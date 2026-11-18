@@ -18,6 +18,7 @@ use crate::mesh::{
     SHARP_FACE, UV_SELECT_EDGE, UV_SELECT_FACE, UV_SELECT_VERT, bool_attr,
 };
 use crate::primitives::UV_MAP_NAME;
+use crate::primitives::trace::{self, Build, ConeTopology};
 
 pub(crate) type V3 = [f32; 3];
 
@@ -89,6 +90,10 @@ pub(crate) struct Bm {
     pub edges: Pool<[u32; 2]>,
     pub faces: Pool<Face>,
     emap: HashMap<(u32, u32), u32>,
+    /// `calc_uvs` assigned UVs in face iteration order (cube, grid): see [`Build`].
+    pub uvs_follow_face_order: bool,
+    /// The cone builder's topology parameters: see [`Build::cone`].
+    pub cone: Option<ConeTopology>,
 }
 
 impl Bm {
@@ -184,6 +189,12 @@ impl Bm {
     /// `.corner_vert`, `.corner_edge`). The `.select_*`/`sharp_face` flags exist only when
     /// their domain is non-empty; the UV selection attributes exist (all false) with a UV map.
     pub fn to_mesh(&self, name: &str, calc_uvs: bool) -> Mesh {
+        // What an Edit Mode merge needs besides the mesh (`primitives::trace`).
+        trace::store(Build {
+            uvs_follow_face_order: self.uvs_follow_face_order,
+            counts: (self.verts.live(), self.edges.live(), self.faces.live()),
+            cone: self.cone,
+        });
         let mut vindex = vec![u32::MAX; self.verts.slots.len()];
         let mut positions = Vec::with_capacity(self.verts.live());
         for (i, co) in self.verts.iter() {

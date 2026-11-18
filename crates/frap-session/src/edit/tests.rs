@@ -220,7 +220,7 @@ fn edit_mesh_block_reports_counts_selection_and_active() {
         serde_json::json!({
             "verts": 8, "edges": 12, "faces": 6, "tris": 12, "select_mode": ["VERT"],
             "selected": {"verts": 8, "edges": 12, "faces": 6},
-            "active": null, "select_history": [],
+            "active": null, "select_history": [], "select_history_len": 0,
         })
     );
     let r = ok(
@@ -345,5 +345,200 @@ fn frap_files_re_enter_edit_mode_on_load() {
         value(&mut t, "bpy.data.meshes['Cube'].vertices[8].select"),
         true
     );
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+#[test]
+fn object_data_cannot_be_reassigned_in_edit_mode() {
+    let mut s = session();
+    ok(&mut s, "bpy.data.meshes.new('Other')");
+    ok(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
+    for src in [
+        "bpy.data.objects['Cube'].data = bpy.data.meshes['Other']",
+        "bpy.context.active_object.data = bpy.data.meshes['Other']",
+    ] {
+        let e = error(&mut s, src);
+        assert_eq!(e["code"], "RNA_EDITMODE_WRITE", "{src}: {e}");
+        assert_eq!(e["detail"]["object"], "Cube", "{e}");
+        assert_eq!(e["hint"], "bpy.ops.object.mode_set(mode='OBJECT')", "{e}");
+    }
+    // The edit session is intact: operators still run on the edit mesh.
+    let r = ok(&mut s, "bpy.ops.mesh.select_all(action='DESELECT')");
+    assert_eq!(r["edit_mesh"]["Cube"]["selected"]["verts"], 0, "{r}");
+    ok(&mut s, "bpy.ops.object.mode_set(mode='OBJECT')");
+    assert!(bm_gen(&s, "Cube").is_none(), "the edit BMesh is gone");
+    // In Object Mode the assignment works, and the old mesh is writable again.
+    ok(
+        &mut s,
+        "bpy.data.objects['Cube'].data = bpy.data.meshes['Other']",
+    );
+    ok(&mut s, "bpy.data.meshes['Cube'].vertices[0].co = (1, 2, 3)");
+    ok(
+        &mut s,
+        "bpy.data.objects['Cube'].data = bpy.data.meshes['Cube']",
+    );
+    ok(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
+    assert_eq!(value(&mut s, "bpy.data.objects['Cube'].mode"), "EDIT");
+    assert!(bm_gen(&s, "Cube").is_some());
+}
+
+#[test]
+fn tool_settings_select_mode_converts_the_active_edit_mesh() {
+    let mut s = session();
+    ok(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
+    ok(&mut s, "bpy.ops.mesh.select_all(action='DESELECT')");
+    ok(
+        &mut s,
+        "bpy.ops.frap.select_elements(type='VERT', indices=[0, 1, 2])",
+    );
+    let g0 = bm_gen(&s, "Cube");
+    let r = ok(
+        &mut s,
+        "bpy.context.tool_settings.mesh_select_mode = (False, False, True)",
+    );
+    let c = &r["edit_mesh"]["Cube"];
+    assert_eq!(c["select_mode"], serde_json::json!(["FACE"]), "{r}");
+    assert_eq!(
+        c["selected"],
+        serde_json::json!({"verts": 0, "edges": 0, "faces": 0}),
+        "{r}"
+    );
+    assert_ne!(bm_gen(&s, "Cube"), g0, "the BMesh changed");
+    assert_eq!(value(&mut s, "bpy.data.meshes['Cube'].total_vert_sel"), 0);
+    // An empty mode is ignored.
+    ok(
+        &mut s,
+        "bpy.context.tool_settings.mesh_select_mode = (False, False, False)",
+    );
+    assert_eq!(
+        value(&mut s, "bpy.context.tool_settings.mesh_select_mode[:]"),
+        serde_json::json!([false, false, true])
+    );
+    let r = ok(&mut s, "bpy.ops.mesh.select_all(action='INVERT')");
+    assert_eq!(
+        r["edit_mesh"]["Cube"]["selected"],
+        serde_json::json!({"verts": 8, "edges": 12, "faces": 6}),
+        "{r}"
+    );
+    // Setting the mode it already has keeps the BMesh.
+    let g0 = bm_gen(&s, "Cube");
+    ok(
+        &mut s,
+        "bpy.context.scene.tool_settings.mesh_select_mode = (False, False, True)",
+    );
+    assert_eq!(bm_gen(&s, "Cube"), g0);
+}
+
+#[test]
+fn total_sel_counts_read_the_edit_bmesh() {
+    let mut s = session();
+    assert_eq!(value(&mut s, "bpy.data.meshes['Cube'].total_vert_sel"), 0);
+    ok(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
+    ok(
+        &mut s,
+        "bpy.ops.frap.select_elements(type='FACE', indices=[0])",
+    );
+    assert_eq!(value(&mut s, "bpy.data.meshes['Cube'].total_vert_sel"), 4);
+    assert_eq!(value(&mut s, "bpy.data.meshes['Cube'].total_edge_sel"), 4);
+    assert_eq!(value(&mut s, "bpy.data.meshes['Cube'].total_face_sel"), 1);
+    ok(&mut s, "bpy.ops.object.mode_set(mode='OBJECT')");
+    // 0 outside Edit Mode (verified on 5.2.4).
+    assert_eq!(value(&mut s, "bpy.data.meshes['Cube'].total_face_sel"), 0);
+}
+
+#[test]
+fn responses_cap_the_selection_history() {
+    let mut s = session();
+    ok(
+        &mut s,
+        "bpy.ops.mesh.primitive_grid_add(x_subdivisions=9, y_subdivisions=9)",
+    );
+    ok(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
+    ok(&mut s, "bpy.ops.mesh.select_all(action='DESELECT')");
+    let mut last = J::Null;
+    for i in 0..20 {
+        last = ok(
+            &mut s,
+            &format!("bpy.ops.frap.select_elements(type='VERT', indices=[{i}], action='ADD')"),
+        );
+    }
+    let c = &last["edit_mesh"]["Grid"];
+    assert_eq!(c["select_history_len"], 20, "{last}");
+    let h = c["select_history"].as_array().unwrap();
+    assert_eq!(h.len(), super::HISTORY_CAP);
+    assert_eq!(h[0], serde_json::json!({"type": "VERT", "index": 12}));
+    assert_eq!(
+        c["active"],
+        serde_json::json!({"type": "VERT", "index": 19})
+    );
+    // The full block (golden dumper, `--verbosity full`) keeps every entry, in order.
+    let full = s.edit_mesh_block(true).unwrap();
+    let h = full["Grid"]["select_history"].as_array().unwrap().clone();
+    assert_eq!(h.len(), 20);
+    assert_eq!(h[0], serde_json::json!({"type": "VERT", "index": 0}));
+    assert_eq!(h[19], serde_json::json!({"type": "VERT", "index": 19}));
+}
+
+#[test]
+fn renaming_a_layer_in_edit_mode_says_frap_does_not_support_it() {
+    let mut s = session();
+    ok(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
+    let e = error(
+        &mut s,
+        "bpy.data.meshes['Cube'].uv_layers['UVMap'].name = 'Other'",
+    );
+    assert_eq!(e["code"], "RNA_EDITMODE_WRITE", "{e}");
+    let msg = e["message"].as_str().unwrap();
+    assert!(
+        msg.contains("frap does not support it in Edit Mode yet"),
+        "{msg}"
+    );
+    let e = error(&mut s, "bpy.data.meshes['Cube'].vertices[0].co = (1, 2, 3)");
+    let msg = e["message"].as_str().unwrap();
+    assert!(msg.contains("Blender would discard the write"), "{msg}");
+}
+
+#[test]
+fn frap_files_reenter_edit_mode_only_where_blender_does() {
+    let dir = std::env::temp_dir().join(format!("frap-edit-cond-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let a = dir.join("a.frap").to_string_lossy().replace('\\', "/");
+    let b = dir.join("b.frap").to_string_lossy().replace('\\', "/");
+    // Saved with the camera active: both edited meshes load in Object Mode.
+    let mut s = session();
+    ok(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
+    ok(
+        &mut s,
+        "bpy.context.view_layer.objects.active = bpy.data.objects['Camera']",
+    );
+    assert_eq!(value(&mut s, "bpy.data.objects['Cube'].mode"), "EDIT");
+    ok(
+        &mut s,
+        &format!("bpy.ops.wm.save_as_mainfile(filepath='{a}')"),
+    );
+    let mut t = session();
+    let r = ok(&mut t, &format!("bpy.ops.wm.open_mainfile(filepath='{a}')"));
+    assert_eq!(r["context"]["mode"], "OBJECT", "{r}");
+    assert_eq!(value(&mut t, "bpy.data.objects['Cube'].mode"), "OBJECT");
+    assert!(bm_gen(&t, "Cube").is_none());
+    ok(&mut t, "bpy.data.meshes['Cube'].vertices[0].co = (1, 2, 3)");
+    // A hidden edit object loads in Object Mode, the visible one re-enters.
+    let mut s = session();
+    ok(
+        &mut s,
+        "bpy.ops.mesh.primitive_plane_add(location=(3, 0, 0))",
+    );
+    ok(&mut s, "bpy.data.objects['Cube'].select_set(True)");
+    ok(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
+    ok(&mut s, "bpy.data.objects['Cube'].hide_viewport = True");
+    ok(
+        &mut s,
+        &format!("bpy.ops.wm.save_as_mainfile(filepath='{b}')"),
+    );
+    let mut t = session();
+    ok(&mut t, &format!("bpy.ops.wm.open_mainfile(filepath='{b}')"));
+    assert_eq!(value(&mut t, "bpy.data.objects['Plane'].mode"), "EDIT");
+    assert_eq!(value(&mut t, "bpy.data.objects['Cube'].mode"), "OBJECT");
+    assert!(bm_gen(&t, "Cube").is_none());
     let _ = std::fs::remove_dir_all(&dir);
 }

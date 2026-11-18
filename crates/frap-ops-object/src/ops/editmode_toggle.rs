@@ -113,8 +113,10 @@ fn exec(cx: &mut OpCtx, _p: object::EditmodeToggle) -> OpResult {
                 })
                 .collect()
         };
-        if !others.is_empty() {
-            (handler.enter)(cx, &others)?;
+        // `editmode_enter_ex` per object: one that cannot enter (linked, no data) does not
+        // stop the others (the handler treats the first object of a slice as the active one).
+        for ob in others {
+            (handler.enter)(cx, &[ob])?;
         }
     } else {
         (handler.exit)(cx, &[active])?;

@@ -24,6 +24,7 @@ use std::collections::HashMap;
 use super::Matrix4;
 use super::bm::math::{invert_m4, mul_m4_v3, mul_mat3_m4_v3, sin_cos_from_fraction};
 use super::bm::{Bm, Face, V3};
+use super::trace::ConeTopology;
 use crate::mesh::Mesh;
 use frap_geom::normals::{dot, face_normal_calc, normalize_v3};
 
@@ -112,6 +113,14 @@ pub(crate) fn create_cone(
     if segs <= 0 {
         return bm.to_mesh(name, calc_uvs);
     }
+    let topology = ConeTopology {
+        segments: segs as u32,
+        radius1_zero: rad1 == 0.0,
+        radius2_zero: rad2 == 0.0,
+        cap_ends,
+        cap_tris,
+    };
+    bm.cone = Some(topology);
     let segs_u = segs as usize;
     let depth_half = 0.5 * depth;
     let mut cent = [None, None];
@@ -151,7 +160,7 @@ pub(crate) fn create_cone(
     }
 
     if rad1 == 0.0 && rad2 == 0.0 {
-        return both_ends_collapsed(&bm, &ring1, &ring2, name, calc_uvs);
+        return both_ends_collapsed(&bm, &ring1, &ring2, name, calc_uvs, topology);
     }
 
     let mut merges = Merges::new(&bm);
@@ -407,8 +416,16 @@ pub(crate) fn dissolve_fan(bm: &mut Bm, centre: u32, ring: &[u32]) {
 
 /// Both radii zero: Blender collapses everything to the two end vertices joined by one edge
 /// (verified for every fill type: vertices `[bottom, top]`, edge `(top, bottom)`, no faces).
-fn both_ends_collapsed(bm: &Bm, ring1: &[u32], ring2: &[u32], name: &str, calc_uvs: bool) -> Mesh {
+fn both_ends_collapsed(
+    bm: &Bm,
+    ring1: &[u32],
+    ring2: &[u32],
+    name: &str,
+    calc_uvs: bool,
+    topology: ConeTopology,
+) -> Mesh {
     let mut out = Bm::new();
+    out.cone = Some(topology);
     let b = out.vert_create(bm.co(ring1[0]));
     let t = out.vert_create(bm.co(*ring2.last().expect("segments > 0")));
     out.edge_create(t, b);

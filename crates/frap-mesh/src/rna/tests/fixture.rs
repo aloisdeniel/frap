@@ -394,6 +394,16 @@ fn reads_equal_blender() {
 
     // Mesh-level properties.
     for (p, j) in want["mesh"].as_object().unwrap() {
+        if matches!(
+            p.as_str(),
+            "total_vert_sel" | "total_edge_sel" | "total_face_sel"
+        ) {
+            // Session hooks (the edit BMesh's counts): the binding asks for them.
+            let prop = MESH.find_prop(p).unwrap();
+            assert!(matches!(m.get(prop), Ok(Field::NeedsHook)), "{p}");
+            assert_eq!(j, &serde_json::json!(0), "{p}");
+            continue;
+        }
         if let Err(e) = close(p, &flat_value(&get_value(&m, p)), &flat_json(j), 1e-6) {
             errs.push(e);
         }
