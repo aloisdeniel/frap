@@ -6,7 +6,8 @@
 //!
 //! Poll `ED_operator_editable_mesh`. Removes the `custom_normal` attribute (Object Mode: of any
 //! type and domain; Edit Mode: the INT16_2D corner layer), so the mesh is shaded with its
-//! automatic normals again. `CANCELLED` without one. The active attribute keeps its index, as
+//! automatic normals again (Edit Mode: the stored custom normal spaces are dropped too).
+//! `CANCELLED` without one. The active attribute keeps its index, as
 //! in Blender (the attribute after it becomes active when it came later in the list).
 
 use frap_mesh::AttrData;
@@ -37,5 +38,9 @@ fn exec(cx: &mut OpCtx, _p: mesh::CustomdataCustomSplitnormalsClear) -> OpResult
             names.active = attrs::name_at(&store.layers(), index, store.is_edit());
         }
     })?;
+    if common::in_edit(cx, me) {
+        // `BKE_lnor_spacearr_clear(bm.lnor_spacearr)`.
+        cx.bmesh_mut(me)?.lnor_spacearr.clear();
+    }
     Ok(OpStatus::Finished)
 }

@@ -368,7 +368,9 @@ pub struct Mesh {
     pub color_default: Option<SmolStr>,
     /// `attributes.active`: the active attribute's name (Blender keeps an index,
     /// `Mesh.attributes_active_index`, and re-resolves it by name across Edit Mode; the
-    /// operators that move it emulate the index arithmetic, WP 2.9). `None`: no active one.
+    /// operators that move it, `Attribute.name` writes and the RNA `remove` functions emulate
+    /// the index arithmetic, WP 2.9). `None`: no active one (an index past the last attribute
+    /// is not kept).
     pub attributes_active: Option<SmolStr>,
     /// Texture space.
     pub texspace: TexSpace,

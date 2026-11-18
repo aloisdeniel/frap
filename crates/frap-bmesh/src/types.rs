@@ -347,7 +347,8 @@ bitflags! {
         /// `BMO_OPTYPE_FLAG_SELECT_VALIDATE`: let the flush drop unselected history entries
         /// (otherwise the history is kept as it was).
         const SELECT_VALIDATE = 4;
-        /// `BMO_OPTYPE_FLAG_INVALIDATE_CLNOR_ALL` (custom normal spaces; no-op in frap).
+        /// `BMO_OPTYPE_FLAG_INVALIDATE_CLNOR_ALL`: marks the custom normal spaces dirty
+        /// ([`LnorSpaceArr::dirty_all`]).
         const INVALIDATE_CLNOR_ALL = 8;
     }
 }
@@ -393,6 +394,48 @@ pub struct BMesh {
     pub index: ElemIndex,
     /// Operator tool flags (`BMO_elem_flag_*`), one layer per running operator.
     pub oflags: ToolFlags,
+    /// `bm->lnor_spacearr` and `bm->spacearr_dirty`: the custom normal spaces the edit
+    /// tools keep between operators.
+    pub lnor_spacearr: LnorSpaceArr,
+}
+
+/// `bm->lnor_spacearr` with `bm->spacearr_dirty` (`BM_SPACEARR_DIRTY_ALL`).
+///
+/// Blender keeps the loop normal spaces of the custom normals (`MLoopNorSpaceArray`) on the
+/// BMesh and rebuilds them only when they were marked dirty (`BM_lnorspace_update`), so
+/// changing the smoothness of edges or faces (`mesh.mark_sharp`, `mesh.faces_shade_smooth`)
+/// leaves them stale until something dirties them. The custom normal tools of `frap-ops-mesh`
+/// own the contents (opaque here); the kernel marks them dirty where Blender's does: element
+/// creation and removal (`bmesh_core.cc`) and `bmesh_edit_end` with `NORMALS_CALC` or
+/// `INVALIDATE_CLNOR_ALL`. Code that moves vertices outside a BMesh operator (a transform)
+/// should call [`LnorSpaceArr::invalidate_all`], as `transform.cc` does.
+#[derive(Clone, Default)]
+pub struct LnorSpaceArr {
+    /// `BM_SPACEARR_DIRTY_ALL`.
+    pub dirty_all: bool,
+    /// The stored array (`lnor_spacearr->lspacearr`); `None` before the first
+    /// `BM_lnorspace_update` and after `BKE_lnor_spacearr_clear`.
+    pub data: Option<std::sync::Arc<dyn std::any::Any + Send + Sync>>,
+}
+
+impl LnorSpaceArr {
+    /// `bm->spacearr_dirty |= BM_SPACEARR_DIRTY_ALL` (`BM_lnorspace_invalidate(bm, true)`).
+    pub fn invalidate_all(&mut self) {
+        self.dirty_all = true;
+    }
+    /// `BKE_lnor_spacearr_clear`: the next update builds the array from scratch.
+    pub fn clear(&mut self) {
+        self.data = None;
+    }
+}
+
+impl std::fmt::Debug for LnorSpaceArr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("LnorSpaceArr")
+            .field("dirty_all", &self.dirty_all)
+            .field("stored", &self.data.is_some())
+            .finish()
+    }
 }
 
 impl BMesh {

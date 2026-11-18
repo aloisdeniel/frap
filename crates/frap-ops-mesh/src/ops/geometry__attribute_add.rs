@@ -87,7 +87,6 @@ fn builtin_domain_and_type(name: &str) -> Option<(Domain, &'static str)> {
         "material_index" => (Domain::Face, "INT"),
         "sharp_face" => (Domain::Face, "BOOLEAN"),
         "sharp_edge" => (Domain::Edge, "BOOLEAN"),
-        "id" => (Domain::Point, "INT"),
         _ => return None,
     })
 }

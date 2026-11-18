@@ -14,11 +14,19 @@
 //! (`BKE_lnor_space_custom_normal_to_data`). Decoding is
 //! `frap_geom::normals::corner_space_custom_data_to_normal`.
 //!
-//! Blender keeps the space array on the BMesh and rebuilds it lazily; frap recomputes it every
-//! time an operator needs it ([`update`]), which gives the same spaces (every operator that
-//! changes them in Blender marks them dirty). Loop indices are face-iteration order
+//! As in Blender, the space array is kept on the edit BMesh (`BMesh::lnor_spacearr`) and
+//! rebuilt lazily ([`update`]): only when none is stored yet or it was marked dirty
+//! (`BM_SPACEARR_DIRTY_ALL`: elements created or removed, a BMesh operator with
+//! `NORMALS_CALC`/`INVALIDATE_CLNOR_ALL`, a flip of the winding). Operators that only change
+//! edge or face smoothness (`mesh.mark_sharp`, `mesh.faces_shade_smooth/flat`) leave it
+//! stale, so a later custom normal tool encodes in the old fans, exactly as Blender does. As a
+//! safety net for code that changes the BMesh without marking the array dirty, it is also
+//! rebuilt when the face windings, the loop/edge/vertex topology or the vertex positions
+//! differ from those it was built from. Every build averages the custom normal values of a fan
+//! that differ (`bm_mesh_loops_calc_normals_for_loop`). Loop indices are face-iteration order
 //! (`BM_mesh_elem_index_ensure(bm, BM_LOOP)`).
 
+use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 
 use frap_bmesh::{BMesh, CdLayer, EdgeId, ElemFlag, FaceId, LoopId, SelectMode, VertId};
@@ -99,6 +107,8 @@ pub(crate) struct Spaces {
     index: Vec<usize>,
     /// Loops by index.
     pub loops: Vec<LoopId>,
+    /// [`fingerprint`] of the BMesh the spaces were built from.
+    fingerprint: u64,
 }
 
 impl Spaces {
@@ -262,13 +272,7 @@ fn co(bm: &BMesh, v: VertId) -> V3 {
 }
 
 /// One call of `bm_mesh_loops_calc_normals_for_loop` with a space array and custom normals.
-fn calc_for_loop(
-    bm: &mut BMesh,
-    out: &mut Spaces,
-    has_clnors: bool,
-    average: bool,
-    l_curr: LoopId,
-) {
+fn calc_for_loop(bm: &mut BMesh, out: &mut Spaces, has_clnors: bool, l_curr: LoopId) {
     let lc = bm.lp(l_curr).clone();
     if etag(bm, lc.e) && (ltag(bm, l_curr) || !check_cyclic_smooth_fan(bm, l_curr)) {
         return;
@@ -354,7 +358,7 @@ fn calc_for_loop(
     let mut fan_normal = lnor_n;
     if has_clnors {
         let mut r = clnor_ref.unwrap_or([0; 2]);
-        if clnors_invalid && average {
+        if clnors_invalid {
             let avg = [
                 (clnors_avg[0] / clnors_count) as i16,
                 (clnors_avg[1] / clnors_count) as i16,
@@ -384,10 +388,10 @@ fn calc_for_loop(
 // Ported from blender/source/blender/bmesh/intern/bmesh_mesh_normals.cc
 // (bm_mesh_loops_calc_normals__single_threaded with a space array, no split angle).
 /// The loop normals and normal spaces of the BMesh, with its custom normals when the layer
-/// exists. With `average`, fans whose custom normal values differ are set to their average, as
-/// Blender does whenever it (re)builds its space array. Uses and leaves the edge, loop and
-/// vertex `TAG` flags. Face normals must be current.
-pub(crate) fn calc(bm: &mut BMesh, average: bool) -> Spaces {
+/// exists; fans whose custom normal values differ are set to their average, as Blender does
+/// whenever it (re)builds its space array. Uses and leaves the edge, loop and vertex `TAG`
+/// flags. Face normals must be current.
+fn calc(bm: &mut BMesh) -> Spaces {
     let has_clnors = has_layer(bm);
     let n = bm.loops.capacity();
     let mut out = Spaces {
@@ -396,6 +400,7 @@ pub(crate) fn calc(bm: &mut BMesh, average: bool) -> Spaces {
         lnors: vec![[0.0; 3]; n],
         index: vec![usize::MAX; n],
         loops: Vec::with_capacity(bm.loops_num()),
+        fingerprint: 0,
     };
     for f in bm.face_ids() {
         for l in bm.face_loops(f) {
@@ -409,32 +414,64 @@ pub(crate) fn calc(bm: &mut BMesh, average: bool) -> Spaces {
     }
     let loops = out.loops.clone();
     for l in loops {
-        calc_for_loop(bm, &mut out, has_clnors, average, l);
+        calc_for_loop(bm, &mut out, has_clnors, l);
     }
     out
 }
 
-/// `BM_lnorspace_update`: ensures the custom normal layer, then computes the spaces. Blender
-/// keeps its space array between operators and rebuilds it only when an operator marked it
-/// dirty, which is when mixed custom normal values in a fan get averaged; frap recomputes the
-/// spaces every time and averages only where Blender rebuilds ([`rebuild`]), so fans an earlier
-/// re-encoding left mixed stay as Blender leaves them.
-pub(crate) fn update(bm: &mut BMesh) -> Spaces {
-    ensure_layer(bm);
+/// What the stored spaces depend on besides the smoothness flags: the faces with their loops
+/// (winding), edges and vertices, and the vertex positions.
+fn fingerprint(bm: &BMesh) -> u64 {
+    let mut h = rustc_hash::FxHasher::default();
     for f in bm.face_ids() {
-        bm.face_normal_update(f);
+        f.slot().hash(&mut h);
+        for l in bm.face_loops(f) {
+            let lp = bm.lp(l);
+            (l.slot(), lp.v.slot(), lp.e.slot()).hash(&mut h);
+        }
     }
-    calc(bm, false)
+    for v in bm.vert_ids() {
+        v.slot().hash(&mut h);
+        bm.vert(v).co.map(f32::to_bits).hash(&mut h);
+    }
+    h.finish()
 }
 
-/// `BM_lnorspace_rebuild` after `BM_SPACEARR_DIRTY_ALL` (the winding changed): the spaces,
-/// with the custom normals of each fan averaged when they differ.
-pub(crate) fn rebuild(bm: &mut BMesh) -> Spaces {
+/// The space array stored on the BMesh, when it is still valid.
+fn stored(bm: &BMesh) -> Option<Arc<Spaces>> {
+    if bm.lnor_spacearr.dirty_all || !has_layer(bm) {
+        return None;
+    }
+    let sp = bm.lnor_spacearr.data.clone()?.downcast::<Spaces>().ok()?;
+    (sp.fingerprint == fingerprint(bm)).then_some(sp)
+}
+
+// Ported from blender/source/blender/bmesh/intern/bmesh_mesh_normals.cc (BM_lnorspace_update,
+// BM_lnorspacearr_store, BM_lnorspace_rebuild with BM_SPACEARR_DIRTY_ALL).
+/// `BM_lnorspace_update`: the stored spaces when there are some and they are not dirty;
+/// otherwise ensures the custom normal layer, builds the spaces (averaging mixed fans) and
+/// stores them on the BMesh.
+pub(crate) fn update(bm: &mut BMesh) -> Arc<Spaces> {
+    if let Some(sp) = stored(bm) {
+        return sp;
+    }
     ensure_layer(bm);
     for f in bm.face_ids() {
         bm.face_normal_update(f);
     }
-    calc(bm, true)
+    let mut sp = calc(bm);
+    sp.fingerprint = fingerprint(bm);
+    let sp = Arc::new(sp);
+    bm.lnor_spacearr.data = Some(sp.clone());
+    bm.lnor_spacearr.dirty_all = false;
+    sp
+}
+
+/// `bm->spacearr_dirty |= BM_SPACEARR_DIRTY_ALL; BM_lnorspace_update(bm)` (after a winding
+/// change): the spaces rebuilt, with the custom normals of each fan averaged when they differ.
+pub(crate) fn rebuild(bm: &mut BMesh) -> Arc<Spaces> {
+    bm.lnor_spacearr.invalidate_all();
+    update(bm)
 }
 
 /// One entry of `BMLoopNorEditDataArray`.
@@ -694,4 +731,63 @@ pub(crate) fn flip_apply(bm: &mut BMesh, old: Option<EditArray>) -> bool {
         }
     }
     true
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use frap_bmesh::types::OpTypeFlag;
+
+    fn cube() -> BMesh {
+        let me = frap_mesh::primitives::cube(2.0, false, [1.0; 3]);
+        let mut bm = BMesh::edit_mesh_make(&me, SelectMode::VERT);
+        for f in bm.face_ids() {
+            bm.face_mut(f).flag.insert(ElemFlag::SMOOTH);
+        }
+        bm
+    }
+
+    #[test]
+    fn spaces_are_kept_until_dirty() {
+        let mut bm = cube();
+        let a = update(&mut bm);
+        assert!(!bm.lnor_spacearr.dirty_all);
+        // Smoothness changes (mark_sharp, shade_flat) leave the stored spaces as they are.
+        for e in bm.edge_ids() {
+            bm.edge_mut(e).flag.remove(ElemFlag::SMOOTH);
+        }
+        assert!(Arc::ptr_eq(&a, &update(&mut bm)), "stale spaces are reused");
+        // A BMesh operator with NORMALS_CALC dirties them.
+        bm.bmesh_edit_end(OpTypeFlag::NORMALS_CALC);
+        let b = update(&mut bm);
+        assert!(!Arc::ptr_eq(&a, &b));
+        assert!(b.spaces.iter().all(|s| s.single), "rebuilt with the sharp edges");
+        bm.bmesh_edit_end(OpTypeFlag::INVALIDATE_CLNOR_ALL);
+        let c = update(&mut bm);
+        assert!(!Arc::ptr_eq(&b, &c));
+        // Element creation dirties them (bmesh_core.cc).
+        bm.vert_create([5.0; 3], None, frap_bmesh::types::CreateFlag::empty());
+        assert!(bm.lnor_spacearr.dirty_all);
+        let d = update(&mut bm);
+        assert!(!Arc::ptr_eq(&c, &d));
+        // Clearing drops them; rebuild always builds.
+        bm.lnor_spacearr.clear();
+        let e = update(&mut bm);
+        assert!(!Arc::ptr_eq(&d, &e));
+        assert!(!Arc::ptr_eq(&e, &rebuild(&mut bm)));
+    }
+
+    #[test]
+    fn moved_vertices_or_a_missing_layer_rebuild() {
+        let mut bm = cube();
+        let a = update(&mut bm);
+        let v = bm.vert_ids()[0];
+        bm.vert_mut(v).co[0] += 0.5;
+        let b = update(&mut bm);
+        assert!(!Arc::ptr_eq(&a, &b), "a vertex moved outside an operator");
+        bm.ldata.remove_layer(LAYER);
+        let c = update(&mut bm);
+        assert!(has_layer(&bm));
+        assert!(!Arc::ptr_eq(&b, &c));
+    }
 }
