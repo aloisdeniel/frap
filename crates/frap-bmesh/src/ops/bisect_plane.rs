@@ -31,12 +31,14 @@ pub struct BisectPlaneIn {
     pub clear_inner: bool,
 }
 
-/// Output slots of `bisect_plane` (the owning WP adds Blender's `*.out` slots).
+/// Output slots of `bisect_plane`.
 #[derive(Clone, Debug, Default, PartialEq)]
 #[non_exhaustive]
 pub struct BisectPlaneOut {
-    /// Every element the op created or kept as its result (`geom.out`-like).
+    /// `geom.out`: new and input elements still alive (vertices, edges, faces; mesh order).
     pub geom: Vec<BMElem>,
+    /// `geom_cut.out`: the vertices and edges on the plane (mesh order).
+    pub geom_cut: Vec<BMElem>,
 }
 
 /// Runs `bisect_plane` on `bm`.

@@ -14,9 +14,9 @@
 //! welded onto its original (`weld_verts`). The output is everything flagged from the bisect
 //! and the duplicate that survived the weld. Monkey `+X` → V507 F500 ([MESH §4.14]).
 //!
-//! The cut vertices (`geom_cut.out` of `bisect_plane`) are the vertices of the bisect's
-//! output lying exactly on the plane: `use_snap_center` snaps every vertex within the
-//! bisect's epsilon onto it, so this is the same set.
+//! The weld sources are the vertices of `geom_cut.out` of `bisect_plane`, exactly as Blender
+//! iterates them (not the output vertices lying on the plane: loose vertices on the plane
+//! are not cut, and split vertices need not be exactly on it).
 //!
 //! Operator type flags: `NORMALS_CALC | SELECT_FLUSH | SELECT_VALIDATE`.
 
@@ -118,11 +118,15 @@ pub fn symmetrize(bm: &mut BMesh, i: &SymmetrizeIn) -> Result<SymmetrizeOut, BmE
             .copied()
             .filter(|&g| bm.elem_alive(g))
             .collect();
-        // `geom_cut.out`: the vertices on the plane.
-        let cut: Vec<VertId> = bisect_geom
+        // `geom_cut.out` of the bisect (its vertices): the weld sources. Not the same set as
+        // the output vertices with `co[axis] == 0`: a loose vertex on the plane is not cut
+        // (`use_tag` rebuilds the vertex tags from the input edges), and a vertex made by an
+        // edge split is interpolated, flagged cut without being snapped.
+        let cut: Vec<VertId> = bisect
+            .geom_cut
             .iter()
             .filter_map(|g| match g {
-                BMElem::Vert(v) if bm.vert(*v).co[axis] == 0.0 => Some(*v),
+                BMElem::Vert(v) if bm.elem_alive(*g) => Some(*v),
                 _ => None,
             })
             .collect();

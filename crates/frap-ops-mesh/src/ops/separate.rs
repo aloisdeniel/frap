@@ -21,7 +21,8 @@
 //!
 //! Each part becomes a copy of the edit **object** (`object_add_duplicate`: name uniquified,
 //! `Cube.001`, transform, modifiers and slots kept, not in Edit Mode, linked to the
-//! collections of the original when it is selected, else to the active collection) with a
+//! collections of the original when its base is visible in the viewport (selected or not),
+//! else to the active collection) with a
 //! copy of its **mesh** (`USER_DUP_MESH`; action copied as the factory Duplicate Data
 //! preferences say) whose geometry is the separated part (selection cleared), and it is
 //! selected; the edit object stays active and in Edit Mode ([MESH §4.11]). With `MATERIAL`
@@ -249,14 +250,65 @@ struct Part {
     bm: BMesh,
 }
 
-/// `BKE_collection_object_add_from` / the active collection: where `object_add_duplicate`
-/// links the copy of `src` (every scene collection holding `src` when its base is selected,
-/// else the context collection).
+/// `base->flag & BASE_ENABLED_AND_MAYBE_VISIBLE_IN_VIEWPORT` (`BKE_base_eval_flags`,
+/// `layer_collection_objects_sync`, `blenkernel/intern/layer.cc`): `ob` has a base reached
+/// through a non-excluded layer collection whose collection chain is not `hide_viewport`,
+/// the object is not `hide_viewport` and the base is not hidden (`hide_set`). A layer
+/// collection's own `hide_viewport` (the eye) does not clear it.
+fn base_maybe_visible_in_viewport(
+    main: &Main,
+    scene: &frap_scene::id::Scene,
+    vl: &frap_scene::ViewLayer,
+    ob: IdRef<ObjectId>,
+) -> bool {
+    fn walk(
+        main: &Main,
+        scene: &frap_scene::id::Scene,
+        lc: &frap_scene::LayerCollection,
+        parent_hidden: bool,
+        depth: usize,
+        ob: IdRef<ObjectId>,
+    ) -> bool {
+        if lc.exclude || depth >= 256 {
+            return false;
+        }
+        let col = match lc.collection {
+            None => Some(&scene.collection),
+            Some(c) => main.collections.get(c),
+        };
+        let Some(col) = col else {
+            return false;
+        };
+        let hidden = parent_hidden || col.hide_viewport;
+        if lc
+            .children
+            .iter()
+            .any(|child| walk(main, scene, child, hidden, depth + 1, ob))
+        {
+            return true;
+        }
+        !hidden && col.objects.contains(&ob)
+    }
+    let Some(base) = vl.bases.iter().find(|b| b.object == ob) else {
+        return false;
+    };
+    if base.flag.contains(BaseFlag::HIDDEN) || main.objects.get(ob).is_none_or(|o| o.hide_viewport)
+    {
+        return false;
+    }
+    walk(main, scene, &vl.layer_collection, false, 0, ob)
+}
+
+/// `object_add_sync_base_collection` (`editors/object/object_add.cc`): where
+/// `object_add_duplicate` links the copy of `src`. When the source base is enabled and maybe
+/// visible in the viewport (`BASE_ENABLED_AND_MAYBE_VISIBLE_IN_VIEWPORT`, not its selection),
+/// `BKE_collection_object_add_from` links it to every scene collection holding `src`; else
+/// (no base, or not visible) it goes to the active layer collection's collection.
 fn link_copy(
     main: &mut Main,
     log: &mut ChangeLog,
     scene: IdRef<SceneId>,
-    src_selected: bool,
+    src_visible: bool,
     active_collection: Option<IdRef<frap_rna::CollectionId>>,
     src: IdRef<ObjectId>,
     new: IdRef<ObjectId>,
@@ -265,7 +317,7 @@ fn link_copy(
         c.objects.contains(&ob)
     }
     let mut targets: Vec<Option<IdRef<frap_rna::CollectionId>>> = Vec::new();
-    if src_selected {
+    if src_visible {
         if main.scenes.get(scene).is_some_and(|s| has(&s.collection, src)) {
             targets.push(None);
         }
@@ -385,7 +437,7 @@ fn add_part_object(
     src_me: IdRef<MeshId>,
     part: Part,
 ) -> Result<IdRef<ObjectId>, OpError> {
-    let (scene, vl_index, src_selected, active_collection) = {
+    let (scene, vl_index, src_visible, active_collection) = {
         let c = cx.ctx();
         let vl = c.view_layer();
         let vl_index = c
@@ -394,12 +446,8 @@ fn add_part_object(
             .iter()
             .position(|v| v.name == vl.name)
             .unwrap_or(0);
-        let selected = vl
-            .bases
-            .iter()
-            .find(|b| b.object == src_ob)
-            .is_some_and(|b| b.flag.contains(BaseFlag::SELECTED));
-        (c.win.scene, vl_index, selected, c.collection())
+        let visible = base_maybe_visible_in_viewport(c.main, c.scene(), vl, src_ob);
+        (c.win.scene, vl_index, visible, c.collection())
     };
     let mut shape_keys_dropped = false;
     let ob_new = {
@@ -439,7 +487,7 @@ fn add_part_object(
         }
         let ob_name = ob.header.name.clone();
         let ob_new = main.objects.insert(&ob_name, ob, log);
-        link_copy(main, log, scene, src_selected, active_collection, src_ob, ob_new);
+        link_copy(main, log, scene, src_visible, active_collection, src_ob, ob_new);
         layers::sync_all(main, log);
         layers::select_set(main, log, scene, vl_index, ob_new, true).map_err(OpError::Rna)?;
         log.context_changed = true;
