@@ -1,0 +1,10 @@
+# WP 2.13 (M2W2-13 follow-up of WP 2.11): `mesh.bevel`'s default `offset=0` bevels nothing and
+# Blender finishes silently; frap finishes too and answers the hint `NO_OP_DEFAULT` naming the
+# argument to pass: `mesh.bevel()`, `offset=0`, `offset_type='PERCENT'` without `offset_pct`,
+# and `offset=float('nan')`. The mesh keeps its 8 vertices (and, for 0, its selection) until a
+# real bevel (`offset=0.1, segments=2`, no hint) adds the geometry; NaN deselects everything
+# first, as Blender's `offset != 0.0f` test does. Outside Edit Mode the poll fails with the
+# `mode_set` hint. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

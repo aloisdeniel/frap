@@ -1,0 +1,13 @@
+bpy.ops.frap.describe(target='op:mesh.select_all')
+bpy.ops.frap.describe(target='bpy.ops.mesh.extrude_region_move')
+frap.describe target='op:frap.select_by_normal'
+frap.describe target=MeshVertex.co
+bpy.ops.frap.describe(target='Mesh.total_vert_sel')
+bpy.ops.frap.describe(target='Object.select_set')
+bpy.ops.frap.describe(target='mesh.bevl')
+bpy.ops.frap.describe(target='struct:MeshVertx')
+bpy.ops.frap.describe(target='MeshVertex.coo')
+bpy.ops.frap.describe(target='jsonshema')
+bpy.ops.frap.describe()
+bpy.ops.frap.describe.poll()
+bpy.data.objects['Cube'].location

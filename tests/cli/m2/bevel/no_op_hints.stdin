@@ -1,0 +1,12 @@
+bpy.ops.mesh.bevel(offset=0.1)
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.mesh.bevel()
+bpy.ops.mesh.bevel(offset=0)
+bpy.ops.mesh.bevel(offset_type='PERCENT')
+bpy.data.meshes['Cube'].total_vert_sel
+bpy.ops.mesh.bevel(offset=float('nan'))
+bpy.data.meshes['Cube'].total_vert_sel
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.mesh.bevel(offset=0.1, segments=2)
+bpy.data.meshes['Cube'].total_face_sel

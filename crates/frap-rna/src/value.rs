@@ -207,6 +207,9 @@ pub enum Value {
     Tuple(Vec<Value>),
     /// Operator collection props (`files=[{"name": "a.glb"}]`). RFC 0001 F-VAL-3.
     Structs(Vec<IndexMap<SmolStr, Value>>),
+    /// Free-form JSON, answered as is (frap extension results without an RNA type, such as
+    /// the `--describe` fragment of `frap.describe`; M2 WP 2.13).
+    Json(Box<serde_json::Value>),
 }
 
 impl<K: IdKind> From<IdRef<K>> for Value {

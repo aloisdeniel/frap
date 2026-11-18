@@ -1,0 +1,8 @@
+{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "transcript", "version": "1"}}}
+{"jsonrpc": "2.0", "method": "notifications/initialized"}
+{"jsonrpc": "2.0", "id": 2, "method": "tools/call", "params": {"name": "frap_describe", "arguments": {"target": "op:frap.select_elements"}}}
+{"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "frap_exec", "arguments": {"statements": "bpy.ops.mesh.primitive_cube_add(size=2, location=(0, 0, 1), scale=(1.2, 0.8, 0.05))\nbpy.context.object.name = 'Table'\nbpy.ops.object.mode_set(mode='EDIT')\nbpy.ops.mesh.select_mode(type='FACE')\nbpy.ops.frap.select_by_normal(direction=(0, 0, -1))\nbpy.ops.mesh.subdivide(number_cuts=2)"}}}
+{"jsonrpc": "2.0", "id": 4, "method": "tools/call", "params": {"name": "frap_exec", "arguments": {"statements": "bpy.data.meshes['Cube.001'].polygons.foreach_get('center')"}}}
+{"jsonrpc": "2.0", "id": 5, "method": "tools/call", "params": {"name": "frap_exec", "arguments": {"statements": "bpy.ops.frap.select_elements(type='FACE', indices=[4, 6, 8, 14])"}}}
+{"jsonrpc": "2.0", "id": 6, "method": "tools/call", "params": {"name": "frap_exec", "arguments": {"statements": "bpy.ops.frap.select_elements(type='FACE', indices=[4, 6, 8, 12])\nbpy.ops.mesh.inset(thickness=0.08, use_individual=True)\nbpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={'value': (0, 0, -0.9)})\nbpy.ops.object.mode_set(mode='OBJECT')\nbpy.ops.frap.scene_summary()"}}}
+{"jsonrpc": "2.0", "id": 7, "method": "tools/call", "params": {"name": "frap_exec", "arguments": {"statements": "bpy.ops.frap.describe(target='struct:MeshPolygn')"}}}

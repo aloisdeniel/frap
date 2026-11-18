@@ -1,0 +1,6 @@
+{"id": 1, "src": "bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.5, depth=1, location=(0, 0, 0.5))\nbpy.context.object.name = 'Mug'\nbpy.ops.mesh.inset(thickness=0.05)"}
+{"id": 2, "src": "bpy.ops.mesh.inset.poll()\nbpy.ops.object.mode_set(mode='EDIT')\nbpy.ops.mesh.select_mode(type='FACE')\nbpy.ops.frap.select_by_normal(direction=(0, 0, 1))\nbpy.data.objects['Mug'].data.total_face_sel"}
+{"id": 3, "src": "bpy.ops.mesh.inset(thickness=0.05)\nbpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={'value': (0, 0, -0.9)})\nbpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={'value': (0, 0, 9)}, bogus=1)\nbpy.ops.mesh.select_all(action='SELECT')"}
+{"id": 4, "src": "bpy.data.objects['Mug'].data.vertices[0].co = (0, 0, 0)\nbpy.ops.mesh.select_all(action='SELECT')\nbpy.ops.mesh.normals_make_consistent(inside=False)\nbpy.ops.mesh.faces_shade_smooth()", "on_error": "continue"}
+{"id": 5, "src": "bpy.ops.mesh.primitive_circle_add(vertices=8, radius=0.06, location=(0.48, 0, 0.8))\nbpy.ops.mesh.edge_face_add()\nbpy.ops.mesh.spin(steps=6, angle=-3.141592653589793, center=(0.48, 0, 0.5), axis=(0, 1, 0))"}
+{"id": 6, "src": "bpy.ops.object.mode_set(mode='OBJECT')\nbpy.ops.frap.scene_summary(objects='SELECTED')\nbpy.ops.frap.describe(target='op:mesh.spin')"}

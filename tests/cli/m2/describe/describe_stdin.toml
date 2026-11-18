@@ -1,0 +1,9 @@
+# WP 2.13: `bpy.ops.frap.describe(target=…)` inside a session (raw stdin, §13.1). The fragment
+# comes back in `result.describe`, exactly as `frap --describe=<target>` prints it: an operator
+# by idname (also `bpy.ops.` prefixed, and in short form), a struct member (short form without
+# quotes), an RNA function; then the errors: an unknown operator, struct and member are KeyError
+# `DESCRIBE_TARGET` with `detail.did_you_mean`; a call without `target` is TypeError. The scene
+# is not changed (empty `changes`), and an error leaves the session going.
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

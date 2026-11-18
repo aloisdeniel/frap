@@ -1,0 +1,26 @@
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.context.mode
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.mesh.select_mode(type='FACE')
+bpy.ops.frap.select_elements(type='FACE', indices=[5])
+bpy.ops.frap.select_elements(type='FACE', indices=[0], action='ADD')
+bpy.ops.frap.select_elements(type='FACE', indices=[5], action='REMOVE')
+bpy.data.meshes['Cube'].polygons.foreach_get('select')
+bpy.ops.frap.select_by_normal(direction=(0, 0, 1))
+bpy.data.meshes['Cube'].polygons[5].select
+bpy.data.meshes['Cube'].vertices[0].co
+bpy.data.meshes['Cube'].vertices[0].co = (0, 0, 0)
+bpy.ops.mesh.select_more()
+bpy.ops.mesh.select_all(action='INVERT')
+bpy.data.meshes['Cube'].total_face_sel
+bpy.ops.mesh.primitive_cube_add(size=0.5, location=(0, 0, 2))
+bpy.data.meshes['Cube'].total_vert_sel
+len(bpy.data.objects)
+bpy.ops.mesh.select_linked()
+bpy.ops.mesh.delete(type='VERT')
+bpy.ops.mesh.delete(type='VERT')
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.data.meshes['Cube'].vertices[0].co = (-1, -1, -1.5)
+bpy.ops.object.mode_set(mode='EDIT', toggle=True)
+bpy.ops.object.editmode_toggle()
+bpy.context.mode
