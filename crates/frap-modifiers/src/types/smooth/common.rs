@@ -515,6 +515,22 @@ pub(crate) mod testing {
         }
     }
 
+    /// A modifier named "M" with `settings` and Blender's default flags.
+    pub(crate) fn modifier(settings: crate::ModifierSettings) -> crate::Modifier {
+        crate::Modifier {
+            name: "M".into(),
+            show_viewport: true,
+            show_render: true,
+            show_in_editmode: true,
+            show_on_cage: false,
+            show_expanded: true,
+            is_active: true,
+            use_pin_to_last: false,
+            persistent_uid: 1,
+            settings,
+        }
+    }
+
     /// `tests/golden/fixtures/modifiers/b/<rel>`.
     pub(crate) fn fixture_path(rel: &str) -> PathBuf {
         PathBuf::from(env!("CARGO_MANIFEST_DIR"))

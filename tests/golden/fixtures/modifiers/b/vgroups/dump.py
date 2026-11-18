@@ -213,7 +213,55 @@ def laplaciansmooth_cases():
     write("laplaciansmooth", cases)
 
 
-ALL = [smooth_cases, cast_cases, simple_deform_cases, laplaciansmooth_cases]
+def wireframe_cases():
+    cases = []
+    base = {"thickness": 0.1, "thickness_vertex_group": 0.0, "offset": 0.0,
+            "use_replace": True, "use_boundary": False, "use_even_offset": True,
+            "use_relative_offset": False, "vertex_group": "G", "invert_vertex_group": False}
+    for name, prim, groups, extra in [
+        ("cube_half", cube, [("G", "half")], {}),
+        ("grid_xramp_boundary", grid, [("G", "x_ramp")],
+         {"use_boundary": True, "thickness_vertex_group": 0.3, "offset": -0.5}),
+        ("monkey_inv_relative", monkey, [("G", "every_third")],
+         {"invert_vertex_group": True, "use_relative_offset": True, "use_replace": False,
+          "thickness": 0.3}),
+    ]:
+        props = dict(base)
+        props.update(extra)
+        c = run(prim, groups, 'WIREFRAME', props)
+        c["name"] = name
+        cases.append(c)
+    write("wireframe", cases)
+
+
+def mask_cases():
+    cases = []
+    base = {"mode": 'VERTEX_GROUP', "vertex_group": "G", "invert_vertex_group": False,
+            "use_smooth": False, "threshold": 0.0}
+    for name, prim, groups, extra in [
+        ("cube_half", cube, [("G", "half")], {}),
+        ("cube_half_inv", cube, [("G", "half")], {"invert_vertex_group": True}),
+        ("sphere_zramp_threshold", sphere, [("G", "z_ramp")], {"threshold": 0.4}),
+        ("sphere_zramp_smooth", sphere, [("H", "half"), ("G", "z_ramp")],
+         {"threshold": 0.37, "use_smooth": True}),
+        ("monkey_xramp_smooth_inv", monkey, [("G", "x_ramp")],
+         {"threshold": 0.55, "use_smooth": True, "invert_vertex_group": True}),
+        ("grid_third_smooth", grid, [("G", "every_third")],
+         {"threshold": 0.5, "use_smooth": True}),
+        ("missing_group", cube, [("H", "half")], {}),
+        ("no_weights", cube, [("G", "none")], {}),
+        ("no_weights_inv", cube, [("G", "none")], {"invert_vertex_group": True}),
+    ]:
+        props = dict(base)
+        props.update(extra)
+        c = run(prim, groups, 'MASK', props)
+        c["name"] = name
+        cases.append(c)
+    write("mask", cases)
+
+
+ALL = [smooth_cases, cast_cases, simple_deform_cases, laplaciansmooth_cases, wireframe_cases,
+       mask_cases]
 
 if __name__ == "__main__":
     for f in ALL:

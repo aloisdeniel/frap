@@ -203,8 +203,18 @@ fn copy_quad_loops(bm: &mut BMesh, l_new: LoopId, a: LoopId, b: LoopId) {
     bm.loop_attrs_copy(b, next2);
 }
 
-// Ported from blender/source/blender/bmesh/tools/bmesh_wireframe.cc (BM_mesh_wireframe, without
-// vertex groups).
+/// The vertex-group arguments of `BM_mesh_wireframe` (`defgrp_index`, `defgrp_invert`,
+/// `offset_fac_vg`), used by the WIREFRAME modifier (WP 4.3).
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct WireframeVgroup {
+    /// `defgrp_index` (a valid group; the weights are `bm.vdata.deform`).
+    pub index: u32,
+    /// `defgrp_invert`.
+    pub invert: bool,
+    /// `offset_fac_vg` (the modifier's `thickness_vertex_group`).
+    pub offset_fac_vg: f32,
+}
+
 /// `BM_mesh_wireframe(bm, offset, offset_fac, 0, use_replace, use_boundary, use_even_offset,
 /// use_relative_offset, use_crease, crease_weight, -1, false, mat_offset, mat_max, use_tag)`.
 #[allow(clippy::too_many_arguments)]
@@ -222,6 +232,43 @@ pub fn mesh_wireframe(
     mat_max: i32,
     use_tag: bool,
 ) {
+    mesh_wireframe_ex(
+        bm,
+        offset,
+        offset_fac,
+        use_replace,
+        use_boundary,
+        use_even_offset,
+        use_relative_offset,
+        use_crease,
+        crease_weight,
+        None,
+        mat_offset,
+        mat_max,
+        use_tag,
+    );
+}
+
+// Ported from blender/source/blender/bmesh/tools/bmesh_wireframe.cc (BM_mesh_wireframe).
+/// `BM_mesh_wireframe` with the vertex-group arguments (`None`: `defgrp_index == -1`; a group
+/// is only honoured when the BMesh has weights, as `CD_MDEFORMVERT` must exist).
+#[allow(clippy::too_many_arguments)]
+pub fn mesh_wireframe_ex(
+    bm: &mut BMesh,
+    offset: f32,
+    offset_fac: f32,
+    use_replace: bool,
+    use_boundary: bool,
+    use_even_offset: bool,
+    use_relative_offset: bool,
+    use_crease: bool,
+    crease_weight: f32,
+    vgroup: Option<WireframeVgroup>,
+    mat_offset: i32,
+    mat_max: i32,
+    use_tag: bool,
+) {
+    let vgroup = vgroup.filter(|_| bm.vdata.deform.is_some());
     let ofs_orig = -(((-offset_fac + 1.0) * 0.5) * offset);
     let ofs_new = offset + ofs_orig;
     let ofs_mid = (ofs_orig + ofs_new) / 2.0;
@@ -281,6 +328,24 @@ pub fn mesh_wireframe(
             let mut fac = 1.0f32;
             if use_relative_offset {
                 verts_relfac[i] = math::vert_calc_median_tagged_edge_length(bm, v_src);
+            }
+            if let Some(vg) = vgroup {
+                let mut defgrp_fac = bm
+                    .vdata
+                    .deform
+                    .as_ref()
+                    .and_then(|d| d.get(v_src.slot()))
+                    .and_then(|dv| dv.weights.iter().find(|(g, _)| *g == vg.index))
+                    .map_or(0.0, |(_, w)| *w);
+                if vg.invert {
+                    defgrp_fac = 1.0 - defgrp_fac;
+                }
+                if vg.offset_fac_vg > 0.0 {
+                    defgrp_fac = vg.offset_fac_vg + defgrp_fac * (1.0 - vg.offset_fac_vg);
+                }
+                verts_relfac[i] *= defgrp_fac;
+            }
+            if use_relative_offset || vgroup.is_some() {
                 fac *= verts_relfac[i];
             }
             let neg = bm.vert_create([0.0; 3], Some(v_src), CreateFlag::empty());
