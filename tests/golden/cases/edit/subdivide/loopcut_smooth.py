@@ -1,0 +1,27 @@
+# WP 2.6: mesh.loopcut smoothness with each falloff (smooth-even spheres over the vertex
+# normals), one fresh cylinder per falloff, positive and negative smoothness.
+# golden: startup=factory compare=objects,mesh:Cylinder,mesh:Cylinder.001,mesh:Cylinder.002,mesh:Cylinder.003,mesh:Cylinder.004,mesh:Cylinder.005 tier=T1 tol=1e-4
+import bpy
+bpy.ops.mesh.primitive_cylinder_add(vertices=8, location=(0, 0, 3))
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.loopcut(number_cuts=3, smoothness=1.0, falloff='SMOOTH', edge_index=1, object_index=0)
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.mesh.primitive_cylinder_add(vertices=8, location=(3, 0, 3))
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.loopcut(number_cuts=2, smoothness=-0.5, falloff='SPHERE', edge_index=1, object_index=0)
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.mesh.primitive_cylinder_add(vertices=8, location=(6, 0, 3))
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.loopcut(number_cuts=1, smoothness=2.0, falloff='ROOT', edge_index=1, object_index=0)
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.mesh.primitive_cylinder_add(vertices=8, location=(0, 3, 3))
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.loopcut(number_cuts=2, smoothness=0.7, falloff='SHARP', edge_index=1, object_index=0)
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.mesh.primitive_cylinder_add(vertices=8, location=(3, 3, 3))
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.loopcut(number_cuts=1, smoothness=0.7, falloff='LINEAR', edge_index=1, object_index=0)
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.mesh.primitive_cylinder_add(vertices=8, location=(6, 3, 3))
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.loopcut(number_cuts=4, smoothness=0.3, edge_index=1, object_index=0)

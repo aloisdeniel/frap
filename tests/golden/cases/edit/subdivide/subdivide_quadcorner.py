@@ -1,0 +1,27 @@
+# WP 2.6: mesh.subdivide of two adjacent cube faces (each neighbour quad gets two adjacent cut
+# edges): the quad-corner patterns INNERVERT, PATH and FAN, with two cuts, and STRAIGHT_CUT.
+# golden: startup=factory compare=objects,mesh:Cube.001,mesh:Cube.002,mesh:Cube.003,mesh:Cube.004 tier=T1
+import bpy
+bpy.ops.mesh.primitive_cube_add()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.frap.select_elements(type='FACE', indices=[0, 5])
+bpy.ops.mesh.subdivide(quadcorner='INNERVERT')
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.mesh.primitive_cube_add(location=(3, 0, 0))
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.frap.select_elements(type='FACE', indices=[0, 5])
+bpy.ops.mesh.subdivide(number_cuts=2, quadcorner='PATH')
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.mesh.primitive_cube_add(location=(-3, 0, 0))
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.frap.select_elements(type='FACE', indices=[0, 5])
+bpy.ops.mesh.subdivide(number_cuts=2, quadcorner='FAN')
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.mesh.primitive_cube_add(location=(0, 3, 0))
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.frap.select_elements(type='FACE', indices=[0, 5])
+bpy.ops.mesh.subdivide(number_cuts=3, ngon=False, quadcorner='STRAIGHT_CUT')
