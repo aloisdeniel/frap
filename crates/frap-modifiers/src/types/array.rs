@@ -136,8 +136,8 @@ pub(crate) fn do_array(
     // Build up the offset matrix, accumulating all settings options.
     let mut offset = unit_m4();
     if s.use_constant_offset {
-        for k in 0..3 {
-            offset[3][k] += s.constant_offset_displace[k];
+        for (o, d) in offset[3].iter_mut().zip(s.constant_offset_displace) {
+            *o += d;
         }
     }
     if s.use_relative_offset
@@ -234,9 +234,9 @@ pub(crate) fn do_array(
         if use_merge && c >= 1 {
             if !offset_has_scale && c >= 2 {
                 // Mapping chunk 3 to chunk 2 is a translation of mapping 2 to 1.
-                let mut this_chunk_index = c * chunk.verts;
-                let mut prev_chunk_index = (c - 1) * chunk.verts;
-                for _ in 0..chunk.verts {
+                for k in 0..chunk.verts {
+                    let this_chunk_index = c * chunk.verts + k;
+                    let prev_chunk_index = (c - 1) * chunk.verts + k;
                     let mut target = full_doubles_map[prev_chunk_index];
                     if target != -1 {
                         target += chunk.verts as i32;
@@ -256,8 +256,6 @@ pub(crate) fn do_array(
                         }
                     }
                     full_doubles_map[this_chunk_index] = target;
-                    this_chunk_index += 1;
-                    prev_chunk_index += 1;
                 }
             } else {
                 map_doubles(
@@ -630,5 +628,35 @@ mod tests {
         let out = do_array(&s, &cube, None, None, None, &mut errors);
         assert_eq!(out.verts_num(), 8);
         assert_eq!(errors.len(), 1);
+    }
+
+
+    /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/array/*.py`.
+    #[test]
+    fn matches_blender_fixtures() {
+        use super::super::weld::util::fixture::assert_evaluated;
+        let cube = super::super::weld::util::fixture::factory_cube();
+        let out = do_array(&ArraySettings::default(), &cube, None, None, None, &mut Vec::new());
+        assert_evaluated("array/defaults", "Cube", &out, 1e-5);
+        let s = ArraySettings {
+            count: 4,
+            use_merge_vertices: true,
+            offset_u: 0.25,
+            offset_v: -0.5,
+            ..ArraySettings::default()
+        };
+        let out = do_array(&s, &cube, None, None, None, &mut Vec::new());
+        assert_evaluated("array/merge_offsets_uv", "Cube", &out, 1e-5);
+        let s = ArraySettings {
+            count: 3,
+            relative_offset_displace: [0.0, 1.05, 0.2],
+            use_constant_offset: true,
+            constant_offset_displace: [0.1, 0.0, -0.4],
+            use_merge_vertices: true,
+            merge_threshold: 0.2,
+            ..ArraySettings::default()
+        };
+        let out = do_array(&s, &cube, None, None, None, &mut Vec::new());
+        assert_evaluated("array/merge_offsets_uv", "Cube.001", &out, 1e-5);
     }
 }

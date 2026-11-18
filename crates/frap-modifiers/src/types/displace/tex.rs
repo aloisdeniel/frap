@@ -254,7 +254,7 @@ pub(crate) struct ImageTex<'a> {
 
 /// `extend` of a texture.
 #[derive(Copy, Clone, PartialEq, Eq)]
-enum Extend {
+enum Wrap {
     Extend,
     Clip,
     ClipCube,
@@ -262,13 +262,13 @@ enum Extend {
     Checker,
 }
 
-fn extend_of(f: &TextureFields) -> Extend {
+fn extend_of(f: &TextureFields) -> Wrap {
     match f.extension.as_str() {
-        "EXTEND" => Extend::Extend,
-        "CLIP" => Extend::Clip,
-        "CLIP_CUBE" => Extend::ClipCube,
-        "CHECKER" => Extend::Checker,
-        _ => Extend::Repeat,
+        "EXTEND" => Wrap::Extend,
+        "CLIP" => Wrap::Clip,
+        "CLIP_CUBE" => Wrap::ClipCube,
+        "CHECKER" => Wrap::Checker,
+        _ => Wrap::Repeat,
     }
 }
 
@@ -326,7 +326,7 @@ pub(crate) fn texture_value(
 fn do_2d_mapping_flat(f: &TextureFields, texvec: &mut [f32; 3]) {
     let mut fx = (texvec[0] + 1.0) / 2.0;
     let mut fy = (texvec[1] + 1.0) / 2.0;
-    if extend_of(f) == Extend::Repeat {
+    if extend_of(f) == Wrap::Repeat {
         if f.repeat_x > 1 {
             fx *= f.repeat_x as f32;
             let origf = fx;
@@ -388,7 +388,7 @@ fn imagewrap(t: &ImageTex<'_>, ibuf: Option<&ImBuf>, texvec: [f32; 3], texres: &
         std::mem::swap(&mut fx, &mut fy);
     }
     let extend = extend_of(f);
-    if extend == Extend::Checker {
+    if extend == Wrap::Checker {
         let xs = libm::floor(f64::from(fx)) as i32;
         let ys = libm::floor(f64::from(fy)) as i32;
         fx -= xs as f32;
@@ -411,21 +411,21 @@ fn imagewrap(t: &ImageTex<'_>, ibuf: Option<&ImBuf>, texvec: [f32; 3], texres: &
     let mut y = yi;
     let (w, h) = (ix as i32, iy as i32);
     match extend {
-        Extend::ClipCube => {
+        Wrap::ClipCube => {
             if x < 0 || y < 0 || x >= w || y >= h || texvec[2] < -1.0 || texvec[2] > 1.0 {
                 return retval;
             }
         }
-        Extend::Clip | Extend::Checker => {
+        Wrap::Clip | Wrap::Checker => {
             if x < 0 || y < 0 || x >= w || y >= h {
                 return retval;
             }
         }
-        Extend::Extend => {
+        Wrap::Extend => {
             x = x.clamp(0, w - 1);
             y = y.clamp(0, h - 1);
         }
-        Extend::Repeat => {
+        Wrap::Repeat => {
             x %= w;
             if x < 0 {
                 x += w;
@@ -453,8 +453,8 @@ fn imagewrap(t: &ImageTex<'_>, ibuf: Option<&ImBuf>, texvec: [f32; 3], texres: &
             fx + filterx,
             fy + filtery,
             texres,
-            extend == Extend::Repeat,
-            extend == Extend::Extend,
+            extend == Wrap::Repeat,
+            extend == Wrap::Extend,
         );
     } else {
         texres.trgba = ibuf.get_color(x, y);
@@ -704,8 +704,8 @@ fn boxsampleclip(ibuf: &ImBuf, rf: &Rctf, texres: &mut TexResult) {
         if startx == endx {
             let mulx = muly;
             let col = ibuf.get_color(startx, y);
-            for k in 0..4 {
-                texres.trgba[k] += col[k] * mulx;
+            for (t, c) in texres.trgba.iter_mut().zip(col) {
+                *t += c * mulx;
             }
             div += mulx;
         } else {
@@ -719,13 +719,13 @@ fn boxsampleclip(ibuf: &ImBuf, rf: &Rctf, texres: &mut TexResult) {
                 }
                 let col = ibuf.get_color(x, y);
                 if mulx == 1.0 {
-                    for k in 0..4 {
-                        texres.trgba[k] += col[k];
+                    for (t, c) in texres.trgba.iter_mut().zip(col) {
+                        *t += c;
                     }
                     div += 1.0;
                 } else {
-                    for k in 0..4 {
-                        texres.trgba[k] += col[k] * mulx;
+                    for (t, c) in texres.trgba.iter_mut().zip(col) {
+                        *t += c * mulx;
                     }
                     div += mulx;
                 }

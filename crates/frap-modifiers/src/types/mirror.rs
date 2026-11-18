@@ -461,26 +461,26 @@ fn defvert_flip(dv: &mut frap_mesh::DeformVert, flip_map: &[i32]) {
 
 // Ported from blender/source/blender/blenkernel/intern/deform.cc (BKE_defvert_flip_merged).
 fn defvert_flip_merged(dv: &mut frap_mesh::DeformVert, flip_map: &[i32]) {
-    let mut i = 0;
-    while i < dv.weights.len() {
-        let (def_nr, weight) = dv.weights[i];
+    // Only the weights present before the copies are added.
+    let totweight = dv.weights.len();
+    for i in 0..totweight {
+        let def_nr = dv.weights[i].0;
         if let Some(&m) = flip_map.get(def_nr as usize)
-            && m != -1
+            && m >= 0
         {
-            match dv.weights.iter().position(|w| w.0 == m as u32) {
-                Some(j) => {
-                    let w_cpy = dv.weights[j].1;
-                    // Swap the weights.
-                    dv.weights[j].1 = weight;
-                    dv.weights[i].1 = w_cpy;
-                }
+            // `BKE_defvert_ensure_index`: a new weight starts at 0.
+            let j = match dv.weights.iter().position(|w| w.0 == m as u32) {
+                Some(j) => j,
                 None => {
-                    // Copy the weight to the flipped group (`BKE_defvert_ensure_index`).
-                    dv.weights.push((m as u32, weight));
+                    dv.weights.push((m as u32, 0.0));
+                    dv.weights.len() - 1
                 }
-            }
+            };
+            // Distribute the weights: one assigned group is halved, two are evened out.
+            let weight = 0.5 * (dv.weights[j].1 + dv.weights[i].1);
+            dv.weights[j].1 = weight;
+            dv.weights[i].1 = weight;
         }
-        i += 1;
     }
 }
 
@@ -634,5 +634,39 @@ mod tests {
         assert_eq!(out.verts_num(), 16);
         assert!(out.positions()[..8].iter().all(|p| p[0] >= 0.0));
         assert!(out.positions()[8..].iter().all(|p| p[0] <= 0.0));
+    }
+
+
+    /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/mirror/*.py`.
+    #[test]
+    fn matches_blender_fixtures() {
+        use super::super::weld::util::fixture::assert_evaluated;
+        use frap_mesh::primitives::monkey::{Monkey, monkey};
+        let cube = super::super::weld::util::fixture::factory_cube();
+        let out = mirror_apply_on_axis(&MirrorSettings::default(), None, &cube, 0);
+        assert_evaluated("mirror/defaults", "Cube", &out, 1e-5);
+        let suzanne = monkey(&Monkey {
+            size: 2.0,
+            ..Default::default()
+        });
+        let out = mirror_apply_on_axis(&MirrorSettings::default(), None, &suzanne, 0);
+        assert_evaluated("mirror/monkey_bisect", "Suzanne", &out, 1e-5);
+        let s = MirrorSettings {
+            use_bisect_axis: [true, false, false],
+            use_bisect_flip_axis: [true, false, false],
+            bisect_threshold: 0.01,
+            ..MirrorSettings::default()
+        };
+        let out = mirror_apply_on_axis(&s, None, &suzanne, 0);
+        assert_evaluated("mirror/monkey_bisect", "Suzanne.001", &out, 1e-5);
+        let s = MirrorSettings {
+            use_mirror_u: true,
+            mirror_offset_u: 0.25,
+            offset_u: 1.5,
+            offset_v: -0.5,
+            ..MirrorSettings::default()
+        };
+        let out = mirror_apply_on_axis(&s, None, &cube, 0);
+        assert_evaluated("mirror/uvs", "Cube", &out, 1e-5);
     }
 }

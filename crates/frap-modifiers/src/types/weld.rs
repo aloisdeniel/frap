@@ -11,6 +11,8 @@
 
 pub(crate) mod merge;
 pub(crate) mod util;
+#[cfg(test)]
+mod vgroup_tests;
 
 use crate::prelude::*;
 
@@ -36,8 +38,7 @@ pub(crate) fn weld(
 ) -> Option<Mesh> {
     let invert = s.invert_vertex_group;
     // `get_vertex_group`: a known group name on a mesh with weights.
-    let group = defgroup_index(mesh, &s.vertex_group)
-        .and_then(|g| mesh.deform_verts().map(|dv| (g, dv)));
+    let group = defgroup_index(mesh, &s.vertex_group).zip(mesh.deform_verts());
     let selection: Option<Vec<bool>> = group.map(|(g, dv)| {
         dv.iter()
             .map(|d| (defvert_find_weight(d, g) > 0.0) != invert)
@@ -93,5 +94,63 @@ mod tests {
             ..WeldSettings::default()
         };
         assert!(weld(&m, &s).is_none(), "the touching cubes share no edge");
+    }
+
+
+    /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/weld/*.py`.
+    #[test]
+    fn matches_blender_fixtures() {
+        use super::util::fixture::assert_evaluated;
+        use frap_mesh::primitives::grid::{Grid, grid};
+        let g = grid(&Grid {
+            x_subdivisions: 5,
+            y_subdivisions: 4,
+            size: 2.0,
+            ..Default::default()
+        });
+        let s = WeldSettings {
+            merge_threshold: 0.6,
+            ..WeldSettings::default()
+        };
+        assert_evaluated("weld/all_grid_collapse", "Grid", &weld(&g, &s).unwrap(), 1e-5);
+        let g = grid(&Grid {
+            x_subdivisions: 6,
+            y_subdivisions: 3,
+            size: 2.0,
+            ..Default::default()
+        });
+        let s = WeldSettings {
+            mode: "CONNECTED".into(),
+            merge_threshold: 0.45,
+            ..WeldSettings::default()
+        };
+        assert_evaluated("weld/connected_grid", "Grid", &weld(&g, &s).unwrap(), 1e-5);
+        let mut w = Mesh::new("W");
+        w.from_pydata(
+            &[
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 0.05, 0.0],
+                [2.0, 0.0, 0.0],
+                [2.05, 0.0, 0.0],
+                [2.1, 0.0, 0.0],
+                [3.0, 0.0, 0.0],
+            ],
+            &[[3, 4], [4, 5], [5, 6]],
+            &[vec![0, 1, 2]],
+            false,
+        );
+        for (case, loose) in [
+            ("weld/connected_loose_edges", true),
+            ("weld/connected_all_edges", false),
+        ] {
+            let s = WeldSettings {
+                mode: "CONNECTED".into(),
+                merge_threshold: 0.1,
+                loose_edges: loose,
+                ..WeldSettings::default()
+            };
+            assert_evaluated(case, "W", &weld(&w, &s).unwrap(), 1e-5);
+        }
     }
 }

@@ -94,4 +94,36 @@ mod tests {
         let out = do_edge_split(&cube, &s);
         assert_eq!(out.verts_num(), 8, "90° is under the split angle");
     }
+
+
+    /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/edge_split/angle.py`.
+    #[test]
+    fn matches_blender_fixtures() {
+        use super::super::weld::util::fixture::assert_evaluated;
+        use frap_mesh::primitives::grid::{Grid, grid};
+        use frap_mesh::primitives::monkey::{Monkey, monkey};
+        let cube = super::super::weld::util::fixture::factory_cube();
+        let out = do_edge_split(&cube, &EdgeSplitSettings::default());
+        assert_evaluated("edge_split/angle", "Cube", &out, 1e-5);
+        let suzanne = monkey(&Monkey {
+            size: 2.0,
+            ..Default::default()
+        });
+        let s = EdgeSplitSettings {
+            split_angle: 0.349_065_85,
+            ..EdgeSplitSettings::default()
+        };
+        assert_evaluated("edge_split/angle", "Suzanne", &do_edge_split(&suzanne, &s), 1e-5);
+        let g = grid(&Grid {
+            x_subdivisions: 3,
+            y_subdivisions: 2,
+            size: 2.0,
+            ..Default::default()
+        });
+        let s = EdgeSplitSettings {
+            split_angle: 0.0,
+            ..EdgeSplitSettings::default()
+        };
+        assert_evaluated("edge_split/angle", "Grid", &do_edge_split(&g, &s), 1e-5);
+    }
 }

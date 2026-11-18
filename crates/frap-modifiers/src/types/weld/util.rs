@@ -490,16 +490,6 @@ pub(crate) fn mul_m4_v3(m: &M4, v: [f32; 3]) -> [f32; 3] {
     ]
 }
 
-/// `mul_mat3_m4_v3`: a direction (upper 3×3).
-pub(crate) fn mul_mat3_m4_v3(m: &M4, v: [f32; 3]) -> [f32; 3] {
-    let [x, y, z] = v;
-    [
-        x * m[0][0] + y * m[1][0] + m[2][0] * z,
-        x * m[0][1] + y * m[1][1] + m[2][1] * z,
-        x * m[0][2] + y * m[1][2] + m[2][2] * z,
-    ]
-}
-
 /// `invert_m4_m4` (glam's inverse; a singular matrix gives the identity, as Blender's
 /// `invert_m4_m4` leaves `r` as the unit matrix when it fails).
 pub(crate) fn invert_m4(m: &M4) -> M4 {
@@ -521,19 +511,90 @@ pub(crate) fn compare_len(a: [f32; 3], b: [f32; 3], limit: f32) -> bool {
     len_sq(a, b) <= limit * limit
 }
 
-/// `normalize_v3` (returns the vector and its original length; a zero vector stays zero).
-pub(crate) fn normalize(v: [f32; 3]) -> ([f32; 3], f32) {
-    let d = v[0] * v[0] + v[1] * v[1] + v[2] * v[2];
-    if d > 1.0e-35 {
-        let l = d.sqrt();
-        let f = 1.0 / l;
-        ([v[0] * f, v[1] * f, v[2] * f], l)
-    } else {
-        ([0.0; 3], 0.0)
-    }
-}
-
 /// `dot_v3v3`.
 pub(crate) fn dot(a: [f32; 3], b: [f32; 3]) -> f32 {
     a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+}
+
+/// Unit-test support: compares an evaluated mesh with the Blender dump of a WP 4.2 golden case
+/// (`tests/golden/fixtures/modifiers/a/<case>.blender.json`), so the evaluators are checked
+/// against Blender without the session (whose `modifiers.new` and evaluated-mesh reads are
+/// WP 4.1's).
+#[cfg(test)]
+pub(crate) mod fixture {
+    use frap_mesh::{AttrData, Domain, Mesh};
+
+    fn load(case: &str) -> serde_json::Value {
+        let path = format!(
+            "{}/../../tests/golden/fixtures/modifiers/a/{case}.blender.json",
+            env!("CARGO_MANIFEST_DIR")
+        );
+        let text = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{path}: {e}"));
+        serde_json::from_str(&text).expect("fixture JSON")
+    }
+
+    /// The mesh of the factory-startup cube (its vertex order differs from
+    /// `mesh.primitive_cube_add`'s).
+    pub(crate) fn factory_cube() -> Mesh {
+        let (main, _) = frap_scene::startup::factory();
+        let r = main.meshes.find("Cube").expect("the factory cube");
+        main.meshes.get(r).expect("the factory cube").clone()
+    }
+
+    fn f(v: &serde_json::Value) -> f32 {
+        v.as_f64().expect("a number") as f32
+    }
+
+    /// Asserts that `mesh` equals Blender's evaluated mesh of `object` in `case`, index by
+    /// index: positions and UVs within `tol`, edges and faces exactly.
+    pub(crate) fn assert_evaluated(case: &str, object: &str, mesh: &Mesh, tol: f32) {
+        let d = load(case);
+        let e = &d["evaluated"][object];
+        assert!(!e.is_null(), "{case}: no evaluated mesh of {object}");
+        let pos = e["positions"].as_array().expect("positions");
+        assert_eq!(mesh.verts_num(), pos.len(), "{case}/{object}: vertex count");
+        for (i, (p, b)) in mesh.positions().iter().zip(pos).enumerate() {
+            for k in 0..3 {
+                assert!(
+                    (p[k] - f(&b[k])).abs() <= tol,
+                    "{case}/{object}: position {i} frap {p:?} blender {b}"
+                );
+            }
+        }
+        let edges = e["edges"].as_array().expect("edges");
+        assert_eq!(mesh.edges_num(), edges.len(), "{case}/{object}: edge count");
+        for (i, (a, b)) in mesh.edges().iter().zip(edges).enumerate() {
+            let b = [b[0].as_i64().unwrap() as i32, b[1].as_i64().unwrap() as i32];
+            assert_eq!(*a, b, "{case}/{object}: edge {i}");
+        }
+        let faces = e["faces"].as_array().expect("faces");
+        assert_eq!(mesh.faces_num(), faces.len(), "{case}/{object}: face count");
+        for (i, b) in faces.iter().enumerate() {
+            let a: Vec<i64> = mesh
+                .face(i)
+                .map(|c| i64::from(mesh.corner_verts()[c]))
+                .collect();
+            let b: Vec<i64> = b
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|v| v.as_i64().unwrap())
+                .collect();
+            assert_eq!(a, b, "{case}/{object}: face {i}");
+        }
+        for (name, uvs) in e["uv_layers"].as_object().expect("uv_layers") {
+            let a = match mesh.attributes().get(name).map(|a| (&a.domain, &a.data)) {
+                Some((Domain::Corner, AttrData::Float2(v))) => v.clone(),
+                _ => panic!("{case}/{object}: no UV map {name}"),
+            };
+            for (i, (u, b)) in a.iter().zip(uvs.as_array().unwrap()).enumerate() {
+                for k in 0..2 {
+                    assert!(
+                        (u[k] - f(&b[k])).abs() <= tol,
+                        "{case}/{object}: {name}[{i}] frap {u:?} blender {b}"
+                    );
+                }
+            }
+        }
+    }
 }

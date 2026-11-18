@@ -94,6 +94,8 @@ fn mesh_calc_hq_normal(
 // Ported from blender/source/blender/modifiers/intern/MOD_solidify_extrude.cc
 // (MOD_solidify_extrude_modifyMesh).
 /// The solidified mesh; `totcol` is the object's material slot count.
+// Index loops kept as in Blender's source, so the port can be read side by side.
+#[allow(clippy::needless_range_loop)]
 pub(crate) fn solidify_extrude(s: &SolidifySettings, mesh: &Mesh, totcol: usize) -> Mesh {
     let verts_num = mesh.verts_num();
     let edges_num = mesh.edges_num();
@@ -381,7 +383,7 @@ pub(crate) fn solidify_extrude(s: &SolidifySettings, mesh: &Mesh, totcol: usize)
         let mut vert_lens: Vec<f32> = Vec::new();
         if do_clamp {
             vert_lens = vec![f32::MAX; verts_num];
-            for e in &orig_edges[..] {
+            for e in orig_edges {
                 let (a, b) = (e[0] as usize, e[1] as usize);
                 let l = len_squared_v3v3(positions[a], positions[b]);
                 vert_lens[a] = vert_lens[a].min(l);
@@ -506,7 +508,7 @@ pub(crate) fn solidify_extrude(s: &SolidifySettings, mesh: &Mesh, totcol: usize)
             if offset > f32::EPSILON {
                 let offset_sq = offset * offset;
                 let mut vert_lens_sq = vec![f32::MAX; verts_num];
-                for e in &orig_edges[..] {
+                for e in orig_edges {
                     let (a, b) = (e[0] as usize, e[1] as usize);
                     let l = len_squared_v3v3(positions[a], positions[b]);
                     vert_lens_sq[a] = vert_lens_sq[a].min(l);
@@ -797,5 +799,41 @@ mod tests {
         // Offset −1: the copy goes against the normal (+Z) by the thickness.
         assert!((out.positions()[4][2] + 0.1).abs() < 1e-6);
         assert!(out.positions()[0][2].abs() < 1e-6);
+    }
+
+
+    /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/solidify/simple_*.py`.
+    #[test]
+    fn matches_blender_fixtures() {
+        use crate::types::weld::util::fixture::assert_evaluated;
+        use frap_mesh::primitives::cone::FillType;
+        use frap_mesh::primitives::cylinder::{Cylinder, cylinder};
+        use frap_mesh::primitives::plane::{Plane, plane};
+        let cube = crate::types::weld::util::fixture::factory_cube();
+        let out = solidify_extrude(&SolidifySettings::default(), &cube, 1);
+        assert_evaluated("solidify/simple_defaults", "Cube", &out, 1e-5);
+        let p = plane(&Plane {
+            size: 2.0,
+            ..Default::default()
+        });
+        let out = solidify_extrude(&SolidifySettings::default(), &p, 0);
+        assert_evaluated("solidify/simple_defaults", "Plane", &out, 1e-5);
+        let tube = cylinder(&Cylinder {
+            vertices: 8,
+            end_fill_type: FillType::Nothing,
+            ..Default::default()
+        });
+        let s = SolidifySettings {
+            thickness: 0.3,
+            offset: 0.0,
+            use_flip_normals: true,
+            ..SolidifySettings::default()
+        };
+        assert_evaluated(
+            "solidify/simple_rims",
+            "Cylinder",
+            &solidify_extrude(&s, &tube, 0),
+            1e-5,
+        );
     }
 }

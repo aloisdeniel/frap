@@ -6,8 +6,8 @@
 //!
 //! Ported from blender/source/blender/modifiers/intern/MOD_solidify.cc (Blender 5.2.4).
 
-mod extrude;
-mod nonmanifold;
+pub(crate) mod extrude;
+pub(crate) mod nonmanifold;
 
 use frap_mesh::Mesh;
 
@@ -88,10 +88,6 @@ pub(crate) mod math {
     /// `safe_asinf`.
     pub(crate) fn safe_asinf(a: f32) -> f32 {
         libm::asinf(a.clamp(-1.0, 1.0))
-    }
-    /// `safe_acosf`.
-    pub(crate) fn safe_acosf(a: f32) -> f32 {
-        libm::acosf(a.clamp(-1.0, 1.0))
     }
     /// `angle_normalized_v3v3`.
     pub(crate) fn angle_normalized_v3v3(v1: V3, v2: V3) -> f32 {

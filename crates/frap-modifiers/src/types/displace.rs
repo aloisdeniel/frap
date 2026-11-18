@@ -59,13 +59,10 @@ fn eval(md: &Modifier, mut mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, M
     let ModifierSettings::Displace(s) = &md.settings else {
         return Ok(mesh);
     };
-    let texture = match s.texture.and_then(IdRef::<TextureId>::from_any) {
-        Some(t) => match cx.main().textures.get(t) {
-            Some(t) => Some(t.clone()),
-            None => None,
-        },
-        None => None,
-    };
+    let texture = s
+        .texture
+        .and_then(IdRef::<TextureId>::from_any)
+        .and_then(|t| cx.main().textures.get(t).cloned());
     // The texture's image buffer.
     let mut image: Option<(ImBuf, bool)> = None;
     if let Some(t) = &texture {
@@ -420,5 +417,26 @@ mod tests {
         );
         // Intensity 0: 2 · (0 − 0.5).
         assert_eq!(m.positions()[1][2], before[2] - 1.0);
+    }
+
+
+    /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/displace/no_texture.py`.
+    #[test]
+    fn matches_blender_fixtures() {
+        use super::super::weld::util::fixture::assert_evaluated;
+        let id = super::super::weld::util::unit_m4();
+        let cube = super::super::weld::util::fixture::factory_cube;
+        let mut m = cube();
+        displace(&DisplaceSettings::default(), None, None, &id, None, &mut m);
+        assert_evaluated("displace/no_texture", "Cube", &m, 1e-5);
+        let mut m = cube();
+        let s = DisplaceSettings {
+            direction: "X".into(),
+            strength: 2.5,
+            mid_level: 0.2,
+            ..DisplaceSettings::default()
+        };
+        displace(&s, None, None, &id, None, &mut m);
+        assert_evaluated("displace/no_texture", "Cube.001", &m, 1e-5);
     }
 }

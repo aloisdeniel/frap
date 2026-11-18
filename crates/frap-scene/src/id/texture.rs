@@ -157,9 +157,7 @@ impl RnaMut for Texture {
                 self.r#type = v.as_str().map(SmolStr::new).unwrap_or(self.r#type.clone());
                 return Ok(SetOutcome::Done);
             }
-            "node_tree" | "color_ramp" | "animation_data" | "image_user"
-                if self.defines(prop) =>
-            {
+            "node_tree" | "color_ramp" | "animation_data" | "image_user" if self.defines(prop) => {
                 return Err(frap_rna::traits::read_only(srna, prop.identifier));
             }
             _ => {}
@@ -225,16 +223,22 @@ mod tests {
         let ext = prop(&frap_spec_rna::IMAGE_TEXTURE, "extension");
         assert!(matches!(t.get(ext), Ok(Field::Value(Value::Enum(e))) if e == "REPEAT"));
         t.set(ext, Value::Enum("CLIP".into())).unwrap();
-        t.set(prop(&frap_spec_rna::TEXTURE, "type"), Value::Enum("NONE".into()))
-            .unwrap();
+        t.set(
+            prop(&frap_spec_rna::TEXTURE, "type"),
+            Value::Enum("NONE".into()),
+        )
+        .unwrap();
         assert_eq!(t.srna().identifier, "Texture");
         let Err(e) = t.get(ext) else {
             panic!("a NONE texture has no extension")
         };
         assert_eq!(e.message, "'Texture' object has no attribute 'extension'");
         // Re-typing keeps the stored value (the union).
-        t.set(prop(&frap_spec_rna::TEXTURE, "type"), Value::Enum("IMAGE".into()))
-            .unwrap();
+        t.set(
+            prop(&frap_spec_rna::TEXTURE, "type"),
+            Value::Enum("IMAGE".into()),
+        )
+        .unwrap();
         assert!(matches!(t.get(ext), Ok(Field::Value(Value::Enum(e))) if e == "CLIP"));
     }
 

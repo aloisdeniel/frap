@@ -200,7 +200,8 @@ fn valid_len(eg: &[EdgeGroup]) -> usize {
 // Ported from blender/source/blender/modifiers/intern/MOD_solidify_nonmanifold.cc
 // (MOD_solidify_nonmanifold_modifyMesh).
 /// The solidified mesh; `totcol` is the object's material slot count.
-#[allow(clippy::cognitive_complexity)]
+// Index loops kept as in Blender's source, so the port can be read side by side.
+#[allow(clippy::cognitive_complexity, clippy::needless_range_loop)]
 pub(crate) fn solidify_nonmanifold(
     s: &SolidifySettings,
     mesh: &Mesh,
@@ -1048,7 +1049,7 @@ pub(crate) fn solidify_nonmanifold(
                     } else if first_unique_end == -1 {
                         first_unique_end = k as i64;
                     } else if unique_start != -1 {
-                        let split = ((unique_start as usize + real_k + 1) / 2) % edges_len;
+                        let split = (unique_start as usize + real_k).div_ceil(2) % edges_len;
                         let is_even_split = ((unique_start as usize + real_k) & 1) != 0;
                         if last_split != -1 {
                             // Override g on the first split (no insert).
@@ -2336,5 +2337,75 @@ mod tests {
         assert_eq!(out.verts_num(), 8);
         assert_eq!(out.faces_num(), 6);
         assert_eq!(out.edges_num(), 12);
+    }
+
+
+    /// Against Blender: the inputs of `tests/golden/cases/modifiers/a/solidify/complex_*.py`.
+    #[test]
+    fn matches_blender_fixtures() {
+        use crate::types::weld::util::fixture::assert_evaluated;
+        let mut fan = Mesh::new("Fan");
+        fan.from_pydata(
+            &[
+                [0.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0],
+                [1.0, 0.0, 0.0],
+                [1.0, 0.0, 1.0],
+                [-0.5, 0.8, 0.0],
+                [-0.5, 0.8, 1.0],
+                [-0.5, -0.8, 0.0],
+                [-0.5, -0.8, 1.0],
+            ],
+            &[],
+            &[vec![0, 2, 3, 1], vec![0, 1, 5, 4], vec![0, 6, 7, 1]],
+            false,
+        );
+        let s = SolidifySettings {
+            solidify_mode: "NON_MANIFOLD".into(),
+            thickness: 0.1,
+            ..SolidifySettings::default()
+        };
+        let out = solidify_nonmanifold(&s, &fan, 0).unwrap();
+        assert_evaluated("solidify/complex_nonmanifold", "Fan", &out, 1e-5);
+        let s = SolidifySettings {
+            solidify_mode: "NON_MANIFOLD".into(),
+            thickness: -0.15,
+            nonmanifold_thickness_mode: "EVEN".into(),
+            nonmanifold_boundary_mode: "FLAT".into(),
+            ..SolidifySettings::default()
+        };
+        let out = solidify_nonmanifold(&s, &fan, 0).unwrap();
+        assert_evaluated("solidify/complex_nonmanifold", "Fan.001", &out, 1e-5);
+        let mut bow = Mesh::new("Bow");
+        bow.from_pydata(
+            &[
+                [0.0, 0.0, 0.0],
+                [1.0, 0.5, 0.0],
+                [1.0, -0.5, 0.0],
+                [-1.0, 0.5, 0.2],
+                [-1.0, -0.5, 0.2],
+            ],
+            &[],
+            &[vec![0, 2, 1], vec![0, 3, 4]],
+            false,
+        );
+        let s = SolidifySettings {
+            solidify_mode: "NON_MANIFOLD".into(),
+            thickness: 0.1,
+            nonmanifold_boundary_mode: "ROUND".into(),
+            ..SolidifySettings::default()
+        };
+        let out = solidify_nonmanifold(&s, &bow, 0).unwrap();
+        assert_evaluated("solidify/complex_nonmanifold", "Bow", &out, 1e-5);
+        let s = SolidifySettings {
+            solidify_mode: "NON_MANIFOLD".into(),
+            thickness: 0.2,
+            offset: 0.5,
+            nonmanifold_thickness_mode: "FIXED".into(),
+            use_flip_normals: true,
+            ..SolidifySettings::default()
+        };
+        let out = solidify_nonmanifold(&s, &bow, 0).unwrap();
+        assert_evaluated("solidify/complex_nonmanifold", "Bow.001", &out, 1e-5);
     }
 }

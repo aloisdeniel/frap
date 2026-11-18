@@ -658,8 +658,8 @@ fn poly_find_doubles(
             .expect("a face is linked to its own corners");
         faces_a.clear();
         faces_a.extend_from_slice(&linked_faces_buffer[lo + pos + 1..hi]);
-        for corner_index in s + 1..e {
-            let elem = corners[corner_index] as usize;
+        for &corner in &corners[s + 1..e] {
+            let elem = corner as usize;
             let lo = linked_faces_offset[elem];
             let hi = linked_faces_offset[elem + 1];
             let pos = linked_faces_buffer[lo..hi]
@@ -1205,6 +1205,7 @@ impl KdTree {
     }
 
     // Ported from blender/source/blender/blenlib/BLI_kdtree.hh (detail::deduplicate_recursive).
+    #[allow(clippy::too_many_arguments)]
     fn deduplicate_recursive(
         &self,
         i: u32,
