@@ -62,7 +62,7 @@ fn manifest_selected_operators() {
         "mesh.bevel",
         "armature.extrude_move",
         "object.modifier_add",
-        "mesh.spin",
+        "mesh.decimate",
     ] {
         let e = find_op(idname).unwrap();
         assert!(

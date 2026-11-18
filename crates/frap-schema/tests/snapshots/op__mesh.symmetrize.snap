@@ -1,0 +1,121 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.symmetrize",
+  "bl_idname": "MESH_OT_symmetrize",
+  "label": "Symmetrize",
+  "description": "Enforce symmetry (both form and topological) across an axis",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "direction",
+      "name": "Direction",
+      "description": "Which sides to copy from and to",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "NEGATIVE_X",
+      "enum_items": [
+        {
+          "identifier": "NEGATIVE_X",
+          "name": "-X to +X",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "POSITIVE_X",
+          "name": "+X to -X",
+          "description": "",
+          "value": 3
+        },
+        {
+          "identifier": "NEGATIVE_Y",
+          "name": "-Y to +Y",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "POSITIVE_Y",
+          "name": "+Y to -Y",
+          "description": "",
+          "value": 4
+        },
+        {
+          "identifier": "NEGATIVE_Z",
+          "name": "-Z to +Z",
+          "description": "",
+          "value": 2
+        },
+        {
+          "identifier": "POSITIVE_Z",
+          "name": "+Z to -Z",
+          "description": "",
+          "value": 5
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "threshold",
+      "name": "Threshold",
+      "description": "Limit for snap middle vertices to the axis center",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 0.0001,
+      "hard_min": 0,
+      "hard_max": 10,
+      "soft_min": 0.00001,
+      "soft_max": 0.1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T2",
+    "support": "partial",
+    "support_note": "tool_settings.use_mesh_automerge is not applied afterwards",
+    "headless": "native",
+    "planned": "M2",
+    "extension": false,
+    "notes": []
+  }
+}

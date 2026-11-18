@@ -1,0 +1,80 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.separate",
+  "bl_idname": "MESH_OT_separate",
+  "label": "Separate",
+  "description": "Separate selected geometry into a new mesh",
+  "bl_options": [
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "SCENE_EDITABLE"
+    ],
+    "text": "requires an editable scene",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Type",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SELECTED",
+      "enum_items": [
+        {
+          "identifier": "SELECTED",
+          "name": "Selection",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "MATERIAL",
+          "name": "By Material",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "LOOSE",
+          "name": "By Loose Parts",
+          "description": "",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "shape keys are not carried into the new meshes (M6)",
+    "headless": "native",
+    "planned": "M2",
+    "extension": false,
+    "notes": [
+      "the new objects are copies of the edit object (mesh copied, materials shared), selected but not in Edit Mode; the edit object stays active"
+    ]
+  }
+}
