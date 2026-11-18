@@ -1,0 +1,88 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.select_edge_ring_multi",
+  "bl_idname": "MESH_OT_select_edge_ring_multi",
+  "label": "Multi Select Edge Rings",
+  "description": "Select rings of connected edges from each selected edge",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "delimit_edge_ring",
+      "name": "Edge Ring Delimit",
+      "description": "Delimit edge ring selection",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": [
+        "NGONS"
+      ],
+      "enum_items": [
+        {
+          "identifier": "SEAM",
+          "name": "Seam",
+          "description": "Delimit edge ring selection at seams",
+          "value": 16
+        },
+        {
+          "identifier": "SHARP",
+          "name": "Sharp",
+          "description": "Delimit edge ring selection at sharp edges",
+          "value": 32
+        },
+        {
+          "identifier": "MATERIAL",
+          "name": "Material",
+          "description": "Delimit edge ring selection at material boundaries",
+          "value": 64
+        },
+        {
+          "identifier": "NGONS",
+          "name": "N-gons",
+          "description": "Allow edge ring selection to step over n-gons with an even number of sides",
+          "value": 8
+        }
+      ],
+      "is_enum_flag": true,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ENUM_FLAG",
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M2",
+    "extension": false,
+    "notes": []
+  }
+}
