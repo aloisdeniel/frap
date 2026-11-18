@@ -34,6 +34,9 @@ def mesh_dump(me, weights=True, attrs=()):
     sf = me.attributes.get("sharp_face")
     if sf is not None:
         d["sharp_face"] = [x.value for x in sf.data]
+    se = me.attributes.get("sharp_edge")
+    if se is not None:
+        d["sharp_edge_flags"] = [x.value for x in se.data]
     d["corner_normals"] = [list(n.vector) for n in me.corner_normals]
     if me.uv_layers:
         d["uv"] = [list(x.uv) for x in me.uv_layers[0].data]
@@ -324,8 +327,92 @@ def screw_cases():
     write("screw", cases)
 
 
+def smooth_shaded(prim, sharp_edges=()):
+    def f():
+        prim()
+        bpy.ops.object.shade_smooth()
+        me = bpy.context.object.data
+        if sharp_edges:
+            a = me.attributes.new("sharp_edge", 'BOOLEAN', 'EDGE')
+            for i in sharp_edges:
+                a.data[i].value = True
+    return f
+
+
+NORMAL_ATTRS = ("sharp_edge", "custom_normal")
+
+
+def weighted_normal_cases():
+    cases = []
+    base = {"weight": 50, "mode": 'FACE_AREA', "thresh": 0.01, "keep_sharp": False,
+            "vertex_group": "", "invert_vertex_group": False}
+    for name, prim, groups, extra in [
+        ("monkey_defaults", smooth_shaded(monkey), [], {}),
+        ("monkey_angle_w70", smooth_shaded(monkey), [], {"mode": 'CORNER_ANGLE', "weight": 70}),
+        ("sphere_face_angle_w1", smooth_shaded(sphere), [],
+         {"mode": 'FACE_AREA_WITH_ANGLE', "weight": 1}),
+        ("cylinder_keep_sharp_w100", smooth_shaded(cylinder, (0, 3, 5)), [],
+         {"keep_sharp": True, "weight": 100}),
+        ("cube_flat", cube, [], {}),
+        ("monkey_vgroup", smooth_shaded(monkey), [("G", "every_third")],
+         {"vertex_group": "G", "thresh": 0.1}),
+        ("monkey_vgroup_inv_keep", smooth_shaded(monkey, (1, 2, 40)), [("G", "half")],
+         {"vertex_group": "G", "invert_vertex_group": True, "keep_sharp": True}),
+    ]:
+        props = dict(base)
+        props.update(extra)
+        c = run(prim, groups, 'WEIGHTED_NORMAL', props, attrs=NORMAL_ATTRS)
+        c["name"] = name
+        cases.append(c)
+    write("weighted_normal", cases)
+
+
+def normal_edit_cases():
+    cases = []
+    base = {"mode": 'RADIAL', "offset": (0.0, 0.0, 0.0), "mix_mode": 'COPY', "mix_factor": 1.0,
+            "mix_limit": math.pi, "no_polynors_fix": False, "vertex_group": "",
+            "invert_vertex_group": False}
+    for name, prim, groups, extra in [
+        ("monkey_defaults", smooth_shaded(monkey), [], {}),
+        ("cube_radial", cube, [], {}),
+        ("monkey_offset_flip", smooth_shaded(monkey), [], {"offset": (0.0, 3.0, 0.0)}),
+        ("monkey_offset_nofix", smooth_shaded(monkey), [],
+         {"offset": (0.0, 3.0, 0.0), "no_polynors_fix": True}),
+        ("sphere_add_limit", smooth_shaded(sphere, (2, 7)), [],
+         {"mix_mode": 'ADD', "mix_factor": 0.6, "mix_limit": 0.3, "offset": (0.5, 0.0, 0.2)}),
+        ("monkey_mul_vg", smooth_shaded(monkey), [("G", "x_ramp")],
+         {"mix_mode": 'MUL', "mix_factor": 0.8, "vertex_group": "G"}),
+        ("monkey_sub_vg_inv", smooth_shaded(monkey), [("G", "z_ramp")],
+         {"mix_mode": 'SUB', "vertex_group": "G", "invert_vertex_group": True}),
+    ]:
+        props = dict(base)
+        props.update(extra)
+        c = run(prim, groups, 'NORMAL_EDIT', props, attrs=NORMAL_ATTRS)
+        c["name"] = name
+        cases.append(c)
+    write("normal_edit", cases)
+
+
+def triangulate_cases():
+    cases = []
+    base = {"quad_method": 'SHORTEST_DIAGONAL', "ngon_method": 'BEAUTY', "min_vertices": 4,
+            "keep_custom_normals": True}
+    for name, prim, extra in [
+        ("monkey_keep", smooth_shaded(monkey), {}),
+        ("cylinder_keep_sharp", smooth_shaded(cylinder, (0, 3)), {"quad_method": 'BEAUTY'}),
+        ("sphere_keep_clip", smooth_shaded(sphere), {"ngon_method": 'CLIP',
+                                                     "quad_method": 'FIXED'}),
+    ]:
+        props = dict(base)
+        props.update(extra)
+        c = run(prim, [], 'TRIANGULATE', props, attrs=NORMAL_ATTRS)
+        c["name"] = name
+        cases.append(c)
+    write("triangulate", cases)
+
+
 ALL = [smooth_cases, cast_cases, simple_deform_cases, laplaciansmooth_cases, wireframe_cases,
-       mask_cases, screw_cases]
+       mask_cases, screw_cases, weighted_normal_cases, normal_edit_cases, triangulate_cases]
 
 if __name__ == "__main__":
     for f in ALL:

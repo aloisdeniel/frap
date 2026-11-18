@@ -617,6 +617,10 @@ pub(crate) mod testing {
             m.uv_active = Some("UVMap".into());
             m.uv_active_render = Some("UVMap".into());
         }
+        if let Some(se) = d.get("sharp_edge_flags").and_then(Json::as_array) {
+            let v: Vec<bool> = se.iter().map(|b| b.as_bool().unwrap()).collect();
+            m.set_bool_attribute(frap_mesh::SHARP_EDGE, frap_mesh::Domain::Edge, v);
+        }
         if let Some(sf) = d.get("sharp_face").and_then(Json::as_array) {
             let v: Vec<bool> = sf.iter().map(|b| b.as_bool().unwrap()).collect();
             m.set_bool_attribute(frap_mesh::SHARP_FACE, frap_mesh::Domain::Face, v);
