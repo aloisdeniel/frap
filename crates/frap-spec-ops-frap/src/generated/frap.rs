@@ -54,7 +54,7 @@ pub static E6: [EnumItem; 3] = [
 // ---------------------------------------------------------------- frap.describe
 /// Props of `frap.describe`, RNA order.
 pub static DESCRIBE_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "target", name: "Target", description: "What to describe: op:<idname> (or mesh.bevel), struct:<Struct> (or Object), <Struct>.<prop>, errors, protocol, manifest", kind: PropKind::String { default: "", max_bytes: 0 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::REQUIRED, deprecated: None },
+    PropDef { identifier: "target", name: "Target", description: "What to describe: op:<idname> (or mesh.bevel), struct:<Struct> (or Object), <Struct>.<prop>, errors, protocol, manifest", kind: PropKind::String { default: "", max_bytes: 0 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::REQUIRED.union(PropFlags::NEVER_NULL), deprecated: None },
 ];
 /// `FRAP_OT_describe`
 pub static OPSPEC_FRAP_OT_DESCRIBE: OperatorSpec = OperatorSpec {
@@ -70,7 +70,7 @@ pub static OPSPEC_FRAP_OT_DESCRIBE: OperatorSpec = OperatorSpec {
 /// Typed props of `frap.describe` (Describe).
 #[derive(Debug, Clone)]
 pub struct Describe {
-    /// What to describe: op:<idname> (or mesh.bevel), struct:<Struct> (or Object), <Struct>.<prop>, errors, protocol, manifest; default "" [REQUIRED]
+    /// What to describe: op:<idname> (or mesh.bevel), struct:<Struct> (or Object), <Struct>.<prop>, errors, protocol, manifest; default "" [REQUIRED, NEVER_NULL]
     pub target: Prop<SmolStr>,
 }
 impl OpProps for Describe {

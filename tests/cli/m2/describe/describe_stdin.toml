@@ -2,8 +2,9 @@
 # comes back in `result.describe`, exactly as `frap --describe=<target>` prints it: an operator
 # by idname (also `bpy.ops.` prefixed, and in short form), a struct member (short form without
 # quotes), an RNA function; then the errors: an unknown operator, struct and member are KeyError
-# `DESCRIBE_TARGET` with `detail.did_you_mean`; a call without `target` is TypeError. The scene
-# is not changed (empty `changes`), and an error leaves the session going.
+# `DESCRIBE_TARGET` with `detail.did_you_mean`; a call without `target`, with an empty or blank
+# one, or with `target=None` (Blender's NEVER_NULL string) is TypeError, never the whole
+# manifest. The scene is not changed (empty `changes`), and an error leaves the session going.
 bin.name = "frap"
 args = ["--verbosity", "minimal"]
 fs.sandbox = true

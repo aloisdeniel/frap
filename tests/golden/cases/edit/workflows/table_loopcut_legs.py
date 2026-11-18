@@ -2,7 +2,7 @@
 # bottom is a 3x3 grid of quads; the four corner quads are extruded down as legs with the
 # extrude-faces macro (each face on its own, shrink/fatten along its normal), then the leg
 # ends are scaled about their own centres (pivot INDIVIDUAL_ORIGINS) to taper the legs.
-# golden: startup=empty compare=objects,context,mesh:Cube tier=T1 order=canonical
+# golden: startup=empty compare=objects,context,mesh:Cube tier=T1
 import bpy
 bpy.ops.mesh.primitive_cube_add(size=2, location=(0, 0, 1), scale=(1, 0.6, 0.05))
 bpy.ops.object.mode_set(mode='EDIT')

@@ -20,7 +20,7 @@
      "unit": "NONE",
      "default": "",
      "length_max": 0,
-     "flags": ["REQUIRED"]
+     "flags": ["REQUIRED", "NEVER_NULL", "RUNTIME"]
     }
    ],
    "poll": null

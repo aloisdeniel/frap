@@ -30,7 +30,8 @@ source: crates/frap-schema/tests/describe_ops.rs
       "hidden": false,
       "skip_save": false,
       "flags": [
-        "REQUIRED"
+        "REQUIRED",
+        "NEVER_NULL"
       ],
       "required": true,
       "unset_semantics": null,

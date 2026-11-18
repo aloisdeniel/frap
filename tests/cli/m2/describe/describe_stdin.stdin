@@ -9,5 +9,9 @@ bpy.ops.frap.describe(target='struct:MeshVertx')
 bpy.ops.frap.describe(target='MeshVertex.coo')
 bpy.ops.frap.describe(target='jsonshema')
 bpy.ops.frap.describe()
+bpy.ops.frap.describe(target='')
+frap.describe target=''
+bpy.ops.frap.describe(target='  ')
+bpy.ops.frap.describe(target=None)
 bpy.ops.frap.describe.poll()
 bpy.data.objects['Cube'].location

@@ -82,10 +82,14 @@ mod tests {
              frap.describe target=Object.location\n\
              bpy.ops.frap.describe(target='struct:Objcet')\n\
              bpy.ops.frap.describe()\n\
-             bpy.ops.frap.describe(target='errors')\n",
+             bpy.ops.frap.describe(target='errors')\n\
+             bpy.ops.frap.describe(target='')\n\
+             frap.describe target=''\n\
+             bpy.ops.frap.describe(target='   ')\n\
+             bpy.ops.frap.describe(target=None)\n",
             1,
         );
-        assert_eq!(rs.len(), 5);
+        assert_eq!(rs.len(), 9);
         let schema = crate::jsonschema::protocol();
         let js: Vec<J> = rs.iter().map(|r| r.to_json()).collect();
         for j in &js {
@@ -112,10 +116,27 @@ mod tests {
         );
         assert_eq!(e["detail"]["did_you_mean"][0], "Object");
         assert_eq!(js[2]["state"], "unchanged");
-        let e = &js[3]["error"];
-        assert_eq!(
-            (&e["exception"], &e["code"]),
-            (&J::from("TypeError"), &J::from("OP_ARG_TYPE"))
+        // No target, an empty or blank one and None are TypeErrors, never the whole manifest.
+        for j in [&js[3], &js[5], &js[6], &js[7], &js[8]] {
+            let e = &j["error"];
+            assert_eq!(
+                (&e["exception"], &e["code"]),
+                (&J::from("TypeError"), &J::from("OP_ARG_TYPE")),
+                "{j:#}"
+            );
+            assert_eq!(j["state"], "unchanged", "{j:#}");
+            assert!(
+                j.get("result").is_none_or(|r| r.get("describe").is_none()),
+                "{j:#}"
+            );
+        }
+        assert!(
+            js[8]["error"]["message"]
+                .as_str()
+                .unwrap()
+                .contains("doesn't support None from string types"),
+            "{:#}",
+            js[8]
         );
     }
 
