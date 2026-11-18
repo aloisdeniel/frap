@@ -90,16 +90,16 @@ impl OpProps for Describe {
 /// Props of `frap.render_contact_sheet`, RNA order.
 pub static RENDER_CONTACT_SHEET_PROPS: [PropDef; 11] = [
     PropDef { identifier: "filepath", name: "File Path", description: "Output image (// = relative to the .frap file, else the working directory)", kind: PropKind::String { default: "//sheet.png", max_bytes: 1024 }, subtype: Subtype::FilePath, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
-    PropDef { identifier: "views", name: "Views", description: "Views to render, in this order", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Flags(&["FRONT", "RIGHT", "TOP", "ISO"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ENUM_FLAG), deprecated: None },
+    PropDef { identifier: "views", name: "Views", description: "Views to render; tiles follow the item order FRONT, BACK, RIGHT, LEFT, TOP, BOTTOM, ISO, CAMERA", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Flags(&["FRONT", "RIGHT", "TOP", "ISO"]), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ENUM_FLAG), deprecated: None },
     PropDef { identifier: "engine", name: "Engine", description: "Render engine of the tiles", kind: PropKind::Enum { items: &enums::E1, default: EnumDefault::Item("BLENDER_WORKBENCH"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
     PropDef { identifier: "objects", name: "Objects", description: "Objects framed by the synthetic cameras", kind: PropKind::Enum { items: &enums::E2, default: EnumDefault::Item("VISIBLE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
     PropDef { identifier: "view_size", name: "View Size", description: "Tile size in pixels", kind: PropKind::Int { default: Defaults::Scalar(512), hard: (16, 4096), soft: (64, 2048) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
     PropDef { identifier: "columns", name: "Columns", description: "Tiles per row (0 = automatic)", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (0, 16), soft: (0, 16) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
-    PropDef { identifier: "margin", name: "Margin", description: "Framing margin around the bounds, as a fraction of the view", kind: PropKind::Float { default: Defaults::Scalar(0.05), hard: (0.0, 0.5), soft: (0.0, 0.5), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Factor, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
+    PropDef { identifier: "margin", name: "Margin", description: "Framing margin around the bounds, as a fraction of their extent on each side", kind: PropKind::Float { default: Defaults::Scalar(0.05), hard: (0.0, 0.5), soft: (0.0, 0.5), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Factor, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
     PropDef { identifier: "show_labels", name: "Show Labels", description: "Write the view name on each tile", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
     PropDef { identifier: "background", name: "Background", description: "Sheet background", kind: PropKind::Float { default: Defaults::Array(&[0.2, 0.2, 0.2, 1.0]), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::ColorGamma, unit: Unit::None, array: ArrayShape::Fixed(4), flags: PropFlags::SKIP_SAVE, deprecated: None },
     PropDef { identifier: "use_scene_camera", name: "Use Scene Camera", description: "Add the scene camera's view (CAMERA) even when not listed", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
-    PropDef { identifier: "frame", name: "Frame", description: "Frame to render (unset: the current frame)", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (-2147483648, 2147483647), soft: (-2147483648, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
+    PropDef { identifier: "frame", name: "Frame", description: "Frame to render (omit it to render the current frame)", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (-2147483648, 2147483647), soft: (-2147483648, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE, deprecated: None },
 ];
 /// `FRAP_OT_render_contact_sheet`
 pub static OPSPEC_FRAP_OT_RENDER_CONTACT_SHEET: OperatorSpec = OperatorSpec {
@@ -200,7 +200,7 @@ pub mod render_contact_sheet {
 pub struct RenderContactSheet {
     /// Output image (// = relative to the .frap file, else the working directory); default "//sheet.png" [SKIP_SAVE]
     pub filepath: Prop<SmolStr>,
-    /// Views to render, in this order; default ["FRONT", "RIGHT", "TOP", "ISO"] [SKIP_SAVE, ENUM_FLAG]
+    /// Views to render; tiles follow the item order FRONT, BACK, RIGHT, LEFT, TOP, BOTTOM, ISO, CAMERA; default ["FRONT", "RIGHT", "TOP", "ISO"] [SKIP_SAVE, ENUM_FLAG]
     pub views: Prop<BTreeSet<SmolStr>>,
     /// Render engine of the tiles; default "BLENDER_WORKBENCH": BLENDER_WORKBENCH | BLENDER_EEVEE [SKIP_SAVE]
     pub engine: Prop<render_contact_sheet::Engine>,
@@ -210,7 +210,7 @@ pub struct RenderContactSheet {
     pub view_size: Prop<i32>,
     /// Tiles per row (0 = automatic); default 0 [SKIP_SAVE]
     pub columns: Prop<i32>,
-    /// Framing margin around the bounds, as a fraction of the view; default 0.05 [SKIP_SAVE]
+    /// Framing margin around the bounds, as a fraction of their extent on each side; default 0.05 [SKIP_SAVE]
     pub margin: Prop<f32>,
     /// Write the view name on each tile; default true [SKIP_SAVE]
     pub show_labels: Prop<bool>,
@@ -218,7 +218,7 @@ pub struct RenderContactSheet {
     pub background: Prop<[f32; 4]>,
     /// Add the scene camera's view (CAMERA) even when not listed; default false [SKIP_SAVE]
     pub use_scene_camera: Prop<bool>,
-    /// Frame to render (unset: the current frame); default 0 [SKIP_SAVE]
+    /// Frame to render (omit it to render the current frame); default 0 [SKIP_SAVE]
     pub frame: Prop<i32>,
 }
 impl OpProps for RenderContactSheet {

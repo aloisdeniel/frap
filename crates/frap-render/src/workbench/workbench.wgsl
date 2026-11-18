@@ -379,6 +379,11 @@ fn vs_shadow(@location(0) pos: vec3<f32>) -> @builtin(position) vec4<f32> {
     // Blender's Metal backend biases shadow volumes (`out_pos.z += 0.00005` in OpenGL clip
     // space, half of it in wgpu's [0, w] depth range) against z-fighting with the caps.
     p.z += 0.000025;
+    // The bias must not push back caps (extruded to just inside the far plane) out of the
+    // view volume: a clipped cap breaks the depth-fail count.
+    if (p.w > 0.0) {
+        p.z = min(p.z, p.w);
+    }
     return p;
 }
 

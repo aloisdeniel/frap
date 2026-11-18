@@ -94,7 +94,7 @@ default = "sRGB"
 items_from = "rna:ColorManagedInputColorspaceSettings.name"
 
 ["View3DShading.studio_light"]
-source = "studio lights shipped with 5.2.4 (user lights are added at runtime)"
+source = "studio lights shipped with 5.2.4 (user lights are added at runtime); STUDIO rigs, then the MATCAP matcaps (Blender lists the matcaps when light = 'MATCAP'; WP 2.3)"
 runtime = true
 default = "Default"
 items = [
@@ -104,6 +104,33 @@ items = [
   ["paint.sl", "paint.sl", "", 3],
   ["rim.sl", "rim.sl", "", 4],
   ["studio.sl", "studio.sl", "", 5],
+  ["basic_bright.exr", "basic_bright.exr", "", 6],
+  ["basic_dark.exr", "basic_dark.exr", "", 7],
+  ["basic_grey.exr", "basic_grey.exr", "", 8],
+  ["basic_side.exr", "basic_side.exr", "", 9],
+  ["brush_thumbnail_preview.exr", "brush_thumbnail_preview.exr", "", 10],
+  ["ceramic_dark.exr", "ceramic_dark.exr", "", 11],
+  ["ceramic_lightbulb.exr", "ceramic_lightbulb.exr", "", 12],
+  ["check_gradient.exr", "check_gradient.exr", "", 13],
+  ["check_normal+y.exr", "check_normal+y.exr", "", 14],
+  ["check_reflection_horizontal.exr", "check_reflection_horizontal.exr", "", 15],
+  ["check_reflection_vertical.exr", "check_reflection_vertical.exr", "", 16],
+  ["check_rim_dark.exr", "check_rim_dark.exr", "", 17],
+  ["check_rim_light.exr", "check_rim_light.exr", "", 18],
+  ["clay_brown.exr", "clay_brown.exr", "", 19],
+  ["clay_green.exr", "clay_green.exr", "", 20],
+  ["clay_studio.exr", "clay_studio.exr", "", 21],
+  ["clay_warm.exr", "clay_warm.exr", "", 22],
+  ["fullmetal.exr", "fullmetal.exr", "", 23],
+  ["hard_surface_grey.exr", "hard_surface_grey.exr", "", 24],
+  ["hard_surface_red.exr", "hard_surface_red.exr", "", 25],
+  ["metal_bronze.exr", "metal_bronze.exr", "", 26],
+  ["metal_carpaint.exr", "metal_carpaint.exr", "", 27],
+  ["pearl.exr", "pearl.exr", "", 28],
+  ["red_wax.exr", "red_wax.exr", "", 29],
+  ["resin.exr", "resin.exr", "", 30],
+  ["toon_dark.exr", "toon_dark.exr", "", 31],
+  ["toon_light.exr", "toon_light.exr", "", 32],
 ]
 
 ["ActionSlot.target_id_type"]
