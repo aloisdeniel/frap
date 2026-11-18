@@ -19,7 +19,7 @@ Raw stdin lets a statement continue while brackets are open. A blank line or EOF
 `tools/list` returns two tools. They are the same definitions as `frap --describe=tools-anthropic`, with MCP's `inputSchema` key (`frap --describe=tools-mcp` prints the exact list):
 
 - `frap_exec(statements: string, on_error?: "skip_rest" | "continue")` runs statements against the connection's scene. The tool result is the list of responses (one per statement, §4) followed by the done record.
-- `frap_describe(target: string)` returns the manifest fragment of an operator (`op:mesh.bevel` or `mesh.bevel`), a struct (`struct:Object` or `Object`), a struct member (`Object.location`, `Object.select_set`), or `errors`.
+- `frap_describe(target: string)` returns the manifest fragment of an operator (`op:mesh.bevel` or `mesh.bevel`), a struct (`struct:Object` or `Object`), a struct member (`Object.location`, `Object.select_set`), or `errors`. The same fragment is available as a statement, `bpy.ops.frap.describe(target='mesh.bevel')` (§5).
 
 The scene persists across `tools/call`s, so build a model over many small calls and read back what you need between them.
 
@@ -46,7 +46,7 @@ Responses (one line each), then the done record:
 If your harness does not speak MCP, use the definitions from `frap --describe=tools-anthropic` (Anthropic Messages API) or `frap --describe=tools-openai` (OpenAI function calling, strict mode), and back them with one long-lived `frap serve --jsonl` process. Keep that one process for the whole conversation: it holds the scene between tool calls.
 
 - `frap_exec({statements, on_error})`: write `{"id": <n>, "src": statements, "on_error": on_error}` and return the response lines up to and including the done record.
-- `frap_describe({target})`: run `frap --describe=<target>` in a separate process and return its stdout (the manifest does not depend on the scene, so it does not have to be the serve process). In this build `bpy.ops.frap.describe(target=…)` and `bpy.ops.<ns>.<op>.get_rna_type()` inside a session are not wired to the manifest yet (`OP_NOT_IMPLEMENTED`); they arrive in a later milestone.
+- `frap_describe({target})`: either send `bpy.ops.frap.describe(target='<target>')` to the same serve process and return the response's `result.describe`, or run `frap --describe=<target>` in a separate process and return its stdout (the manifest does not depend on the scene). Both give the same fragment.
 
 A minimal Python backing (no SDK needed):
 
@@ -101,7 +101,8 @@ The full schemas of the request, response, error, ready/end events and done reco
 
 - `bpy.ops.mesh.bevel.poll()` returns `False` (a `get`-kind response) without changing anything. On failure `detail.unmet` lists the unmet requirements. Use it to check the mode before an edit-mode operator. `detail.requires`/`unmet` of `OP_POLL_FAILED` use the manifest's requirement codes (`MODE_EDIT_MESH`).
 - Every operator's manifest entry has `poll.requires`, the declarative requirements frap checks (`MODE_OBJECT`, `MODE_EDIT_MESH`, `ACTIVE_OBJECT`, `ACTIVE_TYPE(MESH)`, `HAS_SELECTED_OBJECTS`, …), plus `poll.text` in words. `poll.matrix` is Blender's dumped poll result in contexts A–E (legend in `poll_contexts`). An operator frap does not implement has `requires: null` and only the dumped matrix.
-- `bpy.ops.mesh.bevel.idname()` returns `"MESH_OT_bevel"`. `bpy.ops.mesh.bevel.get_rna_type()` will return the operator's describe fragment once it is wired (later milestone); until then use `frap --describe op:mesh.bevel`.
+- `bpy.ops.mesh.bevel.idname()` returns `"MESH_OT_bevel"`. `bpy.ops.mesh.bevel.get_rna_type()` returns a short Blender-shaped summary (`idname`, `name`, `description`, `properties` with their types and defaults).
+- `bpy.ops.frap.describe(target='mesh.bevel')` (short form `frap.describe target=mesh.bevel`; quote targets with a colon: `frap.describe target='op:mesh.bevel'`) returns the full manifest fragment inside the session: `result.target` echoes the target and `result.describe` is exactly what `frap --describe=<target>` prints. It accepts every target form below and changes nothing. An unknown operator, struct or member is `KeyError` with code `DESCRIBE_TARGET` and close names in `detail.did_you_mean`; leaving `target` out, or passing an empty string or `None`, is a `TypeError` (ask for `target='manifest'` explicitly if you really want the whole manifest, several MB).
 
 `frap --describe` prints the whole manifest: `operators[]` (every Blender 5.2 operator plus frap's `frap.*`), `structs[]`, `bpy_struct_functions[]`, `context_members[]`, `modifier_types[]` (with evaluator support), `node_types[]` and `defaults_that_surprise[]`. Other targets:
 
@@ -167,3 +168,90 @@ bpy.ops.wm.save_as_mainfile(filepath='out/cube.frap')
 ```
 
 The factory scene already contains `Cube`, `Camera` and `Light`. The new cube is named `Cube.001`, and its mesh is named independently. Read the names back from `result.object` or `changes.added` instead of guessing them.
+
+## 10. Modelling in Edit Mode
+
+Edit Mode works on the mesh's BMesh, as in Blender. The recipes below follow the golden cases under `tests/golden/cases/edit/workflows/`, which frap and Blender 5.2 run to the same mesh, so you can copy them (the transcripts under `tests/cli/m2/workflows/` show whole agent sessions over `serve` and MCP).
+
+### 10.1 Entering, leaving, and what the response tells you
+
+- `bpy.ops.object.mode_set(mode='EDIT')` edits the active mesh object. Select several mesh objects first to edit them together (multi-object Edit Mode, `bpy.context.objects_in_mode`): selection and modelling operators then act on every edited mesh. `bpy.ops.object.mode_set(mode='OBJECT')` writes the edit mesh back to the mesh data.
+- Every `mesh.*` modelling operator needs Edit Mode. In Object Mode it fails with `OP_POLL_FAILED`, `detail.unmet: ["MODE_EDIT_MESH"]` and the hint `bpy.ops.object.mode_set(mode='EDIT')`; `bpy.ops.mesh.inset.poll()` asks without failing.
+- While a mesh is in Edit Mode, every response carries an `edit_mesh` block per edited mesh: element counts (`verts`, `edges`, `faces`, `tris`), `select_mode`, `selected` counts, the `active` element and the `select_history`. Read it after each step instead of reading the mesh.
+- Reads of the mesh in Edit Mode (`bpy.data.meshes['Cube'].vertices[0].co`, `polygons.foreach_get('center')`, `total_vert_sel`) show the edit mesh as it is now; in a Blender script you would call `update_from_editmode()` first. Writes to mesh data (`vertices[0].co = …`, `foreach_set`) are refused with `RNA_EDITMODE_WRITE` and the hint `bpy.ops.object.mode_set(mode='OBJECT')`: move geometry with `transform.*` operators instead, or leave Edit Mode first.
+- A primitive added in Edit Mode (`bpy.ops.mesh.primitive_cube_add(…)`) joins the edited mesh and becomes the only selection, so the next operator acts on it alone.
+
+### 10.2 Selecting without a mouse
+
+Agents cannot click, so frap adds two selection operators (they also exist as golden emulations, so goldens can use them):
+
+- `bpy.ops.frap.select_elements(type='FACE', indices=[4, 6], action='SET', object='')` selects vertices (`VERT`), edges (`EDGE`) or faces (`FACE`) by index, in `mesh.vertices` / `edges` / `polygons` order. `action='ADD'` and `'REMOVE'` change the current selection; `object` names another edited object. An index out of range is `IndexError` and changes nothing.
+- `bpy.ops.frap.select_by_normal(direction=(0, 0, -1), threshold=radians(30), orientation='GLOBAL', extend=False)` selects the faces whose normal points along `direction` (the bottom cap of a cylinder, the front faces of a box). Use a small `threshold` (`0.1`) to pick only faces that face exactly that way.
+
+Find indices with one bulk read rather than by guessing: `bpy.data.meshes['Table'].polygons.foreach_get('center')` (or `'normal'`, `vertices.foreach_get('co')`, `edges.foreach_get('vertices')`). Indices change when topology changes, so read them again after a modelling step. Faces that a step did not touch keep their index, which is how `chair_seat_legs_back.py` picks the backrest cells after extruding the legs.
+
+Blender's own selection operators work as well: `mesh.select_all(action='SELECT' | 'DESELECT' | 'INVERT' | 'TOGGLE')`, `mesh.select_mode(type='VERT' | 'EDGE' | 'FACE')` (asking for the mode that is already set is `CANCELLED`, as in Blender), `mesh.select_linked()` (the whole island), `mesh.select_more()` / `select_less()`, `mesh.region_to_loop()` (the boundary edges of the selected faces), `mesh.loop_to_region()`, `mesh.select_edge_loop_multi()` / `select_edge_ring_multi()` (loops or rings through the selected edges), `mesh.select_face_by_sides()`, `mesh.select_non_manifold()`, `mesh.select_loose()` and `mesh.shortest_path_select()`. The click-to-pick operators take the element by index through Blender's redo arguments: `mesh.loop_select(object_index=0, edge_index=2)` (the loop through edge 2; `extend=True` adds it) and `mesh.edgering_select(object_index=0, edge_index=2)`. Interactive tools such as `mesh.knife_tool` are not available.
+
+### 10.3 Operators that need arguments the viewport would give
+
+- `mesh.extrude_region_move(TRANSFORM_OT_translate={"value": (0, 0, -0.9)})` and the other extrude macros take the move as the nested transform argument (short form `TRANSFORM_OT_translate.value=0,0,-0.9`); `mesh.extrude_faces_move(TRANSFORM_OT_shrink_fatten={"value": 0.5})` moves each face along its own normal.
+- `mesh.loopcut(number_cuts=2, edge_index=10, object_index=0)` cuts the ring through edge 10 (find the edge with `edges.foreach_get('vertices')`); `mesh.loopcut_slide(MESH_OT_loopcut={…}, TRANSFORM_OT_edge_slide={"value": 0.5})` also slides the new loop. Only the new loops are left selected (in face select mode the meshes switch to edge select mode, as in Blender).
+- `mesh.spin(steps=8, angle=radians(180), center=(x, y, z), axis=(0, 1, 0))` and `mesh.screw(…)`: always pass `center` and `axis` (there is no view to take them from).
+- `mesh.bevel(offset=0.03, segments=3)`: always pass `offset`. Its default `offset=0` bevels nothing (the response says so with the hint `NO_OP_DEFAULT`). The bevel acts on the selected edges: with faces selected that is every edge of those faces, inner ones included, so use `mesh.region_to_loop()` first to bevel only their outline (`mug_rim_bevel.py`).
+- `transform.translate` / `rotate` / `resize` move the selection; `value` is in global axes unless you pass `orient_type`. The pivot is `bpy.context.scene.tool_settings.transform_pivot_point` (`'MEDIAN_POINT'` by default; `'INDIVIDUAL_ORIGINS'` scales each selected island about its own centre).
+
+### 10.4 Recipes
+
+Table legs (`table_legs.py`): cut the bottom of a slab into a 3x3 grid and extrude the four corner cells.
+
+```
+bpy.ops.mesh.primitive_cube_add(size=2, location=(0, 0, 1), scale=(1.2, 0.8, 0.05))
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_mode(type='FACE')
+bpy.ops.frap.select_by_normal(direction=(0, 0, -1))
+bpy.ops.mesh.subdivide(number_cuts=2)
+bpy.data.meshes['Cube.001'].polygons.foreach_get('center')        # corner cells: 4, 6, 8, 12
+bpy.ops.frap.select_elements(type='FACE', indices=[4, 6, 8, 12])
+bpy.ops.mesh.inset(thickness=0.08, use_individual=True)
+bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value": (0, 0, -0.9)})
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.mesh.normals_make_consistent(inside=False)
+bpy.ops.object.mode_set(mode='OBJECT')
+```
+
+Mug body (`mug_body.py`): inset the top cap to leave a rim, then extrude it down into a cavity.
+
+```
+bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.5, depth=1, location=(0, 0, 0.5))
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_mode(type='FACE')
+bpy.ops.frap.select_by_normal(direction=(0, 0, 1))
+bpy.ops.mesh.inset(thickness=0.05)
+bpy.ops.mesh.extrude_region_move(TRANSFORM_OT_translate={"value": (0, 0, -0.9)})
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.mesh.faces_shade_smooth()
+```
+
+Mug handle (`mug_handle_spin.py`): a small filled circle added in Edit Mode beside the body, spun half a turn about a horizontal axis.
+
+```
+bpy.ops.mesh.primitive_circle_add(vertices=8, radius=0.06, location=(0.48, 0, 0.8))
+bpy.ops.mesh.edge_face_add()
+bpy.ops.mesh.spin(steps=8, angle=-3.141592653589793, center=(0.48, 0, 0.5), axis=(0, 1, 0))
+```
+
+Other workflows in the same directory: a round table on a pedestal (inset + two extrusions + `transform.resize`), loop-cut legs tapered with `INDIVIDUAL_ORIGINS`, a table built from five cubes and split with `mesh.separate(type='LOOSE')`, a chair with legs and a backrest, half a chair cut with `mesh.bisect(…, clear_inner=True)` and rebuilt with `mesh.symmetrize(direction='POSITIVE_X')`, a stool whose bottom is `mesh.poke`d into triangles for three legs, pointed legs collapsed with `mesh.merge(type='COLLAPSE')`, a bevelled table top, a rounded mug rim (`region_to_loop` + `bevel`), an open cup with `mesh.solidify`, a cup bridged between two circles with `mesh.bridge_edge_loops` and capped with `mesh.edge_face_add`, a ring lathed with a full `mesh.spin`, a vase shaped with `loopcut_slide`, a cushion (`subdivide(smoothness=1)` + `vertices_smooth`), a shelf from `mesh.extrude_repeat`, a drawer duplicated out of a cabinet and separated, seams and sharp edges for UVs (`mark_seam`, `mark_sharp`), a clean-up pass (`fill_holes`, `dissolve_limited`, `remove_doubles`), a table and a chair edited together, and a mug exported to glTF.
+
+### 10.5 Pitfalls
+
+- Name things right after creating them (`bpy.context.object.name = 'Table'`, `bpy.context.object.data.name = 'Table'`); otherwise read the names from `result.object` and `changes.added`.
+- Read indices again after any operator that changes topology. The side faces of an extrusion come out in a different order in each Blender run (frap's order is fixed); their geometry is the same.
+- `len(…)` and other built-ins are not supported: read the collection path instead (it reports `len`), or the `edit_mesh` block of the response.
+- The select mode is a scene tool setting (`bpy.context.scene.tool_settings.mesh_select_mode`): it is still `FACE` the next time you enter Edit Mode, and `mesh.select_mode(type='FACE')` is then `CANCELLED` with a WARNING. That is harmless; read `context.select_mode` in the response to know the current mode.
+- `bpy.ops.mesh.delete(type='VERT')` with nothing selected is `CANCELLED` with a WARNING report; check `selected` in `edit_mesh` first.
+- Ask for help inside the session: `bpy.ops.frap.describe(target='mesh.spin')` lists every argument with its default and unit.
+
+## 11. Checking a model
+
+- `bpy.ops.frap.scene_summary(objects='SELECTED')` answers, in one response, every object with its mode, transform, materials, modifiers, element counts and world-space bounds (`bounds_min`, `bounds_max`), plus totals. A mesh in Edit Mode is summarised from its edit mesh. Use it after a modelling step to check sizes and counts.
+- `bpy.ops.frap.render_contact_sheet(filepath='out/sheet.png', views={'FRONT', 'RIGHT', 'TOP', 'ISO'}, view_size=256)` renders the scene with Workbench from several synthetic orthographic views (and `'CAMERA'`, the scene camera) into one labelled PNG, without adding cameras to `bpy.data`. The response lists each tile's rectangle and camera. Look at the image when your harness can show it to you.

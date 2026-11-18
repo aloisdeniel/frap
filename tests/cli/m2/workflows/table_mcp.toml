@@ -1,0 +1,10 @@
+# WP 2.13: an agent models a table over `frap mcp` (§13.1), one `tools/call` per step: it reads
+# `frap_describe` for `frap.select_elements` first, builds the top and cuts its bottom (picked
+# by its normal) into a 3x3 grid, reads the face centres with one bulk `foreach_get` to find
+# the corner cells, gets an out-of-range index wrong (IndexError, `isError`, nothing changed),
+# then selects the right cells, insets and extrudes the legs and checks the result with
+# `frap.scene_summary`; `frap.describe` inside `frap_exec` misspells a struct
+# (`DESCRIBE_TARGET` with `did_you_mean`). The scene lives across the calls.
+bin.name = "frap"
+args = ["mcp", "--verbosity", "minimal"]
+fs.sandbox = true

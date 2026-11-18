@@ -174,6 +174,9 @@ pub enum OpError {
     Gpu(String),
     /// `--max-elements` / `--stmt-timeout` (`LIMIT_EXCEEDED`).
     Limit(String),
+    /// A protocol error answered as is, keeping its own exception and code (frap extension
+    /// operators, e.g. `DESCRIBE_TARGET` of `frap.describe`; M2 WP 2.13).
+    Frap(Box<FrapError>),
 }
 
 impl From<RnaError> for OpError {
@@ -205,6 +208,7 @@ impl OpError {
             OpError::Limit(m) => {
                 FrapError::new(PyExc::RuntimeError, LIMIT_EXCEEDED, format!("Error: {m}"))
             }
+            OpError::Frap(e) => *e,
         }
     }
 }

@@ -1,0 +1,12 @@
+# WP 2.13: the edit-mode recipes of docs/agents.md §10 on the factory cube (raw stdin, §13.1):
+# selection by index with `frap.select_elements` (SET, ADD, REMOVE) and by orientation with
+# `frap.select_by_normal`, read back in bulk (`polygons.foreach_get('select')`) and by element;
+# edit-mode reads go through the edit mesh while writes are refused (`RNA_EDITMODE_WRITE`,
+# with the `mode_set(mode='OBJECT')` hint); `select_more` / `select_all(INVERT)`; a primitive
+# added in Edit Mode joins the edited mesh and is the only selection, so `select_linked` +
+# `delete` removes it again (`result.removed`), and a second `delete` with nothing selected is
+# CANCELLED with a WARNING; `len()` is not supported (read the path instead). Back in Object
+# Mode the data write works; `mode_set(toggle=True)` and `editmode_toggle` switch modes.
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

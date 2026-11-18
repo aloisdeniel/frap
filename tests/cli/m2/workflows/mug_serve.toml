@@ -1,0 +1,10 @@
+# WP 2.13: an agent models a mug over `frap serve --jsonl` (§13.1), one request per step, the
+# way docs/agents.md recommends: an edit-mode operator in Object Mode fails its poll with the
+# `mode_set` hint (request 1), `poll()` asks first (request 2), the top cap is picked by its
+# normal; a typo in a keyword stops the rest of request 3 (`skip_rest`) while the steps before
+# it stay committed; a mesh data write in Edit Mode is refused (`RNA_EDITMODE_WRITE`) and
+# `on_error: continue` runs the rest of request 4; a handle is added as a circle in Edit Mode,
+# filled and spun (request 5); `frap.scene_summary` and `frap.describe` check the result.
+bin.name = "frap"
+args = ["serve", "--jsonl", "--verbosity", "minimal"]
+fs.sandbox = true

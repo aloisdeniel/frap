@@ -1,0 +1,11 @@
+# WP 2.13 (M2 exit: contact-sheet transcript): an agent models a chair in Edit Mode (seat,
+# legs and backrest by subdivide + extrusions), checks it with `frap.scene_summary`, then
+# looks at it with `frap.render_contact_sheet`: the default four views (FRONT, RIGHT, TOP,
+# ISO) as 64 px tiles, then ISO plus the scene camera in one column without labels. The
+# response lists every tile's rectangle and synthetic camera (§19.6), which are
+# deterministic; the PNGs are written in the sandbox and not compared (GPU-dependent pixels;
+# the images are compared in `tests/golden/cases/render/m2/`). An empty `views` set is an
+# error. Needs a GPU adapter (Metal, lavapipe, WARP), as every render test.
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

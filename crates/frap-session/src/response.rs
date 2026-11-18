@@ -245,6 +245,7 @@ pub fn value_json(v: &Value, names: &dyn IdNames) -> J {
         }
         Value::Coll(p) => json!({"$coll": p.repr(names)}),
         Value::Tuple(t) => J::Array(t.iter().map(|x| value_json(x, names)).collect()),
+        Value::Json(j) => (**j).clone(),
         _ => J::Null,
     }
 }
