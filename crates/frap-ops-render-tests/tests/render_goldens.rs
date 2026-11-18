@@ -16,6 +16,11 @@
 //!   same case: SSIM ≥ 0.97 for the M1 scenes and ≥ `min_ssim` (0.95 for the M2 X-ray,
 //!   wireframe, matcap, outline and shadow scenes) and mean ΔE ≤ 2, **gating** from M2 (WP 2.3).
 //!
+//! - with `bg_max_delta_e=<x>` on the directive line, every background pixel of Blender's
+//!   render (its top-left colour, with the 3 x 3 neighbourhood also background) must be within
+//!   CIE76 ΔE `x` in frap's render, pixel for pixel over the whole image: the mean SSIM is blind
+//!   to a few stray pixels an agent would take for geometry.
+//!
 //! Without an adapter the test fails, or prints a notice and passes under
 //! `FRAP_GPU_OPTIONAL=1` (ci.yml's GPU-less test job).
 //!
@@ -52,6 +57,8 @@ struct RenderCase {
     image: String,
     /// Minimum SSIM against Blender's render.
     min_ssim: f64,
+    /// Per-pixel ΔE limit on Blender's background pixels (`bg_max_delta_e=`).
+    bg_max_delta_e: Option<f64>,
 }
 
 impl RenderCase {
@@ -87,12 +94,15 @@ fn render_cases(repo: &Repo) -> Vec<RenderCase> {
             let min_ssim = directive(&text, "min_ssim=")
                 .map(|s| s.parse().expect("min_ssim= is a number"))
                 .unwrap_or(WORKBENCH_MIN_SSIM);
+            let bg_max_delta_e = directive(&text, "bg_max_delta_e=")
+                .map(|s| s.parse().expect("bg_max_delta_e= is a number"));
             out.push(RenderCase {
                 area,
                 name: p.file_stem().unwrap().to_string_lossy().into_owned(),
                 text,
                 image,
                 min_ssim,
+                bg_max_delta_e,
             });
         }
     }
@@ -156,6 +166,56 @@ fn render_frap(case: &RenderCase, work: &Path) -> Result<Option<PathBuf>, String
     Ok(Some(out))
 }
 
+/// Pixel-for-pixel background check: every pixel of `reference` that has its top-left colour
+/// (±1 per channel), together with its 8 neighbours (anti-aliased silhouettes excluded), must
+/// be within ΔE `max` in `frap`. Returns the failure message, if any.
+fn background_check(
+    id: &str,
+    frap: &frap_imbuf::DecodedImage,
+    reference: &frap_imbuf::DecodedImage,
+    max: f64,
+) -> Option<String> {
+    let (w, h) = (reference.width as usize, reference.height as usize);
+    if (frap.width as usize, frap.height as usize) != (w, h) {
+        return Some(format!("{id}: background check: size mismatch"));
+    }
+    let (a, b) = (image_ssim::to_rgba8(frap), image_ssim::to_rgba8(reference));
+    let rgb = |v: &[u8], x: usize, y: usize| {
+        let i = (y * w + x) * 4;
+        [v[i], v[i + 1], v[i + 2]]
+    };
+    let bg = rgb(&b, 0, 0);
+    let is_bg = |x: usize, y: usize| {
+        rgb(&b, x, y)
+            .iter()
+            .zip(bg)
+            .all(|(c, k)| c.abs_diff(k) <= 1)
+    };
+    let (mut checked, mut bad, mut worst) = (0usize, Vec::new(), 0.0f64);
+    for y in 1..h.saturating_sub(1) {
+        for x in 1..w.saturating_sub(1) {
+            if !(y - 1..=y + 1).all(|yy| (x - 1..=x + 1).all(|xx| is_bg(xx, yy))) {
+                continue;
+            }
+            checked += 1;
+            let d = image_ssim::delta_e(rgb(&a, x, y), rgb(&b, x, y));
+            worst = worst.max(d);
+            if d > max {
+                bad.push((x, y));
+            }
+        }
+    }
+    eprintln!("{id}: background check: {checked} pixels, max ΔE {worst:.2} (gate {max})");
+    (checked == 0 || !bad.is_empty()).then(|| {
+        format!(
+            "{id}: {} of {checked} Blender background pixels differ by ΔE > {max} (max {worst:.2}; \
+             first {:?})",
+            bad.len(),
+            &bad[..bad.len().min(8)]
+        )
+    })
+}
+
 fn bless_blender(repo: &Repo, case: &RenderCase) -> Result<(), String> {
     let Some(blender) = frap_golden::locate_blender() else {
         eprintln!(
@@ -199,6 +259,7 @@ fn source_transforms() {
     let d = "# render-golden: image=out/a.png min_ssim=0.95\n";
     assert_eq!(directive(d, "image=").as_deref(), Some("out/a.png"));
     assert_eq!(directive(d, "min_ssim=").as_deref(), Some("0.95"));
+    assert_eq!(directive(d, "bg_max_delta_e="), None);
 }
 
 #[test]
@@ -237,6 +298,13 @@ fn workbench_scenes_and_fixtures() {
             0.95
         };
         assert!(c.min_ssim >= floor, "{}: min_ssim {}", c.id(), c.min_ssim);
+        if c.name.starts_with("shadows_background") {
+            assert!(
+                c.bg_max_delta_e.is_some_and(|x| x <= 2.0),
+                "{}: background goldens gate pixel for pixel",
+                c.id()
+            );
+        }
         // Committed self-golden and Blender reference.
         for side in ["frap", "blender"] {
             let p = fixture(&repo, c, side);
@@ -310,6 +378,9 @@ fn self_and_blender_goldens() {
                     DEFAULT_MAX_DELTA_E,
                 ) {
                     failures.push(m.to_string());
+                }
+                if let Some(max) = case.bg_max_delta_e {
+                    failures.extend(background_check(&case.id(), &frap, &b, max));
                 }
             }
             Err(e) => failures.push(format!("{}: Blender reference: {e}", case.id())),

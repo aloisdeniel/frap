@@ -70,7 +70,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.extrude_verts_indiv` | M2 | P1 |  |
 | [x] | `mesh.extrude_vertices_move` | M2 | P1 | macro |
 | [x] | `mesh.extrude_repeat` | M2 | P2 | offset is a vector in 5.x |
-| [ ] | `mesh.extrude_manifold` | M2 | P2 | macro; partial: the translate step's `use_automerge_and_split` is not implemented in Edit Mode (OP_NOT_IMPLEMENTED), golden `macros/manifold.py.pending` |
+| [ ] | `mesh.extrude_manifold` | M2 | P2 | macro; partial: the translate step's `use_automerge_and_split` is not implemented in Edit Mode (OP_NOT_IMPLEMENTED with a hint: `mesh.extrude_region_move` + `mesh.remove_doubles`), golden `macros/manifold.py.pending` |
 | [x] | `mesh.inset` | M2 | P0 | T1 |
 | [x] | `mesh.bevel` | M2 | P0 | seg 1 T1, N segments T2; offset=0 no-op hint (NO_OP_DEFAULT). Partial: `profile_type='CUSTOM'` OP_NOT_IMPLEMENTED; harden_normals and Auto Merge not applied (WARNING), D-80 |
 | [x] | `mesh.subdivide` | M2 | P0 | uniform T1 |
@@ -637,6 +637,15 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `export_scene.gltf` | M1 | P0 | Blender's 110 props + frap_* options (only where Blender has no prop); feature milestones as import; `//` resolved (deviation) |
 | — | `export_scene.fbx` | OUT | — |  |
 
+### `ed.* (undo)`
+
+| ✓ | Operator | M | Prio | Notes |
+|---|---|---|---|---|
+| [ ] | `ed.undo` | M8 | P2 | WP 8.4: the snapshot ring of committed `State`s |
+| [ ] | `ed.redo` | M8 | P2 | WP 8.4 |
+| [ ] | `ed.undo_redo` | M8 | P2 | WP 8.4 |
+| [ ] | `ed.undo_push` | M8 | P2 | WP 8.4 |
+
 ### `frap.*` (frap extensions, namespaced)
 
 | ✓ | Operator | M | Notes |
@@ -849,6 +858,6 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | M3 | 31 |
 | M4 | 15 |
 | M6 | 54 |
-| M8 | 183 |
+| M8 | 187 |
 | OUT | 61 |
-| total listed | 532 |
+| total listed | 536 |

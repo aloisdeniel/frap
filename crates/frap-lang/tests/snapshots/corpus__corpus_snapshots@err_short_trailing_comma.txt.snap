@@ -7,4 +7,4 @@ input_file: crates/frap-lang/tests/corpus/err_short_trailing_comma.txt
 ---
 error 1 SyntaxError SYNTAX @1:38/38+0
   message: invalid syntax
-  hint: no spaces inside a short-form tuple: 0,0,1
+  hint: a short-form value cannot end with a comma: write the items as 0,0,1, or one item of a list as [5]

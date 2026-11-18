@@ -1,0 +1,18 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  "ed.flush_edits | planned OUT | poll YYYYY/YYYYY | ",
+  "ed.lib_id_fake_user_toggle | planned OUT | poll YYYYY/YYYYY | ",
+  "ed.lib_id_generate_preview | planned OUT | poll NNNNN/NNNNN | ",
+  "ed.lib_id_generate_preview_from_object | planned OUT | poll NNNNN/NNNNN | ",
+  "ed.lib_id_load_custom_preview | planned OUT | poll NNNNN/NNNNN | filepath,hide_props_region,check_existing,filter_blender,filter_backup,filter_image,filter_movie,filter_python,filter_font,filter_sound,filter_text,filter_archive,filter_btx,filter_alembic,filter_usd,filter_obj,filter_volume,filter_folder,filter_blenlib,filemode,show_multiview,use_multiview,display_type,sort_method",
+  "ed.lib_id_override_editable_toggle | planned OUT | poll NNNNN/NNNNN | ",
+  "ed.lib_id_remove_preview | planned OUT | poll NNNNN/NNNNN | ",
+  "ed.lib_id_unlink | planned OUT | poll YYYYY/YYYYY | ",
+  "ed.redo | planned M8 | poll NNNNN/NNNNN | ",
+  "ed.undo | planned M8 | poll NNNNN/NNNNN | ",
+  "ed.undo_history | planned OUT | poll NNNNN/NNNNN | item",
+  "ed.undo_push | planned M8 | poll YYYYY/YYYYY | message",
+  "ed.undo_redo | planned M8 | poll NNNNN/NNNNN | "
+]

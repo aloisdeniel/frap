@@ -234,6 +234,9 @@ impl BMesh {
                 break;
             }
         }
+        // `--stmt-timeout` cancellation point weighted by the walk: quadratic algorithms over
+        // large n-gons (subdividing an n-gon n times) are cancelled promptly.
+        frap_math::budget::check_n(out.len() as u32);
         out
     }
     /// `BM_VERTS_OF_FACE`, from `l_first`.

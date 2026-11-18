@@ -103,6 +103,7 @@ fn typed_ops_match_operators_md() {
         "nla",
         "export_scene",
         "import_scene",
+        "ed",
     ] {
         assert!(
             s.ops.iter().any(|o| o.ns == ns),

@@ -400,11 +400,24 @@ fn vs_full(@builtin(vertex_index) i: u32) -> FullOut {
     return out;
 }
 
+// The shadow resolve triangle sits on the far plane: with `depth_compare: Greater` only pixels
+// that hold geometry (depth < 1) pass, as Blender applies the shadow in its deferred resolve
+// of the opaque surfaces only. Depth-fail volumes leave non-zero counts on background pixels
+// too (back caps sit on the far plane, the cleared depth).
+@vertex
+fn vs_full_far(@builtin(vertex_index) i: u32) -> FullOut {
+    let uv = vec2<f32>(f32((i << 1u) & 2u), f32(i & 2u));
+    var out: FullOut;
+    out.position = vec4<f32>(uv * 2.0 - 1.0, 1.0, 1.0);
+    return out;
+}
+
 @group(2) @binding(0) var tex_a: texture_2d<f32>;
 @group(2) @binding(1) var tex_b: texture_2d<f32>;
 @group(2) @binding(2) var tex_ids: texture_2d<u32>;
 
-// Shadowed pixels (stencil != 0, tested by the pipeline) take the shadowed colour.
+// Shadowed geometry pixels (stencil != 0 and depth < 1, tested by the pipeline) take the
+// shadowed colour.
 @fragment
 fn fs_shadow_resolve(in: FullOut) -> @location(0) vec4<f32> {
     return textureLoad(tex_a, vec2<i32>(in.position.xy), 0);

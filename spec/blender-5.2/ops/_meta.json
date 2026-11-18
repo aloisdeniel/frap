@@ -94,7 +94,8 @@
   "pose",
   "nla",
   "export_scene",
-  "import_scene"
+  "import_scene",
+  "ed"
  ],
  "poll_contexts": {
   "A": "object mode, factory scene (Cube active and selected)",

@@ -102,3 +102,30 @@ fn no_timeout_by_default() {
     );
     assert_eq!(r["status"], "FINISHED", "{r}");
 }
+
+#[test]
+fn stmt_timeout_cancels_quadratic_mesh_kernels() {
+    // Loop cuts and bevels whose cost grows with the face size (each cut walks an n-gon) are
+    // cancelled promptly: the deadline is polled by the work done, not per outer step.
+    let mut s = session_with(|o| {
+        o.limits.stmt_timeout = Some(Duration::from_millis(500));
+        o.limits.max_elements = 1 << 30;
+    });
+    one(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
+    let before = s.state_dump();
+    for src in [
+        "bpy.ops.mesh.loopcut(number_cuts=100000, edge_index=0, object_index=0)",
+        "bpy.ops.mesh.loopcut(number_cuts=10000, edge_index=0, object_index=0)",
+        "bpy.ops.mesh.bevel(offset=0.1, segments=300)",
+        "bpy.ops.mesh.bevel(offset=1e30, segments=1000)",
+    ] {
+        let t = Instant::now();
+        let r = one(&mut s, src);
+        let took = t.elapsed();
+        assert_eq!(r["error"]["code"], "TIMEOUT", "{src}: {r}");
+        assert_eq!(r["state"], "unchanged", "{src}: {r}");
+        // Unoptimised test builds on a loaded machine: well under the 20+ s it took before.
+        assert!(took < Duration::from_secs(6), "{src}: {took:?}");
+        assert_eq!(s.state_dump(), before, "{src}");
+    }
+}

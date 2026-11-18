@@ -234,6 +234,8 @@ default = "DEFAULT"
 items_from = "op:OBJECT_OT_empty_image_add.sort_method"
 ["OBJECT_OT_multires_external_save.sort_method"]
 items_from = "op:OBJECT_OT_empty_image_add.sort_method"
+["ED_OT_lib_id_load_custom_preview.sort_method"]
+items_from = "op:OBJECT_OT_empty_image_add.sort_method"
 ["IMAGE_OT_file_browse.sort_method"]
 items_from = "op:OBJECT_OT_empty_image_add.sort_method"
 ["IMAGE_OT_open.sort_method"]

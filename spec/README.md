@@ -6,7 +6,7 @@ except `overlay/`, `frap/` and `current_milestone`.
 | Path | Content | Written by |
 |---|---|---|
 | `blender-5.2/rna/<Struct>.json` | `bl_rna` of every struct frap may implement (515 structs: the OPERATORS.md §D roots, every `Modifier`, `ShaderNode*`, `NodeSocket*` and `Light` type, the glTF add-on preferences, closed over bases and pointer/collection targets; UI, editor, physics and tool structs pruned), with `fresh.differs_from_default` per creatable struct and `context_members` on `Context` | `tools/blender/dump_rna.py` |
-| `blender-5.2/ops/<ns>.json` | every operator of the 20 curated namespaces (1,073): props, options, macro steps, poll matrix A–E with and without a VIEW_3D override | `tools/blender/dump_ops.py` |
+| `blender-5.2/ops/<ns>.json` | every operator of the 21 curated namespaces (1,086): props, options, macro steps, poll matrix A–E with and without a VIEW_3D override | `tools/blender/dump_ops.py` |
 | `blender-5.2/nodes/<bl_idname>.json` | every shader node: default name/width, sockets with defaults, fresh property values, socket availability per enum value | `tools/blender/dump_nodes.py` |
 | `blender-5.2/modifiers/<TYPE>.json` | every mesh modifier type: `modifiers.new` values, `modifier_add` default name | `tools/blender/dump_modifiers.py` |
 | `blender-5.2/startup.json` | the complete factory state: every ID (generic RNA serialisation), exact mesh arrays of the default cube, the Layout viewport's `RegionView3D`/`SpaceView3D` | `tools/blender/dump_startup.py` |

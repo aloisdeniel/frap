@@ -237,7 +237,7 @@ pub fn group_of(ns: &str) -> Res<&'static str> {
         "uv" => "uv",
         "anim" | "screen" | "armature" | "pose" | "nla" => "anim",
         "material" | "image" | "world" => "data",
-        "export_scene" | "import_scene" | "wm" => "io",
+        "export_scene" | "import_scene" | "wm" | "ed" => "io",
         "render" => "render",
         "frap" => "frap",
         other => return Err(format!("namespace `{other}` has no ops group (§3.2)")),

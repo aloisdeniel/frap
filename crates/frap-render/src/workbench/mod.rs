@@ -784,14 +784,15 @@ fn create_pipelines(gpu: &Gpu) -> Pipelines {
     let shadow_resolve = pipeline(
         "frap workbench shadow resolve",
         &fs_layout,
-        "vs_full",
+        "vs_full_far",
         &[],
         Some("fs_shadow_resolve"),
         &[color_target(SAMPLE_FORMAT, None)],
         Some(wgpu::DepthStencilState {
             format: DEPTH_FORMAT,
             depth_write_enabled: Some(false),
-            depth_compare: Some(C::Always),
+            // Geometry only (the triangle is on the far plane, the background at depth 1).
+            depth_compare: Some(C::Greater),
             stencil: wgpu::StencilState {
                 front: not_zero,
                 back: not_zero,

@@ -1032,17 +1032,15 @@ pub fn run(cx: &mut OpCtx, req: Request) -> OpResult {
     }
     let meshes = helpers::iter_edit_meshes(cx);
     let mut cd_targets: Vec<(IdRef<MeshId>, CdTarget)> = Vec::new();
-    {
-        let c = cx.ctx();
-        let ts = c.tool_settings();
-        if ts.use_mesh_automerge && req.mode.data_kind() == DataKind::Verts {
-            return Err(OpError::NotImplemented(
-                "frap: edit-mode transforms with tool_settings.use_mesh_automerge (Auto Merge \
-                 Vertices) are not implemented yet"
-                    .into(),
-            ));
-        }
-    }
+    // `T_AUTOMERGE` (`initTransInfo`: `tool_settings.use_mesh_automerge`; frap does not bind
+    // `use_mesh_automerge_and_split`, so `T_AUTOSPLIT` comes only from the operator property,
+    // refused before this point). Only the vertex conversions run
+    // `special_aftertrans_update__mesh`.
+    let automerge = {
+        let ts = cx.ctx().tool_settings();
+        (ts.use_mesh_automerge && req.mode.data_kind() == DataKind::Verts)
+            .then_some(ts.double_threshold)
+    };
     let (mut t, view_matrix) = {
         let (c, edit) = cx.split_edit();
         let around = PivotPoint::from_identifier(&c.tool_settings().transform_pivot_point);
@@ -1168,11 +1166,66 @@ pub fn run(cx: &mut OpCtx, req: Request) -> OpResult {
         }
     }
 
-    match t.req.mode {
-        Mode::EdgeSlide | Mode::VertSlide => return super::slide::run(cx, t),
-        _ => apply(&mut t),
+    let mes: Vec<IdRef<MeshId>> = t.tcs.iter().map(|tc| tc.me).collect();
+    let status = match t.req.mode {
+        Mode::EdgeSlide | Mode::VertSlide => super::slide::run(cx, t)?,
+        _ => {
+            apply(&mut t);
+            write_back(cx, &t)?
+        }
+    };
+    if let (Some(dist), OpStatus::Finished) = (automerge, &status) {
+        for me in mes {
+            auto_merge(cx.bmesh_mut(me)?, dist)?;
+        }
     }
-    write_back(cx, &t)
+    Ok(status)
+}
+
+// Ported from blender/source/blender/editors/transform/transform_convert_mesh.cc
+// (special_aftertrans_update__mesh, without mesh symmetry: frap does not bind
+// `Mesh.use_mirror_x/y/z`) and blender/source/blender/editors/mesh/editmesh_automerge.cc
+// (EDBM_automerge → edbm_automerge_impl), Blender 5.2.4, GPL-2.0-or-later.
+/// Auto Merge Vertices after a transform: `find_doubles verts=<all> keep_verts=<unselected>
+/// dist=double_threshold`, then `weld_verts` (selected vertices merge into unselected ones and
+/// into each other); in face select mode the selection is flushed from the edges again so the
+/// faces re-select.
+fn auto_merge(bm: &mut BMesh, dist: f32) -> Result<(), OpError> {
+    use frap_bmesh::ops::find_doubles::{FindDoublesIn, find_doubles};
+    use frap_bmesh::ops::weld_verts::{WeldVertsIn, weld_verts};
+    let has_face_sel = bm.selected_counts().2 != 0;
+    let err = |e: frap_bmesh::BmError| OpError::Runtime(e.to_string());
+    // `%av`: every vertex; `%Hv` with `BMO_FLAG_RESPECT_HIDE`: the visible unselected ones.
+    let verts: Vec<VertId> = bm.vert_ids();
+    let keep_verts: Vec<VertId> = bm
+        .verts
+        .iter()
+        .filter(|(_, v)| !v.flag.contains(ElemFlag::HIDDEN) && !v.flag.contains(ElemFlag::SELECT))
+        .map(|(i, _)| VertId(i))
+        .collect();
+    let found = find_doubles(
+        bm,
+        &FindDoublesIn {
+            verts,
+            keep_verts,
+            use_connected: false,
+            dist,
+        },
+    )
+    .map_err(err)?;
+    weld_verts(
+        bm,
+        &WeldVertsIn {
+            targetmap: found.targetmap,
+            use_centroid: false,
+            average_vert_data: false,
+        },
+    )
+    .map_err(err)?;
+    if has_face_sel && bm.select_mode == SelectMode::FACE {
+        bm.select_flush_mode_ex(SelectMode::EDGE, false);
+    }
+    Ok(())
 }
 
 /// Writes the results into the edit BMeshes (`recalcData_mesh`: positions, then normals; the

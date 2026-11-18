@@ -7,7 +7,10 @@
 //! - for cones and cylinders, the topology parameters of `bmo_create_cone_exec`: their builder
 //!   kills elements (cap centres, collapsed rings, dissolved fans), so the merge runs the
 //!   builder itself in the edit BMesh (allocations and kills then follow the edit mesh's
-//!   pools, as in Blender) and takes the positions and UVs from the mesh.
+//!   pools, as in Blender) and takes the positions and UVs from the mesh;
+//! - for circles, the topology parameters of `bmo_create_circle_exec`: its NGON fill creates a
+//!   centre vertex first and kills it when the fan is dissolved, a freed slot the next
+//!   allocation in the edit BMesh takes.
 
 use std::cell::RefCell;
 
@@ -22,6 +25,19 @@ pub struct Build {
     pub counts: (usize, usize, usize),
     /// Set by the cone and cylinder generators.
     pub cone: Option<ConeTopology>,
+    /// Set by the circle generator.
+    pub circle: Option<CircleTopology>,
+}
+
+/// The topology parameters of `bmesh.ops.create_circle` (positions come from the mesh).
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+pub struct CircleTopology {
+    /// `segments`.
+    pub segments: u32,
+    /// `cap_ends` (fill type other than `NOTHING`).
+    pub cap_ends: bool,
+    /// `cap_tris` (fill type `TRIFAN`); otherwise the fan is dissolved into an n-gon.
+    pub cap_tris: bool,
 }
 
 /// The topology parameters of `bmesh.ops.create_cone` (positions come from the mesh).

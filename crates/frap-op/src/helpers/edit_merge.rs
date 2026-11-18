@@ -29,10 +29,12 @@
 //! slot. The cone and cylinder builder kills cap
 //! centres, collapses zero-radius rings and dissolves fans into n-gons: its kills free slots
 //! later allocations take, and `dissolve_faces` follows the slot order of the faces it joins.
-//! The merge therefore runs `bmo_create_cone_exec` itself in the edit BMesh ([`ConePlan`],
+//! The merge therefore runs `bmo_create_cone_exec` itself in the edit BMesh ([`BuildPlan`],
 //! with frap-bmesh's `BM_edge_collapse`, `BM_faces_join` and island walker) and takes the
 //! positions and UVs from the generator's mesh (`frap_mesh::primitives::trace` says which
-//! builder ran). `BM_mesh_calc_uvs_cube`, `_grid` and the cylinder's side quads hand out UVs in
+//! builder ran). The circle's NGON fill creates its centre vertex first and kills it when the
+//! fan is dissolved, so `bmo_create_circle_exec` is replayed the same way: the freed centre
+//! slot is the one the next primitive's first vertex takes, as in Blender. `BM_mesh_calc_uvs_cube`, `_grid` and the cylinder's side quads hand out UVs in
 //! face pool order: they are re-dealt in the edit BMesh's order ([`uvs_in_pool_order`]).
 //! Not replayed: the UV and ico sphere builders recreate elements (subdivide, extrude +
 //! `remove_doubles`) in an order other than the index order, so a sphere added while the edit
@@ -44,7 +46,7 @@ use std::sync::Arc;
 use frap_bmesh::walkers::WalkOpts;
 use frap_bmesh::{BMElem, BMesh, CdLayer, CreateFlag, EdgeId, ElemFlag, FaceId, LoopId, VertId};
 use frap_math::glam::Mat4;
-use frap_mesh::primitives::trace::ConeTopology;
+use frap_mesh::primitives::trace::{CircleTopology, ConeTopology};
 use frap_mesh::{AttrData, Mesh};
 use frap_rna::{IdRef, MeshId, ObjectId};
 use frap_scene::id::Object;
@@ -103,7 +105,12 @@ pub fn merge_into_edit_mesh(
     // 2. + 3. Create, then select only the new elements.
     let bm = cx.bmesh_mut(me)?;
     deselect_all(bm);
-    let new = match build.cone.and_then(|t| ConePlan::new(&t, &mesh)) {
+    let builder = match (build.cone, build.circle) {
+        (Some(t), _) => Some(Builder::Cone(t)),
+        (None, Some(t)) => Some(Builder::Circle(t)),
+        (None, None) => None,
+    };
+    let new = match builder.and_then(|b| BuildPlan::new(b, &mesh)) {
         Some(plan) => plan.create(bm, &mesh, &to_edit)?,
         None => create(bm, &mesh, &to_edit)?,
     };
@@ -458,6 +465,68 @@ fn build_cone(bm: &mut BMesh, t: &ConeTopology) -> Vec<VertId> {
     serial
 }
 
+// Ported from blender/source/blender/bmesh/operators/bmo_primitive.cc (bmo_create_circle_exec,
+// Blender 5.2.4, GPL-2.0-or-later), without the matrix and `calc_uvs`.
+/// Builds the circle's topology in `bm` (positions zero); returns the vertices in creation
+/// order (the centre first with `cap_ends`).
+fn build_circle(bm: &mut BMesh, t: &CircleTopology) -> Vec<VertId> {
+    let segs = t.segments as usize;
+    let mut serial = Vec::with_capacity(segs + 1);
+    if segs == 0 {
+        return serial;
+    }
+    let mut vert = |bm: &mut BMesh| {
+        frap_math::budget::check();
+        let v = bm.vert_create([0.0; 3], None, CreateFlag::empty());
+        serial.push(v);
+        v
+    };
+    let cent = t.cap_ends.then(|| vert(bm));
+    let mut fan: Vec<FaceId> = Vec::with_capacity(if t.cap_ends { segs } else { 0 });
+    let (mut first, mut last) = (None, None);
+    for _ in 0..segs {
+        let v1 = vert(bm);
+        if let Some(lv1) = last {
+            bm.edge_create(v1, lv1, None, CreateFlag::empty());
+            if let Some(c) = cent {
+                // `BM_face_create_quad_tri`: `BM_face_create_verts(…, create_edges = true)`.
+                fan.extend(bm.face_create_verts(&[c, lv1, v1], None, CreateFlag::empty(), true));
+            }
+        }
+        first.get_or_insert(v1);
+        last = Some(v1);
+    }
+    let (Some(v1), Some(fv1)) = (last, first) else {
+        return serial;
+    };
+    bm.edge_create(fv1, v1, None, CreateFlag::empty());
+    if let Some(c) = cent {
+        fan.extend(bm.face_create_verts(&[c, v1, fv1], None, CreateFlag::empty(), true));
+        if !t.cap_tris {
+            dissolve_faces(bm, &fan);
+        }
+    }
+    serial
+}
+
+/// A builder replayed in the edit BMesh.
+#[derive(Copy, Clone, Debug)]
+enum Builder {
+    /// `bmo_create_cone_exec` (cones and cylinders).
+    Cone(ConeTopology),
+    /// `bmo_create_circle_exec`.
+    Circle(CircleTopology),
+}
+
+impl Builder {
+    fn build(&self, bm: &mut BMesh) -> Vec<VertId> {
+        match self {
+            Builder::Cone(t) => build_cone(bm, t),
+            Builder::Circle(t) => build_circle(bm, t),
+        }
+    }
+}
+
 // Ported from blender/source/blender/bmesh/operators/bmo_dissolve.cc (bmo_dissolve_faces_exec
 // with use_verts off, Blender 5.2.4, GPL-2.0-or-later).
 /// `dissolve_faces faces=…`: the regions (`BMW_ISLAND_MANIFOLD` over the input faces, started
@@ -499,20 +568,20 @@ fn dissolve_faces(bm: &mut BMesh, faces: &[FaceId]) {
     }
 }
 
-/// A cone or cylinder merge: the topology parameters, checked against the generator's mesh by
-/// building them once in an empty BMesh (where Blender's creation order is the mesh's index
+/// A cone, cylinder or circle merge: the builder, checked against the generator's mesh by
+/// building it once in an empty BMesh (where Blender's creation order is the mesh's index
 /// order). `mesh_index[k]` is the mesh index of the k-th created vertex, `None` when it dies.
-struct ConePlan {
-    topology: ConeTopology,
+struct BuildPlan {
+    builder: Builder,
     mesh_index: Vec<Option<usize>>,
 }
 
-impl ConePlan {
+impl BuildPlan {
     /// `None` when the port does not reproduce the generator's mesh (then the generic merge
     /// runs).
-    fn new(t: &ConeTopology, mesh: &Mesh) -> Option<ConePlan> {
+    fn new(builder: Builder, mesh: &Mesh) -> Option<BuildPlan> {
         let mut fresh = BMesh::new();
-        let serial = build_cone(&mut fresh, t);
+        let serial = builder.build(&mut fresh);
         let rank = dense_ranks(&fresh.verts.slots);
         let mesh_index: Vec<Option<usize>> = serial.iter().map(|v| rank[v.slot()]).collect();
         if fresh.verts_num() != mesh.verts_num()
@@ -537,8 +606,8 @@ impl ConePlan {
                 return None;
             }
         }
-        Some(ConePlan {
-            topology: *t,
+        Some(BuildPlan {
+            builder,
             mesh_index,
         })
     }
@@ -552,7 +621,7 @@ impl ConePlan {
             live_slots(&bm.faces.slots),
         );
         let is_new = |old: &[bool], slot: usize| !old.get(slot).copied().unwrap_or(false);
-        let serial = build_cone(bm, &self.topology);
+        let serial = self.builder.build(bm);
         let positions = mesh.positions();
         let mut by_index: Vec<Option<VertId>> = vec![None; mesh.verts_num()];
         for (v, idx) in serial.iter().zip(&self.mesh_index) {
@@ -661,7 +730,57 @@ fn dense_ranks<T>(slots: &[Option<T>]) -> Vec<Option<usize>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use frap_mesh::primitives::circle::{Circle, circle};
     use frap_mesh::primitives::cone::{Cone, FillType, cone};
+
+    /// The port of `bmo_create_circle_exec` reproduces the generator for every fill type.
+    #[test]
+    fn circle_port_matches_the_generator() {
+        for vertices in [3, 4, 5, 8, 32] {
+            for fill_type in [FillType::Nothing, FillType::Ngon, FillType::Trifan] {
+                let mesh = circle(&Circle {
+                    vertices,
+                    fill_type,
+                    ..Circle::default()
+                });
+                let t = frap_mesh::primitives::trace::take_last()
+                    .and_then(|b| b.circle)
+                    .expect("circle topology");
+                assert!(
+                    BuildPlan::new(Builder::Circle(t), &mesh).is_some(),
+                    "vertices {vertices} {fill_type:?}"
+                );
+            }
+        }
+    }
+
+    /// The NGON circle frees its centre vertex slot (created first, killed by the dissolve):
+    /// the next element created takes it, as in Blender (a plane after an NGON circle in Edit
+    /// Mode starts at the circle's first index).
+    #[test]
+    fn ngon_circle_leaves_its_centre_slot_free() {
+        let mesh = circle(&Circle {
+            vertices: 8,
+            fill_type: FillType::Ngon,
+            ..Circle::default()
+        });
+        let t = frap_mesh::primitives::trace::take_last()
+            .and_then(|b| b.circle)
+            .expect("circle topology");
+        let plan = BuildPlan::new(Builder::Circle(t), &mesh).expect("plan");
+        let mut bm = BMesh::new();
+        for _ in 0..3 {
+            bm.vert_create([0.0; 3], None, CreateFlag::empty());
+        }
+        let made = plan
+            .create(&mut bm, &mesh, &Mat4::IDENTITY)
+            .expect("circle");
+        assert_eq!(made.verts.len(), 8);
+        assert_eq!(bm.verts.free, vec![3]);
+        let next = bm.vert_create([0.0; 3], None, CreateFlag::empty());
+        assert_eq!(next.slot(), 3);
+        assert_eq!(bm.validate(), Vec::<String>::new());
+    }
 
     /// The port of `bmo_create_cone_exec` reproduces the generator (Blender's object-mode
     /// order, `spec/blender-5.2/primitives`) for every fill type, zero radius and segment count,
@@ -682,7 +801,7 @@ mod tests {
                     let build = frap_mesh::primitives::trace::take_last().expect("a record");
                     let t = build.cone.expect("cone topology");
                     assert!(
-                        ConePlan::new(&t, &mesh).is_some(),
+                        BuildPlan::new(Builder::Cone(t), &mesh).is_some(),
                         "segments {segments} {fill:?} radii ({r1}, {r2})"
                     );
                 }
@@ -704,7 +823,7 @@ mod tests {
         let t = frap_mesh::primitives::trace::take_last()
             .and_then(|b| b.cone)
             .expect("cone topology");
-        let plan = ConePlan::new(&t, &mesh).expect("plan");
+        let plan = BuildPlan::new(Builder::Cone(t), &mesh).expect("plan");
         let mut bm = BMesh::new();
         // Two cylinders: the second fills the slots the first one's caps freed.
         plan.create(&mut bm, &mesh, &Mat4::IDENTITY).expect("first");

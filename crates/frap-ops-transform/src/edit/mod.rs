@@ -19,7 +19,10 @@
 //! `orient_type='NORMAL'` constrains along each island's own axes; proportional editing
 //! measures world distances to the nearest selected vertex (or geodesic distances with
 //! `use_proportional_connected`). Mesh symmetry editing is not reachable (frap does not bind
-//! `Mesh.use_mirror_x/y/z`), Auto Merge is refused (`NotImplementedError`).
+//! `Mesh.use_mirror_x/y/z`). Auto Merge (`tool_settings.use_mesh_automerge`) welds the selected
+//! vertices within `double_threshold` after the transform (`EDBM_automerge`); Auto Merge with
+//! split (`use_automerge_and_split=True`, forced by `mesh.extrude_manifold`) is refused
+//! (`NotImplementedError` with a hint).
 
 pub mod bmq;
 pub mod islands;
@@ -166,6 +169,27 @@ pub fn request_from_args(op: TransformOp, args: &OpArgs) -> Request {
     }
 }
 
+/// `use_automerge_and_split=True` (`T_AUTOSPLIT`, `EDBM_automerge_and_split`: welds and splits
+/// edges and faces at the crossings) is not implemented: the error says how to get there.
+pub fn automerge_and_split_not_implemented() -> OpError {
+    OpError::Frap(Box::new(
+        frap_rna::FrapError::new(
+            frap_rna::PyExc::NotImplementedError,
+            frap_op::errors::OP_NOT_IMPLEMENTED,
+            "frap: edit-mode transforms with use_automerge_and_split=True (Auto Merge with \
+             split, EDBM_automerge_and_split) are not implemented yet",
+        )
+        .with_hint(
+            "transform without use_automerge_and_split (mesh.extrude_manifold: use \
+             mesh.extrude_region_move(MESH_OT_extrude_region={\"use_dissolve_ortho_edges\": True}, \
+             TRANSFORM_OT_translate={\"value\": ...})), then weld with \
+             mesh.remove_doubles(threshold=0.001); or set \
+             bpy.context.scene.tool_settings.use_mesh_automerge = True, which merges without \
+             splitting",
+        ),
+    ))
+}
+
 /// Refuses the options that change the result and are not implemented in Edit Mode.
 fn unsupported(op: TransformOp, args: &OpArgs) -> Result<(), OpError> {
     let what = match op {
@@ -174,7 +198,7 @@ fn unsupported(op: TransformOp, args: &OpArgs) -> Result<(), OpError> {
             if p.texture_space.value {
                 Some("texture_space=True")
             } else if p.use_automerge_and_split.is_set && p.use_automerge_and_split.value {
-                Some("use_automerge_and_split=True")
+                return Err(automerge_and_split_not_implemented());
             } else {
                 None
             }

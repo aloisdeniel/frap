@@ -1115,6 +1115,7 @@ fn split_two_edges_no_pattern(bm: &mut BMesh, face: FaceId, params: &Params) {
         let (la, lb) = (loops[a % vlen], loops[b % vlen]);
         // Special case #32500: the vertex pair shares another face (not as an edge of it);
         // splitting is ambiguous, so the pair is skipped.
+        frap_math::budget::check();
         let va = bm.lp(la).v;
         let vb = bm.lp(lb).v;
         let ok = !bm.vert_loops(va).into_iter().any(|other| {

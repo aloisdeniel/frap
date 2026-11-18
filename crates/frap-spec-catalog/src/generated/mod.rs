@@ -6,9 +6,9 @@
 /// Deflate-compressed JSON array of the catalog operators (schema: `decode.rs`).
 pub static CATALOG_DEFLATE: &[u8] = include_bytes!("catalog.json.deflate");
 /// Number of operators in the blob.
-pub const CATALOG_LEN: usize = 890;
+pub const CATALOG_LEN: usize = 903;
 /// Their idnames, sorted (membership tests without decoding).
-pub static CATALOG_IDNAMES: [&str; 890] = [
+pub static CATALOG_IDNAMES: [&str; 903] = [
     "anim.change_frame",
     "anim.channel_select_keys",
     "anim.channel_view_pick",
@@ -134,6 +134,19 @@ pub static CATALOG_IDNAMES: [&str; 890] = [
     "collection.objects_remove",
     "collection.objects_remove_active",
     "collection.objects_remove_all",
+    "ed.flush_edits",
+    "ed.lib_id_fake_user_toggle",
+    "ed.lib_id_generate_preview",
+    "ed.lib_id_generate_preview_from_object",
+    "ed.lib_id_load_custom_preview",
+    "ed.lib_id_override_editable_toggle",
+    "ed.lib_id_remove_preview",
+    "ed.lib_id_unlink",
+    "ed.redo",
+    "ed.undo",
+    "ed.undo_history",
+    "ed.undo_push",
+    "ed.undo_redo",
     "export_scene.fbx",
     "geometry.geometry_randomization",
     "image.add_render_slot",

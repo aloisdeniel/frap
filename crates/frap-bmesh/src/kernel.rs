@@ -841,8 +841,11 @@ impl BMesh {
         // Find which of the faces the original first loop is in.
         let f_first = self.face(f).l_first;
         let mut first_loop_f1 = false;
+        // The walks below are linear in the face size: `--stmt-timeout` cancellation points
+        // (cutting an n-gon n times is quadratic, e.g. `mesh.loopcut(number_cuts=10000)`).
         let mut it = l_f1;
         loop {
+            frap_math::budget::check();
             if it == f_first {
                 first_loop_f1 = true;
             }
@@ -876,6 +879,7 @@ impl BMesh {
         let mut f2len = 0;
         let mut it = first2;
         loop {
+            frap_math::budget::check();
             self.lp_mut(it).f = f2;
             f2len += 1;
             it = self.lp(it).next;
@@ -890,6 +894,7 @@ impl BMesh {
         let mut f1len = 0;
         let mut it = first1;
         loop {
+            frap_math::budget::check();
             f1len += 1;
             it = self.lp(it).next;
             if it == first1 {

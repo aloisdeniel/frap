@@ -18,7 +18,7 @@ use crate::mesh::{
     SHARP_FACE, UV_SELECT_EDGE, UV_SELECT_FACE, UV_SELECT_VERT, bool_attr,
 };
 use crate::primitives::UV_MAP_NAME;
-use crate::primitives::trace::{self, Build, ConeTopology};
+use crate::primitives::trace::{self, Build, CircleTopology, ConeTopology};
 
 pub(crate) type V3 = [f32; 3];
 
@@ -94,6 +94,8 @@ pub(crate) struct Bm {
     pub uvs_follow_face_order: bool,
     /// The cone builder's topology parameters: see [`Build::cone`].
     pub cone: Option<ConeTopology>,
+    /// The circle builder's topology parameters: see [`Build::circle`].
+    pub circle: Option<CircleTopology>,
 }
 
 impl Bm {
@@ -194,6 +196,7 @@ impl Bm {
             uvs_follow_face_order: self.uvs_follow_face_order,
             counts: (self.verts.live(), self.edges.live(), self.faces.live()),
             cone: self.cone,
+            circle: self.circle,
         });
         let mut vindex = vec![u32::MAX; self.verts.slots.len()];
         let mut positions = Vec::with_capacity(self.verts.live());

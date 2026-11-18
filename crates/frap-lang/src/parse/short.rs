@@ -364,10 +364,17 @@ impl<'a> P<'a> {
         while self.is_punct(',') && self.tight() {
             self.bump();
             if !self.tight() {
-                return Err(self.err_here(
-                    syntax("invalid syntax")
-                        .with_hint("no spaces inside a short-form tuple: 0,0,1"),
-                ));
+                // A comma at the end of the statement or before the next `key=value`.
+                let next_is_kw = self.ident_at(0).is_some()
+                    && self.tight_at(1)
+                    && matches!(self.peek_at(1).map(|t| &t.tok), Some(Tok::Punct('=')));
+                let hint = if self.at_end() || next_is_kw {
+                    "a short-form value cannot end with a comma: write the items as 0,0,1, or \
+                     one item of a list as [5]"
+                } else {
+                    "no spaces inside a short-form tuple: 0,0,1"
+                };
+                return Err(self.err_here(syntax("invalid syntax").with_hint(hint)));
             }
             items.push(self.sitem()?);
         }
@@ -448,6 +455,12 @@ impl<'a> P<'a> {
                     return self.primary();
                 }
                 self.bare()
+            }
+            // An unquoted path (`filepath=/tmp/x.png`, `~/x`, `./x`, `\\server`).
+            Tok::Punct('/' | '~' | '.' | '\\') | Tok::Op(_) => {
+                Err(self.err_here(syntax("invalid syntax").with_hint(
+                    "quote paths and other text in single quotes, e.g. filepath='/tmp/out.png'",
+                )))
             }
             _ => Err(self.bad()),
         }

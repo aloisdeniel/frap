@@ -148,6 +148,22 @@ pub fn check() {
     }
 }
 
+/// [`check`] for a step that cost about `work` loop iterations (a walk over an n-gon): the
+/// clock is read once every [`CHECK_EVERY`] units of work, so loops whose steps grow with the
+/// mesh (quadratic algorithms on large faces) are still cancelled promptly.
+#[inline]
+pub fn check_n(work: u32) {
+    let (old, new) = COUNTER.with(|c| {
+        let old = c.get();
+        let new = old.wrapping_add(work.max(1));
+        c.set(new);
+        (old, new)
+    });
+    if old / CHECK_EVERY != new / CHECK_EVERY || new < old {
+        check_now();
+    }
+}
+
 /// Like [`check`], reading the clock every time (between coarse steps: per object, per
 /// render pass, per exported mesh).
 pub fn check_now() {
@@ -270,6 +286,24 @@ mod tests {
         );
         // The guard was dropped during the unwind.
         assert!(!is_active());
+    }
+
+    #[test]
+    fn weighted_checks_read_the_clock_by_work() {
+        let r = catch_unwind(AssertUnwindSafe(|| {
+            let _s = scope(Budget {
+                timeout: Some(Duration::from_millis(1)),
+                max_elements: u64::MAX,
+            });
+            std::thread::sleep(Duration::from_millis(5));
+            // One step worth a full check interval reads the clock at once.
+            check_n(CHECK_EVERY);
+        }));
+        assert!(interrupted(&*r.expect_err("unwinds")).is_some());
+        assert!(!is_active());
+        // Unlimited outside a scope, whatever the work.
+        check_n(u32::MAX);
+        check_n(0);
     }
 
     #[test]

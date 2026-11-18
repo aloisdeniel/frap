@@ -123,10 +123,7 @@ fn exec(cx: &mut OpCtx, args: &OpArgs) -> OpResult {
         ));
     }
     if p.use_automerge_and_split.is_set && p.use_automerge_and_split.value {
-        return Err(OpError::NotImplemented(
-            "frap: edit-mode transforms with use_automerge_and_split=True are not implemented yet"
-                .into(),
-        ));
+        return Err(crate::edit::automerge_and_split_not_implemented());
     }
     let mut r = Request::new(mode);
     if let Some(v) = set(&p.value) {

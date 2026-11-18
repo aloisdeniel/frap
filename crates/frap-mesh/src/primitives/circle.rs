@@ -66,6 +66,11 @@ pub fn circle(p: &Circle) -> Mesh {
     if segs <= 0 {
         return bm.to_mesh("Circle", p.calc_uvs);
     }
+    bm.circle = Some(super::trace::CircleTopology {
+        segments: segs as u32,
+        cap_ends,
+        cap_tris,
+    });
     let cent = cap_ends.then(|| bm.vert_create(mul_m4_v3(mat, [0.0; 3])));
     let mut ring: Vec<u32> = Vec::with_capacity(segs as usize);
     for a in 0..segs {

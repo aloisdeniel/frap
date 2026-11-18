@@ -1021,17 +1021,30 @@ fn coerce_array(def: &PropDef, input: Input, qual: &str) -> Result<Coerced, RnaE
 
     let Some(seq) = sequence_items(&input) else {
         // `PySequence_Fast(seq, error_prefix)`: the message is the prefix alone.
-        return Err(type_err(String::new()).with_hint(format!(
-            "{} expects a sequence of {} {}s, e.g. {}",
-            def.identifier,
-            def.array_len(),
+        let hint = if dynamic {
+            // A variable-length array (`frap.select_elements(indices=…)`): any length.
             if matches!(kind, ElemKind::Bool) {
-                "boolean"
+                format!(
+                    "{} expects a list, e.g. [True] or [True, False]",
+                    def.identifier
+                )
             } else {
-                "number"
-            },
-            example(def.array_len(), kind)
-        )));
+                format!("{} expects a list, e.g. [5] or [4, 6]", def.identifier)
+            }
+        } else {
+            format!(
+                "{} expects a sequence of {} {}s, e.g. {}",
+                def.identifier,
+                def.array_len(),
+                if matches!(kind, ElemKind::Bool) {
+                    "boolean"
+                } else {
+                    "number"
+                },
+                example(def.array_len(), kind)
+            )
+        };
+        return Err(type_err(String::new()).with_hint(hint));
     };
     let mut flat = Vec::new();
     validate_array_type(seq, 0, &dims, dynamic, kind, &mut flat)?;
@@ -1100,6 +1113,10 @@ fn example(n: usize, kind: ElemKind) -> String {
     let mut items = vec![one; n.max(1)];
     if !matches!(kind, ElemKind::Bool) && n >= 3 {
         items[n - 1] = "1";
+    }
+    if items.len() == 1 {
+        // `(0)` is not a tuple in Python.
+        return format!("({},)", items[0]);
     }
     format!("({})", items.join(", "))
 }
