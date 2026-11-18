@@ -372,6 +372,9 @@ fn exec(bm: &mut BMesh, i: &ExtrudeFaceRegionIn) -> Result<ExtrudeFaceRegionOut,
     }
 
     for v in dissolve_verts {
+        if !bm.verts.contains(v.0) {
+            continue;
+        }
         let Some(e) = bm.vert(v).e else {
             continue;
         };
@@ -493,7 +496,7 @@ mod tests {
         )
         .unwrap();
         assert_eq!(out.geom, vec![BMElem::Vert(VertId(6))]);
-        assert_eq!(bm.edge_exists(v[0], VertId(6)).is_some(), true);
+        assert!(bm.edge_exists(v[0], VertId(6)).is_some());
         assert_eq!(bm.faces_num(), 2);
     }
 

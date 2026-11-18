@@ -394,9 +394,9 @@ fn exec(bm: &mut BMesh, i: &InsetRegionIn) -> InsetRegionOut {
         }
     }
 
-    for idx in 0..edge_info.len() {
+    for (idx, es) in edge_info.iter_mut().enumerate() {
         frap_math::budget::check();
-        let e_old = edge_info[idx].e_old;
+        let e_old = es.e_old;
         let l = match edge_is_mixed_face_tag(bm, bm.edge(e_old).l) {
             Some(l) => l,
             // Must be a boundary.
@@ -422,9 +422,9 @@ fn exec(bm: &mut BMesh, i: &InsetRegionIn) -> InsetRegionOut {
         let [a, b] = bm.edge(e_new).v;
         set_tag(bm, a, true);
         set_tag(bm, b, true);
-        edge_info[idx] = SplitEdgeInfo {
+        *es = SplitEdgeInfo {
             no,
-            length: edge_info[idx].length,
+            length: es.length,
             e_old: e_old_now,
             e_new,
             l,
@@ -478,9 +478,8 @@ fn exec(bm: &mut BMesh, i: &InsetRegionIn) -> InsetRegionOut {
                         && tagged(bm, bm.lp(el).f)
                     {
                         if vert_edge_tag_tot < 2 {
-                            let ix = edge_index(bm, e);
-                            debug_assert!(ix != -1);
-                            vecpair[vert_edge_tag_tot] = ix.max(0) as usize;
+                            // Tagged edges always carry their edge-info index.
+                            vecpair[vert_edge_tag_tot] = edge_index(bm, e).max(0) as usize;
                         }
                         vert_edge_tag_tot += 1;
                     }
@@ -542,13 +541,13 @@ fn exec(bm: &mut BMesh, i: &InsetRegionIn) -> InsetRegionOut {
                     } else {
                         // One edge user: a boundary vertex, not so common.
                         let e_no_a = edge_info[vecpair[0]].no;
-                        if use_even_boundary {
+                        // `v_split->e->l`: the split vertex's first edge has a face (wire
+                        // edges are split off into their own vertices); Blender would crash
+                        // otherwise, frap falls back to the edge normal.
+                        let l0 = bm.vert(v_split).e.and_then(|e| bm.edge(e).l);
+                        if let (true, Some(l0)) = (use_even_boundary, l0) {
                             // Align the inset with the boundary edge instead of the normal of
                             // the interior edge (which would give an unsightly bump).
-                            let l0 = bm
-                                .edge(bm.vert(v_split).e.expect("split vertex has edges"))
-                                .l
-                                .expect("inset edge has a face");
                             let ll = bm.lp(l0);
                             let l = if bm.lp(ll.prev).v == v_split {
                                 ll.prev
@@ -557,16 +556,14 @@ fn exec(bm: &mut BMesh, i: &InsetRegionIn) -> InsetRegionOut {
                             } else {
                                 l0
                             };
-                            // Find the edge which is *not* being split here.
+                            // Find the edge which is *not* being split here (Blender asserts
+                            // that one of the two is).
                             let le = bm.lp(l).e;
                             let lpe = bm.lp(bm.lp(l).prev).e;
-                            let e_other = if !tagged(bm, le) {
+                            let e_other = if !tagged(bm, le) || tagged(bm, lpe) {
                                 le
-                            } else if !tagged(bm, lpe) {
-                                lpe
                             } else {
-                                debug_assert!(false, "inset_region: no untagged edge");
-                                le
+                                lpe
                             };
                             let v_other = bm.edge_other_vert(e_other, v_split);
                             tvec = geom::normalize_v3(geom::sub(

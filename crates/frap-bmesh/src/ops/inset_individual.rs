@@ -606,7 +606,7 @@ mod tests {
         let c = [0.0, 1.0, 0.0];
         assert!((shell_v3v3_mid_normalized_to_dist(a, c) - std::f32::consts::SQRT_2).abs() < 1e-6);
         assert_eq!(shell_v3v3_mid_normalized_to_dist(a, [-1.0, 0.0, 0.0]), 1.0);
-        assert!((angle_v3v3v3([1.0, 0.0, 0.0], [0.0; 3], [0.0, 1.0, 0.0]) - 1.570_796_3).abs() < 1e-6);
+        assert!((angle_v3v3v3([1.0, 0.0, 0.0], [0.0; 3], [0.0, 1.0, 0.0]) - std::f32::consts::FRAC_PI_2).abs() < 1e-6);
     }
 
     #[test]

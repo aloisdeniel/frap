@@ -6,7 +6,6 @@ source: crates/frap-schema/tests/snapshots.rs
   "$id": "urn:frap:op:mesh.extrude_region_move",
   "title": "bpy.ops.mesh.extrude_region_move",
   "description": "Extrude Region and Move: Extrude region and move result",
-  "$comment": "not implemented by frap yet (planned: M2); calling it gives OP_NOT_IMPLEMENTED",
   "type": "object",
   "additionalProperties": false,
   "properties": {

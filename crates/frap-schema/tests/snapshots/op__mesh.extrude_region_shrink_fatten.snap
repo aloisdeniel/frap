@@ -1,0 +1,83 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.extrude_region_shrink_fatten",
+  "bl_idname": "MESH_OT_extrude_region_shrink_fatten",
+  "label": "Extrude Region and Shrink/Fatten",
+  "description": "Extrude region together along local normals",
+  "bl_options": [
+    "MACRO",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "MACRO",
+  "macro_steps": [
+    "MESH_OT_extrude_region",
+    "TRANSFORM_OT_shrink_fatten"
+  ],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "MESH_OT_extrude_region",
+      "name": "Extrude Region",
+      "description": "Extrude region of faces",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "MESH_OT_extrude_region",
+      "is_id": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "TRANSFORM_OT_shrink_fatten",
+      "name": "Shrink/Fatten",
+      "description": "Shrink/fatten selected vertices along normals",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "TRANSFORM_OT_shrink_fatten",
+      "is_id": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "the TRANSFORM_OT_shrink_fatten step needs `transform.shrink_fatten` in Edit Mode (edit-mode transforms, WP 2.12): until then the macro raises OP_NOT_IMPLEMENTED and nothing changes",
+    "headless": "native",
+    "planned": "M2",
+    "extension": false,
+    "notes": []
+  }
+}

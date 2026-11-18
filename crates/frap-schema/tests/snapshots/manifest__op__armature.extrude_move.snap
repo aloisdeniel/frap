@@ -1,0 +1,83 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "idname": "armature.extrude_move",
+  "bl_idname": "ARMATURE_OT_extrude_move",
+  "label": "Extrude",
+  "description": "Create new bones from the selected joints and move them",
+  "bl_options": [
+    "MACRO",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "MACRO",
+  "macro_steps": [
+    "ARMATURE_OT_extrude",
+    "TRANSFORM_OT_translate"
+  ],
+  "poll": {
+    "requires": null,
+    "text": "Blender 5.2's poll passes in: E (Edit Mode on an armature)",
+    "matrix": {
+      "plain": "NNNNY",
+      "view3d": "NNNNY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "ARMATURE_OT_extrude",
+      "name": "Extrude",
+      "description": "Create new bones from the selected joints",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "ARMATURE_OT_extrude",
+      "is_id": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "TRANSFORM_OT_translate",
+      "name": "Move",
+      "description": "Move selected items",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "TRANSFORM_OT_translate",
+      "is_id": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "not_implemented",
+    "tier": null,
+    "support": null,
+    "support_note": null,
+    "headless": null,
+    "planned": "M6",
+    "extension": false,
+    "notes": [
+      "armature.extrude_move exists in Blender 5.2; frap implements it in M6 (OP_NOT_IMPLEMENTED until then)"
+    ]
+  }
+}

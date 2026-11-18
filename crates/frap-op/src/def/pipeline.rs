@@ -561,13 +561,9 @@ pub fn prepare(
 /// `WM_operatortype_macro_define` callers): they win over the caller's nested arguments
 /// (verified on 5.2.4: `duplicate_move_linked(OBJECT_OT_duplicate={'linked': False})` still
 /// links). `(macro, step, prop, value)`; the operator dumps do not record them (WP 1.20).
+#[rustfmt::skip]
 pub const MACRO_STEP_FORCED: &[(&str, &str, &str, bool)] = &[
-    (
-        "OBJECT_OT_duplicate_move_linked",
-        "OBJECT_OT_duplicate",
-        "linked",
-        true,
-    ),
+    ("OBJECT_OT_duplicate_move_linked", "OBJECT_OT_duplicate", "linked", true),
     // `ED_operatormacros_mesh` (editors/mesh/mesh_ops.cc, WP 2.5): every extrude macro's
     // transform step runs without proportional editing and mesh mirror; `extrude_manifold`
     // also dissolves orthogonal edges and auto-merges.

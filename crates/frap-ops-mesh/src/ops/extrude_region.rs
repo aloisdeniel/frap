@@ -458,4 +458,80 @@ pub(crate) mod common {
             .map(|em| counts(&em.bm))
             .unwrap_or((0, 0, 0))
     }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        use frap_bmesh::{CreateFlag, VertId};
+
+        /// A quad from x = 0 to x = 2 (normal +Z), everything selected.
+        fn quad() -> BMesh {
+            let mut bm = BMesh::new();
+            let v: Vec<VertId> = [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0], [2.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
+                .into_iter()
+                .map(|co| bm.vert_create(co, None, CreateFlag::empty()))
+                .collect();
+            let f = bm
+                .face_create_verts(&v, None, CreateFlag::empty(), true)
+                .unwrap();
+            bm.select_set(BMElem::Face(f), true);
+            bm.normals_update();
+            bm
+        }
+
+        #[test]
+        fn mirror_clip_excludes_the_edge_on_the_plane() {
+            let bm = quad();
+            let x = MirrorClip {
+                axes: [true, false, false],
+                tolerance: 0.001,
+                mtx: None,
+            };
+            let ex = mirror_exclude(&bm, std::slice::from_ref(&x));
+            assert_eq!(ex.len(), 1);
+            assert_eq!(bm.edge(ex[0]).v.map(|v| bm.vert(v).co[0]), [0.0, 0.0]);
+            // Another axis, or a mirror object moving the plane, changes the result.
+            let y = MirrorClip {
+                axes: [false, true, false],
+                ..x.clone()
+            };
+            assert_eq!(mirror_exclude(&bm, &[y]).len(), 1);
+            let moved = MirrorClip {
+                mtx: Some(Mat4::from_translation(Vec3::new(-2.0, 0.0, 0.0))),
+                ..x.clone()
+            };
+            let ex = mirror_exclude(&bm, &[moved]);
+            assert_eq!(bm.edge(ex[0]).v.map(|v| bm.vert(v).co[0]), [2.0, 2.0]);
+            // Two clipping mirrors on the same axis list an edge once.
+            assert_eq!(mirror_exclude(&bm, &[x.clone(), x]).len(), 1);
+        }
+
+        #[test]
+        fn htype_follows_mode_and_selection() {
+            let mut bm = quad();
+            assert_eq!(htype_from_select(&bm), HType::ALL);
+            bm.select_mode = SelectMode::EDGE;
+            assert_eq!(
+                htype_from_select(&bm),
+                HType {
+                    vert: false,
+                    edge: true,
+                    face: true
+                }
+            );
+            bm.select_mode = SelectMode::FACE;
+            bm.deselect_all();
+            assert_eq!(
+                htype_from_select(&bm),
+                HType {
+                    vert: false,
+                    edge: false,
+                    face: false
+                }
+            );
+            // Nothing selected: nothing to extrude, nothing changed.
+            assert!(!extrude_mesh(&mut bm, &[], false, false).unwrap());
+            assert_eq!(bm.verts_num(), 4);
+        }
+    }
 }
