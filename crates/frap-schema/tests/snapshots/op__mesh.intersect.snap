@@ -1,0 +1,175 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.intersect",
+  "bl_idname": "MESH_OT_intersect",
+  "label": "Intersect (Knife)",
+  "description": "Cut an intersection into faces",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "mode",
+      "name": "Source",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SELECT_UNSELECT",
+      "enum_items": [
+        {
+          "identifier": "SELECT",
+          "name": "Self Intersect",
+          "description": "Self intersect selected faces",
+          "value": 0
+        },
+        {
+          "identifier": "SELECT_UNSELECT",
+          "name": "Selected/Unselected",
+          "description": "Intersect selected with unselected faces",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "separate_mode",
+      "name": "Separate Mode",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "CUT",
+      "enum_items": [
+        {
+          "identifier": "ALL",
+          "name": "All",
+          "description": "Separate all geometry from intersections",
+          "value": 0
+        },
+        {
+          "identifier": "CUT",
+          "name": "Cut",
+          "description": "Cut into geometry keeping each side separate (Selected/Unselected only)",
+          "value": 1
+        },
+        {
+          "identifier": "NONE",
+          "name": "Merge",
+          "description": "Merge all geometry from the intersection",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "threshold",
+      "name": "Merge Threshold",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 0.000001,
+      "hard_min": 0,
+      "hard_max": 0.01,
+      "soft_min": 0,
+      "soft_max": 0.001,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "solver",
+      "name": "Solver",
+      "description": "Which Intersect solver to use",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "EXACT",
+      "enum_items": [
+        {
+          "identifier": "FLOAT",
+          "name": "Float",
+          "description": "Simple solver with good performance, without support for overlapping geometry",
+          "value": 0
+        },
+        {
+          "identifier": "EXACT",
+          "name": "Exact",
+          "description": "Slower solver with the best results for coplanar faces",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T3",
+    "support": "partial",
+    "support_note": "the cuts come from manifold-rust's exact intersection graph (Blender's exact mesh arrangement is not ported, WP 8.6): Blender's cut lines, not always its face layout; mode='SELECT' does not cut a connected part of the selection with itself; FLOAT runs EXACT with a WARNING",
+    "headless": "native",
+    "planned": "M4",
+    "extension": false,
+    "notes": []
+  }
+}

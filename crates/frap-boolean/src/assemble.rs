@@ -181,10 +181,13 @@ fn try_merge_out_face_pair(f1: &mut OutFace, f2: &OutFace, se: &SharedEdge) -> b
 }
 
 /// `merge_out_face_pair`: two triangles sharing an edge become the quad `b, c, a, d`.
-fn merge_out_face_pair(faces: &mut Vec<OutFace>) {
+fn merge_out_face_pair(faces: &mut Vec<OutFace>, can_dissolve: &dyn Fn(u32, u32) -> bool) {
     let Some(se) = get_shared_edge_from_pair(&faces[0], &faces[1]) else {
         return;
     };
+    if !can_dissolve(se.v1, se.v2) {
+        return;
+    }
     let (va, vb) = (se.v1, se.v2);
     let vc = faces[0].verts[(se.e1 + 2) % 3];
     let vd = faces[1].verts[(se.e2 - 3 + 2) % 3];
@@ -198,11 +201,17 @@ fn merge_out_face_pair(faces: &mut Vec<OutFace>) {
 /// `merge_out_faces`: dissolves as many shared edges of one input face's triangles as
 /// possible while every face stays legal.
 pub fn merge_out_faces(faces: &mut Vec<OutFace>) {
+    merge_out_faces_with(faces, &|_, _| true);
+}
+
+/// [`merge_out_faces`] that only dissolves the shared edges `can_dissolve(v1, v2)` accepts
+/// (the knife keeps its cut lines).
+pub fn merge_out_faces_with(faces: &mut Vec<OutFace>, can_dissolve: &dyn Fn(u32, u32) -> bool) {
     if faces.len() <= 1 {
         return;
     }
     if faces.len() == 2 {
-        merge_out_face_pair(faces);
+        merge_out_face_pair(faces, can_dissolve);
         return;
     }
     let shared_edges = get_shared_edges(faces);
@@ -220,7 +229,7 @@ pub fn merge_out_faces(faces: &mut Vec<OutFace>) {
     for se in &shared_edges {
         let f1 = final_merged_to(&merged_to, se.e1 / 3);
         let f2 = final_merged_to(&merged_to, se.e2 / 3);
-        if f1 == f2 {
+        if f1 == f2 || !can_dissolve(se.v1, se.v2) {
             // `is_legal_merge` of a face with itself fails (every other vertex repeats).
             continue;
         }

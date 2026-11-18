@@ -555,3 +555,179 @@ fn index_based_remap_is_blenders() {
         vec![0]
     );
 }
+
+// --------------------------------------------- the golden fixtures, until WP 4.1 enables them
+
+/// A scene of primitives placed by a golden fixture's `matrix_world`s; `Cube` carries the
+/// modifier, operand `operand` (or the collection of `collection`).
+fn fixture_scene(
+    fixture: &Value,
+    objects: Vec<(&str, Mesh, Vec<&str>)>,
+    settings: frap_scene::generated::modifier_settings::BooleanSettings,
+    operand: &str,
+    collection: &[&str],
+) -> Scene {
+    let mut main = Main::default();
+    let mut log = ChangeLog::default();
+    let mut matrices = Vec::new();
+    let mut refs = Vec::new();
+    for (name, mut me, mats) in objects {
+        for m in mats {
+            let r = material(&mut main, &mut log, m);
+            me.materials.push(Some(r));
+        }
+        let me_ref = main.meshes.insert(name, me, &mut log);
+        let ob = main
+            .objects
+            .insert(name, Object::new(name, Some(me_ref.any())), &mut log);
+        matrices.push((ob, mat4_rows(&fixture["objects"][name]["matrix_world"])));
+        refs.push((name, ob));
+    }
+    let find = |n: &str| refs.iter().find(|(m, _)| *m == n).unwrap().1;
+    let mut settings = settings;
+    if collection.is_empty() {
+        settings.object = Some(find(operand).any());
+    } else {
+        let mut col = Collection::new("Cutters");
+        col.objects = collection.iter().map(|n| find(n)).collect();
+        let c = main.collections.insert("Cutters", col, &mut log);
+        settings.operand_type = "COLLECTION".into();
+        settings.collection = Some(c.any());
+    }
+    Scene {
+        main,
+        base: find("Cube"),
+        matrices,
+        modifier: Modifier {
+            name: "Boolean".into(),
+            show_viewport: true,
+            show_render: true,
+            show_in_editmode: true,
+            show_on_cage: false,
+            show_expanded: true,
+            is_active: true,
+            use_pin_to_last: false,
+            persistent_uid: 1,
+            settings: ModifierSettings::Boolean(settings),
+        },
+    }
+}
+
+/// A fixture's evaluated mesh in the dump format [`compare_t2`] reads.
+fn fixture_result(g: &Value, materials: &[Option<&str>]) -> Value {
+    let faces = g["faces"].clone();
+    let n = faces.as_array().unwrap().len();
+    let mi = g["attributes"]
+        .get("material_index")
+        .map(|a| a["data"].clone())
+        .unwrap_or_else(|| Value::from(vec![0; n]));
+    serde_json::json!({
+        "positions": g["positions"],
+        "edges": g["edges"],
+        "faces": faces,
+        "material_index": mi,
+        "uv": {"UVMap": g["uv_layers"]["UVMap"]},
+        "materials": materials,
+    })
+}
+
+fn settings(
+    solver: &str,
+    operation: &str,
+    material_mode: &str,
+) -> frap_scene::generated::modifier_settings::BooleanSettings {
+    frap_scene::generated::modifier_settings::BooleanSettings {
+        solver: solver.into(),
+        operation: operation.into(),
+        material_mode: material_mode.into(),
+        ..Default::default()
+    }
+}
+
+fn cube(size: f32) -> Mesh {
+    frap_mesh::primitives::cube(size, true, [1.0, 1.0, 1.0])
+}
+
+fn fixture(name: &str) -> Value {
+    let path = format!(
+        "{}/../../tests/golden/fixtures/modifiers/boolean/{name}.blender.json",
+        env!("CARGO_MANIFEST_DIR")
+    );
+    serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap()
+}
+
+#[test]
+fn golden_manifold_difference_t2() {
+    let fx = fixture("manifold_difference");
+    let s = fixture_scene(
+        &fx,
+        vec![
+            ("Cube", cube(2.0), vec!["Material"]),
+            (
+                "Cube.001",
+                frap_mesh::primitives::cube(1.0, true, [1.2, 0.8, 1.0]),
+                vec![],
+            ),
+        ],
+        settings("MANIFOLD", "DIFFERENCE", "INDEX"),
+        "Cube.001",
+        &[],
+    );
+    let out = evaluate(&s).0.unwrap();
+    let res = fixture_result(&fx["evaluated"]["Cube"], &[Some("Material"), None]);
+    compare_t2("manifold_difference", &s, &out, &res);
+}
+
+#[test]
+fn golden_manifold_union_transfer_t2() {
+    let fx = fixture("manifold_union_transfer");
+    let cyl =
+        frap_mesh::primitives::cylinder::cylinder(&frap_mesh::primitives::cylinder::Cylinder {
+            vertices: 10,
+            radius: 0.5,
+            depth: 3.0,
+            ..Default::default()
+        });
+    let s = fixture_scene(
+        &fx,
+        vec![
+            ("Cube", cube(2.0), vec!["Material", "Red"]),
+            ("Cylinder", cyl, vec!["Blue"]),
+        ],
+        settings("MANIFOLD", "UNION", "TRANSFER"),
+        "Cylinder",
+        &[],
+    );
+    let out = evaluate(&s).0.unwrap();
+    let res = fixture_result(
+        &fx["evaluated"]["Cube"],
+        &[Some("Material"), Some("Red"), Some("Blue")],
+    );
+    compare_t2("manifold_union_transfer", &s, &out, &res);
+}
+
+#[test]
+fn golden_manifold_collection_t2() {
+    let fx = fixture("manifold_collection");
+    let ico = frap_mesh::primitives::ico_sphere::ico_sphere(
+        &frap_mesh::primitives::ico_sphere::IcoSphere {
+            subdivisions: 1,
+            radius: 0.6,
+            ..Default::default()
+        },
+    );
+    let s = fixture_scene(
+        &fx,
+        vec![
+            ("Cube", cube(2.0), vec!["Material"]),
+            ("Icosphere", ico, vec![]),
+            ("Cube.001", cube(0.8), vec![]),
+        ],
+        settings("MANIFOLD", "DIFFERENCE", "INDEX"),
+        "",
+        &["Icosphere", "Cube.001"],
+    );
+    let out = evaluate(&s).0.unwrap();
+    let res = fixture_result(&fx["evaluated"]["Cube"], &[Some("Material"), None]);
+    compare_t2("manifold_collection", &s, &out, &res);
+}

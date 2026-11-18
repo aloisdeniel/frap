@@ -58,7 +58,7 @@ impl BooleanSolver for ManifoldSolver {
 }
 
 #[cfg(feature = "manifold")]
-mod imp {
+pub(crate) mod imp {
     use manifold_rust::csg_tree::CsgNode;
     use manifold_rust::linalg::Vec3;
     use manifold_rust::manifold::Manifold;
@@ -90,13 +90,13 @@ mod imp {
     }
 
     /// One operand's transformed positions and triangles (`get_manifold`'s `MeshGL`).
-    struct Prepared {
-        positions: Vec<[f32; 3]>,
-        tris: Vec<[u32; 3]>,
-        face_of_tri: Vec<u32>,
+    pub(crate) struct Prepared {
+        pub(crate) positions: Vec<[f32; 3]>,
+        pub(crate) tris: Vec<[u32; 3]>,
+        pub(crate) face_of_tri: Vec<u32>,
     }
 
-    fn prepare(m: &BoolMesh<'_>) -> Prepared {
+    pub(crate) fn prepare(m: &BoolMesh<'_>) -> Prepared {
         let positions = m.transformed_positions();
         let mut tris = Vec::new();
         let mut face_of_tri = Vec::new();

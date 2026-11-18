@@ -13,6 +13,7 @@
 #![deny(unsafe_code)]
 
 pub mod assemble;
+pub mod knife;
 pub mod manifold;
 
 /// `BooleanModifier.operation` / `mesh.intersect_boolean(operation=…)`.
