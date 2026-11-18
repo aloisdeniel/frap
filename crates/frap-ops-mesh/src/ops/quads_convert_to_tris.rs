@@ -2,7 +2,11 @@
 //! `bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')`: tier T1
 //! for `FIXED`/`FIXED_ALTERNATE` and the diagonal methods, T2 for `BEAUTY` (its edge-rotation
 //! costs are float comparisons where a last-bit difference can flip a tie;
-//! `tests/golden/cases/edit/misc/quads_convert_to_tris_*.py`). Port of
+//! `tests/golden/cases/edit/misc/quads_convert_to_tris_*.py`). N-gons (`CLIP`/`BEAUTY`) are
+//! T1 only when irregular: for a regular n-gon (`primitive_circle_add`) the triangle
+//! creation order has equal-cost ties that even Blender resolves differently from one
+//! session state to the next (same coordinates), so only the triangle set is reproducible
+//! (T2). Port of
 //! `edbm_quads_convert_to_tris_exec` (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4,
 //! GPL-2.0-or-later).
 //!
