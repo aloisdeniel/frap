@@ -12,6 +12,7 @@
 //! fields to the `#[non_exhaustive]` structs and items to the modules.
 #![deny(unsafe_code)]
 
+pub mod assemble;
 pub mod manifold;
 
 /// `BooleanModifier.operation` / `mesh.intersect_boolean(operation=…)`.
@@ -50,6 +51,10 @@ pub struct BoolMesh<'a> {
     pub corner_verts: &'a [u32],
     /// Operand-to-common-space transform (column-major 4x4; identity for the first operand).
     pub transform: [[f32; 4]; 4],
+    /// The face triangulation as corner indices (`Mesh::corner_tris()`, Blender's
+    /// `mesh.corner_tris()` of the **transformed** mesh, face by face). Empty: the solver fans
+    /// every face from its first corner (exact for triangles and convex quads).
+    pub corner_tris: &'a [[u32; 3]],
 }
 
 impl<'a> BoolMesh<'a> {
@@ -69,8 +74,55 @@ impl<'a> BoolMesh<'a> {
                 [0.0, 0.0, 1.0, 0.0],
                 [0.0, 0.0, 0.0, 1.0],
             ],
+            corner_tris: &[],
         }
     }
+
+    /// The same operand with an operand-to-common-space transform (column-major 4x4,
+    /// `world_to_object * ob.matrix_world` for the BOOLEAN modifier's operands).
+    pub fn with_transform(mut self, transform: [[f32; 4]; 4]) -> Self {
+        self.transform = transform;
+        self
+    }
+
+    /// The same operand with its face triangulation (corner indices, see
+    /// [`BoolMesh::corner_tris`]).
+    pub fn with_corner_tris(mut self, corner_tris: &'a [[u32; 3]]) -> Self {
+        self.corner_tris = corner_tris;
+        self
+    }
+
+    /// Number of faces.
+    pub fn faces_num(&self) -> usize {
+        self.face_offsets.len().saturating_sub(1)
+    }
+
+    /// Whether the transform is exactly the identity (`math::is_identity`).
+    pub fn is_identity(&self) -> bool {
+        (0..4).all(|c| (0..4).all(|r| self.transform[c][r] == if c == r { 1.0 } else { 0.0 }))
+    }
+
+    /// The positions in the common space: `math::transform_point(transform, co)` in `f32`
+    /// (`bke::mesh_transform`), or the positions themselves for the identity.
+    pub fn transformed_positions(&self) -> Vec<[f32; 3]> {
+        if self.is_identity() {
+            return self.positions.to_vec();
+        }
+        let m = &self.transform;
+        self.positions
+            .iter()
+            .map(|p| transform_point(m, *p))
+            .collect()
+    }
+}
+
+/// `math::transform_point(float4x4, float3)`: `mat3 * p + location`, in `f32`.
+pub fn transform_point(m: &[[f32; 4]; 4], p: [f32; 3]) -> [f32; 3] {
+    let mut r = [0.0f32; 3];
+    for (i, ri) in r.iter_mut().enumerate() {
+        *ri = m[0][i] * p[0] + m[1][i] * p[1] + m[2][i] * p[2] + m[3][i];
+    }
+    r
 }
 
 /// Options of one boolean.
@@ -135,6 +187,16 @@ pub enum BoolError {
     /// The solver is not available in this build.
     #[error("{0}")]
     Unavailable(String),
+    /// `BooleanErrorType::NonManifold`: the operands (indices into the operand list) that are
+    /// not manifold; empty when the solver could not tell which.
+    #[error("non-manifold inputs")]
+    NonManifold(Vec<u32>),
+    /// `BooleanErrorType::ResultTooBig`.
+    #[error("result too big")]
+    ResultTooBig,
+    /// `BooleanErrorType::UnknownError`.
+    #[error("unknown error")]
+    Unknown,
 }
 
 /// A boolean backend (CONTRACT, ARCHITECTURE §3.2, §7.2). Implementations are stateless.
