@@ -102,6 +102,16 @@ NORMALISE = {
     "D-51": ("comparator", "reports are not part of GoldenState, so they are never compared"),
     "D-52": None,
     "D-53": None,
+    "D-54": ("cases", "cases do not compare select_history after leaving and re-entering Edit Mode"),
+    "D-55": None,
+    "D-56": None,
+    "D-57": None,
+    "D-58": None,
+    "D-59": None,
+    "D-60": None,
+    "D-61": ("cases", "cases do not read bpy.context.screen/area/region"),
+    "D-62": ("cases", "cases do not compare the repr of space_data"),
+    "D-63": ("cases", "cases do not assign unknown studio_light names"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

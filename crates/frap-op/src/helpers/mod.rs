@@ -187,9 +187,9 @@ fn order_log(cx: &mut OpCtx, ob: IdAny, data: IdAny) {
 /// requested as `name` and **uniquified independently** in `meshes` and `objects` (after
 /// deleting the factory Cube: object `Cube`, mesh `Cube.001`, verified), links the object to
 /// `context.collection`, deselects the others, selects and activates it, then enters Edit Mode
-/// if `enter_editmode` (through the `EDIT` mode handler; `OP_NOT_IMPLEMENTED` until M2). With a
-/// mesh in Edit Mode Blender merges the new geometry into it instead: `OP_NOT_IMPLEMENTED`
-/// until M2. Another object type in Edit Mode leaves it first. The caller bakes `scale` and the
+/// if `enter_editmode` (through the `EDIT` mode handler). With a mesh in Edit Mode Blender
+/// merges the new geometry into it instead ([`edit_merge::merge_into_edit_mesh`]). Another
+/// object type in Edit Mode leaves it first. The caller bakes `scale` and the
 /// creation matrix into `mesh` (`frap_mesh::primitives::creation_matrix`); object scale stays 1.
 pub fn add_primitive_or_merge(
     cx: &mut OpCtx,
@@ -222,7 +222,7 @@ pub fn add_primitive_or_merge(
 /// may use data `Camera`). Leaves Edit Mode first, links to `context.collection`, deselects
 /// others, selects and activates it (context view layer). `data: None` adds an Empty.
 /// `enter_editmode` enters Edit Mode through the mode handler of the object's type
-/// (`OP_NOT_IMPLEMENTED` until M2 for meshes, M6 for armatures).
+/// (`OP_NOT_IMPLEMENTED` for armatures until M6).
 pub fn add_object_with_data(
     cx: &mut OpCtx,
     name: &str,

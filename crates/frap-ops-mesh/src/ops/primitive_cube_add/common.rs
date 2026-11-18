@@ -22,12 +22,12 @@ pub(crate) const NOTES: [&str; 4] = [
     "unset location => 3D cursor location",
     "unset rotation => from align (WORLD: none, VIEW: the virtual 3D View, CURSOR: the 3D cursor); a set rotation wins over align",
     "unset scale => (1, 1, 1); the scale is baked into the mesh, object scale stays 1",
-    "enter_editmode=True and adding while a mesh is in Edit Mode answer OP_NOT_IMPLEMENTED until M2",
+    "enter_editmode=True enters Edit Mode; adding while a mesh is in Edit Mode builds the primitive into the edit mesh, with only the new elements selected",
 ];
 
 /// `support` text of every C primitive operator.
 pub(crate) const PARTIAL: &str =
-    "enter_editmode=True and adding into a mesh in Edit Mode arrive in M2 (OP_NOT_IMPLEMENTED)";
+    "in Edit Mode, UV and ico spheres do not reuse the edit mesh's freed element slots in Blender's order (element order may differ after deletions)";
 
 /// Where the new object goes and the matrix its geometry is created with.
 #[derive(Copy, Clone, Debug)]

@@ -37,7 +37,7 @@ static DEF: OperatorDef = OperatorDef {
     support: Support::Partial(".frap files only (a .blend path is IO_UNSUPPORTED_FORMAT)"),
     notes: &[
         "restores data, window scene and view layer, selection, active object and tool settings",
-        "objects saved in Edit Mode are loaded in Object Mode with a WARNING until M2",
+        "meshes saved in Edit Mode are loaded back into Edit Mode (selection history is not kept)",
         "load_ui, use_scripts and the file-browser props are accepted and ignored with an INFO report",
     ],
 };

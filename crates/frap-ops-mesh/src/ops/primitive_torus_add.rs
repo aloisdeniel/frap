@@ -93,7 +93,7 @@ fn object_first(cx: &mut OpCtx, ob: IdAny, data: IdAny) {
 #[operator(
     poll = poll::always,
     tier = T1,
-    support = Partial("adding into a mesh in Edit Mode (joined into it) arrives in M2 (OP_NOT_IMPLEMENTED)"),
+    support = Partial("adding into a mesh in Edit Mode (joined into it) answers OP_NOT_IMPLEMENTED"),
     notes = [
         "Python operator in Blender: the object is named after the mesh ('Torus', uniquified in bpy.data.meshes)",
         "unset location => 3D cursor location",
@@ -106,7 +106,7 @@ fn exec(cx: &mut OpCtx, p: mesh::PrimitiveTorusAdd) -> OpResult {
         && ob.object_type() == "MESH"
     {
         return Err(OpError::NotImplemented(
-            "frap: adding a torus to a mesh in Edit Mode (joined into the edit mesh) arrives in M2"
+            "frap: adding a torus to a mesh in Edit Mode (joined into the edit mesh) is not implemented yet"
                 .into(),
         ));
     }

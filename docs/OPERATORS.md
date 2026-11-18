@@ -24,8 +24,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.primitive_torus_add` | M1 | P0 |  |
 | [x] | `mesh.primitive_grid_add` | M1 | P0 |  |
 | [x] | `mesh.primitive_monkey_add` | M1 | P0 | depends on licence decision D1 |
-| [ ] | `mesh.select_all` | M2 | P0 | prereq (WP 2.2) |
-| [ ] | `mesh.select_mode` | M2 | P0 | prereq (WP 2.2); conversion table [MESH §3.3] |
+| [x] | `mesh.select_all` | M2 | P0 | prereq (WP 2.2) |
+| [x] | `mesh.select_mode` | M2 | P0 | prereq (WP 2.2); conversion table [MESH §3.3] |
 | [ ] | `mesh.select_linked` | M2 | P0 | default delimit SEAM |
 | [ ] | `mesh.select_more` | M2 | P0 |  |
 | [ ] | `mesh.select_less` | M2 | P0 |  |
@@ -193,7 +193,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
 | [x] | `object.mode_set` | M1 | P0 | prereq (WP 1.19); dispatcher + `modes/object.rs` M1; `modes/edit_mesh.rs` M2 (WP 2.2); `modes/{edit_armature,pose}.rs` M6 (WP 6.2) |
-| [ ] | `object.editmode_toggle` | M2 | P1 |  |
+| [x] | `object.editmode_toggle` | M2 | P1 |  |
 | [ ] | `object.posemode_toggle` | M6 | P1 |  |
 | [ ] | `object.mode_set_with_submode` | M8 | P2 |  |
 | [x] | `object.select_all` | M1 | P0 | prereq (WP 1.19) |
@@ -642,10 +642,10 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | ✓ | Operator | M | Notes |
 |---|---|---|---|
 | [ ] | `frap.describe` | M2 | target (op:<idname>, struct:<Struct>, <Struct>.<prop>) → manifest fragment; moved from M1 (M1 stabilization): the manifest lives in `frap-schema` (L11), above the ops crates, so the operator needs the describe core moved below `frap-op` first; `frap --describe` and `--describe-json` serve agents meanwhile. M2 W0 added `frap_op::DESCRIBE_PROVIDERS` (frap-schema registers the manifest); owner: WP 2.13 |
-| [ ] | `frap.select_elements` | M2 | prereq (WP 2.2); type VERT/EDGE/FACE, indices, action SET/ADD/REMOVE, object; agent selection by index |
+| [x] | `frap.select_elements` | M2 | prereq (WP 2.2); type VERT/EDGE/FACE, indices, action SET/ADD/REMOVE, object; agent selection by index |
 | [ ] | `frap.select_by_normal` | M2 | direction, threshold, extend; select faces facing a direction |
 | [ ] | `frap.scene_summary` | M2 | objects, counts, bounds, materials, modifiers in one JSON value |
-| [ ] | `frap.render_contact_sheet` | M2 | multi-view sheet (FRONT/BACK/LEFT/RIGHT/TOP/BOTTOM/ISO/CAMERA); synthetic cameras never enter bpy.data |
+| [x] | `frap.render_contact_sheet` | M2 | multi-view sheet (FRONT/BACK/LEFT/RIGHT/TOP/BOTTOM/ISO/CAMERA); synthetic cameras never enter bpy.data |
 
 ## B. Modifier types (`object.modifier_add(type=…)`, `modifiers.new(name, type)`)
 
@@ -748,7 +748,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | AddonPreferences for `io_scene_gltf2` (`KHR_materials_variants_ui`, …) | M1 data / M7 variants | via `bpy.context.preferences.addons['io_scene_gltf2'].preferences` |
 | [ ] | BlendData + BlendData<Coll> (objects, meshes, materials, cameras, lights, collections, worlds, scenes, images, node_groups, libraries, pointclouds) | M1 | new/remove/get/find/[i]/['name']; order rule §5.4; `scenes.new` M3 |
 | [ ] | Context (object, active_object, selected_objects, selected_editable_objects, visible_objects, selectable_objects, editable_objects, scene, view_layer, collection, tool_settings, mode, edit_object, objects_in_mode*, blend_data) | M1 | read-only |
-| [ ] | Context (preferences, space_data stub) | M2 | moved from M1 (M1 stabilization): no `Preferences`/`SpaceView3D` RNA binding yet; `NOT_IMPLEMENTED`; WP 2.3 (`frap-session/src/resolve/context/ui.rs`, M2 W0 assignment) |
+| [x] | Context (preferences, space_data stub) | M2 | WP 2.3 (`frap-session/src/resolve/context/ui.rs`): `window`, `space_data` (`SpaceView3D` stub: `type`, `shading`, read-only `region_3d`), factory `preferences`; `screen`/`area`/`region` read `None` (deviations D-61, D-62) |
 | [ ] | Object | M1 | transforms, parent, matrix_world (fresh), dimensions, data, type, mode, material_slots, hide_*, display; vertex_groups M6; pose M6; animation_data M6 |
 | [ ] | ObjectModifiers, Modifier (+ every <Type>Modifier settings struct) | M1 data / M4 eval | generated settings |
 | [ ] | Mesh, MeshVertex, MeshEdge, MeshPolygon, MeshLoop, MeshLoopTriangle | M1 | SoA proxies (WP 1.27); use_smooth/use_seam/use_edge_sharp proxies; foreach_get/foreach_set; edit-mode reads via cached view (M2) |
@@ -775,7 +775,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | Armature, Bone, EditBone, ArmatureEditBones, Pose, PoseBone, BoneCollection | M6 |  |
 | [ ] | Action, ActionSlot, ActionLayer, ActionStrip, ActionKeyframeStrip, ActionChannelbag, FCurve, Keyframe, FCurveKeyframePoints, ActionGroup | M6 | slotted actions; action.fcurves → 5.x hint |
 | [ ] | AnimData, NlaTrack, NlaTracks, NlaStrip, NlaStrips | M6 |  |
-| [ ] | Preferences (edit.use_duplicate_*, edit.keyframe_new_*) | M2 read-only | moved from M1 (M1 stabilization) with `bpy.context.preferences` |
+| [x] | Preferences (edit.use_duplicate_*, edit.keyframe_new_*) | M2 read-only | moved from M1 (M1 stabilization) with `bpy.context.preferences` |
 
 ## E. RNA functions and Python-only members
 

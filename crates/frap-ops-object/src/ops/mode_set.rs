@@ -149,7 +149,7 @@ fn step(
 #[operator(
     poll = ACTIVE_EDITABLE,
     tier = T0,
-    support = Partial("only Object Mode has a mode handler in M1: EDIT arrives in M2 (meshes) and M6 (armatures), POSE in M6; other modes answer OP_NOT_IMPLEMENTED"),
+    support = Partial("mode handlers exist for OBJECT and EDIT (meshes); EDIT for armatures and POSE arrive in M6; other modes answer OP_NOT_IMPLEMENTED"),
     notes = [
         "mode items follow the active object's type (OBJECT only for cameras, lights and empties)",
         "toggle=True in the requested mode goes back to OBJECT",

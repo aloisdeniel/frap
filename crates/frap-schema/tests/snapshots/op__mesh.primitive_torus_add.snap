@@ -326,7 +326,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T1",
     "support": "partial",
-    "support_note": "adding into a mesh in Edit Mode (joined into it) arrives in M2 (OP_NOT_IMPLEMENTED)",
+    "support_note": "adding into a mesh in Edit Mode (joined into it) answers OP_NOT_IMPLEMENTED",
     "headless": "native",
     "planned": "M1",
     "extension": false,
