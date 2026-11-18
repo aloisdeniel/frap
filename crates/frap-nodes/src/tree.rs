@@ -47,6 +47,10 @@ pub struct NodeTree {
     pub interface: Vec<InterfaceSocket>,
     /// Next session-unique node uid (§21.4: deterministic per session).
     pub next_node_uid: u32,
+    /// Number of the next `Socket_<n>` interface item identifier (Blender's
+    /// `bNodeTreeInterface.next_uid`): only increases, so identifiers are never reused after
+    /// `interface.remove()`/`clear()` (WP 3.1).
+    pub next_interface_uid: u32,
     /// Animation (`NTShader Nodetree` action slot, §18).
     pub animation_data: Option<AnimData>,
 }
@@ -68,6 +72,7 @@ impl NodeTree {
             links: Vec::new(),
             interface: Vec::new(),
             next_node_uid: 0,
+            next_interface_uid: 0,
             animation_data: None,
         }
     }

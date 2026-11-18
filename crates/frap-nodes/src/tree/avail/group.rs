@@ -7,11 +7,13 @@
 //!
 //! Verified on Blender 5.2.4:
 //! - `interface.new_socket(name, in_out='INPUT', socket_type='NodeSocketFloat')` names the item
-//!   `Socket_<n>` from a counter of the tree (never reused; frap continues after the highest
-//!   number present, the same until a removal of the last item); output items are kept before
-//!   the input items (`position`/`index` follow `items_tree` order); socket types are the
-//!   `NodeSocketFloat|Int|Bool|Vector|Color|Menu|Shader|Bundle|Closure` classes and 'DEFAULT'
-//!   (a float). Fresh values: 0, 0, False, (0, 0, 0), (0, 0, 0, 1), '' (menu).
+//!   `Socket_<n>` from a counter of the tree (`next_uid`, never reused: after `clear()` or the
+//!   removal of the last item the next item still takes the next number); output items are
+//!   kept before the input items (`position`/`index` follow `items_tree` order); socket types
+//!   depend on the tree type ([`interface_socket_types`]; 'DEFAULT' is refused). Fresh values:
+//!   0, 0, False, (0, 0, 0), (0, 0, 0, 1), '' (menu).
+//! - `item.socket_type = …` changes the item's type and resets its value to the fresh one;
+//!   the sockets it declares change type (taking the item's value) and keep their links.
 //! - `Group Input` has one output per input item (identifier, name and type of the item, its
 //!   value taken from the item **when the socket is created**: a later write of the item's
 //!   `default_value` changes no existing socket) and a last virtual `__extend__` output;
@@ -43,17 +45,66 @@ pub fn is_group_node(bl_idname: &str) -> bool {
     matches!(bl_idname, "ShaderNodeGroup" | "GeometryNodeGroup")
 }
 
-/// The socket type of an interface `socket_type` (`NodeSocketFloat`, …; `DEFAULT` is a float).
-/// `None` for the classes frap cannot store (`NodeSocketBundle`, `NodeSocketClosure`).
+/// The `socket_type` items of an interface socket of a shader tree (material, world and
+/// shader groups), in Blender's order (`rna_NodeTreeInterfaceSocket_socket_type_itemf`, verified
+/// on 5.2.4 from the `TypeError` lists of `new_socket` and of an item write).
+pub const SHADER_INTERFACE_SOCKET_TYPES: [&str; 9] = [
+    "NodeSocketFloat",
+    "NodeSocketInt",
+    "NodeSocketBool",
+    "NodeSocketVector",
+    "NodeSocketColor",
+    "NodeSocketMenu",
+    "NodeSocketShader",
+    "NodeSocketBundle",
+    "NodeSocketClosure",
+];
+
+/// The `socket_type` items of an interface socket of a geometry node tree (verified on 5.2.4
+/// like [`SHADER_INTERFACE_SOCKET_TYPES`]).
+pub const GEOMETRY_INTERFACE_SOCKET_TYPES: [&str; 18] = [
+    "NodeSocketFloat",
+    "NodeSocketInt",
+    "NodeSocketBool",
+    "NodeSocketVector",
+    "NodeSocketColor",
+    "NodeSocketRotation",
+    "NodeSocketMatrix",
+    "NodeSocketString",
+    "NodeSocketMenu",
+    "NodeSocketGeometry",
+    "NodeSocketObject",
+    "NodeSocketCollection",
+    "NodeSocketImage",
+    "NodeSocketMaterial",
+    "NodeSocketFont",
+    "NodeSocketSound",
+    "NodeSocketBundle",
+    "NodeSocketClosure",
+];
+
+/// The `socket_type` items an interface socket of a tree of type `ty` accepts (Blender's
+/// `valid_socket_type` of the tree type).
+pub fn interface_socket_types(ty: crate::NodeTreeType) -> &'static [&'static str] {
+    match ty {
+        crate::NodeTreeType::Geometry => &GEOMETRY_INTERFACE_SOCKET_TYPES,
+        _ => &SHADER_INTERFACE_SOCKET_TYPES,
+    }
+}
+
+/// The socket type of an interface `socket_type` (`NodeSocketFloat`, …). `None` for the
+/// classes frap cannot store as interface items yet (`NodeSocketBundle`, `NodeSocketClosure`,
+/// and every geometry-only class except `NodeSocketGeometry`).
 pub fn interface_socket_type(socket_type: &str) -> Option<SocketType> {
     Some(match socket_type {
-        "DEFAULT" | "NodeSocketFloat" => SocketType::Value,
+        "NodeSocketFloat" => SocketType::Value,
         "NodeSocketInt" => SocketType::Int,
         "NodeSocketBool" => SocketType::Boolean,
         "NodeSocketVector" => SocketType::Vector,
         "NodeSocketColor" => SocketType::Rgba,
         "NodeSocketMenu" => SocketType::Menu,
         "NodeSocketShader" => SocketType::Shader,
+        "NodeSocketGeometry" => SocketType::Geometry,
         _ => return None,
     })
 }
@@ -172,14 +223,20 @@ impl Node {
 }
 
 impl NodeTree {
-    /// The number `n` of the next `Socket_<n>` item identifier.
-    fn next_interface_uid(&self) -> u32 {
-        self.interface
+    /// Takes the number `n` of the next `Socket_<n>` item identifier from the tree's counter
+    /// (`next_uid++` in `bNodeTreeInterface::add_socket`). An interface built without the
+    /// counter (a builtin group, an older `.frap`) continues after its highest `Socket_<n>`.
+    fn take_interface_uid(&mut self) -> u32 {
+        let after_items = self
+            .interface
             .iter()
             .filter_map(|s| s.identifier.strip_prefix("Socket_")?.parse::<u32>().ok())
-            .map(|n| n + 1)
+            .map(|n| n.saturating_add(1))
             .max()
-            .unwrap_or(0)
+            .unwrap_or(0);
+        let uid = self.next_interface_uid.max(after_items);
+        self.next_interface_uid = uid.saturating_add(1);
+        uid
     }
 
     /// `interface.new_socket(name, in_out=…, socket_type=…)`: adds an item of type `ty`
@@ -189,7 +246,7 @@ impl NodeTree {
     pub fn interface_new_socket(&mut self, name: &str, in_out: InOut, ty: SocketType) -> usize {
         let item = InterfaceSocket {
             name: SmolStr::new(name),
-            identifier: format_smolstr!("Socket_{}", self.next_interface_uid()),
+            identifier: format_smolstr!("Socket_{}", self.take_interface_uid()),
             in_out,
             socket_type: ty,
             default_value: interface_default(ty),
@@ -205,6 +262,19 @@ impl NodeTree {
         self.interface.insert(at, item);
         self.sync_group_io_nodes();
         at
+    }
+
+    /// `item.socket_type = …` (`bNodeTreeInterfaceSocket::set_socket_type`): item `index` takes
+    /// type `ty` and the fresh value of that type (also when the type does not change: Blender
+    /// frees and remakes the socket data); this tree's group input/output nodes are refreshed
+    /// (a socket that changes type takes the item's value, links are kept). Group nodes of
+    /// other trees are refreshed by the caller ([`NodeTree::sync_group_nodes_of`]).
+    pub fn interface_set_socket_type(&mut self, index: usize, ty: SocketType) {
+        if let Some(it) = self.interface.get_mut(index) {
+            it.socket_type = ty;
+            it.default_value = interface_default(ty);
+            self.sync_group_io_nodes();
+        }
     }
 
     /// `interface.remove(item)`: removes item `index` (no-op when out of range) and refreshes
@@ -355,6 +425,81 @@ mod tests {
         assert_eq!(
             g.nodes[gi].outputs[1].default_value,
             SocketValue::Color([0.0, 0.0, 0.0, 1.0])
+        );
+    }
+
+    #[test]
+    fn identifiers_are_never_reused() {
+        // Verified on 5.2.4: p, q, clear(), z → Socket_2; then add and remove the last item,
+        // the next one is Socket_4.
+        let mut g = NodeTree::new("G", NodeTreeType::Shader, false);
+        g.interface_new_socket("p", InOut::Input, SocketType::Value);
+        g.interface_new_socket("q", InOut::Input, SocketType::Value);
+        g.interface_clear();
+        g.interface_new_socket("z", InOut::Input, SocketType::Value);
+        assert_eq!(g.interface[0].identifier, "Socket_2");
+        g.interface_new_socket("last", InOut::Input, SocketType::Value);
+        g.interface_remove(1);
+        let i = g.interface_new_socket("again", InOut::Output, SocketType::Shader);
+        assert_eq!(g.interface[i].identifier, "Socket_4");
+        // A copy keeps the counter; an interface built without it continues after its items.
+        let mut c = g.clone();
+        c.interface_clear();
+        c.interface_new_socket("c", InOut::Input, SocketType::Value);
+        assert_eq!(c.interface[0].identifier, "Socket_5");
+        let mut b = NodeTree::new("B", NodeTreeType::Shader, false);
+        b.interface = g.interface.clone();
+        let i = b.interface_new_socket("b", InOut::Input, SocketType::Value);
+        assert_eq!(b.interface[i].identifier, "Socket_5");
+    }
+
+    #[test]
+    fn socket_type_change_resets_the_value_and_keeps_links() {
+        let mut g = NodeTree::new("G", NodeTreeType::Shader, false);
+        g.interface_new_socket("a", InOut::Input, SocketType::Value);
+        g.interface[0].default_value = SocketValue::Float(0.7);
+        let gi = g.new_node(GROUP_INPUT).unwrap();
+        let math = g.new_node("ShaderNodeMath").unwrap();
+        g.sync_group_io_nodes();
+        let (from, to) = (g.nodes[gi].uid, g.nodes[math].uid);
+        g.links.push(crate::Link {
+            from_node: from,
+            from_socket: "Socket_0".into(),
+            to_node: to,
+            to_socket: "Value".into(),
+        });
+        g.interface_set_socket_type(0, SocketType::Rgba);
+        assert_eq!(g.interface[0].socket_type, SocketType::Rgba);
+        assert_eq!(
+            g.interface[0].default_value,
+            SocketValue::Color([0.0, 0.0, 0.0, 1.0])
+        );
+        assert_eq!(g.nodes[gi].outputs[0].ty, SocketType::Rgba);
+        assert_eq!(
+            g.nodes[gi].outputs[0].default_value,
+            SocketValue::Color([0.0, 0.0, 0.0, 1.0])
+        );
+        assert_eq!(g.links.len(), 1);
+        // The same type resets the item's value too.
+        g.interface[0].default_value = SocketValue::Color([1.0; 4]);
+        g.interface_set_socket_type(0, SocketType::Rgba);
+        assert_eq!(
+            g.interface[0].default_value,
+            SocketValue::Color([0.0, 0.0, 0.0, 1.0])
+        );
+    }
+
+    #[test]
+    fn socket_types_depend_on_the_tree_type() {
+        use crate::NodeTreeType::{Geometry, Shader};
+        assert!(interface_socket_types(Shader).contains(&"NodeSocketShader"));
+        assert!(!interface_socket_types(Shader).contains(&"NodeSocketGeometry"));
+        assert!(interface_socket_types(Geometry).contains(&"NodeSocketGeometry"));
+        assert!(!interface_socket_types(Geometry).contains(&"NodeSocketShader"));
+        assert_eq!(interface_socket_type("DEFAULT"), None);
+        assert_eq!(
+            interface_socket_type("NodeSocketGeometry"),
+            Some(SocketType::Geometry)
         );
     }
 

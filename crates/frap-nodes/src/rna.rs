@@ -399,10 +399,44 @@ impl Rna for NodeMut<'_> {
     }
 }
 
+/// `ShaderNodeMix.data_type` lists 'ROTATION' only in geometry trees
+/// (`rna_ShaderNodeMix_data_type_itemf`): in a shader tree Blender 5.2.4 refuses it with
+/// `TypeError: bpy_struct: item.attr = val: enum "ROTATION" not found in ('FLOAT', 'VECTOR',
+/// 'RGBA')` (the only static item a shader node refuses, from a write of every item of every
+/// enum of every supported node).
+fn refuse_mix_rotation(
+    tree: crate::NodeTreeType,
+    n: &crate::Node,
+    prop: &PropDef,
+    v: &Value,
+) -> Result<(), RnaError> {
+    const SHADER_ITEMS: [&str; 3] = ["FLOAT", "VECTOR", "RGBA"];
+    match v {
+        Value::Enum(e)
+            if tree == crate::NodeTreeType::Shader
+                && n.bl_idname == "ShaderNodeMix"
+                && prop.identifier == "data_type"
+                && !SHADER_ITEMS.contains(&e.as_str()) =>
+        {
+            Err(RnaError::new(
+                RnaErrorKind::Enum,
+                PyExc::TypeError,
+                format!(
+                    "bpy_struct: item.attr = val: enum \"{e}\" not found in ('FLOAT', 'VECTOR', \
+                     'RGBA')"
+                ),
+            )
+            .with_detail("valid", SHADER_ITEMS.to_vec()))
+        }
+        _ => Ok(()),
+    }
+}
+
 impl RnaMut for NodeMut<'_> {
     fn set(&mut self, prop: &'static PropDef, v: Value) -> Result<SetOutcome, RnaError> {
         let srna = self.srna();
         let i = self.i;
+        refuse_mix_rotation(self.tree.ty, &self.tree.nodes[i], prop, &v)?;
         let n = &mut self.tree.nodes[i];
         if n.props.values.contains_key(prop.identifier) {
             n.set_prop(prop.identifier, v);
@@ -482,6 +516,31 @@ pub struct SocketsCollMut<'a> {
     pub is_output: bool,
 }
 
+/// `node.inputs[key]` / `node.outputs[key]` (`find_socket_by_key`): the first available socket
+/// whose identifier is `key`, else the first available one named `key`. Mix and Map Range match
+/// names only (their sockets of several data types share a name, and their identifiers such as
+/// `A_Color` are not keys). Verified on 5.2.4: `nodes['Math'].inputs['Value_001']` is the second
+/// input, a group node's `inputs['Socket_1']` and a Group Output's `inputs['__extend__']`
+/// resolve, and an identifier wins over another socket's equal name.
+// Ported from blender/source/blender/makesrna/intern/rna_nodetree.cc (`find_socket_by_key`,
+// `allow_identifier_lookup`), Blender 5.2.4, GPL-2.0-or-later.
+pub fn find_socket_by_key(node: &crate::Node, is_output: bool, key: &str) -> Option<usize> {
+    let sockets = if is_output {
+        &node.outputs
+    } else {
+        &node.inputs
+    };
+    let by_identifier = !matches!(node.bl_idname, "ShaderNodeMix" | "ShaderNodeMapRange");
+    by_identifier
+        .then(|| {
+            sockets
+                .iter()
+                .position(|s| s.enabled && s.identifier == key)
+        })
+        .flatten()
+        .or_else(|| crate::find_socket(sockets, key))
+}
+
 fn sockets_of(t: &NodeTree, node: usize, is_output: bool) -> &[crate::Socket] {
     let n = &t.nodes[node];
     if is_output { &n.outputs } else { &n.inputs }
@@ -520,7 +579,7 @@ macro_rules! sockets_coll {
                     .map(|s| s.name.clone())
             }
             fn find(&self, key: &str) -> Option<usize> {
-                crate::find_socket(sockets_of(&self.tree, self.node, self.is_output), key)
+                find_socket_by_key(&self.tree.nodes[self.node], self.is_output, key)
             }
             fn item(&self, i: usize) -> Result<Item<'_>, RnaError> {
                 sockets_item(&self.tree, self.node, self.is_output, i)

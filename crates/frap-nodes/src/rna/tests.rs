@@ -1241,7 +1241,10 @@ fn node_rna_constants_equal_blender() {
     ];
     let mut t = NodeTree::new("T", NodeTreeType::Shader, false);
     let mut failures = Vec::new();
+    // Reads compared and equal (`checked`), and reads frap does not bind (`unbound`, not
+    // compared).
     let mut checked = 0;
+    let mut unbound = 0;
     for (bl_idname, jn) in dump["nodes"].as_object().unwrap() {
         let i = t.new_node(bl_idname).expect("node type");
         let node = super::NodeRef { tree: &t, i };
@@ -1257,10 +1260,11 @@ fn node_rna_constants_equal_blender() {
                 Some(got) if !json_eq(&got, want) => {
                     failures.push(format!("{bl_idname}.{prop}: frap {got}, Blender {want}"))
                 }
+                Some(_) => checked += 1,
                 None if must_bind.contains(&prop.as_str()) => {
                     failures.push(format!("{bl_idname}.{prop} unbound"))
                 }
-                _ => checked += 1,
+                None => unbound += 1,
             }
         }
         for (dir, is_output) in [("inputs", false), ("outputs", true)] {
@@ -1280,10 +1284,11 @@ fn node_rna_constants_equal_blender() {
                         Some(got) if !json_eq(&got, want) => failures.push(format!(
                             "{bl_idname}.{dir}[{si}].{prop}: frap {got}, Blender {want}"
                         )),
+                        Some(_) => checked += 1,
                         None if must_bind.contains(&prop.as_str()) => {
                             failures.push(format!("{bl_idname}.{dir}[{si}].{prop} unbound"))
                         }
-                        _ => checked += 1,
+                        None => unbound += 1,
                     }
                 }
             }
@@ -1314,5 +1319,8 @@ fn node_rna_constants_equal_blender() {
         }
     }
     assert!(failures.is_empty(), "{}", failures.join("\n"));
-    assert!(checked > 5000, "{checked} reads compared");
+    assert!(
+        checked > 5000,
+        "{checked} reads compared equal ({unbound} unbound reads not compared)"
+    );
 }
