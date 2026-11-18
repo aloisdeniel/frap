@@ -436,6 +436,14 @@ fn convert_struct(
             args.nested.insert(sub.bl_idname, nested);
             continue;
         }
+        // frap's own operators (`frap.*`, no Blender counterpart) document an unset number as
+        // `=None` (`render_contact_sheet(frame=None)`, §19.6): an explicit `None` is unset
+        // there. Blender's operators keep Blender's TypeError.
+        let found = found.filter(|(_, input)| {
+            !(matches!(input, Input::None)
+                && spec.idname.starts_with("frap.")
+                && matches!(def.kind, PropKind::Int { .. } | PropKind::Float { .. }))
+        });
         let Some((_, input)) = found else {
             args.values.insert(def.identifier, Value::default_for(def));
             continue;

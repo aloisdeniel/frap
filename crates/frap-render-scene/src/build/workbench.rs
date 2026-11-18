@@ -98,7 +98,13 @@ pub fn shading(scene: &Scene) -> crate::types::RWorkbenchShading {
     let s = &d.shading;
     crate::types::RWorkbenchShading {
         shading_type: s.r#type.clone(),
-        studio_light: s.studio_light.clone(),
+        // `workbench_state.cc`: the MatCap comes from DNA `matcap`, the studio rig from DNA
+        // `studio_light` (RNA `studio_light` routes between them by `light`).
+        studio_light: if s.light == "MATCAP" {
+            s.matcap.clone()
+        } else {
+            s.studio_light.clone()
+        },
         studiolight_rotate_z: s.studiolight_rotate_z,
         use_world_space_lighting: s.use_world_space_lighting,
         show_backface_culling: s.show_backface_culling,

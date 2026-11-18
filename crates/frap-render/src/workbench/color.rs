@@ -87,9 +87,104 @@ pub fn gbuffer_roughness_metallic(roughness: f32, metallic: f32) -> (f32, f32) {
     (iv1 as f32 * (1.0 / 31.0), iv2 as f32 * (1.0 / 7.0))
 }
 
+/// `(roughness, metallic)` as the transparent pass sees them: `Material::pack_data` only
+/// (`sqrt(roughness)` and metallic in 8 bits each, `material_data_get`).
+pub fn packed_roughness_metallic(roughness: f32, metallic: f32) -> (f32, f32) {
+    (
+        unit_float_to_uchar_clamp(roughness.max(0.0).sqrt()) as f32 * (1.0 / 255.0),
+        unit_float_to_uchar_clamp(metallic) as f32 * (1.0 / 255.0),
+    )
+}
+
+/// IEEE 754 binary16 bits of `v`, rounded to nearest even (overflow → infinity, NaN kept): the
+/// conversion a GPU applies when it stores into a half-float texture.
+pub fn f32_to_f16_bits(v: f32) -> u16 {
+    let x = v.to_bits();
+    let sign = ((x >> 16) & 0x8000) as u16;
+    let exp = ((x >> 23) & 0xff) as i32;
+    let man = x & 0x007f_ffff;
+    if exp == 0xff {
+        // Inf / NaN.
+        return sign | 0x7c00 | if man != 0 { 0x200 } else { 0 };
+    }
+    let e = exp - 127 + 15;
+    if e >= 0x1f {
+        return sign | 0x7c00;
+    }
+    if e <= 0 {
+        // Subnormal half (or zero).
+        if e < -10 {
+            return sign;
+        }
+        let m = man | 0x0080_0000;
+        let shift = (14 - e) as u32;
+        let half = m >> shift;
+        let rem = m & ((1 << shift) - 1);
+        let mid = 1 << (shift - 1);
+        let round = rem > mid || (rem == mid && (half & 1) == 1);
+        return sign | (half + u32::from(round)) as u16;
+    }
+    let half = ((e as u32) << 10) | (man >> 13);
+    let rem = man & 0x1fff;
+    let round = rem > 0x1000 || (rem == 0x1000 && (half & 1) == 1);
+    // A carry out of the mantissa correctly bumps the exponent (up to infinity).
+    sign | (half + u32::from(round)) as u16
+}
+
+/// The value of binary16 bits.
+pub fn f16_bits_to_f32(h: u16) -> f32 {
+    let sign = if h & 0x8000 != 0 { -1.0f32 } else { 1.0 };
+    let exp = ((h >> 10) & 0x1f) as i32;
+    let man = f32::from(h & 0x3ff);
+    match exp {
+        0 => sign * man * (1.0 / 16_777_216.0), // 2^-24
+        0x1f if man == 0.0 => sign * f32::INFINITY,
+        0x1f => f32::NAN,
+        e => sign * (1.0 + man / 1024.0) * 2f32.powi(e - 15),
+    }
+}
+
+/// `v` rounded to the nearest half float.
+pub fn round_f16(v: f32) -> f32 {
+    f16_bits_to_f32(f32_to_f16_bits(v))
+}
+
+/// `v` stored in, then read from, a half-float render target the way the Apple GPUs that
+/// rendered Blender's references do it: rounded toward zero (`workbench.wgsl` `rtz16`).
+pub fn round_f16_toward_zero(v: f32) -> f32 {
+    let bits = f32_to_f16_bits(v);
+    let h = f16_bits_to_f32(bits);
+    if h.abs() > v.abs() {
+        f16_bits_to_f32(bits - 1)
+    } else {
+        h
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn half_floats() {
+        for v in [0.0f32, 1.0, -2.5, 0.1, 65504.0, 6.1e-5, 1e-7, 3.0e-8] {
+            let r = round_f16(v);
+            assert!((r - v).abs() <= v.abs() * 1e-3 + 6e-8, "{v} -> {r}");
+        }
+        assert_eq!(f32_to_f16_bits(1.0), 0x3c00);
+        assert_eq!(f32_to_f16_bits(-2.0), 0xc000);
+        assert_eq!(f32_to_f16_bits(65520.0), 0x7c00);
+        assert_eq!(f32_to_f16_bits(0.1), 0x2e66);
+        assert_eq!(f16_bits_to_f32(0x3555), 0.333_251_95);
+        assert!(round_f16(f32::NAN).is_nan());
+        // Ties to even: 1 + 2^-11 is halfway between 1 and 1 + 2^-10.
+        assert_eq!(round_f16(1.0 + 1.0 / 2048.0), 1.0);
+        // Toward zero: just below 1 truncates to 1 - 2^-11, never up; no overflow to infinity.
+        assert_eq!(round_f16_toward_zero(0.99999), 1.0 - 1.0 / 2048.0);
+        assert_eq!(round_f16_toward_zero(-0.99999), -(1.0 - 1.0 / 2048.0));
+        assert_eq!(round_f16_toward_zero(1.0), 1.0);
+        assert_eq!(round_f16_toward_zero(1e6), 65504.0);
+    }
 
     #[test]
     fn hsv_primaries() {

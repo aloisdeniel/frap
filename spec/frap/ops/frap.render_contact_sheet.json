@@ -1,5 +1,5 @@
 {
- "_comment": "Hand-written spec of frap's own operator `frap.render_contact_sheet` (dump schema of spec/blender-5.2/ops/<ns>.json, `poll: null`). Created by M2 W0 (WP 2.0); owned by WP 2.3, which may refine it (re-run `cargo xtask codegen`).",
+ "_comment": "Hand-written spec of frap's own operator `frap.render_contact_sheet` (dump schema of spec/blender-5.2/ops/<ns>.json, `poll: null`). Created by M2 W0 (WP 2.0); owned by WP 2.3 (descriptions of views, margin and frame refined; re-run `cargo xtask codegen`).",
  "namespace": "frap",
  "count": 1,
  "operators": [
@@ -31,7 +31,7 @@
     {
      "identifier": "views",
      "name": "Views",
-     "description": "Views to render, in this order",
+     "description": "Views to render; tiles follow the item order FRONT, BACK, RIGHT, LEFT, TOP, BOTTOM, ISO, CAMERA",
      "type": "ENUM",
      "subtype": "NONE",
      "unit": "NONE",
@@ -209,7 +209,7 @@
     {
      "identifier": "margin",
      "name": "Margin",
-     "description": "Framing margin around the bounds, as a fraction of the view",
+     "description": "Framing margin around the bounds, as a fraction of their extent on each side",
      "type": "FLOAT",
      "subtype": "FACTOR",
      "unit": "NONE",
@@ -281,7 +281,7 @@
     {
      "identifier": "frame",
      "name": "Frame",
-     "description": "Frame to render (unset: the current frame)",
+     "description": "Frame to render (omit it to render the current frame)",
      "type": "INT",
      "subtype": "NONE",
      "unit": "NONE",

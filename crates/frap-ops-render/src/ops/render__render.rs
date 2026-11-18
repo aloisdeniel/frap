@@ -323,6 +323,17 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
     for w in &plan.cm.warnings {
         cx.report(ReportType::Warning, w.clone());
     }
+    // Workbench effects frap does not render yet, as `frap.render_contact_sheet` reports them
+    // (WP 2.3).
+    if plan.engine == WORKBENCH {
+        let shading = frap_render_scene::build::workbench::shading(cx.ctx().scene());
+        for effect in super::frap__render_contact_sheet::workbench_left_out(&shading) {
+            cx.report(
+                ReportType::Warning,
+                format!("frap: the Workbench {effect} is not rendered yet"),
+            );
+        }
+    }
     cx.result("engine", Value::Str(WORKBENCH.into()));
     cx.result(
         "resolution",

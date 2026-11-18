@@ -14,6 +14,7 @@ frap-rna.workspace = true
 frap-scene.workspace = true
 frap-spec-rna.workspace = true
 frap-spec-ops-render.workspace = true
+frap-spec-ops-frap.workspace = true
 frap-render-scene.workspace = true
 frap-color.workspace = true
 frap-imbuf.workspace = true

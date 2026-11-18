@@ -189,6 +189,24 @@ pub fn file_pixels(
     cm: &ColorManagement,
     dither_intensity: f32,
 ) -> Result<DecodedImage, String> {
+    // The film is straight alpha; Blender's render buffer is premultiplied. Without an alpha
+    // channel Blender composites it over black (`IMB_alpha_under_color_float`,
+    // `colormanagement.cc`: RGB = premultiplied colour, alpha 1); float files keep it
+    // premultiplied (WP 2.3, found by the Workbench parity gate).
+    let premultiplied: Vec<[f32; 4]>;
+    let rgba = if ws.channels != 4 || ws.linear {
+        let under = ws.channels != 4;
+        premultiplied = rgba
+            .iter()
+            .map(|p| {
+                let a = p[3];
+                [p[0] * a, p[1] * a, p[2] * a, if under { 1.0 } else { a }]
+            })
+            .collect();
+        &premultiplied[..]
+    } else {
+        rgba
+    };
     let pixels = if ws.linear {
         PixelData::F32(rgba.iter().flatten().copied().collect())
     } else {
@@ -312,11 +330,20 @@ mod tests {
         let img = file_pixels(&[[1.0, 1.0, 1.0, 1.0]], 1, 1, &bw, &cm, 0.0).unwrap();
         assert_eq!((img.channels, img.pixels), (1, PixelData::U8(vec![255])));
         let exr = write_settings(&settings("OPEN_EXR", "RGB", "32")).unwrap();
+        // Without alpha the (premultiplied) render goes over black (`IMB_alpha_under_color_*`).
         let img = file_pixels(&[[2.0, 0.5, 0.25, 0.5]], 1, 1, &exr, &cm, 0.0).unwrap();
         assert_eq!(
             (img.channels, img.pixels),
-            (3, PixelData::F32(vec![2.0, 0.5, 0.25]))
+            (3, PixelData::F32(vec![1.0, 0.25, 0.125]))
         );
+        let rgb8 = write_settings(&settings("PNG", "RGB", "8")).unwrap();
+        let img = file_pixels(&[[0.25, 0.0, 1.0, 0.5]], 1, 1, &rgb8, &cm, 0.0).unwrap();
+        // Linear 0.125 → sRGB 0.3896 → 99; 0.5 → 0.7354 → 188.
+        assert_eq!(img.pixels, PixelData::U8(vec![99, 0, 188]));
+        // Float RGBA files keep Blender's premultiplied buffer.
+        let exr = write_settings(&settings("OPEN_EXR", "RGBA", "32")).unwrap();
+        let img = file_pixels(&[[2.0, 0.5, 0.25, 0.5]], 1, 1, &exr, &cm, 0.0).unwrap();
+        assert_eq!(img.pixels, PixelData::F32(vec![1.0, 0.25, 0.125, 0.5]));
     }
 
     #[test]

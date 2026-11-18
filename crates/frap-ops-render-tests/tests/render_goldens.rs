@@ -1,17 +1,20 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Workbench render goldens (WP 1.24, ARCHITECTURE §20.1 "Render", §20.4 `image_ssim`).
+//! Workbench render goldens (WP 1.24, WP 2.3; ARCHITECTURE §20.1 "Render", §20.4
+//! `image_ssim`).
 //!
-//! Every case of `tests/golden/cases/render/m1/` with a `# render-golden: image=<path>` line is
-//! a render golden. Its render statements are `#@render` lines: comments for the generic golden
-//! suite (`cargo test -p frap-golden`, which compares the scene the case builds with Blender's
-//! and must run without a GPU), statements here. This test runs the case through frap with the
-//! render lines and compares the written image with
+//! Every case of `tests/golden/cases/render/m1/` and `…/render/m2/` with a
+//! `# render-golden: image=<path> [min_ssim=<x>]` line is a render golden. Its render statements
+//! are `#@render` lines: comments for the generic golden suite (`cargo test -p frap-golden`,
+//! which compares the scene the case builds with Blender's and must run without a GPU),
+//! statements here. This test runs the case through frap with the render lines and compares the
+//! written image with
 //!
-//! - `tests/golden/fixtures/render/m1/<case>.frap.png`, the frap-blessed self-golden:
-//!   SSIM ≥ 0.995 and mean ΔE ≤ 2 in the centre crop, **gating** on every CI adapter (gpu.yml:
-//!   Metal, lavapipe, WARP);
-//! - `tests/golden/fixtures/render/m1/<case>.blender.png`, Blender 5.2.4's Workbench render of
-//!   the same case: the SSIM is **reported** (it gates from M2, WP 2.3, at 0.97).
+//! - `tests/golden/fixtures/<area>/<case>.frap.png`, the frap-blessed self-golden: SSIM ≥ 0.995
+//!   and mean ΔE ≤ 2 in the centre crop, gating on every CI adapter (gpu.yml: Metal, lavapipe,
+//!   WARP);
+//! - `tests/golden/fixtures/<area>/<case>.blender.png`, Blender 5.2.4's Workbench render of the
+//!   same case: SSIM ≥ 0.97 for the M1 scenes and ≥ `min_ssim` (0.95 for the M2 X-ray,
+//!   wireframe, matcap, outline and shadow scenes) and mean ΔE ≤ 2, **gating** from M2 (WP 2.3).
 //!
 //! Without an adapter the test fails, or prints a notice and passes under
 //! `FRAP_GPU_OPTIONAL=1` (ci.yml's GPU-less test job).
@@ -20,6 +23,7 @@
 //! --nocapture` rewrites the `.frap.png` files from this machine's render and, when Blender
 //! 5.2 is found (`$BLENDER_BIN`, `PATH`, `~/Applications/Blender-5.2.app`), the `.blender.png`
 //! files through the golden runner (`tools/blender/golden_runner.py`, VIEW_3D override and all).
+//! `FRAP_RENDER_KEEP=<dir>` copies every frap render there (debugging).
 
 mod common;
 
@@ -31,8 +35,8 @@ use frap_golden::compare::image_ssim::{
 };
 use frap_session::{Session, SessionOptions};
 
-/// Case area of the M1 render goldens.
-const AREA: &str = "render/m1";
+/// Case areas of the render goldens.
+const AREAS: [&str; 2] = ["render/m1", "render/m2"];
 /// Bless switch.
 const BLESS_ENV: &str = "FRAP_RENDER_BLESS";
 /// Directive naming the rendered image (case-relative output path).
@@ -42,42 +46,57 @@ const RENDER_LINE: &str = "#@render";
 
 /// One render golden.
 struct RenderCase {
+    area: &'static str,
     name: String,
     text: String,
     image: String,
+    /// Minimum SSIM against Blender's render.
+    min_ssim: f64,
 }
 
 impl RenderCase {
     fn id(&self) -> String {
-        format!("{AREA}/{}", self.name)
+        format!("{}/{}", self.area, self.name)
     }
 }
 
+fn directive(text: &str, key: &str) -> Option<String> {
+    text.lines().find_map(|l| {
+        l.strip_prefix(DIRECTIVE)?
+            .split_whitespace()
+            .find_map(|kv| kv.strip_prefix(key).map(str::to_owned))
+    })
+}
+
 fn render_cases(repo: &Repo) -> Vec<RenderCase> {
-    let dir = repo.cases_dir().join(AREA);
-    let mut paths: Vec<PathBuf> = std::fs::read_dir(&dir)
-        .unwrap_or_else(|e| panic!("{}: {e}", dir.display()))
-        .flatten()
-        .map(|e| e.path())
-        .filter(|p| p.extension().is_some_and(|x| x == "py"))
-        .collect();
-    paths.sort();
-    paths
-        .into_iter()
-        .filter_map(|p| {
+    let mut out = Vec::new();
+    for area in AREAS {
+        let dir = repo.cases_dir().join(area);
+        let mut paths: Vec<PathBuf> = std::fs::read_dir(&dir)
+            .unwrap_or_else(|e| panic!("{}: {e}", dir.display()))
+            .flatten()
+            .map(|e| e.path())
+            .filter(|p| p.extension().is_some_and(|x| x == "py"))
+            .collect();
+        paths.sort();
+        for p in paths {
             let text = std::fs::read_to_string(&p).unwrap();
-            let image = text.lines().find_map(|l| {
-                l.strip_prefix(DIRECTIVE)?
-                    .split_whitespace()
-                    .find_map(|kv| kv.strip_prefix("image=").map(str::to_owned))
-            })?;
-            Some(RenderCase {
+            let Some(image) = directive(&text, "image=") else {
+                continue;
+            };
+            let min_ssim = directive(&text, "min_ssim=")
+                .map(|s| s.parse().expect("min_ssim= is a number"))
+                .unwrap_or(WORKBENCH_MIN_SSIM);
+            out.push(RenderCase {
+                area,
                 name: p.file_stem().unwrap().to_string_lossy().into_owned(),
                 text,
                 image,
-            })
-        })
-        .collect()
+                min_ssim,
+            });
+        }
+    }
+    out
 }
 
 fn strip_prefix_line<'a>(line: &'a str, prefix: &str) -> Option<&'a str> {
@@ -114,7 +133,7 @@ fn blender_case_text(text: &str) -> String {
 
 fn fixture(repo: &Repo, case: &RenderCase, side: &str) -> PathBuf {
     repo.fixtures_dir()
-        .join(AREA)
+        .join(case.area)
         .join(format!("{}.{side}.png", case.name))
 }
 
@@ -160,6 +179,7 @@ fn bless_blender(repo: &Repo, case: &RenderCase) -> Result<(), String> {
         ));
     }
     let dst = fixture(repo, case, "blender");
+    std::fs::create_dir_all(dst.parent().unwrap()).map_err(|e| e.to_string())?;
     std::fs::copy(run.join(&case.image), &dst).map_err(|e| format!("{}: {e}", dst.display()))?;
     eprintln!("blessed {}", dst.display());
     Ok(())
@@ -176,13 +196,33 @@ fn source_transforms() {
         blender_case_text(text),
         "# golden: compare=objects\nimport bpy\nbpy.ops.render.render(write_still=True)\n#@frap  x = 1\n#@blender y = 2"
     );
+    let d = "# render-golden: image=out/a.png min_ssim=0.95\n";
+    assert_eq!(directive(d, "image=").as_deref(), Some("out/a.png"));
+    assert_eq!(directive(d, "min_ssim=").as_deref(), Some("0.95"));
 }
 
 #[test]
-fn at_least_three_workbench_scenes() {
+fn workbench_scenes_and_fixtures() {
     let repo = Repo::locate();
     let cases = render_cases(&repo);
-    assert!(cases.len() >= 3, "{} render goldens", cases.len());
+    let in_area = |a: &str| cases.iter().filter(|c| c.area == a).count();
+    assert!(
+        in_area("render/m1") >= 3,
+        "{} M1 render goldens",
+        in_area("render/m1")
+    );
+    // WP 2.3 acceptance: X-ray, wireframe, matcap, outline and shadows against Blender.
+    let m2: Vec<&str> = cases
+        .iter()
+        .filter(|c| c.area == "render/m2")
+        .map(|c| c.name.as_str())
+        .collect();
+    for feature in ["xray", "wireframe", "matcap", "outline", "shadows"] {
+        assert!(
+            m2.iter().any(|n| n.contains(feature)),
+            "no render/m2 golden for {feature}: {m2:?}"
+        );
+    }
     for c in &cases {
         assert!(
             c.text.contains("render.engine = 'BLENDER_WORKBENCH'"),
@@ -190,6 +230,13 @@ fn at_least_three_workbench_scenes() {
             c.id()
         );
         assert!(c.text.contains(RENDER_LINE), "{}: no #@render line", c.id());
+        // M1 scenes gate at 0.97 (§22.4); M2 feature scenes at 0.95 or more.
+        let floor = if c.area == "render/m1" {
+            WORKBENCH_MIN_SSIM
+        } else {
+            0.95
+        };
+        assert!(c.min_ssim >= floor, "{}: min_ssim {}", c.id(), c.min_ssim);
         // Committed self-golden and Blender reference.
         for side in ["frap", "blender"] {
             let p = fixture(&repo, c, side);
@@ -199,9 +246,10 @@ fn at_least_three_workbench_scenes() {
 }
 
 #[test]
-fn self_goldens() {
+fn self_and_blender_goldens() {
     let repo = Repo::locate();
     let bless = std::env::var(BLESS_ENV).is_ok_and(|v| v == "1");
+    let keep = std::env::var("FRAP_RENDER_KEEP").ok();
     let mut failures = Vec::new();
     for case in render_cases(&repo) {
         let work = ScratchDir::new(&case.name).unwrap();
@@ -213,6 +261,10 @@ fn self_goldens() {
                 continue;
             }
         };
+        if let Some(dir) = &keep {
+            let _ = std::fs::create_dir_all(dir);
+            let _ = std::fs::copy(&out, Path::new(dir).join(format!("{}.png", case.name)));
+        }
         let frap = image_ssim::load_png(&out).unwrap();
         if bless {
             let dst = fixture(&repo, &case, "frap");
@@ -237,18 +289,30 @@ fn self_goldens() {
             }
             Err(e) => failures.push(format!("{}: self-golden: {e}", case.id())),
         }
-        // Reported, not gating (§22.3 WP 1.24; gating from M2).
-        match image_ssim::load_png(&fixture(&repo, &case, "blender"))
-            .and_then(|b| image_ssim::score(&frap, &b))
-        {
-            Ok(s) => eprintln!(
-                "{}: vs Blender 5.2.4 Workbench: SSIM {:.4} (M2 gate {WORKBENCH_MIN_SSIM}), \
-                 mean ΔE {:.3} (centre crop)",
-                case.id(),
-                s.ssim,
-                s.mean_delta_e
-            ),
-            Err(e) => eprintln!("{}: vs Blender: not compared: {e}", case.id()),
+        // Gating against Blender 5.2.4's Workbench (§22.4, WP 2.3).
+        match image_ssim::load_png(&fixture(&repo, &case, "blender")) {
+            Ok(b) => {
+                if let Ok(s) = image_ssim::score(&frap, &b) {
+                    eprintln!(
+                        "{}: vs Blender 5.2.4 Workbench: SSIM {:.4} (gate {}), mean ΔE {:.3} \
+                         (centre crop)",
+                        case.id(),
+                        s.ssim,
+                        case.min_ssim,
+                        s.mean_delta_e
+                    );
+                }
+                for m in image_ssim::compare(
+                    &format!("{} vs {}.blender.png", case.id(), case.name),
+                    &frap,
+                    &b,
+                    case.min_ssim,
+                    DEFAULT_MAX_DELTA_E,
+                ) {
+                    failures.push(m.to_string());
+                }
+            }
+            Err(e) => failures.push(format!("{}: Blender reference: {e}", case.id())),
         }
     }
     assert!(

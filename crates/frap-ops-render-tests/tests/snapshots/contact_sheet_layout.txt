@@ -1,0 +1,7 @@
+default: size 128x128 | FRONT [0, 0, 64, 64] | RIGHT [64, 0, 64, 64] | TOP [0, 64, 64, 64] | ISO [64, 64, 64, 64]
+three: size 80x80 | FRONT [0, 0, 40, 40] | TOP [40, 0, 40, 40] | ISO [0, 40, 40, 40]
+all_views_3_columns: size 96x96 | FRONT [0, 0, 32, 32] | BACK [32, 0, 32, 32] | RIGHT [64, 0, 32, 32] | LEFT [0, 32, 32, 32] | TOP [32, 32, 32, 32] | BOTTOM [64, 32, 32, 32] | ISO [0, 64, 32, 32] | CAMERA [32, 71, 32, 18]
+one_column: size 24x48 | RIGHT [0, 0, 24, 24] | LEFT [0, 24, 24, 24]
+columns_above_tiles: size 16x16 | TOP [0, 0, 16, 16]
+camera_only: size 100x100 | CAMERA [0, 22, 100, 56]
+camera_portrait: size 200x100 | TOP [0, 0, 100, 100] | CAMERA [122, 0, 56, 100]

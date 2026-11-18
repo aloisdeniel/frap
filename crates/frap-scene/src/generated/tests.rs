@@ -142,7 +142,6 @@ fn default_equals_fresh_view3_d_shading() {
     check("View3DShading", "type", |p| v.rna_get(p));
     check("View3DShading", "light", |p| v.rna_get(p));
     check("View3DShading", "show_object_outline", |p| v.rna_get(p));
-    check("View3DShading", "studio_light", |p| v.rna_get(p));
     check("View3DShading", "use_world_space_lighting", |p| v.rna_get(p));
     check("View3DShading", "show_backface_culling", |p| v.rna_get(p));
     check("View3DShading", "show_cavity", |p| v.rna_get(p));

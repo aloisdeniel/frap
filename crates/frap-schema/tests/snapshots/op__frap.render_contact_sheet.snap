@@ -1,0 +1,376 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "frap.render_contact_sheet",
+  "bl_idname": "FRAP_OT_render_contact_sheet",
+  "label": "Render Contact Sheet",
+  "description": "Render the scene from several views into one labelled image (frap extension; synthetic cameras never enter bpy.data)",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": null
+  },
+  "properties": [
+    {
+      "identifier": "filepath",
+      "name": "File Path",
+      "description": "Output image (// = relative to the .frap file, else the working directory)",
+      "type": "STRING",
+      "subtype": "FILE_PATH",
+      "unit": "NONE",
+      "array": null,
+      "default": "//sheet.png",
+      "length_max": 1024,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "views",
+      "name": "Views",
+      "description": "Views to render; tiles follow the item order FRONT, BACK, RIGHT, LEFT, TOP, BOTTOM, ISO, CAMERA",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": [
+        "FRONT",
+        "ISO",
+        "RIGHT",
+        "TOP"
+      ],
+      "enum_items": [
+        {
+          "identifier": "FRONT",
+          "name": "Front",
+          "description": "Looking along +Y (numpad 1)",
+          "value": 1
+        },
+        {
+          "identifier": "BACK",
+          "name": "Back",
+          "description": "Looking along -Y (Ctrl numpad 1)",
+          "value": 2
+        },
+        {
+          "identifier": "RIGHT",
+          "name": "Right",
+          "description": "Looking along -X (numpad 3)",
+          "value": 4
+        },
+        {
+          "identifier": "LEFT",
+          "name": "Left",
+          "description": "Looking along +X (Ctrl numpad 3)",
+          "value": 8
+        },
+        {
+          "identifier": "TOP",
+          "name": "Top",
+          "description": "Looking along -Z (numpad 7)",
+          "value": 16
+        },
+        {
+          "identifier": "BOTTOM",
+          "name": "Bottom",
+          "description": "Looking along +Z (Ctrl numpad 7)",
+          "value": 32
+        },
+        {
+          "identifier": "ISO",
+          "name": "Iso",
+          "description": "The factory viewport rotation",
+          "value": 64
+        },
+        {
+          "identifier": "CAMERA",
+          "name": "Camera",
+          "description": "The scene camera",
+          "value": 128
+        }
+      ],
+      "is_enum_flag": true,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ENUM_FLAG"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "engine",
+      "name": "Engine",
+      "description": "Render engine of the tiles",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "BLENDER_WORKBENCH",
+      "enum_items": [
+        {
+          "identifier": "BLENDER_WORKBENCH",
+          "name": "Workbench",
+          "description": "Workbench",
+          "value": 0
+        },
+        {
+          "identifier": "BLENDER_EEVEE",
+          "name": "EEVEE",
+          "description": "EEVEE (Workbench with a WARNING until M5)",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "objects",
+      "name": "Objects",
+      "description": "Objects framed by the synthetic cameras",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "VISIBLE",
+      "enum_items": [
+        {
+          "identifier": "VISIBLE",
+          "name": "Visible",
+          "description": "Visible renderable objects",
+          "value": 0
+        },
+        {
+          "identifier": "SELECTED",
+          "name": "Selected",
+          "description": "Selected objects",
+          "value": 1
+        },
+        {
+          "identifier": "ALL",
+          "name": "All",
+          "description": "Every object of the view layer",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "view_size",
+      "name": "View Size",
+      "description": "Tile size in pixels",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 512,
+      "hard_min": 16,
+      "hard_max": 4096,
+      "soft_min": 64,
+      "soft_max": 2048,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "columns",
+      "name": "Columns",
+      "description": "Tiles per row (0 = automatic)",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": 0,
+      "hard_max": 16,
+      "soft_min": 0,
+      "soft_max": 16,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "margin",
+      "name": "Margin",
+      "description": "Framing margin around the bounds, as a fraction of their extent on each side",
+      "type": "FLOAT",
+      "subtype": "FACTOR",
+      "unit": "NONE",
+      "array": null,
+      "default": 0.05,
+      "hard_min": 0,
+      "hard_max": 0.5,
+      "soft_min": 0,
+      "soft_max": 0.5,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "show_labels",
+      "name": "Show Labels",
+      "description": "Write the view name on each tile",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "background",
+      "name": "Background",
+      "description": "Sheet background",
+      "type": "FLOAT",
+      "subtype": "COLOR_GAMMA",
+      "unit": "NONE",
+      "array": [
+        4
+      ],
+      "default": [
+        0.2,
+        0.2,
+        0.2,
+        1
+      ],
+      "hard_min": 0,
+      "hard_max": 1,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "use_scene_camera",
+      "name": "Use Scene Camera",
+      "description": "Add the scene camera's view (CAMERA) even when not listed",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "frame",
+      "name": "Frame",
+      "description": "Frame to render (omit it to render the current frame)",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T4",
+    "support": "partial",
+    "support_note": "engine='BLENDER_EEVEE' renders its tiles with BLENDER_WORKBENCH (WARNING) until M5",
+    "headless": "native",
+    "planned": "M2",
+    "extension": true,
+    "notes": [
+      "frap extension: one orthographic tile per view (FRONT/BACK/RIGHT/LEFT/TOP/BOTTOM: Blender's numpad views; ISO: the factory viewport rotation; CAMERA: scene.camera), framing the drawn objects' bounds",
+      "needs a GPU: GPU_UNAVAILABLE without an adapter or in a build without the gpu feature",
+      "nothing in the session changes; synthetic cameras never enter bpy.data, and result.tiles reports each one",
+      "tiles follow the item order FRONT, BACK, RIGHT, LEFT, TOP, BOTTOM, ISO, CAMERA, whatever the order of views",
+      "each tile has the pixels of an 8-bit render of its view (same colour management and dither); the sheet is an RGBA PNG"
+    ]
+  }
+}

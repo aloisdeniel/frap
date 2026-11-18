@@ -92,6 +92,10 @@ pub struct View3DShading {
     pub aov_name: String,
     /// `use_compositor`: When to preview the compositor output inside the viewport
     pub use_compositor: SmolStr,
+    /// DNA `matcap`: the MatCap `studio_light` shows when `type == 'SOLID'` and `light == 'MATCAP'` (no RNA property; empty = Blender's default matcap)
+    pub matcap: SmolStr,
+    /// DNA `lookdev_light`: the HDRI `studio_light` shows when `type != 'SOLID'` (no RNA property; empty = `forest.exr`)
+    pub lookdev_light: SmolStr,
 }
 
 impl Default for View3DShading {
@@ -135,6 +139,8 @@ impl Default for View3DShading {
             render_pass: SmolStr::new_static("COMBINED"),
             aov_name: String::from(""),
             use_compositor: SmolStr::new_static("DISABLED"),
+            matcap: SmolStr::new_static(""),
+            lookdev_light: SmolStr::new_static(""),
         }
     }
 }
@@ -148,7 +154,7 @@ impl View3DShading {
             "type" => Field::Value(Value::Enum(self.r#type.clone())),
             "light" => Field::Value(Value::Enum(self.light.clone())),
             "show_object_outline" => Field::Value(Value::Bool(self.show_object_outline)),
-            "studio_light" => Field::Value(Value::Enum(self.studio_light.clone())),
+            "studio_light" => Field::NeedsHook,
             "use_world_space_lighting" => Field::Value(Value::Bool(self.use_world_space_lighting)),
             "show_backface_culling" => Field::Value(Value::Bool(self.show_backface_culling)),
             "show_cavity" => Field::Value(Value::Bool(self.show_cavity)),
@@ -193,7 +199,7 @@ impl View3DShading {
             "type" => self.r#type = FromValue::from_value(&v),
             "light" => self.light = FromValue::from_value(&v),
             "show_object_outline" => self.show_object_outline = FromValue::from_value(&v),
-            "studio_light" => self.studio_light = FromValue::from_value(&v),
+            "studio_light" => return Some(Ok(SetOutcome::NeedsHook)),
             "use_world_space_lighting" => self.use_world_space_lighting = FromValue::from_value(&v),
             "show_backface_culling" => self.show_backface_culling = FromValue::from_value(&v),
             "show_cavity" => self.show_cavity = FromValue::from_value(&v),

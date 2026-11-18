@@ -1,0 +1,27 @@
+basic_bright.exr diffuse specular
+basic_dark.exr diffuse specular
+basic_grey.exr diffuse specular
+basic_side.exr diffuse specular
+brush_thumbnail_preview.exr diffuse specular
+ceramic_dark.exr diffuse specular
+ceramic_lightbulb.exr diffuse specular
+check_gradient.exr diffuse specular
+check_normal+y.exr diffuse
+check_reflection_horizontal.exr diffuse specular
+check_reflection_vertical.exr diffuse specular
+check_rim_dark.exr diffuse specular
+check_rim_light.exr diffuse specular
+clay_brown.exr diffuse specular
+clay_green.exr diffuse specular
+clay_studio.exr diffuse specular
+clay_warm.exr diffuse specular
+fullmetal.exr diffuse specular
+hard_surface_grey.exr diffuse specular
+hard_surface_red.exr diffuse specular
+metal_bronze.exr diffuse specular
+metal_carpaint.exr diffuse specular
+pearl.exr diffuse specular
+red_wax.exr diffuse specular
+resin.exr diffuse specular
+toon_dark.exr diffuse specular
+toon_light.exr diffuse specular

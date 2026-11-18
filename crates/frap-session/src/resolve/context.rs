@@ -11,7 +11,7 @@ use super::Target;
 use super::access::id_srna;
 use crate::errors::*;
 
-mod ui;
+pub(crate) mod ui;
 
 fn id_target(host: &dyn HostRead, id: Option<IdAny>) -> Result<Target, FrapError> {
     match id {
@@ -126,9 +126,9 @@ pub fn member(host: &dyn HostRead, prop: &'static PropDef) -> Result<Member, Fra
         "engine" => {
             return Ok(Member::Value(Value::Str(ctx.scene().render.engine.clone())));
         }
-        // UI members of the virtual 3D View (§8: `space_data` stub with `shading` and
-        // `region_3d`, read-only `preferences`), WP 2.3 (`context/ui.rs`).
-        "space_data" | "preferences" | "area" | "region" | "region_data" | "screen" => {
+        // UI members of the virtual 3D View (§8: `window` stub, `space_data` stub with
+        // `shading` and `region_3d`, read-only `preferences`), WP 2.3 (`context/ui.rs`).
+        "window" | "space_data" | "preferences" | "area" | "region" | "region_data" | "screen" => {
             return ui::member(host, prop).map_err(|e| {
                 if e.code == NOT_IMPLEMENTED {
                     not_yet(prop.identifier)

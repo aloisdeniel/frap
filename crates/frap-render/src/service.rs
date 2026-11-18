@@ -2,7 +2,7 @@
 //! `RenderService` implementation (§19.1): the device is created lazily on the first render.
 
 use frap_render_scene::{
-    AdapterSummary, Film, GpuOptions, RenderError, RenderScene, RenderService,
+    AdapterSummary, Film, GpuOptions, RenderError, RenderScene, RenderService, SheetLayout,
 };
 
 use crate::engine::{Engine, GpuCache};
@@ -64,7 +64,7 @@ impl RenderService for Renderer {
         frap_math::budget::check_now();
         self.gpu()?;
         let gpu = self.gpu.as_ref().expect("invariant: created above");
-        // M1: every engine renders with Workbench. `render.render` reports the EEVEE/CYCLES
+        // Every engine renders with Workbench until M5. `render.render` reports the EEVEE/CYCLES
         // fallback WARNING (WP 1.24); the EEVEE-like engine arrives in M5.
         let engine: &mut dyn Engine = &mut self.workbench;
         // wgpu reports validation and allocation failures to an error scope instead of the
@@ -82,6 +82,14 @@ impl RenderService for Renderer {
     }
     fn render_tiles(&mut self, scenes: &[RenderScene]) -> Result<Vec<Film>, RenderError> {
         scenes.iter().map(|s| self.render(s)).collect()
+    }
+    fn composite_sheet(
+        &mut self,
+        films: &[Film],
+        layout: &SheetLayout,
+    ) -> Result<Film, RenderError> {
+        // CPU only: no device is needed (§19.6).
+        crate::composite::composite(films, layout)
     }
     fn adapter_info(&self) -> AdapterSummary {
         self.gpu.as_ref().map(Gpu::summary).unwrap_or_default()

@@ -16,6 +16,11 @@ use glam::{Mat4, Vec3};
 
 const BG: [f32; 3] = [0.050876, 0.050876, 0.050876];
 
+/// Tolerance of colours that went through Blender's half-float colour and accumulation targets
+/// (rounded toward zero, as on the Apple GPUs of the references; WP 2.3): the 8-sample alpha
+/// of an opaque pixel is 0.998046875, as in Blender.
+const HALF: f32 = 2e-3;
+
 fn close(a: &[f32], b: &[f32], tol: f32) -> bool {
     a.iter().zip(b).all(|(x, y)| (x - y).abs() <= tol)
 }
@@ -56,15 +61,15 @@ fn service_renders_solid_studio_material() {
     // Corners: the factory world colour, opaque.
     for (x, y) in [(0, 0), (95, 0), (0, 63), (95, 63)] {
         let p = px(&film, x, y);
-        assert!(close(&p, &[BG[0], BG[1], BG[2], 1.0], 1e-6), "{p:?}");
+        assert!(close(&p, &[BG[0], BG[1], BG[2], 1.0], HALF), "{p:?}");
     }
     // Centre: the red cube, lit (neither the flat base colour nor black).
     let c = centre(&film);
-    assert_eq!(c[3], 1.0);
+    assert!((c[3] - 1.0).abs() < HALF, "{c:?}");
     assert!(c[0] > c[1] * 3.0 && c[0] > 0.05, "{c:?}");
     assert!(!close(&c[..3], &[0.8, 0.1, 0.1], 1e-3), "{c:?}");
     // Every pixel is opaque without film_transparent.
-    assert!(film.rgba.iter().all(|p| (p[3] - 1.0).abs() < 1e-6));
+    assert!(film.rgba.iter().all(|p| (p[3] - 1.0).abs() < HALF));
 }
 
 #[test]
@@ -85,7 +90,7 @@ fn flat_lighting_reproduces_each_colour_source_exactly() {
         let Some(f) = render(&scene) else { return };
         let c = centre(&f);
         assert!(
-            close(&c, &[want[0], want[1], want[2], 1.0], 1e-6),
+            close(&c, &[want[0], want[1], want[2], 1.0], HALF),
             "{ct}: {c:?} != {want:?}"
         );
     }
@@ -93,7 +98,7 @@ fn flat_lighting_reproduces_each_colour_source_exactly() {
     scene.settings.shading_color_type = "MATERIAL".into();
     scene.objects[0].materials = vec![None];
     let Some(f) = render(&scene) else { return };
-    assert!(close(&centre(&f), &[0.8, 0.8, 0.8, 1.0], 1e-6));
+    assert!(close(&centre(&f), &[0.8, 0.8, 0.8, 1.0], HALF));
 }
 
 #[test]
@@ -113,8 +118,8 @@ fn material_slots_draw_their_own_colours() {
     let mut seen_red = false;
     let mut seen_blue = false;
     for p in &f.rgba {
-        seen_red |= close(p, &[0.8, 0.1, 0.1, 1.0], 1e-6);
-        seen_blue |= close(p, &[0.1, 0.2, 0.9, 1.0], 1e-6);
+        seen_red |= close(p, &[0.8, 0.1, 0.1, 1.0], HALF);
+        seen_blue |= close(p, &[0.1, 0.2, 0.9, 1.0], HALF);
     }
     assert!(seen_red && seen_blue);
 }
@@ -130,20 +135,24 @@ fn background_and_film_transparent() {
         strength: 4.0,
     };
     let Some(opaque) = render(&scene) else { return };
-    assert!(close(&px(&opaque, 0, 0), &[0.3, 0.2, 0.1, 1.0], 1e-6));
+    assert!(close(&px(&opaque, 0, 0), &[0.3, 0.2, 0.1, 1.0], HALF));
 
     scene.settings.film_transparent = true;
     let Some(f) = render(&scene) else { return };
     assert_eq!(px(&f, 0, 0), [0.0; 4]);
-    assert!(close(&centre(&f), &[0.25, 0.5, 0.75, 1.0], 1e-6));
-    // Anti-aliased silhouette: partial coverage in straight alpha keeps the surface colour.
-    let edges: Vec<_> = f.rgba.iter().filter(|p| p[3] > 0.0 && p[3] < 1.0).collect();
+    assert!(close(&centre(&f), &[0.25, 0.5, 0.75, 1.0], HALF));
+    // Anti-aliased silhouette: Blender filters the premultiplied samples with Blackman-Harris
+    // weights in log2(c + 1) space (WP 2.3), so partially covered pixels keep the surface hue
+    // and never get brighter than the surface.
+    let edges: Vec<_> = f
+        .rgba
+        .iter()
+        .filter(|p| p[3] > 0.01 && p[3] < 0.99)
+        .collect();
     assert!(!edges.is_empty(), "no partially covered pixel");
     for p in edges {
-        assert!(close(&p[..3], &[0.25, 0.5, 0.75], 1e-5), "{p:?}");
-        // 8 samples, each fully in or out: coverage is a multiple of 1/8.
-        let k = p[3] * 8.0;
-        assert!((k - k.round()).abs() < 1e-5, "{p:?}");
+        assert!(p[0] < p[1] && p[1] < p[2], "{p:?}");
+        assert!(p[2] <= 0.75 + HALF, "{p:?}");
     }
 }
 
@@ -162,28 +171,33 @@ fn renders_above_256_mib_of_rgba32float() {
     let f = r.expect("render above 16.7 Mpx");
     assert_eq!((f.width, f.height, f.rgba.len()), (w, h, (w * h) as usize));
     for (x, y) in [(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)] {
-        assert!(close(&px(&f, x, y), &[BG[0], BG[1], BG[2], 1.0], 1e-6));
+        assert!(close(&px(&f, x, y), &[BG[0], BG[1], BG[2], 1.0], HALF));
     }
-    assert!(close(&centre(&f), &[0.25, 0.5, 0.75, 1.0], 1e-6));
+    assert!(close(&centre(&f), &[0.25, 0.5, 0.75, 1.0], HALF));
 }
 
 #[test]
 fn rgba32float_accumulation_keeps_full_precision() {
-    // 64 samples of a colour that is not representable in f16: an Rgba16Float accumulator
-    // drifts by > 1e-4 here, Rgba32Float stays within float rounding.
+    // 32 samples (render_aa = 32, the most Blender offers) of a colour that is not
+    // representable in f16. The accumulator is an
+    // Rgba32Float texture, but since WP 2.3 it holds the half-float values Blender's
+    // `SFLOAT_16_16_16_16` accumulation target holds, so the result is within half-float error.
     let mut scene = cube_scene(32, 32);
     scene.settings.shading_light = "FLAT".into();
     scene.settings.shading_color_type = "SINGLE".into();
     scene.settings.shading_single_color = [0.123_457, 0.987_654, 0.333_333];
-    let Some(f) = render_with(64, &scene) else {
+    let Some(f) = render_with(32, &scene) else {
         return;
     };
     let f = f.unwrap();
     let c = centre(&f);
     assert!(
-        close(&c, &[0.123_457, 0.987_654, 0.333_333, 1.0], 2e-6),
+        close(&c[..3], &[0.123_457, 0.987_654, 0.333_333], HALF),
         "{c:?}"
     );
+    // Blender 5.2.4 (Metal) gives this alpha to every opaque pixel at 32 samples: its
+    // half-float accumulator truncates.
+    assert_eq!(c[3], 0.993_164_06, "{c:?}");
 }
 
 #[test]
@@ -208,7 +222,7 @@ fn studio_lighting_shades_and_specular_varies() {
         .collect();
     let (mut lo, mut hi) = (f32::MAX, f32::MIN);
     for &(x, y) in &inside {
-        assert!(close(&px(&flat, x, y), &[0.8, 0.8, 0.8, 1.0], 1e-6));
+        assert!(close(&px(&flat, x, y), &[0.8, 0.8, 0.8, 1.0], HALF));
         let l = lum(px(&studio, x, y));
         lo = lo.min(l);
         hi = hi.max(l);
@@ -257,8 +271,8 @@ fn odd_width_readback_is_unpadded_and_symmetric() {
             assert!(close(&l, &r, 1e-6), "row {y}: {x} {l:?} vs {r:?}");
         }
     }
-    assert!(close(&centre(&f), &[0.8, 0.1, 0.1, 1.0], 1e-6));
-    assert!(close(&px(&f, 0, h / 2), &[BG[0], BG[1], BG[2], 1.0], 1e-6));
+    assert!(close(&centre(&f), &[0.8, 0.1, 0.1, 1.0], HALF));
+    assert!(close(&px(&f, 0, h / 2), &[BG[0], BG[1], BG[2], 1.0], HALF));
 }
 
 #[test]
@@ -368,7 +382,7 @@ fn invalid_scenes_are_errors_not_panics() {
     assert!(
         f.rgba
             .iter()
-            .all(|p| close(p, &[BG[0], BG[1], BG[2], 1.0], 1e-6))
+            .all(|p| close(p, &[BG[0], BG[1], BG[2], 1.0], HALF))
     );
 }
 
