@@ -757,4 +757,82 @@ mod tests {
             matches!(bevel(&mut bm, &custom), Err(BmError::Invalid(m)) if m.contains("CUSTOM"))
         );
     }
+
+    /// Random selections and parameters on several meshes: no panic and a valid BMesh (golden
+    /// cases check the geometry against Blender).
+    #[test]
+    fn random_bevels_keep_the_mesh_valid() {
+        use frap_mesh::primitives::cylinder::{Cylinder, cylinder};
+        use frap_mesh::primitives::grid::{Grid, grid};
+        use frap_mesh::primitives::monkey::{Monkey, monkey};
+        let meshes = [
+            cube_mesh(&Cube::default()),
+            monkey(&Monkey::default()),
+            cylinder(&Cylinder::default()),
+            grid(&Grid {
+                x_subdivisions: 4,
+                y_subdivisions: 3,
+                ..Grid::default()
+            }),
+        ];
+        let mut seed = 0x2545_f491_4f6c_dd1du64;
+        let mut rnd = move |n: u64| {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            seed % n
+        };
+        const OFFSET_TYPES: [&str; 5] = ["OFFSET", "WIDTH", "DEPTH", "PERCENT", "ABSOLUTE"];
+        const MITERS: [&str; 3] = ["SHARP", "PATCH", "ARC"];
+        for iter in 0..120 {
+            let me = &meshes[iter % meshes.len()];
+            let mut bm = BMesh::from_mesh(me, &FromMeshParams::default());
+            let vertices = rnd(4) == 0;
+            let mut geom = Vec::new();
+            if vertices {
+                for v in bm.vert_ids() {
+                    if rnd(5) == 0 {
+                        geom.push(BMElem::Vert(v));
+                    }
+                }
+            } else {
+                for e in bm.edge_ids() {
+                    if rnd(4) == 0 {
+                        let [a, b] = bm.edge(e).v;
+                        geom.extend([BMElem::Vert(a), BMElem::Vert(b), BMElem::Edge(e)]);
+                    }
+                }
+            }
+            let offset_type = OFFSET_TYPES[rnd(5) as usize];
+            let i = BevelIn {
+                geom,
+                offset: if offset_type == "PERCENT" {
+                    5.0 + rnd(60) as f32
+                } else {
+                    0.01 + rnd(30) as f32 / 100.0
+                },
+                offset_type,
+                segments: 1 + rnd(6) as i32,
+                profile: [0.0, 0.15, 0.5, 0.8, 1.0][rnd(5) as usize],
+                affect: if vertices { "VERTICES" } else { "EDGES" },
+                clamp_overlap: rnd(2) == 0,
+                material: -1,
+                loop_slide: rnd(3) != 0,
+                mark_seam: rnd(2) == 0,
+                mark_sharp: rnd(2) == 0,
+                miter_outer: MITERS[rnd(3) as usize],
+                miter_inner: ["SHARP", "ARC"][rnd(2) as usize],
+                spread: 0.05,
+                vmesh_method: ["ADJ", "CUTOFF"][rnd(2) as usize],
+                ..BevelIn::default()
+            };
+            let out = bevel(&mut bm, &i).unwrap_or_else(|e| panic!("iteration {iter}: {e}"));
+            let problems = bm.validate();
+            assert!(problems.is_empty(), "iteration {iter} ({i:?}): {problems:?}");
+            // Every output element is alive and tagged as Blender's output slots are.
+            for g in out.geom {
+                assert!(bm.elem_alive(g) && bm.elem_flag(g).contains(ElemFlag::TAG));
+            }
+        }
+    }
 }
