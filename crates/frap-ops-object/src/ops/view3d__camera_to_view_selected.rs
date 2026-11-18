@@ -20,6 +20,15 @@
 //!   `BKE_object_foreach_display_point`: every vertex of the evaluated mesh of each selected
 //!   visible object, in world space (objects without geometry, such as empties, cameras and
 //!   lights, contribute nothing);
+//! - `blenkernel/intern/mesh_wrapper.cc` `BKE_mesh_wrapper_vert_coords` and
+//!   `mesh_data_update.cc` `editbmesh_calc_modifiers`: a mesh in Edit Mode evaluates to the
+//!   `ME_WRAPPER_TYPE_BMESH` wrapper of the edit BMesh, whose display points are
+//!   `edit_data->vert_positions`, empty until a modifier enabled in Edit Mode writes them (a
+//!   deform modifier with `deform_verts_EM`) or converts the wrapper to mesh data (any other
+//!   modifier). So an object whose mesh is in Edit Mode adds no point unless at least one of
+//!   its modifiers ran in Edit Mode (`show_viewport` and `show_in_editmode`): entering Edit
+//!   Mode on the factory cube and fitting is `CANCELLED` (verified against 5.2.4, golden
+//!   `camera_fit_editmode.py`);
 //! - `blenlib` `planes_from_projmat`, `isect_plane_plane_v3`, `isect_line_line_epsilon_v3`,
 //!   `plane_from_point_normal_v3`, `normalize_v3`, `project_v3_v3v3`, `perspective_m4`,
 //!   `orthographic_m4`.
@@ -29,9 +38,9 @@
 
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_rna::{CameraId, IdRef, LightId, ObjectId};
+use frap_rna::{CameraId, IdRef, LightId, MeshId, ObjectId};
 use frap_scene::id::transform::{parent_world_matrix, world_matrix};
-use frap_scene::{Context, Main};
+use frap_scene::{Context, EvaluatedObject, Main, ModifierStatus};
 use frap_spec_ops_object::view3d;
 use glam::{Mat3, Mat4, Vec3, Vec4};
 
@@ -403,6 +412,30 @@ fn transform_point(m: &Mat4, v: V3) -> V3 {
     std::array::from_fn(|i| c[0][i] * v[0] + c[1][i] * v[1] + c[2][i] * v[2] + c[3][i])
 }
 
+/// Whether the mesh of `ob` is in Edit Mode (its evaluation starts from the edit BMesh, as
+/// `BKE_object_is_in_editmode` for every object sharing that mesh).
+fn mesh_in_edit_mode(cx: &mut OpCtx, ob: IdRef<ObjectId>) -> bool {
+    let (c, edit) = cx.split_edit();
+    c.main
+        .objects
+        .get(ob)
+        .and_then(|o| o.data)
+        .and_then(|d| d.typed::<MeshId>())
+        .is_some_and(|me| edit.meshes.contains_key(&me.key()))
+}
+
+/// `BKE_mesh_wrapper_vert_coords` of an edit-mode evaluated mesh: the plain BMesh wrapper
+/// (`edit_data->vert_positions` empty) has no points; it gains them once a modifier ran in Edit
+/// Mode (deformed positions or mesh data). Skipped and disabled modifiers do not count.
+fn edit_wrapper_has_points(ev: &EvaluatedObject) -> bool {
+    ev.modifier_status.iter().any(|(_, s)| {
+        matches!(
+            s,
+            ModifierStatus::Evaluated | ModifierStatus::PassedThrough | ModifierStatus::Error(_)
+        )
+    })
+}
+
 #[operator(poll = poll::SCENE_EDITABLE, tier = T1)]
 fn exec(cx: &mut OpCtx, _p: view3d::CameraToViewSelected) -> OpResult {
     let (camera, selected, res) = {
@@ -430,7 +463,11 @@ fn exec(cx: &mut OpCtx, _p: view3d::CameraToViewSelected) -> OpResult {
 
     // BKE_scene_foreach_display_point over the selected visible objects.
     for ob in selected {
+        let in_edit_mode = mesh_in_edit_mode(cx, ob);
         let ev = cx.evaluated(ob)?;
+        if in_edit_mode && !edit_wrapper_has_points(&ev) {
+            continue;
+        }
         if let Some(mesh) = &ev.mesh {
             for co in mesh.positions() {
                 data.add_point(transform_point(&ev.matrix_world, *co));
@@ -485,6 +522,30 @@ mod tests {
             isect_line_line([0.0; 3], [1.0, 0.0, 0.0], [0.0, 0.0, 1.0], [0.0, 1.0, 1.0]).unwrap();
         assert_eq!(a, [0.0, 0.0, 0.0]);
         assert_eq!(b, [0.0, 0.0, 1.0]);
+    }
+
+    #[test]
+    fn edit_mode_wrapper_points_need_a_modifier_run_in_edit_mode() {
+        let ev = |st: Vec<ModifierStatus>| EvaluatedObject {
+            matrix_world: Mat4::IDENTITY,
+            mesh: None,
+            bounds: None,
+            pose: None,
+            modifier_status: st.into_iter().map(|s| ("M".into(), s)).collect(),
+            warnings: Vec::new(),
+        };
+        // No modifier, or only skipped / disabled ones: the plain BMesh wrapper, no points.
+        assert!(!edit_wrapper_has_points(&ev(vec![])));
+        assert!(!edit_wrapper_has_points(&ev(vec![
+            ModifierStatus::Skipped,
+            ModifierStatus::Disabled("no operand".into()),
+        ])));
+        // A modifier that ran in Edit Mode gives mesh data (or deformed edit positions).
+        assert!(edit_wrapper_has_points(&ev(vec![
+            ModifierStatus::Skipped,
+            ModifierStatus::Evaluated,
+        ])));
+        assert!(edit_wrapper_has_points(&ev(vec![ModifierStatus::PassedThrough])));
     }
 
     #[test]

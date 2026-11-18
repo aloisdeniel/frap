@@ -10,7 +10,10 @@
 //! - LIGHT objects are kept by the vtree filter only with `export_lights` (default False);
 //! - `POINT` → `point`, `SUN` → `directional`, `SPOT` → `spot`; an `AREA` light keeps its
 //!   node (with the camera/light correction) but gets no light, with the WARNING
-//!   `Unsupported light source AREA`;
+//!   `Unsupported light source AREA` once per distinct (light datablock, world matrix), as
+//!   the add-on's `@cached gather_lights_punctual(blender_lamp, world_matrix, …)` logs it
+//!   (two AREA objects warn twice, even when they share their data, unless they also share
+//!   their world matrix);
 //! - `color` = `Light.color`, times `temperature_color` with `use_temperature` (always
 //!   written, even white; it may exceed 1 as in Blender);
 //! - `intensity` from `energy` (W), times `Light.area(matrix_world)` when `normalize` is off,
@@ -36,7 +39,7 @@ use frap_gltf::ext::khr_lights_punctual::{
 };
 use frap_gltf::json::{Extension, Index, Node};
 use frap_math::glam::Mat4;
-use frap_rna::LightId;
+use frap_rna::{IdRef, LightId, Report, ReportType};
 use frap_scene::id::{Light, Object};
 use frap_spec_ops_io::export_scene::gltf::ExportImportConvertLightingMode as Mode;
 
@@ -120,6 +123,11 @@ pub fn light_to_gltf(la: &Light, matrix_world: &Mat4, mode: Mode) -> Result<GLig
     })
 }
 
+/// The `(light, world matrix)` keys already gathered (the add-on's `@cached` key of
+/// `gather_lights_punctual`); an unsupported light warns once per key.
+#[derive(Default)]
+struct GatheredLights(Vec<(IdRef<LightId>, [u32; 16])>);
+
 /// Adds the node's `KHR_lights_punctual` reference (and the light to the root extension) for a
 /// LIGHT object; nothing for other objects (and only a WARNING for an AREA light).
 pub fn apply(g: &mut Gather, ob: &Object, node: &mut Node) -> Result<(), ExportError> {
@@ -127,18 +135,25 @@ pub fn apply(g: &mut Gather, ob: &Object, node: &mut Node) -> Result<(), ExportE
         return Ok(());
     }
     let main = g.main;
-    let Some(la) = ob
+    let Some((la_ref, la)) = ob
         .data
         .and_then(|d| d.typed::<LightId>())
-        .and_then(|r| main.lights.get(r))
+        .and_then(|r| Some((r, main.lights.get(r)?)))
     else {
         return Ok(());
     };
     let mode = g.settings.props.export_import_convert_lighting_mode.value;
-    let light = match light_to_gltf(la, &matrix_world(main, ob), mode) {
+    let world = matrix_world(main, ob);
+    let light = match light_to_gltf(la, &world, mode) {
         Ok(l) => l,
         Err(msg) => {
-            g.warn(msg);
+            // `world_matrix.copy().freeze()` hashes by value (`-0.0` equals `0.0`).
+            let key = (la_ref, world.to_cols_array().map(|v| (v + 0.0).to_bits()));
+            let seen = &mut g.state::<GatheredLights>().0;
+            if !seen.contains(&key) {
+                seen.push(key);
+                g.reports.push(Report::new(ReportType::Warning, msg));
+            }
             return Ok(());
         }
     };
@@ -209,6 +224,45 @@ mod tests {
         assert_eq!(out.reports.len(), 1);
         assert_eq!(out.reports[0].message, "Unsupported light source AREA");
         assert_eq!(out.reports[0].level, frap_rna::ReportType::Warning);
+    }
+
+    // Blender 5.2.4 logs the WARNING once per `(light, matrix_world)`: two AREA objects with
+    // the same data and transform warn once, a third one elsewhere warns again.
+    #[test]
+    fn area_light_warns_once_per_light_and_world_matrix() {
+        let (mut main, win) = frap_scene::startup::factory();
+        let mut log = frap_scene::ChangeLog::default();
+        let la = main.lights.find("Light").unwrap();
+        main.lights.get_mut(la, &mut log).unwrap().r#type = "AREA".into();
+        let src = main.objects.find("Light").unwrap();
+        let coll = main.collections.find("Collection").unwrap();
+        for (name, loc) in [("L2", None), ("L3", Some([1.0, 2.0, 3.0]))] {
+            let mut ob = main.objects.get(src).unwrap().clone();
+            ob.header = Object::new(name, ob.data).header;
+            if let Some(l) = loc {
+                ob.location = l;
+            }
+            let r = main.objects.insert(name, ob, &mut log);
+            main.collections
+                .get_mut(coll, &mut log)
+                .unwrap()
+                .objects
+                .push(r);
+        }
+        frap_scene::id::layers::sync_all(&mut main, &mut log);
+        let prefs = frap_scene::Preferences::default();
+        let ctx = frap_scene::Context {
+            main: &main,
+            win: &win,
+            prefs: &prefs,
+        };
+        let mut p = crate::export::settings::default_props();
+        p.export_lights.value = true;
+        let s = ExportSettings::from_props(&p);
+        let out = crate::export::export(&main, &ctx, &s).unwrap();
+        assert_eq!(out.document.nodes.len(), 4);
+        let warnings: Vec<_> = out.reports.iter().map(|r| r.message.as_str()).collect();
+        assert_eq!(warnings, ["Unsupported light source AREA"; 2]);
     }
 
     #[test]
