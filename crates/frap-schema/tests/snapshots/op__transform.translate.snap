@@ -1006,7 +1006,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T0",
     "support": "partial",
-    "support_note": "object mode only (edit mode M2, pose mode M6); texture_space, translate_origin and the Affect Only Origins/Parents tool settings are not implemented; snapping options change nothing (as in a non-interactive Blender call)",
+    "support_note": "Object Mode and mesh Edit Mode (pose mode M6); texture_space, translate_origin and the Affect Only Origins/Parents tool settings are not implemented; snapping options change nothing (as in a non-interactive Blender call)",
     "headless": "native",
     "planned": "M1",
     "extension": false,

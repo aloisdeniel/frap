@@ -60,12 +60,7 @@ fn interp_id(i: mesh::bridge_edge_loops::Interpolation) -> &'static str {
 
 #[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::BridgeEdgeLoops) -> OpResult {
-    edbm::with_deps(
-        cx,
-        "mesh.bridge_edge_loops",
-        "bmesh.ops.weld_verts (WP 2.7), bmesh.ops.triangulate (WP 2.10) or bmesh.ops.subdivide_edgering (WP 2.6)",
-        move |cx| run(cx, p),
-    )
+    run(cx, p)
 }
 
 fn run(cx: &mut OpCtx, p: mesh::BridgeEdgeLoops) -> OpResult {

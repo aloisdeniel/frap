@@ -27,7 +27,7 @@ static ROTATE: OperatorDef = OperatorDef {
     dyn_enums: &[],
     tier: Tier::T0,
     support: Support::Partial(
-        "object mode only (edit mode M2, pose mode M6); the Affect Only Origins/Parents tool \
+        "Object Mode and mesh Edit Mode (pose mode M6); the Affect Only Origins/Parents tool \
          settings are not implemented; snapping options change nothing (as in a non-interactive \
          Blender call)",
     ),

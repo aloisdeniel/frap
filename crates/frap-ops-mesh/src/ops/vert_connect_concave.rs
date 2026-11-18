@@ -16,12 +16,7 @@ use super::edge_face_add::edbm;
 
 #[operator(poll = poll::EDITMESH, tier = T2)]
 fn exec(cx: &mut OpCtx, p: mesh::VertConnectConcave) -> OpResult {
-    edbm::with_deps(
-        cx,
-        "mesh.vert_connect_concave",
-        "bmesh.ops.triangulate (WP 2.10)",
-        move |cx| run(cx, p),
-    )
+    run(cx, p)
 }
 
 fn run(cx: &mut OpCtx, _p: mesh::VertConnectConcave) -> OpResult {

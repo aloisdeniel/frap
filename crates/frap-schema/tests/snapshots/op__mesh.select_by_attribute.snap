@@ -32,7 +32,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "planned": "M2",
     "extension": false,
     "notes": [
-      "selects by the mesh's active BOOLEAN attribute; frap keeps no active attribute yet (mesh.attributes.active, WP 2.9), so the poll fails with 'There must be an active attribute'"
+      "selects by the mesh's active BOOLEAN attribute (mesh.attributes.active); set it in Object Mode before entering Edit Mode"
     ]
   }
 }

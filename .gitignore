@@ -9,3 +9,6 @@
 /fuzz/corpus/
 /fuzz/artifacts/
 /fuzz/coverage/
+# Python bytecode (tools/blender)
+__pycache__/
+*.pyc

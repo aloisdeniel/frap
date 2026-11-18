@@ -41,7 +41,8 @@ else:
 #   runner:     this file changes how Blender runs the case;
 #   dumper:     dump_state.py / the frap dumper encode or skip something;
 #   comparator: a frap-golden comparator ignores or normalises something;
-#   cases:      golden cases are written so that the deviation never shows.
+#   cases:      golden cases are written so that the deviation never shows;
+#   fixtures:   fixtures are blessed so that the deviation never shows (platform, build).
 NORMALISE = {
     "D-01": None,
     "D-02": None,
@@ -112,6 +113,27 @@ NORMALISE = {
     "D-61": ("cases", "cases do not read bpy.context.screen/area/region"),
     "D-62": ("cases", "cases do not compare the repr of space_data"),
     "D-63": ("cases", "cases do not assign unknown studio_light names"),
+    "D-64": ("cases", "cases that call select_linked() without delimit never pass an explicit delimit earlier in the same Blender process (the defaults agree then)"),
+    "D-65": ("comparator", "the affected cases (16 under edit/extrude/) compare meshes with order=canonical"),
+    "D-66": ("cases", "cases do not connect loose edges that touch the edges of more than one face"),
+    "D-67": ("fixtures", "fixtures are blessed with Blender on macOS"),
+    "D-68": None,
+    "D-69": None,
+    "D-70": None,
+    "D-71": None,
+    "D-72": ("cases", "cases do not read attributes.active* after removing attributes past the active index"),
+    "D-73": None,
+    "D-74": ("cases", "cases set attributes.active before attribute_convert"),
+    "D-75": ("cases", "cases do not read attributes.active in Edit Mode after activating a flag attribute"),
+    "D-76": ("cases", "cases read active_index in Object Mode only"),
+    "D-77": ("comparator", "n-gon triangulation cases of regular n-gons compare at T2 (canonical order)"),
+    "D-78": ("cases", "cases do not pass invalid enum values to operators whose poll fails"),
+    "D-79": ("cases", "cases do not set harden_normals or Auto Merge with bevel"),
+    "D-80": ("comparator", "the two-bevel cases compare at T2 (canonical order)"),
+    "D-81": None,
+    "D-82": None,
+    "D-83": ("cases", "cases pass correct_uv explicitly when an earlier slide in the same scene set it"),
+    "D-84": ("cases", "cases do not call them in Object Mode"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

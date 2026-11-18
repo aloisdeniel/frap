@@ -18,7 +18,8 @@
 //! are folded into the walls.
 //!
 //! Golden: `tests/golden/cases/edit/extrude/macros/manifold.py.pending` (blessed; enabled by
-//! renaming it to `.py` once the transform step works in Edit Mode).
+//! renaming it to `.py` once edit-mode transforms implement `use_automerge_and_split`,
+//! `EDBM_automerge_and_split`).
 
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -29,8 +30,9 @@ use frap_spec_ops_mesh::mesh;
     tier = T1,
     kind = Macro,
     support = Partial(
-        "the TRANSFORM_OT_translate step needs `transform.translate` in Edit Mode (edit-mode transforms, WP 2.12): \
-         until then the macro raises OP_NOT_IMPLEMENTED and nothing changes"
+        "the TRANSFORM_OT_translate step forces use_automerge_and_split=True, which edit-mode \
+         transforms do not implement yet (EDBM_automerge_and_split): the macro raises \
+         OP_NOT_IMPLEMENTED and nothing changes"
     ),
 )]
 fn exec(_cx: &mut OpCtx, _p: mesh::ExtrudeManifold) -> OpResult {

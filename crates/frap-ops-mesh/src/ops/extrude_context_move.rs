@@ -16,8 +16,7 @@
 //! Verified on 5.2.4: two adjacent faces give the same result as `extrude_region_move` (V14 E24
 //! F12).
 //!
-//! Golden: `tests/golden/cases/edit/extrude/macros/context_move.py.pending` (blessed; enabled by
-//! renaming it to `.py` once the transform step works in Edit Mode).
+//! Golden: `tests/golden/cases/edit/extrude/macros/context_move.py`.
 
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -27,10 +26,6 @@ use frap_spec_ops_mesh::mesh;
     poll = poll::EDITMESH,
     tier = T1,
     kind = Macro,
-    support = Partial(
-        "the TRANSFORM_OT_translate step needs `transform.translate` in Edit Mode (edit-mode transforms, WP 2.12): \
-         until then the macro raises OP_NOT_IMPLEMENTED and nothing changes"
-    ),
 )]
 fn exec(_cx: &mut OpCtx, _p: mesh::ExtrudeContextMove) -> OpResult {
     Ok(OpStatus::Finished)

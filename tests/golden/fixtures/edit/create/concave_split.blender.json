@@ -1,0 +1,124 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 3,
+      "ok": true
+    },
+    {
+      "line": 4,
+      "ok": true
+    },
+    {
+      "line": 5,
+      "ok": true
+    },
+    {
+      "line": 6,
+      "ok": true
+    },
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "L": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "EDIT"
+    }
+  },
+  "meshes": {
+    "L": {
+      "positions": [
+        [0.0, 0.0, 0.0],
+        [2.0, 0.0, 0.0],
+        [2.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0],
+        [1.0, 2.0, 0.0],
+        [0.0, 2.0, 0.0]
+      ],
+      "edges": [
+        [0, 5],
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 4],
+        [4, 5],
+        [3, 0]
+      ],
+      "faces": [
+        [0, 3, 4, 5],
+        [1, 2, 3, 0]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0]
+      ],
+      "uv_layers": {},
+      "attributes": {
+        "sharp_face": {
+          "data": [true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": {
+        "edge": [0, 1, 2, 3, 4, 5, 6],
+        "face": [0, 1],
+        "vert": [0, 1, 2, 3, 4, 5]
+      },
+      "active": null,
+      "select_history": []
+    }
+  },
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "L",
+    "selected": [],
+    "mode": "EDIT_MESH",
+    "select_mode": [true, false, false],
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

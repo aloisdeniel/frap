@@ -100,7 +100,10 @@ pub fn split(bm: &mut BMesh, i: &SplitIn) -> Result<SplitOut, BmError> {
             }
         }
         // The outputs are made before the deletion (`boundary_map.out` keys of deleted input
-        // edges become their copies).
+        // edges become their copies), but after `BMO_mesh_delete_oflag_context(DEL_FACES)` has
+        // marked what it deletes: Blender builds the map in the delete's `prepare` callback, so
+        // input edges still used by a face outside the input keep their own key.
+        mark_del_faces(bm, SPLIT_INPUT);
         let boundary_map = dupe
             .boundary_map
             .iter()
@@ -120,4 +123,37 @@ pub fn split(bm: &mut BMesh, i: &SplitIn) -> Result<SplitOut, BmError> {
         bm.delete_oflag_context(SPLIT_INPUT, DeleteContext::Faces);
         Ok(out)
     })
+}
+
+/// The marking passes of `BMO_mesh_delete_oflag_context(bm, oflag, DEL_FACES)` (they run
+/// before its `prepare` callback): the vertices and edges of flagged faces are flagged, those
+/// of unflagged faces and the vertices of unflagged edges are unflagged. Idempotent, so the
+/// delete itself marks the same elements again.
+// Ported from blender/source/blender/bmesh/intern/bmesh_delete.cc (BMO_mesh_delete_oflag_context).
+fn mark_del_faces(bm: &mut BMesh, oflag: u16) {
+    for f in bm.face_ids() {
+        if bm.oflag_test(f, oflag) {
+            for l in bm.face_loops(f) {
+                let (v, e) = (bm.lp(l).v, bm.lp(l).e);
+                bm.oflag_enable(v, oflag);
+                bm.oflag_enable(e, oflag);
+            }
+        }
+    }
+    for f in bm.face_ids() {
+        if !bm.oflag_test(f, oflag) {
+            for l in bm.face_loops(f) {
+                let (v, e) = (bm.lp(l).v, bm.lp(l).e);
+                bm.oflag_disable(v, oflag);
+                bm.oflag_disable(e, oflag);
+            }
+        }
+    }
+    for e in bm.edge_ids() {
+        if !bm.oflag_test(e, oflag) {
+            let [a, b] = bm.edge(e).v;
+            bm.oflag_disable(a, oflag);
+            bm.oflag_disable(b, oflag);
+        }
+    }
 }

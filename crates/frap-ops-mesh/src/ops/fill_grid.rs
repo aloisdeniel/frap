@@ -20,7 +20,7 @@
 use frap_bmesh::ops::bridge_loops::edgeloop;
 use frap_bmesh::ops::contextual_create::{bli, construct};
 use frap_bmesh::ops::grid_fill::{GridFillIn, grid_fill};
-use frap_bmesh::{BMElem, BMesh, BmError, EdgeId, ElemFlag, FaceId, VertId};
+use frap_bmesh::{BMElem, BMesh, BmError, ElemFlag, FaceId, VertId};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;
@@ -177,25 +177,6 @@ fn split_join_init(bm: &mut BMesh) -> Result<Option<SplitJoin>, BmError> {
     geom.extend(bm.vert_ids().into_iter().filter(|&v| bm.vert(v).flag.contains(ElemFlag::TAG)).map(BMElem::Vert));
     geom.extend(bm.edge_ids().into_iter().filter(|&e| bm.edge(e).flag.contains(ElemFlag::TAG)).map(BMElem::Edge));
     geom.extend(bm.face_ids().into_iter().filter(|&f| bm.face(f).flag.contains(ElemFlag::TAG)).map(BMElem::Face));
-    // `boundary_map.out` (source edges used by fewer than two input faces), recovered after
-    // the split by position since the copies keep the vertex order and coordinates.
-    let boundary: Vec<(EdgeId, [f32; 3], [f32; 3])> = bm
-        .edge_ids()
-        .into_iter()
-        .filter(|&e| {
-            bm.edge(e).flag.contains(ElemFlag::TAG)
-                && bm
-                    .edge_faces(e)
-                    .into_iter()
-                    .filter(|&f| bm.face(f).flag.contains(ElemFlag::TAG))
-                    .count()
-                    < 2
-        })
-        .map(|e| {
-            let [a, b] = bm.edge(e).v;
-            (e, bm.vert(a).co, bm.vert(b).co)
-        })
-        .collect();
     let out = frap_bmesh::ops::split::split(
         bm,
         &frap_bmesh::ops::split::SplitIn {
@@ -203,14 +184,6 @@ fn split_join_init(bm: &mut BMesh) -> Result<Option<SplitJoin>, BmError> {
             ..Default::default()
         },
     )?;
-    let new_edges: Vec<EdgeId> = out
-        .geom
-        .iter()
-        .filter_map(|g| match g {
-            BMElem::Edge(e) => Some(*e),
-            _ => None,
-        })
-        .collect();
     let island: Vec<FaceId> = out
         .geom
         .iter()
@@ -220,13 +193,8 @@ fn split_join_init(bm: &mut BMesh) -> Result<Option<SplitJoin>, BmError> {
         })
         .collect();
     let mut weld = Vec::new();
-    for (e, ca, cb) in boundary {
-        let Some(&e_dst) = new_edges.iter().find(|&&n| {
-            let [a, b] = bm.edge(n).v;
-            bm.vert(a).co == ca && bm.vert(b).co == cb
-        }) else {
-            continue;
-        };
+    // `boundary_map.out`: source boundary edge -> its copy (a deleted source maps from its copy).
+    for &(e, e_dst) in &out.boundary_map {
         bm.edge_mut(e_dst).flag.insert(ElemFlag::SELECT);
         if bm.edges.contains(e.0) && e != e_dst {
             bm.edge_mut(e).flag.remove(ElemFlag::SELECT);
@@ -292,12 +260,7 @@ fn split_join_finish(bm: &mut BMesh, sj: SplitJoin, changed: bool) {
 
 #[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::FillGrid) -> OpResult {
-    edbm::with_deps(
-        cx,
-        "mesh.fill_grid",
-        "bmesh.ops.split (WP 2.10), bmesh.ops.reverse_faces (WP 2.9) or bmesh.ops.weld_verts (WP 2.7)",
-        move |cx| run(cx, p),
-    )
+    run(cx, p)
 }
 
 fn run(cx: &mut OpCtx, p: mesh::FillGrid) -> OpResult {

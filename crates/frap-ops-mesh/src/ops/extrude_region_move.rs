@@ -17,8 +17,7 @@
 //! selected and in the history; `exec` translates in `GLOBAL` space unless `orient_type` is given
 //! (the along-the-normal move is the interactive invoke).
 //!
-//! Golden: `tests/golden/cases/edit/extrude/macros/region_move.py.pending` (blessed; enabled by
-//! renaming it to `.py` once the transform step works in Edit Mode).
+//! Golden: `tests/golden/cases/edit/extrude/macros/region_move.py`.
 
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -28,10 +27,6 @@ use frap_spec_ops_mesh::mesh;
     poll = poll::EDITMESH,
     tier = T1,
     kind = Macro,
-    support = Partial(
-        "the TRANSFORM_OT_translate step needs `transform.translate` in Edit Mode (edit-mode transforms, WP 2.12): \
-         until then the macro raises OP_NOT_IMPLEMENTED and nothing changes"
-    ),
 )]
 fn exec(_cx: &mut OpCtx, _p: mesh::ExtrudeRegionMove) -> OpResult {
     Ok(OpStatus::Finished)

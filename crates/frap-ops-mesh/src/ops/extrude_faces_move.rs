@@ -18,8 +18,7 @@
 //! Verified on 5.2.4: two adjacent cube faces give V16 E28 F14, the copies selected, the history
 //! cleared.
 //!
-//! Golden: `tests/golden/cases/edit/extrude/macros/faces_move.py.pending` (blessed; enabled by
-//! renaming it to `.py` once the transform step works in Edit Mode).
+//! Golden: `tests/golden/cases/edit/extrude/macros/faces_move.py`.
 
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -29,10 +28,6 @@ use frap_spec_ops_mesh::mesh;
     poll = poll::EDITMESH,
     tier = T1,
     kind = Macro,
-    support = Partial(
-        "the TRANSFORM_OT_shrink_fatten step needs `transform.shrink_fatten` in Edit Mode (edit-mode transforms, WP 2.12): \
-         until then the macro raises OP_NOT_IMPLEMENTED and nothing changes"
-    ),
 )]
 fn exec(_cx: &mut OpCtx, _p: mesh::ExtrudeFacesMove) -> OpResult {
     Ok(OpStatus::Finished)

@@ -19,12 +19,7 @@ use super::edge_face_add::edbm;
 
 #[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::ConvexHull) -> OpResult {
-    edbm::with_deps(
-        cx,
-        "mesh.convex_hull",
-        "bmesh.ops.join_triangles (WP 2.10)",
-        move |cx| run(cx, p),
-    )
+    run(cx, p)
 }
 
 fn run(cx: &mut OpCtx, p: mesh::ConvexHull) -> OpResult {

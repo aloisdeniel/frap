@@ -11,10 +11,11 @@ AttributeError, and the case author must use a `#@blender` line instead).
 Each emulation returns what the operator would (`{'FINISHED'}` / `{'CANCELLED'}`) and raises
 the exception class Blender would raise for bad input.
 
-Later milestones add entries here (for example the `mesh.loopcut(edge_index=…)` recipe of
-[MESH App. B.7] in M2). Owned by WP 1.8 in M1; in M2 each WP adds the emulation of the frap
-operator or headless-extended operator it implements (`select_elements`: WP 2.2,
-`select_by_normal`: WP 2.4, `loopcut`: WP 2.6), appending to `EMULATED`.
+Owned by WP 1.8 in M1; in M2 each WP adds the emulation of the frap operator or
+headless-extended operator it implements (`select_elements`: WP 2.2, `select_by_normal` and
+`scene_summary`: WP 2.4), appending to `EMULATED`. `mesh.loopcut(edge_index=…)` needs no
+emulation: under the runner's VIEW_3D `temp_override` Blender 5.2.4 runs its exec headless (WP
+2.6), so goldens call it directly instead of the [MESH App. B.7] recipe.
 """
 
 import bpy

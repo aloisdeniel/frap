@@ -26,25 +26,25 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.primitive_monkey_add` | M1 | P0 | depends on licence decision D1 |
 | [x] | `mesh.select_all` | M2 | P0 | prereq (WP 2.2) |
 | [x] | `mesh.select_mode` | M2 | P0 | prereq (WP 2.2); conversion table [MESH §3.3] |
-| [ ] | `mesh.select_linked` | M2 | P0 | default delimit SEAM |
-| [ ] | `mesh.select_more` | M2 | P0 |  |
-| [ ] | `mesh.select_less` | M2 | P0 |  |
-| [ ] | `mesh.select_edge_loop_multi` | M2 | P0 | replaces loop_multi_select |
-| [ ] | `mesh.select_edge_ring_multi` | M2 | P0 |  |
-| [ ] | `mesh.select_non_manifold` | M2 | P1 | VERT/EDGE mode only |
-| [ ] | `mesh.select_loose` | M2 | P1 |  |
-| [ ] | `mesh.select_face_by_sides` | M2 | P1 |  |
-| [ ] | `mesh.select_by_attribute` | M2 | P1 |  |
-| [ ] | `mesh.loop_select` | M2 | P1 | headless-extended: edge_index |
-| [ ] | `mesh.edgering_select` | M2 | P1 | headless-extended: edge_index |
-| [ ] | `mesh.edges_select_sharp` | M2 | P1 |  |
-| [ ] | `mesh.hide` | M2 | P1 |  |
-| [ ] | `mesh.reveal` | M2 | P1 |  |
-| [ ] | `mesh.select_random` | M2 | P2 | BliRng, equal per seed |
-| [ ] | `mesh.faces_select_linked_flat` | M2 | P2 |  |
-| [ ] | `mesh.loop_to_region` | M2 | P2 |  |
-| [ ] | `mesh.region_to_loop` | M2 | P2 |  |
-| [ ] | `mesh.shortest_path_select` | M2 | P2 |  |
+| [x] | `mesh.select_linked` | M2 | P0 | default delimit SEAM; no last-delimit memory (D-64) |
+| [x] | `mesh.select_more` | M2 | P0 |  |
+| [x] | `mesh.select_less` | M2 | P0 |  |
+| [x] | `mesh.select_edge_loop_multi` | M2 | P0 | replaces loop_multi_select |
+| [x] | `mesh.select_edge_ring_multi` | M2 | P0 |  |
+| [x] | `mesh.select_non_manifold` | M2 | P1 | VERT/EDGE mode only |
+| [x] | `mesh.select_loose` | M2 | P1 |  |
+| [x] | `mesh.select_face_by_sides` | M2 | P1 |  |
+| [x] | `mesh.select_by_attribute` | M2 | P1 | active attribute = `mesh.attributes.active` (WP 2.9) |
+| [x] | `mesh.loop_select` | M2 | P1 | headless-extended: edge_index |
+| [x] | `mesh.edgering_select` | M2 | P1 | headless-extended: edge_index |
+| [x] | `mesh.edges_select_sharp` | M2 | P1 |  |
+| [x] | `mesh.hide` | M2 | P1 |  |
+| [x] | `mesh.reveal` | M2 | P1 |  |
+| [x] | `mesh.select_random` | M2 | P2 | BliRng, equal per seed |
+| [x] | `mesh.faces_select_linked_flat` | M2 | P2 |  |
+| [x] | `mesh.loop_to_region` | M2 | P2 |  |
+| [x] | `mesh.region_to_loop` | M2 | P2 |  |
+| [x] | `mesh.shortest_path_select` | M2 | P2 |  |
 | [ ] | `mesh.select_nth` | M8 | P2 | undefined without active element |
 | [ ] | `mesh.select_boundary_loop_multi` | M8 | P2 |  |
 | [ ] | `mesh.select_similar` | M8 | P2 |  |
@@ -58,28 +58,28 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `mesh.select_prev_item` | M8 | P2 |  |
 | [ ] | `mesh.select_linked_pick` | M8 | P2 | headless-extended: index |
 | [ ] | `mesh.shortest_path_pick` | M8 | P2 | headless-extended: index |
-| [ ] | `mesh.extrude_region` | M2 | P0 | T1 |
-| [ ] | `mesh.extrude_region_move` | M2 | P0 | macro; T1 |
-| [ ] | `mesh.extrude_region_shrink_fatten` | M2 | P0 | macro |
-| [ ] | `mesh.extrude_context` | M2 | P0 |  |
-| [ ] | `mesh.extrude_context_move` | M2 | P0 | macro |
-| [ ] | `mesh.extrude_faces_indiv` | M2 | P1 |  |
-| [ ] | `mesh.extrude_faces_move` | M2 | P1 | macro |
-| [ ] | `mesh.extrude_edges_indiv` | M2 | P1 |  |
-| [ ] | `mesh.extrude_edges_move` | M2 | P1 | macro |
-| [ ] | `mesh.extrude_verts_indiv` | M2 | P1 |  |
-| [ ] | `mesh.extrude_vertices_move` | M2 | P1 | macro |
-| [ ] | `mesh.extrude_repeat` | M2 | P2 | offset is a vector in 5.x |
-| [ ] | `mesh.extrude_manifold` | M2 | P2 | macro |
-| [ ] | `mesh.inset` | M2 | P0 | T1 |
-| [ ] | `mesh.bevel` | M2 | P0 | seg 1 T1, N segments T2; offset=0 no-op hint |
-| [ ] | `mesh.subdivide` | M2 | P0 | uniform T1 |
-| [ ] | `mesh.loopcut` | M2 | P0 | headless-extended: edge_index (crashes Blender -b); golden via emulation |
-| [ ] | `mesh.loopcut_slide` | M2 | P0 | macro; headless-extended |
-| [ ] | `mesh.subdivide_edgering` | M2 | P2 |  |
-| [ ] | `mesh.unsubdivide` | M2 | P2 |  |
-| [ ] | `mesh.offset_edge_loops` | M2 | P2 |  |
-| [ ] | `mesh.offset_edge_loops_slide` | M2 | P2 | macro |
+| [x] | `mesh.extrude_region` | M2 | P0 | T1 |
+| [x] | `mesh.extrude_region_move` | M2 | P0 | macro; T1 |
+| [x] | `mesh.extrude_region_shrink_fatten` | M2 | P0 | macro |
+| [x] | `mesh.extrude_context` | M2 | P0 |  |
+| [x] | `mesh.extrude_context_move` | M2 | P0 | macro |
+| [x] | `mesh.extrude_faces_indiv` | M2 | P1 |  |
+| [x] | `mesh.extrude_faces_move` | M2 | P1 | macro |
+| [x] | `mesh.extrude_edges_indiv` | M2 | P1 |  |
+| [x] | `mesh.extrude_edges_move` | M2 | P1 | macro |
+| [x] | `mesh.extrude_verts_indiv` | M2 | P1 |  |
+| [x] | `mesh.extrude_vertices_move` | M2 | P1 | macro |
+| [x] | `mesh.extrude_repeat` | M2 | P2 | offset is a vector in 5.x |
+| [ ] | `mesh.extrude_manifold` | M2 | P2 | macro; partial: the translate step's `use_automerge_and_split` is not implemented in Edit Mode (OP_NOT_IMPLEMENTED), golden `macros/manifold.py.pending` |
+| [x] | `mesh.inset` | M2 | P0 | T1 |
+| [x] | `mesh.bevel` | M2 | P0 | seg 1 T1, N segments T2; offset=0 no-op hint (NO_OP_DEFAULT). Partial: `profile_type='CUSTOM'` OP_NOT_IMPLEMENTED; harden_normals and Auto Merge not applied (WARNING), D-80 |
+| [x] | `mesh.subdivide` | M2 | P0 | uniform T1 |
+| [x] | `mesh.loopcut` | M2 | P0 | headless-extended: object_index/edge_index; Blender -b runs it under the golden runner's VIEW_3D override, so goldens call it directly (WP 2.6) |
+| [x] | `mesh.loopcut_slide` | M2 | P0 | macro; headless-extended (edge_slide step: WP 2.12) |
+| [x] | `mesh.subdivide_edgering` | M2 | P2 |  |
+| [x] | `mesh.unsubdivide` | M2 | P2 |  |
+| [x] | `mesh.offset_edge_loops` | M2 | P2 |  |
+| [x] | `mesh.offset_edge_loops_slide` | M2 | P2 | macro |
 | [x] | `mesh.merge` | M2 | P0 | dynamic enum FIRST/LAST (WP 2.7, T1) |
 | [x] | `mesh.remove_doubles` | M2 | P0 | "Removed N vertex/vertices", `result.removed` (WP 2.7, T1) |
 | [x] | `mesh.delete` | M2 | P0 | type is HIDDEN but essential (WP 2.7, T1) |
@@ -92,48 +92,48 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.delete_edgeloop` | M2 | P2 | WP 2.7, T1 |
 | [x] | `mesh.dissolve_degenerate` | M2 | P2 | WP 2.7, T1 |
 | [x] | `mesh.edge_collapse` | M2 | P2 | WP 2.7, T1 |
-| [ ] | `mesh.edge_face_add` | M2 | P0 | contextual create ("F") |
-| [ ] | `mesh.bridge_edge_loops` | M2 | P1 |  |
-| [ ] | `mesh.fill` | M2 | P1 |  |
-| [ ] | `mesh.fill_grid` | M2 | P1 |  |
-| [ ] | `mesh.vert_connect` | M2 | P1 |  |
-| [ ] | `mesh.vert_connect_path` | M2 | P1 |  |
-| [ ] | `mesh.fill_holes` | M2 | P2 |  |
-| [ ] | `mesh.beautify_fill` | M2 | P2 |  |
-| [ ] | `mesh.vert_connect_concave` | M2 | P2 |  |
-| [ ] | `mesh.vert_connect_nonplanar` | M2 | P2 |  |
-| [ ] | `mesh.face_split_by_edges` | M2 | P2 |  |
-| [ ] | `mesh.edge_rotate` | M2 | P2 |  |
-| [ ] | `mesh.bisect` | M2 | P2 | plane must be explicit headless |
-| [ ] | `mesh.convex_hull` | M2 | P2 |  |
-| [ ] | `mesh.flip_normals` | M2 | P0 | keeps l_first |
-| [ ] | `mesh.normals_make_consistent` | M2 | P0 |  |
-| [ ] | `mesh.faces_shade_smooth` | M2 | P0 |  |
-| [ ] | `mesh.faces_shade_flat` | M2 | P0 |  |
-| [ ] | `mesh.mark_sharp` | M2 | P0 |  |
-| [ ] | `mesh.mark_seam` | M2 | P0 | attribute uv_seam |
-| [ ] | `mesh.set_normals_from_faces` | M2 | P1 | writes custom_normal |
-| [ ] | `mesh.set_sharpness_by_angle` | M2 | P1 | also adds custom_normal (as Blender) |
-| [ ] | `mesh.customdata_custom_splitnormals_add` | M2 | P1 |  |
-| [ ] | `mesh.customdata_custom_splitnormals_clear` | M2 | P1 |  |
-| [ ] | `mesh.attribute_set` | M2 | P1 |  |
-| [ ] | `mesh.uv_texture_add` | M2 | P0 | copies active UV map |
-| [ ] | `mesh.uv_texture_remove` | M2 | P0 |  |
-| [ ] | `mesh.split` | M2 | P1 |  |
-| [ ] | `mesh.edge_split` | M2 | P1 |  |
-| [ ] | `mesh.separate` | M2 | P0 |  |
-| [ ] | `mesh.duplicate` | M2 | P1 |  |
-| [ ] | `mesh.duplicate_move` | M2 | P0 | macro |
-| [ ] | `mesh.spin` | M2 | P1 | axis required headless |
-| [ ] | `mesh.screw` | M2 | P2 |  |
-| [ ] | `mesh.solidify` | M2 | P2 | edit-mode op (not the modifier) |
-| [ ] | `mesh.wireframe` | M2 | P2 |  |
-| [ ] | `mesh.quads_convert_to_tris` | M2 | P1 | FIXED T1, BEAUTY T2 |
-| [ ] | `mesh.tris_convert_to_quads` | M2 | P1 | T2 |
-| [ ] | `mesh.poke` | M2 | P2 | T1 |
-| [ ] | `mesh.flip_quad_tessellation` | M2 | P2 |  |
-| [ ] | `mesh.vertices_smooth` | M2 | P1 | factor=0 default is a no-op |
-| [ ] | `mesh.symmetrize` | M2 | P1 |  |
+| [x] | `mesh.edge_face_add` | M2 | P0 | contextual create ("F") |
+| [x] | `mesh.bridge_edge_loops` | M2 | P1 |  |
+| [x] | `mesh.fill` | M2 | P1 |  |
+| [x] | `mesh.fill_grid` | M2 | P1 |  |
+| [x] | `mesh.vert_connect` | M2 | P1 |  |
+| [x] | `mesh.vert_connect_path` | M2 | P1 |  |
+| [x] | `mesh.fill_holes` | M2 | P2 |  |
+| [x] | `mesh.beautify_fill` | M2 | P2 |  |
+| [x] | `mesh.vert_connect_concave` | M2 | P2 |  |
+| [x] | `mesh.vert_connect_nonplanar` | M2 | P2 |  |
+| [x] | `mesh.face_split_by_edges` | M2 | P2 |  |
+| [x] | `mesh.edge_rotate` | M2 | P2 |  |
+| [x] | `mesh.bisect` | M2 | P2 | plane must be explicit headless |
+| [x] | `mesh.convex_hull` | M2 | P2 |  |
+| [x] | `mesh.flip_normals` | M2 | P0 | keeps l_first |
+| [x] | `mesh.normals_make_consistent` | M2 | P0 |  |
+| [x] | `mesh.faces_shade_smooth` | M2 | P0 |  |
+| [x] | `mesh.faces_shade_flat` | M2 | P0 |  |
+| [x] | `mesh.mark_sharp` | M2 | P0 |  |
+| [x] | `mesh.mark_seam` | M2 | P0 | attribute uv_seam |
+| [x] | `mesh.set_normals_from_faces` | M2 | P1 | writes custom_normal |
+| [x] | `mesh.set_sharpness_by_angle` | M2 | P1 | also adds custom_normal (as Blender) |
+| [x] | `mesh.customdata_custom_splitnormals_add` | M2 | P1 |  |
+| [x] | `mesh.customdata_custom_splitnormals_clear` | M2 | P1 |  |
+| [x] | `mesh.attribute_set` | M2 | P1 |  |
+| [x] | `mesh.uv_texture_add` | M2 | P0 | copies active UV map |
+| [x] | `mesh.uv_texture_remove` | M2 | P0 |  |
+| [x] | `mesh.split` | M2 | P1 |  |
+| [x] | `mesh.edge_split` | M2 | P1 |  |
+| [x] | `mesh.separate` | M2 | P0 | partial: shape keys not carried (M6) |
+| [x] | `mesh.duplicate` | M2 | P1 |  |
+| [x] | `mesh.duplicate_move` | M2 | P0 | macro |
+| [x] | `mesh.spin` | M2 | P1 | axis required headless |
+| [x] | `mesh.screw` | M2 | P2 |  |
+| [x] | `mesh.solidify` | M2 | P2 | edit-mode op (not the modifier) |
+| [x] | `mesh.wireframe` | M2 | P2 |  |
+| [x] | `mesh.quads_convert_to_tris` | M2 | P1 | FIXED T1, BEAUTY T2 |
+| [x] | `mesh.tris_convert_to_quads` | M2 | P1 | T2 |
+| [x] | `mesh.poke` | M2 | P2 | T1 |
+| [x] | `mesh.flip_quad_tessellation` | M2 | P2 |  |
+| [x] | `mesh.vertices_smooth` | M2 | P1 | factor=0 default is a no-op |
+| [x] | `mesh.symmetrize` | M2 | P1 | partial: `use_mesh_automerge` not applied afterwards |
 | [ ] | `mesh.decimate` | M4 | P2 | shares DECIMATE COLLAPSE |
 | [ ] | `mesh.intersect` | M4 | P2 | shares Boolean solver |
 | [ ] | `mesh.intersect_boolean` | M4 | P2 | solver FLOAT/EXACT (5.x renamed FAST) |
@@ -178,14 +178,14 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `geometry.color_attribute_add` | M2 | P0 | name '' -> "Attribute", FLOAT_COLOR POINT; glTF COLOR_0 |
-| [ ] | `geometry.color_attribute_remove` | M2 | P1 |  |
-| [ ] | `geometry.color_attribute_render_set` | M2 | P1 |  |
-| [ ] | `geometry.attribute_add` | M2 | P1 |  |
-| [ ] | `geometry.attribute_remove` | M2 | P1 |  |
-| [ ] | `geometry.attribute_convert` | M2 | P1 |  |
-| [ ] | `geometry.color_attribute_duplicate` | M2 | P2 |  |
-| [ ] | `geometry.color_attribute_convert` | M2 | P2 |  |
+| [x] | `geometry.color_attribute_add` | M2 | P0 | name '' -> "Attribute", FLOAT_COLOR POINT; glTF COLOR_0 |
+| [x] | `geometry.color_attribute_remove` | M2 | P1 |  |
+| [x] | `geometry.color_attribute_render_set` | M2 | P1 |  |
+| [x] | `geometry.attribute_add` | M2 | P1 |  |
+| [x] | `geometry.attribute_remove` | M2 | P1 |  |
+| [x] | `geometry.attribute_convert` | M2 | P1 |  |
+| [x] | `geometry.color_attribute_duplicate` | M2 | P2 |  |
+| [x] | `geometry.color_attribute_convert` | M2 | P2 |  |
 | — | `geometry.geometry_randomization` | OUT | — | debug |
 
 ### `object.*`
@@ -258,9 +258,9 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.material_slot_remove` | M1 | P0 |  |
 | [x] | `object.material_slot_remove_unused` | M1 | P1 |  |
 | [x] | `object.material_slot_remove_all` | M1 | P2 |  |
-| [ ] | `object.material_slot_assign` | M2 | P0 | edit-mode face assignment (object mode: no-op as Blender); WP 2.9 (M2 W0 assignment) |
-| [ ] | `object.material_slot_select` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
-| [ ] | `object.material_slot_deselect` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
+| [x] | `object.material_slot_assign` | M2 | P0 | edit-mode face assignment (object mode: no-op as Blender); WP 2.9 (M2 W0 assignment) |
+| [x] | `object.material_slot_select` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
+| [x] | `object.material_slot_deselect` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
 | [ ] | `object.material_slot_move` | M3 | P2 |  |
 | [ ] | `object.material_slot_copy` | M8 | P2 |  |
 | [ ] | `object.vertex_group_add` | M6 | P0 |  |
@@ -349,17 +349,17 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `transform.translate` | M1 | P0 | object mode M1; edit M2; pose M6 (mode handlers, dispatcher owned by WP 1.21) |
 | [x] | `transform.rotate` | M1 | P0 | +θ about axis (verified) |
 | [x] | `transform.resize` | M1 | P0 | decomposes matrices, loses shear (as Blender) |
-| [ ] | `transform.mirror` | M2 | P1 |  |
-| [ ] | `transform.transform` | M2 | P1 | generic `mode` dispatcher; WP 2.12 (`ops/transform.rs`, M2 W0 assignment) |
-| [ ] | `transform.shrink_fatten` | M2 | P1 |  |
-| [ ] | `transform.edge_slide` | M2 | P1 |  |
-| [ ] | `transform.edge_crease` | M2 | P1 | writes crease_edge |
-| [ ] | `transform.edge_bevelweight` | M2 | P1 | writes bevel_weight_edge |
-| [ ] | `transform.tosphere` | M2 | P1 |  |
-| [ ] | `transform.vert_slide` | M2 | P2 |  |
-| [ ] | `transform.vert_crease` | M2 | P2 |  |
-| [ ] | `transform.push_pull` | M2 | P2 |  |
-| [ ] | `transform.vertex_random` | M2 | P2 | BliRng |
+| [x] | `transform.mirror` | M2 | P1 | Edit Mode (meshes) only |
+| [x] | `transform.transform` | M2 | P1 | generic `mode` dispatcher; WP 2.12; Object Mode CREASE/BWEIGHT raise NotImplementedError (Blender 5.2.4 crashes) |
+| [x] | `transform.shrink_fatten` | M2 | P1 |  |
+| [x] | `transform.edge_slide` | M2 | P1 |  |
+| [x] | `transform.edge_crease` | M2 | P1 | writes crease_edge |
+| [x] | `transform.edge_bevelweight` | M2 | P1 | writes bevel_weight_edge |
+| [x] | `transform.tosphere` | M2 | P1 | Edit Mode (meshes) only |
+| [x] | `transform.vert_slide` | M2 | P2 |  |
+| [x] | `transform.vert_crease` | M2 | P2 |  |
+| [x] | `transform.push_pull` | M2 | P2 | Edit Mode (meshes) only |
+| [x] | `transform.vertex_random` | M2 | P2 | BliRng |
 | [ ] | `transform.shear` | M8 | P2 |  |
 | [ ] | `transform.bend` | M8 | P2 |  |
 | [ ] | `transform.rotate_normal` | M8 | P2 |  |
@@ -643,8 +643,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 |---|---|---|---|
 | [ ] | `frap.describe` | M2 | target (op:<idname>, struct:<Struct>, <Struct>.<prop>) → manifest fragment; moved from M1 (M1 stabilization): the manifest lives in `frap-schema` (L11), above the ops crates, so the operator needs the describe core moved below `frap-op` first; `frap --describe` and `--describe-json` serve agents meanwhile. M2 W0 added `frap_op::DESCRIBE_PROVIDERS` (frap-schema registers the manifest); owner: WP 2.13 |
 | [x] | `frap.select_elements` | M2 | prereq (WP 2.2); type VERT/EDGE/FACE, indices, action SET/ADD/REMOVE, object; agent selection by index |
-| [ ] | `frap.select_by_normal` | M2 | direction, threshold, extend; select faces facing a direction |
-| [ ] | `frap.scene_summary` | M2 | objects, counts, bounds, materials, modifiers in one JSON value |
+| [x] | `frap.select_by_normal` | M2 | direction, threshold, extend; select faces facing a direction |
+| [x] | `frap.scene_summary` | M2 | objects, counts, bounds, materials, modifiers in one JSON value |
 | [x] | `frap.render_contact_sheet` | M2 | multi-view sheet (FRONT/BACK/LEFT/RIGHT/TOP/BOTTOM/ISO/CAMERA); synthetic cameras never enter bpy.data |
 
 ## B. Modifier types (`object.modifier_add(type=…)`, `modifiers.new(name, type)`)
@@ -790,11 +790,11 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | `ID.rename(name, mode), ID.copy(), ID.user_clear()` | M1 |  |
 | [ ] | `Mesh.from_pydata(vertices, edges, faces), Mesh.shade_smooth()/shade_flat() (Python-only)` | M1 |  |
 | [ ] | `Mesh.update(), validate(), calc_loop_triangles(), transform(matrix), clear_geometry()` | M1 | `validate()` answers `False` for a valid mesh and refuses to repair (`RNA_NOT_IMPLEMENTED`); `transform` ignores `shape_keys` (M6) |
-| [ ] | `Mesh.set_sharp_from_angle(angle), flip_normals(), split_faces()` | M2 | moved from M1 (M1 stabilization); `object.shade_smooth_by_angle` covers sharp-from-angle meanwhile; WP 2.9 (`frap-ops-data/src/funcs/mesh_*.rs`, M2 W0 assignment) |
+| [x] | `Mesh.set_sharp_from_angle(angle), flip_normals(), split_faces()` | M2 | moved from M1 (M1 stabilization); `object.shade_smooth_by_angle` covers sharp-from-angle meanwhile; WP 2.9 (`frap-ops-data/src/funcs/mesh_*.rs`, M2 W0 assignment) |
 | [ ] | `Mesh.calc_tangents(uvmap)` | M3 | bevy_mikktspace |
 | [ ] | `mesh.materials.append/pop/clear, MaterialSlot.material/link` | M1 |  |
 | [ ] | `mesh.attributes.new/remove, mesh.uv_layers.new, mesh.color_attributes.new/remove` | M1 | colour attributes default to white and become active/default when none is |
-| [ ] | `mesh.uv_layers.remove, mesh.vertex_colors.new` | M2 | moved from M1 (M1 stabilization); `attributes.remove` removes a UV map meanwhile; vertex_colors creates "Col" BYTE_COLOR CORNER; WP 2.9 (`funcs/{u_v_loop_layers_remove,loop_colors_new}.rs`, M2 W0 assignment) |
+| [x] | `mesh.uv_layers.remove, mesh.vertex_colors.new` | M2 | moved from M1 (M1 stabilization); `attributes.remove` removes a UV map meanwhile; vertex_colors creates "Col" BYTE_COLOR CORNER; WP 2.9 (`funcs/{u_v_loop_layers_remove,loop_colors_new}.rs`, M2 W0 assignment) |
 | [ ] | `node_tree.nodes.new/remove, node_tree.links.new/remove` | M1 | links.new replaces existing input link |
 | [ ] | `obj.modifiers.new(name, type)/remove/move/clear` | M4 (data from M1) |  |
 | [ ] | `Image.pack/unpack/save/save_render/scale/reload, bpy.data.images.load` | M3 |  |

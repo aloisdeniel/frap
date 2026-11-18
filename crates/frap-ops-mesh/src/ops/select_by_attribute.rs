@@ -11,10 +11,8 @@
 //! (`The active attribute must be on the vertex, edge, or face domain`). A new attribute is not
 //! made active (`attributes.new` leaves `attributes.active` at `None`, verified on 5.2.4).
 //!
-//! frap's `Mesh` stores no active attribute yet (`mesh.attributes.active` is a deviations.md §2
-//! gap owned by WP 2.9), so the active attribute is always unset and the poll fails with
-//! Blender's first message; the selection itself (`select_by_bool_layer`) is complete and runs
-//! as soon as the active attribute exists.
+//! The active attribute is `Mesh::attributes_active` (WP 2.9), which `mesh.attributes.active`
+//! reads and writes; set it in Object Mode, before entering Edit Mode.
 
 use frap_bmesh::{BMElem, BMesh};
 use frap_mesh::{AttrData, Mesh};
@@ -29,10 +27,11 @@ use smol_str::SmolStr;
 
 use super::select_more::common;
 
-/// `BKE_attributes_active_name_get` of a mesh. frap's `Mesh` has no active-attribute storage
-/// yet (deviations.md §2, WP 2.9): no attribute is ever active.
-pub(crate) fn active_attribute_name(_me: &Mesh) -> Option<SmolStr> {
-    None
+/// `BKE_attributes_active_name_get` of a mesh: the name stored in `Mesh::attributes_active`
+/// (WP 2.9), `None` without one. The layer itself is looked up again in the edit BMesh, which is
+/// authoritative in Edit Mode.
+pub(crate) fn active_attribute_name(me: &Mesh) -> Option<SmolStr> {
+    me.attributes_active.clone()
 }
 
 /// The domain of a BMesh custom-data layer (`BM_data_layer_lookup`).
@@ -130,7 +129,7 @@ const POLL: Poll = Poll {
     poll = POLL,
     tier = T1,
     notes = [
-        "selects by the mesh's active BOOLEAN attribute; frap keeps no active attribute yet (mesh.attributes.active, WP 2.9), so the poll fails with 'There must be an active attribute'",
+        "selects by the mesh's active BOOLEAN attribute (mesh.attributes.active); set it in Object Mode before entering Edit Mode",
     ]
 )]
 fn exec(cx: &mut OpCtx, _p: mesh::SelectByAttribute) -> OpResult {

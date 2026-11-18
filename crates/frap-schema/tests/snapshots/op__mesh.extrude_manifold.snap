@@ -74,7 +74,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T1",
     "support": "partial",
-    "support_note": "the TRANSFORM_OT_translate step needs `transform.translate` in Edit Mode (edit-mode transforms, WP 2.12): until then the macro raises OP_NOT_IMPLEMENTED and nothing changes",
+    "support_note": "the TRANSFORM_OT_translate step forces use_automerge_and_split=True, which edit-mode transforms do not implement yet (EDBM_automerge_and_split): the macro raises OP_NOT_IMPLEMENTED and nothing changes",
     "headless": "native",
     "planned": "M2",
     "extension": false,
