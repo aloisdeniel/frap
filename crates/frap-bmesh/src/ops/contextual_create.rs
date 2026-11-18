@@ -233,3 +233,40 @@ fn exec(bm: &mut BMesh, i: &ContextualCreateIn) -> ContextualCreateOut {
     }
     ContextualCreateOut::default()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn two_verts_make_an_edge_and_a_loop_makes_a_face() {
+        let mut bm = BMesh::new();
+        let v: Vec<VertId> = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
+            .iter()
+            .map(|&c| bm.vert_create(c, None, CreateFlag::empty()))
+            .collect();
+        let out = contextual_create(
+            &mut bm,
+            &ContextualCreateIn {
+                geom: vec![BMElem::Vert(v[0]), BMElem::Vert(v[1])],
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(out.edges.len(), 1);
+        let out = contextual_create(
+            &mut bm,
+            &ContextualCreateIn {
+                geom: v.iter().map(|&x| BMElem::Vert(x)).collect(),
+                mat_nr: 2,
+                use_smooth: true,
+            },
+        )
+        .unwrap();
+        assert_eq!(out.faces.len(), 1);
+        let f = bm.face(out.faces[0]);
+        assert_eq!((f.len, f.mat_nr), (4, 2));
+        assert!(f.flag.contains(ElemFlag::SMOOTH));
+        assert!(bm.validate().is_empty());
+    }
+}

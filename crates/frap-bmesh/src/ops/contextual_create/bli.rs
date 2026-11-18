@@ -352,3 +352,148 @@ mod tests {
         assert!((s - PI / 2.0).abs() < 1e-5, "{s}");
     }
 }
+
+// Ported from FreeBSD's libc `qsort.c` (Bentley & McIlroy, "Engineering a Sort Function"),
+// the `qsort` Blender 5.2.4 calls on macOS (the golden fixtures' platform): ties keep the
+// order this exact algorithm produces, which decides e.g. the triangle-fill projection side.
+/// The C library `qsort` on macOS, as an in-place sort with a C comparator (`< 0`, `0`,
+/// `> 0`).
+pub fn c_qsort<T>(a: &mut [T], cmp: &dyn Fn(&T, &T) -> i32) {
+    fn insertion<T>(a: &mut [T], cmp: &dyn Fn(&T, &T) -> i32) {
+        for m in 1..a.len() {
+            let mut l = m;
+            while l > 0 && cmp(&a[l - 1], &a[l]) > 0 {
+                a.swap(l, l - 1);
+                l -= 1;
+            }
+        }
+    }
+    fn med3<T>(a: &[T], i: usize, j: usize, k: usize, cmp: &dyn Fn(&T, &T) -> i32) -> usize {
+        if cmp(&a[i], &a[j]) < 0 {
+            if cmp(&a[j], &a[k]) < 0 {
+                j
+            } else if cmp(&a[i], &a[k]) < 0 {
+                k
+            } else {
+                i
+            }
+        } else if cmp(&a[j], &a[k]) > 0 {
+            j
+        } else if cmp(&a[i], &a[k]) < 0 {
+            i
+        } else {
+            k
+        }
+    }
+    fn vecswap<T>(a: &mut [T], i: usize, j: usize, n: usize) {
+        for k in 0..n {
+            a.swap(i + k, j + k);
+        }
+    }
+    let mut lo = 0usize;
+    let mut n = a.len();
+    loop {
+        let s = &mut a[lo..lo + n];
+        if n < 7 {
+            insertion(s, cmp);
+            return;
+        }
+        let mut pm = n / 2;
+        if n > 7 {
+            let mut pl = 0usize;
+            let mut pn = n - 1;
+            if n > 40 {
+                let d = n / 8;
+                pl = med3(s, pl, pl + d, pl + 2 * d, cmp);
+                pm = med3(s, pm - d, pm, pm + d, cmp);
+                pn = med3(s, pn - 2 * d, pn - d, pn, cmp);
+            }
+            pm = med3(s, pl, pm, pn, cmp);
+        }
+        s.swap(0, pm);
+        let mut swap_cnt = false;
+        let (mut pa, mut pb) = (1usize, 1usize);
+        let (mut pc, mut pd) = (n as isize - 1, n as isize - 1);
+        loop {
+            while pb as isize <= pc {
+                let r = cmp(&s[pb], &s[0]);
+                if r > 0 {
+                    break;
+                }
+                if r == 0 {
+                    swap_cnt = true;
+                    s.swap(pa, pb);
+                    pa += 1;
+                }
+                pb += 1;
+            }
+            while pb as isize <= pc {
+                let r = cmp(&s[pc as usize], &s[0]);
+                if r < 0 {
+                    break;
+                }
+                if r == 0 {
+                    swap_cnt = true;
+                    s.swap(pc as usize, pd as usize);
+                    pd -= 1;
+                }
+                pc -= 1;
+            }
+            if pb as isize > pc {
+                break;
+            }
+            s.swap(pb, pc as usize);
+            swap_cnt = true;
+            pb += 1;
+            pc -= 1;
+        }
+        if !swap_cnt {
+            insertion(s, cmp);
+            return;
+        }
+        let pn = n;
+        let d = pa.min(pb - pa);
+        vecswap(s, 0, pb - d, d);
+        let d = ((pd - pc) as usize).min(pn - pd as usize - 1);
+        vecswap(s, pb, pn - d, d);
+        let r = pb - pa;
+        if r > 1 {
+            c_qsort(&mut s[..r], cmp);
+        }
+        let r = (pd - pc) as usize;
+        if r > 1 {
+            lo += pn - r;
+            n = r;
+            continue;
+        }
+        return;
+    }
+}
+
+/// `BLI_sortutil_cmp_float_reverse` for `(value, payload)` pairs.
+pub fn cmp_float_reverse<T>(a: &(f32, T), b: &(f32, T)) -> i32 {
+    if a.0 < b.0 {
+        1
+    } else if a.0 > b.0 {
+        -1
+    } else {
+        0
+    }
+}
+
+#[cfg(test)]
+mod qsort_tests {
+    use super::*;
+
+    #[test]
+    fn sorts_like_a_sort() {
+        let mut v: Vec<i32> = (0..100).map(|i| (i * 37) % 101).collect();
+        c_qsort(&mut v, &|a: &i32, b: &i32| a.cmp(b) as i32);
+        let mut w = v.clone();
+        w.sort();
+        assert_eq!(v, w);
+        let mut v: Vec<i32> = vec![3, 1, 2, 3, 1, 2, 3, 1, 2, 0];
+        c_qsort(&mut v, &|a: &i32, b: &i32| a.cmp(b) as i32);
+        assert_eq!(v, vec![0, 1, 1, 1, 2, 2, 2, 3, 3, 3]);
+    }
+}

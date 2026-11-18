@@ -151,9 +151,9 @@ pub fn edge_rotate(bm: &mut BMesh, e: EdgeId, ccw: bool, check_flag: u8) -> Opti
     let v2 = bm.lp(l2).v;
     if check_flag & CHECK_BEAUTY != 0 {
         let [a, b] = bm.edge(e).v;
-        if !(bli::len_squared_v3v3(bm.vert(a).co, bm.vert(b).co)
-            > bli::len_squared_v3v3(bm.vert(v1).co, bm.vert(v2).co))
-        {
+        let old = bli::len_squared_v3v3(bm.vert(a).co, bm.vert(b).co);
+        let new = bli::len_squared_v3v3(bm.vert(v1).co, bm.vert(v2).co);
+        if !matches!(old.partial_cmp(&new), Some(std::cmp::Ordering::Greater)) {
             return None;
         }
     }

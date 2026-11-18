@@ -508,3 +508,55 @@ fn exec(bm: &mut BMesh, i: &BridgeLoopsIn) -> Result<BridgeLoopsOut, BmError> {
     }
     Ok(out)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn errors() {
+        let mut bm = BMesh::new();
+        let v: Vec<VertId> = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0]]
+            .iter()
+            .map(|&c| bm.vert_create(c, None, CreateFlag::empty()))
+            .collect();
+        let e = vec![
+            bm.edge_create(v[0], v[1], None, CreateFlag::empty()),
+            bm.edge_create(v[1], v[2], None, CreateFlag::empty()),
+        ];
+        let r = bridge_loops(
+            &mut bm,
+            &BridgeLoopsIn {
+                edges: e,
+                ..Default::default()
+            },
+        );
+        assert_eq!(r, Err(BmError::Cancel("Select at least two edge loops".into())));
+    }
+
+    #[test]
+    fn two_squares_make_four_quads() {
+        let mut bm = BMesh::new();
+        let mut edges = Vec::new();
+        for z in [0.0f32, 2.0] {
+            let v: Vec<VertId> = [[-1.0, -1.0], [1.0, -1.0], [1.0, 1.0], [-1.0, 1.0]]
+                .iter()
+                .map(|c| bm.vert_create([c[0], c[1], z], None, CreateFlag::empty()))
+                .collect();
+            for i in 0..4 {
+                edges.push(bm.edge_create(v[i], v[(i + 1) % 4], None, CreateFlag::empty()));
+            }
+        }
+        let out = bridge_loops(
+            &mut bm,
+            &BridgeLoopsIn {
+                edges,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(out.faces.len(), 4);
+        assert_eq!(out.edges.len(), 4);
+        assert!(bm.validate().is_empty());
+    }
+}

@@ -6,11 +6,16 @@
 //! `BM_face_exists_overlap_subset`, `BM_edge_ordered_verts`, face area/centre helpers,
 //! `BM_mesh_calc_face_groups` (edge stepping).
 
+use std::cmp::Ordering;
+
 use rustc_hash::FxHashSet;
 
 use super::bli::{self, V3};
 use crate::types::CreateFlag;
 use crate::{BMesh, EdgeId, ElemFlag, FaceId, LoopId, VertId};
+
+/// A source-loop filter (`BMLoopFilterFunc`).
+pub type LoopFilter<'a> = &'a dyn Fn(&BMesh, LoopId) -> bool;
 
 /// `BM_edge_ordered_verts`: the vertices of `e` in the winding of its first face (`e->l`), or
 /// `e`'s own order without faces.
@@ -100,7 +105,7 @@ pub fn verts_calc_normal_from_cloud_ex(bm: &BMesh, varr: &[VertId]) -> (V3, V3, 
         let mut dist_sq_max = -1.0f32;
         for i in 0..len {
             let d = bli::len_squared_v3v3(co(i), center);
-            if !(d <= dist_sq_max) {
+            if !matches!(d.partial_cmp(&dist_sq_max), Some(Ordering::Less | Ordering::Equal)) {
                 co_a = Some(i);
                 co_a_index = i;
                 dist_sq_max = d;
@@ -120,7 +125,7 @@ pub fn verts_calc_normal_from_cloud_ex(bm: &BMesh, varr: &[VertId]) -> (V3, V3, 
             }
             let t = bli::project_plane_normalized_v3_v3v3(bli::sub(co(i), center), dir_a);
             let d = bli::len_squared_v3(t);
-            if !(d <= dist_sq_max) {
+            if !matches!(d.partial_cmp(&dist_sq_max), Some(Ordering::Less | Ordering::Equal)) {
                 co_b = Some(i);
                 dist_sq_max = d;
                 dir_b = t;
@@ -186,7 +191,7 @@ pub fn verts_calc_normal_from_cloud_ex(bm: &BMesh, varr: &[VertId]) -> (V3, V3, 
             for i in 0..len {
                 let t = bli::project_plane_normalized_v3_v3v3(bli::sub(co(i), center), refine);
                 let d = bli::len_squared_v3(t);
-                if !(d <= dist_sq_max) {
+                if !matches!(d.partial_cmp(&dist_sq_max), Some(Ordering::Less | Ordering::Equal)) {
                     co_a_index = i;
                     dist_sq_max = d;
                 }
@@ -223,7 +228,7 @@ pub fn verts_sort_radial_plane(bm: &BMesh, verts: &mut [VertId]) {
 // Ported from blender/source/blender/bmesh/intern/bmesh_construct.cc (BM_face_copy_shared).
 /// `BM_face_copy_shared`: each corner of `f` takes the loop data of the matching corner of a
 /// face sharing its edge (first match wins; `filter` tests the source loop).
-pub fn face_copy_shared(bm: &mut BMesh, f: FaceId, filter: Option<&dyn Fn(&BMesh, LoopId) -> bool>) {
+pub fn face_copy_shared(bm: &mut BMesh, f: FaceId, filter: Option<LoopFilter<'_>>) {
     let mut done: FxHashSet<LoopId> = FxHashSet::default();
     for l_iter in bm.face_loops(f) {
         let l_other = bm.lp(l_iter).radial_next;

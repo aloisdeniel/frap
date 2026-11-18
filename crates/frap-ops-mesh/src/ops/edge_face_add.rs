@@ -32,7 +32,7 @@ fn vert_edge_lookup(
     v: VertId,
     e_used: Option<EdgeId>,
     max: usize,
-    test: fn(&BMesh, EdgeId) -> bool,
+    test: EdgeTest,
 ) -> Vec<EdgeId> {
     let mut out = Vec::new();
     for e in bm.vert_edges(v) {
@@ -45,6 +45,9 @@ fn vert_edge_lookup(
     }
     out
 }
+
+/// An edge predicate of `edbm_add_edge_face_exec__vert_edge_lookup`.
+type EdgeTest = fn(&BMesh, EdgeId) -> bool;
 
 fn is_wire(bm: &BMesh, e: EdgeId) -> bool {
     bm.edge_is_wire(e)
@@ -61,7 +64,7 @@ fn tricky_extend_sel(bm: &mut BMesh) -> Option<BMElem> {
     if tv == 1 && te == 0 && tf == 0 {
         let v = edbm::sel_verts(bm).into_iter().next()?;
         let mut pair = None;
-        for test in [is_wire as fn(&BMesh, EdgeId) -> bool, is_boundary] {
+        for test in [is_wire as EdgeTest, is_boundary] {
             let ed = vert_edge_lookup(bm, v, None, 3, test);
             if ed.len() == 2 && !construct::edge_share_face_check(bm, ed[0], ed[1]) {
                 pair = Some((ed[0], ed[1]));
@@ -80,7 +83,7 @@ fn tricky_extend_sel(bm: &mut BMesh) -> Option<BMElem> {
     if tv == 2 && te == 1 && tf == 0 {
         let e = edbm::sel_edges(bm).into_iter().next()?;
         let [v1, v2] = bm.edge(e).v;
-        let combos: [(fn(&BMesh, EdgeId) -> bool, fn(&BMesh, EdgeId) -> bool); 4] = [
+        let combos: [(EdgeTest, EdgeTest); 4] = [
             (is_wire, is_wire),
             (is_wire, is_boundary),
             (is_boundary, is_wire),

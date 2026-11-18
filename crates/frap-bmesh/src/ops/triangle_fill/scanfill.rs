@@ -569,7 +569,9 @@ impl ScanFill {
                 });
             }
         }
-        scdata.sort_by(|a, b| self.cmp_sc(a.vert, b.vert));
+        bli::c_qsort(&mut scdata, &|a: &ScanVert, b: &ScanVert| {
+            self.cmp_sc(a.vert, b.vert) as i32
+        });
         let verts = scdata.len();
         for e in collect(&self.edges, &self.ebase) {
             remlink(&mut self.edges, &mut self.ebase, e);
@@ -938,9 +940,9 @@ impl ScanFill {
                 }
                 Self::fill_target_map_recursive(&pflist, a, a, &mut map);
             }
-            for a in 0..n {
-                if map[a] != a {
-                    self.merge_polys(&mut pflist, map[a], a);
+            for (a, &target) in map.iter().enumerate() {
+                if target != a {
+                    self.merge_polys(&mut pflist, target, a);
                 }
             }
         }

@@ -549,3 +549,98 @@ fn exec(bm: &mut BMesh, i: &GridFillIn) -> Result<GridFillOut, BmError> {
         faces,
     })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::types::CreateFlag;
+
+    fn mesh(cos: &[[f32; 3]], edges: &[(usize, usize)]) -> (BMesh, Vec<EdgeId>) {
+        let mut bm = BMesh::new();
+        let v: Vec<VertId> = cos
+            .iter()
+            .map(|&c| bm.vert_create(c, None, CreateFlag::empty()))
+            .collect();
+        let e = edges
+            .iter()
+            .map(|&(a, b)| bm.edge_create(v[a], v[b], None, CreateFlag::empty()))
+            .collect();
+        (bm, e)
+    }
+
+    #[test]
+    fn overlapping_rails_are_refused() {
+        // Chains 0-1 and 2-3; both rails run through vertex 4.
+        let (mut bm, e) = mesh(
+            &[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [1.0, 2.0, 0.0], [0.5, 1.0, 0.0]],
+            &[(0, 1), (2, 3), (0, 4), (4, 2), (1, 4), (4, 3)],
+        );
+        let r = grid_fill(
+            &mut bm,
+            &GridFillIn {
+                edges: vec![e[0], e[1]],
+                ..Default::default()
+            },
+        );
+        assert_eq!(r, Err(BmError::Cancel("Connecting edge loops overlap".into())));
+        assert_eq!(bm.faces_num(), 0);
+    }
+
+    #[test]
+    fn errors_for_bad_loops() {
+        let (mut bm, e) = mesh(&[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]], &[(0, 1)]);
+        let r = grid_fill(
+            &mut bm,
+            &GridFillIn {
+                edges: e.clone(),
+                ..Default::default()
+            },
+        );
+        assert!(matches!(r, Err(BmError::Cancel(m)) if m.starts_with("Select two edge loops")));
+        let (mut bm, e) = mesh(
+            &[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [1.0, 2.0, 0.0]],
+            &[(0, 1), (2, 3)],
+        );
+        let r = grid_fill(
+            &mut bm,
+            &GridFillIn {
+                edges: e,
+                ..Default::default()
+            },
+        );
+        assert_eq!(
+            r,
+            Err(BmError::Cancel(
+                "Loops are not connected by wire/boundary edges".into()
+            ))
+        );
+    }
+
+    #[test]
+    fn two_chains_make_a_grid() {
+        let (mut bm, e) = mesh(
+            &[
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [2.0, 0.0, 0.0],
+                [0.0, 2.0, 0.0],
+                [1.0, 2.0, 0.0],
+                [2.0, 2.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [2.0, 1.0, 0.0],
+            ],
+            &[(0, 1), (1, 2), (3, 4), (4, 5), (0, 6), (6, 3), (2, 7), (7, 5)],
+        );
+        let out = grid_fill(
+            &mut bm,
+            &GridFillIn {
+                edges: e[..4].to_vec(),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(out.faces.len(), 4);
+        assert_eq!((bm.verts_num(), bm.edges_num(), bm.faces_num()), (9, 12, 4));
+        assert!(bm.validate().is_empty());
+    }
+}

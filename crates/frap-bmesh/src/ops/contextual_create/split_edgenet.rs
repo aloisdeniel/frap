@@ -175,7 +175,7 @@ fn find_loop_walk(bm: &mut BMesh, net: &mut Net, v_init: VertId, face_normal: V3
                         face_normal,
                     );
                 }
-                order.sort_by(|a, b| b.0.total_cmp(&a.0));
+                bli::c_qsort(&mut order, &bli::cmp_float_reverse);
                 visit.push(v);
                 net.vert_visit.insert(v);
             }

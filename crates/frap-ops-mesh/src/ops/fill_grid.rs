@@ -101,7 +101,7 @@ fn fill_grid_prepare(bm: &mut BMesh, offset: i32, span_in: Option<i32>) -> Optio
                 })
                 .collect();
             // `qsort(..., BLI_sortutil_cmp_float_reverse)`.
-            sorted.sort_by(|a, b| b.0.total_cmp(&a.0));
+            bli::c_qsort(&mut sorted, &bli::cmp_float_reverse);
             if sorted[0].0 - sorted[(verts_len - 3) as usize].0 > eps_even {
                 span = sorted[0].1 as i32;
             }

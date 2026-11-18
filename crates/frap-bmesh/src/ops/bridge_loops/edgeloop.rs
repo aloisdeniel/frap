@@ -9,6 +9,9 @@ use rustc_hash::{FxHashMap, FxHashSet};
 use crate::ops::contextual_create::bli::{self, V3};
 use crate::{BMesh, EdgeId, VertId};
 
+/// An edge predicate (`bool (*test_fn)(BMEdge *, void *user_data)`).
+pub type EdgeTest<'a> = &'a dyn Fn(&BMesh, EdgeId) -> bool;
+
 /// Normals of very small loops are still wanted.
 const EDGELOOP_EPS: f32 = 1e-10;
 
@@ -216,8 +219,7 @@ impl EdgeLoopStore {
             let dst = (len - self.verts.len()) as i32;
             let picks = bli::sparse_range(src, dst);
             // `picks` are original indices; `shift` counts the entries inserted before them.
-            let mut shift = 0usize;
-            for p in picks {
+            for (shift, p) in picks.into_iter().enumerate() {
                 let i = p as usize + shift;
                 let v = self.verts[i];
                 let has_next = i + 1 < self.verts.len();
@@ -230,7 +232,6 @@ impl EdgeLoopStore {
                     let vs = edge_split(bm, v, other, split_swap);
                     self.verts.insert(i, vs);
                 }
-                shift += 1;
                 split_swap = !split_swap;
             }
         }
@@ -329,7 +330,7 @@ pub fn mesh_edgeloops_find(bm: &BMesh, test: &dyn Fn(&BMesh, EdgeId) -> bool) ->
 /// vertices to the edge they were reached by.
 pub fn mesh_edgeloops_find_path(
     bm: &mut BMesh,
-    test: Option<&dyn Fn(&BMesh, EdgeId) -> bool>,
+    test: Option<EdgeTest<'_>>,
     v_src: VertId,
     v_dst: VertId,
 ) -> Option<EdgeLoopStore> {

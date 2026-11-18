@@ -120,7 +120,7 @@ fn exec(bm: &mut BMesh, i: &TriangleFillIn) -> TriangleFillOut {
         }
         if !is_degenerate {
             // `qsort(..., BLI_sortutil_cmp_float_reverse)`.
-            nors.sort_by(|a, b| b.0.total_cmp(&a.0));
+            bli::c_qsort(&mut nors, &bli::cmp_float_reverse);
             normal = nors[0].1;
             for item in &nors {
                 if item.0 == -1.0 {
