@@ -60,7 +60,7 @@ fn manifest_selected_operators() {
     frap_ops_all::link();
     for idname in [
         "mesh.bevel",
-        "mesh.extrude_region_move",
+        "armature.extrude_move",
         "object.modifier_add",
         "mesh.spin",
     ] {

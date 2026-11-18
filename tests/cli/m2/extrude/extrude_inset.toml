@@ -1,0 +1,8 @@
+# WP 2.5: extrude and inset in Edit Mode, in both statement forms (bpy and short form), and the
+# macro step arguments in both spellings (MESH_OT_extrude_region={...} and
+# MESH_OT_extrude_region.use_normal_flip=…; the errors are raised while converting, before
+# any step runs). The vertex positions read at the end were checked against Blender 5.2.4
+# running the same statements (max difference 1e-7); counts in the edit_mesh blocks match it.
+bin.name = "frap"
+args = []
+fs.sandbox = true

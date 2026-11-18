@@ -1,0 +1,6 @@
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.frap.select_elements(type='FACE', indices=[5])
+bpy.ops.mesh.extrude_region()
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.data.meshes['Cube'].edges.foreach_get('vertices')
+bpy.data.meshes['Cube'].polygons.foreach_get('vertices')

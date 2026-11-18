@@ -1,0 +1,9 @@
+# WP 2.5: the deterministic prefix of a region extrude, index by index. Blender 5.2.4 creates
+# the side edges and faces of a region extrude in a run-dependent order (a pointer-keyed
+# GHash), so the region goldens compare with order=canonical; this transcript pins what does
+# not depend on that order. Blender 5.2.4, in 3 runs of the same statements on the factory
+# cube: edges 0..15 (the 12 kept edges, then the cap edges (9,11) (8,9) (10,11) (10,8)) and
+# face 6 (the cap, (11,10,8,9)) were identical; only edges 16..19 and faces 5, 7..9 moved.
+bin.name = "frap"
+args = []
+fs.sandbox = true

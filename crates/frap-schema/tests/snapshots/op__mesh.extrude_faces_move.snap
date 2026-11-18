@@ -1,0 +1,83 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.extrude_faces_move",
+  "bl_idname": "MESH_OT_extrude_faces_move",
+  "label": "Extrude Individual Faces and Move",
+  "description": "Extrude each individual face separately along local normals",
+  "bl_options": [
+    "MACRO",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "MACRO",
+  "macro_steps": [
+    "MESH_OT_extrude_faces_indiv",
+    "TRANSFORM_OT_shrink_fatten"
+  ],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "MESH_OT_extrude_faces_indiv",
+      "name": "Extrude Individual Faces",
+      "description": "Extrude individual faces only",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "MESH_OT_extrude_faces_indiv",
+      "is_id": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "TRANSFORM_OT_shrink_fatten",
+      "name": "Shrink/Fatten",
+      "description": "Shrink/fatten selected vertices along normals",
+      "type": "POINTER",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": null,
+      "fixed_type": "TRANSFORM_OT_shrink_fatten",
+      "is_id": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "READONLY"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "the TRANSFORM_OT_shrink_fatten step needs `transform.shrink_fatten` in Edit Mode (edit-mode transforms, WP 2.12): until then the macro raises OP_NOT_IMPLEMENTED and nothing changes",
+    "headless": "native",
+    "planned": "M2",
+    "extension": false,
+    "notes": []
+  }
+}

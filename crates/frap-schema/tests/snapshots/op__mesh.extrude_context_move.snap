@@ -1,11 +1,11 @@
 ---
-source: crates/frap-schema/tests/snapshots.rs
+source: crates/frap-schema/tests/describe_ops.rs
 ---
 {
-  "idname": "mesh.extrude_region_move",
-  "bl_idname": "MESH_OT_extrude_region_move",
+  "idname": "mesh.extrude_context_move",
+  "bl_idname": "MESH_OT_extrude_context_move",
   "label": "Extrude Region and Move",
-  "description": "Extrude region and move result",
+  "description": "Extrude region together along the average normal",
   "bl_options": [
     "MACRO",
     "REGISTER",
@@ -13,12 +13,14 @@ source: crates/frap-schema/tests/snapshots.rs
   ],
   "kind": "MACRO",
   "macro_steps": [
-    "MESH_OT_extrude_region",
+    "MESH_OT_extrude_context",
     "TRANSFORM_OT_translate"
   ],
   "poll": {
-    "requires": null,
-    "text": "Blender 5.2's poll passes in: C (Edit Mode on a mesh)",
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
     "matrix": {
       "plain": "NNYNN",
       "view3d": "NNYNN"
@@ -26,15 +28,15 @@ source: crates/frap-schema/tests/snapshots.rs
   },
   "properties": [
     {
-      "identifier": "MESH_OT_extrude_region",
-      "name": "Extrude Region",
-      "description": "Extrude region of faces",
+      "identifier": "MESH_OT_extrude_context",
+      "name": "Extrude Context",
+      "description": "Extrude selection",
       "type": "POINTER",
       "subtype": "NONE",
       "unit": "NONE",
       "array": null,
       "default": null,
-      "fixed_type": "MESH_OT_extrude_region",
+      "fixed_type": "MESH_OT_extrude_context",
       "is_id": false,
       "hidden": false,
       "skip_save": false,
@@ -69,15 +71,13 @@ source: crates/frap-schema/tests/snapshots.rs
     }
   ],
   "frap": {
-    "status": "not_implemented",
-    "tier": null,
-    "support": null,
-    "support_note": null,
-    "headless": null,
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "the TRANSFORM_OT_translate step needs `transform.translate` in Edit Mode (edit-mode transforms, WP 2.12): until then the macro raises OP_NOT_IMPLEMENTED and nothing changes",
+    "headless": "native",
     "planned": "M2",
     "extension": false,
-    "notes": [
-      "mesh.extrude_region_move exists in Blender 5.2; frap implements it in M2 (OP_NOT_IMPLEMENTED until then)"
-    ]
+    "notes": []
   }
 }
