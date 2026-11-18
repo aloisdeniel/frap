@@ -175,9 +175,13 @@ pub(crate) fn isect_line_plane_v3(l1: V3, l2: V3, plane_co: V3, plane_no: V3) ->
     None
 }
 
-/// `closest_to_line_v3`: the closest point and its factor along `l1 → l2`.
+/// `closest_to_line_v3` (`closest_to_ray_v3`): the closest point and its factor along
+/// `l1 → l2`; `(l1, 0)` for a zero-length line (no 0/0 NaN).
 pub(crate) fn closest_to_line_v3(p: V3, l1: V3, l2: V3) -> (V3, f32) {
     let ray_dir = sub(l2, l1);
+    if ray_dir == [0.0; 3] {
+        return (l1, 0.0);
+    }
     let h = sub(p, l1);
     let lambda = dot(ray_dir, h) / dot(ray_dir, ray_dir);
     (madd(l1, ray_dir, lambda), lambda)

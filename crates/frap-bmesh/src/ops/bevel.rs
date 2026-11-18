@@ -8,7 +8,7 @@
 //! Python signature (docs/research/blender-ops-mesh-uv.md, Appendix C):
 //! `bmesh.ops.bevel(bmesh, geom=[], offset=0.0, offset_type='OFFSET', profile_type='SUPERELLIPSE', segments=0, profile=0.0, affect='VERTICES', clamp_overlap=False, material=0, loop_slide=False, mark_seam=False, mark_sharp=False, harden_normals=False, face_strength_mode='NONE', miter_outer='SHARP', miter_inner='SHARP', spread=0.0, custom_profile=None, vmesh_method='ADJ')`.
 //!
-//! **Create/kill order** (`BM_mesh_bevel`): nothing happens when `offset <= 0`. Otherwise
+//! **Create/kill order** (`BM_mesh_bevel`): nothing happens unless `offset > 0` (so also for NaN). Otherwise
 //! the input vertices (and both vertices of every manifold input edge) are tagged; then, in
 //! vertex iteration order, each tagged vertex gets its boundary (no elements created). Then,
 //! per beveled vertex in iteration order (`build_vmesh`): the boundary BMVerts `(i, 0, 0)`
@@ -212,7 +212,8 @@ pub fn bevel(bm: &mut BMesh, i: &BevelIn) -> Result<BevelOut, BmError> {
 /// `bmo_bevel_exec`.
 fn bmo_bevel_exec(bm: &mut BMesh, i: &BevelIn, en: &Enums) -> BevelOut {
     let mut out = BevelOut::default();
-    if i.offset <= 0.0 {
+    // `if (offset > 0)`: a NaN offset bevels nothing either.
+    if i.offset.is_nan() || i.offset <= 0.0 {
         return out;
     }
     // First flush 'geom' into flags; faces are cleared so new faces can be collected.
@@ -311,7 +312,8 @@ fn mesh_bevel(bm: &mut BMesh, i: &BevelIn, en: &Enums) {
         bevs: Vec::new(),
         edge_tag: Vec::new(),
     };
-    if bp.offset <= 0.0 {
+    // `if (bp.offset > 0)` in Blender: a NaN offset bevels nothing too.
+    if bp.offset.is_nan() || bp.offset <= 0.0 {
         return;
     }
     // Disable the miters with the cutoff vertex mesh method.
@@ -742,6 +744,23 @@ mod tests {
         let out = bevel(&mut bm, &zero).unwrap();
         assert_eq!(counts(&bm), before);
         assert!(out.geom.is_empty());
+        // `if (offset > 0)`: a NaN offset bevels nothing either (no NaN vertices).
+        let all: Vec<BMElem> = bm.vert_ids().into_iter().map(BMElem::Vert).collect();
+        let co_before: Vec<_> = bm.vert_ids().iter().map(|&v| bm.vert(v).co).collect();
+        for offset_type in ["OFFSET", "PERCENT"] {
+            let nan = BevelIn {
+                geom: all.clone(),
+                offset: f32::NAN,
+                offset_type,
+                segments: 2,
+                ..BevelIn::default()
+            };
+            let out = bevel(&mut bm, &nan).unwrap();
+            assert_eq!(counts(&bm), before);
+            assert!(out.geom.is_empty());
+            let co: Vec<_> = bm.vert_ids().iter().map(|&v| bm.vert(v).co).collect();
+            assert_eq!(co, co_before);
+        }
         let bad = BevelIn {
             offset: 0.1,
             offset_type: "WIDE",
@@ -756,6 +775,86 @@ mod tests {
         assert!(
             matches!(bevel(&mut bm, &custom), Err(BmError::Invalid(m)) if m.contains("CUSTOM"))
         );
+    }
+
+    /// Every vertex coordinate and every UV of a live face corner is finite.
+    fn assert_finite(bm: &BMesh, what: &str) {
+        for v in bm.vert_ids() {
+            let co = bm.vert(v).co;
+            assert!(co.iter().all(|x| x.is_finite()), "{what}: vertex {v:?} at {co:?}");
+        }
+        for (layer, l) in bm.ldata.layers.iter().enumerate() {
+            if !matches!(l.data, frap_mesh::AttrData::Float2(_)) {
+                continue;
+            }
+            for f in bm.face_ids() {
+                for lp in bm.face_loops(f) {
+                    let uv = bm.ldata.float2(layer, lp.0).expect("uv");
+                    assert!(
+                        uv.iter().all(|x| x.is_finite()),
+                        "{what}: UV {uv:?} at loop {lp:?} of vertex {:?}",
+                        bm.lp(lp).v
+                    );
+                }
+            }
+        }
+    }
+
+    fn all_verts_and_edges(bm: &BMesh) -> Vec<BMElem> {
+        let mut geom: Vec<BMElem> = bm.vert_ids().into_iter().map(BMElem::Vert).collect();
+        geom.extend(bm.edge_ids().into_iter().map(BMElem::Edge));
+        geom
+    }
+
+    #[test]
+    fn zero_length_snap_edge_gives_the_end_not_nan() {
+        // `closest_to_ray_v3`: a zero direction gives the origin (lambda 0), not 0/0.
+        let p = [1.0, 2.0, 3.0];
+        let a = [0.5, -0.25, 1.0];
+        assert_eq!(math::closest_to_line_v3(p, a, a), (a, 0.0));
+        assert_eq!(math::closest_to_line_segment_v3(p, a, a), a);
+    }
+
+    /// A clamped vertex bevel of Suzanne leaves zero-length edges; beveling all of it again
+    /// snaps corners to them for the UV interpolation (Blender: (0.5, 0.074485) at loop 6121,
+    /// no NaN UV).
+    #[test]
+    fn second_bevel_of_a_clamped_suzanne_has_finite_uvs() {
+        use frap_mesh::primitives::monkey::{Monkey, monkey};
+        for (seg1, second) in [
+            (1, ("WIDTH", 0.01f32, 2, "SHARP", "ADJ")),
+            (3, ("OFFSET", 0.01, 3, "ARC", "CUTOFF")),
+            (3, ("WIDTH", 0.01, 2, "SHARP", "CUTOFF")),
+        ] {
+            let mut bm = BMesh::from_mesh(&monkey(&Monkey::default()), &FromMeshParams::default());
+            let first = BevelIn {
+                geom: bm.vert_ids().into_iter().map(BMElem::Vert).collect(),
+                offset: 0.05,
+                segments: seg1,
+                profile: 0.5,
+                clamp_overlap: true,
+                material: -1,
+                ..BevelIn::default()
+            };
+            bevel(&mut bm, &first).unwrap();
+            assert_finite(&bm, "first bevel");
+            let (offset_type, offset, segments, miter_outer, vmesh_method) = second;
+            let again = BevelIn {
+                geom: all_verts_and_edges(&bm),
+                offset,
+                offset_type,
+                segments,
+                profile: 0.5,
+                affect: "EDGES",
+                material: -1,
+                miter_outer,
+                vmesh_method,
+                ..BevelIn::default()
+            };
+            bevel(&mut bm, &again).unwrap();
+            assert!(bm.validate().is_empty(), "{:?}", bm.validate());
+            assert_finite(&bm, &format!("second bevel {second:?}"));
+        }
     }
 
     /// Random selections and parameters on several meshes: no panic and a valid BMesh (golden
@@ -829,9 +928,27 @@ mod tests {
             let out = bevel(&mut bm, &i).unwrap_or_else(|e| panic!("iteration {iter}: {e}"));
             let problems = bm.validate();
             assert!(problems.is_empty(), "iteration {iter} ({i:?}): {problems:?}");
+            assert_finite(&bm, &format!("iteration {iter} ({i:?})"));
             // Every output element is alive and tagged as Blender's output slots are.
             for g in out.geom {
                 assert!(bm.elem_alive(g) && bm.elem_flag(g).contains(ElemFlag::TAG));
+            }
+            // A second bevel of everything, in the same BMesh (reused slots, beveled and
+            // possibly clamped-to-zero-length geometry).
+            if iter % 3 == 0 {
+                let again = BevelIn {
+                    geom: all_verts_and_edges(&bm),
+                    offset: i.offset * 0.25,
+                    affect: ["VERTICES", "EDGES"][rnd(2) as usize],
+                    segments: 1 + rnd(3) as i32,
+                    clamp_overlap: rnd(2) == 0,
+                    ..i.clone()
+                };
+                bevel(&mut bm, &again)
+                    .unwrap_or_else(|e| panic!("iteration {iter}, second bevel: {e}"));
+                let problems = bm.validate();
+                assert!(problems.is_empty(), "iteration {iter} again ({again:?}): {problems:?}");
+                assert_finite(&bm, &format!("iteration {iter}, second bevel ({again:?})"));
             }
         }
     }

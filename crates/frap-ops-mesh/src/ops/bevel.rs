@@ -59,6 +59,33 @@ fn any_vert_selected(bm: &frap_bmesh::BMesh) -> bool {
 /// Hint code: the arguments (here the default `offset=0`) make the operator do nothing.
 const NO_OP_DEFAULT: &str = "NO_OP_DEFAULT";
 
+/// The `NO_OP_DEFAULT` message when `offset` bevels nothing: `bmo_bevel_exec` bevels only
+/// when `offset > 0`, so 0 (the default) and NaN are no-ops (negative values are clamped to 0
+/// by the property).
+fn no_op_hint(offset: f32, percent: bool) -> Option<&'static str> {
+    if offset > 0.0 {
+        return None;
+    }
+    Some(match (percent, offset.is_nan()) {
+        (true, true) => {
+            "mesh.bevel offset_pct is NaN, which bevels nothing; pass a finite offset_pct, e.g. \
+             bpy.ops.mesh.bevel(offset_type='PERCENT', offset_pct=10)"
+        }
+        (false, true) => {
+            "mesh.bevel offset is NaN, which bevels nothing; pass a finite offset, e.g. \
+             bpy.ops.mesh.bevel(offset=0.1, segments=2)"
+        }
+        (true, false) => {
+            "mesh.bevel offset_pct=0 is a no-op with offset_type='PERCENT'; pass offset_pct, \
+             e.g. bpy.ops.mesh.bevel(offset_type='PERCENT', offset_pct=10)"
+        }
+        (false, false) => {
+            "mesh.bevel offset=0 is a no-op; pass offset, e.g. bpy.ops.mesh.bevel(offset=0.1, \
+             segments=2)"
+        }
+    })
+}
+
 fn bm_error(e: BmError) -> OpError {
     match e {
         BmError::Invalid(m) if m.contains("CUSTOM") => OpError::NotImplemented(m),
@@ -177,18 +204,11 @@ fn exec(cx: &mut OpCtx, p: mesh::Bevel) -> OpResult {
         }
     }
 
-    if offset == 0.0 {
+    if let Some(message) = no_op_hint(offset, percent) {
         // Blender finishes silently; frap answers the `NO_OP_DEFAULT` hint (§13.2).
-        let message = if percent {
-            "mesh.bevel offset_pct=0 is a no-op with offset_type='PERCENT'; pass offset_pct, \
-             e.g. bpy.ops.mesh.bevel(offset_type='PERCENT', offset_pct=10)"
-        } else {
-            "mesh.bevel offset=0 is a no-op; pass offset, e.g. bpy.ops.mesh.bevel(offset=0.1, \
-             segments=2)"
-        };
         cx.hint(NO_OP_DEFAULT, message);
     }
-    if p.harden_normals.value && offset != 0.0 {
+    if p.harden_normals.value && offset > 0.0 {
         cx.report(
             ReportType::Warning,
             "frap: harden_normals is not supported yet: the bevel was made without hardening \
@@ -202,4 +222,24 @@ fn exec(cx: &mut OpCtx, p: mesh::Bevel) -> OpResult {
         );
     }
     Ok(OpStatus::Finished)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::no_op_hint;
+
+    #[test]
+    fn no_op_hint_for_zero_and_nan_offsets() {
+        // The default offset=0 (and offset_pct=0 with PERCENT) bevels nothing.
+        assert!(no_op_hint(0.0, false).unwrap().contains("offset=0 is a no-op"));
+        assert!(no_op_hint(0.0, true).unwrap().contains("offset_pct=0"));
+        assert!(no_op_hint(-0.0, false).is_some());
+        // `bmo_bevel_exec` tests `offset > 0`, so NaN bevels nothing either.
+        assert!(no_op_hint(f32::NAN, false).unwrap().contains("offset is NaN"));
+        assert!(no_op_hint(f32::NAN, true).unwrap().contains("offset_pct is NaN"));
+        // A positive offset bevels: no hint.
+        assert!(no_op_hint(0.1, false).is_none());
+        assert!(no_op_hint(10.0, true).is_none());
+        assert!(no_op_hint(f32::INFINITY, false).is_none());
+    }
 }
