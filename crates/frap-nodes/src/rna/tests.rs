@@ -1178,3 +1178,141 @@ fn socket_types_and_values() {
     assert_eq!(super::socket_type_str(SocketType::Rgba), "RGBA");
     assert!(node_type("ShaderNodeSeparateRGB").is_none());
 }
+
+// ------------------------------------------------- WP 3.1: node RNA reads against Blender
+
+const NODE_RNA_DUMP: &str = include_str!("_node_rna.blender.json");
+
+/// A frap read as JSON for comparison with the dump (`None` for unbound properties).
+fn field_json(f: Result<Field<'_>, RnaError>) -> Option<serde_json::Value> {
+    use serde_json::{Value as J, json};
+    match f {
+        Ok(Field::Value(v)) => Some(match v {
+            Value::None => J::Null,
+            Value::Bool(b) => json!(b),
+            Value::Int(i) => json!(i),
+            Value::Float(x) => json!(f64::from(x)),
+            Value::Double(x) => json!(x),
+            Value::Str(s) | Value::Enum(s) => json!(s.as_str()),
+            Value::FloatArray { data, .. } => {
+                json!(data.iter().map(|x| f64::from(*x)).collect::<Vec<_>>())
+            }
+            other => panic!("unexpected value {other:?}"),
+        }),
+        Ok(Field::Id(None)) => Some(J::Null),
+        Ok(_) => None,
+        Err(e) => {
+            assert_eq!(e.kind, RnaErrorKind::NotImplemented, "{}", e.message);
+            None
+        }
+    }
+}
+
+fn json_eq(a: &serde_json::Value, b: &serde_json::Value) -> bool {
+    match (a.as_f64(), b.as_f64()) {
+        (Some(x), Some(y)) => x == y || (x - y).abs() <= 1e-6 * x.abs().max(1.0),
+        _ => match (a.as_array(), b.as_array()) {
+            (Some(x), Some(y)) => x.len() == y.len() && x.iter().zip(y).all(|(p, q)| json_eq(p, q)),
+            _ => a == b,
+        },
+    }
+}
+
+/// Every node and socket property listed in `_dump_node_rna.py` that frap binds reads as in
+/// Blender 5.2.4, for every node type; the WP 3.1 constants must be bound.
+#[test]
+fn node_rna_constants_equal_blender() {
+    let dump: serde_json::Value = serde_json::from_str(NODE_RNA_DUMP).unwrap();
+    let must_bind = [
+        "type",
+        "bl_static_type",
+        "bl_label",
+        "bl_description",
+        "bl_width_default",
+        "bl_width_min",
+        "bl_width_max",
+        "color_tag",
+        "label",
+        "bl_subtype_label",
+        "is_icon_visible",
+        "link_limit",
+        "description",
+        "display_shape",
+    ];
+    let mut t = NodeTree::new("T", NodeTreeType::Shader, false);
+    let mut failures = Vec::new();
+    let mut checked = 0;
+    for (bl_idname, jn) in dump["nodes"].as_object().unwrap() {
+        let i = t.new_node(bl_idname).expect("node type");
+        let node = super::NodeRef { tree: &t, i };
+        let srna = node.srna();
+        for (prop, want) in jn.as_object().unwrap() {
+            if prop == "inputs" || prop == "outputs" || want.get("$error").is_some() {
+                continue;
+            }
+            let p = srna
+                .find_prop(prop)
+                .unwrap_or_else(|| panic!("{bl_idname}.{prop}"));
+            match field_json(node.get(p)) {
+                Some(got) if !json_eq(&got, want) => {
+                    failures.push(format!("{bl_idname}.{prop}: frap {got}, Blender {want}"))
+                }
+                None if must_bind.contains(&prop.as_str()) => {
+                    failures.push(format!("{bl_idname}.{prop} unbound"))
+                }
+                _ => checked += 1,
+            }
+        }
+        for (dir, is_output) in [("inputs", false), ("outputs", true)] {
+            for (si, js) in jn[dir].as_array().unwrap().iter().enumerate() {
+                let sock = super::SocketRef {
+                    tree: &t,
+                    node: i,
+                    is_output,
+                    i: si,
+                };
+                let srna = sock.srna();
+                for (prop, want) in js.as_object().unwrap() {
+                    let p = srna
+                        .find_prop(prop)
+                        .unwrap_or_else(|| panic!("socket {prop}"));
+                    match field_json(sock.get(p)) {
+                        Some(got) if !json_eq(&got, want) => failures.push(format!(
+                            "{bl_idname}.{dir}[{si}].{prop}: frap {got}, Blender {want}"
+                        )),
+                        None if must_bind.contains(&prop.as_str()) => {
+                            failures.push(format!("{bl_idname}.{dir}[{si}].{prop} unbound"))
+                        }
+                        _ => checked += 1,
+                    }
+                }
+            }
+        }
+    }
+    for (key, tree) in [
+        ("material", NodeTree::default_material()),
+        ("world", NodeTree::default_world()),
+        (
+            "group",
+            NodeTree::new("NodeGroup", NodeTreeType::Shader, false),
+        ),
+    ] {
+        let jt = &dump["trees"][key];
+        for (prop, want) in jt.as_object().unwrap() {
+            if prop == "name" && key != "group" {
+                continue; // the factory trees are "Shader Nodetree"; `default_*()` differ
+            }
+            let p = tree
+                .srna()
+                .find_prop(prop)
+                .unwrap_or_else(|| panic!("tree {prop}"));
+            if let Some(got) = field_json(tree.get(p))
+                && !json_eq(&got, want)
+            {
+                failures.push(format!("{key} tree.{prop}: frap {got}, Blender {want}"));
+            }
+        }
+    }
+    assert!(failures.is_empty(), "{}", failures.join("\n"));
+    assert!(checked > 5000, "{checked} reads compared");
+}

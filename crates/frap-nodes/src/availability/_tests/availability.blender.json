@@ -1,0 +1,4177 @@
+{
+ "blender": "5.2.4 LTS",
+ "build_hash": "cd5dc428cce1",
+ "types": {
+  "NodeFrame": {
+   "cases": [
+    [
+     [],
+     "",
+     ""
+    ]
+   ],
+   "default": [
+    "",
+    ""
+   ],
+   "inputs": [],
+   "outputs": [],
+   "relevant": []
+  },
+  "NodeGroupInput": {
+   "cases": [
+    [
+     [],
+     "",
+     "1"
+    ]
+   ],
+   "default": [
+    "",
+    "1"
+   ],
+   "inputs": [],
+   "outputs": [
+    "__extend__"
+   ],
+   "relevant": []
+  },
+  "NodeGroupOutput": {
+   "cases": [
+    [
+     [],
+     "1",
+     ""
+    ]
+   ],
+   "default": [
+    "1",
+    ""
+   ],
+   "inputs": [
+    "__extend__"
+   ],
+   "outputs": [],
+   "relevant": []
+  },
+  "NodeReroute": {
+   "cases": [
+    [
+     [],
+     "1",
+     "1"
+    ]
+   ],
+   "default": [
+    "1",
+    "1"
+   ],
+   "inputs": [
+    "Input"
+   ],
+   "outputs": [
+    "Output"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeAddShader": {
+   "cases": [
+    [
+     [],
+     "11",
+     "1"
+    ]
+   ],
+   "default": [
+    "11",
+    "1"
+   ],
+   "inputs": [
+    "Shader",
+    "Shader_001"
+   ],
+   "outputs": [
+    "Shader"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeAmbientOcclusion": {
+   "cases": [
+    [
+     [],
+     "111",
+     "11"
+    ]
+   ],
+   "default": [
+    "111",
+    "11"
+   ],
+   "inputs": [
+    "Color",
+    "Distance",
+    "Normal"
+   ],
+   "outputs": [
+    "Color",
+    "AO"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeAttribute": {
+   "cases": [
+    [
+     [],
+     "",
+     "1111"
+    ]
+   ],
+   "default": [
+    "",
+    "1111"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Color",
+    "Vector",
+    "Fac",
+    "Alpha"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBackground": {
+   "cases": [
+    [
+     [],
+     "110",
+     "1"
+    ]
+   ],
+   "default": [
+    "110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Strength",
+    "Weight"
+   ],
+   "outputs": [
+    "Background"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBevel": {
+   "cases": [
+    [
+     [],
+     "11",
+     "1"
+    ]
+   ],
+   "default": [
+    "11",
+    "1"
+   ],
+   "inputs": [
+    "Radius",
+    "Normal"
+   ],
+   "outputs": [
+    "Normal"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBlackbody": {
+   "cases": [
+    [
+     [],
+     "1",
+     "1"
+    ]
+   ],
+   "default": [
+    "1",
+    "1"
+   ],
+   "inputs": [
+    "Temperature"
+   ],
+   "outputs": [
+    "Color"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBrightContrast": {
+   "cases": [
+    [
+     [],
+     "111",
+     "1"
+    ]
+   ],
+   "default": [
+    "111",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Bright",
+    "Contrast"
+   ],
+   "outputs": [
+    "Color"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBsdfAnisotropic": {
+   "cases": [
+    [
+     [],
+     "1111110",
+     "1"
+    ]
+   ],
+   "default": [
+    "1111110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Roughness",
+    "Anisotropy",
+    "Rotation",
+    "Normal",
+    "Tangent",
+    "Weight"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBsdfDiffuse": {
+   "cases": [
+    [
+     [],
+     "1110",
+     "1"
+    ]
+   ],
+   "default": [
+    "1110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Roughness",
+    "Normal",
+    "Weight"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBsdfGlass": {
+   "cases": [
+    [
+     [],
+     "1111011",
+     "1"
+    ]
+   ],
+   "default": [
+    "1111011",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Roughness",
+    "IOR",
+    "Normal",
+    "Weight",
+    "Thin Film Thickness",
+    "Thin Film IOR"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBsdfHair": {
+   "cases": [
+    [
+     [],
+     "111110",
+     "1"
+    ]
+   ],
+   "default": [
+    "111110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Offset",
+    "RoughnessU",
+    "RoughnessV",
+    "Tangent",
+    "Weight"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBsdfHairPrincipled": {
+   "cases": [
+    [
+     [
+      "CHIANG",
+      "ABSORPTION"
+     ],
+     "000010111110110000",
+     "1"
+    ],
+    [
+     [
+      "CHIANG",
+      "MELANIN"
+     ],
+     "011100111111110000",
+     "1"
+    ],
+    [
+     [
+      "CHIANG",
+      "COLOR"
+     ],
+     "100000111110110000",
+     "1"
+    ],
+    [
+     [
+      "HUANG",
+      "ABSORPTION"
+     ],
+     "000011100110110111",
+     "1"
+    ],
+    [
+     [
+      "HUANG",
+      "MELANIN"
+     ],
+     "011101100111110111",
+     "1"
+    ],
+    [
+     [
+      "HUANG",
+      "COLOR"
+     ],
+     "100001100110110111",
+     "1"
+    ]
+   ],
+   "default": [
+    "100000111110110000",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Melanin",
+    "Melanin Redness",
+    "Tint",
+    "Absorption Coefficient",
+    "Aspect Ratio",
+    "Roughness",
+    "Radial Roughness",
+    "Coat",
+    "IOR",
+    "Offset",
+    "Random Color",
+    "Random Roughness",
+    "Random",
+    "Weight",
+    "R lobe",
+    "TT lobe",
+    "TRT lobe"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": [
+    "model",
+    "parametrization"
+   ]
+  },
+  "ShaderNodeBsdfMetallic": {
+   "cases": [
+    [
+     [
+      "PHYSICAL_CONDUCTOR"
+     ],
+     "001111111011",
+     "1"
+    ],
+    [
+     [
+      "F82"
+     ],
+     "110011111011",
+     "1"
+    ]
+   ],
+   "default": [
+    "110011111011",
+    "1"
+   ],
+   "inputs": [
+    "Base Color",
+    "Edge Tint",
+    "IOR",
+    "Extinction",
+    "Roughness",
+    "Anisotropy",
+    "Rotation",
+    "Normal",
+    "Tangent",
+    "Weight",
+    "Thin Film Thickness",
+    "Thin Film IOR"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": [
+    "fresnel_type"
+   ]
+  },
+  "ShaderNodeBsdfPrincipled": {
+   "cases": [
+    [
+     [
+      "BURLEY"
+     ],
+     "11111110111101111111111111111111",
+     "1"
+    ],
+    [
+     [
+      "RANDOM_WALK"
+     ],
+     "11111110111101111111111111111111",
+     "1"
+    ],
+    [
+     [
+      "RANDOM_WALK_SKIN"
+     ],
+     "11111110111111111111111111111111",
+     "1"
+    ],
+    [
+     [
+      "RANDOM_WALK_LEGACY"
+     ],
+     "11111110111101111111111111111111",
+     "1"
+    ]
+   ],
+   "default": [
+    "11111110111101111111111111111111",
+    "1"
+   ],
+   "inputs": [
+    "Base Color",
+    "Metallic",
+    "Roughness",
+    "IOR",
+    "Alpha",
+    "Thin Wall",
+    "Normal",
+    "Weight",
+    "Diffuse Roughness",
+    "Subsurface Weight",
+    "Subsurface Radius",
+    "Subsurface Scale",
+    "Subsurface IOR",
+    "Subsurface Anisotropy",
+    "Specular IOR Level",
+    "Specular Tint",
+    "Anisotropic",
+    "Anisotropic Rotation",
+    "Tangent",
+    "Transmission Weight",
+    "Coat Weight",
+    "Coat Roughness",
+    "Coat IOR",
+    "Coat Tint",
+    "Coat Normal",
+    "Sheen Weight",
+    "Sheen Roughness",
+    "Sheen Tint",
+    "Emission Color",
+    "Emission Strength",
+    "Thin Film Thickness",
+    "Thin Film IOR"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": [
+    "subsurface_method"
+   ]
+  },
+  "ShaderNodeBsdfRayPortal": {
+   "cases": [
+    [
+     [],
+     "1110",
+     "1"
+    ]
+   ],
+   "default": [
+    "1110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Position",
+    "Direction",
+    "Weight"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBsdfRefraction": {
+   "cases": [
+    [
+     [],
+     "11110",
+     "1"
+    ]
+   ],
+   "default": [
+    "11110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Roughness",
+    "IOR",
+    "Normal",
+    "Weight"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBsdfSheen": {
+   "cases": [
+    [
+     [],
+     "1110",
+     "1"
+    ]
+   ],
+   "default": [
+    "1110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Roughness",
+    "Normal",
+    "Weight"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBsdfToon": {
+   "cases": [
+    [
+     [],
+     "11110",
+     "1"
+    ]
+   ],
+   "default": [
+    "11110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Size",
+    "Smooth",
+    "Normal",
+    "Weight"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBsdfTranslucent": {
+   "cases": [
+    [
+     [],
+     "110",
+     "1"
+    ]
+   ],
+   "default": [
+    "110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Normal",
+    "Weight"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBsdfTransparent": {
+   "cases": [
+    [
+     [],
+     "10",
+     "1"
+    ]
+   ],
+   "default": [
+    "10",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Weight"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeBump": {
+   "cases": [
+    [
+     [],
+     "11111",
+     "1"
+    ]
+   ],
+   "default": [
+    "11111",
+    "1"
+   ],
+   "inputs": [
+    "Strength",
+    "Distance",
+    "Filter Width",
+    "Height",
+    "Normal"
+   ],
+   "outputs": [
+    "Normal"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeCameraData": {
+   "cases": [
+    [
+     [],
+     "",
+     "111"
+    ]
+   ],
+   "default": [
+    "",
+    "111"
+   ],
+   "inputs": [],
+   "outputs": [
+    "View Vector",
+    "View Z Depth",
+    "View Distance"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeClamp": {
+   "cases": [
+    [
+     [],
+     "111",
+     "1"
+    ]
+   ],
+   "default": [
+    "111",
+    "1"
+   ],
+   "inputs": [
+    "Value",
+    "Min",
+    "Max"
+   ],
+   "outputs": [
+    "Result"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeCombineColor": {
+   "cases": [
+    [
+     [],
+     "111",
+     "1"
+    ]
+   ],
+   "default": [
+    "111",
+    "1"
+   ],
+   "inputs": [
+    "Red",
+    "Green",
+    "Blue"
+   ],
+   "outputs": [
+    "Color"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeCombineXYZ": {
+   "cases": [
+    [
+     [],
+     "111",
+     "1"
+    ]
+   ],
+   "default": [
+    "111",
+    "1"
+   ],
+   "inputs": [
+    "X",
+    "Y",
+    "Z"
+   ],
+   "outputs": [
+    "Vector"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeDisplacement": {
+   "cases": [
+    [
+     [],
+     "1111",
+     "1"
+    ]
+   ],
+   "default": [
+    "1111",
+    "1"
+   ],
+   "inputs": [
+    "Height",
+    "Midlevel",
+    "Scale",
+    "Normal"
+   ],
+   "outputs": [
+    "Displacement"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeEeveeSpecular": {
+   "cases": [
+    [
+     [],
+     "1111111110",
+     "1"
+    ]
+   ],
+   "default": [
+    "1111111110",
+    "1"
+   ],
+   "inputs": [
+    "Base Color",
+    "Specular",
+    "Roughness",
+    "Emissive Color",
+    "Transparency",
+    "Normal",
+    "Clear Coat",
+    "Clear Coat Roughness",
+    "Clear Coat Normal",
+    "Weight"
+   ],
+   "outputs": [
+    "BSDF"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeEmission": {
+   "cases": [
+    [
+     [],
+     "110",
+     "1"
+    ]
+   ],
+   "default": [
+    "110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Strength",
+    "Weight"
+   ],
+   "outputs": [
+    "Emission"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeFloatCurve": {
+   "cases": [
+    [
+     [],
+     "11",
+     "1"
+    ]
+   ],
+   "default": [
+    "11",
+    "1"
+   ],
+   "inputs": [
+    "Factor",
+    "Value"
+   ],
+   "outputs": [
+    "Value"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeFresnel": {
+   "cases": [
+    [
+     [],
+     "11",
+     "1"
+    ]
+   ],
+   "default": [
+    "11",
+    "1"
+   ],
+   "inputs": [
+    "IOR",
+    "Normal"
+   ],
+   "outputs": [
+    "Fac"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeGamma": {
+   "cases": [
+    [
+     [],
+     "11",
+     "1"
+    ]
+   ],
+   "default": [
+    "11",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Gamma"
+   ],
+   "outputs": [
+    "Color"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeGroup": {
+   "cases": [
+    [
+     [],
+     "",
+     ""
+    ]
+   ],
+   "default": [
+    "",
+    ""
+   ],
+   "inputs": [],
+   "outputs": [],
+   "relevant": []
+  },
+  "ShaderNodeHairInfo": {
+   "cases": [
+    [
+     [],
+     "",
+     "111111"
+    ]
+   ],
+   "default": [
+    "",
+    "111111"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Is Strand",
+    "Intercept",
+    "Length",
+    "Thickness",
+    "Tangent Normal",
+    "Random"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeHoldout": {
+   "cases": [
+    [
+     [],
+     "0",
+     "1"
+    ]
+   ],
+   "default": [
+    "0",
+    "1"
+   ],
+   "inputs": [
+    "Weight"
+   ],
+   "outputs": [
+    "Holdout"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeHueSaturation": {
+   "cases": [
+    [
+     [],
+     "11111",
+     "1"
+    ]
+   ],
+   "default": [
+    "11111",
+    "1"
+   ],
+   "inputs": [
+    "Hue",
+    "Saturation",
+    "Value",
+    "Fac",
+    "Color"
+   ],
+   "outputs": [
+    "Color"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeInvert": {
+   "cases": [
+    [
+     [],
+     "11",
+     "1"
+    ]
+   ],
+   "default": [
+    "11",
+    "1"
+   ],
+   "inputs": [
+    "Fac",
+    "Color"
+   ],
+   "outputs": [
+    "Color"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeLayerWeight": {
+   "cases": [
+    [
+     [],
+     "11",
+     "11"
+    ]
+   ],
+   "default": [
+    "11",
+    "11"
+   ],
+   "inputs": [
+    "Blend",
+    "Normal"
+   ],
+   "outputs": [
+    "Fresnel",
+    "Facing"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeLightFalloff": {
+   "cases": [
+    [
+     [],
+     "11",
+     "111"
+    ]
+   ],
+   "default": [
+    "11",
+    "111"
+   ],
+   "inputs": [
+    "Strength",
+    "Smooth"
+   ],
+   "outputs": [
+    "Quadratic",
+    "Linear",
+    "Constant"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeLightPath": {
+   "cases": [
+    [
+     [],
+     "",
+     "111111111111111"
+    ]
+   ],
+   "default": [
+    "",
+    "111111111111111"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Is Camera Ray",
+    "Is Shadow Ray",
+    "Is Diffuse Ray",
+    "Is Glossy Ray",
+    "Is Singular Ray",
+    "Is Reflection Ray",
+    "Is Transmission Ray",
+    "Is Volume Scatter Ray",
+    "Ray Length",
+    "Ray Depth",
+    "Diffuse Depth",
+    "Glossy Depth",
+    "Transparent Depth",
+    "Transmission Depth",
+    "Portal Depth"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeMapRange": {
+   "cases": [
+    [
+     [
+      "LINEAR",
+      "FLOAT"
+     ],
+     "111110000000",
+     "10"
+    ],
+    [
+     [
+      "LINEAR",
+      "FLOAT_VECTOR"
+     ],
+     "000000111110",
+     "01"
+    ],
+    [
+     [
+      "STEPPED",
+      "FLOAT"
+     ],
+     "111111000000",
+     "10"
+    ],
+    [
+     [
+      "STEPPED",
+      "FLOAT_VECTOR"
+     ],
+     "000000111111",
+     "01"
+    ],
+    [
+     [
+      "SMOOTHSTEP",
+      "FLOAT"
+     ],
+     "111110000000",
+     "10"
+    ],
+    [
+     [
+      "SMOOTHSTEP",
+      "FLOAT_VECTOR"
+     ],
+     "000000111110",
+     "01"
+    ],
+    [
+     [
+      "SMOOTHERSTEP",
+      "FLOAT"
+     ],
+     "111110000000",
+     "10"
+    ],
+    [
+     [
+      "SMOOTHERSTEP",
+      "FLOAT_VECTOR"
+     ],
+     "000000111110",
+     "01"
+    ]
+   ],
+   "default": [
+    "111110000000",
+    "10"
+   ],
+   "inputs": [
+    "Value",
+    "From Min",
+    "From Max",
+    "To Min",
+    "To Max",
+    "Steps",
+    "Vector",
+    "From_Min_FLOAT3",
+    "From_Max_FLOAT3",
+    "To_Min_FLOAT3",
+    "To_Max_FLOAT3",
+    "Steps_FLOAT3"
+   ],
+   "outputs": [
+    "Result",
+    "Vector"
+   ],
+   "relevant": [
+    "interpolation_type",
+    "data_type"
+   ]
+  },
+  "ShaderNodeMapping": {
+   "cases": [
+    [
+     [
+      "POINT"
+     ],
+     "1111",
+     "1"
+    ],
+    [
+     [
+      "TEXTURE"
+     ],
+     "1111",
+     "1"
+    ],
+    [
+     [
+      "VECTOR"
+     ],
+     "1011",
+     "1"
+    ],
+    [
+     [
+      "NORMAL"
+     ],
+     "1011",
+     "1"
+    ]
+   ],
+   "default": [
+    "1111",
+    "1"
+   ],
+   "inputs": [
+    "Vector",
+    "Location",
+    "Rotation",
+    "Scale"
+   ],
+   "outputs": [
+    "Vector"
+   ],
+   "relevant": [
+    "vector_type"
+   ]
+  },
+  "ShaderNodeMath": {
+   "cases": [
+    [
+     [
+      "ADD"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "SUBTRACT"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "MULTIPLY"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "DIVIDE"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "MULTIPLY_ADD"
+     ],
+     "111",
+     "1"
+    ],
+    [
+     [
+      "POWER"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "LOGARITHM"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "SQRT"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "INVERSE_SQRT"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "ABSOLUTE"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "EXPONENT"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "MINIMUM"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "MAXIMUM"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "LESS_THAN"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "GREATER_THAN"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "SIGN"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "COMPARE"
+     ],
+     "111",
+     "1"
+    ],
+    [
+     [
+      "SMOOTH_MIN"
+     ],
+     "111",
+     "1"
+    ],
+    [
+     [
+      "SMOOTH_MAX"
+     ],
+     "111",
+     "1"
+    ],
+    [
+     [
+      "ROUND"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "FLOOR"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "CEIL"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "TRUNC"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "FRACT"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "MODULO"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "FLOORED_MODULO"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "WRAP"
+     ],
+     "111",
+     "1"
+    ],
+    [
+     [
+      "SNAP"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "PINGPONG"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "SINE"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "COSINE"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "TANGENT"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "ARCSINE"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "ARCCOSINE"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "ARCTANGENT"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "ARCTAN2"
+     ],
+     "110",
+     "1"
+    ],
+    [
+     [
+      "SINH"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "COSH"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "TANH"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "RADIANS"
+     ],
+     "100",
+     "1"
+    ],
+    [
+     [
+      "DEGREES"
+     ],
+     "100",
+     "1"
+    ]
+   ],
+   "default": [
+    "110",
+    "1"
+   ],
+   "inputs": [
+    "Value",
+    "Value_001",
+    "Value_002"
+   ],
+   "outputs": [
+    "Value"
+   ],
+   "relevant": [
+    "operation"
+   ]
+  },
+  "ShaderNodeMix": {
+   "cases": [
+    [
+     [
+      "FLOAT",
+      "UNIFORM"
+     ],
+     "1011000000",
+     "1000"
+    ],
+    [
+     [
+      "FLOAT",
+      "NON_UNIFORM"
+     ],
+     "1011000000",
+     "1000"
+    ],
+    [
+     [
+      "VECTOR",
+      "UNIFORM"
+     ],
+     "1000110000",
+     "0100"
+    ],
+    [
+     [
+      "VECTOR",
+      "NON_UNIFORM"
+     ],
+     "0100110000",
+     "0100"
+    ],
+    [
+     [
+      "RGBA",
+      "UNIFORM"
+     ],
+     "1000001100",
+     "0010"
+    ],
+    [
+     [
+      "RGBA",
+      "NON_UNIFORM"
+     ],
+     "1000001100",
+     "0010"
+    ]
+   ],
+   "default": [
+    "1011000000",
+    "1000"
+   ],
+   "inputs": [
+    "Factor_Float",
+    "Factor_Vector",
+    "A_Float",
+    "B_Float",
+    "A_Vector",
+    "B_Vector",
+    "A_Color",
+    "B_Color",
+    "A_Rotation",
+    "B_Rotation"
+   ],
+   "outputs": [
+    "Result_Float",
+    "Result_Vector",
+    "Result_Color",
+    "Result_Rotation"
+   ],
+   "relevant": [
+    "data_type",
+    "factor_mode"
+   ]
+  },
+  "ShaderNodeMixRGB": {
+   "cases": [
+    [
+     [],
+     "111",
+     "1"
+    ]
+   ],
+   "default": [
+    "111",
+    "1"
+   ],
+   "inputs": [
+    "Fac",
+    "Color1",
+    "Color2"
+   ],
+   "outputs": [
+    "Color"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeMixShader": {
+   "cases": [
+    [
+     [],
+     "111",
+     "1"
+    ]
+   ],
+   "default": [
+    "111",
+    "1"
+   ],
+   "inputs": [
+    "Fac",
+    "Shader",
+    "Shader_001"
+   ],
+   "outputs": [
+    "Shader"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeNewGeometry": {
+   "cases": [
+    [
+     [],
+     "",
+     "111111111"
+    ]
+   ],
+   "default": [
+    "",
+    "111111111"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Position",
+    "Normal",
+    "Tangent",
+    "True Normal",
+    "Incoming",
+    "Parametric",
+    "Backfacing",
+    "Pointiness",
+    "Random Per Island"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeNormal": {
+   "cases": [
+    [
+     [],
+     "1",
+     "11"
+    ]
+   ],
+   "default": [
+    "1",
+    "11"
+   ],
+   "inputs": [
+    "Normal"
+   ],
+   "outputs": [
+    "Normal",
+    "Dot"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeNormalMap": {
+   "cases": [
+    [
+     [],
+     "11",
+     "1"
+    ]
+   ],
+   "default": [
+    "11",
+    "1"
+   ],
+   "inputs": [
+    "Strength",
+    "Color"
+   ],
+   "outputs": [
+    "Normal"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeObjectInfo": {
+   "cases": [
+    [
+     [],
+     "",
+     "111111"
+    ]
+   ],
+   "default": [
+    "",
+    "111111"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Location",
+    "Color",
+    "Alpha",
+    "Object Index",
+    "Material Index",
+    "Random"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeOutputAOV": {
+   "cases": [
+    [
+     [],
+     "11",
+     ""
+    ]
+   ],
+   "default": [
+    "11",
+    ""
+   ],
+   "inputs": [
+    "Color",
+    "Value"
+   ],
+   "outputs": [],
+   "relevant": []
+  },
+  "ShaderNodeOutputLight": {
+   "cases": [
+    [
+     [],
+     "1",
+     ""
+    ]
+   ],
+   "default": [
+    "1",
+    ""
+   ],
+   "inputs": [
+    "Surface"
+   ],
+   "outputs": [],
+   "relevant": []
+  },
+  "ShaderNodeOutputLineStyle": {
+   "cases": [
+    [
+     [],
+     "1111",
+     ""
+    ]
+   ],
+   "default": [
+    "1111",
+    ""
+   ],
+   "inputs": [
+    "Color",
+    "Color Fac",
+    "Alpha",
+    "Alpha Fac"
+   ],
+   "outputs": [],
+   "relevant": []
+  },
+  "ShaderNodeOutputMaterial": {
+   "cases": [
+    [
+     [],
+     "1111",
+     ""
+    ]
+   ],
+   "default": [
+    "1111",
+    ""
+   ],
+   "inputs": [
+    "Surface",
+    "Volume",
+    "Displacement",
+    "Thickness"
+   ],
+   "outputs": [],
+   "relevant": []
+  },
+  "ShaderNodeOutputWorld": {
+   "cases": [
+    [
+     [],
+     "11",
+     ""
+    ]
+   ],
+   "default": [
+    "11",
+    ""
+   ],
+   "inputs": [
+    "Surface",
+    "Volume"
+   ],
+   "outputs": [],
+   "relevant": []
+  },
+  "ShaderNodeParticleInfo": {
+   "cases": [
+    [
+     [],
+     "",
+     "11111111"
+    ]
+   ],
+   "default": [
+    "",
+    "11111111"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Index",
+    "Random",
+    "Age",
+    "Lifetime",
+    "Location",
+    "Size",
+    "Velocity",
+    "Angular Velocity"
+   ],
+   "relevant": []
+  },
+  "ShaderNodePointInfo": {
+   "cases": [
+    [
+     [],
+     "",
+     "111"
+    ]
+   ],
+   "default": [
+    "",
+    "111"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Position",
+    "Radius",
+    "Random"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeRGB": {
+   "cases": [
+    [
+     [],
+     "",
+     "1"
+    ]
+   ],
+   "default": [
+    "",
+    "1"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Color"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeRGBCurve": {
+   "cases": [
+    [
+     [],
+     "11",
+     "1"
+    ]
+   ],
+   "default": [
+    "11",
+    "1"
+   ],
+   "inputs": [
+    "Fac",
+    "Color"
+   ],
+   "outputs": [
+    "Color"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeRGBToBW": {
+   "cases": [
+    [
+     [],
+     "1",
+     "1"
+    ]
+   ],
+   "default": [
+    "1",
+    "1"
+   ],
+   "inputs": [
+    "Color"
+   ],
+   "outputs": [
+    "Val"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeRadialTiling": {
+   "cases": [
+    [
+     [],
+     "111",
+     "1111"
+    ]
+   ],
+   "default": [
+    "111",
+    "1111"
+   ],
+   "inputs": [
+    "Vector",
+    "Sides",
+    "Roundness"
+   ],
+   "outputs": [
+    "Segment Coordinates",
+    "Segment ID",
+    "Segment Width",
+    "Segment Rotation"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeRaycast": {
+   "cases": [
+    [
+     [],
+     "1111",
+     "111111"
+    ]
+   ],
+   "default": [
+    "1111",
+    "111111"
+   ],
+   "inputs": [
+    "Position",
+    "Direction",
+    "Length",
+    "__extend__"
+   ],
+   "outputs": [
+    "Is Hit",
+    "Self Hit",
+    "Hit Distance",
+    "Hit Position",
+    "Hit Normal",
+    "__extend__"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeScript": {
+   "cases": [
+    [
+     [],
+     "",
+     ""
+    ]
+   ],
+   "default": [
+    "",
+    ""
+   ],
+   "inputs": [],
+   "outputs": [],
+   "relevant": []
+  },
+  "ShaderNodeSeparateColor": {
+   "cases": [
+    [
+     [],
+     "1",
+     "111"
+    ]
+   ],
+   "default": [
+    "1",
+    "111"
+   ],
+   "inputs": [
+    "Color"
+   ],
+   "outputs": [
+    "Red",
+    "Green",
+    "Blue"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeSeparateXYZ": {
+   "cases": [
+    [
+     [],
+     "1",
+     "111"
+    ]
+   ],
+   "default": [
+    "1",
+    "111"
+   ],
+   "inputs": [
+    "Vector"
+   ],
+   "outputs": [
+    "X",
+    "Y",
+    "Z"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeShaderToRGB": {
+   "cases": [
+    [
+     [],
+     "1",
+     "11"
+    ]
+   ],
+   "default": [
+    "1",
+    "11"
+   ],
+   "inputs": [
+    "Shader"
+   ],
+   "outputs": [
+    "Color",
+    "Alpha"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeSqueeze": {
+   "cases": [
+    [
+     [],
+     "111",
+     "1"
+    ]
+   ],
+   "default": [
+    "111",
+    "1"
+   ],
+   "inputs": [
+    "Value",
+    "Width",
+    "Center"
+   ],
+   "outputs": [
+    "Value"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeSubsurfaceScattering": {
+   "cases": [
+    [
+     [
+      "BURLEY"
+     ],
+     "11100010",
+     "1"
+    ],
+    [
+     [
+      "RANDOM_WALK"
+     ],
+     "11111110",
+     "1"
+    ],
+    [
+     [
+      "RANDOM_WALK_SKIN"
+     ],
+     "11110110",
+     "1"
+    ],
+    [
+     [
+      "RANDOM_WALK_LEGACY"
+     ],
+     "11111110",
+     "1"
+    ]
+   ],
+   "default": [
+    "11111110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Scale",
+    "Radius",
+    "IOR",
+    "Roughness",
+    "Anisotropy",
+    "Normal",
+    "Weight"
+   ],
+   "outputs": [
+    "BSSRDF"
+   ],
+   "relevant": [
+    "falloff"
+   ]
+  },
+  "ShaderNodeTangent": {
+   "cases": [
+    [
+     [],
+     "",
+     "1"
+    ]
+   ],
+   "default": [
+    "",
+    "1"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Tangent"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeTexBrick": {
+   "cases": [
+    [
+     [],
+     "1111111111",
+     "11"
+    ]
+   ],
+   "default": [
+    "1111111111",
+    "11"
+   ],
+   "inputs": [
+    "Vector",
+    "Color1",
+    "Color2",
+    "Mortar",
+    "Scale",
+    "Mortar Size",
+    "Mortar Smooth",
+    "Bias",
+    "Brick Width",
+    "Row Height"
+   ],
+   "outputs": [
+    "Color",
+    "Fac"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeTexChecker": {
+   "cases": [
+    [
+     [],
+     "1111",
+     "11"
+    ]
+   ],
+   "default": [
+    "1111",
+    "11"
+   ],
+   "inputs": [
+    "Vector",
+    "Color1",
+    "Color2",
+    "Scale"
+   ],
+   "outputs": [
+    "Color",
+    "Fac"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeTexCoord": {
+   "cases": [
+    [
+     [],
+     "",
+     "1111111"
+    ]
+   ],
+   "default": [
+    "",
+    "1111111"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Generated",
+    "Normal",
+    "UV",
+    "Object",
+    "Camera",
+    "Window",
+    "Reflection"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeTexEnvironment": {
+   "cases": [
+    [
+     [],
+     "1",
+     "1"
+    ]
+   ],
+   "default": [
+    "1",
+    "1"
+   ],
+   "inputs": [
+    "Vector"
+   ],
+   "outputs": [
+    "Color"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeTexGabor": {
+   "cases": [
+    [
+     [
+      "2D"
+     ],
+     "111110",
+     "111"
+    ],
+    [
+     [
+      "3D"
+     ],
+     "111101",
+     "111"
+    ]
+   ],
+   "default": [
+    "111110",
+    "111"
+   ],
+   "inputs": [
+    "Vector",
+    "Scale",
+    "Frequency",
+    "Anisotropy",
+    "Orientation 2D",
+    "Orientation 3D"
+   ],
+   "outputs": [
+    "Value",
+    "Phase",
+    "Intensity"
+   ],
+   "relevant": [
+    "gabor_type"
+   ]
+  },
+  "ShaderNodeTexGradient": {
+   "cases": [
+    [
+     [],
+     "1",
+     "11"
+    ]
+   ],
+   "default": [
+    "1",
+    "11"
+   ],
+   "inputs": [
+    "Vector"
+   ],
+   "outputs": [
+    "Color",
+    "Fac"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeTexIES": {
+   "cases": [
+    [
+     [],
+     "11",
+     "1"
+    ]
+   ],
+   "default": [
+    "11",
+    "1"
+   ],
+   "inputs": [
+    "Vector",
+    "Strength"
+   ],
+   "outputs": [
+    "Fac"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeTexImage": {
+   "cases": [
+    [
+     [],
+     "1",
+     "11"
+    ]
+   ],
+   "default": [
+    "1",
+    "11"
+   ],
+   "inputs": [
+    "Vector"
+   ],
+   "outputs": [
+    "Color",
+    "Alpha"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeTexMagic": {
+   "cases": [
+    [
+     [],
+     "111",
+     "11"
+    ]
+   ],
+   "default": [
+    "111",
+    "11"
+   ],
+   "inputs": [
+    "Vector",
+    "Scale",
+    "Distortion"
+   ],
+   "outputs": [
+    "Color",
+    "Fac"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeTexNoise": {
+   "cases": [
+    [
+     [
+      "1D",
+      "MULTIFRACTAL"
+     ],
+     "011111001",
+     "11"
+    ],
+    [
+     [
+      "1D",
+      "RIDGED_MULTIFRACTAL"
+     ],
+     "011111111",
+     "11"
+    ],
+    [
+     [
+      "1D",
+      "HYBRID_MULTIFRACTAL"
+     ],
+     "011111111",
+     "11"
+    ],
+    [
+     [
+      "1D",
+      "FBM"
+     ],
+     "011111001",
+     "11"
+    ],
+    [
+     [
+      "1D",
+      "HETERO_TERRAIN"
+     ],
+     "011111101",
+     "11"
+    ],
+    [
+     [
+      "2D",
+      "MULTIFRACTAL"
+     ],
+     "101111001",
+     "11"
+    ],
+    [
+     [
+      "2D",
+      "RIDGED_MULTIFRACTAL"
+     ],
+     "101111111",
+     "11"
+    ],
+    [
+     [
+      "2D",
+      "HYBRID_MULTIFRACTAL"
+     ],
+     "101111111",
+     "11"
+    ],
+    [
+     [
+      "2D",
+      "FBM"
+     ],
+     "101111001",
+     "11"
+    ],
+    [
+     [
+      "2D",
+      "HETERO_TERRAIN"
+     ],
+     "101111101",
+     "11"
+    ],
+    [
+     [
+      "3D",
+      "MULTIFRACTAL"
+     ],
+     "101111001",
+     "11"
+    ],
+    [
+     [
+      "3D",
+      "RIDGED_MULTIFRACTAL"
+     ],
+     "101111111",
+     "11"
+    ],
+    [
+     [
+      "3D",
+      "HYBRID_MULTIFRACTAL"
+     ],
+     "101111111",
+     "11"
+    ],
+    [
+     [
+      "3D",
+      "FBM"
+     ],
+     "101111001",
+     "11"
+    ],
+    [
+     [
+      "3D",
+      "HETERO_TERRAIN"
+     ],
+     "101111101",
+     "11"
+    ],
+    [
+     [
+      "4D",
+      "MULTIFRACTAL"
+     ],
+     "111111001",
+     "11"
+    ],
+    [
+     [
+      "4D",
+      "RIDGED_MULTIFRACTAL"
+     ],
+     "111111111",
+     "11"
+    ],
+    [
+     [
+      "4D",
+      "HYBRID_MULTIFRACTAL"
+     ],
+     "111111111",
+     "11"
+    ],
+    [
+     [
+      "4D",
+      "FBM"
+     ],
+     "111111001",
+     "11"
+    ],
+    [
+     [
+      "4D",
+      "HETERO_TERRAIN"
+     ],
+     "111111101",
+     "11"
+    ]
+   ],
+   "default": [
+    "101111001",
+    "11"
+   ],
+   "inputs": [
+    "Vector",
+    "W",
+    "Scale",
+    "Detail",
+    "Roughness",
+    "Lacunarity",
+    "Offset",
+    "Gain",
+    "Distortion"
+   ],
+   "outputs": [
+    "Fac",
+    "Color"
+   ],
+   "relevant": [
+    "noise_dimensions",
+    "noise_type"
+   ]
+  },
+  "ShaderNodeTexSky": {
+   "cases": [
+    [
+     [
+      "SINGLE_SCATTERING",
+      false
+     ],
+     "1",
+     "1"
+    ],
+    [
+     [
+      "SINGLE_SCATTERING",
+      true
+     ],
+     "0",
+     "1"
+    ],
+    [
+     [
+      "MULTIPLE_SCATTERING",
+      false
+     ],
+     "1",
+     "1"
+    ],
+    [
+     [
+      "MULTIPLE_SCATTERING",
+      true
+     ],
+     "0",
+     "1"
+    ],
+    [
+     [
+      "PREETHAM",
+      false
+     ],
+     "1",
+     "1"
+    ],
+    [
+     [
+      "PREETHAM",
+      true
+     ],
+     "1",
+     "1"
+    ],
+    [
+     [
+      "HOSEK_WILKIE",
+      false
+     ],
+     "1",
+     "1"
+    ],
+    [
+     [
+      "HOSEK_WILKIE",
+      true
+     ],
+     "1",
+     "1"
+    ]
+   ],
+   "default": [
+    "0",
+    "1"
+   ],
+   "inputs": [
+    "Vector"
+   ],
+   "outputs": [
+    "Color"
+   ],
+   "relevant": [
+    "sky_type",
+    "sun_disc"
+   ]
+  },
+  "ShaderNodeTexVoronoi": {
+   "cases": [
+    [
+     [
+      "1D",
+      "EUCLIDEAN",
+      "F1"
+     ],
+     "011111001",
+     "11010"
+    ],
+    [
+     [
+      "1D",
+      "EUCLIDEAN",
+      "F2"
+     ],
+     "011111001",
+     "11010"
+    ],
+    [
+     [
+      "1D",
+      "EUCLIDEAN",
+      "SMOOTH_F1"
+     ],
+     "011111101",
+     "11010"
+    ],
+    [
+     [
+      "1D",
+      "EUCLIDEAN",
+      "DISTANCE_TO_EDGE"
+     ],
+     "011111001",
+     "10000"
+    ],
+    [
+     [
+      "1D",
+      "EUCLIDEAN",
+      "N_SPHERE_RADIUS"
+     ],
+     "011000001",
+     "00001"
+    ],
+    [
+     [
+      "1D",
+      "MANHATTAN",
+      "F1"
+     ],
+     "011111001",
+     "11010"
+    ],
+    [
+     [
+      "1D",
+      "MANHATTAN",
+      "F2"
+     ],
+     "011111001",
+     "11010"
+    ],
+    [
+     [
+      "1D",
+      "MANHATTAN",
+      "SMOOTH_F1"
+     ],
+     "011111101",
+     "11010"
+    ],
+    [
+     [
+      "1D",
+      "MANHATTAN",
+      "DISTANCE_TO_EDGE"
+     ],
+     "011111001",
+     "10000"
+    ],
+    [
+     [
+      "1D",
+      "MANHATTAN",
+      "N_SPHERE_RADIUS"
+     ],
+     "011000001",
+     "00001"
+    ],
+    [
+     [
+      "1D",
+      "CHEBYCHEV",
+      "F1"
+     ],
+     "011111001",
+     "11010"
+    ],
+    [
+     [
+      "1D",
+      "CHEBYCHEV",
+      "F2"
+     ],
+     "011111001",
+     "11010"
+    ],
+    [
+     [
+      "1D",
+      "CHEBYCHEV",
+      "SMOOTH_F1"
+     ],
+     "011111101",
+     "11010"
+    ],
+    [
+     [
+      "1D",
+      "CHEBYCHEV",
+      "DISTANCE_TO_EDGE"
+     ],
+     "011111001",
+     "10000"
+    ],
+    [
+     [
+      "1D",
+      "CHEBYCHEV",
+      "N_SPHERE_RADIUS"
+     ],
+     "011000001",
+     "00001"
+    ],
+    [
+     [
+      "1D",
+      "MINKOWSKI",
+      "F1"
+     ],
+     "011111001",
+     "11010"
+    ],
+    [
+     [
+      "1D",
+      "MINKOWSKI",
+      "F2"
+     ],
+     "011111001",
+     "11010"
+    ],
+    [
+     [
+      "1D",
+      "MINKOWSKI",
+      "SMOOTH_F1"
+     ],
+     "011111101",
+     "11010"
+    ],
+    [
+     [
+      "1D",
+      "MINKOWSKI",
+      "DISTANCE_TO_EDGE"
+     ],
+     "011111001",
+     "10000"
+    ],
+    [
+     [
+      "1D",
+      "MINKOWSKI",
+      "N_SPHERE_RADIUS"
+     ],
+     "011000001",
+     "00001"
+    ],
+    [
+     [
+      "2D",
+      "EUCLIDEAN",
+      "F1"
+     ],
+     "101111001",
+     "11100"
+    ],
+    [
+     [
+      "2D",
+      "EUCLIDEAN",
+      "F2"
+     ],
+     "101111001",
+     "11100"
+    ],
+    [
+     [
+      "2D",
+      "EUCLIDEAN",
+      "SMOOTH_F1"
+     ],
+     "101111101",
+     "11100"
+    ],
+    [
+     [
+      "2D",
+      "EUCLIDEAN",
+      "DISTANCE_TO_EDGE"
+     ],
+     "101111001",
+     "10000"
+    ],
+    [
+     [
+      "2D",
+      "EUCLIDEAN",
+      "N_SPHERE_RADIUS"
+     ],
+     "101000001",
+     "00001"
+    ],
+    [
+     [
+      "2D",
+      "MANHATTAN",
+      "F1"
+     ],
+     "101111001",
+     "11100"
+    ],
+    [
+     [
+      "2D",
+      "MANHATTAN",
+      "F2"
+     ],
+     "101111001",
+     "11100"
+    ],
+    [
+     [
+      "2D",
+      "MANHATTAN",
+      "SMOOTH_F1"
+     ],
+     "101111101",
+     "11100"
+    ],
+    [
+     [
+      "2D",
+      "MANHATTAN",
+      "DISTANCE_TO_EDGE"
+     ],
+     "101111001",
+     "10000"
+    ],
+    [
+     [
+      "2D",
+      "MANHATTAN",
+      "N_SPHERE_RADIUS"
+     ],
+     "101000001",
+     "00001"
+    ],
+    [
+     [
+      "2D",
+      "CHEBYCHEV",
+      "F1"
+     ],
+     "101111001",
+     "11100"
+    ],
+    [
+     [
+      "2D",
+      "CHEBYCHEV",
+      "F2"
+     ],
+     "101111001",
+     "11100"
+    ],
+    [
+     [
+      "2D",
+      "CHEBYCHEV",
+      "SMOOTH_F1"
+     ],
+     "101111101",
+     "11100"
+    ],
+    [
+     [
+      "2D",
+      "CHEBYCHEV",
+      "DISTANCE_TO_EDGE"
+     ],
+     "101111001",
+     "10000"
+    ],
+    [
+     [
+      "2D",
+      "CHEBYCHEV",
+      "N_SPHERE_RADIUS"
+     ],
+     "101000001",
+     "00001"
+    ],
+    [
+     [
+      "2D",
+      "MINKOWSKI",
+      "F1"
+     ],
+     "101111011",
+     "11100"
+    ],
+    [
+     [
+      "2D",
+      "MINKOWSKI",
+      "F2"
+     ],
+     "101111011",
+     "11100"
+    ],
+    [
+     [
+      "2D",
+      "MINKOWSKI",
+      "SMOOTH_F1"
+     ],
+     "101111111",
+     "11100"
+    ],
+    [
+     [
+      "2D",
+      "MINKOWSKI",
+      "DISTANCE_TO_EDGE"
+     ],
+     "101111001",
+     "10000"
+    ],
+    [
+     [
+      "2D",
+      "MINKOWSKI",
+      "N_SPHERE_RADIUS"
+     ],
+     "101000001",
+     "00001"
+    ],
+    [
+     [
+      "3D",
+      "EUCLIDEAN",
+      "F1"
+     ],
+     "101111001",
+     "11100"
+    ],
+    [
+     [
+      "3D",
+      "EUCLIDEAN",
+      "F2"
+     ],
+     "101111001",
+     "11100"
+    ],
+    [
+     [
+      "3D",
+      "EUCLIDEAN",
+      "SMOOTH_F1"
+     ],
+     "101111101",
+     "11100"
+    ],
+    [
+     [
+      "3D",
+      "EUCLIDEAN",
+      "DISTANCE_TO_EDGE"
+     ],
+     "101111001",
+     "10000"
+    ],
+    [
+     [
+      "3D",
+      "EUCLIDEAN",
+      "N_SPHERE_RADIUS"
+     ],
+     "101000001",
+     "00001"
+    ],
+    [
+     [
+      "3D",
+      "MANHATTAN",
+      "F1"
+     ],
+     "101111001",
+     "11100"
+    ],
+    [
+     [
+      "3D",
+      "MANHATTAN",
+      "F2"
+     ],
+     "101111001",
+     "11100"
+    ],
+    [
+     [
+      "3D",
+      "MANHATTAN",
+      "SMOOTH_F1"
+     ],
+     "101111101",
+     "11100"
+    ],
+    [
+     [
+      "3D",
+      "MANHATTAN",
+      "DISTANCE_TO_EDGE"
+     ],
+     "101111001",
+     "10000"
+    ],
+    [
+     [
+      "3D",
+      "MANHATTAN",
+      "N_SPHERE_RADIUS"
+     ],
+     "101000001",
+     "00001"
+    ],
+    [
+     [
+      "3D",
+      "CHEBYCHEV",
+      "F1"
+     ],
+     "101111001",
+     "11100"
+    ],
+    [
+     [
+      "3D",
+      "CHEBYCHEV",
+      "F2"
+     ],
+     "101111001",
+     "11100"
+    ],
+    [
+     [
+      "3D",
+      "CHEBYCHEV",
+      "SMOOTH_F1"
+     ],
+     "101111101",
+     "11100"
+    ],
+    [
+     [
+      "3D",
+      "CHEBYCHEV",
+      "DISTANCE_TO_EDGE"
+     ],
+     "101111001",
+     "10000"
+    ],
+    [
+     [
+      "3D",
+      "CHEBYCHEV",
+      "N_SPHERE_RADIUS"
+     ],
+     "101000001",
+     "00001"
+    ],
+    [
+     [
+      "3D",
+      "MINKOWSKI",
+      "F1"
+     ],
+     "101111011",
+     "11100"
+    ],
+    [
+     [
+      "3D",
+      "MINKOWSKI",
+      "F2"
+     ],
+     "101111011",
+     "11100"
+    ],
+    [
+     [
+      "3D",
+      "MINKOWSKI",
+      "SMOOTH_F1"
+     ],
+     "101111111",
+     "11100"
+    ],
+    [
+     [
+      "3D",
+      "MINKOWSKI",
+      "DISTANCE_TO_EDGE"
+     ],
+     "101111001",
+     "10000"
+    ],
+    [
+     [
+      "3D",
+      "MINKOWSKI",
+      "N_SPHERE_RADIUS"
+     ],
+     "101000001",
+     "00001"
+    ],
+    [
+     [
+      "4D",
+      "EUCLIDEAN",
+      "F1"
+     ],
+     "111111001",
+     "11110"
+    ],
+    [
+     [
+      "4D",
+      "EUCLIDEAN",
+      "F2"
+     ],
+     "111111001",
+     "11110"
+    ],
+    [
+     [
+      "4D",
+      "EUCLIDEAN",
+      "SMOOTH_F1"
+     ],
+     "111111101",
+     "11110"
+    ],
+    [
+     [
+      "4D",
+      "EUCLIDEAN",
+      "DISTANCE_TO_EDGE"
+     ],
+     "111111001",
+     "10000"
+    ],
+    [
+     [
+      "4D",
+      "EUCLIDEAN",
+      "N_SPHERE_RADIUS"
+     ],
+     "111000001",
+     "00001"
+    ],
+    [
+     [
+      "4D",
+      "MANHATTAN",
+      "F1"
+     ],
+     "111111001",
+     "11110"
+    ],
+    [
+     [
+      "4D",
+      "MANHATTAN",
+      "F2"
+     ],
+     "111111001",
+     "11110"
+    ],
+    [
+     [
+      "4D",
+      "MANHATTAN",
+      "SMOOTH_F1"
+     ],
+     "111111101",
+     "11110"
+    ],
+    [
+     [
+      "4D",
+      "MANHATTAN",
+      "DISTANCE_TO_EDGE"
+     ],
+     "111111001",
+     "10000"
+    ],
+    [
+     [
+      "4D",
+      "MANHATTAN",
+      "N_SPHERE_RADIUS"
+     ],
+     "111000001",
+     "00001"
+    ],
+    [
+     [
+      "4D",
+      "CHEBYCHEV",
+      "F1"
+     ],
+     "111111001",
+     "11110"
+    ],
+    [
+     [
+      "4D",
+      "CHEBYCHEV",
+      "F2"
+     ],
+     "111111001",
+     "11110"
+    ],
+    [
+     [
+      "4D",
+      "CHEBYCHEV",
+      "SMOOTH_F1"
+     ],
+     "111111101",
+     "11110"
+    ],
+    [
+     [
+      "4D",
+      "CHEBYCHEV",
+      "DISTANCE_TO_EDGE"
+     ],
+     "111111001",
+     "10000"
+    ],
+    [
+     [
+      "4D",
+      "CHEBYCHEV",
+      "N_SPHERE_RADIUS"
+     ],
+     "111000001",
+     "00001"
+    ],
+    [
+     [
+      "4D",
+      "MINKOWSKI",
+      "F1"
+     ],
+     "111111011",
+     "11110"
+    ],
+    [
+     [
+      "4D",
+      "MINKOWSKI",
+      "F2"
+     ],
+     "111111011",
+     "11110"
+    ],
+    [
+     [
+      "4D",
+      "MINKOWSKI",
+      "SMOOTH_F1"
+     ],
+     "111111111",
+     "11110"
+    ],
+    [
+     [
+      "4D",
+      "MINKOWSKI",
+      "DISTANCE_TO_EDGE"
+     ],
+     "111111001",
+     "10000"
+    ],
+    [
+     [
+      "4D",
+      "MINKOWSKI",
+      "N_SPHERE_RADIUS"
+     ],
+     "111000001",
+     "00001"
+    ]
+   ],
+   "default": [
+    "101111001",
+    "11100"
+   ],
+   "inputs": [
+    "Vector",
+    "W",
+    "Scale",
+    "Detail",
+    "Roughness",
+    "Lacunarity",
+    "Smoothness",
+    "Exponent",
+    "Randomness"
+   ],
+   "outputs": [
+    "Distance",
+    "Color",
+    "Position",
+    "W",
+    "Radius"
+   ],
+   "relevant": [
+    "voronoi_dimensions",
+    "distance",
+    "feature"
+   ]
+  },
+  "ShaderNodeTexWave": {
+   "cases": [
+    [
+     [],
+     "1111111",
+     "11"
+    ]
+   ],
+   "default": [
+    "1111111",
+    "11"
+   ],
+   "inputs": [
+    "Vector",
+    "Scale",
+    "Distortion",
+    "Detail",
+    "Detail Scale",
+    "Detail Roughness",
+    "Phase Offset"
+   ],
+   "outputs": [
+    "Color",
+    "Fac"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeTexWhiteNoise": {
+   "cases": [
+    [
+     [
+      "1D"
+     ],
+     "01",
+     "11"
+    ],
+    [
+     [
+      "2D"
+     ],
+     "10",
+     "11"
+    ],
+    [
+     [
+      "3D"
+     ],
+     "10",
+     "11"
+    ],
+    [
+     [
+      "4D"
+     ],
+     "11",
+     "11"
+    ]
+   ],
+   "default": [
+    "10",
+    "11"
+   ],
+   "inputs": [
+    "Vector",
+    "W"
+   ],
+   "outputs": [
+    "Value",
+    "Color"
+   ],
+   "relevant": [
+    "noise_dimensions"
+   ]
+  },
+  "ShaderNodeUVAlongStroke": {
+   "cases": [
+    [
+     [],
+     "",
+     "1"
+    ]
+   ],
+   "default": [
+    "",
+    "1"
+   ],
+   "inputs": [],
+   "outputs": [
+    "UV"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeUVMap": {
+   "cases": [
+    [
+     [],
+     "",
+     "1"
+    ]
+   ],
+   "default": [
+    "",
+    "1"
+   ],
+   "inputs": [],
+   "outputs": [
+    "UV"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeValToRGB": {
+   "cases": [
+    [
+     [],
+     "1",
+     "11"
+    ]
+   ],
+   "default": [
+    "1",
+    "11"
+   ],
+   "inputs": [
+    "Fac"
+   ],
+   "outputs": [
+    "Color",
+    "Alpha"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeValue": {
+   "cases": [
+    [
+     [],
+     "",
+     "1"
+    ]
+   ],
+   "default": [
+    "",
+    "1"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Value"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeVectorCurve": {
+   "cases": [
+    [
+     [],
+     "11",
+     "1"
+    ]
+   ],
+   "default": [
+    "11",
+    "1"
+   ],
+   "inputs": [
+    "Fac",
+    "Vector"
+   ],
+   "outputs": [
+    "Vector"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeVectorDisplacement": {
+   "cases": [
+    [
+     [],
+     "111",
+     "1"
+    ]
+   ],
+   "default": [
+    "111",
+    "1"
+   ],
+   "inputs": [
+    "Vector",
+    "Midlevel",
+    "Scale"
+   ],
+   "outputs": [
+    "Displacement"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeVectorMath": {
+   "cases": [
+    [
+     [
+      "ADD"
+     ],
+     "1100",
+     "10"
+    ],
+    [
+     [
+      "SUBTRACT"
+     ],
+     "1100",
+     "10"
+    ],
+    [
+     [
+      "MULTIPLY"
+     ],
+     "1100",
+     "10"
+    ],
+    [
+     [
+      "DIVIDE"
+     ],
+     "1100",
+     "10"
+    ],
+    [
+     [
+      "MULTIPLY_ADD"
+     ],
+     "1110",
+     "10"
+    ],
+    [
+     [
+      "CROSS_PRODUCT"
+     ],
+     "1100",
+     "10"
+    ],
+    [
+     [
+      "PROJECT"
+     ],
+     "1100",
+     "10"
+    ],
+    [
+     [
+      "REFLECT"
+     ],
+     "1100",
+     "10"
+    ],
+    [
+     [
+      "REFRACT"
+     ],
+     "1101",
+     "10"
+    ],
+    [
+     [
+      "FACEFORWARD"
+     ],
+     "1110",
+     "10"
+    ],
+    [
+     [
+      "DOT_PRODUCT"
+     ],
+     "1100",
+     "01"
+    ],
+    [
+     [
+      "DISTANCE"
+     ],
+     "1100",
+     "01"
+    ],
+    [
+     [
+      "LENGTH"
+     ],
+     "1000",
+     "01"
+    ],
+    [
+     [
+      "SCALE"
+     ],
+     "1001",
+     "10"
+    ],
+    [
+     [
+      "NORMALIZE"
+     ],
+     "1000",
+     "10"
+    ],
+    [
+     [
+      "ABSOLUTE"
+     ],
+     "1000",
+     "10"
+    ],
+    [
+     [
+      "POWER"
+     ],
+     "1100",
+     "10"
+    ],
+    [
+     [
+      "SIGN"
+     ],
+     "1000",
+     "10"
+    ],
+    [
+     [
+      "MINIMUM"
+     ],
+     "1100",
+     "10"
+    ],
+    [
+     [
+      "MAXIMUM"
+     ],
+     "1100",
+     "10"
+    ],
+    [
+     [
+      "ROUND"
+     ],
+     "1000",
+     "10"
+    ],
+    [
+     [
+      "FLOOR"
+     ],
+     "1000",
+     "10"
+    ],
+    [
+     [
+      "CEIL"
+     ],
+     "1000",
+     "10"
+    ],
+    [
+     [
+      "FRACTION"
+     ],
+     "1000",
+     "10"
+    ],
+    [
+     [
+      "MODULO"
+     ],
+     "1100",
+     "10"
+    ],
+    [
+     [
+      "WRAP"
+     ],
+     "1110",
+     "10"
+    ],
+    [
+     [
+      "SNAP"
+     ],
+     "1100",
+     "10"
+    ],
+    [
+     [
+      "SINE"
+     ],
+     "1000",
+     "10"
+    ],
+    [
+     [
+      "COSINE"
+     ],
+     "1000",
+     "10"
+    ],
+    [
+     [
+      "TANGENT"
+     ],
+     "1000",
+     "10"
+    ]
+   ],
+   "default": [
+    "1100",
+    "10"
+   ],
+   "inputs": [
+    "Vector",
+    "Vector_001",
+    "Vector_002",
+    "Scale"
+   ],
+   "outputs": [
+    "Vector",
+    "Value"
+   ],
+   "relevant": [
+    "operation"
+   ]
+  },
+  "ShaderNodeVectorRotate": {
+   "cases": [
+    [
+     [
+      "AXIS_ANGLE"
+     ],
+     "11110",
+     "1"
+    ],
+    [
+     [
+      "X_AXIS"
+     ],
+     "11010",
+     "1"
+    ],
+    [
+     [
+      "Y_AXIS"
+     ],
+     "11010",
+     "1"
+    ],
+    [
+     [
+      "Z_AXIS"
+     ],
+     "11010",
+     "1"
+    ],
+    [
+     [
+      "EULER_XYZ"
+     ],
+     "11001",
+     "1"
+    ]
+   ],
+   "default": [
+    "11110",
+    "1"
+   ],
+   "inputs": [
+    "Vector",
+    "Center",
+    "Axis",
+    "Angle",
+    "Rotation"
+   ],
+   "outputs": [
+    "Vector"
+   ],
+   "relevant": [
+    "rotation_type"
+   ]
+  },
+  "ShaderNodeVectorTransform": {
+   "cases": [
+    [
+     [],
+     "1",
+     "1"
+    ]
+   ],
+   "default": [
+    "1",
+    "1"
+   ],
+   "inputs": [
+    "Vector"
+   ],
+   "outputs": [
+    "Vector"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeVertexColor": {
+   "cases": [
+    [
+     [],
+     "",
+     "11"
+    ]
+   ],
+   "default": [
+    "",
+    "11"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Color",
+    "Alpha"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeVolumeAbsorption": {
+   "cases": [
+    [
+     [],
+     "110",
+     "1"
+    ]
+   ],
+   "default": [
+    "110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Density",
+    "Weight"
+   ],
+   "outputs": [
+    "Volume"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeVolumeCoefficients": {
+   "cases": [
+    [
+     [
+      "HENYEY_GREENSTEIN"
+     ],
+     "011100001",
+     "1"
+    ],
+    [
+     [
+      "FOURNIER_FORAND"
+     ],
+     "011011001",
+     "1"
+    ],
+    [
+     [
+      "DRAINE"
+     ],
+     "011100101",
+     "1"
+    ],
+    [
+     [
+      "RAYLEIGH"
+     ],
+     "011000001",
+     "1"
+    ],
+    [
+     [
+      "MIE"
+     ],
+     "011000011",
+     "1"
+    ]
+   ],
+   "default": [
+    "011100001",
+    "1"
+   ],
+   "inputs": [
+    "Weight",
+    "Absorption Coefficients",
+    "Scatter Coefficients",
+    "Anisotropy",
+    "IOR",
+    "Backscatter",
+    "Alpha",
+    "Diameter",
+    "Emission Coefficients"
+   ],
+   "outputs": [
+    "Volume"
+   ],
+   "relevant": [
+    "phase"
+   ]
+  },
+  "ShaderNodeVolumeInfo": {
+   "cases": [
+    [
+     [],
+     "",
+     "1111"
+    ]
+   ],
+   "default": [
+    "",
+    "1111"
+   ],
+   "inputs": [],
+   "outputs": [
+    "Color",
+    "Density",
+    "Flame",
+    "Temperature"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeVolumePrincipled": {
+   "cases": [
+    [
+     [],
+     "1111111111110",
+     "1"
+    ]
+   ],
+   "default": [
+    "1111111111110",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Color Attribute",
+    "Density",
+    "Density Attribute",
+    "Anisotropy",
+    "Absorption Color",
+    "Emission Strength",
+    "Emission Color",
+    "Blackbody Intensity",
+    "Blackbody Tint",
+    "Temperature",
+    "Temperature Attribute",
+    "Weight"
+   ],
+   "outputs": [
+    "Volume"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeVolumeScatter": {
+   "cases": [
+    [
+     [
+      "HENYEY_GREENSTEIN"
+     ],
+     "11100000",
+     "1"
+    ],
+    [
+     [
+      "FOURNIER_FORAND"
+     ],
+     "11011000",
+     "1"
+    ],
+    [
+     [
+      "DRAINE"
+     ],
+     "11100100",
+     "1"
+    ],
+    [
+     [
+      "RAYLEIGH"
+     ],
+     "11000000",
+     "1"
+    ],
+    [
+     [
+      "MIE"
+     ],
+     "11000010",
+     "1"
+    ]
+   ],
+   "default": [
+    "11100000",
+    "1"
+   ],
+   "inputs": [
+    "Color",
+    "Density",
+    "Anisotropy",
+    "IOR",
+    "Backscatter",
+    "Alpha",
+    "Diameter",
+    "Weight"
+   ],
+   "outputs": [
+    "Volume"
+   ],
+   "relevant": [
+    "phase"
+   ]
+  },
+  "ShaderNodeWavelength": {
+   "cases": [
+    [
+     [],
+     "1",
+     "1"
+    ]
+   ],
+   "default": [
+    "1",
+    "1"
+   ],
+   "inputs": [
+    "Wavelength"
+   ],
+   "outputs": [
+    "Color"
+   ],
+   "relevant": []
+  },
+  "ShaderNodeWireframe": {
+   "cases": [
+    [
+     [],
+     "1",
+     "1"
+    ]
+   ],
+   "default": [
+    "1",
+    "1"
+   ],
+   "inputs": [
+    "Size"
+   ],
+   "outputs": [
+    "Fac"
+   ],
+   "relevant": []
+  }
+ }
+}

@@ -25,6 +25,11 @@ use crate::{
     SocketAddr, SocketType, SocketValue,
 };
 
+// WP 3.1: per-type node constants and the group interface.
+mod info;
+pub mod interface;
+pub use info::*;
+
 /// A property that exists in Blender's RNA but has no frap binding yet.
 pub fn unbound(srna: &'static StructDef, prop: &str) -> RnaError {
     RnaError::new(
@@ -144,6 +149,34 @@ impl Rna for NodeTree {
             "type" => val(Value::Enum(tree_type_str(self.ty).0.into())),
             "bl_idname" => str_val(tree_type_str(self.ty).1),
             "animation_data" if self.animation_data.is_none() => val(Value::None),
+            "interface" => Ok(Field::Struct(StructRef::Owned(Box::new(
+                interface::InterfaceRef { tree: self },
+            )))),
+            "users" => Ok(Field::NeedsHook),
+            // WP 3.1, verified on 5.2.4 for material, world and group trees.
+            "id_type" => val(Value::Enum("NODETREE".into())),
+            "is_evaluated"
+            | "is_missing"
+            | "is_runtime_data"
+            | "tag"
+            | "use_extra_user"
+            | "is_library_indirect" => val(Value::Bool(false)),
+            "is_editable" => val(Value::Bool(self.header.library.is_none())),
+            "is_linked_packed" => val(Value::Bool(self.header.is_linked_packed)),
+            "annotation"
+            | "asset_data"
+            | "preview"
+            | "override_library"
+            | "library_weak_reference" => val(Value::None),
+            "color_tag" => val(Value::Enum("NONE".into())),
+            "default_group_node_width" => val(Value::Int(140)),
+            "description" => str_val(""),
+            "bl_use_group_interface" => val(Value::Bool(true)),
+            "bl_label" if self.ty == NodeTreeType::Shader => str_val("Shader Editor"),
+            "bl_description" if self.ty == NodeTreeType::Shader => {
+                str_val("Edit materials, lights, and world shading using nodes")
+            }
+            "bl_icon" if self.ty == NodeTreeType::Shader => str_val("NODE_MATERIAL"),
             id => Err(unbound(self.srna(), id)),
         }
     }
@@ -163,10 +196,11 @@ impl RnaMut for NodeTree {
         }
     }
     fn struct_mut(&mut self, prop: &'static PropDef) -> Result<RnaMutGuard<'_>, RnaError> {
-        Err(match prop.identifier {
-            "animation_data" => unbound(self.srna(), prop.identifier),
-            id => wrong_access(self.srna(), id, "a struct"),
-        })
+        match prop.identifier {
+            "interface" => Ok(Box::new(interface::InterfaceMut { tree: self })),
+            "animation_data" => Err(unbound(self.srna(), prop.identifier)),
+            id => Err(wrong_access(self.srna(), id, "a struct")),
+        }
     }
     fn coll_mut(&mut self, prop: &'static PropDef) -> Result<RnaCollMutGuard<'_>, RnaError> {
         match prop.identifier {
@@ -315,8 +349,36 @@ fn node_get<'a>(t: &'a NodeTree, i: usize, prop: &'static PropDef) -> Result<Fie
         "is_active_output" => val(Value::Bool(
             t.nodes.iter().position(|x| x.bl_idname == n.bl_idname) == Some(i),
         )),
-        id => Err(unbound(srna, id)),
+        id => node_constant(n, prop).unwrap_or_else(|| Err(unbound(srna, id))),
     }
+}
+
+/// Node properties that are constants of the type or of a fresh node and that frap does not
+/// store (WP 3.1; every value verified on 5.2.4 for every node type, `rna/tests.rs`). Writes
+/// of the stored-in-Blender ones (`color`, `height`, …) stay unbound.
+fn node_constant(n: &Node, prop: &'static PropDef) -> Option<Result<Field<'static>, RnaError>> {
+    let def = node_type(n.bl_idname);
+    let info = node_info(n.bl_idname);
+    Some(match prop.identifier {
+        "type" | "bl_static_type" => val(Value::Enum(info?.ty.into())),
+        "bl_label" => str_val(def?.name),
+        "bl_description" => str_val(info?.description),
+        "bl_icon" => val(Value::Enum("NONE".into())),
+        "bl_width_default" => val(Value::Float(def?.width)),
+        "bl_width_min" => val(Value::Float(info?.width_min)),
+        "bl_width_max" => val(Value::Float(info?.width_max)),
+        "bl_height_default" | "height" => val(Value::Float(100.0)),
+        "bl_height_min" => val(Value::Float(30.0)),
+        "bl_height_max" => val(Value::Float(f32::MAX)),
+        "color" => val(floats(prop, &[0.608, 0.608, 0.608])),
+        "use_custom_color" | "show_preview" | "show_texture" => val(Value::Bool(false)),
+        "show_options" => val(Value::Bool(true)),
+        "color_tag" => val(Value::Enum(info?.color_tag.into())),
+        // The drawn size: (0, 0) without a UI (verified headless).
+        "dimensions" => val(floats(prop, &[0.0, 0.0])),
+        "warning_propagation" => val(Value::Enum("ALL".into())),
+        _ => return None,
+    })
 }
 
 impl Rna for NodeRef<'_> {
@@ -602,18 +664,29 @@ fn socket_get<'a>(
     match prop.identifier {
         "name" => str_val(s.name.clone()),
         "identifier" => str_val(s.identifier.clone()),
-        "label" | "description" => str_val(""),
+        // Verified on 5.2.4: the label of every socket is its name (built-in and group nodes).
+        "label" => str_val(s.name.clone()),
+        "description" => str_val(""),
         "is_output" => val(Value::Bool(is_output)),
         "hide" => val(Value::Bool(def.is_some_and(|d| d.hide))),
+        "bl_label" => str_val(socket_class_labels(socket_bl_idname(n, is_output, i)).0),
+        "bl_subtype_label" => str_val(socket_class_labels(socket_bl_idname(n, is_output, i)).1),
+        "display_shape" => val(Value::Enum("CIRCLE".into())),
+        "inferred_structure_type" => val(Value::Enum("DYNAMIC".into())),
+        "is_icon_visible" => val(Value::Bool(s.enabled && !def.is_some_and(|d| d.hide))),
+        "pin_gizmo" | "show_expanded" => val(Value::Bool(false)),
         "enabled" => val(Value::Bool(s.enabled)),
         "is_unavailable" => val(Value::Bool(!s.enabled)),
         "is_multi_input" => val(Value::Bool(false)),
         "hide_value" => val(Value::Bool(s.hide_value)),
-        "link_limit" => val(Value::Int(i64::from(if is_output {
-            OUTPUT_LINK_LIMIT
-        } else {
-            INPUT_LINK_LIMIT
-        }))),
+        // The virtual `__extend__` input of a Group Output takes any number of links.
+        "link_limit" => val(Value::Int(i64::from(
+            if is_output || s.ty == SocketType::Custom {
+                OUTPUT_LINK_LIMIT
+            } else {
+                INPUT_LINK_LIMIT
+            },
+        ))),
         "is_linked" => {
             let a = SocketAddr {
                 node: n.uid,
