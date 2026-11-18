@@ -105,6 +105,19 @@ def attribute_value(a, field):
 
 
 def dump_mesh(me, p, edit=False):
+    if edit:
+        # D-05 (M2, WP 2.2): in Edit Mode Blender's RNA lists the BMesh layers as `attributes`
+        # (no `sharp_face`, …) and gives UV maps no data, while frap reads the edit mesh as a
+        # mesh. The geometry of an edit mesh is dumped from a copy of the mesh written by
+        # `update_from_editmode()` (the runner's D-05 normalisation), the edit state from the
+        # mesh itself.
+        copy = me.copy()
+        try:
+            state = dump_mesh(copy, p)
+        finally:
+            bpy.data.meshes.remove(copy)
+        state.update(dump_edit_state(me, p))
+        return state
     pm = p["mesh"]
     uv_names = [l.name for l in resolve(me, pm["uv_layers"])]
     attributes = {}
@@ -128,25 +141,31 @@ def dump_mesh(me, p, edit=False):
         "active": None,
         "select_history": None,
     }
-    if edit:
-        sel = {}
-        for key, path in zip(("vert", "edge", "face"), pm["selection"]):
-            sel[key] = [i for i, s in enumerate(items(me, path)) if s]
-        state["selection"] = sel
-        try:
-            import bmesh
+    return state
 
-            bm = bmesh.from_edit_mesh(me)
 
-            def el(e):
-                kind = {"BMVert": "VERT", "BMEdge": "EDGE", "BMFace": "FACE"}[type(e).__name__]
-                return {"type": kind, "index": e.index}
+def dump_edit_state(me, p):
+    """Selection, active element and selection history of a mesh in Edit Mode."""
+    pm = p["mesh"]
+    state = {}
+    sel = {}
+    for key, path in zip(("vert", "edge", "face"), pm["selection"]):
+        sel[key] = [i for i, s in enumerate(items(me, path)) if s]
+    state["selection"] = sel
+    try:
+        import bmesh
 
-            act = bm.select_history.active
-            state["active"] = None if act is None else el(act)
-            state["select_history"] = [el(e) for e in bm.select_history]
-        except Exception:  # noqa: BLE001 - mesh not in edit mode after all
-            pass
+        bm = bmesh.from_edit_mesh(me)
+
+        def el(e):
+            kind = {"BMVert": "VERT", "BMEdge": "EDGE", "BMFace": "FACE"}[type(e).__name__]
+            return {"type": kind, "index": e.index}
+
+        act = bm.select_history.active
+        state["active"] = None if act is None else el(act)
+        state["select_history"] = [el(e) for e in bm.select_history]
+    except Exception:  # noqa: BLE001 - mesh not in edit mode after all
+        pass
     return state
 
 

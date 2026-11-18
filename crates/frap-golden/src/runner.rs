@@ -779,6 +779,9 @@ struct Dumper<'a> {
     props: &'a Props,
     fallbacks: Vec<String>,
     context: Option<J>,
+    /// The `edit_mesh` block of the last read (§13.2): active element and selection history
+    /// per object in Edit Mode (M2, WP 2.2).
+    edit_mesh: Option<J>,
 }
 
 impl Dumper<'_> {
@@ -793,6 +796,7 @@ impl Dumper<'_> {
         if let Some(c) = &r.context {
             self.context = Some(c.clone());
         }
+        self.edit_mesh = r.edit_mesh.clone();
         if r.ok() {
             Ok(r.value.ok_or_else(|| format!("{expr}: no value"))?)
         } else {
@@ -834,6 +838,57 @@ impl Dumper<'_> {
         (0..n)
             .map(|i| self.read(&format!("{coll_path}[{i}].{prop}")))
             .collect()
+    }
+
+    /// Edit-mode state of a `mesh:` dump (M2, WP 2.2; mirrors `dump_state.py::dump_mesh`
+    /// with `edit=True`): when an object in Edit Mode uses the mesh, the selected indices read
+    /// through RNA (the edit-mode view) and the active element and selection history of the
+    /// response's `edit_mesh` block.
+    fn edit_state(&mut self, mesh: &str, m: &mut GMesh) -> Result<(), ReadErr> {
+        let editor = {
+            let main = self.session.main();
+            let Some(me) = main.meshes.find(mesh) else {
+                return Ok(());
+            };
+            main.objects
+                .iter()
+                .find(|(_, o)| {
+                    o.mode == frap_scene::ObjectMode::Edit
+                        && o.data.and_then(IdRef::<MeshId>::from_any) == Some(me)
+                })
+                .map(|(_, o)| o.header.name.to_string())
+        };
+        let Some(editor) = editor else {
+            return Ok(());
+        };
+        let base = data_path("meshes", mesh);
+        let mut sel = serde_json::Map::new();
+        for (key, path) in ["vert", "edge", "face"]
+            .iter()
+            .zip(self.props.mesh.selection.clone())
+        {
+            let picked: Vec<J> = self
+                .read_items(&base, &path)?
+                .iter()
+                .enumerate()
+                .filter(|(_, v)| v.as_bool() == Some(true))
+                .map(|(i, _)| J::from(i))
+                .collect();
+            sel.insert((*key).to_owned(), J::Array(picked));
+        }
+        m.selection = J::Object(sel);
+        let entry = self
+            .edit_mesh
+            .as_ref()
+            .and_then(|b| b.get(&editor))
+            .cloned()
+            .ok_or_else(|| format!("{mesh}: no edit_mesh entry for {editor:?}"))?;
+        m.active = entry.get("active").cloned().unwrap_or(J::Null);
+        m.select_history = entry
+            .get("select_history")
+            .cloned()
+            .unwrap_or(J::Array(Vec::new()));
+        Ok(())
     }
 
     fn fallback(&mut self, what: String) {
@@ -1112,6 +1167,7 @@ pub fn run_frap(case: &Case, props: &Props, opts: &RunOptions) -> Result<FrapRun
         props,
         fallbacks: Vec::new(),
         context: None,
+        edit_mesh: None,
     };
 
     // 1. The statements.
@@ -1174,7 +1230,10 @@ pub fn run_frap(case: &Case, props: &Props, opts: &RunOptions) -> Result<FrapRun
                 let Some(r) = d.session.main().meshes.find(name) else {
                     continue;
                 };
-                let m = match d.rna_mesh(&data_path("meshes", name)) {
+                let m = match d
+                    .rna_mesh(&data_path("meshes", name))
+                    .and_then(|mut m| d.edit_state(name, &mut m).map(|()| m))
+                {
                     Ok(m) => m,
                     Err(e) => {
                         let key = format!("meshes[{name:?}]");
@@ -1282,20 +1341,6 @@ pub fn run_frap(case: &Case, props: &Props, opts: &RunOptions) -> Result<FrapRun
             d.native_context()
         }
     };
-    // The frap side does not dump edit-mode selection / active / select history yet (M2
-    // edit-mode WP): such a comparison could only fail, so the case is rejected up front.
-    if state.context.mode == "EDIT_MESH"
-        && case
-            .compare
-            .iter()
-            .any(|c| matches!(c, CompareSpec::Mesh(_)))
-    {
-        return Err(HarnessError::Frap(format!(
-            "{}: `mesh:` compare of a case that ends in Edit Mode: the frap dump of edit-mode \
-             selection arrives with M2 (end the case in Object Mode)",
-            case.id()
-        )));
-    }
     if opts.strict_rna && !d.fallbacks.is_empty() {
         return Err(HarnessError::Frap(format!(
             "{}: RNA fallbacks with {STRICT_RNA_ENV}=1:\n  {}",
@@ -1686,6 +1731,7 @@ mod tests {
             props: &props,
             fallbacks: Vec::new(),
             context: None,
+            edit_mesh: None,
         };
         let case = Case::parse(Path::new("y.py"), "# golden: tier=T0\nbpy.data\n").unwrap();
         // Not bound: fallback.

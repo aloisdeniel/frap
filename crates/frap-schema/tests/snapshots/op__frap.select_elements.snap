@@ -1,0 +1,165 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "frap.select_elements",
+  "bl_idname": "FRAP_OT_select_elements",
+  "label": "Select Elements",
+  "description": "Select mesh elements by index in Edit Mode (frap extension: agents cannot click)",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": null
+  },
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Type",
+      "description": "Element type the indices refer to",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "VERT",
+      "enum_items": [
+        {
+          "identifier": "VERT",
+          "name": "Vertex",
+          "description": "Vertices (mesh.vertices order)",
+          "value": 0
+        },
+        {
+          "identifier": "EDGE",
+          "name": "Edge",
+          "description": "Edges (mesh.edges order)",
+          "value": 1
+        },
+        {
+          "identifier": "FACE",
+          "name": "Face",
+          "description": "Faces (mesh.polygons order)",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "indices",
+      "name": "Indices",
+      "description": "Element indices (as in mesh.vertices/edges/polygons of the object leaving Edit Mode now); an index outside 0..len-1 raises IndexError",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": "dynamic",
+      "default": [],
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "action",
+      "name": "Action",
+      "description": "How the indices change the selection",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SET",
+      "enum_items": [
+        {
+          "identifier": "SET",
+          "name": "Set",
+          "description": "Select exactly these elements (everything else is deselected, selection history restarts)",
+          "value": 0
+        },
+        {
+          "identifier": "ADD",
+          "name": "Add",
+          "description": "Select these elements too",
+          "value": 1
+        },
+        {
+          "identifier": "REMOVE",
+          "name": "Remove",
+          "description": "Deselect these elements",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "object",
+      "name": "Object",
+      "description": "Name of the edit object the indices refer to (default: the active object)",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 258,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M2",
+    "extension": true,
+    "notes": [
+      "frap extension: agents select by index (mesh.vertices / edges / polygons order of the edit-mode view)",
+      "SET and ADD append to the selection history, so the last index becomes the active element",
+      "goldens run tools/blender/emulations.py::select_elements on the Blender side"
+    ]
+  }
+}
