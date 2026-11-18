@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.bisect(plane_co, plane_no, use_fill=False, clear_inner=False,
-//! clear_outer=False, threshold=0.0001)`, tier T2
+//! clear_outer=False, threshold=0.0001)`, tier T1
 //! (`tests/golden/cases/edit/create/bisect_*.py`). Port of `mesh_bisect_exec`
 //! (`editors/mesh/editmesh_bisect.cc`, Blender 5.2.4, GPL-2.0-or-later) over
 //! `bmesh.ops.bisect_plane`; the interactive line drawing is not available headless (pass the
@@ -40,7 +40,7 @@ fn mul_transposed_mat3_m4_v3(m: &[[f32; 4]; 4], v: [f32; 3]) -> [f32; 3] {
     ]
 }
 
-#[operator(poll = poll::EDITMESH, tier = T2)]
+#[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::Bisect) -> OpResult {
     let thresh = p.threshold.value;
     let use_fill = p.use_fill.value;

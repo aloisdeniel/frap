@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.edge_face_add()` ("F", Make Edge/Face), tier T2
+//! `bpy.ops.mesh.edge_face_add()` ("F", Make Edge/Face), tier T1
 //! (`tests/golden/cases/edit/create/edge_face_add_*.py`). Port of `edbm_add_edge_face_exec`
 //! and its `USE_FACE_CREATE_SEL_EXTEND` helpers (`editors/mesh/editmesh_tools.cc`, Blender
 //! 5.2.4, GPL-2.0-or-later) over `bmesh.ops.contextual_create`.
@@ -154,7 +154,7 @@ fn tricky_finalize_sel(bm: &mut BMesh, ele_desel: BMElem, f: FaceId) {
     }
 }
 
-#[operator(poll = poll::EDITMESH, tier = T2)]
+#[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, _p: mesh::EdgeFaceAdd) -> OpResult {
     let mut changed_multi = false;
     for (ob, me) in helpers::iter_edit_meshes(cx) {

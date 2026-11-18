@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.edge_rotate(use_ccw=False)`, tier T2
+//! `bpy.ops.mesh.edge_rotate(use_ccw=False)`, tier T1
 //! (`tests/golden/cases/edit/create/edge_rotate.py`). Port of
 //! `edbm_edge_rotate_selected_exec` (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4,
 //! GPL-2.0-or-later) over `bmesh.ops.rotate_edges`.
@@ -18,7 +18,7 @@ use frap_spec_ops_mesh::mesh;
 
 use super::edge_face_add::edbm;
 
-#[operator(poll = poll::EDITMESH, tier = T2)]
+#[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::EdgeRotate) -> OpResult {
     let use_ccw = p.use_ccw.value;
     let mut tot_failed_all = 0usize;

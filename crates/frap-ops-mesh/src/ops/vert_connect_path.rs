@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.vert_connect_path()` ("J"), tier T2
+//! `bpy.ops.mesh.vert_connect_path()` ("J"), tier T1
 //! (`tests/golden/cases/edit/create/vert_connect_path.py`). Port of
 //! `edbm_vert_connect_path_exec`, `bm_vert_connect_select_history`,
 //! `bm_vert_connect_pair` and `bm_vert_connect_select_history_edge_to_vert_path`
@@ -202,7 +202,7 @@ fn edge_to_vert_path(bm: &BMesh) -> Option<Vec<BMElem>> {
     Some(out.into_iter().collect())
 }
 
-#[operator(poll = poll::EDITMESH, tier = T2)]
+#[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, _p: mesh::VertConnectPath) -> OpResult {
     let meshes = helpers::iter_edit_meshes(cx);
     let mut failed_order = 0usize;

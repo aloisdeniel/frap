@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.fill_grid(span=1, offset=0, use_interp_simple=False)`, tier T2
+//! `bpy.ops.mesh.fill_grid(span=1, offset=0, use_interp_simple=False)`, tier T1
 //! (`tests/golden/cases/edit/create/fill_grid_*.py`). Port of `edbm_fill_grid_exec`,
 //! `edbm_fill_grid_prepare` and the split/join helpers (`editors/mesh/editmesh_tools.cc`,
 //! Blender 5.2.4, GPL-2.0-or-later) over `bmesh.ops.grid_fill`.
@@ -291,7 +291,7 @@ fn split_join_finish(bm: &mut BMesh, sj: SplitJoin, changed: bool) {
     );
 }
 
-#[operator(poll = poll::EDITMESH, tier = T2)]
+#[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::FillGrid) -> OpResult {
     let use_interp_simple = p.use_interp_simple.value;
     let span_in = p.span.is_set.then_some(p.span.value);

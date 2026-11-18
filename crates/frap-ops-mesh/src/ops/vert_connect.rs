@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.vert_connect()` ("J" on two vertices of a face), tier T2
+//! `bpy.ops.mesh.vert_connect()` ("J" on two vertices of a face), tier T1
 //! (`tests/golden/cases/edit/create/vert_connect*.py`). Port of `edbm_vert_connect_exec` and
 //! `edbm_connect_vert_pair` (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4,
 //! GPL-2.0-or-later).
@@ -100,7 +100,7 @@ pub(crate) fn connect_vert_pair_mesh(cx: &mut OpCtx, me: IdRef<MeshId>) -> Resul
     }
 }
 
-#[operator(poll = poll::EDITMESH, tier = T2)]
+#[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, _p: mesh::VertConnect) -> OpResult {
     let meshes = helpers::iter_edit_meshes(cx);
     let mut failed = 0usize;

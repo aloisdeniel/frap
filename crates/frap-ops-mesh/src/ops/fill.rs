@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.fill(use_beauty=True)`, tier T2 (`tests/golden/cases/edit/create/fill_*.py`).
+//! `bpy.ops.mesh.fill(use_beauty=True)`, tier T1 (`tests/golden/cases/edit/create/fill_*.py`).
 //! Port of `edbm_fill_exec` (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4,
 //! GPL-2.0-or-later) over `bmesh.ops.triangle_fill`.
 //!
@@ -16,7 +16,7 @@ use frap_spec_ops_mesh::mesh;
 
 use super::edge_face_add::edbm;
 
-#[operator(poll = poll::EDITMESH, tier = T2)]
+#[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::Fill) -> OpResult {
     let use_beauty = p.use_beauty.value;
     let mut has_selected_edges = false;

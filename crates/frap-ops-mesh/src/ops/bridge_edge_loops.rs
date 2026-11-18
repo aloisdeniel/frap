@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.mesh.bridge_edge_loops(type='SINGLE', use_merge=False, merge_factor=0.5,
 //! twist_offset=0, number_cuts=0, interpolation='PATH', smoothness=1.0,
-//! profile_shape_factor=0.0, profile_shape='SMOOTH')`, tier T2
+//! profile_shape_factor=0.0, profile_shape='SMOOTH')`, tier T1
 //! (`tests/golden/cases/edit/create/bridge_*.py`). Port of `edbm_bridge_edge_loops_exec` and
 //! `edbm_bridge_edge_loops_for_single_editmesh` (`editors/mesh/editmesh_tools.cc`, Blender
 //! 5.2.4, GPL-2.0-or-later) over `bmesh.ops.bridge_loops`.
@@ -58,7 +58,7 @@ fn interp_id(i: mesh::bridge_edge_loops::Interpolation) -> &'static str {
     i.identifier()
 }
 
-#[operator(poll = poll::EDITMESH, tier = T2)]
+#[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::BridgeEdgeLoops) -> OpResult {
     let ty = p.r#type.value;
     let use_pairs = ty == Type::Pairs;

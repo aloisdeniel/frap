@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.face_split_by_edges()` (Weld Edges into Faces), tier T2
+//! `bpy.ops.mesh.face_split_by_edges()` (Weld Edges into Faces), tier T1
 //! (`tests/golden/cases/edit/create/face_split_by_edges.py`). Port of
 //! `edbm_face_split_by_edges_exec` and `bm_face_split_by_edges`
 //! (`editors/mesh/editmesh_intersect.cc`, Blender 5.2.4, GPL-2.0-or-later) over
@@ -58,7 +58,7 @@ fn split_face(bm: &mut BMesh, f: FaceId, f_index: i64, index: &mut FxHashMap<Edg
     }
 }
 
-#[operator(poll = poll::EDITMESH, tier = T2)]
+#[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, _p: mesh::FaceSplitByEdges) -> OpResult {
     for (_, me) in helpers::iter_edit_meshes(cx) {
         let Some((_, te, tf)) = edbm::with_bm(cx, me, |bm| bm.selected_counts()) else {

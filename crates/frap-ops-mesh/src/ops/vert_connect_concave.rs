@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.vert_connect_concave()` (Split Concave Faces), tier T2. Port of
+//! `bpy.ops.mesh.vert_connect_concave()` (Split Concave Faces), tier T2 (`tests/golden/cases/edit/create/vert_connect_concave.py`
+//! covers convex input; concave faces need WP 2.10's `triangulate`). Port of
 //! `edbm_vert_connect_concave_exec` (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4,
 //! GPL-2.0-or-later) over `bmesh.ops.connect_verts_concave` (which triangulates through WP
 //! 2.10's `triangulate`): selected concave faces are cut into convex pieces, which are added to

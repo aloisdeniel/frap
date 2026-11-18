@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.vert_connect_nonplanar(angle_limit=5°)` (Split Non-Planar Faces), tier T2
+//! `bpy.ops.mesh.vert_connect_nonplanar(angle_limit=5°)` (Split Non-Planar Faces), tier T1
 //! (`tests/golden/cases/edit/create/vert_connect_nonplanar.py`). Port of
 //! `edbm_vert_connect_nonplaner_exec` (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4,
 //! GPL-2.0-or-later) over `bmesh.ops.connect_verts_nonplanar`: selected faces bent more than
@@ -16,7 +16,7 @@ use frap_spec_ops_mesh::mesh;
 
 use super::edge_face_add::edbm;
 
-#[operator(poll = poll::EDITMESH, tier = T2)]
+#[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::VertConnectNonplanar) -> OpResult {
     for (_, me) in helpers::iter_edit_meshes(cx) {
         if edbm::with_bm(cx, me, |bm| bm.selected_counts().2) == Some(0) {

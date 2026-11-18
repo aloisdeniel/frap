@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `bpy.ops.mesh.beautify_fill(angle_limit=π)`, tier T2
+//! `bpy.ops.mesh.beautify_fill(angle_limit=π)`, tier T1
 //! (`tests/golden/cases/edit/create/beautify_fill.py`). Port of `edbm_beautify_fill_exec`
 //! (`editors/mesh/editmesh_tools.cc`, Blender 5.2.4, GPL-2.0-or-later) over
 //! `bmesh.ops.beautify_fill`: edges between selected triangles are rotated while the shape
@@ -29,7 +29,7 @@ fn edge_calc_face_angle_ex(bm: &BMesh, e: EdgeId, fallback: f32) -> f32 {
     bli::angle_normalized_v3v3(na, nb)
 }
 
-#[operator(poll = poll::EDITMESH, tier = T2)]
+#[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::BeautifyFill) -> OpResult {
     let angle_max = bli::PI;
     let angle_limit = p.angle_limit.value;
