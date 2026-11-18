@@ -641,7 +641,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Notes |
 |---|---|---|---|
-| [ ] | `frap.describe` | M2 | target (op:<idname>, struct:<Struct>, <Struct>.<prop>) → manifest fragment; moved from M1 (M1 stabilization): the manifest lives in `frap-schema` (L11), above the ops crates, so the operator needs the describe core moved below `frap-op` first; `frap --describe` and `--describe-json` serve agents meanwhile. M2 W0 added `frap_op::DESCRIBE_PROVIDERS` (frap-schema registers the manifest); owner: WP 2.13 |
+| [x] | `frap.describe` | M2 | target (op:<idname>, struct:<Struct>, <Struct>.<prop>, errors, protocol, manifest) → manifest fragment in `result.describe`; T0; served through `frap_op::DESCRIBE_PROVIDERS` (`frap-schema/src/provider.rs` registers the manifest); unknown target → `KeyError` `DESCRIBE_TARGET`, missing/`None`/empty target → `TypeError` `OP_ARG_TYPE`; WP 2.13 |
 | [x] | `frap.select_elements` | M2 | prereq (WP 2.2); type VERT/EDGE/FACE, indices, action SET/ADD/REMOVE, object; agent selection by index |
 | [x] | `frap.select_by_normal` | M2 | direction, threshold, extend; select faces facing a direction |
 | [x] | `frap.scene_summary` | M2 | objects, counts, bounds, materials, modifiers in one JSON value |
