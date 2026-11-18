@@ -11,7 +11,9 @@
 //!   Mode through the object handler, with the matching `translate`/`rotate`/`resize`
 //!   arguments);
 //! - `TOSPHERE`, `SHRINKFATTEN`, `PUSHPULL`, `CREASE`, `VERTEX_CREASE`, `BWEIGHT`, `MIRROR` and
-//!   `EDGESLIDE` run in Edit Mode on meshes;
+//!   `EDGESLIDE` run in Edit Mode on meshes; in Object Mode, `SHRINKFATTEN` and `EDGESLIDE`
+//!   raise Blender's mode-init `RuntimeError` and `VERTEX_CREASE` does nothing (all three are
+//!   `CANCELLED` without a selected object), the others answer `NotImplementedError`;
 //! - the other modes (`SHEAR`, `BEND`, `TILT`, `TRACKBALL`, `ALIGN`, `SKIN_RESIZE`, bone,
 //!   curve, mask, time and sequencer modes, `INIT`, `DUMMY`) answer `NotImplementedError`.
 
@@ -109,6 +111,11 @@ fn exec(cx: &mut OpCtx, args: &OpArgs) -> OpResult {
             )));
         }
     };
+    if cx.ctx().mode() == ContextMode::Object
+        && let Some(r) = object_mode_edit_only(cx, tmode)
+    {
+        return r;
+    }
     crate::edit::require_edit_mesh(cx)?;
     if p.texture_space.value {
         return Err(OpError::NotImplemented(
@@ -129,7 +136,7 @@ fn exec(cx: &mut OpCtx, args: &OpArgs) -> OpResult {
     r.orient_axis = axis_index(p.orient_axis.value.identifier());
     r.orient_type = set(&p.orient_type).map(|s| s.to_string());
     r.orient_matrix = matrix(&p.orient_matrix);
-    r.orient_matrix_type = p.orient_matrix_type.value.to_string();
+    r.orient_matrix_type = set(&p.orient_matrix_type).map(|s| s.to_string());
     r.constraint_axis = set(&p.constraint_axis);
     r.has_constraint_prop = true;
     r.center_override = set(&p.center_override).map(Vec3::from_array);
@@ -145,6 +152,33 @@ fn exec(cx: &mut OpCtx, args: &OpArgs) -> OpResult {
     crate::edit::trans::run(cx, r)
 }
 
+/// The mesh-only modes whose Object Mode answer is deterministic in Blender: once there is
+/// something to transform (a selected visible object; `CANCELLED` otherwise), `SHRINKFATTEN`
+/// and `EDGESLIDE` fail in their mode init and `VERTEX_CREASE` changes nothing. (`CREASE` and
+/// `BWEIGHT` crash Blender 5.2.4 there; frap leaves them unimplemented.)
+fn object_mode_edit_only(cx: &mut OpCtx, tmode: TMode) -> Option<OpResult> {
+    let error = match tmode {
+        TMode::Shrinkfatten => Some("'Shrink/Fatten' meshes is only supported in edit mode"),
+        TMode::Edgeslide => Some("'Edge Slide' is only supported in mesh edit mode"),
+        TMode::VertexCrease => None,
+        _ => return None,
+    };
+    let any_selected = crate::object::data::create(&cx.ctx(), false, false)
+        .iter()
+        .any(|t| t.selected);
+    if !any_selected {
+        cx.report(
+            ReportType::Warning,
+            "frap: nothing to transform: no visible object is selected",
+        );
+        return Some(Ok(OpStatus::Cancelled));
+    }
+    Some(match error {
+        Some(msg) => Err(OpError::Runtime(msg.into())),
+        None => Ok(OpStatus::Finished),
+    })
+}
+
 #[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
 #[linkme::distributed_slice(OPERATORS)]
 static TRANSFORM: OperatorDef = OperatorDef {
@@ -157,8 +191,9 @@ static TRANSFORM: OperatorDef = OperatorDef {
     support: Support::Partial(
         "modes TRANSLATION, ROTATION, RESIZE (every mode with a transform handler) and \
          TOSPHERE, SHRINKFATTEN, PUSHPULL, CREASE, VERTEX_CREASE, BWEIGHT, MIRROR, EDGESLIDE \
-         (Edit Mode on meshes); the other modes are not implemented; snapping options change \
-         nothing",
+         (Edit Mode on meshes; in Object Mode SHRINKFATTEN and EDGESLIDE raise Blender's \
+         RuntimeError and VERTEX_CREASE does nothing); the other modes are not implemented; \
+         snapping options change nothing",
     ),
     notes: &[
         "value is an array: setting it constrains to every axis (mode='ROTATION' with a value \

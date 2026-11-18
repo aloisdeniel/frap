@@ -33,6 +33,7 @@ use frap_op::prelude::*;
 use frap_rna::{IdRef, MeshId, ObjectId};
 use frap_scene::id::transform::world_matrix;
 use glam::{Mat3, Mat4, Vec3};
+use smol_str::SmolStr;
 
 use super::bmq::{self, co, has, vno};
 use super::islands::{connectivity_distance, islands_calc};
@@ -131,8 +132,8 @@ pub struct Request {
     pub orient_type: Option<String>,
     /// `orient_matrix`, when set.
     pub orient_matrix: Option<Mat3>,
-    /// `orient_matrix_type`.
-    pub orient_matrix_type: String,
+    /// `orient_matrix_type`, when set.
+    pub orient_matrix_type: Option<String>,
     /// `constraint_axis` when the operator has it and it was set (`None` otherwise).
     pub constraint_axis: Option<[bool; 3]>,
     /// Whether the operator has a `constraint_axis` property.
@@ -155,7 +156,7 @@ impl Request {
             orient_axis: 2,
             orient_type: None,
             orient_matrix: None,
-            orient_matrix_type: "GLOBAL".into(),
+            orient_matrix_type: None,
             constraint_axis: None,
             has_constraint_prop: false,
             center_override: None,
@@ -237,8 +238,93 @@ pub struct Tc {
     pub center_local: Vec3,
     /// The transform data.
     pub data: Vec<Td>,
-    /// A custom-data layer to create (`BM_data_layer_add_named`) before writing.
-    pub add_layer: bool,
+    /// The float layer of a custom-data mode, once resolved (the container passed the
+    /// early-outs of `createTransEdge` / `createTransMeshVertCData`).
+    pub cd: Option<CdTarget>,
+}
+
+/// The float layer a custom-data mode reads and writes in one edit mesh, resolved as Blender
+/// does: `CustomData_has_layer_named(CD_PROP_FLOAT, name)`, else `BM_data_layer_add_named`
+/// (whose `CustomData_add_layer_named` makes the name unique within the domain), then
+/// `CustomData_get_offset_named(CD_PROP_FLOAT, name)`.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct CdTarget {
+    /// A zero-filled FLOAT layer to add, under this domain-unique name.
+    pub add: Option<SmolStr>,
+    /// The FLOAT layer the values are read from and written to; `None` when the name is
+    /// taken by another attribute, see [`cd_target`].
+    pub write: Option<SmolStr>,
+}
+
+/// The attribute (custom-data layer) name limit (`MAX_CUSTOMDATA_LAYER_NAME` minus the NUL).
+const MAX_LAYER_NAME: usize = 67;
+
+/// Resolves the float layer `name` of the vertex (`vert`) or edge domain of `bm`.
+///
+/// - A FLOAT layer of that name in the domain is used.
+/// - Otherwise a FLOAT layer is added; when another layer of the domain already has the name
+///   (another type), the new layer is named `name.001` and Blender's offset lookup fails:
+///   vertex data is then skipped (`createTransMeshVertCData` continues), edge values are not
+///   stored (Blender writes them through an invalid offset; its layer stays zero).
+/// - An edge layer named like a vertex attribute never reaches the mesh: `BM_mesh_bm_to_me`
+///   keeps the first attribute of a name in domain order (points, edges, faces, corners), so
+///   Blender drops the edge layer and its values on leaving Edit Mode; frap does not add it.
+fn cd_target(bm: &BMesh, vert: bool, name: &str) -> CdTarget {
+    if !vert && bm.vdata.find(name).is_some() {
+        return CdTarget::default();
+    }
+    let cd = if vert { &bm.vdata } else { &bm.edata };
+    if cd
+        .get(name)
+        .is_some_and(|l| matches!(l.data, AttrData::Float(_)))
+    {
+        return CdTarget {
+            add: None,
+            write: Some(name.into()),
+        };
+    }
+    let taken = |n: &str| cd.find(n).is_some();
+    let unique = frap_rna::naming::unique_subname(&taken, name, MAX_LAYER_NAME, name);
+    CdTarget {
+        write: (unique == name).then(|| unique.clone()),
+        add: Some(unique),
+    }
+}
+
+/// Applies a resolved [`CdTarget`]: adds its layer and, when the values are written, drops the
+/// layers of the later domains sharing the name (Blender drops them on leaving Edit Mode, see
+/// [`cd_target`]).
+fn apply_cd_target(bm: &mut BMesh, vert: bool, name: &str, t: &CdTarget) {
+    if let Some(n) = &t.add {
+        let slots = if vert {
+            bm.verts.slots.len()
+        } else {
+            bm.edges.slots.len()
+        };
+        let cd = if vert { &mut bm.vdata } else { &mut bm.edata };
+        cd.ensure_slots(slots);
+        cd.add_layer(CdLayer {
+            name: n.clone(),
+            data: AttrData::Float(Arc::new(vec![0.0; slots])),
+        });
+    }
+    if t.write.is_none() {
+        return;
+    }
+    let later: Vec<&mut frap_bmesh::CustomData> = if vert {
+        vec![&mut bm.edata, &mut bm.pdata, &mut bm.ldata]
+    } else {
+        vec![&mut bm.pdata, &mut bm.ldata]
+    };
+    for cd in later {
+        while cd.remove_layer(name).is_some() {}
+        let first_uv = cd.float2_names().first().cloned();
+        for slot in [&mut cd.uv_active, &mut cd.uv_render] {
+            if slot.as_deref() == Some(name) {
+                *slot = first_uv.clone();
+            }
+        }
+    }
 }
 
 /// The transform state (`TransInfo`).
@@ -289,10 +375,13 @@ fn create_verts(tc: &mut Tc, bm: &BMesh, req: &Request, around: PivotPoint) {
         DataKind::VertCData(name) => Some(name),
         _ => None,
     };
-    if let Some(name) = cdata
-        && bm.vdata.find(name).is_none()
-    {
-        tc.add_layer = true;
+    if let Some(name) = cdata {
+        let target = cd_target(bm, true, name);
+        let skip = target.write.is_none();
+        tc.cd = Some(target);
+        if skip {
+            return;
+        }
     }
     let data_len = if prop.is_some() {
         counts(bm).0
@@ -324,7 +413,11 @@ fn create_verts(tc: &mut Tc, bm: &BMesh, req: &Request, around: PivotPoint) {
     } else {
         (None, None)
     };
-    let layer = cdata.and_then(|name| bm.vdata.get(name));
+    let layer = tc
+        .cd
+        .as_ref()
+        .and_then(|t| t.write.as_deref())
+        .and_then(|n| bm.vdata.get(n));
     for (a, v) in verts.iter().enumerate() {
         let v = *v;
         if has(bm, v, ElemFlag::HIDDEN) {
@@ -425,8 +518,9 @@ fn create_edges(tc: &mut Tc, bm: &BMesh, req: &Request, name: &str) {
     {
         return;
     }
-    let layer = bm.edata.get(name);
-    tc.add_layer = layer.is_none();
+    let target = cd_target(bm, false, name);
+    let layer = target.write.as_deref().and_then(|n| bm.edata.get(n));
+    tc.cd = Some(target);
     for e in bm.edge_ids() {
         if has(bm, e, ElemFlag::HIDDEN) {
             continue;
@@ -475,6 +569,12 @@ fn set_prop_dist(t: &mut TransInfo, with_dist: bool, view_matrix: &Mat4) {
         for (di, td) in tc.data.iter().enumerate() {
             if td.selected {
                 let vec = prop_loc(tc, td, use_island, proj);
+                // A non-finite point is never the nearest one (every comparison with a NaN or
+                // infinite distance fails in Blender's search); left out, it cannot break the
+                // kd-tree's partitioning either.
+                if !vec.is_finite() {
+                    continue;
+                }
                 tree.insert(table.len() as i32, vec.to_array());
                 table.push((ci, di));
             }
@@ -855,12 +955,8 @@ pub fn orientation(
     around: PivotPoint,
 ) -> Orientation {
     let src = crate::object::orient_source(c);
-    let mut orient = Orientation::from_props(
-        req.orient_type.as_deref(),
-        req.orient_matrix,
-        &req.orient_matrix_type,
-        &src,
-    );
+    let (orient_type, orient_matrix, orient_matrix_type) = orient_props(req);
+    let mut orient = Orientation::from_props(orient_type, orient_matrix, orient_matrix_type, &src);
     if orient.kind == OrientType::Normal {
         orient.matrix = c
             .active_object()
@@ -882,6 +978,22 @@ pub fn orientation(
             .map_or(Mat3::IDENTITY, |m| crate::core::math::axes_of(&m));
     }
     orient
+}
+
+/// The `orient_type`, `orient_matrix` and `orient_matrix_type` handed to
+/// [`Orientation::from_props`] so that it resolves them as `initTransInfo` does
+/// (`transform_generics.cc`): a set `orient_matrix` is used when `orient_matrix_type` is set and
+/// equals the orientation (an unset `orient_type` then takes `orient_matrix_type`), or when
+/// neither type is set (`V3D_ORIENT_CUSTOM_MATRIX`); with `orient_type` set and
+/// `orient_matrix_type` unset, the matrix is ignored.
+fn orient_props(req: &Request) -> (Option<&str>, Option<Mat3>, &str) {
+    let ot = req.orient_type.as_deref();
+    match (req.orient_matrix, req.orient_matrix_type.as_deref()) {
+        (None, _) => (ot, None, "GLOBAL"),
+        (Some(m), Some(mt)) => (Some(ot.unwrap_or(mt)), Some(m), mt),
+        (Some(m), None) if ot.is_none() => (Some("GLOBAL"), Some(m), "GLOBAL"),
+        (Some(_), None) => (ot, None, "GLOBAL"),
+    }
 }
 
 /// `transform.translate(cursor_transform=True)` in Edit Mode: moves the 3D cursor by the
@@ -919,6 +1031,7 @@ pub fn run(cx: &mut OpCtx, req: Request) -> OpResult {
         p.size = 1.0;
     }
     let meshes = helpers::iter_edit_meshes(cx);
+    let mut cd_targets: Vec<(IdRef<MeshId>, CdTarget)> = Vec::new();
     {
         let c = cx.ctx();
         let ts = c.tool_settings();
@@ -958,11 +1071,14 @@ pub fn run(cx: &mut OpCtx, req: Request) -> OpResult {
                 smtx: pseudoinverse_m3(&mtx),
                 center_local: Vec3::ZERO,
                 data: Vec::new(),
-                add_layer: false,
+                cd: None,
             };
             match t.req.mode.data_kind() {
                 DataKind::Edges(name) => create_edges(&mut tc, bm, &t.req, name),
                 _ => create_verts(&mut tc, bm, &t.req, around),
+            }
+            if let Some(target) = &tc.cd {
+                cd_targets.push((tc.me, target.clone()));
             }
             if !tc.data.is_empty() {
                 t.tcs.push(tc);
@@ -970,6 +1086,35 @@ pub fn run(cx: &mut OpCtx, req: Request) -> OpResult {
         }
         (t, c.win.view3d.view_matrix)
     };
+    // `BM_data_layer_add_named` happens while the data is created, whatever comes next.
+    match t.req.mode.data_kind() {
+        DataKind::Verts => {}
+        DataKind::Edges(name) | DataKind::VertCData(name) => {
+            let vert = matches!(t.req.mode.data_kind(), DataKind::VertCData(_));
+            for (me, target) in &cd_targets {
+                apply_cd_target(cx.bmesh_mut(*me)?, vert, name, target);
+                if target.write.is_none() {
+                    let taken_by = if vert || target.add.is_some() {
+                        "another attribute type of the same domain"
+                    } else {
+                        "a vertex attribute"
+                    };
+                    let skipped = if vert {
+                        "the mesh is skipped"
+                    } else {
+                        "the values are not stored"
+                    };
+                    cx.report(
+                        ReportType::Warning,
+                        format!(
+                            "frap: the attribute name '{name}' is taken by {taken_by}: {skipped}, \
+                             as in Blender"
+                        ),
+                    );
+                }
+            }
+        }
+    }
     let nothing = t.tcs.is_empty()
         || (t.req.proportional.is_some()
             && !t.tcs.iter().any(|tc| tc.data.iter().any(|td| td.selected)));
@@ -1042,18 +1187,24 @@ pub fn write_back(cx: &mut OpCtx, t: &TransInfo) -> OpResult {
                         bm.vert_mut(v).co = td.loc.to_array();
                     }
                 }
-                bm.normals_update();
+                normals_update(bm, t, tc);
             }
-            DataKind::Edges(name) => {
-                let col = float_layer(&mut bm.edata, name, bm.edges.slots.len(), tc.add_layer);
+            DataKind::Edges(_) => {
+                let slots = bm.edges.slots.len();
+                let Some(col) = float_col(&mut bm.edata, tc.cd.as_ref(), slots) else {
+                    continue;
+                };
                 for td in &tc.data {
                     if let Some(e) = td.e {
                         col[e.slot()] = td.val;
                     }
                 }
             }
-            DataKind::VertCData(name) => {
-                let col = float_layer(&mut bm.vdata, name, bm.verts.slots.len(), tc.add_layer);
+            DataKind::VertCData(_) => {
+                let slots = bm.verts.slots.len();
+                let Some(col) = float_col(&mut bm.vdata, tc.cd.as_ref(), slots) else {
+                    continue;
+                };
                 for td in &tc.data {
                     if let Some(v) = td.v {
                         col[v.slot()] = td.val;
@@ -1065,29 +1216,359 @@ pub fn write_back(cx: &mut OpCtx, t: &TransInfo) -> OpResult {
     Ok(OpStatus::Finished)
 }
 
-/// The float column named `name`, created (zeroed, `BM_data_layer_add_named`) when missing.
-fn float_layer<'a>(
+/// `mesh_partial_types_calc` (no snapping, no projection): whether the tessellation and the
+/// normals need the `PARTIAL_TYPE_ALL` update (`PARTIAL_TYPE_GROUP` otherwise).
+fn partial_types(t: &TransInfo) -> (bool, bool) {
+    match t.req.mode {
+        Mode::Translate => (false, false),
+        Mode::Rotate => (false, true),
+        Mode::Resize => {
+            // Ensure zero (or small) scale calculates normals (Blender #159460).
+            let v = &t.req.values;
+            let all = t.con.is_some()
+                || v[..3].iter().any(|x| *x <= 1e-6)
+                || v[0] != v[1]
+                || v[0] != v[2];
+            (false, all)
+        }
+        _ => (true, true),
+    }
+}
+
+/// `mesh_partial_update` of one non-interactive run (`recalcData_mesh`): a full normals update
+/// when everything is updated and selected, else Blender's partial update — face normals of
+/// the faces of the partial (`BM_mesh_partial_create_from_verts*`), then the vertex normals of
+/// its vertices.
+///
+/// Ported from blender/source/blender/editors/transform/transform_convert_mesh.cc
+/// (`mesh_partial_update`, `mesh_partial_ensure`) and
+/// blender/source/blender/bmesh/intern/bmesh_mesh_partial_update.cc. As in Blender 5.2.4, a
+/// loose vertex (in no face) keeps its normal under a `PARTIAL_TYPE_ALL` update (it is never
+/// part of that partial) and under a proportional `PARTIAL_TYPE_GROUP` one (`mesh_partial_ensure`
+/// passes a zero group count, which disables the loose-vertex pass).
+fn normals_update(bm: &mut BMesh, t: &TransInfo, tc: &Tc) {
+    let (looptris_all, normals_all) = partial_types(t);
+    let (totvert, totvertsel) = (bm.vert_ids().len(), bm.selected_counts().0);
+    if looptris_all && normals_all && totvert == totvertsel {
+        bm.normals_update();
+        return;
+    }
+    let (verts, vidx) = bmq::vert_index(bm);
+    // `td->factor != 0` marks a vertex (`verts_mask`), `verts_group` is 1 at full factor and
+    // -1 below it.
+    let mut group = vec![0i32; verts.len()];
+    let mut mask_count = 0usize;
+    for td in &tc.data {
+        let Some(v) = td.v else { continue };
+        if td.factor == 0.0 {
+            continue;
+        }
+        let i = vidx[v.slot()] as usize;
+        group[i] = if td.factor < 1.0 { -1 } else { 1 };
+        mask_count += 1;
+    }
+    let mut faces: Vec<frap_bmesh::FaceId> = Vec::new();
+    let mut face_tag = rustc_hash::FxHashSet::default();
+    let gi = |v: VertId| group[vidx[v.slot()] as usize];
+    let mut loose_pass = false;
+    if normals_all {
+        // `BM_mesh_partial_create_from_verts`: every face of a marked vertex.
+        for (i, &v) in verts.iter().enumerate() {
+            if group[i] == 0 {
+                continue;
+            }
+            for f in bm.vert_faces(v) {
+                if face_tag.insert(f) {
+                    faces.push(f);
+                }
+            }
+        }
+    } else {
+        let multi = t.req.proportional.is_some();
+        for f in bm.face_ids() {
+            let ls = bm.face_loops(f);
+            let mixed = if multi {
+                // `BM_mesh_partial_create_from_verts_group_multi`.
+                let first = gi(bm.lp(bm.lp(ls[0]).prev).v);
+                ls.iter().any(|&l| {
+                    let g = gi(bm.lp(l).v);
+                    g != first || g == -1
+                })
+            } else {
+                // `BM_mesh_partial_create_from_verts_group_single`.
+                let mut a = false;
+                let mut b = false;
+                ls.iter().any(|&l| {
+                    if gi(bm.lp(l).v) != 0 {
+                        a = true;
+                    } else {
+                        b = true;
+                    }
+                    a && b
+                })
+            };
+            if mixed && face_tag.insert(f) {
+                faces.push(f);
+            }
+        }
+        // The group-multi call gets `verts_group_count == 0` from `mesh_partial_ensure`.
+        loose_pass = !multi;
+    }
+    let mut part_verts: Vec<VertId> = Vec::new();
+    let mut vert_tag = vec![false; verts.len()];
+    for &f in &faces {
+        for l in bm.face_loops(f) {
+            let v = bm.lp(l).v;
+            let i = vidx[v.slot()] as usize;
+            if !vert_tag[i] {
+                vert_tag[i] = true;
+                part_verts.push(v);
+            }
+        }
+    }
+    if loose_pass && part_verts.len() < mask_count {
+        for (i, &v) in verts.iter().enumerate() {
+            if group[i] != 0 && !vert_tag[i] && bm.vert_face_count(v) == 0 {
+                vert_tag[i] = true;
+                part_verts.push(v);
+            }
+        }
+    }
+    // The face normals of the partial come from the tessellation pass or the normals pass
+    // (both cover the same faces or a subset of the normals pass's).
+    for &f in &faces {
+        bm.face_normal_update(f);
+    }
+    for &v in &part_verts {
+        bm.vert_normal_update(v);
+    }
+}
+
+/// The FLOAT column a custom-data mode writes (`None` when the values are not stored, see
+/// [`cd_target`]).
+fn float_col<'a>(
     cd: &'a mut frap_bmesh::CustomData,
-    name: &str,
+    target: Option<&CdTarget>,
     slots: usize,
-    add: bool,
-) -> &'a mut Vec<f32> {
-    if add || cd.find(name).is_none() {
+) -> Option<&'a mut Vec<f32>> {
+    let name = target?.write.as_deref()?;
+    cd.ensure_slots(slots);
+    let layer = cd.layers.iter_mut().find(|l| l.name == name)?;
+    match &mut layer.data {
+        AttrData::Float(c) => Some(Arc::make_mut(c)),
+        _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use frap_bmesh::FromMeshParams;
+    use frap_rna::IdKey;
+
+    fn cube() -> BMesh {
+        BMesh::from_mesh(
+            &frap_mesh::primitives::cube(2.0, true, [1.0; 3]),
+            &FromMeshParams::default(),
+        )
+    }
+
+    fn add(cd: &mut frap_bmesh::CustomData, name: &str, data: AttrData) {
         cd.add_layer(CdLayer {
             name: name.into(),
-            data: AttrData::Float(Arc::new(vec![0.0; slots])),
+            data,
         });
     }
-    cd.ensure_slots(slots);
-    let i = cd.find(name).expect("layer just ensured");
-    match &mut cd.layers[i].data {
-        AttrData::Float(c) => {
-            let v = Arc::make_mut(c);
-            if v.len() < slots {
-                v.resize(slots, 0.0);
+
+    fn some(n: &str) -> Option<SmolStr> {
+        Some(n.into())
+    }
+
+    #[test]
+    fn a_layer_of_another_type_gets_a_unique_float_layer_and_no_values() {
+        // Verifier repro: an INT `crease_edge` edge attribute, then `edge_crease`. Blender adds
+        // `crease_edge.001` (FLOAT, zero) and leaves the INT layer alone.
+        let mut bm = cube();
+        let ne = bm.edges.slots.len();
+        add(
+            &mut bm.edata,
+            "crease_edge",
+            AttrData::Int(Arc::new(vec![3; ne])),
+        );
+        let t = cd_target(&bm, false, "crease_edge");
+        assert_eq!(
+            t,
+            CdTarget {
+                add: some("crease_edge.001"),
+                write: None
             }
-            v
+        );
+        apply_cd_target(&mut bm, false, "crease_edge", &t);
+        assert!(float_col(&mut bm.edata, Some(&t), ne).is_none());
+        let names: Vec<_> = bm.edata.layers.iter().map(|l| l.name.as_str()).collect();
+        assert_eq!(names, ["crease_edge.001", "crease_edge"]);
+        assert!(matches!(
+            &bm.edata.get("crease_edge").expect("INT layer").data,
+            AttrData::Int(v) if v.iter().all(|x| *x == 3)
+        ));
+        // A second call finds no FLOAT `crease_edge` either.
+        assert_eq!(
+            cd_target(&bm, false, "crease_edge").add,
+            some("crease_edge.002")
+        );
+        // The same for the vertex crease: the mesh is skipped.
+        let nv = bm.verts.slots.len();
+        add(
+            &mut bm.vdata,
+            "crease_vert",
+            AttrData::Bool(Arc::new(vec![false; nv])),
+        );
+        let t = cd_target(&bm, true, "crease_vert");
+        assert_eq!(t.add, some("crease_vert.001"));
+        assert_eq!(t.write, None);
+    }
+
+    #[test]
+    fn float_layers_are_reused_and_other_domains_give_way() {
+        let mut bm = cube();
+        let (nv, ne) = (bm.verts.slots.len(), bm.edges.slots.len());
+        let nl = bm.loops.slots.len();
+        add(
+            &mut bm.edata,
+            "crease_edge",
+            AttrData::Float(Arc::new(vec![0.25; ne])),
+        );
+        let t = cd_target(&bm, false, "crease_edge");
+        assert_eq!(
+            t,
+            CdTarget {
+                add: None,
+                write: some("crease_edge")
+            }
+        );
+        assert_eq!(
+            float_col(&mut bm.edata, Some(&t), ne).expect("FLOAT")[0],
+            0.25
+        );
+        // An edge layer named like a vertex attribute never reaches the mesh: not added.
+        add(
+            &mut bm.vdata,
+            "bevel_weight_edge",
+            AttrData::Float(Arc::new(vec![0.0; nv])),
+        );
+        assert_eq!(
+            cd_target(&bm, false, "bevel_weight_edge"),
+            CdTarget::default()
+        );
+        // The vertex crease wins over same-named edge, face and corner layers (a UV map too).
+        add(
+            &mut bm.edata,
+            "crease_vert",
+            AttrData::Float(Arc::new(vec![0.0; ne])),
+        );
+        add(
+            &mut bm.ldata,
+            "crease_vert",
+            AttrData::Float2(Arc::new(vec![[0.0; 2]; nl])),
+        );
+        bm.ldata.uv_active = some("crease_vert");
+        let t = cd_target(&bm, true, "crease_vert");
+        assert_eq!(
+            t,
+            CdTarget {
+                add: some("crease_vert"),
+                write: some("crease_vert")
+            }
+        );
+        apply_cd_target(&mut bm, true, "crease_vert", &t);
+        assert!(bm.edata.get("crease_vert").is_none());
+        assert!(bm.ldata.get("crease_vert").is_none());
+        assert_eq!(bm.ldata.uv_active, some("UVMap"));
+        float_col(&mut bm.vdata, Some(&t), nv).expect("FLOAT")[1] = 0.5;
+        assert!(matches!(
+            &bm.vdata.get("crease_vert").expect("added").data,
+            AttrData::Float(v) if v[1] == 0.5
+        ));
+    }
+
+    fn info(points: &[(Vec3, bool)]) -> TransInfo {
+        let mut req = Request::new(Mode::Translate);
+        req.proportional = Some(PropEdit {
+            falloff: Falloff::Smooth,
+            size: 1e12,
+            connected: false,
+            projected: false,
+        });
+        let data = points
+            .iter()
+            .map(|&(c, selected)| {
+                let mut td = Td::new();
+                td.center = c;
+                td.iloc = c;
+                td.loc = c;
+                td.selected = selected;
+                td
+            })
+            .collect();
+        TransInfo {
+            req,
+            around: PivotPoint::MedianPoint,
+            tcs: vec![Tc {
+                ob: IdRef::from_key(IdKey::next()),
+                me: IdRef::from_key(IdKey::next()),
+                mat: Mat4::IDENTITY,
+                imat: Mat4::IDENTITY,
+                mat3_unit: Mat3::IDENTITY,
+                mtx: Mat3::IDENTITY,
+                smtx: Mat3::IDENTITY,
+                center_local: Vec3::ZERO,
+                data,
+                cd: None,
+            }],
+            center_global: Vec3::ZERO,
+            orient: Orientation::GLOBAL,
+            con: None,
         }
-        _ => unreachable!("crease and bevel weight layers are FLOAT"),
+    }
+
+    #[test]
+    fn proportional_distances_skip_non_finite_points() {
+        // Verifier repro (overflowing values): NaN and infinite selected coordinates used to
+        // send the kd-tree partition out of bounds.
+        let nan = Vec3::splat(f32::NAN);
+        let inf = Vec3::new(f32::INFINITY, 0.0, 0.0);
+        let mut pts = vec![(nan, true), (inf, true), (Vec3::new(1.0, 0.0, 0.0), true)];
+        for i in 0..6 {
+            pts.push((Vec3::new(f32::NAN, i as f32, 0.0), true));
+            pts.push((Vec3::new(-f32::INFINITY, i as f32, 0.0), true));
+        }
+        pts.push((Vec3::new(4.0, 0.0, 0.0), false));
+        pts.push((nan, false));
+        let mut t = info(&pts);
+        set_prop_dist(&mut t, false, &Mat4::IDENTITY);
+        let d = &t.tcs[0].data;
+        assert_eq!(d[d.len() - 2].rdist, 3.0);
+        // A NaN query finds nothing (every comparison fails).
+        assert_eq!(d[d.len() - 1].rdist, -1.0);
+        assert!(d.iter().filter(|td| td.selected).all(|td| td.rdist == 0.0));
+        calc_prop_ratio(&mut t);
+    }
+
+    #[test]
+    fn orient_matrix_type_resolution() {
+        let m = Mat3::from_cols(Vec3::Y, -Vec3::X, Vec3::Z);
+        let mut r = Request::new(Mode::Rotate);
+        assert_eq!(orient_props(&r), (None, None, "GLOBAL"));
+        r.orient_matrix = Some(m);
+        // Neither type set: V3D_ORIENT_CUSTOM_MATRIX.
+        assert_eq!(orient_props(&r), (Some("GLOBAL"), Some(m), "GLOBAL"));
+        // Only orient_matrix_type: orient_type takes it, so the matrix is used.
+        r.orient_matrix_type = Some("LOCAL".into());
+        assert_eq!(orient_props(&r), (Some("LOCAL"), Some(m), "LOCAL"));
+        r.orient_type = Some("GLOBAL".into());
+        assert_eq!(orient_props(&r), (Some("GLOBAL"), Some(m), "LOCAL"));
+        // orient_type without orient_matrix_type: the matrix is ignored.
+        r.orient_matrix_type = None;
+        assert_eq!(orient_props(&r), (Some("GLOBAL"), None, "GLOBAL"));
     }
 }

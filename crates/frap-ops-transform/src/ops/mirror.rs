@@ -26,7 +26,7 @@ fn exec(cx: &mut OpCtx, p: transform::Mirror) -> OpResult {
     let mut r = Request::new(Mode::Mirror);
     r.orient_type = set(&p.orient_type).map(|s| s.to_string());
     r.orient_matrix = matrix(&p.orient_matrix);
-    r.orient_matrix_type = p.orient_matrix_type.value.to_string();
+    r.orient_matrix_type = set(&p.orient_matrix_type).map(|s| s.to_string());
     r.constraint_axis = set(&p.constraint_axis);
     r.has_constraint_prop = true;
     r.center_override = set(&p.center_override).map(Vec3::from_array);

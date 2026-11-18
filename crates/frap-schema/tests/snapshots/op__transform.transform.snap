@@ -1237,7 +1237,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T1",
     "support": "partial",
-    "support_note": "modes TRANSLATION, ROTATION, RESIZE (every mode with a transform handler) and TOSPHERE, SHRINKFATTEN, PUSHPULL, CREASE, VERTEX_CREASE, BWEIGHT, MIRROR, EDGESLIDE (Edit Mode on meshes); the other modes are not implemented; snapping options change nothing",
+    "support_note": "modes TRANSLATION, ROTATION, RESIZE (every mode with a transform handler) and TOSPHERE, SHRINKFATTEN, PUSHPULL, CREASE, VERTEX_CREASE, BWEIGHT, MIRROR, EDGESLIDE (Edit Mode on meshes; in Object Mode SHRINKFATTEN and EDGESLIDE raise Blender's RuntimeError and VERTEX_CREASE does nothing); the other modes are not implemented; snapping options change nothing",
     "headless": "native",
     "planned": "M2",
     "extension": false,

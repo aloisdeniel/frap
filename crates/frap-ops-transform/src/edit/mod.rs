@@ -107,7 +107,7 @@ pub fn request_from_args(op: TransformOp, args: &OpArgs) -> Request {
             r.orient_axis = axis_index(p.orient_axis.value.identifier());
             r.orient_type = set(&p.orient_type).map(|s| s.to_string());
             r.orient_matrix = matrix(&p.orient_matrix);
-            r.orient_matrix_type = p.orient_matrix_type.value.to_string();
+            r.orient_matrix_type = set(&p.orient_matrix_type).map(|s| s.to_string());
             r.constraint_axis = set(&p.constraint_axis);
             r.has_constraint_prop = true;
             r.center_override = set(&p.center_override).map(Vec3::from_array);
@@ -129,7 +129,7 @@ pub fn request_from_args(op: TransformOp, args: &OpArgs) -> Request {
             }
             r.orient_type = set(&p.orient_type).map(|s| s.to_string());
             r.orient_matrix = matrix(&p.orient_matrix);
-            r.orient_matrix_type = p.orient_matrix_type.value.to_string();
+            r.orient_matrix_type = set(&p.orient_matrix_type).map(|s| s.to_string());
             r.constraint_axis = set(&p.constraint_axis);
             r.has_constraint_prop = true;
             r.center_override = set(&p.center_override).map(Vec3::from_array);
@@ -151,7 +151,7 @@ pub fn request_from_args(op: TransformOp, args: &OpArgs) -> Request {
             }
             r.orient_type = set(&p.orient_type).map(|s| s.to_string());
             r.orient_matrix = matrix(&p.orient_matrix);
-            r.orient_matrix_type = p.orient_matrix_type.value.to_string();
+            r.orient_matrix_type = set(&p.orient_matrix_type).map(|s| s.to_string());
             r.constraint_axis = set(&p.constraint_axis);
             r.has_constraint_prop = true;
             r.proportional = proportional(
