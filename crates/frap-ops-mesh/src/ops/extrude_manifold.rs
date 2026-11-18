@@ -14,27 +14,22 @@
 //! `use_proportional_edit=False` and `mirror=False` forced
 //! (`frap_op::pipeline::MACRO_STEP_FORCED`).
 //!
+//! The translate step's Auto Merge with split (`EDBM_automerge_and_split`:
+//! `BM_mesh_intersect_edges` + `weld_verts`, `frap-ops-transform/src/edit/automerge.rs`) welds
+//! the moved vertices onto the ones they reach within `tool_settings.double_threshold` and
+//! splits the edges and faces they cross, which is what folds an inward push into the walls.
+//!
 //! Verified on 5.2.4: pushing the cube's top face inward only moves it (V8 E12 F6): the side faces
 //! are folded into the walls.
 //!
-//! Golden: `tests/golden/cases/edit/extrude/macros/manifold.py.pending` (blessed; enabled by
-//! renaming it to `.py` once edit-mode transforms implement `use_automerge_and_split`,
-//! `EDBM_automerge_and_split`).
+//! Goldens: `tests/golden/cases/edit/extrude/macros/manifold.py` and
+//! `tests/golden/cases/edit/automerge_split/*.py`.
 
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;
 
-#[operator(
-    poll = poll::EDITMESH,
-    tier = T1,
-    kind = Macro,
-    support = Partial(
-        "the TRANSFORM_OT_translate step forces use_automerge_and_split=True, which edit-mode \
-         transforms do not implement yet (EDBM_automerge_and_split): the macro raises \
-         OP_NOT_IMPLEMENTED and nothing changes"
-    ),
-)]
+#[operator(poll = poll::EDITMESH, tier = T1, kind = Macro)]
 fn exec(_cx: &mut OpCtx, _p: mesh::ExtrudeManifold) -> OpResult {
     Ok(OpStatus::Finished)
 }

@@ -93,7 +93,8 @@ fn mesh_from(j: &Value, name: &str, main: &mut Main, log: &mut ChangeLog) -> Mes
         });
     }
     for ma in j["materials"].as_array().unwrap() {
-        m.materials.push(ma.as_str().map(|n| material(main, log, n)));
+        m.materials
+            .push(ma.as_str().map(|n| material(main, log, n)));
     }
     m
 }
@@ -498,7 +499,12 @@ fn float_runs_exact_with_a_warning() {
     let out = r.unwrap();
     assert_eq!(reports.len(), 1);
     assert!(reports[0].message.contains("FLOAT solver runs as EXACT"));
-    compare_t3("float", &s, &out, &cases()["exact_cube_cube_difference"]["result"]);
+    compare_t3(
+        "float",
+        &s,
+        &out,
+        &cases()["exact_cube_cube_difference"]["result"],
+    );
 }
 
 #[test]

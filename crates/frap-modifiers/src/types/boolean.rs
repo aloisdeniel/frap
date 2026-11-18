@@ -117,9 +117,11 @@ fn error_messages(s: &BooleanSettings, main: &Main) -> Option<&'static str> {
         if !use_exact && col.objects.is_empty() && col.children.is_empty() {
             err = Some("Cannot execute, non-exact solver and empty collection");
         }
-        let any_non_mesh = collection_objects(main, s.collection)
-            .iter()
-            .any(|&o| main.objects.get(o).is_some_and(|o| o.object_type() != "MESH"));
+        let any_non_mesh = collection_objects(main, s.collection).iter().any(|&o| {
+            main.objects
+                .get(o)
+                .is_some_and(|o| o.object_type() != "MESH")
+        });
         if any_non_mesh {
             err = Some("Cannot execute, the selected collection contains non mesh objects");
         }
@@ -326,9 +328,7 @@ fn non_float_boolean_mesh(
         Err(BoolError::NonManifold(_)) => Err(ModError::Error(
             "Cannot execute, non-manifold inputs".into(),
         )),
-        Err(BoolError::Input(msg)) | Err(BoolError::Unavailable(msg)) => {
-            Err(ModError::Error(msg))
-        }
+        Err(BoolError::Input(msg)) | Err(BoolError::Unavailable(msg)) => Err(ModError::Error(msg)),
         // `ResultTooBig` sets no modifier error and returns no mesh: the input is kept.
         Err(BoolError::ResultTooBig) => Ok(mesh.clone()),
         Err(_) => Err(ModError::Error("Cannot execute, unknown error".into())),
@@ -415,7 +415,8 @@ pub fn mesh_boolean(
         off.vert.push(off.vert.last().unwrap() + m.verts_num());
         off.edge.push(off.edge.last().unwrap() + m.edges_num());
         off.face.push(off.face.last().unwrap() + m.faces_num());
-        off.corner.push(off.corner.last().unwrap() + m.corners_num());
+        off.corner
+            .push(off.corner.last().unwrap() + m.corners_num());
     }
 
     // The joined mesh's materials (`realize_instances`: every input's slots, an empty slot for
@@ -548,7 +549,15 @@ pub fn mesh_boolean(
     }
     // Vertex groups (`MDeformVert` through the vertex map, groups merged by name).
     transfer_vertex_groups(&mut out, &meshes, &off, &vert_map);
-    interpolate_corner_attributes(&mut out, &meshes, &off, &joined, &names, &face_map, &corner_map);
+    interpolate_corner_attributes(
+        &mut out,
+        &meshes,
+        &off,
+        &joined,
+        &names,
+        &face_map,
+        &corner_map,
+    );
 
     let face_input: Vec<u32> = r.face_src.iter().map(|s| s.0).collect();
     let intersecting_edges = if want_intersecting_edges {
@@ -570,9 +579,8 @@ fn face_map_opt(face_map: &[usize]) -> Vec<Option<usize>> {
 
 /// `get_mapped_material_index` of `realize_instances`: an input's slot in the joined slots.
 fn joined_material_index(m: &Mesh, joined: &[Option<IdRef<MaterialId>>], orig: i32) -> i32 {
-    let first = |ma: Option<IdRef<MaterialId>>| {
-        joined.iter().position(|x| *x == ma).unwrap_or(0) as i32
-    };
+    let first =
+        |ma: Option<IdRef<MaterialId>>| joined.iter().position(|x| *x == ma).unwrap_or(0) as i32;
     if m.materials.is_empty() {
         return first(None);
     }
@@ -615,8 +623,11 @@ impl Joined {
         for (i, m) in meshes.iter().enumerate() {
             let (vo, eo, co) = (off.vert[i], off.edge[i], off.corner[i]);
             j.positions.extend_from_slice(m.positions());
-            j.edges
-                .extend(m.edges().iter().map(|e| [e[0] as usize + vo, e[1] as usize + vo]));
+            j.edges.extend(
+                m.edges()
+                    .iter()
+                    .map(|e| [e[0] as usize + vo, e[1] as usize + vo]),
+            );
             j.face_offsets
                 .extend(m.face_offsets()[1..].iter().map(|&o| o as usize + co));
             j.corner_verts
@@ -916,7 +927,10 @@ fn interpolate_corner_attributes(
         return;
     }
     let corners = out.corners_num();
-    let mut dsts: Vec<AttrData> = srcs.iter().map(|(_, s)| s.default_of_len(corners)).collect();
+    let mut dsts: Vec<AttrData> = srcs
+        .iter()
+        .map(|(_, s)| s.default_of_len(corners))
+        .collect();
     let out_cv: Vec<i32> = out.corner_verts().to_vec();
     let out_pos: Vec<[f32; 3]> = out.positions().to_vec();
     for (out_f, &in_f) in face_map.iter().enumerate() {
@@ -949,9 +963,8 @@ fn interpolate_corner_attributes(
             .collect();
         let out_face_verts: Vec<i32> = out_cv[out_face.clone()].to_vec();
         let out_normal = frap_geom::normals::face_normal_calc(&out_pos, &out_face_verts);
-        let flipped = normal[0] * out_normal[0] + normal[1] * out_normal[1]
-            + normal[2] * out_normal[2]
-            < 0.0;
+        let flipped =
+            normal[0] * out_normal[0] + normal[1] * out_normal[1] + normal[2] * out_normal[2] < 0.0;
         for c in out_face {
             if let Some(ic) = corner_map[c] {
                 for (k, (_, src)) in srcs.iter().enumerate() {
