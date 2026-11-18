@@ -1,6 +1,6 @@
 # WP 2.6: mesh.loopcut smoothness with each falloff (smooth-even spheres over the vertex
 # normals), one fresh cylinder per falloff, positive and negative smoothness.
-# golden: startup=factory compare=objects,mesh:Cylinder,mesh:Cylinder.001,mesh:Cylinder.002,mesh:Cylinder.003,mesh:Cylinder.004,mesh:Cylinder.005 tier=T1 tol=1e-4
+# golden: startup=factory compare=objects,mesh:Cylinder,mesh:Cylinder.001,mesh:Cylinder.002,mesh:Cylinder.003,mesh:Cylinder.004,mesh:Cylinder.005 tier=T1
 import bpy
 bpy.ops.mesh.primitive_cylinder_add(vertices=8, location=(0, 0, 3))
 bpy.ops.object.mode_set(mode='EDIT')

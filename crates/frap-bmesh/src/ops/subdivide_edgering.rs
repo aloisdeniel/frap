@@ -28,7 +28,7 @@
 //! Operator type flags: `NORMALS_CALC | SELECT_FLUSH | SELECT_VALIDATE` (plus
 //! `UNTAN_MULTIRES`).
 
-mod edgeloop;
+pub(crate) mod edgeloop;
 
 use rustc_hash::FxHashMap;
 
@@ -160,9 +160,12 @@ fn edgeloop_check_overlap_all(bm: &mut BMesh, a: &EdgeLoop, b: &EdgeLoop) -> boo
     ok
 }
 
-/// `bm_edgering_pair_calc`: the pairs of rims connected by ring edges, in discovery order
-/// (each pair once, ordered by rim index: Blender orders them by store address, which follows
-/// the allocation order).
+/// `bm_edgering_pair_calc`: the pairs of rims connected by ring edges, each pair once, in
+/// discovery order (Blender's `VectorSet` keeps insertion order, as here). Within a pair Blender
+/// orders the two rims by the heap address of their `BMEdgeLoopStore` (the `std::swap` when
+/// `first > second`), which is not reproducible; frap orders them by rim index instead. That
+/// choice of first/second rim rotates the start vertex and loop direction of the cut, so with
+/// 2+ pairs element order can differ from Blender (compared canonically, T2).
 fn edgering_pair_calc(bm: &BMesh, rims: &[EdgeLoop]) -> Vec<(usize, usize)> {
     let mut vert_rim: FxHashMap<VertId, usize> = FxHashMap::default();
     for (i, el) in rims.iter().enumerate() {
@@ -296,7 +299,12 @@ fn faces_share_tag_clear(bm: &mut BMesh, edges: &[EdgeId]) {
 }
 
 /// `bm_edgering_pair_store_create`.
-fn edgering_pair_store_create(bm: &mut BMesh, a: &EdgeLoop, b: &EdgeLoop, interp: Interp) -> LoopPairStore {
+fn edgering_pair_store_create(
+    bm: &mut BMesh,
+    a: &EdgeLoop,
+    b: &EdgeLoop,
+    interp: Interp,
+) -> LoopPairStore {
     let mut lpair = LoopPairStore::default();
     if interp != Interp::Surface {
         return lpair;
@@ -372,7 +380,9 @@ fn edgering_pair_interpolate(
         let xs: Vec<Vec<f32>> = (0..3)
             .map(|i| math::forward_diff_bezier(q0[i], q1[i], q2[i], q3[i], resolu - 1))
             .collect();
-        (0..resolu).map(|k| [xs[0][k], xs[1][k], xs[2][k]]).collect()
+        (0..resolu)
+            .map(|k| [xs[0][k], xs[1][k], xs[2][k]])
+            .collect()
     };
 
     // The centre spline.
@@ -654,7 +664,10 @@ fn edgering_pair_ringsubd(
 }
 
 /// Runs `subdivide_edgering` on `bm`.
-pub fn subdivide_edgering(bm: &mut BMesh, i: &SubdivideEdgeringIn) -> Result<SubdivideEdgeringOut, BmError> {
+pub fn subdivide_edgering(
+    bm: &mut BMesh,
+    i: &SubdivideEdgeringIn,
+) -> Result<SubdivideEdgeringOut, BmError> {
     let interp = match i.interp_mode {
         "LINEAR" => Interp::Linear,
         "PATH" => Interp::Path,
@@ -750,7 +763,10 @@ fn exec(
         let mut lpairs: Vec<Option<LoopPairStore>> = Vec::with_capacity(pairs.len());
         for &(ia, ib) in &pairs {
             let (a, b) = (rims[ia].clone(), rims[ib].clone());
-            lpairs.push(edgeloop_check_overlap_all(bm, &a, &b).then(|| edgering_pair_store_create(bm, &a, &b, interp)));
+            lpairs.push(
+                edgeloop_check_overlap_all(bm, &a, &b)
+                    .then(|| edgering_pair_store_create(bm, &a, &b, interp)),
+            );
         }
         let mut any = false;
         for (k, &(ia, ib)) in pairs.iter().enumerate() {

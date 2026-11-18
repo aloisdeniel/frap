@@ -1,7 +1,8 @@
 # WP 2.6: mesh.subdivide_edgering over three ring pairs (four rims after a first edgering):
-# Blender orders the pairs by the heap addresses of its loop stores ("order of execution with
-# 2+ rings is undefined"), so element order is not reproducible; compared canonically (T2).
-# golden: startup=factory compare=objects,mesh:Cylinder tier=T2 tol=1e-4
+# pairs run in discovery order (as in frap), but within a pair Blender orders the two rims by the
+# heap address of their loop stores, which is not reproducible (frap uses rim index); that
+# rotates the start vertex and loop direction, so element order differs; compared canonically (T2).
+# golden: startup=factory compare=objects,mesh:Cylinder tier=T2
 import bpy
 bpy.ops.mesh.primitive_cylinder_add(vertices=8)
 bpy.ops.object.mode_set(mode='EDIT')

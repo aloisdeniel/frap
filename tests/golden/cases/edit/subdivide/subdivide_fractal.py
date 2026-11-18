@@ -1,6 +1,6 @@
 # WP 2.6: mesh.subdivide with fractal displacement (BLI_rng offsets from the seed, new-Perlin
 # turbulence), along the normal and free, two seeds.
-# golden: startup=factory compare=objects,mesh:Cube,mesh:Grid tier=T1 tol=1e-4
+# golden: startup=factory compare=objects,mesh:Cube,mesh:Grid tier=T1
 import bpy
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='SELECT')

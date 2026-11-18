@@ -69,21 +69,9 @@ fn face_exists_subset_from_face(bm: &BMesh, l_a: LoopId, l_b: LoopId, f_len: usi
             (bm.lp(lr).next, lr)
         };
         let found = if swap_winding {
-            overlap_check_subset(
-                bm,
-                bm.lp(l_a).next,
-                bm.lp(l_b).prev,
-                bm.lp(beg).prev,
-                true,
-            )
+            overlap_check_subset(bm, bm.lp(l_a).next, bm.lp(l_b).prev, bm.lp(beg).prev, true)
         } else {
-            overlap_check_subset(
-                bm,
-                bm.lp(l_a).next,
-                bm.lp(l_b).prev,
-                bm.lp(beg).next,
-                false,
-            )
+            overlap_check_subset(bm, bm.lp(l_a).next, bm.lp(l_b).prev, bm.lp(beg).next, false)
         };
         let _ = end;
         if found {
@@ -95,7 +83,12 @@ fn face_exists_subset_from_face(bm: &BMesh, l_a: LoopId, l_b: LoopId, f_len: usi
 
 /// `BM_face_split_check_double_face(l_a, l_b, f_len)`: splitting the face between `l_a` and
 /// `l_b` would create a face that already exists (on either side).
-pub(crate) fn face_split_check_double_face(bm: &BMesh, l_a: LoopId, l_b: LoopId, f_len: usize) -> bool {
+pub(crate) fn face_split_check_double_face(
+    bm: &BMesh,
+    l_a: LoopId,
+    l_b: LoopId,
+    f_len: usize,
+) -> bool {
     let flen = bm.face(bm.lp(l_a).f).len as usize;
     let side_b_len = (flen + 2).wrapping_sub(f_len);
     face_exists_subset_from_face(bm, l_a, l_b, f_len)
@@ -195,7 +188,12 @@ pub(crate) fn face_exists_multi_edge(bm: &mut BMesh, earr: &[EdgeId]) -> bool {
 }
 
 /// `BM_faces_join_pair(l_a, l_b, do_del)`: joins the faces of two loops of one edge.
-pub(crate) fn faces_join_pair(bm: &mut BMesh, l_a: LoopId, l_b: LoopId, do_del: bool) -> (Option<FaceId>, Option<FaceId>) {
+pub(crate) fn faces_join_pair(
+    bm: &mut BMesh,
+    l_a: LoopId,
+    l_b: LoopId,
+    do_del: bool,
+) -> (Option<FaceId>, Option<FaceId>) {
     if bm.lp(l_a).v == bm.lp(l_b).v {
         let fb = bm.lp(l_b).f;
         bm.loop_reverse(fb);
@@ -243,8 +241,10 @@ pub(crate) fn vert_collapse_faces(
                 if kill_duplicate_faces && let Some(fd) = f_double {
                     bm.face_kill(fd);
                 }
-                if let (Some(l_a), Some(l_b)) = (bm.face_vert_share_loop(f2, tv), bm.face_vert_share_loop(f2, tv2))
-                    && let Some((_, l_new)) = bm.face_split(f2, l_a, l_b, None, false)
+                if let (Some(l_a), Some(l_b)) = (
+                    bm.face_vert_share_loop(f2, tv),
+                    bm.face_vert_share_loop(f2, tv2),
+                ) && let Some((_, l_new)) = bm.face_split(f2, l_a, l_b, None, false)
                 {
                     e_new = Some(bm.lp(l_new).e);
                 }
@@ -252,7 +252,14 @@ pub(crate) fn vert_collapse_faces(
         }
         e_new
     } else {
-        bm.join_edge_kill_vert(e_kill, v_kill, do_del, true, kill_degenerate_faces, kill_duplicate_faces)
+        bm.join_edge_kill_vert(
+            e_kill,
+            v_kill,
+            do_del,
+            true,
+            kill_degenerate_faces,
+            kill_duplicate_faces,
+        )
     }
 }
 
@@ -266,7 +273,16 @@ pub(crate) fn vert_collapse_edge(
     kill_degenerate_faces: bool,
     kill_duplicate_faces: bool,
 ) -> Option<EdgeId> {
-    vert_collapse_faces(bm, e_kill, v_kill, 1.0, do_del, false, kill_degenerate_faces, kill_duplicate_faces)
+    vert_collapse_faces(
+        bm,
+        e_kill,
+        v_kill,
+        1.0,
+        do_del,
+        false,
+        kill_degenerate_faces,
+        kill_duplicate_faces,
+    )
 }
 
 /// `BM_vert_dissolve`.

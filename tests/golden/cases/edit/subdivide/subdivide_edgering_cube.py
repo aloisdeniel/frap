@@ -1,7 +1,7 @@
 # WP 2.6: mesh.subdivide_edgering on the cube's vertical ring (open rims): the default (10 cuts,
 # PATH), LINEAR with 2 cuts, SURFACE with a profile; a single edge is no ring (INFO report,
 # unchanged).
-# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001,mesh:Cube.002,mesh:Cube.003 tier=T1 tol=1e-4
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001,mesh:Cube.002,mesh:Cube.003 tier=T1
 import bpy
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_mode(type='EDGE')

@@ -80,7 +80,12 @@ pub(crate) fn project_v3_plane(out: V3, plane_no: V3, plane_co: V3) -> V3 {
 /// `plane_from_point_normal_v3`.
 #[inline]
 pub(crate) fn plane_from_point_normal_v3(plane_co: V3, plane_no: V3) -> [f32; 4] {
-    [plane_no[0], plane_no[1], plane_no[2], -dot(plane_no, plane_co)]
+    [
+        plane_no[0],
+        plane_no[1],
+        plane_no[2],
+        -dot(plane_no, plane_co),
+    ]
 }
 
 /// `determinant_m2`.

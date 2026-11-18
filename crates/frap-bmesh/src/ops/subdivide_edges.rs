@@ -342,7 +342,11 @@ fn loop_is_adjacent(bm: &BMesh, l_a: LoopId, l_b: LoopId) -> bool {
 
 /// `connect_smallest_face`: splits the smallest face using both vertices; returns the new
 /// edge and the new face.
-fn connect_smallest_face(bm: &mut BMesh, v_a: VertId, v_b: VertId) -> (Option<EdgeId>, Option<FaceId>) {
+fn connect_smallest_face(
+    bm: &mut BMesh,
+    v_a: VertId,
+    v_b: VertId,
+) -> (Option<EdgeId>, Option<FaceId>) {
     let Some((f, l_a, l_b)) = vert_pair_share_face_by_len(bm, v_a, v_b, true) else {
         return (None, None);
     };
@@ -358,8 +362,13 @@ fn interp_slerp_co_no_v3(co_a: V3, no_a: V3, co_b: V3, no_b: V3, no_dir: V3, fac
     let no_mid = math::normalize_v3(math::add(no_a, no_b)).0;
     let (no_ortho, len) = math::normalize_v3(math::cross(no_mid, no_dir));
     if len != 0.0 {
-        let v_a_no_ortho = math::project_v3_plane(math::cross(no_ortho, no_a), no_ortho, [0.0; 3]);
-        let v_b_no_ortho = math::project_v3_plane(math::cross(no_ortho, no_b), no_ortho, [0.0; 3]);
+        // Blender calls `project_v3_plane(v_no_ortho, no_ortho, v_no_ortho)`: the plane passes
+        // through the vector itself, so the projection is a no-op. Mirror the call exactly
+        // (projecting through the origin drifts the floats away from Blender).
+        let t_a = math::cross(no_ortho, no_a);
+        let v_a_no_ortho = math::project_v3_plane(t_a, no_ortho, t_a);
+        let t_b = math::cross(no_ortho, no_b);
+        let v_b_no_ortho = math::project_v3_plane(t_b, no_ortho, t_b);
         let plane_a = math::plane_from_point_normal_v3(co_a, v_a_no_ortho);
         let plane_b = math::plane_from_point_normal_v3(co_b, v_b_no_ortho);
         let plane_c = math::plane_from_point_normal_v3(co_b, no_ortho);
@@ -772,7 +781,10 @@ fn check_ids(bm: &BMesh, i: &SubdivideEdgesIn) -> Result<(), BmError> {
     }
     for &(f, p) in &i.custom_patterns {
         if !bm.faces.contains(f.0) {
-            return Err(BmError::Invalid(format!("custom_patterns: no face {}", f.0)));
+            return Err(BmError::Invalid(format!(
+                "custom_patterns: no face {}",
+                f.0
+            )));
         }
         if usize::try_from(p).map_or(true, |p| p >= PATTERN_TABLE.len()) {
             return Err(BmError::Invalid(format!("custom_patterns: no pattern {p}")));
@@ -787,7 +799,10 @@ pub fn subdivide_edges(bm: &mut BMesh, i: &SubdivideEdgesIn) -> Result<Subdivide
         BmError::Invalid(format!("smooth_falloff: unknown '{}'", i.smooth_falloff))
     })?;
     let cornertype = CornerType::from_identifier(i.quad_corner_type).ok_or_else(|| {
-        BmError::Invalid(format!("quad_corner_type: unknown '{}'", i.quad_corner_type))
+        BmError::Invalid(format!(
+            "quad_corner_type: unknown '{}'",
+            i.quad_corner_type
+        ))
     })?;
     check_ids(bm, i)?;
     Ok(bm.bmo_exec(TYPE_FLAG, |bm| exec(bm, i, smooth_falloff, cornertype)))
@@ -1102,10 +1117,9 @@ fn split_two_edges_no_pattern(bm: &mut BMesh, face: FaceId, params: &Params) {
         // splitting is ambiguous, so the pair is skipped.
         let va = bm.lp(la).v;
         let vb = bm.lp(lb).v;
-        let ok = !bm
-            .vert_loops(va)
-            .into_iter()
-            .any(|other| bm.lp(other).f != face && bm.face_vert_share_loop(bm.lp(other).f, vb).is_some());
+        let ok = !bm.vert_loops(va).into_iter().any(|other| {
+            bm.lp(other).f != face && bm.face_vert_share_loop(bm.lp(other).f, vb).is_some()
+        });
         loops_split.push(ok.then_some((la, lb)));
         b = (b + vlen - 1) % vlen;
         a = (a + 1) % vlen;
@@ -1438,7 +1452,10 @@ pub(crate) mod tests {
                 ..SubdivideEdgesIn::default()
             },
         ] {
-            assert!(matches!(subdivide_edges(&mut bm, &i), Err(BmError::Invalid(_))));
+            assert!(matches!(
+                subdivide_edges(&mut bm, &i),
+                Err(BmError::Invalid(_))
+            ));
         }
     }
 
@@ -1482,7 +1499,10 @@ pub(crate) mod tests {
     fn esubdivide_selection_modes() {
         // Loop cut selection: only the new inner edges.
         let mut bm = cyl(8);
-        let ring: Vec<EdgeId> = [2u32, 3, 6, 9, 12, 15, 18, 21].iter().map(|&i| EdgeId(i)).collect();
+        let ring: Vec<EdgeId> = [2u32, 3, 6, 9, 12, 15, 18, 21]
+            .iter()
+            .map(|&i| EdgeId(i))
+            .collect();
         for e in bm.edge_ids() {
             bm.edge_select_set(e, false);
         }
@@ -1550,8 +1570,17 @@ mod falloff_tests {
         assert_eq!(Falloff::Smooth.calc(0.5), 0.5);
         assert_eq!(Falloff::Root.calc(0.25), 0.5);
         assert!((Falloff::Sphere.calc(0.5) - 0.75f32.sqrt()).abs() < 1e-7);
-        assert_eq!(Falloff::from_identifier("INVERSE_SQUARE"), Some(Falloff::InverseSquare));
-        assert_eq!(CornerType::from_identifier("INNERVERT"), Some(CornerType::InnerVert));
-        assert_eq!(CornerType::from_identifier("INNER_VERT"), Some(CornerType::InnerVert));
+        assert_eq!(
+            Falloff::from_identifier("INVERSE_SQUARE"),
+            Some(Falloff::InverseSquare)
+        );
+        assert_eq!(
+            CornerType::from_identifier("INNERVERT"),
+            Some(CornerType::InnerVert)
+        );
+        assert_eq!(
+            CornerType::from_identifier("INNER_VERT"),
+            Some(CornerType::InnerVert)
+        );
     }
 }

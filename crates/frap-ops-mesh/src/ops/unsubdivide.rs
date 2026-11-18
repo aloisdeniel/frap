@@ -9,8 +9,8 @@
 //! a mesh with nothing selected is skipped. The selection is then flushed for the select mode
 //! (through vertices first when vertex mode is off).
 
-use frap_bmesh::{ElemFlag, SelectMode};
 use frap_bmesh::ops::unsubdivide::{UnsubdivideIn, unsubdivide};
+use frap_bmesh::{ElemFlag, SelectMode};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;

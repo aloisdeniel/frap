@@ -142,7 +142,11 @@ fn fan_makes_double_with_self(bm: &BMesh, v_loops_all: &[LoopId]) -> bool {
         let i_min = (0..n).min_by_key(|&i| verts[i]).unwrap_or(0);
         let i_next = if i_min + 1 == n { 0 } else { i_min + 1 };
         let i_prev = if i_min == 0 { n - 1 } else { i_min - 1 };
-        let step = if verts[i_next] < verts[i_prev] { 1 } else { n - 1 };
+        let step = if verts[i_next] < verts[i_prev] {
+            1
+        } else {
+            n - 1
+        };
         let mut out = Vec::with_capacity(n);
         let mut j = i_min;
         for _ in 0..n {
@@ -233,7 +237,9 @@ fn dissolve_test(
                 return None;
             }
             v_loops = vert_loops_from_vert_edges(bm, v, &v_edges);
-            if fan_makes_double_with_existing(bm, &v_loops) || fan_makes_double_with_self(bm, &v_loops) {
+            if fan_makes_double_with_existing(bm, &v_loops)
+                || fan_makes_double_with_self(bm, &v_loops)
+            {
                 return None;
             }
         }
@@ -305,7 +311,8 @@ pub fn decimate_unsubdivide_ex(bm: &mut BMesh, iterations: i32, tag_only: bool) 
         // Tag every vertex eligible to be dissolved in this iteration.
         for v in bm.vert_ids() {
             frap_math::budget::check();
-            let ok = bm.vert(v).flag.contains(ElemFlag::TAG) && dissolve_test(bm, v, false).is_some();
+            let ok =
+                bm.vert(v).flag.contains(ElemFlag::TAG) && dissolve_test(bm, v, false).is_some();
             bm.index_set(
                 BMElem::Vert(v),
                 if ok {
@@ -324,7 +331,8 @@ pub fn decimate_unsubdivide_ex(bm: &mut BMesh, iterations: i32, tag_only: bool) 
             let mut verts_ignore = vec![v];
             loop {
                 frap_math::budget::check();
-                let verts_collapse = tag_untagged_neighbors(bm, &verts_ignore, VERT_INDEX_DO_COLLAPSE);
+                let verts_collapse =
+                    tag_untagged_neighbors(bm, &verts_ignore, VERT_INDEX_DO_COLLAPSE);
                 if verts_collapse.is_empty() {
                     break;
                 }
@@ -448,9 +456,7 @@ mod tests {
     fn canonical_collapse_detects_doubles() {
         // Two quads around the same centre that collapse to the same triangle.
         let mut bm = BMesh::new();
-        let p = |bm: &mut BMesh, co: [f32; 3]| {
-            bm.vert_create(co, None, crate::CreateFlag::empty())
-        };
+        let p = |bm: &mut BMesh, co: [f32; 3]| bm.vert_create(co, None, crate::CreateFlag::empty());
         let c = p(&mut bm, [0.0, 0.0, 0.0]);
         let a = p(&mut bm, [1.0, 0.0, 0.0]);
         let b = p(&mut bm, [0.0, 1.0, 0.0]);

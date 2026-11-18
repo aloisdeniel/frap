@@ -1,6 +1,6 @@
 # WP 2.6: mesh.subdivide_edgering between the closed rims of cylinders (the n-gon caps stay out):
 # PATH with smoothness and a profile, SURFACE, LINEAR with a profile; loop cuts across the ring.
-# golden: startup=factory compare=objects,mesh:Cylinder,mesh:Cylinder.001,mesh:Cylinder.002,mesh:Cylinder.003 tier=T1 tol=1e-4
+# golden: startup=factory compare=objects,mesh:Cylinder,mesh:Cylinder.001,mesh:Cylinder.002,mesh:Cylinder.003 tier=T1
 import bpy
 bpy.ops.mesh.primitive_cylinder_add(vertices=8)
 bpy.ops.object.mode_set(mode='EDIT')

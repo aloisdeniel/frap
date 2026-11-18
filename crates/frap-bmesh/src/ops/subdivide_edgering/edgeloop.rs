@@ -206,7 +206,10 @@ fn loop_build(bm: &mut BMesh, el: &mut EdgeLoop, v_prev: VertId, v: VertId, fron
 /// `BM_mesh_edgeloops_find(bm, r_eloops, test_fn)`: the loops (open or closed, without
 /// branches, at least two vertices) of the edges passing `test`, from the first edge of each
 /// in edge iteration order.
-pub(crate) fn mesh_edgeloops_find(bm: &mut BMesh, test: &dyn Fn(&BMesh, EdgeId) -> bool) -> Vec<EdgeLoop> {
+pub(crate) fn mesh_edgeloops_find(
+    bm: &mut BMesh,
+    test: &dyn Fn(&BMesh, EdgeId) -> bool,
+) -> Vec<EdgeLoop> {
     let it = ElemFlag::INTERNAL_TAG;
     for v in bm.vert_ids() {
         bm.vert_mut(v).flag.remove(it);
@@ -228,7 +231,10 @@ pub(crate) fn mesh_edgeloops_find(bm: &mut BMesh, test: &dyn Fn(&BMesh, EdgeId) 
         if bm.edge(e).flag.contains(it) {
             let [v1, v2] = bm.edge(e).v;
             let mut el = EdgeLoop::default();
-            if loop_build(bm, &mut el, v1, v2, true) && loop_build(bm, &mut el, v2, v1, false) && el.len() > 1 {
+            if loop_build(bm, &mut el, v1, v2, true)
+                && loop_build(bm, &mut el, v2, v1, false)
+                && el.len() > 1
+            {
                 out.push(el);
             }
         }

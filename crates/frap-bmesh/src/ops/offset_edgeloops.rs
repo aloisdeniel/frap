@@ -85,7 +85,10 @@ fn face_split_walk_back(bm: &mut BMesh, l_src: crate::LoopId) -> Option<crate::L
 }
 
 /// Runs `offset_edgeloops` on `bm`.
-pub fn offset_edgeloops(bm: &mut BMesh, i: &OffsetEdgeloopsIn) -> Result<OffsetEdgeloopsOut, BmError> {
+pub fn offset_edgeloops(
+    bm: &mut BMesh,
+    i: &OffsetEdgeloopsIn,
+) -> Result<OffsetEdgeloopsOut, BmError> {
     for &e in &i.edges {
         if !bm.edges.contains(e.0) {
             return Err(BmError::Invalid(format!("edges: no edge {}", e.0)));
@@ -365,6 +368,8 @@ mod tests {
         let f = bm.face_ids()[0];
         let l = bm.face(f).l_first;
         let ll = bm.lp(l);
-        assert!(!mods::face_split_check_double_face(&bm, ll.prev, ll.next, 3));
+        assert!(!mods::face_split_check_double_face(
+            &bm, ll.prev, ll.next, 3
+        ));
     }
 }
