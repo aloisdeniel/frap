@@ -1,6 +1,7 @@
-# WP 2.6: mesh.loopcut special cases: an edge with no adjacent quad (a cone side) only splits
-# the edge and deselects its end vertices; a wire edge (a circle without fill) selects its new
-# vertices and edges; a ring stopped by n-gons; a second edit object picked by object_index.
+# WP 2.6: mesh.loopcut special cases, objects indexed active first (Circle), then in base order
+# (Cube, Cone): a wire edge (circle without fill) selects its new vertices and edges; a cube
+# ring; an edge with no adjacent quad (cone) only splits the edge and deselects its ends; an
+# out-of-range object_index cancels; then rings stopped by n-gons on a subdivided cube.
 # golden: startup=factory compare=objects,context,mesh:Cone,mesh:Circle,mesh:Cube tier=T1
 import bpy
 bpy.ops.mesh.primitive_cone_add(vertices=6, location=(3, 0, 0))
