@@ -441,6 +441,33 @@ mod tests {
     }
 
     #[test]
+    fn empty_operand() {
+        let a = cube(2.0, [0.0; 3]);
+        let none: Vec<[f32; 3]> = Vec::new();
+        let fo = vec![0u32];
+        let cv: Vec<u32> = Vec::new();
+        let ops = [
+            BoolMesh::new(&a.0, &a.1, &a.2),
+            BoolMesh::new(&none, &fo, &cv),
+        ];
+        for solver in [SolverKind::Manifold, SolverKind::Exact] {
+            for (op, faces) in [
+                (BoolOperation::Difference, 6),
+                (BoolOperation::Union, 6),
+                (BoolOperation::Intersect, 0),
+            ] {
+                let opts = BoolOptions {
+                    solver,
+                    operation: op,
+                    ..Default::default()
+                };
+                let r = ManifoldSolver.run(&ops, &opts).unwrap();
+                assert_eq!(r.face_offsets.len() - 1, faces, "{solver:?} {op:?}");
+            }
+        }
+    }
+
+    #[test]
     fn open_operand_is_non_manifold() {
         let a = cube(2.0, [0.0; 3]);
         let p = vec![
