@@ -244,7 +244,7 @@ fn clear_tags(bm: &mut BMesh) {
 
 // ---------------------------------------------------------------- objects
 
-/// The source object and the new BMesh of one separated part.
+/// One separated part: its new BMesh (written into the new object's mesh copy).
 struct Part {
     bm: BMesh,
 }
