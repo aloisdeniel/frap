@@ -141,6 +141,12 @@ fn exec(cx: &mut OpCtx, p: mesh::Bevel) -> OpResult {
         return Ok(OpStatus::Cancelled);
     }
 
+    // `--max-elements`: strips and vertex patches of `segments` (ARCHITECTURE §12).
+    let segments = u64::try_from(p.segments.value.max(1)).unwrap_or(1);
+    super::_growth::reserve(cx, |_, bm| {
+        super::_growth::bevel_corners(bm, segments, affect_vertices)
+    })?;
+
     let automerge = {
         let ctx = cx.ctx();
         ctx.main
@@ -231,12 +237,24 @@ mod tests {
     #[test]
     fn no_op_hint_for_zero_and_nan_offsets() {
         // The default offset=0 (and offset_pct=0 with PERCENT) bevels nothing.
-        assert!(no_op_hint(0.0, false).unwrap().contains("offset=0 is a no-op"));
+        assert!(
+            no_op_hint(0.0, false)
+                .unwrap()
+                .contains("offset=0 is a no-op")
+        );
         assert!(no_op_hint(0.0, true).unwrap().contains("offset_pct=0"));
         assert!(no_op_hint(-0.0, false).is_some());
         // `bmo_bevel_exec` tests `offset > 0`, so NaN bevels nothing either.
-        assert!(no_op_hint(f32::NAN, false).unwrap().contains("offset is NaN"));
-        assert!(no_op_hint(f32::NAN, true).unwrap().contains("offset_pct is NaN"));
+        assert!(
+            no_op_hint(f32::NAN, false)
+                .unwrap()
+                .contains("offset is NaN")
+        );
+        assert!(
+            no_op_hint(f32::NAN, true)
+                .unwrap()
+                .contains("offset_pct is NaN")
+        );
         // A positive offset bevels: no hint.
         assert!(no_op_hint(0.1, false).is_none());
         assert!(no_op_hint(10.0, true).is_none());

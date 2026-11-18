@@ -16,7 +16,12 @@ use crate::{BMesh, EdgeId, ElemFlag, FaceId, VertId};
 // Ported from blender/source/blender/bmesh/operators/bmo_fill_edgeloop.cc
 // (bmo_edgeloop_fill_exec).
 /// `bmesh.ops.edgeloop_fill(edges, mat_nr, use_smooth)`; returns `faces.out` (mesh order).
-pub fn edgeloop_fill(bm: &mut BMesh, edges: &[EdgeId], mat_nr: i32, use_smooth: bool) -> Vec<FaceId> {
+pub fn edgeloop_fill(
+    bm: &mut BMesh,
+    edges: &[EdgeId],
+    mat_nr: i32,
+    use_smooth: bool,
+) -> Vec<FaceId> {
     let tote = edges.len();
     let totv = tote;
     let mut verts: Vec<VertId> = Vec::with_capacity(totv);
@@ -90,5 +95,8 @@ pub fn edgeloop_fill(bm: &mut BMesh, edges: &[EdgeId], mat_nr: i32, use_smooth: 
             }
         }
     }
-    bm.face_ids().into_iter().filter(|f| out.contains(f)).collect()
+    bm.face_ids()
+        .into_iter()
+        .filter(|f| out.contains(f))
+        .collect()
 }

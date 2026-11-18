@@ -6,8 +6,8 @@
 //! 2.10's `triangulate`): selected concave faces are cut into convex pieces, which are added to
 //! the selection.
 
-use frap_bmesh::ops::connect_verts::concave::{ConnectVertsConcaveIn, connect_verts_concave};
 use frap_bmesh::BMElem;
+use frap_bmesh::ops::connect_verts::concave::{ConnectVertsConcaveIn, connect_verts_concave};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;

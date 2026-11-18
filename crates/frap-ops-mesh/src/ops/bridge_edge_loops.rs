@@ -95,7 +95,10 @@ fn run(cx: &mut OpCtx, p: mesh::BridgeEdgeLoops) -> OpResult {
                 },
             );
         }
-        let edges: Vec<_> = edges.into_iter().filter(|e| bm.edges.contains(e.0)).collect();
+        let edges: Vec<_> = edges
+            .into_iter()
+            .filter(|e| bm.edges.contains(e.0))
+            .collect();
         let r = bridge_loops(
             bm,
             &BridgeLoopsIn {

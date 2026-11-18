@@ -19,8 +19,8 @@
 //! → `ALTERNATE`, `SHORTEST_DIAGONAL` → `SHORT_EDGE`, `LONGEST_DIAGONAL` → `LONG_EDGE`,
 //! `CLIP` → `EAR_CLIP`. Custom split normals are not carried (deviations §2).
 
-use frap_bmesh::ops::triangulate::{TriangulateIn, triangulate};
 use frap_bmesh::BMElem;
+use frap_bmesh::ops::triangulate::{TriangulateIn, triangulate};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh::{

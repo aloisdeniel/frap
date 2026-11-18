@@ -23,7 +23,7 @@ use frap_bmesh::BMesh;
 use frap_mesh::Mesh;
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_rna::{ArrayShape, IdRef, MathTag, MaterialId, MeshId, ObjectId};
+use frap_rna::{ArrayShape, IdRef, MaterialId, MathTag, MeshId, ObjectId};
 use frap_scene::id::slots;
 use frap_scene::{Main, ObjectMode};
 use frap_spec_ops_frap::frap::{self, scene_summary::Objects};
@@ -98,11 +98,7 @@ fn bounds_of(points: impl Iterator<Item = [f32; 3]>) -> Option<[[f32; 3]; 2]> {
 /// The world-space box of the local box `b` under `m` (its 8 corners transformed).
 pub(crate) fn world_bounds(b: [[f32; 3]; 2], m: &Mat4) -> [[f32; 3]; 2] {
     let corners = (0..8).map(|i| {
-        let c = Vec3::new(
-            b[i & 1][0],
-            b[(i >> 1) & 1][1],
-            b[(i >> 2) & 1][2],
-        );
+        let c = Vec3::new(b[i & 1][0], b[(i >> 1) & 1][1], b[(i >> 2) & 1][2]);
         m.transform_point3(c).to_array()
     });
     bounds_of(corners).expect("eight corners")
@@ -234,12 +230,7 @@ fn exec(cx: &mut OpCtx, p: frap::SceneSummary) -> OpResult {
                     Some(mesh) => (mesh_stats(mesh).0, e.bounds),
                     None => (Counts::default(), e.bounds),
                 },
-                _ => cx
-                    .main()
-                    .meshes
-                    .get(me)
-                    .map(mesh_stats)
-                    .unwrap_or_default(),
+                _ => cx.main().meshes.get(me).map(mesh_stats).unwrap_or_default(),
             };
             let world = match &ev {
                 Some(e) => e.matrix_world,
@@ -304,11 +295,7 @@ mod tests {
             Vec3::new(0.0, 0.0, 3.0),
         );
         let b = world_bounds([[-1.0; 3], [1.0; 3]], &m);
-        for (got, want) in b
-            .iter()
-            .flatten()
-            .zip([-1.0, -2.0, 2.0, 1.0, 2.0, 4.0])
-        {
+        for (got, want) in b.iter().flatten().zip([-1.0, -2.0, 2.0, 1.0, 2.0, 4.0]) {
             assert!((got - want).abs() < 1e-5, "{b:?}");
         }
     }

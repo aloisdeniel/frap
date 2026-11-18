@@ -74,7 +74,13 @@ fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
     }
     let socket = cx.input(bsdf, "Emission Color");
     let loc = cx.location("emission");
-    cx.color_factor_and_texture(loc, "Emissive", socket, factor, lm.emissive.texture.as_ref());
+    cx.color_factor_and_texture(
+        loc,
+        "Emissive",
+        socket,
+        factor,
+        lm.emissive.texture.as_ref(),
+    );
     cx.set_input(
         bsdf,
         "Emission Strength",

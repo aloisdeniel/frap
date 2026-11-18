@@ -22,9 +22,9 @@ use frap_spec_ops_object::object;
 
 /// Material-slot helpers shared by the `material_slot_*` operators (WP 1.20).
 pub(crate) mod common {
+    use frap_mesh::{AttrData, Mesh};
     use frap_op::prelude::*;
     use frap_op::{PollFail, PollReq};
-    use frap_mesh::{AttrData, Mesh};
     use frap_rna::{IdRef, MeshId, ObjectId};
     use frap_scene::id::{Object, SlotLink, SlotOverride, slots};
     use frap_scene::{ChangeLog, Context, Main, ObjectMode};
@@ -104,7 +104,10 @@ pub(crate) mod common {
         let (_, ob) = poll::active(c).expect("invariant: checked by supported_poll");
         if ob.mode == ObjectMode::Edit {
             return Err(with_message(
-                poll::fail(PollReq::ModeObject, "bpy.ops.object.mode_set(mode='OBJECT')"),
+                poll::fail(
+                    PollReq::ModeObject,
+                    "bpy.ops.object.mode_set(mode='OBJECT')",
+                ),
                 idname,
                 "Unable to remove material slot in edit mode",
             ));

@@ -144,7 +144,9 @@ struct Enums {
 }
 
 fn bad(slot: &str, value: &str, items: &str) -> BmError {
-    BmError::Invalid(format!("bevel: unknown {slot} '{value}' (expected {items})"))
+    BmError::Invalid(format!(
+        "bevel: unknown {slot} '{value}' (expected {items})"
+    ))
 }
 
 fn parse(i: &BevelIn) -> Result<Enums, BmError> {
@@ -154,7 +156,13 @@ fn parse(i: &BevelIn) -> Result<Enums, BmError> {
         "DEPTH" => OffsetType::Depth,
         "PERCENT" => OffsetType::Percent,
         "ABSOLUTE" => OffsetType::Absolute,
-        o => return Err(bad("offset_type", o, "OFFSET, WIDTH, DEPTH, PERCENT or ABSOLUTE")),
+        o => {
+            return Err(bad(
+                "offset_type",
+                o,
+                "OFFSET, WIDTH, DEPTH, PERCENT or ABSOLUTE",
+            ));
+        }
     };
     match i.profile_type {
         "SUPERELLIPSE" => {}
@@ -204,7 +212,9 @@ fn parse(i: &BevelIn) -> Result<Enums, BmError> {
 pub fn bevel(bm: &mut BMesh, i: &BevelIn) -> Result<BevelOut, BmError> {
     let en = parse(i)?;
     if let Some(dead) = i.geom.iter().find(|&&g| !bm.elem_alive(g)) {
-        return Err(BmError::Invalid(format!("bevel: dead element {dead:?} in geom")));
+        return Err(BmError::Invalid(format!(
+            "bevel: dead element {dead:?} in geom"
+        )));
     }
     Ok(bm.bmo_exec(TYPE_FLAG, |bm| bmo_bevel_exec(bm, i, &en)))
 }
@@ -461,7 +471,11 @@ impl Bevel {
         let ea = self.enext(eb); // NOTE: this is in direction b --> a.
         let ka = self.eh(ea).offset_r_spec;
         let [e1, e2] = bm.edge(self.ehe(eb)).v;
-        let (vb, mut vc) = if self.eh(eb).is_rev { (e2, e1) } else { (e1, e2) };
+        let (vb, mut vc) = if self.eh(eb).is_rev {
+            (e2, e1)
+        } else {
+            (e1, e2)
+        };
         let [a1, a2] = bm.edge(self.ehe(ea)).v;
         let va = if self.eh(ea).is_rev { a1 } else { a2 };
         let (ebother, bvc) = self.find_other_end_edge_half(bm, eb);
@@ -472,7 +486,11 @@ impl Bevel {
                 }
                 // This is only right sometimes.
                 let blen = edge_calc_length(bm, self.ehe(eb));
-                return if self.offset > blen / 2.0 { blen / 2.0 } else { blen };
+                return if self.offset > blen / 2.0 {
+                    blen / 2.0
+                } else {
+                    blen
+                };
             }
             return no_collide_offset;
         }
@@ -723,7 +741,10 @@ mod tests {
         };
         let out = bevel(&mut bm, &i).unwrap();
         assert_eq!(counts(&bm), (10, 15, 7));
-        assert_eq!((out.verts.len(), out.edges.len(), out.faces.len()), (3, 3, 1));
+        assert_eq!(
+            (out.verts.len(), out.edges.len(), out.faces.len()),
+            (3, 3, 1)
+        );
         // The new vertices are 0.2 from the old corner along each edge.
         for &v in &out.verts {
             let c = bm.vert(v).co;
@@ -781,7 +802,10 @@ mod tests {
     fn assert_finite(bm: &BMesh, what: &str) {
         for v in bm.vert_ids() {
             let co = bm.vert(v).co;
-            assert!(co.iter().all(|x| x.is_finite()), "{what}: vertex {v:?} at {co:?}");
+            assert!(
+                co.iter().all(|x| x.is_finite()),
+                "{what}: vertex {v:?} at {co:?}"
+            );
         }
         for (layer, l) in bm.ldata.layers.iter().enumerate() {
             if !matches!(l.data, frap_mesh::AttrData::Float2(_)) {
@@ -927,7 +951,10 @@ mod tests {
             };
             let out = bevel(&mut bm, &i).unwrap_or_else(|e| panic!("iteration {iter}: {e}"));
             let problems = bm.validate();
-            assert!(problems.is_empty(), "iteration {iter} ({i:?}): {problems:?}");
+            assert!(
+                problems.is_empty(),
+                "iteration {iter} ({i:?}): {problems:?}"
+            );
             assert_finite(&bm, &format!("iteration {iter} ({i:?})"));
             // Every output element is alive and tagged as Blender's output slots are.
             for g in out.geom {
@@ -947,7 +974,10 @@ mod tests {
                 bevel(&mut bm, &again)
                     .unwrap_or_else(|e| panic!("iteration {iter}, second bevel: {e}"));
                 let problems = bm.validate();
-                assert!(problems.is_empty(), "iteration {iter} again ({again:?}): {problems:?}");
+                assert!(
+                    problems.is_empty(),
+                    "iteration {iter} again ({again:?}): {problems:?}"
+                );
                 assert_finite(&bm, &format!("iteration {iter}, second bevel ({again:?})"));
             }
         }

@@ -109,6 +109,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: rustfmt
         run: cargo fmt --all --check
+      - name: rustfmt on automod modules (every tracked hand-written .rs)
+        run: cargo xtask fmt --check
       - name: dependency rules (layers, no dev-dependency cycles)
         run: cargo xtask check-deps
       - name: generated code is up to date

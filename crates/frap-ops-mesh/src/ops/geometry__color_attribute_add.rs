@@ -41,9 +41,8 @@ fn exec(cx: &mut OpCtx, p: geometry::ColorAttributeAdd) -> OpResult {
         names.color_active = Some(name.clone());
         let list = store.layers();
         let default_found = names.color_default.as_deref().is_some_and(|n| {
-            list.iter().any(|l| {
-                l.name == n && attrs::is_color(l.domain, l.data_type)
-            })
+            list.iter()
+                .any(|l| l.name == n && attrs::is_color(l.domain, l.data_type))
         });
         if !default_found {
             names.color_default = Some(name.clone());

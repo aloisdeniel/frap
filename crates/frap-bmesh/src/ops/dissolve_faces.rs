@@ -58,7 +58,9 @@ pub fn dissolve_faces(bm: &mut BMesh, i: &DissolveFacesIn) -> Result<DissolveFac
     if let Some(f) = i.faces.iter().find(|f| !bm.faces.contains(f.0)) {
         return Err(BmError::Invalid(format!("dissolve_faces: dead face {f:?}")));
     }
-    let region = bm.bmo_exec(TYPE_FLAG, |bm| dissolve_faces_exec(bm, &i.faces, i.use_verts));
+    let region = bm.bmo_exec(TYPE_FLAG, |bm| {
+        dissolve_faces_exec(bm, &i.faces, i.use_verts)
+    });
     Ok(DissolveFacesOut {
         geom: region.iter().map(|&f| BMElem::Face(f)).collect(),
         region,

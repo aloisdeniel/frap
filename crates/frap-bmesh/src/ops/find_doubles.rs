@@ -118,12 +118,8 @@ pub(crate) fn find_doubles_common(
         find_doubles_connected(bm, verts, dist, has_keep_vert)
     } else {
         let coords: Vec<[f32; 3]> = verts.iter().map(|&v| bm.vert(v).co).collect();
-        let keep: Option<Vec<bool>> = has_keep_vert.then(|| {
-            verts
-                .iter()
-                .map(|&v| bm.oflag_test(v, VERT_KEEP))
-                .collect()
-        });
+        let keep: Option<Vec<bool>> =
+            has_keep_vert.then(|| verts.iter().map(|&v| bm.oflag_test(v, VERT_KEEP)).collect());
         frap_geom::kdtree::find_doubles_by_distance(&coords, dist, keep.as_deref())
     };
     let Some(duplicates) = duplicates else {

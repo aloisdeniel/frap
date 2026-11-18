@@ -122,7 +122,10 @@ fn side_edge(bm: &mut BMesh, a: VertId, b: VertId, flag_vert: VertId) -> EdgeId 
 }
 
 /// Runs `extrude_face_region` on `bm`.
-pub fn extrude_face_region(bm: &mut BMesh, i: &ExtrudeFaceRegionIn) -> Result<ExtrudeFaceRegionOut, BmError> {
+pub fn extrude_face_region(
+    bm: &mut BMesh,
+    i: &ExtrudeFaceRegionIn,
+) -> Result<ExtrudeFaceRegionOut, BmError> {
     if let Some(dead) = i.geom.iter().find(|&&g| !bm.elem_alive(g)) {
         return Err(BmError::Invalid(format!(
             "extrude_face_region: dead element {dead:?} in geom"
@@ -381,7 +384,11 @@ fn exec(bm: &mut BMesh, i: &ExtrudeFaceRegionIn) -> Result<ExtrudeFaceRegionOut,
         let e_other = bm.disk_edge_next(e, v);
         if e_other == e || bm.disk_edge_next(e_other, v) == e {
             // Loose edge or the vertex is an edge pair.
-            let e_kill = if bm.oflag_test(e, EXT_TAG) { e } else { e_other };
+            let e_kill = if bm.oflag_test(e, EXT_TAG) {
+                e
+            } else {
+                e_other
+            };
             bm.join_vert_kill_edge(e_kill, v, true, true, true);
         }
     }
@@ -438,7 +445,10 @@ mod tests {
         )
         .unwrap();
         // The input face is deleted and replaced by its copy, plus 4 side quads.
-        assert_eq!((bm.verts_num(), bm.edges_num(), bm.faces_num()), (10, 15, 6));
+        assert_eq!(
+            (bm.verts_num(), bm.edges_num(), bm.faces_num()),
+            (10, 15, 6)
+        );
         let caps: Vec<FaceId> = out
             .geom
             .iter()

@@ -218,9 +218,9 @@ fn exec(cx: &mut OpCtx, p: object::SelectPattern) -> OpResult {
     let changes = {
         let main = cx.main();
         let hit = |ob: IdRef<ObjectId>| -> bool {
-            main.objects.get(ob).is_some_and(|o| {
-                fnmatch(&o.header.name, &p.pattern.value, p.case_sensitive.value)
-            })
+            main.objects
+                .get(ob)
+                .is_some_and(|o| fnmatch(&o.header.name, &p.pattern.value, p.case_sensitive.value))
         };
         plan(&bases, p.extend.value, hit)
     };

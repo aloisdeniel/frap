@@ -47,7 +47,14 @@ mod tests {
     fn macro_definition_forces_step_properties() {
         let mut forced = macro_step_forced("MESH_OT_extrude_manifold", "TRANSFORM_OT_translate");
         forced.sort();
-        assert_eq!(forced, vec![("mirror", false), ("use_automerge_and_split", true), ("use_proportional_edit", false)]);
+        assert_eq!(
+            forced,
+            vec![
+                ("mirror", false),
+                ("use_automerge_and_split", true),
+                ("use_proportional_edit", false)
+            ]
+        );
         assert_eq!(
             macro_step_forced("MESH_OT_extrude_manifold", "MESH_OT_extrude_region"),
             vec![("use_dissolve_ortho_edges", true)]

@@ -169,16 +169,23 @@ pub fn face_splits_check_legal(bm: &BMesh, f: FaceId, loops: &mut [Option<[LoopI
             }
             let co_prev = proj[idx(l_prev)];
             let co_next = proj[idx(l_next)];
-            let dir_other = if side == 0 { pair_dir } else { [-pair_dir[0], -pair_dir[1]] };
+            let dir_other = if side == 0 {
+                pair_dir
+            } else {
+                [-pair_dir[0], -pair_dir[1]]
+            };
             let dir_prev = normalize2([co_prev[0] - co[0], co_prev[1] - co[1]]);
             let dir_next = normalize2([co_next[0] - co[0], co_next[1] - co[1]]);
-            if angle_signed_v2v2_pos(dir_prev, dir_other) > angle_signed_v2v2_pos(dir_prev, dir_next) {
+            if angle_signed_v2v2_pos(dir_prev, dir_other)
+                > angle_signed_v2v2_pos(dir_prev, dir_next)
+            {
                 *lp = None;
                 break;
             }
         }
     }
-    let share = |a: [usize; 2], b: [usize; 2]| a[0] == b[0] || a[0] == b[1] || a[1] == b[0] || a[1] == b[1];
+    let share =
+        |a: [usize; 2], b: [usize; 2]| a[0] == b[0] || a[0] == b[1] || a[1] == b[0] || a[1] == b[1];
     let mut i_prev = n - 1;
     for i in 0..n {
         let f_edge = [i_prev, i];
@@ -305,9 +312,7 @@ fn face_connect_verts(bm: &mut BMesh, mut f: FaceId, check_degenerate: bool) -> 
     let mut l_tag_first: Option<LoopId> = None;
     for l in bm.face_loops(f) {
         let ll = bm.lp(l);
-        if input(bm, ll.v)
-            && (!input(bm, bm.lp(ll.prev).v) || !input(bm, bm.lp(ll.next).v))
-        {
+        if input(bm, ll.v) && (!input(bm, bm.lp(ll.prev).v) || !input(bm, bm.lp(ll.next).v)) {
             let Some(prev) = l_tag_prev else {
                 l_tag_prev = Some(l);
                 l_tag_first = Some(l);
@@ -343,7 +348,10 @@ fn face_connect_verts(bm: &mut BMesh, mut f: FaceId, check_degenerate: bool) -> 
     let mut result = 1;
     for vp in verts_pair {
         let edge_exists = bm.edge_exists(vp[0], vp[1]).is_some();
-        let split = match (bm.face_vert_share_loop(f, vp[0]), bm.face_vert_share_loop(f, vp[1])) {
+        let split = match (
+            bm.face_vert_share_loop(f, vp[0]),
+            bm.face_vert_share_loop(f, vp[1]),
+        ) {
             (Some(a), Some(b)) => {
                 let r = bm.face_split(f, a, b, None, edge_exists);
                 if edge_exists {
@@ -387,7 +395,9 @@ fn face_connect_verts(bm: &mut BMesh, mut f: FaceId, check_degenerate: bool) -> 
 /// after the operator ran.
 pub fn connect_verts(bm: &mut BMesh, i: &ConnectVertsIn) -> Result<ConnectVertsOut, BmError> {
     if let Some(dead) = i.verts.iter().find(|&&v| !bm.verts.contains(v.0)) {
-        return Err(BmError::Invalid(format!("connect_verts: dead vertex {dead:?}")));
+        return Err(BmError::Invalid(format!(
+            "connect_verts: dead vertex {dead:?}"
+        )));
     }
     bm.bmo_exec(TYPE_FLAG, |bm| exec(bm, i))
 }

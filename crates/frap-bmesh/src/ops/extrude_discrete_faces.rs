@@ -97,7 +97,10 @@ pub(crate) fn face_copy(bm: &mut BMesh, f: FaceId, copy_verts: bool, copy_edges:
 }
 
 /// Runs `extrude_discrete_faces` on `bm`.
-pub fn extrude_discrete_faces(bm: &mut BMesh, i: &ExtrudeDiscreteFacesIn) -> Result<ExtrudeDiscreteFacesOut, BmError> {
+pub fn extrude_discrete_faces(
+    bm: &mut BMesh,
+    i: &ExtrudeDiscreteFacesIn,
+) -> Result<ExtrudeDiscreteFacesOut, BmError> {
     if let Some(dead) = i.faces.iter().find(|f| !bm.faces.contains(f.0)) {
         return Err(BmError::Invalid(format!(
             "extrude_discrete_faces: dead face {dead:?} in faces"
@@ -213,7 +216,10 @@ mod tests {
             },
         )
         .unwrap();
-        assert_eq!((bm.verts_num(), bm.edges_num(), bm.faces_num()), (14, 23, 10));
+        assert_eq!(
+            (bm.verts_num(), bm.edges_num(), bm.faces_num()),
+            (14, 23, 10)
+        );
         assert_eq!(out.faces.len(), 2);
         assert!(!bm.faces.contains(a.0) || !out.faces.contains(&a));
         assert_eq!(bm.select_history, vec![BMElem::Face(out.faces[1])]);

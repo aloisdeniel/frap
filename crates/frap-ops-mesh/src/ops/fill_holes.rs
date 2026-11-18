@@ -4,8 +4,8 @@
 //! GPL-2.0-or-later) over `bmesh.ops.holes_fill`: every hole bounded by selected boundary
 //! edges with at most `sides` corners (0: any) gets one face, added to the selection.
 
-use frap_bmesh::ops::holes_fill::{HolesFillIn, holes_fill};
 use frap_bmesh::BMElem;
+use frap_bmesh::ops::holes_fill::{HolesFillIn, holes_fill};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;

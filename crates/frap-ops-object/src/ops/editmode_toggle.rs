@@ -99,7 +99,8 @@ fn exec(cx: &mut OpCtx, _p: object::EditmodeToggle) -> OpResult {
     };
     let handler = helpers::mode_handler(ObjectMode::Edit, ty)?;
     if !in_edit_mode(cx, active) {
-        if !matches!((handler.enter)(cx, &[active])?, OpStatus::Finished) || !in_edit_mode(cx, active)
+        if !matches!((handler.enter)(cx, &[active])?, OpStatus::Finished)
+            || !in_edit_mode(cx, active)
         {
             return Ok(OpStatus::Finished);
         }
@@ -108,8 +109,7 @@ fn exec(cx: &mut OpCtx, _p: object::EditmodeToggle) -> OpResult {
             c.selected_objects()
                 .into_iter()
                 .filter(|&r| {
-                    r != active
-                        && c.main.objects.get(r).is_some_and(|o| o.object_type() == ty)
+                    r != active && c.main.objects.get(r).is_some_and(|o| o.object_type() == ty)
                 })
                 .collect()
         };

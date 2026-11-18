@@ -86,7 +86,12 @@ impl IcoSphere {
         let p = 4u64.checked_pow(k)?;
         let f = p.checked_mul(20)?;
         let e = p.checked_mul(30)?;
-        super::estimate(e.checked_sub(f)?.checked_add(2), Some(e), Some(f), f.checked_mul(3))
+        super::estimate(
+            e.checked_sub(f)?.checked_add(2),
+            Some(e),
+            Some(f),
+            f.checked_mul(3),
+        )
     }
 }
 

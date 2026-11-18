@@ -248,8 +248,7 @@ pub fn face_triangulate(
             let mut l_iter = first_radial;
             loop {
                 let lf = bm.lp(l_iter).f;
-                if bm.face(lf).len == 3
-                    && bm.lp(bm.lp(l_new).prev).v == bm.lp(bm.lp(l_iter).prev).v
+                if bm.face(lf).len == 3 && bm.lp(bm.lp(l_new).prev).v == bm.lp(bm.lp(l_iter).prev).v
                 {
                     // Check the last tri because we swap the last `f_new` with `f` at the end.
                     out.faces_double
@@ -329,9 +328,7 @@ pub fn mesh_triangulate(
         if bm.faces.contains(s) {
             let face = FaceId(s);
             let fl = bm.face(face);
-            if fl.len as usize >= min_vertices
-                && (!tag_only || fl.flag.contains(ElemFlag::TAG))
-            {
+            if fl.len as usize >= min_vertices && (!tag_only || fl.flag.contains(ElemFlag::TAG)) {
                 frap_math::budget::check();
                 let t = face_triangulate(bm, face, quad_method, ngon_method, tag_only);
                 face_map.push((face, face));

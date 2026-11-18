@@ -44,13 +44,21 @@ pub(crate) fn madd(a: V3, b: V3, f: f32) -> V3 {
 #[inline]
 pub(crate) fn interp(a: V3, b: V3, t: f32) -> V3 {
     let s = 1.0 - t;
-    [s * a[0] + t * b[0], s * a[1] + t * b[1], s * a[2] + t * b[2]]
+    [
+        s * a[0] + t * b[0],
+        s * a[1] + t * b[1],
+        s * a[2] + t * b[2],
+    ]
 }
 
 /// `mid_v3_v3v3`: `(a + b) * 0.5`.
 #[inline]
 pub(crate) fn mid(a: V3, b: V3) -> V3 {
-    [(a[0] + b[0]) * 0.5, (a[1] + b[1]) * 0.5, (a[2] + b[2]) * 0.5]
+    [
+        (a[0] + b[0]) * 0.5,
+        (a[1] + b[1]) * 0.5,
+        (a[2] + b[2]) * 0.5,
+    ]
 }
 
 /// `compare_v3v3(a, b, limit)`: every component within `limit`.
@@ -100,7 +108,10 @@ pub(crate) fn project_plane_normalized(p: V3, v_plane: V3) -> V3 {
 pub(crate) fn angle_on_axis_v3v3v3_v3(v1: V3, v2: V3, v3: V3, axis: V3) -> f32 {
     let vec1 = sub(v1, v2);
     let vec2 = sub(v3, v2);
-    angle_v3v3(project_plane_normalized(vec1, axis), project_plane_normalized(vec2, axis))
+    angle_v3v3(
+        project_plane_normalized(vec1, axis),
+        project_plane_normalized(vec2, axis),
+    )
 }
 
 /// `angle_signed_on_axis_v3v3_v3`.
@@ -230,7 +241,11 @@ pub(crate) fn axis_angle_normalized_to_mat3(axis: V3, angle: f32) -> [[f32; 3]; 
     let angle_sin = libm::sinf(angle);
     let angle_cos = libm::cosf(angle);
     let ico = 1.0 - angle_cos;
-    let nsi = [axis[0] * angle_sin, axis[1] * angle_sin, axis[2] * angle_sin];
+    let nsi = [
+        axis[0] * angle_sin,
+        axis[1] * angle_sin,
+        axis[2] * angle_sin,
+    ];
     let n_00 = (axis[0] * axis[0]) * ico;
     let n_01 = (axis[0] * axis[1]) * ico;
     let n_11 = (axis[1] * axis[1]) * ico;
@@ -354,7 +369,13 @@ pub(crate) fn transform_pivot_set_m4(mat: &M4, pivot: V3) -> M4 {
 /// `bmesh.ops.transform(verts, matrix, space, use_shapekey)`: `matrix` conjugated by `space`
 /// (`space⁻¹ · matrix · space`) when `space` is not zero, applied to every vertex (and its
 /// shape-key coordinates with `use_shapekey`).
-pub(crate) fn bmo_transform(bm: &mut BMesh, verts: &[VertId], matrix: &M4, space: &M4, use_shapekey: bool) {
+pub(crate) fn bmo_transform(
+    bm: &mut BMesh,
+    verts: &[VertId],
+    matrix: &M4,
+    space: &M4,
+    use_shapekey: bool,
+) {
     let mut mat = *matrix;
     if !is_zero_m4(space) {
         let imat_space = invert_m4(space).unwrap_or(UNIT_M4);

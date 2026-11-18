@@ -47,7 +47,10 @@ pub(crate) fn with_mesh_mut<R>(
 
 /// UV map names in collection order (`mesh.uv_layers`).
 pub(crate) fn uv_names(m: &Mesh) -> Vec<SmolStr> {
-    m.uv_maps().into_iter().map(|(n, _)| SmolStr::new(n)).collect()
+    m.uv_maps()
+        .into_iter()
+        .map(|(n, _)| SmolStr::new(n))
+        .collect()
 }
 
 /// Whether `a` is listed by `mesh.color_attributes` (FLOAT_COLOR / BYTE_COLOR on POINT or

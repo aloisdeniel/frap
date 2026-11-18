@@ -170,7 +170,15 @@ mod tests {
         assert!(m.iter().all(|x| x.comparator == NAME));
         let m = check("gltf-samples/Nope.glb", &allow(), &f, None, &f, None, 1e-5);
         assert_eq!(m.len(), 1);
-        let m = check("gltf-samples/Quad.glb", &allow(), b"junk", None, &f, None, 1e-5);
+        let m = check(
+            "gltf-samples/Quad.glb",
+            &allow(),
+            b"junk",
+            None,
+            &f,
+            None,
+            1e-5,
+        );
         assert!(m[0].detail.starts_with("frap output"));
     }
 

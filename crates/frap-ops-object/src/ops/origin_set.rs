@@ -22,7 +22,10 @@ use frap_op::operator;
 use frap_op::prelude::*;
 use frap_rna::{IdCode, IdRef, MeshId, ObjectId};
 use frap_scene::Context;
-use frap_spec_ops_object::object::{self, origin_set::{Center, Type}};
+use frap_spec_ops_object::object::{
+    self,
+    origin_set::{Center, Type},
+};
 use glam::{Mat3, Vec3};
 
 use crate::support::xform::{self, Worlds};

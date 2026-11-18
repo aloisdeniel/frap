@@ -9,6 +9,7 @@
 //! `-c` text is one complete unit (`parse_complete`).
 
 use std::io::{self, BufRead, Write};
+use std::ops::ControlFlow;
 
 use frap_lang::errors::SYNTAX;
 use frap_lang::split::RawSplitter;
@@ -36,13 +37,22 @@ pub fn run_unit<W: Write>(
     fail_fast: bool,
 ) -> io::Result<Flow> {
     let _span = tracing::debug_span!("chunk", line = first_line).entered();
-    for r in session.exec_source_at(src, first_line) {
-        out.response(&r)?;
-        if fail_fast && !r.ok() {
-            return Ok(Flow::Stopped);
+    // Each response is written (and flushed) as soon as its statement has run, so a script
+    // killed in a later statement still leaves the answers of the earlier ones; with
+    // `fail_fast` nothing after the failed statement runs.
+    let mut flow = Ok(Flow::Done);
+    session.exec_source_each(src, first_line, |r| {
+        if let Err(e) = out.response(&r) {
+            flow = Err(e);
+            return ControlFlow::Break(());
         }
-    }
-    Ok(Flow::Done)
+        if fail_fast && !r.ok() {
+            flow = Ok(Flow::Stopped);
+            return ControlFlow::Break(());
+        }
+        ControlFlow::Continue(())
+    });
+    flow
 }
 
 /// CPython's wording for a line that is not UTF-8:
@@ -245,5 +255,51 @@ mod tests {
         assert_eq!(v.len(), 2);
         assert_eq!(v[0]["value"], serde_json::json!([1, 2]));
         assert_eq!(v[1]["line"], 4);
+    }
+
+    /// A writer whose second line fails, as when the reader of stdout goes away.
+    struct FailSecondLine {
+        lines: usize,
+    }
+
+    impl Write for FailSecondLine {
+        fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+            if self.lines >= 1 {
+                return Err(io::ErrorKind::BrokenPipe.into());
+            }
+            self.lines += buf.iter().filter(|b| **b == b'\n').count();
+            Ok(buf.len())
+        }
+        fn flush(&mut self) -> io::Result<()> {
+            Ok(())
+        }
+    }
+
+    /// M2 stabilization round 3: a script unit (`frap run <file>`, `-c`) answers each statement
+    /// as soon as it has run, not after the whole unit: the first response is written before the
+    /// second statement runs, and nothing runs after a failed write or a fail-fast failure.
+    #[test]
+    fn script_units_answer_statement_by_statement() {
+        let src = "bpy.ops.mesh.primitive_cube_add()\nbpy.ops.mesh.primitive_cube_add()\nbpy.ops.mesh.primitive_cube_add()\n";
+        let mut s = session();
+        let mut out = Out::new(FailSecondLine { lines: 0 });
+        let e = run_unit(&mut s, &mut out, src, 1, false).unwrap_err();
+        assert_eq!(e.kind(), io::ErrorKind::BrokenPipe);
+        let n_objects = |s: &mut Session| {
+            s.exec_source("bpy.data.objects")[0].to_json()["value"]["len"].clone()
+        };
+        // Camera, Cube, Light + Cube.001 and Cube.002 (the second ran, its write failed); the
+        // third statement never ran.
+        assert_eq!(n_objects(&mut s), 5);
+
+        let mut s = session();
+        let mut out = Out::new(Vec::new());
+        let src = "bpy.ops.mesh.primitive_cube_add()\nbpy.ops.mesh.nope()\nbpy.ops.mesh.primitive_cube_add()\n";
+        assert_eq!(
+            run_unit(&mut s, &mut out, src, 1, true).unwrap(),
+            Flow::Stopped
+        );
+        assert_eq!(lines(out).len(), 2);
+        assert_eq!(n_objects(&mut s), 4);
     }
 }

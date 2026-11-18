@@ -325,7 +325,15 @@ impl VMesh {
     }
 
     /// `copy_mesh_vert`.
-    pub(crate) fn copy_mesh_vert(&mut self, ito: i32, jto: i32, kto: i32, ifr: i32, jfr: i32, kfr: i32) {
+    pub(crate) fn copy_mesh_vert(
+        &mut self,
+        ito: i32,
+        jto: i32,
+        kto: i32,
+        ifr: i32,
+        jfr: i32,
+        kfr: i32,
+    ) {
         let src = *self.mv(ifr, jfr, kfr);
         let d = self.mv_mut(ito, jto, kto);
         d.v = src.v;
@@ -471,7 +479,9 @@ impl Bevel {
     #[inline]
     #[track_caller]
     pub(crate) fn bstart(&self, v: Vm) -> Bnd {
-        self.vms[v.0 as usize].boundstart.expect("VMesh without boundary")
+        self.vms[v.0 as usize]
+            .boundstart
+            .expect("VMesh without boundary")
     }
     /// `bndv->next`.
     #[inline]

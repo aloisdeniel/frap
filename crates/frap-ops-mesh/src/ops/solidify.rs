@@ -9,8 +9,8 @@
 //! WP 2.5 and `reverse_faces` of WP 2.9), the new shell's faces are selected and the
 //! selection history is cleared. Default cube, all faces: V16 F12 ([MESH §4.12]).
 
-use frap_bmesh::ops::solidify::{SolidifyIn, solidify};
 use frap_bmesh::BMElem;
+use frap_bmesh::ops::solidify::{SolidifyIn, solidify};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;

@@ -60,7 +60,9 @@ pub fn split(bm: &mut BMesh, i: &SplitIn) -> Result<SplitOut, BmError> {
         ));
     }
     if let Some(dead) = i.geom.iter().find(|&&g| !bm.elem_alive(g)) {
-        return Err(BmError::Invalid(format!("split: dead element {dead:?} in geom")));
+        return Err(BmError::Invalid(format!(
+            "split: dead element {dead:?} in geom"
+        )));
     }
     bm.bmo_exec(TYPE_FLAG, |bm| {
         let dupe = duplicate(

@@ -108,7 +108,12 @@ fn vert_calc_edge_angle_blended(bm: &BMesh, v: VertId) -> f32 {
 /// `bmo_find_end_of_chain`: walks a chain of edge-pair vertices from `v` (away from `e`) to
 /// its far end, tagging each edge with `edge_oflag` (0: no tagging); `None` when an already
 /// tagged edge is met or the chain loops.
-fn find_end_of_chain(bm: &mut BMesh, mut e: EdgeId, mut v: VertId, edge_oflag: u16) -> Option<VertId> {
+fn find_end_of_chain(
+    bm: &mut BMesh,
+    mut e: EdgeId,
+    mut v: VertId,
+    edge_oflag: u16,
+) -> Option<VertId> {
     let v_init = v;
     while mods::vert_is_edge_pair(bm, v) {
         // Move one step down the chain.

@@ -117,7 +117,9 @@ fn canonical_rotation(cycle: &[u32]) -> usize {
 }
 
 fn rotated(cycle: &[u32], r: usize) -> Vec<u32> {
-    (0..cycle.len()).map(|k| cycle[(r + k) % cycle.len()]).collect()
+    (0..cycle.len())
+        .map(|k| cycle[(r + k) % cycle.len()])
+        .collect()
 }
 
 fn corner_offsets(m: &GMesh) -> Vec<usize> {
@@ -218,14 +220,20 @@ pub fn compare(what: &str, frap: &GMesh, blender: &GMesh, tol: f32) -> Vec<Misma
                 out.push(Mismatch::new(
                     NAME,
                     format!("{what}.positions[{i}]"),
-                    format!("frap vertex {:?} has no blender counterpart", frap.positions[i]),
+                    format!(
+                        "frap vertex {:?} has no blender counterpart",
+                        frap.positions[i]
+                    ),
                 ));
             }
             if unmatched.len() > MAX_LISTED {
                 out.push(Mismatch::new(
                     NAME,
                     format!("{what}.positions"),
-                    format!("… and {} more unmatched vertices", unmatched.len() - MAX_LISTED),
+                    format!(
+                        "… and {} more unmatched vertices",
+                        unmatched.len() - MAX_LISTED
+                    ),
                 ));
             }
             return out;
@@ -236,7 +244,14 @@ pub fn compare(what: &str, frap: &GMesh, blender: &GMesh, tol: f32) -> Vec<Misma
     for (i, &j) in vmap.iter().enumerate() {
         pos[j] = frap.positions[i];
     }
-    floats(NAME, &format!("{what}.positions"), &pos, &blender.positions, tol, &mut out);
+    floats(
+        NAME,
+        &format!("{what}.positions"),
+        &pos,
+        &blender.positions,
+        tol,
+        &mut out,
+    );
 
     // Edges: an injective matching (a duplicated frap edge standing in for a missing one is
     // reported both as the duplicate and as the blender edge left unmatched).
@@ -389,7 +404,14 @@ pub fn compare(what: &str, frap: &GMesh, blender: &GMesh, tol: f32) -> Vec<Misma
         for (i, &j) in cmap.iter().enumerate() {
             o[j] = uv[i];
         }
-        floats(NAME, &format!("{what}.uv_layers[{name:?}]"), &o, b, tol, &mut out);
+        floats(
+            NAME,
+            &format!("{what}.uv_layers[{name:?}]"),
+            &o,
+            b,
+            tol,
+            &mut out,
+        );
     }
 
     // Attributes through the element matchings.

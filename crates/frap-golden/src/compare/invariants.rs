@@ -106,8 +106,8 @@ pub fn check(who: &str, what: &str, mesh: &GMesh, checks: &[String]) -> Vec<Mism
                 }
             }
             ("euler", Some(n)) => {
-                let chi = mesh.positions.len() as i64 - mesh.edges.len() as i64
-                    + mesh.faces.len() as i64;
+                let chi =
+                    mesh.positions.len() as i64 - mesh.edges.len() as i64 + mesh.faces.len() as i64;
                 match n.parse::<i64>() {
                     Ok(n) if n == chi => {}
                     Ok(n) => fail(c, format!("V - E + F = {chi}, expected {n}")),
@@ -155,7 +155,10 @@ pub fn check(who: &str, what: &str, mesh: &GMesh, checks: &[String]) -> Vec<Mism
                 }
             }
             ("uv_area", Some(b)) => {
-                let a: f64 = uv_triangles(mesh).iter().map(|t| area2(t).abs() / 2.0).sum();
+                let a: f64 = uv_triangles(mesh)
+                    .iter()
+                    .map(|t| area2(t).abs() / 2.0)
+                    .sum();
                 match band(b) {
                     Some((lo, hi)) if a >= lo && a <= hi => {}
                     Some(_) => fail(c, format!("UV area = {a}")),
@@ -219,7 +222,10 @@ mod tests {
         let quad = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]];
         ov.uv_layers
             .insert("UVMap".into(), (0..24).map(|i| quad[i % 4]).collect());
-        assert_eq!(check("frap", "m", &ov, &checks(&["uv_no_overlap"])).len(), 1);
+        assert_eq!(
+            check("frap", "m", &ov, &checks(&["uv_no_overlap"])).len(),
+            1
+        );
         assert_eq!(check("frap", "m", &m, &checks(&["nope"])).len(), 1);
     }
 }

@@ -43,7 +43,10 @@ pub fn json_close(
 ) {
     match (frap, blender) {
         (Json::Number(a), Json::Number(b)) => {
-            let (a, b) = (a.as_f64().unwrap_or(f64::NAN), b.as_f64().unwrap_or(f64::NAN));
+            let (a, b) = (
+                a.as_f64().unwrap_or(f64::NAN),
+                b.as_f64().unwrap_or(f64::NAN),
+            );
             if !close(a, b, tol) {
                 out.push(Mismatch::new(
                     comparator,
@@ -130,7 +133,11 @@ fn compare_maps<T: Serialize>(
         .keys()
         .filter(|n| !frap.contains_key(*n) && !skip.contains(&n.as_str()))
     {
-        out.push(Mismatch::new(NAME, format!("{what}[{name:?}]"), "only in blender"));
+        out.push(Mismatch::new(
+            NAME,
+            format!("{what}[{name:?}]"),
+            "only in blender",
+        ));
     }
 }
 
@@ -167,7 +174,14 @@ pub fn compare_materials(
     tol: f32,
 ) -> Vec<Mismatch> {
     let mut out = Vec::new();
-    compare_maps("materials", frap, blender, EXCLUDED_MATERIALS, tol, &mut out);
+    compare_maps(
+        "materials",
+        frap,
+        blender,
+        EXCLUDED_MATERIALS,
+        tol,
+        &mut out,
+    );
     out
 }
 

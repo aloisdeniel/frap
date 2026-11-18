@@ -6,10 +6,8 @@
 //! `angle_limit` are split along their flattest diagonal, recursively; the pieces are added to
 //! the selection.
 
-use frap_bmesh::ops::connect_verts::nonplanar::{
-    ConnectVertsNonplanarIn, connect_verts_nonplanar,
-};
 use frap_bmesh::BMElem;
+use frap_bmesh::ops::connect_verts::nonplanar::{ConnectVertsNonplanarIn, connect_verts_nonplanar};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;

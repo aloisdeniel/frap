@@ -29,6 +29,13 @@ fn exec(cx: &mut OpCtx, p: mesh::Screw) -> OpResult {
     let steps = p.steps.value;
     let cent = p.center.value;
     let axis = p.axis.value;
+    // `--max-elements`: one extrusion of the selection per step (ARCHITECTURE §12).
+    let total_steps = u64::try_from(turns.max(0))
+        .unwrap_or(0)
+        .saturating_mul(u64::try_from(steps.max(0)).unwrap_or(0));
+    super::_growth::reserve(cx, |_, bm| {
+        super::_growth::extrude_steps_corners(bm, total_steps, false)
+    })?;
     let objects = helpers::iter_edit_meshes(cx);
     let (mut objects_empty_len, mut failed_axis_len, mut failed_verts_len) = (0usize, 0, 0);
     for &(ob, me) in &objects {
@@ -85,7 +92,11 @@ fn exec(cx: &mut OpCtx, p: mesh::Screw) -> OpResult {
         };
         let (g1, g2) = (mul_m4(co1), mul_m4(co2));
         let inv = 1.0 / steps as f32;
-        let mut dvec = [(g1[0] - g2[0]) * inv, (g1[1] - g2[1]) * inv, (g1[2] - g2[2]) * inv];
+        let mut dvec = [
+            (g1[0] - g2[0]) * inv,
+            (g1[1] - g2[1]) * inv,
+            (g1[2] - g2[2]) * inv,
+        ];
         if nor[0] * dvec[0] + nor[1] * dvec[1] + nor[2] * dvec[2] > 0.0 {
             dvec = [-dvec[0], -dvec[1], -dvec[2]];
         }

@@ -13,9 +13,9 @@
 //! Blender also refuses a collection the object instances (a dependency cycle); frap has no
 //! collection instancing before M8, so that check cannot fail.
 
+use frap_op::EnumItemOwned;
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_op::EnumItemOwned;
 use frap_rna::{PyExc, RnaError, RnaErrorKind};
 use frap_scene::Context;
 use frap_scene::id::layers;
@@ -49,7 +49,10 @@ fn exec(cx: &mut OpCtx, p: object::CollectionLink) -> OpResult {
     let wanted = if p.collection.is_set {
         p.collection.value.clone()
     } else {
-        items.first().map(|i| i.identifier.clone()).unwrap_or_default()
+        items
+            .first()
+            .map(|i| i.identifier.clone())
+            .unwrap_or_default()
     };
     if p.collection.is_set && !items.iter().any(|i| i.identifier == wanted) {
         let list = items
@@ -76,10 +79,7 @@ fn exec(cx: &mut OpCtx, p: object::CollectionLink) -> OpResult {
         return Err(OpError::Rna(e));
     }
     let ob = cx.ctx().object();
-    let col = cx
-        .main()
-        .collections
-        .find_in(&wanted, None);
+    let col = cx.main().collections.find_in(&wanted, None);
     let (Some(ob), Some(col)) = (ob, col) else {
         cx.report(
             ReportType::Warning,
@@ -88,7 +88,11 @@ fn exec(cx: &mut OpCtx, p: object::CollectionLink) -> OpResult {
         return Ok(OpStatus::Cancelled);
     };
     let (main, log) = cx.main_mut();
-    if main.collections.get(col).is_some_and(|c| c.objects.contains(&ob)) {
+    if main
+        .collections
+        .get(col)
+        .is_some_and(|c| c.objects.contains(&ob))
+    {
         return Ok(OpStatus::Finished);
     }
     if let Some(c) = main.collections.get_mut(col, log) {

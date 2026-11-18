@@ -66,7 +66,10 @@ pub(crate) fn history_replace(bm: &mut BMesh, from: BMElem, to: BMElem) {
 }
 
 /// Runs `extrude_vert_indiv` on `bm`.
-pub fn extrude_vert_indiv(bm: &mut BMesh, i: &ExtrudeVertIndivIn) -> Result<ExtrudeVertIndivOut, BmError> {
+pub fn extrude_vert_indiv(
+    bm: &mut BMesh,
+    i: &ExtrudeVertIndivIn,
+) -> Result<ExtrudeVertIndivOut, BmError> {
     if let Some(dead) = i.verts.iter().find(|v| !bm.verts.contains(v.0)) {
         return Err(BmError::Invalid(format!(
             "extrude_vert_indiv: dead vertex {dead:?} in verts"

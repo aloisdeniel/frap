@@ -247,6 +247,35 @@ pub fn reserve_corners(
     Ok(())
 }
 
+/// Running cap for code that builds geometry one element at a time (BMesh loop allocation):
+/// once a mesh holds more than `--max-elements` face corners, unwinds with an
+/// [`ElementsExceeded`] payload, which the session's transaction turns into a rollback and
+/// `LIMIT_EXCEEDED` (like [`Interrupted`] for the deadline). It is the backstop for growth no
+/// operator pre-check ([`reserve_corners`]) estimated: runaway geometry stops at the limit
+/// instead of exhausting memory. Unlimited outside a scope; a single thread-local read.
+#[inline]
+pub fn check_corners(corners: u64) {
+    let max = max_elements();
+    if corners > max {
+        exceed_corners(corners, max);
+    }
+}
+
+#[cold]
+#[inline(never)]
+fn exceed_corners(corners: u64, limit: u64) -> ! {
+    std::panic::resume_unwind(Box::new(ElementsExceeded {
+        corners,
+        limit,
+        index_range: false,
+    }))
+}
+
+/// The [`ElementsExceeded`] payload of a caught unwind ([`check_corners`]), if it is one.
+pub fn elements_exceeded(payload: &(dyn std::any::Any + Send)) -> Option<ElementsExceeded> {
+    payload.downcast_ref::<ElementsExceeded>().cloned()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -49,9 +49,21 @@ fn indices(v: &Value) -> Vec<i64> {
 /// The elements of `ty` in index order (live pool slots, ascending).
 fn elements(bm: &BMesh, ty: Type) -> Vec<BMElem> {
     match ty {
-        Type::Vert => bm.verts.iter().map(|(i, _)| BMElem::Vert(VertId(i))).collect(),
-        Type::Edge => bm.edges.iter().map(|(i, _)| BMElem::Edge(EdgeId(i))).collect(),
-        Type::Face => bm.faces.iter().map(|(i, _)| BMElem::Face(FaceId(i))).collect(),
+        Type::Vert => bm
+            .verts
+            .iter()
+            .map(|(i, _)| BMElem::Vert(VertId(i)))
+            .collect(),
+        Type::Edge => bm
+            .edges
+            .iter()
+            .map(|(i, _)| BMElem::Edge(EdgeId(i)))
+            .collect(),
+        Type::Face => bm
+            .faces
+            .iter()
+            .map(|(i, _)| BMElem::Face(FaceId(i)))
+            .collect(),
     }
 }
 
@@ -112,10 +124,9 @@ fn exec(cx: &mut OpCtx, p: frap::SelectElements) -> OpResult {
     let ty = p.r#type.value;
     let picked = {
         let (_, edit) = cx.split_edit();
-        let em = edit
-            .meshes
-            .get(&me.key())
-            .ok_or_else(|| OpError::Runtime("frap.select_elements: the mesh has no edit data".into()))?;
+        let em = edit.meshes.get(&me.key()).ok_or_else(|| {
+            OpError::Runtime("frap.select_elements: the mesh has no edit data".into())
+        })?;
         let all = elements(&em.bm, ty);
         let mut picked = Vec::with_capacity(wanted.len());
         for &i in &wanted {

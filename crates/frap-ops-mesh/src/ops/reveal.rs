@@ -61,9 +61,17 @@ pub(crate) fn mesh_reveal(bm: &mut BMesh, select: bool) -> bool {
 fn exec(cx: &mut OpCtx, p: mesh::Reveal) -> OpResult {
     for (_, me) in common::edit_meshes(cx) {
         let any_hidden = common::read(cx, me, |bm| {
-            bm.verts.iter().any(|(_, v)| v.flag.contains(ElemFlag::HIDDEN))
-                || bm.edges.iter().any(|(_, e)| e.flag.contains(ElemFlag::HIDDEN))
-                || bm.faces.iter().any(|(_, f)| f.flag.contains(ElemFlag::HIDDEN))
+            bm.verts
+                .iter()
+                .any(|(_, v)| v.flag.contains(ElemFlag::HIDDEN))
+                || bm
+                    .edges
+                    .iter()
+                    .any(|(_, e)| e.flag.contains(ElemFlag::HIDDEN))
+                || bm
+                    .faces
+                    .iter()
+                    .any(|(_, f)| f.flag.contains(ElemFlag::HIDDEN))
         })
         .unwrap_or(false);
         if any_hidden {

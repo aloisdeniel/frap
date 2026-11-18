@@ -249,7 +249,10 @@ mod tests {
         let v0 = bm.vert_create([0.0; 3], None, frap_bmesh::CreateFlag::empty());
         let v1 = bm.vert_create([1.0, 0.0, 0.0], None, frap_bmesh::CreateFlag::empty());
         let e = bm.edge_create(v0, v1, None, frap_bmesh::CreateFlag::empty());
-        assert_eq!(merge_items(Some(&bm)), [Type::Center, Type::Cursor, Type::Collapse]);
+        assert_eq!(
+            merge_items(Some(&bm)),
+            [Type::Center, Type::Cursor, Type::Collapse]
+        );
         bm.select_history = vec![BMElem::Vert(v0), BMElem::Edge(e)];
         assert_eq!(
             merge_items(Some(&bm)),
@@ -261,7 +264,10 @@ mod tests {
             [Type::Center, Type::Cursor, Type::Collapse, Type::Last]
         );
         bm.select_mode = SelectMode::EDGE;
-        assert_eq!(merge_items(Some(&bm)), [Type::Center, Type::Cursor, Type::Collapse]);
+        assert_eq!(
+            merge_items(Some(&bm)),
+            [Type::Center, Type::Cursor, Type::Collapse]
+        );
         assert_eq!(merge_items(None).len(), 5);
     }
 }

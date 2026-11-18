@@ -172,7 +172,13 @@ impl Ctx<'_> {
     }
 
     /// `test_edges_isect_2d_vert`.
-    fn isect_vert(&self, bm: &BMesh, new: &[EdgeId], v_origin: VertId, v_other: VertId) -> Option<EdgeId> {
+    fn isect_vert(
+        &self,
+        bm: &BMesh,
+        new: &[EdgeId],
+        v_origin: VertId,
+        v_other: VertId,
+    ) -> Option<EdgeId> {
         let (_, dist_orig) = normalize_v2(sub2(self.c(v_other), self.c(v_origin)));
         let (dir, _) = normalize_v2(sub2(self.c(v_other), self.c(v_origin)));
         let o = self.c(v_origin);
@@ -231,11 +237,16 @@ impl Ctx<'_> {
         let mut hit_dist = f32::MAX / 2.0;
         let hit = self
             .bvh
-            .ray_cast([o[0], o[1], 0.0], [dir[0], dir[1], 0.0], hit_dist, &mut |i, d| {
-                let r = cb(i, d);
-                hit_dist = *d;
-                r
-            })
+            .ray_cast(
+                [o[0], o[1], 0.0],
+                [dir[0], dir[1], 0.0],
+                hit_dist,
+                &mut |i, d| {
+                    let r = cb(i, d);
+                    hit_dist = *d;
+                    r
+                },
+            )
             .map(|i| i as usize);
         let mut e_hit = hit.map(|i| self.edge_arr[i]);
         if hit.is_some() {
@@ -255,7 +266,13 @@ impl Ctx<'_> {
     }
 
     /// `bm_face_split_edgenet_find_connection`: the index of the vertex to connect to.
-    fn find_connection(&mut self, bm: &BMesh, new: &[EdgeId], v_origin: VertId, positive: bool) -> Option<usize> {
+    fn find_connection(
+        &mut self,
+        bm: &BMesh,
+        new: &[EdgeId],
+        v_origin: VertId,
+        positive: bool,
+    ) -> Option<usize> {
         let dir = [if positive { 1.0 } else { -1.0 }, 0.0];
         let mut e_hit = self.isect_ray(bm, new, v_origin, dir)?;
         let o = self.c(v_origin);
@@ -307,7 +324,12 @@ impl Ctx<'_> {
 }
 
 /// `test_tagged_and_notface` for the partial connection (tagged = in the net).
-fn tagged_and_notface(bm: &BMesh, tagged: &rustc_hash::FxHashSet<EdgeId>, e: EdgeId, f: FaceId) -> bool {
+fn tagged_and_notface(
+    bm: &BMesh,
+    tagged: &rustc_hash::FxHashSet<EdgeId>,
+    e: EdgeId,
+    f: FaceId,
+) -> bool {
     tagged.contains(&e) && !bm.edge_in_face(e, f)
 }
 
@@ -422,10 +444,18 @@ fn splice_check_double_face(bm: &BMesh, v_a: VertId, v_b: VertId) -> bool {
     let faces_a = bm.vert_faces(v_a);
     let faces_b = bm.vert_faces(v_b);
     faces_a.iter().any(|&fa| {
-        let mut va: Vec<VertId> = bm.face_verts(fa).into_iter().map(|x| if x == v_b { v_a } else { x }).collect();
+        let mut va: Vec<VertId> = bm
+            .face_verts(fa)
+            .into_iter()
+            .map(|x| if x == v_b { v_a } else { x })
+            .collect();
         va.sort();
         faces_b.iter().any(|&fb| {
-            let mut vb: Vec<VertId> = bm.face_verts(fb).into_iter().map(|x| if x == v_b { v_a } else { x }).collect();
+            let mut vb: Vec<VertId> = bm
+                .face_verts(fb)
+                .into_iter()
+                .map(|x| if x == v_b { v_a } else { x })
+                .collect();
             vb.sort();
             fa != fb && va == vb
         })
@@ -463,7 +493,9 @@ pub fn face_split_edgenet_connect_islands(
         for &e_init in &edge_arr[..edge_net_init_len] {
             for j in 0..2 {
                 let v_delimit = bm.edge(e_init).v[j];
-                while let Some(v_other) = partial_connect(bm, &mut edge_in, &mut vert_in, v_delimit, f) {
+                while let Some(v_other) =
+                    partial_connect(bm, &mut edge_in, &mut vert_in, v_delimit, f)
+                {
                     temp_vert_pairs.insert(0, (v_delimit, v_other));
                 }
             }
@@ -529,10 +561,17 @@ pub fn face_split_edgenet_connect_islands(
         }
     }
 
-    let finish = |bm: &mut BMesh, temp_vert_pairs: &[(VertId, VertId)], use_partial: bool, mut net_new: Vec<EdgeId>, is_new: &rustc_hash::FxHashSet<EdgeId>| -> Vec<EdgeId> {
+    let finish = |bm: &mut BMesh,
+                  temp_vert_pairs: &[(VertId, VertId)],
+                  use_partial: bool,
+                  mut net_new: Vec<EdgeId>,
+                  is_new: &rustc_hash::FxHashSet<EdgeId>|
+     -> Vec<EdgeId> {
         if use_partial {
             for &(v_orig, v_temp) in temp_vert_pairs {
-                if bm.edge_exists(v_orig, v_temp).is_none() && !splice_check_double_face(bm, v_orig, v_temp) {
+                if bm.edge_exists(v_orig, v_temp).is_none()
+                    && !splice_check_double_face(bm, v_orig, v_temp)
+                {
                     bm.vert_splice(v_orig, v_temp);
                 }
             }
@@ -557,7 +596,13 @@ pub fn face_split_edgenet_connect_islands(
     };
 
     if groups.len() == 1 {
-        let _ = finish(bm, &temp_vert_pairs, use_partial_connect, edge_net_init.to_vec(), &Default::default());
+        let _ = finish(
+            bm,
+            &temp_vert_pairs,
+            use_partial_connect,
+            edge_net_init.to_vec(),
+            &Default::default(),
+        );
         return None;
     }
 
@@ -625,7 +670,11 @@ pub fn face_split_edgenet_connect_islands(
                 if let std::collections::hash_map::Entry::Vacant(slot) = vidx.entry(v_iter) {
                     slot.insert(vert_arr.len());
                     let co = bm.vert(v_iter).co;
-                    let rel = [co[0] - f_co_ref[0], co[1] - f_co_ref[1], co[2] - f_co_ref[2]];
+                    let rel = [
+                        co[0] - f_co_ref[0],
+                        co[1] - f_co_ref[1],
+                        co[2] - f_co_ref[2],
+                    ];
                     co2d.push(bli::mul_v2_m3v3(&axis_mat, rel));
                     vert_arr.push(v_iter);
                     verts_group_table.push(g_index);
@@ -658,7 +707,10 @@ pub fn face_split_edgenet_connect_islands(
     for g_index in 1..group_arr.len() {
         vert_range[0] = vert_range[1];
         vert_range[1] += group_arr[g_index].vert_len;
-        for (positive, v_origin) in [(false, group_arr[g_index].min), (true, group_arr[g_index].max)] {
+        for (positive, v_origin) in [
+            (false, group_arr[g_index].min),
+            (true, group_arr[g_index].max),
+        ] {
             if !positive && has_prev[g_index] {
                 continue;
             }
@@ -695,5 +747,11 @@ pub fn face_split_edgenet_connect_islands(
             }
         }
     }
-    Some(finish(bm, &temp_vert_pairs, use_partial_connect, edge_net_new, &is_new))
+    Some(finish(
+        bm,
+        &temp_vert_pairs,
+        use_partial_connect,
+        edge_net_new,
+        &is_new,
+    ))
 }

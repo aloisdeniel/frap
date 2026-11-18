@@ -14,7 +14,8 @@ use std::sync::Arc;
 use super::UV_MAP_NAME;
 use super::bm::math::angle_wrap_rad;
 use crate::mesh::{
-    AttrData, Attribute, AttributeSet, Domain, Mesh, SELECT_POLY, SELECT_VERT, SHARP_FACE, bool_attr,
+    AttrData, Attribute, AttributeSet, Domain, Mesh, SELECT_POLY, SELECT_VERT, SHARP_FACE,
+    bool_attr,
 };
 
 /// `mode` of the torus operator.
@@ -141,7 +142,11 @@ pub fn torus(p: &Torus) -> Mesh {
     let nf = faces.len() / 4;
     let mut attrs = AttributeSet::default();
     if !verts.is_empty() {
-        attrs.insert(bool_attr(SELECT_VERT, Domain::Point, vec![true; verts.len()]));
+        attrs.insert(bool_attr(
+            SELECT_VERT,
+            Domain::Point,
+            vec![true; verts.len()],
+        ));
         attrs.insert(Attribute {
             name: "position".into(),
             domain: Domain::Point,
@@ -207,11 +212,19 @@ fn uvs(minor_seg: usize, major_seg: usize) -> Vec<[f32; 2]> {
             out[l + 1] = [u_next as f32, v_prev as f32];
             out[l + 3] = [u_prev as f32, v_next as f32];
             out[l + 2] = [u_next as f32, v_next as f32];
-            v_prev = if v_next > v_wrap { v_next - 1.0 } else { v_next };
+            v_prev = if v_next > v_wrap {
+                v_next - 1.0
+            } else {
+                v_next
+            };
             v_next = v_prev + v_step;
             vertex_index += 1;
         }
-        u_prev = if u_next > u_wrap { u_next - 1.0 } else { u_next };
+        u_prev = if u_next > u_wrap {
+            u_next - 1.0
+        } else {
+            u_next
+        };
         u_next = u_prev + u_step;
     }
     out

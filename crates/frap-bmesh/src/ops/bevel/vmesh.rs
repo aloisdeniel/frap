@@ -163,6 +163,8 @@ impl Bevel {
             self.fill_profile_fracs(bndv, &mut new_frac, nseg);
             for j in 0..nseg2 + odd {
                 for k in 0..=nseg2 {
+                    // `--stmt-timeout`: each step scans the `ns_in` fractions twice.
+                    frap_math::budget::check_n(ns_in.max(1) as u32);
                     // Where "fraction" fits into the previous and current "frac".
                     let fraction = new_frac[k as usize];
                     let (k_in, restk) = interp_range(&frac, ns_in, fraction);
@@ -180,8 +182,16 @@ impl Bevel {
                     let p = if restj < BEVEL_EPSILON && restk < BEVEL_EPSILON {
                         self.mco_canon(vm_in, i, j_in, k_in)
                     } else {
-                        let j0inc = if restj < BEVEL_EPSILON || j_in == ns_in { 0 } else { 1 };
-                        let k0inc = if restk < BEVEL_EPSILON || k_in == ns_in { 0 } else { 1 };
+                        let j0inc = if restj < BEVEL_EPSILON || j_in == ns_in {
+                            0
+                        } else {
+                            1
+                        };
+                        let k0inc = if restk < BEVEL_EPSILON || k_in == ns_in {
+                            0
+                        } else {
+                            1
+                        };
                         let quad = [
                             self.mco_canon(vm_in, i, j_in, k_in),
                             self.mco_canon(vm_in, i, j_in, k_in + k0inc),
@@ -780,10 +790,12 @@ impl Bevel {
                 let co1 = math::add(bndco, dir1);
                 let co2 = math::add(bndco, dir2);
                 // Intersect e1 with the line through bndv parallel to e2 to get v1co.
-                let (ikind, meet1, _) = math::isect_line_line_v3(co(bm, a1), co(bm, a2), bndco, co2);
+                let (ikind, meet1, _) =
+                    math::isect_line_line_v3(co(bm, a1), co(bm, a2), bndco, co2);
                 let v1co = (ikind != 0).then_some(meet1);
                 // Intersect e2 with the line through bndv parallel to e1 to get v2co.
-                let (ikind, meet1, _) = math::isect_line_line_v3(co(bm, b1), co(bm, b2), bndco, co1);
+                let (ikind, meet1, _) =
+                    math::isect_line_line_v3(co(bm, b1), co(bm, b2), bndco, co1);
                 let v2co = (ikind != 0).then_some(meet1);
                 // on_edge[i] is the min dist to bv->v of v2co and the next iteration's v1co.
                 let iprev = if i == 0 { n_bndv - 1 } else { i - 1 };
@@ -827,7 +839,8 @@ impl Bevel {
                         }
                     } else {
                         let p = if prev_arc { co1 } else { co2 };
-                        centerline[cl(i)] = math::closest_to_line_segment_v3(p, co(bm, a1), co(bm, a2));
+                        centerline[cl(i)] =
+                            math::closest_to_line_segment_v3(p, co(bm, a1), co(bm, a2));
                         cset[i as usize] = true;
                     }
                 }

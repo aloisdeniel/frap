@@ -107,7 +107,9 @@ fn edge_find_double(bm: &BMesh, e: EdgeId) -> Option<EdgeId> {
 /// Runs `spin` on `bm`.
 pub fn spin(bm: &mut BMesh, i: &SpinIn) -> Result<SpinOut, BmError> {
     if let Some(dead) = i.geom.iter().find(|&&g| !bm.elem_alive(g)) {
-        return Err(BmError::Invalid(format!("spin: dead element {dead:?} in geom")));
+        return Err(BmError::Invalid(format!(
+            "spin: dead element {dead:?} in geom"
+        )));
     }
     let cent = i.cent;
     let axis = math::normalize_v3(i.axis).0;

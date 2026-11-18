@@ -26,8 +26,7 @@ pub(crate) const NOTES: [&str; 4] = [
 ];
 
 /// `support` text of every C primitive operator.
-pub(crate) const PARTIAL: &str =
-    "in Edit Mode, UV and ico spheres do not reuse the edit mesh's freed element slots in Blender's order (element order may differ after deletions)";
+pub(crate) const PARTIAL: &str = "in Edit Mode, UV and ico spheres do not reuse the edit mesh's freed element slots in Blender's order (element order may differ after deletions)";
 
 /// Where the new object goes and the matrix its geometry is created with.
 #[derive(Copy, Clone, Debug)]
@@ -113,7 +112,15 @@ pub(crate) fn prim(
     scale: &Prop<[f32; 3]>,
     uses_scale: bool,
 ) -> Result<Prim, OpError> {
-    prim_aligned(cx, location, rotation, align, scale, uses_scale, ViewAxis::Z)
+    prim_aligned(
+        cx,
+        location,
+        rotation,
+        align,
+        scale,
+        uses_scale,
+        ViewAxis::Z,
+    )
 }
 
 /// [`prim`] with the `align='VIEW'` axis of the operator.
@@ -216,7 +223,12 @@ mod tests {
     #[test]
     fn creation_matrix_of_a_rotated_add_is_nearly_the_scale() {
         let a = at([1.0, -2.0, 0.5], [0.3, 1.2, -2.0]);
-        let m = creation_matrix(&object_matrix(&a), a.location, a.rotation, Some([1.0, 2.0, 3.0]));
+        let m = creation_matrix(
+            &object_matrix(&a),
+            a.location,
+            a.rotation,
+            Some([1.0, 2.0, 3.0]),
+        );
         let want = frap_mesh::primitives::scale_matrix([1.0, 2.0, 3.0]);
         for (c, w) in m.iter().zip(want.iter()) {
             for (x, y) in c.iter().zip(w.iter()) {

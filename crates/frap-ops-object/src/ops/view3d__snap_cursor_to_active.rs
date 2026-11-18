@@ -21,10 +21,16 @@ fn exec(cx: &mut OpCtx, _p: view3d::SnapCursorToActive) -> OpResult {
     let (scene, center) = {
         let c = cx.ctx();
         snap::object_mode_only(&c, "view3d.snap_cursor_to_active")?;
-        (c.win.scene, snap::active_center(&c, &Worlds::of(c.main), false))
+        (
+            c.win.scene,
+            snap::active_center(&c, &Worlds::of(c.main), false),
+        )
     };
     let Some(center) = center else {
-        cx.report(ReportType::Warning, "frap: nothing to snap to: no active object");
+        cx.report(
+            ReportType::Warning,
+            "frap: nothing to snap to: no active object",
+        );
         return Ok(OpStatus::Cancelled);
     };
     let (main, log) = cx.main_mut();

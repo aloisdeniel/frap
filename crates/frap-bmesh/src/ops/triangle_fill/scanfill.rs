@@ -213,7 +213,11 @@ fn dist_squared_to_line_v2(l1: [f32; 2], l2: [f32; 2], p: [f32; 2]) -> f32 {
     let u = [l2[0] - l1[0], l2[1] - l1[1]];
     let h = [p[0] - l1[0], p[1] - l1[1]];
     let dot = u[0] * u[0] + u[1] * u[1];
-    let lambda = if dot != 0.0 { (u[0] * h[0] + u[1] * h[1]) / dot } else { 0.0 };
+    let lambda = if dot != 0.0 {
+        (u[0] * h[0] + u[1] * h[1]) / dot
+    } else {
+        0.0
+    };
     let closest = [l1[0] + u[0] * lambda, l1[1] + u[1] * lambda];
     let d = [closest[0] - p[0], closest[1] - p[1]];
     d[0] * d[0] + d[1] * d[1]
@@ -335,7 +339,12 @@ impl ScanFill {
             || pf2.min_xy[1] > pf1.max_xy[1])
     }
 
-    fn fill_target_map_recursive(pf_list: &[PolyFill], target: usize, test: usize, map: &mut [usize]) {
+    fn fill_target_map_recursive(
+        pf_list: &[PolyFill],
+        target: usize,
+        test: usize,
+        map: &mut [usize],
+    ) {
         for b in (target + 1)..pf_list.len() {
             if map[b] != b {
                 continue;
@@ -460,9 +469,17 @@ impl ScanFill {
         let e = &self.edges[eed];
         let (a, b) = (self.xy(e.v1), self.xy(e.v2));
         let p = self.xy(eve);
-        let (minx, maxx) = if a[0] < b[0] { (a[0], b[0]) } else { (b[0], a[0]) };
+        let (minx, maxx) = if a[0] < b[0] {
+            (a[0], b[0])
+        } else {
+            (b[0], a[0])
+        };
         if p[0] >= minx && p[0] <= maxx {
-            let (miny, maxy) = if a[1] < b[1] { (a[1], b[1]) } else { (b[1], a[1]) };
+            let (miny, maxy) = if a[1] < b[1] {
+                (a[1], b[1])
+            } else {
+                (b[1], a[1])
+            };
             if p[1] >= miny && p[1] <= maxy {
                 return true;
             }
@@ -502,7 +519,8 @@ impl ScanFill {
                         break;
                     }
                     if self.bound_inside_ev(eed, eve) {
-                        let dist = dist_squared_to_line_v2(self.xy(ev1), self.xy(ev2), self.xy(eve));
+                        let dist =
+                            dist_squared_to_line_v2(self.xy(ev1), self.xy(ev2), self.xy(eve));
                         if dist < SF_EPSILON_SQ {
                             let ne = self.edge_add(ev1, eve);
                             self.edges[ne].poly_nr = self.edges[eed].poly_nr;
@@ -577,7 +595,11 @@ impl ScanFill {
             remlink(&mut self.edges, &mut self.ebase, e);
             if flag & CALC_REMOVE_DOUBLES != 0 {
                 for k in 0..2 {
-                    let vv = if k == 0 { self.edges[e].v1 } else { self.edges[e].v2 };
+                    let vv = if k == 0 {
+                        self.edges[e].v1
+                    } else {
+                        self.edges[e].v2
+                    };
                     if self.verts[vv].f == SF_VERT_ZERO_LEN {
                         let start = vv;
                         let mut cur = vv;
@@ -820,7 +842,9 @@ impl ScanFill {
                         }
                         for eed in list {
                             let (v1, v2) = (self.edges[eed].v1, self.edges[eed].v2);
-                            if self.verts[v1].poly_nr == SF_POLY_UNSET && self.verts[v2].poly_nr == poly {
+                            if self.verts[v1].poly_nr == SF_POLY_UNSET
+                                && self.verts[v2].poly_nr == poly
+                            {
                                 self.verts[v1].poly_nr = poly;
                                 self.edges[eed].poly_nr = poly;
                                 ok = true;
@@ -873,7 +897,11 @@ impl ScanFill {
             while ok {
                 ok = false;
                 toggle += 1;
-                let mut it = if toggle & 1 == 1 { self.ebase.first } else { self.ebase.last };
+                let mut it = if toggle & 1 == 1 {
+                    self.ebase.first
+                } else {
+                    self.ebase.last
+                };
                 while let Some(eed) = it {
                     it = if toggle & 1 == 1 {
                         self.edges[eed].next
@@ -922,10 +950,26 @@ impl ScanFill {
             let sv = &self.verts[v];
             let pf = &mut pflist[sv.poly_nr as usize];
             pf.verts += 1;
-            pf.min_xy[0] = if pf.min_xy[0] < sv.xy[0] { pf.min_xy[0] } else { sv.xy[0] };
-            pf.min_xy[1] = if pf.min_xy[1] < sv.xy[1] { pf.min_xy[1] } else { sv.xy[1] };
-            pf.max_xy[0] = if pf.max_xy[0] > sv.xy[0] { pf.max_xy[0] } else { sv.xy[0] };
-            pf.max_xy[1] = if pf.max_xy[1] > sv.xy[1] { pf.max_xy[1] } else { sv.xy[1] };
+            pf.min_xy[0] = if pf.min_xy[0] < sv.xy[0] {
+                pf.min_xy[0]
+            } else {
+                sv.xy[0]
+            };
+            pf.min_xy[1] = if pf.min_xy[1] < sv.xy[1] {
+                pf.min_xy[1]
+            } else {
+                sv.xy[1]
+            };
+            pf.max_xy[0] = if pf.max_xy[0] > sv.xy[0] {
+                pf.max_xy[0]
+            } else {
+                sv.xy[0]
+            };
+            pf.max_xy[1] = if pf.max_xy[1] > sv.xy[1] {
+                pf.max_xy[1]
+            } else {
+                sv.xy[1]
+            };
             if sv.edge_count > 2 {
                 pf.f = SF_POLY_VALID;
             }
@@ -971,8 +1015,17 @@ mod tests {
     #[test]
     fn square_two_triangles() {
         let mut sf = ScanFill::new();
-        let p = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]];
-        let v: Vec<usize> = p.iter().enumerate().map(|(i, &c)| sf.vert_add(c, i)).collect();
+        let p = [
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+        ];
+        let v: Vec<usize> = p
+            .iter()
+            .enumerate()
+            .map(|(i, &c)| sf.vert_add(c, i))
+            .collect();
         for i in 0..4 {
             sf.edge_add(v[i], v[(i + 1) % 4]);
         }
@@ -983,8 +1036,18 @@ mod tests {
     #[test]
     fn square_with_hole() {
         let mut sf = ScanFill::new();
-        let outer = [[0.0, 0.0, 0.0], [4.0, 0.0, 0.0], [4.0, 4.0, 0.0], [0.0, 4.0, 0.0]];
-        let inner = [[1.0, 1.0, 0.0], [3.0, 1.0, 0.0], [3.0, 3.0, 0.0], [1.0, 3.0, 0.0]];
+        let outer = [
+            [0.0, 0.0, 0.0],
+            [4.0, 0.0, 0.0],
+            [4.0, 4.0, 0.0],
+            [0.0, 4.0, 0.0],
+        ];
+        let inner = [
+            [1.0, 1.0, 0.0],
+            [3.0, 1.0, 0.0],
+            [3.0, 3.0, 0.0],
+            [1.0, 3.0, 0.0],
+        ];
         for ring in [outer, inner] {
             let v: Vec<usize> = ring.iter().map(|&c| sf.vert_add(c, 0)).collect();
             for i in 0..4 {

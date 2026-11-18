@@ -350,9 +350,7 @@ pub fn mesh_wireframe(
                         vert_boundary_tangent(bm, v_boundary);
                     let fac = verts_relfac[vbi];
                     let mut fac_shell = fac;
-                    if use_even_offset
-                        && let (Some(va), Some(vb)) = (va_other, vb_other)
-                    {
+                    if use_even_offset && let (Some(va), Some(vb)) = (va_other, vb_other) {
                         fac_shell *= math::shell_angle_to_dist(
                             (std::f32::consts::PI
                                 - math::angle_on_axis_v3v3v3_v3(
@@ -369,7 +367,8 @@ pub fn mesh_wireframe(
                     if offset != 0.0 {
                         t = math::madd(t, bno, ofs_mid * fac);
                     }
-                    verts_boundary[vbi] = Some(bm.vert_create(t, Some(v_boundary), CreateFlag::empty()));
+                    verts_boundary[vbi] =
+                        Some(bm.vert_create(t, Some(v_boundary), CreateFlag::empty()));
                 }
             }
         }
@@ -399,15 +398,20 @@ pub fn mesh_wireframe(
             let v_l2 = verts_loop[loop_index[&l_next]];
             let i_1 = vidx(bm, bm.lp(l).v);
             let i_2 = vidx(bm, bm.lp(l_next).v);
-            let (Some(v_neg1), Some(v_neg2), Some(v_pos1), Some(v_pos2)) =
-                (verts_neg[i_1], verts_neg[i_2], verts_pos[i_1], verts_pos[i_2])
-            else {
+            let (Some(v_neg1), Some(v_neg2), Some(v_pos1), Some(v_pos2)) = (
+                verts_neg[i_1],
+                verts_neg[i_2],
+                verts_pos[i_1],
+                verts_pos[i_2],
+            ) else {
                 continue;
             };
 
-            let (_, l_new) = create_quad(bm, [v_l1, v_l2, v_neg2, v_neg1], f_src, mat_offset, mat_max);
+            let (_, l_new) =
+                create_quad(bm, [v_l1, v_l2, v_neg2, v_neg1], f_src, mat_offset, mat_max);
             copy_quad_loops(bm, l_new, l, l_next);
-            let (_, l_new) = create_quad(bm, [v_l2, v_l1, v_pos1, v_pos2], f_src, mat_offset, mat_max);
+            let (_, l_new) =
+                create_quad(bm, [v_l2, v_l1, v_pos1, v_pos2], f_src, mat_offset, mat_max);
             copy_quad_loops(bm, l_new, l_next, l);
 
             if use_boundary
@@ -446,7 +450,11 @@ pub fn mesh_wireframe(
                 let verts = bm.face_verts(f_src);
                 let mut mix_flag = 0;
                 for &v in &verts {
-                    mix_flag |= if verts_neg[vidx(bm, v)].is_some() { 1 } else { 2 };
+                    mix_flag |= if verts_neg[vidx(bm, v)].is_some() {
+                        1
+                    } else {
+                        2
+                    };
                     if mix_flag == 3 {
                         break;
                     }

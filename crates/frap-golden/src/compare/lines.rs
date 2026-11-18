@@ -25,7 +25,8 @@ impl MessageNorm {
     /// Replaces `dir` (in `/` and native spelling) by `placeholder`.
     pub fn with_dir(mut self, dir: &std::path::Path, placeholder: &str) -> Self {
         let s = dir.to_string_lossy().into_owned();
-        self.paths.push((s.replace('\\', "/"), placeholder.to_owned()));
+        self.paths
+            .push((s.replace('\\', "/"), placeholder.to_owned()));
         if s.contains('\\') {
             self.paths.push((s, placeholder.to_owned()));
         }
@@ -145,7 +146,11 @@ mod tests {
     fn equal_under_permutation_and_quote_normalisation() {
         let f = vec![
             ok(3),
-            err(4, "KeyError", "bpy_prop_collection[key]: key \"Nope\" not found"),
+            err(
+                4,
+                "KeyError",
+                "bpy_prop_collection[key]: key \"Nope\" not found",
+            ),
         ];
         // Python's str(KeyError) quotes the message; order of records is irrelevant.
         let b = vec![
@@ -156,7 +161,10 @@ mod tests {
             ),
             ok(3),
         ];
-        assert_eq!(compare(&f, &b, &BTreeSet::new(), &MessageNorm::default()), vec![]);
+        assert_eq!(
+            compare(&f, &b, &BTreeSet::new(), &MessageNorm::default()),
+            vec![]
+        );
     }
 
     #[test]
@@ -189,7 +197,12 @@ mod tests {
     fn side_only_lines_must_succeed_on_their_side() {
         let side = BTreeSet::from([5]);
         assert!(compare(&[ok(5)], &[], &side, &MessageNorm::default()).is_empty());
-        let m = compare(&[], &[err(5, "NameError", "bmesh")], &side, &MessageNorm::default());
+        let m = compare(
+            &[],
+            &[err(5, "NameError", "bmesh")],
+            &side,
+            &MessageNorm::default(),
+        );
         assert_eq!(m.len(), 1);
         assert!(m[0].detail.starts_with("blender-only line failed"));
     }

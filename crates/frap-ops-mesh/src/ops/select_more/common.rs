@@ -132,7 +132,10 @@ mod tests {
             walk_delimit(&set, Ngons::Loop),
             LoopDelimit::LOOP_NGONS | LoopDelimit::OUTER_CORNERS | LoopDelimit::SEAM
         );
-        let ring: BTreeSet<SmolStr> = ["NGONS", "MATERIAL"].into_iter().map(SmolStr::new).collect();
+        let ring: BTreeSet<SmolStr> = ["NGONS", "MATERIAL"]
+            .into_iter()
+            .map(SmolStr::new)
+            .collect();
         assert_eq!(
             walk_delimit(&ring, Ngons::Ring),
             LoopDelimit::RING_NGONS | LoopDelimit::MATERIAL

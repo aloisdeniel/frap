@@ -18,5 +18,8 @@ fn get<'h>(
         .objects
         .get(object_of(this)?)
         .ok_or_else(|| internal("Object.material_slots: the object was removed"))?;
-    Ok(Field::Coll(CollRef::Owned(Box::new(MaterialSlots { main, ob }))))
+    Ok(Field::Coll(CollRef::Owned(Box::new(MaterialSlots {
+        main,
+        ob,
+    }))))
 }

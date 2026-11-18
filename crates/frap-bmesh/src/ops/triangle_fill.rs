@@ -56,7 +56,9 @@ const EDGE_MARK: u16 = 4;
 /// Runs `triangle_fill` on `bm`.
 pub fn triangle_fill(bm: &mut BMesh, i: &TriangleFillIn) -> Result<TriangleFillOut, BmError> {
     if let Some(dead) = i.edges.iter().find(|&&e| !bm.edges.contains(e.0)) {
-        return Err(BmError::Invalid(format!("triangle_fill: dead edge {dead:?}")));
+        return Err(BmError::Invalid(format!(
+            "triangle_fill: dead edge {dead:?}"
+        )));
     }
     Ok(bm.bmo_exec(TYPE_FLAG, |bm| exec(bm, i)))
 }
@@ -215,7 +217,8 @@ fn exec(bm: &mut BMesh, i: &TriangleFillIn) -> TriangleFillOut {
             });
             match pair {
                 Some((la, lb))
-                    if bm.oflag_test(bm.lp(la).f, ELE_NEW) && bm.oflag_test(bm.lp(lb).f, ELE_NEW) =>
+                    if bm.oflag_test(bm.lp(la).f, ELE_NEW)
+                        && bm.oflag_test(bm.lp(lb).f, ELE_NEW) =>
                 {
                     // `BM_faces_join_pair(e->l, e->l->radial_next, false)`.
                     if bm.lp(la).v == bm.lp(lb).v {

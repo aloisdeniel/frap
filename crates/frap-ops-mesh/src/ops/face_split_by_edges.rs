@@ -91,7 +91,11 @@ fn closest_on_tri_to_point_v3(p: V3, v1: V3, v2: V3, v3: V3) -> V3 {
 /// The loop triangles of `f` (`BM_face_calc_tessellation` / `mesh_calc_tessellation`:
 /// quads split on the 0–2 diagonal unless degenerate, n-gons by polyfill).
 fn face_tris(bm: &BMesh, f: FaceId) -> Vec<[V3; 3]> {
-    let co: Vec<V3> = bm.face_verts(f).into_iter().map(|v| bm.vert(v).co).collect();
+    let co: Vec<V3> = bm
+        .face_verts(f)
+        .into_iter()
+        .map(|v| bm.vert(v).co)
+        .collect();
     match co.len() {
         0..=2 => Vec::new(),
         3 => vec![[co[0], co[1], co[2]]],
@@ -200,13 +204,18 @@ fn split_edge_find(
             let dist_test_sq = bli::len_squared_v3v3(co_test, p);
             if dist_test_sq < dist_best_sq || e_split.is_none() {
                 let mut ok = true;
-                if bm.edge_exists(v_pivot, ev1).is_some() || bm.edge_exists(v_pivot, ev2).is_some() {
+                if bm.edge_exists(v_pivot, ev1).is_some() || bm.edge_exists(v_pivot, ev2).is_some()
+                {
                     ok = false;
                 } else if found_other_face != 0 {
                     let mut other_face_shared = 0;
                     let mut l_radial: LoopId = bm.lp(l_iter).radial_next;
                     while l_radial != l_iter {
-                        if bm.face(bm.lp(l_radial).f).flag.contains(ElemFlag::INTERNAL_TAG) {
+                        if bm
+                            .face(bm.lp(l_radial).f)
+                            .flag
+                            .contains(ElemFlag::INTERNAL_TAG)
+                        {
                             other_face_shared += 1;
                         }
                         l_radial = bm.lp(l_radial).radial_next;
@@ -287,7 +296,11 @@ fn island_connect(bm: &mut BMesh, f: FaceId, e_link: &[EdgeId]) {
 // (edbm_face_split_by_edges_exec, USE_NET_ISLAND_CONNECT part).
 fn net_island_connect(bm: &mut BMesh, edges_loose: Vec<EdgeId>) {
     let ftable: Vec<FaceId> = bm.face_ids();
-    let fidx: FxHashMap<FaceId, i64> = ftable.iter().enumerate().map(|(i, &f)| (f, i as i64)).collect();
+    let fidx: FxHashMap<FaceId, i64> = ftable
+        .iter()
+        .enumerate()
+        .map(|(i, &f)| (f, i as i64))
+        .collect();
     let tris: Vec<(FaceId, [V3; 3])> = ftable
         .iter()
         .flat_map(|&f| face_tris(bm, f).into_iter().map(move |t| (f, t)))
@@ -304,7 +317,11 @@ fn net_island_connect(bm: &mut BMesh, edges_loose: Vec<EdgeId>) {
             index.insert(e, fidx[&f]);
         }
     }
-    let faces: Vec<FaceId> = ftable.iter().copied().filter(|f| face_edges.contains_key(f)).collect();
+    let faces: Vec<FaceId> = ftable
+        .iter()
+        .copied()
+        .filter(|f| face_edges.contains_key(f))
+        .collect();
     for &f in &faces {
         for &e in &face_edges[&f] {
             for j in 0..2 {
@@ -312,7 +329,8 @@ fn net_island_connect(bm: &mut BMesh, edges_loose: Vec<EdgeId>) {
                 if bm.face_verts(f).contains(&v_pivot) {
                     continue;
                 }
-                let Some((e_split, fac)) = split_edge_find(bm, e, f, v_pivot, &ftable, &index) else {
+                let Some((e_split, fac)) = split_edge_find(bm, e, f, v_pivot, &ftable, &index)
+                else {
                     continue;
                 };
                 if !vert_in_faces_radial(bm, v_pivot, e_split, f) {
@@ -415,7 +433,8 @@ fn exec(cx: &mut OpCtx, _p: mesh::FaceSplitByEdges) -> OpResult {
                     1 => Some(loops[0]),
                     _ => {
                         let v_other = bm.edge_other_vert(e, v);
-                        let e_dir = bli::normalize_v3(bli::sub(bm.vert(v_other).co, bm.vert(v).co)).0;
+                        let e_dir =
+                            bli::normalize_v3(bli::sub(bm.vert(v_other).co, bm.vert(v).co)).0;
                         let mut dot_best = f32::MAX;
                         let mut best = None;
                         // `BLI_SMALLSTACK_POP`: the last pushed loop first.
@@ -427,9 +446,17 @@ fn exec(cx: &mut OpCtx, _p: mesh::FaceSplitByEdges) -> OpResult {
                                 let co = |x: VertId| bm.vert(x).co;
                                 let pv = bm.lp(ll.prev).v;
                                 let nv = bm.lp(ll.next).v;
-                                if bli::angle_signed_on_axis_v3v3v3_v3(co(pv), co(ll.v), co(v_other), fno)
-                                    < bli::angle_signed_on_axis_v3v3v3_v3(co(pv), co(ll.v), co(nv), fno)
-                                {
+                                if bli::angle_signed_on_axis_v3v3v3_v3(
+                                    co(pv),
+                                    co(ll.v),
+                                    co(v_other),
+                                    fno,
+                                ) < bli::angle_signed_on_axis_v3v3v3_v3(
+                                    co(pv),
+                                    co(ll.v),
+                                    co(nv),
+                                    fno,
+                                ) {
                                     dot_best = dot_test;
                                     best = Some(l);
                                 }

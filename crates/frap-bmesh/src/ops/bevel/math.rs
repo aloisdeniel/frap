@@ -329,8 +329,7 @@ pub(crate) fn isect_point_poly_v2(pt: [f32; 2], verts: &[[f32; 2]]) -> bool {
     for i in 0..nr {
         if ((verts[i][1] > pt[1]) != (verts[j][1] > pt[1]))
             && (pt[0]
-                < (verts[j][0] - verts[i][0]) * (pt[1] - verts[i][1])
-                    / (verts[j][1] - verts[i][1])
+                < (verts[j][0] - verts[i][0]) * (pt[1] - verts[i][1]) / (verts[j][1] - verts[i][1])
                     + verts[i][0])
         {
             isect = !isect;
@@ -463,7 +462,8 @@ mod tests {
         assert_eq!(k, 2);
         assert!((a[0] - 0.5).abs() < 1e-6 && a[2].abs() < 1e-6);
         assert!((b[2] - 1.0).abs() < 1e-6);
-        let (k, _, _) = isect_line_line_v3([0.0; 3], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [2.0, 1.0, 0.0]);
+        let (k, _, _) =
+            isect_line_line_v3([0.0; 3], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [2.0, 1.0, 0.0]);
         assert_eq!(k, 0);
     }
 

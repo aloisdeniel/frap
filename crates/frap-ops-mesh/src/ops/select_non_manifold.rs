@@ -28,7 +28,9 @@ const VERT_OR_EDGE_MSG: &str = "An edit-mesh with vertex or edge selection mode 
 /// `edbm_vert_or_edge_select_mode_poll` (frap reads the select mode from
 /// `tool_settings.mesh_select_mode`, which every edit mesh follows).
 pub(crate) fn vert_or_edge_poll(c: &Context, idname: &str) -> Result<(), PollFail> {
-    let message = Some(format!("Operator bpy.ops.{idname}.poll() {VERT_OR_EDGE_MSG}"));
+    let message = Some(format!(
+        "Operator bpy.ops.{idname}.poll() {VERT_OR_EDGE_MSG}"
+    ));
     if let Err(mut f) = poll::editmesh(c) {
         f.message = message;
         return Err(f);

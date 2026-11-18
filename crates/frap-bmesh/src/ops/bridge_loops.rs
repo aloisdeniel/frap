@@ -73,7 +73,9 @@ const FACE_OUT: u16 = 16;
 /// the operator ran (nothing was changed).
 pub fn bridge_loops(bm: &mut BMesh, i: &BridgeLoopsIn) -> Result<BridgeLoopsOut, BmError> {
     if let Some(dead) = i.edges.iter().find(|&&e| !bm.edges.contains(e.0)) {
-        return Err(BmError::Invalid(format!("bridge_loops: dead edge {dead:?}")));
+        return Err(BmError::Invalid(format!(
+            "bridge_loops: dead edge {dead:?}"
+        )));
     }
     bm.bmo_exec(TYPE_FLAG, |bm| exec(bm, i))
 }
@@ -102,7 +104,11 @@ fn vert_loop_pair(bm: &BMesh, v1: VertId, v2: VertId) -> (Option<LoopId>, Option
     match bm.edge(e).l {
         Some(l) => {
             let ll = bm.lp(l);
-            if ll.v == v1 { (Some(l), Some(ll.next)) } else { (Some(ll.next), Some(l)) }
+            if ll.v == v1 {
+                (Some(l), Some(ll.next))
+            } else {
+                (Some(ll.next), Some(l))
+            }
         }
         None => (
             bm.vert_loops(v1).first().copied(),
@@ -219,7 +225,11 @@ fn bridge_loop_pair(
                             && bm.edge_is_boundary(e)
                         {
                             let l = bm.edge(e).l.expect("boundary edge loop");
-                            votes[k] += if bm.lp(l).v == v { winding_dir } else { -winding_dir };
+                            votes[k] += if bm.lp(l).v == v {
+                                winding_dir
+                            } else {
+                                -winding_dir
+                            };
                         }
                     }
                 }
@@ -269,7 +279,10 @@ fn bridge_loop_pair(
         let mut ib = 0usize;
         loop {
             let (ia_next, ib_next) = if is_closed {
-                (el_a.next_index(ia).expect("closed"), el_b.next_index(ib).expect("closed"))
+                (
+                    el_a.next_index(ia).expect("closed"),
+                    el_b.next_index(ib).expect("closed"),
+                )
             } else {
                 match (
                     (ia + 1 < n).then_some(ia + 1),
@@ -304,9 +317,7 @@ fn bridge_loop_pair(
             if l_b_next.is_some() && l_b.is_none() {
                 l_b = l_b_next;
             }
-            let f_example = l_a
-                .map(|l| bm.lp(l).f)
-                .or_else(|| l_b.map(|l| bm.lp(l).f));
+            let f_example = l_a.map(|l| bm.lp(l).f).or_else(|| l_b.map(|l| bm.lp(l).f));
             let f: Option<FaceId> = if v_b != v_b_next {
                 if v_b == v_a_next || v_b == v_a || v_b_next == v_a_next || v_b_next == v_a {
                     None
@@ -531,7 +542,10 @@ mod tests {
                 ..Default::default()
             },
         );
-        assert_eq!(r, Err(BmError::Cancel("Select at least two edge loops".into())));
+        assert_eq!(
+            r,
+            Err(BmError::Cancel("Select at least two edge loops".into()))
+        );
     }
 
     #[test]

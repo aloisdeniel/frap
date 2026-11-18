@@ -27,8 +27,9 @@ fn unlink_poll(c: &Context) -> Result<(), PollFail> {
              bpy.context.view_layer.layer_collection.children[{}]",
             poll::py_name(&col.header.name)
         ),
-        None => "bpy.context.view_layer.active_layer_collection must not be the scene collection"
-            .into(),
+        None => {
+            "bpy.context.view_layer.active_layer_collection must not be the scene collection".into()
+        }
     };
     // No `PollReq` names "a collection other than the scene collection is active": the
     // failure lists no unmet requirement and the hint says what to change.

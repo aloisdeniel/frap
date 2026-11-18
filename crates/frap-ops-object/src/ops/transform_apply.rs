@@ -298,7 +298,8 @@ fn exec(cx: &mut OpCtx, p: object::TransformApply) -> OpResult {
                 if l.r#type != "AREA" {
                     continue;
                 }
-                let keeps_aspect = compare_ff_relative(rsmat.x_axis.x, rsmat.y_axis.y, f32::EPSILON, 64);
+                let keeps_aspect =
+                    compare_ff_relative(rsmat.x_axis.x, rsmat.y_axis.y, f32::EPSILON, 64);
                 let f = &mut l.fields;
                 if !keeps_aspect && f.shape == "SQUARE" {
                     f.shape = "RECTANGLE".into();
@@ -326,7 +327,11 @@ fn exec(cx: &mut OpCtx, p: object::TransformApply) -> OpResult {
         let inv = amat.inverse();
         for &ob in objects.iter().filter(|o| Some(**o) != active) {
             let w = worlds_before.get(ob) * inv;
-            let pw = main.objects.get(ob).and_then(|o| o.parent).map(|p| worlds.get(p));
+            let pw = main
+                .objects
+                .get(ob)
+                .and_then(|o| o.parent)
+                .map(|p| worlds.get(p));
             let Some(o) = main.objects.get_mut(ob, log) else {
                 continue;
             };
@@ -360,7 +365,10 @@ mod tests {
         // Vertex (1, 1, 1) → (0.684, 1.6676, 1.5464) (verified on 5.2.4).
         let (_, m) = apply_matrix(&cube(), false, true, false);
         let v = m.transform_point3(Vec3::ONE);
-        assert!(v.abs_diff_eq(Vec3::new(0.683996, 1.667566, 1.546377), 1e-5), "{v:?}");
+        assert!(
+            v.abs_diff_eq(Vec3::new(0.683996, 1.667566, 1.546377), 1e-5),
+            "{v:?}"
+        );
     }
 
     #[test]
@@ -368,7 +376,10 @@ mod tests {
         // Vertex (1, 1, 1) → (1.918217, 3.105321, 5.978005) (verified on 5.2.4).
         let (_, m) = apply_matrix(&cube(), true, false, false);
         let v = m.transform_point3(Vec3::ONE);
-        assert!(v.abs_diff_eq(Vec3::new(1.918217, 3.105321, 5.978005), 1e-5), "{v:?}");
+        assert!(
+            v.abs_diff_eq(Vec3::new(1.918217, 3.105321, 5.978005), 1e-5),
+            "{v:?}"
+        );
     }
 
     #[test]
@@ -384,6 +395,11 @@ mod tests {
     fn relative_compare() {
         assert!(compare_ff_relative(2.0, 2.0, f32::EPSILON, 64));
         assert!(!compare_ff_relative(2.0, 3.0, f32::EPSILON, 64));
-        assert!(compare_ff_relative(1.0, 1.0 + 2.0 * f32::EPSILON, f32::EPSILON, 64));
+        assert!(compare_ff_relative(
+            1.0,
+            1.0 + 2.0 * f32::EPSILON,
+            f32::EPSILON,
+            64
+        ));
     }
 }

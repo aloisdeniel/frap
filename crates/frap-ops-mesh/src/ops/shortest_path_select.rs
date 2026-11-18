@@ -65,7 +65,10 @@ impl Interval {
     /// `WM_operator_properties_checker_interval_test`, with Blender's `int` sums wrapping.
     pub(crate) fn test(&self, depth: i32) -> bool {
         self.skip == 0
-            || c_rem(self.offset.wrapping_add(depth), self.skip.wrapping_add(self.nth)) >= self.skip
+            || c_rem(
+                self.offset.wrapping_add(depth),
+                self.skip.wrapping_add(self.nth),
+            ) >= self.skip
     }
 }
 
@@ -101,7 +104,9 @@ fn shortest_path_vert(bm: &mut BMesh, p: &Params, v_act: VertId, v_dst: VertId) 
     let mut ordered = false;
     if v_act != v_dst {
         if p.use_fill {
-            if let Some(Region::Verts(r)) = path::path_region(bm, Elem::Vert(v_act), Elem::Vert(v_dst)) {
+            if let Some(Region::Verts(r)) =
+                path::path_region(bm, Elem::Vert(v_act), Elem::Vert(v_dst))
+            {
                 path = Some(r);
             }
         } else {
@@ -215,7 +220,9 @@ fn shortest_path_edge(bm: &mut BMesh, p: &Params, e_act: EdgeId, e_dst: EdgeId) 
     let mut ordered = false;
     if e_act != e_dst {
         if p.use_fill {
-            if let Some(Region::Edges(r)) = path::path_region(bm, Elem::Edge(e_act), Elem::Edge(e_dst)) {
+            if let Some(Region::Edges(r)) =
+                path::path_region(bm, Elem::Edge(e_act), Elem::Edge(e_dst))
+            {
                 path = Some(r);
             }
         } else {

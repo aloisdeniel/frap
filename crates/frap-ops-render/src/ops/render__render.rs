@@ -124,7 +124,9 @@ fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
     let frames: Vec<Option<i32>> = if p.animation.value {
         let (start, end) = helpers::frame_range_or_scene(cx, &p.frame_start, &p.frame_end);
         if start > end {
-            return Err(OpError::Runtime("Start frame is larger than end frame".into()));
+            return Err(OpError::Runtime(
+                "Start frame is larger than end frame".into(),
+            ));
         }
         let step = scene.frame_step.max(1) as usize;
         (i64::from(start)..=i64::from(end))
@@ -207,10 +209,15 @@ fn render_frame(cx: &mut OpCtx, frame: Option<i32>) -> Result<Film, OpError> {
         ..RenderRequest::default()
     };
     let mut eval = snap.eval;
-    let mut scene = frap_render_scene::build(&*snap.host, &mut *eval, &req).map_err(render_error)?;
+    let mut scene =
+        frap_render_scene::build(&*snap.host, &mut *eval, &req).map_err(render_error)?;
     // M1: every engine renders with Workbench (§19.3; the WARNING is reported once).
     scene.settings.engine = WORKBENCH.into();
-    let film = cx.services().render()?.render(&scene).map_err(render_error)?;
+    let film = cx
+        .services()
+        .render()?
+        .render(&scene)
+        .map_err(render_error)?;
     if film.rgba.len() != film.width as usize * film.height as usize {
         return Err(OpError::Gpu(format!(
             "the renderer returned {} pixels for {}x{}",
@@ -257,11 +264,7 @@ fn ensure_render_result(cx: &mut OpCtx) -> IdRef<ImageId> {
 
 fn store_render_result(cx: &mut OpCtx, film: Film) {
     let r = ensure_render_result(cx);
-    let generation = cx
-        .main()
-        .images
-        .get(r)
-        .map_or(0, |im| im.header.generation);
+    let generation = cx.main().images.get(r).map_or(0, |im| im.header.generation);
     let pixels = DecodedImage {
         width: film.width,
         height: film.height,

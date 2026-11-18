@@ -168,6 +168,16 @@ pub(crate) fn loopcut_run(
     for e in ring {
         bm.edge_select_set(e, true);
     }
+    // `--max-elements` (ARCHITECTURE §12): `cuts + 1` faces per face of the ring.
+    let after = super::_growth::ring_cut_corners(bm, u64::try_from(cuts.max(0)).unwrap_or(0));
+    super::_growth::reserve(cx, |m, b| {
+        if m == me {
+            after
+        } else {
+            Some(super::_growth::corners(b))
+        }
+    })?;
+    let bm = cx.bmesh_mut(me)?;
 
     let is_edge_wire = bm.edge_is_wire(edge);
     let is_single = is_edge_wire || !edge_has_quad(bm, edge);

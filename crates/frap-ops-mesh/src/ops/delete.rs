@@ -46,17 +46,27 @@ fn exec(cx: &mut OpCtx, p: mesh::Delete) -> OpResult {
         };
         let (tv, te, tf) = bm.selected_counts();
         let (geom, context): (Vec<BMElem>, &'static str) = match ty {
-            Type::Vert if tv > 0 => (sel_verts(bm).into_iter().map(BMElem::Vert).collect(), "VERTS"),
-            Type::Edge if te > 0 => (sel_edges(bm).into_iter().map(BMElem::Edge).collect(), "EDGES"),
-            Type::Face if tf > 0 => (sel_faces(bm).into_iter().map(BMElem::Face).collect(), "FACES"),
+            Type::Vert if tv > 0 => (
+                sel_verts(bm).into_iter().map(BMElem::Vert).collect(),
+                "VERTS",
+            ),
+            Type::Edge if te > 0 => (
+                sel_edges(bm).into_iter().map(BMElem::Edge).collect(),
+                "EDGES",
+            ),
+            Type::Face if tf > 0 => (
+                sel_faces(bm).into_iter().map(BMElem::Face).collect(),
+                "FACES",
+            ),
             Type::EdgeFace if te > 0 || tf > 0 => {
                 let mut g: Vec<BMElem> = sel_edges(bm).into_iter().map(BMElem::Edge).collect();
                 g.extend(sel_faces(bm).into_iter().map(BMElem::Face));
                 (g, "EDGES_FACES")
             }
-            Type::OnlyFace if tf > 0 => {
-                (sel_faces(bm).into_iter().map(BMElem::Face).collect(), "FACES_ONLY")
-            }
+            Type::OnlyFace if tf > 0 => (
+                sel_faces(bm).into_iter().map(BMElem::Face).collect(),
+                "FACES_ONLY",
+            ),
             _ => continue,
         };
         let bm = cx.bmesh_mut(me)?;

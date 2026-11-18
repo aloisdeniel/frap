@@ -95,7 +95,11 @@ mod tests {
         let expect = axis(normal_key(n), true);
         assert_eq!(
             &col.words[..3],
-            &[key_word(expect[0]), key_word(expect[1]), key_word(expect[2])]
+            &[
+                key_word(expect[0]),
+                key_word(expect[1]),
+                key_word(expect[2])
+            ]
         );
         // Y-up: Blender +Z is glTF +Y.
         assert!(f32::from_bits(col.words[1]) > 0.99);

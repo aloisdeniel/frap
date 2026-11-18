@@ -56,7 +56,9 @@ pub fn dissolve_degenerate(
             "dissolve_degenerate: dead edge {e:?}"
         )));
     }
-    bm.bmo_exec(TYPE_FLAG, |bm| dissolve_degenerate_exec(bm, &i.edges, i.dist));
+    bm.bmo_exec(TYPE_FLAG, |bm| {
+        dissolve_degenerate_exec(bm, &i.edges, i.dist)
+    });
     Ok(DissolveDegenerateOut::default())
 }
 
@@ -67,7 +69,9 @@ fn collapse_flagged(bm: &mut BMesh, oflag: u16) {
         .into_iter()
         .filter(|&e| bm.oflag_test(e, oflag))
         .collect();
-    bm.bmo_exec(crate::ops::collapse::TYPE_FLAG, |bm| collapse_exec(bm, &edges, true));
+    bm.bmo_exec(crate::ops::collapse::TYPE_FLAG, |bm| {
+        collapse_exec(bm, &edges, true)
+    });
 }
 
 fn sub(a: [f32; 3], b: [f32; 3]) -> [f32; 3] {
@@ -125,8 +129,7 @@ fn dissolve_degenerate_exec(bm: &mut BMesh, edges: &[EdgeId], dist: f32) {
                     crate::query::geom::normalize_v3(sub(bm.vert(bm.lp(li.prev).v).co, co));
                 let (dir_next, len_next) =
                     crate::query::geom::normalize_v3(sub(bm.vert(bm.lp(li.next).v).co, co));
-                if frap_geom::normals::len_v3v3(dir_prev, dir_next) * len_prev.min(len_next)
-                    <= dist
+                if frap_geom::normals::len_v3v3(dir_prev, dir_next) * len_prev.min(len_next) <= dist
                 {
                     let mut reset = false;
                     if (len_prev - len_next).abs() <= dist {
@@ -149,7 +152,8 @@ fn dissolve_degenerate_exec(bm: &mut BMesh, edges: &[EdgeId], dist: f32) {
                         // Split `l_iter->e`, then join the vert with next.
                         bm.edge_split(li.e, li.v, len_prev / len_next);
                         let li = bm.lp(l_iter).clone();
-                        if let Some((_, l_split)) = bm.face_split(li.f, li.prev, li.next, None, true)
+                        if let Some((_, l_split)) =
+                            bm.face_split(li.f, li.prev, li.next, None, true)
                         {
                             let se = bm.lp(l_split).e;
                             bm.oflag_enable(se, EDGE_COLLAPSE);
@@ -161,7 +165,8 @@ fn dissolve_degenerate_exec(bm: &mut BMesh, edges: &[EdgeId], dist: f32) {
                         let prev_e = bm.lp(li.prev).e;
                         bm.edge_split(prev_e, li.v, len_next / len_prev);
                         let li = bm.lp(l_iter).clone();
-                        if let Some((_, l_split)) = bm.face_split(li.f, li.prev, li.next, None, true)
+                        if let Some((_, l_split)) =
+                            bm.face_split(li.f, li.prev, li.next, None, true)
                         {
                             let se = bm.lp(l_split).e;
                             bm.oflag_enable(se, EDGE_COLLAPSE);

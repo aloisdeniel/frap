@@ -43,7 +43,12 @@ fn run(cx: &mut OpCtx, p: mesh::ConvexHull) -> OpResult {
         let faces = edbm::faces_of(&out.geom);
         edbm::select_enable(bm, &faces, true);
         if p.delete_unused.value {
-            let geom: Vec<_> = out.geom_unused.iter().copied().filter(|g| bm.elem_alive(*g)).collect();
+            let geom: Vec<_> = out
+                .geom_unused
+                .iter()
+                .copied()
+                .filter(|g| bm.elem_alive(*g))
+                .collect();
             let r = frap_bmesh::ops::delete::delete(
                 bm,
                 &frap_bmesh::ops::delete::DeleteIn {
@@ -57,7 +62,12 @@ fn run(cx: &mut OpCtx, p: mesh::ConvexHull) -> OpResult {
         }
         let bm = cx.bmesh_mut(me)?;
         if p.make_holes.value {
-            let geom: Vec<_> = out.geom_holes.iter().copied().filter(|g| bm.elem_alive(*g)).collect();
+            let geom: Vec<_> = out
+                .geom_holes
+                .iter()
+                .copied()
+                .filter(|g| bm.elem_alive(*g))
+                .collect();
             let r = frap_bmesh::ops::delete::delete(
                 bm,
                 &frap_bmesh::ops::delete::DeleteIn {

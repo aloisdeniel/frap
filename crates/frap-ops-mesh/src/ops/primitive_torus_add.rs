@@ -63,9 +63,7 @@ fn align_matrix(
     } else {
         match align {
             primitive_torus_add::Align::World => eul_o_to_mat3(rotation.value, EulerOrder::XYZ),
-            primitive_torus_add::Align::View => {
-                Mat3::from_mat4(c.win.view3d.view_matrix).inverse()
-            }
+            primitive_torus_add::Align::View => Mat3::from_mat4(c.win.view3d.view_matrix).inverse(),
             primitive_torus_add::Align::Cursor => cursor_matrix(c.cursor()),
         }
     };

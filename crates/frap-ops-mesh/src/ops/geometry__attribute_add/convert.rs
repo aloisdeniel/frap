@@ -174,9 +174,12 @@ pub(crate) fn convert(v: Val, to: &str) -> Option<Val> {
         (S2(a), "FLOAT_VECTOR") => F3([f32::from(a[0]), f32::from(a[1]), 0.0]),
         (S2(a), "FLOAT4") => F4([f32::from(a[0]), f32::from(a[1]), 0.0, 0.0]),
         (S2(a), "FLOAT_COLOR") => C([f32::from(a[0]), f32::from(a[1]), 0.0, 1.0]),
-        (S2(a), "BYTE_COLOR") => {
-            Bc(encode_byte_color([f32::from(a[0]), f32::from(a[1]), 0.0, 1.0]))
-        }
+        (S2(a), "BYTE_COLOR") => Bc(encode_byte_color([
+            f32::from(a[0]),
+            f32::from(a[1]),
+            0.0,
+            1.0,
+        ])),
         // From INT32_2D.
         (I2(a), "BOOLEAN") => B(a != [0; 2]),
         (I2(a), "FLOAT2") => F2([a[0] as f32, a[1] as f32]),
@@ -212,9 +215,11 @@ pub(crate) fn convert(v: Val, to: &str) -> Option<Val> {
         (B(a), "FLOAT_VECTOR") => F3([if a { 1.0 } else { 0.0 }; 3]),
         (B(a), "FLOAT4") => F4([if a { 1.0 } else { 0.0 }; 4]),
         (B(a), "FLOAT_COLOR") => C(if a { [1.0; 4] } else { [0.0, 0.0, 0.0, 1.0] }),
-        (B(a), "BYTE_COLOR") => {
-            Bc(encode_byte_color(if a { [1.0; 4] } else { [0.0, 0.0, 0.0, 1.0] }))
-        }
+        (B(a), "BYTE_COLOR") => Bc(encode_byte_color(if a {
+            [1.0; 4]
+        } else {
+            [0.0, 0.0, 0.0, 1.0]
+        })),
         // From FLOAT_COLOR.
         (C(a), "BOOLEAN") => B(luminance(a) > 0.0),
         (C(a), "FLOAT") => F(luminance(a)),
@@ -594,7 +599,10 @@ mod tests {
             convert(Val::Bc([255, 0, 0, 255]), "FLOAT_VECTOR"),
             Some(Val::F3([1.0, 0.0, 0.0]))
         );
-        assert_eq!(convert(Val::C([0.0, 0.0, 0.0, 1.0]), "BOOLEAN"), Some(Val::B(false)));
+        assert_eq!(
+            convert(Val::C([0.0, 0.0, 0.0, 1.0]), "BOOLEAN"),
+            Some(Val::B(false))
+        );
     }
 
     #[test]

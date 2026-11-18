@@ -156,7 +156,11 @@ mod tests {
         let m = normal_matrix(&world).unwrap();
         let n = select_facing(&mut bm, Vec3::Z, 0.9, Some(m), false);
         assert_eq!(n, 1);
-        let f = bm.face_ids().into_iter().find(|&f| bm.is_selected(f.into())).unwrap();
+        let f = bm
+            .face_ids()
+            .into_iter()
+            .find(|&f| bm.is_selected(f.into()))
+            .unwrap();
         assert!(bm.face(f).no[2] < -0.99);
         // A singular matrix selects nothing (and still replaces the selection).
         assert!(normal_matrix(&Mat4::from_scale(Vec3::new(1.0, 0.0, 1.0))).is_none());
@@ -172,8 +176,14 @@ mod tests {
 
     #[test]
     fn non_finite_and_extreme_directions() {
-        assert_eq!(normalized([f32::NAN, 0.0, 1.0]), Err(BadDirection::NotFinite));
-        assert_eq!(normalized([0.0, f32::INFINITY, 0.0]), Err(BadDirection::NotFinite));
+        assert_eq!(
+            normalized([f32::NAN, 0.0, 1.0]),
+            Err(BadDirection::NotFinite)
+        );
+        assert_eq!(
+            normalized([0.0, f32::INFINITY, 0.0]),
+            Err(BadDirection::NotFinite)
+        );
         // f32 would overflow (1e20^2) or underflow (1e-30^2) the squared length.
         assert_eq!(normalized([0.0, 0.0, 1e20]), Ok(Vec3::Z));
         assert_eq!(normalized([0.0, 0.0, -f32::MAX]), Ok(Vec3::NEG_Z));

@@ -97,7 +97,11 @@ pub fn monkey(p: &Monkey) -> Mesh {
                 tv[MONKEYNV + idx(3)],
             ]
         } else {
-            vec![tv[MONKEYNV + idx(2)], tv[MONKEYNV + idx(1)], tv[MONKEYNV + idx(0)]]
+            vec![
+                tv[MONKEYNV + idx(2)],
+                tv[MONKEYNV + idx(1)],
+                tv[MONKEYNV + idx(0)],
+            ]
         };
         let fa = bm.face_create(&a);
         let fb = bm.face_create(&b);

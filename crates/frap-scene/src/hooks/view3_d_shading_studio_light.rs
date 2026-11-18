@@ -18,9 +18,7 @@
 //! Blender's `TypeError: bpy_struct: item.attr = val: enum "rim.sl" not found in (…)` (verified
 //! on 5.2.4 in each mode, also for the per-mode reads after switching `light`).
 
-use frap_rna::{
-    Field, PropDef, PyExc, RnaError, RnaErrorKind, RnaPtr, Root, Seg, Value, rna_hook,
-};
+use frap_rna::{Field, PropDef, PyExc, RnaError, RnaErrorKind, RnaPtr, Root, Seg, Value, rna_hook};
 
 use smol_str::SmolStr;
 
@@ -226,7 +224,14 @@ mod hook {
         match owner(this)? {
             Owner::Scene(scene) => {
                 // Validate first: a refused assignment leaves the scene unmodified.
-                let mut probe = h.main().scenes.get(scene).ok_or_else(gone)?.display.shading.clone();
+                let mut probe = h
+                    .main()
+                    .scenes
+                    .get(scene)
+                    .ok_or_else(gone)?
+                    .display
+                    .shading
+                    .clone();
                 set_value(&mut probe, &name)?;
                 let (main, log) = h.main_mut();
                 let s = main.scenes.get_mut(scene, log).ok_or_else(gone)?;
@@ -254,7 +259,12 @@ mod tests {
         s.light = "MATCAP".into();
         assert_eq!(get_value(&s), "basic_bright.exr");
         let e = set_value(&mut s, "rim.sl").unwrap_err();
-        assert!(e.message.contains("enum \"rim.sl\" not found in ('basic_bright.exr'"), "{}", e.message);
+        assert!(
+            e.message
+                .contains("enum \"rim.sl\" not found in ('basic_bright.exr'"),
+            "{}",
+            e.message
+        );
         set_value(&mut s, "clay_brown.exr").unwrap();
         s.light = "STUDIO".into();
         assert_eq!(get_value(&s), "Default");
@@ -272,7 +282,10 @@ mod tests {
         assert!(e.message.ends_with("not found in ()"), "{}", e.message);
         s.r#type = "SOLID".into();
         assert_eq!(get_value(&s), "clay_brown.exr");
-        assert_eq!((s.studio_light.as_str(), s.lookdev_light.as_str()), ("rim.sl", "city.exr"));
+        assert_eq!(
+            (s.studio_light.as_str(), s.lookdev_light.as_str()),
+            ("rim.sl", "city.exr")
+        );
     }
 
     #[test]
@@ -284,7 +297,12 @@ mod tests {
         let frap_rna::PropKind::Enum { items, .. } = prop.kind else {
             panic!("studio_light is an enum")
         };
-        let mut ours: Vec<&str> = STUDIO.iter().chain(&WORLD).chain(&MATCAP).copied().collect();
+        let mut ours: Vec<&str> = STUDIO
+            .iter()
+            .chain(&WORLD)
+            .chain(&MATCAP)
+            .copied()
+            .collect();
         let mut spec: Vec<&str> = items.iter().map(|i| i.identifier).collect();
         ours.sort_unstable();
         spec.sort_unstable();

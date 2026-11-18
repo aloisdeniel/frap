@@ -24,7 +24,11 @@ use super::split::edbm;
 #[operator(poll = poll::EDITMESH, tier = T1)]
 fn exec(cx: &mut OpCtx, p: mesh::VerticesSmooth) -> OpResult {
     let fac = p.factor.value;
-    let repeat = if p.repeat.value == 0 { 1 } else { p.repeat.value };
+    let repeat = if p.repeat.value == 0 {
+        1
+    } else {
+        p.repeat.value
+    };
     let mut tot_selected = 0;
     for (ob, me) in helpers::iter_edit_meshes(cx) {
         let (v, _, _) = edbm::read(cx, me, edbm::sel_counts).unwrap_or_default();

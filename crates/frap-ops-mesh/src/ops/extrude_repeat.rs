@@ -158,10 +158,15 @@ mod tests {
     #[test]
     fn growth_of_a_selected_cube_face() {
         let mut bm = BMesh::new();
-        let v: Vec<VertId> = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
-            .into_iter()
-            .map(|co| bm.vert_create(co, None, frap_bmesh::CreateFlag::empty()))
-            .collect();
+        let v: Vec<VertId> = [
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+        ]
+        .into_iter()
+        .map(|co| bm.vert_create(co, None, frap_bmesh::CreateFlag::empty()))
+        .collect();
         let f = bm
             .face_create_verts(&v, None, frap_bmesh::CreateFlag::empty(), true)
             .unwrap();
@@ -170,8 +175,14 @@ mod tests {
         let growth = step_growth(&bm);
         assert_eq!(growth, [4, 8, 5, 20]);
         // One exact extrude step stays within the bound.
-        let counts =
-            |bm: &BMesh| [bm.verts_num(), bm.edges_num(), bm.faces_num(), bm.loops_num()];
+        let counts = |bm: &BMesh| {
+            [
+                bm.verts_num(),
+                bm.edges_num(),
+                bm.faces_num(),
+                bm.loops_num(),
+            ]
+        };
         let before = counts(&bm);
         common::extrude_ex(&mut bm, common::HType::ALL, false, false, Vec::new(), true).unwrap();
         let after = counts(&bm);

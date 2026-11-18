@@ -105,7 +105,10 @@ pub fn verts_calc_normal_from_cloud_ex(bm: &BMesh, varr: &[VertId]) -> (V3, V3, 
         let mut dist_sq_max = -1.0f32;
         for i in 0..len {
             let d = bli::len_squared_v3v3(co(i), center);
-            if !matches!(d.partial_cmp(&dist_sq_max), Some(Ordering::Less | Ordering::Equal)) {
+            if !matches!(
+                d.partial_cmp(&dist_sq_max),
+                Some(Ordering::Less | Ordering::Equal)
+            ) {
                 co_a = Some(i);
                 co_a_index = i;
                 dist_sq_max = d;
@@ -125,7 +128,10 @@ pub fn verts_calc_normal_from_cloud_ex(bm: &BMesh, varr: &[VertId]) -> (V3, V3, 
             }
             let t = bli::project_plane_normalized_v3_v3v3(bli::sub(co(i), center), dir_a);
             let d = bli::len_squared_v3(t);
-            if !matches!(d.partial_cmp(&dist_sq_max), Some(Ordering::Less | Ordering::Equal)) {
+            if !matches!(
+                d.partial_cmp(&dist_sq_max),
+                Some(Ordering::Less | Ordering::Equal)
+            ) {
                 co_b = Some(i);
                 dist_sq_max = d;
                 dir_b = t;
@@ -191,7 +197,10 @@ pub fn verts_calc_normal_from_cloud_ex(bm: &BMesh, varr: &[VertId]) -> (V3, V3, 
             for i in 0..len {
                 let t = bli::project_plane_normalized_v3_v3v3(bli::sub(co(i), center), refine);
                 let d = bli::len_squared_v3(t);
-                if !matches!(d.partial_cmp(&dist_sq_max), Some(Ordering::Less | Ordering::Equal)) {
+                if !matches!(
+                    d.partial_cmp(&dist_sq_max),
+                    Some(Ordering::Less | Ordering::Equal)
+                ) {
                     co_a_index = i;
                     dist_sq_max = d;
                 }

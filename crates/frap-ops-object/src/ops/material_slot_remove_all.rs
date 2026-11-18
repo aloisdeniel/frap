@@ -38,7 +38,10 @@ fn exec(cx: &mut OpCtx, _p: object::MaterialSlotRemoveAll) -> OpResult {
     let (main, log) = cx.main_mut();
     for ob in objects {
         loop {
-            let tot = main.objects.get(ob).map_or(0, |o| slots::slot_count(main, o));
+            let tot = main
+                .objects
+                .get(ob)
+                .map_or(0, |o| slots::slot_count(main, o));
             if tot == 0 || !common::slot_remove_at(main, log, ob, tot - 1) {
                 break;
             }

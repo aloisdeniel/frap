@@ -130,7 +130,10 @@ fn selected_slots(bm: &BMesh, domain: Domain) -> Vec<usize> {
                     }
                 }
             }
-            if bm.select_mode.intersects(SelectMode::VERT | SelectMode::EDGE) {
+            if bm
+                .select_mode
+                .intersects(SelectMode::VERT | SelectMode::EDGE)
+            {
                 for v in bm.vert_ids() {
                     if sel(bm.vert(v).flag) {
                         out.extend(bm.vert_loops(v).into_iter().map(|l| l.slot()));

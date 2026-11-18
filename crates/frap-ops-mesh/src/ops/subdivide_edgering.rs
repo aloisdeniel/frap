@@ -25,6 +25,9 @@ use frap_spec_ops_mesh::mesh;
     notes = ["a selection that is not an edge ring between two loops reports 'No edge rings found' as INFO and changes nothing"]
 )]
 fn exec(cx: &mut OpCtx, p: mesh::SubdivideEdgering) -> OpResult {
+    // `--max-elements`: `cuts + 1` faces per face between the loops (ARCHITECTURE §12).
+    let cuts = u64::try_from(p.number_cuts.value.max(0)).unwrap_or(0);
+    super::_growth::reserve(cx, |_, bm| super::_growth::ring_cut_corners(bm, cuts))?;
     for (_, me) in helpers::iter_edit_meshes(cx) {
         let any = {
             let (_, edit) = cx.split_edit();

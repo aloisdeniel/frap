@@ -332,8 +332,7 @@ fn exec(bm: &mut BMesh, i: &InsetRegionIn) -> InsetRegionOut {
     let use_interpolate = i.use_interpolate;
     let thickness = i.thickness;
     let depth = i.depth;
-    let has_math_ldata =
-        use_interpolate && bm.ldata.layers.iter().any(|l| col_has_math(&l.data));
+    let has_math_ldata = use_interpolate && bm.ldata.layers.iter().any(|l| col_has_math(&l.data));
 
     // Interpolation: the faces stored (`iface_array`, indexed by face), and their blocks.
     let mut blocks = use_interpolate.then(|| CdBlocks::save(bm));
@@ -572,7 +571,8 @@ fn exec(bm: &mut BMesh, i: &InsetRegionIn) -> InsetRegionOut {
                             ))
                             .0;
                             if use_even_offset {
-                                tvec = geom::scale(tvec, shell_v3v3_normalized_to_dist(e_no_a, tvec));
+                                tvec =
+                                    geom::scale(tvec, shell_v3v3_normalized_to_dist(e_no_a, tvec));
                             }
                         } else {
                             tvec = e_no_a;
@@ -862,7 +862,10 @@ mod tests {
         assert_eq!(out.faces.len(), 4);
         assert_eq!(bm.faces_num(), 6);
         for c in bm.face_verts(a).iter().map(|&v| bm.vert(v).co) {
-            assert!(c[0] > 0.05 && c[0] < 0.95 && c[1] > 0.05 && c[1] < 0.95, "{c:?}");
+            assert!(
+                c[0] > 0.05 && c[0] < 0.95 && c[1] > 0.05 && c[1] < 0.95,
+                "{c:?}"
+            );
         }
         assert!(bm.validate().is_empty());
     }

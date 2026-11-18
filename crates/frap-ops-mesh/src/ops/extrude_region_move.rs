@@ -40,7 +40,12 @@ mod tests {
     fn macro_definition_forces_step_properties() {
         let mut forced = macro_step_forced("MESH_OT_extrude_region_move", "TRANSFORM_OT_translate");
         forced.sort();
-        assert_eq!(forced, vec![("mirror", false), ("use_proportional_edit", false)]);
-        assert!(macro_step_forced("MESH_OT_extrude_region_move", "MESH_OT_extrude_region").is_empty());
+        assert_eq!(
+            forced,
+            vec![("mirror", false), ("use_proportional_edit", false)]
+        );
+        assert!(
+            macro_step_forced("MESH_OT_extrude_region_move", "MESH_OT_extrude_region").is_empty()
+        );
     }
 }

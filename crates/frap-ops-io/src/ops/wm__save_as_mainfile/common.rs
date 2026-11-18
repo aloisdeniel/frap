@@ -179,7 +179,10 @@ pub(crate) fn save(cx: &mut OpCtx, path: &Path, kind: SaveKind) -> OpResult {
         main.filepath = Some(path.to_string_lossy().into_owned());
         main.is_dirty = false;
     }
-    cx.result("filepath", Value::Str(path.to_string_lossy().as_ref().into()));
+    cx.result(
+        "filepath",
+        Value::Str(path.to_string_lossy().as_ref().into()),
+    );
     cx.result("bytes", Value::Int(saved.bytes.len() as i64));
     cx.result("orphans_dropped", Value::Int(saved.dropped.len() as i64));
     Ok(OpStatus::Finished)
@@ -244,10 +247,16 @@ pub(crate) fn open(cx: &mut OpCtx, path: &Path) -> OpResult {
     if let Some(v) = opened.migrated_from {
         cx.report(
             ReportType::Info,
-            format!("frap: {} was migrated from schema version {v}", file_name(path)),
+            format!(
+                "frap: {} was migrated from schema version {v}",
+                file_name(path)
+            ),
         );
     }
-    cx.result("filepath", Value::Str(path.to_string_lossy().as_ref().into()));
+    cx.result(
+        "filepath",
+        Value::Str(path.to_string_lossy().as_ref().into()),
+    );
     Ok(OpStatus::Finished)
 }
 

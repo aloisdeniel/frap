@@ -35,7 +35,9 @@ mod hook {
                 let srna = m
                     .attributes()
                     .get(n)
-                    .map_or(&frap_spec_rna::ATTRIBUTE, |a| frap_mesh::attribute_srna(&a.data));
+                    .map_or(&frap_spec_rna::ATTRIBUTE, |a| {
+                        frap_mesh::attribute_srna(&a.data)
+                    });
                 item_ptr(this, n, srna)
             }
             _ => Value::None,

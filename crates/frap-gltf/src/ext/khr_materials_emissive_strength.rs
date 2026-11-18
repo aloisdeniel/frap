@@ -88,16 +88,22 @@ mod tests {
         assert!(d.extensions_required.is_empty());
         assert!(validate(&d).is_ok(), "{}", validate(&d));
         let json = String::from_utf8(d.to_vec(&Default::default())).unwrap();
-        assert!(json.contains(r#"{"KHR_materials_emissive_strength":{"emissiveStrength":5}}"#), "{json}");
-        let e: KhrMaterialsEmissiveStrength =
-            d.materials[0].extensions.get().unwrap().unwrap();
+        assert!(
+            json.contains(r#"{"KHR_materials_emissive_strength":{"emissiveStrength":5}}"#),
+            "{json}"
+        );
+        let e: KhrMaterialsEmissiveStrength = d.materials[0].extensions.get().unwrap().unwrap();
         assert_eq!(e.emissive_strength_or_default(), 5.0);
-        d.materials[0].extensions.set(Some(KhrMaterialsEmissiveStrength {
-            emissive_strength: Some(-1.0),
-            ..Default::default()
-        }));
+        d.materials[0]
+            .extensions
+            .set(Some(KhrMaterialsEmissiveStrength {
+                emissive_strength: Some(-1.0),
+                ..Default::default()
+            }));
         assert!(validate(&d).has("VALUE_NOT_IN_RANGE"));
-        d.materials[0].extensions.set::<KhrMaterialsEmissiveStrength>(None);
+        d.materials[0]
+            .extensions
+            .set::<KhrMaterialsEmissiveStrength>(None);
         assert!(d.materials[0].extensions.is_empty());
         assert!(validate(&d).has("UNUSED_EXTENSION"));
     }

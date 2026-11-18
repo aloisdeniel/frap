@@ -56,7 +56,8 @@ fn exec(cx: &mut OpCtx, p: object::LightAdd) -> OpResult {
     let name = default_name(t);
     let data = {
         let (main, log) = cx.main_mut();
-        main.lights.insert(name, light_data(name, t, p.radius.value), log)
+        main.lights
+            .insert(name, light_data(name, t, p.radius.value), log)
     };
     let ob = helpers::add_object_with_data(cx, name, Some(data.any()), at, false)?;
     cx.result("object", ob.any());

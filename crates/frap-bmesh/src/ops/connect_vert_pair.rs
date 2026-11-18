@@ -169,8 +169,20 @@ impl Pc {
     fn isect_co_pair(&self, a: V3, b: V3) -> bool {
         let da = self.row_x(a) - self.axis_sep;
         let db = self.row_x(b) - self.axis_sep;
-        let ta = if da.abs() < CONNECT_EPS { 0 } else if da < 0.0 { -1 } else { 1 };
-        let tb = if db.abs() < CONNECT_EPS { 0 } else if db < 0.0 { -1 } else { 1 };
+        let ta = if da.abs() < CONNECT_EPS {
+            0
+        } else if da < 0.0 {
+            -1
+        } else {
+            1
+        };
+        let tb = if db.abs() < CONNECT_EPS {
+            0
+        } else if db < 0.0 {
+            -1
+        } else {
+            1
+        };
         ta != 0 && tb != 0 && ta != tb
     }
     fn isect_co_exact(&self, co: V3) -> bool {
@@ -352,7 +364,13 @@ impl Pc {
                         && self.isect_co_exact(bm.vert(v_other).co)
                         && !bm.oflag_test(v_other, ELE_TOUCHED)
                     {
-                        s = self.link_add_test(bm, s, &orig, BMElem::Vert(v_other), BMElem::Edge(e));
+                        s = self.link_add_test(
+                            bm,
+                            s,
+                            &orig,
+                            BMElem::Vert(v_other),
+                            BMElem::Edge(e),
+                        );
                     }
                 }
             }
@@ -369,9 +387,21 @@ fn invert_m3(m: [[f32; 3]; 3]) -> Option<[[f32; 3]; 3]> {
     let [m10, m11, m12] = m[1];
     let [m20, m21, m22] = m[2];
     let mut r = [
-        [m11 * m22 - m12 * m21, -m01 * m22 + m02 * m21, m01 * m12 - m02 * m11],
-        [-m10 * m22 + m12 * m20, m00 * m22 - m02 * m20, -m00 * m12 + m02 * m10],
-        [m10 * m21 - m11 * m20, -m00 * m21 + m01 * m20, m00 * m11 - m01 * m10],
+        [
+            m11 * m22 - m12 * m21,
+            -m01 * m22 + m02 * m21,
+            m01 * m12 - m02 * m11,
+        ],
+        [
+            -m10 * m22 + m12 * m20,
+            m00 * m22 - m02 * m20,
+            -m00 * m12 + m02 * m10,
+        ],
+        [
+            m10 * m21 - m11 * m20,
+            -m00 * m21 + m01 * m20,
+            m00 * m11 - m01 * m10,
+        ],
     ];
     let det = m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
         - m[1][0] * (m[0][1] * m[2][2] - m[0][2] * m[2][1])
@@ -405,7 +435,8 @@ fn vert_pair_to_matrix(bm: &BMesh, v_pair: [VertId; 2]) -> [[f32; 3]; 3] {
         for (i, &v) in v_pair.iter().enumerate() {
             for l in bm.vert_loops(v) {
                 let fno = bm.face(bm.lp(l).f).no;
-                let (proj, pl) = bli::normalize_v3(bli::project_plane_normalized_v3_v3v3(basis_dir, fno));
+                let (proj, pl) =
+                    bli::normalize_v3(bli::project_plane_normalized_v3_v3v3(basis_dir, fno));
                 if pl > eps {
                     let c = bli::dot(proj, basis_dir);
                     if c > axis_pair[i].1 {

@@ -10,8 +10,8 @@
 //! `(4, 5, 0)` gives scale `(2, -2.5, 0)`; a parent's scale is included.
 
 use frap_rna::traits::FromRnaValue;
-use frap_rna::{MathTag, PropDef, RnaError, RnaPtr, Value, rna_hook};
 use frap_rna::traits::ToRnaValue;
+use frap_rna::{MathTag, PropDef, RnaError, RnaPtr, Value, rna_hook};
 use frap_scene::{EvalMode, Host, HostRead};
 
 use super::_common::{evaluated_read, internal, object_of};

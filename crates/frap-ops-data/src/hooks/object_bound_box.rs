@@ -11,7 +11,11 @@ use frap_scene::HostRead;
 use super::_common::{evaluated_read, object_of};
 
 #[rna_hook(srna = "Object", prop = "bound_box")]
-fn get<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn get<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let ob = object_of(this)?;
     let eo = evaluated_read(h, ob)?;
     let corners = frap_eval::bound_box(&eo);

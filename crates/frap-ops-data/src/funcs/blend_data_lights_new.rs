@@ -18,5 +18,8 @@ fn blend_data_lights_new(
     let name = arg_str(args, "name").to_owned();
     let ty = arg_str(args, "type").to_owned();
     let (main, log) = h.main_mut();
-    Ok(main.lights.insert(&name, Light::new(&name, &ty), log).into())
+    Ok(main
+        .lights
+        .insert(&name, Light::new(&name, &ty), log)
+        .into())
 }

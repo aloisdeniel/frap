@@ -166,7 +166,8 @@ impl Store for Mesh {
             .map(|a| (a.domain, a.data.clone()))
     }
     fn insert(&mut self, name: SmolStr, domain: Domain, data: AttrData) {
-        self.attributes_mut().insert(Attribute { name, domain, data });
+        self.attributes_mut()
+            .insert(Attribute { name, domain, data });
     }
     fn replace(&mut self, name: &str, data: AttrData) {
         if let Some(a) = self.attributes_mut().get_mut(name) {
@@ -191,11 +192,9 @@ impl Store for Mesh {
         };
         match a.domain {
             Domain::Corner => fill_indices(&mut a.data, corners, color),
-            Domain::Point => fill_indices(
-                &mut a.data,
-                corner_verts.iter().map(|&v| v as usize),
-                color,
-            ),
+            Domain::Point => {
+                fill_indices(&mut a.data, corner_verts.iter().map(|&v| v as usize), color)
+            }
             _ => {}
         }
     }
@@ -269,7 +268,11 @@ impl Store for BMesh {
             return;
         }
         let i = cd(self, domain).find(name).expect("found above");
-        fill_indices(&mut cd_mut(self, domain).layers[i].data, idx.into_iter(), color);
+        fill_indices(
+            &mut cd_mut(self, domain).layers[i].data,
+            idx.into_iter(),
+            color,
+        );
     }
 }
 
@@ -426,7 +429,10 @@ fn uv_clamped(list: &[Layer], index: i32) -> Option<SmolStr> {
 
 /// Attributes that cannot be removed (`BKE_mesh_attribute_required`).
 pub(crate) fn required(name: &str) -> bool {
-    matches!(name, "position" | ".edge_verts" | ".corner_vert" | ".corner_edge")
+    matches!(
+        name,
+        "position" | ".edge_verts" | ".corner_vert" | ".corner_edge"
+    )
 }
 
 /// `BKE_attribute_remove`: removes `name`; the active/default colour and active/render UV map
@@ -438,7 +444,9 @@ pub(crate) fn remove(store: &mut dyn Store, names: &mut Names, name: &str) -> Re
         return Err("The attribute name must not be empty".into());
     }
     if required(name) {
-        return Err(format!("Attribute '{name}' is required and cannot be removed"));
+        return Err(format!(
+            "Attribute '{name}' is required and cannot be removed"
+        ));
     }
     let before = store.layers();
     let Some(layer) = before.iter().find(|l| l.name == name).cloned() else {
@@ -567,7 +575,10 @@ mod tests {
 
     #[test]
     fn name_at_edit_rules() {
-        let list: Vec<Layer> = ["foo", "UVMap", ".pn.UVMap"].into_iter().map(layer).collect();
+        let list: Vec<Layer> = ["foo", "UVMap", ".pn.UVMap"]
+            .into_iter()
+            .map(layer)
+            .collect();
         assert_eq!(name_at(&list, 2, true), None);
         assert_eq!(name_at(&list, 9, true).as_deref(), Some("foo"));
         assert_eq!(name_at(&list, 9, false), None);
@@ -577,7 +588,10 @@ mod tests {
     #[test]
     fn byte_color_encoding() {
         assert_eq!(encode_byte_color([0.0, 0.0, 0.0, 1.0]), [0, 0, 0, 255]);
-        assert_eq!(encode_byte_color([1.0, 0.5, 0.2140411, 0.5]), [255, 188, 127, 128]);
+        assert_eq!(
+            encode_byte_color([1.0, 0.5, 0.2140411, 0.5]),
+            [255, 188, 127, 128]
+        );
     }
 
     #[test]
@@ -591,7 +605,10 @@ mod tests {
         assert_eq!(remove(&mut me, &mut names, "A"), Ok(true));
         assert_eq!(names.color_active.as_deref(), Some("B"));
         assert_eq!(remove(&mut me, &mut names, "B"), Ok(true));
-        assert_eq!((names.color_active.clone(), names.color_default.clone()), (None, None));
+        assert_eq!(
+            (names.color_active.clone(), names.color_default.clone()),
+            (None, None)
+        );
         assert!(remove(&mut me, &mut names, "position").is_err());
         assert_eq!(remove(&mut me, &mut names, "nope"), Ok(false));
     }

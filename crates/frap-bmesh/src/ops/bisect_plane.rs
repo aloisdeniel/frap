@@ -99,7 +99,14 @@ fn face_in_stack(bm: &BMesh, f: FaceId) -> bool {
 }
 
 // Ported from blender/source/blender/bmesh/tools/bmesh_bisect_plane.cc (bm_face_bisect_verts).
-fn face_bisect_verts(bm: &mut BMesh, st: &mut Bisect, f: FaceId, plane: [f32; 4], oflag_center: u16, oflag_new: u16) {
+fn face_bisect_verts(
+    bm: &mut BMesh,
+    st: &mut Bisect,
+    f: FaceId,
+    plane: [f32; 4],
+    oflag_center: u16,
+    oflag_new: u16,
+) {
     let f_len_orig = bm.face(f).len;
     let mut vert_split: Vec<VertId> = Vec::new();
     let mut use_dirs = [false; 3];
@@ -154,8 +161,8 @@ fn face_bisect_verts(bm: &mut BMesh, st: &mut Bisect, f: FaceId, plane: [f32; 4]
         let mut l_iter = l_first_nc;
         loop {
             let v = bm.lp(l_iter).v;
-            let skip_this = st.get(v).skip
-                || !(is_center(bm, v) && is_center(bm, bm.lp(bm.lp(l_iter).next).v));
+            let skip_this =
+                st.get(v).skip || !(is_center(bm, v) && is_center(bm, bm.lp(bm.lp(l_iter).next).v));
             if !skip_this {
                 let l_prev = bm.lp(l_iter).prev;
                 let mut l_next = bm.lp(bm.lp(l_iter).next).next;
@@ -202,7 +209,8 @@ fn face_bisect_verts(bm: &mut BMesh, st: &mut Bisect, f: FaceId, plane: [f32; 4]
     for i in 0..vert_split.len() - 1 {
         let (v_a, v_b) = (vert_split[i], vert_split[i + 1]);
         if face_has_center_edge {
-            let d = (st.get(v_a).loopindex as i64 - st.get(v_b).loopindex as i64).unsigned_abs() as u32;
+            let d =
+                (st.get(v_a).loopindex as i64 - st.get(v_b).loopindex as i64).unsigned_abs() as u32;
             if d == 1 || d == f_len_orig - 1 {
                 continue;
             }
@@ -215,7 +223,10 @@ fn face_bisect_verts(bm: &mut BMesh, st: &mut Bisect, f: FaceId, plane: [f32; 4]
         }
         let mut found = None;
         for (j, &fs) in face_split_arr.iter().enumerate() {
-            if let (Some(a), Some(b)) = (bm.face_vert_share_loop(fs, v_a), bm.face_vert_share_loop(fs, v_b)) {
+            if let (Some(a), Some(b)) = (
+                bm.face_vert_share_loop(fs, v_a),
+                bm.face_vert_share_loop(fs, v_b),
+            ) {
                 found = Some((j, a, b));
                 break;
             }
@@ -354,7 +365,9 @@ pub fn mesh_bisect_plane(
 /// Runs `bisect_plane` on `bm`. `Zero normal given` is a [`BmError::Cancel`].
 pub fn bisect_plane(bm: &mut BMesh, i: &BisectPlaneIn) -> Result<BisectPlaneOut, BmError> {
     if let Some(dead) = i.geom.iter().find(|&&g| !bm.elem_alive(g)) {
-        return Err(BmError::Invalid(format!("bisect_plane: dead element {dead:?}")));
+        return Err(BmError::Invalid(format!(
+            "bisect_plane: dead element {dead:?}"
+        )));
     }
     bm.bmo_exec(TYPE_FLAG, |bm| exec(bm, i))
 }
@@ -401,11 +414,36 @@ fn exec(bm: &mut BMesh, i: &BisectPlaneIn) -> Result<BisectPlaneOut, BmError> {
     }
     let flags = ELE_NEW | ELE_INPUT;
     let mut geom: Vec<BMElem> = Vec::new();
-    geom.extend(bm.vert_ids().into_iter().filter(|&v| bm.oflag_test(v, flags)).map(BMElem::Vert));
-    geom.extend(bm.edge_ids().into_iter().filter(|&e| bm.oflag_test(e, flags)).map(BMElem::Edge));
-    geom.extend(bm.face_ids().into_iter().filter(|&f| bm.oflag_test(f, flags)).map(BMElem::Face));
+    geom.extend(
+        bm.vert_ids()
+            .into_iter()
+            .filter(|&v| bm.oflag_test(v, flags))
+            .map(BMElem::Vert),
+    );
+    geom.extend(
+        bm.edge_ids()
+            .into_iter()
+            .filter(|&e| bm.oflag_test(e, flags))
+            .map(BMElem::Edge),
+    );
+    geom.extend(
+        bm.face_ids()
+            .into_iter()
+            .filter(|&f| bm.oflag_test(f, flags))
+            .map(BMElem::Face),
+    );
     let mut geom_cut: Vec<BMElem> = Vec::new();
-    geom_cut.extend(bm.vert_ids().into_iter().filter(|&v| bm.oflag_test(v, ELE_CUT)).map(BMElem::Vert));
-    geom_cut.extend(bm.edge_ids().into_iter().filter(|&e| bm.oflag_test(e, ELE_CUT)).map(BMElem::Edge));
+    geom_cut.extend(
+        bm.vert_ids()
+            .into_iter()
+            .filter(|&v| bm.oflag_test(v, ELE_CUT))
+            .map(BMElem::Vert),
+    );
+    geom_cut.extend(
+        bm.edge_ids()
+            .into_iter()
+            .filter(|&e| bm.oflag_test(e, ELE_CUT))
+            .map(BMElem::Edge),
+    );
     Ok(BisectPlaneOut { geom, geom_cut })
 }

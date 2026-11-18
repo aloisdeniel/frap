@@ -551,7 +551,10 @@ mod tests {
                 false
             }
         };
-        assert_eq!(t.find_nearest([17.3, 0.5, 0.0], f32::INFINITY, &mut cb), Some(17));
+        assert_eq!(
+            t.find_nearest([17.3, 0.5, 0.0], f32::INFINITY, &mut cb),
+            Some(17)
+        );
         let mut rc = |i: i32, d: &mut f32| {
             let dist = i as f32 - 3.0;
             if dist > 0.0 && dist < *d {
@@ -561,6 +564,9 @@ mod tests {
                 false
             }
         };
-        assert_eq!(t.ray_cast([3.0, 0.5, 0.0], [1.0, 0.0, 0.0], f32::MAX, &mut rc), Some(4));
+        assert_eq!(
+            t.ray_cast([3.0, 0.5, 0.0], [1.0, 0.0, 0.0], f32::MAX, &mut rc),
+            Some(4)
+        );
     }
 }

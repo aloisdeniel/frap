@@ -195,7 +195,12 @@ fn unwind<T: Copy>(dst: T, slot: impl Fn(T) -> usize, prev: &[Option<T>]) -> Vec
 // ----------------------------------------------------------------------------- vert path
 
 /// `BM_mesh_calc_path_vert` (hidden vertices are not walked; `filter_fn` = not hidden).
-pub(crate) fn path_vert(bm: &BMesh, src: VertId, dst: VertId, p: PathParams) -> Option<Vec<VertId>> {
+pub(crate) fn path_vert(
+    bm: &BMesh,
+    src: VertId,
+    dst: VertId,
+    p: PathParams,
+) -> Option<Vec<VertId>> {
     let cap = bm.verts.ids().map(|s| s as usize + 1).max().unwrap_or(0);
     let mut tag = vec![false; cap];
     for v in bm.vert_ids() {
@@ -257,7 +262,12 @@ pub(crate) fn path_vert(bm: &BMesh, src: VertId, dst: VertId, p: PathParams) -> 
 // ----------------------------------------------------------------------------- edge path
 
 /// `BM_mesh_calc_path_edge`.
-pub(crate) fn path_edge(bm: &BMesh, src: EdgeId, dst: EdgeId, p: PathParams) -> Option<Vec<EdgeId>> {
+pub(crate) fn path_edge(
+    bm: &BMesh,
+    src: EdgeId,
+    dst: EdgeId,
+    p: PathParams,
+) -> Option<Vec<EdgeId>> {
     let vcap = bm.verts.ids().map(|s| s as usize + 1).max().unwrap_or(0);
     let cap = bm.edges.ids().map(|s| s as usize + 1).max().unwrap_or(0);
     let mut vtag = vec![false; vcap];
@@ -355,7 +365,12 @@ pub(crate) fn path_edge(bm: &BMesh, src: EdgeId, dst: EdgeId, p: PathParams) -> 
 // ----------------------------------------------------------------------------- face path
 
 /// `BM_mesh_calc_path_face`.
-pub(crate) fn path_face(bm: &BMesh, src: FaceId, dst: FaceId, p: PathParams) -> Option<Vec<FaceId>> {
+pub(crate) fn path_face(
+    bm: &BMesh,
+    src: FaceId,
+    dst: FaceId,
+    p: PathParams,
+) -> Option<Vec<FaceId>> {
     let cap = bm.faces.ids().map(|s| s as usize + 1).max().unwrap_or(0);
     let mut tag = vec![false; cap];
     for f in bm.face_ids() {
@@ -679,7 +694,12 @@ pub(crate) fn path_region(bm: &BMesh, src: Elem, dst: Elem) -> Option<Region> {
                 .filter(|&e| !etag[e.slot()] && bm.edge(e).v.iter().all(|&v| test_chain(v)))
                 .collect(),
         ),
-        Elem::Vert(_) => Region::Verts(bm.vert_ids().into_iter().filter(|&v| test_chain(v)).collect()),
+        Elem::Vert(_) => Region::Verts(
+            bm.vert_ids()
+                .into_iter()
+                .filter(|&v| test_chain(v))
+                .collect(),
+        ),
     })
 }
 

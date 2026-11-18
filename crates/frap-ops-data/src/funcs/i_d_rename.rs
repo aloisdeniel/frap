@@ -36,7 +36,10 @@ fn rename_embedded(
         EmbeddedSlot::MasterCollection => "Collection",
         _ => "NodeTree",
     };
-    let wanted = SmolStr::new(truncate_utf8(if name.is_empty() { default } else { name }, 255));
+    let wanted = SmolStr::new(truncate_utf8(
+        if name.is_empty() { default } else { name },
+        255,
+    ));
     let current = main
         .embedded_header(owner, slot)
         .ok_or_else(|| internal("ID.rename(): the datablock was removed"))?;

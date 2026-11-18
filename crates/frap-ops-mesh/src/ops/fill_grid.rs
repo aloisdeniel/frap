@@ -44,9 +44,8 @@ fn vert_tag_angle(bm: &BMesh, v: VertId) -> f32 {
 /// selection as is.
 fn fill_grid_prepare(bm: &mut BMesh, offset: i32, span_in: Option<i32>) -> Option<i32> {
     let eps_even = 1e-3f32;
-    let eloops = edgeloop::mesh_edgeloops_find(bm, &|bm, e| {
-        bm.edge(e).flag.contains(ElemFlag::SELECT)
-    });
+    let eloops =
+        edgeloop::mesh_edgeloops_find(bm, &|bm, e| bm.edge(e).flag.contains(ElemFlag::SELECT));
     if eloops.len() != 1 {
         return None;
     }
@@ -96,7 +95,11 @@ fn fill_grid_prepare(bm: &mut BMesh, offset: i32, span_in: Option<i32>) -> Optio
                 .enumerate()
                 .map(|(i, &v)| {
                     let a = vert_tag_angle(bm, v);
-                    let a = if i == 0 || i == (verts_len / 2) as usize { 0.0 } else { a };
+                    let a = if i == 0 || i == (verts_len / 2) as usize {
+                        0.0
+                    } else {
+                        a
+                    };
                     (a, i)
                 })
                 .collect();
@@ -174,9 +177,24 @@ fn split_join_init(bm: &mut BMesh) -> Result<Option<SplitJoin>, BmError> {
         return Ok(None);
     }
     let mut geom: Vec<BMElem> = Vec::new();
-    geom.extend(bm.vert_ids().into_iter().filter(|&v| bm.vert(v).flag.contains(ElemFlag::TAG)).map(BMElem::Vert));
-    geom.extend(bm.edge_ids().into_iter().filter(|&e| bm.edge(e).flag.contains(ElemFlag::TAG)).map(BMElem::Edge));
-    geom.extend(bm.face_ids().into_iter().filter(|&f| bm.face(f).flag.contains(ElemFlag::TAG)).map(BMElem::Face));
+    geom.extend(
+        bm.vert_ids()
+            .into_iter()
+            .filter(|&v| bm.vert(v).flag.contains(ElemFlag::TAG))
+            .map(BMElem::Vert),
+    );
+    geom.extend(
+        bm.edge_ids()
+            .into_iter()
+            .filter(|&e| bm.edge(e).flag.contains(ElemFlag::TAG))
+            .map(BMElem::Edge),
+    );
+    geom.extend(
+        bm.face_ids()
+            .into_iter()
+            .filter(|&f| bm.face(f).flag.contains(ElemFlag::TAG))
+            .map(BMElem::Face),
+    );
     let out = frap_bmesh::ops::split::split(
         bm,
         &frap_bmesh::ops::split::SplitIn {
@@ -288,7 +306,11 @@ fn run(cx: &mut OpCtx, p: mesh::FillGrid) -> OpResult {
         }
         let bm = cx.bmesh_mut(me)?;
         let use_prepare = fill_grid_prepare(bm, offset, span_in).is_some();
-        let flag = if use_prepare { ElemFlag::TAG } else { ElemFlag::SELECT };
+        let flag = if use_prepare {
+            ElemFlag::TAG
+        } else {
+            ElemFlag::SELECT
+        };
         let edges = edbm::edges_with(bm, flag);
         let r = grid_fill(
             bm,

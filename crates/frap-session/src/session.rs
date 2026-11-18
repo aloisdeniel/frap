@@ -445,16 +445,35 @@ impl Session {
 
     /// Like [`Session::exec_source`], with line numbers starting at `first_line`.
     pub fn exec_source_at(&mut self, src: &str, first_line: u32) -> Vec<Response> {
-        frap_lang::parse_complete_at(src, first_line)
-            .into_iter()
-            .map(|r| match r {
+        let mut out = Vec::new();
+        self.exec_source_each(src, first_line, |r| {
+            out.push(r);
+            std::ops::ControlFlow::Continue(())
+        });
+        out
+    }
+
+    /// Like [`Session::exec_source_at`], handing each response to `on` as soon as its
+    /// statement has run (a front end writes and flushes it before the next statement
+    /// starts); `ControlFlow::Break` stops before the next statement (`--fail-fast`).
+    pub fn exec_source_each(
+        &mut self,
+        src: &str,
+        first_line: u32,
+        mut on: impl FnMut(Response) -> std::ops::ControlFlow<()>,
+    ) {
+        for r in frap_lang::parse_complete_at(src, first_line) {
+            let resp = match r {
                 Ok(stmt) => self.exec(&stmt),
                 Err(e) => {
                     let line = e.span.map(|s| s.line).unwrap_or(first_line);
                     self.reject(line, e)
                 }
-            })
-            .collect()
+            };
+            if on(resp).is_break() {
+                return;
+            }
+        }
     }
 
     /// A response for input that never became a statement (e.g. invalid UTF-8 on a line).
@@ -755,6 +774,16 @@ impl Session {
     fn unwind_error(&self, payload: Box<dyn std::any::Any + Send>) -> FrapError {
         if frap_math::budget::interrupted(&*payload).is_some() {
             self.timeout_error()
+        } else if let Some(e) = frap_math::budget::elements_exceeded(&*payload) {
+            // A growing BMesh hit `--max-elements` (`budget::check_corners`).
+            FrapError::new(
+                PyExc::RuntimeError,
+                frap_op::errors::LIMIT_EXCEEDED,
+                format!("Error: {e}"),
+            )
+            .with_detail("max_elements", self.opts.limits.max_elements)
+            .with_detail("corners", e.corners)
+            .with_hint("raise --max-elements, or build less geometry per statement")
         } else {
             FrapError::internal_panic(payload)
         }
@@ -778,9 +807,12 @@ impl Session {
         )
     }
 
-    /// `--max-elements`: corners of the meshes the statement created or modified.
+    /// `--max-elements`: corners of the meshes the statement created or modified. A mesh in
+    /// Edit Mode counts the loops of its edit BMesh (its `Main` geometry is stale until the
+    /// mesh leaves Edit Mode), so the statement that grows it fails, not the later `mode_set`.
     fn check_limits(&self) -> Result<(), FrapError> {
         let main = &self.host.state.main;
+        let edit = &self.host.state.edit;
         let log = &self.host.log;
         // A mesh both added and modified by the statement counts once.
         let meshes: std::collections::BTreeSet<IdRef<MeshId>> = log
@@ -791,8 +823,10 @@ impl Session {
             .collect();
         let corners: u64 = meshes
             .into_iter()
-            .filter_map(|m| main.meshes.get(m))
-            .map(|m| m.corners_num() as u64)
+            .filter_map(|m| match edit.meshes.get(&m.key()) {
+                Some(em) => Some(em.bm.loops_num() as u64),
+                None => main.meshes.get(m).map(|me| me.corners_num() as u64),
+            })
             .sum();
         if corners > self.opts.limits.max_elements {
             return Err(FrapError::new(

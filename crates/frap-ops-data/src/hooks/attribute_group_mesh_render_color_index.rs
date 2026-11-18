@@ -43,7 +43,10 @@ mod hook {
     ) -> Result<(), RnaError> {
         let i = i32::from_rna_value(prop, v)?;
         with_mesh_mut(h, this, |m| {
-            if let Some(n) = usize::try_from(i).ok().and_then(|i| color_names(m).get(i).cloned()) {
+            if let Some(n) = usize::try_from(i)
+                .ok()
+                .and_then(|i| color_names(m).get(i).cloned())
+            {
                 m.color_default = Some(n);
             }
         })

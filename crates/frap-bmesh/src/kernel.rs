@@ -95,6 +95,9 @@ impl BMesh {
         EdgeId(s)
     }
     fn alloc_loop(&mut self, v: VertId, e: EdgeId, f: FaceId) -> LoopId {
+        // `--max-elements` backstop (ARCHITECTURE §12): growth no operator pre-check estimated
+        // stops at the limit (rolled back, `LIMIT_EXCEEDED`) instead of exhausting memory.
+        frap_math::budget::check_corners(self.loops.live() as u64 + 1);
         let me = LoopId(self.loops.next_slot());
         let s = self.loops.alloc(BMLoop {
             v,

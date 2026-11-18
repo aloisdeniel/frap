@@ -143,7 +143,10 @@ mod tests {
         let p = plan(Action::Toggle, &bases);
         assert_eq!(p.set, vec![(ob(1), false)]);
         assert!(p.changed);
-        let p = plan(Action::Toggle, &[(ob(1), false, true), (ob(2), false, true)]);
+        let p = plan(
+            Action::Toggle,
+            &[(ob(1), false, true), (ob(2), false, true)],
+        );
         assert_eq!(p.set, vec![(ob(1), true), (ob(2), true)]);
     }
 
@@ -163,7 +166,10 @@ mod tests {
         let p = plan(Action::Select, &[(ob(1), false, false)]);
         assert!(p.changed);
         assert!(p.set.is_empty());
-        let p = plan(Action::Invert, &[(ob(1), false, false), (ob(2), true, true)]);
+        let p = plan(
+            Action::Invert,
+            &[(ob(1), false, false), (ob(2), true, true)],
+        );
         assert_eq!(p.set, vec![(ob(2), false)]);
     }
 

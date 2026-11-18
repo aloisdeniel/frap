@@ -31,7 +31,13 @@ const UNARY: [&str; 21] = [
     "DEGREES",
 ];
 
-const TERNARY: [&str; 5] = ["MULTIPLY_ADD", "COMPARE", "SMOOTH_MIN", "SMOOTH_MAX", "WRAP"];
+const TERNARY: [&str; 5] = [
+    "MULTIPLY_ADD",
+    "COMPARE",
+    "SMOOTH_MIN",
+    "SMOOTH_MAX",
+    "WRAP",
+];
 
 fn update(node: &mut Node) {
     let op = node.prop_str("operation").to_owned();

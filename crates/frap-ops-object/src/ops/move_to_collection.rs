@@ -44,7 +44,10 @@ pub(crate) mod common {
 
     /// Every collection below the master collection of `scene`, depth first in `children`
     /// order, each once (`FOREACH_SCENE_COLLECTION` without the master).
-    pub(crate) fn scene_collections(main: &Main, scene: IdRef<SceneId>) -> Vec<IdRef<CollectionId>> {
+    pub(crate) fn scene_collections(
+        main: &Main,
+        scene: IdRef<SceneId>,
+    ) -> Vec<IdRef<CollectionId>> {
         let Some(s) = main.scenes.get(scene) else {
             return Vec::new();
         };
@@ -103,7 +106,12 @@ pub(crate) mod common {
     }
 
     /// True when the collection holds `ob` directly.
-    pub(crate) fn has_object(main: &Main, scene: IdRef<SceneId>, c: SceneColl, ob: IdRef<ObjectId>) -> bool {
+    pub(crate) fn has_object(
+        main: &Main,
+        scene: IdRef<SceneId>,
+        c: SceneColl,
+        ob: IdRef<ObjectId>,
+    ) -> bool {
         get(main, scene, c).is_some_and(|col| col.objects.contains(&ob))
     }
 
@@ -191,7 +199,11 @@ pub(crate) mod common {
     /// `collection_uid=0` targets it, where Blender raises `Unexpected error, collection not
     /// found` for a literal 0. Matching 0 keeps `collection_uid=scene.collection.session_uid`
     /// working in both.
-    pub(crate) fn from_session_uid(main: &Main, scene: IdRef<SceneId>, uid: i64) -> Option<SceneColl> {
+    pub(crate) fn from_session_uid(
+        main: &Main,
+        scene: IdRef<SceneId>,
+        uid: i64,
+    ) -> Option<SceneColl> {
         all_scene_collections(main, scene).into_iter().find(|c| {
             get(main, scene, *c).is_some_and(|col| i64::from(col.header.session_uid as i32) == uid)
         })

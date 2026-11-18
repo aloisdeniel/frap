@@ -21,9 +21,11 @@ fn get<'h>(
         .get(scene)
         .and_then(|s| s.view_layers[i].layer_collection.at(&path))
         .ok_or_else(|| internal("layer collection not found"))?;
-    Ok(Field::Coll(CollRef::Owned(Box::new(LayerCollectionChildren {
-        main,
-        scene,
-        items: &lc.children,
-    }))))
+    Ok(Field::Coll(CollRef::Owned(Box::new(
+        LayerCollectionChildren {
+            main,
+            scene,
+            items: &lc.children,
+        },
+    ))))
 }

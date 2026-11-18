@@ -160,9 +160,10 @@ fn exec(cx: &mut OpCtx, _p: mesh::UvTextureAdd) -> OpResult {
         let name = add_object(m, &mut names, &vgroups);
         if let Some(n) = &name {
             names.uv_active = Some(n.clone());
-            let has_render = names.uv_render.as_deref().is_some_and(|r| {
-                m.uv_maps().iter().any(|(u, _)| *u == r)
-            });
+            let has_render = names
+                .uv_render
+                .as_deref()
+                .is_some_and(|r| m.uv_maps().iter().any(|(u, _)| *u == r));
             if !has_render {
                 names.uv_render = Some(n.clone());
             }

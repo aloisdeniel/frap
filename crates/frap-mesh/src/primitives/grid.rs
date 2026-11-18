@@ -53,7 +53,14 @@ impl Grid {
 }
 
 /// `bmo_create_grid_exec` with `dia = size / 2` (shared with the plane).
-pub(crate) fn create_grid(name: &str, x_segments: i32, y_segments: i32, dia: f32, calc_uvs: bool, matrix: &Matrix4) -> Mesh {
+pub(crate) fn create_grid(
+    name: &str,
+    x_segments: i32,
+    y_segments: i32,
+    dia: f32,
+    calc_uvs: bool,
+    matrix: &Matrix4,
+) -> Mesh {
     // `usize` (not Blender's `uint`) so the vertex count cannot wrap; callers bound the counts
     // first (`Grid::estimate`, `--max-elements`), the pools refuse more than `u32` elements.
     let xtot = x_segments.max(1) as usize;
@@ -94,5 +101,12 @@ pub(crate) fn create_grid(name: &str, x_segments: i32, y_segments: i32, dia: f32
 
 /// The mesh of `mesh.primitive_grid_add(…)`.
 pub fn grid(p: &Grid) -> Mesh {
-    create_grid("Grid", p.x_subdivisions, p.y_subdivisions, p.size / 2.0, p.calc_uvs, &p.matrix)
+    create_grid(
+        "Grid",
+        p.x_subdivisions,
+        p.y_subdivisions,
+        p.size / 2.0,
+        p.calc_uvs,
+        &p.matrix,
+    )
 }

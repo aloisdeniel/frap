@@ -133,7 +133,12 @@ fn connect_select_history(bm: &mut BMesh) -> bool {
             }
         }
         if !changed && select_history_open(bm) {
-            let e = bm.edge_create(vert_at(0), vert_at(hist.len() - 1), None, CreateFlag::empty());
+            let e = bm.edge_create(
+                vert_at(0),
+                vert_at(hist.len() - 1),
+                None,
+                CreateFlag::empty(),
+            );
             bm.edge_select_set(e, true);
         }
         true

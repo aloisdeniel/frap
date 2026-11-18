@@ -31,8 +31,8 @@ use std::sync::Arc;
 
 use frap_bmesh::{BMesh, CdLayer, EdgeId, ElemFlag, FaceId, LoopId, SelectMode, VertId};
 use frap_geom::normals::{
-    CornerNormalSpace, V3, corner_space_custom_data_to_normal, cross, dot, normalize,
-    normalize_v3, safe_acos_approx, scale, sub,
+    CornerNormalSpace, V3, corner_space_custom_data_to_normal, cross, dot, normalize, normalize_v3,
+    safe_acos_approx, scale, sub,
 };
 use frap_mesh::AttrData;
 
@@ -44,7 +44,10 @@ const LNOR_SPACE_TRIGO_THRESHOLD: f32 = 1.0 - 1e-4;
 
 /// Whether the edit BMesh has the INT16_2D `custom_normal` corner layer.
 pub(crate) fn has_layer(bm: &BMesh) -> bool {
-    matches!(bm.ldata.get(LAYER).map(|l| &l.data), Some(AttrData::Int16x2(_)))
+    matches!(
+        bm.ldata.get(LAYER).map(|l| &l.data),
+        Some(AttrData::Int16x2(_))
+    )
 }
 
 /// `BM_data_layer_ensure_named(bm, &bm->ldata, CD_PROP_INT16_2D, "custom_normal")`: adds the
@@ -114,9 +117,7 @@ pub(crate) struct Spaces {
 impl Spaces {
     /// The space of loop `l`.
     pub(crate) fn of(&self, l: LoopId) -> Option<&Space> {
-        self.of_slot
-            .get(l.slot())
-            .and_then(|&i| self.spaces.get(i))
+        self.of_slot.get(l.slot()).and_then(|&i| self.spaces.get(i))
     }
     /// The loop index of `l` (face iteration order).
     pub(crate) fn index(&self, l: LoopId) -> usize {
@@ -125,8 +126,9 @@ impl Spaces {
     /// The custom normal of `l` decoded in its space
     /// (`BKE_lnor_space_custom_data_to_normal`).
     pub(crate) fn decode(&self, bm: &BMesh, l: LoopId) -> V3 {
-        self.of(l)
-            .map_or([0.0; 3], |s| corner_space_custom_data_to_normal(&s.space, get(bm, l)))
+        self.of(l).map_or([0.0; 3], |s| {
+            corner_space_custom_data_to_normal(&s.space, get(bm, l))
+        })
     }
     /// `BKE_lnor_space_custom_normal_to_data` in the space of `l`.
     pub(crate) fn encode(&self, l: LoopId, n: V3) -> [i16; 2] {
@@ -318,7 +320,11 @@ fn calc_for_loop(bm: &mut BMesh, out: &mut Spaces, has_clnors: bool, l_curr: Loo
         let next = bm.vert_step_fan_loop(pivot, &mut e_next);
         if next.is_none() {
             let lp = bm.lp(pivot);
-            e_next = if lp.e == e_next { bm.lp(lp.prev).e } else { lp.e };
+            e_next = if lp.e == e_next {
+                bm.lp(lp.prev).e
+            } else {
+                lp.e
+            };
         }
         let other = bm.edge_other_vert(e_next, v_pivot);
         vec_next = normalize_v3(sub(co(bm, other), co_pivot)).0;
@@ -761,7 +767,10 @@ mod tests {
         bm.bmesh_edit_end(OpTypeFlag::NORMALS_CALC);
         let b = update(&mut bm);
         assert!(!Arc::ptr_eq(&a, &b));
-        assert!(b.spaces.iter().all(|s| s.single), "rebuilt with the sharp edges");
+        assert!(
+            b.spaces.iter().all(|s| s.single),
+            "rebuilt with the sharp edges"
+        );
         bm.bmesh_edit_end(OpTypeFlag::INVALIDATE_CLNOR_ALL);
         let c = update(&mut bm);
         assert!(!Arc::ptr_eq(&b, &c));

@@ -112,7 +112,8 @@ pub fn quad_rotate_calc_ex(
     let area_2x_241 = cross_tri_v2(v2, v4, v1);
     let area_2x_123 = cross_tri_v2(v1, v2, v3);
     let area_2x_134 = cross_tri_v2(v1, v3, v4);
-    let r_area = (area_2x_234.abs() + area_2x_241.abs() + area_2x_123.abs() + area_2x_134.abs()) / 8.0;
+    let r_area =
+        (area_2x_234.abs() + area_2x_241.abs() + area_2x_123.abs() + area_2x_134.abs()) / 8.0;
     if (area_2x_123 >= 0.0) != (area_2x_134 >= 0.0) {
         return (f32::MAX, r_area);
     }
@@ -300,7 +301,11 @@ pub fn mesh_beautify_fill(
     oflag_edge: u16,
     oflag_face: u16,
 ) {
-    let flag = (if use_restrict_tag { VERT_RESTRICT_TAG } else { 0 }) | EDGE_RESTRICT_DEGENERATE;
+    let flag = (if use_restrict_tag {
+        VERT_RESTRICT_TAG
+    } else {
+        0
+    }) | EDGE_RESTRICT_DEGENERATE;
     let n = edge_array.len();
     let mut b = Beauty {
         heap: Heap::new(),
@@ -326,7 +331,8 @@ pub fn mesh_beautify_fill(
         let e = b.heap.pop_min();
         let i = b.index[&e];
         b.table[i] = None;
-        let Some(e_new) = rotate_edges::edge_rotate(bm, e, false, rotate_edges::CHECK_EXISTS) else {
+        let Some(e_new) = rotate_edges::edge_rotate(bm, e, false, rotate_edges::CHECK_EXISTS)
+        else {
             continue;
         };
         b.index.remove(&e);
@@ -446,10 +452,14 @@ pub fn beautify_fill(bm: &mut BMesh, i: &BeautifyFillIn) -> Result<BeautifyFillO
         }
     };
     if let Some(dead) = i.faces.iter().find(|&&f| !bm.faces.contains(f.0)) {
-        return Err(BmError::Invalid(format!("beautify_fill: dead face {dead:?}")));
+        return Err(BmError::Invalid(format!(
+            "beautify_fill: dead face {dead:?}"
+        )));
     }
     if let Some(dead) = i.edges.iter().find(|&&e| !bm.edges.contains(e.0)) {
-        return Err(BmError::Invalid(format!("beautify_fill: dead edge {dead:?}")));
+        return Err(BmError::Invalid(format!(
+            "beautify_fill: dead edge {dead:?}"
+        )));
     }
     let (e_out, f_out) = bm.bmo_exec(TYPE_FLAG, |bm| {
         beautify_body(bm, &i.faces, &i.edges, i.use_restrict_tag, method)

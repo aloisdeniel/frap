@@ -289,7 +289,10 @@ pub(crate) mod common {
     // (EDBM_extrude_edges_indiv).
     /// `EDBM_extrude_edges_indiv`: every selected edge extruded alone; the new edges and
     /// vertices become the selection.
-    pub(crate) fn extrude_edges_indiv(bm: &mut BMesh, use_normal_flip: bool) -> Result<(), OpError> {
+    pub(crate) fn extrude_edges_indiv(
+        bm: &mut BMesh,
+        use_normal_flip: bool,
+    ) -> Result<(), OpError> {
         let edges: Vec<EdgeId> = selected_geom(
             bm,
             HType {
@@ -467,10 +470,15 @@ pub(crate) mod common {
         /// A quad from x = 0 to x = 2 (normal +Z), everything selected.
         fn quad() -> BMesh {
             let mut bm = BMesh::new();
-            let v: Vec<VertId> = [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0], [2.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
-                .into_iter()
-                .map(|co| bm.vert_create(co, None, CreateFlag::empty()))
-                .collect();
+            let v: Vec<VertId> = [
+                [0.0, 0.0, 0.0],
+                [2.0, 0.0, 0.0],
+                [2.0, 1.0, 0.0],
+                [0.0, 1.0, 0.0],
+            ]
+            .into_iter()
+            .map(|co| bm.vert_create(co, None, CreateFlag::empty()))
+            .collect();
             let f = bm
                 .face_create_verts(&v, None, CreateFlag::empty(), true)
                 .unwrap();

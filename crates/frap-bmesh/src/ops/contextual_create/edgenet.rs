@@ -104,7 +104,12 @@ fn path_check_overlap(bm: &BMesh, net: &Net, v1: VertId, v2: VertId) -> bool {
 
 /// `bm_edgenet_path_step`: pushes the next vertices onto `v_ls` (a stack: last = head);
 /// returns the connecting edge when both search fronts meet.
-fn path_step(bm: &BMesh, net: &mut Net, mut v_curr: VertId, v_ls: &mut Vec<VertId>) -> Option<EdgeId> {
+fn path_step(
+    bm: &BMesh,
+    net: &mut Net,
+    mut v_curr: VertId,
+    v_ls: &mut Vec<VertId>,
+) -> Option<EdgeId> {
     loop {
         let mut tot = 0;
         let mut v_ls_tot = 0;
@@ -164,7 +169,11 @@ fn path_calc(
     let f_index = net.edge_face(bm, e);
     let [v1, v2] = bm.edge(e).v;
     {
-        let flag = if f_index == -1 { VNINFO_FLAG_IS_MIXFACE } else { 0 };
+        let flag = if f_index == -1 {
+            VNINFO_FLAG_IS_MIXFACE
+        } else {
+            0
+        };
         let a = net.get_mut(v1);
         a.pass = pass_nr;
         a.prev = Some(v2);
@@ -316,7 +325,12 @@ pub struct EdgenetFillOut {
 
 // Ported from blender/source/blender/bmesh/operators/bmo_edgenet.cc (bmo_edgenet_fill_exec).
 /// `bmesh.ops.edgenet_fill(edges, mat_nr, use_smooth, sides)` (`sides` unused, as in Blender).
-pub fn edgenet_fill(bm: &mut BMesh, edges: &[EdgeId], mat_nr: i32, use_smooth: bool) -> EdgenetFillOut {
+pub fn edgenet_fill(
+    bm: &mut BMesh,
+    edges: &[EdgeId],
+    mat_nr: i32,
+    use_smooth: bool,
+) -> EdgenetFillOut {
     if bm.verts_num() == 0 || bm.edges_num() == 0 {
         return EdgenetFillOut::default();
     }
@@ -346,7 +360,12 @@ pub fn edgenet_fill(bm: &mut BMesh, edges: &[EdgeId], mat_nr: i32, use_smooth: b
 }
 
 /// `edge_next` of `bmo_edgenet_prepare_exec`.
-fn prepare_edge_next(bm: &BMesh, mark: &dyn Fn(EdgeId) -> bool, vis: &rustc_hash::FxHashSet<EdgeId>, e: EdgeId) -> Option<EdgeId> {
+fn prepare_edge_next(
+    bm: &BMesh,
+    mark: &dyn Fn(EdgeId) -> bool,
+    vis: &rustc_hash::FxHashSet<EdgeId>,
+    e: EdgeId,
+) -> Option<EdgeId> {
     for v in bm.edge(e).v {
         for e2 in bm.vert_edges(v) {
             if mark(e2) && !vis.contains(&e2) && e2 != e {
@@ -364,7 +383,8 @@ fn prepare_edge_next(bm: &BMesh, mark: &dyn Fn(EdgeId) -> bool, vis: &rustc_hash
 pub fn edgenet_prepare(bm: &mut BMesh, edges: &[EdgeId]) -> Vec<EdgeId> {
     let marked: rustc_hash::FxHashSet<EdgeId> = edges.iter().copied().collect();
     let mark = |e: EdgeId| marked.contains(&e);
-    let count_marked = |bm: &BMesh, v: VertId| bm.vert_edges(v).into_iter().filter(|&e| mark(e)).count();
+    let count_marked =
+        |bm: &BMesh, v: VertId| bm.vert_edges(v).into_iter().filter(|&e| mark(e)).count();
     for &e in edges {
         for v in bm.edge(e).v {
             if count_marked(bm, v) > 2 {
@@ -422,10 +442,18 @@ pub fn edgenet_prepare(bm: &mut BMesh, edges: &[EdgeId]) -> Vec<EdgeId> {
             (a, b)
         } else {
             let e0 = bm.edge(list[0]).v;
-            let a = if bm.vert_in_edge(list[1], e0[0]) { e0[1] } else { e0[0] };
+            let a = if bm.vert_in_edge(list[1], e0[0]) {
+                e0[1]
+            } else {
+                e0[0]
+            };
             let i = list.len() - 1;
             let ei = bm.edge(list[i]).v;
-            let b = if bm.vert_in_edge(list[i - 1], ei[0]) { ei[1] } else { ei[0] };
+            let b = if bm.vert_in_edge(list[i - 1], ei[0]) {
+                ei[1]
+            } else {
+                ei[0]
+            };
             (a, b)
         }
     };
@@ -451,5 +479,8 @@ pub fn edgenet_prepare(bm: &mut BMesh, edges: &[EdgeId]) -> Vec<EdgeId> {
     }
     // `BMO_slot_buffer_from_enabled_flag(ELE_NEW)`: mesh order.
     let set: rustc_hash::FxHashSet<EdgeId> = new_edges.into_iter().collect();
-    bm.edge_ids().into_iter().filter(|e| set.contains(e)).collect()
+    bm.edge_ids()
+        .into_iter()
+        .filter(|e| set.contains(e))
+        .collect()
 }

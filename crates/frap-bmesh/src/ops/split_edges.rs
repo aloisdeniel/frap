@@ -120,11 +120,7 @@ pub fn mesh_edgesplit(bm: &mut BMesh, use_verts: bool, tag_only: bool, copy_sele
                 }
                 bm.vert_mut(v).flag.remove(ElemFlag::TAG);
                 let pos = use_ese
-                    .then(|| {
-                        bm.select_history
-                            .iter()
-                            .position(|&h| h == BMElem::Vert(v))
-                    })
+                    .then(|| bm.select_history.iter().position(|&h| h == BMElem::Vert(v)))
                     .flatten();
                 let vtar = vert_separate_hflag(bm, v, ElemFlag::TAG, copy_select);
                 if let Some(p) = pos {

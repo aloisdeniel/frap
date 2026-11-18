@@ -9,8 +9,8 @@
 //! `rotation_euler.z == -0.5`); with a one-axis constraint it is about that axis (`+0.5`).
 //! Registered by hand: the mode handlers take the converted `OpArgs`.
 
-use frap_op::prelude::*;
 use frap_op::TransformOp;
+use frap_op::prelude::*;
 use frap_spec_ops_transform::transform;
 
 fn exec(cx: &mut OpCtx, args: &OpArgs) -> OpResult {

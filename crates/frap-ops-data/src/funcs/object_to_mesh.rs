@@ -22,15 +22,17 @@
 
 use std::sync::Arc;
 
-use frap_rna::{
-    Detached, IdCode, IdRef, MeshId, ObjectId, RnaError, RnaPtr, Value, rna_func,
-};
+use frap_rna::{Detached, IdCode, IdRef, MeshId, ObjectId, RnaError, RnaPtr, Value, rna_func};
 use frap_scene::{EvalMode, FuncArgs, Host};
 
 use super::_common::{detached, internal, not_implemented, report_error, root_id};
 
 #[rna_func(srna = "Object", func = "to_mesh")]
-fn object_to_mesh(h: &mut dyn Host, this: &RnaPtr, _args: &mut FuncArgs) -> Result<Value, RnaError> {
+fn object_to_mesh(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    _args: &mut FuncArgs,
+) -> Result<Value, RnaError> {
     let ob: IdRef<ObjectId> = root_id(this)?
         .typed()
         .ok_or_else(|| internal("to_mesh(): not an object"))?;

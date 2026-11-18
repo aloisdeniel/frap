@@ -227,12 +227,7 @@ pub(crate) fn grid(n: usize, columns: i32) -> (u32, u32) {
 /// The rectangle of a `w x h` image centred in cell `i` of a `cols`-wide grid of `cell` px.
 pub(crate) fn cell_rect(i: usize, cols: u32, cell: u32, w: u32, h: u32) -> [u32; 4] {
     let (cx, cy) = (i as u32 % cols, i as u32 / cols);
-    [
-        cx * cell + (cell - w) / 2,
-        cy * cell + (cell - h) / 2,
-        w,
-        h,
-    ]
+    [cx * cell + (cell - w) / 2, cy * cell + (cell - h) / 2, w, h]
 }
 
 /// The CAMERA tile size: the scene's render aspect (pixel aspect included) fitted in `cell`.
@@ -393,6 +388,14 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
         )
     };
 
+    // Why nothing may be framed (the WARNING below): no object in the chosen set at all.
+    let objects_kind = match p.objects.value {
+        rcs::Objects::Visible => "VISIBLE",
+        rcs::Objects::Selected => "SELECTED",
+        rcs::Objects::All => "ALL",
+    };
+    let none_listed = objects.as_ref().is_some_and(|o| o.is_empty());
+
     // One build of the (cloned, animation-applied) state; tiles only swap camera and size.
     let snap = cx.snapshot_at(frame)?;
     let mut eval = snap.eval;
@@ -402,8 +405,7 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
         camera: Some(RCamera::default()),
         objects,
     };
-    let mut base =
-        frap_render_scene::build(&*snap.host, &mut *eval, &req).map_err(render_error)?;
+    let mut base = frap_render_scene::build(&*snap.host, &mut *eval, &req).map_err(render_error)?;
     base.settings.engine = WORKBENCH.into();
     let points = scene_points(&base);
 
@@ -470,9 +472,10 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
         tiles.push(SheetTile::new(rect, label));
         jobs.push(job);
     }
-    let bg = p.background.value.map(|v| {
-        f32::from(frap_color::display::unit_float_to_uchar_clamp(v)) / 255.0
-    });
+    let bg = p
+        .background
+        .value
+        .map(|v| f32::from(frap_color::display::unit_float_to_uchar_clamp(v)) / 255.0);
     let layout = SheetLayout::new([cols * cell, rows * cell], bg, tiles.clone());
     let sheet = service
         .composite_sheet(&display, &layout)
@@ -501,6 +504,19 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
             format!("Engine 'BLENDER_EEVEE' is not available in frap yet (M5); rendered with {WORKBENCH}"),
         );
     }
+    if points.is_empty() {
+        let why = match (none_listed, p.objects.value) {
+            (true, rcs::Objects::Selected) => "none selected",
+            (true, rcs::Objects::Visible) => "none visible",
+            _ => "none of them has mesh geometry",
+        };
+        cx.report(
+            ReportType::Warning,
+            format!(
+                "frap: no objects to frame (objects='{objects_kind}', {why}); the views frame a 2 m cube around the origin"
+            ),
+        );
+    }
     for w in &cm.warnings {
         cx.report(ReportType::Warning, w.clone());
     }
@@ -519,7 +535,12 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
             m.insert("view".into(), Value::Str(job.view.into()));
             m.insert(
                 "rect".into(),
-                Value::Tuple(tile.rect.iter().map(|v| Value::Int(i64::from(*v))).collect()),
+                Value::Tuple(
+                    tile.rect
+                        .iter()
+                        .map(|v| Value::Int(i64::from(*v)))
+                        .collect(),
+                ),
             );
             if let Some(c) = &job.camera {
                 m.insert("location".into(), floats(&c.location));
@@ -587,7 +608,10 @@ mod tests {
         // The camera matrix maps the bounds' centre onto its view axis.
         let m = cam.matrix_world();
         let local = m.inverse().transform_point3(Vec3::new(1.0, 0.0, 0.5));
-        assert!(local.x.abs() < 1e-5 && local.y.abs() < 1e-5 && local.z < 0.0, "{local}");
+        assert!(
+            local.x.abs() < 1e-5 && local.y.abs() < 1e-5 && local.z < 0.0,
+            "{local}"
+        );
         // No objects: the 2 m cube.
         let empty = frame_points(&[], &rot, 0.0);
         assert!((empty.ortho_scale - 2.0).abs() < 1e-6);

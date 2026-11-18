@@ -59,11 +59,15 @@ pub(crate) fn flip_faces(mesh: &mut Mesh) {
                 AttrData::Float2(v) => flip_corner_data(Arc::make_mut(v).as_mut_slice(), &faces),
                 AttrData::Float3(v) => flip_corner_data(Arc::make_mut(v).as_mut_slice(), &faces),
                 AttrData::Float4(v) => flip_corner_data(Arc::make_mut(v).as_mut_slice(), &faces),
-                AttrData::FloatColor(v) => flip_corner_data(Arc::make_mut(v).as_mut_slice(), &faces),
+                AttrData::FloatColor(v) => {
+                    flip_corner_data(Arc::make_mut(v).as_mut_slice(), &faces)
+                }
                 AttrData::ByteColor(v) => flip_corner_data(Arc::make_mut(v).as_mut_slice(), &faces),
                 AttrData::Int16x2(v) => flip_corner_data(Arc::make_mut(v).as_mut_slice(), &faces),
                 AttrData::Int32x2(v) => flip_corner_data(Arc::make_mut(v).as_mut_slice(), &faces),
-                AttrData::Quaternion(v) => flip_corner_data(Arc::make_mut(v).as_mut_slice(), &faces),
+                AttrData::Quaternion(v) => {
+                    flip_corner_data(Arc::make_mut(v).as_mut_slice(), &faces)
+                }
                 AttrData::Float4x4(v) => flip_corner_data(Arc::make_mut(v).as_mut_slice(), &faces),
                 _ => {}
             },

@@ -132,7 +132,8 @@ fn edge_rotate_check_degenerate(bm: &BMesh, e: EdgeId, l1: LoopId, l2: LoopId) -
         return false;
     }
     let ed_dir_new_flip = bli::negate(ed_dir_new);
-    if bli::dot(ed_dir_new, ed_dir_v1_new) > 0.999 || bli::dot(ed_dir_new_flip, ed_dir_v2_new) > 0.999
+    if bli::dot(ed_dir_new, ed_dir_v1_new) > 0.999
+        || bli::dot(ed_dir_new_flip, ed_dir_v2_new) > 0.999
     {
         return false;
     }
@@ -194,7 +195,10 @@ pub fn edge_rotate(bm: &mut BMesh, e: EdgeId, ccw: bool, check_flag: u8) -> Opti
     let faces = [bm.lp(la).f, bm.lp(lb).f];
     let (f, f_double) = bm.faces_join(&faces, true, true);
     let f = f?;
-    let split = match (bm.face_vert_share_loop(f, v1), bm.face_vert_share_loop(f, v2)) {
+    let split = match (
+        bm.face_vert_share_loop(f, v1),
+        bm.face_vert_share_loop(f, v2),
+    ) {
         (Some(a), Some(b)) => bm.face_split(f, a, b, None, true),
         _ => None,
     };
@@ -226,7 +230,9 @@ pub fn edge_rotate(bm: &mut BMesh, e: EdgeId, ccw: bool, check_flag: u8) -> Opti
 /// Runs `rotate_edges` on `bm`.
 pub fn rotate_edges(bm: &mut BMesh, i: &RotateEdgesIn) -> Result<RotateEdgesOut, BmError> {
     if let Some(dead) = i.edges.iter().find(|&&e| !bm.edges.contains(e.0)) {
-        return Err(BmError::Invalid(format!("rotate_edges: dead edge {dead:?}")));
+        return Err(BmError::Invalid(format!(
+            "rotate_edges: dead edge {dead:?}"
+        )));
     }
     Ok(bm.bmo_exec(TYPE_FLAG, |bm| exec(bm, i)))
 }

@@ -115,6 +115,9 @@ mod tests {
         remove_uv_map(&mut m, "UVMap");
         assert_eq!(m.uv_active_render.as_deref(), Some("UVMap.001"));
         remove_uv_map(&mut m, "UVMap.001");
-        assert_eq!((m.uv_active.clone(), m.uv_active_render.clone()), (None, None));
+        assert_eq!(
+            (m.uv_active.clone(), m.uv_active_render.clone()),
+            (None, None)
+        );
     }
 }

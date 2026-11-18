@@ -8,6 +8,7 @@
 //! cargo xtask check-deps              layer rules (§3.2) and no dev-dependency cycles (rule 2.2.11)
 //! cargo xtask budgets [--record]      clean build time of each frap-spec-* crate vs xtask/budgets.toml
 //! cargo xtask codegen [--check]       Blender dumps -> generated Rust (WP 1.1)
+//! cargo xtask fmt [--check]           rustfmt on every tracked hand-written .rs (automod modules too)
 //! cargo xtask golden <bless|live|report> [--filter <glob>]   (WP 1.8)
 //! ```
 #![deny(unsafe_code)]
@@ -18,6 +19,7 @@ use std::process::ExitCode;
 mod budgets;
 mod check_deps;
 mod codegen;
+mod fmt;
 mod golden;
 
 /// Prints a warning; on GitHub Actions also as a `::warning` annotation, so a check that passes
@@ -37,7 +39,7 @@ pub fn workspace_root() -> PathBuf {
         .to_path_buf()
 }
 
-const USAGE: &str = "usage: cargo xtask <check-deps | budgets [--record] | codegen [--check] | golden <bless|live|report> [--filter <glob>]>";
+const USAGE: &str = "usage: cargo xtask <check-deps | budgets [--record] | codegen [--check] | fmt [--check] | golden <bless|live|report> [--filter <glob>]>";
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -49,6 +51,7 @@ fn main() -> ExitCode {
         "check-deps" => check_deps::run(rest),
         "budgets" => budgets::run(rest),
         "codegen" => codegen::run(rest),
+        "fmt" => fmt::run(rest),
         "golden" => golden::run(rest),
         "-h" | "--help" | "help" => {
             println!("{USAGE}");

@@ -6,8 +6,8 @@
 //! `bisect_plane`, `convex_hull`).
 
 pub use crate::query::geom::{
-    V3, add, cross, dot, len_squared_v3, madd_v3_v3fl, normal_quad_v3, normal_tri_v3,
-    normalize_v3, scale, sub,
+    V3, add, cross, dot, len_squared_v3, madd_v3_v3fl, normal_quad_v3, normal_tri_v3, normalize_v3,
+    scale, sub,
 };
 pub use frap_geom::normals::{len_squared_v3v3, len_v3v3};
 
@@ -302,7 +302,11 @@ pub fn mul_v3_m3v3(m: &[V3; 3], a: V3) -> V3 {
 pub fn divide_floor_i(a: i32, b: i32) -> i32 {
     let d = a / b;
     let r = a % b;
-    if r != 0 { d - ((a < 0) ^ (b < 0)) as i32 } else { d }
+    if r != 0 {
+        d - ((a < 0) ^ (b < 0)) as i32
+    } else {
+        d
+    }
 }
 
 /// `mod_i` (always non-negative for a positive `n`).

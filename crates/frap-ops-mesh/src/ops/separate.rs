@@ -318,7 +318,11 @@ fn link_copy(
     }
     let mut targets: Vec<Option<IdRef<frap_rna::CollectionId>>> = Vec::new();
     if src_visible {
-        if main.scenes.get(scene).is_some_and(|s| has(&s.collection, src)) {
+        if main
+            .scenes
+            .get(scene)
+            .is_some_and(|s| has(&s.collection, src))
+        {
             targets.push(None);
         }
         // Every collection below the master collection, depth first.
@@ -391,8 +395,16 @@ fn assign_mat_nr(main: &mut Main, log: &mut ChangeLog, ob: IdRef<ObjectId>, mat_
     let i = mat_nr.max(0) as usize;
     let totcol = m.materials.len();
     let new_len = if totcol > 0 {
-        let ov = o.material_slot_overrides.get(i).cloned().unwrap_or_default();
-        let ov = if i < totcol { ov } else { SlotOverride::default() };
+        let ov = o
+            .material_slot_overrides
+            .get(i)
+            .cloned()
+            .unwrap_or_default();
+        let ov = if i < totcol {
+            ov
+        } else {
+            SlotOverride::default()
+        };
         let ma_obdata = m.materials.get(i).copied().flatten();
         if let Some(m) = main.meshes.get_mut(me, log) {
             m.materials = vec![ma_obdata];
@@ -487,7 +499,15 @@ fn add_part_object(
         }
         let ob_name = ob.header.name.clone();
         let ob_new = main.objects.insert(&ob_name, ob, log);
-        link_copy(main, log, scene, src_visible, active_collection, src_ob, ob_new);
+        link_copy(
+            main,
+            log,
+            scene,
+            src_visible,
+            active_collection,
+            src_ob,
+            ob_new,
+        );
         layers::sync_all(main, log);
         layers::select_set(main, log, scene, vl_index, ob_new, true).map_err(OpError::Rna)?;
         log.context_changed = true;

@@ -22,8 +22,8 @@
 use super::Matrix4;
 use super::bm::Bm;
 use super::bm::math::{
-    axis_angle_normalized_to_mat3, len_v3, m4_from_m3, mul_m4_v3, mul_v3_m3v3, sin_cos_from_fraction,
-    transform_pivot_set_m4,
+    axis_angle_normalized_to_mat3, len_v3, m4_from_m3, mul_m4_v3, mul_v3_m3v3,
+    sin_cos_from_fraction, transform_pivot_set_m4,
 };
 use crate::mesh::Mesh;
 use frap_geom::kdtree::find_doubles_by_distance;
@@ -134,7 +134,12 @@ pub fn uv_sphere(p: &UvSphere) -> Mesh {
         if tot >= 2 {
             push(vec![vid(k, tot), vid(k, tot - 1), vid(k + 1, tot - 1)]);
             for a in 1..tot - 1 {
-                push(vec![vid(k, a + 1), vid(k, a), vid(k + 1, a), vid(k + 1, a + 1)]);
+                push(vec![
+                    vid(k, a + 1),
+                    vid(k, a),
+                    vid(k + 1, a),
+                    vid(k + 1, a + 1),
+                ]);
             }
             push(vec![vid(k, 1), vid(k, 0), vid(k + 1, 1)]);
         }
@@ -155,7 +160,12 @@ pub fn uv_sphere(p: &UvSphere) -> Mesh {
 // (bm_mesh_calc_uvs_sphere_face, BM_mesh_calc_uvs_sphere).
 fn calc_uvs_sphere(bm: &mut Bm) {
     let pi = std::f32::consts::PI;
-    let positions: Vec<[f32; 3]> = bm.verts.slots.iter().map(|v| v.unwrap_or([0.0; 3])).collect();
+    let positions: Vec<[f32; 3]> = bm
+        .verts
+        .slots
+        .iter()
+        .map(|v| v.unwrap_or([0.0; 3]))
+        .collect();
     for f in bm.faces.slots.iter_mut().flatten() {
         let n = f.verts.len();
         let (mut avgx, mut avgy) = (0.0f32, 0.0f32);

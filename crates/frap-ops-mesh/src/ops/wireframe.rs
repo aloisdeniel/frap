@@ -8,8 +8,8 @@
 //! faces (`frap_bmesh::ops::wireframe`), then every element is deselected (history cleared)
 //! and the wire faces are selected. Default cube: V40 E96 F48 ([MESH §4.12]).
 
-use frap_bmesh::ops::wireframe::{WireframeIn, wireframe};
 use frap_bmesh::BMElem;
+use frap_bmesh::ops::wireframe::{WireframeIn, wireframe};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;

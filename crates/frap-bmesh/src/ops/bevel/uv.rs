@@ -201,9 +201,11 @@ impl Bevel {
                     };
                     let orig_l2 = orig_v.and_then(|ov| bm.face_vert_share_loop(attached2, ov));
                     let connected = match (orig_v, orig_l, orig_l2) {
-                        (Some(ov), Some(a), Some(b)) => self.uv_vert_maps[mi]
-                            .get(&ov)
-                            .is_some_and(|bs| bs.iter().any(|bk| bk.contains(&a) && bk.contains(&b))),
+                        (Some(ov), Some(a), Some(b)) => {
+                            self.uv_vert_maps[mi].get(&ov).is_some_and(|bs| {
+                                bs.iter().any(|bk| bk.contains(&a) && bk.contains(&b))
+                            })
+                        }
                         _ => false,
                     };
                     // Join the bucket of l2 when both faces have the same representative, or

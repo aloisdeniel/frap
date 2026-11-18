@@ -243,10 +243,15 @@ mod tests {
     #[test]
     fn two_verts_make_an_edge_and_a_loop_makes_a_face() {
         let mut bm = BMesh::new();
-        let v: Vec<VertId> = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
-            .iter()
-            .map(|&c| bm.vert_create(c, None, CreateFlag::empty()))
-            .collect();
+        let v: Vec<VertId> = [
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+        ]
+        .iter()
+        .map(|&c| bm.vert_create(c, None, CreateFlag::empty()))
+        .collect();
         let out = contextual_create(
             &mut bm,
             &ContextualCreateIn {

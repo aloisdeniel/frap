@@ -23,9 +23,7 @@ use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;
 
-use super::delete::common::{
-    Removed, bm_err, edit_bm, removed_vertices_report, sel_verts, totals,
-};
+use super::delete::common::{Removed, bm_err, edit_bm, removed_vertices_report, sel_verts, totals};
 
 /// The elements of one type, in pool order.
 fn elems_of(bm: &BMesh, mode: SelectMode) -> Vec<BMElem> {

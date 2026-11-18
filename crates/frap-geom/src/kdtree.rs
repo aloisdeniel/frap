@@ -97,7 +97,10 @@ impl KdTree {
             loop {
                 loop {
                     i += 1;
-                    if nodes[i as usize].co[ax] >= co {
+                    // Exactly `while (nodes[++i].co[axis] < co)`: a NaN on either side stops
+                    // the scan (`>=` would not, and would run past `right`).
+                    #[allow(clippy::neg_cmp_op_on_partial_ord)]
+                    if !(nodes[i as usize].co[ax] < co) {
                         break;
                     }
                 }
@@ -161,7 +164,9 @@ impl KdTree {
                 cur = -cur * cur;
                 if -cur < min_dist {
                     let ds = dist_sq(node.co, co);
-                    if ds < min_dist {
+                    // `node_test_nearest`: rejects only `dist_sq >= min_dist` (NaN accepted).
+                    #[allow(clippy::neg_cmp_op_on_partial_ord)]
+                    if !(ds >= min_dist) {
                         min_dist = ds;
                         min_node = Some(ni as usize);
                     }
@@ -176,7 +181,9 @@ impl KdTree {
                 cur *= cur;
                 if cur < min_dist {
                     let ds = dist_sq(node.co, co);
-                    if ds < min_dist {
+                    // `node_test_nearest`: rejects only `dist_sq >= min_dist` (NaN accepted).
+                    #[allow(clippy::neg_cmp_op_on_partial_ord)]
+                    if !(ds >= min_dist) {
                         min_dist = ds;
                         min_node = Some(ni as usize);
                     }
@@ -441,5 +448,42 @@ mod tests {
         let pts = [[0.0, 0.0, 0.0], [0.0, 0.0, 1e-4], [0.0, 0.0, 2e-4]];
         let d = find_doubles_by_distance(&pts, 1e-3, Some(&[false, false, true])).unwrap();
         assert_eq!(d, vec![2, 2, 2]);
+    }
+
+    /// Regression (M2 stabilization round 3): NaN coordinates must not make `balance` run past
+    /// the slice; as in Blender, NaN points are simply never within range of anything.
+    #[test]
+    fn nan_points_balance_and_search() {
+        let nan = f32::NAN;
+        let all_nan = vec![[nan; 3]; 8];
+        let mut t = KdTree::new(all_nan.len());
+        for (i, p) in all_nan.iter().enumerate() {
+            t.insert(i as i32, *p);
+        }
+        t.balance();
+        // Blender: every axis distance is NaN, so no node is ever tested (returns -1).
+        assert!(t.find_nearest([0.0; 3]).is_none());
+        assert!(t.range_search([0.0; 3], 1.0).is_empty());
+        assert!(find_doubles_by_distance(&all_nan, 1e-4, None).is_none());
+
+        let mut mixed: Vec<V3> = Vec::new();
+        for i in 0..17 {
+            let f = i as f32;
+            mixed.push(if i % 3 == 0 {
+                [nan, f, nan]
+            } else {
+                [f, nan, f * 0.5]
+            });
+        }
+        mixed.push([1.0, 2.0, 3.0]);
+        mixed.push([1.0, 2.0, 3.0 + 1e-6]);
+        let mut t = KdTree::new(mixed.len());
+        for (i, p) in mixed.iter().enumerate() {
+            t.insert(i as i32, *p);
+        }
+        t.balance();
+        let _ = t.find_nearest([1.0, 2.0, 3.0]);
+        let _ = t.range_search([1.0, 2.0, 3.0], 1e-3);
+        let _ = find_doubles_by_distance(&mixed, 1e-4, None);
     }
 }

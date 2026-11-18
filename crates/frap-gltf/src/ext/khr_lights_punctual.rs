@@ -9,7 +9,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::json::{
-    ExtensionCx, ExtensionDef, Extensions, Extension, Extras, EXTENSIONS, Index, str_enum,
+    EXTENSIONS, Extension, ExtensionCx, ExtensionDef, Extensions, Extras, Index, str_enum,
 };
 use crate::validate::Report;
 
@@ -183,28 +183,54 @@ fn validate(cx: &ExtensionCx, r: &mut Report) {
             if let Some(c) = l.color
                 && c.iter().any(|v| !(0.0..=1.0).contains(v))
             {
-                r.error("VALUE_NOT_IN_RANGE", format!("{p}/color"), "colour components are in [0, 1]");
+                r.error(
+                    "VALUE_NOT_IN_RANGE",
+                    format!("{p}/color"),
+                    "colour components are in [0, 1]",
+                );
             }
             if l.intensity.is_some_and(|v| v < 0.0 || !v.is_finite()) {
-                r.error("VALUE_NOT_IN_RANGE", format!("{p}/intensity"), "intensity must be ≥ 0");
+                r.error(
+                    "VALUE_NOT_IN_RANGE",
+                    format!("{p}/intensity"),
+                    "intensity must be ≥ 0",
+                );
             }
             if let Some(range) = l.range {
                 if l.type_ == LightType::Directional {
-                    r.error("KHR_LIGHTS_PUNCTUAL_DIRECTIONAL_RANGE", format!("{p}/range"), "directional lights have no range");
+                    r.error(
+                        "KHR_LIGHTS_PUNCTUAL_DIRECTIONAL_RANGE",
+                        format!("{p}/range"),
+                        "directional lights have no range",
+                    );
                 } else if range <= 0.0 {
-                    r.error("VALUE_NOT_IN_RANGE", format!("{p}/range"), "range must be > 0");
+                    r.error(
+                        "VALUE_NOT_IN_RANGE",
+                        format!("{p}/range"),
+                        "range must be > 0",
+                    );
                 }
             }
             match (&l.spot, l.type_) {
                 (None, LightType::Spot) => {
-                    r.error("UNSATISFIED_DEPENDENCY", &p, "spot lights need a spot object");
+                    r.error(
+                        "UNSATISFIED_DEPENDENCY",
+                        &p,
+                        "spot lights need a spot object",
+                    );
                 }
                 (Some(_), t) if t != LightType::Spot => {
-                    r.error("UNEXPECTED_PROPERTY", format!("{p}/spot"), "only spot lights have a spot object");
+                    r.error(
+                        "UNEXPECTED_PROPERTY",
+                        format!("{p}/spot"),
+                        "only spot lights have a spot object",
+                    );
                 }
                 (Some(s), _) => {
-                    let (inner, outer) =
-                        (s.inner_cone_angle_or_default(), s.outer_cone_angle_or_default());
+                    let (inner, outer) = (
+                        s.inner_cone_angle_or_default(),
+                        s.outer_cone_angle_or_default(),
+                    );
                     if !(0.0 <= inner && inner < outer && outer <= std::f64::consts::FRAC_PI_2) {
                         r.error(
                             "KHR_LIGHTS_PUNCTUAL_LIGHT_SPOT_ANGLES",
@@ -259,7 +285,10 @@ mod tests {
             ..Default::default()
         }));
         d.nodes.push(n);
-        d.use_extension(KhrLightsPunctual::NAME, KhrLightsPunctual::REQUIRED_BY_DEFAULT);
+        d.use_extension(
+            KhrLightsPunctual::NAME,
+            KhrLightsPunctual::REQUIRED_BY_DEFAULT,
+        );
         d
     }
 
@@ -277,7 +306,12 @@ mod tests {
         let lights = back.extensions.get::<KhrLightsPunctual>().unwrap().unwrap();
         assert_eq!(lights.lights[1], spot);
         assert_eq!(
-            back.nodes[0].extensions.get::<KhrLightsPunctualNode>().unwrap().unwrap().light,
+            back.nodes[0]
+                .extensions
+                .get::<KhrLightsPunctualNode>()
+                .unwrap()
+                .unwrap()
+                .light,
             1
         );
         assert!(validate(&back).is_ok(), "{}", validate(&back));
@@ -304,8 +338,10 @@ mod tests {
         );
         // Malformed JSON and a wrong owner.
         let mut d = doc(vec![], 0);
-        d.extensions
-            .insert_raw("KHR_lights_punctual", serde_json::json!({"lights": [{"type": "laser"}]}));
+        d.extensions.insert_raw(
+            "KHR_lights_punctual",
+            serde_json::json!({"lights": [{"type": "laser"}]}),
+        );
         d.scenes.push(Default::default());
         d.scenes[0]
             .extensions

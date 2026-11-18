@@ -98,7 +98,10 @@ pub(crate) fn deselect_all(bm: &mut BMesh) {
 
 /// Faces of a `geom`-like list.
 pub(crate) fn faces_of(g: &[BMElem]) -> Vec<BMElem> {
-    g.iter().copied().filter(|e| matches!(e, BMElem::Face(_))).collect()
+    g.iter()
+        .copied()
+        .filter(|e| matches!(e, BMElem::Face(_)))
+        .collect()
 }
 
 /// `EDBM_op_finish(do_report = true)` for an op result: `Ok(Some(out))` when it ran,
@@ -124,7 +127,11 @@ pub(crate) fn mat_nr(cx: &OpCtx, ob: IdRef<ObjectId>) -> i32 {
 }
 
 /// Read-only view of an edit mesh's BMesh (no generation bump).
-pub(crate) fn with_bm<R>(cx: &mut OpCtx, me: IdRef<MeshId>, f: impl FnOnce(&BMesh) -> R) -> Option<R> {
+pub(crate) fn with_bm<R>(
+    cx: &mut OpCtx,
+    me: IdRef<MeshId>,
+    f: impl FnOnce(&BMesh) -> R,
+) -> Option<R> {
     let (_, edit) = cx.split_edit();
     edit.meshes.get(&me.key()).map(|em| f(&em.bm))
 }

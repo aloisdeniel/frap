@@ -48,7 +48,10 @@ fn join_poll(c: &Context) -> Result<(), PollFail> {
     if ob.header.library.is_some() {
         return Err(poll::fail(
             PollReq::ActiveEditable,
-            format!("bpy.data.objects[{}].make_local()", poll::py_name(&ob.header.name)),
+            format!(
+                "bpy.data.objects[{}].make_local()",
+                poll::py_name(&ob.header.name)
+            ),
         ));
     }
     if ob.data.is_none() || !matches!(ob.object_type(), "MESH" | "ARMATURE") {
@@ -93,7 +96,11 @@ fn exec(cx: &mut OpCtx, _p: object::Join) -> OpResult {
             "This data does not support joining in edit mode".into(),
         ));
     }
-    if ob.data.and_then(|d| main.header(d)).is_some_and(|h| h.library.is_some()) {
+    if ob
+        .data
+        .and_then(|d| main.header(d))
+        .is_some_and(|h| h.library.is_some())
+    {
         return Err(OpError::Runtime("Cannot edit external library data".into()));
     }
     if ob.object_type() == "ARMATURE" {
@@ -137,7 +144,10 @@ fn exec(cx: &mut OpCtx, _p: object::Join) -> OpResult {
     if totvert > i32::MAX as usize {
         cx.report(
             ReportType::Warning,
-            format!("Joining results in {totvert} vertices, limit is {}", i32::MAX),
+            format!(
+                "Joining results in {totvert} vertices, limit is {}",
+                i32::MAX
+            ),
         );
         return Ok(OpStatus::Cancelled);
     }

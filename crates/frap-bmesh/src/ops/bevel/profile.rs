@@ -7,7 +7,7 @@ use super::boundary::nearly_parallel;
 use super::math::{self, M4, V3};
 use super::types::{
     Affect, BEVEL_EPSILON, BEVEL_EPSILON_BIG, Bev, Bevel, Bnd, PRO_CIRCLE_R, PRO_LINE_R,
-    PRO_SQUARE_IN_R, PRO_SQUARE_R, ProfileSpacing, VmeshMethod, Vm, bevel_epsilon_ang,
+    PRO_SQUARE_IN_R, PRO_SQUARE_R, ProfileSpacing, Vm, VmeshMethod, bevel_epsilon_ang,
 };
 use super::util::co;
 use crate::types::{BMesh, EdgeId, VertId};
@@ -66,7 +66,8 @@ impl Bevel {
                     } else {
                         let co3 = math::add(start, d3);
                         let co4 = math::add(end, d4);
-                        let (isect_kind, meetco, _) = math::isect_line_line_v3(start, co3, end, co4);
+                        let (isect_kind, meetco, _) =
+                            math::isect_line_line_v3(start, co3, end, co4);
                         if isect_kind != 0 {
                             pro.middle = meetco;
                         } else {
@@ -286,7 +287,12 @@ impl Bevel {
         if seg_2 != seg {
             ps.xvals_2 = vec![0.0; (seg_2 + 1) as usize];
             ps.yvals_2 = vec![0.0; (seg_2 + 1) as usize];
-            find_even_superellipse_chords(seg_2, self.pro_super_r, &mut ps.xvals_2, &mut ps.yvals_2);
+            find_even_superellipse_chords(
+                seg_2,
+                self.pro_super_r,
+                &mut ps.xvals_2,
+                &mut ps.yvals_2,
+            );
         }
         ps.xvals = vec![0.0; (seg + 1) as usize];
         ps.yvals = vec![0.0; (seg + 1) as usize];
@@ -362,8 +368,16 @@ fn calculate_profile_segments(
         } else if let Some(m) = map {
             let (kk, nk) = (k as usize, (ns - k) as usize);
             let p = [
-                if reversed { yvals[nk] as f32 } else { xvals[kk] as f32 },
-                if reversed { xvals[nk] as f32 } else { yvals[kk] as f32 },
+                if reversed {
+                    yvals[nk] as f32
+                } else {
+                    xvals[kk] as f32
+                },
+                if reversed {
+                    xvals[nk] as f32
+                } else {
+                    yvals[kk] as f32
+                },
                 0.0,
             ];
             // The 2D -> 3D transformation of the profile coordinates.
@@ -460,10 +474,8 @@ fn find_superellipse_chord_endpoint(x0: f64, dtarget: f64, r: f32, rbig: bool) -
     let mut xmax = (x0 + dtarget).min(1.0);
     let ymin = superellipse_co(xmin, r, rbig);
     let ymax = superellipse_co(xmax, r, rbig);
-    let mut dmaxerr =
-        (libm::pow(xmax - x0, 2.0) + libm::pow(ymax - y0, 2.0)).sqrt() - dtarget;
-    let mut dminerr =
-        (libm::pow(xmin - x0, 2.0) + libm::pow(ymin - y0, 2.0)).sqrt() - dtarget;
+    let mut dmaxerr = (libm::pow(xmax - x0, 2.0) + libm::pow(ymax - y0, 2.0)).sqrt() - dtarget;
+    let mut dminerr = (libm::pow(xmin - x0, 2.0) + libm::pow(ymin - y0, 2.0)).sqrt() - dtarget;
     let mut xnew = xmax - dmaxerr * (xmax - xmin) / (dmaxerr - dminerr);
     let mut lastupdated_upper = true;
     for _ in 0..maxiter {

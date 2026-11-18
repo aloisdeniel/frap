@@ -49,6 +49,9 @@ fn exec(cx: &mut OpCtx, p: mesh::Subdivide) -> OpResult {
         use_only_quads: false,
         seed: p.seed.value,
     };
+    // `--max-elements`: `(cuts + 1)²` faces per fully cut face (ARCHITECTURE §12).
+    let cuts_u = u64::try_from(cuts.max(0)).unwrap_or(0);
+    super::_growth::reserve(cx, |_, bm| super::_growth::subdivide_corners(bm, cuts_u))?;
     for (_, me) in helpers::iter_edit_meshes(cx) {
         let bm = cx.bmesh_mut(me)?;
         let (_, te, tf) = bm.selected_counts();

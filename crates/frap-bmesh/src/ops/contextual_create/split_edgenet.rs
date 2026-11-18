@@ -123,7 +123,13 @@ fn find_loop_pair_exists(bm: &BMesh, net: &Net, v_init: VertId) -> bool {
 }
 
 /// `bm_face_split_edgenet_find_loop_walk`.
-fn find_loop_walk(bm: &mut BMesh, net: &mut Net, v_init: VertId, face_normal: V3, pair: [EdgeId; 2]) -> bool {
+fn find_loop_walk(
+    bm: &mut BMesh,
+    net: &mut Net,
+    v_init: VertId,
+    face_normal: V3,
+    pair: [EdgeId; 2],
+) -> bool {
     let mut visit: Vec<VertId> = Vec::new();
     let mut stack: Vec<VertId> = Vec::new();
     let mut stack_next: Vec<VertId> = Vec::new();

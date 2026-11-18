@@ -20,7 +20,12 @@ use super::base_color::describe;
 use crate::graph::{Src, unrecognised};
 use crate::{Channel, ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, TexRef};
 
-fn lower_channel(cx: &LowerCx, out: &mut LoweredMaterial, socket: &str, direct: ChannelSel) -> Channel<f32> {
+fn lower_channel(
+    cx: &LowerCx,
+    out: &mut LoweredMaterial,
+    socket: &str,
+    direct: ChannelSel,
+) -> Channel<f32> {
     let Some(p) = cx.principled() else {
         return Channel {
             factor: 1.0,
@@ -44,7 +49,10 @@ fn lower_channel(cx: &LowerCx, out: &mut LoweredMaterial, socket: &str, direct: 
             if let Src::Linked(..) = rest {
                 unrecognised(
                     &mut out.diagnostics,
-                    format!("{socket}: unsupported node setup at {}; exported without a texture", describe(rest)),
+                    format!(
+                        "{socket}: unsupported node setup at {}; exported without a texture",
+                        describe(rest)
+                    ),
                 );
             }
             None
@@ -80,7 +88,12 @@ fn channel_output(ch: ChannelSel) -> Option<&'static str> {
 }
 
 /// One importer chain: factor Math nodes, a Separate Color for R/G/B channels, the texture.
-fn chain(cx: &mut RaiseCx, location: [f32; 2], ends: &[(SocketAddr, &Channel<f32>, &str, f32)], tex: &TexRef) {
+fn chain(
+    cx: &mut RaiseCx,
+    location: [f32; 2],
+    ends: &[(SocketAddr, &Channel<f32>, &str, f32)],
+    tex: &TexRef,
+) {
     let [mut x, y] = location;
     let mut sockets: Vec<(SocketAddr, ChannelSel)> = Vec::new();
     let mut any_factor = false;
@@ -142,14 +155,25 @@ fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
         (mt, rt) => {
             match mt {
                 Some(t) => chain(cx, loc, &[(metallic, &lm.metallic, "Metallic", 0.0)], t),
-                None => cx.set_input_at(bsdf, metallic.index, SocketValue::Float(lm.metallic.factor)),
+                None => {
+                    cx.set_input_at(bsdf, metallic.index, SocketValue::Float(lm.metallic.factor))
+                }
             }
             match rt {
                 Some(t) => {
                     let below = [loc[0], loc[1] - 460.0 * f32::from(u8::from(mt.is_some()))];
-                    chain(cx, below, &[(roughness, &lm.roughness, "Roughness", 200.0)], t)
+                    chain(
+                        cx,
+                        below,
+                        &[(roughness, &lm.roughness, "Roughness", 200.0)],
+                        t,
+                    )
                 }
-                None => cx.set_input_at(bsdf, roughness.index, SocketValue::Float(lm.roughness.factor)),
+                None => cx.set_input_at(
+                    bsdf,
+                    roughness.index,
+                    SocketValue::Float(lm.roughness.factor),
+                ),
             }
         }
     }

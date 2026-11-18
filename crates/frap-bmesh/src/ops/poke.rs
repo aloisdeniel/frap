@@ -78,7 +78,9 @@ pub fn poke(bm: &mut BMesh, i: &PokeIn) -> Result<PokeOut, BmError> {
         }
     };
     if let Some(dead) = i.faces.iter().find(|f| !bm.faces.contains(f.0)) {
-        return Err(BmError::Invalid(format!("poke: dead face {dead:?} in faces")));
+        return Err(BmError::Invalid(format!(
+            "poke: dead face {dead:?} in faces"
+        )));
     }
     Ok(bm.bmo_exec(TYPE_FLAG, |bm| {
         for &f in &i.faces {

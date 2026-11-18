@@ -49,9 +49,12 @@ impl Circle {
         match self.fill_type {
             FillType::Nothing => super::estimate(Some(n), Some(n), Some(0), Some(0)),
             FillType::Ngon => super::estimate(Some(n), Some(n), Some(1), Some(n)),
-            FillType::Trifan => {
-                super::estimate(n.checked_add(1), n.checked_mul(2), Some(n), n.checked_mul(3))
-            }
+            FillType::Trifan => super::estimate(
+                n.checked_add(1),
+                n.checked_mul(2),
+                Some(n),
+                n.checked_mul(3),
+            ),
         }
     }
 }
@@ -93,7 +96,12 @@ pub fn circle(p: &Circle) -> Mesh {
             // BM_mesh_calc_uvs_circle on the fan faces.
             let uv_scale = 0.5f32 / p.radius;
             let inv = invert_m4(mat);
-            let positions: Vec<[f32; 3]> = bm.verts.slots.iter().map(|v| v.unwrap_or([0.0; 3])).collect();
+            let positions: Vec<[f32; 3]> = bm
+                .verts
+                .slots
+                .iter()
+                .map(|v| v.unwrap_or([0.0; 3]))
+                .collect();
             for slot in bm.faces.slots.iter_mut() {
                 let Some(f) = slot.as_mut() else { continue };
                 for (k, uv) in f.uvs.iter_mut().enumerate() {

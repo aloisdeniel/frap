@@ -136,12 +136,7 @@ fn edge_to_quad_verts(bm: &BMesh, e: EdgeId) -> [VertId; 4] {
     let l = bm.edge(e).l.expect("invariant: manifold edge");
     let ll = bm.lp(l);
     let lr = bm.lp(ll.radial_next);
-    [
-        ll.v,
-        bm.lp(lr.prev).v,
-        bm.lp(ll.next).v,
-        bm.lp(ll.prev).v,
-    ]
+    [ll.v, bm.lp(lr.prev).v, bm.lp(ll.next).v, bm.lp(ll.prev).v]
 }
 
 struct DelimitData {
@@ -330,7 +325,12 @@ fn add_neighbors(bm: &BMesh, items: &mut Vec<(EdgeId, LoopId)>, l_in_quad: LoopI
 }
 
 /// `rotate_to_plane`.
-fn rotate_to_plane(bm: &BMesh, quad_verts: &[VertId; 4], l_shared: LoopId, plane_normal: V3) -> [V3; 4] {
+fn rotate_to_plane(
+    bm: &BMesh,
+    quad_verts: &[VertId; 4],
+    l_shared: LoopId,
+    plane_normal: V3,
+) -> [V3; 4] {
     let ls = bm.lp(l_shared);
     let (s_v, s_next_v) = (ls.v, bm.lp(ls.next).v);
     let rotation_axis = math::normalize_v3(math::sub(bm.vert(s_v).co, bm.vert(s_next_v).co)).0;
@@ -393,7 +393,10 @@ fn reprioritize_join(
     neighbor_quad_normal: V3,
 ) {
     let idx = bm.index_get(BMElem::Edge(e_merge));
-    let Some(node) = usize::try_from(idx).ok().and_then(|i| s.nodes.get(i).copied().flatten()) else {
+    let Some(node) = usize::try_from(idx)
+        .ok()
+        .and_then(|i| s.nodes.get(i).copied().flatten())
+    else {
         return;
     };
     let join_error_curr = s.heap.node_value(node);

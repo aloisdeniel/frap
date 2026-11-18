@@ -64,11 +64,7 @@ impl KhrTextureTransform {
         let [sx, sy] = self.scale_or_default();
         let r = self.rotation_or_default();
         let (s, c) = (libm::sin(r), libm::cos(r));
-        [
-            [c * sx, s * sy, tx],
-            [-s * sx, c * sy, ty],
-            [0.0, 0.0, 1.0],
-        ]
+        [[c * sx, s * sy, tx], [-s * sx, c * sy, ty], [0.0, 0.0, 1.0]]
     }
 
     /// Applies the transform to a UV coordinate.
@@ -97,7 +93,11 @@ fn validate(cx: &ExtensionCx, r: &mut Report) {
         .chain(t.rotation.iter())
         .all(|v| v.is_finite());
     if !finite {
-        r.error("VALUE_NOT_FINITE", cx.pointer(), "transform has a non-finite value");
+        r.error(
+            "VALUE_NOT_FINITE",
+            cx.pointer(),
+            "transform has a non-finite value",
+        );
     }
 }
 
@@ -125,8 +125,14 @@ mod tests {
         };
         // Spec example shape: scale, then rotate CCW in UV space, then translate.
         let uv = t.apply([1.0, 0.0]);
-        assert!((uv[0] - 0.5).abs() < 1e-12 && (uv[1] + 2.0).abs() < 1e-12, "{uv:?}");
-        assert_eq!(KhrTextureTransform::default().apply([0.25, 0.75]), [0.25, 0.75]);
+        assert!(
+            (uv[0] - 0.5).abs() < 1e-12 && (uv[1] + 2.0).abs() < 1e-12,
+            "{uv:?}"
+        );
+        assert_eq!(
+            KhrTextureTransform::default().apply([0.25, 0.75]),
+            [0.25, 0.75]
+        );
     }
 
     #[test]

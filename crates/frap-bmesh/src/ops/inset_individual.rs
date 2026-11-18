@@ -510,8 +510,8 @@ fn face_inset_individual(
         }
         // Modify the vertices and their normals.
         if use_relative_offset {
-            let len = edge_calc_length(bm, bm.lp(l).e)
-                + edge_calc_length(bm, bm.lp(bm.lp(l).prev).e);
+            let len =
+                edge_calc_length(bm, bm.lp(l).e) + edge_calc_length(bm, bm.lp(bm.lp(l).prev).e);
             tvec = geom::scale(tvec, len / 2.0);
         }
         geom::madd_v3_v3fl(&mut v_new_co, tvec, thickness);
@@ -550,7 +550,10 @@ fn face_inset_individual(
 }
 
 /// Runs `inset_individual` on `bm`.
-pub fn inset_individual(bm: &mut BMesh, i: &InsetIndividualIn) -> Result<InsetIndividualOut, BmError> {
+pub fn inset_individual(
+    bm: &mut BMesh,
+    i: &InsetIndividualIn,
+) -> Result<InsetIndividualOut, BmError> {
     if let Some(dead) = i.faces.iter().find(|f| !bm.faces.contains(f.0)) {
         return Err(BmError::Invalid(format!(
             "inset_individual: dead face {dead:?} in faces"
@@ -606,16 +609,26 @@ mod tests {
         let c = [0.0, 1.0, 0.0];
         assert!((shell_v3v3_mid_normalized_to_dist(a, c) - std::f32::consts::SQRT_2).abs() < 1e-6);
         assert_eq!(shell_v3v3_mid_normalized_to_dist(a, [-1.0, 0.0, 0.0]), 1.0);
-        assert!((angle_v3v3v3([1.0, 0.0, 0.0], [0.0; 3], [0.0, 1.0, 0.0]) - std::f32::consts::FRAC_PI_2).abs() < 1e-6);
+        assert!(
+            (angle_v3v3v3([1.0, 0.0, 0.0], [0.0; 3], [0.0, 1.0, 0.0])
+                - std::f32::consts::FRAC_PI_2)
+                .abs()
+                < 1e-6
+        );
     }
 
     #[test]
     fn lone_quad_inset() {
         let mut bm = BMesh::new();
-        let v: Vec<VertId> = [[-1.0, -1.0, 0.0], [1.0, -1.0, 0.0], [1.0, 1.0, 0.0], [-1.0, 1.0, 0.0]]
-            .into_iter()
-            .map(|co| bm.vert_create(co, None, CreateFlag::empty()))
-            .collect();
+        let v: Vec<VertId> = [
+            [-1.0, -1.0, 0.0],
+            [1.0, -1.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [-1.0, 1.0, 0.0],
+        ]
+        .into_iter()
+        .map(|co| bm.vert_create(co, None, CreateFlag::empty()))
+        .collect();
         let f = bm
             .face_create_verts(&v, None, CreateFlag::empty(), true)
             .unwrap();
@@ -634,7 +647,10 @@ mod tests {
         assert_eq!(out.faces.len(), 4);
         assert_eq!((bm.verts_num(), bm.edges_num(), bm.faces_num()), (8, 12, 5));
         for c in bm.face_verts(f).iter().map(|&x| bm.vert(x).co) {
-            assert!((c[0].abs() - 0.75).abs() < 1e-6 && (c[1].abs() - 0.75).abs() < 1e-6, "{c:?}");
+            assert!(
+                (c[0].abs() - 0.75).abs() < 1e-6 && (c[1].abs() - 0.75).abs() < 1e-6,
+                "{c:?}"
+            );
             assert!((c[2] - 0.5).abs() < 1e-6);
         }
         // The outer ring keeps the original positions.

@@ -112,7 +112,9 @@ fn percent_decode(s: &str) -> String {
     let mut i = 0;
     while i < b.len() {
         if b[i] == b'%'
-            && let Some(h) = s.get(i + 1..i + 3).and_then(|h| u8::from_str_radix(h, 16).ok())
+            && let Some(h) = s
+                .get(i + 1..i + 3)
+                .and_then(|h| u8::from_str_radix(h, 16).ok())
         {
             out.push(h);
             i += 3;
@@ -273,10 +275,16 @@ impl GltfDoc {
             .get(i)
             .ok_or_else(|| format!("accessor {i} missing"))?;
         let count = idx(a, "count").unwrap_or(0);
-        let ct = a.get("componentType").and_then(|c| c.as_u64()).unwrap_or(5126);
+        let ct = a
+            .get("componentType")
+            .and_then(|c| c.as_u64())
+            .unwrap_or(5126);
         let n = components(a.get("type").and_then(|t| t.as_str()).unwrap_or(""))
             .ok_or("bad accessor type")?;
-        let normalized = a.get("normalized").and_then(|b| b.as_bool()).unwrap_or(false);
+        let normalized = a
+            .get("normalized")
+            .and_then(|b| b.as_bool())
+            .unwrap_or(false);
         let mut out = self.read_elems(
             idx(a, "bufferView"),
             idx(a, "byteOffset").unwrap_or(0),
@@ -288,7 +296,10 @@ impl GltfDoc {
         if let Some(s) = a.get("sparse") {
             let sc = idx(s, "count").unwrap_or(0);
             let ind = s.get("indices").ok_or("sparse without indices")?;
-            let ict = ind.get("componentType").and_then(|c| c.as_u64()).unwrap_or(5125);
+            let ict = ind
+                .get("componentType")
+                .and_then(|c| c.as_u64())
+                .unwrap_or(5125);
             let indices = self.read_elems(
                 idx(ind, "bufferView"),
                 idx(ind, "byteOffset").unwrap_or(0),
@@ -338,7 +349,9 @@ pub fn fnv64(bytes: &[u8]) -> String {
 fn num(x: f64) -> Json {
     serde_json::Number::from_f64(x)
         .map(Json::Number)
-        .unwrap_or_else(|| json!({"$float": if x.is_nan() { "nan" } else if x > 0.0 { "inf" } else { "-inf" }}))
+        .unwrap_or_else(
+            || json!({"$float": if x.is_nan() { "nan" } else if x > 0.0 { "inf" } else { "-inf" }}),
+        )
 }
 
 fn qkey(v: &[f64]) -> Vec<i64> {
@@ -372,9 +385,21 @@ fn local_matrix(n: &Json) -> Result<Json, String> {
     let s = floats_of(n.get("scale"), &[1.0; 3])?;
     let (x, y, z, w) = (q[0], q[1], q[2], q[3]);
     let r = [
-        [1.0 - 2.0 * (y * y + z * z), 2.0 * (x * y - z * w), 2.0 * (x * z + y * w)],
-        [2.0 * (x * y + z * w), 1.0 - 2.0 * (x * x + z * z), 2.0 * (y * z - x * w)],
-        [2.0 * (x * z - y * w), 2.0 * (y * z + x * w), 1.0 - 2.0 * (x * x + y * y)],
+        [
+            1.0 - 2.0 * (y * y + z * z),
+            2.0 * (x * y - z * w),
+            2.0 * (x * z + y * w),
+        ],
+        [
+            2.0 * (x * y + z * w),
+            1.0 - 2.0 * (x * x + z * z),
+            2.0 * (y * z - x * w),
+        ],
+        [
+            2.0 * (x * z - y * w),
+            2.0 * (y * z + x * w),
+            1.0 - 2.0 * (x * x + y * y),
+        ],
     ];
     let mut m = [0.0; 16];
     for col in 0..3 {
@@ -431,10 +456,7 @@ impl Canon<'_> {
             ("wrapS", json!(10497)),
             ("wrapT", json!(10497)),
         ] {
-            sampler.insert(
-                k.into(),
-                s.and_then(|s| s.get(k)).cloned().unwrap_or(d),
-            );
+            sampler.insert(k.into(), s.and_then(|s| s.get(k)).cloned().unwrap_or(d));
         }
         o.insert("sampler".into(), Json::Object(sampler));
         if let Some(src) = idx(t, "source") {
@@ -488,11 +510,10 @@ impl Canon<'_> {
             .cloned()
             .ok_or_else(|| format!("material {i} missing"))?;
         let o = m.as_object_mut().ok_or("material is not an object")?;
-        let pbr = o
-            .entry("pbrMetallicRoughness")
-            .or_insert_with(|| json!({}));
+        let pbr = o.entry("pbrMetallicRoughness").or_insert_with(|| json!({}));
         if let Some(p) = pbr.as_object_mut() {
-            p.entry("baseColorFactor").or_insert(json!([1.0, 1.0, 1.0, 1.0]));
+            p.entry("baseColorFactor")
+                .or_insert(json!([1.0, 1.0, 1.0, 1.0]));
             p.entry("metallicFactor").or_insert(json!(1.0));
             p.entry("roughnessFactor").or_insert(json!(1.0));
         }
@@ -680,7 +701,10 @@ impl Canon<'_> {
         if let Some(c) = idx(n, "camera") {
             o.insert(
                 "camera".into(),
-                arr(&self.doc.json, "cameras").get(c).cloned().unwrap_or(Json::Null),
+                arr(&self.doc.json, "cameras")
+                    .get(c)
+                    .cloned()
+                    .unwrap_or(Json::Null),
             );
         }
         if let Some(s) = idx(n, "skin") {
@@ -937,9 +961,9 @@ fn corners(x: &Json) -> Option<Corners> {
 
 fn corners_close(a: &[Vec<f64>], b: &[Vec<f64>], tol: f64) -> bool {
     a.len() == b.len()
-        && a.iter().zip(b).all(|(x, y)| {
-            x.len() == y.len() && x.iter().zip(y).all(|(p, q)| close(*p, *q, tol))
-        })
+        && a.iter()
+            .zip(b)
+            .all(|(x, y)| x.len() == y.len() && x.iter().zip(y).all(|(p, q)| close(*p, *q, tol)))
 }
 
 /// `a` rotated (cyclically: winding kept; a line's ends may swap) to match `b` within `tol`.
@@ -1128,7 +1152,12 @@ impl Sampler {
             .iter()
             .map(|t| vector(t).and_then(|v| v.first().copied()))
             .collect::<Option<_>>()?;
-        let out: Vec<Vec<f64>> = c.get("output")?.as_array()?.iter().map(vector).collect::<Option<_>>()?;
+        let out: Vec<Vec<f64>> = c
+            .get("output")?
+            .as_array()?
+            .iter()
+            .map(vector)
+            .collect::<Option<_>>()?;
         let interpolation = c.get("interpolation")?.as_str()?.to_owned();
         let cubic = interpolation == "CUBICSPLINE";
         let groups = times.len() * if cubic { 3 } else { 1 };
@@ -1164,7 +1193,11 @@ impl Sampler {
         if t >= self.times[n - 1] {
             return self.keys[n - 1][1].clone();
         }
-        let k = self.times.partition_point(|&x| x <= t).saturating_sub(1).min(n - 2);
+        let k = self
+            .times
+            .partition_point(|&x| x <= t)
+            .saturating_sub(1)
+            .min(n - 2);
         let (t0, t1) = (self.times[k], self.times[k + 1]);
         let td = t1 - t0;
         if td <= 0.0 {
@@ -1187,11 +1220,7 @@ impl Sampler {
                     .collect()
             }
             _ if self.rotation && v0.len() == 4 && v1.len() == 4 => slerp(v0, v1, s),
-            _ => v0
-                .iter()
-                .zip(v1)
-                .map(|(a, b)| a + (b - a) * s)
-                .collect(),
+            _ => v0.iter().zip(v1).map(|(a, b)| a + (b - a) * s).collect(),
         };
         if self.rotation { normalized(v) } else { v }
     }
@@ -1199,7 +1228,11 @@ impl Sampler {
 
 fn normalized(v: Vec<f64>) -> Vec<f64> {
     let l = v.iter().map(|x| x * x).sum::<f64>().sqrt();
-    if l > 0.0 { v.into_iter().map(|x| x / l).collect() } else { v }
+    if l > 0.0 {
+        v.into_iter().map(|x| x / l).collect()
+    } else {
+        v
+    }
 }
 
 /// Spherical linear interpolation along the shorter arc (glTF 2.0 Appendix C).
@@ -1217,7 +1250,12 @@ fn slerp(a: &[f64], b: &[f64], s: f64) -> Vec<f64> {
         let th = d.acos();
         (((1.0 - s) * th).sin() / th.sin(), (s * th).sin() / th.sin())
     };
-    normalized(a.iter().zip(b).map(|(x, y)| wa * x + wb * sign * y).collect())
+    normalized(
+        a.iter()
+            .zip(b)
+            .map(|(x, y)| wa * x + wb * sign * y)
+            .collect(),
+    )
 }
 
 /// Replaces both channels' `interpolation`/`input`/`output` by `times` and `samples` on the
@@ -1286,7 +1324,13 @@ pub(crate) mod tests {
             for x in data {
                 self.bin.extend_from_slice(&x.to_le_bytes());
             }
-            self.view_accessor(off, data.len() * 4, 5126, data.len() / components(ty).unwrap(), ty)
+            self.view_accessor(
+                off,
+                data.len() * 4,
+                5126,
+                data.len() / components(ty).unwrap(),
+                ty,
+            )
         }
         pub(crate) fn u16s(&mut self, data: &[u16]) -> usize {
             while !self.bin.len().is_multiple_of(4) {
@@ -1298,7 +1342,14 @@ pub(crate) mod tests {
             }
             self.view_accessor(off, data.len() * 2, 5123, data.len(), "SCALAR")
         }
-        fn view_accessor(&mut self, off: usize, len: usize, ct: u32, count: usize, ty: &str) -> usize {
+        fn view_accessor(
+            &mut self,
+            off: usize,
+            len: usize,
+            ct: u32,
+            count: usize,
+            ty: &str,
+        ) -> usize {
             let views = self.json["bufferViews"].as_array_mut().unwrap();
             views.push(json!({"buffer": 0, "byteOffset": off, "byteLength": len}));
             let v = views.len() - 1;
@@ -1333,7 +1384,12 @@ pub(crate) mod tests {
     }
 
     /// A quad (two triangles) in a node named `name`, vertices in the given order.
-    pub(crate) fn quad_scene(order: [usize; 4], tris: [[u16; 3]; 2], z: f32, generator: &str) -> Vec<u8> {
+    pub(crate) fn quad_scene(
+        order: [usize; 4],
+        tris: [[u16; 3]; 2],
+        z: f32,
+        generator: &str,
+    ) -> Vec<u8> {
         let verts = [[0.0, 0.0, z], [1.0, 0.0, z], [1.0, 1.0, z], [0.0, 1.0, z]];
         let mut b = Builder::new();
         b.json["asset"]["generator"] = json!(generator);
@@ -1347,7 +1403,8 @@ pub(crate) mod tests {
         let n = b.f32s(&nor, "VEC3");
         let idx: Vec<u16> = tris.iter().flatten().copied().collect();
         let ix = b.u16s(&idx);
-        b.json["materials"] = json!([{"name": "Mat", "pbrMetallicRoughness": {"metallicFactor": 0.0}}]);
+        b.json["materials"] =
+            json!([{"name": "Mat", "pbrMetallicRoughness": {"metallicFactor": 0.0}}]);
         b.json["meshes"] = json!([{"name": "Plane", "primitives": [
             {"attributes": {"POSITION": p, "NORMAL": n}, "indices": ix, "material": 0}]}]);
         b.json["nodes"] = json!([
@@ -1370,13 +1427,20 @@ pub(crate) mod tests {
         let a = quad_scene([0, 1, 2, 3], [[0, 1, 2], [0, 2, 3]], 0.0, "frap");
         // Vertices reordered, triangles reordered and rotated, other generator.
         // new vertex k holds old vertex order[k]: old 0->new 2, 1->3, 2->0, 3->1
-        let b = quad_scene([2, 3, 0, 1], [[1, 2, 0], [0, 2, 3]], 0.0, "Khronos glTF Blender I/O");
+        let b = quad_scene(
+            [2, 3, 0, 1],
+            [[1, 2, 0], [0, 2, 3]],
+            0.0,
+            "Khronos glTF Blender I/O",
+        );
         assert_ne!(a, b);
         let (ca, cb) = (canon(&a), canon(&b));
         assert_eq!(compare("glb", &ca, &cb, 1e-5), vec![]);
         // Children order and extension order are irrelevant too.
         let mut d: Json = cb.clone();
-        let kids = d["scenes"][0]["nodes"][0]["children"].as_array_mut().unwrap();
+        let kids = d["scenes"][0]["nodes"][0]["children"]
+            .as_array_mut()
+            .unwrap();
         kids.reverse();
         assert_ne!(compare("glb", &ca, &d, 1e-5), vec![]); // raw reversal is visible …
         let e = canon(&b);
@@ -1407,10 +1471,7 @@ pub(crate) mod tests {
     fn strips_and_fans_equal_triangle_lists() {
         let tri = |mode: u64, idx: &[u16]| {
             let mut b = Builder::new();
-            let p = b.f32s(
-                &[0., 0., 0., 1., 0., 0., 0., 1., 0., 1., 1., 0.],
-                "VEC3",
-            );
+            let p = b.f32s(&[0., 0., 0., 1., 0., 0., 0., 1., 0., 1., 1., 0.], "VEC3");
             let ix = b.u16s(idx);
             b.json["meshes"] = json!([{"primitives": [{"attributes": {"POSITION": p}, "indices": ix, "mode": mode}]}]);
             b.json["nodes"] = json!([{"name": "N", "mesh": 0}]);
@@ -1510,7 +1571,12 @@ pub(crate) mod tests {
     /// Animations compare by sampled values (§20.4).
     #[test]
     fn animations_compare_by_samples() {
-        let sparse = anim("translation", "LINEAR", &[0.0, 1.0], json!([[0, 0, 0], [10, 0, 0]]));
+        let sparse = anim(
+            "translation",
+            "LINEAR",
+            &[0.0, 1.0],
+            json!([[0, 0, 0], [10, 0, 0]]),
+        );
         let baked = anim(
             "translation",
             "LINEAR",
@@ -1523,11 +1589,23 @@ pub(crate) mod tests {
             "translation",
             "CUBICSPLINE",
             &[0.0, 1.0],
-            json!([[10, 0, 0], [0, 0, 0], [10, 0, 0], [10, 0, 0], [10, 0, 0], [10, 0, 0]]),
+            json!([
+                [10, 0, 0],
+                [0, 0, 0],
+                [10, 0, 0],
+                [10, 0, 0],
+                [10, 0, 0],
+                [10, 0, 0]
+            ]),
         );
         assert_eq!(compare("glb", &cubic, &sparse, 1e-6), vec![]);
         // STEP holds the value: different between the keys.
-        let step = anim("translation", "STEP", &[0.0, 1.0], json!([[0, 0, 0], [10, 0, 0]]));
+        let step = anim(
+            "translation",
+            "STEP",
+            &[0.0, 1.0],
+            json!([[0, 0, 0], [10, 0, 0]]),
+        );
         assert!(!compare("glb", &step, &sparse, 1e-6).is_empty());
         // One key value changed.
         let changed = anim(
@@ -1539,7 +1617,12 @@ pub(crate) mod tests {
         assert!(!compare("glb", &changed, &sparse, 1e-6).is_empty());
         // Rotations: slerp, and q / -q are the same rotation.
         let h = std::f64::consts::FRAC_1_SQRT_2;
-        let rot = anim("rotation", "LINEAR", &[0.0, 1.0], json!([[0, 0, 0, 1], [0, 0, 1, 0]]));
+        let rot = anim(
+            "rotation",
+            "LINEAR",
+            &[0.0, 1.0],
+            json!([[0, 0, 0, 1], [0, 0, 1, 0]]),
+        );
         let rot_baked = anim(
             "rotation",
             "LINEAR",
@@ -1578,7 +1661,10 @@ pub(crate) mod tests {
             "sparse": {"count": 1, "indices": {"bufferView": iv, "componentType": 5123},
                        "values": {"bufferView": vv}}}]);
         let doc = load(&s.glb(), None).unwrap();
-        assert_eq!(doc.accessor(0).unwrap(), vec![vec![0.0], vec![0.0], vec![7.0]]);
+        assert_eq!(
+            doc.accessor(0).unwrap(),
+            vec![vec![0.0], vec![0.0], vec![7.0]]
+        );
     }
 
     #[test]

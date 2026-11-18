@@ -10,8 +10,8 @@
 //! selection is kept. The bmesh operator has no file of its own in frap (it is three lines);
 //! its type flags (`NORMALS_CALC`) are applied here.
 
-use frap_bmesh::types::OpTypeFlag;
 use frap_bmesh::ElemTypes;
+use frap_bmesh::types::OpTypeFlag;
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;

@@ -29,10 +29,7 @@ use crate::edit::{Mode, Request, axis_index, matrix, proportional, set};
 /// The `translate`/`rotate`/`resize` arguments equivalent to a `transform.transform` call: every
 /// set property of the same name is copied, `value` is cut to the target's shape, and a set
 /// `value` constrains to every axis.
-fn sub_args(
-    op: TransformOp,
-    args: &OpArgs,
-) -> Result<OpArgs, OpError> {
+fn sub_args(op: TransformOp, args: &OpArgs) -> Result<OpArgs, OpError> {
     let spec = match op {
         TransformOp::Rotate => &transform::OPSPEC_TRANSFORM_OT_ROTATE,
         TransformOp::Resize => &transform::OPSPEC_TRANSFORM_OT_RESIZE,

@@ -82,7 +82,8 @@ fn face_split_find(bm: &BMesh, f: FaceId) -> Option<([LoopId; 2], f32)> {
             if lb == 0.0 {
                 continue;
             }
-            let err_test = subset_calc_planar(bm, l_a, l_b, no_a) + subset_calc_planar(bm, l_b, l_a, no_b);
+            let err_test =
+                subset_calc_planar(bm, l_a, l_b, no_a) + subset_calc_planar(bm, l_b, l_a, no_b);
             if err_test < err_best {
                 let mut split = [Some([l_a, l_b])];
                 face_splits_check_legal(bm, f, &mut split);

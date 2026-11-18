@@ -103,7 +103,10 @@ pub(crate) fn all_with_oflag(bm: &BMesh, oflag: u16) -> Vec<BMElem> {
 }
 
 /// Runs `extrude_edge_only` on `bm`.
-pub fn extrude_edge_only(bm: &mut BMesh, i: &ExtrudeEdgeOnlyIn) -> Result<ExtrudeEdgeOnlyOut, BmError> {
+pub fn extrude_edge_only(
+    bm: &mut BMesh,
+    i: &ExtrudeEdgeOnlyIn,
+) -> Result<ExtrudeEdgeOnlyOut, BmError> {
     if let Some(dead) = i.edges.iter().find(|e| !bm.edges.contains(e.0)) {
         return Err(BmError::Invalid(format!(
             "extrude_edge_only: dead edge {dead:?} in edges"
@@ -154,7 +157,11 @@ pub fn extrude_edge_only(bm: &mut BMesh, i: &ExtrudeEdgeOnlyIn) -> Result<Extrud
                 .face_create_verts(&f_verts, None, CreateFlag::empty(), true)
                 .expect("four distinct corners");
             copy_face_loop_attributes(bm, f);
-            let e_keep = if bm.oflag_test(e, EXT_INPUT) { e_new } else { e };
+            let e_keep = if bm.oflag_test(e, EXT_INPUT) {
+                e_new
+            } else {
+                e
+            };
             bm.oflag_enable(f, EXT_KEEP);
             bm.oflag_enable(e_keep, EXT_KEEP);
             let [k1, k2] = bm.edge(e_keep).v;
@@ -175,10 +182,15 @@ mod tests {
     /// A unit quad in the XY plane, wound counter-clockwise (normal +Z).
     pub(crate) fn quad() -> (BMesh, Vec<VertId>, FaceId) {
         let mut bm = BMesh::new();
-        let v: Vec<VertId> = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
-            .into_iter()
-            .map(|co| bm.vert_create(co, None, CreateFlag::empty()))
-            .collect();
+        let v: Vec<VertId> = [
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+        ]
+        .into_iter()
+        .map(|co| bm.vert_create(co, None, CreateFlag::empty()))
+        .collect();
         let f = bm
             .face_create_verts(&v, None, CreateFlag::empty(), true)
             .unwrap();

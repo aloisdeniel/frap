@@ -10,16 +10,10 @@
 use frap_rna::{RnaError, RnaPtr, Value, rna_func};
 use frap_scene::{FuncArgs, Host};
 
-use super::_common::{
-    arg_bool, arg_ptr, as_report, internal, link_ptr, socket_of, tree, tree_mut,
-};
+use super::_common::{arg_bool, arg_ptr, as_report, internal, link_ptr, socket_of, tree, tree_mut};
 
 #[rna_func(srna = "NodeLinks", func = "new")]
-fn node_links_new(
-    h: &mut dyn Host,
-    this: &RnaPtr,
-    args: &mut FuncArgs,
-) -> Result<Value, RnaError> {
+fn node_links_new(h: &mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Result<Value, RnaError> {
     super::_common::refuse_detached(this, "new")?;
     let root = this.root;
     let a = arg_ptr(args, "input").ok_or_else(|| internal("links.new(): no input socket"))?;

@@ -49,7 +49,10 @@ fn exec(cx: &mut OpCtx, _p: object::MaterialSlotRemoveUnused) -> OpResult {
         let mut act = common::actcol(o, slots::slot_count(main, o));
         let mut slot = 1usize;
         loop {
-            let tot = main.objects.get(ob).map_or(0, |o| slots::slot_count(main, o));
+            let tot = main
+                .objects
+                .get(ob)
+                .map_or(0, |o| slots::slot_count(main, o));
             if slot > tot {
                 break;
             }

@@ -45,10 +45,11 @@ fn i_d_evaluated_get(
         detached: None,
         ..this.clone()
     };
-    if this.detached == Some(Detached::Evaluated)
-        || in_depsgraph(h.main(), scene, id)
-    {
-        Ok(Value::Ptr(Box::new(detached(original, Detached::Evaluated))))
+    if this.detached == Some(Detached::Evaluated) || in_depsgraph(h.main(), scene, id) {
+        Ok(Value::Ptr(Box::new(detached(
+            original,
+            Detached::Evaluated,
+        ))))
     } else {
         Ok(Value::Ptr(Box::new(original)))
     }

@@ -28,7 +28,10 @@ use crate::{ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx};
 
 /// `gather_color_info` without colour attributes (M3 `vertex_color.rs`): the constant factor
 /// and the source left after peeling a multiply-by-constant.
-pub(crate) fn color_info<'a>(cx: &LowerCx<'a>, src: Src<'a>) -> (Option<[f32; 3]>, Option<Src<'a>>) {
+pub(crate) fn color_info<'a>(
+    cx: &LowerCx<'a>,
+    src: Src<'a>,
+) -> (Option<[f32; 3]>, Option<Src<'a>>) {
     if let Some(c) = cx.const_rgb(src) {
         return (Some(c), None);
     }
@@ -56,7 +59,10 @@ fn node_desc(n: &Node) -> String {
 fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     let Some(p) = cx.principled() else {
         let what = match cx.surface_shader() {
-            Some(n) => format!("the surface shader {} is not a Principled BSDF", node_desc(n)),
+            Some(n) => format!(
+                "the surface shader {} is not a Principled BSDF",
+                node_desc(n)
+            ),
             None => "no shader is linked to the Material Output's Surface".into(),
         };
         unrecognised(
@@ -140,13 +146,13 @@ fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
         cx.link(color_socket, o);
         cx.set_input(mix, "Factor", SocketValue::Float(1.0));
         color_socket = cx.input(mix, "A");
-        cx.set_input(
-            mix,
-            "B",
-            SocketValue::Color([rgb[0], rgb[1], rgb[2], 1.0]),
-        );
+        cx.set_input(mix, "B", SocketValue::Color([rgb[0], rgb[1], rgb[2], 1.0]));
     }
-    let mut alpha_to = if tex_alpha { cx.base_alpha_socket } else { None };
+    let mut alpha_to = if tex_alpha {
+        cx.base_alpha_socket
+    } else {
+        None
+    };
     if needs_alpha_factor && let Some(socket) = alpha_to {
         let m = cx.add_node("ShaderNodeMath", [x - 140.0, y - 230.0]);
         cx.set_label(m, "Alpha Factor");

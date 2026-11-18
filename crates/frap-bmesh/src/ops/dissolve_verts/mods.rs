@@ -64,8 +64,7 @@ pub(crate) fn vert_calc_edge_angle(bm: &BMesh, v: VertId) -> f32 {
         Some((e1, e2)) => {
             let v1 = bm.edge_other_vert(e1, v);
             let v2 = bm.edge_other_vert(e2, v);
-            core::f32::consts::PI
-                - angle_v3v3v3(bm.vert(v1).co, bm.vert(v).co, bm.vert(v2).co)
+            core::f32::consts::PI - angle_v3v3v3(bm.vert(v1).co, bm.vert(v).co, bm.vert(v2).co)
         }
         None => deg2radf(90.0),
     }
@@ -397,9 +396,7 @@ pub(crate) fn math_equal(a: &MathValue, b: &MathValue) -> bool {
             d[0] * d[0] + d[1] * d[1] < 0.00001
         }
         (MathValue::Byte(a), MathValue::Byte(b)) => {
-            let d: Vec<f32> = (0..4)
-                .map(|k| f32::from(a[k]) - f32::from(b[k]))
-                .collect();
+            let d: Vec<f32> = (0..4).map(|k| f32::from(a[k]) - f32::from(b[k])).collect();
             d[0] * d[0] + d[1] * d[1] + d[2] * d[2] + d[3] * d[3] < 0.001
         }
         (MathValue::Color(a), MathValue::Color(b)) => {
@@ -489,7 +486,8 @@ mod tests {
         assert!((straight - core::f32::consts::PI).abs() < 1e-6);
         assert!((cos_v3v3v3([1.0, 0.0, 0.0], [0.0; 3], [-1.0, 0.0, 0.0]) + 1.0).abs() < 1e-6);
         // Projected on the XY plane the corner is a right angle.
-        let a = angle_on_axis_v3v3v3_v3([1.0, 0.0, 5.0], [0.0; 3], [0.0, 1.0, -3.0], [0.0, 0.0, 1.0]);
+        let a =
+            angle_on_axis_v3v3v3_v3([1.0, 0.0, 5.0], [0.0; 3], [0.0, 1.0, -3.0], [0.0, 0.0, 1.0]);
         assert!((a - core::f32::consts::FRAC_PI_2).abs() < 1e-6);
         assert_eq!(interpf(10.0, 0.0, 0.25), 2.5);
         assert!((deg2radf(180.0) - core::f32::consts::PI).abs() < 1e-6);
@@ -533,7 +531,13 @@ mod tests {
         mm.add(&MathValue::Float2([0.0, 1.0]));
         mm.add(&MathValue::Float2([2.0, -1.0]));
         assert_eq!(mm.center(), MathValue::Float2([1.0, 0.0]));
-        assert!(math_equal(&MathValue::Float2([0.0, 0.0]), &MathValue::Float2([0.001, 0.0])));
-        assert!(!math_equal(&MathValue::Float2([0.0, 0.0]), &MathValue::Float2([0.01, 0.0])));
+        assert!(math_equal(
+            &MathValue::Float2([0.0, 0.0]),
+            &MathValue::Float2([0.001, 0.0])
+        ));
+        assert!(!math_equal(
+            &MathValue::Float2([0.0, 0.0]),
+            &MathValue::Float2([0.01, 0.0])
+        ));
     }
 }

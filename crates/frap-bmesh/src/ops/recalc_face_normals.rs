@@ -377,7 +377,10 @@ mod tests {
         assert_eq!(verts_of(&bm), original);
         for f in bm.face_ids() {
             let c = bm.face_calc_center_median(f);
-            assert!(geom::dot(c, bm.face(f).no) > 0.0, "face {f:?} points inwards");
+            assert!(
+                geom::dot(c, bm.face(f).no) > 0.0,
+                "face {f:?} points inwards"
+            );
         }
     }
 

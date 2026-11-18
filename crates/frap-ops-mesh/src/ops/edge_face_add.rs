@@ -19,7 +19,7 @@
 
 pub(crate) mod edbm;
 
-use frap_bmesh::ops::contextual_create::{ContextualCreateIn, contextual_create, construct};
+use frap_bmesh::ops::contextual_create::{ContextualCreateIn, construct, contextual_create};
 use frap_bmesh::{BMElem, BMesh, EdgeId, ElemFlag, FaceId, VertId};
 use frap_op::operator;
 use frap_op::prelude::*;

@@ -134,7 +134,10 @@ pub(crate) fn create_cone(
     let mut fan = [Vec::new(), Vec::new()];
     for i in 0..segs {
         let (sin_phi, cos_phi) = sin_cos_from_fraction(i, segs);
-        let v1 = bm.vert_create(mul_m4_v3(mat, [rad1 * sin_phi, rad1 * cos_phi, -depth_half]));
+        let v1 = bm.vert_create(mul_m4_v3(
+            mat,
+            [rad1 * sin_phi, rad1 * cos_phi, -depth_half],
+        ));
         let v2 = bm.vert_create(mul_m4_v3(mat, [rad2 * sin_phi, rad2 * cos_phi, depth_half]));
         if i > 0 {
             let (lv1, lv2) = (*ring1.last().unwrap(), *ring2.last().unwrap());
@@ -201,7 +204,14 @@ pub(crate) fn create_cone(
 }
 
 // Ported from blender/source/blender/bmesh/operators/bmo_primitive.cc (BM_mesh_calc_uvs_cone).
-fn calc_uvs_cone(bm: &mut Bm, mat: &Matrix4, radius_top: f32, radius_bottom: f32, segments: i32, cap_ends: bool) {
+fn calc_uvs_cone(
+    bm: &mut Bm,
+    mat: &Matrix4,
+    radius_top: f32,
+    radius_bottom: f32,
+    segments: i32,
+    cap_ends: bool,
+) {
     let uv_width = 1.0f32 / segments as f32;
     let uv_height = if cap_ends { 0.5f32 } else { 1.0 };
     let uv_center_y = if cap_ends { 0.25f32 } else { 0.5 };
@@ -215,12 +225,21 @@ fn calc_uvs_cone(bm: &mut Bm, mat: &Matrix4, radius_top: f32, radius_bottom: f32
     } else {
         uv_radius
     };
-    let uv_scale_bottom = if radius_bottom != 0.0 { uv_radius / radius_bottom } else { uv_scale_top };
+    let uv_scale_bottom = if radius_bottom != 0.0 {
+        uv_radius / radius_bottom
+    } else {
+        uv_scale_top
+    };
     let local_up = normalize_v3(mul_mat3_m4_v3(mat, [0.0, 0.0, 1.0])).0;
     let inv_mat = invert_m4(mat);
     let mut x = 1.0f32;
     let mut y = 1.0f32 - uv_height;
-    let positions: Vec<V3> = bm.verts.slots.iter().map(|v| v.unwrap_or([0.0; 3])).collect();
+    let positions: Vec<V3> = bm
+        .verts
+        .slots
+        .iter()
+        .map(|v| v.unwrap_or([0.0; 3]))
+        .collect();
     for slot in bm.faces.slots.iter_mut() {
         let Some(f) = slot.as_mut() else { continue };
         if f.verts.len() == 4 && radius_top != 0.0 && radius_bottom != 0.0 {
@@ -240,9 +259,15 @@ fn calc_uvs_cone(bm: &mut Bm, mat: &Matrix4, radius_top: f32, radius_bottom: f32
             for (k, uv) in f.uvs.iter_mut().enumerate() {
                 let co = mul_m4_v3(&inv_mat, positions[f.verts[k] as usize]);
                 *uv = if top {
-                    [uv_center_x_top + co[0] * uv_scale_top, uv_center_y + co[1] * uv_scale_top]
+                    [
+                        uv_center_x_top + co[0] * uv_scale_top,
+                        uv_center_y + co[1] * uv_scale_top,
+                    ]
                 } else {
-                    [uv_center_x_bottom + co[0] * uv_scale_bottom, uv_center_y + co[1] * uv_scale_bottom]
+                    [
+                        uv_center_x_bottom + co[0] * uv_scale_bottom,
+                        uv_center_y + co[1] * uv_scale_bottom,
+                    ]
                 };
             }
         }
@@ -323,8 +348,10 @@ impl Merges {
                     }
                     // The killed vertex of the collapsed pair: the non-surviving one, or the one
                     // merged directly into the other.
-                    let a_dies = !self.is_root(a) && (self.is_root(b) || self.parent[a as usize] == b);
-                    let b_dies = !self.is_root(b) && (self.is_root(a) || self.parent[b as usize] == a);
+                    let a_dies =
+                        !self.is_root(a) && (self.is_root(b) || self.parent[a as usize] == b);
+                    let b_dies =
+                        !self.is_root(b) && (self.is_root(a) || self.parent[b as usize] == a);
                     let kill_a = a_dies || !b_dies;
                     let (kill, keep) = if kill_a { (i, j) } else { (j, i) };
                     if kill == 0 {
@@ -391,9 +418,17 @@ pub(crate) fn dissolve_fan(bm: &mut Bm, centre: u32, ring: &[u32]) {
     }
     let n = ring.len();
     let uvs: Vec<[f32; 2]> = (0..n)
-        .map(|k| directed.get(&(ring[k], ring[(k + 1) % n])).copied().unwrap_or([0.0; 2]))
+        .map(|k| {
+            directed
+                .get(&(ring[k], ring[(k + 1) % n]))
+                .copied()
+                .unwrap_or([0.0; 2])
+        })
         .collect();
-    bm.faces.alloc(Face { verts: ring.to_vec(), uvs });
+    bm.faces.alloc(Face {
+        verts: ring.to_vec(),
+        uvs,
+    });
     let mut kill = region.clone();
     if kill.len() > 3 {
         let second_last = kill.remove(kill.len() - 2);

@@ -18,7 +18,10 @@ mod hook {
         _prop: &'static PropDef,
     ) -> Result<Field<'h>, RnaError> {
         let c = h.ctx();
-        Ok(Field::Ptr(view_layer_ptr(h.win().scene, &c.view_layer().name)))
+        Ok(Field::Ptr(view_layer_ptr(
+            h.win().scene,
+            &c.view_layer().name,
+        )))
     }
 
     pub fn set(

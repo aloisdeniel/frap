@@ -65,7 +65,9 @@ pub mod bullet;
 /// Runs `convex_hull` on `bm`. `Requires at least three vertices` is a [`BmError::Cancel`].
 pub fn convex_hull(bm: &mut BMesh, i: &ConvexHullIn) -> Result<ConvexHullOut, BmError> {
     if let Some(dead) = i.input.iter().find(|&&g| !bm.elem_alive(g)) {
-        return Err(BmError::Invalid(format!("convex_hull: dead element {dead:?}")));
+        return Err(BmError::Invalid(format!(
+            "convex_hull: dead element {dead:?}"
+        )));
     }
     bm.bmo_exec(TYPE_FLAG, |bm| exec(bm, i))
 }
@@ -78,9 +80,9 @@ struct HullTriangle {
 
 /// `hull_find_example_face`.
 fn find_example_face(bm: &BMesh, e: EdgeId) -> Option<FaceId> {
-    bm.edge_faces(e).into_iter().find(|&f| {
-        bm.oflag_test(f, HULL_FLAG_INPUT) || !bm.oflag_test(f, HULL_FLAG_OUTPUT_GEOM)
-    })
+    bm.edge_faces(e)
+        .into_iter()
+        .find(|&f| bm.oflag_test(f, HULL_FLAG_INPUT) || !bm.oflag_test(f, HULL_FLAG_OUTPUT_GEOM))
 }
 
 fn ord(a: VertId, b: VertId) -> (VertId, VertId) {
@@ -115,7 +117,11 @@ fn exec(bm: &mut BMesh, i: &ConvexHullIn) -> Result<ConvexHullOut, BmError> {
     for fvi in &hull.faces {
         if fvi.len() > 2 {
             for j in 2..fvi.len() {
-                let v = [hull_verts[fvi[0]], hull_verts[fvi[j - 1]], hull_verts[fvi[j]]];
+                let v = [
+                    hull_verts[fvi[0]],
+                    hull_verts[fvi[j - 1]],
+                    hull_verts[fvi[j]],
+                ];
                 // `hull_add_triangle`.
                 for &x in &v {
                     bm.oflag_disable(x, HULL_FLAG_INTERIOR_ELE);
@@ -266,9 +272,24 @@ fn exec(bm: &mut BMesh, i: &ConvexHullIn) -> Result<ConvexHullOut, BmError> {
     }
     let collect = |bm: &BMesh, flag: u16| -> Vec<BMElem> {
         let mut out: Vec<BMElem> = Vec::new();
-        out.extend(bm.vert_ids().into_iter().filter(|&v| bm.oflag_test(v, flag)).map(BMElem::Vert));
-        out.extend(bm.edge_ids().into_iter().filter(|&e| bm.oflag_test(e, flag)).map(BMElem::Edge));
-        out.extend(bm.face_ids().into_iter().filter(|&f| bm.oflag_test(f, flag)).map(BMElem::Face));
+        out.extend(
+            bm.vert_ids()
+                .into_iter()
+                .filter(|&v| bm.oflag_test(v, flag))
+                .map(BMElem::Vert),
+        );
+        out.extend(
+            bm.edge_ids()
+                .into_iter()
+                .filter(|&e| bm.oflag_test(e, flag))
+                .map(BMElem::Edge),
+        );
+        out.extend(
+            bm.face_ids()
+                .into_iter()
+                .filter(|&f| bm.oflag_test(f, flag))
+                .map(BMElem::Face),
+        );
         out
     };
     Ok(ConvexHullOut {

@@ -43,9 +43,7 @@ pub(crate) mod common {
                 .and_then(|v| v.get("view_rotation"))
                 .and_then(|v| v.as_array())
                 .filter(|a| a.len() == 4)
-                .map(|a| {
-                    std::array::from_fn::<f32, 4, _>(|i| a[i].as_f64().unwrap_or(0.0) as f32)
-                })
+                .map(|a| std::array::from_fn::<f32, 4, _>(|i| a[i].as_f64().unwrap_or(0.0) as f32))
                 .unwrap_or([1.0, 0.0, 0.0, 0.0]);
             conjugate_qt(q)
         })

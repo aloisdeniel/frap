@@ -54,7 +54,11 @@ fn ngon(n: usize) -> BMesh {
     let v: Vec<VertId> = (0..n)
         .map(|i| {
             let a = i as f32 / n as f32 * std::f32::consts::TAU;
-            bm.vert_create([libm::cosf(a), libm::sinf(a), 0.0], None, CreateFlag::empty())
+            bm.vert_create(
+                [libm::cosf(a), libm::sinf(a), 0.0],
+                None,
+                CreateFlag::empty(),
+            )
         })
         .collect();
     bm.face_create_verts(&v, None, CreateFlag::empty(), true)
@@ -95,7 +99,10 @@ fn triangulate_fixed_splits_corners_0_2() {
     assert_eq!(face_vert_indices(&bm, FaceId(6)), [0, 1, 3]);
     assert_eq!(face_vert_indices(&bm, FaceId(0)), [0, 3, 2]);
     assert_eq!(out.faces, [FaceId(0), FaceId(6)]);
-    assert_eq!(out.face_map, [(FaceId(0), FaceId(0)), (FaceId(6), FaceId(0))]);
+    assert_eq!(
+        out.face_map,
+        [(FaceId(0), FaceId(0)), (FaceId(6), FaceId(0))]
+    );
 }
 
 #[test]
@@ -171,11 +178,17 @@ fn triangulate_ngon_keeps_area_and_winding() {
                 crate::query::geom::sub(c[1], c[0]),
                 crate::query::geom::sub(c[2], c[0]),
             );
-            assert!(crate::query::geom::dot(n, no) > 0.0, "{method}: flipped triangle");
+            assert!(
+                crate::query::geom::dot(n, no) > 0.0,
+                "{method}: flipped triangle"
+            );
             area += crate::query::geom::dot(n, no) * 0.5;
         }
         let expect = 0.5 * 9.0 * libm::sinf(std::f32::consts::TAU / 9.0);
-        assert!((area - expect).abs() < 1e-5, "{method}: area {area} != {expect}");
+        assert!(
+            (area - expect).abs() < 1e-5,
+            "{method}: area {area} != {expect}"
+        );
     }
 }
 
@@ -195,8 +208,9 @@ fn beautify_prefers_fat_triangles() {
     assert_eq!(tris.len(), 4);
     // The fan's long diagonals 0-2 and 0-3 are gone.
     let has = |a: u32, b: u32| {
-        tris.iter()
-            .any(|t| (0..3).any(|k| (t[k] == a && t[(k + 1) % 3] == b) || (t[k] == b && t[(k + 1) % 3] == a)))
+        tris.iter().any(|t| {
+            (0..3).any(|k| (t[k] == a && t[(k + 1) % 3] == b) || (t[k] == b && t[(k + 1) % 3] == a))
+        })
     };
     assert!(!has(0, 2) || !has(0, 3));
     assert!(has(1, 4));

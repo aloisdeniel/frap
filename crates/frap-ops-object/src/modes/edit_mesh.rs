@@ -69,9 +69,11 @@ fn can_enter(cx: &mut OpCtx, ob: IdRef<ObjectId>) -> Result<IdRef<MeshId>, Skip>
         // `BKE_object_is_in_editmode`: another object in Edit Mode uses this mesh. An entry no
         // object in Edit Mode uses any more is stale (cannot happen through the guarded paths)
         // and is replaced.
-        let users_editing = c.main.objects.iter().any(|(r, x)| {
-            r != ob && x.mode == ObjectMode::Edit && x.data == Some(me.any())
-        });
+        let users_editing = c
+            .main
+            .objects
+            .iter()
+            .any(|(r, x)| r != ob && x.mode == ObjectMode::Edit && x.data == Some(me.any()));
         if users_editing {
             return Err(Skip::AlreadyEditing);
         }
@@ -81,8 +83,18 @@ fn can_enter(cx: &mut OpCtx, ob: IdRef<ObjectId>) -> Result<IdRef<MeshId>, Skip>
 }
 
 /// `editmode_enter_ex` for one mesh object that can enter.
-fn enter_one(cx: &mut OpCtx, ob: IdRef<ObjectId>, me: IdRef<MeshId>, mode: SelectMode) -> Result<(), OpError> {
-    if cx.main().objects.get(ob).is_some_and(|o| o.mode != ObjectMode::Edit) {
+fn enter_one(
+    cx: &mut OpCtx,
+    ob: IdRef<ObjectId>,
+    me: IdRef<MeshId>,
+    mode: SelectMode,
+) -> Result<(), OpError> {
+    if cx
+        .main()
+        .objects
+        .get(ob)
+        .is_some_and(|o| o.mode != ObjectMode::Edit)
+    {
         cx.object_mut(ob)?.mode = ObjectMode::Edit;
         cx.main_mut().1.context_changed = true;
     }

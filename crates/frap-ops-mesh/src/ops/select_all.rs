@@ -111,7 +111,11 @@ fn exec(cx: &mut OpCtx, p: mesh::SelectAll) -> OpResult {
                     .get(&me.key())
                     .is_some_and(|em| any_selected(&em.bm))
             });
-            if any { Action::Deselect } else { Action::Select }
+            if any {
+                Action::Deselect
+            } else {
+                Action::Select
+            }
         }
         a => a,
     };

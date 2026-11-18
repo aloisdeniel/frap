@@ -48,9 +48,17 @@ fn scene_collections(main: &Main, scene: IdRef<SceneId>) -> Vec<IdRef<Collection
 /// `ED_object_base_free_and_unlink_no_indirect_check`: unlinks `ob` from every collection of
 /// `scene` (master included), touching only the collections that hold it, then resyncs the
 /// view layers.
-fn unlink_from_scene(main: &mut Main, log: &mut ChangeLog, scene: IdRef<SceneId>, ob: IdRef<ObjectId>) {
+fn unlink_from_scene(
+    main: &mut Main,
+    log: &mut ChangeLog,
+    scene: IdRef<SceneId>,
+    ob: IdRef<ObjectId>,
+) {
     for c in scene_collections(main, scene) {
-        if main.collections.get(c).is_some_and(|col| col.objects.contains(&ob))
+        if main
+            .collections
+            .get(c)
+            .is_some_and(|col| col.objects.contains(&ob))
             && let Some(col) = main.collections.get_mut(c, log)
         {
             col.objects.retain(|o| *o != ob);

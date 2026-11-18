@@ -86,7 +86,12 @@ impl NewIds {
     }
 
     /// `USER_DUP_ACT` on copied camera and light data: their action is copied too.
-    fn data_action(&mut self, main: &mut Main, log: &mut ChangeLog, new: Option<IdAny>) -> Option<IdAny> {
+    fn data_action(
+        &mut self,
+        main: &mut Main,
+        log: &mut ChangeLog,
+        new: Option<IdAny>,
+    ) -> Option<IdAny> {
         let n = new?;
         let action = match n.code {
             IdCode::CA => main
@@ -127,7 +132,12 @@ impl NewIds {
     }
 
     /// The copy of an action (`USER_DUP_ACT`).
-    fn action(&mut self, main: &mut Main, log: &mut ChangeLog, a: IdRef<ActionId>) -> IdRef<ActionId> {
+    fn action(
+        &mut self,
+        main: &mut Main,
+        log: &mut ChangeLog,
+        a: IdRef<ActionId>,
+    ) -> IdRef<ActionId> {
         if let Some(n) = self.0.get(&a.any()).and_then(|n| n.typed()) {
             return n;
         }
@@ -162,10 +172,7 @@ fn duplicate(cx: &mut OpCtx, linked: bool) -> OpResult {
         if src.mode == ObjectMode::Pose {
             continue;
         }
-        let (data, action) = (
-            src.data,
-            src.animation_data.as_ref().and_then(|a| a.action),
-        );
+        let (data, action) = (src.data, src.animation_data.as_ref().and_then(|a| a.action));
         let Some(new) = copy_in(&mut main.objects, ob.any(), log).and_then(|n| n.typed()) else {
             continue;
         };

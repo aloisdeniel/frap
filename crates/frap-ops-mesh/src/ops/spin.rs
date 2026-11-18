@@ -44,6 +44,11 @@ fn exec(cx: &mut OpCtx, p: mesh::Spin) -> OpResult {
     if axis == [0.0; 3] {
         return Err(OpError::Runtime("Invalid/unset axis".into()));
     }
+    // `--max-elements`: one extrusion of the selection per step (ARCHITECTURE §12).
+    let steps_u = u64::try_from(steps.max(0)).unwrap_or(0);
+    super::_growth::reserve(cx, |_, bm| {
+        super::_growth::extrude_steps_corners(bm, steps_u, dupli)
+    })?;
     for (ob, me) in helpers::iter_edit_meshes(cx) {
         let space = world_matrix(&cx.main().objects, ob).to_cols_array_2d();
         let bm = cx.bmesh_mut(me)?;

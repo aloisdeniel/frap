@@ -26,7 +26,11 @@ pub(crate) fn floats<const N: usize>(
         out.push(Mismatch::new(
             comparator,
             path,
-            format!("frap has {} elements, blender {}", frap.len(), blender.len()),
+            format!(
+                "frap has {} elements, blender {}",
+                frap.len(),
+                blender.len()
+            ),
         ));
         return;
     }
@@ -67,7 +71,11 @@ pub(crate) fn exact<T: PartialEq + std::fmt::Debug>(
         out.push(Mismatch::new(
             comparator,
             path,
-            format!("frap has {} elements, blender {}", frap.len(), blender.len()),
+            format!(
+                "frap has {} elements, blender {}",
+                frap.len(),
+                blender.len()
+            ),
         ));
         return;
     }
@@ -122,8 +130,20 @@ pub fn compare(what: &str, frap: &GMesh, blender: &GMesh, tol: f32) -> Vec<Misma
         tol,
         &mut out,
     );
-    exact(NAME, &format!("{what}.edges"), &frap.edges, &blender.edges, &mut out);
-    exact(NAME, &format!("{what}.faces"), &frap.faces, &blender.faces, &mut out);
+    exact(
+        NAME,
+        &format!("{what}.edges"),
+        &frap.edges,
+        &blender.edges,
+        &mut out,
+    );
+    exact(
+        NAME,
+        &format!("{what}.faces"),
+        &frap.faces,
+        &blender.faces,
+        &mut out,
+    );
     floats(
         NAME,
         &format!("{what}.corner_normals"),

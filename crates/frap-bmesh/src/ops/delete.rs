@@ -64,7 +64,9 @@ pub fn delete(bm: &mut BMesh, i: &DeleteIn) -> Result<DeleteOut, BmError> {
         )));
     };
     if let Some(dead) = i.geom.iter().find(|&&g| !bm.elem_alive(g)) {
-        return Err(BmError::Invalid(format!("delete: dead element {dead:?} in geom")));
+        return Err(BmError::Invalid(format!(
+            "delete: dead element {dead:?} in geom"
+        )));
     }
     const DEL_INPUT: u16 = 1;
     bm.bmo_exec(TYPE_FLAG, |bm| {

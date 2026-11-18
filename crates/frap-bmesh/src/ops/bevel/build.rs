@@ -183,9 +183,17 @@ impl Bevel {
                     None => 0.0,
                 },
                 // Selected face beats unselected one.
-                if fa.flag.contains(ElemFlag::SELECT) { 0.0 } else { 1.0 },
+                if fa.flag.contains(ElemFlag::SELECT) {
+                    0.0
+                } else {
+                    1.0
+                },
                 // Lower material index.
-                if fa.mat_nr >= 0 { f32::from(fa.mat_nr) } else { 0.0 },
+                if fa.mat_nr >= 0 {
+                    f32::from(fa.mat_nr)
+                } else {
+                    0.0
+                },
                 // z, x, y components of the face center.
                 cent[2],
                 cent[0],
@@ -224,7 +232,11 @@ impl Bevel {
     }
 
     /// `get_incident_edges`: the (up to) two edges of `f` incident to `v`.
-    fn get_incident_edges(bm: &BMesh, f: Option<FaceId>, v: VertId) -> (Option<EdgeId>, Option<EdgeId>) {
+    fn get_incident_edges(
+        bm: &BMesh,
+        f: Option<FaceId>,
+        v: VertId,
+    ) -> (Option<EdgeId>, Option<EdgeId>) {
         let mut r = (None, None);
         let Some(f) = f else {
             return r;
@@ -252,7 +264,12 @@ impl Bevel {
     }
 
     /// `find_face_internal_boundverts`: the (up to 3) BoundVerts of `bv` inside face `f`.
-    fn find_face_internal_boundverts(&self, bm: &BMesh, bv: Bev, f: Option<FaceId>) -> [Option<Bnd>; 3] {
+    fn find_face_internal_boundverts(
+        &self,
+        bm: &BMesh,
+        bv: Bev,
+        f: Option<FaceId>,
+    ) -> [Option<Bnd>; 3] {
         let mut out = [None; 3];
         let Some(f) = f else {
             return out;
@@ -288,7 +305,10 @@ impl Bevel {
                 let snap2 = math::closest_to_line_segment_v3(p, co(bm, a2), co(bm, b2));
                 let d1_sq = math::len_sq_v3v3(snap1, p);
                 let d2_sq = math::len_sq_v3v3(snap2, p);
-                proj_co.push(geom::project_v2(&rows, if d1_sq <= d2_sq { snap1 } else { snap2 }));
+                proj_co.push(geom::project_v2(
+                    &rows,
+                    if d1_sq <= d2_sq { snap1 } else { snap2 },
+                ));
             }
         }
         math::area_poly_v2(&proj_co)
@@ -363,7 +383,17 @@ impl Bevel {
                 ve.push(None);
             }
         }
-        let f = self.bev_create_ngon(bm, &vv, Some(&vf), frep, Some(&ve), Some(bvv), None, mat_nr, true);
+        let f = self.bev_create_ngon(
+            bm,
+            &vv,
+            Some(&vf),
+            frep,
+            Some(&ve),
+            Some(bvv),
+            None,
+            mat_nr,
+            true,
+        );
         self.record_face_kind(f, FKind::Vert);
     }
 
@@ -485,7 +515,11 @@ impl Bevel {
                 None
             };
             let (e, eprev, enext) = if !edges_aff {
-                (self.bnd(bndv).efirst, self.bnd(pv).efirst, self.bnd(nx).efirst)
+                (
+                    self.bnd(bndv).efirst,
+                    self.bnd(pv).efirst,
+                    self.bnd(nx).efirst,
+                )
             } else {
                 (self.bnd(bndv).ebev, self.bnd(pv).ebev, self.bnd(nx).ebev)
             };
@@ -524,9 +558,21 @@ impl Bevel {
                         // Edge bevel.
                         fr = [f; 4];
                         if odd == 1 {
-                            let b1 = if eprev.is_some_and(|x| self.eh(x).is_seam) { bmeprev } else { None };
-                            let b2 = if e.is_some_and(|x| self.eh(x).is_seam) { bme } else { None };
-                            let b3 = if enext.is_some_and(|x| self.eh(x).is_seam) { bmenext } else { None };
+                            let b1 = if eprev.is_some_and(|x| self.eh(x).is_seam) {
+                                bmeprev
+                            } else {
+                                None
+                            };
+                            let b2 = if e.is_some_and(|x| self.eh(x).is_seam) {
+                                bme
+                            } else {
+                                None
+                            };
+                            let b3 = if enext.is_some_and(|x| self.eh(x).is_seam) {
+                                bmenext
+                            } else {
+                                None
+                            };
                             se = snap_edges_for_vmesh_vert(
                                 i,
                                 j,
@@ -554,8 +600,11 @@ impl Bevel {
                                     // The 4th vertex of these faces is used for the center poly.
                                     center_verts[i as usize] = bmvs[3];
                                     center_edge_snaps[i as usize] = se[3];
-                                    center_face_interps[i as usize] =
-                                        if self.bev(bv).any_seam { center_frep } else { f };
+                                    center_face_interps[i as usize] = if self.bev(bv).any_seam {
+                                        center_frep
+                                    } else {
+                                        f
+                                    };
                                 }
                             }
                         } else {
@@ -624,8 +673,10 @@ impl Bevel {
             let i = self.bnd(bndv).index;
             let pv = self.bprev(bndv);
             // "Down": along the intersection of the two adjacent profile planes.
-            let mut down_direction =
-                math::cross(self.bnd(bndv).profile.plane_no, self.bnd(pv).profile.plane_no);
+            let mut down_direction = math::cross(
+                self.bnd(bndv).profile.plane_no,
+                self.bnd(pv).profile.plane_no,
+            );
             if math::dot(down_direction, vno) > 0.0 {
                 down_direction = math::neg(down_direction);
             }
@@ -677,12 +728,32 @@ impl Bevel {
             if build_center_face {
                 face_bmverts.push(self.mvv(vm, i, 1, 1));
             }
-            self.bev_create_ngon(bm, &face_bmverts, None, None, None, Some(bvv), None, self.mat_nr, true);
+            self.bev_create_ngon(
+                bm,
+                &face_bmverts,
+                None,
+                None,
+                None,
+                Some(bvv),
+                None,
+                self.mat_nr,
+                true,
+            );
         }
         // The bottom face.
         if build_center_face {
             let face_bmverts: Vec<VertId> = (0..n_bndv).map(|i| self.mvv(vm, i, 1, 0)).collect();
-            self.bev_create_ngon(bm, &face_bmverts, None, None, None, Some(bvv), None, self.mat_nr, true);
+            self.bev_create_ngon(
+                bm,
+                &face_bmverts,
+                None,
+                None,
+                None,
+                Some(bvv),
+                None,
+                self.mat_nr,
+                true,
+            );
         }
     }
 
@@ -997,7 +1068,8 @@ impl Bevel {
         let enable_smooth = fp.contains(ElemFlag::SMOOTH) != fnx.contains(ElemFlag::SMOOTH);
         let nseg = self.eh(e).seg;
         for i in 0..nseg {
-            let Some(bme) = bm.edge_exists(self.mvv(vm, vmindex, 0, i), self.mvv(vm, vmindex, 0, i + 1))
+            let Some(bme) =
+                bm.edge_exists(self.mvv(vm, vmindex, 0, i), self.mvv(vm, vmindex, 0, i + 1))
             else {
                 continue;
             };
@@ -1027,8 +1099,14 @@ impl Bevel {
         };
         let nseg = self.eh(e1).seg;
         debug_assert!(nseg > 0 && nseg == self.eh(e2).seg);
-        let (e1l, e1r) = (self.eh(e1).leftv.expect("leftv"), self.eh(e1).rightv.expect("rightv"));
-        let (e2l, e2r) = (self.eh(e2).leftv.expect("leftv"), self.eh(e2).rightv.expect("rightv"));
+        let (e1l, e1r) = (
+            self.eh(e1).leftv.expect("leftv"),
+            self.eh(e1).rightv.expect("rightv"),
+        );
+        let (e2l, e2r) = (
+            self.eh(e2).leftv.expect("leftv"),
+            self.eh(e2).rightv.expect("rightv"),
+        );
         let bmv1 = self.bnd(e1l).nv.v.expect("boundary vertex");
         let bmv4 = self.bnd(e1r).nv.v.expect("boundary vertex");
         let bmv2 = self.bnd(e2r).nv.v.expect("boundary vertex");
@@ -1073,10 +1151,30 @@ impl Bevel {
                     } else {
                         [Some(bme), Some(bme), None, None]
                     };
-                    self.bev_create_ngon(bm, &verts, None, f_choice, Some(&edges), None, Some(&nv_bv_map), mat_nr, true)
+                    self.bev_create_ngon(
+                        bm,
+                        &verts,
+                        None,
+                        f_choice,
+                        Some(&edges),
+                        None,
+                        Some(&nv_bv_map),
+                        mat_nr,
+                        true,
+                    )
                 } else {
                     // Straddles but not a seam: left half in f1, right half in f2.
-                    self.bev_create_ngon(bm, &verts, Some(&faces), f_choice, None, None, Some(&nv_bv_map), mat_nr, true)
+                    self.bev_create_ngon(
+                        bm,
+                        &verts,
+                        Some(&faces),
+                        f_choice,
+                        None,
+                        None,
+                        Some(&nv_bv_map),
+                        mat_nr,
+                        true,
+                    )
                 }
             } else if odd && k == center_adj_k && e1_seam {
                 // The strip next to the center one, in another UV island: snap the edge near
@@ -1086,19 +1184,59 @@ impl Bevel {
                 } else {
                     ([Some(bme), Some(bme), None, None], f2)
                 };
-                self.bev_create_ngon(bm, &verts, None, f_interp, Some(&edges), None, Some(&nv_bv_map), mat_nr, true)
+                self.bev_create_ngon(
+                    bm,
+                    &verts,
+                    None,
+                    f_interp,
+                    Some(&edges),
+                    None,
+                    Some(&nv_bv_map),
+                    mat_nr,
+                    true,
+                )
             } else if !odd && k == mid {
                 // Left poly that touches an even center line on the right.
                 let edges = [None, None, Some(bme), Some(bme)];
-                self.bev_create_ngon(bm, &verts, None, f1, Some(&edges), None, Some(&nv_bv_map), mat_nr, true)
+                self.bev_create_ngon(
+                    bm,
+                    &verts,
+                    None,
+                    f1,
+                    Some(&edges),
+                    None,
+                    Some(&nv_bv_map),
+                    mat_nr,
+                    true,
+                )
             } else if !odd && k == mid + 1 {
                 // Right poly that touches an even center line on the left.
                 let edges = [Some(bme), Some(bme), None, None];
-                self.bev_create_ngon(bm, &verts, None, f2, Some(&edges), None, Some(&nv_bv_map), mat_nr, true)
+                self.bev_create_ngon(
+                    bm,
+                    &verts,
+                    None,
+                    f2,
+                    Some(&edges),
+                    None,
+                    Some(&nv_bv_map),
+                    mat_nr,
+                    true,
+                )
             } else {
                 // Doesn't cross or touch the center line: interpolate in f1 or f2.
                 let f = if k <= mid { f1 } else { f2 };
-                self.bev_create_ngon(bm, &verts, None, f, None, None, Some(&nv_bv_map), mat_nr, true)
+                self.bev_create_ngon(
+                    bm,
+                    &verts,
+                    None,
+                    f,
+                    None,
+                    None,
+                    Some(&nv_bv_map),
+                    mat_nr,
+                    true,
+                )
             };
             self.record_face_kind(r_f, FKind::Edge);
             // Tag the long edges: those out of verts[0] and verts[2].
@@ -1205,12 +1343,12 @@ impl Bevel {
                     } else {
                         1
                     };
-                    let kend = if self.eh(eprev).rightv == Some(v) && self.eh(eprev).profile_index > 0
-                    {
-                        self.eh(eprev).profile_index
-                    } else {
-                        seg
-                    };
+                    let kend =
+                        if self.eh(eprev).rightv == Some(v) && self.eh(eprev).profile_index > 0 {
+                            self.eh(eprev).profile_index
+                        } else {
+                            seg
+                        };
                     for k in kstart..=kend {
                         if let Some(bmv) = self.vm(vm).mv(i, 0, k).v {
                             vv.push(bmv);
@@ -1228,7 +1366,8 @@ impl Bevel {
                     } else {
                         seg - 1
                     };
-                    let kend = if self.eh(e).rightv == Some(self.bprev(v)) && self.eh(e).profile_index > 0
+                    let kend = if self.eh(e).rightv == Some(self.bprev(v))
+                        && self.eh(e).profile_index > 0
                     {
                         self.eh(e).profile_index
                     } else {
@@ -1252,7 +1391,17 @@ impl Bevel {
             return false;
         }
         let n = vv.len();
-        let f_new = self.bev_create_ngon(bm, &vv, None, Some(f), None, None, Some(&nv_bv_map), -1, true);
+        let f_new = self.bev_create_ngon(
+            bm,
+            &vv,
+            None,
+            Some(f),
+            None,
+            None,
+            Some(&nv_bv_map),
+            -1,
+            true,
+        );
 
         // Copy attributes from old edges.
         let mut bme_prev = ee[n - 1];

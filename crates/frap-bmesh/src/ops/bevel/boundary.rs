@@ -28,7 +28,8 @@ impl Bevel {
 
     /// `slide_dist`: the point a distance `d` from `v` along `e->e`.
     pub(crate) fn slide_dist(&self, bm: &BMesh, e: Eh, v: VertId, mut d: f32) -> V3 {
-        let (dir, len) = math::normalize_v3(math::sub(co(bm, v), co(bm, self.other_vert(bm, e, v))));
+        let (dir, len) =
+            math::normalize_v3(math::sub(co(bm, v), co(bm, self.other_vert(bm, e, v))));
         if d > len {
             d = len - (50.0 * super::types::BEVEL_EPSILON_D) as f32;
         }
@@ -430,7 +431,11 @@ impl Bevel {
             math::cross(no, dir)
         };
         let fdir = math::norm(fdir);
-        math::madd(co(bm, v), fdir, if left { eh.offset_l } else { eh.offset_r })
+        math::madd(
+            co(bm, v),
+            fdir,
+            if left { eh.offset_l } else { eh.offset_r },
+        )
     }
 
     /// `adjust_bound_vert`.
@@ -552,7 +557,9 @@ impl Bevel {
         if construct {
             self.set_bound_vert_seams(bm, bv);
             // Also check for seams at the vertex itself.
-            if self.affect_vertices_odd && !self.bev(bv).any_seam && !contig_ldata_around_vert(bm, v)
+            if self.affect_vertices_odd
+                && !self.bev(bv).any_seam
+                && !contig_ldata_around_vert(bm, v)
             {
                 self.bev_mut(bv).any_seam = true;
             }
@@ -864,10 +871,9 @@ impl Bevel {
             }
 
             let ang_kind = self.edges_angle_kind(bm, e, e2, v);
-            let special = (miter_outer != Miter::Sharp
-                && emiter.is_none()
-                && ang_kind == AngleKind::Larger)
-                || (miter_inner != Miter::Sharp && ang_kind == AngleKind::Smaller);
+            let special =
+                (miter_outer != Miter::Sharp && emiter.is_none() && ang_kind == AngleKind::Larger)
+                    || (miter_inner != Miter::Sharp && ang_kind == AngleKind::Smaller);
             if construct {
                 let bnd = self.add_new_bound_vert(vm, p);
                 {
@@ -1236,7 +1242,12 @@ fn slide_dist_edge(bm: &BMesh, e: crate::EdgeId, v: VertId, mut d: f32) -> V3 {
 
 /// `edge_edge_angle_less_than_180`: is the angle swept from `e1` to `e2`, CCW from the normal
 /// side of `f`, neither reflex nor straight?
-fn edge_edge_angle_less_than_180(bm: &BMesh, e1: crate::EdgeId, e2: crate::EdgeId, f: FaceId) -> bool {
+fn edge_edge_angle_less_than_180(
+    bm: &BMesh,
+    e1: crate::EdgeId,
+    e2: crate::EdgeId,
+    f: FaceId,
+) -> bool {
     let [a1, a2] = bm.edge(e1).v;
     let [b1, b2] = bm.edge(e2).v;
     let (v, v1, v2) = if a1 == b1 {

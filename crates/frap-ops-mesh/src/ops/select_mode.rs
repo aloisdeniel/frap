@@ -149,13 +149,22 @@ mod tests {
         assert_eq!(plan(V, F, Action::Toggle, false, true), Some((F, true)));
         assert_eq!(plan(V, V, Action::Toggle, false, false), None);
         // A mixed mode toggles the type off without use_extend… into the type alone.
-        assert_eq!(plan(V | E, E, Action::Toggle, false, false), Some((E, false)));
+        assert_eq!(
+            plan(V | E, E, Action::Toggle, false, false),
+            Some((E, false))
+        );
     }
 
     #[test]
     fn extend_combines_modes() {
-        assert_eq!(plan(V, E, Action::Toggle, true, false), Some((V | E, false)));
-        assert_eq!(plan(V | E, E, Action::Toggle, true, false), Some((V, false)));
+        assert_eq!(
+            plan(V, E, Action::Toggle, true, false),
+            Some((V | E, false))
+        );
+        assert_eq!(
+            plan(V | E, E, Action::Toggle, true, false),
+            Some((V, false))
+        );
         // use_expand only applies without use_extend.
         assert_eq!(plan(V, F, Action::Enable, true, true), Some((V | F, false)));
     }
@@ -165,7 +174,13 @@ mod tests {
         assert_eq!(plan(V, E, Action::Disable, false, false), None);
         assert_eq!(plan(V, V, Action::Disable, false, false), None);
         assert_eq!(plan(V | E, E, Action::Enable, false, false), None);
-        assert_eq!(plan(V | E, E, Action::Disable, false, false), Some((E, false)));
-        assert_eq!(plan(V | E, E, Action::Disable, true, false), Some((V, false)));
+        assert_eq!(
+            plan(V | E, E, Action::Disable, false, false),
+            Some((E, false))
+        );
+        assert_eq!(
+            plan(V | E, E, Action::Disable, true, false),
+            Some((V, false))
+        );
     }
 }

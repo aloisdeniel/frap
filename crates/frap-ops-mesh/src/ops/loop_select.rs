@@ -126,9 +126,8 @@ fn loop_edge(
     if select_cycle && bm.edge_is_boundary(e) {
         // If the loop is selected, toggle to the boundary; if the boundary is, back to the loop.
         if common::walker_select_count(bm, &edge_walk(bm, e, d))[not] == 0 {
-            full_boundary = common::walker_select_count(bm, &edges(walk::edge_boundary(bm, e)))
-                [not]
-                != 0;
+            full_boundary =
+                common::walker_select_count(bm, &edges(walk::edge_boundary(bm, e)))[not] != 0;
         }
     } else if !non_manifold && d.intersects(LoopDelimit::SEAM | LoopDelimit::SHARP) {
         full_loop = full_without_delimiters(bm, |bm, d| edge_walk(bm, e, d), d, select);
@@ -173,14 +172,13 @@ pub(crate) fn exec_impl(cx: &mut OpCtx, p: &Pick, ring: bool, delimit: LoopDelim
     let Some(&me) = bases.get(object_index) else {
         return Ok(OpStatus::Cancelled);
     };
-    let Some(Some(eed)) =
-        common::read(cx, me, |bm| bm.edge_ids().get(edge_index).copied())
-    else {
+    let Some(Some(eed)) = common::read(cx, me, |bm| bm.edge_ids().get(edge_index).copied()) else {
         return Ok(OpStatus::Cancelled);
     };
-    let (eed_hidden, eed_selected) =
-        common::read(cx, me, |bm| (common::hidden(bm, eed), common::selected(bm, eed)))
-            .unwrap_or((true, false));
+    let (eed_hidden, eed_selected) = common::read(cx, me, |bm| {
+        (common::hidden(bm, eed), common::selected(bm, eed))
+    })
+    .unwrap_or((true, false));
     if eed_hidden {
         return Ok(OpStatus::Cancelled);
     }

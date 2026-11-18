@@ -6,7 +6,7 @@
 
 use super::math;
 use super::types::{
-    Affect, Bev, BevVert, BEVEL_EPSILON, Bevel, EdgeHalf, Eh, OffsetType, VMesh, Vm,
+    Affect, BEVEL_EPSILON, Bev, BevVert, Bevel, EdgeHalf, Eh, OffsetType, VMesh, Vm,
 };
 use super::util::{co, contig_ldata_across_edge, edge_calc_length, fno};
 use crate::types::{BMesh, EdgeId, ElemFlag, FaceId, VertId};
@@ -347,7 +347,9 @@ impl Bevel {
         if vertices {
             // Modify the offset by the bevel weight if it is used.
             if self.use_weights {
-                let weight = self.bweight_vert.map_or(0.0, |li| float_at(&bm.vdata, li, v.slot()));
+                let weight = self
+                    .bweight_vert
+                    .map_or(0.0, |li| float_at(&bm.vdata, li, v.slot()));
                 self.bev_mut(bv).offset *= weight;
             }
             // Find the center axis. NOTE: Don't use the vertex normal.

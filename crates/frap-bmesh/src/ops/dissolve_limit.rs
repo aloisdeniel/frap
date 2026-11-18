@@ -99,7 +99,9 @@ pub fn dissolve_limit(bm: &mut BMesh, i: &DissolveLimitIn) -> Result<DissolveLim
         }
     }
     if let Some(v) = i.verts.iter().find(|v| !bm.verts.contains(v.0)) {
-        return Err(BmError::Invalid(format!("dissolve_limit: dead vertex {v:?}")));
+        return Err(BmError::Invalid(format!(
+            "dissolve_limit: dead vertex {v:?}"
+        )));
     }
     if let Some(e) = i.edges.iter().find(|e| !bm.edges.contains(e.0)) {
         return Err(BmError::Invalid(format!("dissolve_limit: dead edge {e:?}")));
@@ -227,7 +229,8 @@ impl Ctx {
             && bm.edge_is_manifold(ve)
             && !self.vert_is_delimiter(bm, v)
         {
-            return ((angle * angle_to_unit) * (mods::edge_calc_face_angle(bm, ve) * angle_to_unit))
+            return ((angle * angle_to_unit)
+                * (mods::edge_calc_face_angle(bm, ve) * angle_to_unit))
                 * unit_to_angle;
         }
         angle
@@ -335,8 +338,7 @@ fn vert_collapse_is_degenerate(bm: &BMesh, v: VertId) -> bool {
     }
     let v0 = bm.edge_other_vert(e0, v);
     let v1 = bm.edge_other_vert(e1, v);
-    if mods::cos_v3v3v3(bm.vert(v0).co, bm.vert(v).co, bm.vert(v1).co).abs()
-        < (1.0 - f32::EPSILON)
+    if mods::cos_v3v3v3(bm.vert(v0).co, bm.vert(v).co, bm.vert(v1).co).abs() < (1.0 - f32::EPSILON)
     {
         for l in bm.edge_loops(e1) {
             if bm.face(bm.lp(l).f).len > 3 {
@@ -547,7 +549,12 @@ mod tests {
             }
         }
         for x in 0..3 {
-            bm.face_create_verts(&[v[x], v[x + 1], v[x + 5], v[x + 4]], None, CreateFlag::empty(), true);
+            bm.face_create_verts(
+                &[v[x], v[x + 1], v[x + 5], v[x + 4]],
+                None,
+                CreateFlag::empty(),
+                true,
+            );
         }
         bm.normals_update();
         bm

@@ -143,13 +143,22 @@ mod tests {
     fn cube_angles() {
         let mut m = frap_mesh::primitives::cube(2.0, true, [1.0; 3]);
         set_sharp_from_angle(&mut m, 0.5);
-        assert_eq!(m.bool_attribute(SHARP_EDGE, Domain::Edge), Some(&[true; 12][..]));
+        assert_eq!(
+            m.bool_attribute(SHARP_EDGE, Domain::Edge),
+            Some(&[true; 12][..])
+        );
         assert!(m.attributes().get(SHARP_FACE).is_none());
         set_sharp_from_angle(&mut m, 2.0);
-        assert_eq!(m.bool_attribute(SHARP_EDGE, Domain::Edge), Some(&[false; 12][..]));
+        assert_eq!(
+            m.bool_attribute(SHARP_EDGE, Domain::Edge),
+            Some(&[false; 12][..])
+        );
         set_sharp_from_angle(&mut m, 0.0);
         assert!(m.attributes().get(SHARP_EDGE).is_none());
-        assert_eq!(m.bool_attribute(SHARP_FACE, Domain::Face), Some(&[true; 6][..]));
+        assert_eq!(
+            m.bool_attribute(SHARP_FACE, Domain::Face),
+            Some(&[true; 6][..])
+        );
         set_sharp_from_angle(&mut m, std::f32::consts::PI);
         assert!(m.attributes().get(SHARP_FACE).is_none());
     }

@@ -59,7 +59,11 @@ fn detect_clip<'a>(cx: &LowerCx<'a>, src: Src<'a>) -> Option<(f32, Src<'a>)> {
         }
         _ => {}
     }
-    match (n.prop_str("operation"), cx.const_f32(in0), cx.const_f32(in1)) {
+    match (
+        n.prop_str("operation"),
+        cx.const_f32(in0),
+        cx.const_f32(in1),
+    ) {
         ("GREATER_THAN", _, Some(c)) => Some((c, in0)),
         ("LESS_THAN", Some(c), _) => Some((c, in1)),
         _ => None,

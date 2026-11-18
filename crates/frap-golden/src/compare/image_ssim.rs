@@ -32,13 +32,10 @@ pub fn decode_png(bytes: &[u8]) -> Result<DecodedImage, String> {
     let mut dec = png::Decoder::new(std::io::Cursor::new(bytes));
     dec.set_transformations(png::Transformations::EXPAND);
     let mut reader = dec.read_info().map_err(|e| format!("PNG: {e}"))?;
-    let mut buf = vec![
-        0;
-        reader
-            .output_buffer_size()
-            .ok_or("PNG: image too large")?
-    ];
-    let info = reader.next_frame(&mut buf).map_err(|e| format!("PNG: {e}"))?;
+    let mut buf = vec![0; reader.output_buffer_size().ok_or("PNG: image too large")?];
+    let info = reader
+        .next_frame(&mut buf)
+        .map_err(|e| format!("PNG: {e}"))?;
     buf.truncate(info.buffer_size());
     let channels = match info.color_type {
         png::ColorType::Grayscale => 1,
@@ -160,13 +157,10 @@ fn ssim_channels(w: u32, h: u32, a: &[u8], b: &[u8], alpha: bool) -> Result<f64,
     }
     let ia = RgbImage::from_raw(w, h, rgb(a)).ok_or("bad RGB buffer")?;
     let ib = RgbImage::from_raw(w, h, rgb(b)).ok_or("bad RGB buffer")?;
-    let mut score = image_compare::rgb_similarity_structure(
-        &image_compare::Algorithm::MSSIMSimple,
-        &ia,
-        &ib,
-    )
-    .map_err(|e| e.to_string())?
-    .score;
+    let mut score =
+        image_compare::rgb_similarity_structure(&image_compare::Algorithm::MSSIMSimple, &ia, &ib)
+            .map_err(|e| e.to_string())?
+            .score;
     if alpha {
         let al = |p: &[u8]| -> Vec<u8> { p.chunks_exact(4).map(|c| c[3]).collect() };
         let ga = GrayImage::from_raw(w, h, al(a)).ok_or("bad alpha buffer")?;
@@ -309,7 +303,9 @@ pub(crate) mod tests {
     fn equal_under_re_encoding() {
         // Same pixels as RGBA8, as 16-bit RGB, and through a PNG round trip.
         let a = picture();
-        let PixelData::U8(p) = &a.pixels else { unreachable!() };
+        let PixelData::U8(p) = &a.pixels else {
+            unreachable!()
+        };
         let rgba = DecodedImage {
             channels: 4,
             pixels: PixelData::U8(
@@ -333,7 +329,9 @@ pub(crate) mod tests {
     fn differs_under_one_change() {
         let a = picture();
         let mut b = a.clone();
-        let PixelData::U8(p) = &mut b.pixels else { unreachable!() };
+        let PixelData::U8(p) = &mut b.pixels else {
+            unreachable!()
+        };
         // One pixel in the centre crop.
         let i = (16 * 32 + 16) * 3;
         p[i] = 255;
@@ -346,7 +344,9 @@ pub(crate) mod tests {
         assert_eq!(compare("img", &b, &a, 1.0, 0.0).len(), 2);
         // A large change fails the default thresholds.
         let mut c = a.clone();
-        let PixelData::U8(p) = &mut c.pixels else { unreachable!() };
+        let PixelData::U8(p) = &mut c.pixels else {
+            unreachable!()
+        };
         for x in p.iter_mut().skip(1).step_by(3) {
             *x = 255 - *x;
         }

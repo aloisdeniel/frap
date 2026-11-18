@@ -40,7 +40,10 @@ const CORNER_VERT: &str = ".corner_vert";
 const CORNER_EDGE: &str = ".corner_edge";
 
 fn is_topology(name: &str) -> bool {
-    matches!(name, POSITION | EDGE_VERTS | CORNER_VERT | CORNER_EDGE | MATERIAL_INDEX)
+    matches!(
+        name,
+        POSITION | EDGE_VERTS | CORNER_VERT | CORNER_EDGE | MATERIAL_INDEX
+    )
 }
 
 fn domain_len(m: &Mesh, d: Domain) -> usize {
@@ -190,7 +193,8 @@ pub(crate) fn join(parts: &[Part], write_material_index: bool) -> Result<Mesh, S
             })
             .collect();
         let data = concat(&cols).ok_or_else(|| format!("frap internal: attribute '{name}'"))?;
-        out.attributes_mut().insert(Attribute { name, domain, data });
+        out.attributes_mut()
+            .insert(Attribute { name, domain, data });
     }
     // Vertex groups by name.
     let mut groups: Vec<SmolStr> = base.vertex_group_names.clone();
@@ -274,7 +278,13 @@ mod tests {
         let names: Vec<&str> = m.attributes().iter().map(|a| a.name.as_str()).collect();
         assert_eq!(
             names,
-            [POSITION, EDGE_VERTS, CORNER_VERT, CORNER_EDGE, MATERIAL_INDEX]
+            [
+                POSITION,
+                EDGE_VERTS,
+                CORNER_VERT,
+                CORNER_EDGE,
+                MATERIAL_INDEX
+            ]
         );
         match &m.attributes().get(MATERIAL_INDEX).unwrap().data {
             AttrData::Int(v) => assert_eq!(v.as_slice(), &[0, 1]),
@@ -312,7 +322,9 @@ mod tests {
         b.deform_verts_mut()[0].weights.push((0, 0.5));
         let m = join(&parts(&a, &b), false).unwrap();
         match &m.attributes().get("w").unwrap().data {
-            AttrData::Float(v) => assert_eq!(v.as_slice(), &[0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 4.0]),
+            AttrData::Float(v) => {
+                assert_eq!(v.as_slice(), &[0.0, 0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 4.0])
+            }
             _ => panic!(),
         }
         assert!(m.attributes().get(MATERIAL_INDEX).is_none());

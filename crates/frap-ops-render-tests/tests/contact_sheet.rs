@@ -473,6 +473,45 @@ bpy.data.objects['Sphere'].select_set(True)");
     assert!(corner.iter().all(|c| *c < 80), "{corner:?}");
 }
 
+/// Nothing to frame (no object selected, or no mesh at all) still renders, framed on a 2 m
+/// cube around the origin, and says so with a WARNING (M2 stabilization round 3).
+#[test]
+fn nothing_to_frame_warns() {
+    let mut e = Env::new("cs_nothing");
+    let warning = |j: &J| -> Option<String> {
+        common::reports(j)
+            .into_iter()
+            .find(|(t, m)| t == "WARNING" && m.starts_with("frap: no objects to frame"))
+            .map(|(_, m)| m)
+    };
+    e.ok("bpy.ops.object.select_all(action='DESELECT')");
+    let Some(j) = sheet(
+        &mut e,
+        "filepath='//none.png', views={'TOP'}, objects='SELECTED', view_size=16",
+    ) else {
+        return;
+    };
+    assert_eq!(
+        warning(&j).as_deref(),
+        Some(
+            "frap: no objects to frame (objects='SELECTED', none selected); the views frame a 2 m cube around the origin"
+        ),
+        "{j}"
+    );
+    let j = sheet(&mut e, "filepath='//vis.png', views={'TOP'}, view_size=16").unwrap();
+    assert_eq!(warning(&j), None, "{j}");
+    e.ok("bpy.data.objects.remove(bpy.data.objects['Cube'])");
+    let j = sheet(
+        &mut e,
+        "filepath='//empty.png', views={'TOP'}, view_size=16",
+    )
+    .unwrap();
+    assert!(
+        warning(&j).is_some_and(|m| m.contains("objects='VISIBLE'")),
+        "{j}"
+    );
+}
+
 /// Cavity and depth of field are not rendered yet: both `render.render` and the sheet say so
 /// (WARNING), and say nothing when X-ray disables them (Blender ignores them there too).
 #[test]

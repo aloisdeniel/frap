@@ -183,11 +183,7 @@ pub(crate) fn edge_boundary(bm: &BMesh, e: EdgeId) -> Vec<EdgeId> {
         }
         for v in bm.edge(e).v {
             for eo in bm.vert_edges(v) {
-                if eo != e
-                    && bm.edge_is_boundary(eo)
-                    && !visit.contains(&eo)
-                    && !hidden_e(bm, eo)
-                {
+                if eo != e && bm.edge_is_boundary(eo) && !visit.contains(&eo) && !hidden_e(bm, eo) {
                     st.push_front(eo);
                     visit.insert(eo);
                 }
@@ -437,7 +433,9 @@ impl<'m> LoopShellWire<'m> {
             if !self.edge_ok(bm, e) {
                 continue;
             }
-            let Some(l_first) = bm.edge(e).l else { continue };
+            let Some(l_first) = bm.edge(e).l else {
+                continue;
+            };
             let mut it = l_first;
             loop {
                 let r = if bm.lp(it).v == ll.v {

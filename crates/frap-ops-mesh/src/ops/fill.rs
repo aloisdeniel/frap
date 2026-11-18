@@ -8,8 +8,8 @@
 //! edge anywhere: `RuntimeError: Error: No edges selected`; nothing filled: WARNING `No faces
 //! filled` and `CANCELLED`.
 
-use frap_bmesh::ops::triangle_fill::{TriangleFillIn, triangle_fill};
 use frap_bmesh::BMElem;
+use frap_bmesh::ops::triangle_fill::{TriangleFillIn, triangle_fill};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_mesh::mesh;

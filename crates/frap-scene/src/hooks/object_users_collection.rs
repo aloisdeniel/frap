@@ -7,9 +7,7 @@
 //! A tuple value: a master collection is embedded (no `IdAny`), so it is a pointer item
 //! (`Value::Ptr` at `Root::Embedded`), which a collection of IDs cannot hold.
 
-use frap_rna::{
-    EmbeddedSlot, Field, PropDef, RnaError, RnaPtr, Root, Value, rna_hook,
-};
+use frap_rna::{EmbeddedSlot, Field, PropDef, RnaError, RnaPtr, Root, Value, rna_hook};
 
 use crate::HostRead;
 use crate::id::paths::object_of;

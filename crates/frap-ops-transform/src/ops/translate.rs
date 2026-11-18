@@ -9,8 +9,8 @@
 //! The operator is registered by hand rather than with `#[operator]` because the mode
 //! handlers take the converted `OpArgs` (`TransformModeHandler::apply`).
 
-use frap_op::prelude::*;
 use frap_op::TransformOp;
+use frap_op::prelude::*;
 use frap_spec_ops_transform::transform;
 
 fn exec(cx: &mut OpCtx, args: &OpArgs) -> OpResult {
@@ -44,7 +44,10 @@ mod tests {
 
     #[test]
     fn registered_with_the_generated_spec() {
-        assert!(std::ptr::eq(super::TRANSLATE.spec, transform::Translate::spec()));
+        assert!(std::ptr::eq(
+            super::TRANSLATE.spec,
+            transform::Translate::spec()
+        ));
         assert_eq!(super::TRANSLATE.spec.idname, "transform.translate");
     }
 

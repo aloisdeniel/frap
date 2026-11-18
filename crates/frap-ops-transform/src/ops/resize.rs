@@ -10,8 +10,8 @@
 //! without a value scales to zero. Registered by hand: the mode handlers take the converted
 //! `OpArgs`.
 
-use frap_op::prelude::*;
 use frap_op::TransformOp;
+use frap_op::prelude::*;
 use frap_spec_ops_transform::transform;
 
 fn exec(cx: &mut OpCtx, args: &OpArgs) -> OpResult {

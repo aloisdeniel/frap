@@ -56,7 +56,9 @@ const EDGE_ISGC: u16 = 8;
 /// Runs `dissolve_verts` on `bm`.
 pub fn dissolve_verts(bm: &mut BMesh, i: &DissolveVertsIn) -> Result<DissolveVertsOut, BmError> {
     if let Some(v) = i.verts.iter().find(|v| !bm.verts.contains(v.0)) {
-        return Err(BmError::Invalid(format!("dissolve_verts: dead vertex {v:?}")));
+        return Err(BmError::Invalid(format!(
+            "dissolve_verts: dead vertex {v:?}"
+        )));
     }
     bm.bmo_exec(TYPE_FLAG, |bm| {
         dissolve_verts_exec(bm, &i.verts, i.use_face_split, i.use_boundary_tear);
@@ -126,7 +128,12 @@ pub(crate) fn bm_face_split(bm: &mut BMesh, oflag: u16, use_edge_delete: bool) {
     }
 }
 
-fn dissolve_verts_exec(bm: &mut BMesh, verts: &[VertId], use_face_split: bool, use_boundary_tear: bool) {
+fn dissolve_verts_exec(
+    bm: &mut BMesh,
+    verts: &[VertId],
+    use_face_split: bool,
+    use_boundary_tear: bool,
+) {
     for &v in verts {
         bm.oflag_enable(v, VERT_MARK | VERT_ISGC);
     }

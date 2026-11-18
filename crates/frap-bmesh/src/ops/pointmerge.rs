@@ -47,7 +47,12 @@ pub const TYPE_FLAG: OpTypeFlag = OpTypeFlag::NORMALS_CALC
     .union(OpTypeFlag::SELECT_FLUSH)
     .union(OpTypeFlag::SELECT_VALIDATE);
 
-fn check_alive(bm: &BMesh, op: &str, verts: &[VertId], target: Option<VertId>) -> Result<(), BmError> {
+fn check_alive(
+    bm: &BMesh,
+    op: &str,
+    verts: &[VertId],
+    target: Option<VertId>,
+) -> Result<(), BmError> {
     if let Some(v) = verts
         .iter()
         .chain(target.iter())
@@ -168,10 +173,15 @@ mod tests {
 
     fn quad() -> (BMesh, Vec<VertId>) {
         let mut bm = BMesh::new();
-        let v: Vec<VertId> = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
-            .iter()
-            .map(|&c| bm.vert_create(c, None, CreateFlag::empty()))
-            .collect();
+        let v: Vec<VertId> = [
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+        ]
+        .iter()
+        .map(|&c| bm.vert_create(c, None, CreateFlag::empty()))
+        .collect();
         bm.face_create_verts(&v, None, CreateFlag::empty(), true);
         (bm, v)
     }

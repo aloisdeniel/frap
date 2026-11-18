@@ -99,12 +99,16 @@ fn mode_items(c: &Context) -> Vec<EnumItemOwned> {
 
 /// The objects in `mode` with the active object's type: the active one first, then the others
 /// in base order (`editmode_toggle`'s exit loop runs over every object of the view layer).
-fn objects_in_mode(c: &Context, active: IdRef<ObjectId>, ty: &str, mode: ObjectMode) -> Vec<IdRef<ObjectId>> {
+fn objects_in_mode(
+    c: &Context,
+    active: IdRef<ObjectId>,
+    ty: &str,
+    mode: ObjectMode,
+) -> Vec<IdRef<ObjectId>> {
     let mut out = vec![active];
     for b in &c.view_layer().bases {
         if b.object != active
-            && c
-                .main
+            && c.main
                 .objects
                 .get(b.object)
                 .is_some_and(|o| o.mode == mode && o.object_type() == ty)
@@ -183,7 +187,11 @@ fn exec(cx: &mut OpCtx, p: object::ModeSet) -> OpResult {
         );
         e.detail.insert(
             "valid".into(),
-            items.iter().map(|i| i.identifier.as_str()).collect::<Vec<_>>().into(),
+            items
+                .iter()
+                .map(|i| i.identifier.as_str())
+                .collect::<Vec<_>>()
+                .into(),
         );
         return Err(OpError::Rna(e));
     }

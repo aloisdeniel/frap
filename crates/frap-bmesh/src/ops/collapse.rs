@@ -217,8 +217,7 @@ fn uv_edge_walker_step(
             let mut l_radial = l_radial_first;
             loop {
                 let lr = bm.lp(l_radial);
-                let skip = visit.contains(&l_radial)
-                    || (lr.v != pv && !mask_edge(bm, lr.e, oflag));
+                let skip = visit.contains(&l_radial) || (lr.v != pv && !mask_edge(bm, lr.e, oflag));
                 if !skip {
                     let l_other = if lr.v != pv { lr.next } else { l_radial };
                     let data_other = mods::math_get(bm, layer, l_other);
@@ -250,10 +249,15 @@ mod tests {
     #[test]
     fn collapsing_one_edge_of_a_quad_leaves_a_triangle() {
         let mut bm = BMesh::new();
-        let v: Vec<VertId> = [[0.0, 0.0, 0.0], [2.0, 0.0, 0.0], [2.0, 1.0, 0.0], [0.0, 1.0, 0.0]]
-            .iter()
-            .map(|&c| bm.vert_create(c, None, CreateFlag::empty()))
-            .collect();
+        let v: Vec<VertId> = [
+            [0.0, 0.0, 0.0],
+            [2.0, 0.0, 0.0],
+            [2.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+        ]
+        .iter()
+        .map(|&c| bm.vert_create(c, None, CreateFlag::empty()))
+        .collect();
         bm.face_create_verts(&v, None, CreateFlag::empty(), true);
         let e = bm.edge_exists(v[0], v[1]).unwrap();
         collapse(

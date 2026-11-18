@@ -287,7 +287,11 @@ impl Internal {
             if dx > 0 {
                 loop {
                     let dy = self.pt(v1).y - self.pt(v0).y;
-                    let w0 = if side == 1 { self.v[v0].next } else { self.v[v0].prev };
+                    let w0 = if side == 1 {
+                        self.v[v0].next
+                    } else {
+                        self.v[v0].prev
+                    };
                     if w0 != v0 {
                         let dx0 = (self.pt(w0).x - self.pt(v0).x) * sign;
                         let dy0 = self.pt(w0).y - self.pt(v0).y;
@@ -297,7 +301,11 @@ impl Internal {
                             continue;
                         }
                     }
-                    let w1 = if side == 1 { self.v[v1].next } else { self.v[v1].prev };
+                    let w1 = if side == 1 {
+                        self.v[v1].next
+                    } else {
+                        self.v[v1].prev
+                    };
                     if w1 != v1 {
                         let dx1 = (self.pt(w1).x - self.pt(v1).x) * sign;
                         let dy1 = self.pt(w1).y - self.pt(v1).y;
@@ -313,7 +321,11 @@ impl Internal {
             } else if dx < 0 {
                 loop {
                     let dy = self.pt(v1).y - self.pt(v0).y;
-                    let w1 = if side == 1 { self.v[v1].prev } else { self.v[v1].next };
+                    let w1 = if side == 1 {
+                        self.v[v1].prev
+                    } else {
+                        self.v[v1].next
+                    };
                     if w1 != v1 {
                         let dx1 = (self.pt(w1).x - self.pt(v1).x) * sign;
                         let dy1 = self.pt(w1).y - self.pt(v1).y;
@@ -323,7 +335,11 @@ impl Internal {
                             continue;
                         }
                     }
-                    let w0 = if side == 1 { self.v[v0].prev } else { self.v[v0].next };
+                    let w0 = if side == 1 {
+                        self.v[v0].prev
+                    } else {
+                        self.v[v0].next
+                    };
                     if w0 != v0 {
                         let dx0 = (self.pt(w0).x - self.pt(v0).x) * sign;
                         let dy0 = self.pt(w0).y - self.pt(v0).y;
@@ -341,7 +357,11 @@ impl Internal {
                 let mut y0 = self.pt(v0).y;
                 let mut w0 = v0;
                 loop {
-                    let t = if side == 1 { self.v[w0].next } else { self.v[w0].prev };
+                    let t = if side == 1 {
+                        self.v[w0].next
+                    } else {
+                        self.v[w0].prev
+                    };
                     if t != v0 && self.pt(t).x == x && self.pt(t).y <= y0 {
                         w0 = t;
                         y0 = self.pt(t).y;
@@ -353,7 +373,11 @@ impl Internal {
                 let mut y1 = self.pt(v1).y;
                 let mut w1 = v1;
                 loop {
-                    let t = if side == 1 { self.v[w1].prev } else { self.v[w1].next };
+                    let t = if side == 1 {
+                        self.v[w1].prev
+                    } else {
+                        self.v[w1].next
+                    };
                     if t != v1 && self.pt(t).x == x && self.pt(t).y >= y1 {
                         w1 = t;
                         y1 = self.pt(t).y;
@@ -1277,7 +1301,11 @@ mod tests {
                 let z = 1.0 - 2.0 * t;
                 let r = (1.0 - z * z).max(0.0).sqrt();
                 let a = i as f64 * 2.399_963_229_728_653;
-                [(r * libm::cos(a)) as f32, (r * libm::sin(a)) as f32, z as f32]
+                [
+                    (r * libm::cos(a)) as f32,
+                    (r * libm::sin(a)) as f32,
+                    z as f32,
+                ]
             })
             .collect();
         let h = compute(&pts);

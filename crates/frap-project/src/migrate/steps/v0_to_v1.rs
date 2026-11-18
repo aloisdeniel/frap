@@ -18,11 +18,18 @@ pub const MIGRATION: Migration = Migration {
 fn apply(cx: &mut MigrationCx<'_>) -> Result<(), String> {
     rename_key(cx.manifest, "blender_rna_version", "blender_api")?;
     for_each_id(cx.scene, "meshes", |name, mesh| {
-        let Some(attrs) = mesh.get_mut("attributes") else { return Ok(()) };
-        let attrs = attrs.as_array_mut().ok_or_else(|| format!("meshes[{name:?}].attributes is not an array"))?;
+        let Some(attrs) = mesh.get_mut("attributes") else {
+            return Ok(());
+        };
+        let attrs = attrs
+            .as_array_mut()
+            .ok_or_else(|| format!("meshes[{name:?}].attributes is not an array"))?;
         for attr in attrs {
-            let attr = attr.as_object_mut().ok_or_else(|| format!("meshes[{name:?}] has a non-object attribute"))?;
-            rename_key(attr, "type", "data_type").map_err(|e| format!("meshes[{name:?}] attribute: {e}"))?;
+            let attr = attr
+                .as_object_mut()
+                .ok_or_else(|| format!("meshes[{name:?}] has a non-object attribute"))?;
+            rename_key(attr, "type", "data_type")
+                .map_err(|e| format!("meshes[{name:?}] attribute: {e}"))?;
         }
         Ok(())
     })?;

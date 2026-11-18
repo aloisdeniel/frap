@@ -200,7 +200,11 @@ impl EdgeLoopStore {
                 let v = self.verts[i];
                 let has_next = i + 1 < self.verts.len();
                 if has_next || self.closed {
-                    let other = if has_next { self.verts[i + 1] } else { self.verts[0] };
+                    let other = if has_next {
+                        self.verts[i + 1]
+                    } else {
+                        self.verts[0]
+                    };
                     let vs = edge_split(bm, v, other, split_swap);
                     self.verts.insert(i + 1, vs);
                     i += 2;
@@ -224,7 +228,11 @@ impl EdgeLoopStore {
                 let v = self.verts[i];
                 let has_next = i + 1 < self.verts.len();
                 if has_next || self.closed {
-                    let other = if has_next { self.verts[i + 1] } else { self.verts[0] };
+                    let other = if has_next {
+                        self.verts[i + 1]
+                    } else {
+                        self.verts[0]
+                    };
                     let vs = edge_split(bm, v, other, split_swap);
                     self.verts.insert(i + 1, vs);
                 } else {
@@ -242,7 +250,10 @@ impl EdgeLoopStore {
 // bm_loop_build, BM_mesh_edgeloops_find).
 /// `BM_mesh_edgeloops_find`: the chains/loops of edges passing `test` (vertices with more
 /// than two such edges break a loop and discard it).
-pub fn mesh_edgeloops_find(bm: &BMesh, test: &dyn Fn(&BMesh, EdgeId) -> bool) -> Vec<EdgeLoopStore> {
+pub fn mesh_edgeloops_find(
+    bm: &BMesh,
+    test: &dyn Fn(&BMesh, EdgeId) -> bool,
+) -> Vec<EdgeLoopStore> {
     let mut tag_e: FxHashSet<EdgeId> = FxHashSet::default();
     let mut tag_v: FxHashSet<VertId> = FxHashSet::default();
     let mut edges = Vec::new();
@@ -255,17 +266,18 @@ pub fn mesh_edgeloops_find(bm: &BMesh, test: &dyn Fn(&BMesh, EdgeId) -> bool) ->
             edges.push(e);
         }
     }
-    let other_tag = |tag_e: &FxHashSet<EdgeId>, v: VertId, v_prev: VertId| -> (u32, Option<EdgeId>) {
-        let mut count = 0;
-        let mut e_next = None;
-        for e in bm.vert_edges(v) {
-            if tag_e.contains(&e) && bm.edge_other_vert(e, v) != v_prev {
-                e_next = Some(e);
-                count += 1;
+    let other_tag =
+        |tag_e: &FxHashSet<EdgeId>, v: VertId, v_prev: VertId| -> (u32, Option<EdgeId>) {
+            let mut count = 0;
+            let mut e_next = None;
+            for e in bm.vert_edges(v) {
+                if tag_e.contains(&e) && bm.edge_other_vert(e, v) != v_prev {
+                    e_next = Some(e);
+                    count += 1;
+                }
             }
-        }
-        (count, e_next)
-    };
+            (count, e_next)
+        };
     // `bm_loop_build`: returns false on a branch.
     let build = |tag_e: &mut FxHashSet<EdgeId>,
                  tag_v: &mut FxHashSet<VertId>,
@@ -352,10 +364,10 @@ pub fn mesh_edgeloops_find_path(
     let mut v_match: Option<(VertId, VertId)> = None;
 
     let step = |bm: &mut BMesh,
-                    index: &mut FxHashMap<VertId, i32>,
-                    tag_e: &mut FxHashSet<EdgeId>,
-                    lb: &mut Vec<VertId>,
-                    dir: i32|
+                index: &mut FxHashMap<VertId, i32>,
+                tag_e: &mut FxHashSet<EdgeId>,
+                lb: &mut Vec<VertId>,
+                dir: i32|
      -> (bool, Option<(VertId, VertId)>) {
         let mut lb_tmp = Vec::new();
         for &vs in lb.iter() {
@@ -420,7 +432,10 @@ pub fn mesh_edgeloops_find_path(
         let e = bm.vert(v).e.expect("path edge");
         v = bm.edge_other_vert(e, v);
     }
-    Some(EdgeLoopStore::from_verts(verts.into_iter().collect(), false))
+    Some(EdgeLoopStore::from_verts(
+        verts.into_iter().collect(),
+        false,
+    ))
 }
 
 /// `BM_mesh_edgeloops_calc_center`.

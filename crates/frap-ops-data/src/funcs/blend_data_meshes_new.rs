@@ -16,5 +16,8 @@ fn blend_data_meshes_new(
 ) -> Result<Value, RnaError> {
     let name = arg_str(args, "name").to_owned();
     let (main, log) = h.main_mut();
-    Ok(main.meshes.insert(&name, Mesh::new(name.as_str()), log).into())
+    Ok(main
+        .meshes
+        .insert(&name, Mesh::new(name.as_str()), log)
+        .into())
 }

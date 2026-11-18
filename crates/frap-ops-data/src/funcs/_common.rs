@@ -22,8 +22,8 @@
 use frap_mesh::{AttrData, Domain, Mesh};
 use frap_nodes::{NodeTree, SocketAddr};
 use frap_rna::{
-    CollectionId, Detached, EmbeddedSlot, IdAny, IdCode, IdRef, IdType, MeshId, ObjectId, PyExc, RnaError,
-    RnaErrorKind, RnaPtr, Root, SceneId, Seg, StructDef, Value,
+    CollectionId, Detached, EmbeddedSlot, IdAny, IdCode, IdRef, IdType, MeshId, ObjectId, PyExc,
+    RnaError, RnaErrorKind, RnaPtr, Root, SceneId, Seg, StructDef, Value,
 };
 use frap_scene::id::Collection;
 use frap_scene::{ChangeLog, FuncArgs, Host, IdMap, Main, ObjectMode};
@@ -365,8 +365,9 @@ pub(crate) fn copy_id(main: &mut Main, a: IdAny, log: &mut ChangeLog) -> Result<
             "ID.copy() of a {} is not implemented yet (scenes: M3)",
             id_type_name(a.code)
         ))),
-        IdCode::OB => dup(&mut main.objects, a, log, |o| o.mode = ObjectMode::Object)
-            .ok_or_else(missing),
+        IdCode::OB => {
+            dup(&mut main.objects, a, log, |o| o.mode = ObjectMode::Object).ok_or_else(missing)
+        }
         IdCode::ME => {
             let new = dup(&mut main.meshes, a, log, |_| ()).ok_or_else(missing)?;
             // A mesh copy owns a copy of its shape keys (`BKE_id_copy` of the `Key`).
@@ -628,9 +629,9 @@ pub(crate) fn tree_mut<'m>(
     log: &mut ChangeLog,
 ) -> Result<&'m mut NodeTree, RnaError> {
     match root {
-        Root::Id(a) if a.code == IdCode::NT => a
-            .typed()
-            .and_then(|r| main.node_groups.get_mut(r, log)),
+        Root::Id(a) if a.code == IdCode::NT => {
+            a.typed().and_then(|r| main.node_groups.get_mut(r, log))
+        }
         Root::Embedded {
             owner,
             slot: EmbeddedSlot::NodeTree,

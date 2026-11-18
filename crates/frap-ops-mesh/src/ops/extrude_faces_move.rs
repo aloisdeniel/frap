@@ -39,9 +39,16 @@ mod tests {
 
     #[test]
     fn macro_definition_forces_step_properties() {
-        let mut forced = macro_step_forced("MESH_OT_extrude_faces_move", "TRANSFORM_OT_shrink_fatten");
+        let mut forced =
+            macro_step_forced("MESH_OT_extrude_faces_move", "TRANSFORM_OT_shrink_fatten");
         forced.sort();
-        assert_eq!(forced, vec![("mirror", false), ("use_proportional_edit", false)]);
-        assert!(macro_step_forced("MESH_OT_extrude_faces_move", "MESH_OT_extrude_faces_indiv").is_empty());
+        assert_eq!(
+            forced,
+            vec![("mirror", false), ("use_proportional_edit", false)]
+        );
+        assert!(
+            macro_step_forced("MESH_OT_extrude_faces_move", "MESH_OT_extrude_faces_indiv")
+                .is_empty()
+        );
     }
 }

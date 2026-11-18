@@ -145,11 +145,17 @@ pub(crate) fn split_edges(mesh: &mut Mesh, split: &[bool]) {
     }
     let vert_to_corner = group_by(
         orig_verts,
-        corner_verts.iter().enumerate().map(|(c, &v)| (v as usize, c)),
+        corner_verts
+            .iter()
+            .enumerate()
+            .map(|(c, &v)| (v as usize, c)),
     );
     let edge_to_corner = group_by(
         orig_edges.len(),
-        corner_edges.iter().enumerate().map(|(c, &e)| (e as usize, c)),
+        corner_edges
+            .iter()
+            .enumerate()
+            .map(|(c, &e)| (e as usize, c)),
     );
     let loose: Vec<bool> = edge_to_corner.iter().map(Vec::is_empty).collect();
     let any_loose = loose.iter().any(|&l| l);
@@ -284,7 +290,13 @@ pub(crate) fn split_edges(mesh: &mut Mesh, split: &[bool]) {
         }
     }
     // `propagate_edge_attributes` / `propagate_vert_attributes`.
-    propagate(mesh, Domain::Edge, orig_edges.len(), &edge_map, ".edge_verts");
+    propagate(
+        mesh,
+        Domain::Edge,
+        orig_edges.len(),
+        &edge_map,
+        ".edge_verts",
+    );
     edges.extend(new_edges);
     let mut vert_map = Vec::new();
     for (i, &v) in affected.iter().enumerate() {

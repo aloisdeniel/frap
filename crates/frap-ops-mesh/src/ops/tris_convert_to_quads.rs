@@ -76,7 +76,11 @@ fn exec(cx: &mut OpCtx, p: mesh::TrisConvertToQuads) -> OpResult {
         }
         let elems: Vec<BMElem> = out.faces.iter().map(|&f| BMElem::Face(f)).collect();
         edbm::select_elems(bm, &elems);
-        if deselect_joined && bm.select_mode.intersects(SelectMode::VERT | SelectMode::EDGE) {
+        if deselect_joined
+            && bm
+                .select_mode
+                .intersects(SelectMode::VERT | SelectMode::EDGE)
+        {
             // Failing to flush would leave an invalid selection.
             let mode = bm.select_mode;
             bm.select_flush_mode_ex(mode, false);

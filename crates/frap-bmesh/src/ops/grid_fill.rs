@@ -99,7 +99,11 @@ fn barycentric_weights_v2(v1: [f32; 2], v2: [f32; 2], v3: [f32; 2], co: [f32; 2]
     let cross_tri = |a: [f32; 2], b: [f32; 2], c: [f32; 2]| {
         (a[0] - b[0]) * (b[1] - c[1]) + (a[1] - b[1]) * (c[0] - b[0])
     };
-    let mut w = [cross_tri(v2, v3, co), cross_tri(v3, v1, co), cross_tri(v1, v2, co)];
+    let mut w = [
+        cross_tri(v2, v3, co),
+        cross_tri(v3, v1, co),
+        cross_tri(v1, v2, co),
+    ];
     let wtot = w[0] + w[1] + w[2];
     let f = 1.0 / wtot;
     w = [w[0] * f, w[1] * f, w[2] * f];
@@ -119,7 +123,12 @@ fn transform_point_by_tri_v3(pt_src: V3, tar: &[V3; 3], src: &[V3; 3]) -> V3 {
     let t0 = bli::mul_v3_m3v3(&m, src[0]);
     let t1 = bli::mul_v3_m3v3(&m, src[1]);
     let t2 = bli::mul_v3_m3v3(&m, src[2]);
-    let w = barycentric_weights_v2([t0[0], t0[1]], [t1[0], t1[1]], [t2[0], t2[1]], [pt_xy[0], pt_xy[1]]);
+    let w = barycentric_weights_v2(
+        [t0[0], t0[1]],
+        [t1[0], t1[1]],
+        [t2[0], t2[1]],
+        [pt_xy[0], pt_xy[1]],
+    );
     let mut p = [0.0f32; 3];
     for k in 0..3 {
         p[k] = tar[0][k] * w[0] + tar[1][k] * w[1] + tar[2][k] * w[2];
@@ -133,7 +142,10 @@ fn transform_point_by_tri_v3(pt_src: V3, tar: &[V3; 3], src: &[V3; 3]) -> V3 {
 // Ported from blender/source/blender/blenlib/intern/math_geom.cc (barycentric_weights_v2_quad).
 fn barycentric_weights_v2_quad(v: [[f32; 2]; 4], co: [f32; 2]) -> [f32; 4] {
     let dirs: Vec<[f32; 2]> = v.iter().map(|p| [p[0] - co[0], p[1] - co[1]]).collect();
-    let lens: Vec<f32> = dirs.iter().map(|d| (d[0] * d[0] + d[1] * d[1]).sqrt()).collect();
+    let lens: Vec<f32> = dirs
+        .iter()
+        .map(|d| (d[0] * d[0] + d[1] * d[1]).sqrt())
+        .collect();
     for k in 0..4 {
         if lens[k] < f32::EPSILON {
             let mut w = [0.0; 4];
@@ -176,7 +188,11 @@ fn barycentric_weights_v2_quad(v: [[f32; 2]; 4], co: [f32; 2]) -> [f32; 4] {
     for x in &mut w {
         *x *= f;
     }
-    if w.iter().all(|x| x.is_finite()) { w } else { [0.25; 4] }
+    if w.iter().all(|x| x.is_finite()) {
+        w
+    } else {
+        [0.25; 4]
+    }
 }
 
 /// `barycentric_weights_v2_grid_cache`.
@@ -201,7 +217,11 @@ fn loop_pair_from_verts(bm: &BMesh, v_a: VertId, v_b: VertId) -> [Option<LoopId>
     match bm.edge(e).l {
         Some(l) => {
             let ll = bm.lp(l);
-            if ll.v == v_a { [Some(l), Some(ll.next)] } else { [Some(ll.next), Some(l)] }
+            if ll.v == v_a {
+                [Some(l), Some(ll.next)]
+            } else {
+                [Some(ll.next), Some(l)]
+            }
         }
         None => [None, None],
     }
@@ -286,7 +306,10 @@ fn grid_fill_array(
             co(bm, v_grid, xy(xtot - 1, y)),
             co(bm, v_grid, xy(0, y + 1)),
             co(bm, v_grid, xy(xtot - 1, y + 1)),
-            Some((co(bm, v_grid, xy(0, y - 1)), co(bm, v_grid, xy(xtot - 1, y - 1)))),
+            Some((
+                co(bm, v_grid, xy(0, y - 1)),
+                co(bm, v_grid, xy(xtot - 1, y - 1)),
+            )),
             false,
         );
         for x in 1..xtot - 1 {
@@ -328,7 +351,11 @@ fn grid_fill_array(
             let tl = g(v_grid, xy(x, y + 1));
             let tr = g(v_grid, xy(x + 1, y + 1));
             let br = g(v_grid, xy(x + 1, y));
-            let quad = if use_flip { [bl, tl, tr, br] } else { [br, tr, tl, bl] };
+            let quad = if use_flip {
+                [bl, tl, tr, br]
+            } else {
+                [br, tr, tl, bl]
+            };
             let f = bm
                 .face_create_verts(&quad, None, CreateFlag::empty(), true)
                 .expect("grid quad");
@@ -486,7 +513,8 @@ fn exec(bm: &mut BMesh, i: &GridFillIn) -> Result<GridFillOut, BmError> {
     edgeloop_hide_set(bm, &b, true);
     let mut rails: Option<(EdgeLoopStore, EdgeLoopStore)> = None;
     if let Some(ra) = edgeloop::mesh_edgeloops_find_path(bm, Some(&rail_test), v_a_first, v_b_first)
-        && let Some(rb) = edgeloop::mesh_edgeloops_find_path(bm, Some(&rail_test), v_a_last, v_b_last)
+        && let Some(rb) =
+            edgeloop::mesh_edgeloops_find_path(bm, Some(&rail_test), v_a_last, v_b_last)
     {
         rails = Some((ra, rb));
     }
@@ -572,7 +600,13 @@ mod tests {
     fn overlapping_rails_are_refused() {
         // Chains 0-1 and 2-3; both rails run through vertex 4.
         let (mut bm, e) = mesh(
-            &[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [1.0, 2.0, 0.0], [0.5, 1.0, 0.0]],
+            &[
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 2.0, 0.0],
+                [1.0, 2.0, 0.0],
+                [0.5, 1.0, 0.0],
+            ],
             &[(0, 1), (2, 3), (0, 4), (4, 2), (1, 4), (4, 3)],
         );
         let r = grid_fill(
@@ -582,7 +616,10 @@ mod tests {
                 ..Default::default()
             },
         );
-        assert_eq!(r, Err(BmError::Cancel("Connecting edge loops overlap".into())));
+        assert_eq!(
+            r,
+            Err(BmError::Cancel("Connecting edge loops overlap".into()))
+        );
         assert_eq!(bm.faces_num(), 0);
     }
 
@@ -598,7 +635,12 @@ mod tests {
         );
         assert!(matches!(r, Err(BmError::Cancel(m)) if m.starts_with("Select two edge loops")));
         let (mut bm, e) = mesh(
-            &[[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 2.0, 0.0], [1.0, 2.0, 0.0]],
+            &[
+                [0.0, 0.0, 0.0],
+                [1.0, 0.0, 0.0],
+                [0.0, 2.0, 0.0],
+                [1.0, 2.0, 0.0],
+            ],
             &[(0, 1), (2, 3)],
         );
         let r = grid_fill(
@@ -629,7 +671,16 @@ mod tests {
                 [0.0, 1.0, 0.0],
                 [2.0, 1.0, 0.0],
             ],
-            &[(0, 1), (1, 2), (3, 4), (4, 5), (0, 6), (6, 3), (2, 7), (7, 5)],
+            &[
+                (0, 1),
+                (1, 2),
+                (3, 4),
+                (4, 5),
+                (0, 6),
+                (6, 3),
+                (2, 7),
+                (7, 5),
+            ],
         );
         let out = grid_fill(
             &mut bm,
