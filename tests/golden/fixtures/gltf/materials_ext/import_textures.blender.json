@@ -1,0 +1,320 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {
+    "Material": {
+      "nodes": {
+        "Image Texture": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Image Texture.001": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Image Texture.002": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Image Texture.003": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Material Output": {
+          "bl_idname": "ShaderNodeOutputMaterial",
+          "inputs": {
+            "Displacement": [0.0, 0.0, 0.0],
+            "Thickness": 0.0
+          },
+          "mute": false
+        },
+        "Math": {
+          "bl_idname": "ShaderNodeMath",
+          "inputs": {
+            "Value": 0.5,
+            "Value_001": 0.5,
+            "Value_002": 0.5
+          },
+          "mute": false
+        },
+        "Mix": {
+          "bl_idname": "ShaderNodeMix",
+          "inputs": {
+            "A_Color": [0.5, 0.5, 0.5, 1.0],
+            "A_Float": 0.0,
+            "A_Rotation": [0.0, 0.0, 0.0],
+            "A_Vector": [0.0, 0.0, 0.0],
+            "B_Color": [0.5, 0.25, 1.0, 1.0],
+            "B_Float": 0.0,
+            "B_Rotation": [0.0, 0.0, 0.0],
+            "B_Vector": [0.0, 0.0, 0.0],
+            "Factor_Float": 1.0,
+            "Factor_Vector": [0.5, 0.5, 0.5]
+          },
+          "mute": false
+        },
+        "Normal Map": {
+          "bl_idname": "ShaderNodeNormalMap",
+          "inputs": {
+            "Color": [0.5, 0.5, 1.0, 1.0],
+            "Strength": 0.5
+          },
+          "mute": false
+        },
+        "Principled BSDF": {
+          "bl_idname": "ShaderNodeBsdfPrincipled",
+          "inputs": {
+            "Alpha": 1.0,
+            "Anisotropic": 0.0,
+            "Anisotropic Rotation": 0.0,
+            "Base Color": [0.8, 0.8, 0.8, 1.0],
+            "Coat IOR": 1.5,
+            "Coat Normal": [0.0, 0.0, 0.0],
+            "Coat Roughness": 0.03,
+            "Coat Tint": [1.0, 1.0, 1.0, 1.0],
+            "Coat Weight": 0.8,
+            "Diffuse Roughness": 0.0,
+            "Emission Color": [1.0, 1.0, 1.0, 1.0],
+            "Emission Strength": 0.0,
+            "IOR": 1.5,
+            "Metallic": 0.0,
+            "Normal": [0.0, 0.0, 0.0],
+            "Roughness": 0.5,
+            "Sheen Roughness": 0.5,
+            "Sheen Tint": [1.0, 1.0, 1.0, 1.0],
+            "Sheen Weight": 1.0,
+            "Specular IOR Level": 0.5,
+            "Specular Tint": [1.0, 1.0, 1.0, 1.0],
+            "Subsurface Anisotropy": 0.0,
+            "Subsurface IOR": 1.4,
+            "Subsurface Radius": [1.0, 0.2, 0.1],
+            "Subsurface Scale": 0.005,
+            "Subsurface Weight": 0.0,
+            "Tangent": [0.0, 0.0, 0.0],
+            "Thin Film IOR": 1.33,
+            "Thin Film Thickness": 0.0,
+            "Thin Wall": false,
+            "Transmission Weight": 0.0,
+            "Weight": 0.0
+          },
+          "mute": false
+        },
+        "Separate Color": {
+          "bl_idname": "ShaderNodeSeparateColor",
+          "inputs": {
+            "Color": [0.8, 0.8, 0.8, 1.0]
+          },
+          "mute": false
+        }
+      },
+      "links": [
+        ["Image Texture", "Color", "Normal Map", "Color"],
+        ["Image Texture.001", "Color", "Separate Color", "Color"],
+        ["Image Texture.002", "Color", "Principled BSDF", "Specular Tint"],
+        ["Image Texture.003", "Color", "Mix", "A_Color"],
+        ["Math", "Value", "Principled BSDF", "Transmission Weight"],
+        ["Mix", "Result_Color", "Principled BSDF", "Sheen Tint"],
+        ["Normal Map", "Normal", "Principled BSDF", "Coat Normal"],
+        ["Principled BSDF", "BSDF", "Material Output", "Surface"],
+        ["Separate Color", "Red", "Math", "Value"]
+      ]
+    }
+  },
+  "actions": {},
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {
+    "out/again.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "import_textures.out_again.glb"
+      }
+    }
+  }
+}

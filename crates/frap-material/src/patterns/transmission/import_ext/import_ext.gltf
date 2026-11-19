@@ -1,0 +1,264 @@
+{
+ "asset": {
+  "version": "2.0"
+ },
+ "scene": 0,
+ "scenes": [
+  {
+   "nodes": [
+    0
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "mesh": 0,
+   "name": "N"
+  }
+ ],
+ "meshes": [
+  {
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "TEXCOORD_0": 1
+     },
+     "material": 0
+    }
+   ]
+  }
+ ],
+ "buffers": [
+  {
+   "byteLength": 60,
+   "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/"
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteLength": 36
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 36,
+   "byteLength": 24
+  }
+ ],
+ "accessors": [
+  {
+   "bufferView": 0,
+   "componentType": 5126,
+   "count": 3,
+   "type": "VEC3",
+   "min": [
+    0,
+    0,
+    0
+   ],
+   "max": [
+    1,
+    1,
+    0
+   ]
+  },
+  {
+   "bufferView": 1,
+   "componentType": 5126,
+   "count": 3,
+   "type": "VEC2"
+  }
+ ],
+ "images": [
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP43+DwHwAHAAK/K9fH4gAAAABJRU5ErkJggg==",
+   "name": "img0"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP43+DwHwAHAAK/K9fH4gAAAABJRU5ErkJggg==",
+   "name": "img1"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP43+DwHwAHAAK/K9fH4gAAAABJRU5ErkJggg==",
+   "name": "img2"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP43+DwHwAHAAK/K9fH4gAAAABJRU5ErkJggg==",
+   "name": "img3"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP43+DwHwAHAAK/K9fH4gAAAABJRU5ErkJggg==",
+   "name": "img4"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP43+DwHwAHAAK/K9fH4gAAAABJRU5ErkJggg==",
+   "name": "img5"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP43+DwHwAHAAK/K9fH4gAAAABJRU5ErkJggg==",
+   "name": "img6"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP43+DwHwAHAAK/K9fH4gAAAABJRU5ErkJggg==",
+   "name": "img7"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP43+DwHwAHAAK/K9fH4gAAAABJRU5ErkJggg==",
+   "name": "img8"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP43+DwHwAHAAK/K9fH4gAAAABJRU5ErkJggg==",
+   "name": "img9"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP43+DwHwAHAAK/K9fH4gAAAABJRU5ErkJggg==",
+   "name": "img10"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGP43+DwHwAHAAK/K9fH4gAAAABJRU5ErkJggg==",
+   "name": "img11"
+  }
+ ],
+ "textures": [
+  {
+   "source": 0
+  },
+  {
+   "source": 1
+  },
+  {
+   "source": 2
+  },
+  {
+   "source": 3
+  },
+  {
+   "source": 4
+  },
+  {
+   "source": 5
+  },
+  {
+   "source": 6
+  },
+  {
+   "source": 7
+  },
+  {
+   "source": 8
+  },
+  {
+   "source": 9
+  },
+  {
+   "source": 10
+  },
+  {
+   "source": 11
+  }
+ ],
+ "extensionsUsed": [
+  "KHR_materials_clearcoat",
+  "KHR_materials_sheen",
+  "KHR_materials_volume",
+  "KHR_materials_specular",
+  "KHR_materials_anisotropy",
+  "KHR_materials_iridescence",
+  "KHR_materials_transmission",
+  "KHR_materials_ior",
+  "KHR_materials_dispersion"
+ ],
+ "materials": [
+  {
+   "name": "M",
+   "extensions": {
+    "KHR_materials_clearcoat": {
+     "clearcoatFactor": 0.5,
+     "clearcoatTexture": {
+      "index": 0
+     },
+     "clearcoatRoughnessFactor": 0.25,
+     "clearcoatRoughnessTexture": {
+      "index": 1
+     },
+     "clearcoatNormalTexture": {
+      "index": 2,
+      "scale": 0.5
+     }
+    },
+    "KHR_materials_transmission": {
+     "transmissionFactor": 1.0,
+     "transmissionTexture": {
+      "index": 3
+     }
+    },
+    "KHR_materials_volume": {
+     "thicknessFactor": 2.0,
+     "thicknessTexture": {
+      "index": 4
+     },
+     "attenuationDistance": 0.5,
+     "attenuationColor": [
+      0.5,
+      0.25,
+      1.0
+     ]
+    },
+    "KHR_materials_dispersion": {
+     "dispersion": 0.125
+    },
+    "KHR_materials_specular": {
+     "specularFactor": 0.5,
+     "specularTexture": {
+      "index": 5
+     },
+     "specularColorFactor": [
+      0.5,
+      1.0,
+      0.25
+     ],
+     "specularColorTexture": {
+      "index": 6
+     }
+    },
+    "KHR_materials_anisotropy": {
+     "anisotropyStrength": 0.5,
+     "anisotropyRotation": 1.25,
+     "anisotropyTexture": {
+      "index": 7
+     }
+    },
+    "KHR_materials_sheen": {
+     "sheenColorFactor": [
+      1.0,
+      0.5,
+      0.25
+     ],
+     "sheenColorTexture": {
+      "index": 8
+     },
+     "sheenRoughnessFactor": 0.75,
+     "sheenRoughnessTexture": {
+      "index": 9
+     }
+    },
+    "KHR_materials_iridescence": {
+     "iridescenceFactor": 0.5,
+     "iridescenceTexture": {
+      "index": 10
+     },
+     "iridescenceIor": 1.4,
+     "iridescenceThicknessMinimum": 150.0,
+     "iridescenceThicknessMaximum": 600.0,
+     "iridescenceThicknessTexture": {
+      "index": 11
+     }
+    },
+    "KHR_materials_ior": {
+     "ior": 1.25
+    }
+   }
+  }
+ ]
+}

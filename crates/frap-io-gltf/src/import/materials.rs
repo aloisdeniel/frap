@@ -85,6 +85,8 @@ pub(crate) fn create(
     if !MATERIAL_PATTERNS.is_empty() {
         let mut names = NameAlloc::default();
         frap_material::raise(&lm, &mut mat, &mut names);
+        // WP 3.6: the settings node `raise` made gets the "glTF Material Output" group.
+        crate::material_ext::bind_settings_nodes(main, log, &mut mat);
     }
     let r = main.materials.insert(&name, mat, log);
     cx.materials.insert((idx, vertex_color), r);
