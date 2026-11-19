@@ -14,6 +14,7 @@ mod access;
 pub(crate) use access::evaluated_for_read;
 pub mod compat;
 mod context;
+pub mod idprops;
 mod write;
 
 use frap_lang::PathSeg;
@@ -153,6 +154,28 @@ pub enum StructFunc {
     PathFromId,
     /// `path_resolve(path, coerce=True)`
     PathResolve,
+    /// `keys()` (ID properties)
+    Keys,
+    /// `values()` (ID properties)
+    Values,
+    /// `items()` (ID properties)
+    Items,
+    /// `get(key, default=None)` (ID properties)
+    Get,
+}
+
+impl StructFunc {
+    /// Python name.
+    pub fn name(self) -> &'static str {
+        match self {
+            StructFunc::PathFromId => "path_from_id",
+            StructFunc::PathResolve => "path_resolve",
+            StructFunc::Keys => "keys",
+            StructFunc::Values => "values",
+            StructFunc::Items => "items",
+            StructFunc::Get => "get",
+        }
+    }
 }
 
 /// A callable.
@@ -198,10 +221,7 @@ impl FuncTarget {
         match self {
             FuncTarget::Rna { def, .. } => def.identifier,
             FuncTarget::Coll { which, .. } => which.name(),
-            FuncTarget::Struct { which, .. } => match which {
-                StructFunc::PathFromId => "path_from_id",
-                StructFunc::PathResolve => "path_resolve",
-            },
+            FuncTarget::Struct { which, .. } => which.name(),
             FuncTarget::Math { name, .. } => name,
         }
     }
@@ -673,6 +693,17 @@ fn step_value(v: Value, seg: &PathSeg) -> Result<Target, FrapError> {
                 chars[st..e].iter().collect::<String>().into(),
             )))
         }
+        // An ID property group read below an ID (`ID["group"]["key"]`).
+        (Value::Json(j), PathSeg::Key(k)) if j.is_object() => j
+            .get(k.as_str())
+            .map(|m| Target::Value(idprops::json_value(m)))
+            .ok_or_else(|| {
+                FrapError::new(
+                    PyExc::KeyError,
+                    RNA_KEY_NOT_FOUND,
+                    frap_rna::ptr::py_str_repr(k),
+                )
+            }),
         (Value::Str(_) | Value::Enum(_), PathSeg::Key(_) | PathSeg::KeyLib(..)) => {
             Err(type_error("string indices must be integers, not 'str'"))
         }
@@ -760,7 +791,7 @@ fn step_python(t: Target, seg: &PathSeg) -> Result<Target, FrapError> {
     }
 }
 
-fn step_struct(_host: &dyn HostRead, ptr: RnaPtr, seg: &PathSeg) -> Result<Target, FrapError> {
+fn step_struct(host: &dyn HostRead, ptr: RnaPtr, seg: &PathSeg) -> Result<Target, FrapError> {
     let srna = ptr.srna;
     match seg {
         PathSeg::Attr(a) => {
@@ -799,6 +830,11 @@ fn step_struct(_host: &dyn HostRead, ptr: RnaPtr, seg: &PathSeg) -> Result<Targe
                 let which = match a.as_str() {
                     "path_from_id" => Some(StructFunc::PathFromId),
                     "path_resolve" => Some(StructFunc::PathResolve),
+                    // The ID-property mapping methods (`bpy_struct.keys()` etc.).
+                    "keys" if idprops::owner(&ptr).is_some() => Some(StructFunc::Keys),
+                    "values" if idprops::owner(&ptr).is_some() => Some(StructFunc::Values),
+                    "items" if idprops::owner(&ptr).is_some() => Some(StructFunc::Items),
+                    "get" if idprops::owner(&ptr).is_some() => Some(StructFunc::Get),
                     _ => None,
                 };
                 if let Some(which) = which {
@@ -813,17 +849,19 @@ fn step_struct(_host: &dyn HostRead, ptr: RnaPtr, seg: &PathSeg) -> Result<Targe
             }
             Err(no_attr(srna, a))
         }
-        PathSeg::Key(k) | PathSeg::KeyLib(k, _) => {
-            if srna.is_id && matches!(ptr.root, Root::Id(_)) && ptr.path.is_empty() {
-                // ID properties: frap stores none (custom properties arrive with M8).
-                Err(FrapError::new(
-                    PyExc::KeyError,
-                    RNA_KEY_NOT_FOUND,
-                    format!("'bpy_struct[key]: key \"{k}\" not found'"),
-                ))
-            } else {
-                Err(type_error("this type doesn't support IDProperties"))
-            }
+        PathSeg::Key(_) | PathSeg::KeyLib(..) | PathSeg::Index(_) | PathSeg::Slice(..)
+            if idprops::owner(&ptr).is_some() =>
+        {
+            // ID properties (`ID["key"]`).
+            let id = idprops::owner(&ptr).expect("invariant: checked by the guard");
+            let key = idprops::read_key(seg)?;
+            Ok(Target::Value(idprops::read(host, id, key)?))
+        }
+        PathSeg::Key(_) | PathSeg::KeyLib(..) if idprops::is_embedded_id(&ptr) => {
+            Err(idprops::not_supported("an ID property of an embedded ID"))
+        }
+        PathSeg::Key(_) | PathSeg::KeyLib(..) => {
+            Err(type_error("this type doesn't support IDProperties"))
         }
         PathSeg::Index(_) | PathSeg::Slice(..) => Err(type_error(format!(
             "'{}' object is not subscriptable",

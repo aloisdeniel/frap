@@ -215,7 +215,8 @@ fn exec(cx: &mut OpCtx, p: object::ModifierApply) -> OpResult {
     let mut changed = false;
     let mut errors: Vec<String> = Vec::new();
     let mut reported = reports_before;
-    for ob in objects {
+    let mut found = false;
+    for &ob in &objects {
         let Some((i, ty, in_edit)) = cx.main().objects.get(ob).and_then(|o| {
             shared::find(o, &name).map(|i| {
                 (
@@ -227,6 +228,7 @@ fn exec(cx: &mut OpCtx, p: object::ModifierApply) -> OpResult {
         }) else {
             continue;
         };
+        found = true;
         let kind = ty.map(|t| registry::meta(t).kind);
         // `single_user`: make the data single-user first.
         if p.single_user.value
@@ -287,6 +289,10 @@ fn exec(cx: &mut OpCtx, p: object::ModifierApply) -> OpResult {
             Ok(a) => a,
             // A frap limitation (no evaluator, a node group frap cannot evaluate, an input it
             // does not support) is not Blender's error.
+            // `--max-elements` (SCREW's own check; the others unwind): LIMIT_EXCEEDED.
+            Err(frap_modifiers::ModError::Error(m)) if stack::is_limit_error(&m) => {
+                return Err(OpError::Limit(m));
+            }
             Err(frap_modifiers::ModError::Error(m)) if stack::is_frap_limitation(&m) => {
                 return Err(OpError::NotImplemented(if m.starts_with("frap:") {
                     m
@@ -319,6 +325,9 @@ fn exec(cx: &mut OpCtx, p: object::ModifierApply) -> OpResult {
         return Err(OpError::Runtime(errors.join("\nError: ")));
     }
     if !changed {
+        if !found {
+            shared::report_missing(cx, &objects, &name);
+        }
         return Ok(OpStatus::Cancelled);
     }
     if p.report.value && reported == reports_before {

@@ -623,6 +623,19 @@ impl Main {
     pub fn header(&self, a: IdAny) -> Option<&IdHeader> {
         with_map!(self, a.code, |m| id_ref(m, a).map(|t| t.header()))
     }
+    /// The ID's header, mutably, through `IdMap::get_mut` (COW, generation bump, logged):
+    /// ID properties (`ID["key"] = value`).
+    pub fn header_mut(&mut self, a: IdAny, log: &mut ChangeLog) -> Option<&mut IdHeader> {
+        fn g<'a, T: IdType>(
+            m: &'a mut IdMap<T>,
+            a: IdAny,
+            log: &mut ChangeLog,
+        ) -> Option<&'a mut IdHeader> {
+            m.get_mut(a.typed::<T::Kind>()?, log)
+                .map(|t| t.header_mut())
+        }
+        with_map_mut!(self, a.code, |m| g(m, a, log))
+    }
     /// `bpy.data.<attr>`: the IDs in Blender order and the item struct (F-MAIN-1).
     pub fn collection(&self, attr: &str) -> Option<(Vec<IdAny>, &'static StructDef)> {
         fn ids<T: IdType>(m: &IdMap<T>) -> Vec<IdAny> {

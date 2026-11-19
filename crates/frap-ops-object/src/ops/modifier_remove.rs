@@ -33,7 +33,7 @@ fn exec(cx: &mut OpCtx, p: object::ModifierRemove) -> OpResult {
     let name = p.modifier.value.clone();
     let objects = shared::edit_objects(&cx.ctx(), p.use_selected_objects.value);
     let mut changed = false;
-    for ob in objects {
+    for &ob in &objects {
         let Some(i) = cx
             .main()
             .objects
@@ -46,6 +46,7 @@ fn exec(cx: &mut OpCtx, p: object::ModifierRemove) -> OpResult {
         changed = true;
     }
     if !changed {
+        shared::report_missing(cx, &objects, &name);
         return Ok(OpStatus::Cancelled);
     }
     if p.report.value {

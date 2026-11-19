@@ -127,6 +127,11 @@ fn evaluated_mesh(
         .iter()
         .find(|(_, st)| stack::status_is_frap_limitation(st))
     {
+        if let ModifierStatus::Error(e) = st
+            && stack::is_limit_error(e)
+        {
+            return Err(OpError::Limit(e.clone()));
+        }
         let why = match st {
             ModifierStatus::Error(e) => e.clone(),
             _ => "its type has no frap evaluator".to_owned(),

@@ -108,7 +108,7 @@ pub fn evaluate(base: Arc<Mesh>, in_edit_mode: bool, cx: &mut dyn ModEvalCx) -> 
                 non_deform_applied = true;
             }
             let input = Arc::unwrap_or_clone(mesh.clone());
-            match (info.eval)(m, input, cx) {
+            match eval_within_limits(info, m, input, cx) {
                 Ok(out) => {
                     mesh = Arc::new(out);
                     ModifierStatus::Evaluated
@@ -135,6 +135,37 @@ pub fn evaluate(base: Arc<Mesh>, in_edit_mode: bool, cx: &mut dyn ModEvalCx) -> 
         modifier_status,
         warnings,
     }
+}
+
+/// Runs one evaluator. A result over `--max-elements` (or Blender's `int` index range) is
+/// the modifier's error, whichever way the evaluator noticed it: an [`ElementsExceeded`]
+/// unwind (a pre-check such as ARRAY's or BEVEL's, or the BMesh allocation backstop) or a
+/// returned error (SCREW). The stack then passes the mesh through with a WARNING and
+/// [`ModifierStatus::Error`], as Blender does for its own size caps (`MOD_array.cc`: "Array
+/// too big"): one policy for every evaluator, so a read of the evaluated mesh succeeds and
+/// names the modifier (M3+M4 stabilization round 2). A `--stmt-timeout` unwind still ends
+/// the statement.
+///
+/// [`ElementsExceeded`]: frap_math::budget::ElementsExceeded
+fn eval_within_limits(
+    info: &crate::ModifierTypeInfo,
+    m: &Modifier,
+    input: Mesh,
+    cx: &mut dyn ModEvalCx,
+) -> Result<Mesh, crate::ModError> {
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| (info.eval)(m, input, cx))) {
+        Ok(r) => r,
+        Err(payload) => match frap_math::budget::elements_exceeded(&*payload) {
+            Some(e) => Err(crate::ModError::Error(e.to_string())),
+            None => std::panic::resume_unwind(payload),
+        },
+    }
+}
+
+/// Whether a modifier error is `--max-elements` (or Blender's index range) refusing the
+/// result ([`frap_math::budget::ElementsExceeded`]'s message).
+pub fn is_limit_error(message: &str) -> bool {
+    message.starts_with("frap: limit exceeded")
 }
 
 /// Whether a modifier error is a frap limitation rather than one Blender would report too: a

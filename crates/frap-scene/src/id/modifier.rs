@@ -800,6 +800,62 @@ pub(crate) fn set_pin_to_last(mods: &mut Vec<Modifier>, i: usize, value: bool) -
     to
 }
 
+/// The object-pointer rule of a modifier property (`srna.prop`): `Some(None)` for a pointer
+/// with `PROP_ID_SELF_CHECK` only, `Some(Some(type))` when its setter also refuses objects
+/// of another type (`RNA_MOD_OBJECT_SET`, `modifier_object_set`: the assignment is ignored
+/// and the pointer keeps its value), `None` for any other property.
+///
+/// Ported from blender/source/blender/makesrna/intern/rna_modifier.cc (Blender 5.2.4,
+/// GPL-2.0-or-later): every modifier `Object` pointer is `PROP_ID_SELF_CHECK` (assigning the
+/// modifier's own object raises `TypeError: … ID type does not support assignment to
+/// itself`, before the setter runs) except `UVWarpModifier.object_from`/`object_to`;
+/// `OB_EMPTY` in `RNA_MOD_OBJECT_SET` means any type (verified on 5.2.4: an ARRAY cap or a
+/// BOOLEAN operand that is a camera stays `None`).
+pub fn object_pointer_rule(srna: &str, prop: &str) -> Option<Option<&'static str>> {
+    const RULES: &[(&str, &str, Option<&str>)] = &[
+        ("WarpModifier", "object_from", None),
+        ("WarpModifier", "object_to", None),
+        ("WarpModifier", "texture_coords_object", None),
+        ("LatticeModifier", "object", Some("LATTICE")),
+        ("CurveModifier", "object", Some("CURVE")),
+        ("MirrorModifier", "mirror_object", None),
+        ("WaveModifier", "start_position_object", None),
+        ("WaveModifier", "texture_coords_object", None),
+        ("ArmatureModifier", "object", Some("ARMATURE")),
+        ("HookModifier", "object", None),
+        ("BooleanModifier", "object", Some("MESH")),
+        ("ArrayModifier", "curve", Some("CURVE")),
+        ("ArrayModifier", "offset_object", None),
+        ("ArrayModifier", "start_cap", Some("MESH")),
+        ("ArrayModifier", "end_cap", Some("MESH")),
+        ("UVProjector", "object", None),
+        ("CastModifier", "object", None),
+        ("MeshDeformModifier", "object", Some("MESH")),
+        ("ParticleInstanceModifier", "object", Some("MESH")),
+        ("ShrinkwrapModifier", "target", Some("MESH")),
+        ("ShrinkwrapModifier", "auxiliary_target", Some("MESH")),
+        ("MaskModifier", "armature", Some("ARMATURE")),
+        ("SimpleDeformModifier", "origin", None),
+        ("ScrewModifier", "object", None),
+        ("UVWarpModifier", "mask_tex_map_object", None),
+        ("VertexWeightProximityModifier", "target", None),
+        ("VertexWeightEditModifier", "mask_tex_map_object", None),
+        ("VertexWeightMixModifier", "mask_tex_map_object", None),
+        ("VertexWeightProximityModifier", "mask_tex_map_object", None),
+        ("DataTransferModifier", "object", Some("MESH")),
+        ("NormalEditModifier", "target", None),
+        ("SurfaceDeformModifier", "target", Some("MESH")),
+        ("DisplaceModifier", "texture_coords_object", None),
+        ("MeshToVolumeModifier", "object", None),
+        ("VolumeDisplaceModifier", "texture_map_object", None),
+        ("VolumeToMeshModifier", "object", None),
+    ];
+    RULES
+        .iter()
+        .find(|(s, p, _)| *s == srna && *p == prop)
+        .map(|(_, _, t)| *t)
+}
+
 #[cfg(test)]
 mod pin_tests {
     use super::*;

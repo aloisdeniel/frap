@@ -8,8 +8,9 @@
 //! - a modified image packs its buffer from memory (`BKE_image_memorypack`): PNG for a byte
 //!   buffer (in its colour mode: `images.new` images are RGB), OpenEXR for a float buffer;
 //!   `file_format` becomes `PNG`/`OPEN_EXR` (also for a JPEG file), a GENERATED image becomes
-//!   FILE (type `IMAGE`, `filepath` stays `''`), the packed file's `filepath` is the image's,
-//!   and the image is no longer dirty;
+//!   FILE (type `IMAGE`, `filepath` stays `''`), the packed file's `filepath` is the image's
+//!   (`''` for a generated image, whose buffer was made before any path was set), and the
+//!   image is no longer dirty;
 //! - an unmodified image packs the bytes of its file (`BKE_image_packfiles`), with the
 //!   image's `filepath` as the packed file's path; an image without a path (an unmodified
 //!   generated image) packs nothing, silently; a missing file fails with `Error: Unable to pack
@@ -47,7 +48,15 @@ pub(crate) fn pack(h: &mut dyn Host, r: IdRef<ImageId>, rep: &mut Reports) -> Re
             .expect("invariant: dirty images have a buffer"))
         .clone();
         let (bytes, mime, ff) = memorypack(&buf).map_err(not_implemented)?;
-        let packed_filepath = im.filepath.clone();
+        // `image_memorypack_imbuf` names the packed file after the buffer's own path, set
+        // when the buffer was made: a generated buffer is made by `images.new`, before any
+        // `filepath` (verified on 5.2.4: `filepath_raw = '/x/y.png'` then `pack()` leaves
+        // `packed_files[0].filepath == ''`, and `unpack()` names the file after the image).
+        let packed_filepath = if im.source == "GENERATED" {
+            String::new()
+        } else {
+            im.filepath.clone()
+        };
         let (main, log) = h.main_mut();
         if let Some(im) = main.images.get_mut(r, log) {
             im.packed_file = Some(Arc::new(EncodedImage {

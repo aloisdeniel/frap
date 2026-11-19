@@ -1,0 +1,14 @@
+# M3+M4 stabilization round 2 (WP 4.7): the modifier operators and their reports in bpy-line
+# form, with `--verbosity full` so every response carries `context.modifier_status`. Moving
+# the first modifier up / the last down is CANCELLED with Blender's WARNING; a pinned modifier
+# (`use_pin_to_last`) stays last and cannot move up (CANCELLED, silent); WAVE has no frap
+# evaluator (PASSED_THROUGH, WARNING); a BOOLEAN without operand is DISABLED and applying it
+# fails (`Modifier is disabled, skipping apply`, after the INFO `Applied modifier was not
+# first, …`); applying a modifier that is not first gives that INFO; a misspelt name is
+# CANCELLED with frap's WARNING and suggestion; a linked duplicate's shared mesh refuses
+# `Modifiers cannot be applied to multi-user data`; in Edit Mode `modifier_apply` fails its poll
+# while `modifier_remove` is allowed. Every outcome and report verified on Blender 5.2.4
+# (frap-only: the `frap:` WARNING). Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "full"]
+fs.sandbox = true

@@ -43,10 +43,13 @@ use frap_scene::{Context, LayerCollection, Main};
 use crate::export::gather::Gather;
 use crate::export::mesh::gather::slot_materials;
 
-/// `export_apply` is honoured (no "not supported yet" WARNING).
+/// `export_apply` is honoured (no "not supported yet" WARNING), and so is
+/// `export_current_frame`: without it the operator evaluates the meshes at frame 0
+/// (`export.save`'s `frame_set(0)`); object transforms do not depend on the frame before
+/// animation (M6).
 #[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
 #[linkme::distributed_slice(crate::export::SUPPORTED_EXPORT_PROPS)]
-static APPLY_PROPS: &[&str] = &["export_apply"];
+static APPLY_PROPS: &[&str] = &["export_apply", "export_current_frame"];
 
 /// The evaluated mesh to export for `ob` instead of its data (`None`: export the original):
 /// `Some` only with `export_apply=True`, for an object with at least one modifier whose

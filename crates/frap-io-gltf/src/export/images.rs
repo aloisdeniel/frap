@@ -834,11 +834,21 @@ pub fn slot_inputs(slot: TextureSlot, t: &TexRef) -> Vec<TexInput<'_>> {
     }
 }
 
+/// The WARNING of a texture gathered from more than one socket (`__gather_sampler`).
+pub const SAMPLER_OF_FIRST_NODE: &str = "More than one shader node tex image used for a texture. \
+     The resulting glTF sampler will behave like the first shader node tex image.";
+
 fn gather_new_texture(g: &mut Gather, inputs: &[TexInput]) -> Result<Option<Index>, ExportError> {
     let main = g.main;
     let Some(first) = inputs.first() else {
         return Ok(None);
     };
+    // `texture.py` `__gather_sampler`: a texture gathered from several sockets (metallic and
+    // roughness, base colour and alpha, an ORM image), even when one image node feeds them
+    // all (verified on 5.2.4).
+    if inputs.len() > 1 {
+        g.warn(SAMPLER_OF_FIRST_NODE);
+    }
     if g.settings.export_image_format == ExportImageFormat::Webp {
         g.warn("export_image_format='WEBP' is not supported yet (EXT_texture_webp); images are written as PNG");
     }

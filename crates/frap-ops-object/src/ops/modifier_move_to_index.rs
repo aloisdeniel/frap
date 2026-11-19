@@ -30,13 +30,15 @@ const MOVE_POLL: Poll = Poll {
 fn exec(cx: &mut OpCtx, p: object::ModifierMoveToIndex) -> OpResult {
     let objects = shared::edit_objects(&cx.ctx(), p.use_selected_objects.value);
     let mut changed = false;
-    for ob in objects {
+    let mut found = false;
+    for &ob in &objects {
         let Some(mut mods) = cx.main().objects.get(ob).map(|o| o.modifiers.clone()) else {
             continue;
         };
         let Some(i) = mods.iter().position(|m| m.name == p.modifier.value) else {
             continue;
         };
+        found = true;
         match edit::move_to_index(&mut mods, i, i64::from(p.index.value), true) {
             Ok(()) => {
                 if cx
@@ -52,6 +54,9 @@ fn exec(cx: &mut OpCtx, p: object::ModifierMoveToIndex) -> OpResult {
             Err(Some(msg)) => cx.report(ReportType::Warning, msg),
             Err(None) => {}
         }
+    }
+    if !found {
+        shared::report_missing(cx, &objects, &p.modifier.value);
     }
     Ok(if changed {
         OpStatus::Finished

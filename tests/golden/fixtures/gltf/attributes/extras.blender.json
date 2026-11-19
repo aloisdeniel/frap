@@ -5,6 +5,10 @@
   },
   "lines": [
     {
+      "line": 6,
+      "ok": true
+    },
+    {
       "line": 7,
       "ok": true
     },
@@ -30,10 +34,6 @@
     },
     {
       "line": 13,
-      "ok": true
-    },
-    {
-      "line": 14,
       "ok": true
     }
   ],

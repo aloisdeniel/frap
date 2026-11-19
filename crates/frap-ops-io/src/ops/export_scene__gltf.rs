@@ -115,6 +115,17 @@ pub(crate) fn unsupported_props(a: &OpArgs) -> Vec<&'static str> {
         .collect()
 }
 
+/// Sets the context scene's `frame_current` for the duration of the export (`frame_set`);
+/// returns the previous frame when it changed. The change is not logged: the export puts the
+/// frame back, as the add-on does.
+fn set_scene_frame(cx: &mut OpCtx, frame: i32) -> Option<i32> {
+    let scene = cx.ctx().win.scene;
+    let (main, _) = cx.main_mut();
+    let mut untracked = frap_scene::ChangeLog::default();
+    let sc = main.scenes.get_mut(scene, &mut untracked)?;
+    (sc.frame_current != frame).then(|| std::mem::replace(&mut sc.frame_current, frame))
+}
+
 /// `export_apply=True`: the viewport-evaluated mesh of every MESH object the viewport
 /// depsgraph evaluates (the add-on's `blender_object.evaluated_get(depsgraph).to_mesh()`), read
 /// by the exporter's `apply.rs`. Objects outside the depsgraph (`hide_viewport`, in a hidden
@@ -164,7 +175,19 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
     settings.blend_dir = common::blend_dir(cx);
     settings.cwd = Some(cx.services().paths().cwd.clone());
     if p.export_apply.value {
-        settings.evaluated_meshes = Some(std::sync::Arc::new(evaluated_meshes(cx)));
+        // `export.save`: `if not export_current_frame: scene.frame_set(0)`, restored after
+        // the export. Until animation (M6) only frame-dependent modifiers (BUILD, WAVE)
+        // see it, through the evaluated meshes.
+        let restore = if p.export_current_frame.value {
+            None
+        } else {
+            set_scene_frame(cx, 0)
+        };
+        let meshes = evaluated_meshes(cx);
+        if let Some(frame) = restore {
+            set_scene_frame(cx, frame);
+        }
+        settings.evaluated_meshes = Some(std::sync::Arc::new(meshes));
     }
     for prop in unsupported_props(a) {
         cx.report(

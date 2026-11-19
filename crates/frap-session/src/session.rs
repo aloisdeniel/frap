@@ -515,6 +515,7 @@ impl Session {
     /// Reads a property path (§11.6; the path uses the shared path grammar).
     pub fn get(&mut self, path: &str) -> Response {
         self.seq += 1;
+        let _budget = frap_math::budget::scope(self.budget());
         match exec::parse_path(path) {
             Ok(p) => self
                 .get_path(1, &p)
@@ -526,6 +527,7 @@ impl Session {
     /// Assigns a property path (§11.6).
     pub fn set(&mut self, path: &str, value: Input) -> Response {
         self.seq += 1;
+        let _budget = frap_math::budget::scope(self.budget());
         match exec::parse_path(path) {
             Ok(p) => self
                 .set_path(
@@ -547,6 +549,7 @@ impl Session {
         kwargs: IndexMap<String, Input>,
     ) -> Response {
         self.seq += 1;
+        let _budget = frap_math::budget::scope(self.budget());
         let mut call_args: Vec<funcs::CallArg> = args
             .into_iter()
             .map(|v| funcs::CallArg {
@@ -692,8 +695,38 @@ impl Session {
     ) -> serde_json::Map<String, J> {
         use frap_scene::ModifierStatus as S;
         let mut m = serde_json::Map::new();
-        let Ok(eo) = crate::resolve::evaluated_for_read(&self.host, ob) else {
-            return m;
+        let modifier_names = |s: &Self| -> Vec<SmolStr> {
+            s.host
+                .state
+                .main
+                .objects
+                .get(ob)
+                .map(|o| o.modifiers.iter().map(|md| md.name.clone()).collect())
+                .unwrap_or_default()
+        };
+        // The context is built after the statement, still under its budget: an evaluation
+        // that runs past `--stmt-timeout` (or any other unwind: a limit an evaluator checks
+        // outside the stack) must not escape `Session::exec` (the statement itself already
+        // succeeded). `evaluated` is then omitted and every modifier reports the error.
+        let eo = match catch_unwind(AssertUnwindSafe(|| {
+            crate::resolve::evaluated_for_read(&self.host, ob)
+        })) {
+            Ok(Ok(eo)) => eo,
+            Ok(Err(_)) => return m,
+            Err(payload) => {
+                let err = self.unwind_error(payload);
+                let list: Vec<J> = modifier_names(self)
+                    .iter()
+                    .map(|n| {
+                        let msg = err.message.strip_prefix("Error: ").unwrap_or(&err.message);
+                        json!({"name": n.as_str(), "status": "ERROR", "message": msg})
+                    })
+                    .collect();
+                if !list.is_empty() {
+                    m.insert("modifier_status".into(), J::Array(list));
+                }
+                return m;
+            }
         };
         if let Some(mesh) = &eo.mesh {
             m.insert(

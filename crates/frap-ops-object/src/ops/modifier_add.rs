@@ -104,6 +104,47 @@ pub(crate) mod shared {
     pub(crate) fn find(o: &Object, name: &str) -> Option<usize> {
         o.modifiers.iter().position(|m| m.name == name)
     }
+
+    /// frap: Blender cancels a modifier operator whose `modifier` names no modifier of the
+    /// edited objects without a message; an agent gets a WARNING naming the objects and the
+    /// closest modifier names (`frap_rna::error::suggest`), or the ones that exist.
+    pub(crate) fn report_missing(cx: &mut frap_op::OpCtx, objects: &[IdRef<ObjectId>], name: &str) {
+        let main = cx.main();
+        let mut obs: Vec<String> = Vec::new();
+        let mut cands: Vec<String> = Vec::new();
+        for ob in objects {
+            if let Some(o) = main.objects.get(*ob) {
+                obs.push(format!("'{}'", o.header.name));
+                cands.extend(o.modifiers.iter().map(|m| m.name.to_string()));
+            }
+        }
+        let owner = match obs.as_slice() {
+            [] => return,
+            [one] => format!("object {one}"),
+            many => format!("the edited objects ({})", many.join(", ")),
+        };
+        let sugg = frap_rna::error::suggest(name, cands.iter().map(String::as_str));
+        let quoted = |v: &[&str]| {
+            v.iter()
+                .map(|n| format!("'{n}'"))
+                .collect::<Vec<_>>()
+                .join(", ")
+        };
+        let tail = if !sugg.is_empty() {
+            format!("; did you mean {}?", quoted(&sugg))
+        } else if cands.is_empty() {
+            "; it has no modifiers".to_owned()
+        } else {
+            let all: Vec<&str> = cands.iter().map(String::as_str).collect();
+            format!("; its modifiers: {}", quoted(&all))
+        };
+        let msg = if name.is_empty() {
+            format!("frap: no modifier given (pass modifier='<name>') for {owner}{tail}")
+        } else {
+            format!("frap: {owner} has no modifier named '{name}'{tail}")
+        };
+        cx.report(frap_rna::ReportType::Warning, msg);
+    }
 }
 
 fn add_poll(c: &Context) -> Result<(), PollFail> {

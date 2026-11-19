@@ -35,6 +35,7 @@ fn exec(cx: &mut OpCtx, p: object::ModifierMoveUp) -> OpResult {
         return Ok(OpStatus::Cancelled);
     };
     let Some(i) = mods.iter().position(|m| m.name == p.modifier.value) else {
+        shared::report_missing(cx, &[ob], &p.modifier.value);
         return Ok(OpStatus::Cancelled);
     };
     match edit::move_up(&mut mods, i) {

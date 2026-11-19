@@ -30,7 +30,8 @@ fn eval(md: &Modifier, mesh: Mesh, _cx: &mut dyn ModEvalCx) -> Result<Mesh, ModE
         _ => extrude::solidify_extrude(s, &mesh, totcol),
     };
     // frap (ARCHITECTURE §12): the shell is a bounded multiple of the input; `--max-elements`
-    // backstop (unwinds with `ElementsExceeded`, answered as `LIMIT_EXCEEDED`).
+    // backstop (unwinds with `ElementsExceeded`: the modifier's error in the stack,
+    // `LIMIT_EXCEEDED` for `object.modifier_apply`).
     frap_math::budget::check_corners(result.corners_num() as u64);
     Ok(result)
 }

@@ -303,11 +303,11 @@ pub(crate) fn modify_mesh(
         vmesh_method: ident(&s.vmesh_method),
     };
     // The `--max-elements` pre-check (ARCHITECTURE §12), as `mesh.bevel` does: an absurd
-    // request fails at once with LIMIT_EXCEEDED instead of building geometry for minutes.
+    // request is refused at once instead of building geometry for minutes.
     let estimate = bevel_corners(&bm, u64::try_from(s.segments).unwrap_or(1), affect_vertices);
     if let Err(e) = frap_math::budget::reserve_corners(estimate, estimate) {
-        // The payload `budget::check_corners` unwinds with; the statement turns it into a
-        // rollback and LIMIT_EXCEEDED.
+        // The payload `budget::check_corners` unwinds with: the stack makes it this
+        // modifier's error (`stack::evaluate`), `object.modifier_apply` LIMIT_EXCEEDED.
         std::panic::resume_unwind(Box::new(e));
     }
     let weights = MeshBevelWeights {

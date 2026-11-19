@@ -150,7 +150,7 @@ NORMALISE = {
     "D-94": ("fixtures", "fixtures are blessed with Blender on macOS; cases avoid negative-scale camera fits"),
     "D-95": ("cases", "cases do not write base flags of objects whose bases in different scenes disagree"),
     "D-96": ("cases", "cases create probe objects in the window's scene"),
-    "D-97": ("cases", "cases do not assign a modifier's own object or non-mesh caps"),
+    "D-97": None,
     "D-98": ("cases", "cases set only the property of the deform method"),
     "D-99": ("comparator", "LAPLACIANSMOOTH cases pin tol=1e-4, strong_lambda tol=5e-4"),
     "D-100": ("comparator", "these configurations are checked at T3 (KNOWN_GAPS in frap-modifiers/src/types/boolean/tests.rs), not golden cases"),
@@ -173,6 +173,7 @@ NORMALISE = {
     "D-117": None,
     "D-118": ("cases", "gltf/m3_workflows/export_options.py drops texCoord -1 from Blender's no-UV re-export (#@blender line)"),
     "D-119": ("comparator", "gltf/m3_workflows/modifier_stack_reimport.py compares at tol=2e-4"),
+    "D-120": ("comparator", "checked at T3 (modifiers/bevel_decimate/decimate_after_subsurf)"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

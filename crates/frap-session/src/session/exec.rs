@@ -480,14 +480,49 @@ impl Session {
                 ValueSrc::Value(v) => Ok(v.clone()),
             };
             // Python evaluates the right-hand side of `=` first; `+=` reads the target first.
-            let (place, v) = match binop_of(op) {
+            let (parent, assigned) = match binop_of(op) {
                 None => {
                     let v = rhs(s)?;
-                    let parent = s.eval_segs(target, target.segs.len() - 1)?;
-                    (s.assign_target(parent, last, v.type_name())?, v)
+                    (s.eval_segs(target, target.segs.len() - 1)?, Some(v))
                 }
-                Some(bop) => {
-                    let parent = s.eval_segs(target, target.segs.len() - 1)?;
+                Some(_) => (s.eval_segs(target, target.segs.len() - 1)?, None),
+            };
+            // `ID["key"] = value`: an ID property, not an RNA property.
+            if let Target::Struct(ptr) = &parent
+                && let Some(id) = resolve::idprops::owner(ptr)
+                && !matches!(last, PathSeg::Attr(_) | PathSeg::Call(_))
+            {
+                let key = resolve::idprops::write_key(last)?.to_owned();
+                let v = match (assigned, binop_of(op)) {
+                    (Some(v), _) => v,
+                    (None, Some(bop)) => {
+                        let cur = resolve::idprops::read(&s.host, id, &key)?;
+                        let cur = eval::value_py(None, cur);
+                        let v = rhs(s)?;
+                        eval::binop(bop, &cur, &v, true)?
+                    }
+                    (None, None) => unreachable!("an assignment without a value"),
+                };
+                let out = s.assign_idprop(id, &key, &v)?;
+                let path = Some(format!(
+                    "{}[{}]",
+                    resolve::repr(&parent, &s.host.state.main).unwrap_or_default(),
+                    frap_rna::ptr::py_str_repr(&key)
+                ));
+                return Ok(((out, path), false));
+            }
+            if let Target::Struct(ptr) = &parent
+                && resolve::idprops::is_embedded_id(ptr)
+                && matches!(last, PathSeg::Key(_))
+            {
+                return Err(resolve::idprops::not_supported(
+                    "an ID property of an embedded ID",
+                ));
+            }
+            let (place, v) = match (assigned, binop_of(op)) {
+                (Some(v), _) => (s.assign_target(parent, last, v.type_name())?, v),
+                (None, None) => unreachable!("an assignment without a value"),
+                (None, Some(bop)) => {
                     let place = s.assign_target(parent, last, "value")?;
                     let cur = eval::target_py(&s.host, Target::Prop(place.clone()))?;
                     let v = rhs(s)?;
@@ -614,6 +649,23 @@ impl Session {
     }
 
     /// Coerces and writes; returns the echoed value, frap's reports and hints.
+    /// `ID["key"] = value` (`idprop_py_api.cc` `BPy_IDProperty_Map_ValidateAndCreate`).
+    fn assign_idprop(
+        &mut self,
+        id: frap_rna::IdAny,
+        key: &str,
+        v: &Py,
+    ) -> Result<(J, Vec<Report>, Vec<J>), FrapError> {
+        let p = idprop_from_py(v)?;
+        let echo = value_json(&resolve::idprops::to_value(&p), &self.host.state.main);
+        let (main, log) = (&mut self.host.state.main, &mut self.host.log);
+        let header = main
+            .header_mut(id, log)
+            .ok_or_else(|| resolve::stale("an ID that no longer exists"))?;
+        header.custom.insert(SmolStr::new(key), p);
+        Ok((echo, vec![], vec![]))
+    }
+
     fn assign(&mut self, p: &PropPlace, v: Py) -> Result<(J, Vec<Report>, Vec<J>), FrapError> {
         let prop = p.prop;
         let owner = p.ptr.srna.identifier;
@@ -650,6 +702,14 @@ impl Session {
             // A long dynamic array (`Image.pixels`) echoes a capped `$array`.
             let echo = resolve::long_value_json(prop, &c.value, 0, self.opts.max_array)
                 .unwrap_or_else(|| value_json(&c.value, &self.host.state.main));
+            // A pointer setter may refuse the value silently (`ArrayModifier.start_cap` = a
+            // camera, D-97): echo what the pointer holds now.
+            let echo = match prop.kind {
+                PropKind::Pointer { .. } => resolve::read_value(&self.host, p)
+                    .map(|v| value_json(&v, &self.host.state.main))
+                    .unwrap_or(echo),
+                _ => echo,
+            };
             return Ok((echo, reports, hints));
         }
         // One element (or a slice) of an array: read, replace, write the whole array back.
@@ -1149,6 +1209,114 @@ fn put(arr: &mut Value, i: usize, v: &Value) {
         (Value::BoolArray(a), Value::Bool(x)) => a[i] = *x,
         _ => {}
     }
+}
+
+/// The ID property Python creates for `value` (`idprop_py_api.cc`, verified on 5.2.4).
+fn idprop_from_py(v: &Py) -> Result<frap_rna::IdProp, FrapError> {
+    use frap_rna::IdProp;
+    let overflow = || {
+        FrapError::new(
+            PyExc::ValueError,
+            RNA_TYPE,
+            "Python int too large to convert to C int",
+        )
+        .with_detail("python_exception", "OverflowError")
+    };
+    let int32 = |i: i64| i32::try_from(i).map(i64::from).map_err(|_| overflow());
+    Ok(match v {
+        Py::Bool(b) => IdProp::Bool(*b),
+        Py::Int(i) => IdProp::Int(int32(*i)?),
+        Py::Float(f) => IdProp::Float(*f),
+        Py::Str(s) => IdProp::Str(s.as_str().into()),
+        Py::Bare(s) => IdProp::Str(s.clone()),
+        Py::Dict(d) => IdProp::Group(
+            d.iter()
+                .map(|(k, v)| Ok((SmolStr::new(k), idprop_from_py(v)?)))
+                .collect::<Result<_, FrapError>>()?,
+        ),
+        Py::None => {
+            return Err(resolve::idprops::not_supported(
+                "an ID property holding None",
+            ));
+        }
+        Py::Json(j) => idprop_from_json(j)?,
+        Py::Rna(resolve::Target::Value(frap_rna::Value::Json(j))) => idprop_from_json(j)?,
+        Py::Rna(resolve::Target::Struct(_)) => {
+            return Err(resolve::idprops::not_supported(
+                "an ID property holding a pointer",
+            ));
+        }
+        other => {
+            let Some(items) = other.items().filter(|_| !matches!(other, Py::Matrix(_))) else {
+                return Err(resolve::idprops::not_supported(&format!(
+                    "an ID property holding a {}",
+                    other.type_name()
+                )));
+            };
+            if items.is_empty() {
+                return Ok(IdProp::IntArray(vec![]));
+            }
+            let all = |f: fn(&Py) -> bool| items.iter().all(f);
+            if all(|x| matches!(x, Py::Bool(_))) {
+                IdProp::List(items.iter().map(idprop_from_py).collect::<Result<_, _>>()?)
+            } else if all(|x| matches!(x, Py::Int(_) | Py::Bool(_))) {
+                IdProp::IntArray(
+                    items
+                        .iter()
+                        .map(|x| match x {
+                            Py::Int(i) => int32(*i),
+                            Py::Bool(b) => Ok(i64::from(*b)),
+                            _ => unreachable!("checked above"),
+                        })
+                        .collect::<Result<_, _>>()?,
+                )
+            } else if all(|x| x.number().is_some()) {
+                IdProp::FloatArray(items.iter().filter_map(Py::number).collect())
+            } else if all(|x| matches!(x, Py::Str(_) | Py::Bare(_)))
+                || all(|x| matches!(x, Py::Dict(_)))
+            {
+                IdProp::List(items.iter().map(idprop_from_py).collect::<Result<_, _>>()?)
+            } else {
+                return Err(FrapError::new(
+                    PyExc::TypeError,
+                    RNA_TYPE,
+                    "only floats, ints, booleans and dicts are allowed in ID property arrays",
+                ));
+            }
+        }
+    })
+}
+
+/// An ID property value read back (a group's JSON) and assigned again.
+fn idprop_from_json(j: &J) -> Result<frap_rna::IdProp, FrapError> {
+    use frap_rna::IdProp;
+    Ok(match j {
+        J::Null => {
+            return Err(resolve::idprops::not_supported(
+                "an ID property holding None",
+            ));
+        }
+        J::Bool(b) => IdProp::Bool(*b),
+        J::Number(n) => match n.as_i64() {
+            Some(i) => IdProp::Int(i),
+            None => IdProp::Float(n.as_f64().unwrap_or(0.0)),
+        },
+        J::String(s) => IdProp::Str(s.as_str().into()),
+        J::Object(o) => IdProp::Group(
+            o.iter()
+                .map(|(k, v)| Ok((SmolStr::new(k), idprop_from_json(v)?)))
+                .collect::<Result<_, FrapError>>()?,
+        ),
+        J::Array(a) => {
+            if a.iter().all(J::is_i64) {
+                IdProp::IntArray(a.iter().filter_map(J::as_i64).collect())
+            } else if a.iter().all(J::is_number) {
+                IdProp::FloatArray(a.iter().filter_map(J::as_f64).collect())
+            } else {
+                IdProp::List(a.iter().map(idprop_from_json).collect::<Result<_, _>>()?)
+            }
+        }
+    })
 }
 
 #[cfg(test)]

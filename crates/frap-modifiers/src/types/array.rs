@@ -102,8 +102,9 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
 /// frap (ARCHITECTURE §12 Limits): the arrayed mesh is checked against `--max-elements` (face
 /// corners) and Blender's `int` index range before it is built. Blender's own cap (about 67
 /// million vertices, above) still allows far more corners than a statement may create; a
-/// request over the limit unwinds with [`frap_math::budget::ElementsExceeded`], which the
-/// session answers as `RuntimeError` code `LIMIT_EXCEEDED`, with rollback.
+/// request over the limit unwinds with [`frap_math::budget::ElementsExceeded`]: the stack
+/// makes it the modifier's error and passes the mesh through (`stack::evaluate`);
+/// `object.modifier_apply` answers `RuntimeError` code `LIMIT_EXCEEDED`, with rollback.
 fn reserve(chunk: Counts, count: usize, sc: Counts, ec: Counts) {
     let total = |f: fn(&Counts) -> usize| -> Option<u64> {
         (f(&chunk) as u64)

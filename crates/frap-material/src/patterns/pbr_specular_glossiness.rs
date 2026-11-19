@@ -29,7 +29,10 @@ const BLOCK_HEIGHT: f32 = 460.0;
 /// `calc_locations` of the spec-gloss importer: blocks top to bottom (occlusion, diffuse,
 /// glossiness, normal, specular, emission), centred vertically. The diffuse block is stored
 /// under `diffuse`; the emission, normal and occlusion raisers read their usual keys.
-fn calc_locations(lm: &LoweredMaterial, sg: &SpecularGlossiness) -> BTreeMap<&'static str, [f32; 2]> {
+fn calc_locations(
+    lm: &LoweredMaterial,
+    sg: &SpecularGlossiness,
+) -> BTreeMap<&'static str, [f32; 2]> {
     let x = -200.0;
     let mut y = 0.0;
     let blocks: [(&'static str, bool); 6] = [

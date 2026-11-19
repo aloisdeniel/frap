@@ -281,3 +281,59 @@ fn edit_mode_backstop_and_post_check_count_edit_bmeshes() {
     let r = one(&mut s, "bpy.ops.object.mode_set(mode='OBJECT')");
     assert_eq!(r["status"], "FINISHED", "{r}");
 }
+
+/// One policy for every modifier evaluator (M3+M4 stabilization round 2): a modifier whose
+/// result would exceed `--max-elements` is that modifier's error (WARNING, `modifier_status`
+/// `ERROR`) and passes the mesh through, whether the evaluator refuses before building
+/// (SUBSURF, ARRAY, BEVEL, SCREW) or the BMesh backstop stops it; the read succeeds.
+/// `object.modifier_apply` of it answers `LIMIT_EXCEEDED`, with rollback.
+#[test]
+fn modifiers_over_max_elements_are_modifier_errors() {
+    let cases = [
+        ("SUBSURF", "modifiers['M'].levels = 11"),
+        ("ARRAY", "modifiers['M'].count = 1000"),
+        ("BEVEL", "modifiers['M'].segments = 1000"),
+        ("SCREW", "modifiers['M'].steps = 10000"),
+    ];
+    for (ty, set) in cases {
+        let mut s = session_with(|o| o.limits.max_elements = 20_000);
+        for src in [
+            format!("bpy.data.objects['Cube'].modifiers.new(name='M', type='{ty}')"),
+            format!("bpy.data.objects['Cube'].{set}"),
+        ] {
+            let r = one(&mut s, &src);
+            assert_eq!(r["ok"], true, "{src}: {r}");
+        }
+        if ty == "BEVEL" {
+            let r = one(
+                &mut s,
+                "bpy.data.objects['Cube'].modifiers['M'].affect = 'VERTICES'",
+            );
+            assert_eq!(r["ok"], true, "{r}");
+        }
+        let r = one(
+            &mut s,
+            "bpy.data.objects['Cube'].evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices[0].co",
+        );
+        assert_eq!(r["ok"], true, "{ty}: {r}");
+        let warned = r["reports"].as_array().unwrap().iter().any(|w| {
+            w["type"] == "WARNING"
+                && w["message"]
+                    .as_str()
+                    .unwrap()
+                    .starts_with("Modifier 'M': frap: limit exceeded (max_elements)")
+        });
+        assert!(warned, "{ty}: {r}");
+        let (exc, code, msg) = err(&mut s, "bpy.ops.object.modifier_apply(modifier='M')");
+        assert_eq!(
+            (exc.as_str(), code.as_str()),
+            ("RuntimeError", "LIMIT_EXCEEDED"),
+            "{ty}: {msg}"
+        );
+        assert_eq!(
+            val(&mut s, "bpy.data.objects['Cube'].modifiers.keys()"),
+            serde_json::json!(["M"]),
+            "{ty}: rolled back"
+        );
+    }
+}

@@ -129,6 +129,9 @@ pub fn set_prop(
     if is_api_ptr(ptr) || matches!(ptr.root, Root::Data | Root::Context) {
         return Err(needs_hook(ptr, prop));
     }
+    if !modifier_object_pointer_accepts(host.main(), ptr, prop, &v)? {
+        return Ok(());
+    }
     let (main, log) = host.main_mut();
     let outcome = with_struct_mut(main, log, ptr, &mut |s| {
         let srna = s.srna();
@@ -139,6 +142,46 @@ pub fn set_prop(
         SetOutcome::Done => Ok(()),
         SetOutcome::NeedsHook => Err(needs_hook(ptr, prop)),
     }
+}
+
+/// A modifier's `Object` pointer (`frap_scene::id::object_pointer_rule`, D-97):
+/// the modifier's own object raises Blender's `PROP_ID_SELF_CHECK` `TypeError`; an object
+/// of another type than the setter takes (`ArrayModifier.start_cap` = a camera) is ignored,
+/// the pointer keeps its value (`Ok(false)`), as `modifier_object_set` does.
+fn modifier_object_pointer_accepts(
+    main: &frap_scene::Main,
+    ptr: &RnaPtr,
+    prop: &PropDef,
+    v: &Value,
+) -> Result<bool, FrapError> {
+    let Root::Id(owner) = ptr.root else {
+        return Ok(true);
+    };
+    let Some(rule) = frap_scene::id::object_pointer_rule(ptr.srna.identifier, prop.identifier)
+    else {
+        return Ok(true);
+    };
+    let Value::Id(Some(target)) = v else {
+        return Ok(true);
+    };
+    if *target == owner {
+        return Err(FrapError::new(
+            PyExc::TypeError,
+            RNA_TYPE,
+            format!(
+                "{}.{} ID type does not support assignment to itself",
+                ptr.srna.identifier, prop.identifier
+            ),
+        ));
+    }
+    let Some(required) = rule else {
+        return Ok(true);
+    };
+    let ty = target
+        .typed::<frap_rna::ObjectId>()
+        .and_then(|o| main.objects.get(o))
+        .map(|o| o.object_type());
+    Ok(ty.is_none_or(|t| t == required))
 }
 
 /// Writes through a [`frap_rna::Detached`] pointer would change the original data, which

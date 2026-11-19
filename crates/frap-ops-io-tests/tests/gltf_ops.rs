@@ -389,3 +389,38 @@ fn a_failing_file_rolls_back_the_whole_files_import() {
     assert_eq!(s.main().objects.len(), 0);
     assert_eq!(s.main().meshes.len(), 0);
 }
+
+/// `__gather_sampler`: a texture gathered from several sockets warns that the sampler is the
+/// first image node's, also when one image node feeds them all (verified on 5.2.4: an image
+/// through Separate Color into Metallic and Roughness warns; into Roughness alone it does
+/// not). M3+M4 stabilization round 2.
+#[test]
+fn a_texture_from_several_sockets_warns_about_its_sampler() {
+    let d = Scratch::new("sampler-warning");
+    let mut s = session_in(d.path(), false);
+    ok(
+        &mut s,
+        "bpy.data.images.new('T', 4, 4)\n\
+         bpy.data.materials['Material'].node_tree.nodes.new('ShaderNodeTexImage')\n\
+         bpy.data.materials['Material'].node_tree.nodes['Image Texture'].image = bpy.data.images['T']\n\
+         bpy.data.materials['Material'].node_tree.nodes.new('ShaderNodeSeparateColor')\n\
+         bpy.data.materials['Material'].node_tree.links.new(bpy.data.materials['Material'].node_tree.nodes['Image Texture'].outputs['Color'], \
+         bpy.data.materials['Material'].node_tree.nodes['Separate Color'].inputs['Color'])\n\
+         bpy.data.materials['Material'].node_tree.links.new(bpy.data.materials['Material'].node_tree.nodes['Separate Color'].outputs['Green'], \
+         bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Roughness'])",
+    );
+    let warned = |s: &mut frap_session::Session, file: &str| {
+        let r = run(s, &format!("bpy.ops.export_scene.gltf(filepath='{file}')"));
+        assert!(r.ok(), "{}", r.to_json());
+        r.reports
+            .iter()
+            .any(|r| r.message == frap_io_gltf::export::images::SAMPLER_OF_FIRST_NODE)
+    };
+    assert!(!warned(&mut s, "rough.glb"));
+    ok(
+        &mut s,
+        "bpy.data.materials['Material'].node_tree.links.new(bpy.data.materials['Material'].node_tree.nodes['Separate Color'].outputs['Blue'], \
+         bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Metallic'])",
+    );
+    assert!(warned(&mut s, "mr.glb"));
+}

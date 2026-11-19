@@ -30,7 +30,7 @@ const COPY_POLL: Poll = Poll {
 fn exec(cx: &mut OpCtx, p: object::ModifierCopy) -> OpResult {
     let objects = shared::edit_objects(&cx.ctx(), p.use_selected_objects.value);
     let mut changed = false;
-    for ob in objects {
+    for &ob in &objects {
         let Some(i) = cx
             .main()
             .objects
@@ -42,9 +42,9 @@ fn exec(cx: &mut OpCtx, p: object::ModifierCopy) -> OpResult {
         edit::copy(&mut cx.object_mut(ob)?.modifiers, i);
         changed = true;
     }
-    Ok(if changed {
-        OpStatus::Finished
-    } else {
-        OpStatus::Cancelled
-    })
+    if !changed {
+        shared::report_missing(cx, &objects, &p.modifier.value);
+        return Ok(OpStatus::Cancelled);
+    }
+    Ok(OpStatus::Finished)
 }

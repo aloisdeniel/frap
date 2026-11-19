@@ -740,7 +740,49 @@ impl Session {
                 .or_else(|| args.iter().filter(|a| a.name.is_none()).nth(i))
                 .map(|a| a.value.clone())
         };
+        let idprops = || {
+            resolve::idprops::owner(&this)
+                .map(|id| resolve::idprops::all(&self.host, id))
+                .unwrap_or_default()
+        };
         match which {
+            StructFunc::Keys => Ok(Py::List(
+                idprops().into_iter().map(|(k, _)| Py::Str(k)).collect(),
+            )),
+            StructFunc::Values => Ok(Py::List(
+                idprops()
+                    .into_iter()
+                    .map(|(_, v)| super::eval::value_py(None, v))
+                    .collect(),
+            )),
+            StructFunc::Items => Ok(Py::List(
+                idprops()
+                    .into_iter()
+                    .map(|(k, v)| Py::Tuple(vec![Py::Str(k), super::eval::value_py(None, v)]))
+                    .collect(),
+            )),
+            StructFunc::Get => {
+                let key = match arg(0, "key") {
+                    Some(Py::Str(k)) => k,
+                    Some(Py::Bare(k)) => k.to_string(),
+                    Some(other) => {
+                        return Err(type_err(format!(
+                            "{srna}.get(): argument 1 must be str, not {}",
+                            other.type_name()
+                        )));
+                    }
+                    None => {
+                        return Err(type_err(
+                            "get() takes at least 1 argument (0 given)".to_owned(),
+                        ));
+                    }
+                };
+                let default = arg(1, "default").unwrap_or(Py::None);
+                Ok(idprops()
+                    .into_iter()
+                    .find(|(k, _)| *k == key)
+                    .map_or(default, |(_, v)| super::eval::value_py(None, v)))
+            }
             StructFunc::PathFromId => {
                 let prop = match arg(0, "property") {
                     None => String::new(),
