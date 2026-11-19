@@ -1,8 +1,8 @@
 # WP 3.9: an agent UV-maps a cube for a texture atlas: it marks the standard cube seams in Edit
-# Mode, unwraps CONFORMAL (LSCM, compared within 1e-4), adds a second UV map filled by
+# Mode, unwraps CONFORMAL (LSCM, equal at the default 1e-5), adds a second UV map filled by
 # cube_project and exports both maps (TEXCOORD_0 and TEXCOORD_1) with a checker texture.
 # A cylinder gets cylinder_project and a sphere sphere_project. Round trip (§17.2).
-# golden: startup=factory tier=T2 tol=1e-4 compare=glb:out/atlas.glb,glb:out/atlas_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/atlas.glb,glb:out/atlas_rt.glb
 import bpy
 bpy.ops.image.new(name='Checker', width=8, height=8, generated_type='COLOR_GRID')
 bpy.data.materials['Material'].node_tree.nodes.new('ShaderNodeTexImage')

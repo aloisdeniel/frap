@@ -5,9 +5,11 @@
 # a loose vertex exported with use_selection while it is not selected leaves it out; selected,
 # with use_mesh_edges and use_mesh_vertices, it writes LINES and POINTS primitives. In an empty
 # file, importing a missing file is `RuntimeError: Error: Please select a file` (the add-on's
-# message), the LINES/POINTS file imports as loose geometry and the lit file brings the factory
-# light back as a POINT light. Every statement's outcome and value equals Blender 5.2.4's
-# (checked with `frap-golden diff` and a value dump). Statements on stdin (raw mode, §13.1).
+# message; Blender's text ends with a newline, which frap's messages never carry, deviations
+# §3), the LINES/POINTS file imports as loose geometry and the lit file brings the factory
+# light back as a POINT light. Every statement's outcome and value equals Blender 5.2.4's up to
+# that trailing newline (checked with `frap-golden diff` and a value dump). Statements on stdin
+# (raw mode, §13.1).
 bin.name = "frap"
 args = ["--verbosity", "minimal"]
 fs.sandbox = true

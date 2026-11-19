@@ -7,7 +7,9 @@
 # enum items, and `surface_render_method = 'BLENDED'` is accepted. The export, an empty file and
 # the import bring back a Principled BSDF with transmission 1 and IOR 1.52 on the same
 # material. Every statement's outcome and value equals Blender 5.2.4's (checked with
-# `frap-golden diff` and a value dump). Statements on stdin (raw mode, §13.1).
+# `frap-golden diff` and a value dump), up to the trailing newline of Blender's `RuntimeError`
+# texts, which frap's messages never carry (deviations §3). Statements on stdin (raw mode,
+# §13.1).
 bin.name = "frap"
 args = ["--verbosity", "minimal"]
 fs.sandbox = true

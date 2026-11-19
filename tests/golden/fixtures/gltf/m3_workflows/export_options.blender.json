@@ -5,10 +5,6 @@
   },
   "lines": [
     {
-      "line": 11,
-      "ok": true
-    },
-    {
       "line": 12,
       "ok": true
     },
@@ -103,6 +99,26 @@
     {
       "line": 35,
       "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
     }
   ],
   "objects": {
@@ -152,6 +168,12 @@
       "kind": "gltf",
       "canonical": {
         "$file": "export_options.out_no_uvs.glb"
+      }
+    },
+    "out/no_uvs_rt.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "export_options.out_no_uvs_rt.glb"
       }
     },
     "out/placeholder.glb": {

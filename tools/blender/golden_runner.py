@@ -171,6 +171,8 @@ NORMALISE = {
     "D-115": ("comparator", "checked at T3 (uv/pack/aabb_rotate_any)"),
     "D-116": ("comparator", "checked at T3 (uv/lightmap/pack_in_one)"),
     "D-117": None,
+    "D-118": ("cases", "gltf/m3_workflows/export_options.py drops texCoord -1 from Blender's no-UV re-export (#@blender line)"),
+    "D-119": ("comparator", "gltf/m3_workflows/modifier_stack_reimport.py compares at tol=2e-4"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

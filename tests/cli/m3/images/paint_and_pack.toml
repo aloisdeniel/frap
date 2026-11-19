@@ -6,9 +6,10 @@
 # base colour texture; exported and imported into an empty file it comes back packed, named
 # after the glTF image (`paint`), with the same size and the same packed bytes. Every
 # statement's outcome and value equals Blender 5.2.4's (checked with `frap-golden diff` and a
-# value dump) except `packed_file.size`: frap's PNG encoder writes 85 bytes where Blender's
-# writes 260 for the same pixels (byte identity is not a goal; the decoded pixels are equal).
-# Statements on stdin (raw mode, §13.1).
+# value dump; `RuntimeError` texts up to Blender's trailing newline, deviations §3) except
+# `packed_file.size`: frap's PNG encoder writes 85 bytes where Blender's writes 260 for the
+# same pixels (byte identity is not a goal; the decoded pixels are equal; listed in
+# docs/deviations.md §2 next to the JPEG encoder). Statements on stdin (raw mode, §13.1).
 bin.name = "frap"
 args = ["--verbosity", "minimal"]
 fs.sandbox = true
