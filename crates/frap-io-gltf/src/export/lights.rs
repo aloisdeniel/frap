@@ -29,8 +29,7 @@
 //!
 //! Light node trees (Cycles emission strength) are not modelled in frap (`Light.node_tree`
 //! reads `None`), which is the add-on's no-emission-node path. `extras` of the light
-//! datablock (`export_extras`) are written by `extras.rs` once it has a datablock entry point
-//! (WP 3.7).
+//! datablock (`export_extras`): `lights.py`'s `__gather_extras`, through `extras::id` (WP 3.7).
 
 use std::f64::consts::PI;
 
@@ -145,7 +144,10 @@ pub fn apply(g: &mut Gather, ob: &Object, node: &mut Node) -> Result<(), ExportE
     let mode = g.settings.props.export_import_convert_lighting_mode.value;
     let world = matrix_world(main, ob);
     let light = match light_to_gltf(la, &world, mode) {
-        Ok(l) => l,
+        Ok(mut l) => {
+            l.extras = crate::export::extras::id(g, &la.header);
+            l
+        }
         Err(msg) => {
             // `world_matrix.copy().freeze()` hashes by value (`-0.0` equals `0.0`).
             let key = (la_ref, world.to_cols_array().map(|v| (v + 0.0).to_bits()));

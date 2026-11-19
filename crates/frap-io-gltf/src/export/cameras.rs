@@ -23,8 +23,8 @@
 //!   with +Y up as glTF expects ([`correct_matrix_world`]); children of a camera or light are
 //!   expressed relative to the corrected matrix.
 //!
-//! `extras` of the camera datablock (`export_extras`) are written by `extras.rs` once it has
-//! a datablock entry point (WP 3.7).
+//! `extras` of the camera datablock (`export_extras`): `camera.py`'s `__gather_extras`, through
+//! `extras::id` (WP 3.7).
 
 use std::collections::HashMap;
 
@@ -169,7 +169,8 @@ pub fn gather(g: &mut Gather, ob: &Object) -> Result<Option<Index>, ExportError>
         return Ok(None);
     };
     let ctx = g.ctx;
-    let idx = camera_to_gltf(cam, &ctx.scene().render).map(|c| {
+    let idx = camera_to_gltf(cam, &ctx.scene().render).map(|mut c| {
+        c.extras = crate::export::extras::id(g, &cam.header);
         g.doc.cameras.push(c);
         (g.doc.cameras.len() - 1) as Index
     });

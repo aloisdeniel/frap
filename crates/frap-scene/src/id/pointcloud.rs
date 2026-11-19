@@ -117,8 +117,35 @@ impl PointCloud {
         }
     }
 
-    /// `points[i].co = v`.
+    /// `points[i].co` (zero without a `position` attribute or past the end), without copying
+    /// the column.
+    pub fn position(&self, i: usize) -> [f32; 3] {
+        match self.attributes.get("position").map(|a| &a.data) {
+            Some(AttrData::Float3(v)) => v.get(i).copied().unwrap_or_default(),
+            _ => [0.0; 3],
+        }
+    }
+
+    /// `points[i].radius` (`DEFAULT_RADIUS` without a `radius` attribute), without copying
+    /// the column.
+    pub fn radius(&self, i: usize) -> f32 {
+        match self.attributes.get("radius").map(|a| &a.data) {
+            Some(AttrData::Float(v)) => v.get(i).copied().unwrap_or(DEFAULT_RADIUS),
+            _ => DEFAULT_RADIUS,
+        }
+    }
+
+    /// `points[i].co = v`: written in place (the column is copied only when a snapshot
+    /// shares it).
     pub fn set_position(&mut self, i: usize, v: [f32; 3]) {
+        if let Some(AttrData::Float3(col)) =
+            self.attributes.get_mut("position").map(|a| &mut a.data)
+        {
+            if let Some(x) = std::sync::Arc::make_mut(col).get_mut(i) {
+                *x = v;
+            }
+            return;
+        }
         let mut p = self.positions();
         if let Some(x) = p.get_mut(i) {
             *x = v;
@@ -130,8 +157,15 @@ impl PointCloud {
         });
     }
 
-    /// `points[i].radius = v` (creates `radius` filled with the default first).
+    /// `points[i].radius = v` (creates `radius` filled with the default first; afterwards
+    /// written in place).
     pub fn set_radius(&mut self, i: usize, v: f32) {
+        if let Some(AttrData::Float(col)) = self.attributes.get_mut("radius").map(|a| &mut a.data) {
+            if let Some(x) = std::sync::Arc::make_mut(col).get_mut(i) {
+                *x = v;
+            }
+            return;
+        }
         let mut r = self.radii();
         if let Some(x) = r.get_mut(i) {
             *x = v;
@@ -146,9 +180,9 @@ impl PointCloud {
 
 crate::id::id_rna! { PointCloud as frap_spec_rna::POINT_CLOUD, "POINTCLOUD" {
     points => soa(pub Point as frap_spec_rna::POINT, len = |p| p.len()) {
-        co => get(|p, i| p.positions()[i]) set(|p, i, v: [f32; 3]| p.set_position(i, v))
+        co => get(|p, i| p.position(i)) set(|p, i, v: [f32; 3]| p.set_position(i, v))
             (tag = Vector),
-        radius => get(|p, i| p.radii()[i]) set(|p, i, v: f32| p.set_radius(i, v)),
+        radius => get(|p, i| p.radius(i)) set(|p, i, v: f32| p.set_radius(i, v)),
         index => get(|_p, i| i as i32),
     },
 }}
@@ -201,6 +235,16 @@ mod tests {
         assert_eq!(pc.positions()[2], [1.0, 2.0, 3.0]);
         assert_eq!(pc.positions()[3], [0.0; 3]);
         assert_eq!(pc.radii().len(), 4);
+        assert_eq!((pc.position(2), pc.radius(0)), ([1.0, 2.0, 3.0], 0.5));
+        // In place: a shared column is copied once, the other holder keeps its values.
+        let snapshot = pc.clone();
+        pc.set_position(0, [9.0; 3]);
+        pc.set_radius(1, 2.0);
+        assert_eq!((pc.position(0), pc.radius(1)), ([9.0; 3], 2.0));
+        assert_eq!(
+            (snapshot.position(0), snapshot.radius(1)),
+            ([0.0; 3], DEFAULT_RADIUS)
+        );
         assert!(
             pc.set_attribute("x", AttrData::Float(vec![0.0; 2].into()))
                 .is_err()

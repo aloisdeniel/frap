@@ -1,0 +1,319 @@
+{
+ "blender": "5.2.4 LTS (cd5dc428cce1)",
+ "source": "in.gltf",
+ "export": "export_scene.gltf(export_format=GLTF_SEPARATE, export_extras=True, export_cameras=True, export_lights=True) after import_scene.gltf(in.gltf) into the factory startup",
+ "extras": {
+  "scenes": [
+   {
+    "name": "Scene",
+    "extras": {
+     "tag": "scene",
+     "num": 3,
+     "flt": 1.5,
+     "neg": -7,
+     "flag": true,
+     "list": [
+      1,
+      2,
+      3
+     ],
+     "flist": [
+      0.5,
+      1.5
+     ],
+     "obj": {
+      "a": 1,
+      "b": "x",
+      "c": {
+       "d": [
+        4,
+        5
+       ]
+      }
+     },
+     "big": "12345678901",
+     "sé": "été",
+     "mixed": "[1, 'a']",
+     "empty": [],
+     "eobj": {}
+    }
+   }
+  ],
+  "nodes": [
+   {
+    "name": "Cam",
+    "extras": {
+     "tag": "camnode",
+     "num": 3,
+     "flt": 1.5,
+     "neg": -7,
+     "flag": true,
+     "list": [
+      1,
+      2,
+      3
+     ],
+     "flist": [
+      0.5,
+      1.5
+     ],
+     "obj": {
+      "a": 1,
+      "b": "x",
+      "c": {
+       "d": [
+        4,
+        5
+       ]
+      }
+     },
+     "big": "12345678901",
+     "sé": "été",
+     "mixed": "[1, 'a']",
+     "empty": [],
+     "eobj": {}
+    }
+   },
+   {
+    "name": "Camera",
+    "extras": null
+   },
+   {
+    "name": "Cube",
+    "extras": null
+   },
+   {
+    "name": "Lamp",
+    "extras": {
+     "tag": "lightnode",
+     "num": 3,
+     "flt": 1.5,
+     "neg": -7,
+     "flag": true,
+     "list": [
+      1,
+      2,
+      3
+     ],
+     "flist": [
+      0.5,
+      1.5
+     ],
+     "obj": {
+      "a": 1,
+      "b": "x",
+      "c": {
+       "d": [
+        4,
+        5
+       ]
+      }
+     },
+     "big": "12345678901",
+     "sé": "été",
+     "mixed": "[1, 'a']",
+     "empty": [],
+     "eobj": {}
+    }
+   },
+   {
+    "name": "Light",
+    "extras": null
+   },
+   {
+    "name": "Tri",
+    "extras": {
+     "tag": "node",
+     "num": 3,
+     "flt": 1.5,
+     "neg": -7,
+     "flag": true,
+     "list": [
+      1,
+      2,
+      3
+     ],
+     "flist": [
+      0.5,
+      1.5
+     ],
+     "obj": {
+      "a": 1,
+      "b": "x",
+      "c": {
+       "d": [
+        4,
+        5
+       ]
+      }
+     },
+     "big": "12345678901",
+     "sé": "été",
+     "mixed": "[1, 'a']",
+     "empty": [],
+     "eobj": {}
+    }
+   }
+  ],
+  "meshes": [
+   {
+    "name": "Cube",
+    "extras": null
+   },
+   {
+    "name": "TriMesh",
+    "extras": {
+     "tag": "mesh",
+     "num": 3,
+     "flt": 1.5,
+     "neg": -7,
+     "flag": true,
+     "list": [
+      1,
+      2,
+      3
+     ],
+     "flist": [
+      0.5,
+      1.5
+     ],
+     "obj": {
+      "a": 1,
+      "b": "x",
+      "c": {
+       "d": [
+        4,
+        5
+       ]
+      }
+     },
+     "big": "12345678901",
+     "sé": "été",
+     "mixed": "[1, 'a']",
+     "empty": [],
+     "eobj": {}
+    }
+   }
+  ],
+  "materials": [
+   {
+    "name": "Material",
+    "extras": null
+   },
+   {
+    "name": "M",
+    "extras": {
+     "tag": "material",
+     "num": 3,
+     "flt": 1.5,
+     "neg": -7,
+     "flag": true,
+     "list": [
+      1,
+      2,
+      3
+     ],
+     "flist": [
+      0.5,
+      1.5
+     ],
+     "obj": {
+      "a": 1,
+      "b": "x",
+      "c": {
+       "d": [
+        4,
+        5
+       ]
+      }
+     },
+     "big": "12345678901",
+     "sé": "été",
+     "mixed": "[1, 'a']",
+     "empty": [],
+     "eobj": {}
+    }
+   }
+  ],
+  "cameras": [
+   {
+    "name": "Camera.001",
+    "extras": {
+     "tag": "camera",
+     "num": 3,
+     "flt": 1.5,
+     "neg": -7,
+     "flag": true,
+     "list": [
+      1,
+      2,
+      3
+     ],
+     "flist": [
+      0.5,
+      1.5
+     ],
+     "obj": {
+      "a": 1,
+      "b": "x",
+      "c": {
+       "d": [
+        4,
+        5
+       ]
+      }
+     },
+     "big": "12345678901",
+     "sé": "été",
+     "mixed": "[1, 'a']",
+     "empty": [],
+     "eobj": {}
+    }
+   },
+   {
+    "name": "Camera",
+    "extras": null
+   }
+  ],
+  "lights": [
+   {
+    "name": "L",
+    "extras": {
+     "tag": "light",
+     "num": 3,
+     "flt": 1.5,
+     "neg": -7,
+     "flag": true,
+     "list": [
+      1,
+      2,
+      3
+     ],
+     "flist": [
+      0.5,
+      1.5
+     ],
+     "obj": {
+      "a": 1,
+      "b": "x",
+      "c": {
+       "d": [
+        4,
+        5
+       ]
+      }
+     },
+     "big": "12345678901",
+     "sé": "été",
+     "mixed": "[1, 'a']",
+     "empty": [],
+     "eobj": {}
+    }
+   },
+   {
+    "name": "Light",
+    "extras": null
+   }
+  ]
+ }
+}

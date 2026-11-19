@@ -12,7 +12,9 @@
 //! the ID's key order: ints, floats, bools (Python bools are ints), strings, int/float arrays
 //! (`to_list()`), groups (`to_dict()`) and lists of groups, recursively. No custom property
 //! writes no `extras`. W0 wired `nodes.rs`, `mesh/gather.rs`, `materials/mod.rs` and `scenes.rs`
-//! to these functions; the point cloud gatherer (`mesh/extract/pointcloud.rs`) uses [`id`].
+//! to these functions; the point cloud gatherer (`mesh/extract/pointcloud.rs`), the camera
+//! gatherer (`cameras.rs`, `camera.py`) and the light gatherer (`lights.rs`, `lights.py`) use
+//! [`id`].
 
 use frap_gltf::json::Extras;
 use frap_mesh::Mesh;
@@ -250,6 +252,92 @@ mod tests {
             extras("", false),
             json!({"nodes": [null], "meshes": [null], "materials": [null], "scenes": [null]})
         );
+    }
+
+    /// Import → export round trip of extras on every glTF object that carries them (scene,
+    /// nodes, mesh, material, camera, `KHR_lights_punctual` light), against Blender 5.2.4:
+    /// `tests/golden/fixtures/gltf/attributes/extras_roundtrip/in.gltf` imported into the
+    /// factory startup and exported with `export_extras`, `export_cameras` and `export_lights`
+    /// (`blender_extras.json`, `extras` of each object by name). The importer keeps the
+    /// extras as ID properties (big ints and mixed lists stringified, `null` dropped); the
+    /// exporter writes them back on the same objects.
+    #[test]
+    fn import_export_round_trip_equals_blenders() {
+        use frap_scene::{ChangeLog, Context, Preferences, startup};
+        let dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/golden/fixtures/gltf/attributes/extras_roundtrip");
+        let (mut main, win) = startup::factory();
+        let mut log = ChangeLog::default();
+        crate::import::import_file(
+            &mut main,
+            &win,
+            &dir.join("in.gltf"),
+            &crate::import::ImportSettings::default(),
+            &mut log,
+        )
+        .unwrap();
+        let prefs = Preferences::default();
+        let ctx = Context {
+            main: &main,
+            win: &win,
+            prefs: &prefs,
+        };
+        let mut p = crate::export::settings::default_props();
+        p.export_extras.value = true;
+        p.export_cameras.value = true;
+        p.export_lights.value = true;
+        let s = crate::export::ExportSettings {
+            props: std::sync::Arc::new(p),
+            ..crate::export::ExportSettings::default()
+        };
+        let doc = crate::export::export(&main, &ctx, &s).unwrap().document;
+        let e =
+            |x: Option<&Extras>| x.map_or(J::Null, |e| serde_json::from_str::<J>(e.get()).unwrap());
+        let by_name = |items: Vec<(Option<String>, J)>| -> Map<String, J> {
+            items
+                .into_iter()
+                .map(|(n, x)| (n.unwrap_or_default(), x))
+                .collect()
+        };
+        let lights = doc
+            .extensions
+            .get::<frap_gltf::ext::khr_lights_punctual::KhrLightsPunctual>()
+            .unwrap()
+            .unwrap_or_default()
+            .lights;
+        let ours = json!({
+            "scenes": by_name(doc.scenes.iter().map(|x| (x.name.clone(), e(x.extras.as_ref()))).collect()),
+            "nodes": by_name(doc.nodes.iter().map(|x| (x.name.clone(), e(x.extras.as_ref()))).collect()),
+            "meshes": by_name(doc.meshes.iter().map(|x| (x.name.clone(), e(x.extras.as_ref()))).collect()),
+            "materials": by_name(doc.materials.iter().map(|x| (x.name.clone(), e(x.extras.as_ref()))).collect()),
+            "cameras": by_name(doc.cameras.iter().map(|x| (x.name.clone(), e(x.extras.as_ref()))).collect()),
+            "lights": by_name(lights.iter().map(|x| (x.name.clone(), e(x.extras.as_ref()))).collect()),
+        });
+        let blender: J = serde_json::from_str(
+            &std::fs::read_to_string(dir.join("blender_extras.json")).unwrap(),
+        )
+        .unwrap();
+        let theirs: Map<String, J> = blender["extras"]
+            .as_object()
+            .unwrap()
+            .iter()
+            .map(|(k, v)| {
+                let items = v
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .map(|x| (x["name"].as_str().map(str::to_owned), x["extras"].clone()))
+                    .collect();
+                (k.clone(), J::Object(by_name(items)))
+            })
+            .collect();
+        assert_eq!(ours, J::Object(theirs));
+        // Off: no extras anywhere.
+        let doc = crate::export::export(&main, &ctx, &crate::export::ExportSettings::default())
+            .unwrap()
+            .document;
+        assert!(doc.cameras.iter().all(|c| c.extras.is_none()));
+        assert!(doc.nodes.iter().all(|c| c.extras.is_none()));
     }
 
     #[test]

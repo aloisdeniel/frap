@@ -764,7 +764,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | AttributeGroupMesh, Attribute and typed attributes (FloatAttribute, FloatVectorAttribute, FloatColorAttribute, ByteColorAttribute, BoolAttribute, IntAttribute, Float2Attribute, …) | M1 | attributes.new/remove, active_color, default_color |
 | [ ] | MeshUVLoopLayer, MeshUVLoop, UVLoopLayers | M1 | uv_layers.new(do_init), active, active_render |
 | [ ] | Material, MaterialSlot, IDMaterials (mesh.materials) | M1 | diffuse_color (Workbench), surface_render_method, use_backface_culling; MaterialSlot derived from data + per-object overrides |
-| [x] | PointCloud | M1 data / M3 glTF | POINTS export, `import_point_as_pointcloud`; RNA `points` (`co`, `radius`, `index`), `.frap` persistence (WP 3.7); `attributes`/`materials` RNA and `resize()` not bound yet |
+| [ ] | PointCloud | M1 data / M3 glTF | POINTS export, `import_point_as_pointcloud`; RNA `points` (`co`, `radius`, `index`), `.frap` persistence (WP 3.7); not done: `attributes`/`materials` RNA and `resize()` are not bound yet |
 | [ ] | ShaderNodeTree, Node, NodeSocket (+ typed sockets), NodeLink, Nodes, NodeLinks | M1 | first-enabled socket lookup; generic for all node types; material/world trees are embedded IDs |
 | [ ] | Camera, CameraDOFSettings | M1 | lens/angle hook; glTF M3 |
 | [ ] | Light, PointLight, SunLight, SpotLight, AreaLight | M1 | type re-typing hook; glTF M3 |

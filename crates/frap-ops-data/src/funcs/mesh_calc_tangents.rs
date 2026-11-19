@@ -6,14 +6,23 @@
 //! Fills the temporary corner tangent layer (`CD_MLOOPTANGENT`) that `MeshLoop.tangent`,
 //! `bitangent_sign` and `bitangent` read: MikkTSpace over the mesh faces with the corner
 //! normals and the UV map named `uvmap` (the active UV map when the argument is omitted; an
-//! explicit `""` names no map, verified on 5.2.4). The layer is (re)created zeroed first, so a
-//! failing call leaves zero tangents behind, as Blender's does:
-//! - no such UV map: `RuntimeError: Error: Tangent space computation needs a UV Map, "<name>"
-//!   not found, aborting`;
+//! explicit `""` names no map, verified on 5.2.4). The UV map is read the way
+//! `attributes.lookup<float2>(uvmap, Corner)` reads it: any attribute of that name, its values
+//! interpolated to the corners and converted to `float2` (a POINT FLOAT2 attribute, or
+//! `uvmap='position'`, works; verified on 5.2.4). Errors:
+//! - no such attribute: `RuntimeError: Error: Tangent space computation needs a UV Map,
+//!   "<name>" not found, aborting`;
 //! - a face with more than four corners: `RuntimeError: Error: Tangent space can only be
 //!   computed for tris/quads, aborting`.
+//!
+//! The layer lives as long as Blender's temporary layer: the stale values survive geometry
+//! edits and attribute removals in Object Mode, but an ID copy (`mesh.copy()`) and every
+//! BMesh → Mesh conversion (leaving Edit Mode) read zero tangents (`frap_mesh::Mesh`'s
+//! `tangents` field). Deviation: Blender zeroes the layer before it fails, so a failing call
+//! leaves zero tangents behind; frap rolls the failing statement back, so the tangents of
+//! the previous successful call stay.
 
-use frap_mesh::{AttrData, Domain};
+use frap_mesh::Domain;
 use frap_rna::{RnaError, RnaPtr, Value, rna_func};
 use frap_scene::{FuncArgs, Host};
 
@@ -43,12 +52,8 @@ fn mesh_calc_tangents(
     };
     mesh.set_corner_tangents(Some(vec![[0.0; 4]; mesh.corners_num()]));
     let uv = mesh
-        .attributes()
-        .get(&uvmap)
-        .and_then(|a| match (&a.domain, &a.data) {
-            (Domain::Corner, AttrData::Float2(v)) => Some(v.clone()),
-            _ => None,
-        });
+        .lookup_float2(&uvmap, Domain::Corner)
+        .map(|v| v.into_owned());
     let Some(uv) = uv.filter(|v| !v.is_empty()) else {
         return Err(report_error(format!(
             "Tangent space computation needs a UV Map, \"{uvmap}\" not found, aborting"
