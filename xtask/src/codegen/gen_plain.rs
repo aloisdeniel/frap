@@ -46,9 +46,10 @@ struct PlainSpec {
     doc: &'static str,
 }
 
-/// A stored field without an RNA property: a `SmolStr` (`ty: None`, default `default`), or a
-/// hand-written type of `frap-scene` (`ty: Some(path)`, `Default::default()`; M4 W0: the
-/// `NodesModifier.properties.inputs` storage).
+/// A stored field without an RNA property: a `SmolStr` (`ty: None`, default `default`), or
+/// another type (`ty: Some(path)`: a hand-written type of `frap-scene`, M4 W0's
+/// `NodesModifier.properties.inputs` storage, or a scalar such as `f32`) whose default is the
+/// Rust expression `default` (empty: `Default::default()`).
 struct Extra {
     name: &'static str,
     doc: &'static str,
@@ -117,7 +118,47 @@ const PLAIN: &[PlainSpec] = &[
         own_only: false,
         rna_impl: true,
         hooked: &[],
-        extra: &[],
+        // M3 W2 (WP 3.8): the UV calculation settings the `uv.*` operators remember between
+        // calls (`unwrap_options_sync_toolsettings`, `pack_islands_exec`, `smart_project_exec`);
+        // DNA only. Defaults are the factory scene's (`startup.blend`: ANGLE_BASED, fill holes).
+        extra: &[
+            Extra {
+                name: "unwrapper",
+                doc: "DNA `unwrapper`: the `uv.unwrap` method a call without `method` uses (no RNA property)",
+                default: "ANGLE_BASED",
+                ty: None,
+            },
+            Extra {
+                name: "uvcalc_flag",
+                doc: "DNA `uvcalc_flag`: `UVCALC_FILLHOLES` (1), `UVCALC_NO_ASPECT_CORRECT` (2), `UVCALC_USESUBSURF` (8), `UVCALC_UNWRAP_NO_FLIP` (64), `UVCALC_UNWRAP_USE_WEIGHTS` (128) (no RNA property)",
+                default: "1",
+                ty: Some("i32"),
+            },
+            Extra {
+                name: "uvcalc_margin",
+                doc: "DNA `uvcalc_margin`: the island margin `uv.unwrap` / `uv.pack_islands` use without `margin` (no RNA property)",
+                default: "0.001",
+                ty: Some("f32"),
+            },
+            Extra {
+                name: "uvcalc_iterations",
+                doc: "DNA `uvcalc_iterations`: `uv.unwrap` `iterations` (no RNA property)",
+                default: "10",
+                ty: Some("i32"),
+            },
+            Extra {
+                name: "uvcalc_weight_factor",
+                doc: "DNA `uvcalc_weight_factor`: `uv.unwrap` `weight_factor` (no RNA property)",
+                default: "1.0",
+                ty: Some("f32"),
+            },
+            Extra {
+                name: "uvcalc_weight_group",
+                doc: "DNA `uvcalc_weight_group`: `uv.unwrap` `weight_group` (no RNA property)",
+                default: "uv_importance",
+                ty: None,
+            },
+        ],
         doc: "`bpy.types.ToolSettings` (`scene.tool_settings`; the OPERATORS.md §D subset).",
     },
     PlainSpec {
@@ -693,7 +734,13 @@ fn emit_struct(
     }
     for e in extra {
         if e.ty.is_some() {
-            let _ = writeln!(out, "            {}: Default::default(),", ident(e.name));
+            // A typed extra's `default` is a Rust expression (empty: `Default::default()`).
+            let d = if e.default.is_empty() {
+                "Default::default()"
+            } else {
+                e.default
+            };
+            let _ = writeln!(out, "            {}: {d},", ident(e.name));
         } else {
             let _ = writeln!(
                 out,

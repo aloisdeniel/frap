@@ -1,0 +1,21 @@
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.uv.unwrap()
+bpy.ops.mesh.select_mode(type='EDGE')
+bpy.ops.frap.select_elements(type='EDGE', indices=[0, 2, 3, 5, 6, 9, 11])
+bpy.ops.mesh.mark_seam()
+bpy.ops.mesh.select_all(action='SELECT')
+bpy.ops.uv.unwrap(method='CONFORMAL', fill_holes=False)
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.data.meshes['Cube'].uv_layers.active.data[0].uv
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.mark_seam(clear=True)
+bpy.ops.uv.smart_project(island_margin=0.02)
+bpy.ops.uv.pack_islands(shape_method='AABB')
+bpy.ops.uv.seams_from_islands()
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.data.meshes['Cube'].uv_layers.active.data[0].uv
+bpy.data.meshes['Cube'].edges[3].use_seam
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.uv.lightmap_pack()
+bpy.context.mode

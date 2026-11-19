@@ -1,0 +1,326 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "uv.unwrap",
+  "bl_idname": "UV_OT_unwrap",
+  "label": "Unwrap",
+  "description": "Unwrap the mesh of the object being edited",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "method",
+      "name": "Method",
+      "description": "Unwrapping method (Angle Based usually gives better results than Conformal, while being somewhat slower)",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "CONFORMAL",
+      "enum_items": [
+        {
+          "identifier": "ANGLE_BASED",
+          "name": "Angle Based",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "CONFORMAL",
+          "name": "Conformal",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "MINIMUM_STRETCH",
+          "name": "Minimum Stretch",
+          "description": "",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "fill_holes",
+      "name": "Fill Holes",
+      "description": "Virtually fill holes in mesh before unwrapping, to better avoid overlaps and preserve symmetry",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "correct_aspect",
+      "name": "Correct Aspect",
+      "description": "Map UVs taking aspect ratio of the image associated with the material into account",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_subsurf_data",
+      "name": "Use Subdivision Surface",
+      "description": "Map UVs taking vertex position after Subdivision Surface modifier has been applied",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_original_bounds",
+      "name": "Original Bounds",
+      "description": "Unwrap islands into their original bounds, instead of re-packing",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "margin_method",
+      "name": "Margin Method",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SCALED",
+      "enum_items": [
+        {
+          "identifier": "SCALED",
+          "name": "Scaled",
+          "description": "Use scale of existing UVs to multiply margin",
+          "value": 0
+        },
+        {
+          "identifier": "ADD",
+          "name": "Add",
+          "description": "Just add the margin, ignoring any UV scale",
+          "value": 1
+        },
+        {
+          "identifier": "FRACTION",
+          "name": "Fraction",
+          "description": "Specify a precise fraction of final UV output",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "margin",
+      "name": "Margin",
+      "description": "Space between islands",
+      "type": "FLOAT",
+      "subtype": "FACTOR",
+      "unit": "NONE",
+      "array": null,
+      "default": 0.001,
+      "hard_min": 0,
+      "hard_max": 1,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "no_flip",
+      "name": "No Flip",
+      "description": "Prevent flipping UV's, flipping may lower distortion depending on the position of pins",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "iterations",
+      "name": "Iterations",
+      "description": "Number of iterations when \"Minimum Stretch\" method is used",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 10,
+      "hard_min": 0,
+      "hard_max": 10000,
+      "soft_min": 1,
+      "soft_max": 30,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_weights",
+      "name": "Importance Weights",
+      "description": "Whether to take into account per-vertex importance weights",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "weight_group",
+      "name": "Weight Group",
+      "description": "Vertex group name for importance weights (modulating the deform)",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "uv_importance",
+      "length_max": 64,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "weight_factor",
+      "name": "Weight Factor",
+      "description": "How much influence the weightmap has for weighted parameterization, 0 being no influence",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": -10000,
+      "hard_max": 10000,
+      "soft_min": -10,
+      "soft_max": 10,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T2",
+    "support": "partial",
+    "support_note": "ANGLE_BASED is solved with LSCM (ABF++ is M8); MINIMUM_STRETCH falls back to CONFORMAL with Blender's no-SLIM WARNING; use_subsurf_data with a Subdivision Surface modifier first and use_original_bounds=True answer OP_NOT_IMPLEMENTED",
+    "headless": "native",
+    "planned": "M3",
+    "extension": false,
+    "notes": []
+  }
+}

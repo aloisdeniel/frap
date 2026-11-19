@@ -115,6 +115,11 @@ fn template() -> &'static Scene {
         sc.frame_start = factory["frame_start"].as_i64().unwrap_or(1) as i32;
         sc.frame_end = factory["frame_end"].as_i64().unwrap_or(250) as i32;
         sc.frame_current = factory["frame_current"].as_i64().unwrap_or(1) as i32;
+        // DNA-only UV settings (M3 W2, WP 3.8): a new scene has the `ToolSettings` DNA
+        // defaults (`unwrapper` CONFORMAL, no `UVCALC_FILLHOLES`), the factory scene not
+        // (verified on 5.2.4: a bare `uv.unwrap()` there is ANGLE_BASED with filled holes).
+        sc.tool_settings.unwrapper = "CONFORMAL".into();
+        sc.tool_settings.uvcalc_flag = 0;
         sc
     })
 }

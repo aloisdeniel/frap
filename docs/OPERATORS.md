@@ -392,20 +392,20 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `uv.unwrap` | M3 | P0 | default CONFORMAL (LSCM); ANGLE_BASED/MINIMUM_STRETCH exact in M8 |
-| [ ] | `uv.smart_project` | M3 | P0 |  |
-| [ ] | `uv.pack_islands` | M3 | P0 | T3 invariants |
-| [ ] | `uv.cube_project` | M3 | P1 |  |
-| [ ] | `uv.cylinder_project` | M3 | P1 | headless view fallback as Blender |
-| [ ] | `uv.sphere_project` | M3 | P1 |  |
-| [ ] | `uv.reset` | M3 | P1 |  |
-| [ ] | `uv.average_islands_scale` | M3 | P1 |  |
-| [ ] | `uv.seams_from_islands` | M3 | P1 |  |
-| [ ] | `uv.mark_seam` | M3 | P1 |  |
-| [ ] | `uv.follow_active_quads` | M3 | P2 | needs active face |
-| [ ] | `uv.lightmap_pack` | M3 | P2 | upper-case prop names are real |
-| [ ] | `uv.pin` | M3 | P2 |  |
-| [ ] | `uv.project_from_view` | M3 | P2 | frap-extended: projects from scene.camera |
+| [x] | `uv.unwrap` | M3 | P0 | CONFORMAL (LSCM) T2; ANGLE_BASED via LSCM (hint `UV_ANGLE_BASED_AS_CONFORMAL`), MINIMUM_STRETCH falls back as a no-SLIM build; exact in M8 |
+| [x] | `uv.smart_project` | M3 | P0 |  |
+| [x] | `uv.pack_islands` | M3 | P0 | T3 invariants |
+| [x] | `uv.cube_project` | M3 | P1 |  |
+| [x] | `uv.cylinder_project` | M3 | P1 | view directions use the virtual 3D View (D-10) |
+| [x] | `uv.sphere_project` | M3 | P1 |  |
+| [x] | `uv.reset` | M3 | P1 |  |
+| [x] | `uv.average_islands_scale` | M3 | P1 |  |
+| [x] | `uv.seams_from_islands` | M3 | P1 |  |
+| [x] | `uv.mark_seam` | M3 | P1 |  |
+| [x] | `uv.follow_active_quads` | M3 | P2 | needs active face (`mesh.loop_select(face_index=…)`) |
+| [x] | `uv.lightmap_pack` | M3 | P2 | upper-case prop names are real |
+| [x] | `uv.pin` | M3 | P2 |  |
+| [x] | `uv.project_from_view` | M3 | P2 | frap-extended: projects from scene.camera |
 | [ ] | `uv.minimize_stretch` | M8 | P2 | iterations > 0 headless |
 | [ ] | `uv.select_all` | M8 | P2 | meaningful with sync select off |
 | [ ] | `uv.select_mode` | M8 | P2 |  |

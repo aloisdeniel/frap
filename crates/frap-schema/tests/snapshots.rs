@@ -59,7 +59,7 @@ fn manifest_per_namespace() {
 fn manifest_selected_operators() {
     frap_ops_all::link();
     for idname in [
-        "uv.smart_project",
+        "uv.minimize_stretch",
         "armature.extrude_move",
         "object.modifier_apply_as_shapekey",
         "mesh.select_similar",
