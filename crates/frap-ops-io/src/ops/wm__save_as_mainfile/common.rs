@@ -32,6 +32,27 @@ pub(crate) fn resolve(cx: &mut OpCtx, p: &str) -> PathBuf {
     cx.services().paths().resolve(p)
 }
 
+/// [`resolve`] followed by Blender's `BLI_path_canonicalize_native` separator rule, as
+/// `wm.open_mainfile` and `wm.save_(as_)mainfile` apply it to `filepath`: on Windows every `/`
+/// after the drive prefix becomes `\` (`BLI_path_slash_native`), so reports and
+/// `bpy.data.filepath` show `C:\work\dir\a.frap`, never `C:\work\dir/a.frap`. A no-op elsewhere.
+pub(crate) fn resolve_native(cx: &mut OpCtx, p: &str) -> PathBuf {
+    slash_native(resolve(cx, p))
+}
+
+/// `BLI_path_slash_native`: `/` → `\` past the first two characters on Windows.
+pub(crate) fn slash_native(p: PathBuf) -> PathBuf {
+    if std::path::MAIN_SEPARATOR != '\\' {
+        return p;
+    }
+    match p.to_str() {
+        Some(s) if s.len() > 2 && s.is_char_boundary(2) => {
+            PathBuf::from(format!("{}{}", &s[..2], s[2..].replace('/', "\\")))
+        }
+        _ => p,
+    }
+}
+
 /// The file name Blender's reports show (`Saved "part.frap"`).
 pub(crate) fn file_name(p: &Path) -> String {
     p.file_name()
@@ -45,13 +66,10 @@ pub(crate) fn is_blend(p: &Path) -> bool {
         .is_some_and(|e| e.to_string_lossy().eq_ignore_ascii_case("blend"))
 }
 
-/// An OS error as Python's `strerror` spells it (`No such file or directory`).
+/// An OS error as Blender's reports spell it, C `strerror` (`No such file or directory`) on
+/// every OS.
 pub(crate) fn os_error(e: &std::io::Error) -> String {
-    let s = e.to_string();
-    match s.find(" (os error ") {
-        Some(i) => s[..i].to_owned(),
-        None => s,
-    }
+    frap_rna::error::strerror(e)
 }
 
 /// `{"<prop>": …}` props the caller set that do not apply to frap: one INFO each (§15).

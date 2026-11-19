@@ -20,7 +20,7 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
     } else {
         p.filepath.value.to_string()
     };
-    let path = common::resolve(cx, &raw);
+    let path = common::resolve_native(cx, &raw);
     common::save(cx, &path, common::SaveKind::Save)
 }
 

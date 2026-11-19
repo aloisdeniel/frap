@@ -17,6 +17,8 @@ use frap_session::{SessionOptions, Startup, Verbosity};
 #[derive(Parser, Debug)]
 #[command(
     name = "frap",
+    // Usage lines say `frap` on every OS (not `frap.exe` from argv[0] on Windows).
+    bin_name = "frap",
     version,
     after_help = "\
 Transports:

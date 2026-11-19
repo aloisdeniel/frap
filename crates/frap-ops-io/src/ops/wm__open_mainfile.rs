@@ -15,7 +15,7 @@ use super::wm__save_as_mainfile::common;
 fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
     let p = P::from_args(a);
     common::report_ignored(cx, a, &["filepath"]);
-    let path = common::resolve(cx, &p.filepath.value);
+    let path = common::resolve_native(cx, &p.filepath.value);
     if path.is_dir() {
         return Err(OpError::UnsupportedFormat(format!(
             "File format is not supported in file \"{}\"",

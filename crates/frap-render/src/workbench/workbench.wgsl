@@ -95,14 +95,32 @@ struct Draw {
 // when a render target converts to half (verified: the 8-sample TAA alpha of an opaque pixel
 // comes out as 0.998046875, which only truncation gives). Done explicitly so every adapter
 // stores the same values.
+//
+// Integer bit masking on the f32, not `unpack2x16float(pack2x16float(x))`: Mesa's NIR folds
+// that round trip to `x` (an inexact algebraic rule), so on lavapipe nothing was quantised
+// (verified on Mesa 25.2.8 llvmpipe: `unpack2x16float(pack2x16float(0.123457)).x == 0.123457`).
+// Equals `color::round_f16_toward_zero` (CPU) for every input.
 fn rtz16(x: f32) -> f32 {
-    let bits = pack2x16float(vec2<f32>(x, 0.0)) & 0xffffu;
-    let h = unpack2x16float(bits).x;
-    if (abs(h) > abs(x)) {
-        // One step toward zero (also turns a rounded-up infinity into the largest half).
-        return unpack2x16float(bits - 1u).x;
+    let u = bitcast<u32>(x);
+    let sign = u & 0x80000000u;
+    let a = u & 0x7fffffffu;
+    if (a >= 0x7f800000u) {
+        // Infinity and NaN are kept.
+        return x;
     }
-    return h;
+    if (a >= 0x477fe000u) {
+        // At or above 65504, the largest half: truncation never reaches infinity.
+        return bitcast<f32>(sign | 0x477fe000u);
+    }
+    let e = a >> 23u;
+    if (e < 103u) {
+        // Below 2^-24, the smallest half subnormal.
+        return bitcast<f32>(sign);
+    }
+    // Half normals (f32 biased exponent >= 113) keep 10 mantissa bits (13 dropped); half
+    // subnormals keep the bits down to 2^-24 (126 - e dropped, 14..=23).
+    let drop = select(126u - e, 13u, e >= 113u);
+    return bitcast<f32>(sign | (a & ~((1u << drop) - 1u)));
 }
 
 fn q16(v: vec4<f32>) -> vec4<f32> {

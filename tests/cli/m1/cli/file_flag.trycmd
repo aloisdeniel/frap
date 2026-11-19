@@ -15,6 +15,6 @@ $ frap --file scene.frap --no-ready --no-end-event --verbosity minimal -c "bpy.d
 
 $ frap --file file_flag.trycmd -c "print(1)"
 ? 2
-frap: cannot read --file file_flag.trycmd: No such file or directory (os error 2)
+frap: cannot read --file file_flag.trycmd: No such file or directory
 
 ```

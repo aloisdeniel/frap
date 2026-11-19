@@ -90,7 +90,11 @@ fn start_session(cli: &Cli) -> Result<Session, ExitCode> {
     if let Startup::File(path) = &opts.startup
         && let Err(e) = std::fs::File::open(path)
     {
-        eprintln!("frap: cannot read --file {}: {e}", path.display());
+        eprintln!(
+            "frap: cannot read --file {}: {}",
+            path.display(),
+            frap_rna::error::strerror(&e)
+        );
         return Err(ExitCode::from(EXIT_USAGE));
     }
     Session::new(opts).map_err(|e| {
@@ -112,7 +116,11 @@ fn run(cli: &Cli, mode: Mode) -> io::Result<ExitCode> {
         Mode::File(path) => match std::fs::read(path) {
             Ok(b) => Some(b),
             Err(e) => {
-                eprintln!("frap: cannot read {}: {e}", path.display());
+                eprintln!(
+                    "frap: cannot read {}: {}",
+                    path.display(),
+                    frap_rna::error::strerror(&e)
+                );
                 return Ok(ExitCode::from(EXIT_USAGE));
             }
         },
