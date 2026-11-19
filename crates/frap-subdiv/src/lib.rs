@@ -11,14 +11,26 @@
 //! `blender/source/blender/blenkernel/intern/subdiv*.cc` over OpenSubdiv (`intern/opensubdiv`).
 //!
 //! Ownership (M4): WP 4.4 owns this crate (`crates/frap-subdiv/**`) after W0; the signatures
-//! below are the contract `frap-eval`'s `ModEvalCx::subdivider` hands out. WP 4.4 may add
-//! fields to the `#[non_exhaustive]` structs and items to the modules.
+//! below are the contract `frap-eval`'s `ModEvalCx::subdivider` hands out. WP 4.4 added
+//! [`SubdivResult::vert_sources`] / [`SubdivResult::corner_sources`] (Blender's two-stage
+//! attribute interpolation, which flattened weights cannot reproduce for integer and boolean
+//! attributes) and [`SubdivResult::identity`].
+//!
+//! Internals: `sdc` (Catmull-Clark masks and creasing rules), `vtr` (levels and
+//! uniform refinement), `fvar` (face-varying channels), `primvar` (interpolation and limit),
+//! all ported from OpenSubdiv as Blender links it.
 #![deny(unsafe_code)]
 
 pub mod catmull_clark;
+mod fvar;
 pub mod layout;
 #[cfg(feature = "osd")]
 pub mod osd;
+mod primvar;
+mod sdc;
+mod vtr;
+
+pub use layout::{DataSource, PosSource};
 
 use smallvec::SmallVec;
 
@@ -36,23 +48,49 @@ pub enum VtxBoundary {
     EdgeAndCorner,
 }
 
-/// `Subdiv` face-varying (UV) linear interpolation (`SubsurfModifier.uv_smooth`).
+/// `Subdiv` face-varying (UV) linear interpolation (`OpenSubdiv`'s `FVarLinearInterpolation`),
+/// from `SubsurfModifier.uv_smooth` by [`FVarLinear::from_uv_smooth`].
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub enum FVarLinear {
-    /// `NONE` (smooth everywhere)
+    /// `FVAR_LINEAR_NONE`: smooth everywhere (`uv_smooth='SMOOTH_ALL'`).
     None,
-    /// `PRESERVE_CORNERS` (the 5.2 default)
-    #[default]
+    /// `FVAR_LINEAR_CORNERS_ONLY` (`PRESERVE_CORNERS`).
     CornersOnly,
-    /// `PRESERVE_CORNERS_AND_JUNCTIONS`
+    /// `FVAR_LINEAR_CORNERS_PLUS1` (`PRESERVE_CORNERS_AND_JUNCTIONS`).
     CornersPlusOne,
-    /// `PRESERVE_CORNERS_JUNCTIONS_AND_CONCAVE`
+    /// `FVAR_LINEAR_CORNERS_PLUS2` (`PRESERVE_CORNERS_JUNCTIONS_AND_CONCAVE`).
     CornersPlusTwo,
-    /// `PRESERVE_BOUNDARIES`
+    /// `FVAR_LINEAR_BOUNDARIES` (`PRESERVE_BOUNDARIES`, the 5.2 default).
+    #[default]
     Boundaries,
-    /// `SMOOTH_ALL` is `None`; `ALL` keeps every UV linear.
+    /// `FVAR_LINEAR_ALL`: every UV linear (`uv_smooth='NONE'`).
     All,
+}
+
+impl FVarLinear {
+    /// `bke::subdiv::fvar_interpolation_from_uv_smooth` (unknown identifiers: `All`, as
+    /// Blender's fallback).
+    pub fn from_uv_smooth(uv_smooth: &str) -> FVarLinear {
+        match uv_smooth {
+            "PRESERVE_CORNERS" => FVarLinear::CornersOnly,
+            "PRESERVE_CORNERS_AND_JUNCTIONS" => FVarLinear::CornersPlusOne,
+            "PRESERVE_CORNERS_JUNCTIONS_AND_CONCAVE" => FVarLinear::CornersPlusTwo,
+            "PRESERVE_BOUNDARIES" => FVarLinear::Boundaries,
+            "SMOOTH_ALL" => FVarLinear::None,
+            _ => FVarLinear::All,
+        }
+    }
+}
+
+impl VtxBoundary {
+    /// `bke::subdiv::vtx_boundary_interpolation_from_subsurf`
+    pub fn from_boundary_smooth(boundary_smooth: &str) -> VtxBoundary {
+        match boundary_smooth {
+            "PRESERVE_CORNERS" => VtxBoundary::EdgeAndCorner,
+            _ => VtxBoundary::EdgeOnly,
+        }
+    }
 }
 
 /// `blender::bke::subdiv::Settings` (`BKE_subsurf_modifier_settings_init` fills it from the
@@ -62,9 +100,11 @@ pub enum FVarLinear {
 pub struct SubdivSettings {
     /// `subdivision_type == 'SIMPLE'`
     pub is_simple: bool,
-    /// Adaptive subdivision (Cycles only; always false in frap).
+    /// Cycles' adaptive subdivision (`use_adaptive_subdivision`); not evaluated by frap.
+    /// (Blender's own `Settings::is_adaptive` is `use_limit_surface` here.)
     pub is_adaptive: bool,
-    /// Levels (`levels` in the viewport, `render_levels` in a render).
+    /// Levels (`levels` in the viewport, `render_levels` in a render): the output resolution
+    /// is `(1 << level) + 1` points per coarse edge.
     pub level: u32,
     /// `use_creases`
     pub use_creases: bool,
@@ -72,9 +112,9 @@ pub struct SubdivSettings {
     pub vtx_boundary: VtxBoundary,
     /// `uv_smooth`
     pub fvar_linear: FVarLinear,
-    /// `use_limit_surface` (positions on the limit surface).
+    /// `use_limit_surface` (positions on the limit surface; Blender's adaptive refinement).
     pub use_limit_surface: bool,
-    /// `quality` (OpenSubdiv's adaptive refinement level for the limit evaluation).
+    /// `quality` (OpenSubdiv's isolation level for the limit evaluation).
     pub quality: u32,
 }
 
@@ -87,7 +127,7 @@ impl Default for SubdivSettings {
             level: 1,
             use_creases: true,
             vtx_boundary: VtxBoundary::EdgeOnly,
-            fvar_linear: FVarLinear::CornersOnly,
+            fvar_linear: FVarLinear::Boundaries,
             use_limit_surface: true,
             quality: 3,
         }
@@ -167,8 +207,42 @@ pub struct SubdivResult {
     pub face_origin: Vec<u32>,
     /// Per output corner: weights over base corners.
     pub corner_weights: Vec<Weights>,
-    /// Per output edge: its crease (subdivided creases decay like Blender's).
+    /// Per output edge: its crease. Blender copies `crease_edge` like any edge attribute: the
+    /// edges along a coarse edge keep its value, inner edges get 0 (no decay).
     pub edge_creases: Option<Vec<f32>>,
+    /// Per output vertex: where Blender takes its attributes from (`subdiv_mesh.cc`), for
+    /// exact integer/boolean mixing; [`SubdivResult::vert_weights`] is its linear expansion.
+    pub vert_sources: Vec<DataSource>,
+    /// Per output corner: where Blender takes its attributes from;
+    /// [`SubdivResult::corner_weights`] is its linear expansion.
+    pub corner_sources: Vec<DataSource>,
+}
+
+impl SubdivResult {
+    /// The base mesh unchanged (level 0), every element its own source.
+    pub fn identity(topo: &SubdivTopology<'_>) -> SubdivResult {
+        let one = |i: usize| -> Weights { smallvec::smallvec![(i as u32, 1.0)] };
+        let nf = topo.face_offsets.len().saturating_sub(1);
+        SubdivResult {
+            positions: topo.positions.to_vec(),
+            edges: topo.edges.to_vec(),
+            face_offsets: topo.face_offsets.to_vec(),
+            corner_verts: topo.corner_verts.to_vec(),
+            corner_edges: topo.corner_edges.to_vec(),
+            uv_layers: topo.uv_layers.iter().map(|l| l.to_vec()).collect(),
+            vert_weights: (0..topo.positions.len()).map(one).collect(),
+            edge_origin: (0..topo.edges.len() as u32).map(Some).collect(),
+            face_origin: (0..nf as u32).collect(),
+            corner_weights: (0..topo.corner_verts.len()).map(one).collect(),
+            edge_creases: topo.edge_creases.map(|c| c.to_vec()),
+            vert_sources: (0..topo.positions.len() as u32)
+                .map(DataSource::Copy)
+                .collect(),
+            corner_sources: (0..topo.corner_verts.len() as u32)
+                .map(DataSource::Copy)
+                .collect(),
+        }
+    }
 }
 
 /// Why subdivision failed.
