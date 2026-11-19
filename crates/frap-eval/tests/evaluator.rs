@@ -135,19 +135,21 @@ fn modifier(name: &str, ty: ModifierType) -> Modifier {
 }
 
 #[test]
-fn modifiers_pass_through_with_a_warning_until_m4() {
+fn modifiers_without_an_evaluator_pass_through_with_a_warning() {
+    // Types no M4 work package evaluates (REMESH, SKIN, UV_PROJECT), so the test does not
+    // depend on which modifiers are implemented.
     let (mut h, [_, mid, _, _]) = scene();
     let me = h.main.meshes.find("Box").unwrap();
     h.edit_obj(mid, |o| {
-        let mut pinned = modifier("Pinned", ModifierType::Triangulate);
+        let mut pinned = modifier("Pinned", ModifierType::UvProject);
         pinned.use_pin_to_last = true;
         let mut hidden = modifier("Hidden", ModifierType::Bevel);
         hidden.show_viewport = false;
-        let mut no_render = modifier("NoRender", ModifierType::Mirror);
+        let mut no_render = modifier("NoRender", ModifierType::Skin);
         no_render.show_render = false;
         o.modifiers = vec![
             pinned,
-            modifier("Subdivision", ModifierType::Subsurf),
+            modifier("Remesh", ModifierType::Remesh),
             hidden,
             no_render,
         ];
@@ -166,7 +168,7 @@ fn modifiers_pass_through_with_a_warning_until_m4() {
     assert_eq!(
         st,
         [
-            ("Subdivision", &ModifierStatus::PassedThrough),
+            ("Remesh", &ModifierStatus::PassedThrough),
             ("Hidden", &ModifierStatus::Skipped),
             ("NoRender", &ModifierStatus::PassedThrough),
             ("Pinned", &ModifierStatus::PassedThrough),
@@ -176,9 +178,9 @@ fn modifiers_pass_through_with_a_warning_until_m4() {
     assert_eq!(
         msgs,
         [
-            "Modifier 'Subdivision' (SUBSURF) is not evaluated by frap; passed through",
-            "Modifier 'NoRender' (MIRROR) is not evaluated by frap; passed through",
-            "Modifier 'Pinned' (TRIANGULATE) is not evaluated by frap; passed through",
+            "Modifier 'Remesh' (REMESH) is not evaluated by frap; passed through",
+            "Modifier 'NoRender' (SKIN) is not evaluated by frap; passed through",
+            "Modifier 'Pinned' (UV_PROJECT) is not evaluated by frap; passed through",
         ]
     );
     assert!(e.warnings.iter().all(|r| r.level == ReportType::Warning));
