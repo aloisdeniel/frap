@@ -62,7 +62,7 @@ fn manifest_selected_operators() {
         "uv.smart_project",
         "armature.extrude_move",
         "object.modifier_apply_as_shapekey",
-        "mesh.decimate",
+        "mesh.select_similar",
     ] {
         let e = find_op(idname).unwrap();
         assert!(

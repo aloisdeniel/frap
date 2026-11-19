@@ -411,6 +411,9 @@ pub(crate) struct Bevel {
     pub(crate) bweight_vert: Option<usize>,
     /// Layer index of `bevel_weight_edge`, if any.
     pub(crate) bweight_edge: Option<usize>,
+    /// `dvert` + `vertex_group` (the BEVEL modifier's vertex group, WP 4.5): the group weight
+    /// of every vertex by slot (`BKE_defvert_find_weight`), scaling vertex-bevel offsets.
+    pub(crate) vertex_group_weights: Option<Vec<f32>>,
     pub(crate) loop_slide: bool,
     pub(crate) limit_offset: bool,
     pub(crate) offset_adjust: bool,

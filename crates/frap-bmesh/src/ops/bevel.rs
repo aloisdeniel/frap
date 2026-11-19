@@ -253,7 +253,13 @@ fn bmo_bevel_exec(bm: &mut BMesh, i: &BevelIn, en: &Enums) -> BevelOut {
         }
     }
 
-    mesh_bevel(bm, i, en);
+    let weights = MeshBevelWeights {
+        use_weights: false,
+        bweight_vert: bm.vdata.find("bevel_weight_vert"),
+        bweight_edge: bm.edata.find("bevel_weight_edge"),
+        vertex_group_weights: None,
+    };
+    mesh_bevel(bm, i, en, i.clamp_overlap, weights);
 
     for f in bm.face_ids() {
         if bm.face(f).flag.contains(ElemFlag::TAG) {
@@ -280,9 +286,47 @@ fn bmo_bevel_exec(bm: &mut BMesh, i: &BevelIn, en: &Enums) -> BevelOut {
     out
 }
 
-/// `BM_mesh_bevel` with the arguments `bmo_bevel_exec` passes (no bevel weights, no vertex
-/// group, `limit_offset = clamp_overlap`).
-fn mesh_bevel(bm: &mut BMesh, i: &BevelIn, en: &Enums) {
+/// The weight arguments of `BM_mesh_bevel` (`use_weights`, `dvert`/`vertex_group`,
+/// `bweight_offset_vert`/`bweight_offset_edge`): what the BEVEL modifier passes besides the
+/// `bmesh.ops.bevel` slots (WP 4.5).
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct MeshBevelWeights {
+    /// `use_weights`: scale the offsets by the bevel weight attributes.
+    pub use_weights: bool,
+    /// Position in `bm.vdata` of the FLOAT vertex bevel-weight layer (`bweight_offset_vert`).
+    pub bweight_vert: Option<usize>,
+    /// Position in `bm.edata` of the FLOAT edge bevel-weight layer (`bweight_offset_edge`).
+    pub bweight_edge: Option<usize>,
+    /// `dvert` + `vertex_group`: the group weight of every vertex by slot; it scales the
+    /// offset of a vertex bevel (and takes precedence over `use_weights` there).
+    pub vertex_group_weights: Option<Vec<f32>>,
+}
+
+// Ported from blender/source/blender/bmesh/tools/bmesh_bevel.cc (BM_mesh_bevel).
+/// `BM_mesh_bevel` on the vertices and edges the caller tagged `BM_ELEM_TAG` (the BEVEL
+/// modifier tags beveled edges together with both their vertices), as the modifier calls it:
+/// `i.geom` and `i.clamp_overlap` are ignored, `limit_offset` is the clamp. `profile_type='CUSTOM'` answers [`BmError::Invalid`];
+/// `harden_normals` is not applied (as in [`bevel`]).
+pub fn mesh_bevel_tagged(
+    bm: &mut BMesh,
+    i: &BevelIn,
+    limit_offset: bool,
+    weights: MeshBevelWeights,
+) -> Result<(), BmError> {
+    let en = parse(i)?;
+    mesh_bevel(bm, i, &en, limit_offset, weights);
+    Ok(())
+}
+
+/// `BM_mesh_bevel` with the given clamp and weights (`bmo_bevel_exec` passes no bevel weights,
+/// no vertex group and `limit_offset = clamp_overlap`).
+fn mesh_bevel(
+    bm: &mut BMesh,
+    i: &BevelIn,
+    en: &Enums,
+    limit_offset: bool,
+    weights: MeshBevelWeights,
+) {
     let seg = i.segments.max(1);
     let profile = i.profile;
     let mut bp = Bevel {
@@ -301,11 +345,12 @@ fn mesh_bevel(bm: &mut BMesh, i: &BevelIn, en: &Enums) {
         profile,
         // Convert to the superellipse exponent.
         pro_super_r: -libm::logf(2.0) / libm::logf(profile.sqrt()),
-        use_weights: false,
-        bweight_vert: bm.vdata.find("bevel_weight_vert"),
-        bweight_edge: bm.edata.find("bevel_weight_edge"),
+        use_weights: weights.use_weights,
+        bweight_vert: weights.bweight_vert,
+        bweight_edge: weights.bweight_edge,
+        vertex_group_weights: weights.vertex_group_weights,
         loop_slide: i.loop_slide,
-        limit_offset: i.clamp_overlap,
+        limit_offset,
         offset_adjust: en.affect != Affect::Vertices
             && !matches!(en.offset_type, OffsetType::Percent | OffsetType::Absolute),
         mark_seam: i.mark_seam,

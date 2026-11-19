@@ -1,5 +1,5 @@
 ---
-source: crates/frap-schema/tests/snapshots.rs
+source: crates/frap-schema/tests/describe_ops.rs
 ---
 {
   "idname": "mesh.decimate",
@@ -13,8 +13,10 @@ source: crates/frap-schema/tests/snapshots.rs
   "kind": "NORMAL",
   "macro_steps": [],
   "poll": {
-    "requires": null,
-    "text": "Blender 5.2's poll passes in: C (Edit Mode on a mesh)",
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
     "matrix": {
       "plain": "NNYNN",
       "view3d": "NNYNN"
@@ -170,15 +172,16 @@ source: crates/frap-schema/tests/snapshots.rs
     }
   ],
   "frap": {
-    "status": "not_implemented",
-    "tier": null,
-    "support": null,
+    "status": "implemented",
+    "tier": "T2",
+    "support": "full",
     "support_note": null,
-    "headless": null,
+    "headless": "native",
     "planned": "M4",
     "extension": false,
     "notes": [
-      "mesh.decimate exists in Blender 5.2; frap implements it in M4 (OP_NOT_IMPLEMENTED until then)"
+      "ratio defaults to 1, which does nothing",
+      "only edges between selected vertices collapse; a partial selection rescales ratio to the faces touching it"
     ]
   }
 }
