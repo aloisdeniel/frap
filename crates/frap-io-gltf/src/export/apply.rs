@@ -53,14 +53,15 @@ static APPLY_PROPS: &[&str] = &["export_apply", "export_current_frame"];
 
 /// The evaluated mesh to export for `ob` instead of its data (`None`: export the original):
 /// `Some` only with `export_apply=True`, for an object with at least one modifier whose
-/// evaluation the operator could provide.
+/// evaluation the operator could provide, in the depsgraph of the scene being gathered
+/// (`Gather::scene`, the add-on's window scene).
 pub fn evaluated(g: &Gather, ob: IdRef<ObjectId>) -> Option<Arc<Mesh>> {
     let meshes = g.settings.evaluated_meshes.as_ref()?;
     let object = g.main.objects.get(ob)?;
     if !has_modifiers(object) {
         return None;
     }
-    meshes.get(&ob).cloned()
+    meshes.get(&(g.scene, ob)).cloned()
 }
 
 /// The objects whose geometry the viewport depsgraph of the context view layer evaluates; for

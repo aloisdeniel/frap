@@ -14,7 +14,7 @@
 //! `//` resolves against `bpy.data.filepath`, a deliberate deviation (D-08). Files are written
 //! to temporary siblings and renamed after every fallible step (§12).
 
-use frap_io_gltf::export::settings::{ExportFormat, ExportSettings, is_supported};
+use frap_io_gltf::export::settings::{EvaluatedMeshes, ExportFormat, ExportSettings, is_supported};
 use frap_op::prelude::*;
 use frap_op::{EnumItemOwned, Support as S};
 use frap_scene::Context;
@@ -166,18 +166,14 @@ fn scene_objects(
 /// Each exported scene is evaluated in its own depsgraph: the add-on gathers a scene's meshes
 /// while `bpy.context.window.scene` is that scene (`VExportTree.construct`), so
 /// `evaluated_depsgraph_get()` is the depsgraph of that scene's view layer (the window's view
-/// layer name when the scene has it, else its first) at that scene's frame. An object in
-/// several scenes is decided by the first exported scene that contains it (the add-on's
-/// gathered meshes are cached across scenes). The window goes back to the user's scene.
-fn evaluated_meshes(
-    cx: &mut OpCtx,
-    settings: &ExportSettings,
-) -> std::collections::HashMap<frap_rna::IdRef<frap_rna::ObjectId>, std::sync::Arc<frap_mesh::Mesh>>
-{
+/// layer name when the scene has it, else its first) at that scene's frame. An object linked
+/// into several scenes is evaluated once per scene, so a frame-dependent modifier (BUILD, WAVE)
+/// gives each scene's node that scene's result (M34S5-1: verified on 5.2.4, identical in every
+/// run). The window goes back to the user's scene.
+fn evaluated_meshes(cx: &mut OpCtx, settings: &ExportSettings) -> EvaluatedMeshes {
     let user_win = cx.ctx().win.clone();
     let scenes = frap_io_gltf::export::scenes::exported_scenes(cx.main(), user_win.scene, settings);
-    let mut decided = std::collections::HashSet::new();
-    let mut out = std::collections::HashMap::new();
+    let mut out = EvaluatedMeshes::new();
     for scene in scenes {
         if scene != cx.ctx().win.scene {
             let mut win = cx.ctx().win.clone();
@@ -200,7 +196,6 @@ fn evaluated_meshes(
                         .get(*r)
                         .is_some_and(|o| o.object_type() == "MESH")
                 })
-                .filter(|r| decided.insert(*r))
                 .filter(|r| in_depsgraph.contains(r))
                 .collect()
         };
@@ -208,7 +203,7 @@ fn evaluated_meshes(
             if let Ok(ev) = cx.evaluated(ob)
                 && let Some(me) = ev.mesh.clone()
             {
-                out.insert(ob, me);
+                out.insert((scene, ob), me);
             }
         }
     }

@@ -14,7 +14,7 @@ use std::collections::HashMap;
 
 use frap_gltf::json::Index;
 use frap_gltf::{BufferBuilder, Document};
-use frap_rna::{IdRef, MaterialId, MeshId, Report, ReportType};
+use frap_rna::{IdRef, MaterialId, MeshId, Report, ReportType, SceneId};
 use frap_scene::{Context, Main};
 
 use crate::export::ExportSettings;
@@ -33,6 +33,9 @@ pub struct Gather<'a> {
     pub ctx: &'a Context<'a>,
     /// Settings.
     pub settings: &'a ExportSettings,
+    /// The scene whose tree is being gathered (`bpy.context.window.scene` while the add-on
+    /// gathers it; `scenes::gather` sets it): `export_apply` reads that scene's evaluation.
+    pub scene: IdRef<SceneId>,
     /// The document being built (views and accessors live in `buf` until the end).
     pub doc: Document,
     /// The single buffer (GLB BIN chunk, `.bin` file or data URI).
@@ -64,6 +67,7 @@ impl<'a> Gather<'a> {
             main,
             ctx,
             settings,
+            scene: ctx.win.scene,
             doc: Document::default(),
             buf: BufferBuilder::new(),
             reports: Vec::new(),

@@ -23,7 +23,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use frap_mesh::Mesh;
-use frap_rna::{IdRef, ObjectId, OpArgs, OpProps, Value};
+use frap_rna::{IdRef, ObjectId, OpArgs, OpProps, SceneId, Value};
 use frap_spec_ops_io::export_scene::{ExportSceneGltf, gltf};
 
 /// `export_format`.
@@ -137,11 +137,16 @@ pub struct ExportSettings {
     pub cwd: Option<PathBuf>,
     /// Every operator prop as given (M3+M4 W0); defaults when built with `Default`.
     pub props: Arc<ExportSceneGltf>,
-    /// frap: `export_apply=True`: the viewport-evaluated mesh of every MESH object of the scene
-    /// (`evaluated_get(depsgraph).to_mesh()`), filled by the operator (M4 W0, read by
-    /// `apply.rs`, WP 4.7); `None` otherwise.
-    pub evaluated_meshes: Option<Arc<HashMap<IdRef<ObjectId>, Arc<Mesh>>>>,
+    /// frap: `export_apply=True`: the viewport-evaluated mesh of every MESH object of each
+    /// exported scene (`evaluated_get(depsgraph).to_mesh()` in that scene's depsgraph), filled
+    /// by the operator (M4 W0, read by `apply.rs`, WP 4.7); `None` otherwise.
+    pub evaluated_meshes: Option<Arc<EvaluatedMeshes>>,
 }
+
+/// The evaluated meshes of `export_apply=True`, per (exported scene, object): an object linked
+/// into several scenes is evaluated in each scene's own depsgraph, at that scene's frame
+/// (decision log M34S5-1).
+pub type EvaluatedMeshes = HashMap<(IdRef<SceneId>, IdRef<ObjectId>), Arc<Mesh>>;
 
 /// The operator props with nothing set (every prop at its RNA default).
 pub fn default_props() -> ExportSceneGltf {

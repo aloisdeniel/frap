@@ -14,11 +14,15 @@
 //!   its first reference;
 //! - an extension's own content (the `KHR_texture_transform` of its textures) before its name;
 //! - a material that is not unlit carries an `Extension` object for clearcoat, transmission,
-//!   emissive strength, specular, anisotropy and IOR **even when it is empty**, in
+//!   emissive strength, specular, anisotropy and IOR **even when it is empty**, and one for
+//!   dispersion whenever it has a volume (`export_dispersion` only checks for the volume
+//!   extension and the glTF Material Output node's Dispersion socket), in
 //!   `__gather_extensions`' order; empty ones are dropped from the JSON at the end, and so are
 //!   their declarations when no material keeps them, but the declarations that stay keep the
 //!   traversal order. So two imported files whose first material is transmission and second
-//!   clearcoat declare `[clearcoat, transmission]` (verified on 5.2.4 with every import order).
+//!   clearcoat declare `[clearcoat, transmission]` (verified on 5.2.4 with every import order), and
+//!   volume, sheen, then dispersion materials declare `[…, dispersion, sheen]` (the volume
+//!   material's empty dispersion object comes first; M34S5-2).
 //!
 //! frap records the extensions while gathering (first-use order, [`Gather::use_extension`]);
 //! [`reorder`] then sorts the declared names by this traversal of the finished document.
@@ -58,6 +62,8 @@ const ALWAYS_CREATED: [&str; 6] = [
 ];
 
 const UNLIT: &str = "KHR_materials_unlit";
+const VOLUME: &str = "KHR_materials_volume";
+const DISPERSION: &str = "KHR_materials_dispersion";
 
 struct Walk<'d> {
     doc: &'d Document,
@@ -178,6 +184,12 @@ impl Walk<'_> {
                         self.declare(name);
                     }
                     None if ALWAYS_CREATED.contains(&name) => self.declare(name),
+                    // `export_dispersion`: a (possibly empty) object whenever the material
+                    // has a volume (and a glTF Material Output node with a Dispersion socket,
+                    // which every material a volume comes from has).
+                    None if name == DISPERSION && m.extensions.0.contains_key(VOLUME) => {
+                        self.declare(name)
+                    }
                     None => {}
                 }
             }
@@ -302,6 +314,52 @@ mod tests {
             [
                 "KHR_materials_clearcoat",
                 "KHR_materials_transmission",
+                "KHR_materials_sheen"
+            ]
+        );
+    }
+
+    #[test]
+    fn a_volume_declares_dispersion_before_a_later_sheen() {
+        // Volume, sheen and dispersion materials in that order (M34S5-2).
+        let mut doc = Document::default();
+        doc.materials = vec![
+            material("Glass", &["KHR_materials_transmission", VOLUME]),
+            material("Velvet", &["KHR_materials_sheen"]),
+            material("Prism", &["KHR_materials_transmission", VOLUME, DISPERSION]),
+        ];
+        doc.meshes = (0..3)
+            .map(|i| Mesh {
+                primitives: vec![Primitive {
+                    material: Some(i),
+                    ..Primitive::default()
+                }],
+                ..Mesh::default()
+            })
+            .collect();
+        doc.nodes = (0..3)
+            .map(|i| Node {
+                mesh: Some(i),
+                ..Node::default()
+            })
+            .collect();
+        doc.scenes = vec![Scene {
+            nodes: vec![0, 1, 2],
+            ..Scene::default()
+        }];
+        doc.extensions_used = vec![
+            "KHR_materials_transmission".into(),
+            VOLUME.into(),
+            "KHR_materials_sheen".into(),
+            DISPERSION.into(),
+        ];
+        reorder(&mut doc);
+        assert_eq!(
+            doc.extensions_used,
+            [
+                "KHR_materials_transmission",
+                VOLUME,
+                DISPERSION,
                 "KHR_materials_sheen"
             ]
         );

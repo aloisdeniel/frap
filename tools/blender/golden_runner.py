@@ -176,6 +176,7 @@ NORMALISE = {
     "D-120": ("comparator", "checked at T3 (modifiers/bevel_decimate/decimate_after_subsurf, dissolve_after_subsurf)"),
     "D-121": ("cases", "SUBSURF cases past the isolation level use meshes without UV maps (modifiers/subsurf/simple_end_caps*, levels_above_quality)"),
     "D-122": ("comparator", "stacks with these modifiers compare normals at tol=1e-4"),
+    "D-123": None,
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

@@ -251,7 +251,11 @@ pub(crate) fn encode_from_vertices(inp: &Input<'_>, vert_custom: &[V3]) -> Vec<[
     if corner_verts.is_empty() {
         return out;
     }
-    // Zero vectors take the vertex normal.
+    // Zero vectors take the vertex normal; the others are normalised with `math::normalize`
+    // (division by the length) before they are encoded, as `mesh_set_custom_normals` does.
+    // Without it, a glTF normal whose length rounds just below 1 can encode an `alpha` of
+    // several units where Blender's dot product with the fan normal rounds to exactly 1
+    // (`alpha` 0): an imported Blender-written file re-exported 2e-4 off (M34S5-3).
     let custom: Vec<V3> = vert_custom
         .iter()
         .enumerate()
@@ -259,7 +263,7 @@ pub(crate) fn encode_from_vertices(inp: &Input<'_>, vert_custom: &[V3]) -> Vec<[
             if n == [0.0; 3] {
                 inp.vert_normals.get(i).copied().unwrap_or(n)
             } else {
-                n
+                normalize(n)
             }
         })
         .collect();
@@ -438,5 +442,42 @@ mod tests {
         let d = custom_normal_to_data(&space, n);
         let back = frap_geom::normals::corner_space_custom_data_to_normal(&space, d);
         assert!(dot(n, back) > 0.9999, "{n:?} → {d:?} → {back:?}");
+    }
+
+    #[test]
+    fn custom_normals_are_normalized_before_encoding() {
+        // M34S5-3: the top-centre corner of the `export_apply_stack` cube (Bevel + Subdivision)
+        // re-imported from Blender's own re-export, a single-corner fan. The glTF normal's
+        // squared length rounds to 0.99999994; normalised, its dot product with the fan normal
+        // is exactly 1, so Blender 5.2.4 stores `alpha` 0 (verified: `(0, -16384)`), where the
+        // raw vector encoded `alpha` 7 (2e-4 off after decoding).
+        let positions = [
+            [0.556_723_4, 8.558_992e-9, 0.988_022_8],
+            [1.069_874e-9, -1.883_714_7e-8, 0.995_175_1],
+            [9.900_878e-9, -0.556_723_4, 0.988_022_8],
+        ];
+        let face_offsets = [0, 3];
+        let corner_verts = [0, 1, 2];
+        let corner_edges = [0, 1, 2];
+        let face_normals =
+            frap_geom::normals::normals_calc_faces(&positions, &face_offsets, &corner_verts);
+        let vert_normals = [face_normals[0]; 3];
+        let inp = Input {
+            positions: &positions,
+            face_offsets: &face_offsets,
+            corner_verts: &corner_verts,
+            corner_edges: &corner_edges,
+            face_normals: &face_normals,
+            vert_normals: &vert_normals,
+            sharp_edges: None,
+            sharp_faces: None,
+        };
+        let custom = [
+            [0.0; 3],
+            [0.012_500_546, -0.012_500_546, 0.999_843_7],
+            [0.0; 3],
+        ];
+        let data = encode_from_vertices(&inp, &custom);
+        assert_eq!(data[1], [0, -16384]);
     }
 }

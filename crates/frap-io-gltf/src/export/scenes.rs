@@ -11,7 +11,9 @@
 //! selection, visibility and active-collection filters. The node gatherer runs once per
 //! scene (each vnode has a fresh uuid, so an object in two scenes gives two glTF nodes), while
 //! meshes, materials, textures and accessors are shared through the export-wide caches, as the
-//! add-on's `@cached` gatherers share them (verified on 5.2.4).
+//! add-on's `@cached` gatherers share them (verified on 5.2.4). With `export_apply`, an object
+//! with modifiers gets one glTF mesh per scene, from that scene's own depsgraph (the add-on's
+//! key holds the temporary mesh of that depsgraph; M34S5-1).
 
 use frap_gltf::json::{Index, Scene};
 use frap_rna::{IdRef, SceneId};
@@ -60,6 +62,7 @@ pub fn gather(g: &mut Gather) -> Result<(), ExportError> {
             prefs: g.ctx.prefs,
         };
         let tree = vtree::build(g.main, &cx, g.settings);
+        g.scene = scene;
         let mut roots: Vec<Index> = Vec::with_capacity(tree.roots.len());
         for &r in &tree.roots {
             roots.push(nodes::gather_node(g, &tree, r)?);

@@ -21,7 +21,7 @@ use std::collections::HashMap;
 use frap_gltf::json::{Index, Mesh as GMesh, Mode, Primitive};
 use frap_gltf::{AccessorData, AccessorOpts};
 use frap_mesh::Mesh;
-use frap_rna::{IdRef, MaterialId, MeshId, ObjectId};
+use frap_rna::{IdRef, MaterialId, MeshId, ObjectId, SceneId};
 use frap_scene::id::{Object, SlotLink};
 use indexmap::IndexMap;
 
@@ -89,11 +89,17 @@ pub fn column_data(c: &AttrColumn) -> AccessorData {
     }
 }
 
-/// An applied glTF mesh's identity: the object and its material per slot.
-type AppliedKey = (IdRef<ObjectId>, Vec<Option<IdRef<MaterialId>>>);
+/// An applied glTF mesh's identity: the scene, the object and its material per slot.
+type AppliedKey = (
+    IdRef<SceneId>,
+    IdRef<ObjectId>,
+    Vec<Option<IdRef<MaterialId>>>,
+);
 
-/// glTF meshes of `export_apply` objects, per (object, materials): an object with modifiers
-/// never shares its mesh with another object (`apply.rs`).
+/// glTF meshes of `export_apply` objects, per (scene, object, materials): an object with
+/// modifiers never shares its mesh with another object (`apply.rs`), nor with its own node of
+/// another scene (each scene's depsgraph gives a temporary mesh of its own; verified on 5.2.4:
+/// a Cube with a Subdivision linked into three scenes exports three glTF meshes).
 #[derive(Default)]
 struct AppliedMeshes(HashMap<AppliedKey, Option<Index>>);
 
@@ -124,11 +130,11 @@ pub fn gather_mesh(g: &mut Gather, ob: &Object) -> Result<Option<Index>, ExportE
         let evaluated = apply::evaluated(g, ob_ref);
         let data: &Mesh = evaluated.as_deref().unwrap_or(mesh);
         let mats = apply::evaluated_materials(ob, mesh, data);
-        let key = (ob_ref, mats);
+        let key = (g.scene, ob_ref, mats);
         if let Some(i) = g.state::<AppliedMeshes>().0.get(&key) {
             return Ok(*i);
         }
-        let (index, _) = build_mesh(g, data, mesh, Some(ob_ref), &key.1, None)?;
+        let (index, _) = build_mesh(g, data, mesh, Some(ob_ref), &key.2, None)?;
         g.state::<AppliedMeshes>().0.insert(key, index);
         return Ok(index);
     }
@@ -430,6 +436,12 @@ mod tests {
                 }];
             }
             fn export(&self, evaluated: Option<HashMap<IdRef<ObjectId>, Arc<Mesh>>>) -> Document {
+                // The operator's map is per (scene, object); these tests export one scene.
+                let evaluated = evaluated.map(|m| {
+                    m.into_iter()
+                        .map(|(o, me)| ((self.win.scene, o), me))
+                        .collect::<crate::export::settings::EvaluatedMeshes>()
+                });
                 let ctx = Context {
                     main: &self.main,
                     win: &self.win,
@@ -553,7 +565,10 @@ mod tests {
             };
             let settings = ExportSettings {
                 generator: "frap test".to_owned(),
-                evaluated_meshes: Some(Arc::new(HashMap::from([(ob, Arc::new(Mesh::new("")))]))),
+                evaluated_meshes: Some(Arc::new(HashMap::from([(
+                    (s.win.scene, ob),
+                    Arc::new(Mesh::new("")),
+                )]))),
                 ..ExportSettings::default()
             };
             let out = export(&s.main, &ctx, &settings).unwrap();
