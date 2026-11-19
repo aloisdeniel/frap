@@ -1,0 +1,11 @@
+# WP 3.8: an agent UV-maps the default cube. A bare `uv.unwrap()` without seams reports
+# `Unwrap failed to solve 1 of 1 island(s), …` and carries the hint
+# `UV_ANGLE_BASED_AS_CONFORMAL` (the factory tool settings unwrap ANGLE_BASED, which frap solves
+# with LSCM until M8). Marking the standard seams and unwrapping CONFORMAL gives the cross
+# layout; `uv.smart_project` then `uv.pack_islands` (rotation, the margin remembered from
+# `island_margin`), `uv.seams_from_islands` (marks the 12 island edges) and
+# `uv.lightmap_pack` (leaves and re-enters Edit Mode) follow. UVs are read back in Object Mode.
+# Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

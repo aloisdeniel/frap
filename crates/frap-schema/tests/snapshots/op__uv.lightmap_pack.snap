@@ -1,0 +1,157 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "uv.lightmap_pack",
+  "bl_idname": "UV_OT_lightmap_pack",
+  "label": "Lightmap Pack",
+  "description": "Pack each face's UVs into the UV bounds",
+  "bl_options": [
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_TYPE(MESH)"
+    ],
+    "text": "requires the active object is of type MESH",
+    "matrix": {
+      "plain": "YNYNN",
+      "view3d": "YNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "PREF_CONTEXT",
+      "name": "Selection",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SEL_FACES",
+      "enum_items": [
+        {
+          "identifier": "SEL_FACES",
+          "name": "Selected Faces",
+          "description": "Pack only selected faces",
+          "value": 0
+        },
+        {
+          "identifier": "ALL_FACES",
+          "name": "All Faces",
+          "description": "Pack all faces in the mesh",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "PREF_PACK_IN_ONE",
+      "name": "Share Texture Space",
+      "description": "Objects share texture space, map all objects into a single UV map",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "PREF_NEW_UVLAYER",
+      "name": "New UV Map",
+      "description": "Create a new UV map for every mesh packed",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "PREF_BOX_DIV",
+      "name": "Pack Quality",
+      "description": "Quality of the packing. Higher values will be slower but waste less space",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 12,
+      "hard_min": 1,
+      "hard_max": 48,
+      "soft_min": 1,
+      "soft_max": 48,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "PREF_MARGIN_DIV",
+      "name": "Margin",
+      "description": "Size of the margin as a division of the UV",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0.1,
+      "hard_min": 0.001,
+      "hard_max": 1,
+      "soft_min": 0.001,
+      "soft_max": 1,
+      "precision": 2,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M3",
+    "extension": false,
+    "notes": []
+  }
+}

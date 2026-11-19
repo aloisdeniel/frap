@@ -58,6 +58,18 @@ pub struct ToolSettings {
     pub mesh_select_mode: [bool; 3],
     /// `vertex_group_weight`: Weight to assign in vertex groups
     pub vertex_group_weight: f32,
+    /// DNA `unwrapper`: the `uv.unwrap` method a call without `method` uses (no RNA property)
+    pub unwrapper: SmolStr,
+    /// DNA `uvcalc_flag`: `UVCALC_FILLHOLES` (1), `UVCALC_NO_ASPECT_CORRECT` (2), `UVCALC_USESUBSURF` (8), `UVCALC_UNWRAP_NO_FLIP` (64), `UVCALC_UNWRAP_USE_WEIGHTS` (128) (no RNA property)
+    pub uvcalc_flag: i32,
+    /// DNA `uvcalc_margin`: the island margin `uv.unwrap` / `uv.pack_islands` use without `margin` (no RNA property)
+    pub uvcalc_margin: f32,
+    /// DNA `uvcalc_iterations`: `uv.unwrap` `iterations` (no RNA property)
+    pub uvcalc_iterations: i32,
+    /// DNA `uvcalc_weight_factor`: `uv.unwrap` `weight_factor` (no RNA property)
+    pub uvcalc_weight_factor: f32,
+    /// DNA `uvcalc_weight_group`: `uv.unwrap` `weight_group` (no RNA property)
+    pub uvcalc_weight_group: SmolStr,
 }
 
 impl Default for ToolSettings {
@@ -84,6 +96,12 @@ impl Default for ToolSettings {
             use_uv_select_sync: true,
             mesh_select_mode: [true, false, false],
             vertex_group_weight: 1.0,
+            unwrapper: SmolStr::new_static("ANGLE_BASED"),
+            uvcalc_flag: 1,
+            uvcalc_margin: 0.001,
+            uvcalc_iterations: 10,
+            uvcalc_weight_factor: 1.0,
+            uvcalc_weight_group: SmolStr::new_static("uv_importance"),
         }
     }
 }

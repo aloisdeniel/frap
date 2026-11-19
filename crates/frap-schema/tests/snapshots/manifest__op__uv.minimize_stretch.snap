@@ -1,0 +1,105 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "idname": "uv.minimize_stretch",
+  "bl_idname": "UV_OT_minimize_stretch",
+  "label": "Minimize Stretch",
+  "description": "Reduce UV stretching by relaxing angles",
+  "bl_options": [
+    "BLOCKING",
+    "GRAB_CURSOR",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": null,
+    "text": "Blender 5.2's poll passes in: C (Edit Mode on a mesh)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "fill_holes",
+      "name": "Fill Holes",
+      "description": "Virtually fill holes in mesh before unwrapping, to better avoid overlaps and preserve symmetry",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "blend",
+      "name": "Blend",
+      "description": "Blend factor between stretch minimized and original",
+      "type": "FLOAT",
+      "subtype": "FACTOR",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": 0,
+      "hard_max": 1,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "iterations",
+      "name": "Iterations",
+      "description": "Number of iterations to run, 0 is unlimited when run interactively",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": 0,
+      "hard_max": 2147483647,
+      "soft_min": 0,
+      "soft_max": 100,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "not_implemented",
+    "tier": null,
+    "support": null,
+    "support_note": null,
+    "headless": null,
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "uv.minimize_stretch exists in Blender 5.2; frap implements it in M8 (OP_NOT_IMPLEMENTED until then)"
+    ]
+  }
+}
