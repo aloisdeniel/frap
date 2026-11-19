@@ -5,11 +5,18 @@
 //! attributes, `_`/`KHR_` custom attributes, material slots, `merge_vertices`,
 //! `import_shading`, edges, validation and custom split normals.
 //!
+//! With `import_point_as_pointcloud`, a glTF mesh whose primitives are all POINTS becomes a
+//! `PointCloud` instead (`create_pointcloud`, WP 3.7): one point per distinct index of each
+//! primitive (sorted), positions converted to Z-up, every `_`/`KHR_` attribute as a POINT
+//! attribute (zeros where a primitive lacks it), the mesh's extras as custom properties, named
+//! like the mesh (`PointCloud_<i>` without a name); no material slots.
+//!
 //! Ported from io_scene_gltf2 5.2.41 `blender/imp/mesh.py` (`create_mesh`, `do_primitives`,
-//! `set_poly_smoothing`, `merge_duplicate_verts`, `colors_rgb_to_rgba`, `uvs_gltf_to_blender`)
-//! and `blender/com/gltf2_blender_utils.py` (`fast_structured_np_unique`: byte-wise unique
-//! order), Apache-2.0, The glTF-Blender-IO authors. Skinning and shape keys arrive in M6,
-//! Draco/meshopt in M7, point clouds in M3 (WP 3.7, which takes this file over).
+//! `set_poly_smoothing`, `merge_duplicate_verts`, `colors_rgb_to_rgba`, `uvs_gltf_to_blender`,
+//! `create_pointcloud`, `do_primitives_pointcloud`), `blender/imp/node.py`
+//! (`create_mesh_object`: `is_point_cloud`) and `blender/com/gltf2_blender_utils.py`
+//! (`fast_structured_np_unique`: byte-wise unique order), Apache-2.0, The glTF-Blender-IO
+//! authors. Skinning and shape keys arrive in M6, Draco/meshopt in M7.
 
 mod custom_normals;
 mod validate;
@@ -23,7 +30,8 @@ use frap_gltf::primitive::{decode_topology, primitive_indices};
 use frap_mesh::{
     AttrData, Attribute, Domain, Mesh, SELECT_POLY, SELECT_VERT, SHARP_EDGE, SHARP_FACE,
 };
-use frap_rna::{IdRef, MaterialId, MeshId};
+use frap_rna::{IdAny, IdCode, IdRef, MaterialId, MeshId, PointCloudId};
+use frap_scene::id::PointCloud;
 use frap_scene::{ChangeLog, Main};
 use smol_str::SmolStr;
 
@@ -130,6 +138,167 @@ fn gather<T: Copy>(src: &[T], idx: &[u32], what: &str) -> Result<Vec<T>, ImportE
             })
         })
         .collect()
+}
+
+/// `is_point_cloud` of `create_mesh_object`: `import_point_as_pointcloud` and every primitive
+/// of the mesh is POINTS.
+pub(crate) fn is_point_cloud(cx: &Gltf, mesh_idx: usize) -> bool {
+    cx.settings.import_point_as_pointcloud
+        && cx.doc.meshes[mesh_idx]
+            .primitives
+            .iter()
+            .all(|p| p.mode_or_default() == Mode::Points)
+}
+
+/// The Blender data of glTF mesh `mesh_idx`: a mesh, or a point cloud ([`is_point_cloud`]).
+pub(crate) fn create_data(
+    cx: &mut Gltf,
+    main: &mut Main,
+    log: &mut ChangeLog,
+    mesh_idx: usize,
+) -> Result<IdAny, ImportError> {
+    if is_point_cloud(cx, mesh_idx) {
+        Ok(create_pointcloud(cx, main, log, mesh_idx)?.any())
+    } else {
+        Ok(create_mesh(cx, main, log, mesh_idx)?.any())
+    }
+}
+
+/// The name of a mesh or point cloud made by [`create_data`].
+pub(crate) fn data_name(main: &Main, data: IdAny) -> String {
+    let name = match data.code {
+        IdCode::PT => {
+            IdRef::<PointCloudId>::from_any(data).and_then(|r| main.pointclouds.name_of(r))
+        }
+        _ => IdRef::<MeshId>::from_any(data).and_then(|r| main.meshes.name_of(r)),
+    };
+    name.unwrap_or("Mesh").to_owned()
+}
+
+/// A `_`/`KHR_` attribute of a point cloud being gathered.
+struct PcAttr {
+    name: String,
+    components: usize,
+    blender_type: Option<&'static str>,
+    data: Vec<f32>,
+}
+
+/// `create_pointcloud`: a new point cloud for glTF mesh `mesh_idx`.
+pub(crate) fn create_pointcloud(
+    cx: &mut Gltf,
+    main: &mut Main,
+    log: &mut ChangeLog,
+    mesh_idx: usize,
+) -> Result<IdRef<PointCloudId>, ImportError> {
+    let pypc = cx.doc.meshes[mesh_idx].clone();
+    let name = super::truthy_name(&pypc.name).unwrap_or_else(|| format!("PointCloud_{mesh_idx}"));
+    let mut locs: Vec<[f32; 3]> = Vec::new();
+    let mut attrs: Vec<PcAttr> = Vec::new();
+    for prim in &pypc.primitives {
+        let Some(&pos_acc) = prim.attributes.get("POSITION") else {
+            continue;
+        };
+        if prim.extensions.contains("KHR_draco_mesh_compression") {
+            return Err(ImportError::NotImplemented(
+                "KHR_draco_mesh_compression: Draco-compressed primitives are imported from M7"
+                    .into(),
+            ));
+        }
+        if prim.mode_or_default() != Mode::Points {
+            let what = super::truthy_name(&pypc.name).unwrap_or_else(|| "[unnamed]".into());
+            cx.report(
+                frap_rna::ReportType::Warning,
+                format!(
+                    "Point Cloud import: Primitive mode is not POINTS, skipping primitive in mesh {what}"
+                ),
+            );
+            continue;
+        }
+        let indices = match prim.indices {
+            Some(_) => primitive_indices(&cx.doc, &cx.buffers, prim)?,
+            None => {
+                let n = cx
+                    .doc
+                    .accessors
+                    .get(pos_acc as usize)
+                    .map_or(0, |a| a.count as u32);
+                (0..n).collect()
+            }
+        };
+        let (unique, _) = unique_inverse(&indices);
+        let before = locs.len();
+        let vs = cx.accessor_f32::<3>(pos_acc)?;
+        locs.extend(gather(&vs, &unique, "POSITION")?);
+        for (k, &acc) in &prim.attributes {
+            if !(k.starts_with('_') || k.starts_with("KHR_")) || attrs.iter().any(|a| &a.name == k)
+            {
+                continue;
+            }
+            let a = cx
+                .doc
+                .accessors
+                .get(acc as usize)
+                .ok_or_else(|| ImportError::Data(format!("accessor {acc} does not exist")))?;
+            attrs.push(PcAttr {
+                name: k.clone(),
+                components: a.type_.components(),
+                blender_type: custom_attribute_type(a.component_type, a.type_),
+                data: vec![0.0; before * a.type_.components()],
+            });
+        }
+        for a in attrs.iter_mut() {
+            match prim.attributes.get(&a.name) {
+                Some(&acc) => {
+                    let flat = cx.accessor(acc)?.to_f32();
+                    for &u in &unique {
+                        let s = u as usize * a.components;
+                        let e = s + a.components;
+                        let v = flat.get(s..e).ok_or_else(|| {
+                            ImportError::Data(format!("{} index {u} out of range", a.name))
+                        })?;
+                        a.data.extend_from_slice(v);
+                    }
+                }
+                None => a
+                    .data
+                    .extend(std::iter::repeat_n(0.0, unique.len() * a.components)),
+            }
+        }
+    }
+    cx.units.locs_batch(&mut locs);
+    let mut pc = PointCloud::new("");
+    pc.resize(locs.len());
+    let n = locs.len();
+    let bad = |e: String| ImportError::Data(e);
+    pc.set_attribute("position", AttrData::Float3(Arc::new(locs)))
+        .map_err(bad)?;
+    for a in attrs {
+        let Some(ty) = a.blender_type else {
+            continue;
+        };
+        let data = match ty {
+            "FLOAT" => AttrData::Float(Arc::new(a.data)),
+            "INT" => AttrData::Int(Arc::new(a.data.iter().map(|&v| v as i32).collect())),
+            "FLOAT2" => AttrData::Float2(Arc::new(chunks::<2>(&a.data))),
+            "FLOAT_VECTOR" => AttrData::Float3(Arc::new(chunks::<3>(&a.data))),
+            "FLOAT_COLOR" => AttrData::FloatColor(Arc::new(chunks::<4>(&a.data))),
+            "BYTE_COLOR" => AttrData::ByteColor(Arc::new(
+                chunks::<4>(&a.data).into_iter().map(byte_color).collect(),
+            )),
+            "FLOAT4X4" => AttrData::Float4x4(Arc::new(
+                chunks::<16>(&a.data)
+                    .into_iter()
+                    .map(|m| std::array::from_fn(|col| std::array::from_fn(|row| m[col * 4 + row])))
+                    .collect(),
+            )),
+            _ => continue,
+        };
+        if data.len() == n {
+            pc.set_attribute(&a.name, data).map_err(bad)?;
+        }
+    }
+    extras::set_extras(&mut pc.header, pypc.extras.as_ref(), &[]);
+    Ok(main.pointclouds.insert(&name, pc, log))
 }
 
 /// `create_mesh`: a new Blender mesh for glTF mesh `mesh_idx`.

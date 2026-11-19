@@ -88,7 +88,11 @@ pub fn gather_node(g: &mut Gather, tree: &VTree, i: usize) -> Result<Index, Expo
     };
     lights::apply(g, ob, &mut node)?;
     node.extras = extras::object(g, ob);
-    node.mesh = gather_mesh(g, ob)?;
+    node.mesh = match ob.object_type() {
+        // Point clouds become POINTS meshes (WP 3.7, `mesh/extract/pointcloud.rs`).
+        "POINTCLOUD" => crate::export::mesh::extract::pointcloud::gather(g, ob)?,
+        _ => gather_mesh(g, ob)?,
+    };
     let (translation, rotation, scale) = trs(&tree.local_matrix(i), g.settings.export_yup);
     node.rotation = rotation;
     node.scale = scale;

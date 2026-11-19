@@ -8,7 +8,8 @@ use frap_nodes::{NodeTree, NodeTreeType};
 use frap_rna::{IdProp, IdRef, ObjectId, Value};
 use frap_scene::generated::modifier_settings::{ModifierSettings, ModifierType};
 use frap_scene::id::{
-    Camera, EncodedImage, Image, Library, Light, Material, Modifier, Object, SlotLink, SlotOverride,
+    Camera, EncodedImage, Image, Library, Light, Material, Modifier, Object, PointCloud, SlotLink,
+    SlotOverride,
 };
 use frap_scene::{Base, BaseFlag, ChangeLog, Main, Preferences, WindowState};
 use serde_json::{Value as J, json};
@@ -628,4 +629,54 @@ fn images_packed_bytes_and_buffers() {
     tree["images"]["p.png"]["filepath"] = json!("//q.png");
     let o = from_json(&tree, &buffers, &images, false).unwrap();
     assert_eq!(find(&o.main, "p.png").packed_filepath, "//q.png");
+}
+
+/// WP 3.7: point clouds keep their point count, attributes (in order), material slots and
+/// custom properties; they are no longer header-only.
+#[test]
+fn pointclouds_round_trip() {
+    let (mut main, win) = frap_scene::startup::factory();
+    let mut log = ChangeLog::default();
+    let mat = main.materials.find("Material");
+    let mut pc = PointCloud::new("PC");
+    pc.resize(3);
+    pc.set_position(1, [1.0, 2.0, 3.0]);
+    pc.set_radius(2, 0.25);
+    pc.set_attribute("_w", AttrData::Float(Arc::new(vec![1.0, 2.0, 3.0])))
+        .unwrap();
+    pc.set_attribute(
+        "Col",
+        AttrData::ByteColor(Arc::new(vec![[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]])),
+    )
+    .unwrap();
+    pc.materials = vec![mat, None];
+    pc.header
+        .custom
+        .insert(SmolStr::new("k"), IdProp::Str("v".into()));
+    let r = main.pointclouds.insert("PC", pc, &mut log);
+    let ob = main.objects.insert(
+        "PCObj",
+        Object::new("", Some(frap_rna::IdAny::from(r))),
+        &mut log,
+    );
+    {
+        let s = main.scenes.get_mut(win.scene, &mut log).unwrap();
+        s.collection.objects.push(ob);
+        s.view_layers[0].bases.push(Base {
+            object: ob,
+            flag: BaseFlag::empty(),
+        });
+    }
+    let saved = save(&main, &win, &Preferences::default(), None).unwrap();
+    assert!(saved.header_only.is_empty(), "{:?}", saved.header_only);
+    let o = open(&saved.bytes, false).unwrap();
+    assert_same(&normalized(&o.main, &o.win), &normalized(&main, &win));
+    let pc = o
+        .main
+        .pointclouds
+        .get(o.main.pointclouds.find("PC").unwrap())
+        .unwrap();
+    let names: Vec<_> = pc.attributes().iter().map(|a| a.name.as_str()).collect();
+    assert_eq!(names, ["position", "radius", "_w", "Col"]);
+    assert_eq!(pc.radii(), [0.01, 0.01, 0.25]);
 }

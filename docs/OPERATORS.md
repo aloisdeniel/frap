@@ -764,7 +764,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | AttributeGroupMesh, Attribute and typed attributes (FloatAttribute, FloatVectorAttribute, FloatColorAttribute, ByteColorAttribute, BoolAttribute, IntAttribute, Float2Attribute, …) | M1 | attributes.new/remove, active_color, default_color |
 | [ ] | MeshUVLoopLayer, MeshUVLoop, UVLoopLayers | M1 | uv_layers.new(do_init), active, active_render |
 | [ ] | Material, MaterialSlot, IDMaterials (mesh.materials) | M1 | diffuse_color (Workbench), surface_render_method, use_backface_culling; MaterialSlot derived from data + per-object overrides |
-| [ ] | PointCloud | M1 data / M3 glTF | POINTS export, `import_point_as_pointcloud` |
+| [ ] | PointCloud | M1 data / M3 glTF | POINTS export, `import_point_as_pointcloud`; RNA `points` (`co`, `radius`, `index`), `.frap` persistence (WP 3.7); not done: `attributes`/`materials` RNA and `resize()` are not bound yet |
 | [ ] | ShaderNodeTree, Node, NodeSocket (+ typed sockets), NodeLink, Nodes, NodeLinks | M1 | first-enabled socket lookup; generic for all node types; material/world trees are embedded IDs |
 | [ ] | Camera, CameraDOFSettings | M1 | lens/angle hook; glTF M3 |
 | [ ] | Light, PointLight, SunLight, SpotLight, AreaLight | M1 | type re-typing hook; glTF M3 |
@@ -800,7 +800,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | `Mesh.from_pydata(vertices, edges, faces), Mesh.shade_smooth()/shade_flat() (Python-only)` | M1 |  |
 | [ ] | `Mesh.update(), validate(), calc_loop_triangles(), transform(matrix), clear_geometry()` | M1 | `validate()` answers `False` for a valid mesh and refuses to repair (`RNA_NOT_IMPLEMENTED`); `transform` ignores `shape_keys` (M6) |
 | [x] | `Mesh.set_sharp_from_angle(angle), flip_normals(), split_faces()` | M2 | moved from M1 (M1 stabilization); `object.shade_smooth_by_angle` covers sharp-from-angle meanwhile; WP 2.9 (`frap-ops-data/src/funcs/mesh_*.rs`, M2 W0 assignment) |
-| [ ] | `Mesh.calc_tangents(uvmap)` | M3 | bevy_mikktspace (`frap-geom/src/mikktspace.rs`); WP 3.7 (M3+M4 W0 assignment) |
+| [x] | `Mesh.calc_tangents(uvmap)` | M3 | bevy_mikktspace (`frap-geom/src/mikktspace.rs`); WP 3.7 (M3+M4 W0 assignment) |
 | [ ] | `mesh.materials.append/pop/clear, MaterialSlot.material/link` | M1 |  |
 | [ ] | `mesh.attributes.new/remove, mesh.uv_layers.new, mesh.color_attributes.new/remove` | M1 | colour attributes default to white and become active/default when none is |
 | [x] | `mesh.uv_layers.remove, mesh.vertex_colors.new` | M2 | moved from M1 (M1 stabilization); `attributes.remove` removes a UV map meanwhile; vertex_colors creates "Col" BYTE_COLOR CORNER; WP 2.9 (`funcs/{u_v_loop_layers_remove,loop_colors_new}.rs`, M2 W0 assignment) |

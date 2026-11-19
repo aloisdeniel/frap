@@ -269,6 +269,8 @@ impl Mesh {
 
     /// `BKE_mesh_clear_geometry_and_metadata` (module docs).
     pub fn clear_geometry(&mut self) {
+        // The temporary tangent layer goes with the geometry (`CustomData_free`).
+        self.tangents = None;
         let mut attrs = AttributeSet::default();
         for (name, domain, data) in [
             (POSITION, Domain::Point, AttrData::Float3(Arc::default())),

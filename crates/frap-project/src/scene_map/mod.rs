@@ -102,7 +102,7 @@ pub struct Saved {
     /// `Main::all_ids` order.
     pub dropped: Vec<String>,
     /// IDs written by name and header only, because their contents have no serializer yet
-    /// (`actions`, `armatures`, `shape_keys`, `textures`, `pointclouds`; M6+), as `bpy.data`
+    /// (`actions`, `armatures`, `shape_keys`, `textures`; M6+), as `bpy.data`
     /// keys. No M1 path creates such IDs; the save operator reports them as a WARNING so the
     /// loss is never silent.
     pub header_only: Vec<String>,
@@ -132,7 +132,7 @@ fn header_only_ids(main: &Main, skip: &BTreeSet<IdAny>) -> Vec<String> {
     go(&main.armatures, skip, &mut out);
     go(&main.shape_keys, skip, &mut out);
     go(&main.textures, skip, &mut out);
-    go(&main.pointclouds, skip, &mut out);
+    // Point clouds are written in full since WP 3.7.
     out
 }
 

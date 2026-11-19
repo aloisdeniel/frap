@@ -374,6 +374,13 @@ pub struct Mesh {
     pub attributes_active: Option<SmolStr>,
     /// Texture space.
     pub texspace: TexSpace,
+    /// `CD_MLOOPTANGENT`: the temporary corner tangent layer `Mesh.calc_tangents()` fills
+    /// (tangent xyz, bitangent sign w), tagged with the `session_uid` of the mesh it was
+    /// computed on. Never persisted (`CD_FLAG_TEMPORARY`), not part of an ID copy (Blender
+    /// copies `CD_MASK_MESH` layers only, so `mesh.copy()` reads zero tangents: a copy has a
+    /// new `session_uid`), and dropped by every BMesh → Mesh conversion (leaving Edit Mode,
+    /// `update_from_editmode`) through [`Mesh::clear_geometry`]. WP 3.7.
+    tangents: Option<(u32, Arc<Vec<[f32; 4]>>)>,
     /// OnceLock caches; never persisted, compared or cloned.
     runtime: MeshRuntime,
 }
@@ -431,8 +438,24 @@ impl Mesh {
             color_default: None,
             attributes_active: None,
             texspace: TexSpace::default(),
+            tangents: None,
             runtime: MeshRuntime::default(),
         }
+    }
+
+    /// The temporary corner tangent layer of `Mesh.calc_tangents()` (`MeshLoop.tangent`,
+    /// `bitangent_sign`), when it exists and still has one value per corner.
+    /// Only the mesh the layer was computed on has it (not an ID copy of it).
+    pub fn corner_tangents(&self) -> Option<&[[f32; 4]]> {
+        self.tangents
+            .as_ref()
+            .filter(|(owner, t)| *owner == self.header.session_uid && t.len() == self.corners_num())
+            .map(|(_, t)| t.as_slice())
+    }
+
+    /// Sets (or with `None` frees, `Mesh.free_tangents()`) the temporary corner tangent layer.
+    pub fn set_corner_tangents(&mut self, tangents: Option<Vec<[f32; 4]>>) {
+        self.tangents = tangents.map(|t| (self.header.session_uid, Arc::new(t)));
     }
 
     /// Builds a mesh from face offsets and a complete attribute set (crate use: generators).

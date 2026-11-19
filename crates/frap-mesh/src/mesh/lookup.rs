@@ -101,6 +101,62 @@ impl Mesh {
                 .collect(),
         ))
     }
+
+    /// `attributes.lookup<float2>(name, domain)` (`Mesh.calc_tangents` reads its UV map this
+    /// way, WP 3.7): the attribute's values interpolated to `domain` in their own type, then
+    /// converted to `float2` as `type_conversions.cc` does (`float_to_float2`, `int_to_float2`,
+    /// `int8_to_float2`, `bool_to_float2`: the value twice; `float3/4_to_float2`,
+    /// `short2/int2_to_float2`: the first two components; `color_to_float2`: red and green;
+    /// `byte_color_to_float2`: red and green decoded). `None` when it is missing or its type
+    /// is not converted here (QUATERNION, whose `to_euler().xy` conversion frap does not
+    /// port, FLOAT4X4, STRING). Borrowed when the attribute is already FLOAT2 on `domain`.
+    pub fn lookup_float2(&self, name: &str, domain: Domain) -> Option<Cow<'_, [[f32; 2]]>> {
+        let a = self.attributes.get(name)?;
+        match &a.data {
+            AttrData::Float2(v) if a.domain == domain => {
+                return Some(Cow::Borrowed(v.as_slice()));
+            }
+            AttrData::Bool(v) => {
+                let b: Cow<'_, [bool]> = if a.domain == domain {
+                    Cow::Borrowed(v.as_slice())
+                } else {
+                    Cow::Owned(adapt_bool(self, v, a.domain, domain))
+                };
+                return Some(Cow::Owned(
+                    b.iter().map(|&x| [f32::from(u8::from(x)); 2]).collect(),
+                ));
+            }
+            _ => {}
+        }
+        let col = match &a.data {
+            AttrData::ByteColor(v) => Column {
+                kind: Kind::ByteRaw,
+                width: 4,
+                integer: false,
+                values: v.iter().flat_map(|c| c.map(f64::from)).collect(),
+            },
+            data => Column::from_data(data)?,
+        };
+        let mixed = if a.domain == domain {
+            col.values.clone()
+        } else {
+            adapt_mixed(self, &col, a.domain, domain)
+        };
+        let n = col.width.max(1);
+        Some(Cow::Owned(
+            mixed
+                .chunks(n)
+                .map(|v| match col.kind {
+                    Kind::ByteRaw => [
+                        srgb_byte_to_linear(v[0] as f32 as u8),
+                        srgb_byte_to_linear(v[1] as f32 as u8),
+                    ],
+                    _ if n == 1 => [v[0] as f32; 2],
+                    _ => [v[0] as f32, v[1] as f32],
+                })
+                .collect(),
+        ))
+    }
 }
 
 /// How a numeric column converts to `bool` and averages.
@@ -665,5 +721,41 @@ mod tests {
         for b in [0u8, 1, 3, 10, 128, 254, 255] {
             assert_eq!(linear_to_srgb_byte(srgb_byte_to_linear(b)), b);
         }
+    }
+
+    /// `lookup<float2>` on the corners: POINT values follow the corner's vertex, FLOAT is
+    /// repeated, FLOAT_VECTOR keeps x and y, byte colours decode red and green, a missing
+    /// name or a QUATERNION gives `None`.
+    #[test]
+    fn float2_lookup_converts_and_interpolates() {
+        use AttrData as D;
+        let pts: Vec<[f32; 2]> = (0..8).map(|i| [i as f32, 10.0 + i as f32]).collect();
+        let m = cube_with("p", Domain::Point, D::Float2(a(pts)));
+        let uv = m.lookup_float2("p", Domain::Corner).unwrap();
+        for (c, v) in m.corner_verts().iter().enumerate() {
+            assert_eq!(uv[c], [*v as f32, 10.0 + *v as f32]);
+        }
+        assert!(matches!(
+            m.lookup_float2("p", Domain::Point),
+            Some(Cow::Borrowed(_))
+        ));
+        let pos = m.lookup_float2("position", Domain::Corner).unwrap();
+        let v0 = m.corner_verts()[0] as usize;
+        assert_eq!(pos[0], [m.positions()[v0][0], m.positions()[v0][1]]);
+        let f = cube_with("f", Domain::Face, D::Float(a(vec![0.5; 6])));
+        assert_eq!(f.lookup_float2("f", Domain::Corner).unwrap()[5], [0.5, 0.5]);
+        let b = cube_with(
+            "b",
+            Domain::Corner,
+            D::ByteColor(a(vec![[255, 0, 9, 7]; 24])),
+        );
+        assert_eq!(b.lookup_float2("b", Domain::Corner).unwrap()[3], [1.0, 0.0]);
+        let q = cube_with(
+            "q",
+            Domain::Face,
+            D::Quaternion(a(vec![[1.0, 0.0, 0.0, 0.0]; 6])),
+        );
+        assert!(q.lookup_float2("q", Domain::Corner).is_none());
+        assert!(q.lookup_float2("nope", Domain::Corner).is_none());
     }
 }

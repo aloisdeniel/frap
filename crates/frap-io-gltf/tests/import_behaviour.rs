@@ -282,7 +282,9 @@ fn unit_scale_is_divided_out() {
 }
 
 #[test]
-fn points_stay_loose_vertices_until_point_clouds_land() {
+fn points_only_meshes_become_point_clouds() {
+    // WP 3.7, Blender 5.2.4: with import_point_as_pointcloud, "mesh with POINTS" (POINTS only)
+    // is a POINTCLOUD of 7 points (Z-up), the other modes stay meshes.
     let (mut main, win) = startup::factory();
     let mut log = ChangeLog::default();
     let s = ImportSettings {
@@ -297,10 +299,19 @@ fn points_stay_loose_vertices_until_point_clouds_land() {
         &mut log,
     )
     .unwrap();
-    assert!(r.reports.iter().any(|m| m.message.contains("point clouds")));
-    let me = main
-        .meshes
-        .get(main.meshes.find("mesh with POINTS").unwrap())
+    assert!(!r.reports.iter().any(|m| m.message.contains("point clouds")));
+    assert!(main.meshes.find("mesh with POINTS").is_none());
+    let pc = main
+        .pointclouds
+        .get(main.pointclouds.find("mesh with POINTS").unwrap())
         .unwrap();
-    assert_eq!((me.verts_num(), me.edges_num(), me.faces_num()), (7, 0, 0));
+    assert_eq!(pc.len(), 7);
+    let p = pc.positions()[1];
+    assert!((p[0] - 0.866).abs() < 1e-3 && p[1].abs() < 1e-6 && (p[2] + 0.5).abs() < 1e-3);
+    let ob = main
+        .objects
+        .get(main.objects.find("mesh with POINTS").unwrap())
+        .unwrap();
+    assert_eq!(ob.object_type(), "POINTCLOUD");
+    assert!(main.meshes.find("mesh with LINES").is_some());
 }
