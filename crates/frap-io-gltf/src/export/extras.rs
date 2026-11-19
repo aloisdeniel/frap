@@ -42,8 +42,8 @@ pub const BLACK_LIST: [&str; 9] = [
     "gltf2_variant_mesh_data",
 ];
 
-/// A float as JSON (`json.dumps` of a Python float; non-finite values are not valid JSON and
-/// become `null`, which no ID property can hold in practice).
+/// A float as JSON. Non-finite values are not valid JSON: the add-on's `json.dumps(…,
+/// allow_nan=False)` fails the whole export ([`NonFinite`]); `null` only stands in until then.
 fn float(x: f64) -> J {
     Number::from_f64(x).map_or(J::Null, J::Number)
 }
@@ -68,6 +68,54 @@ pub fn to_json(p: &IdProp) -> J {
     }
 }
 
+/// The first exported custom property holding a non-finite float, as the export error Blender
+/// raises when it writes the JSON (`ValueError: Out of range float values are not JSON
+/// compliant: nan`, a `RuntimeError` from the operator, nothing written). Checked by
+/// [`crate::export::export`] after gathering.
+#[derive(Debug, Default)]
+pub struct NonFinite(pub Option<String>);
+
+/// Python's `repr` of a non-finite float.
+fn py_repr(x: f64) -> &'static str {
+    if x.is_nan() {
+        "nan"
+    } else if x > 0.0 {
+        "inf"
+    } else {
+        "-inf"
+    }
+}
+
+/// The first non-finite float inside `p`.
+fn non_finite(p: &IdProp) -> Option<f64> {
+    match p {
+        IdProp::Float(f) => (!f.is_finite()).then_some(*f),
+        IdProp::FloatArray(v) => v.iter().copied().find(|f| !f.is_finite()),
+        IdProp::Group(g) => g.values().find_map(non_finite),
+        IdProp::List(v) => v.iter().find_map(non_finite),
+        _ => None,
+    }
+}
+
+/// Records the first non-finite custom property of `header` (exported keys only).
+fn check_finite(g: &mut Gather, header: &IdHeader) {
+    if g.state::<NonFinite>().0.is_some() {
+        return;
+    }
+    let found = header
+        .custom
+        .iter()
+        .filter(|(k, _)| !BLACK_LIST.contains(&k.as_str()))
+        .find_map(|(k, v)| non_finite(v).map(|x| (k.clone(), x)));
+    if let Some((key, x)) = found {
+        g.state::<NonFinite>().0 = Some(format!(
+            "Out of range float values are not JSON compliant: {} (custom property '{key}' of '{}' with export_extras)",
+            py_repr(x),
+            header.name
+        ));
+    }
+}
+
 /// `generate_extras(blender_element)`: the ID's custom properties, `None` without any.
 pub fn generate(header: &IdHeader) -> Option<Extras> {
     let map: Map<String, J> = header
@@ -81,8 +129,9 @@ pub fn generate(header: &IdHeader) -> Option<Extras> {
 }
 
 /// `extras` of any ID when `export_extras` is on.
-pub fn id(g: &Gather, header: &IdHeader) -> Option<Extras> {
+pub fn id(g: &mut Gather, header: &IdHeader) -> Option<Extras> {
     if g.settings.props.export_extras.value {
+        check_finite(g, header);
         generate(header)
     } else {
         None
@@ -111,13 +160,16 @@ pub fn scene(g: &mut Gather, scene: &Scene) -> Option<Extras> {
         return None;
     }
     if g.settings.collection.is_empty() {
+        check_finite(g, &scene.header);
         return generate(&scene.header);
     }
     let main = g.main;
-    main.collections
+    let col = main
+        .collections
         .find_in(&g.settings.collection, None)
-        .and_then(|c| main.collections.get(c))
-        .and_then(|c| generate(&c.header))
+        .and_then(|c| main.collections.get(c))?;
+    check_finite(g, &col.header);
+    generate(&col.header)
 }
 
 #[cfg(test)]

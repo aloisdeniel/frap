@@ -195,3 +195,17 @@ def sphere():
 
 
 run("sphere_l2", sphere, {"levels": 2})
+
+
+# SIMPLE past level 1 (Gregory end caps around the level-1 face points of non-quads) and
+# levels above quality (Gregory end caps at the isolation level). Suzanne at SIMPLE level 2 is a
+# golden case (`tests/golden/cases/modifiers/subsurf/simple_end_caps.py`).
+for lv in (2, 3):
+    run("cone_l%d_simple" % lv, cone, {"levels": lv, "subdivision_type": "SIMPLE"})
+    run("cylinder_l%d_simple" % lv, cylinder, {"levels": lv, "subdivision_type": "SIMPLE"})
+    run("sphere_l%d_simple" % lv, sphere, {"levels": lv, "subdivision_type": "SIMPLE"})
+run("tris_l3_simple", tri, {"levels": 3, "subdivision_type": "SIMPLE"})
+run("cylinder_l4", cylinder, {"levels": 4})
+# Level above quality on a mesh with smooth boundary corners (one face) and an extraordinary
+# face point: the faces around the corners keep frap's own evaluation (D-121).
+run("ngon_l4", torus_ngon, {"levels": 4})

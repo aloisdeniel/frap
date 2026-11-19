@@ -105,14 +105,37 @@ fn data_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/data")
 }
 
-/// Cases that differ from Blender beyond the tolerance by design (`levels > quality`: frap
-/// evaluates the exact limit where Blender evaluates Gregory end-cap patches between the
-/// vertices of the isolation level; see `frap_subdiv::catmull_clark`), with the largest
-/// position and UV error accepted.
-const APPROXIMATE: &[(&str, f32)] = &[
-    ("cube_l2_q1", 2e-2),
-    ("cube_l3_q2", 7e-3),
-    ("cube_l4", 3e-3),
+/// Cases that differ from Blender beyond the tolerance by design, with the largest position
+/// and UV errors accepted. Past the isolation level (`levels > quality`, `SIMPLE` past level 1)
+/// Blender evaluates Gregory end caps: with the `osd` feature (default) positions come from
+/// `opensubdiv-rs`'s patches and match, but its face-varying patches are built over a separate
+/// value mesh, so UVs inside face-varying Gregory caps differ (deviations.md D-121); without it
+/// frap evaluates the exact limit there (`frap_subdiv::catmull_clark`).
+#[cfg(feature = "osd")]
+const APPROXIMATE: &[(&str, f32, f32)] = &[
+    ("cone_l2_simple", 1e-5, 3e-3),
+    ("cone_l3_simple", 1e-5, 3e-3),
+    ("cylinder_l2_simple", 1e-5, 5e-3),
+    ("cylinder_l3_simple", 1e-5, 5e-3),
+    ("cylinder_l4", 1e-5, 1e-4),
+    ("ngon_l4", 1e-5, 2e-4),
+    ("sphere_l2_simple", 1e-5, 1e-3),
+    ("sphere_l3_simple", 1e-5, 1e-3),
+];
+#[cfg(not(feature = "osd"))]
+const APPROXIMATE: &[(&str, f32, f32)] = &[
+    ("cube_l2_q1", 2e-2, 3e-3),
+    ("cube_l3_q2", 7e-3, 2e-3),
+    ("cube_l4", 3e-3, 1e-3),
+    ("cone_l2_simple", 3e-2, 7e-3),
+    ("cone_l3_simple", 4e-2, 9e-3),
+    ("cylinder_l2_simple", 5e-2, 1.2e-2),
+    ("cylinder_l3_simple", 7.1e-2, 1.7e-2),
+    ("cylinder_l4", 1.3e-2, 4.1e-3),
+    ("ngon_l4", 2.5e-2, 1.3e-2),
+    ("sphere_l2_simple", 6.1e-3, 2.5e-3),
+    ("sphere_l3_simple", 8.3e-3, 3.3e-3),
+    ("tris_l3_simple", 1.7e-2, 1e-5),
 ];
 
 /// Largest position and UV errors of `backend` on a dump; `Err` on a topology difference.
@@ -193,14 +216,14 @@ fn errors(name: &str, backend: &dyn Subdivider) -> Result<(f32, usize, f32), Str
 
 fn check(name: &str) -> Result<f32, String> {
     let (pos, worst, uv) = errors(name, &CatmullClark)?;
-    let tol = APPROXIMATE
+    let (tol, uv_tol) = APPROXIMATE
         .iter()
-        .find(|(n, _)| *n == name)
-        .map_or(1e-5, |(_, t)| *t);
+        .find(|(n, _, _)| *n == name)
+        .map_or((1e-5, 1e-5), |&(_, p, u)| (p, u));
     if pos > tol {
         return Err(format!("position error {pos:e} at vertex {worst}"));
     }
-    if uv > tol {
+    if uv > uv_tol {
         return Err(format!("UV error {uv:e}"));
     }
     Ok(pos)
@@ -227,8 +250,9 @@ fn osd_backend_matches_blender() {
         match errors(&n, &frap_subdiv::osd::OpenSubdiv) {
             Ok((pos, worst, uv)) => {
                 eprintln!("{n}: position {pos:e} (vertex {worst}), uv {uv:e}");
-                // Smooth boundary corners: opensubdiv-rs has no legacy sharp corner patches.
-                if pos > 6e-3 || uv > 2e-3 {
+                // Smooth boundary corners: opensubdiv-rs has no legacy sharp corner patches;
+                // UVs inside face-varying Gregory caps (D-121).
+                if pos > 6e-3 || uv > 5e-3 {
                     failures.push(format!("{n}: position {pos:e}, uv {uv:e}"));
                 }
             }

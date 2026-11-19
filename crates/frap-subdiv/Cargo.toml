@@ -26,7 +26,10 @@ proptest.workspace = true
 serde_json.workspace = true
 
 [features]
-# §3.6 `subdiv-osd` (off until the M4 gate, WP 4.4): the OpenSubdiv backend.
+# §3.6 `subdiv-osd`: the OpenSubdiv backend. On by default since the M4 gate (decision log): frap's
+# own Catmull-Clark evaluates Blender's Gregory end caps (levels above quality, SIMPLE past
+# level 1) through its patch table. On by default here so per-crate test builds match Blender.
+default = ["osd"]
 osd = ["dep:opensubdiv-rs"]
 
 [lints]

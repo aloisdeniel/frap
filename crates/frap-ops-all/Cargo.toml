@@ -63,7 +63,8 @@ draco = []
 draco-sys = []
 basisu = []
 basisu-encode = []
-# M4 W0: the OpenSubdiv backend of `Subdivider` (off until the M4 gate, WP 4.4).
+# M4 W0: the OpenSubdiv backend of `Subdivider`. Since the M4 gate (decision log M34S3-1)
+# frap-subdiv enables it by default (its Gregory end caps); the flag stays for §3.6's matrix.
 subdiv-osd = ["frap-subdiv/osd"]
 # M4 W0: the manifold-rust backend of `BooleanSolver`. frap-boolean enables it by default (so
 # per-crate test builds have a solver); the flag stays for the feature matrix of §3.6.

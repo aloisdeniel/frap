@@ -843,9 +843,9 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | KHR_mesh_quantization | M7 | M7 | frap_mesh_quantization or gltfpack path |
 | [ ] | EXT_meshopt_compression, KHR_meshopt_compression | M7 | M7 |  |
 | [ ] | KHR_draco_mesh_compression | M7 | M7 | spike gate |
-| [ ] | EXT_texture_webp | M7 (lossless M3) | M3 |  |
+| [ ] | EXT_texture_webp | M7 (lossless and lossy; lossless moved from M3, decision log M34S3-5) | M3 | export writes WebP sources as PNG with a WARNING until then (deviations §2) |
 | [ ] | KHR_texture_basisu | M7 (feature basisu-encode) | M7 | frap_texture_format='KTX2' |
-| [ ] | KHR_materials_variants | M7 | M7 | add-on data model; RNA exists only with `KHR_materials_variants_ui` on (dumped that way); import turns it on |
+| [ ] | KHR_materials_variants | M7 | M7 | not part of M3's "every KHR material extension" (decision log M34S3-5); add-on data model; RNA exists only with `KHR_materials_variants_ui` on (dumped that way); import turns it on |
 | [ ] | EXT_mesh_gpu_instancing | M7 (`export_gpu_instances`, Blender prop) | M7 | children of an Empty sharing a mesh (add-on rule) |
 | [ ] | KHR_node_visibility, KHR_materials_diffuse_transmission | M7 (frap_*) | M7 | not produced by Blender |
 

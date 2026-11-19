@@ -39,10 +39,10 @@ allow = [
     "CDLA-Permissive-2.0",
 ]
 confidence-threshold = 0.9
-# M4 W0: opensubdiv-rs (optional `subdiv-osd` backend of frap-subdiv, off by default, §3.6) ports
-# Pixar's OpenSubdiv under its "Modified Apache 2.0" licence (TOST-1.0: Apache-2.0 plus a
-# trademark clause), the licence Blender's own GPL builds ship OpenSubdiv under. Allowed for that
-# crate only; the decision on the default backend is WP 4.4's gate.
+# M4 W0: opensubdiv-rs (`subdiv-osd` of frap-subdiv, on by default since the M4 gate: decision
+# log M34S3-1, §3.6) ports Pixar's OpenSubdiv under its "Modified Apache 2.0" licence (TOST-1.0:
+# Apache-2.0 plus a trademark clause), the licence Blender's own GPL builds ship OpenSubdiv under.
+# Allowed for that crate only.
 exceptions = [
     { allow = ["LicenseRef-TOST-1.0"], crate = "opensubdiv-rs" },
 ]

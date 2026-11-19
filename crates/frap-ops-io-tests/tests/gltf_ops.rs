@@ -424,3 +424,35 @@ fn a_texture_from_several_sockets_warns_about_its_sampler() {
     );
     assert!(warned(&mut s, "mr.glb"));
 }
+
+/// A non-finite custom property with `export_extras` fails the whole export like Blender's
+/// (`ValueError: Out of range float values are not JSON compliant: nan` from the add-on's JSON
+/// encoder, raised as `RuntimeError`); nothing is written. Without `export_extras` it exports.
+#[test]
+fn non_finite_extras_fail_the_export() {
+    let d = Scratch::new("export-nan-extras");
+    let mut s = session_in(d.path(), false);
+    ok(&mut s, "bpy.data.objects['Cube']['x'] = float('nan')");
+    let (code, msg) = err_code(
+        &mut s,
+        "bpy.ops.export_scene.gltf(filepath='n.glb', export_extras=True)",
+    );
+    assert_eq!(code, "OP_EXEC_ERROR", "{msg}");
+    assert!(
+        msg.contains("Out of range float values are not JSON compliant: nan")
+            && msg.contains("'x'"),
+        "{msg}"
+    );
+    assert!(!d.path().join("n.glb").exists());
+    ok(
+        &mut s,
+        "bpy.data.objects['Cube']['x'] = [1.0, float('-inf')]",
+    );
+    let (_, msg) = err_code(
+        &mut s,
+        "bpy.ops.export_scene.gltf(filepath='n.glb', export_extras=True)",
+    );
+    assert!(msg.contains("not JSON compliant: -inf"), "{msg}");
+    ok(&mut s, "bpy.ops.export_scene.gltf(filepath='n.glb')");
+    assert!(d.path().join("n.glb").is_file());
+}

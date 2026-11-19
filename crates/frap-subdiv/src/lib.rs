@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `frap-subdiv` (layer L3): the [`Subdivider`] trait (CONTRACT, M4 W0), frap's own
 //! Catmull-Clark with creases and face-varying UVs ([`catmull_clark`]), the optional
-//! `opensubdiv-rs` backend ([`osd`], feature `osd`, off until the M4 gate, ARCHITECTURE §3.6) and
-//! the pass that reorders the output like Blender's `subdiv_mesh` ([`layout`]).
+//! `opensubdiv-rs` backend ([`osd`], feature `osd`, ARCHITECTURE §3.6: on by default since the M4
+//! gate, where the own backend evaluates Gregory end caps through it) and the pass that reorders the output like Blender's `subdiv_mesh` ([`layout`]).
 //!
 //! The crate sits below `frap-mesh` (L4), so it works on plain arrays: [`SubdivTopology`] is
 //! the base mesh in `Mesh`'s struct-of-arrays layout, [`SubdivResult`] the subdivided mesh plus
@@ -273,15 +273,9 @@ pub trait Subdivider: Send + Sync {
     ) -> Result<SubdivResult, SubdivError>;
 }
 
-/// The backend `frap-eval` hands to the SUBSURF evaluator: OpenSubdiv with the `osd` feature,
-/// frap's own Catmull-Clark otherwise.
+/// The backend `frap-eval` hands to the SUBSURF evaluator: frap's own Catmull-Clark, which
+/// evaluates Blender's Gregory end caps through `opensubdiv-rs` with the `osd` feature (on by
+/// default since the M4 gate, ARCHITECTURE decision log).
 pub fn default_subdivider() -> &'static dyn Subdivider {
-    #[cfg(feature = "osd")]
-    {
-        &osd::OpenSubdiv
-    }
-    #[cfg(not(feature = "osd"))]
-    {
-        &catmull_clark::CatmullClark
-    }
+    &catmull_clark::CatmullClark
 }

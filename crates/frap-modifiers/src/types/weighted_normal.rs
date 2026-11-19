@@ -8,8 +8,9 @@
 //! Ported from blender/source/blender/modifiers/intern/MOD_weighted_normal.cc (Blender 5.2.4)
 //! with `face_area_calc` / `face_angles_calc` (blenkernel/intern/mesh_evaluate.cc). The
 //! custom-normal encoding is `normal_edit::custom_normals`. Blender sorts the weights with the
-//! unstable `qsort`; frap sorts stably, which only changes the summation order of equal
-//! weights.
+//! C library's unstable `qsort`; frap uses the same BSD algorithm (`frap_bmesh`'s `c_qsort`), so
+//! equal weights (symmetric meshes) are summed in Blender's order. A custom normal can still
+//! encode one INT16 unit away (D-122).
 
 use frap_geom::normals::V3;
 use frap_mesh::{AttrData, Attribute, Domain};
@@ -201,7 +202,17 @@ pub(crate) fn weighted_normal(s: &WeightedNormalSettings, mut mesh: Mesh) -> Mes
             v
         }
     };
-    mode_pair.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+    // `qsort(…, modepair_cmp_by_val_inverse)`: the C library sort, whose order of equal values
+    // decides the summation order (torus corners tie by symmetry).
+    frap_bmesh::ops::contextual_create::bli::c_qsort(&mut mode_pair, &|a, b| {
+        if a.0 < b.0 {
+            1
+        } else if a.0 > b.0 {
+            -1
+        } else {
+            0
+        }
+    });
 
     let keep_sharp = s.keep_sharp;
     let start_item = Item {

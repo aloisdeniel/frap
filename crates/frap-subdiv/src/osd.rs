@@ -1,19 +1,21 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! OpenSubdiv backend over `opensubdiv-rs` (feature `osd`, ARCHITECTURE §3.6 `subdiv-osd`,
-//! off by default): the same base level and the same output layout as
+//! OpenSubdiv backend over `opensubdiv-rs` (feature `osd`, ARCHITECTURE §3.6 `subdiv-osd`, on by
+//! default since the M4 gate): the same base level and the same output layout as
 //! [`crate::catmull_clark`], but the surface comes from the crate's `TopologyRefiner` refined
 //! as Blender refines it (`evaluator_impl.cc`: adaptive to `quality` with
 //! `considerFVarChannels` for the limit surface, uniform otherwise) and its patch tables with
 //! Gregory end caps, evaluated at every ptex coordinate of the layout like
 //! `eval_limit_point` / `eval_face_varying`.
 //!
-//! `opensubdiv-rs` 0.7 has neither `useInfSharpPatch` nor `generateLegacySharpCornerPatches`,
-//! so smooth boundary corners (and face-varying corners with `uv_smooth='SMOOTH_ALL'`) are
-//! evaluated as smooth end caps where Blender's OpenSubdiv uses sharp corner patches: within
-//! `6e-3` there and exact elsewhere, including `levels > quality`, where its Gregory patches
-//! match Blender and frap's own backend evaluates the exact limit
+//! frap's own backend stays the default subdivider; it calls this one where Blender evaluates
+//! Gregory end caps (`levels > quality`, `SIMPLE` past level 1; decision log M34S3-1).
+//! `opensubdiv-rs` 0.7 has no `generateLegacySharpCornerPatches`, so smooth boundary corners
+//! are evaluated as smooth end caps where Blender's OpenSubdiv uses sharp corner patches
+//! (within `6e-3` there; the own backend keeps those faces), and its face-varying patches are
+//! built over a separate value mesh (UVs inside face-varying Gregory caps within `5e-3`,
+//! D-121). Positions are exact elsewhere, including the Gregory caps
 //! (`tests/blender_dumps.rs::osd_backend_matches_blender`). Without `use_limit_surface` it
-//! uses frap's own uniform refinement. frap's own backend stays the default.
+//! uses frap's own uniform refinement.
 
 use opensubdiv_rs::far::{
     AdaptiveOptions, FVarChannelDescriptor, PatchMap, PatchTableFactory, PatchTableOptions,

@@ -49,6 +49,10 @@ pub enum ExportError {
     /// Inconsistent data produced by an extension point (a writer or post-processor bug).
     #[error("frap glTF export: {0}")]
     Invalid(String),
+    /// Data the add-on's JSON encoder rejects (a non-finite custom property with
+    /// `export_extras`): Blender's export fails with a Python `ValueError`.
+    #[error("{0}")]
+    Json(String),
 }
 
 /// What the exporter produced.
@@ -79,5 +83,8 @@ pub fn export(
 ) -> Result<ExportOutput, ExportError> {
     let mut g = gather::Gather::new(main, ctx, settings);
     scenes::gather(&mut g)?;
+    if let Some(m) = g.state::<extras::NonFinite>().0.take() {
+        return Err(ExportError::Json(m));
+    }
     write::finish(g)
 }

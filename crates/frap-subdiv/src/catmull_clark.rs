@@ -26,11 +26,12 @@
 //!    Without `use_limit_surface` the points are the refined vertices themselves (`SIMPLE`:
 //!    bilinear inside level-1 faces, Blender's uniform linear patches).
 //!
-//!    Known difference: with `levels > quality` (or `SIMPLE` with `levels > 1` on faces other
-//!    than quads) the points between isolation-level vertices inside Gregory end caps are the
-//!    exact limit here, Blender's Gregory approximation there (up to `3e-3` on the unit cube at
-//!    level 4, `quality` 3; `tests/blender_dumps.rs` `APPROXIMATE`). The `osd` backend evaluates
-//!    those patches like Blender.
+//!    Past the isolation level (`levels > quality`, or `SIMPLE` with `levels > 1`, whose
+//!    level-1 faces around the face point of a non-quad are irregular) Blender evaluates the
+//!    points between isolation-level vertices inside Gregory end caps. With the `osd` feature
+//!    (on by default, the M4 gate's decision) those cases take their points from the
+//!    `opensubdiv-rs` patch table ([`needs_end_caps`]); without it they are the exact limit
+//!    here (up to `5e-2` from Blender on a 6-sided cylinder, `SIMPLE` level 3; deviations.md).
 //! 4. The output follows Blender's layout ([`crate::layout`]), so indices match (T1).
 
 use smallvec::SmallVec;
@@ -69,8 +70,132 @@ impl Subdivider for CatmullClark {
         }
         let resolution = (1u32 << settings.level) + 1;
         let lay = layout::compute(topo.coarse(), resolution);
+        #[cfg(feature = "osd")]
+        if needs_end_caps(settings) {
+            return end_caps::subdivide(topo, settings, lay);
+        }
         let surf = Surface::new(topo, settings)?;
         Ok(surf.evaluate(topo, settings, lay))
+    }
+}
+
+/// Whether Blender evaluates some output points inside Gregory end-cap patches between the
+/// vertices of its isolation level: the limit surface past the isolation level (`quality`, or
+/// level 1 for `SIMPLE`, whose all-sharp level-1 faces around the face point of a non-quad are
+/// irregular).
+pub fn needs_end_caps(s: &SubdivSettings) -> bool {
+    let isolation = if s.is_simple { 1 } else { s.quality.max(1) };
+    s.use_limit_surface && s.level > isolation
+}
+
+/// The end-cap path (§3.6 `subdiv-osd`, decision log M34S3-1): the points come from the
+/// `opensubdiv-rs` patch table, which builds and evaluates Blender's Gregory end caps
+/// (`ENDCAP_GREGORY_BASIS`, `useInfSharpPatch`). `opensubdiv-rs` has no
+/// `generateLegacySharpCornerPatches`, so at a smooth boundary corner (one face,
+/// `boundary_smooth='ALL'`) it caps the isolation-level face at the corner where Blender has a
+/// regular sharp-corner patch: the points of that face keep frap's own evaluation.
+#[cfg(feature = "osd")]
+mod end_caps {
+    use super::{Manifold, Surface, base_level};
+    use crate::layout::{Layout, PosSource};
+    use crate::{SubdivError, SubdivResult, SubdivSettings, SubdivTopology, Subdivider};
+    use crate::{VtxBoundary, sdc};
+
+    /// Mesh vertices that Blender's patch table makes legacy sharp corner patches.
+    fn smooth_corners(
+        topo: &SubdivTopology<'_>,
+        s: &SubdivSettings,
+    ) -> Result<Vec<bool>, SubdivError> {
+        let mut out = vec![false; topo.positions.len()];
+        if s.is_simple || s.vtx_boundary != VtxBoundary::EdgeOnly {
+            return Ok(out);
+        }
+        let m = Manifold::new(topo);
+        if topo.face_offsets.len() < 2 || m.nverts == 0 {
+            return Ok(out);
+        }
+        let (base, reverse) = base_level(topo, s, &m)?;
+        for (bv, &v) in reverse.iter().enumerate() {
+            out[v as usize] =
+                base.vert_faces[bv].len() == 1 && base.vert_sharpness[bv] < sdc::SHARPNESS_INFINITE;
+        }
+        Ok(out)
+    }
+
+    /// Whether ptex point `(u, v)` lies in the isolation-level face at a smooth corner.
+    struct CornerFaces<'a> {
+        topo: &'a SubdivTopology<'a>,
+        corners: Vec<bool>,
+        face_ptex_offset: &'a [u32],
+        /// Side of the isolation-level face in ptex units: `2^-quality` for a quad, twice
+        /// that for the ptex quads of an n-gon (already one level down).
+        quad_side: f32,
+    }
+
+    impl CornerFaces<'_> {
+        fn contains(&self, ptex: u32, u: f32, v: f32) -> bool {
+            let f = self.face_ptex_offset.partition_point(|&o| o <= ptex) - 1;
+            let r = self.topo.face_offsets[f] as usize..self.topo.face_offsets[f + 1] as usize;
+            let fv = &self.topo.corner_verts[r];
+            if fv.len() == 4 {
+                let side = self.quad_side;
+                [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
+                    .iter()
+                    .zip(fv)
+                    .any(|(&(cu, cv), &vert)| {
+                        self.corners[vert as usize]
+                            && (u - cu).abs() <= side
+                            && (v - cv).abs() <= side
+                    })
+            } else {
+                let k = (ptex - self.face_ptex_offset[f]) as usize;
+                let side = (2.0 * self.quad_side).min(1.0);
+                self.corners[fv[k] as usize] && u <= side && v <= side
+            }
+        }
+    }
+
+    pub(super) fn subdivide(
+        topo: &SubdivTopology<'_>,
+        s: &SubdivSettings,
+        lay: Layout,
+    ) -> Result<SubdivResult, SubdivError> {
+        let mut osd = crate::osd::OpenSubdiv.subdivide(topo, s)?;
+        let corners = smooth_corners(topo, s)?;
+        if !corners.iter().any(|&c| c) {
+            return Ok(osd);
+        }
+        let cf = CornerFaces {
+            topo,
+            corners,
+            face_ptex_offset: &lay.face_ptex_offset,
+            quad_side: 1.0 / (1u32 << s.quality.clamp(1, 16)) as f32,
+        };
+        let own_vert: Vec<bool> = lay
+            .vert_pos
+            .iter()
+            .map(|p| match *p {
+                PosSource::Ptex { ptex, u, v } => cf.contains(ptex, u, v),
+                _ => false,
+            })
+            .collect();
+        let own_corner: Vec<bool> = lay
+            .corner_ptex
+            .iter()
+            .map(|&(ptex, u, v)| cf.contains(ptex, u, v))
+            .collect();
+        drop(cf);
+        let surf = Surface::new(topo, s)?;
+        let own = surf.evaluate(topo, s, lay);
+        for (i, _) in own_vert.iter().enumerate().filter(|(_, o)| **o) {
+            osd.positions[i] = own.positions[i];
+        }
+        for (layer, own_layer) in osd.uv_layers.iter_mut().zip(&own.uv_layers) {
+            for (c, _) in own_corner.iter().enumerate().filter(|(_, o)| **o) {
+                layer[c] = own_layer[c];
+            }
+        }
+        Ok(osd)
     }
 }
 
@@ -486,6 +611,9 @@ impl Surface {
         surf.bilinear = !s.use_limit_surface && level > patch_level;
         for _ in 0..target {
             surf.refine_once(s);
+            if s.use_limit_surface && level > patch_level && surf.levels.len() - 1 == patch_level {
+                surf.sharpen_smooth_corners();
+            }
         }
         if s.use_limit_surface {
             while surf.levels.len() - 1 < patch_level && {
@@ -498,6 +626,28 @@ impl Surface {
         let corner_steps = patch_level.saturating_sub(surf.levels.len() - 1);
         surf.finish(topo, s.use_limit_surface, corner_steps);
         Ok(surf)
+    }
+
+    /// Past the isolation level, the face at a smooth boundary corner is Blender's regular
+    /// sharp-corner patch (`generateLegacySharpCornerPatches`): a B-spline patch whose corner
+    /// interpolates the isolation-level vertex, i.e. the limit with that vertex infinitely
+    /// sharp from here on. Only the corner face's surface changes.
+    fn sharpen_smooth_corners(&mut self) {
+        let lvl = self.levels.last_mut().expect("level");
+        for v in 0..lvl.nverts {
+            let t = lvl.vert_tags[v];
+            if t.rule == Rule::Crease
+                && t.boundary
+                && !t.inf_sharp
+                && !t.non_manifold
+                && lvl.vert_faces[v].len() == 1
+            {
+                let t = &mut lvl.vert_tags[v];
+                t.inf_sharp = true;
+                t.rule = Rule::Corner;
+                lvl.vert_sharpness[v] = sdc::SHARPNESS_INFINITE;
+            }
+        }
     }
 
     fn refine_once(&mut self, s: &SubdivSettings) {

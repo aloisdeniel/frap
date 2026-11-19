@@ -12,12 +12,18 @@
 //! creation matrix (operator `scale` included).
 //!
 //! **Vertex order and positions are Blender's (T1). Edge and face order are not a property of
-//! Blender 5.2:** the extrusion iterates a pointer-keyed `GHash` (`boundary_map.out`) and the
-//! weld rebuilds faces in that order, so three runs of the same Blender build give different
-//! edge/face orders (verified on 5.2.4; vertex order and the topology itself are stable). frap
-//! uses one fixed order: per segment, the bottom triangle, the quads from the top down, the top
-//! triangle, with Blender's corner order per face; edges in face-creation order. Goldens
-//! compare UV-sphere edges and faces canonically (T2) and vertices index by index.
+//! Blender 5.2:** each extrusion creates its faces (and with them the connecting edges between
+//! two meridians) in the iteration order of `extrude_edge_only`'s `boundary_map.out`, a
+//! pointer-keyed `GHash`, so three runs of the same Blender build give different edge/face
+//! orders and edge orientations (verified on 5.2.4; vertex order and the topology itself are
+//! stable). frap replays the whole construction ([`blender_order`]): the profile edges, each
+//! extrusion's duplicated edges and its faces with their connecting edges, in the `GHash` order
+//! a single contiguous `BLI_mempool` chunk gives (`BLI_ghashutil_ptrhash` of 80-byte
+//! `BMEdge_OFlag`s from an address that hashes to bucket 0, modulo buckets), then
+//! `weld_verts`' edge re-creation (appended in pool order) and in-place face rebuilds. The result
+//! is one of the orders Blender produces, so operators that depend on edge order (DECIMATE,
+//! SCREW) give Blender's results. Goldens still compare UV-sphere edges and faces canonically
+//! (T2, D-19) and vertices index by index.
 
 use super::Matrix4;
 use super::bm::Bm;
@@ -119,31 +125,14 @@ pub fn uv_sphere(p: &UvSphere) -> Mesh {
             slot[i] = bm.vert_create(*co);
         }
     }
-    let vid = |k: usize, a: usize| -> u32 { slot[target[k * ring_len + a] as usize] };
-
-    let mut face_list: Vec<Vec<u32>> = Vec::with_capacity(seg * tot);
-    for k in 0..seg {
-        let mut push = |verts: Vec<u32>| {
-            let mut uniq = verts.clone();
-            uniq.sort_unstable();
-            uniq.dedup();
-            if uniq.len() == verts.len() && verts.len() >= 3 {
-                face_list.push(verts);
-            }
-        };
-        if tot >= 2 {
-            push(vec![vid(k, tot), vid(k, tot - 1), vid(k + 1, tot - 1)]);
-            for a in 1..tot - 1 {
-                push(vec![
-                    vid(k, a + 1),
-                    vid(k, a),
-                    vid(k + 1, a),
-                    vid(k + 1, a + 1),
-                ]);
-            }
-            push(vec![vid(k, 1), vid(k, 0), vid(k + 1, 1)]);
-        }
+    let (edge_list, face_list) = blender_order(seg, tot, &target);
+    for &[a, b] in &edge_list {
+        bm.edge_create_always(slot[a], slot[b]);
     }
+    let face_list: Vec<Vec<u32>> = face_list
+        .iter()
+        .map(|f| f.iter().map(|&i| slot[i]).collect())
+        .collect();
     for f in &face_list {
         bm.face_create(f);
     }
@@ -154,6 +143,115 @@ pub fn uv_sphere(p: &UvSphere) -> Mesh {
         *co = mul_m4_v3(&p.matrix, *co);
     }
     bm.to_mesh("Sphere", p.calc_uvs)
+}
+
+/// `GHash` bucket count after inserting `n` entries into a fresh `BLI_ghash_ptr_new`
+/// (`hashsizes`, grown past `GHASH_LIMIT_GROW` = 3/4 load).
+fn ghash_buckets(n: usize) -> usize {
+    const SIZES: [usize; 27] = [
+        5, 11, 17, 37, 67, 131, 257, 521, 1031, 2053, 4099, 8209, 16411, 32771, 65537, 131101,
+        262147, 524309, 1048583, 2097169, 4194319, 8388617, 16777259, 33554467, 67108879,
+        134217757, 268435459,
+    ];
+    SIZES
+        .iter()
+        .copied()
+        .find(|&nb| n <= nb * 3 / 4)
+        .unwrap_or(SIZES[SIZES.len() - 1])
+}
+
+/// Iteration order of a pointer-keyed `GHash` whose `n` keys are the edges in pool slots
+/// `first..first + n`, inserted in slot order: buckets in index order, a bucket's entries most
+/// recent first. Edges are 80 bytes apart, so `ptrhash` (address `>> 4`) steps by 5.
+fn ghash_order(first: usize, n: usize) -> Vec<usize> {
+    let nb = ghash_buckets(n);
+    let mut keys: Vec<(usize, usize, usize)> =
+        (0..n).map(|a| ((5 * (first + a)) % nb, n - a, a)).collect();
+    keys.sort_unstable();
+    keys.into_iter().map(|(_, _, a)| a).collect()
+}
+
+// Ported from blender/source/blender/bmesh/operators/bmo_primitive.cc
+// (bmo_create_uvsphere_exec), bmo_extrude.cc (bmo_extrude_edge_only_exec), bmo_dupe.cc
+// (bmo_mesh_copy) and bmo_removedoubles.cc (bmo_weld_verts_exec, remdoubles_createface): the
+// edge and face creation order of the sphere, over the pre-weld vertex indices
+// (`k * (tot + 1) + a`, profile `k = 0`) mapped through `target`.
+/// Edges (in pool order, with Blender's orientation) and faces (corner order from `l_first`).
+fn blender_order(seg: usize, tot: usize, target: &[i32]) -> (Vec<[usize; 2]>, Vec<Vec<usize>>) {
+    if tot < 2 {
+        // A single ring collapses to its two poles (the operator's RNA minimum is 3).
+        return (Vec::new(), Vec::new());
+    }
+    let ring_len = tot + 1;
+    let vi = |k: usize, a: usize| k * ring_len + a;
+    // Pre-weld edges in pool order and faces in creation order.
+    let mut pre: Vec<[usize; 2]> = (1..=tot).map(|a| [vi(0, a - 1), vi(0, a)]).collect();
+    let mut faces: Vec<[usize; 4]> = Vec::with_capacity(seg * tot);
+    let mut src_first = 0;
+    for k in 1..=seg {
+        // `duplicate`: the source edges' copies, in pool order (no `use_edge_flip_from_face`).
+        let dup_first = pre.len();
+        pre.extend((0..tot).map(|a| [vi(k, a), vi(k, a + 1)]));
+        // Faces over `boundary_map.out`: the source edges have no face, or one whose loop
+        // runs `v1 -> v2`, so `edge_normal_flip` is set and the face is
+        // `(e.v2, e.v1, e_new.v1, e_new.v2)`; `BM_edges_from_verts_ensure` adds the
+        // connecting edge at `e.v2`, then the one at `e.v1`.
+        let mut conn = vec![false; ring_len];
+        for a in ghash_order(src_first, tot) {
+            let (old, new) = (k - 1, k);
+            if !conn[a + 1] {
+                conn[a + 1] = true;
+                pre.push([vi(new, a + 1), vi(old, a + 1)]);
+            }
+            if !conn[a] {
+                conn[a] = true;
+                pre.push([vi(old, a), vi(new, a)]);
+            }
+            faces.push([vi(old, a + 1), vi(old, a), vi(new, a), vi(new, a + 1)]);
+        }
+        src_first = dup_first;
+    }
+    // `weld_verts`: an edge with a merged vertex is re-created between the targets (appended,
+    // unless it exists or collapses); the old edges are deleted at the end.
+    let t = |i: usize| target[i] as usize;
+    let merged = |i: usize| t(i) != i;
+    let mut exists: std::collections::HashSet<(usize, usize)> = pre
+        .iter()
+        .filter(|e| !merged(e[0]) && !merged(e[1]))
+        .map(|e| (e[0].min(e[1]), e[0].max(e[1])))
+        .collect();
+    let mut edges: Vec<[usize; 2]> = pre
+        .iter()
+        .copied()
+        .filter(|e| !merged(e[0]) && !merged(e[1]))
+        .collect();
+    for e in &pre {
+        if !merged(e[0]) && !merged(e[1]) {
+            continue;
+        }
+        let (v1, v2) = (t(e[0]), t(e[1]));
+        if v1 != v2 && exists.insert((v1.min(v2), v1.max(v2))) {
+            edges.push([v1, v2]);
+        }
+    }
+    // Faces rebuilt in place, skipping collapsed corners (`remdoubles_createface`).
+    let faces = faces
+        .iter()
+        .filter_map(|f| {
+            let m: Vec<usize> = f.iter().map(|&i| t(i)).collect();
+            let mut out = Vec::with_capacity(4);
+            for i in 0..4 {
+                if m[i] != m[(i + 1) % 4] {
+                    out.push(m[i]);
+                }
+            }
+            let mut uniq = out.clone();
+            uniq.sort_unstable();
+            uniq.dedup();
+            (out.len() >= 3 && uniq.len() == out.len()).then_some(out)
+        })
+        .collect();
+    (edges, faces)
 }
 
 // Ported from blender/source/blender/bmesh/operators/bmo_primitive.cc

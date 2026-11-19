@@ -151,7 +151,7 @@ frap-ops-render-tests = { path = "crates/frap-ops-render-tests", version = "0.1.
 # here already (so the version decision is visible) but no member uses them until that
 # milestone's W0: draco-core, meshopt, ktx2, basisu, basisu_c_sys, spade (M7). M3+M4 W0 put
 # faer (frap-uv), bevy_mikktspace (frap-geom), manifold-rust (frap-boolean) and opensubdiv-rs
-# (frap-subdiv, optional) in use.
+# (frap-subdiv, default feature `osd` since the M4 gate) in use.
 # `libm`: glam uses libm for its transcendentals too (rule 2.2.12, byte-stable across OSes).
 glam = { version = "0.34.3", features = ["serde", "approx-05", "libm"] }
 wgpu = { version = "30.0.2", default-features = false, features = ["wgsl", "metal", "vulkan", "dx12", "std"] }

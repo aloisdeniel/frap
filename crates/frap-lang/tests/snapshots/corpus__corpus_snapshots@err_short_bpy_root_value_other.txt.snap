@@ -1,0 +1,10 @@
+---
+source: crates/frap-lang/tests/corpus.rs
+expression: "common::render(&src)"
+input_file: crates/frap-lang/tests/corpus/err_short_bpy_root_value_other.txt
+---
+> context.object.data = bpy.foo
+---
+error 1 SyntaxError SYNTAX @1:23/23+3
+  message: invalid syntax
+  hint: a short-form value starts at a short-form root: use data.… or context.… (not bpy.…), or write the whole statement in bpy form

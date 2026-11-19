@@ -435,6 +435,28 @@ impl<'a> P<'a> {
                         self.bump();
                         return Ok(Expr::Lit(Lit::None, self.span_from(start)));
                     }
+                    // `context.window.scene = bpy.data.scenes['S2']`: the bpy root inside a
+                    // short-form statement.
+                    "bpy"
+                        if self.tight_at(1)
+                            && matches!(self.peek_at(1).map(|t| &t.tok), Some(Tok::Punct('.'))) =>
+                    {
+                        let end = self.src[start..self.eof]
+                            .find(char::is_whitespace)
+                            .map_or(self.eof, |n| start + n);
+                        let rest = &self.src[start + 4..end];
+                        let hint = if rest.starts_with("data.") || rest.starts_with("context.") {
+                            format!(
+                                "a short-form value starts at a short-form root: write {rest} \
+                                 (not bpy.{rest}), or write the whole statement in bpy form"
+                            )
+                        } else {
+                            "a short-form value starts at a short-form root: use data.… or \
+                             context.… (not bpy.…), or write the whole statement in bpy form"
+                                .to_owned()
+                        };
+                        return Err(self.err_here(syntax("invalid syntax").with_hint(hint)));
+                    }
                     "data" | "context" | "D" | "C"
                         if self.tight_at(1)
                             && matches!(

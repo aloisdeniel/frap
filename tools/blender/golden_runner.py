@@ -69,7 +69,7 @@ NORMALISE = {
     "D-16": None,
     "D-17": None,
     "D-18": None,
-    "D-19": ("cases", "UV-sphere topology, UVs and normals are compared at T2 (mesh_canonical); face-order-dependent UV layouts (uv/smart/uv_sphere) at T3"),
+    "D-19": ("cases", "UV-sphere topology, UVs and normals are compared at T2 (mesh_canonical): Blender's own edge/face order changes between runs"),
     "D-20": ("cases", "meshes with 1000+ faces compare edges with mesh_canonical"),
     "D-21": None,
     "D-23": None,
@@ -173,7 +173,9 @@ NORMALISE = {
     "D-117": None,
     "D-118": ("cases", "gltf/m3_workflows/export_options.py drops texCoord -1 from Blender's no-UV re-export (#@blender line)"),
     "D-119": ("comparator", "gltf/m3_workflows/modifier_stack_reimport.py compares at tol=2e-4"),
-    "D-120": ("comparator", "checked at T3 (modifiers/bevel_decimate/decimate_after_subsurf)"),
+    "D-120": ("comparator", "checked at T3 (modifiers/bevel_decimate/decimate_after_subsurf, dissolve_after_subsurf)"),
+    "D-121": ("cases", "SUBSURF cases past the isolation level use meshes without UV maps (modifiers/subsurf/simple_end_caps*, levels_above_quality)"),
+    "D-122": ("comparator", "stacks with these modifiers compare normals at tol=1e-4"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),
