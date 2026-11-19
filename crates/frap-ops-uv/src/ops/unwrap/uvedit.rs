@@ -246,10 +246,10 @@ impl UvTs {
     pub(crate) fn of(c: &Context) -> UvTs {
         let ts = c.tool_settings();
         let mut m = SelectMode::empty();
-        for (on, bit) in ts
-            .mesh_select_mode
-            .iter()
-            .zip([SelectMode::VERT, SelectMode::EDGE, SelectMode::FACE])
+        for (on, bit) in
+            ts.mesh_select_mode
+                .iter()
+                .zip([SelectMode::VERT, SelectMode::EDGE, SelectMode::FACE])
         {
             if *on {
                 m |= bit;
@@ -597,7 +597,12 @@ pub(crate) fn aspect_from_material(
         }
     }
     let image = node
-        .filter(|n| matches!(n.bl_idname, "ShaderNodeTexImage" | "ShaderNodeTexEnvironment"))
+        .filter(|n| {
+            matches!(
+                n.bl_idname,
+                "ShaderNodeTexImage" | "ShaderNodeTexEnvironment"
+            )
+        })
         .and_then(|n| match n.props.values.get("image") {
             Some(Value::Id(Some(id))) => id.typed::<frap_rna::ImageId>(),
             _ => None,
@@ -748,10 +753,7 @@ pub(crate) struct UvOb {
 
 impl UvOb {
     /// The objects of `obs` with a UV map, with their columns.
-    pub(crate) fn gather(
-        cx: &mut OpCtx,
-        obs: &[(IdRef<ObjectId>, IdRef<MeshId>)],
-    ) -> Vec<UvOb> {
+    pub(crate) fn gather(cx: &mut OpCtx, obs: &[(IdRef<ObjectId>, IdRef<MeshId>)]) -> Vec<UvOb> {
         let mut out = Vec::new();
         for &(ob, me) in obs {
             let Some(bm) = edit_bm(cx, me) else { continue };
@@ -837,8 +839,12 @@ pub(crate) fn pack_islands_multi(
             only_selected_faces = false;
             only_selected_uvs = false;
         }
-        for faces in calc_uv_islands(&sel, only_selected_faces, only_selected_uvs, params.use_seams)
-        {
+        for faces in calc_uv_islands(
+            &sel,
+            only_selected_faces,
+            only_selected_uvs,
+            params.use_seams,
+        ) {
             let pinned = island_has_pins(o, &sel, &faces, params);
             if ignore_pinned && pinned {
                 continue;
@@ -901,12 +907,11 @@ pub(crate) fn pack_islands_multi(
             };
             p.pinned = *pinned;
             for &f in faces {
-                let poly: Vec<Uv> = o
-                    .bm
-                    .face_loops(f)
-                    .into_iter()
-                    .map(|l| o.uvs[l.slot()])
-                    .collect();
+                let poly: Vec<Uv> =
+                    o.bm.face_loops(f)
+                        .into_iter()
+                        .map(|l| o.uvs[l.slot()])
+                        .collect();
                 if poly.iter().all(|uv| uv[0].is_finite() && uv[1].is_finite()) {
                     p.add_polygon(&poly);
                 } else {
@@ -1396,9 +1401,7 @@ pub(crate) fn have_selection(bm: &BMesh, ts: UvTs, only_selected_uvs: bool) -> b
         } else {
             fl.contains(ElemFlag::SELECT)
         };
-        visible
-            && (!only_selected_uvs
-                || bm.face_loops(f).into_iter().any(|l| sel.uv_select(l)))
+        visible && (!only_selected_uvs || bm.face_loops(f).into_iter().any(|l| sel.uv_select(l)))
     })
 }
 

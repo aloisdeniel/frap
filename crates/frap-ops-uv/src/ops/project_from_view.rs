@@ -102,8 +102,7 @@ fn from_camera(co: [f32; 3], uci: &CameraInfo) -> [f32; 2] {
     pv4 = mul_m4_v4(&uci.caminv, pv4);
     let mut t = [0.0f32; 2];
     if uci.do_pano {
-        let angle =
-            libm::atan2f(pv4[0], -pv4[2]) / (core::f32::consts::PI * 2.0);
+        let angle = libm::atan2f(pv4[0], -pv4[2]) / (core::f32::consts::PI * 2.0);
         if !uci.do_persp {
             t = [angle, pv4[1] / uci.camsize];
         } else {

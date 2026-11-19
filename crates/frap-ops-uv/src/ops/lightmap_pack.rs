@@ -23,7 +23,10 @@
 //! Blender's own quirks are kept: the triangle pairing stops at the first triangle left
 //! without a partner (the remaining triangles keep their UVs), and a single triangle's
 //! rectangle uses its first two edge lengths. Several meshes are laid out in the order of the
-//! objects (Blender iterates a Python `set`, whose order depends on memory addresses).
+//! objects (Blender iterates a Python `set`, whose order depends on memory addresses), so with
+//! `PREF_PACK_IN_ONE` and two or more meshes the layout differs from Blender's (reproducible
+//! there for one build and scene, but not derivable from the data):
+//! `tests/golden/cases/uv/lightmap/pack_in_one.py` checks it at T3.
 
 mod kdtree;
 mod qsort;
@@ -397,7 +400,9 @@ fn place(
     let yoff = yoff + p.yoff;
     if let Kind::Group(children) = &p.kind {
         for &c in children {
-            place(pfs, tris, meshes, c, xoff, yoff, xfac, yfac, margin_w, margin_h);
+            place(
+                pfs, tris, meshes, c, xoff, yoff, xfac, yfac, margin_w, margin_h,
+            );
         }
         return;
     }
@@ -449,10 +454,7 @@ fn place(
                 let yspan = b.y2 - b.y1;
                 for &c in uv {
                     let [x, y] = md.uvs[c];
-                    md.uvs[c] = s(
-                        b.x1 + f64::from(x) * xspan,
-                        b.y1 + f64::from(y) * yspan,
-                    );
+                    md.uvs[c] = s(b.x1 + f64::from(x) * xspan, b.y1 + f64::from(y) * yspan);
                 }
             }
         }
@@ -483,12 +485,7 @@ fn trylens(md: &MeshData, f: FaceRef) -> Tri {
 }
 
 /// `lightmap_uvpack` for one face group.
-fn pack_group(
-    meshes: &mut [MeshData],
-    face_sel: &[FaceRef],
-    box_div: i32,
-    margin_div: i64,
-) {
+fn pack_group(meshes: &mut [MeshData], face_sel: &[FaceRef], box_div: i32, margin_div: i64) {
     let mut pfs: Vec<Pf> = Vec::new();
     for &f in face_sel {
         if meshes[f.mesh].corners(f.face).len() >= 4 {
@@ -503,10 +500,7 @@ fn pack_group(
             .map(|&f| trylens(&meshes[f.mesh], f))
             .collect();
         let sorted = |t: &Tri| [t.lens[t.ord[0]], t.lens[t.ord[1]], t.lens[t.ord[2]]];
-        let points: Vec<V3> = tris
-            .iter()
-            .map(|t| sorted(t).map(|x| x as f32))
-            .collect();
+        let points: Vec<V3> = tris.iter().map(|t| sorted(t).map(|x| x as f32)).collect();
         let kd = kdtree::KdTree::new(&points);
         let mut added = vec![false; tris.len()];
         let threshold = 0.00001f64;
@@ -817,7 +811,10 @@ fn exec(cx: &mut OpCtx, p: uv::LightmapPack) -> OpResult {
     let margin_div = (1.0 / (f64::from(p.PREF_MARGIN_DIV.value) / 100.0)) as i64;
 
     let objects: Vec<IdRef<ObjectId>> = if is_editmode {
-        let obs: Vec<_> = uvedit::edit_objects(cx).into_iter().map(|(o, _)| o).collect();
+        let obs: Vec<_> = uvedit::edit_objects(cx)
+            .into_iter()
+            .map(|(o, _)| o)
+            .collect();
         helpers::mode_set_object(cx)?;
         obs
     } else {
@@ -859,7 +856,9 @@ fn exec(cx: &mut OpCtx, p: uv::LightmapPack) -> OpResult {
     let mut meshes = Vec::new();
     for (mi, &me) in mesh_ids.iter().enumerate() {
         let m = cx.mesh_mut(me)?;
-        let sel = m.bool_attribute(".select_poly", Domain::Face).map(<[bool]>::to_vec);
+        let sel = m
+            .bool_attribute(".select_poly", Domain::Face)
+            .map(<[bool]>::to_vec);
         let faces: Vec<FaceRef> = (0..m.faces_num())
             .filter(|&f| !sel_only || sel.as_ref().is_some_and(|s| s[f]))
             .map(|face| FaceRef { mesh: mi, face })
@@ -946,6 +945,9 @@ mod tests {
         assert_eq!(q, [1.0, 0.0, 0.0, 0.0]);
         let r = mul_qt_v3(rotation_to_z([1.0, 0.0, 0.0]), [1.0, 0.0, 0.0]);
         assert!((r[2] - 1.0).abs() < 1e-6);
-        assert!((face_area(&[[0.0; 3], [2.0, 0.0, 0.0], [2.0, 2.0, 0.0], [0.0, 2.0, 0.0]]) - 4.0).abs() < 1e-6);
+        assert!(
+            (face_area(&[[0.0; 3], [2.0, 0.0, 0.0], [2.0, 2.0, 0.0], [0.0, 2.0, 0.0]]) - 4.0).abs()
+                < 1e-6
+        );
     }
 }

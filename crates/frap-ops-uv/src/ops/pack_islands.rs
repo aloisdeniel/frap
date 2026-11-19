@@ -16,8 +16,15 @@
 //! `uv.unwrap`'s `margin` leave there); a given `margin` is stored there. Nothing selected:
 //! `CANCELLED`.
 //!
-//! Exact layouts match Blender on simple inputs (a smart-projected cube); in general the
-//! packer's search is golden-tested by invariants (T3).
+//! Exact layouts match Blender on simple inputs (a smart-projected cube, a cube-projected
+//! Suzanne with the default `CONCAVE` shapes, `rotate=False` or `CARDINAL` rotation); in
+//! general the packer's search is golden-tested by invariants (T3). With `shape_method` `AABB`
+//! or `CONVEX` and `rotate_method='ANY'`, the islands are first rotated to their minimum-area
+//! box and then sorted by box size: mirror-image islands get boxes equal to the last bit, so
+//! their order (and the slots they take) follows float rounding of the pre-rotation, where
+//! Blender's arm64 build contracts multiply-adds and uses the platform `sinf`/`cosf`. A
+//! cube-projected Suzanne then swaps two mirrored islands (58 UVs) against Blender:
+//! `tests/golden/cases/uv/pack/aabb_rotate_any.py` checks it at T3.
 
 use frap_op::operator;
 use frap_op::prelude::*;

@@ -80,7 +80,14 @@ fn walk_edgeloop_all(bm: &BMesh, e: EdgeId) -> Vec<EdgeId> {
 }
 
 /// `extrapolate_uv`.
-fn extrapolate(fac: f64, uvs: &mut [Uv], a_outer: LoopId, a_inner: LoopId, b_outer: LoopId, b_inner: LoopId) {
+fn extrapolate(
+    fac: f64,
+    uvs: &mut [Uv],
+    a_outer: LoopId,
+    a_inner: LoopId,
+    b_outer: LoopId,
+    b_inner: LoopId,
+) {
     let inner = uvs[a_inner.slot()];
     let outer = uvs[a_outer.slot()];
     let f = fac as f32;
@@ -94,7 +101,10 @@ fn extrapolate(fac: f64, uvs: &mut [Uv], a_outer: LoopId, a_inner: LoopId, b_out
 /// `extend`: the status of one mesh; the UVs are written into `o.uvs`.
 fn extend(o: &mut UvOb, mode: Mode) -> u32 {
     let bm = o.bm.clone();
-    let Some(f_act) = bm.act_face.filter(|&f| bm.elem_alive(frap_bmesh::BMElem::Face(f))) else {
+    let Some(f_act) = bm
+        .act_face
+        .filter(|&f| bm.elem_alive(frap_bmesh::BMElem::Face(f)))
+    else {
         return STATUS_ERR_ACTIVE_FACE;
     };
     if !bm.face(f_act).flag.contains(ElemFlag::SELECT) {
@@ -263,7 +273,10 @@ fn exec(cx: &mut OpCtx, p: uv::FollowActiveQuads) -> OpResult {
 /// The active-face checks of `extend` that come before the UV map test (0: they pass).
 fn extend_checks(o: &mut UvOb) -> u32 {
     let bm = &o.bm;
-    let Some(f_act) = bm.act_face.filter(|&f| bm.elem_alive(frap_bmesh::BMElem::Face(f))) else {
+    let Some(f_act) = bm
+        .act_face
+        .filter(|&f| bm.elem_alive(frap_bmesh::BMElem::Face(f)))
+    else {
         return STATUS_ERR_ACTIVE_FACE;
     };
     if !bm.face(f_act).flag.contains(ElemFlag::SELECT) {

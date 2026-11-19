@@ -214,7 +214,10 @@ mod tests {
     fn nearest_with_filter_and_range() {
         let pts: Vec<V3> = (0..20).map(|i| [i as f32, 0.0, 0.0]).collect();
         let t = KdTree::new(&pts);
-        assert_eq!(t.find_filtered([3.2, 0.0, 0.0], |_| true).map(|r| r.0), Some(3));
+        assert_eq!(
+            t.find_filtered([3.2, 0.0, 0.0], |_| true).map(|r| r.0),
+            Some(3)
+        );
         assert_eq!(
             t.find_filtered([3.2, 0.0, 0.0], |i| i != 3).map(|r| r.0),
             Some(4)

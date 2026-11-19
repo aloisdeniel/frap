@@ -12,6 +12,12 @@
 //! (`correct_aspect` with the active face's material image, `scale_to_bounds`).
 //! `island_margin` is stored as the scene's `uvcalc_margin` (what `uv.pack_islands` uses
 //! without `margin`). The operator always finishes.
+//!
+//! The port is exact on primitives whose face order is Blender's (cube, cylinder, cone, torus,
+//! icosphere, circle, monkey). A `primitive_uv_sphere_add` mesh has another face order in
+//! frap (D-19), and the area sort that orders the groups breaks ties between equal-area faces
+//! by face order, so smart-projecting a UV sphere gives another (valid) layout than Blender's:
+//! `tests/golden/cases/uv/smart/uv_sphere.py` checks it at T3.
 
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -48,8 +54,7 @@ fn exec(cx: &mut OpCtx, p: uv::SmartProject) -> OpResult {
         let mut changed = false;
         // Zero UVs on faces too small to project, so they do not overlap others.
         for (&f, &a) in thick.iter().zip(&areas) {
-            if a.partial_cmp(&frap_uv::smart::AREA_IGNORE) != Some(core::cmp::Ordering::Greater)
-            {
+            if a.partial_cmp(&frap_uv::smart::AREA_IGNORE) != Some(core::cmp::Ordering::Greater) {
                 for l in bm.face_loops(f) {
                     o.uvs[l.slot()] = [0.0, 0.0];
                     changed = true;

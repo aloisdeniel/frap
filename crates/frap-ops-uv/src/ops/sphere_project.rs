@@ -66,13 +66,8 @@ pub(crate) fn curved_exec(cx: &mut OpCtx, c: &Curved) -> OpResult {
             continue;
         };
         let obmat = uvedit::object_to_world(cx.main(), ob);
-        let rotmat = frap_uv::project::uv_map_transform(
-            direction,
-            align,
-            c.radius,
-            Some(&view),
-            &obmat,
-        );
+        let rotmat =
+            frap_uv::project::uv_map_transform(direction, align, c.radius, Some(&view), &obmat);
         let bm = o.bm.clone();
         let (center, _) = uvedit::transform_center(&cx.ctx(), ob, &bm);
         let walk = BmProject::new(&bm);
