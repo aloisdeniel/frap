@@ -159,6 +159,7 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
         .map(|s| s.to_string_lossy().into_owned())
         .unwrap_or_else(|| "scene".into());
     settings.blend_dir = common::blend_dir(cx);
+    settings.cwd = Some(cx.services().paths().cwd.clone());
     if p.export_apply.value {
         settings.evaluated_meshes = Some(std::sync::Arc::new(evaluated_meshes(cx)));
     }

@@ -2,7 +2,9 @@
 //! Double-sidedness: `doubleSided = not Material.use_backface_culling`
 //! (`__gather_double_sided`, `io_scene_gltf2/blender/exp/material/materials.py`) and back
 //! (`set_double_sided`, `imp/material.py`; glTF-Blender-IO 5.2.41, Apache-2.0). The
-//! `KHR_materials_volume` override (forced single-sided) arrives with that extension in M3.
+//! `KHR_materials_volume` override (`doubleSided: false` whenever the volume extension is
+//! written) is the exporter's (`frap-io-gltf` `export/materials/mod.rs`), which knows which
+//! extensions it wrote.
 
 use crate::{LowerCx, LoweredMaterial, MaterialPattern, RaiseCx};
 

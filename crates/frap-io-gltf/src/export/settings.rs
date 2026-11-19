@@ -132,6 +132,9 @@ pub struct ExportSettings {
     /// frap: directory of the saved project (`bpy.data.filepath`'s folder), used to resolve
     /// `//`-relative image paths; relative paths without `//` resolve against the cwd.
     pub blend_dir: Option<PathBuf>,
+    /// frap: the session's working directory, against which relative image paths (and `//`
+    /// in an unsaved file) resolve, as `Image::acquire` does (WP 3.5); `None`: the process's.
+    pub cwd: Option<PathBuf>,
     /// Every operator prop as given (M3+M4 W0); defaults when built with `Default`.
     pub props: Arc<ExportSceneGltf>,
     /// frap: `export_apply=True`: the viewport-evaluated mesh of every MESH object of the scene
@@ -171,6 +174,7 @@ impl Default for ExportSettings {
             export_hierarchy_flatten_objs: false,
             file_stem: "scene".to_owned(),
             blend_dir: None,
+            cwd: None,
             props: Arc::new(default_props()),
             evaluated_meshes: None,
         }

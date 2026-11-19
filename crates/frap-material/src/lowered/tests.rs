@@ -471,8 +471,9 @@ fn unrecognised_setups_fall_back_with_a_warning() {
         again
     );
 
-    // A surface that is not a Principled BSDF: the glTF default material.
-    let mut m = mat("Unlit");
+    // An Emission shader alone (WP 3.5): emissive, with the add-on's
+    // `get_default_pbr_for_emissive_node` black base colour, no warning.
+    let mut m = mat("Glow");
     let em = add(&mut m, "ShaderNodeEmission");
     let out = m
         .node_tree
@@ -480,6 +481,16 @@ fn unrecognised_setups_fall_back_with_a_warning() {
         .unwrap()
         .uid;
     link(&mut m, (em, "Emission"), (out, "Surface"));
+    let x = lower_m(&m, &images);
+    assert_eq!(x.base_color.factor, [0.0, 0.0, 0.0, 1.0]);
+    assert_eq!(x.emissive.factor, [1.0; 3]);
+    assert!(!x.unlit);
+    assert!(x.diagnostics.is_empty(), "{:?}", x.diagnostics);
+
+    // A surface that is not a Principled BSDF: the glTF default material.
+    let mut m = mat("Diffuse");
+    let d = add(&mut m, "ShaderNodeBsdfDiffuse");
+    link(&mut m, (d, "BSDF"), (out, "Surface"));
     let x = lower_m(&m, &images);
     assert_eq!(x.base_color.factor, [1.0; 4]);
     assert_eq!((x.metallic.factor, x.roughness.factor), (1.0, 1.0));

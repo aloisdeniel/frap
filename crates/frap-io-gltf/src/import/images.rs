@@ -170,15 +170,28 @@ fn create_from_file(
                 }
                 return Ok(r);
             }
-            let mut img = Image::new("", 0, 0);
-            img.source = "FILE".into();
-            img.filepath = path;
-            set_file_metadata(&mut img, &bytes);
+            // `bpy.data.images.load(path)` (WP 3.2's `Image::load`: file format, size, colour
+            // space and alpha mode read from the file), then `image.pack()`.
+            let base = frap_scene::id::PathBase {
+                blend: main.filepath.clone(),
+                cwd: None,
+            };
+            let mut img = Image::load(&path, &base).unwrap_or_else(|_| {
+                let mut im = Image::new("", 0, 0);
+                im.source = "FILE".into();
+                im.filepath = path.clone();
+                im
+            });
+            if img.size == [0, 0] {
+                // No header reader linked (library use): decode with frap-imbuf.
+                set_file_metadata(&mut img, &bytes);
+            }
             if cx.settings.import_pack_images {
                 img.packed_file = Some(Arc::new(EncodedImage {
                     mime: mime_of(&bytes, declared_mime.as_deref()),
                     bytes,
                 }));
+                img.packed_filepath = path;
             }
             Ok(main.images.insert(&img_name, img, log))
         }

@@ -245,13 +245,57 @@ pub struct MaterialExts {
     pub diffuse_transmission: Option<DiffuseTransmission>,
 }
 
-/// How a colour attribute feeds the material (glTF `COLOR_0`).
+/// How a colour attribute feeds the material (glTF `COLOR_0`): the add-on's `vc_info`.
+///
+/// The exporter's `COLOR_n` writer (MATERIAL mode) exports `attribute` when `color`; it adds
+/// the alpha of `alpha_attribute` when `alpha` and the material is not OPAQUE
+/// ([`LoweredMaterial::alpha_mode`], the add-on's `vc_info['alpha_mode'] != 'OPAQUE'`);
+/// without `color` it exports nothing (the add-on warns "Vertex Color alpha without color").
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct VertexColorUse {
-    /// Attribute name (`None` = active colour attribute).
+    /// Attribute name (`None` = active colour attribute): the one Base Color reads when
+    /// `color`, else the one Alpha reads.
     pub attribute: Option<SmolStr>,
     /// Multiplies base colour (true) or is used alone.
     pub multiply: bool,
+    /// `vc_info['color_type']` is set: Base Color reads `attribute`. M3 (WP 3.5).
+    pub color: bool,
+    /// `vc_info['alpha_type']` is set: Alpha reads `alpha_attribute`. M3 (WP 3.5).
+    pub alpha: bool,
+    /// `vc_info['alpha']` (`None` = active colour attribute), meaningful when `alpha`. M3
+    /// (WP 3.5).
+    pub alpha_attribute: Option<SmolStr>,
+}
+
+impl VertexColorUse {
+    /// Base Color (and Alpha) read the same colour attribute: the active one when
+    /// `attribute` is `None`.
+    pub fn color_and_alpha(attribute: Option<SmolStr>, multiply: bool) -> VertexColorUse {
+        VertexColorUse {
+            alpha_attribute: attribute.clone(),
+            attribute,
+            multiply,
+            color: true,
+            alpha: true,
+        }
+    }
+
+    /// Only Base Color reads a colour attribute.
+    pub fn color_only(attribute: Option<SmolStr>, multiply: bool) -> VertexColorUse {
+        VertexColorUse {
+            attribute,
+            multiply,
+            color: true,
+            alpha: false,
+            alpha_attribute: None,
+        }
+    }
+
+    /// Whether `COLOR_n` carries the alpha attribute (the add-on's `add_alpha` in MATERIAL
+    /// mode) for a material with alpha mode `mode`.
+    pub fn adds_alpha(&self, mode: AlphaMode) -> bool {
+        self.color && self.alpha && mode != AlphaMode::Opaque
+    }
 }
 
 /// The glTF-shaped shading model shared by the exporter and the renderer.

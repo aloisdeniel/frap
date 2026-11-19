@@ -829,11 +829,11 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | Non-triangle modes: LINES (`use_mesh_edges`), POINTS (`use_mesh_vertices`, point clouds); import of strips, fans, line strips/loops | M3 | M3 | WP 3.7 |
 | [ ] | pbrMetallicRoughness factors + baseColorTexture, doubleSided | M1 | M1 |  |
 | [ ] | Multiple UV sets, vertex colours (COLOR_n, fake COLOR_0), TANGENT, extras | M3 | M3 |  |
-| [ ] | All textures/samplers/images (PNG/JPEG passthrough, ORM packing), alpha modes OPAQUE/MASK/BLEND | M3 | M3 |  |
+| [x] | All textures/samplers/images (PNG/JPEG passthrough, ORM packing), alpha modes OPAQUE/MASK/BLEND | M3 | M3 | WP 3.5; WebP written as PNG (EXT_texture_webp pending) |
 | [x] | Cameras (perspective/orthographic) | M3 | M3 | export_cameras=False by default |
 | [x] | KHR_lights_punctual | M3 | M3 | export_lights=False by default; AREA warning |
-| [ ] | KHR_texture_transform | M3 | M3 | marked required (Blender quirk) |
-| [ ] | KHR_materials_emissive_strength, unlit | M3 | M3 |  |
+| [x] | KHR_texture_transform | M3 | M3 | marked required (Blender quirk); WP 3.5 |
+| [x] | KHR_materials_emissive_strength, unlit | M3 | M3 | WP 3.5 |
 | [ ] | KHR_materials_transmission, clearcoat, sheen, ior, specular, volume, iridescence, anisotropy, dispersion | M3 | M3 |  |
 | [ ] | KHR_materials_pbrSpecularGlossiness | — | M3 | import only (archived) |
 | [ ] | Animations (TRS, weights; ACTIONS/ACTIVE_ACTIONS/BROADCAST/NLA_TRACKS/SCENE; LINEAR/STEP/CUBICSPLINE, sampling) | M6 | M6 |  |
