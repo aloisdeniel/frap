@@ -11,7 +11,9 @@
 //! and are kept. The result is written back into the BMesh as Blender does: vertices and
 //! faces that survive unchanged are kept, new faces copy the attributes and interpolate the
 //! corner data (UVs) of the face they come from, new edges those of the edge they lie on,
-//! and the edges along the intersection are tagged. When something changed, everything is
+//! and the edges along the intersection are tagged (`get_cdt_edge_orig`'s `is_intersect`:
+//! between the two sides, on no edge of its own input face nor of a coplanar one, so a cutter
+//! that only touches the mesh's faces tags nothing). When something changed, everything is
 //! deselected and, in vertex or edge select mode, the intersection edges are selected. When
 //! nothing changed on any mesh: WARNING `No intersections found`.
 //!
@@ -430,7 +432,7 @@ pub(crate) mod common {
             Err(frap_boolean::BoolError::NonManifold(_)) => return Err(open_side_error()),
             Err(e) => return Err(OpError::Runtime(e.to_string())),
         };
-        // Intersection edges: between faces of different sides.
+        // Candidate intersection edges: between faces of different sides.
         let mut edge_side: FxHashMap<(u32, u32), u32> = FxHashMap::default();
         let mut isect: FxHashSet<(u32, u32)> = FxHashSet::default();
         for (f, w) in r.face_offsets.windows(2).enumerate() {
@@ -450,7 +452,7 @@ pub(crate) mod common {
                 }
             }
         }
-        let out = out_mesh(
+        let mut out = out_mesh(
             bm,
             &shapes,
             &r.positions,
@@ -460,7 +462,115 @@ pub(crate) mod common {
             &r.face_src,
             &|a, b| isect.contains(&(a.min(b), a.max(b))),
         );
+        // `get_cdt_edge_orig`: an edge is an intersection only where it lies on no edge of
+        // its own input face nor of an input face coplanar with it (Blender triangulates
+        // coplanar faces together, and their edges keep their origin).
+        let planes = Planes::new(&shapes);
+        for (fi, w) in r.face_offsets.windows(2).enumerate() {
+            let fv = &r.corner_verts[w[0] as usize..w[1] as usize];
+            let (m, lf) = r.face_src[fi];
+            for i in 0..fv.len() {
+                if !out.is_intersect[fi][i] {
+                    continue;
+                }
+                let (a, b) = (fv[i], fv[(i + 1) % fv.len()]);
+                if out.edge_orig[fi][i].is_some()
+                    || planes.on_coplanar_edge(
+                        &shapes,
+                        (m as usize, lf as usize),
+                        r.positions[a as usize],
+                        r.positions[b as usize],
+                    )
+                {
+                    out.is_intersect[fi][i] = false;
+                }
+            }
+        }
         Ok(apply(bm, &out, true, &rest))
+    }
+
+    /// The plane of every input face of every side (unit Newell normal and offset).
+    struct Planes {
+        planes: Vec<Vec<([f64; 3], f64)>>,
+        tol: f64,
+    }
+
+    impl Planes {
+        fn new(shapes: &[Shape]) -> Self {
+            let mut scale = 0.0f64;
+            let planes = shapes
+                .iter()
+                .map(|sh| {
+                    for p in &sh.positions {
+                        for c in p {
+                            scale = scale.max(f64::from(c.abs()));
+                        }
+                    }
+                    sh.face_offsets
+                        .windows(2)
+                        .map(|w| {
+                            let fv = &sh.corner_verts[w[0] as usize..w[1] as usize];
+                            let pt = |i: usize| sh.positions[fv[i % fv.len()] as usize].map(f64::from);
+                            let mut n = [0.0f64; 3];
+                            for i in 0..fv.len() {
+                                let (c, d) = (pt(i), pt(i + 1));
+                                n[0] += (c[1] - d[1]) * (c[2] + d[2]);
+                                n[1] += (c[2] - d[2]) * (c[0] + d[0]);
+                                n[2] += (c[0] - d[0]) * (c[1] + d[1]);
+                            }
+                            let len = (n[0] * n[0] + n[1] * n[1] + n[2] * n[2]).sqrt();
+                            if len > 0.0 {
+                                n = n.map(|x| x / len);
+                            }
+                            let p0 = pt(0);
+                            (n, n[0] * p0[0] + n[1] * p0[1] + n[2] * p0[2])
+                        })
+                        .collect()
+                })
+                .collect();
+            Planes {
+                planes,
+                tol: 1e-6 * scale.max(1.0),
+            }
+        }
+
+        /// Whether `pa`-`pb` lies on an edge of an input face (other than `src`) in the plane
+        /// of the input face `src` (side, face).
+        fn on_coplanar_edge(
+            &self,
+            shapes: &[Shape],
+            src: (usize, usize),
+            pa: [f32; 3],
+            pb: [f32; 3],
+        ) -> bool {
+            let (n, d) = self.planes[src.0][src.1];
+            if n == [0.0; 3] {
+                return false;
+            }
+            for (s, sh) in shapes.iter().enumerate() {
+                for (f, &(m, e)) in self.planes[s].iter().enumerate() {
+                    if (s, f) == src {
+                        continue;
+                    }
+                    let cos = n[0] * m[0] + n[1] * m[1] + n[2] * m[2];
+                    if cos.abs() < 1.0 - 1e-6 || (e - cos.signum() * d).abs() > self.tol {
+                        continue;
+                    }
+                    let fv = &sh.corner_verts
+                        [sh.face_offsets[f] as usize..sh.face_offsets[f + 1] as usize];
+                    for i in 0..fv.len() {
+                        let (u, w) = (
+                            sh.positions[fv[i] as usize],
+                            sh.positions[fv[(i + 1) % fv.len()] as usize],
+                        );
+                        if on_segment(pa, u, w) && on_segment(pb, u, w) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            false
+        }
     }
 
     /// `edbm_intersect_select`: after a change everything is deselected and, in vertex or
@@ -484,5 +594,139 @@ pub(crate) mod common {
             }
         }
         bm.normals_update();
+    }
+}
+
+#[cfg(test)]
+pub(crate) mod tests {
+    //! Edit-mode booleans against Blender 5.2.4 (`bpy.ops.mesh.primitive_cube_add` in Edit
+    //! Mode, then the operator): element counts, the selection the operator leaves, and the
+    //! result's volume and bounds.
+    use frap_bmesh::{BMesh, CreateFlag, ElemFlag, SelectMode};
+    use frap_boolean::BoolOperation;
+
+    use super::common;
+
+    /// Adds Blender's cube (`primitive_cube_add` order), selected or not.
+    pub(crate) fn add_cube(bm: &mut BMesh, size: f32, c: [f32; 3], select: bool) {
+        let h = size / 2.0;
+        let mut v = Vec::new();
+        for x in [-h, h] {
+            for y in [-h, h] {
+                for z in [-h, h] {
+                    v.push(bm.vert_create([c[0] + x, c[1] + y, c[2] + z], None, CreateFlag::empty()));
+                }
+            }
+        }
+        for f in [
+            [0, 1, 3, 2],
+            [2, 3, 7, 6],
+            [6, 7, 5, 4],
+            [4, 5, 1, 0],
+            [2, 6, 4, 0],
+            [7, 3, 1, 5],
+        ] {
+            let verts: Vec<_> = f.iter().map(|&i| v[i]).collect();
+            let face = bm
+                .face_create_verts(&verts, None, CreateFlag::empty(), true)
+                .unwrap();
+            if select {
+                bm.face_select_set(face, true);
+            }
+        }
+    }
+
+    pub(crate) fn counts(bm: &BMesh) -> (usize, usize, usize) {
+        (bm.vert_ids().len(), bm.edge_ids().len(), bm.face_ids().len())
+    }
+
+    /// Signed volume and bounds of the visible faces.
+    pub(crate) fn volume_bounds(bm: &BMesh) -> (f64, [[f32; 3]; 2]) {
+        let mut vol = 0.0f64;
+        let mut b = [[f32::INFINITY; 3], [f32::NEG_INFINITY; 3]];
+        for f in bm.face_ids() {
+            if bm.face(f).flag.contains(ElemFlag::HIDDEN) {
+                continue;
+            }
+            let p: Vec<[f64; 3]> = bm
+                .face_verts(f)
+                .iter()
+                .map(|&v| bm.vert(v).co.map(f64::from))
+                .collect();
+            for q in &p {
+                for c in 0..3 {
+                    b[0][c] = b[0][c].min(q[c] as f32);
+                    b[1][c] = b[1][c].max(q[c] as f32);
+                }
+            }
+            for i in 1..p.len() - 1 {
+                let (a, u, w) = (p[0], p[i], p[i + 1]);
+                vol += (a[0] * (u[1] * w[2] - u[2] * w[1]) - a[1] * (u[0] * w[2] - u[2] * w[0])
+                    + a[2] * (u[0] * w[1] - u[1] * w[0]))
+                    / 6.0;
+            }
+        }
+        (vol, b)
+    }
+
+    fn run(cutter: (f32, [f32; 3]), op: BoolOperation, mode: SelectMode) -> BMesh {
+        let mut bm = BMesh::new();
+        bm.select_mode = mode;
+        add_cube(&mut bm, 2.0, [0.0; 3], false);
+        add_cube(&mut bm, cutter.0, cutter.1, true);
+        let changed = common::boolean(&mut bm, common::side_pair, op).unwrap();
+        common::intersect_select(&mut bm, changed);
+        bm
+    }
+
+    #[test]
+    fn coplanar_contact_is_not_an_intersection() {
+        // Blender: V14 E21 F9, nothing selected (the notch's edges lie on the cutter's
+        // coplanar faces' edges).
+        let bm = run((1.0, [0.5; 3]), BoolOperation::Difference, SelectMode::VERT);
+        assert_eq!(counts(&bm), (14, 21, 9));
+        assert_eq!(bm.selected_counts(), (0, 0, 0));
+        let (vol, b) = volume_bounds(&bm);
+        assert!((vol - 7.0).abs() < 1e-5, "{vol}");
+        assert_eq!(b, [[-1.0; 3], [1.0; 3]]);
+    }
+
+    #[test]
+    fn coplanar_union_selects_nothing() {
+        // Blender: V16 E28 F14 (its coplanar faces stay split: T3), nothing selected.
+        let bm = run((2.0, [1.0, 0.0, 0.0]), BoolOperation::Union, SelectMode::VERT);
+        assert_eq!(bm.selected_counts(), (0, 0, 0));
+        let (vol, b) = volume_bounds(&bm);
+        assert!((vol - 12.0).abs() < 1e-5, "{vol}");
+        assert_eq!(b, [[-1.0; 3], [2.0, 1.0, 1.0]]);
+    }
+
+    #[test]
+    fn poke_through_selects_the_cut() {
+        // Blender: V16 E26 F12 with the 4 edges of the hole selected, in vertex and edge
+        // select mode, for DIFFERENCE and UNION. The DIFFERENCE's floor is the cutter's own
+        // face, which `apply_mesh_output_to_bmesh` reuses with its old winding
+        // (`BM_face_exists` matches either winding): Blender's signed volume is 7.1333, not
+        // 7.4.
+        for (op, vol, hi) in [
+            (BoolOperation::Difference, 7.133_333_33, [1.0, 1.0, 1.0]),
+            (BoolOperation::Union, 8.4, [1.4, 1.0, 1.0]),
+        ] {
+            for mode in [SelectMode::VERT, SelectMode::EDGE] {
+                let bm = run((1.0, [0.9, 0.2, 0.3]), op, mode);
+                assert_eq!(counts(&bm), (16, 26, 12), "{op:?}");
+                assert_eq!(bm.selected_counts(), (4, 4, 0), "{op:?} {mode:?}");
+                let (v, b) = volume_bounds(&bm);
+                assert!((v - vol).abs() < 1e-5, "{op:?}: {v}");
+                assert!((0..3).all(|c| (b[1][c] - hi[c]).abs() < 1e-6), "{b:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn face_select_mode_selects_nothing() {
+        // `edbm_intersect_select` selects the cut only in vertex and edge select mode.
+        let bm = run((1.0, [0.9, 0.2, 0.3]), BoolOperation::Difference, SelectMode::FACE);
+        assert_eq!(bm.selected_counts(), (0, 0, 0));
     }
 }

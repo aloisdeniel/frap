@@ -1,7 +1,8 @@
 # WP 4.6: mesh.intersect_boolean UNION and INTERSECT with use_swap (Edit Mode, EXACT; T3): a
 # rotated cube added in Edit Mode is merged into the default cube; then a sphere is
 # intersected with the result. Every result is one closed mesh.
-# golden: startup=factory compare=objects,context,mesh:Cube tier=T3 check=manifold,euler:2,faces:6-200
+# Blender 5.2.4 ends with V113 E180 F69 (frap too; the bands allow a different layout, T3).
+# golden: startup=factory compare=objects,context,mesh:Cube tier=T3 check=manifold,euler:2,verts:108-118,edges:172-188,faces:66-72
 import bpy
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='DESELECT')

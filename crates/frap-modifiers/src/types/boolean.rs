@@ -10,7 +10,11 @@
 //! `interpolate_corner_attributes`, `set_material_from_map`, `get_intersecting_edges`, the
 //! joined mesh of `join_meshes_with_transforms`), Blender 5.2.4, GPL-2.0-or-later.
 //!
-//! Solvers: MANIFOLD at T2; EXACT at T3 (manifold-rust stands in for Blender's exact mesh
+//! Solvers: MANIFOLD at T2, with two known gaps from manifold-rust's triangles (a cutter that
+//! makes a hole inside a face can leave the bridge at another in-line vertex than Blender's;
+//! coincident vertices Manifold 3.5.2 keeps apart, e.g. three cylinders meeting at a cube's
+//! centre, are one vertex): those results keep Blender's volume and slots (T3, `KNOWN_GAPS` in
+//! `boolean/tests.rs`); EXACT at T3 (manifold-rust stands in for Blender's exact mesh
 //! arrangement, see `frap_boolean::manifold`); FLOAT runs EXACT and reports a WARNING
 //! (`Boolean: the FLOAT solver runs as EXACT …`) until M8 (WP 8.6). The FLOAT-only refusals
 //! (`Cannot execute, intersect only available using exact solver`, the empty collection) are
@@ -419,8 +423,8 @@ pub fn mesh_boolean(
             .push(off.corner.last().unwrap() + m.corners_num());
     }
 
-    // The joined mesh's materials (`realize_instances`: every input's slots, an empty slot for
-    // an input without any) and each input's slot map.
+    // The joined mesh's materials (`realize_instances`: every input's slots once, an empty
+    // slot for an input without any) and each input's slot map.
     let mut joined_materials: Vec<Option<IdRef<MaterialId>>> = Vec::new();
     for m in &meshes {
         if m.materials.is_empty() {
@@ -439,7 +443,15 @@ pub fn mesh_boolean(
     let base = inputs[0].mesh;
     let mut out = Mesh::new(base.header.name.clone());
     copy_parameters_for_eval(&mut out, base);
-    out.materials = joined_materials.clone();
+    // `realize_instances` copies the first mesh's parameters (its slots, duplicates included)
+    // and then assigns the joined materials to the first slots (`BKE_id_material_eval_assign`).
+    for (i, ma) in joined_materials.iter().enumerate() {
+        if i < out.materials.len() {
+            out.materials[i] = *ma;
+        } else {
+            out.materials.push(*ma);
+        }
+    }
     let faces_num = r.face_offsets.len().saturating_sub(1);
     if r.positions.is_empty() || faces_num == 0 {
         return Ok(BoolOutput {

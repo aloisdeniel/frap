@@ -167,3 +167,39 @@ fn separate_faces(bm: &mut BMesh) {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use frap_bmesh::{BMesh, CreateFlag, SelectMode};
+
+    use super::*;
+    use crate::ops::intersect_boolean::tests::{add_cube, counts, volume_bounds};
+
+    #[test]
+    fn plane_cuts_the_cube_like_blender() {
+        // Blender 5.2.4: a plane of size 3 at z = 0.25 added in Edit Mode, then
+        // `mesh.intersect(separate_mode='NONE')`: V16 E26 F13, the cut square selected
+        // (4 verts, 4 edges) and the plane's inner face; no extra vertex where the cube's
+        // triangulation diagonals cross the cut.
+        let mut bm = BMesh::new();
+        bm.select_mode = SelectMode::VERT;
+        add_cube(&mut bm, 2.0, [0.0; 3], false);
+        let v: Vec<_> = [[-1.5, -1.5], [1.5, -1.5], [1.5, 1.5], [-1.5, 1.5]]
+            .iter()
+            .map(|p| bm.vert_create([p[0], p[1], 0.25], None, CreateFlag::empty()))
+            .collect();
+        let f = bm
+            .face_create_verts(&v, None, CreateFlag::empty(), true)
+            .unwrap();
+        bm.face_select_set(f, true);
+        let changed = knife(&mut bm, common::side_pair, false, false).unwrap();
+        common::intersect_select(&mut bm, changed);
+        assert_eq!(counts(&bm), (16, 26, 13));
+        assert_eq!(bm.selected_counts(), (4, 4, 1));
+        // The cube (8) and the plane's faces (z * area / 3 = 0.25 * 9 / 3 against the
+        // origin), as in Blender.
+        let (vol, b) = volume_bounds(&bm);
+        assert!((vol - 8.75).abs() < 1e-5, "{vol}");
+        assert_eq!(b, [[-1.5, -1.5, -1.0], [1.5, 1.5, 1.0]]);
+    }
+}

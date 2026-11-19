@@ -25,7 +25,7 @@ pub struct OutFace {
 
 impl OutFace {
     /// `find_vert_index`.
-    fn find_vert_index(&self, v: u32) -> Option<usize> {
+    pub(crate) fn find_vert_index(&self, v: u32) -> Option<usize> {
         self.verts.iter().position(|&x| x == v)
     }
 }
@@ -337,6 +337,192 @@ pub fn dissolve_valence2_verts(a: &mut Assembly) {
     }
 }
 
+/// Moves the bridge edges that merging left at an in-line vertex `v` (`line[v] = (a, b)`: a
+/// corner `a, v, w` of a face of one input face's `group`, `v`-`w` shared with another face
+/// of the group and not `is_cut`) to `a`: the ear `a, v, w` goes to the other face, where `v`
+/// is then between its two cut-line neighbours, so it can be dissolved. An ear that is
+/// not convex, holds another vertex of its face or would repeat `a` is left alone.
+pub fn reroute_bridges(
+    group: &mut [OutFace],
+    line: &FxHashMap<u32, (u32, u32)>,
+    pos: &dyn Fn(u32) -> [f64; 3],
+    is_cut: &dyn Fn(u32, u32) -> bool,
+) {
+    if group.len() < 2 || line.is_empty() {
+        return;
+    }
+    let mut cands: Vec<u32> = group
+        .iter()
+        .flat_map(|f| f.verts.iter().copied())
+        .filter(|v| line.contains_key(v))
+        .collect();
+    cands.sort_unstable();
+    cands.dedup();
+    for v in cands {
+        let (a, b) = line[&v];
+        for _ in 0..2 * group.len() {
+            let mut moved = false;
+            let mut blocked = false;
+            for fi in 0..group.len() {
+                let f = &group[fi];
+                let Some(i) = f.find_vert_index(v) else {
+                    continue;
+                };
+                let k = f.verts.len();
+                let (p, n) = (f.verts[(i + k - 1) % k], f.verts[(i + 1) % k]);
+                let on = |x: u32| x == a || x == b;
+                if on(p) && on(n) {
+                    continue;
+                }
+                // `ear_first`: the face runs `a, v, w` (else `w, v, a`).
+                let (ear_first, w) = match (on(p), on(n)) {
+                    (true, false) => (true, n),
+                    (false, true) => (false, p),
+                    _ => {
+                        blocked = true;
+                        break;
+                    }
+                };
+                let a_here = if ear_first { p } else { n };
+                if is_cut(v, w) {
+                    continue;
+                }
+                // The other face of the group with the edge `v`-`w` reversed.
+                let other = group.iter().position(|g| {
+                    let m = g.verts.len();
+                    g.find_vert_index(w).is_some_and(|j| {
+                        if ear_first {
+                            g.verts[(j + 1) % m] == v
+                        } else {
+                            g.verts[(j + m - 1) % m] == v
+                        }
+                    })
+                });
+                let Some(oi) = other.filter(|&oi| oi != fi) else {
+                    continue;
+                };
+                if k <= 3
+                    || group[oi].find_vert_index(a_here).is_some()
+                    || !is_ear(&group[fi].verts, i, pos)
+                {
+                    // Another corner of `v` may move instead.
+                    continue;
+                }
+                group[fi].verts.remove(i);
+                let g = &mut group[oi];
+                let j = g.find_vert_index(v).expect("the other face has v");
+                // `w, v` (ear first) becomes `w, a, v`; `v, w` becomes `v, a, w`.
+                let at = if ear_first { j } else { j + 1 };
+                g.verts.insert(at, a_here);
+                moved = true;
+                break;
+            }
+            if blocked || !moved {
+                break;
+            }
+        }
+    }
+}
+
+/// Whether the corner `i` of the planar polygon `verts` is convex and its triangle holds
+/// no other vertex of the polygon.
+fn is_ear(verts: &[u32], i: usize, pos: &dyn Fn(u32) -> [f64; 3]) -> bool {
+    let k = verts.len();
+    let pt = pos;
+    // Newell normal; project along its largest axis.
+    let mut nrm = [0.0f64; 3];
+    for j in 0..k {
+        let (c, d) = (pt(verts[j]), pt(verts[(j + 1) % k]));
+        nrm[0] += (c[1] - d[1]) * (c[2] + d[2]);
+        nrm[1] += (c[2] - d[2]) * (c[0] + d[0]);
+        nrm[2] += (c[0] - d[0]) * (c[1] + d[1]);
+    }
+    let ax = nrm.map(f64::abs);
+    let (u, w, sign) = if ax[0] >= ax[1] && ax[0] >= ax[2] {
+        (1, 2, nrm[0].signum())
+    } else if ax[1] >= ax[2] {
+        (2, 0, nrm[1].signum())
+    } else {
+        (0, 1, nrm[2].signum())
+    };
+    let p2 = |x: u32| (pt(x)[u], pt(x)[w]);
+    let orient = |a: (f64, f64), b: (f64, f64), c: (f64, f64)| {
+        sign * ((b.0 - a.0) * (c.1 - a.1) - (b.1 - a.1) * (c.0 - a.0))
+    };
+    let (pa, pv, pn) = (
+        p2(verts[(i + k - 1) % k]),
+        p2(verts[i]),
+        p2(verts[(i + 1) % k]),
+    );
+    let area = orient(pa, pv, pn);
+    if area <= 0.0 {
+        return false;
+    }
+    let tol = 1e-12 * area.abs().max(1e-300);
+    for (j, &x) in verts.iter().enumerate() {
+        if j == i || j == (i + 1) % k || j == (i + k - 1) % k {
+            continue;
+        }
+        let q = p2(x);
+        if orient(pa, pv, q) >= -tol && orient(pv, pn, q) >= -tol && orient(pn, pa, q) >= -tol {
+            return false;
+        }
+    }
+    true
+}
+
+/// The vertices (not `is_input`) with exactly two neighbours across edges between different
+/// input faces, strictly between them on a straight line: `v -> (a, b)`.
+fn in_line_vertices(
+    positions: &[[f32; 3]],
+    faces: &[OutFace],
+    is_input: &dyn Fn(u32) -> bool,
+) -> FxHashMap<u32, (u32, u32)> {
+    let mut edge_face: FxHashMap<(u32, u32), u32> = FxHashMap::default();
+    for f in faces {
+        let k = f.verts.len();
+        for i in 0..k {
+            edge_face.insert((f.verts[i], f.verts[(i + 1) % k]), f.face_id);
+        }
+    }
+    let mut nb: FxHashMap<u32, SmallVec<[u32; 4]>> = FxHashMap::default();
+    for (&(u, w), &fid) in &edge_face {
+        if edge_face.get(&(w, u)) == Some(&fid) {
+            continue;
+        }
+        for (x, y) in [(u, w), (w, u)] {
+            let n = nb.entry(x).or_default();
+            if !n.contains(&y) {
+                n.push(y);
+            }
+        }
+    }
+    let mut line = FxHashMap::default();
+    for (&v, n) in &nb {
+        if n.len() != 2 || is_input(v) {
+            continue;
+        }
+        let p = positions[v as usize].map(f64::from);
+        let (a, b) = (
+            positions[n[0] as usize].map(f64::from),
+            positions[n[1] as usize].map(f64::from),
+        );
+        let d1 = [p[0] - a[0], p[1] - a[1], p[2] - a[2]];
+        let d2 = [b[0] - p[0], b[1] - p[1], b[2] - p[2]];
+        let c = [
+            d1[1] * d2[2] - d1[2] * d2[1],
+            d1[2] * d2[0] - d1[0] * d2[2],
+            d1[0] * d2[1] - d1[1] * d2[0],
+        ];
+        let dd = |x: [f64; 3], y: [f64; 3]| x[0] * y[0] + x[1] * y[1] + x[2] * y[2];
+        let scale = dd(d1, d1).max(dd(d2, d2));
+        if dd(c, c) <= 1e-10 * scale * scale && dd(d1, d2) > 0.0 {
+            line.insert(v, (n[0], n[1]));
+        }
+    }
+    line
+}
+
 /// `assemble_mesh_from_meshgl` over a cleaned triangle soup: the triangles grouped by input
 /// face (`get_face_groups`, groups in input-face order), each group merged, then valence-2
 /// vertices dissolved.
@@ -346,6 +532,19 @@ pub fn assemble(
     face_ids: &[u32],
     input_faces_num: usize,
 ) -> Assembly {
+    assemble_with(positions, tri_verts, face_ids, input_faces_num, None)
+}
+
+/// [`assemble`], and with `reroute` (`is_input` of an output vertex), the bridges merging left
+/// at new in-line vertices are moved away first ([`reroute_bridges`]) so those vertices are
+/// dissolved too (the EXACT stand-in: Blender's exact solver keeps no such vertices).
+pub fn assemble_with(
+    positions: Vec<[f32; 3]>,
+    tri_verts: &[u32],
+    face_ids: &[u32],
+    input_faces_num: usize,
+    reroute: Option<&dyn Fn(u32) -> bool>,
+) -> Assembly {
     let tris_num = tri_verts.len() / 3;
     let mut groups: Vec<SmallVec<[u32; 4]>> = vec![SmallVec::new(); input_faces_num];
     for (t, &fid) in face_ids.iter().enumerate().take(tris_num) {
@@ -354,6 +553,7 @@ pub fn assemble(
         }
     }
     let mut faces = Vec::with_capacity(tris_num);
+    let mut ranges = Vec::new();
     for (gid, group) in groups.iter().enumerate() {
         let mut gf: Vec<OutFace> = group
             .iter()
@@ -366,7 +566,17 @@ pub fn assemble(
             })
             .collect();
         merge_out_faces(&mut gf);
+        if gf.len() > 1 {
+            ranges.push(faces.len()..faces.len() + gf.len());
+        }
         faces.extend(gf);
+    }
+    if let Some(is_input) = reroute {
+        let line = in_line_vertices(&positions, &faces, is_input);
+        let pos = |v: u32| positions[v as usize].map(f64::from);
+        for r in ranges {
+            reroute_bridges(&mut faces[r], &line, &pos, &|_, _| false);
+        }
     }
     let mut a = Assembly { positions, faces };
     dissolve_valence2_verts(&mut a);
@@ -424,6 +634,49 @@ mod tests {
         clean_tris(3, &mut tv, &mut ids);
         assert_eq!(tv, vec![0, 1, 2, 2, 1, 0]);
         assert_eq!(ids, vec![5, 8]);
+    }
+
+    #[test]
+    fn bridge_moves_off_an_in_line_vertex() {
+        // The plane at z = 0.25 cut by the default cube: its outer ring was left as two faces
+        // bridged at 7, which lies on the cut line 5-7-9 (where the cube's diagonal crossed).
+        let mut pos = [[0.0f64; 3]; 17];
+        for (i, p) in [
+            (3, [-1.0, -1.0]),
+            (5, [-1.0, 1.0]),
+            (7, [0.25, 1.0]),
+            (9, [1.0, 1.0]),
+            (12, [1.0, -1.0]),
+            (13, [-1.5, -1.5]),
+            (14, [1.5, -1.5]),
+            (15, [1.5, 1.5]),
+            (16, [-1.5, 1.5]),
+        ] {
+            pos[i] = [p[0], p[1], 0.25];
+        }
+        let mut group = vec![
+            f(&[12, 3, 5, 7, 16, 13, 14, 15, 9]),
+            f(&[5, 3, 12, 9, 7]),
+            f(&[9, 15, 16, 7]),
+        ];
+        let line: FxHashMap<u32, (u32, u32)> = [(7, (5, 9))].into_iter().collect();
+        reroute_bridges(&mut group, &line, &|v| pos[v as usize], &|_, _| false);
+        for g in &group {
+            if let Some(i) = g.find_vert_index(7) {
+                let k = g.verts.len();
+                let mut n = [g.verts[(i + k - 1) % k], g.verts[(i + 1) % k]];
+                n.sort_unstable();
+                assert_eq!(n, [5, 9], "{group:?}");
+            }
+        }
+        assert_eq!(group[0].verts.as_slice(), &[12, 3, 5, 16, 13, 14, 15, 9]);
+        assert_eq!(group[2].verts.as_slice(), &[9, 15, 16, 5, 7]);
+        // A reflex corner is no ear: nothing moves.
+        let mut group2 = vec![f(&[13, 5, 7, 16]), f(&[16, 7, 9])];
+        pos[16] = [0.25, 2.0, 0.25];
+        let before = group2.clone();
+        reroute_bridges(&mut group2, &line, &|v| pos[v as usize], &|_, _| false);
+        assert_eq!(group2, before);
     }
 
     #[test]

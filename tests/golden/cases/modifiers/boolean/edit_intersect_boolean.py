@@ -1,7 +1,9 @@
 # WP 4.6: mesh.intersect_boolean (Edit Mode, EXACT; T3): a smaller cube added in Edit Mode
 # (selected) is cut out of the default cube (unselected). The result is one closed mesh
 # (V - E + F = 2); a second call with nothing selected changes nothing.
-# golden: startup=factory compare=objects,context tier=T3 check=manifold,euler:2,faces:9-30,verts:14-40
+# Blender 5.2.4: V14 E21 F9 with nothing selected (the cutter only touches the cube's faces:
+# no intersection edge; unit tests in intersect_boolean.rs check selection and volume).
+# golden: startup=factory compare=objects,context tier=T3 check=manifold,euler:2,verts:14-15,edges:21-23,faces:9-10
 # golden: compare=mesh:Cube
 import bpy
 bpy.ops.object.mode_set(mode='EDIT')

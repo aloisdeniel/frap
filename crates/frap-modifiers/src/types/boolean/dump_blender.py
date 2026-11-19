@@ -221,6 +221,164 @@ for solver in ("MANIFOLD", "EXACT"):
     run(f"{s}_disjoint_intersect", disjoint, solver, "INTERSECT")
     run(f"{s}_torus_cube", torus_cube, solver)
 
+
+# Wider MANIFOLD coverage (verifier probes): large offsets, coincident operands, n-gons,
+# subdivided faces, operand slots, nested collections, mixed scale, thin cutters, drills,
+# duplicate and empty slots. The ones frap does not match at T2 are the known gaps listed in
+# tests.rs (KNOWN_GAPS), checked at T3.
+def big():
+    bpy.ops.mesh.primitive_cube_add(size=1000, location=(1e4, 2e4, -3e4))
+    a = bpy.context.object
+    bpy.ops.mesh.primitive_cube_add(size=600, location=(1e4 + 400, 2e4 + 300, -3e4 + 200), rotation=(0.1, 0.2, 0.3))
+    return a, [bpy.context.object]
+
+
+def same():
+    bpy.ops.mesh.primitive_cube_add(size=2)
+    a = bpy.context.object
+    bpy.ops.mesh.primitive_cube_add(size=2)
+    return a, [bpy.context.object]
+
+
+def ngon():
+    bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=1, depth=1)
+    a = bpy.context.object
+    bpy.ops.mesh.primitive_cube_add(size=0.6, location=(0.2, 0.1, 0.5), rotation=(0.2, 0.3, 0.4))
+    return a, [bpy.context.object]
+
+
+def subdiv():
+    bpy.ops.mesh.primitive_cube_add(size=2)
+    a = bpy.context.object
+    bpy.ops.object.mode_set(mode='EDIT')
+    bpy.ops.mesh.subdivide(number_cuts=2)
+    bpy.ops.object.mode_set(mode='OBJECT')
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.9, segments=10, ring_count=6, location=(0.83, -0.41, 0.57))
+    return a, [bpy.context.object]
+
+
+def mat_noslot():
+    bpy.ops.mesh.primitive_cube_add(size=2)
+    a = bpy.context.object
+    bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.4, depth=3, location=(0.3, 0.2, 0), rotation=(0.3, 0.1, 0))
+    b = bpy.context.object
+    b.data.materials.append(mat("Blue"))
+    b.data.materials.append(mat("Green"))
+    for i, p in enumerate(b.data.polygons):
+        p.material_index = i % 2
+    return a, [b]
+
+
+def nested():
+    bpy.ops.mesh.primitive_cube_add(size=2)
+    a = bpy.context.object
+    bpy.ops.mesh.primitive_cube_add(size=1, location=(1, 1, 1))
+    b = bpy.context.object
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.7, location=(-1, -0.9, -0.8))
+    c = bpy.context.object
+    bpy.ops.mesh.primitive_cube_add(size=0.5, location=(1, -1, 0.3), rotation=(0.5, 0.5, 0.5))
+    d = bpy.context.object
+    return a, [b, c, d]
+
+
+def mixedscale():
+    bpy.ops.mesh.primitive_cube_add(size=2, scale=(2, 0.5, 1), rotation=(0.3, 0, 0.2))
+    a = bpy.context.object
+    bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.4, depth=3, location=(0.6, 0.2, 0.1), scale=(1, 2, 0.7), rotation=(0, 1.2, 0.3))
+    return a, [bpy.context.object]
+
+
+def thin():
+    bpy.ops.mesh.primitive_cube_add(size=2)
+    a = bpy.context.object
+    bpy.ops.mesh.primitive_cube_add(size=1, location=(0.3, 0.2, 0.9999), scale=(1, 1, 0.001))
+    return a, [bpy.context.object]
+
+
+def cyl(**kw):
+    def f():
+        bpy.ops.mesh.primitive_cube_add(size=2)
+        a = bpy.context.object
+        bpy.ops.mesh.primitive_cylinder_add(**kw)
+        return a, [bpy.context.object]
+    return f
+
+
+def three():
+    bpy.ops.mesh.primitive_cube_add(size=2)
+    a = bpy.context.object
+    r = []
+    for rot in [(0, 0, 0), (1.5707963, 0, 0), (0, 1.5707963, 0)]:
+        bpy.ops.mesh.primitive_cylinder_add(radius=0.5, depth=3, rotation=rot)
+        r.append(bpy.context.object)
+    return a, r
+
+
+def sph():
+    bpy.ops.mesh.primitive_cube_add(size=2)
+    a = bpy.context.object
+    bpy.ops.mesh.primitive_uv_sphere_add(location=(1, 0, 0))
+    return a, [bpy.context.object]
+
+
+def notch():
+    bpy.ops.mesh.primitive_cylinder_add()
+    a = bpy.context.object
+    bpy.ops.mesh.primitive_cube_add(size=0.5, location=(1, 0, 1))
+    return a, [bpy.context.object]
+
+
+def dupslots():
+    bpy.ops.mesh.primitive_cube_add(size=2)
+    a = bpy.context.object
+    for n in ("Green", "Red", "Red"):
+        a.data.materials.append(mat(n))
+    bpy.ops.mesh.primitive_cube_add(size=1, location=(0.9, 0.8, 0.7))
+    b = bpy.context.object
+    b.data.materials.append(mat("Red"))
+    return a, [b]
+
+
+def emptyslots():
+    bpy.ops.mesh.primitive_cube_add(size=2)
+    a = bpy.context.object
+    a.data.materials.append(mat("Green"))
+    a.data.materials.append(None)
+    bpy.ops.mesh.primitive_cube_add(size=1, location=(0.9, 0.8, 0.7))
+    b = bpy.context.object
+    b.data.materials.append(mat("Blue"))
+    b.data.materials.append(None)
+    for i, p in enumerate(b.data.polygons):
+        p.material_index = i % 2
+    return a, [b]
+
+
+run("manifold_big_offset", big)
+run("manifold_same_union", same, operation="UNION")
+run("manifold_same_difference", same)
+run("manifold_same_intersect", same, operation="INTERSECT")
+run("manifold_ngon", ngon)
+run("manifold_ngon_intersect", ngon, operation="INTERSECT")
+run("manifold_subdiv", subdiv)
+run("manifold_noslot_index", mat_noslot, operation="UNION")
+run("manifold_noslot_transfer", mat_noslot, operation="UNION", material_mode="TRANSFER")
+run("manifold_nested", nested, collection=True)
+run("manifold_nested_union", nested, operation="UNION", collection=True)
+run("manifold_mixedscale", mixedscale)
+run("manifold_mixedscale_union", mixedscale, operation="UNION")
+run("manifold_thin", thin)
+run("manifold_cyl_coplanar", cyl(radius=0.3, depth=2))
+run("manifold_drill32", cyl(radius=0.3, depth=3, vertices=32))
+run("manifold_drill_x", cyl(radius=0.4, depth=3, vertices=16, rotation=(1.5707963, 0, 0), location=(0.2, 0, 0.1)))
+run("manifold_drill_off", cyl(radius=0.25, depth=3, vertices=12, location=(0.3, -0.2, 0)))
+run("manifold_three_cylinders", three, collection=True)
+run("manifold_sphere_union", sph, operation="UNION")
+run("manifold_notch", notch)
+run("manifold_dupslots_index", dupslots, operation="UNION")
+run("manifold_dupslots_transfer", dupslots, operation="UNION", material_mode="TRANSFER")
+run("manifold_emptyslots_index", emptyslots, operation="UNION")
+run("manifold_emptyslots_transfer", emptyslots, operation="UNION", material_mode="TRANSFER")
+
 with open(out_path, "w") as f:
     json.dump(cases, f)
 print("wrote", len(cases))

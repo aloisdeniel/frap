@@ -1,6 +1,24 @@
 import json, sys
 
 src, dst = sys.argv[1], sys.argv[2]
+
+
+class Exact:
+    """Inputs keep every bit of their f32 values (9 significant digits): a rounded matrix
+    moves far-off operands (1e4) by more than the comparison tolerance."""
+
+    def __init__(self, v):
+        self.v = v
+
+
+def exact(x):
+    if isinstance(x, float):
+        return Exact(float("%.9g" % x))
+    if isinstance(x, list):
+        return [exact(y) for y in x]
+    if isinstance(x, dict):
+        return {k: exact(v) for k, v in x.items()}
+    return x
 d = json.load(open(src))
 
 
@@ -8,6 +26,8 @@ def r(x):
     if isinstance(x, float):
         v = round(x, 6)
         return 0.0 if v == 0 else v
+    if isinstance(x, Exact):
+        return x.v
     if isinstance(x, list):
         return [r(y) for y in x]
     if isinstance(x, dict):
@@ -45,13 +65,16 @@ for k, c in d.items():
         "solver": c["solver"],
         "operation": c["operation"],
         "material_mode": c["material_mode"],
-        "base": {"matrix_world": c["base"]["matrix_world"], "slots": c["base"]["slots"], "mesh": mesh(c["base"]["mesh"])},
-        "operands": [{"name": o["name"], "matrix_world": o["matrix_world"], "slots": o["slots"], "mesh": mesh(o["mesh"])} for o in c["operands"]],
+        "base": exact({"matrix_world": c["base"]["matrix_world"], "slots": c["base"]["slots"], "mesh": mesh(c["base"]["mesh"])}),
+        "operands": exact([{"name": o["name"], "matrix_world": o["matrix_world"], "slots": o["slots"], "mesh": mesh(o["mesh"])} for o in c["operands"]]),
     }
     res = c["result"]
     if c["solver"] == "MANIFOLD":
         e["result"] = mesh(res)
         e["result"]["edges"] = res["edges"]
+        # For the known gaps (tests.rs), checked at T3.
+        e["result"]["volume"] = volume(res)
+        e["result"]["faces_num"] = len(res["faces"])
     else:
         e["result"] = {
             "verts_num": len(res["positions"]),

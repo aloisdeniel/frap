@@ -7,7 +7,9 @@
 //! (`robust::intersection_graph::build_graph`, exact rational arithmetic): every input triangle
 //! is subdivided along the segments where it meets triangles of the other operand. The pieces
 //! of one input face are merged back into polygons except across the cut lines
-//! (`crate::assemble::merge_out_faces_with`), and the new vertices left with exactly two
+//! (`crate::assemble::merge_out_faces_with`); where a face is cut into a ring, the bridges
+//! merging leaves at a new vertex on a straight cut line are moved to its neighbours
+//! (`crate::assemble::reroute_bridges`), and the new vertices left with exactly two
 //! neighbours on a straight line (where a cut line crossed an internal triangulation edge)
 //! are dissolved, as Blender's `polymesh_from_trimesh_with_dissolve` does. Vertices at the
 //! same exact position are one vertex (Blender's vertex arena), so the cut lines are shared
@@ -58,7 +60,7 @@ mod imp {
     use smallvec::SmallVec;
 
     use super::*;
-    use crate::assemble::{OutFace, merge_out_faces_with};
+    use crate::assemble::{OutFace, merge_out_faces_with, reroute_bridges};
     use crate::manifold::imp::{Prepared, prepare};
 
     type Key = [u64; 3];
@@ -224,6 +226,34 @@ mod imp {
         Ok(finish(out, operands, &prepared))
     }
 
+    /// The two cut-line neighbours `(a, b)` of every cut vertex that lies on a straight cut
+    /// line strictly between them and on no other cut: the vertices a triangulation edge of
+    /// one operand left on the other's cut, which Blender does not have.
+    fn cut_line_neighbours(out: &Out, vert_src: &[Option<Src>]) -> FxHashMap<u32, (u32, u32)> {
+        let mut nb: FxHashMap<u32, SmallVec<[u32; 4]>> = FxHashMap::default();
+        for &(a, b) in &out.isect {
+            nb.entry(a).or_default().push(b);
+            nb.entry(b).or_default().push(a);
+        }
+        let mut line = FxHashMap::default();
+        for (&v, n) in &nb {
+            if n.len() != 2 || vert_src[v as usize].is_some() {
+                continue;
+            }
+            let p = out.positions[v as usize];
+            let (d1, d2) = (
+                p - out.positions[n[0] as usize],
+                out.positions[n[1] as usize] - p,
+            );
+            let c = cross(d1, d2);
+            let scale = dot(d1, d1).max(dot(d2, d2));
+            if dot(c, c) <= 1e-12 * scale * scale && dot(d1, d2) > 0.0 {
+                line.insert(v, (n[0], n[1]));
+            }
+        }
+        line
+    }
+
     /// Merges the pieces into polygons, dissolves the straight valence-2 cut vertices and
     /// builds the result.
     fn finish(out: Out, operands: &[BoolMesh<'_>], prepared: &[Prepared]) -> KnifeResult {
@@ -235,6 +265,12 @@ mod imp {
             }
         }
         let isect = &out.isect;
+        let vert_src: Vec<Option<Src>> = out
+            .positions
+            .iter()
+            .map(|&p| input.get(&key(p)).copied())
+            .collect();
+        let line = cut_line_neighbours(&out, &vert_src);
         let mut faces: Vec<OutFace> = Vec::new();
         let mut face_src: Vec<Src> = Vec::new();
         for (o, op) in operands.iter().enumerate() {
@@ -250,17 +286,19 @@ mod imp {
                     })
                     .collect();
                 merge_out_faces_with(&mut group, &|a, b| !isect.contains(&(a.min(b), a.max(b))));
+                let pos = |v: u32| {
+                    let p = out.positions[v as usize];
+                    [p.x, p.y, p.z]
+                };
+                reroute_bridges(&mut group, &line, &pos, &|a, b| {
+                    isect.contains(&(a.min(b), a.max(b)))
+                });
                 for g in group {
                     faces.push(g);
                     face_src.push((o as u32, f));
                 }
             }
         }
-        let vert_src: Vec<Option<Src>> = out
-            .positions
-            .iter()
-            .map(|&p| input.get(&key(p)).copied())
-            .collect();
         // Dissolve the cut vertices with exactly two neighbours on a straight line.
         let n = out.positions.len();
         let mut nbrs: Vec<SmallVec<[u32; 4]>> = vec![SmallVec::new(); n];
@@ -383,13 +421,10 @@ mod tests {
         // The four side faces are cut in two; top and bottom stay.
         let cube_faces = r.face_src.iter().filter(|s| s.0 == 0).count();
         assert_eq!(cube_faces, 10);
-        // The cut lines run around the cube at z = 0.25 (a vertex where a plane triangle edge
-        // left a bridge to the plane's outer ring may split one of them).
-        assert!(
-            (4..=8).contains(&r.isect_edges.len()),
-            "{:?}",
-            r.isect_edges
-        );
+        // The cut lines run around the cube at z = 0.25: no vertex where a triangulation
+        // diagonal crossed them is left (the bridges to the plane's outer ring are moved off).
+        assert_eq!(r.isect_edges.len(), 4, "{:?}", r.isect_edges);
+        assert_eq!(r.positions.len(), 16);
         for e in &r.isect_edges {
             for &v in e {
                 let p = r.positions[v as usize];

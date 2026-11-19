@@ -14,10 +14,21 @@
 //! `OutToInMaps::ensure_vertex_map` / `ensure_corner_map`: an output vertex maps to the first
 //! vertex of its face's input face with exactly the same position.
 //!
+//! The input (transformed positions, `corner_tris`) is bit-identical to Blender's and the
+//! assembly is a line-by-line port, but manifold-rust 0.19.2 (Manifold 3.5.4, eagerly
+//! evaluated) does not return the triangles of the Manifold 3.5.2 Blender links in every case:
+//! where a cutter makes a hole inside a face the bridge can end at another in-line vertex, and
+//! coincident vertices Manifold 3.5.2 keeps apart can be one. Those results have Blender's
+//! volume but not its vertex count (known T2 gaps, listed in the BOOLEAN modifier's tests).
+//!
 //! EXACT (Blender's exact-arithmetic mesh arrangement, not ported: WP 8.6) runs on the same
 //! pipeline with manifold-rust's robust engine (`BooleanEngine::Robust`: exact rational
 //! arithmetic and winding numbers, so closed non-manifold soup is accepted and an inside-out
-//! operand is empty space, as in Blender), as a left fold. Open operands fail with
+//! operand is empty space, as in Blender), as a left fold; the bridges merging leaves at new
+//! in-line vertices are moved off them (`assemble::reroute_bridges`) so those vertices are
+//! dissolved, as Blender's exact solver has none. Coordinates beyond 1e12 and an empty result
+//! that cannot be right (a UNION, a DIFFERENCE whose base reaches outside its cutters) are
+//! errors, not silent empty meshes. Open operands fail with
 //! [`BoolError::NonManifold`] (Blender's exact solver accepts them). Results have Blender's
 //! volume but the MANIFOLD face layout (T3). `use_self` and `use_hole_tolerant` do not change
 //! the result.
@@ -211,6 +222,18 @@ pub(crate) mod imp {
         let offsets = Offsets::new(operands);
         let prepared: Vec<Prepared> = operands.iter().map(prepare).collect();
         let exact = opts.solver != SolverKind::Manifold;
+        if exact {
+            let max = prepared
+                .iter()
+                .flat_map(|p| p.positions.iter().flatten())
+                .fold(0.0f32, |m, c| m.max(c.abs()));
+            if max > EXACT_RANGE {
+                return Err(BoolError::Input(format!(
+                    "frap: the EXACT solver handles coordinates up to {EXACT_RANGE:e} (found \
+                     {max:e}); Blender's exact mesh arrangement is not ported (WP 8.6)"
+                )));
+            }
+        }
         let manifolds: Vec<Manifold> = prepared
             .iter()
             .enumerate()
@@ -295,8 +318,54 @@ pub(crate) mod imp {
             if result.status() != Error::NoError {
                 return Err(result_error(result.status()));
             }
+            if exact && gl_result.tri_verts.is_empty() && cannot_be_empty(&prepared, opts.operation)
+            {
+                return Err(BoolError::Input(
+                    "frap: the EXACT solver returned nothing for operands whose result cannot be \
+                     empty (Blender's exact mesh arrangement is not ported, WP 8.6)"
+                        .into(),
+                ));
+            }
         }
-        Ok(to_result(gl_result, operands, &prepared, &offsets))
+        Ok(to_result(gl_result, operands, &prepared, &offsets, exact))
+    }
+
+    /// The largest coordinate the EXACT stand-in (manifold-rust's robust engine) is trusted
+    /// with: from 1e13 on, a single far vertex makes it lose the whole result.
+    const EXACT_RANGE: f32 = 1e12;
+
+    /// Whether a boolean of these operands is non-empty for certain: a UNION of non-empty
+    /// operands, a DIFFERENCE whose base reaches outside the bounding box of the cutters.
+    pub(crate) fn cannot_be_empty(prepared: &[Prepared], op: BoolOperation) -> bool {
+        let bbox = |ps: &[&Prepared]| {
+            let mut b = [[f32::INFINITY; 3], [f32::NEG_INFINITY; 3]];
+            for p in ps {
+                for t in &p.tris {
+                    for &v in t {
+                        let q = p.positions[v as usize];
+                        for c in 0..3 {
+                            b[0][c] = b[0][c].min(q[c]);
+                            b[1][c] = b[1][c].max(q[c]);
+                        }
+                    }
+                }
+            }
+            b
+        };
+        let non_empty = |p: &Prepared| !p.tris.is_empty();
+        match op {
+            BoolOperation::Union => prepared.iter().any(non_empty),
+            BoolOperation::Difference => {
+                if !non_empty(&prepared[0]) {
+                    return false;
+                }
+                let a = bbox(&[&prepared[0]]);
+                let rest: Vec<&Prepared> = prepared[1..].iter().collect();
+                let b = bbox(&rest);
+                (0..3).any(|c| a[0][c] < b[0][c] || a[1][c] > b[1][c])
+            }
+            BoolOperation::Intersect => false,
+        }
     }
 
     /// `meshgl_to_mesh` up to the attributes: clean, assemble, and the out-to-in maps.
@@ -305,6 +374,7 @@ pub(crate) mod imp {
         operands: &[BoolMesh<'_>],
         prepared: &[Prepared],
         offsets: &Offsets,
+        exact: bool,
     ) -> BoolResult {
         let np = gl.num_prop as usize;
         if gl.vert_properties.is_empty() || gl.tri_verts.is_empty() || np < 3 {
@@ -320,7 +390,24 @@ pub(crate) mod imp {
             .collect();
         assemble::clean_tris(positions.len(), &mut gl.tri_verts, &mut gl.face_id);
         let input_faces_num = *offsets.face_start.last().unwrap() as usize;
-        let a = assemble::assemble(positions, &gl.tri_verts, &gl.face_id, input_faces_num);
+        let a = if exact {
+            // The EXACT stand-in also moves the bridges off new in-line vertices.
+            let input: rustc_hash::FxHashSet<[u32; 3]> = prepared
+                .iter()
+                .flat_map(|p| p.positions.iter().map(|q| q.map(|c| (c + 0.0).to_bits())))
+                .collect();
+            let is_input =
+                |v: u32| input.contains(&positions[v as usize].map(|c| (c + 0.0).to_bits()));
+            assemble::assemble_with(
+                positions.clone(),
+                &gl.tri_verts,
+                &gl.face_id,
+                input_faces_num,
+                Some(&is_input),
+            )
+        } else {
+            assemble::assemble(positions, &gl.tri_verts, &gl.face_id, input_faces_num)
+        };
 
         let mut r = BoolResult {
             positions: a.positions,
@@ -465,6 +552,91 @@ mod tests {
                 assert_eq!(r.face_offsets.len() - 1, faces, "{solver:?} {op:?}");
             }
         }
+    }
+
+    #[test]
+    fn exact_refuses_coordinates_out_of_range() {
+        // Blender's exact solver cuts a cube with a vertex at 1e20; manifold-rust's robust
+        // engine loses the whole result from 1e13 on: an error, not a silent empty mesh.
+        let mut a = cube(2.0, [0.0; 3]);
+        a.0[0] = [1e20, 0.0, 0.0];
+        let b = cube(1.0, [0.5; 3]);
+        let ops = [
+            BoolMesh::new(&a.0, &a.1, &a.2),
+            BoolMesh::new(&b.0, &b.1, &b.2),
+        ];
+        let r = ManifoldSolver.run(&ops, &BoolOptions::default());
+        assert!(
+            matches!(r, Err(BoolError::Input(ref m)) if m.contains("1e12")),
+            "{r:?}"
+        );
+        a.0[0] = [1e12, 0.0, 0.0];
+        let ops = [
+            BoolMesh::new(&a.0, &a.1, &a.2),
+            BoolMesh::new(&b.0, &b.1, &b.2),
+        ];
+        let r = ManifoldSolver.run(&ops, &BoolOptions::default()).unwrap();
+        assert!(r.face_offsets.len() > 1);
+        // MANIFOLD is Blender's: no range check.
+        a.0[0] = [1e20, 0.0, 0.0];
+        let ops = [
+            BoolMesh::new(&a.0, &a.1, &a.2),
+            BoolMesh::new(&b.0, &b.1, &b.2),
+        ];
+        let opts = BoolOptions {
+            solver: SolverKind::Manifold,
+            ..Default::default()
+        };
+        assert!(ManifoldSolver.run(&ops, &opts).is_ok());
+    }
+
+    #[test]
+    fn results_that_cannot_be_empty() {
+        let a = cube(2.0, [0.0; 3]);
+        let inside = cube(4.0, [0.0; 3]);
+        let poke = cube(1.0, [0.9, 0.0, 0.0]);
+        let p = |m: &(Vec<[f32; 3]>, Vec<u32>, Vec<u32>)| {
+            imp::prepare(&BoolMesh::new(&m.0, &m.1, &m.2))
+        };
+        let (pa, pin, ppoke) = (p(&a), p(&inside), p(&poke));
+        assert!(imp::cannot_be_empty(
+            &[&pa, &pin].map(clone),
+            BoolOperation::Union
+        ));
+        assert!(!imp::cannot_be_empty(
+            &[&pa, &pin].map(clone),
+            BoolOperation::Difference
+        ));
+        assert!(imp::cannot_be_empty(
+            &[&pa, &ppoke].map(clone),
+            BoolOperation::Difference
+        ));
+        assert!(!imp::cannot_be_empty(
+            &[&pa, &ppoke].map(clone),
+            BoolOperation::Intersect
+        ));
+    }
+
+    fn clone(p: &imp::Prepared) -> imp::Prepared {
+        imp::Prepared {
+            positions: p.positions.clone(),
+            tris: p.tris.clone(),
+            face_of_tri: p.face_of_tri.clone(),
+        }
+    }
+
+    #[test]
+    fn exact_dissolves_in_line_vertices_behind_bridges() {
+        // A cutter through one face (a hole): Blender's exact solver gives V16 F12 and keeps
+        // no vertex where the base's triangulation diagonal crosses the hole.
+        let a = cube(2.0, [0.0; 3]);
+        let b = cube(1.0, [0.9, 0.2, 0.3]);
+        let ops = [
+            BoolMesh::new(&a.0, &a.1, &a.2),
+            BoolMesh::new(&b.0, &b.1, &b.2),
+        ];
+        let r = ManifoldSolver.run(&ops, &BoolOptions::default()).unwrap();
+        assert_eq!((r.positions.len(), r.face_offsets.len() - 1), (16, 12));
     }
 
     #[test]
