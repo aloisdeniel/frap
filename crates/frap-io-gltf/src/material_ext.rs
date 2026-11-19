@@ -139,8 +139,12 @@ pub fn importers() -> Vec<&'static MaterialExtImporter> {
 
 // ------------------------------------------------------------------ helpers (WP 3.6)
 
-/// The typed extension `E` of a glTF material; a malformed one is skipped with a WARNING (the
-/// add-on would raise on it).
+/// The typed extension `E` of a glTF material; a malformed one is skipped with a WARNING.
+///
+/// Deviation (proposed for `docs/deviations.md`): the 5.2 add-on raises a Python
+/// `RuntimeError` on a malformed extension (`clearcoatFactor: "abc"`) and on an extension
+/// texture index out of range, so the whole import fails; frap imports the rest of the file
+/// and names the extension in a WARNING.
 pub fn ext_of<E: Extension>(host: &mut dyn ExtImportHost, m: &GMaterial) -> Option<E> {
     match m.extensions.get::<E>() {
         Ok(e) => e,
