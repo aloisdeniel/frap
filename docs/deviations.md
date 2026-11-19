@@ -7,7 +7,7 @@ mirrors the **Golden** column; WP 1.8 keeps them in sync). Work packages add ent
 PR description; the integrator merges them here. `--describe` surfaces the operator-level ones as
 `frap_note` / `headless`.
 
-Status: M3+M4 W2 integration (2026-11-19). "Since" is the milestone in which the behaviour exists in code.
+Status: M3+M4 W3 integration (2026-11-19). "Since" is the milestone in which the behaviour exists in code.
 
 ## 1. Deliberate deviations
 
