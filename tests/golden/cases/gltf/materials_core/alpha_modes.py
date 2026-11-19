@@ -1,5 +1,5 @@
 # WP 3.5: the alpha mode comes from the node graph, never from `blend_method`: a constant 0.5
-# → BLEND; Math ROUND of 0.7 → MASK (cutoff 0.5 omitted, alpha factor 0.7); `1 − (alpha < 0.3)`
+# → BLEND; Math ROUND of 0.7 → OPAQUE (the inliner folds round(0.7) = 1); `1 − (alpha < 0.3)`
 # of an image's alpha → MASK 0.3 with an alpha-only base colour image (white RGB, the image's
 # alpha packed into a new PNG); a constant 0 → MASK; an image's Color and Alpha on Base Color
 # and Alpha → BLEND with the image re-encoded RGBA (its pixels were edited, so not passed through).

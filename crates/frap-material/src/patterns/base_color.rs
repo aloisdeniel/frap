@@ -112,6 +112,9 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
                 "the surface shader {} is not a Principled BSDF",
                 node_desc(n)
             ),
+            None if cx.inline_fails() => {
+                "its node tree has a link cycle, which Blender's exporter cannot inline".into()
+            }
             None => "no shader is linked to the Material Output's Surface".into(),
         };
         unrecognised(
@@ -183,6 +186,9 @@ pub(crate) fn raise_base_color(
     let alpha_factor = f[3];
     let texture = lm.base_color.texture.as_ref();
     let vertex_color = lm.vertex_color.is_some();
+    // Which halves the Color Attribute node feeds.
+    let vc_color = lm.vertex_color.as_ref().is_some_and(|v| v.color);
+    let vc_alpha = lm.vertex_color.as_ref().is_some_and(|v| v.alpha);
     let rgba = |c: [f32; 3]| SocketValue::Color([c[0], c[1], c[2], 1.0]);
     // Only factor.
     if texture.is_none() && !vertex_color {
@@ -200,7 +206,7 @@ pub(crate) fn raise_base_color(
     }
     let (tex_color, tex_alpha) = texture_uses(lm);
     // Something feeds the alpha besides the factor (the importer assumes it always does).
-    let alpha_linked = tex_alpha || vertex_color;
+    let alpha_linked = tex_alpha || vc_alpha;
     let mut alpha_socket = alpha_socket;
     if let Some(a) = alpha_socket {
         match lm.alpha_mode {
@@ -246,7 +252,7 @@ pub(crate) fn raise_base_color(
     }
     // Mix in the base colour factor.
     let mut color_socket = color_socket;
-    let color_linked = tex_color || vertex_color;
+    let color_linked = tex_color || vc_color;
     if !color_linked {
         cx.set_input_at(color_socket.node, color_socket.index, rgba(color_factor));
     }
@@ -276,33 +282,52 @@ pub(crate) fn raise_base_color(
     }
     // Where the texture and the vertex colour put their outputs.
     let (mut tex_color_to, mut tex_alpha_to) = (color_socket, alpha_socket);
-    let (mut vc_color, mut vc_alpha) = (color_socket, alpha_socket);
+    let mut vc_color_to = vc_color.then_some(color_socket);
+    let mut vc_alpha_to = alpha_socket.filter(|_| vc_alpha);
     if texture.is_some() && vertex_color {
-        let mix = cx.add_node("ShaderNodeMix", [x - 140.0, y]);
-        cx.set_label(mix, "Mix Vertex Color");
-        cx.set_enum(mix, "data_type", "RGBA");
-        cx.set_enum(mix, "blend_type", "MULTIPLY");
-        let o = cx.output(mix, "Result");
-        cx.link(color_socket, o);
-        cx.set_input(mix, "Factor", SocketValue::Float(1.0));
-        tex_color_to = cx.input(mix, "A");
-        vc_color = cx.input(mix, "B");
-        if let Some(a) = alpha_socket {
+        if vc_color {
+            let mix = cx.add_node("ShaderNodeMix", [x - 140.0, y]);
+            cx.set_label(mix, "Mix Vertex Color");
+            cx.set_enum(mix, "data_type", "RGBA");
+            cx.set_enum(mix, "blend_type", "MULTIPLY");
+            let o = cx.output(mix, "Result");
+            cx.link(color_socket, o);
+            cx.set_input(mix, "Factor", SocketValue::Float(1.0));
+            tex_color_to = cx.input(mix, "A");
+            vc_color_to = Some(cx.input(mix, "B"));
+        }
+        if let Some(a) = alpha_socket.filter(|_| vc_alpha && tex_alpha) {
             let m = cx.add_node("ShaderNodeMath", [x - 140.0, y - 230.0]);
             cx.set_label(m, "Mix Vertex Alpha");
             cx.set_enum(m, "operation", "MULTIPLY");
             cx.link(a, SocketAddr::output(m, 0));
             tex_alpha_to = Some(SocketAddr::input(m, 0));
-            vc_alpha = Some(SocketAddr::input(m, 1));
+            vc_alpha_to = Some(SocketAddr::input(m, 1));
         }
         x -= 200.0;
     }
-    if vertex_color {
-        let vc = cx.add_node("ShaderNodeVertexColor", [x - 250.0, y - 240.0]);
-        let o = cx.output(vc, "Color");
-        cx.link(vc_color, o);
-        if let Some(a) = vc_alpha {
-            let o = cx.output(vc, "Alpha");
+    if let Some(v) = &lm.vertex_color {
+        // A Color Attribute node naming the attribute (empty: the active one, as the
+        // importer makes it); a second one when Alpha reads another attribute.
+        let vc_node = |cx: &mut RaiseCx, name: &Option<smol_str::SmolStr>, dy: f32| {
+            let vc = cx.add_node("ShaderNodeVertexColor", [x - 250.0, y - 240.0 - dy]);
+            if let Some(n) = name {
+                cx.set_prop(vc, "layer_name", frap_rna::Value::Str(n.clone()));
+            }
+            vc
+        };
+        let vc = vc_node(cx, if v.color { &v.attribute } else { &v.alpha_attribute }, 0.0);
+        if let Some(c) = vc_color_to {
+            let o = cx.output(vc, "Color");
+            cx.link(c, o);
+        }
+        if let Some(a) = vc_alpha_to {
+            let from = if v.color && v.alpha_attribute != v.attribute {
+                vc_node(cx, &v.alpha_attribute, 120.0)
+            } else {
+                vc
+            };
+            let o = cx.output(from, "Alpha");
             cx.link(a, o);
         }
         x -= 280.0;
@@ -436,10 +461,7 @@ mod tests {
         link(&mut m, (t, "Color"), (BSDF, "Base Color"));
         link(&mut m, (t, "Alpha"), (BSDF, "Alpha"));
         let mut lm = lower_m(&m, &images);
-        lm.vertex_color = Some(VertexColorUse {
-            attribute: None,
-            multiply: true,
-        });
+        lm.vertex_color = Some(VertexColorUse::color_and_alpha(None, true));
         let (raised, _) = raise_lower(&lm, &images);
         let labels: Vec<&str> = raised
             .node_tree

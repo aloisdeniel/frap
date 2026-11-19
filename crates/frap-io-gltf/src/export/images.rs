@@ -486,6 +486,15 @@ fn under_black_byte(p: &mut [u8]) {
 /// for a byte buffer and 16-bit for a float one, a float buffer converted from scene linear
 /// to the image's colour space (`sRGB` for a generated image) and unpremultiplied.
 fn save_copy(g: &Gather, im: &Image, buf: &ImBuf, mime: &'static str) -> Option<Vec<u8>> {
+    encode_copy(im, buf, mime, g.settings.export_image_quality)
+}
+
+/// [`save_copy`] with the JPEG quality given. Alpha is composited over black
+/// (`IMB_alpha_under_color`) only when the buffer's own colour mode has no alpha (24 planes,
+/// or an RGBA buffer whose alpha is opaque); a JPEG written from an RGBA buffer drops the
+/// alpha and keeps the straight colour (verified on 5.2.4: a generated image of colour
+/// (0.7, 0.1, 0.3, 0.2) exports as (0.702, 0.106, 0.306) with `export_image_format='JPEG'`).
+fn encode_copy(im: &Image, buf: &ImBuf, mime: &'static str, quality: u8) -> Option<Vec<u8>> {
     let mut channels: u8 = match buf.planes {
         8 => 1,
         24 | 0 => 3,
@@ -502,18 +511,17 @@ fn save_copy(g: &Gather, im: &Image, buf: &ImBuf, mime: &'static str) -> Option<
         im.colorspace_settings.name.as_str()
     };
     let float = buf.is_float();
+    // From the buffer's colour mode, before JPEG narrows the output to RGB.
+    let under_black = channels != 4;
     let format = if mime == JPEG {
         channels = channels.min(3);
-        EncodeFormat::Jpeg {
-            quality: g.settings.export_image_quality,
-        }
+        EncodeFormat::Jpeg { quality }
     } else {
         EncodeFormat::Png {
             bit_depth: if float { 16 } else { 8 },
             compression: 15,
         }
     };
-    let under_black = channels != 4;
     let row = buf.x as usize * 4;
     let pixels = match &buf.data {
         ImBufData::Byte(b) => {
@@ -1116,6 +1124,49 @@ mod tests {
         let e = texture_transform(&t).unwrap();
         assert_eq!(e.rotation, None);
         assert_eq!(e.scale, Some([2.0, 2.0]));
+    }
+
+    /// The first pixel of an encoded image, as RGB bytes.
+    fn first_rgb(bytes: &[u8]) -> [u8; 3] {
+        let d = frap_imbuf::decode(bytes).unwrap().with_channels(3).unwrap();
+        match d.pixels {
+            PixelData::U8(v) => [v[0], v[1], v[2]],
+            _ => panic!("8-bit image expected"),
+        }
+    }
+
+    #[test]
+    fn jpeg_of_an_rgba_buffer_keeps_the_straight_colour() {
+        // Verified on 5.2.4 (`export_image_format='JPEG'`): an RGBA image (32 planes) with
+        // generated colour (0.7, 0.1, 0.3, 0.2) exports as (0.702, 0.106, 0.306): the alpha is
+        // dropped, not composited over black.
+        let mut im = Image::new("Q", 16, 16);
+        im.generated_depth = 32;
+        im.generated_color = [0.7, 0.1, 0.3, 0.2];
+        let buf = im.generated_buffer().unwrap();
+        let jpeg = encode_copy(&im, &buf, JPEG, 75).unwrap();
+        assert!(is_jpeg(&jpeg));
+        let [r, g, b] = first_rgb(&jpeg);
+        for (got, want) in [(r, 179u8), (g, 27), (b, 78)] {
+            assert!(got.abs_diff(want) <= 3, "({r}, {g}, {b})");
+        }
+        // PNG keeps the alpha channel and the straight colour.
+        let png = encode_copy(&im, &buf, PNG, 75).unwrap();
+        let d = frap_imbuf::decode(&png).unwrap();
+        assert_eq!(d.channels, 4);
+        // A 24-plane buffer whose pixels carry alpha (`pixels = …` on an image made without
+        // alpha) is composited over black, as Blender does (0.7 × 0.2 = 0.14 → 36).
+        let mut im = Image::new("N", 4, 4);
+        im.generated_color = [0.7, 0.1, 0.3, 0.2];
+        let mut buf = im.generated_buffer().unwrap();
+        buf.planes = 24;
+        for bytes in [
+            encode_copy(&im, &buf, PNG, 75).unwrap(),
+            encode_copy(&im, &buf, JPEG, 75).unwrap(),
+        ] {
+            let [r, _, _] = first_rgb(&bytes);
+            assert!(r.abs_diff(36) <= 3, "{r}");
+        }
     }
 
     #[test]

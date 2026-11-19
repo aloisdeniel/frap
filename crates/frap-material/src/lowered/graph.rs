@@ -27,6 +27,9 @@ use smol_str::SmolStr;
 
 use crate::{ChannelSel, LowerCx, Sampler, TexRef, TexTransform, UvSource};
 
+mod fold;
+pub use fold::FoldVal;
+
 /// Where an input socket gets its value from.
 #[derive(Copy, Clone, Debug)]
 pub enum Src<'t> {
@@ -141,6 +144,18 @@ pub enum SrcChannel {
     Rgb2Bw,
 }
 
+/// The state of one depth-first node search ([`LowerCx::texture_from`]).
+struct SearchState<'t> {
+    /// `is_valid` of each link of the tree, in `links` order.
+    valid: Vec<bool>,
+    /// Nodes whose whole upstream was searched without a match.
+    done: std::collections::BTreeSet<u32>,
+    /// Nodes on the current path (the start node included).
+    on_path: std::collections::BTreeSet<u32>,
+    /// The links walked so far.
+    path: Vec<PathLink<'t>>,
+}
+
 /// A WARNING diagnostic for a node setup the recognisers do not understand.
 pub fn unrecognised(out: &mut Vec<Report>, what: impl Into<String>) {
     let r = Report::new(ReportType::Warning, what.into());
@@ -154,7 +169,12 @@ impl<'a> LowerCx<'a> {
     /// in `tree.nodes`, whatever its `target` (verified on 5.2.4: Blender flags the first
     /// output node of the tree, and the next one when it is removed; frap does not store the
     /// flag, so a script cannot move it yet).
+    ///
+    /// `None` when [`Self::inline_fails`]: the inlined tree the exporter reads is empty.
     pub fn material_output(&self) -> Option<&'a Node> {
+        if self.inline_fails() {
+            return None;
+        }
         self.tree
             .nodes
             .iter()
@@ -208,6 +228,14 @@ impl<'a> LowerCx<'a> {
     /// group node with a node tree qualifies; a group node without a tree has no inputs.
     /// Muted group nodes are skipped (`get_material_nodes`).
     pub fn gltf_output_input(&self, name: &str) -> Option<In<'a>> {
+        if self.inline_fails() {
+            return None;
+        }
+        self.gltf_output_input_raw(name)
+    }
+
+    /// [`Self::gltf_output_input`] in the original tree.
+    fn gltf_output_input_raw(&self, name: &str) -> Option<In<'a>> {
         self.tree
             .nodes
             .iter()
@@ -298,7 +326,7 @@ impl<'a> LowerCx<'a> {
     /// `NodeNav.peek_back()`: the node and output an input is linked from (reroutes
     /// skipped).
     pub fn peek_back(&self, i: In<'a>) -> Option<(&'a Node, usize)> {
-        if self.folded(i).is_some() {
+        if self.folded_value(i).is_some() {
             // The inlined tree has a constant there instead of the link.
             return None;
         }
@@ -312,63 +340,125 @@ impl<'a> LowerCx<'a> {
     /// (`BlenderMaterialIndentifier.__can_use_inline`): yes, unless a "glTF Material Output"
     /// group node has an `Occlusion` input (then the original tree is read).
     pub fn uses_inline_tree(&self) -> bool {
-        self.gltf_output_input("Occlusion").is_none()
+        self.gltf_output_input_raw("Occlusion").is_none()
+    }
+
+    /// `InlineShaderNodes.from_material` gives up (`ShaderNodesInliner::do_inline` returns
+    /// false on `has_available_link_cycle`), so the exporter reads an empty tree: the
+    /// material exports as the glTF default (verified on 5.2.4: a Math cycle on Base Color
+    /// exports only `doubleSided`).
+    pub fn inline_fails(&self) -> bool {
+        self.uses_inline_tree() && self.has_available_link_cycle()
+    }
+
+    /// `bNodeTree::has_available_link_cycle`: a cycle through links between enabled sockets.
+    pub fn has_available_link_cycle(&self) -> bool {
+        let tree = self.tree;
+        let n = tree.nodes.len();
+        let index: std::collections::HashMap<u32, usize> = tree
+            .nodes
+            .iter()
+            .enumerate()
+            .map(|(i, nd)| (nd.uid, i))
+            .collect();
+        let enabled_out =
+            |nd: &Node, id: &str| nd.outputs.iter().any(|s| s.identifier == id && s.enabled);
+        let enabled_in =
+            |nd: &Node, id: &str| nd.inputs.iter().any(|s| s.identifier == id && s.enabled);
+        // Edges from each node to the nodes it feeds.
+        let mut next: Vec<Vec<usize>> = vec![Vec::new(); n];
+        for l in &tree.links {
+            let (Some(&f), Some(&t)) = (index.get(&l.from_node), index.get(&l.to_node)) else {
+                continue;
+            };
+            if enabled_out(&tree.nodes[f], &l.from_socket)
+                && enabled_in(&tree.nodes[t], &l.to_socket)
+            {
+                next[f].push(t);
+            }
+        }
+        // Iterative three-colour depth-first search.
+        let mut state = vec![0u8; n];
+        for start in 0..n {
+            if state[start] != 0 {
+                continue;
+            }
+            let mut stack = vec![(start, 0usize)];
+            state[start] = 1;
+            while let Some(&mut (v, ref mut k)) = stack.last_mut() {
+                if let Some(&w) = next[v].get(*k) {
+                    *k += 1;
+                    match state[w] {
+                        0 => {
+                            state[w] = 1;
+                            stack.push((w, 0));
+                        }
+                        1 => return true,
+                        _ => {}
+                    }
+                } else {
+                    state[v] = 2;
+                    stack.pop();
+                }
+            }
+        }
+        false
     }
 
     /// The value the inliner (`shader_nodes_inline.cc`, Blender 5.2.4, GPL-2.0-or-later)
-    /// constant-folds into a VALUE input: the input is linked (through reroutes) to a node
-    /// with a multi-function whose available inputs are all constants. frap folds Value and
-    /// Math nodes (every operation, `use_clamp`); other foldable nodes (Mix, Vector Math,
-    /// Clamp, Map Range, …) are left linked (docs/deviations.md §2). `None` when the input is
-    /// not folded (unlinked, not foldable, or the original tree is read).
-    pub fn folded(&self, i: In<'a>) -> Option<f32> {
-        if i.socket().ty != SocketType::Value || !self.uses_inline_tree() {
+    /// constant-folds into input `i` (any type: the implicit conversion into the socket's type
+    /// applied): the input is linked (through reroutes and muted nodes) to a node with a
+    /// multi-function whose available inputs are all constants (see `graph/fold.rs` for the
+    /// nodes frap evaluates), or to a muted node or an unlinked reroute that leaves it
+    /// dangling (then it is the socket's own value). `None` when the input is unlinked, not
+    /// folded, or the original tree is read.
+    pub fn folded_value(&self, i: In<'a>) -> Option<FoldVal> {
+        if !self.uses_inline_tree() {
             return None;
         }
-        match self.src_in(i) {
-            Src::Linked(n, o) => self.fold_output(n, o, 0),
-            _ => None,
+        let mut f = fold::Folder::new(self);
+        let (from, o) = f.link_into(i.node, i.index)?;
+        let s = i.socket();
+        let ty = match s.ty {
+            SocketType::Shader => SocketType::Rgba,
+            t => t,
+        };
+        match f.output(from, o) {
+            fold::Res::Val(v) => v.to(ty),
+            fold::Res::Dangling => FoldVal::of_socket(s.ty, &s.default_value),
+            fold::Res::No => None,
         }
     }
 
-    /// The folded value of output `o` of node `n` (see [`Self::folded`]).
-    fn fold_output(&self, n: &'a Node, o: usize, depth: usize) -> Option<f32> {
-        if depth > self.tree.nodes.len() || n.mute {
+    /// [`Self::folded_value`] of a VALUE input.
+    pub fn folded(&self, i: In<'a>) -> Option<f32> {
+        if i.socket().ty != SocketType::Value {
             return None;
         }
-        match n.bl_idname {
-            "ShaderNodeValue" => match n.outputs.get(o)?.default_value {
-                SocketValue::Float(f) => Some(f),
-                _ => None,
-            },
-            "ShaderNodeMath" => {
-                let mut args = [0.0f32; 3];
-                for (k, s) in n.inputs.iter().enumerate().take(3) {
-                    if !s.enabled {
-                        continue;
-                    }
-                    args[k] = match self.src_at(n, k) {
-                        Src::Const(SocketValue::Float(f)) => *f,
-                        Src::Linked(m, mo) if m.outputs[mo].ty == SocketType::Value => {
-                            self.fold_output(m, mo, depth + 1)?
-                        }
-                        _ => return None,
-                    };
-                }
-                let r = math_op(n.prop_str("operation"), args)?;
-                let clamp = matches!(n.prop("use_clamp"), Some(Value::Bool(true)));
-                Some(if clamp { r.clamp(0.0, 1.0) } else { r })
-            }
-            _ => None,
+        self.folded_value(i).map(FoldVal::f)
+    }
+
+    /// The value the exporter reads from `inputs[…].default_value` of input `i`: its own value
+    /// when unlinked, the folded one when the inliner folds the link; `None` when it stays
+    /// linked (the add-on then reads `is_linked`, or the stale default).
+    pub fn inline_value(&self, i: In<'a>) -> Option<FoldVal> {
+        let s = i.socket();
+        if self.tree.link_into(i.node.uid, &s.identifier).is_none() {
+            return FoldVal::of_socket(s.ty, &s.default_value);
         }
+        self.folded_value(i)
     }
 
     /// `NodeNav.get_constant()` (see the module documentation), by the socket's type.
     pub fn get_constant(&self, i: In<'a>) -> Option<Konst> {
         let s = i.socket();
         let ty = s.ty;
-        if let Some(v) = self.folded(i) {
-            return Some(Konst::Value(v));
+        if let Some(v) = self.folded_value(i) {
+            return Some(match v {
+                FoldVal::Float(f) => Konst::Value(f),
+                FoldVal::Vector(v) => Konst::Vector(v),
+                FoldVal::Color(c) => Konst::Rgb(rgb(&c)),
+            });
         }
         if self.tree.link_into(i.node.uid, &s.identifier).is_none() {
             return match (ty, &s.default_value) {
@@ -610,6 +700,12 @@ impl<'a> LowerCx<'a> {
     /// The Image Texture node behind `src` and the channel used: its `Color` (RGB) or `Alpha`
     /// (A) output, or a Separate Color (RGB mode) output fed by its `Color` (R, G or B).
     pub fn image_behind(&self, src: Src<'a>) -> Option<(&'a Node, ChannelSel)> {
+        self.image_behind_at(src, 0)
+    }
+
+    /// [`Self::image_behind`], `depth` Separate Color nodes deep (a cycle of Separate Color
+    /// nodes ends once every node was crossed).
+    fn image_behind_at(&self, src: Src<'a>, depth: usize) -> Option<(&'a Node, ChannelSel)> {
         let Src::Linked(n, o) = src else { return None };
         match n.bl_idname {
             "ShaderNodeTexImage" => match n.outputs[o].identifier.as_str() {
@@ -624,7 +720,10 @@ impl<'a> LowerCx<'a> {
                     "Blue" => ChannelSel::B,
                     _ => return None,
                 };
-                match self.image_behind(self.src(n, "Color"))? {
+                if depth >= self.tree.nodes.len() {
+                    return None;
+                }
+                match self.image_behind_at(self.src(n, "Color"), depth + 1)? {
                     (tex, ChannelSel::Rgb) => Some((tex, channel)),
                     _ => None,
                 }
@@ -647,9 +746,7 @@ impl<'a> LowerCx<'a> {
                 path: Vec::new(),
             });
         }
-        let mut done = std::collections::BTreeSet::new();
-        let mut path = Vec::new();
-        let hit = self.search(i.node, i.index, "ShaderNodeTexImage", &mut path, &mut done)?;
+        let hit = self.search_from(i, "ShaderNodeTexImage")?;
         self.image_of(hit.node).map(|_| hit)
     }
 
@@ -660,55 +757,71 @@ impl<'a> LowerCx<'a> {
         if i.node.bl_idname == bl_idname {
             return Some(i.node);
         }
-        let mut done = std::collections::BTreeSet::new();
-        let mut path = Vec::new();
-        self.search(i.node, i.index, bl_idname, &mut path, &mut done)
-            .map(|h| h.node)
+        self.search_from(i, bl_idname).map(|h| h.node)
     }
 
-    /// `__search_from_socket`, stopping at the first match. `done` holds nodes whose whole
+    /// The depth-first search of [`Self::texture_from`] / [`Self::node_from`] from input `i`.
+    fn search_from(&self, i: In<'a>, ty: &str) -> Option<TexHit<'a>> {
+        let mut st = SearchState {
+            valid: self.tree.links_valid(),
+            done: std::collections::BTreeSet::new(),
+            on_path: std::collections::BTreeSet::from([i.node.uid]),
+            path: Vec::new(),
+        };
+        self.search(i.node, i.index, ty, &mut st)
+    }
+
+    /// `__search_from_socket`, stopping at the first match. `st.done` holds nodes whose whole
     /// upstream was searched without a match (searching them again finds nothing either).
+    ///
+    /// Links that Blender flags invalid (`NodeLink.is_valid`: the back edge of a cycle, a
+    /// shader output into a non-shader input, an unavailable socket) are not followed: they
+    /// carry nothing in the tree the exporter reads (verified on 5.2.4: an Image Texture whose
+    /// link closes a Math cycle is not exported). Edges back to a node on the current path
+    /// are skipped as well, so a cycle always ends the walk.
     fn search(
         &self,
         node: &'a Node,
         input: usize,
         ty: &str,
-        path: &mut Vec<PathLink<'a>>,
-        done: &mut std::collections::BTreeSet<u32>,
+        st: &mut SearchState<'a>,
     ) -> Option<TexHit<'a>> {
         let s = node.inputs.get(input)?;
-        for l in self
-            .tree
-            .links
-            .iter()
-            .filter(|l| l.to_node == node.uid && l.to_socket == s.identifier)
-        {
+        for (li, l) in self.tree.links.iter().enumerate() {
+            if l.to_node != node.uid || l.to_socket != s.identifier || !st.valid[li] {
+                continue;
+            }
             let Some(from) = self.tree.node(l.from_node) else {
                 continue;
             };
             let Some(o) = from.output_by_identifier(&l.from_socket) else {
                 continue;
             };
-            if frap_nodes::is_group_node(from.bl_idname) || done.contains(&from.uid) {
+            if frap_nodes::is_group_node(from.bl_idname)
+                || st.done.contains(&from.uid)
+                || st.on_path.contains(&from.uid)
+            {
                 continue;
             }
-            path.push(PathLink {
+            st.path.push(PathLink {
                 from_node: from,
                 from_output: o,
             });
             if from.bl_idname == ty {
                 return Some(TexHit {
                     node: from,
-                    path: path.clone(),
+                    path: st.path.clone(),
                 });
             }
+            st.on_path.insert(from.uid);
             for k in 0..from.inputs.len() {
-                if let Some(hit) = self.search(from, k, ty, path, done) {
+                if let Some(hit) = self.search(from, k, ty, st) {
                     return Some(hit);
                 }
             }
-            path.pop();
-            done.insert(from.uid);
+            st.on_path.remove(&from.uid);
+            st.path.pop();
+            st.done.insert(from.uid);
         }
         None
     }
@@ -800,7 +913,7 @@ impl<'a> LowerCx<'a> {
         if let Src::Linked(n, _) = src
             && n.bl_idname == "ShaderNodeMapping"
         {
-            transform = crate::patterns::texture_transform::from_mapping(n, diags);
+            transform = crate::patterns::texture_transform::from_mapping(self, n, diags);
             src = self.src(n, "Vector");
         }
         let uv: UvSource = crate::patterns::uv_source::uv_of(tex, src, diags);

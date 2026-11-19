@@ -179,7 +179,8 @@ fn lower(_: &LowerCx, _: &mut LoweredMaterial) {}
 #[linkme::distributed_slice(crate::MATERIAL_PATTERNS)]
 static PATTERN: MaterialPattern = MaterialPattern {
     name: "sampler",
-    order: 2,
+    // 2 is WP 3.6's volume pattern; the sampler has nothing to lower, so any free order fits.
+    order: 5,
     lower,
     raise: None,
 };
@@ -218,6 +219,10 @@ mod tests {
         link_at(&mut m, (wrap, 0), (comb, 0));
         link_at(&mut m, (pp, 0), (comb, 1));
         link(&mut m, (comb, "Vector"), (t, "Vector"));
+        // The importer feeds the Separate XYZ from a UV Map node (unlinked, the chain would
+        // be constants that the inliner folds away).
+        let uv = add(&mut m, "ShaderNodeUVMap");
+        link(&mut m, (uv, "UV"), (sep, "Vector"));
         let lm = lower_m(&m, &images);
         let s = lm.base_color.texture.as_ref().unwrap().sampler;
         assert_eq!((s.wrap_s, s.wrap_t), (Wrap::Repeat, Wrap::Mirror));

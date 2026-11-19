@@ -292,9 +292,13 @@ fn lowered(
         double_sided: m.double_sided.unwrap_or(false),
         unlit: m.extensions.contains("KHR_materials_unlit"),
         ext: MaterialExts::default(),
-        vertex_color: vertex_color.then(|| VertexColorUse {
-            attribute: Some(COLOR_0_ATTRIBUTE.into()),
-            multiply: true,
+        // The importer's Color Attribute node names no layer (the active colour attribute,
+        // which is the imported COLOR_0) and links its Alpha only when the material is not
+        // OPAQUE (`base_color()`).
+        vertex_color: vertex_color.then(|| {
+            let mut v = VertexColorUse::color_and_alpha(None, true);
+            v.alpha = alpha_mode != AlphaMode::Opaque;
+            v
         }),
         diagnostics: Vec::new(),
     };

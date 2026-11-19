@@ -19,12 +19,20 @@
 use frap_nodes::{Node, SocketAddr, SocketValue};
 use frap_rna::Report;
 
-use crate::graph::unrecognised;
+use crate::graph::{In, unrecognised};
 use crate::{LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, TexTransform};
 
 /// `get_texture_transform_from_mapping_node` + `texture_transform_blender_to_gltf`: the glTF
 /// transform of Mapping node `n` (`None` when it cannot be exported or changes nothing).
-pub fn from_mapping(n: &Node, diags: &mut Vec<Report>) -> Option<TexTransform> {
+///
+/// The add-on reads `inputs[…].default_value` of the inlined tree: a linked input that the
+/// inliner constant-folds (a Combine XYZ of constants, …) gives the folded value; one that
+/// stays linked gives the socket's own value, as Blender does, with a WARNING.
+pub fn from_mapping<'a>(
+    cx: &LowerCx<'a>,
+    n: &'a Node,
+    diags: &mut Vec<Report>,
+) -> Option<TexTransform> {
     let vector_type = n.prop_str("vector_type");
     if !matches!(vector_type, "POINT" | "VECTOR" | "TEXTURE") {
         unrecognised(
@@ -36,9 +44,24 @@ pub fn from_mapping(n: &Node, diags: &mut Vec<Report>) -> Option<TexTransform> {
         );
         return None;
     }
-    let v3 = |name: &str| match n.input(name).map(|s| &s.default_value) {
-        Some(SocketValue::Vector(v)) => [v[0], v[1], v[2]].map(f64::from),
-        _ => [0.0; 3],
+    let mut v3 = |name: &str| {
+        let Some(i) = In::named(n, name) else {
+            return [0.0; 3];
+        };
+        if let Some(v) = cx.inline_value(i) {
+            return v.v().map(f64::from);
+        }
+        unrecognised(
+            diags,
+            format!(
+                "Mapping \"{}\": input {name} is linked to a value that is not constant; its own value is exported",
+                n.name
+            ),
+        );
+        match &i.socket().default_value {
+            SocketValue::Vector(v) => [v[0], v[1], v[2]].map(f64::from),
+            _ => [0.0; 3],
+        }
     };
     let (loc, rot, scale) = (v3("Location"), v3("Rotation"), v3("Scale"));
     if rot[0] != 0.0 || rot[1] != 0.0 {
@@ -173,10 +196,13 @@ static PATTERN: MaterialPattern = MaterialPattern {
 mod tests {
     use super::*;
 
-    fn mapping(vector_type: &str, loc: [f32; 2], rot: f32, scale: [f32; 2]) -> Node {
-        let mut t = frap_nodes::NodeTree::default_material();
-        let i = t.new_node("ShaderNodeMapping").unwrap();
-        let n = &mut t.nodes[i];
+    use crate::graph::testkit::*;
+    use frap_scene::id::Material;
+
+    fn mapping(vector_type: &str, loc: [f32; 2], rot: f32, scale: [f32; 2]) -> (Material, u32) {
+        let mut m = mat("M");
+        let uid = add(&mut m, "ShaderNodeMapping");
+        let n = m.node_tree.node_mut(uid).unwrap();
         // Location before the mode change: VECTOR and NORMAL disable it.
         n.input_mut("Location").unwrap().default_value =
             SocketValue::Vector([loc[0], loc[1], 0.0, 0.0]);
@@ -186,34 +212,59 @@ mod tests {
         }
         n.input_mut("Scale").unwrap().default_value =
             SocketValue::Vector([scale[0], scale[1], 1.0, 0.0]);
-        n.clone()
+        (m, uid)
+    }
+
+    fn run(m: &(Material, u32), d: &mut Vec<Report>) -> Option<TexTransform> {
+        let images = Images::default();
+        let cx = LowerCx::new(&m.0.node_tree, &m.0, &images);
+        from_mapping(&cx, m.0.node_tree.node(m.1).unwrap(), d)
     }
 
     #[test]
     fn point_vector_and_texture_mappings() {
         let mut d = Vec::new();
         // Research run: Location (0.1, 0.2), Scale 2 → offset [0.1, -1.2], scale [2, 2].
-        let t = from_mapping(&mapping("POINT", [0.1, 0.2], 0.0, [2.0, 2.0]), &mut d).unwrap();
+        let t = run(&mapping("POINT", [0.1, 0.2], 0.0, [2.0, 2.0]), &mut d).unwrap();
         assert!((t.offset[0] - 0.1).abs() < 1e-6 && (t.offset[1] + 1.2).abs() < 1e-6);
         assert_eq!(t.scale, [2.0, 2.0]);
         // VECTOR drops the location.
-        let t = from_mapping(&mapping("VECTOR", [0.1, 0.2], 0.0, [2.0, 2.0]), &mut d).unwrap();
+        let t = run(&mapping("VECTOR", [0.1, 0.2], 0.0, [2.0, 2.0]), &mut d).unwrap();
         assert!((t.offset[0]).abs() < 1e-6 && (t.offset[1] + 1.0).abs() < 1e-6);
         // TEXTURE inverts: scale 2 → 0.5, location (0.1, 0.2) → (-0.05, -0.1).
-        let t = from_mapping(&mapping("TEXTURE", [0.1, 0.2], 0.0, [2.0, 2.0]), &mut d).unwrap();
+        let t = run(&mapping("TEXTURE", [0.1, 0.2], 0.0, [2.0, 2.0]), &mut d).unwrap();
         assert_eq!(t.scale, [0.5, 0.5]);
         assert!((t.offset[0] + 0.05).abs() < 1e-6);
         assert!((t.offset[1] - (1.0 + 0.1 - 0.5)).abs() < 1e-6, "{t:?}");
         // Identity is omitted.
-        assert!(from_mapping(&mapping("POINT", [0.0, 0.0], 0.0, [1.0, 1.0]), &mut d).is_none());
+        assert!(run(&mapping("POINT", [0.0, 0.0], 0.0, [1.0, 1.0]), &mut d).is_none());
         assert!(d.is_empty());
         // NORMAL is not exported.
-        assert!(from_mapping(&mapping("NORMAL", [0.0, 0.0], 0.0, [1.0, 1.0]), &mut d).is_none());
+        assert!(run(&mapping("NORMAL", [0.0, 0.0], 0.0, [1.0, 1.0]), &mut d).is_none());
         assert_eq!(d.len(), 1);
         // Round trip with the importer's conversion.
         let t = blender_to_gltf_transform([0.3, -0.2], 0.5, [2.0, 3.0]);
         let (loc, rot, scale) = gltf_to_blender_transform(&t);
         assert!((loc[0] - 0.3).abs() < 1e-6 && (loc[1] + 0.2).abs() < 1e-6);
         assert_eq!((rot, scale), (0.5, [2.0, 3.0]));
+    }
+
+    #[test]
+    fn linked_mapping_inputs() {
+        // Verified on 5.2.4 (probe tt.py): a Location linked from a Combine XYZ of constants
+        // (X 0.5) is folded by the inliner → offset [0.5, 0].
+        let (mut m, map) = mapping("POINT", [0.0, 0.0], 0.0, [1.0, 1.0]);
+        let xyz = add(&mut m, "ShaderNodeCombineXYZ");
+        set_in(&mut m, xyz, "X", float(0.5));
+        link(&mut m, (xyz, "Vector"), (map, "Location"));
+        let mut d = Vec::new();
+        let t = run(&(m.clone(), map), &mut d).unwrap();
+        assert_eq!((t.offset, t.scale, t.rotation), ([0.5, 0.0], [1.0, 1.0], 0.0));
+        assert!(d.is_empty(), "{d:?}");
+        // Linked to something that is not constant: the socket's own value, with a WARNING.
+        let geo = add(&mut m, "ShaderNodeNewGeometry");
+        link(&mut m, (geo, "Position"), (xyz, "X"));
+        assert!(run(&(m, map), &mut d).is_none());
+        assert!(d[0].message.contains("Location"), "{d:?}");
     }
 }

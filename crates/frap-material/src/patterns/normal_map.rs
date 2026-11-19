@@ -5,16 +5,16 @@
 //! materials.py`) and `__gather_normal_scale` (`texture_info.py`, glTF-Blender-IO 5.2.41,
 //! Apache-2.0, The glTF-Blender-IO authors): the texture is the first Image Texture found
 //! behind `Normal` (through the Normal Map node), used as is; the scale is the `Strength` of
-//! the first Normal Map node found behind `Normal` when it is unlinked (1 otherwise, which the
-//! exporter omits).
+//! the first Normal Map node found behind `Normal` when it is unlinked in the tree the
+//! exporter reads (a link the inliner constant-folds, such as a Value node, gives its value);
+//! 1 otherwise, which the exporter omits.
 //!
 //! Raising ports `normal()` / `normal_map()` (`imp/pbrMetallicRoughness.py`,
 //! `imp/material_utils.py`): a Normal Map node (`uv_map` named after the `TEXCOORD_n`,
 //! `Strength` = scale) and the Image Texture labelled "NORMAL MAP" (data colour space, set by
 //! the importer on the image).
 
-use frap_nodes::SocketValue;
-
+use crate::graph::{FoldVal, In};
 use crate::{ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, NormalMap, RaiseCx};
 
 fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
@@ -33,14 +33,8 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     };
     let scale = cx
         .node_from(socket, "ShaderNodeNormalMap")
-        .and_then(|n| {
-            let i = n.input_index("Strength")?;
-            let s = &n.inputs[i];
-            match (cx.tree.link_into(n.uid, &s.identifier), &s.default_value) {
-                (None, SocketValue::Float(v)) => Some(*v),
-                _ => None,
-            }
-        })
+        .and_then(|n| cx.inline_value(In::named(n, "Strength")?))
+        .map(FoldVal::f)
         .unwrap_or(1.0);
     out.normal = Some(NormalMap { texture, scale });
 }
@@ -96,9 +90,17 @@ mod tests {
         assert_eq!(tex.label, "NORMAL MAP");
         let nmap = raised.node_tree.first_of_type("ShaderNodeNormalMap").unwrap();
         assert_eq!(nmap.prop_str("uv_map"), "UVMap");
-        // A linked Strength is not a scale (1, omitted).
+        // A Strength linked from a Value node is folded by the inliner (verified on 5.2.4,
+        // probe uv2.py: Value 3 → scale 3).
         let v = add(&mut m, "ShaderNodeValue");
+        m.node_tree.node_mut(v).unwrap().outputs[0].default_value = float(3.0);
         link_at(&mut m, (v, 0), (nm, 0));
+        assert_eq!(lower_m(&m, &images).normal.unwrap().scale, 3.0);
+        // A Strength linked to something that is not constant is not a scale (1, omitted).
+        let geo = add(&mut m, "ShaderNodeNewGeometry");
+        let sep = add(&mut m, "ShaderNodeSeparateXYZ");
+        link(&mut m, (geo, "Position"), (sep, "Vector"));
+        link_at(&mut m, (sep, 0), (nm, 0));
         assert_eq!(lower_m(&m, &images).normal.unwrap().scale, 1.0);
         // No texture: no normal map.
         let mut m = mat("Flat");
