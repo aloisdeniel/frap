@@ -50,9 +50,17 @@ pub struct MaterialCache {
     written: HashMap<(IdRef<MaterialId>, Vec<u32>), Option<Index>>,
 }
 
-/// The textures of a lowered material in the add-on's traversal order (emissive, normal,
-/// occlusion, base colour, metallic-roughness).
+/// The textures of a lowered material: the core ones in the add-on's traversal order
+/// (emissive, normal, occlusion, base colour, metallic-roughness), then every
+/// `KHR_materials_*` texture. All of them take part in the cache key, as every texture the
+/// add-on gathers records its `texCoord` for `get_final_material`.
 pub fn textures(lm: &LoweredMaterial) -> Vec<&TexRef> {
+    let e = &lm.ext;
+    let cc = e.clearcoat.as_ref();
+    let sh = e.sheen.as_ref();
+    let sp = e.specular.as_ref();
+    let ir = e.iridescence.as_ref();
+    let dt = e.diffuse_transmission.as_ref();
     [
         lm.emissive.texture.as_ref(),
         lm.normal.as_ref().map(|n| &n.texture),
@@ -60,6 +68,22 @@ pub fn textures(lm: &LoweredMaterial) -> Vec<&TexRef> {
         lm.base_color.texture.as_ref(),
         lm.metallic.texture.as_ref(),
         lm.roughness.texture.as_ref(),
+        cc.and_then(|c| c.factor.texture.as_ref()),
+        cc.and_then(|c| c.roughness.texture.as_ref()),
+        cc.and_then(|c| c.normal.as_ref()).map(|n| &n.texture),
+        e.transmission
+            .as_ref()
+            .and_then(|t| t.factor.texture.as_ref()),
+        e.volume.as_ref().and_then(|v| v.thickness.texture.as_ref()),
+        sp.and_then(|s| s.factor.texture.as_ref()),
+        sp.and_then(|s| s.color.texture.as_ref()),
+        sh.and_then(|s| s.color.texture.as_ref()),
+        sh.and_then(|s| s.roughness.texture.as_ref()),
+        ir.and_then(|i| i.factor.texture.as_ref()),
+        ir.and_then(|i| i.thickness_max.texture.as_ref()),
+        e.anisotropy.as_ref().and_then(|a| a.texture.as_ref()),
+        dt.and_then(|d| d.factor.texture.as_ref()),
+        dt.and_then(|d| d.color.texture.as_ref()),
     ]
     .into_iter()
     .flatten()

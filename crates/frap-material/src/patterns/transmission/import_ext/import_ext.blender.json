@@ -1,0 +1,984 @@
+{
+ "blender": "5.2.4 LTS",
+ "nodes": [
+  [
+   "Principled BSDF",
+   "ShaderNodeBsdfPrincipled",
+   "",
+   [
+    10.0,
+    300.0
+   ],
+   null,
+   {}
+  ],
+  [
+   "Material Output",
+   "ShaderNodeOutputMaterial",
+   "",
+   [
+    300.0,
+    300.0
+   ],
+   null,
+   {}
+  ],
+  [
+   "Group",
+   "ShaderNodeGroup",
+   "",
+   [
+    40.0,
+    -370.0
+   ],
+   null,
+   {
+    "node_tree": "glTF Material Output"
+   }
+  ],
+  [
+   "Volume Absorption",
+   "ShaderNodeVolumeAbsorption",
+   "",
+   [
+    40.0,
+    -520.0
+   ],
+   null,
+   {}
+  ],
+  [
+   "Math",
+   "ShaderNodeMath",
+   "Clearcoat Factor",
+   [
+    -340.0,
+    -250.0
+   ],
+   null,
+   {
+    "operation": "MULTIPLY"
+   }
+  ],
+  [
+   "Separate Color",
+   "ShaderNodeSeparateColor",
+   "",
+   [
+    -550.0,
+    -325.0
+   ],
+   null,
+   {}
+  ],
+  [
+   "Image Texture",
+   "ShaderNodeTexImage",
+   "CLEARCOAT",
+   [
+    -840.0,
+    -250.0
+   ],
+   null,
+   {
+    "interpolation": "Linear",
+    "extension": "REPEAT"
+   }
+  ],
+  [
+   "Math.001",
+   "ShaderNodeMath",
+   "Clearcoat Roughness Factor",
+   [
+    -340.0,
+    -710.0
+   ],
+   null,
+   {
+    "operation": "MULTIPLY"
+   }
+  ],
+  [
+   "Separate Color.001",
+   "ShaderNodeSeparateColor",
+   "",
+   [
+    -550.0,
+    -785.0
+   ],
+   null,
+   {}
+  ],
+  [
+   "Image Texture.001",
+   "ShaderNodeTexImage",
+   "CLEARCOAT ROUGHNESS",
+   [
+    -840.0,
+    -710.0
+   ],
+   null,
+   {
+    "interpolation": "Linear",
+    "extension": "REPEAT"
+   }
+  ],
+  [
+   "Normal Map",
+   "ShaderNodeNormalMap",
+   "",
+   [
+    -350.0,
+    -1210.0
+   ],
+   null,
+   {
+    "uv_map": "UVMap"
+   }
+  ],
+  [
+   "Image Texture.002",
+   "ShaderNodeTexImage",
+   "CLEARCOAT NORMAL",
+   [
+    -640.0,
+    -1170.0
+   ],
+   null,
+   {
+    "interpolation": "Linear",
+    "extension": "REPEAT"
+   }
+  ],
+  [
+   "Separate Color.002",
+   "ShaderNodeSeparateColor",
+   "",
+   [
+    -350.0,
+    2435.0
+   ],
+   null,
+   {}
+  ],
+  [
+   "Image Texture.003",
+   "ShaderNodeTexImage",
+   "TRANSMISSION",
+   [
+    -640.0,
+    2510.0
+   ],
+   null,
+   {
+    "interpolation": "Linear",
+    "extension": "REPEAT"
+   }
+  ],
+  [
+   "Math.002",
+   "ShaderNodeMath",
+   "Thickness Factor",
+   [
+    -340.0,
+    -2090.0
+   ],
+   null,
+   {
+    "operation": "MULTIPLY"
+   }
+  ],
+  [
+   "Separate Color.003",
+   "ShaderNodeSeparateColor",
+   "",
+   [
+    -550.0,
+    -2165.0
+   ],
+   null,
+   {}
+  ],
+  [
+   "Image Texture.004",
+   "ShaderNodeTexImage",
+   "THICKNESS",
+   [
+    -840.0,
+    -2090.0
+   ],
+   null,
+   {
+    "interpolation": "Linear",
+    "extension": "REPEAT"
+   }
+  ],
+  [
+   "Math.003",
+   "ShaderNodeMath",
+   "Specular Factor",
+   [
+    -340.0,
+    2050.0
+   ],
+   null,
+   {
+    "operation": "MULTIPLY"
+   }
+  ],
+  [
+   "Image Texture.005",
+   "ShaderNodeTexImage",
+   "SPECULAR",
+   [
+    -640.0,
+    2050.0
+   ],
+   null,
+   {
+    "interpolation": "Linear",
+    "extension": "REPEAT"
+   }
+  ],
+  [
+   "Mix",
+   "ShaderNodeMix",
+   "Specular Color Factor",
+   [
+    -340.0,
+    1590.0
+   ],
+   null,
+   {
+    "data_type": "RGBA",
+    "blend_type": "MULTIPLY"
+   }
+  ],
+  [
+   "Image Texture.006",
+   "ShaderNodeTexImage",
+   "SPECULAR COLOR",
+   [
+    -640.0,
+    1590.0
+   ],
+   null,
+   {
+    "interpolation": "Linear",
+    "extension": "REPEAT"
+   }
+  ],
+  [
+   "Tangent",
+   "ShaderNodeTangent",
+   "",
+   [
+    -380.0,
+    930.0
+   ],
+   null,
+   {
+    "uv_map": "UVMap",
+    "direction_type": "UV_MAP"
+   }
+  ],
+  [
+   "Math.004",
+   "ShaderNodeMath",
+   "Anisotropy strength",
+   [
+    -380.0,
+    1330.0
+   ],
+   null,
+   {
+    "operation": "MULTIPLY"
+   }
+  ],
+  [
+   "Math.005",
+   "ShaderNodeMath",
+   "Rotation conversion",
+   [
+    -380.0,
+    1130.0
+   ],
+   null,
+   {
+    "operation": "DIVIDE"
+   }
+  ],
+  [
+   "Math.006",
+   "ShaderNodeMath",
+   "Anisotropy rotation",
+   [
+    -560.0,
+    1130.0
+   ],
+   null,
+   {
+    "operation": "ADD"
+   }
+  ],
+  [
+   "Math.007",
+   "ShaderNodeMath",
+   "ArcTan2",
+   [
+    -740.0,
+    1130.0
+   ],
+   null,
+   {
+    "operation": "ARCTAN2"
+   }
+  ],
+  [
+   "Separate XYZ",
+   "ShaderNodeSeparateXYZ",
+   "",
+   [
+    -920.0,
+    1130.0
+   ],
+   null,
+   {}
+  ],
+  [
+   "Vector Math",
+   "ShaderNodeVectorMath",
+   "",
+   [
+    -1100.0,
+    1130.0
+   ],
+   null,
+   {
+    "operation": "MULTIPLY_ADD"
+   }
+  ],
+  [
+   "Image Texture.007",
+   "ShaderNodeTexImage",
+   "ANISOTROPY",
+   [
+    -1520.0,
+    1130.0
+   ],
+   null,
+   {
+    "interpolation": "Linear",
+    "extension": "REPEAT"
+   }
+  ],
+  [
+   "Mix.001",
+   "ShaderNodeMix",
+   "Sheen Color Factor",
+   [
+    -340.0,
+    210.0
+   ],
+   null,
+   {
+    "data_type": "RGBA",
+    "blend_type": "MULTIPLY"
+   }
+  ],
+  [
+   "Image Texture.008",
+   "ShaderNodeTexImage",
+   "SHEEN COLOR",
+   [
+    -640.0,
+    210.0
+   ],
+   null,
+   {
+    "interpolation": "Linear",
+    "extension": "REPEAT"
+   }
+  ],
+  [
+   "Math.008",
+   "ShaderNodeMath",
+   "Sheen Roughness Factor",
+   [
+    -340.0,
+    670.0
+   ],
+   null,
+   {
+    "operation": "MULTIPLY"
+   }
+  ],
+  [
+   "Image Texture.009",
+   "ShaderNodeTexImage",
+   "SHEEN ROUGHNESS",
+   [
+    -640.0,
+    670.0
+   ],
+   null,
+   {
+    "interpolation": "Linear",
+    "extension": "REPEAT"
+   }
+  ],
+  [
+   "Math.009",
+   "ShaderNodeMath",
+   "Iridescence Factor",
+   [
+    -340.0,
+    -1630.0
+   ],
+   null,
+   {
+    "operation": "MULTIPLY"
+   }
+  ],
+  [
+   "Separate Color.004",
+   "ShaderNodeSeparateColor",
+   "",
+   [
+    -550.0,
+    -1705.0
+   ],
+   null,
+   {}
+  ],
+  [
+   "Image Texture.010",
+   "ShaderNodeTexImage",
+   "IRIDESCENCE",
+   [
+    -840.0,
+    -1630.0
+   ],
+   null,
+   {
+    "interpolation": "Linear",
+    "extension": "REPEAT"
+   }
+  ],
+  [
+   "Mix.002",
+   "ShaderNodeMix",
+   "Iridescence Thickness",
+   [
+    -380.0,
+    -1930.0
+   ],
+   null,
+   {
+    "data_type": "FLOAT",
+    "blend_type": "MIX"
+   }
+  ],
+  [
+   "Separate Color.005",
+   "ShaderNodeSeparateColor",
+   "",
+   [
+    -560.0,
+    -1930.0
+   ],
+   null,
+   {}
+  ],
+  [
+   "Image Texture.011",
+   "ShaderNodeTexImage",
+   "IRIDESCENCE THICKNESS",
+   [
+    -980.0,
+    -2230.0
+   ],
+   null,
+   {
+    "interpolation": "Linear",
+    "extension": "REPEAT"
+   }
+  ],
+  [
+   "Value",
+   "ShaderNodeValue",
+   "Iridescence Thickness Minimum",
+   [
+    -560.0,
+    -2130.0
+   ],
+   null,
+   {
+    "value": 150.0
+   }
+  ],
+  [
+   "Value.001",
+   "ShaderNodeValue",
+   "Iridescence Thickness Maximum",
+   [
+    -560.0,
+    -2230.0
+   ],
+   null,
+   {
+    "value": 400.0
+   }
+  ]
+ ],
+ "links": [
+  [
+   "Principled BSDF",
+   "BSDF",
+   "Material Output",
+   "Surface"
+  ],
+  [
+   "Volume Absorption",
+   "Volume",
+   "Material Output",
+   "Volume"
+  ],
+  [
+   "Math",
+   "Value",
+   "Principled BSDF",
+   "Coat Weight"
+  ],
+  [
+   "Separate Color",
+   "Red",
+   "Math",
+   "Value"
+  ],
+  [
+   "Image Texture",
+   "Color",
+   "Separate Color",
+   "Color"
+  ],
+  [
+   "Math.001",
+   "Value",
+   "Principled BSDF",
+   "Coat Roughness"
+  ],
+  [
+   "Separate Color.001",
+   "Green",
+   "Math.001",
+   "Value"
+  ],
+  [
+   "Image Texture.001",
+   "Color",
+   "Separate Color.001",
+   "Color"
+  ],
+  [
+   "Normal Map",
+   "Normal",
+   "Principled BSDF",
+   "Coat Normal"
+  ],
+  [
+   "Image Texture.002",
+   "Color",
+   "Normal Map",
+   "Color"
+  ],
+  [
+   "Separate Color.002",
+   "Red",
+   "Principled BSDF",
+   "Transmission Weight"
+  ],
+  [
+   "Image Texture.003",
+   "Color",
+   "Separate Color.002",
+   "Color"
+  ],
+  [
+   "Math.002",
+   "Value",
+   "Group",
+   "Socket_1"
+  ],
+  [
+   "Separate Color.003",
+   "Green",
+   "Math.002",
+   "Value"
+  ],
+  [
+   "Image Texture.004",
+   "Color",
+   "Separate Color.003",
+   "Color"
+  ],
+  [
+   "Math.003",
+   "Value",
+   "Principled BSDF",
+   "Specular IOR Level"
+  ],
+  [
+   "Image Texture.005",
+   "Alpha",
+   "Math.003",
+   "Value"
+  ],
+  [
+   "Mix",
+   "Result_Color",
+   "Principled BSDF",
+   "Specular Tint"
+  ],
+  [
+   "Image Texture.006",
+   "Color",
+   "Mix",
+   "A_Color"
+  ],
+  [
+   "Tangent",
+   "Tangent",
+   "Principled BSDF",
+   "Tangent"
+  ],
+  [
+   "Math.004",
+   "Value",
+   "Principled BSDF",
+   "Anisotropic"
+  ],
+  [
+   "Math.005",
+   "Value",
+   "Principled BSDF",
+   "Anisotropic Rotation"
+  ],
+  [
+   "Math.006",
+   "Value",
+   "Math.005",
+   "Value"
+  ],
+  [
+   "Math.007",
+   "Value",
+   "Math.006",
+   "Value"
+  ],
+  [
+   "Separate XYZ",
+   "Y",
+   "Math.007",
+   "Value"
+  ],
+  [
+   "Separate XYZ",
+   "X",
+   "Math.007",
+   "Value_001"
+  ],
+  [
+   "Separate XYZ",
+   "Z",
+   "Math.004",
+   "Value"
+  ],
+  [
+   "Vector Math",
+   "Vector",
+   "Separate XYZ",
+   "Vector"
+  ],
+  [
+   "Image Texture.007",
+   "Color",
+   "Vector Math",
+   "Vector"
+  ],
+  [
+   "Mix.001",
+   "Result_Color",
+   "Principled BSDF",
+   "Sheen Tint"
+  ],
+  [
+   "Image Texture.008",
+   "Color",
+   "Mix.001",
+   "A_Color"
+  ],
+  [
+   "Math.008",
+   "Value",
+   "Principled BSDF",
+   "Sheen Roughness"
+  ],
+  [
+   "Image Texture.009",
+   "Alpha",
+   "Math.008",
+   "Value"
+  ],
+  [
+   "Math.009",
+   "Value",
+   "Group",
+   "Socket_3"
+  ],
+  [
+   "Separate Color.004",
+   "Red",
+   "Math.009",
+   "Value"
+  ],
+  [
+   "Image Texture.010",
+   "Color",
+   "Separate Color.004",
+   "Color"
+  ],
+  [
+   "Mix.002",
+   "Result_Float",
+   "Principled BSDF",
+   "Thin Film Thickness"
+  ],
+  [
+   "Separate Color.005",
+   "Green",
+   "Mix.002",
+   "Factor_Float"
+  ],
+  [
+   "Image Texture.011",
+   "Color",
+   "Separate Color.005",
+   "Color"
+  ],
+  [
+   "Value",
+   "Value",
+   "Mix.002",
+   "A_Float"
+  ],
+  [
+   "Value",
+   "Value",
+   "Group",
+   "Socket_4"
+  ],
+  [
+   "Value.001",
+   "Value",
+   "Mix.002",
+   "B_Float"
+  ]
+ ],
+ "images": {
+  "Image Texture": [
+   "img0",
+   "Non-Color"
+  ],
+  "Image Texture.001": [
+   "img1",
+   "Non-Color"
+  ],
+  "Image Texture.002": [
+   "img2",
+   "Non-Color"
+  ],
+  "Image Texture.003": [
+   "img3",
+   "Non-Color"
+  ],
+  "Image Texture.004": [
+   "img4",
+   "Non-Color"
+  ],
+  "Image Texture.005": [
+   "img5",
+   "sRGB"
+  ],
+  "Image Texture.006": [
+   "img6",
+   "sRGB"
+  ],
+  "Image Texture.007": [
+   "img7",
+   "Non-Color"
+  ],
+  "Image Texture.008": [
+   "img8",
+   "sRGB"
+  ],
+  "Image Texture.009": [
+   "img9",
+   "sRGB"
+  ],
+  "Image Texture.010": [
+   "img10",
+   "Non-Color"
+  ],
+  "Image Texture.011": [
+   "img11",
+   "Non-Color"
+  ]
+ },
+ "bsdf": {
+  "Base Color": [
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ],
+  "Metallic": 1.0,
+  "Roughness": 1.0,
+  "IOR": 1.25,
+  "Alpha": 1.0,
+  "Thin Wall": false,
+  "Normal": [
+   0.0,
+   0.0,
+   0.0
+  ],
+  "Diffuse Roughness": 0.0,
+  "Subsurface Weight": 0.0,
+  "Subsurface Radius": [
+   1.0,
+   0.2,
+   0.1
+  ],
+  "Subsurface Scale": 0.005,
+  "Subsurface Anisotropy": 0.0,
+  "Coat IOR": 1.5,
+  "Coat Tint": [
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ],
+  "Sheen Weight": 1.0,
+  "Emission Color": [
+   1.0,
+   1.0,
+   1.0,
+   1.0
+  ],
+  "Emission Strength": 0.0,
+  "Thin Film IOR": 1.33
+ },
+ "group": {
+  "Socket_0": 0.0,
+  "Socket_2": 0.125
+ },
+ "volume_absorption": {
+  "Color": [
+   0.5,
+   0.25,
+   1.0,
+   1.0
+  ],
+  "Density": 2.0
+ },
+ "again": {
+  "doubleSided": false,
+  "extensions": {
+   "KHR_materials_clearcoat": {
+    "clearcoatFactor": 0.5,
+    "clearcoatRoughnessFactor": 0.25,
+    "clearcoatTexture": {
+     "index": 0
+    },
+    "clearcoatRoughnessTexture": {
+     "index": 0
+    },
+    "clearcoatNormalTexture": {
+     "index": 1,
+     "scale": 0.5
+    }
+   },
+   "KHR_materials_transmission": {
+    "transmissionFactor": 1,
+    "transmissionTexture": {
+     "index": 2
+    }
+   },
+   "KHR_materials_volume": {
+    "attenuationColor": [
+     0.5,
+     0.25,
+     1
+    ],
+    "attenuationDistance": 0.5,
+    "thicknessFactor": 2,
+    "thicknessTexture": {
+     "index": 3
+    }
+   },
+   "KHR_materials_specular": {
+    "specularFactor": 0.5,
+    "specularTexture": {
+     "index": 4
+    },
+    "specularColorFactor": [
+     0.5,
+     1,
+     0.25
+    ],
+    "specularColorTexture": {
+     "index": 5
+    }
+   },
+   "KHR_materials_sheen": {
+    "sheenColorFactor": [
+     1,
+     0.5,
+     0.25
+    ],
+    "sheenColorTexture": {
+     "index": 6
+    },
+    "sheenRoughnessFactor": 0.75,
+    "sheenRoughnessTexture": {
+     "index": 7
+    }
+   },
+   "KHR_materials_anisotropy": {
+    "anisotropyStrength": 0.5,
+    "anisotropyRotation": 1.25,
+    "anisotropyTexture": {
+     "index": 8
+    }
+   },
+   "KHR_materials_iridescence": {
+    "iridescenceIor": 1.3300000429153442,
+    "iridescenceFactor": 0.5,
+    "iridescenceTexture": {
+     "index": 9
+    },
+    "iridescenceThicknessMinimum": 150,
+    "iridescenceThicknessTexture": {
+     "index": 10
+    }
+   },
+   "KHR_materials_dispersion": {
+    "dispersion": 0.125
+   },
+   "KHR_materials_ior": {
+    "ior": 1.25
+   }
+  },
+  "name": "M"
+ }
+}
