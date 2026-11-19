@@ -374,6 +374,9 @@ pub struct Mesh {
     pub attributes_active: Option<SmolStr>,
     /// Texture space.
     pub texspace: TexSpace,
+    /// `CD_MLOOPTANGENT`: the temporary corner tangent layer `Mesh.calc_tangents()` fills
+    /// (tangent xyz, bitangent sign w); never persisted (`CD_FLAG_TEMPORARY`). WP 3.7.
+    tangents: Option<Arc<Vec<[f32; 4]>>>,
     /// OnceLock caches; never persisted, compared or cloned.
     runtime: MeshRuntime,
 }
@@ -431,8 +434,23 @@ impl Mesh {
             color_default: None,
             attributes_active: None,
             texspace: TexSpace::default(),
+            tangents: None,
             runtime: MeshRuntime::default(),
         }
+    }
+
+    /// The temporary corner tangent layer of `Mesh.calc_tangents()` (`MeshLoop.tangent`,
+    /// `bitangent_sign`), when it exists and still has one value per corner.
+    pub fn corner_tangents(&self) -> Option<&[[f32; 4]]> {
+        self.tangents
+            .as_deref()
+            .filter(|t| t.len() == self.corners_num())
+            .map(|t| t.as_slice())
+    }
+
+    /// Sets (or with `None` frees, `Mesh.free_tangents()`) the temporary corner tangent layer.
+    pub fn set_corner_tangents(&mut self, tangents: Option<Vec<[f32; 4]>>) {
+        self.tangents = tangents.map(Arc::new);
     }
 
     /// Builds a mesh from face offsets and a complete attribute set (crate use: generators).

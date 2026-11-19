@@ -479,7 +479,7 @@ pub(crate) fn read(
         "pointclouds",
         cx,
         l,
-        |_, _, _| Ok(()),
+        pointcloud,
     )?;
 
     let win = window(root.get("window"), &main, cx)?;
@@ -875,19 +875,8 @@ fn domain(s: &str, path: &str) -> Result<Domain, MapError> {
     })
 }
 
-fn mesh(me: &mut Mesh, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
-    let mut m = Mesh::new(me.header.name.clone());
-    let fp = o.sub("face_offsets");
-    let offsets: Vec<i32> = cx.decode(o.req("face_offsets")?, &fp)?;
-    if offsets.first() != Some(&0) || offsets.windows(2).any(|w| w[1] < w[0]) {
-        return Err(MapError::invalid(
-            &fp,
-            "face offsets must start at 0 and never decrease",
-        ));
-    }
-    // Sets the offsets; the placeholder corner attributes are replaced below.
-    let corners = *offsets.last().unwrap_or(&0) as usize;
-    m.set_topology(offsets, vec![0; corners], Vec::new());
+/// The `attributes` array of a mesh or point cloud.
+fn attributes(o: &mut Obj, cx: &mut Cx) -> Result<AttributeSet, MapError> {
     let mut attrs = AttributeSet::default();
     let ap = o.sub("attributes");
     for (i, a) in array(o.req("attributes")?, &ap)?.iter().enumerate() {
@@ -938,6 +927,59 @@ fn mesh(me: &mut Mesh, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
             data,
         });
     }
+    Ok(attrs)
+}
+
+/// A point cloud (WP 3.7): `points`, `attributes` (POINT domain, one value per point),
+/// `materials`, `animation_data`. Files written before WP 3.7 have none of them: kept empty.
+fn pointcloud(pc: &mut PointCloud, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
+    let Some(n) = o.opt("points") else {
+        return Ok(());
+    };
+    let p = o.sub("points");
+    let n = n
+        .as_u64()
+        .ok_or_else(|| MapError::invalid(&p, "expected a point count"))? as usize;
+    let mut out = PointCloud::new(pc.header.name.clone());
+    out.resize(n);
+    for a in attributes(o, cx)?.iter() {
+        let ap = format!("{}[{:?}]", o.sub("attributes"), a.name);
+        if a.domain != Domain::Point {
+            return Err(MapError::invalid(
+                &ap,
+                "point cloud attributes are POINT attributes",
+            ));
+        }
+        out.set_attribute(&a.name, a.data.clone())
+            .map_err(|e| MapError::invalid(&ap, e))?;
+    }
+    if let Some(v) = o.opt("materials") {
+        let p = o.sub("materials");
+        out.materials = array(v, &p)?
+            .iter()
+            .map(|x| cx.typed(x, &p))
+            .collect::<Result<_, _>>()?;
+    }
+    cx.anim(o, &mut out.animation_data)?;
+    out.header = pc.header.clone();
+    *pc = out;
+    Ok(())
+}
+
+fn mesh(me: &mut Mesh, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
+    let mut m = Mesh::new(me.header.name.clone());
+    let fp = o.sub("face_offsets");
+    let offsets: Vec<i32> = cx.decode(o.req("face_offsets")?, &fp)?;
+    if offsets.first() != Some(&0) || offsets.windows(2).any(|w| w[1] < w[0]) {
+        return Err(MapError::invalid(
+            &fp,
+            "face offsets must start at 0 and never decrease",
+        ));
+    }
+    // Sets the offsets; the placeholder corner attributes are replaced below.
+    let corners = *offsets.last().unwrap_or(&0) as usize;
+    m.set_topology(offsets, vec![0; corners], Vec::new());
+    let attrs = attributes(o, cx)?;
     *m.attributes_mut() = attrs;
     if let Some(dv) = o.opt("deform_verts")
         && !dv.is_null()

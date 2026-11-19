@@ -1,0 +1,130 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Pts.001": {
+      "type": "POINTCLOUD",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {
+    "Pts.001": {
+      "positions": [
+        [0.0, 0.0, 0.0],
+        [1.0, 2.0, 3.0],
+        [-1.0, 0.5, 2.0]
+      ],
+      "edges": [],
+      "faces": [],
+      "corner_normals": [],
+      "uv_layers": {},
+      "attributes": {
+        "sharp_face": {
+          "data": [],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    }
+  },
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": null,
+    "selected": [],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {
+    "out/pc.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "pointcloud.out_pc.glb"
+      }
+    },
+    "out/pc_off.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "pointcloud.out_pc_off.glb"
+      }
+    }
+  }
+}

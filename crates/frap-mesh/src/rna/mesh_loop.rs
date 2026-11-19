@@ -2,8 +2,9 @@
 //! `MeshLoop` (`mesh.loops[i]`, face corners).
 //!
 //! Columns: `.corner_vert` (`vertex_index`), `.corner_edge` (`edge_index`), the cached corner
-//! normals. `tangent`, `bitangent` and `bitangent_sign` read zero until `Mesh.calc_tangents()`
-//! has run (verified on 5.2.4); frap has no tangent layer yet, so they always read zero.
+//! normals. `tangent`, `bitangent` and `bitangent_sign` read the temporary tangent layer of
+//! `Mesh.calc_tangents()` (`rna_MeshLoop_tangent_get`, `rna_MeshLoop_bitangent_get`:
+//! `cross(corner normal, tangent) * sign`), zero without one (verified on 5.2.4).
 //! `vertex_index`/`edge_index` refuse indices outside the vertex/edge range (`ValueError`,
 //! frap deviation; Blender stores them for `Mesh.validate()` to repair).
 
@@ -78,9 +79,24 @@ impl SoaKind for Loops {
                 m.corner_normals()[i].to_rna_value(prop, MathTag::for_subtype(prop.subtype))
             }
             "tangent" | "bitangent" => {
-                [0.0f32; 3].to_rna_value(prop, MathTag::for_subtype(prop.subtype))
+                let v = match m.corner_tangents().map(|t| t[i]) {
+                    None => [0.0f32; 3],
+                    Some([x, y, z, _]) if prop.identifier == "tangent" => [x, y, z],
+                    Some([x, y, z, w]) => {
+                        let n = m.corner_normals()[i];
+                        [
+                            (n[1] * z - n[2] * y) * w,
+                            (n[2] * x - n[0] * z) * w,
+                            (n[0] * y - n[1] * x) * w,
+                        ]
+                    }
+                };
+                v.to_rna_value(prop, MathTag::for_subtype(prop.subtype))
             }
-            "bitangent_sign" => 0.0f32.to_rna_value(prop, none),
+            "bitangent_sign" => m
+                .corner_tangents()
+                .map_or(0.0f32, |t| t[i][3])
+                .to_rna_value(prop, none),
             _ => return Err(soa::no_attr::<Self>(m, ctx, i, prop)),
         };
         Ok(Field::Value(v))

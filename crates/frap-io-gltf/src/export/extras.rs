@@ -1,37 +1,263 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Custom properties → `extras` (M3, WP 3.7; stub created by M3 W0). Port target:
-//! io_scene_gltf2 5.2.41 `blender/com/extras.py` (`generate_extras`: ID properties, nested
-//! groups, arrays, the `RNA_BLACKLIST`), written only with `export_extras` (default False).
+//! Custom properties → `extras` (M3, WP 3.7), written only with `export_extras` (default False).
 //!
-//! W0 wiring: `nodes.rs` (objects), `mesh/gather.rs` (meshes), `materials/mod.rs` (materials)
-//! and `scenes.rs` (scenes) ask these functions; `None` writes no `extras`.
+//! Ported from io_scene_gltf2 5.2.41 `blender/com/extras.py` (`generate_extras`,
+//! `__to_json_compatible`, `BLACK_LIST`), Apache-2.0, The glTF-Blender-IO authors, and the
+//! callers that decide which datablock speaks for each glTF object: `blender/exp/nodes.py` (the
+//! object), `blender/exp/obj_data.py` (the mesh or point cloud data), `material/material_utils.py`
+//! (the material) and `blender/exp/gather.py` (the scene, or the exported collection with a
+//! `collection` export).
+//!
+//! Every custom property of the ID except the black-listed ones becomes one `extras` member, in
+//! the ID's key order: ints, floats, bools (Python bools are ints), strings, int/float arrays
+//! (`to_list()`), groups (`to_dict()`) and lists of groups, recursively. No custom property
+//! writes no `extras`. W0 wired `nodes.rs`, `mesh/gather.rs`, `materials/mod.rs` and `scenes.rs`
+//! to these functions; the point cloud gatherer (`mesh/extract/pointcloud.rs`) uses [`id`].
 
 use frap_gltf::json::Extras;
 use frap_mesh::Mesh;
+use frap_rna::{IdHeader, IdProp};
 use frap_scene::id::{Material, Object, Scene};
+use serde_json::{Map, Number, Value as J};
 
 use crate::export::gather::Gather;
 
-/// `extras` of an object's node.
+/// `export_extras` is honoured here.
+#[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
+#[linkme::distributed_slice(crate::export::SUPPORTED_EXPORT_PROPS)]
+static PROPS: &[&str] = &["export_extras"];
+
+/// Custom properties that are never exported (`BLACK_LIST`).
+pub const BLACK_LIST: [&str; 9] = [
+    "cycles",
+    "cycles_visibility",
+    "cycles_curves",
+    "glTF2ExportSettings",
+    "gltf2_mesh_applied",
+    "gltf2_KHR_materials_variants_variants",
+    "gltf2_active_variant",
+    "gltf2_variant_default_materials",
+    "gltf2_variant_mesh_data",
+];
+
+/// A float as JSON (`json.dumps` of a Python float; non-finite values are not valid JSON and
+/// become `null`, which no ID property can hold in practice).
+fn float(x: f64) -> J {
+    Number::from_f64(x).map_or(J::Null, J::Number)
+}
+
+/// `__to_json_compatible`: the JSON form of one ID property.
+pub fn to_json(p: &IdProp) -> J {
+    match p {
+        IdProp::Int(i) => J::Number((*i).into()),
+        IdProp::Float(f) => float(*f),
+        IdProp::Bool(b) => J::Bool(*b),
+        IdProp::Str(s) => J::String(s.to_string()),
+        IdProp::IntArray(v) => J::Array(v.iter().map(|i| J::Number((*i).into())).collect()),
+        IdProp::FloatArray(v) => J::Array(v.iter().map(|f| float(*f)).collect()),
+        IdProp::Group(g) => J::Object(
+            g.iter()
+                .map(|(k, v)| (k.to_string(), to_json(v)))
+                .collect::<Map<_, _>>(),
+        ),
+        IdProp::List(v) => J::Array(v.iter().map(to_json).collect()),
+        // A kind added later (non-exhaustive): not JSON-convertible, as the add-on skips it.
+        _ => J::Null,
+    }
+}
+
+/// `generate_extras(blender_element)`: the ID's custom properties, `None` without any.
+pub fn generate(header: &IdHeader) -> Option<Extras> {
+    let map: Map<String, J> = header
+        .custom
+        .iter()
+        .filter(|(k, _)| !BLACK_LIST.contains(&k.as_str()))
+        .map(|(k, v)| (k.to_string(), to_json(v)))
+        .filter(|(_, v)| !v.is_null())
+        .collect();
+    (!map.is_empty()).then(|| Extras::from_value(&J::Object(map)))
+}
+
+/// `extras` of any ID when `export_extras` is on.
+pub fn id(g: &Gather, header: &IdHeader) -> Option<Extras> {
+    if g.settings.props.export_extras.value {
+        generate(header)
+    } else {
+        None
+    }
+}
+
+/// `extras` of an object's node (`nodes.py`, `__gather_extras`).
 pub fn object(g: &mut Gather, ob: &Object) -> Option<Extras> {
-    let _ = (g, ob);
-    None
+    id(g, &ob.header)
 }
 
-/// `extras` of a mesh.
+/// `extras` of a mesh (`obj_data.py`, `__gather_extras`; `targetNames` of shape keys is M6).
 pub fn mesh(g: &mut Gather, mesh: &Mesh) -> Option<Extras> {
-    let _ = (g, mesh);
-    None
+    id(g, &mesh.header)
 }
 
-/// `extras` of a material.
+/// `extras` of a material (`material_utils.py`, `gather_extras`).
 pub fn material(g: &mut Gather, mat: &Material) -> Option<Extras> {
-    let _ = (g, mat);
-    None
+    id(g, &mat.header)
 }
 
-/// `extras` of a scene.
+/// `extras` of a scene (`gather.py`, `__gather_extras`): with a `collection` export, the
+/// exported collection's custom properties instead of the scene's.
 pub fn scene(g: &mut Gather, scene: &Scene) -> Option<Extras> {
-    let _ = (g, scene);
-    None
+    if !g.settings.props.export_extras.value {
+        return None;
+    }
+    if g.settings.collection.is_empty() {
+        return generate(&scene.header);
+    }
+    let main = g.main;
+    main.collections
+        .find_in(&g.settings.collection, None)
+        .and_then(|c| main.collections.get(c))
+        .and_then(|c| generate(&c.header))
+}
+
+#[cfg(test)]
+mod tests {
+    use indexmap::IndexMap;
+    use serde_json::json;
+    use smol_str::SmolStr;
+
+    use super::*;
+
+    #[test]
+    fn every_kind_in_key_order() {
+        let mut h = IdHeader::new("X");
+        let mut g = IndexMap::new();
+        g.insert(SmolStr::new("k"), IdProp::FloatArray(vec![1.0, 2.5]));
+        for (k, v) in [
+            ("s", IdProp::Str("x".into())),
+            ("i", IdProp::Int(-3)),
+            ("f", IdProp::Float(0.25)),
+            ("b", IdProp::Bool(true)),
+            ("cycles", IdProp::Int(1)),
+            ("ia", IdProp::IntArray(vec![1, 2])),
+            ("g", IdProp::Group(g)),
+            ("l", IdProp::List(vec![IdProp::Str("a".into())])),
+        ] {
+            h.custom.insert(SmolStr::new(k), v);
+        }
+        let e = generate(&h).unwrap();
+        let v: J = serde_json::from_str(e.get()).unwrap();
+        assert_eq!(
+            v,
+            json!({"s": "x", "i": -3, "f": 0.25, "b": true, "ia": [1, 2],
+                   "g": {"k": [1.0, 2.5]}, "l": ["a"]})
+        );
+        let keys: Vec<_> = v.as_object().unwrap().keys().cloned().collect();
+        assert_eq!(keys[0], "s");
+    }
+
+    /// The custom properties of `tests/golden/cases/gltf/attributes/extras.py` (set by
+    /// Blender-only lines there: frap's `ID[key] = value` arrives with ID properties, M8), and
+    /// Blender 5.2.4's extras for them, exported with `export_extras=True` (with and without
+    /// `collection='Collection'`).
+    #[test]
+    fn factory_scene_extras_equal_blenders() {
+        use frap_scene::{Context, Preferences, startup};
+        let (mut main, win) = startup::factory();
+        let mut log = frap_scene::ChangeLog::default();
+        let set = |h: &mut IdHeader, k: &str, v: IdProp| {
+            h.custom.insert(SmolStr::new(k), v);
+        };
+        let cube = main.objects.find("Cube").unwrap();
+        let ob = main.objects.get_mut(cube, &mut log).unwrap();
+        let mut d = IndexMap::new();
+        d.insert(SmolStr::new("d"), IdProp::FloatArray(vec![2.0, 3.0]));
+        let mut g = IndexMap::new();
+        g.insert(SmolStr::new("a"), IdProp::Int(1));
+        g.insert(SmolStr::new("b"), IdProp::Str("x".into()));
+        g.insert(SmolStr::new("c"), IdProp::Group(d));
+        for (k, v) in [
+            ("int", IdProp::Int(3)),
+            ("float", IdProp::Float(0.25)),
+            ("flag", IdProp::Bool(true)),
+            ("text", IdProp::Str("hello".into())),
+            ("ints", IdProp::IntArray(vec![1, 2, 3])),
+            ("floats", IdProp::FloatArray(vec![0.5, 1.5])),
+            ("group", IdProp::Group(g)),
+            ("cycles", IdProp::Int(1)),
+        ] {
+            set(&mut ob.header, k, v);
+        }
+        let me = main.meshes.find("Cube").unwrap();
+        set(
+            &mut main.meshes.get_mut(me, &mut log).unwrap().header,
+            "mesh_prop",
+            IdProp::Str("m".into()),
+        );
+        let ma = main.materials.find("Material").unwrap();
+        set(
+            &mut main.materials.get_mut(ma, &mut log).unwrap().header,
+            "mat_prop",
+            IdProp::Int(7),
+        );
+        let sc = win.scene;
+        set(
+            &mut main.scenes.get_mut(sc, &mut log).unwrap().header,
+            "scene_prop",
+            IdProp::Str("scene".into()),
+        );
+        let co = main.collections.find("Collection").unwrap();
+        set(
+            &mut main.collections.get_mut(co, &mut log).unwrap().header,
+            "coll_prop",
+            IdProp::Float(1.5),
+        );
+        let prefs = Preferences::default();
+        let ctx = Context {
+            main: &main,
+            win: &win,
+            prefs: &prefs,
+        };
+        let extras = |collection: &str, on: bool| {
+            let mut p = crate::export::settings::default_props();
+            p.export_extras.value = on;
+            let s = crate::export::ExportSettings {
+                collection: collection.into(),
+                props: std::sync::Arc::new(p),
+                ..crate::export::ExportSettings::default()
+            };
+            let doc = crate::export::export(&main, &ctx, &s).unwrap().document;
+            let e = |x: Option<&Extras>| x.map(|e| serde_json::from_str::<J>(e.get()).unwrap());
+            json!({
+                "nodes": doc.nodes.iter().map(|n| e(n.extras.as_ref())).collect::<Vec<_>>(),
+                "meshes": doc.meshes.iter().map(|n| e(n.extras.as_ref())).collect::<Vec<_>>(),
+                "materials": doc.materials.iter().map(|n| e(n.extras.as_ref())).collect::<Vec<_>>(),
+                "scenes": doc.scenes.iter().map(|n| e(n.extras.as_ref())).collect::<Vec<_>>(),
+            })
+        };
+        let node = json!({"int": 3, "float": 0.25, "flag": true, "text": "hello",
+            "ints": [1, 2, 3], "floats": [0.5, 1.5],
+            "group": {"a": 1, "b": "x", "c": {"d": [2.0, 3.0]}}});
+        assert_eq!(
+            extras("", true),
+            json!({"nodes": [node], "meshes": [{"mesh_prop": "m"}],
+                   "materials": [{"mat_prop": 7}], "scenes": [{"scene_prop": "scene"}]})
+        );
+        assert_eq!(
+            extras("Collection", true),
+            json!({"nodes": [node], "meshes": [{"mesh_prop": "m"}],
+                   "materials": [{"mat_prop": 7}], "scenes": [{"coll_prop": 1.5}]})
+        );
+        assert_eq!(
+            extras("", false),
+            json!({"nodes": [null], "meshes": [null], "materials": [null], "scenes": [null]})
+        );
+    }
+
+    #[test]
+    fn nothing_or_only_black_listed_writes_none() {
+        let mut h = IdHeader::new("X");
+        assert!(generate(&h).is_none());
+        h.custom
+            .insert(SmolStr::new("glTF2ExportSettings"), IdProp::Int(1));
+        assert!(generate(&h).is_none());
+    }
 }

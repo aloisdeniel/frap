@@ -12,8 +12,7 @@
 //! default scene's first root active and exclude the other scenes' collections.
 //!
 //! M1 scope (static content): skins, morph targets and animations (M6), EXT_mesh_gpu_instancing,
-//! KHR_materials_variants and compressed meshes (M7), point clouds and material extensions (M3)
-//! are not imported yet; a file using them imports its static part and the report lists one
+//! KHR_materials_variants and compressed meshes (M7) are not imported yet; a file using them imports its static part and the report lists one
 //! WARNING per missing feature.
 
 mod cameras;
@@ -38,7 +37,7 @@ use std::path::{Path, PathBuf};
 
 use frap_gltf::accessor::{AccessorData, load_buffers, read_accessor, uri_to_path};
 use frap_gltf::{Document, GltfError};
-use frap_rna::{IdRef, ImageId, MaterialId, MeshId, ObjectId, Report, ReportType, SceneId};
+use frap_rna::{IdRef, ImageId, MaterialId, ObjectId, Report, ReportType, SceneId};
 use frap_scene::{ChangeLog, Main, WindowState};
 
 pub use settings::{BoneHeuristic, ExportImportConvertLightingMode, ImportSettings, ImportShading};
@@ -260,8 +259,9 @@ pub(crate) struct Gltf<'a> {
     pub materials: HashMap<(usize, bool), IdRef<MaterialId>>,
     /// `pyimage.blender_image_name`.
     pub images: HashMap<usize, Option<IdRef<ImageId>>>,
-    /// `pymesh.blender_name[cache_key]`.
-    pub mesh_cache: HashMap<MeshKey, IdRef<MeshId>>,
+    /// `pymesh.blender_name[cache_key]`: the Blender mesh, or point cloud with
+    /// `import_point_as_pointcloud` (WP 3.7).
+    pub mesh_cache: HashMap<MeshKey, frap_rna::IdAny>,
     /// The context scene (`gltf.blender_scene`).
     pub scene: IdRef<SceneId>,
     /// The context view layer name.
@@ -348,18 +348,6 @@ impl Gltf<'_> {
                     format!("glTF import: {ext} is imported from {milestone}; it was ignored"),
                 ));
             }
-        }
-        let points_only = |m: &frap_gltf::json::Mesh| {
-            !m.primitives.is_empty()
-                && m.primitives
-                    .iter()
-                    .all(|p| p.mode_or_default() == frap_gltf::json::Mode::Points)
-        };
-        if self.settings.import_point_as_pointcloud && doc.meshes.iter().any(points_only) {
-            w.push((
-                "pointcloud",
-                "glTF import: import_point_as_pointcloud creates point clouds from M3; POINTS primitives become loose vertices".into(),
-            ));
         }
         for (k, m) in w {
             self.warn_once(k, m);

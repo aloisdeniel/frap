@@ -10,8 +10,8 @@ use frap_mesh::{AttrData, Mesh};
 use frap_nodes::{InOut, Node, NodeTree, NodeTreeType, Socket, SocketType, SocketValue};
 use frap_rna::{IdAny, IdHeader, IdRef, IdType, MeshId, Value};
 use frap_scene::id::{
-    Camera, Collection, Image, Library, Light, Material, Modifier, Object, Scene, SlotLink,
-    Texture, World,
+    Camera, Collection, Image, Library, Light, Material, Modifier, Object, PointCloud, Scene,
+    SlotLink, Texture, World,
 };
 use frap_scene::{IdMap, LayerCollection, Main, Preferences, ViewLayer, WindowState};
 use serde_json::{Map, Value as J, json};
@@ -211,7 +211,7 @@ impl<'a> Writer<'a> {
         );
         root.insert(
             "pointclouds".into(),
-            self.coll(&main.pointclouds, |_, _, _| Ok(Map::new()))?,
+            self.coll(&main.pointclouds, |w, _, p| w.pointcloud(p))?,
         );
         root.insert("preferences".into(), prefs_j(prefs));
         Ok(J::Object(root))
@@ -428,11 +428,14 @@ impl<'a> Writer<'a> {
         }
     }
 
-    fn mesh(&mut self, me: &Mesh) -> Result<Map<String, J>, MapError> {
-        let mut m = Map::new();
-        m.insert("face_offsets".into(), self.buf(me.face_offsets())?);
+    /// The `attributes` array of a mesh or point cloud (`name`, `domain`, `data_type`, `data`).
+    fn attributes<'x>(
+        &mut self,
+        owner: &str,
+        it: impl Iterator<Item = &'x frap_mesh::Attribute>,
+    ) -> Result<J, MapError> {
         let mut attrs = Vec::new();
-        for a in me.attributes().iter() {
+        for a in it {
             let data = match &a.data {
                 AttrData::Float(v) => self.buf(v.as_slice())?,
                 AttrData::Int(v) => self.buf(v.as_slice())?,
@@ -462,7 +465,7 @@ impl<'a> Writer<'a> {
                 AttrData::String(v) => J::Array(v.iter().map(|s| json!(s.as_str())).collect()),
                 other => {
                     return Err(MapError::invalid(
-                        &format!("meshes[{:?}].attributes[{:?}]", me.header.name, a.name),
+                        &format!("{owner}.attributes[{:?}]", a.name),
                         format!("cannot save {} attributes", other.data_type()),
                     ));
                 }
@@ -474,7 +477,30 @@ impl<'a> Writer<'a> {
                 "data": data,
             }));
         }
-        m.insert("attributes".into(), J::Array(attrs));
+        Ok(J::Array(attrs))
+    }
+
+    /// A point cloud (WP 3.7): its point count, attributes, material slots, animation data.
+    fn pointcloud(&mut self, pc: &PointCloud) -> Result<Map<String, J>, MapError> {
+        let mut m = Map::new();
+        m.insert("points".into(), json!(pc.len()));
+        let owner = format!("pointclouds[{:?}]", pc.header.name);
+        let attrs = self.attributes(&owner, pc.attributes().iter())?;
+        m.insert("attributes".into(), attrs);
+        m.insert(
+            "materials".into(),
+            J::Array(pc.materials.iter().map(|x| self.r(*x)).collect()),
+        );
+        m.insert("animation_data".into(), self.anim(&pc.animation_data));
+        Ok(m)
+    }
+
+    fn mesh(&mut self, me: &Mesh) -> Result<Map<String, J>, MapError> {
+        let mut m = Map::new();
+        m.insert("face_offsets".into(), self.buf(me.face_offsets())?);
+        let owner = format!("meshes[{:?}]", me.header.name);
+        let attrs = self.attributes(&owner, me.attributes().iter())?;
+        m.insert("attributes".into(), attrs);
         m.insert(
             "deform_verts".into(),
             match me.deform_verts() {

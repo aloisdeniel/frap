@@ -155,14 +155,16 @@ fn create_mesh_object(
             Vec::new()
         },
     };
-    let me = match cx.mesh_cache.get(&key) {
+    // A mesh or, with `import_point_as_pointcloud` and only POINTS primitives, a point cloud
+    // (WP 3.7, `mesh::create_data`).
+    let data = match cx.mesh_cache.get(&key) {
         Some(&m) => m,
         None => {
-            let m = mesh::create_mesh(cx, main, log, mesh_idx)?;
+            let m = mesh::create_data(cx, main, log, mesh_idx)?;
             cx.mesh_cache.insert(key, m);
             m
         }
     };
-    let mesh_name = main.meshes.name_of(me).unwrap_or("Mesh").to_owned();
-    Ok((vname.clone().unwrap_or(mesh_name), Some(me.any())))
+    let data_name = mesh::data_name(main, data);
+    Ok((vname.clone().unwrap_or(data_name), Some(data)))
 }
