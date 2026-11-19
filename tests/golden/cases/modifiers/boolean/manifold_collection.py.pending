@@ -1,0 +1,21 @@
+# WP 4.6: BOOLEAN modifier with a COLLECTION operand, MANIFOLD (T2): every mesh object of the
+# collection is subtracted; a non-manifold operand (a plane) gives Blender's modifier error and
+# the input mesh. Needs `obj.modifiers.new` (WP 4.1): enable by renaming to `.py` once it lands.
+# golden: startup=factory compare=objects,evaluated:Cube,evaluated:Cube.001 tier=T2 tol=1e-4
+import bpy
+bpy.data.collections.new(name='Cutters')
+bpy.context.scene.collection.children.link(bpy.data.collections['Cutters'])
+bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=0.6, location=(1, 1, 1))
+bpy.data.collections['Cutters'].objects.link(bpy.data.objects['Icosphere'])
+bpy.ops.mesh.primitive_cube_add(size=0.8, location=(-1, -1, -0.8))
+bpy.data.collections['Cutters'].objects.link(bpy.data.objects['Cube.001'])
+bpy.data.objects['Cube'].modifiers.new(name='Boolean', type='BOOLEAN')
+bpy.data.objects['Cube'].modifiers['Boolean'].operand_type = 'COLLECTION'
+bpy.data.objects['Cube'].modifiers['Boolean'].collection = bpy.data.collections['Cutters']
+bpy.data.objects['Cube'].modifiers['Boolean'].solver = 'MANIFOLD'
+bpy.ops.mesh.primitive_plane_add(size=3, location=(0, 0, 3))
+bpy.data.objects['Cube.001'].modifiers.new(name='Boolean', type='BOOLEAN')
+bpy.data.objects['Cube.001'].modifiers['Boolean'].object = bpy.data.objects['Plane']
+bpy.data.objects['Cube.001'].modifiers['Boolean'].solver = 'MANIFOLD'
+bpy.data.objects['Cube.001'].modifiers['Boolean'].operation = 'UNION'
+bpy.context.view_layer.update()

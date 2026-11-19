@@ -101,7 +101,9 @@ fn short_form_syntax_hints_say_what_is_wrong() {
 }
 
 #[test]
-fn auto_merge_with_split_is_refused_with_a_way_forward() {
+fn auto_merge_with_split_works() {
+    // WP 4.6 implemented Auto Merge with split (EDBM_automerge_and_split): both requests,
+    // refused with OP_NOT_IMPLEMENTED in M2, now run (goldens `edit/automerge_split/*`).
     let mut s = session();
     one(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
     for src in [
@@ -109,13 +111,11 @@ fn auto_merge_with_split_is_refused_with_a_way_forward() {
         "bpy.ops.mesh.extrude_manifold(TRANSFORM_OT_translate={\"value\": (0, 0, -0.5)})",
     ] {
         let r = one(&mut s, src);
-        assert_eq!(r["error"]["code"], "OP_NOT_IMPLEMENTED", "{src}: {r}");
-        assert_eq!(r["state"], "unchanged", "{src}: {r}");
-        let h = r["error"]["hint"].as_str().unwrap_or_default();
-        assert!(h.contains("mesh.remove_doubles(threshold="), "{src}: {r}");
-        assert!(h.contains("use_mesh_automerge = True"), "{src}: {r}");
+        assert_eq!(r["status"], "FINISHED", "{src}: {r}");
     }
     // Auto Merge without split works: moving a vertex onto another welds them.
+    let mut s = session();
+    one(&mut s, "bpy.ops.object.mode_set(mode='EDIT')");
     one(
         &mut s,
         "bpy.context.scene.tool_settings.use_mesh_automerge = True",

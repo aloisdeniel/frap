@@ -1,6 +1,6 @@
-# PENDING (WP 2.5 -> WP 2.12): enable by renaming to `.py` once `transform.translate` and
-# `transform.shrink_fatten` work in Edit Mode (TRANSFORM_MODE_HANDLERS entry of WP 2.12); the
-# Blender fixture is already blessed (tests/golden/fixtures/edit/extrude/macros/).
+# Enabled by WP 4.6 (M2 leftover, decision log M34W0-11): the translate step's
+# use_automerge_and_split=True (EDBM_automerge_and_split) is implemented; the Blender fixture
+# was blessed by WP 2.5.
 # WP 2.5: mesh.extrude_manifold pushing the top face inward only moves it (V8 E12 F6).
 # golden: startup=factory compare=objects,context,mesh:Cube tier=T1 order=canonical
 import bpy

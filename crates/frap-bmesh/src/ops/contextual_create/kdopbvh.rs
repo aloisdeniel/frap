@@ -472,6 +472,56 @@ impl BvhTree {
         hit.0
     }
 
+    /// Number of leaves (`tree->leaf_num`).
+    pub fn leaf_num(&self) -> usize {
+        self.leafs.len()
+    }
+
+    // Ported from blender/source/blender/blenlib/intern/BLI_kdopbvh.cc
+    // (BLI_bvhtree_overlap_ex, tree_overlap_test, tree_overlap_traverse_num,
+    // tree_overlap_traverse_cb, BLI_bvhtree_overlap_thread_num) by WP 4.6 (Auto Merge with
+    // split), Blender 5.2.4, GPL-2.0-or-later.
+    /// `BLI_bvhtree_overlap_ex(self, other, nullptr, callback, data, max_interactions, flag)`
+    /// without returned pairs: `callback(index_a, index_b, thread)` for every overlapping leaf
+    /// pair in Blender's traversal order. With `max_interactions > 0` a leaf of `self` stops at
+    /// its `max_interactions`-th accepted pair (`tree_overlap_traverse_num`). With
+    /// `use_threading` and more than 1024 leaves, every child of the root is its own "thread"
+    /// (`thread` = the child's position, Blender's task index); otherwise `thread` is 0.
+    pub fn overlap_ex(
+        &self,
+        other: &BvhTree,
+        max_interactions: u32,
+        use_threading: bool,
+        callback: &mut dyn FnMut(i32, i32, usize) -> bool,
+    ) {
+        let (Some(root1), Some(root2)) = (self.root, other.root) else {
+            return;
+        };
+        let start_axis = self.start_axis.min(other.start_axis);
+        let stop_axis = self.stop_axis.min(other.stop_axis);
+        let o = Overlap {
+            t1: self,
+            t2: other,
+            start_axis,
+            stop_axis,
+        };
+        if !o.test(root1, root2) {
+            return;
+        }
+        // `KDOPBVH_THREAD_LEAF_THRESHOLD`.
+        let threaded = use_threading && self.leafs.len() > 1024;
+        if threaded {
+            let n = self.tree_type.min(self.nodes[root1].children.len());
+            for j in 0..n {
+                let mut left = max_interactions;
+                o.invoke(self.nodes[root1].children[j], root2, j, &mut left, callback);
+            }
+        } else {
+            let mut left = max_interactions;
+            o.invoke(root1, root2, 0, &mut left, callback);
+        }
+    }
+
     fn raycast_dfs(
         &self,
         node: usize,
@@ -497,6 +547,117 @@ impl BvhTree {
         } else {
             for &c in n.children.iter().rev() {
                 self.raycast_dfs(c, rc, hit, callback);
+            }
+        }
+    }
+}
+
+/// `BVHOverlapData_Shared` (the parts the traversals read).
+struct Overlap<'t> {
+    t1: &'t BvhTree,
+    t2: &'t BvhTree,
+    start_axis: usize,
+    stop_axis: usize,
+}
+
+impl Overlap<'_> {
+    /// `tree_overlap_test`.
+    fn test(&self, n1: usize, n2: usize) -> bool {
+        let (b1, b2) = (&self.t1.nodes[n1].bv, &self.t2.nodes[n2].bv);
+        for a in self.start_axis..self.stop_axis {
+            if b1[2 * a] > b2[2 * a + 1] || b2[2 * a] > b1[2 * a + 1] {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// `tree_overlap_invoke_traverse`.
+    fn invoke(
+        &self,
+        n1: usize,
+        n2: usize,
+        thread: usize,
+        left: &mut u32,
+        cb: &mut dyn FnMut(i32, i32, usize) -> bool,
+    ) {
+        if *left > 0 {
+            self.traverse_num(n1, n2, thread, left, cb);
+        } else {
+            self.traverse_cb(n1, n2, thread, cb);
+        }
+    }
+
+    /// Whether `n1` (of tree 1) and `n2` (of tree 2) are the same node (`node1 == node2`).
+    fn same(&self, n1: usize, n2: usize) -> bool {
+        std::ptr::eq(self.t1, self.t2) && n1 == n2
+    }
+
+    /// `tree_overlap_traverse_num`.
+    fn traverse_num(
+        &self,
+        n1: usize,
+        n2: usize,
+        thread: usize,
+        left: &mut u32,
+        cb: &mut dyn FnMut(i32, i32, usize) -> bool,
+    ) -> bool {
+        if !self.test(n1, n2) {
+            return false;
+        }
+        let (c1, c2) = (&self.t1.nodes[n1].children, &self.t2.nodes[n2].children);
+        if c1.is_empty() {
+            if c2.is_empty() {
+                if self.same(n1, n2) {
+                    return false;
+                }
+                if cb(self.t1.nodes[n1].index, self.t2.nodes[n2].index, thread) {
+                    *left -= 1;
+                    return *left == 0;
+                }
+            } else {
+                for &c in c2 {
+                    if self.traverse_num(n1, c, thread, left, cb) {
+                        return true;
+                    }
+                }
+            }
+        } else {
+            let saved = *left;
+            for &c in c1 {
+                if self.traverse_num(c, n2, thread, left, cb) {
+                    *left = saved;
+                }
+            }
+        }
+        false
+    }
+
+    /// `tree_overlap_traverse_cb`.
+    fn traverse_cb(
+        &self,
+        n1: usize,
+        n2: usize,
+        thread: usize,
+        cb: &mut dyn FnMut(i32, i32, usize) -> bool,
+    ) {
+        if !self.test(n1, n2) {
+            return;
+        }
+        let (c1, c2) = (&self.t1.nodes[n1].children, &self.t2.nodes[n2].children);
+        if c1.is_empty() {
+            if c2.is_empty() {
+                if !self.same(n1, n2) {
+                    cb(self.t1.nodes[n1].index, self.t2.nodes[n2].index, thread);
+                }
+            } else {
+                for &c in c2 {
+                    self.traverse_cb(n1, c, thread, cb);
+                }
+            }
+        } else {
+            for &c in c1 {
+                self.traverse_cb(c, n2, thread, cb);
             }
         }
     }

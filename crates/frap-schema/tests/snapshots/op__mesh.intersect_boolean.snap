@@ -1,0 +1,177 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.intersect_boolean",
+  "bl_idname": "MESH_OT_intersect_boolean",
+  "label": "Intersect (Boolean)",
+  "description": "Cut solid geometry from selected to unselected",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "operation",
+      "name": "Boolean Operation",
+      "description": "Which boolean operation to apply",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "DIFFERENCE",
+      "enum_items": [
+        {
+          "identifier": "INTERSECT",
+          "name": "Intersect",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "UNION",
+          "name": "Union",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "DIFFERENCE",
+          "name": "Difference",
+          "description": "",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_swap",
+      "name": "Swap",
+      "description": "Use with difference intersection to swap which side is kept",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_self",
+      "name": "Self Intersection",
+      "description": "Do self-union or self-intersection",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "threshold",
+      "name": "Merge Threshold",
+      "description": "",
+      "type": "FLOAT",
+      "subtype": "DISTANCE",
+      "unit": "LENGTH",
+      "array": null,
+      "default": 0.000001,
+      "hard_min": 0,
+      "hard_max": 0.01,
+      "soft_min": 0,
+      "soft_max": 0.001,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "solver",
+      "name": "Solver",
+      "description": "Which Boolean solver to use",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "EXACT",
+      "enum_items": [
+        {
+          "identifier": "FLOAT",
+          "name": "Float",
+          "description": "Faster solver, some limitations",
+          "value": 0
+        },
+        {
+          "identifier": "EXACT",
+          "name": "Exact",
+          "description": "Exact solver, slower, handles more cases",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T3",
+    "support": "partial",
+    "support_note": "EXACT runs manifold-rust's exact robust boolean (Blender's exact mesh arrangement is not ported, WP 8.6): Blender's volume, not its face layout; the selected and unselected parts must each be closed (OP_NOT_IMPLEMENTED otherwise); use_self does not change the result; FLOAT runs EXACT with a WARNING",
+    "headless": "native",
+    "planned": "M4",
+    "extension": false,
+    "notes": []
+  }
+}
