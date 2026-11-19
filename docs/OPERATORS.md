@@ -385,8 +385,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `view3d.snap_cursor_to_grid` | M1 | P1 |  |
 | [x] | `view3d.snap_selected_to_active` | M1 | P1 |  |
 | [x] | `view3d.snap_selected_to_grid` | M1 | P2 |  |
-| [ ] | `view3d.camera_to_view_selected` | M3 | P0 | frames selected objects with scene.camera |
-| [ ] | `view3d.object_as_camera` | M3 | P1 | WP 3.4 (M3+M4 W0 assignment) |
+| [x] | `view3d.camera_to_view_selected` | M3 | P0 | frames selected objects with scene.camera (WP 3.4) |
+| [x] | `view3d.object_as_camera` | M3 | P1 | WP 3.4 (M3+M4 W0 assignment) |
 
 ### `uv.*`
 

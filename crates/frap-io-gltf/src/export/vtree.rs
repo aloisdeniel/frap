@@ -18,9 +18,10 @@
 //!   its children) or become roots (appended to the roots).
 //! - `matrix_world` is Blender's `parent.matrix_world @ matrix_parent_inverse @ matrix_basis`.
 //!
-//! M1 limits: cameras and lights are always filtered out (`export_cameras`/`export_lights`
-//! arrive with M3 WP 3.4); collection hierarchies (`export_hierarchy_full_collections`),
-//! instancing and bones are later milestones.
+//! Cameras and lights are kept with `export_cameras`/`export_lights` and their world matrix
+//! gets the add-on's correction rotation (`cameras.rs`, WP 3.4). M1 limits: collection
+//! hierarchies (`export_hierarchy_full_collections`), instancing and bones are later
+//! milestones.
 
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};
@@ -483,7 +484,12 @@ pub fn build(main: &Main, ctx: &Context, s: &ExportSettings) -> VTree {
             object: r,
             parent,
             children: Vec::new(),
-            matrix_world: matrix_world(main, ob),
+            // Cameras and lights get the add-on's Y-up correction (WP 3.4, `cameras.rs`).
+            matrix_world: crate::export::cameras::correct_matrix_world(
+                s,
+                ob,
+                matrix_world(main, ob),
+            ),
             keep: filters.not_inheritable(ob) && filters.inheritable(r, ob),
         });
         match parent {

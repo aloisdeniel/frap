@@ -1,0 +1,9 @@
+bpy.ops.view3d.camera_to_view_selected()
+bpy.data.objects['Camera'].location
+bpy.ops.object.light_add(type='AREA', location=(0, 0, 4))
+bpy.ops.export_scene.gltf(filepath='scene.glb', export_cameras=True, export_lights=True)
+bpy.context.scene.camera = None
+bpy.ops.view3d.camera_to_view_selected()
+bpy.context.view_layer.objects.active = bpy.data.objects['Camera']
+bpy.ops.view3d.object_as_camera()
+bpy.context.scene.camera.name
