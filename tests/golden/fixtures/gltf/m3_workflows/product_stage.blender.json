@@ -1,0 +1,290 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Backdrop": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, -0.00000013435886, -1.0000001, 4.0],
+        [0.0, 1.0000001, -0.00000013435886, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 4.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.7071068, 0.7071068, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Studio"],
+      "mode": "OBJECT"
+    },
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.16996704, -0.98544973, -6.0],
+        [0.0, 0.98544973, 0.16996704, 2.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, -6.0, 2.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.76484215, 0.6442177, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086462, -0.5663932, -0.77110094, 4.0762453],
+        [0.95517117, -0.21839117, -0.19988336, 1.005454],
+        [-0.055189032, -0.79467237, 0.6045247, 5.903862],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0762453, 1.005454, 5.903862],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.5232755, -0.28416628, -0.34203392, 0.7269423],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Product": {
+      "type": "MESH",
+      "parent": "Turntable",
+      "matrix_world": [
+        [0.921061, -0.3894183, 0.0, 0.0],
+        [0.3894183, 0.921061, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 1.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Spot": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [0.6967067, 0.5486642, -0.4621335, -3.0],
+        [-0.7173561, 0.5328707, -0.44883078, -3.0],
+        [0.00000003470535, 0.64421767, 0.7648422, 4.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [-3.0, -3.0, 4.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.8652196, 0.31582978, -0.1335307, -0.36580896],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Sun": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [0.9950042, 0.019833842, 0.0978434, 0.0],
+        [0.0000000065452657, 0.98006654, -0.19866945, 0.0],
+        [-0.09983342, 0.19767693, 0.9751703, 8.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 8.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.9937607, 0.099708706, 0.04972948, -0.0049895905],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Turntable": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.921061, -0.3894183, 0.0, 0.0],
+        [0.3894183, 0.921061, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.9800666, 0.0, 0.0, 0.19866931],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Backdrop",
+    "selected": ["Backdrop", "Camera", "Light", "Spot", "Sun", "Turntable", "Product"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {
+    "out/stage.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "product_stage.out_stage.glb"
+      }
+    },
+    "out/stage_rt.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "product_stage.out_stage_rt.glb"
+      }
+    }
+  }
+}

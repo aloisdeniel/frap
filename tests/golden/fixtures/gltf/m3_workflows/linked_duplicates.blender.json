@@ -1,0 +1,175 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Tree": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 1.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Leaves"],
+      "mode": "OBJECT"
+    },
+    "Tree.001": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 3.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [3.0, 0.0, 1.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Autumn"],
+      "mode": "OBJECT"
+    },
+    "Tree.002": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 3.0],
+        [0.0, 1.0, 0.0, 3.0],
+        [0.0, 0.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [3.0, 3.0, 1.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Leaves"],
+      "mode": "OBJECT"
+    },
+    "Tree.003": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, -3.0],
+        [0.0, 1.0, 0.0, 3.0],
+        [0.0, 0.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [-3.0, 3.0, 1.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Leaves"],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Tree",
+    "selected": ["Tree", "Tree.001", "Tree.002", "Tree.003"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {
+    "out/forest.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "linked_duplicates.out_forest.glb"
+      }
+    },
+    "out/forest_rt.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "linked_duplicates.out_forest_rt.glb"
+      }
+    }
+  }
+}

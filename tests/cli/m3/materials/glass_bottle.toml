@@ -1,0 +1,15 @@
+# WP 3.9: an agent builds a glass material for a bottle with node-tree statements (bpy-line and
+# short form mixed) and exports it. A misspelt socket (`Transmision Weight`) is
+# `KeyError: 'bpy_prop_collection[key]: key "Transmision Weight" not found'` (with a
+# did-you-mean) and a misspelt node type `RuntimeError: Error: Node type
+# ShaderNodeVolumeAbsorbtion undefined`; neither changes anything. The Volume Absorption node is
+# linked to the Material Output's Volume, `blend_method = 'GLASS'` is a TypeError listing the
+# enum items, and `surface_render_method = 'BLENDED'` is accepted. The export, an empty file and
+# the import bring back a Principled BSDF with transmission 1 and IOR 1.52 on the same
+# material. Every statement's outcome and value equals Blender 5.2.4's (checked with
+# `frap-golden diff` and a value dump), up to the trailing newline of Blender's `RuntimeError`
+# texts, which frap's messages never carry (deviations §3). Statements on stdin (raw mode,
+# §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

@@ -1,0 +1,18 @@
+mesh.primitive_uv_sphere_add segments=16 ring_count=8 location=3,0,0
+object.shade_smooth
+data.materials.new Brushed
+data.objects['Sphere'].data.materials.append data.materials['Brushed']
+data.materials['Brushed'].node_tree.nodes['Principled BSDF'].inputs['Metallic'].default_value = 1
+data.materials['Brushed'].node_tree.nodes['Principled BSDF'].inputs['Anisotropic'].default_value = 0.5
+image.new name=Grid width=8 height=8 generated_type=COLOR_GRID
+data.materials['Brushed'].node_tree.nodes.new ShaderNodeTexImage
+data.materials['Brushed'].node_tree.nodes['Image Texture'].image = data.images['Grid']
+data.materials['Brushed'].node_tree.links.new(data.materials['Brushed'].node_tree.nodes['Image Texture'].outputs['Color'], data.materials['Brushed'].node_tree.nodes['Principled BSDF'].inputs['Base Color'])
+object.mode_set mode=EDIT
+mesh.select_all action=SELECT
+uv.sphere_project
+uv.sphere_projekt
+object.mode_set mode=OBJECT
+export_scene.gltf filepath=metal.glb export_tangents=true
+export_scene.gltf filepath=metal.glb export_tangents=maybe
+context.object.data.uv_layers.active.name

@@ -1,0 +1,213 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Body": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [2.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 0.5, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [2.0, 1.0, 0.5],
+      "modifiers": [],
+      "materials": ["Paint"],
+      "mode": "OBJECT"
+    },
+    "Trim": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 1.2],
+        [0.0, -0.00000013435886, -1.0000001, 1.1],
+        [0.0, 1.0000001, -0.00000013435886, -0.3],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.2, 1.1, -0.3],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.7071068, 0.7071068, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Chrome"],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Body",
+    "selected": ["Body", "Trim"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {
+    "out/car.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "car_paint.out_car.glb"
+      }
+    },
+    "out/car_rt.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "car_paint.out_car_rt.glb"
+      }
+    }
+  }
+}

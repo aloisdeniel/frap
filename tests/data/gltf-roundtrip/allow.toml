@@ -2,9 +2,11 @@
 #   gltf_canonical(frap import → frap export) == gltf_canonical(Blender import → Blender export)
 # with default options. Paths are relative to tests/data/. Blender's re-exports are committed
 # under tests/golden/fixtures/gltf/m1/roundtrip/ (re-bless with FRAP_ROUNDTRIP_BLESS=1, see
-# crates/frap-ops-io-tests/tests/gltf_roundtrip.rs). Files with content M1 does not import or
-# export yet (skins, morph targets, animation, vertex colours, texture transforms, instancing,
-# lights and cameras) are not listed.
+# crates/frap-ops-io-tests/tests/gltf_roundtrip.rs). Files with content frap does not import or
+# export yet (skins, morph targets, animation, instancing) are not listed; the M3 static
+# content (strips/fans, lines, points, vertex colours, texture transforms, scenes, lights,
+# cameras, unlit, emissive strength) was added by WP 3.9. LightVisibility is left out:
+# Blender 5.2.4's add-on refuses its required KHR_node_visibility.
 
 [[file]]
 path = "gltf-blender/fixtures/cube.glb"
@@ -61,3 +63,35 @@ note = "Khronos: non-indexed primitive"
 [[file]]
 path = "gltf-samples/SimpleSparseAccessor/glTF-Embedded/SimpleSparseAccessor.gltf"
 note = "Khronos: sparse accessor decoded on import, dense on export"
+
+[[file]]
+path = "gltf-samples/MeshPrimitiveModes/glTF-Embedded/MeshPrimitiveModes.gltf"
+note = "Khronos: POINTS, LINES, LINE_LOOP, LINE_STRIP, TRIANGLE_STRIP and TRIANGLE_FAN imported as loose vertices, loose edges and faces (M3, WP 3.7)"
+
+[[file]]
+path = "gltf-samples/TextureTransformTest/glTF/TextureTransformTest.gltf"
+note = "Khronos: KHR_texture_transform offset/rotation/scale, external images (M3)"
+
+[[file]]
+path = "gltf-samples/MultipleScenes/glTF-Embedded/MultipleScenes.gltf"
+note = "Khronos: two glTF scenes (M3, WP 3.10)"
+
+[[file]]
+path = "gltf-samples/Cameras/glTF-Embedded/Cameras.gltf"
+note = "Khronos: perspective and orthographic cameras (M3)"
+
+[[file]]
+path = "gltf-samples/PointLightIntensityTest/glTF-Binary/PointLightIntensityTest.glb"
+note = "Khronos: KHR_lights_punctual intensities, W <-> cd conversion (M3)"
+
+[[file]]
+path = "gltf-samples/BoxVertexColors/glTF-Binary/BoxVertexColors.glb"
+note = "Khronos: COLOR_0 vertex colours (M3)"
+
+[[file]]
+path = "gltf-samples/UnlitTest/glTF-Binary/UnlitTest.glb"
+note = "Khronos: KHR_materials_unlit (M3)"
+
+[[file]]
+path = "gltf-samples/EmissiveStrengthTest/glTF-Binary/EmissiveStrengthTest.glb"
+note = "Khronos: KHR_materials_emissive_strength (M3)"

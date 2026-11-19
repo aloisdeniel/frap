@@ -1,0 +1,19 @@
+bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.4, depth=1.5)
+bpy.data.materials.new('Glass')
+bpy.context.object.data.materials.append(bpy.data.materials['Glass'])
+bpy.data.materials['Glass'].node_tree.nodes['Principled BSDF'].inputs['Transmission Weight'].default_value = 1.0
+data.materials['Glass'].node_tree.nodes['Principled BSDF'].inputs['IOR'].default_value = 1.52
+bpy.data.materials['Glass'].node_tree.nodes['Principled BSDF'].inputs['Transmision Weight'].default_value = 1.0
+bpy.data.materials['Glass'].node_tree.nodes.new('ShaderNodeVolumeAbsorbtion')
+bpy.data.materials['Glass'].node_tree.nodes.new('ShaderNodeVolumeAbsorption')
+bpy.data.materials['Glass'].node_tree.nodes['Volume Absorption'].inputs['Density'].default_value = 2.5
+bpy.data.materials['Glass'].node_tree.links.new(bpy.data.materials['Glass'].node_tree.nodes['Volume Absorption'].outputs['Volume'], bpy.data.materials['Glass'].node_tree.nodes['Material Output'].inputs['Volume'])
+bpy.data.materials['Glass'].node_tree.nodes['Material Output'].inputs['Volume'].is_linked
+bpy.data.materials['Glass'].blend_method = 'GLASS'
+bpy.data.materials['Glass'].surface_render_method = 'BLENDED'
+bpy.ops.export_scene.gltf(filepath='bottle.glb')
+bpy.ops.wm.read_homefile(use_empty=True)
+bpy.ops.import_scene.gltf(filepath='bottle.glb')
+bpy.data.materials['Glass'].node_tree.nodes['Principled BSDF'].inputs['Transmission Weight'].default_value
+bpy.data.materials['Glass'].node_tree.nodes['Principled BSDF'].inputs['IOR'].default_value
+bpy.data.objects['Cylinder'].active_material.name
