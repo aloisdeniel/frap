@@ -1,0 +1,19 @@
+bpy.ops.export_scene.gltf(filepath='draco.glb', export_draco_mesh_compression_enable=True)
+bpy.ops.export_scene.gltf(filepath='web/scene.gltf', export_format='GLTF_SEPARATE', export_texture_dir='tex')
+bpy.ops.export_scene.gltf(filepath='embedded.gltf', export_format='GLTF_EMBEDDED')
+bpy.context.preferences.addons['io_scene_gltf2'].preferences.allow_embedded_format = True
+bpy.ops.export_scene.gltf(filepath='embedded.gltf', export_format='GLTF_EMBEDDED')
+bpy.ops.export_scene.gltf(filepath='lit.glb', export_lights=True, export_cameras=True, export_yup=False)
+bpy.data.meshes.new('Dots')
+bpy.data.meshes['Dots'].from_pydata([(0, 0, 0), (1, 0, 0), (0, 1, 0)], [(0, 1)], [])
+bpy.data.objects.new('Dots', bpy.data.meshes['Dots'])
+bpy.context.scene.collection.objects.link(bpy.data.objects['Dots'])
+bpy.ops.export_scene.gltf(filepath='dots.glb', use_selection=True)
+bpy.data.objects['Dots'].select_set(True)
+bpy.ops.export_scene.gltf(filepath='dots.glb', use_selection=True, use_mesh_edges=True, use_mesh_vertices=True)
+bpy.ops.wm.read_homefile(use_empty=True)
+bpy.ops.import_scene.gltf(filepath='nothere.glb')
+bpy.ops.import_scene.gltf(filepath='dots.glb')
+bpy.data.meshes['Dots'].vertices[2].co
+bpy.ops.import_scene.gltf(filepath='lit.glb')
+bpy.data.objects['Light'].data.type

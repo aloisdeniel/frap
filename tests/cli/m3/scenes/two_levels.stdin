@@ -1,0 +1,17 @@
+bpy.data.scenes.new('Level2')
+bpy.context.window.scene = bpy.data.scenes['Level2']
+bpy.context.scene.name
+bpy.ops.mesh.primitive_cylinder_add(vertices=8)
+bpy.context.scene.objects[0].name
+bpy.ops.export_scene.gltf(filepath='levels.glb')
+bpy.ops.export_scene.gltf(filepath='level2.glb', use_active_scene=True)
+bpy.context.window.scene = bpy.data.objects['Cylinder']
+bpy.ops.scene.delete()
+bpy.context.scene.name
+bpy.ops.wm.read_homefile(use_empty=True)
+bpy.ops.import_scene.gltf(filepath='levels.glb')
+bpy.data.scenes[0].name
+bpy.data.scenes[1].name
+bpy.context.scene.name
+bpy.data.scenes['Scene'].objects[0].name
+bpy.data.scenes['Scene.001'].objects[0].name

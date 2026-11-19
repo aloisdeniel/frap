@@ -1,0 +1,192 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Survey": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Ground"],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Survey",
+    "selected": ["Survey"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {
+    "out/survey.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "wire_and_points.out_survey.glb"
+      }
+    },
+    "out/survey_all.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "wire_and_points.out_survey_all.glb"
+      }
+    },
+    "out/survey_edges.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "wire_and_points.out_survey_edges.glb"
+      }
+    },
+    "out/survey_edges_rt.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "wire_and_points.out_survey_edges_rt.glb"
+      }
+    },
+    "out/survey_plain_rt.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "wire_and_points.out_survey_plain_rt.glb"
+      }
+    },
+    "out/survey_points.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "wire_and_points.out_survey_points.glb"
+      }
+    },
+    "out/survey_points_rt.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "wire_and_points.out_survey_points_rt.glb"
+      }
+    },
+    "out/survey_rt.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "wire_and_points.out_survey_rt.glb"
+      }
+    }
+  }
+}

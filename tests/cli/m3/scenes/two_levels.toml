@@ -1,0 +1,12 @@
+# WP 3.9: an agent lays out a game in two scenes. `bpy.data.scenes.new('Level2')` and
+# `bpy.context.window.scene = …` switch the context scene; a cylinder lands in Level2. The
+# export writes both scenes with Level2, the window's scene, as the default `scene`;
+# `use_active_scene=True` writes Level2 only. Assigning an object to `window.scene` is a
+# TypeError. `scene.delete` removes Level2 and the window falls back to "Scene". Importing the
+# two-scene file into an empty file imports the default glTF scene into the current scene
+# ("Scene", holding the cylinder) and adds "Scene.001" for the other one, whose `objects` stay
+# empty, as in Blender: IndexError. Every statement's outcome and value equals Blender 5.2.4's
+# (checked with `frap-golden diff` and a value dump). Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

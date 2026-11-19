@@ -1,0 +1,14 @@
+# WP 3.9: an agent paints a 2x2 RGBA image through `pixels` (is_dirty becomes True), saves it as
+# PNG into a new directory (no longer dirty), loads the file back (`size` [2, 2], a `pixels`
+# slice read back as 8-bit values: alpha 0.5 -> 128/255), packs it, and fails to load a missing
+# file (`RuntimeError: Error: Cannot read 'missing.png': No such file or directory`). A
+# generated UV_GRID made with `image.new` is scaled to 4x2. The loaded image becomes the cube's
+# base colour texture; exported and imported into an empty file it comes back packed, named
+# after the glTF image (`paint`), with the same size and the same packed bytes. Every
+# statement's outcome and value equals Blender 5.2.4's (checked with `frap-golden diff` and a
+# value dump) except `packed_file.size`: frap's PNG encoder writes 85 bytes where Blender's
+# writes 260 for the same pixels (byte identity is not a goal; the decoded pixels are equal).
+# Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

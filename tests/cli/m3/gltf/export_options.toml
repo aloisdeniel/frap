@@ -1,0 +1,13 @@
+# WP 3.9: glTF export options an agent tries. Draco compression is accepted and reported as
+# not supported yet (WARNING, exported uncompressed until M7); GLTF_SEPARATE writes a .gltf and
+# its .bin; GLTF_EMBEDDED is a TypeError until the add-on preference `allow_embedded_format`
+# is set, as in Blender; lights, cameras and Z-up export together. A mesh of one loose edge and
+# a loose vertex exported with use_selection while it is not selected leaves it out; selected,
+# with use_mesh_edges and use_mesh_vertices, it writes LINES and POINTS primitives. In an empty
+# file, importing a missing file is `RuntimeError: Error: Please select a file` (the add-on's
+# message), the LINES/POINTS file imports as loose geometry and the lit file brings the factory
+# light back as a POINT light. Every statement's outcome and value equals Blender 5.2.4's
+# (checked with `frap-golden diff` and a value dump). Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

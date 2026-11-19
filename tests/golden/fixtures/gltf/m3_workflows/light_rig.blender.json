@@ -1,0 +1,288 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Fill": {
+      "type": "LIGHT",
+      "parent": "RigRoot",
+      "matrix_world": [
+        [0.8253356, -0.5646425, 0.0, -1.346722],
+        [0.5646425, 0.8253356, 0.0, -3.3445988],
+        [0.0, 0.0, 1.0, 5.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [-3.0000002, -2.0, 2.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Key": {
+      "type": "LIGHT",
+      "parent": "RigRoot",
+      "matrix_world": [
+        [0.26749885, -0.67131746, 0.6912143, 4.1699343],
+        [0.9635582, 0.18636826, -0.19189197, -0.78207946],
+        [0.000000016865755, 0.7173561, 0.6967067, 7.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [3.0, -3.0, 4.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.8652196, 0.36580896, 0.13353068, 0.31582978],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "RigRoot": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.8253356, -0.5646425, 0.0, 0.0],
+        [0.5646425, 0.8253356, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 3.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 3.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.9553365, 0.0, 0.0, 0.29552022],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Rim": {
+      "type": "LIGHT",
+      "parent": "RigRoot",
+      "matrix_world": [
+        [-0.84810007, 0.43729258, 0.29916787, -2.25857],
+        [-0.529836, -0.69996727, -0.47887325, 3.3013425],
+        [-0.000000019621284, -0.5646423, 0.8253357, 8.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 4.0, 5.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.019866107, -0.0061453157, -0.29545623, 0.9551299],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube", "RigRoot", "Fill", "Key", "Rim"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {
+    "out/rig.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "light_rig.out_rig.glb"
+      }
+    },
+    "out/rig_compat.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "light_rig.out_rig_compat.glb"
+      }
+    },
+    "out/rig_compat_rt.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "light_rig.out_rig_compat_rt.glb"
+      }
+    },
+    "out/rig_raw.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "light_rig.out_rig_raw.glb"
+      }
+    },
+    "out/rig_raw_rt.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "light_rig.out_rig_raw_rt.glb"
+      }
+    },
+    "out/rig_rt.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "light_rig.out_rig_rt.glb"
+      }
+    }
+  }
+}

@@ -1,0 +1,11 @@
+# WP 3.9: the M3 workflow in short form only (§11.4): an agent adds a smooth UV sphere, gives it
+# an anisotropic metal material (short path assignments, an RNA function call with a positional
+# value, a Python-style `links.new(…)` call), a generated COLOR_GRID image texture, sphere-projected
+# UVs, and exports with tangents (`export_tangents=true`). A misspelt operator
+# (`uv.sphere_projekt`) is OP_UNKNOWN with a suggestion, and `export_tangents=maybe` is a
+# TypeError; the active UV map is read back. The same statements in bpy-line form give a GLB
+# canonically equal to Blender 5.2.4's (tangents within their 4-decimal rounding, checked with
+# `frap-golden diff`). Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true
