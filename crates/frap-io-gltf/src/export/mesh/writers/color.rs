@@ -33,9 +33,9 @@
 //! VEC4 (clipped to `[0, 1]`). Loose edges and points get the POINT-domain sets (unmasked) and
 //! the fake one; CORNER-domain sets do not exist on them.
 //!
-//! Limit: [`frap_material::VertexColorUse`] does not say whether the material's Alpha reads a
-//! colour attribute, so in MATERIAL mode a set from a material never adds alpha (the add-on
-//! adds it when Alpha reads the attribute and the material is not OPAQUE).
+//! In MATERIAL mode a set from a material adds alpha when the material's Alpha reads a colour
+//! attribute and the material is not OPAQUE ([`frap_material::VertexColorUse::adds_alpha`]); a
+//! material whose Alpha alone reads one exports no set (not managed by the add-on).
 
 use std::collections::BTreeMap;
 
@@ -325,8 +325,8 @@ fn face_buckets(cx: &MeshExportCx) -> Vec<i64> {
 fn vc_info(cx: &MeshExportCx, mats: &[Option<IdRef<MaterialId>>], bucket: i64) -> VcInfo {
     let s = cx.settings;
     let slot = usize::try_from(bucket).unwrap_or(usize::MAX);
-    let mat = material_for_slot(s.export_materials, slot, mats)
-        .and_then(|m| cx.main.materials.get(m));
+    let mat =
+        material_for_slot(s.export_materials, slot, mats).and_then(|m| cx.main.materials.get(m));
     let none_or_active = |has_material| {
         if VcSettings::of(cx).when_no_material {
             VcInfo {
@@ -347,15 +347,18 @@ fn vc_info(cx: &MeshExportCx, mats: &[Option<IdRef<MaterialId>>], bucket: i64) -
             let lm = crate::export::materials::lower::lowered(cx.main, mat);
             match lm.vertex_color {
                 None => VcInfo::none(true),
-                Some(v) => VcInfo {
-                    has_material: true,
-                    color: Some(match v.attribute {
-                        Some(n) if !n.is_empty() => VcRef::Name(n),
+                Some(v) => {
+                    let r = |n: &Option<SmolStr>| match n {
+                        Some(n) if !n.is_empty() => VcRef::Name(n.clone()),
                         _ => VcRef::Active,
-                    }),
-                    alpha: None,
-                    alpha_opaque: lm.alpha_mode == frap_material::AlphaMode::Opaque,
-                },
+                    };
+                    VcInfo {
+                        has_material: true,
+                        color: v.color.then(|| r(&v.attribute)),
+                        alpha: v.alpha.then(|| r(&v.alpha_attribute)),
+                        alpha_opaque: lm.alpha_mode == frap_material::AlphaMode::Opaque,
+                    }
+                }
             }
         }
         ExportMaterials::Viewport => VcInfo::none(true),
@@ -617,7 +620,11 @@ mod tests {
         );
         assert_eq!(
             names(&p),
-            [(0, true, "", true), (1, false, "Col", true), (2, false, "PCol", true)]
+            [
+                (0, true, "", true),
+                (1, false, "Col", true),
+                (2, false, "PCol", true)
+            ]
         );
         assert_eq!(p.using[&0], [0, 1, 2]);
         // export_all_vertex_colors off: nothing.

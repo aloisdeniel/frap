@@ -60,7 +60,10 @@ mod tests {
         let mut m = Material::default();
         m.extensions.set(Some(KhrMaterialsUnlit::default()));
         d.materials.push(m);
-        d.use_extension(KhrMaterialsUnlit::NAME, KhrMaterialsUnlit::REQUIRED_BY_DEFAULT);
+        d.use_extension(
+            KhrMaterialsUnlit::NAME,
+            KhrMaterialsUnlit::REQUIRED_BY_DEFAULT,
+        );
         assert!(d.extensions_required.is_empty());
         assert!(validate(&d).is_ok(), "{}", validate(&d));
         let json = String::from_utf8(d.to_vec(&Default::default())).unwrap();

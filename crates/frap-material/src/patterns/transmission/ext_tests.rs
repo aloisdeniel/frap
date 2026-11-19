@@ -448,9 +448,17 @@ fn sheen_needs_a_weight() {
     let mut m = mat();
     set(&mut m, BSDF, "Sheen Tint", rgb(1.0, 0.0, 0.0));
     assert!(law(&m, &Images::default()).ext.sheen.is_none());
-    // A linked weight enables it whatever its value.
+    // A Value node is constant-folded by the inliner (verified on 5.2.4): 0 disables sheen,
+    // anything else enables it.
     let v = add(&mut m, "ShaderNodeValue");
     link(&mut m, (v, "Value"), (BSDF, "Sheen Weight"));
+    assert!(law(&m, &Images::default()).ext.sheen.is_none());
+    m.node_tree.node_mut(v).unwrap().outputs[0].default_value = f(0.3);
+    let s = law(&m, &Images::default()).ext.sheen.unwrap();
+    assert_eq!(s.color.factor, [1.0, 0.0, 0.0]);
+    // A weight the inliner cannot fold enables it whatever its value.
+    let fr = add(&mut m, "ShaderNodeFresnel");
+    link(&mut m, (fr, "Factor"), (BSDF, "Sheen Weight"));
     let s = law(&m, &Images::default()).ext.sheen.unwrap();
     assert_eq!(s.color.factor, [1.0, 0.0, 0.0]);
 }
@@ -527,9 +535,17 @@ fn unsupported_setups_warn() {
     let mut images = Images::default();
     let img = images.add("grey", false);
     let mut m = mat();
-    // Coat Weight from a Value node: not exported (only unlinked sockets and textures are).
+    // Coat Weight from a Value node is constant-folded (0.7, verified on 5.2.4).
     let v = add(&mut m, "ShaderNodeValue");
+    m.node_tree.node_mut(v).unwrap().outputs[0].default_value = f(0.7);
     link(&mut m, (v, "Value"), (BSDF, "Coat Weight"));
+    let lm = lower(&m.node_tree, &m, &images);
+    assert_eq!(lm.ext.clearcoat.unwrap().factor.factor, 0.7);
+    assert!(lm.diagnostics.is_empty(), "{:?}", lm.diagnostics);
+    // Coat Weight from a node the inliner cannot fold: not exported (only constants and
+    // textures are), WARNING.
+    let fr = add(&mut m, "ShaderNodeFresnel");
+    link(&mut m, (fr, "Factor"), (BSDF, "Coat Weight"));
     let lm = lower(&m.node_tree, &m, &images);
     assert_eq!(lm.ext.clearcoat.unwrap().factor.factor, 0.0);
     assert!(

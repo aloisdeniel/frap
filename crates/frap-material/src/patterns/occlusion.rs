@@ -150,7 +150,13 @@ mod tests {
         let group = raised.node_tree.node_by_name("Group").unwrap();
         assert_eq!(group.inputs.len(), 5);
         assert_eq!((group.location, group.width), ([40.0, -370.0], 180.0));
-        assert!(raised.node_tree.nodes.iter().any(|n| n.label == "Occlusion Strength"));
+        assert!(
+            raised
+                .node_tree
+                .nodes
+                .iter()
+                .any(|n| n.label == "Occlusion Strength")
+        );
         // White as the second colour: strength 1 − factor.
         let mut m = mat("Reversed");
         let t = image_node(&mut m, img);

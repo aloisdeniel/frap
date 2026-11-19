@@ -25,7 +25,7 @@ use std::f64::consts::TAU;
 use frap_nodes::{Node, SocketAddr, SocketValue};
 use frap_rna::Value;
 
-use super::transmission::ext_common::{image_from_socket, uv_map_name};
+use super::transmission::ext_common::{image_from_socket, konst_f32, uv_map_name};
 use crate::graph::{Src, unrecognised};
 use crate::{Anisotropy, ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, TexRef};
 
@@ -137,12 +137,13 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     ) else {
         return;
     };
-    if let (Src::Const(SocketValue::Float(s)), Src::Const(SocketValue::Float(r))) =
-        (cx.src_at(p, ai), cx.src_at(p, ri))
-    {
+    if let (Some(s), Some(r)) = (
+        konst_f32(cx, cx.src_at(p, ai)),
+        konst_f32(cx, cx.src_at(p, ri)),
+    ) {
         out.ext.anisotropy = Some(Anisotropy {
-            strength: *s,
-            rotation: (f64::from(*r) * TAU) as f32,
+            strength: s,
+            rotation: (f64::from(r) * TAU) as f32,
             texture: None,
         });
         return;

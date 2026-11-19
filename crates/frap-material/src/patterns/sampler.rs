@@ -20,9 +20,7 @@
 use frap_nodes::{Node, SocketAddr, SocketValue};
 
 use crate::graph::In;
-use crate::{
-    Filter, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, Sampler, TexRef, Wrap,
-};
+use crate::{Filter, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, Sampler, TexRef, Wrap};
 
 /// What `detect_manual_uv_wrapping` finds in front of an Image Texture's `Vector`.
 #[derive(Copy, Clone, Debug)]
@@ -66,7 +64,8 @@ pub fn detect_manual_uv_wrapping<'a>(
             _ => return None,
         };
         let (prev_node, out) = prev?;
-        if prev_node.bl_idname != "ShaderNodeSeparateXYZ" || prev_node.outputs[out].identifier != soc
+        if prev_node.bl_idname != "ShaderNodeSeparateXYZ"
+            || prev_node.outputs[out].identifier != soc
         {
             return None;
         }

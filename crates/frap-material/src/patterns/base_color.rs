@@ -32,9 +32,7 @@
 use frap_nodes::{Node, SocketAddr, SocketValue};
 
 use crate::graph::{In, Src, SrcChannel, unrecognised};
-use crate::{
-    AlphaMode, ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, TexRef,
-};
+use crate::{AlphaMode, ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, TexRef};
 
 /// Short description of the node behind a source, for diagnostics.
 pub(crate) fn describe(src: Src<'_>) -> String {
@@ -134,8 +132,7 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     out.base_color.factor[..3].copy_from_slice(&rgb);
     let tex_socket = base_socket.or_else(|| cx.gltf_output_input("BaseColor"));
     let alpha_socket = In::named(p, "Alpha");
-    out.base_color.texture =
-        base_color_texture(cx, tex_socket, alpha_socket, &mut out.diagnostics);
+    out.base_color.texture = base_color_texture(cx, tex_socket, alpha_socket, &mut out.diagnostics);
     // A Base Color linked to something that is neither a texture, a factor nor a colour
     // attribute: the add-on exports the factor only.
     if let Some(s) = base_socket
@@ -316,7 +313,15 @@ pub(crate) fn raise_base_color(
             }
             vc
         };
-        let vc = vc_node(cx, if v.color { &v.attribute } else { &v.alpha_attribute }, 0.0);
+        let vc = vc_node(
+            cx,
+            if v.color {
+                &v.attribute
+            } else {
+                &v.alpha_attribute
+            },
+            0.0,
+        );
         if let Some(c) = vc_color_to {
             let o = cx.output(vc, "Color");
             cx.link(c, o);
@@ -441,7 +446,10 @@ mod tests {
         link(&mut m, (ta, "Color"), (BSDF, "Base Color"));
         link(&mut m, (tb, "Alpha"), (BSDF, "Alpha"));
         let lm = lower_m(&m, &images);
-        assert_eq!(lm.base_color.texture.as_ref().unwrap().channel, ChannelSel::Rgb);
+        assert_eq!(
+            lm.base_color.texture.as_ref().unwrap().channel,
+            ChannelSel::Rgb
+        );
         assert_eq!(lm.diagnostics.len(), 1);
         // A colour output into Alpha (RGB → BW): WARNING, no texture.
         let mut m = mat("Gray");
@@ -470,7 +478,15 @@ mod tests {
             .map(|n| n.label.as_str())
             .filter(|l| !l.is_empty())
             .collect();
-        assert_eq!(labels, ["Mix Vertex Color", "Mix Vertex Alpha", "BASE COLOR"]);
-        assert!(raised.node_tree.first_of_type("ShaderNodeVertexColor").is_some());
+        assert_eq!(
+            labels,
+            ["Mix Vertex Color", "Mix Vertex Alpha", "BASE COLOR"]
+        );
+        assert!(
+            raised
+                .node_tree
+                .first_of_type("ShaderNodeVertexColor")
+                .is_some()
+        );
     }
 }

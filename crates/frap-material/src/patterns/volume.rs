@@ -28,11 +28,10 @@
 use frap_nodes::{Node, SocketValue};
 
 use super::transmission::ext_common::{
-    TexKind, default_f32, default_rgb, find_settings_node, needs_settings_node,
+    TexKind, default_f32, default_rgb, find_settings_node, konst_f32, needs_settings_node,
     node_linked_to_output, scalar_factor_and_texture, scalar_member, settings_input, settings_node,
     volume_node,
 };
-use crate::graph::Src;
 use crate::{Channel, ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, Volume};
 
 /// The Volume Absorption node the exporter reads the attenuation from
@@ -47,9 +46,7 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     let Some((g, ti)) = settings_input(cx, "Thickness") else {
         return;
     };
-    if let Src::Const(SocketValue::Float(t)) = cx.src_at(g, ti)
-        && *t == 0.0
-    {
+    if konst_f32(cx, cx.src_at(g, ti)) == Some(0.0) {
         return;
     }
     let thickness = scalar_member(

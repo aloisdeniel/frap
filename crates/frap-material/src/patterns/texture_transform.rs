@@ -259,7 +259,10 @@ mod tests {
         link(&mut m, (xyz, "Vector"), (map, "Location"));
         let mut d = Vec::new();
         let t = run(&(m.clone(), map), &mut d).unwrap();
-        assert_eq!((t.offset, t.scale, t.rotation), ([0.5, 0.0], [1.0, 1.0], 0.0));
+        assert_eq!(
+            (t.offset, t.scale, t.rotation),
+            ([0.5, 0.0], [1.0, 1.0], 0.0)
+        );
         assert!(d.is_empty(), "{d:?}");
         // Linked to something that is not constant: the socket's own value, with a WARNING.
         let geo = add(&mut m, "ShaderNodeNewGeometry");

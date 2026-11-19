@@ -826,9 +826,9 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 |---|---|---|---|---|
 | [ ] | Static meshes, node hierarchy (TRS), multi-material primitives, NORMAL, TEXCOORD_0 | M1 | M1 | Blender-compat rules, looptris |
 | [x] | Multiple scenes (`scenes[]`, default `scene`, `use_active_scene`) | M3 | M3 | WP 3.10 |
-| [ ] | Non-triangle modes: LINES (`use_mesh_edges`), POINTS (`use_mesh_vertices`, point clouds); import of strips, fans, line strips/loops | M3 | M3 | WP 3.7 |
+| [x] | Non-triangle modes: LINES (`use_mesh_edges`), POINTS (`use_mesh_vertices`, point clouds); import of strips, fans, line strips/loops | M3 | M3 | WP 3.7; POINTS from loose vertices carry an identity `indices` accessor (deviations §2) |
 | [ ] | pbrMetallicRoughness factors + baseColorTexture, doubleSided | M1 | M1 |  |
-| [ ] | Multiple UV sets, vertex colours (COLOR_n, fake COLOR_0), TANGENT, extras | M3 | M3 |  |
+| [x] | Multiple UV sets, vertex colours (COLOR_n, fake COLOR_0), TANGENT, extras | M3 | M3 | WP 3.7 (with WP 3.5 for `export_vertex_color='MATERIAL'`); texCoord of an Attribute node not resolved (deviations §2) |
 | [x] | All textures/samplers/images (PNG/JPEG passthrough, ORM packing), alpha modes OPAQUE/MASK/BLEND | M3 | M3 | WP 3.5; WebP written as PNG (EXT_texture_webp pending) |
 | [x] | Cameras (perspective/orthographic) | M3 | M3 | export_cameras=False by default |
 | [x] | KHR_lights_punctual | M3 | M3 | export_lights=False by default; AREA warning |

@@ -7,8 +7,9 @@
 //! Lowering side, ported from `io_scene_gltf2/blender/exp/material/search_node_tree.py`
 //! (glTF-Blender-IO 5.2.41, Apache-2.0):
 //! - `NodeNav.get_factor` ([`factor_f32`], [`factor_rgb`]): a constant (unlinked socket,
-//!   Value or RGB node), else the one constant input of a Math MULTIPLY (values) or of a Mix
-//!   RGBA MULTIPLY whatever its Factor (colours);
+//!   Value or RGB node, or a link the inliner constant-folds, `LowerCx::folded_output`),
+//!   else the one constant input of a Math MULTIPLY (values) or of a Mix RGBA MULTIPLY
+//!   whatever its Factor (colours);
 //! - `get_texture_node_from_socket` ([`image_from_socket`]): the first Image Texture found by
 //!   `from_socket`'s depth-first walk through every input of every node behind the socket
 //!   (`None` when that node has no image), with the channel `image.py`'s
@@ -39,10 +40,36 @@ use frap_rna::Report;
 use crate::graph::{Src, unrecognised};
 use crate::{ChannelSel, LowerCx, NormalMap, RaiseCx, TexRef, UvSource};
 
+/// The constant the add-on reads from an input of the inlined tree: the unlinked socket's
+/// value, or the value the inliner constant-folds the link into
+/// ([`LowerCx::folded_output`]). `None` when the input stays linked.
+pub(crate) fn konst_f32<'a>(cx: &LowerCx<'a>, src: Src<'a>) -> Option<f32> {
+    match src {
+        Src::Const(SocketValue::Float(f)) => Some(*f),
+        Src::Linked(n, o) => cx.folded_output(n, o, SocketType::Value).map(|v| v.f()),
+        _ => None,
+    }
+}
+
+/// [`konst_f32`] for colour sockets (RGB).
+pub(crate) fn konst_rgb<'a>(cx: &LowerCx<'a>, src: Src<'a>) -> Option<[f32; 3]> {
+    match src {
+        Src::Const(SocketValue::Color(c)) => Some([c[0], c[1], c[2]]),
+        Src::Linked(n, o) => cx.folded_output(n, o, SocketType::Rgba).map(|v| v.v()),
+        _ => None,
+    }
+}
+
 /// `NodeNav.get_factor` for a VALUE socket.
 pub(crate) fn factor_f32<'a>(cx: &LowerCx<'a>, src: Src<'a>) -> Option<f32> {
     if let Some(c) = cx.const_f32(src) {
         return Some(c);
+    }
+    // The add-on reads the inlined tree, where a constant-folded link is a plain value.
+    if let Src::Linked(n, o) = src
+        && let Some(v) = cx.folded_output(n, o, SocketType::Value)
+    {
+        return Some(v.f());
     }
     let (a, b) = cx.value_multiply(src)?;
     match (cx.const_f32(a), cx.const_f32(b)) {
@@ -57,7 +84,10 @@ pub(crate) fn factor_rgb<'a>(cx: &LowerCx<'a>, src: Src<'a>) -> Option<[f32; 3]>
     if let Some(c) = cx.const_rgb(src) {
         return Some(c);
     }
-    let Src::Linked(n, _) = src else { return None };
+    let Src::Linked(n, o) = src else { return None };
+    if let Some(v) = cx.folded_output(n, o, SocketType::Rgba) {
+        return Some(v.v());
+    }
     if !(n.bl_idname == "ShaderNodeMix"
         && n.prop_str("data_type") == "RGBA"
         && n.prop_str("blend_type") == "MULTIPLY")
@@ -186,6 +216,12 @@ pub(crate) fn scalar_member<'a>(
         };
         return Scalar {
             factor,
+            texture: None,
+        };
+    }
+    if let Some(f) = konst_f32(cx, src) {
+        return Scalar {
+            factor: Some(f),
             texture: None,
         };
     }

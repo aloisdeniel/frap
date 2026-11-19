@@ -21,12 +21,10 @@
 //! factor through `scalar_factor_and_texture` ("Specular", Alpha), then
 //! `color_factor_and_texture` ("Specular Color").
 
-use frap_nodes::SocketValue;
-
 use super::transmission::ext_common::{
-    TexKind, factor_f32, factor_rgb, scalar_factor_and_texture, texture_behind,
+    TexKind, factor_f32, factor_rgb, konst_f32, konst_rgb, scalar_factor_and_texture,
+    texture_behind,
 };
-use crate::graph::Src;
 use crate::{Channel, ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, Specular};
 
 fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
@@ -39,7 +37,9 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     };
     // `fac` in f64, as Python computes it.
     let (fac, texture) = match cx.src_at(p, si) {
-        Src::Const(SocketValue::Float(f)) => (Some(f64::from(*f) * 2.0), None),
+        src if konst_f32(cx, src).is_some() => {
+            (konst_f32(cx, src).map(|f| f64::from(f) * 2.0), None)
+        }
         src => {
             let fac = factor_f32(cx, src).map(|c| if c != 1.0 { f64::from(c) * 2.0 } else { 1.0 });
             let tex = texture_behind(
@@ -62,8 +62,8 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
         None => c,
     };
     let color = match cx.src_at(p, ti) {
-        Src::Const(SocketValue::Color(c)) => Channel {
-            factor: scale([c[0], c[1], c[2]]),
+        src if konst_rgb(cx, src).is_some() => Channel {
+            factor: scale(konst_rgb(cx, src).unwrap_or([1.0; 3])),
             texture: None,
         },
         src => Channel {

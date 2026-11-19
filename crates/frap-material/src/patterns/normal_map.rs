@@ -86,9 +86,15 @@ mod tests {
         assert_law(&lm, &images);
         // The importer's names: Normal Map then the Image Texture labelled "NORMAL MAP".
         let (raised, _) = raise_lower(&lm, &images);
-        let tex = raised.node_tree.first_of_type("ShaderNodeTexImage").unwrap();
+        let tex = raised
+            .node_tree
+            .first_of_type("ShaderNodeTexImage")
+            .unwrap();
         assert_eq!(tex.label, "NORMAL MAP");
-        let nmap = raised.node_tree.first_of_type("ShaderNodeNormalMap").unwrap();
+        let nmap = raised
+            .node_tree
+            .first_of_type("ShaderNodeNormalMap")
+            .unwrap();
         assert_eq!(nmap.prop_str("uv_map"), "UVMap");
         // A Strength linked from a Value node is folded by the inliner (verified on 5.2.4,
         // probe uv2.py: Value 3 → scale 3).

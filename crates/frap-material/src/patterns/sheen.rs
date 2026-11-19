@@ -17,9 +17,9 @@
 use frap_nodes::SocketValue;
 
 use super::transmission::ext_common::{
-    TexKind, factor_f32, factor_rgb, scalar_factor_and_texture, texture_behind,
+    TexKind, factor_f32, factor_rgb, konst_f32, konst_rgb, scalar_factor_and_texture,
+    texture_behind,
 };
-use crate::graph::Src;
 use crate::{Channel, ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, Sheen};
 
 fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
@@ -31,14 +31,12 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     ) else {
         return;
     };
-    if let Src::Const(SocketValue::Float(w)) = cx.src_at(p, wi)
-        && *w == 0.0
-    {
+    if konst_f32(cx, cx.src_at(p, wi)) == Some(0.0) {
         return;
     }
     let color = match cx.src_at(p, ti) {
-        Src::Const(SocketValue::Color(c)) => Channel {
-            factor: [c[0], c[1], c[2]],
+        src if konst_rgb(cx, src).is_some() => Channel {
+            factor: konst_rgb(cx, src).unwrap_or([1.0; 3]),
             texture: None,
         },
         src => Channel {
@@ -53,8 +51,8 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
         },
     };
     let roughness = match cx.src_at(p, ri) {
-        Src::Const(SocketValue::Float(f)) => Channel {
-            factor: *f,
+        src if konst_f32(cx, src).is_some() => Channel {
+            factor: konst_f32(cx, src).unwrap_or(1.0),
             texture: None,
         },
         src => Channel {

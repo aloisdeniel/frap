@@ -39,10 +39,7 @@ fn detect_clip<'a>(cx: &LowerCx<'a>, alpha: In<'a>) -> Option<(f32, In<'a>)> {
     if n.bl_idname != "ShaderNodeMath" {
         return None;
     }
-    let k = |node, index| {
-        cx.get_constant(In { node, index })
-            .and_then(Konst::value)
-    };
+    let k = |node, index| cx.get_constant(In { node, index }).and_then(Konst::value);
     match n.prop_str("operation") {
         "ROUND" => return Some((0.5, In { node: n, index: 0 })),
         "SUBTRACT" if k(n, 0) == Some(1.0) => {
@@ -272,8 +269,14 @@ mod tests {
         link_at(&mut m, (t, 1), (mul, 0));
         link(&mut m, (mul, "Value"), (BSDF, "Alpha"));
         let lm = lower_m(&m, &images);
-        assert_eq!((lm.alpha_mode, lm.base_color.factor[3]), (AlphaMode::Blend, 0.5));
-        assert_eq!(lm.base_color.texture.as_ref().unwrap().channel, ChannelSel::A);
+        assert_eq!(
+            (lm.alpha_mode, lm.base_color.factor[3]),
+            (AlphaMode::Blend, 0.5)
+        );
+        assert_eq!(
+            lm.base_color.texture.as_ref().unwrap().channel,
+            ChannelSel::A
+        );
         assert_law(&lm, &images);
     }
 
@@ -288,7 +291,10 @@ mod tests {
         set_in_at(&mut m, r, 0, float(0.7));
         link(&mut m, (r, "Value"), (BSDF, "Alpha"));
         let lm = lower_m(&m, &images);
-        assert_eq!((lm.alpha_mode, lm.base_color.factor[3]), (AlphaMode::Opaque, 1.0));
+        assert_eq!(
+            (lm.alpha_mode, lm.base_color.factor[3]),
+            (AlphaMode::Opaque, 1.0)
+        );
         // With a glTF Material Output Occlusion input the original tree is read: no folding.
         let g = settings_node(&mut m);
         let _ = g;

@@ -28,10 +28,9 @@
 use frap_nodes::{Node, SocketAddr, SocketValue};
 
 use super::transmission::ext_common::{
-    TexKind, default_f32, factor_f32, find_settings_node, scalar_factor_and_texture,
+    TexKind, default_f32, factor_f32, find_settings_node, konst_f32, scalar_factor_and_texture,
     settings_input, texture_behind,
 };
-use crate::graph::Src;
 use crate::{
     Channel, ChannelSel, Iridescence, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, TexRef,
 };
@@ -137,10 +136,10 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
         .and_then(|(n, i)| factor_f32(cx, cx.src_at(n, i)))
         .unwrap_or(THICKNESS_MINIMUM);
     let (thickness_min, thickness_max) = match cx.src_at(p, ti) {
-        Src::Const(SocketValue::Float(t)) => (
+        src if konst_f32(cx, src).is_some() => (
             group_min,
             Channel {
-                factor: *t,
+                factor: konst_f32(cx, src).unwrap_or(THICKNESS_MAXIMUM),
                 texture: None,
             },
         ),

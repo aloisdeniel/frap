@@ -57,6 +57,9 @@ mod tests {
         let mut lm = LoweredMaterial::gltf_default();
         lm.emissive.factor = [0.5, 1.0, 0.0];
         lower(&cx, &mut lm);
-        assert_eq!((lm.emissive.factor, lm.emissive_strength), ([0.5, 1.0, 0.0], 1.0));
+        assert_eq!(
+            (lm.emissive.factor, lm.emissive_strength),
+            ([0.5, 1.0, 0.0], 1.0)
+        );
     }
 }

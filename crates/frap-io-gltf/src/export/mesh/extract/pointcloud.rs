@@ -66,7 +66,10 @@ fn custom(data: &AttrData) -> Option<AccessorData> {
     match data {
         AttrData::Float(v) => f(AccessorType::Scalar, v.to_vec()),
         AttrData::Int(v) => f(AccessorType::Scalar, v.iter().map(|&x| x as f32).collect()),
-        AttrData::Int8(v) => f(AccessorType::Scalar, v.iter().map(|&x| f32::from(x)).collect()),
+        AttrData::Int8(v) => f(
+            AccessorType::Scalar,
+            v.iter().map(|&x| f32::from(x)).collect(),
+        ),
         AttrData::Bool(v) => f(
             AccessorType::Scalar,
             v.iter().map(|&x| if x { 1.0 } else { 0.0 }).collect(),
@@ -85,7 +88,9 @@ fn custom(data: &AttrData) -> Option<AccessorData> {
             true,
             Components::U16(
                 v.iter()
-                    .flat_map(|c| crate::export::mesh::convert::color_to_ushort(byte_color_to_linear(*c)))
+                    .flat_map(|c| {
+                        crate::export::mesh::convert::color_to_ushort(byte_color_to_linear(*c))
+                    })
                     .collect(),
             ),
         )
@@ -137,7 +142,9 @@ fn write_attributes(
     );
     let mut out = IndexMap::new();
     for (name, (data, min_max)) in cols {
-        let i = g.buf.push_accessor(&data, &AccessorOpts::attribute(min_max));
+        let i = g
+            .buf
+            .push_accessor(&data, &AccessorOpts::attribute(min_max));
         out.insert(name, i);
     }
     Ok(Some(out))
@@ -275,7 +282,16 @@ mod tests {
         // Off by default: no mesh for the point cloud.
         let s = crate::export::ExportSettings::default();
         let out = crate::export::export(&main, &ctx, &s).unwrap();
-        assert!(!out.document.meshes.iter().any(|m| m.name.as_deref() == Some("PC")));
-        assert!(out.reports.iter().any(|r| r.message.contains("'PC' has no primitives")));
+        assert!(
+            !out.document
+                .meshes
+                .iter()
+                .any(|m| m.name.as_deref() == Some("PC"))
+        );
+        assert!(
+            out.reports
+                .iter()
+                .any(|r| r.message.contains("'PC' has no primitives"))
+        );
     }
 }

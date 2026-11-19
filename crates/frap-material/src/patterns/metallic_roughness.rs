@@ -79,7 +79,6 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     out.roughness = lower_channel(cx, out, "Roughness", "RoughnessFactor");
 }
 
-
 /// Same image, UVs, transform, sampler and colour space: one Image Texture serves both.
 fn same_texture(a: &TexRef, b: &TexRef) -> bool {
     a.image == b.image

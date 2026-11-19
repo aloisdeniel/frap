@@ -43,11 +43,17 @@ fn lightpath_trick<'a>(cx: &LowerCx<'a>, socket: In<'a>) -> Option<In<'a>> {
     if mix.bl_idname != "ShaderNodeMixShader" {
         return None;
     }
-    let (lp, o) = cx.peek_back(In { node: mix, index: 0 })?;
+    let (lp, o) = cx.peek_back(In {
+        node: mix,
+        index: 0,
+    })?;
     if lp.bl_idname != "ShaderNodeLightPath" || lp.outputs[o].identifier != "Is Camera Ray" {
         return None;
     }
-    let mut next = In { node: mix, index: 2 };
+    let mut next = In {
+        node: mix,
+        index: 2,
+    };
     if let Some((em, _)) = cx.peek_back(next)
         && em.bl_idname == "ShaderNodeEmission"
     {
@@ -62,9 +68,20 @@ fn mix_alpha<'a>(cx: &LowerCx<'a>, socket: In<'a>) -> Option<(In<'a>, In<'a>)> {
     if mix.bl_idname != "ShaderNodeMixShader" {
         return None;
     }
-    let (tr, _) = cx.peek_back(In { node: mix, index: 1 })?;
-    (tr.bl_idname == "ShaderNodeBsdfTransparent")
-        .then_some((In { node: mix, index: 0 }, In { node: mix, index: 2 }))
+    let (tr, _) = cx.peek_back(In {
+        node: mix,
+        index: 1,
+    })?;
+    (tr.bl_idname == "ShaderNodeBsdfTransparent").then_some((
+        In {
+            node: mix,
+            index: 0,
+        },
+        In {
+            node: mix,
+            index: 2,
+        },
+    ))
 }
 
 /// `detect_shadeless_material`.
@@ -151,7 +168,10 @@ fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
     let mix = cx.add_node("ShaderNodeMixShader", [260.0, 320.0]);
     let ray = cx.output(lightpath, "Is Camera Ray");
     cx.link(SocketAddr::input(mix, 0), ray);
-    cx.link(SocketAddr::input(mix, 1), SocketAddr::output(transparent, 0));
+    cx.link(
+        SocketAddr::input(mix, 1),
+        SocketAddr::output(transparent, 0),
+    );
     cx.link(SocketAddr::input(mix, 2), SocketAddr::output(emission, 0));
     let mut alpha_socket = None;
     let out = if lm.alpha_mode == AlphaMode::Opaque {
@@ -162,7 +182,10 @@ fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
         let mix2 = cx.add_node("ShaderNodeMixShader", [490.0, -50.0]);
         alpha_socket = Some(SocketAddr::input(mix2, 0));
         let out = cx.add_node("ShaderNodeOutputMaterial", [700.0, -70.0]);
-        cx.link(SocketAddr::input(mix2, 1), SocketAddr::output(transparent, 0));
+        cx.link(
+            SocketAddr::input(mix2, 1),
+            SocketAddr::output(transparent, 0),
+        );
         cx.link(SocketAddr::input(mix2, 2), SocketAddr::output(mix, 0));
         cx.link(SocketAddr::input(out, 0), SocketAddr::output(mix2, 0));
         out

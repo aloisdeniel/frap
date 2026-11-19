@@ -430,6 +430,20 @@ impl<'a> LowerCx<'a> {
         }
     }
 
+    /// The constant the inliner folds output `o` of node `n` into (what a link from it is
+    /// replaced with), converted to `ty`; `None` when it stays linked, leaves the consumer
+    /// dangling, or the original tree is read. For callers holding a resolved [`Src`] rather
+    /// than the input it feeds (the `KHR_materials_*` patterns' `get_factor`).
+    pub fn folded_output(&self, n: &'a Node, o: usize, ty: SocketType) -> Option<FoldVal> {
+        if !self.uses_inline_tree() {
+            return None;
+        }
+        match fold::Folder::new(self).output(n, o) {
+            fold::Res::Val(v) => v.to(ty),
+            fold::Res::Dangling | fold::Res::No => None,
+        }
+    }
+
     /// [`Self::folded_value`] of a VALUE input.
     pub fn folded(&self, i: In<'a>) -> Option<f32> {
         if i.socket().ty != SocketType::Value {

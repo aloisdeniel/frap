@@ -266,7 +266,11 @@ mod tests {
         m.attributes_mut().insert(Attribute {
             name: "P".into(),
             domain: Domain::Point,
-            data: AttrData::Float3(Arc::new(vec![[0.1, 0.2, 9.0], [0.3, 0.4, 9.0], [0.5, 0.75, 9.0]])),
+            data: AttrData::Float3(Arc::new(vec![
+                [0.1, 0.2, 9.0],
+                [0.3, 0.4, 9.0],
+                [0.5, 0.75, 9.0],
+            ])),
         });
         m.attributes_mut().insert(Attribute {
             name: "C".into(),
@@ -337,7 +341,9 @@ mod tests {
             name: "MyUV".into(),
             domain: Domain::Point,
             data: AttrData::Float2(Arc::new(
-                (0..n).map(|i| [i as f32 * 0.1, 0.5 + i as f32 * 0.05]).collect(),
+                (0..n)
+                    .map(|i| [i as f32 * 0.1, 0.5 + i as f32 * 0.05])
+                    .collect(),
             )),
         });
         let mesh = main.meshes.get(me).unwrap();

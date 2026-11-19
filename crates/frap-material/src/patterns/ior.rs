@@ -12,7 +12,7 @@
 
 use frap_nodes::SocketValue;
 
-use crate::graph::Src;
+use super::transmission::ext_common::konst_f32;
 use crate::{LowerCx, LoweredMaterial, MaterialPattern, RaiseCx};
 
 /// `GLTF_IOR` (`io/com/constants.py`).
@@ -20,10 +20,9 @@ pub const GLTF_IOR: f32 = 1.5;
 
 fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     let Some(p) = cx.principled() else { return };
-    out.ext.ior = match p.input_index("IOR").map(|i| cx.src_at(p, i)) {
-        Some(Src::Const(SocketValue::Float(f))) => Some(*f),
-        _ => None,
-    };
+    out.ext.ior = p
+        .input_index("IOR")
+        .and_then(|i| konst_f32(cx, cx.src_at(p, i)));
 }
 
 fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
