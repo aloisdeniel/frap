@@ -643,19 +643,13 @@ fn fixture_set_covers_the_acceptance() {
     }
 }
 
-/// Dumps whose materials use `KHR_materials_unlit`: the unlit pattern (Light Path + Mix Shader
-/// graph) is raised by WP 3.5 (M3); until then they import as Principled (M1 W2 integration).
-const UNLIT_UNTIL_M3: &[&str] = &["khr_point_light", "khr_unlit"];
-
-/// Material node graphs (built by WP 1.11's `frap_material::raise`) against Blender's.
+/// Material node graphs (built by `frap_material::raise`) against Blender's, the
+/// `KHR_materials_unlit` dumps (`khr_point_light`, `khr_unlit`) included since WP 3.5 raises
+/// the unlit graph.
 #[test]
 fn material_graphs_match_blender() {
     let mut failures = Vec::new();
     for p in dumps() {
-        let stem = p.file_stem().and_then(|s| s.to_str()).unwrap_or_default();
-        if UNLIT_UNTIL_M3.contains(&stem) {
-            continue;
-        }
         let dump: J = serde_json::from_str(&std::fs::read_to_string(&p).unwrap()).unwrap();
         let (main, win, _) = run_case(&dump);
         let state = frap_state(&main, &win, &source_of(&dump));

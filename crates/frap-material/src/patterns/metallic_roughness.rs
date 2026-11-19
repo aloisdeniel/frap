@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Metallic and roughness: Principled BSDF `Metallic` / `Roughness` → `metallicFactor`,
-//! `roughnessFactor` and `metallicRoughnessTexture` (ARCHITECTURE §16.2).
+//! `roughnessFactor` and `metallicRoughnessTexture` (ARCHITECTURE §16.2). The exporter packs
+//! the textures (metallic → B, roughness → G, with the occlusion of `occlusion.rs` → R when
+//! the images have the same size: the ORM image).
 //!
-//! Lowering ports `__gather_metallic_factor` / `__gather_roughness_factor` and the channel
-//! rules of `image.py` (`io_scene_gltf2/blender/exp/material/`, glTF-Blender-IO 5.2.41,
-//! Apache-2.0): a constant (unlinked socket or Value node) is the factor; a Math MULTIPLY by
-//! a constant gives the factor of the texture behind it; the texture is read through a
-//! Separate Color output (Red/Green/Blue) or, plugged in directly, with the glTF convention
-//! (metallic = B, roughness = G). Other setups keep factor 1 and get a WARNING.
+//! Lowering ports `__gather_metallic_factor` / `__gather_roughness_factor` /
+//! `__gather_metallic_roughness_texture` (`io_scene_gltf2/blender/exp/material/
+//! pbr_metallic_roughness.py`) and the channel rules of `image.py` (glTF-Blender-IO 5.2.41,
+//! Apache-2.0, The glTF-Blender-IO authors): the factor is `get_factor` of the socket (a
+//! constant, or the single constant input of a Math MULTIPLY; 1 otherwise); the texture is
+//! the first Image Texture found behind the socket, read through the Separate Color output
+//! on the way, or, plugged in directly, with the glTF convention (metallic = B,
+//! roughness = G).
 //!
 //! Raising ports `metallic_roughness()` (`imp/pbrMetallicRoughness.py`): constants, or one
 //! Image Texture labelled "METALLIC ROUGHNESS" → Separate Color → optional "Metallic Factor"
@@ -17,57 +21,64 @@
 use frap_nodes::{SocketAddr, SocketValue};
 
 use super::base_color::describe;
-use crate::graph::{Src, unrecognised};
+use crate::graph::{Konst, SrcChannel, unrecognised};
 use crate::{Channel, ChannelSel, LowerCx, LoweredMaterial, MaterialPattern, RaiseCx, TexRef};
+
+/// The texture of a scalar socket read through the channel `image.py` picks (`None` without
+/// a texture; RGB → BW only happens on Alpha sockets).
+pub(crate) fn scalar_texture(
+    cx: &LowerCx,
+    socket: Option<crate::graph::In>,
+    diags: &mut Vec<frap_rna::Report>,
+) -> Option<TexRef> {
+    let s = socket?;
+    let hit = cx.texture_from(s)?;
+    let ch = match cx.source_channel(s, &hit) {
+        SrcChannel::One(c) => c,
+        SrcChannel::Rgb2Bw => ChannelSel::R,
+    };
+    cx.tex_ref(hit.node, ch, diags)
+}
 
 fn lower_channel(
     cx: &LowerCx,
     out: &mut LoweredMaterial,
     socket: &str,
-    direct: ChannelSel,
+    gltf_factor: &str,
 ) -> Channel<f32> {
-    let Some(p) = cx.principled() else {
-        return Channel {
-            factor: 1.0,
-            texture: None,
-        };
+    let factor_socket = cx
+        .get_socket(socket)
+        .or_else(|| cx.gltf_output_input(gltf_factor));
+    let factor = match factor_socket.and_then(|s| cx.get_factor(s)) {
+        Some(Konst::Value(v)) => v,
+        _ => 1.0,
     };
-    let src = cx.src(p, socket);
-    if let Some(c) = cx.const_f32(src) {
-        return Channel {
-            factor: c,
-            texture: None,
-        };
+    let s = cx.get_socket(socket);
+    let texture = scalar_texture(cx, s, &mut out.diagnostics);
+    if texture.is_none()
+        && let Some(s) = s
+        && cx.peek_back(s).is_some()
+        && factor_socket.and_then(|f| cx.get_factor(f)).is_none()
+    {
+        unrecognised(
+            &mut out.diagnostics,
+            format!(
+                "{socket}: unsupported node setup at {}; exported without a texture",
+                describe(cx.src_in(s))
+            ),
+        );
     }
-    let (factor, rest) = cx.value_times_const(src).unwrap_or((1.0, src));
-    let texture = match cx.image_behind(rest) {
-        Some((tex, ch @ (ChannelSel::R | ChannelSel::G | ChannelSel::B | ChannelSel::A))) => {
-            cx.tex_ref(tex, ch, &mut out.diagnostics)
-        }
-        Some((tex, _)) => cx.tex_ref(tex, direct, &mut out.diagnostics),
-        None => {
-            if let Src::Linked(..) = rest {
-                unrecognised(
-                    &mut out.diagnostics,
-                    format!(
-                        "{socket}: unsupported node setup at {}; exported without a texture",
-                        describe(rest)
-                    ),
-                );
-            }
-            None
-        }
-    };
     Channel { factor, texture }
 }
 
 fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
-    if cx.principled().is_none() {
+    if out.unlit || cx.principled().is_none() {
         return;
     }
-    out.metallic = lower_channel(cx, out, "Metallic", ChannelSel::B);
-    out.roughness = lower_channel(cx, out, "Roughness", ChannelSel::G);
+    out.metallic = lower_channel(cx, out, "Metallic", "MetallicFactor");
+    out.roughness = lower_channel(cx, out, "Roughness", "RoughnessFactor");
 }
+
 
 /// Same image, UVs, transform, sampler and colour space: one Image Texture serves both.
 fn same_texture(a: &TexRef, b: &TexRef) -> bool {

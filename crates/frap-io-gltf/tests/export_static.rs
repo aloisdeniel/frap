@@ -366,7 +366,18 @@ fn base_color_textures_glb() {
     let mut s = Scene::empty();
     let bytes = png(2, 2);
     let img = s.packed_image("Checker.png", bytes.clone(), "image/png");
-    let jpg = s.packed_image("Photo", vec![0xFF, 0xD8, 0xFF, 0xE0, 0, 0], "image/jpeg");
+    // A readable JPEG: an image Blender cannot load has size (0, 0) and no texture (WP 3.5).
+    let jpeg_bytes = frap_imbuf::encode(
+        &frap_imbuf::DecodedImage {
+            width: 2,
+            height: 2,
+            channels: 3,
+            pixels: frap_imbuf::PixelData::U8(vec![200; 12]),
+        },
+        &frap_imbuf::EncodeFormat::Jpeg { quality: 90 },
+    )
+    .unwrap();
+    let jpg = s.packed_image("Photo", jpeg_bytes.clone(), "image/jpeg");
     let generated = s.generated_image("Blank", [0.5, 0.25, 1.0, 1.0]);
     let m1 = s.material("Textured", [1.0; 4], 0.0, 0.5);
     s.base_color_texture(m1, img, false);
@@ -433,6 +444,9 @@ fn base_color_textures_glb() {
     // JPEG source stays JPEG (bytes copied).
     let ji = &d.images[d.textures[tex_of(3).index as usize].source.unwrap() as usize];
     assert_eq!(ji.mime_type.as_deref(), Some("image/jpeg"));
+    let jv = &d.buffer_views[ji.buffer_view.unwrap() as usize];
+    let at = jv.byte_offset.unwrap_or(0) as usize;
+    assert_eq!(&bin[at..at + jv.byte_length as usize], &jpeg_bytes[..]);
     // One shared sampler (LINEAR / LINEAR_MIPMAP_LINEAR, REPEAT omitted).
     assert_eq!(d.samplers.len(), 1);
     assert_eq!(u32::from(d.samplers[0].mag_filter.unwrap()), 9729);

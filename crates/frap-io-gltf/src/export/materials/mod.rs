@@ -8,15 +8,21 @@
 //! mesh is written again, so the cache key is the material plus its resolved texture
 //! coordinates) and material_viewport.py (`export_materials='VIEWPORT'`).
 //!
-//! M1 covers the base colour (factor and Image Texture), metallic and roughness factors,
-//! emission (factor and `KHR_materials_emissive_strength`), alpha mode and cutoff, the normal
-//! map and a metallic-roughness texture used as is. Occlusion (ORM packing), unlit and the
-//! `KHR_materials_*` extensions are M3 (WP 3.5/3.6): a material using them is exported without
-//! them and a WARNING names the feature.
+//! Core features (WP 3.5): alpha mode and cutoff (`core_alpha`), emission and
+//! `KHR_materials_emissive_strength` (`core_emissive`), the normal map (`core_normal`),
+//! occlusion and the ORM image (`core_occlusion`), base colour, metallic and roughness
+//! (`core_pbr`), `KHR_materials_unlit` (`core_unlit`); the `KHR_materials_*` extensions are
+//! the `ext/` exporters (WP 3.6). Members are gathered in the add-on's traversal order
+//! (alphabetical: `emissiveTexture`, `extensions`, `normalTexture`, `occlusionTexture`,
+//! `pbrMetallicRoughness`), so texture, sampler and image arrays follow Blender's.
+//! `doubleSided` is `false` when `KHR_materials_volume` is written (`__gather_double_sided`).
 
 pub mod core_alpha;
 pub mod core_emissive;
+pub mod core_normal;
+pub mod core_occlusion;
 pub mod core_pbr;
+pub mod core_unlit;
 pub mod lower;
 
 /// `KHR_materials_*` exporters, one file per extension (`ext/<name>.rs`, WP 3.6), each
@@ -27,14 +33,14 @@ pub mod ext {
 
 use std::collections::HashMap;
 
-use frap_gltf::json::{Index, Material as GMaterial, NormalTextureInfo, PbrMetallicRoughness};
+use frap_gltf::json::{Index, Material as GMaterial, PbrMetallicRoughness};
 use frap_material::{LoweredMaterial, TexRef};
 use frap_mesh::Mesh;
 use frap_rna::{IdRef, MaterialId};
 use frap_scene::id::Material;
 
 use crate::export::gather::Gather;
-use crate::export::images::{TextureSlot, gather_texture_info, tex_coord};
+use crate::export::images::tex_coord;
 use crate::export::{ExportError, ExportMaterials};
 
 /// Materials gathered so far.
@@ -122,9 +128,8 @@ pub fn viewport(mat: &Material) -> GMaterial {
     }
 }
 
-/// `gather_material` for `export_materials='EXPORT'`, textures gathered in the add-on's
-/// member order (`emissiveTexture`, `normalTexture`, `occlusionTexture`,
-/// `pbrMetallicRoughness`).
+/// `gather_material` for `export_materials='EXPORT'`, members gathered in the add-on's
+/// traversal order (module documentation).
 fn build(
     g: &mut Gather,
     r: IdRef<MaterialId>,
@@ -137,46 +142,34 @@ fn build(
             g.reports.push(d.clone());
         }
     }
-    let name = mat.header.name.to_string();
     let mut m = GMaterial {
-        name: Some(name.clone()),
+        name: Some(mat.header.name.to_string()),
         ..GMaterial::default()
     };
     m.extras = crate::export::extras::material(g, mat);
     core_alpha::apply(lm, &mut m);
     // `use_backface_culling` is read on the original material, as the add-on does.
     m.double_sided = (!mat.use_backface_culling).then_some(true);
-    core_emissive::apply(g, r, lm, mesh, &mut m)?;
-    if let Some(n) = &lm.normal
-        && let Some(info) = gather_texture_info(g, &n.texture, (r, TextureSlot::Normal), mesh)?
-    {
-        m.normal_texture = Some(NormalTextureInfo {
-            index: info.index,
-            scale: (n.scale != 1.0).then(|| num(n.scale)),
-            tex_coord: info.tex_coord,
-            extensions: info.extensions,
-            extras: None,
-        });
-    }
-    if lm.occlusion.is_some() {
-        g.warn(format!(
-            "material '{name}': occlusion (ORM packing) is not exported yet (M3)"
-        ));
-    }
     if lm.unlit {
-        g.warn(format!(
-            "material '{name}': KHR_materials_unlit is not exported yet (M3)"
-        ));
+        core_unlit::apply(g, r, lm, mesh, &mut m)?;
+        return Ok(m);
     }
-    core_pbr::apply(g, r, lm, mesh, &mut m)?;
+    core_emissive::apply(g, r, lm, mesh, &mut m)?;
     // `KHR_materials_*` (M3 W0 extension point; WP 3.6 registers the exporters).
     let mut cx = crate::material_ext::ExtExportCx {
-        g,
+        g: &mut *g,
         material: r,
         mesh,
     };
     for e in crate::material_ext::exporters() {
         (e.run)(&mut cx, lm, &mut m)?;
     }
+    if m.extensions.contains("KHR_materials_volume") {
+        m.double_sided = Some(false);
+    }
+    core_normal::apply(g, r, lm, mesh, &mut m)?;
+    let orm = core_occlusion::orm_inputs(g, lm);
+    core_occlusion::apply(g, r, lm, orm.as_deref(), mesh, &mut m)?;
+    core_pbr::apply(g, r, lm, orm.as_deref(), mesh, &mut m)?;
     Ok(m)
 }

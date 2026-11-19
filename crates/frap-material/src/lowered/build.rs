@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Graph building shared by the pattern raisers (`raise` side). Port of the parts of
 //! `io_scene_gltf2/blender/imp/{pbrMetallicRoughness,material_utils,texture}.py`
-//! (glTF-Blender-IO 5.2.41, Apache-2.0) that M1 needs: the base Principled BSDF → Material
-//! Output graph, `calc_locations`, `color_factor_and_texture` and `texture` (Image Texture,
-//! sampler, mixed-wrap UV chain, Mapping node for `KHR_texture_transform`, UV Map node).
+//! (glTF-Blender-IO 5.2.41, Apache-2.0, The glTF-Blender-IO authors): the base Principled
+//! BSDF → Material Output graph, `calc_locations`, `color_factor_and_texture`,
+//! `scalar_factor_and_texture`, `normal_map`, `make_settings_node` and `texture` (Image
+//! Texture; the sampler, Mapping and UV Map parts live in the per-texture patterns
+//! `sampler.rs`, `texture_transform.rs` and `uv_source.rs`).
 
 use std::collections::BTreeMap;
 
 use frap_nodes::{Node, SocketAddr, SocketValue};
 use frap_rna::Value;
-use smol_str::SmolStr;
 
-use crate::graph::gltf_to_blender_transform;
-use crate::{Filter, LoweredMaterial, RaiseCx, TexRef, UvSource, Wrap};
+use crate::{ChannelSel, Filter, LoweredMaterial, NormalMap, RaiseCx, TexRef, UvSource};
 
 /// Height of one block of the importer's layout (`calc_locations`).
 const BLOCK_HEIGHT: f32 = 460.0;
@@ -100,7 +100,7 @@ impl RaiseCx<'_> {
 
     /// Writes an enum node property.
     pub fn set_enum(&mut self, uid: u32, prop: &str, item: &str) {
-        self.set_prop(uid, prop, Value::Enum(SmolStr::new(item)));
+        self.set_prop(uid, prop, Value::Enum(smol_str::SmolStr::new(item)));
     }
 
     /// Writes `node.inputs[index].default_value`.
@@ -204,6 +204,108 @@ impl RaiseCx<'_> {
         Some(self.texture(tex, [x, y], &label.to_uppercase(), Some(socket), None))
     }
 
+    /// `scalar_factor_and_texture`: a constant, or `texture channel × factor` through a Math
+    /// MULTIPLY labelled `"<label> Factor"` when the factor is not 1, and a Separate Color
+    /// for an R/G/B channel (channel `A` reads the texture's `Alpha` output). Returns the
+    /// Image Texture uid.
+    pub fn scalar_factor_and_texture(
+        &mut self,
+        location: [f32; 2],
+        label: &str,
+        socket: SocketAddr,
+        factor: f32,
+        tex: Option<&TexRef>,
+    ) -> Option<u32> {
+        let [mut x, y] = location;
+        let Some(tex) = tex else {
+            self.set_input_at(socket.node, socket.index, SocketValue::Float(factor));
+            return None;
+        };
+        let mut socket = socket;
+        if factor != 1.0 {
+            let m = self.add_node("ShaderNodeMath", [x - 140.0, y]);
+            self.set_label(m, &format!("{label} Factor"));
+            self.set_enum(m, "operation", "MULTIPLY");
+            self.link(socket, SocketAddr::output(m, 0));
+            socket = SocketAddr::input(m, 0);
+            self.set_input_at(m, 1, SocketValue::Float(factor));
+            x -= 200.0;
+        }
+        let channel_out = match tex.channel {
+            ChannelSel::R => Some(0),
+            ChannelSel::G => Some(1),
+            ChannelSel::B => Some(2),
+            _ => None,
+        };
+        if let Some(c) = channel_out {
+            let sep = self.add_node("ShaderNodeSeparateColor", [x - 150.0, y - 75.0]);
+            self.link(socket, SocketAddr::output(sep, c));
+            socket = self.input(sep, "Color");
+            x -= 200.0;
+        }
+        let (color_to, alpha_to) = if tex.channel == ChannelSel::A {
+            (None, Some(socket))
+        } else {
+            (Some(socket), None)
+        };
+        Some(self.texture(tex, [x, y], &label.to_uppercase(), color_to, alpha_to))
+    }
+
+    /// `normal_map`: a Normal Map node (`uv_map` named after the texture's `TEXCOORD_n`,
+    /// `Strength` = scale) at `(x − 150, y − 40)` linked into `socket`, and the texture
+    /// labelled `label` upper-cased. Returns the Normal Map uid.
+    pub fn normal_map(
+        &mut self,
+        location: [f32; 2],
+        label: &str,
+        socket: SocketAddr,
+        n: &NormalMap,
+    ) -> u32 {
+        let [x, y] = location;
+        let node = self.add_node("ShaderNodeNormalMap", [x - 150.0, y - 40.0]);
+        let uv = match &n.texture.uv {
+            UvSource::Index(i) if *i > 0 => format!("UVMap.{i:03}"),
+            UvSource::Named(name) => name.to_string(),
+            _ => "UVMap".to_owned(),
+        };
+        self.set_prop(node, "uv_map", Value::Str(uv.into()));
+        self.set_input(node, "Strength", SocketValue::Float(n.scale));
+        let o = self.output(node, "Normal");
+        self.link(socket, o);
+        let color = self.input(node, "Color");
+        self.texture(
+            &n.texture,
+            [x - 200.0, y],
+            &label.to_uppercase(),
+            Some(color),
+            None,
+        );
+        node
+    }
+
+    /// `make_settings_node`: the "glTF Material Output" group node (named `Group`, at
+    /// (40, −370), width 180) that occlusion, volume thickness, dispersion and iridescence
+    /// link into, created on first use. It gets the group's five inputs; the importer sets
+    /// its `node_tree` to the `bpy.data.node_groups` entry afterwards (`raise` cannot reach
+    /// `bpy.data`). Returns its uid.
+    pub fn settings_node(&mut self) -> u32 {
+        if let Some(n) = self
+            .into
+            .node_tree
+            .nodes
+            .iter()
+            .find(|n| frap_nodes::is_group_node(n.bl_idname) && n.input("Occlusion").is_some())
+        {
+            return n.uid;
+        }
+        let group = frap_nodes::builtin_groups::gltf_material_output::new_group();
+        let uid = self.add_node("ShaderNodeGroup", [40.0, -370.0]);
+        let n = self.node_mut(uid);
+        n.width = 180.0;
+        n.sync_group_sockets(Some(&group.interface));
+        uid
+    }
+
     /// `texture`: an Image Texture node (label, image, interpolation, extension) at
     /// `location` linked into `color_to` / `alpha_to`, plus the UV chain the texture needs
     /// (mixed wrap modes, Mapping node, UV Map node). Returns the Image Texture uid.
@@ -233,94 +335,19 @@ impl RaiseCx<'_> {
             let o = self.output(img, "Alpha");
             self.link(to, o);
         }
-        let mut uv_socket = self.input(img, "Vector");
+        let uv_socket = self.input(img, "Vector");
         x -= 340.0;
-
-        let (ws, wt) = (tex.sampler.wrap_s, tex.sampler.wrap_t);
-        let mut needs_uv_map = false;
-        if ws == wt {
-            let ext = match ws {
-                Wrap::Clamp => "EXTEND",
-                Wrap::Mirror => "MIRROR",
-                _ => "REPEAT",
-            };
-            self.set_enum(img, "extension", ext);
-        } else {
-            // Mixed wrap modes: per-axis WRAP / PINGPONG math on the UVs.
-            self.set_enum(img, "extension", "EXTEND");
-            let com = self.add_node("ShaderNodeCombineXYZ", [x - 140.0, y - 100.0]);
-            let o = self.output(com, "Vector");
-            self.link(uv_socket, o);
-            let mut axis = [self.input(com, "X"), self.input(com, "Y")];
-            x -= 200.0;
-            for (i, wrap) in [ws, wt].into_iter().enumerate() {
-                let op = match wrap {
-                    Wrap::Repeat => Some("WRAP"),
-                    Wrap::Mirror => Some("PINGPONG"),
-                    _ => None,
-                };
-                if let Some(op) = op {
-                    let m =
-                        self.add_node("ShaderNodeMath", [x - 140.0, y + 30.0 - i as f32 * 200.0]);
-                    self.set_enum(m, "operation", op);
-                    if op == "WRAP" {
-                        self.set_input_at(m, 1, SocketValue::Float(0.0));
-                        self.set_input_at(m, 2, SocketValue::Float(1.0));
-                    } else {
-                        self.set_input_at(m, 1, SocketValue::Float(1.0));
-                    }
-                    self.link(axis[i], SocketAddr::output(m, 0));
-                    axis[i] = SocketAddr::input(m, 0);
-                }
+        let (uv_socket, x, wrap_needs_uv) =
+            crate::patterns::sampler::raise_wrapping(self, tex, img, uv_socket, x, y);
+        let (uv_socket, x, needs_uv_map) = match &tex.transform {
+            Some(t) => {
+                let (s, x) =
+                    crate::patterns::texture_transform::raise_mapping(self, t, uv_socket, x, y);
+                (s, x, true)
             }
-            x -= 200.0;
-            let sep = self.add_node("ShaderNodeSeparateXYZ", [x - 140.0, y - 100.0]);
-            let (ox, oy) = (self.output(sep, "X"), self.output(sep, "Y"));
-            self.link(axis[0], ox);
-            self.link(axis[1], oy);
-            uv_socket = self.input(sep, "Vector");
-            x -= 200.0;
-            needs_uv_map = true;
-        }
-
-        if let Some(t) = &tex.transform {
-            let mapping = self.add_node("ShaderNodeMapping", [x - 160.0, y + 30.0]);
-            self.set_enum(mapping, "vector_type", "POINT");
-            let o = self.output(mapping, "Vector");
-            self.link(uv_socket, o);
-            uv_socket = self.input(mapping, "Vector");
-            let (loc, rot, scale) = gltf_to_blender_transform(t);
-            self.set_input(
-                mapping,
-                "Location",
-                SocketValue::Vector([loc[0], loc[1], 0.0, 0.0]),
-            );
-            self.set_input(
-                mapping,
-                "Rotation",
-                SocketValue::Vector([0.0, 0.0, rot, 0.0]),
-            );
-            self.set_input(
-                mapping,
-                "Scale",
-                SocketValue::Vector([scale[0], scale[1], 1.0, 0.0]),
-            );
-            x -= 260.0;
-            needs_uv_map = true;
-        }
-
-        let uv_name: Option<SmolStr> = match &tex.uv {
-            UvSource::Named(n) => Some(n.clone()),
-            UvSource::Index(0) => needs_uv_map.then(|| "UVMap".into()),
-            UvSource::Index(i) => Some(format!("UVMap.{i:03}").into()),
-            _ => needs_uv_map.then(SmolStr::default),
+            None => (uv_socket, x, wrap_needs_uv),
         };
-        if let Some(name) = uv_name {
-            let uv = self.add_node("ShaderNodeUVMap", [x - 160.0, y - 70.0]);
-            self.set_prop(uv, "uv_map", Value::Str(name));
-            let o = self.output(uv, "UV");
-            self.link(uv_socket, o);
-        }
+        crate::patterns::uv_source::raise_uv_map(self, &tex.uv, needs_uv_map, uv_socket, x, y);
         img
     }
 }

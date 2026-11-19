@@ -4,6 +4,9 @@
 //! [`LoweredMaterial`] read from the glTF material (textures resolved to imported images), and
 //! the node graph built from it by `frap_material::raise` (WP 1.11, §16.2). Materials without
 //! a glTF material but with `COLOR_0` get the add-on's "DefaultMaterial" graph.
+//! `KHR_materials_unlit` materials are raised as the importer's unlit graph (`unlit.rs`), an
+//! `occlusionTexture` into the "glTF Material Output" group node, whose `node_tree` this file
+//! links to `bpy.data.node_groups` (WP 3.5).
 //!
 //! Ported from io_scene_gltf2 5.2.41 `blender/imp/material.py` (`BlenderMaterial.create`,
 //! `set_double_sided`, `set_eevee_surface_render_method`, `set_viewport_color`) and the glTF
@@ -85,10 +88,47 @@ pub(crate) fn create(
     if !MATERIAL_PATTERNS.is_empty() {
         let mut names = NameAlloc::default();
         frap_material::raise(&lm, &mut mat, &mut names);
+        link_settings_group(main, log, &mut mat.node_tree);
     }
     let r = main.materials.insert(&name, mat, log);
     cx.materials.insert((idx, vertex_color), r);
     Ok(r)
+}
+
+/// `make_settings_node` / `get_settings_group`: `raise` builds the "glTF Material Output"
+/// group node with the group's inputs but cannot reach `bpy.data`; its `node_tree` is set
+/// here to `bpy.data.node_groups['glTF Material Output']`, created by
+/// `create_settings_group` when it does not exist.
+fn link_settings_group(main: &mut Main, log: &mut ChangeLog, tree: &mut NodeTree) {
+    use frap_nodes::builtin_groups::gltf_material_output as gmo;
+    let pending: Vec<usize> = tree
+        .nodes
+        .iter()
+        .enumerate()
+        .filter(|(_, n)| {
+            frap_nodes::is_group_node(n.bl_idname)
+                && n.group_tree().is_none()
+                && n.input("Occlusion").is_some()
+        })
+        .map(|(i, _)| i)
+        .collect();
+    if pending.is_empty() {
+        return;
+    }
+    let group = match main.node_groups.find(gmo::NAME) {
+        Some(g) => g,
+        None => main.node_groups.insert(gmo::NAME, gmo::new_group(), log),
+    };
+    let Some(iface) = main.node_groups.get(group).map(|g| g.interface.clone()) else {
+        return;
+    };
+    for i in pending {
+        tree.nodes[i]
+            .props
+            .values
+            .insert("node_tree", Value::Id(Some(group.any())));
+        tree.sync_group_node(i, Some(&iface));
+    }
 }
 
 /// `import_unused_materials`: materials (and images) no primitive used. The add-on gives them
