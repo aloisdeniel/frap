@@ -65,13 +65,24 @@ struct VertCornerInfo {
 #[derive(Copy, Clone, Debug, PartialEq)]
 enum EdgeInfo {
     Uninitialized,
-    OneCorner { local_corner_1: usize, towards: bool },
-    TwoCorners { local_corner_1: usize, local_corner_2: usize },
+    OneCorner {
+        local_corner_1: usize,
+        towards: bool,
+    },
+    TwoCorners {
+        local_corner_1: usize,
+        local_corner_2: usize,
+    },
     Sharp,
 }
 
 // Ported from blender/source/blender/blenkernel/intern/mesh_normals.cc (corner_fan_space_define).
-fn fan_space_define(lnor: V3, vec_ref: V3, vec_other: V3, edge_vectors: &[V3]) -> CornerNormalSpace {
+fn fan_space_define(
+    lnor: V3,
+    vec_ref: V3,
+    vec_other: V3,
+    edge_vectors: &[V3],
+) -> CornerNormalSpace {
     let mut space = CornerNormalSpace::default();
     let pi2 = std::f32::consts::PI * 2.0;
     let dtp_ref = dot(vec_ref, lnor);
@@ -392,8 +403,10 @@ pub(crate) fn calc_corners_with_spaces(
                     avg[1] += c[1] as i32;
                 }
                 let n = fan.len() as i32;
-                fan_normal =
-                    corner_space_custom_data_to_normal(&space, [(avg[0] / n) as i16, (avg[1] / n) as i16]);
+                fan_normal = corner_space_custom_data_to_normal(
+                    &space,
+                    [(avg[0] / n) as i16, (avg[1] / n) as i16],
+                );
             }
             let space_index = spaces.spaces.len();
             spaces.spaces.push(space);
@@ -436,8 +449,7 @@ pub(crate) fn normals_corner_custom_set(
     for f in 0..m.face_offsets.len().saturating_sub(1) {
         corner_to_face[m.face_offsets[f] as usize..m.face_offsets[f + 1] as usize].fill(f);
     }
-    let (corner_normals, mut spaces) =
-        calc_corners_with_spaces(m, Some(sharp_edges), Some(clnors));
+    let (corner_normals, mut spaces) = calc_corners_with_spaces(m, Some(sharp_edges), Some(clnors));
     if use_vertices {
         for (i, n) in custom.iter_mut().enumerate().take(m.positions.len()) {
             if *n == [0.0; 3] {
@@ -520,7 +532,13 @@ pub(crate) fn normals_corner_custom_set(
             continue;
         }
         let fan = &spaces.corners_by_space[space_index];
-        let nidx = |c: usize| if use_vertices { m.corner_verts[c] as usize } else { c };
+        let nidx = |c: usize| {
+            if use_vertices {
+                m.corner_verts[c] as usize
+            } else {
+                c
+            }
+        };
         if fan.len() < 2 {
             clnors[i] = custom_normal_to_data(&spaces.spaces[space_index], custom[nidx(i)]);
             done[i] = false;
@@ -590,7 +608,11 @@ pub(crate) fn clnors_for_write(mesh: &Mesh) -> Option<Vec<[i16; 2]>> {
 }
 
 /// Writes `sharp_edge` and `custom_normal`.
-pub(crate) fn store(mesh: &mut Mesh, sharp_edges: Option<Vec<bool>>, clnors: Option<Vec<[i16; 2]>>) {
+pub(crate) fn store(
+    mesh: &mut Mesh,
+    sharp_edges: Option<Vec<bool>>,
+    clnors: Option<Vec<[i16; 2]>>,
+) {
     let attrs = mesh.attributes_mut();
     if let Some(s) = sharp_edges {
         attrs.insert(Attribute {
@@ -668,7 +690,9 @@ mod tests {
         mesh_set_custom_normals(&mut m, &mut custom, false);
         assert!(m.sharp_edges().unwrap().iter().all(|s| *s));
         for (c, n) in m.corner_normals().iter().enumerate() {
-            let f = (0..m.faces_num()).find(|&f| m.face(f).contains(&c)).unwrap();
+            let f = (0..m.faces_num())
+                .find(|&f| m.face(f).contains(&c))
+                .unwrap();
             for k in 0..3 {
                 assert!((n[k] - fnor[f][k]).abs() < 1e-4);
             }

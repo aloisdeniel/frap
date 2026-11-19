@@ -19,5 +19,7 @@ fn get<'h>(
     let size = im
         .info(&crate::id::PathBase::of(h))
         .map_or([0, 0], |b| [b.x as i32, b.y as i32]);
-    Ok(Field::Value(Value::IntArray(size.iter().map(|&v| i64::from(v)).collect())))
+    Ok(Field::Value(Value::IntArray(
+        size.iter().map(|&v| i64::from(v)).collect(),
+    )))
 }

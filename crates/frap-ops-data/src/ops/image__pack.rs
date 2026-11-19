@@ -11,8 +11,8 @@
 //!
 //! This file also hosts the context lookup shared by the other context-image operators.
 
-use frap_op::prelude::*;
 use frap_op::PollReq;
+use frap_op::prelude::*;
 use frap_op::{Poll, PollFail, operator};
 use frap_rna::{IdRef, ImageId};
 use frap_scene::Context;

@@ -55,7 +55,9 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
             let target = cx.object_matrix_world(o);
             SpaceTransform::from_matrices(local, target)
         });
-    Ok(deform(mesh, |m, cos| simple_deform_do(s, transf.as_ref(), m, cos)))
+    Ok(deform(mesh, |m, cos| {
+        simple_deform_do(s, transf.as_ref(), m, cos)
+    }))
 }
 
 /// `SpaceTransform` (`BLI_space_transform_from_matrices`).
@@ -73,10 +75,14 @@ impl SpaceTransform {
         }
     }
     fn apply(&self, co: [f32; 3]) -> [f32; 3] {
-        self.local2target.transform_point3(Vec3::from(co)).to_array()
+        self.local2target
+            .transform_point3(Vec3::from(co))
+            .to_array()
     }
     fn invert(&self, co: [f32; 3]) -> [f32; 3] {
-        self.target2local.transform_point3(Vec3::from(co)).to_array()
+        self.target2local
+            .transform_point3(Vec3::from(co))
+            .to_array()
     }
 }
 

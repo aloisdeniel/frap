@@ -40,7 +40,11 @@ fn object_modifiers_move(
     };
     match edit::move_to_index(&mut mods, i, to, false) {
         Ok(()) => {
-            let changed = h.main().objects.get(ob).is_some_and(|o| o.modifiers != mods);
+            let changed = h
+                .main()
+                .objects
+                .get(ob)
+                .is_some_and(|o| o.modifiers != mods);
             let (main, log) = h.main_mut();
             if changed && let Some(o) = main.objects.get_mut(ob, log) {
                 o.modifiers = mods;

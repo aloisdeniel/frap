@@ -63,7 +63,10 @@ pub(crate) fn has_group(dv: &DeformVert, index: u32) -> bool {
 
 /// The raw inputs of `BKE_defvert_array_find_weight_safe`: the group index (`None` = -1) and
 /// the mesh's weights (`None` = null when the mesh has none).
-pub(crate) fn vgroup_raw<'a>(mesh: &'a Mesh, name: &str) -> (Option<u32>, Option<&'a [DeformVert]>) {
+pub(crate) fn vgroup_raw<'a>(
+    mesh: &'a Mesh,
+    name: &str,
+) -> (Option<u32>, Option<&'a [DeformVert]>) {
     let index = defgroup_index(mesh, name);
     let dverts = index.and(mesh.deform_verts().filter(|d| !d.is_empty()));
     (index, dverts)
@@ -263,7 +266,8 @@ pub(crate) fn carry(data: &AttrData, srcs: &[Src]) -> AttrData {
             for (k, s) in srcs.iter().enumerate() {
                 match s {
                     Src::Copy(i) => out[k] = $v[*i].clone(),
-                    Src::Mix(w) => {
+                    Src::Mix(w) =>
+                    {
                         #[allow(clippy::redundant_closure_call)]
                         if let Some(x) = ($mix)(&**$v, &w[..]) {
                             out[k] = x;
@@ -322,10 +326,7 @@ pub(crate) fn carry(data: &AttrData, srcs: &[Src]) -> AttrData {
         }
         AttrData::ByteColor(v) => {
             build!(v, ByteColor, def, |v: &[[u8; 4]], w: &[(usize, f32)]| {
-                let f: Vec<[f32; 4]> = w
-                    .iter()
-                    .map(|&(i, _)| v[i].map(|c| c as f32))
-                    .collect();
+                let f: Vec<[f32; 4]> = w.iter().map(|&(i, _)| v[i].map(|c| c as f32)).collect();
                 let idx: Vec<(usize, f32)> =
                     w.iter().enumerate().map(|(k, &(_, wi))| (k, wi)).collect();
                 let m = mixv!(f, &idx, 4);
@@ -333,11 +334,9 @@ pub(crate) fn carry(data: &AttrData, srcs: &[Src]) -> AttrData {
             })
         }
         AttrData::Int16x2(v) => build!(v, Int16x2, def, |v: &[[i16; 2]], w: &[(usize, f32)]| {
-            let f: Vec<[f32; 2]> = w
-                .iter()
-                .map(|&(i, _)| v[i].map(|c| c as f32))
-                .collect();
-            let idx: Vec<(usize, f32)> = w.iter().enumerate().map(|(k, &(_, wi))| (k, wi)).collect();
+            let f: Vec<[f32; 2]> = w.iter().map(|&(i, _)| v[i].map(|c| c as f32)).collect();
+            let idx: Vec<(usize, f32)> =
+                w.iter().enumerate().map(|(k, &(_, wi))| (k, wi)).collect();
             let m = mixv!(f, &idx, 2);
             Some(m.map(|c| c.round() as i16))
         }),
@@ -361,32 +360,42 @@ pub(crate) fn carry(data: &AttrData, srcs: &[Src]) -> AttrData {
             })
         }
         AttrData::Float4x4(v) => {
-            build!(v, Float4x4, def, |v: &[[[f32; 4]; 4]], w: &[(usize, f32)]| {
-                let flat: Vec<[f32; 16]> = w
-                    .iter()
-                    .map(|&(i, _)| {
-                        let m = v[i];
-                        let mut f = [0.0; 16];
-                        for r in 0..4 {
-                            f[r * 4..r * 4 + 4].copy_from_slice(&m[r]);
-                        }
-                        f
-                    })
-                    .collect();
-                let idx: Vec<(usize, f32)> =
-                    w.iter().enumerate().map(|(k, &(_, wi))| (k, wi)).collect();
-                let f = mixv!(flat, &idx, 16);
-                let mut m = [[0.0; 4]; 4];
-                for r in 0..4 {
-                    m[r].copy_from_slice(&f[r * 4..r * 4 + 4]);
+            build!(
+                v,
+                Float4x4,
+                def,
+                |v: &[[[f32; 4]; 4]], w: &[(usize, f32)]| {
+                    let flat: Vec<[f32; 16]> = w
+                        .iter()
+                        .map(|&(i, _)| {
+                            let m = v[i];
+                            let mut f = [0.0; 16];
+                            for r in 0..4 {
+                                f[r * 4..r * 4 + 4].copy_from_slice(&m[r]);
+                            }
+                            f
+                        })
+                        .collect();
+                    let idx: Vec<(usize, f32)> =
+                        w.iter().enumerate().map(|(k, &(_, wi))| (k, wi)).collect();
+                    let f = mixv!(flat, &idx, 16);
+                    let mut m = [[0.0; 4]; 4];
+                    for r in 0..4 {
+                        m[r].copy_from_slice(&f[r * 4..r * 4 + 4]);
+                    }
+                    Some(m)
                 }
-                Some(m)
-            })
+            )
         }
         // Strings have no mixer (`DefaultMixer<std::string>` is void): mixed elements keep the
         // default.
         AttrData::String(v) => {
-            build!(v, String, def, |_v: &[smol_str::SmolStr], _w: &[(usize, f32)]| None)
+            build!(
+                v,
+                String,
+                def,
+                |_v: &[smol_str::SmolStr], _w: &[(usize, f32)]| None
+            )
         }
         _ => data.default_of_len(srcs.len()),
     }
@@ -558,12 +567,7 @@ pub(crate) mod testing {
     /// A mesh from a dump `{positions, edges, faces, groups?, weights?, sharp_face?, uv?}`
     /// with Blender's exact element order.
     pub(crate) fn mesh_from_dump(d: &Json) -> Mesh {
-        let positions: Vec<[f32; 3]> = d["positions"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .map(f3)
-            .collect();
+        let positions: Vec<[f32; 3]> = d["positions"].as_array().unwrap().iter().map(f3).collect();
         let edges: Vec<[i32; 2]> = d["edges"]
             .as_array()
             .unwrap()
@@ -582,10 +586,7 @@ pub(crate) mod testing {
         m.set_positions(positions);
         m.set_topology(offsets, corner_verts, edges);
         if let Some(groups) = d.get("groups").and_then(Json::as_array) {
-            m.vertex_group_names = groups
-                .iter()
-                .map(|g| g.as_str().unwrap().into())
-                .collect();
+            m.vertex_group_names = groups.iter().map(|g| g.as_str().unwrap().into()).collect();
             let dv: Vec<DeformVert> = d["weights"]
                 .as_array()
                 .unwrap()
@@ -701,7 +702,11 @@ pub(crate) mod testing {
             return;
         }
         let g = g.unwrap_or_else(|| panic!("{name}: missing in frap"));
-        assert_eq!(g.domain.identifier(), w["domain"].as_str().unwrap(), "{name}");
+        assert_eq!(
+            g.domain.identifier(),
+            w["domain"].as_str().unwrap(),
+            "{name}"
+        );
         let data = w["data"].as_array().unwrap();
         let num = |v: &Json| -> Vec<f64> {
             match v {
@@ -712,7 +717,9 @@ pub(crate) mod testing {
             }
         };
         let got_vals: Vec<Vec<f64>> = match &g.data {
-            frap_mesh::AttrData::Bool(v) => v.iter().map(|b| vec![f64::from(u8::from(*b))]).collect(),
+            frap_mesh::AttrData::Bool(v) => {
+                v.iter().map(|b| vec![f64::from(u8::from(*b))]).collect()
+            }
             frap_mesh::AttrData::Int(v) => v.iter().map(|x| vec![*x as f64]).collect(),
             frap_mesh::AttrData::Float(v) => v.iter().map(|x| vec![*x as f64]).collect(),
             frap_mesh::AttrData::Int16x2(v) => {

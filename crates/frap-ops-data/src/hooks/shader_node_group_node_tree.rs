@@ -44,7 +44,10 @@ fn set(h: &mut dyn Host, this: &RnaPtr, _prop: &'static PropDef, v: Value) -> Re
     let (main, log) = h.main_mut();
     let iface = match group {
         Some(g) => {
-            let Some(gt) = g.typed::<NodeTreeId>().and_then(|r| main.node_groups.get(r)) else {
+            let Some(gt) = g
+                .typed::<NodeTreeId>()
+                .and_then(|r| main.node_groups.get(r))
+            else {
                 return Ok(());
             };
             if gt.ty != NodeTreeType::Shader || group_reaches(main, g, root) {
@@ -58,7 +61,10 @@ fn set(h: &mut dyn Host, this: &RnaPtr, _prop: &'static PropDef, v: Value) -> Re
         return Ok(());
     };
     let t = tree_mut(main, root, log)?;
-    t.nodes[i].props.values.insert("node_tree", Value::Id(group));
+    t.nodes[i]
+        .props
+        .values
+        .insert("node_tree", Value::Id(group));
     t.sync_group_node(i, iface.as_deref());
     Ok(())
 }

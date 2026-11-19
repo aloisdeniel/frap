@@ -236,7 +236,12 @@ fn exec(cx: &mut OpCtx, p: object::Convert) -> OpResult {
                 // A shape key whose basis is not in the result is dropped.
                 new_mesh.shape_keys = None;
                 *mesh = new_mesh;
-                if !cx.main().objects.get(target).is_some_and(|o| o.modifiers.is_empty()) {
+                if !cx
+                    .main()
+                    .objects
+                    .get(target)
+                    .is_some_and(|o| o.modifiers.is_empty())
+                {
                     cx.object_mut(target)?.modifiers.clear();
                 }
                 if let Some(d) = data

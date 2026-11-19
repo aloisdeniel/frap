@@ -45,7 +45,11 @@ fn existing_group(main: &Main) -> Option<IdRef<NodeTreeId>> {
             .library
             .and_then(|l| main.libraries.get(l))
             .map(|l| l.filepath.as_str());
-        let valid = t.interface.iter().filter(|s| s.in_out == frap_nodes::InOut::Input).count()
+        let valid = t
+            .interface
+            .iter()
+            .filter(|s| s.in_out == frap_nodes::InOut::Input)
+            .count()
             == 3
             && t.interface
                 .iter()
@@ -59,9 +63,8 @@ fn existing_group(main: &Main) -> Option<IdRef<NodeTreeId>> {
 /// Links the group as Blender's asset import does: the library, its packed archive, and the
 /// group from the archive.
 fn link_group(main: &mut Main, log: &mut ChangeLog) -> IdRef<NodeTreeId> {
-    let find_lib = |main: &Main, name: &str| -> Option<IdRef<LibraryId>> {
-        main.libraries.find(name)
-    };
+    let find_lib =
+        |main: &Main, name: &str| -> Option<IdRef<LibraryId>> { main.libraries.find(name) };
     if find_lib(main, sba::LIBRARY_BASENAME).is_none() {
         main.libraries.insert(
             sba::LIBRARY_BASENAME,
@@ -150,7 +153,12 @@ fn exec(cx: &mut OpCtx, p: object::ShadeAutoSmooth) -> OpResult {
         {
             smooth_set(cx.mesh_mut(me)?, true, true);
         }
-        let mut o = cx.main().objects.get(ob).cloned().expect("invariant: found");
+        let mut o = cx
+            .main()
+            .objects
+            .get(ob)
+            .cloned()
+            .expect("invariant: found");
         let existing = {
             let main = cx.main();
             o.modifiers

@@ -21,8 +21,8 @@
 
 use frap_imbuf::{DecodedImage, EncodeFormat, FileFormat, PixelData};
 use frap_rna::{IdRef, ImageId, PyExc, Report, ReportType, RnaError, RnaErrorKind, RnaPtr};
-use frap_scene::id::{ImBuf, ImBufData, ImInfo, Image, PathBase};
 use frap_scene::Host;
+use frap_scene::id::{ImBuf, ImBufData, ImInfo, Image, PathBase};
 use smol_str::SmolStr;
 
 use super::super::_common::{internal, root_id};
@@ -228,7 +228,8 @@ pub(crate) fn to_decoded(
         }
     };
     let img = DecodedImage::new(buf.x, buf.y, 4, pixels).expect("invariant: 4 channels");
-    img.with_channels(channels).expect("invariant: 1..=4 channels")
+    img.with_channels(channels)
+        .expect("invariant: 1..=4 channels")
 }
 
 /// `image_memorypack_imbuf`: (bytes, MIME type, `file_format`).
@@ -328,7 +329,11 @@ impl Reports {
             }
             return Ok(());
         }
-        let msg: String = self.errors.iter().map(|e| format!("Error: {e}\n")).collect();
+        let msg: String = self
+            .errors
+            .iter()
+            .map(|e| format!("Error: {e}\n"))
+            .collect();
         Err(RnaError::new(RnaErrorKind::Other, PyExc::RuntimeError, msg))
     }
 }
@@ -377,10 +382,16 @@ mod tests {
         // (10, 100) → (0.039216 ×3, 0.392157), depth 16.
         let b = decode(&png(2, 1, 1, vec![10, 200])).unwrap();
         assert_eq!(b.depth(), 8);
-        assert_eq!(b.data, ImBufData::Byte(vec![10, 10, 10, 255, 200, 200, 200, 255]));
+        assert_eq!(
+            b.data,
+            ImBufData::Byte(vec![10, 10, 10, 255, 200, 200, 200, 255])
+        );
         let b = decode(&png(2, 1, 2, vec![10, 100, 200, 255])).unwrap();
         assert_eq!(b.depth(), 16);
-        assert_eq!(b.data, ImBufData::Byte(vec![10, 10, 10, 100, 200, 200, 200, 255]));
+        assert_eq!(
+            b.data,
+            ImBufData::Byte(vec![10, 10, 10, 100, 200, 200, 200, 255])
+        );
     }
 
     #[test]
@@ -399,7 +410,10 @@ mod tests {
         .unwrap();
         let mut b = decode(&bytes).unwrap();
         assert_eq!(probe(&bytes).unwrap(), ImInfo::of(&b));
-        assert_eq!(b.pixels(), vec![1.0, 32768.0 / 65535.0, 0.0, 32768.0 / 65535.0]);
+        assert_eq!(
+            b.pixels(),
+            vec![1.0, 32768.0 / 65535.0, 0.0, 32768.0 / 65535.0]
+        );
         b.handle_colorspace_and_alpha("sRGB", false, "STRAIGHT");
         assert_eq!(b.depth(), 128);
         let p = b.pixels();
@@ -416,27 +430,43 @@ mod tests {
         let mut b = ImBuf::new(2, 1, 32, true);
         b.data = ImBufData::Float(vec![0.1, 0.2, 0.05, 0.5, 0.5, 0.04, 0.9, 0.25]);
         let png = to_decoded(&b, 4, Encoding::LinearToSrgb, Unpremul::After, false);
-        let PixelData::F32(v) = &png.pixels else { panic!() };
+        let PixelData::F32(v) = &png.pixels else {
+            panic!()
+        };
         let want = [0.69837, 0.96905, 0.4956, 0.5, 1.0, 0.88367, 1.0, 0.25];
         for (g, w) in v.iter().zip(want) {
             assert!((g.min(1.0) - w).abs() < 1e-4, "{v:?}");
         }
-        let bytes = frap_imbuf::encode(&png, &EncodeFormat::Png { bit_depth: 16, compression: 15 })
-            .unwrap();
-        let PixelData::U16(u) = frap_imbuf::decode(&bytes).unwrap().pixels else { panic!() };
+        let bytes = frap_imbuf::encode(
+            &png,
+            &EncodeFormat::Png {
+                bit_depth: 16,
+                compression: 15,
+            },
+        )
+        .unwrap();
+        let PixelData::U16(u) = frap_imbuf::decode(&bytes).unwrap().pixels else {
+            panic!()
+        };
         let blender = [45768u16, 63507, 32479, 32768, 65535, 57911, 65535, 16384];
         for (g, w) in u.iter().zip(blender) {
             assert!((i32::from(*g) - i32::from(w)).abs() <= 8, "{u:?}");
         }
         let exr = to_decoded(&b, 4, Encoding::LinearToSrgb, Unpremul::Never, false);
-        let PixelData::F32(v) = &exr.pixels else { panic!() };
-        let want = [0.34919, 0.48453, 0.2478, 0.5, 0.73536, 0.22092, 0.95469, 0.25];
+        let PixelData::F32(v) = &exr.pixels else {
+            panic!()
+        };
+        let want = [
+            0.34919, 0.48453, 0.2478, 0.5, 0.73536, 0.22092, 0.95469, 0.25,
+        ];
         for (g, w) in v.iter().zip(want) {
             assert!((g - w).abs() < 1e-4, "{v:?}");
         }
         // 8-bit output unpremultiplies first: srgb(c / a).
         let jpg = to_decoded(&b, 4, Encoding::LinearToSrgb, Unpremul::Before, false);
-        let PixelData::F32(v) = &jpg.pixels else { panic!() };
+        let PixelData::F32(v) = &jpg.pixels else {
+            panic!()
+        };
         assert!((v[0] - linear_to_srgb(0.2)).abs() < 1e-6);
     }
 

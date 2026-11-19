@@ -73,7 +73,9 @@ mod hook {
                     return Err(RnaError::new(
                         RnaErrorKind::Other,
                         PyExc::RuntimeError,
-                        format!("Error: Modifier \"{name}\" is not in the object's modifier list\n"),
+                        format!(
+                            "Error: Modifier \"{name}\" is not in the object's modifier list\n"
+                        ),
                     ));
                 }
                 i

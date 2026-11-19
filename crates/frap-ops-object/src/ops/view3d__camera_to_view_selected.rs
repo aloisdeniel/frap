@@ -545,7 +545,9 @@ mod tests {
             ModifierStatus::Skipped,
             ModifierStatus::Evaluated,
         ])));
-        assert!(edit_wrapper_has_points(&ev(vec![ModifierStatus::PassedThrough])));
+        assert!(edit_wrapper_has_points(&ev(vec![
+            ModifierStatus::PassedThrough
+        ])));
     }
 
     #[test]
@@ -571,7 +573,10 @@ mod tests {
         d.add_point([1.0, 1.0, -5.0]);
         let (co, _) = d.fit(&p).unwrap();
         // A camera looking down -Z frames the two points from above their middle.
-        assert!((co[0] - 0.5).abs() < 1e-4 && (co[1] - 0.5).abs() < 1e-4, "{co:?}");
+        assert!(
+            (co[0] - 0.5).abs() < 1e-4 && (co[1] - 0.5).abs() < 1e-4,
+            "{co:?}"
+        );
         assert!(co[2] > -5.0);
     }
 }

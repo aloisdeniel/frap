@@ -83,7 +83,10 @@ pub(crate) fn group_reaches(main: &Main, group: IdAny, target: Root) -> bool {
             continue;
         }
         seen.push(g);
-        if let Some(t) = g.typed::<NodeTreeId>().and_then(|r| main.node_groups.get(r)) {
+        if let Some(t) = g
+            .typed::<NodeTreeId>()
+            .and_then(|r| main.node_groups.get(r))
+        {
             stack.extend(t.nodes.iter().filter_map(|n| n.group_tree()));
         }
     }

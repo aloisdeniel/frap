@@ -95,7 +95,8 @@ fn angle_normalized(v1: V3, v2: V3) -> f32 {
     if dot(v1, v2) >= 0.0 {
         2.0 * safe_asin(len(sub(v1, v2)) / 2.0)
     } else {
-        std::f32::consts::PI - 2.0 * safe_asin(len([v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]]) / 2.0)
+        std::f32::consts::PI
+            - 2.0 * safe_asin(len([v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2]]) / 2.0)
     }
 }
 
@@ -187,7 +188,14 @@ pub(crate) fn weighted_normal(s: &WeightedNormalSettings, mut mesh: Mesh) -> Mes
                 let angles = face_angles(positions, &cv[r.clone()]);
                 for (k, c) in r.enumerate() {
                     let a = std::f32::consts::PI - angles[k];
-                    v.push((if mode == "FACE_AREA_WITH_ANGLE" { a * area } else { a }, c));
+                    v.push((
+                        if mode == "FACE_AREA_WITH_ANGLE" {
+                            a * area
+                        } else {
+                            a
+                        },
+                        c,
+                    ));
                 }
             }
             v
@@ -283,13 +291,27 @@ pub(crate) fn weighted_normal(s: &WeightedNormalSettings, mut mesh: Mesh) -> Mes
                 *n = it.normal;
             }
         }
-        normals_corner_custom_set(&view, &vnor, false, &mut corner_normals, &mut sharp, &mut clnors);
+        normals_corner_custom_set(
+            &view,
+            &vnor,
+            false,
+            &mut corner_normals,
+            &mut sharp,
+            &mut clnors,
+        );
     } else if vg.is_none() {
         let mut vert_normals: Vec<V3> = vec![[0.0; 3]; positions.len()];
         for &v in cv {
             vert_normals[v as usize] = items[v as usize].normal;
         }
-        normals_corner_custom_set(&view, &vnor, true, &mut vert_normals, &mut sharp, &mut clnors);
+        normals_corner_custom_set(
+            &view,
+            &vnor,
+            true,
+            &mut vert_normals,
+            &mut sharp,
+            &mut clnors,
+        );
     } else {
         let (mut cn, _) = calc_corners_with_spaces(&view, Some(&sharp), Some(&clnors));
         for (c, n) in cn.iter_mut().enumerate() {
@@ -341,7 +363,12 @@ mod tests {
 
     #[test]
     fn face_angles_of_a_square() {
-        let p = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [1.0, 1.0, 0.0], [0.0, 1.0, 0.0]];
+        let p = [
+            [0.0, 0.0, 0.0],
+            [1.0, 0.0, 0.0],
+            [1.0, 1.0, 0.0],
+            [0.0, 1.0, 0.0],
+        ];
         for a in face_angles(&p, &[0, 1, 2, 3]) {
             assert!((a - std::f32::consts::FRAC_PI_2).abs() < 1e-6);
         }

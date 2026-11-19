@@ -56,7 +56,11 @@ fn enabled_sets_equal_blender_for_every_mode_combination() {
     for (bl_idname, t) in types {
         let mut node = fresh(bl_idname);
         assert_eq!(ids(&node.inputs), strs(&t["inputs"]), "{bl_idname} inputs");
-        assert_eq!(ids(&node.outputs), strs(&t["outputs"]), "{bl_idname} outputs");
+        assert_eq!(
+            ids(&node.outputs),
+            strs(&t["outputs"]),
+            "{bl_idname} outputs"
+        );
         let default = strs(&t["default"]);
         if [bits(&node.inputs), bits(&node.outputs)] != [default[0], default[1]] {
             failures.push(format!("{bl_idname} fresh: {default:?}"));

@@ -68,7 +68,11 @@ fn image_save_render(
         s.quality.clamp(0, 100) as u8
     };
     let mut enc = encoder(&s.file_format, false, q).map_err(not_implemented)?;
-    if let EncodeFormat::Png { bit_depth, compression } = &mut enc {
+    if let EncodeFormat::Png {
+        bit_depth,
+        compression,
+    } = &mut enc
+    {
         *bit_depth = if s.color_depth == "16" { 16 } else { 8 };
         *compression = s.compression.clamp(0, 100) as u8;
     }
@@ -115,7 +119,8 @@ fn image_save_render(
             look: "None".into(),
             ..vs.clone()
         };
-        DisplayProcessor::new(&std, &ds).or_else(|_| DisplayProcessor::new(&std, &DisplaySettings::default()))
+        DisplayProcessor::new(&std, &ds)
+            .or_else(|_| DisplayProcessor::new(&std, &DisplaySettings::default()))
     });
     let processor = processor.map_err(|e| internal(e.to_string()))?;
     // Scene-linear, straight pixels, top row first.

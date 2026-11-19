@@ -39,7 +39,12 @@ fn exec(cx: &mut OpCtx, p: object::ModifierMoveToIndex) -> OpResult {
         };
         match edit::move_to_index(&mut mods, i, i64::from(p.index.value), true) {
             Ok(()) => {
-                if cx.main().objects.get(ob).is_some_and(|o| o.modifiers != mods) {
+                if cx
+                    .main()
+                    .objects
+                    .get(ob)
+                    .is_some_and(|o| o.modifiers != mods)
+                {
                     cx.object_mut(ob)?.modifiers = mods;
                 }
                 changed = true;

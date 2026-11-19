@@ -30,8 +30,7 @@ fn report_stack_warnings(h: &mut dyn Host, id: IdAny) {
     let Some(ob) = id.typed::<ObjectId>() else {
         return;
     };
-    if h
-        .main()
+    if h.main()
         .objects
         .get(ob)
         .is_none_or(|o| o.modifiers.is_empty())

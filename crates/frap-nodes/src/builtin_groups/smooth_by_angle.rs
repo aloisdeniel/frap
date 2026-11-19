@@ -32,7 +32,8 @@ pub const LIBRARY_BASENAME: &str = "geometry_nodes_essentials.blend";
 pub const ARCHIVE_LIBRARY_NAME: &str = "geometry_nodes_essentials.blend.001";
 /// `Library.filepath` of both libraries (Blender: `<install>/datafiles/assets/nodes/…`; the
 /// path suffix is what `is_smooth_by_angle_modifier` checks).
-pub const ESSENTIALS_FILEPATH: &str = "<frap>/datafiles/assets/nodes/geometry_nodes_essentials.blend";
+pub const ESSENTIALS_FILEPATH: &str =
+    "<frap>/datafiles/assets/nodes/geometry_nodes_essentials.blend";
 /// Identifier of the geometry input.
 pub const INPUT_MESH: &str = "Input_0";
 /// Identifier of the "Angle" input (`interface_inputs()[1]`, what `shade_auto_smooth` sets).
@@ -366,7 +367,10 @@ mod tests {
         let ids: Vec<&str> = t.interface.iter().map(|s| s.identifier.as_str()).collect();
         assert_eq!(ids, ["Output_2", "Input_0", "Input_1", "Socket_1"]);
         let names: Vec<&str> = t.nodes.iter().map(|n| n.name.as_str()).collect();
-        assert_eq!(names[0..3], ["Set Shade Smooth", "Set Shade Smooth.001", "Group Output"]);
+        assert_eq!(
+            names[0..3],
+            ["Set Shade Smooth", "Set Shade Smooth.001", "Group Output"]
+        );
         // Every link joins existing sockets.
         for l in &t.links {
             let from = t.nodes.iter().find(|n| n.uid == l.from_node).unwrap();
@@ -381,10 +385,15 @@ mod tests {
         assert!(is_smooth_by_angle(NAME, Some(ESSENTIALS_FILEPATH)));
         assert!(is_smooth_by_angle(
             NAME,
-            Some("/Applications/Blender.app/Contents/Resources/5.2/datafiles/assets/nodes/geometry_nodes_essentials.blend")
+            Some(
+                "/Applications/Blender.app/Contents/Resources/5.2/datafiles/assets/nodes/geometry_nodes_essentials.blend"
+            )
         ));
         assert!(!is_smooth_by_angle(NAME, None), "a local group");
-        assert!(!is_smooth_by_angle("Smooth by Angle.001", Some(ESSENTIALS_FILEPATH)));
+        assert!(!is_smooth_by_angle(
+            "Smooth by Angle.001",
+            Some(ESSENTIALS_FILEPATH)
+        ));
         assert!(!is_smooth_by_angle(NAME, Some("/tmp/other.blend")));
     }
 }

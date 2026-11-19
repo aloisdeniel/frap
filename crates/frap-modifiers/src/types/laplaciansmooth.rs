@@ -437,12 +437,8 @@ mod tests {
             cotangent_tri_weight([0.0; 3], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]),
             0.0
         );
-        let v = volume_tetrahedron_signed(
-            [0.0; 3],
-            [1.0, 0.0, 0.0],
-            [0.0, 1.0, 0.0],
-            [0.0, 0.0, 1.0],
-        );
+        let v =
+            volume_tetrahedron_signed([0.0; 3], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]);
         assert!((v.abs() - 1.0 / 6.0).abs() < 1e-7);
     }
 }

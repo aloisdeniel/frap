@@ -61,7 +61,11 @@ pub(crate) fn evaluate(
         mode,
         reports: Vec::new(),
     };
-    let r = frap_modifiers::stack::evaluate(base, in_edit_mode, &mut cx);
+    // A modifier may unwind (TIMEOUT, LIMIT_EXCEEDED); the cache outlives the statement, so the
+    // cycle guard is cleared before the unwind goes on (else a later read reports a false cycle).
+    let r = guarded(&mut cx, |cx| {
+        frap_modifiers::stack::evaluate(base, in_edit_mode, cx)
+    });
     let mut warnings = std::mem::take(&mut cx.reports);
     cx.ev.in_progress.retain(|k| *k != ob_ref.key());
     warnings.extend(r.warnings);
@@ -117,10 +121,24 @@ impl EvalCache {
             mode: EvalMode::Viewport,
             reports: Vec::new(),
         };
-        let r = frap_modifiers::stack::evaluate_one(m, base, &mut cx);
+        let r = guarded(&mut cx, |cx| {
+            frap_modifiers::stack::evaluate_one(m, base, cx)
+        });
         let reports = std::mem::take(&mut cx.reports);
         self.in_progress.retain(|k| *k != ob_ref.key());
         r.map(|mesh| AppliedModifier { mesh, reports })
+    }
+}
+
+/// Runs `f`; if it unwinds, removes `cx.ob_ref` from the cycle guard first and resumes the unwind.
+fn guarded<R>(cx: &mut GeoCx<'_, '_>, f: impl FnOnce(&mut GeoCx<'_, '_>) -> R) -> R {
+    match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut *cx))) {
+        Ok(r) => r,
+        Err(payload) => {
+            let key = cx.ob_ref.key();
+            cx.ev.in_progress.retain(|k| *k != key);
+            std::panic::resume_unwind(payload)
+        }
     }
 }
 

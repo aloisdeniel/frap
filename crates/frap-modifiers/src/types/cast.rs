@@ -350,11 +350,13 @@ mod tests {
         let ctrl = cx.add_object("Empty", Mat4::from_translation(Vec3::new(2.0, 0.0, 0.0)));
         let c = control(Some(ctrl.any()), &mut cx).unwrap();
         assert_eq!(c.center, Vec3::new(2.0, 0.0, 0.0));
-        assert!(deps(&ModifierSettings::Cast(CastSettings {
-            object: Some(ctrl.any()),
-            ..CastSettings::default()
-        }))
-        .contains(&ctrl.any()));
+        assert!(
+            deps(&ModifierSettings::Cast(CastSettings {
+                object: Some(ctrl.any()),
+                ..CastSettings::default()
+            }))
+            .contains(&ctrl.any())
+        );
     }
 
     /// Blender refuses `object = <the modified object>`; frap treats such a reference as no

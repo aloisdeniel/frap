@@ -300,7 +300,10 @@ mod tests {
         let mut expected = vec![false; 12];
         expected[2] = true;
         assert_eq!(m.sharp_edges().unwrap(), expected.as_slice());
-        assert_eq!(m.attributes().iter().last().map(|a| a.name.as_str()), Some(SHARP_EDGE));
+        assert_eq!(
+            m.attributes().iter().last().map(|a| a.name.as_str()),
+            Some(SHARP_EDGE)
+        );
     }
 
     #[test]
@@ -313,7 +316,12 @@ mod tests {
             false,
         );
         assert_eq!(unsigned_edge_angles(&m), vec![0.0; 3]);
-        assert!((angle_normalized_v3v3([0.0, 0.0, 1.0], [1.0, 0.0, 0.0]) - 1.570_796_4).abs() < 1e-6);
-        assert!((angle_normalized_v3v3([0.0, 0.0, 1.0], [0.0, 0.0, -1.0]) - std::f32::consts::PI).abs() < 1e-6);
+        assert!(
+            (angle_normalized_v3v3([0.0, 0.0, 1.0], [1.0, 0.0, 0.0]) - 1.570_796_4).abs() < 1e-6
+        );
+        assert!(
+            (angle_normalized_v3v3([0.0, 0.0, 1.0], [0.0, 0.0, -1.0]) - std::f32::consts::PI).abs()
+                < 1e-6
+        );
     }
 }

@@ -91,7 +91,11 @@ mod tests {
     fn check_socket(s: &Socket, j: &J, ctx: &str) {
         assert_eq!(s.name, j["name"].as_str().unwrap(), "{ctx}");
         assert_eq!(s.identifier, j["identifier"].as_str().unwrap(), "{ctx}");
-        assert_eq!(rna::socket_type_str(s.ty), j["type"].as_str().unwrap(), "{ctx}");
+        assert_eq!(
+            rna::socket_type_str(s.ty),
+            j["type"].as_str().unwrap(),
+            "{ctx}"
+        );
         assert_eq!(s.enabled, j["enabled"].as_bool().unwrap(), "{ctx}");
         assert_eq!(s.hide_value, j["hide_value"].as_bool().unwrap(), "{ctx}");
         match (&s.default_value, j.get("default_value")) {
@@ -178,7 +182,9 @@ mod tests {
                     other => panic!("{prop}: {:?}", other.err()),
                 };
                 match (got.as_f64(), want.as_f64()) {
-                    (Some(a), Some(b)) => assert!((a - b).abs() <= 1e-6 * b.abs().max(1.0), "{prop}"),
+                    (Some(a), Some(b)) => {
+                        assert!((a - b).abs() <= 1e-6 * b.abs().max(1.0), "{prop}")
+                    }
                     _ => assert_eq!(&got, want, "item {i}.{prop}"),
                 }
             }

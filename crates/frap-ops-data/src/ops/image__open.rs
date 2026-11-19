@@ -249,7 +249,10 @@ mod tests {
             sequence_decode("img_012.png"),
             ("img_".into(), 12, ".png".into())
         );
-        assert_eq!(sequence_decode("rgb.png"), ("rgb.png".into(), 0, String::new()));
+        assert_eq!(
+            sequence_decode("rgb.png"),
+            ("rgb.png".into(), 0, String::new())
+        );
         assert_eq!(sequence_length(&[3, 1, 2, 5]), 3);
         assert_eq!(sequence_length(&[7]), 1);
     }
@@ -260,7 +263,10 @@ mod tests {
             path_rel("/a/b/tex/x.png", Some("/a/b/scene.frap")),
             "//tex/x.png"
         );
-        assert_eq!(path_rel("/a/c/x.png", Some("/a/b/scene.frap")), "//../c/x.png");
+        assert_eq!(
+            path_rel("/a/c/x.png", Some("/a/b/scene.frap")),
+            "//../c/x.png"
+        );
         assert_eq!(path_rel("rel/x.png", Some("/a/b/scene.frap")), "rel/x.png");
         assert_eq!(path_rel("/a/x.png", None), "/a/x.png");
         assert_eq!(join("dir", "x.png"), "dir/x.png");

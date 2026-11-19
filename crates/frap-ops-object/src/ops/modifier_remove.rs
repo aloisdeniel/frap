@@ -34,7 +34,12 @@ fn exec(cx: &mut OpCtx, p: object::ModifierRemove) -> OpResult {
     let objects = shared::edit_objects(&cx.ctx(), p.use_selected_objects.value);
     let mut changed = false;
     for ob in objects {
-        let Some(i) = cx.main().objects.get(ob).and_then(|o| shared::find(o, &name)) else {
+        let Some(i) = cx
+            .main()
+            .objects
+            .get(ob)
+            .and_then(|o| shared::find(o, &name))
+        else {
             continue;
         };
         edit::remove(&mut cx.object_mut(ob)?.modifiers, i);

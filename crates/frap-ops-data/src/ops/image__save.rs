@@ -6,8 +6,8 @@
 //! (verified on 5.2.4: `RuntimeError: Operator bpy.ops.image.save.poll() failed, context is
 //! incorrect`; see `image__pack.rs`). `bpy.data.images['X'].save()` does the work.
 
-use frap_op::prelude::*;
 use frap_op::PollReq;
+use frap_op::prelude::*;
 use frap_op::{Poll, PollFail, operator};
 use frap_scene::Context;
 use frap_scene::id::PathBase;

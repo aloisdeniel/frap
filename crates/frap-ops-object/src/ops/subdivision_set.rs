@@ -49,12 +49,9 @@ fn exec(cx: &mut OpCtx, p: object::SubdivisionSet) -> OpResult {
     }
     let first_relevant = |cx: &OpCtx, ob| {
         cx.main().objects.get(ob).and_then(|o| {
-            o.modifiers.iter().position(|m| {
-                matches!(
-                    m.settings.type_identifier(),
-                    "SUBSURF" | "MULTIRES"
-                )
-            })
+            o.modifiers
+                .iter()
+                .position(|m| matches!(m.settings.type_identifier(), "SUBSURF" | "MULTIRES"))
         })
     };
     // `any_object_has_relevant_modifier`: SUBSURF counts for an object in Object Mode only

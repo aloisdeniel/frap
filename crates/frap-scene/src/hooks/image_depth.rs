@@ -17,5 +17,7 @@ fn get<'h>(
 ) -> Result<Field<'h>, RnaError> {
     let im = image_of(h, this)?;
     let info = im.info(&crate::id::PathBase::of(h));
-    Ok(Field::Value(Value::Int(info.map_or(0, |i| i64::from(i.depth())))))
+    Ok(Field::Value(Value::Int(
+        info.map_or(0, |i| i64::from(i.depth())),
+    )))
 }

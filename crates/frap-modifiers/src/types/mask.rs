@@ -351,7 +351,8 @@ pub(crate) fn mask(s: &MaskSettings, armature: Option<&ArmatureInfo>, mesh: Mesh
                     dst_ce[i_ml_dst] = edge_index as i32;
                     dst_cv[i_ml_dst] = dst_edges[edge_map[fe[last_index] as usize] as usize][0];
                     // The closing edge.
-                    dst_edges[edge_index] = [dst_cv[face_offsets[i_dst] as usize], dst_cv[i_ml_dst]];
+                    dst_edges[edge_index] =
+                        [dst_cv[face_offsets[i_dst] as usize], dst_cv[i_ml_dst]];
                     edge_index += 1;
                     // Only one cut per iteration.
                     break;

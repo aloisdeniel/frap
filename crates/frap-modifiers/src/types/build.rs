@@ -111,8 +111,10 @@ pub(crate) fn build(s: &BuildSettings, mesh: &Mesh, ctime: f32) -> Mesh {
     };
     for &old in &edge_hash {
         let e = edges_src[old];
-        topo.edges
-            .push([vert_hash[&(e[0] as usize)] as i32, vert_hash[&(e[1] as usize)] as i32]);
+        topo.edges.push([
+            vert_hash[&(e[0] as usize)] as i32,
+            vert_hash[&(e[1] as usize)] as i32,
+        ]);
         src.edge.push(Src::Copy(old));
     }
     topo.face_offsets.push(0);

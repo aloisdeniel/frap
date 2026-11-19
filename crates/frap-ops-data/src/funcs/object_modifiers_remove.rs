@@ -34,7 +34,9 @@ fn object_modifiers_remove(
         .get(ob)
         .ok_or_else(|| internal("modifiers.remove(): the object was removed"))?;
     let same = root_id(p).ok() == Some(ob.any());
-    let i = same.then(|| Modifier::index_in(&o.modifiers, &p.path)).flatten();
+    let i = same
+        .then(|| Modifier::index_in(&o.modifiers, &p.path))
+        .flatten();
     let Some(i) = i else {
         let name = p
             .path

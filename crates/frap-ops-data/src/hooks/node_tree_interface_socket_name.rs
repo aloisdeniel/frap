@@ -28,8 +28,8 @@ fn set(h: &mut dyn Host, this: &RnaPtr, _prop: &'static PropDef, v: Value) -> Re
         .ok_or_else(|| internal("interface socket name: not a string"))?
         .to_owned();
     let (main, log) = h.main_mut();
-    let Some(i) = tree(main, root)
-        .and_then(|t| frap_nodes::rna::interface::item_index_of(t, &this.path))
+    let Some(i) =
+        tree(main, root).and_then(|t| frap_nodes::rna::interface::item_index_of(t, &this.path))
     else {
         return Err(internal("interface socket not found"));
     };

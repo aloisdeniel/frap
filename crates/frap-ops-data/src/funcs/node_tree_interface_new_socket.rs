@@ -84,7 +84,6 @@ pub(crate) fn item_ptr(main: &Main, root: Root, t: &NodeTree, i: usize) -> RnaPt
         .child(Seg::Index(i as i64), srna)
 }
 
-
 #[rna_func(srna = "NodeTreeInterface", func = "new_socket")]
 fn node_tree_interface_new_socket(
     h: &mut dyn Host,

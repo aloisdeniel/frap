@@ -70,7 +70,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.extrude_verts_indiv` | M2 | P1 |  |
 | [x] | `mesh.extrude_vertices_move` | M2 | P1 | macro |
 | [x] | `mesh.extrude_repeat` | M2 | P2 | offset is a vector in 5.x |
-| [ ] | `mesh.extrude_manifold` | M2 | P2 | macro; partial: the translate step's `use_automerge_and_split` is not implemented in Edit Mode (OP_NOT_IMPLEMENTED with a hint: `mesh.extrude_region_move` + `mesh.remove_doubles`), golden `macros/manifold.py.pending` |
+| [x] | `mesh.extrude_manifold` | M2 | P2 | macro; the translate step's `use_automerge_and_split` (`EDBM_automerge_and_split`, `BM_mesh_intersect_edges`) since M4 (WP 4.6), golden `macros/manifold.py` |
 | [x] | `mesh.inset` | M2 | P0 | T1 |
 | [x] | `mesh.bevel` | M2 | P0 | seg 1 T1, N segments T2; offset=0 no-op hint (NO_OP_DEFAULT). Partial: `profile_type='CUSTOM'` OP_NOT_IMPLEMENTED; harden_normals and Auto Merge not applied (WARNING), D-80 |
 | [x] | `mesh.subdivide` | M2 | P0 | uniform T1 |
@@ -134,9 +134,9 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.flip_quad_tessellation` | M2 | P2 |  |
 | [x] | `mesh.vertices_smooth` | M2 | P1 | factor=0 default is a no-op |
 | [x] | `mesh.symmetrize` | M2 | P1 | partial: `use_mesh_automerge` not applied afterwards |
-| [ ] | `mesh.decimate` | M4 | P2 | shares DECIMATE COLLAPSE |
-| [ ] | `mesh.intersect` | M4 | P2 | shares Boolean solver |
-| [ ] | `mesh.intersect_boolean` | M4 | P2 | solver FLOAT/EXACT (5.x renamed FAST) |
+| [x] | `mesh.decimate` | M4 | P2 | shares DECIMATE COLLAPSE (WP 4.5) |
+| [x] | `mesh.intersect` | M4 | P2 | shares Boolean solver |
+| [x] | `mesh.intersect_boolean` | M4 | P2 | solver FLOAT/EXACT (5.x renamed FAST) |
 | [ ] | `mesh.blend_from_shape` | M6 | P2 | shape keys |
 | [ ] | `mesh.shape_propagate_to_all` | M6 | P2 | shape keys |
 | [ ] | `mesh.normals_tools` | M8 | P2 |  |
@@ -261,7 +261,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.material_slot_assign` | M2 | P0 | edit-mode face assignment (object mode: no-op as Blender); WP 2.9 (M2 W0 assignment) |
 | [x] | `object.material_slot_select` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
 | [x] | `object.material_slot_deselect` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
-| [ ] | `object.material_slot_move` | M3 | P2 | WP 3.1 (M3+M4 W0 assignment) |
+| [x] | `object.material_slot_move` | M3 | P2 | WP 3.1 (M3+M4 W0 assignment) |
 | [ ] | `object.material_slot_copy` | M8 | P2 |  |
 | [ ] | `object.vertex_group_add` | M6 | P0 |  |
 | [ ] | `object.vertex_group_remove` | M6 | P0 |  |
@@ -306,10 +306,10 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.collection_remove` | M1 | P2 |  |
 | [x] | `object.collection_link` | M1 | P2 | dynamic enum |
 | [x] | `object.collection_unlink` | M1 | P2 |  |
-| [ ] | `object.hide_view_set` | M3 | P1 | virtual 3D View poll; WP 3.10 (M3+M4 W0 assignment) |
-| [ ] | `object.hide_view_clear` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
-| [ ] | `object.make_single_user` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
-| [ ] | `object.make_links_data` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
+| [x] | `object.hide_view_set` | M3 | P1 | virtual 3D View poll; WP 3.10 (M3+M4 W0 assignment) |
+| [x] | `object.hide_view_clear` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
+| [x] | `object.make_single_user` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
+| [x] | `object.make_links_data` | M3 | P1 | WP 3.10 (M3+M4 W0 assignment) |
 | [ ] | `object.hide_render_clear_all` | M8 | P2 |  |
 | [ ] | `object.track_set` | M8 | P2 |  |
 | [ ] | `object.track_clear` | M8 | P2 |  |
@@ -582,8 +582,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `scene.new` | M3 | P1 | WP 3.10; multi-scene glTF |
-| [ ] | `scene.delete` | M3 | P2 | WP 3.10 |
+| [x] | `scene.new` | M3 | P1 | WP 3.10; multi-scene glTF |
+| [x] | `scene.delete` | M3 | P2 | WP 3.10 |
 | — | `scene.view_layer_add` | OUT | — |  |
 | — | `scene.view_layer_remove` | OUT | — |  |
 
@@ -611,7 +611,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `world.new` | M3 | P1 |  |
+| [x] | `world.new` | M3 | P1 |  |
 
 ### `collection.*`
 
@@ -662,28 +662,28 @@ All types exist as data from M1 (settings generated from dumps, round-trip in `.
 
 | ✓ | Type | Struct | M | Prio | Notes |
 |---|---|---|---|---|---|
-| [ ] | `SUBSURF` | `SubsurfModifier` | M4 | P0 | frap-subdiv; T2, layout pass towards T1 |
-| [ ] | `MIRROR` | `MirrorModifier` | M4 | P0 |  |
-| [ ] | `ARRAY` | `ArrayModifier` | M4 | P0 |  |
-| [ ] | `BEVEL` | `BevelModifier` | M4 | P0 | shares mesh.bevel core |
-| [ ] | `SOLIDIFY` | `SolidifyModifier` | M4 | P0 | simple + complex |
-| [ ] | `BOOLEAN` | `BooleanModifier` | M4 | P0 | MANIFOLD T2, EXACT T3, FLOAT → EXACT + WARNING until M8 |
-| [ ] | `TRIANGULATE` | `TriangulateModifier` | M4 | P0 |  |
-| [ ] | `DECIMATE` | `DecimateModifier` | M4 | P0 | COLLAPSE/UNSUBDIV/DISSOLVE |
-| [ ] | `WELD` | `WeldModifier` | M4 | P0 |  |
-| [ ] | `DISPLACE` | `DisplaceModifier` | M4 | P0 | Texture IMAGE/NONE |
+| [x] | `SUBSURF` | `SubsurfModifier` | M4 | P0 | frap-subdiv; T2, layout pass towards T1 |
+| [x] | `MIRROR` | `MirrorModifier` | M4 | P0 |  |
+| [x] | `ARRAY` | `ArrayModifier` | M4 | P0 |  |
+| [x] | `BEVEL` | `BevelModifier` | M4 | P0 | shares mesh.bevel core |
+| [x] | `SOLIDIFY` | `SolidifyModifier` | M4 | P0 | simple + complex |
+| [x] | `BOOLEAN` | `BooleanModifier` | M4 | P0 | MANIFOLD T2 (hole-bridge and coincident-vertex configurations T3, see deviations D-100; EXACT D-101), EXACT T3, FLOAT → EXACT + WARNING until M8 |
+| [x] | `TRIANGULATE` | `TriangulateModifier` | M4 | P0 |  |
+| [x] | `DECIMATE` | `DecimateModifier` | M4 | P0 | COLLAPSE/UNSUBDIV/DISSOLVE |
+| [x] | `WELD` | `WeldModifier` | M4 | P0 |  |
+| [x] | `DISPLACE` | `DisplaceModifier` | M4 | P0 | Texture IMAGE/NONE |
 | [x] | `NODES` | `NodesModifier` | M4 | P0 | "Smooth by Angle" only; inputs at properties.inputs.Input_1.value |
-| [ ] | `EDGE_SPLIT` | `EdgeSplitModifier` | M4 | P1 |  |
-| [ ] | `WEIGHTED_NORMAL` | `WeightedNormalModifier` | M4 | P1 |  |
-| [ ] | `SMOOTH` | `SmoothModifier` | M4 | P1 |  |
-| [ ] | `CAST` | `CastModifier` | M4 | P1 |  |
-| [ ] | `SIMPLE_DEFORM` | `SimpleDeformModifier` | M4 | P1 |  |
-| [ ] | `WIREFRAME` | `WireframeModifier` | M4 | P1 |  |
-| [ ] | `SCREW` | `ScrewModifier` | M4 | P1 |  |
-| [ ] | `MASK` | `MaskModifier` | M4 | P1 |  |
-| [ ] | `BUILD` | `BuildModifier` | M4 | P2 |  |
-| [ ] | `NORMAL_EDIT` | `NormalEditModifier` | M4 | P2 |  |
-| [ ] | `LAPLACIANSMOOTH` | `LaplacianSmoothModifier` | M4 | P2 |  |
+| [x] | `EDGE_SPLIT` | `EdgeSplitModifier` | M4 | P1 |  |
+| [x] | `WEIGHTED_NORMAL` | `WeightedNormalModifier` | M4 | P1 |  |
+| [x] | `SMOOTH` | `SmoothModifier` | M4 | P1 |  |
+| [x] | `CAST` | `CastModifier` | M4 | P1 |  |
+| [x] | `SIMPLE_DEFORM` | `SimpleDeformModifier` | M4 | P1 |  |
+| [x] | `WIREFRAME` | `WireframeModifier` | M4 | P1 |  |
+| [x] | `SCREW` | `ScrewModifier` | M4 | P1 |  |
+| [x] | `MASK` | `MaskModifier` | M4 | P1 |  |
+| [x] | `BUILD` | `BuildModifier` | M4 | P2 |  |
+| [x] | `NORMAL_EDIT` | `NormalEditModifier` | M4 | P2 |  |
+| [x] | `LAPLACIANSMOOTH` | `LaplacianSmoothModifier` | M4 | P2 |  |
 | [ ] | `ARMATURE` | `ArmatureModifier` | M6 | P0 | LBS; dual quaternion P2 |
 | [ ] | `REMESH` | `RemeshModifier` | M8 | P2 |  |
 | [ ] | `SHRINKWRAP` | `ShrinkwrapModifier` | M8 | P2 |  |
@@ -778,7 +778,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | Collection, CollectionObjects, CollectionChildren | M1 | link/unlink |
 | [ ] | Depsgraph, DepsgraphObjectInstance (evaluated_get, to_mesh) | M1 | always fresh |
 | [x] | Image, ImagePackedFile | M1 meta / M3 full | pixels, pack, save, save_render; `PackedFile.data` (bytes) not readable; WP 3.2 |
-| [ ] | Texture, ImageTexture | M4 | DISPLACE only; field set frozen by M3+M4 W0 (`TextureFields`), bindings and `bpy.data.textures.new` WP 4.2 |
+| [x] | Texture, ImageTexture | M4 | DISPLACE only; field set frozen by M3+M4 W0 (`TextureFields`), bindings and `bpy.data.textures.new` WP 4.2 |
 | [ ] | VertexGroup, VertexGroups, VertexGroupElement | M6 | names on Mesh, RNA on Object |
 | [ ] | Key, ShapeKey | M6 |  |
 | [ ] | Armature, Bone, EditBone, ArmatureEditBones, Pose, PoseBone, BoneCollection | M6 |  |
@@ -817,7 +817,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | `bpy_struct.path_resolve / path_from_id, repr` | M1 | byte-identical to Blender, incl. embedded roots |
 | [ ] | `<collection>.foreach_get(attr[, seq]) / foreach_set(attr, seq)`, slices `coll[a:b]` | M1 | one-argument `foreach_get` is a frap extension; bulk `$array` encoding |
 | [ ] | `bpy.ops.<ns>.<op>.poll() / get_rna_type() / idname() / idname_py()` | M1 | poll returns bool + `unmet` requirements |
-| [ ] | `bpy.data.scenes.new(name) / remove`, `context.window.scene = …` | M3 | WP 3.10 |
+| [x] | `bpy.data.scenes.new(name) / remove`, `context.window.scene = …` | M3 | WP 3.10 |
 | — | `bpy_struct.driver_add/driver_remove` | OUT | drivers out of scope |
 
 ## F. glTF features
@@ -825,13 +825,13 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | ✓ | Feature | Export M | Import M | Notes |
 |---|---|---|---|---|
 | [ ] | Static meshes, node hierarchy (TRS), multi-material primitives, NORMAL, TEXCOORD_0 | M1 | M1 | Blender-compat rules, looptris |
-| [ ] | Multiple scenes (`scenes[]`, default `scene`, `use_active_scene`) | M3 | M3 | WP 3.10 |
+| [x] | Multiple scenes (`scenes[]`, default `scene`, `use_active_scene`) | M3 | M3 | WP 3.10 |
 | [ ] | Non-triangle modes: LINES (`use_mesh_edges`), POINTS (`use_mesh_vertices`, point clouds); import of strips, fans, line strips/loops | M3 | M3 | WP 3.7 |
 | [ ] | pbrMetallicRoughness factors + baseColorTexture, doubleSided | M1 | M1 |  |
 | [ ] | Multiple UV sets, vertex colours (COLOR_n, fake COLOR_0), TANGENT, extras | M3 | M3 |  |
 | [ ] | All textures/samplers/images (PNG/JPEG passthrough, ORM packing), alpha modes OPAQUE/MASK/BLEND | M3 | M3 |  |
-| [ ] | Cameras (perspective/orthographic) | M3 | M3 | export_cameras=False by default |
-| [ ] | KHR_lights_punctual | M3 | M3 | export_lights=False by default; AREA warning |
+| [x] | Cameras (perspective/orthographic) | M3 | M3 | export_cameras=False by default |
+| [x] | KHR_lights_punctual | M3 | M3 | export_lights=False by default; AREA warning |
 | [ ] | KHR_texture_transform | M3 | M3 | marked required (Blender quirk) |
 | [ ] | KHR_materials_emissive_strength, unlit | M3 | M3 |  |
 | [ ] | KHR_materials_transmission, clearcoat, sheen, ior, specular, volume, iridescence, anisotropy, dispersion | M3 | M3 |  |

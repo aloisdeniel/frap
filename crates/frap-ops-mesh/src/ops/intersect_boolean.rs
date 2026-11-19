@@ -510,7 +510,8 @@ pub(crate) mod common {
                         .windows(2)
                         .map(|w| {
                             let fv = &sh.corner_verts[w[0] as usize..w[1] as usize];
-                            let pt = |i: usize| sh.positions[fv[i % fv.len()] as usize].map(f64::from);
+                            let pt =
+                                |i: usize| sh.positions[fv[i % fv.len()] as usize].map(f64::from);
                             let mut n = [0.0f64; 3];
                             for i in 0..fv.len() {
                                 let (c, d) = (pt(i), pt(i + 1));
@@ -614,7 +615,11 @@ pub(crate) mod tests {
         for x in [-h, h] {
             for y in [-h, h] {
                 for z in [-h, h] {
-                    v.push(bm.vert_create([c[0] + x, c[1] + y, c[2] + z], None, CreateFlag::empty()));
+                    v.push(bm.vert_create(
+                        [c[0] + x, c[1] + y, c[2] + z],
+                        None,
+                        CreateFlag::empty(),
+                    ));
                 }
             }
         }
@@ -637,7 +642,11 @@ pub(crate) mod tests {
     }
 
     pub(crate) fn counts(bm: &BMesh) -> (usize, usize, usize) {
-        (bm.vert_ids().len(), bm.edge_ids().len(), bm.face_ids().len())
+        (
+            bm.vert_ids().len(),
+            bm.edge_ids().len(),
+            bm.face_ids().len(),
+        )
     }
 
     /// Signed volume and bounds of the visible faces.
@@ -694,7 +703,11 @@ pub(crate) mod tests {
     #[test]
     fn coplanar_union_selects_nothing() {
         // Blender: V16 E28 F14 (its coplanar faces stay split: T3), nothing selected.
-        let bm = run((2.0, [1.0, 0.0, 0.0]), BoolOperation::Union, SelectMode::VERT);
+        let bm = run(
+            (2.0, [1.0, 0.0, 0.0]),
+            BoolOperation::Union,
+            SelectMode::VERT,
+        );
         assert_eq!(bm.selected_counts(), (0, 0, 0));
         let (vol, b) = volume_bounds(&bm);
         assert!((vol - 12.0).abs() < 1e-5, "{vol}");
@@ -726,7 +739,11 @@ pub(crate) mod tests {
     #[test]
     fn face_select_mode_selects_nothing() {
         // `edbm_intersect_select` selects the cut only in vertex and edge select mode.
-        let bm = run((1.0, [0.9, 0.2, 0.3]), BoolOperation::Difference, SelectMode::FACE);
+        let bm = run(
+            (1.0, [0.9, 0.2, 0.3]),
+            BoolOperation::Difference,
+            SelectMode::FACE,
+        );
         assert_eq!(bm.selected_counts(), (0, 0, 0));
     }
 }

@@ -233,24 +233,32 @@ fn screw_sizes(
     );
     // `((step_tot + 1) * iter) - (iter - 1)`, which is `step_tot * iter + 1` (also for
     // `iter == 0`, where Blender's `uint` arithmetic wraps back to 1).
-    let sizes = steps.checked_mul(iter).and_then(|n| n.checked_add(1)).and_then(|step_tot| {
-        let close = screw_ofs.abs() <= f32::EPSILON * 100.0
-            && (angle.abs() - std::f32::consts::PI * 2.0).abs() <= f32::EPSILON * 100.0
-            && step_tot > 3;
-        let (step_tot, verts, edges, polys) = if close {
-            let step_tot = step_tot - 1;
-            let verts = totvert.checked_mul(step_tot)?;
-            (step_tot, verts, verts.checked_add(totedge.checked_mul(step_tot)?)?, totedge.checked_mul(step_tot)?)
-        } else {
-            let step_tot = step_tot.max(2);
-            let verts = totvert.checked_mul(step_tot)?;
-            let edges = totvert
-                .checked_mul(step_tot - 1)?
-                .checked_add(totedge.checked_mul(step_tot)?)?;
-            (step_tot, verts, edges, totedge.checked_mul(step_tot - 1)?)
-        };
-        Some((close, step_tot, verts, edges, polys, polys.checked_mul(4)?))
-    });
+    let sizes = steps
+        .checked_mul(iter)
+        .and_then(|n| n.checked_add(1))
+        .and_then(|step_tot| {
+            let close = screw_ofs.abs() <= f32::EPSILON * 100.0
+                && (angle.abs() - std::f32::consts::PI * 2.0).abs() <= f32::EPSILON * 100.0
+                && step_tot > 3;
+            let (step_tot, verts, edges, polys) = if close {
+                let step_tot = step_tot - 1;
+                let verts = totvert.checked_mul(step_tot)?;
+                (
+                    step_tot,
+                    verts,
+                    verts.checked_add(totedge.checked_mul(step_tot)?)?,
+                    totedge.checked_mul(step_tot)?,
+                )
+            } else {
+                let step_tot = step_tot.max(2);
+                let verts = totvert.checked_mul(step_tot)?;
+                let edges = totvert
+                    .checked_mul(step_tot - 1)?
+                    .checked_add(totedge.checked_mul(step_tot)?)?;
+                (step_tot, verts, edges, totedge.checked_mul(step_tot - 1)?)
+            };
+            Some((close, step_tot, verts, edges, polys, polys.checked_mul(4)?))
+        });
     let reserve = match sizes {
         Some((.., verts, edges, polys, corners)) => frap_math::budget::reserve_corners(
             Some(corners),
@@ -285,7 +293,12 @@ pub(crate) fn screw(
         if do_flip { 1 } else { 2 },
         if do_flip { 0 } else { 3 },
     ];
-    let quad_ord_ofs: [usize; 4] = [if do_flip { 2 } else { 0 }, 1, if do_flip { 0 } else { 2 }, 3];
+    let quad_ord_ofs: [usize; 4] = [
+        if do_flip { 2 } else { 0 },
+        1,
+        if do_flip { 0 } else { 2 },
+        3,
+    ];
     if totvert == 0 {
         return Ok(rebuild(mesh, Topology::default(), &Sources::default()));
     }
@@ -356,7 +369,12 @@ pub(crate) fn screw(
     let mut uv_v_range_inv = 0.0f32;
     let plane_side = |plane: &[f32; 4], p: V3| dot([plane[0], plane[1], plane[2]], p) + plane[3];
     if has_uv {
-        uv_axis_plane = [axis_vec[0], axis_vec[1], axis_vec[2], -dot(axis_vec, [0.0; 3])];
+        uv_axis_plane = [
+            axis_vec[0],
+            axis_vec[1],
+            axis_vec[2],
+            -dot(axis_vec, [0.0; 3]),
+        ];
         if s.use_stretch_v {
             for &p in positions_orig {
                 // dist_signed_squared_to_plane_v3.

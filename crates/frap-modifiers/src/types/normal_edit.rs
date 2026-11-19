@@ -507,6 +507,9 @@ mod tests {
         let r = slerp_safe([0.0, 0.0, 1.0], [0.0, 0.0, -1.0], 0.5);
         assert!((dot(r, r) - 1.0).abs() < 1e-5);
         assert!(r[2].abs() < 1e-5);
-        assert!((angle_v3v3([1.0, 0.0, 0.0], [0.0, 1.0, 0.0]) - std::f32::consts::FRAC_PI_2).abs() < 1e-6);
+        assert!(
+            (angle_v3v3([1.0, 0.0, 0.0], [0.0, 1.0, 0.0]) - std::f32::consts::FRAC_PI_2).abs()
+                < 1e-6
+        );
     }
 }

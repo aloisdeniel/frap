@@ -117,7 +117,10 @@ pub(crate) fn unpack(
 ) -> Result<(), RnaError> {
     let base = PathBase::of(h);
     let main = h.main();
-    let im = main.images.get(r).ok_or_else(|| internal("the image was removed"))?;
+    let im = main
+        .images
+        .get(r)
+        .ok_or_else(|| internal("the image was removed"))?;
     let Some(packed) = im.packed_file.clone() else {
         rep.error("Image not packed");
         return Ok(());

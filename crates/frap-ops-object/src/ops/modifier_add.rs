@@ -46,9 +46,7 @@ pub(crate) mod shared {
         poll::active_editable(c).map_err(|mut f| {
             let why = match poll::active(c) {
                 None => "Context missing active object",
-                Some((_, ob)) if ob.header.library.is_some() => {
-                    "Cannot edit library linked object"
-                }
+                Some((_, ob)) if ob.header.library.is_some() => "Cannot edit library linked object",
                 Some(_) => "Cannot edit hidden object",
             };
             f.message = Some(poll_message(op, why));

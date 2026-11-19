@@ -86,7 +86,12 @@ impl Csr {
     /// Solves `M x = b` for every right-hand side; `None` when the matrix is singular or the
     /// system is not finite.
     pub fn solve(&self, rhs: &[Vec<f64>]) -> Option<Vec<Vec<f64>>> {
-        if self.vals.iter().chain(rhs.iter().flatten()).any(|v| !v.is_finite()) {
+        if self
+            .vals
+            .iter()
+            .chain(rhs.iter().flatten())
+            .any(|v| !v.is_finite())
+        {
             return None;
         }
         let mut out = Vec::with_capacity(rhs.len());
@@ -96,10 +101,7 @@ impl Csr {
                 None => return self.dense_solve(rhs),
             }
         }
-        out.iter()
-            .flatten()
-            .all(|v| v.is_finite())
-            .then_some(out)
+        out.iter().flatten().all(|v| v.is_finite()).then_some(out)
     }
 
     /// `out = Mᵀ x`.
@@ -154,7 +156,12 @@ impl Csr {
             }
         }
         self.mul(&x, &mut w);
-        let res = w.iter().zip(b).map(|(a, c)| (a - c) * (a - c)).sum::<f64>().sqrt();
+        let res = w
+            .iter()
+            .zip(b)
+            .map(|(a, c)| (a - c) * (a - c))
+            .sum::<f64>()
+            .sqrt();
         (res <= 1e-9 * bnorm && x.iter().all(|v| v.is_finite())).then_some(x)
     }
 
@@ -313,7 +320,13 @@ mod tests {
         // [[4, 1], [2, 3]] with the 4 given as 3 + 1.
         let m = Csr::from_triplets(
             2,
-            vec![(0, 0, 3.0), (0, 1, 1.0), (1, 0, 2.0), (1, 1, 3.0), (0, 0, 1.0)],
+            vec![
+                (0, 0, 3.0),
+                (0, 1, 1.0),
+                (1, 0, 2.0),
+                (1, 1, 3.0),
+                (0, 0, 1.0),
+            ],
         );
         let x = m.solve(&[vec![1.0, 2.0]]).unwrap();
         assert!((x[0][0] - 0.1).abs() < 1e-12);
@@ -336,7 +349,10 @@ mod tests {
         let b = vec![1.0, 2.0];
         assert!(m.bicgstab(&b).is_none());
         let x = m.cgnr(&b).unwrap();
-        assert!((x[0] + 2.0).abs() < 1e-9 && (x[1] - 1.0).abs() < 1e-9, "{x:?}");
+        assert!(
+            (x[0] + 2.0).abs() < 1e-9 && (x[1] - 1.0).abs() < 1e-9,
+            "{x:?}"
+        );
         let x = m.solve(&[b]).unwrap();
         assert!((x[0][0] + 2.0).abs() < 1e-9);
     }

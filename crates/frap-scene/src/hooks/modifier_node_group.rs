@@ -60,9 +60,10 @@ fn set(h: &mut dyn Host, this: &RnaPtr, _prop: &'static PropDef, v: Value) -> Re
     s.node_group = group;
     let mut inputs = IndexMap::new();
     for (id, default) in interface {
-        let kept = s.inputs.0.get(&id).filter(|old| {
-            std::mem::discriminant(&old.value) == std::mem::discriminant(&default)
-        });
+        let kept =
+            s.inputs.0.get(&id).filter(|old| {
+                std::mem::discriminant(&old.value) == std::mem::discriminant(&default)
+            });
         let input = kept.cloned().unwrap_or_else(|| GnInput::new(default));
         inputs.insert(id, input);
     }

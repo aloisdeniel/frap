@@ -23,7 +23,10 @@ use super::image_save::write::{image_ref, mime_of};
 pub(crate) fn reload(h: &mut dyn Host, r: IdRef<ImageId>) -> Result<(), RnaError> {
     let base = PathBase::of(h);
     let main = h.main();
-    let im = main.images.get(r).ok_or_else(|| internal("the image was removed"))?;
+    let im = main
+        .images
+        .get(r)
+        .ok_or_else(|| internal("the image was removed"))?;
     let repacked = match &im.packed_file {
         Some(_) if !im.packed_filepath.is_empty() => {
             std::fs::read(base.file(&im.packed_filepath)).ok()

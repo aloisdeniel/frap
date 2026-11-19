@@ -459,6 +459,8 @@ Shared: they act on the **active UV map** (`mesh.uv_layers.active`), on **select
 | `uv.select_all/select_mode/select_linked/select_more/less/select_split/select_overlap/select_similar/select_pinned/select_by_winding/hide/reveal` | App. A | UV-space selection. Only meaningful when sync is off. P2 | ✅ | P2 |
 | `uv.weld/remove_doubles/stitch/align/align_rotation/arrange_islands/randomize_uv_transform/copy_mirrored_faces/snap_selected/rip` | App. A | | ✅ mostly | P2 |
 
+**Correction (M3+M4 W1, verified by WP 3.3 against 5.2.4):** a bare `uv.unwrap()` without `method`/`fill_holes` takes them from the scene tool settings (`toolsettings->unwrapper` and the `UVCALC_FILLHOLES` flag; 5.2 factory: `ANGLE_BASED` and `fill_holes=True`), not the RNA defaults `CONFORMAL`/`False` listed above; `uv.smart_project` writes `island_margin` into `tool_settings.uvcalc_margin`. WP 3.8 replicates both.
+
 **UV algorithm notes:**
 * Islands are connected components of faces over edges that are **not seams** *and* whose two corners share UVs (for repacking). For unwrap, only seams and mesh boundaries split islands.
 * Unwrap pipeline (`uvedit_unwrap_ops.cc` → `GEO_uv_parametrizer_*`): build a ParamHandle (faces triangulated internally, seams as constraints, pins), solve (ABF++ then LSCM, LSCM alone, or SLIM), `param_average`, then `param_pack` (margin + rotation off for unwrap by default 📖). frap needs a sparse least-squares solver (LSCM) as P0. For ABF++, use port references (OpenNL usage in Blender).

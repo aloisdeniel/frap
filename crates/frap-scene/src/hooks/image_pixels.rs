@@ -18,8 +18,7 @@ use std::sync::Arc;
 
 use frap_rna::traits::{FromRnaValue, ToRnaValue};
 use frap_rna::{
-    Field, IdRef, ImageId, MathTag, PropDef, PyExc, RnaError, RnaErrorKind, RnaPtr, Value,
-    rna_hook,
+    Field, IdRef, ImageId, MathTag, PropDef, PyExc, RnaError, RnaErrorKind, RnaPtr, Value, rna_hook,
 };
 
 use super::image_packed_file::image_of;
@@ -45,10 +44,7 @@ mod hook {
                 crate::id::imbuf::buffer_bytes(i.x, i.y, true),
             );
         }
-        let px = im
-            .acquire(&base)
-            .map(|b| b.pixels())
-            .unwrap_or_default();
+        let px = im.acquire(&base).map(|b| b.pixels()).unwrap_or_default();
         Ok(Field::Value(px.to_rna_value(prop, MathTag::None)))
     }
 

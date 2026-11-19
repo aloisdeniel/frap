@@ -29,7 +29,10 @@ fn blend_data_images_new(
     let w = arg_int(args, "width", 1024).clamp(1, i32::MAX as i64) as i32;
     let ht = arg_int(args, "height", 1024).clamp(1, i32::MAX as i64) as i32;
     let float = arg_bool(args, "float_buffer", false);
-    frap_math::budget::check_buffer(imbuf::BUFFER, imbuf::buffer_bytes(w as u32, ht as u32, float));
+    frap_math::budget::check_buffer(
+        imbuf::BUFFER,
+        imbuf::buffer_bytes(w as u32, ht as u32, float),
+    );
     let mut img = Image::new(&name, w, ht);
     if arg_bool(args, "alpha", false) {
         img.generated_depth = 32;

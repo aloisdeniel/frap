@@ -55,7 +55,11 @@ pub(crate) fn encoder(file_format: &str, float: bool, quality: u8) -> Result<Enc
         "HDR" => EncodeFormat::Hdr,
         "TARGA" | "TARGA_RAW" => EncodeFormat::Targa,
         "BMP" => EncodeFormat::Bmp,
-        other => return Err(format!("frap: writing file_format '{other}' is not supported yet")),
+        other => {
+            return Err(format!(
+                "frap: writing file_format '{other}' is not supported yet"
+            ));
+        }
     })
 }
 
@@ -75,7 +79,10 @@ pub(crate) fn save(
 ) -> Result<(), RnaError> {
     let base = PathBase::of(h);
     let main = h.main();
-    let im = main.images.get(r).ok_or_else(|| super::_common::internal("the image was removed"))?;
+    let im = main
+        .images
+        .get(r)
+        .ok_or_else(|| super::_common::internal("the image was removed"))?;
     let name = im.header.name.clone();
     let Some(mut buf) = im.acquire(&base) else {
         rep.error(format!("Image '{name}' does not have any image data"));
@@ -87,10 +94,18 @@ pub(crate) fn save(
     } else {
         im.colorspace_settings.name.clone()
     };
-    let quality = if quality != 0 { quality.clamp(0, 100) as u8 } else { 90 };
+    let quality = if quality != 0 {
+        quality.clamp(0, 100) as u8
+    } else {
+        90
+    };
     let file_format = im.file_format.clone();
     let enc = encoder(&file_format, buf.is_float(), quality).map_err(not_implemented)?;
-    let path = base.abs(if filepath.is_empty() { &im.filepath } else { filepath });
+    let path = base.abs(if filepath.is_empty() {
+        &im.filepath
+    } else {
+        filepath
+    });
     let image_filepath = im.filepath.clone();
     // Colour mode: a modified RGBA buffer is tested for alpha.
     let mut channels = mode_channels(buf.planes);
@@ -128,7 +143,9 @@ pub(crate) fn save(
     let bytes = frap_imbuf::encode(&img, &enc).map_err(|e| not_implemented(e.to_string()))?;
     if let Err(e) = write_file(&base, &path, &bytes) {
         rep.error(format!("Could not write image: {e}"));
-        rep.error(format!("Image '{name}' could not be saved to '{image_filepath}'"));
+        rep.error(format!(
+            "Image '{name}' could not be saved to '{image_filepath}'"
+        ));
         return Ok(());
     }
     if save_copy {
