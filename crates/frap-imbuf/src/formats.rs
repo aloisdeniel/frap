@@ -151,6 +151,110 @@ pub fn decode(bytes: &[u8]) -> Result<DecodedImage, ImageError> {
     }
 }
 
+/// What [`decode`] would give, read from the file's header without decoding the pixels.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct ImageInfo {
+    /// The sniffed format.
+    pub format: FileFormat,
+    /// Width in pixels.
+    pub width: u32,
+    /// Height in pixels.
+    pub height: u32,
+    /// Channels [`decode`] gives (1–4).
+    pub channels: u8,
+    /// Bits per sample [`decode`] gives: 8, 16 or 32 (float).
+    pub bit_depth: u8,
+}
+
+/// Reads the header of any supported format: the size, channels and sample type [`decode`]
+/// would give, without decoding (or allocating) the pixels.
+pub fn probe(bytes: &[u8]) -> Result<ImageInfo, ImageError> {
+    let format = FileFormat::detect(bytes).ok_or_else(|| {
+        ImageError::Unsupported(
+            "unrecognised image data (not PNG, JPEG, WebP, OpenEXR, HDR, BMP or TGA)".into(),
+        )
+    })?;
+    let (width, height, channels, bit_depth) = match format {
+        FileFormat::Png => {
+            let mut decoder = png::Decoder::new(Cursor::new(bytes));
+            decoder.set_transformations(png::Transformations::EXPAND);
+            let reader = decoder
+                .read_info()
+                .map_err(|e| ImageError::Decode(format!("PNG: {e}")))?;
+            let (ct, bd) = reader.output_color_type();
+            let info = reader.info();
+            let channels = match ct {
+                png::ColorType::Grayscale => 1,
+                png::ColorType::GrayscaleAlpha => 2,
+                png::ColorType::Rgb => 3,
+                png::ColorType::Rgba => 4,
+                png::ColorType::Indexed => {
+                    return Err(ImageError::Decode("PNG: palette was not expanded".into()));
+                }
+            };
+            let bits = match bd {
+                png::BitDepth::Sixteen => 16,
+                png::BitDepth::Eight => 8,
+                other => return Err(ImageError::Decode(format!("PNG: bit depth {other:?}"))),
+            };
+            (info.width, info.height, channels, bits)
+        }
+        FileFormat::OpenExr => {
+            let meta = exr::meta::MetaData::read_from_buffered(Cursor::new(bytes), false)
+                .map_err(|e| ImageError::Decode(format!("OpenEXR: {e}")))?;
+            let header = meta
+                .headers
+                .iter()
+                .find(|h| !h.deep)
+                .ok_or_else(|| ImageError::Decode("OpenEXR: no flat layer".into()))?;
+            let list = &header.channels.list;
+            let has = |n: &str| list.iter().any(|c| c.name.eq_case_insensitive(n));
+            // The channel selection of `decode_exr`.
+            let colour = if has("R") && has("G") && has("B") {
+                3
+            } else if has("Y") || has("V") || list.iter().any(|c| !c.name.eq("A")) {
+                1
+            } else {
+                0
+            };
+            let channels = colour + u8::from(has("A"));
+            if channels == 0 {
+                return Err(ImageError::Decode("OpenEXR: no channels".into()));
+            }
+            let size = header.layer_size;
+            (size.width() as u32, size.height() as u32, channels, 32)
+        }
+        f => {
+            use image::ImageDecoder;
+            let decoder = image::ImageReader::with_format(Cursor::new(bytes), image_format(f))
+                .into_decoder()
+                .map_err(|e| ImageError::Decode(format!("{}: {e}", f.identifier())))?;
+            let (w, h) = decoder.dimensions();
+            // The `DynamicImage` variants of `decode_with_image`.
+            let (channels, bits) = match decoder.color_type() {
+                image::ColorType::L8 => (1, 8),
+                image::ColorType::La8 => (2, 8),
+                image::ColorType::Rgb8 => (3, 8),
+                image::ColorType::Rgba8 => (4, 8),
+                image::ColorType::L16 => (1, 16),
+                image::ColorType::La16 => (2, 16),
+                image::ColorType::Rgb16 => (3, 16),
+                image::ColorType::Rgba16 => (4, 16),
+                image::ColorType::Rgb32F => (3, 32),
+                _ => (4, 32),
+            };
+            (w, h, channels, bits)
+        }
+    };
+    Ok(ImageInfo {
+        format,
+        width,
+        height,
+        channels,
+        bit_depth,
+    })
+}
+
 /// Encodes to `format`, converting the sample type and channels as the format requires.
 pub fn encode(image: &DecodedImage, format: &EncodeFormat) -> Result<Vec<u8>, ImageError> {
     check(image)?;

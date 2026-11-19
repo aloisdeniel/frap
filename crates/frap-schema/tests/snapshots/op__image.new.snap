@@ -1,0 +1,259 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "image.new",
+  "bl_idname": "IMAGE_OT_new",
+  "label": "New Image",
+  "description": "Create a new image",
+  "bl_options": [
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "name",
+      "name": "Name",
+      "description": "Image data-block name",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "Untitled",
+      "length_max": 256,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "width",
+      "name": "Width",
+      "description": "Image width",
+      "type": "INT",
+      "subtype": "PIXEL",
+      "unit": "NONE",
+      "array": null,
+      "default": 1024,
+      "hard_min": 1,
+      "hard_max": 2147483647,
+      "soft_min": 1,
+      "soft_max": 16384,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "height",
+      "name": "Height",
+      "description": "Image height",
+      "type": "INT",
+      "subtype": "PIXEL",
+      "unit": "NONE",
+      "array": null,
+      "default": 1024,
+      "hard_min": 1,
+      "hard_max": 2147483647,
+      "soft_min": 1,
+      "soft_max": 16384,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "color",
+      "name": "Color",
+      "description": "Default fill color",
+      "type": "FLOAT",
+      "subtype": "COLOR_GAMMA",
+      "unit": "NONE",
+      "array": [
+        4
+      ],
+      "default": [
+        0,
+        0,
+        0,
+        1
+      ],
+      "hard_min": 0,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 0,
+      "soft_max": 1,
+      "precision": 3,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "alpha",
+      "name": "Alpha",
+      "description": "Create an image with an alpha channel",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "generated_type",
+      "name": "Generated Type",
+      "description": "Fill the image with a grid for UV map testing",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "BLANK",
+      "enum_items": [
+        {
+          "identifier": "BLANK",
+          "name": "Blank",
+          "description": "Generate a blank image",
+          "value": 0
+        },
+        {
+          "identifier": "UV_GRID",
+          "name": "UV Grid",
+          "description": "Generated grid to test UV mappings",
+          "value": 1
+        },
+        {
+          "identifier": "COLOR_GRID",
+          "name": "Color Grid",
+          "description": "Generated improved UV grid to test UV mappings",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "float",
+      "name": "32-bit Float",
+      "description": "Create image with 32-bit floating-point bit depth",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_stereo_3d",
+      "name": "Stereo 3D",
+      "description": "Create an image with left and right views",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "tiled",
+      "name": "Tiled",
+      "description": "Create a tiled image",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M3",
+    "extension": false,
+    "notes": [
+      "the new image has no users and is shown nowhere (no Image Editor headless, as Blender from scripts); assign it to an Image Texture node with node.image = bpy.data.images['Untitled']",
+      "COLOR_GRID has no letter/number labels (frap has no font rasteriser); every other pixel is Blender's"
+    ]
+  }
+}

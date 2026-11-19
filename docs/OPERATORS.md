@@ -599,13 +599,13 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `image.new` | M3 | P0 |  |
-| [ ] | `image.open` | M3 | P0 |  |
-| [ ] | `image.pack` | M3 | P1 |  |
-| [ ] | `image.unpack` | M3 | P2 |  |
-| [ ] | `image.reload` | M3 | P2 |  |
-| [ ] | `image.save` | M3 | P2 |  |
-| [ ] | `image.save_as` | M3 | P2 |  |
+| [x] | `image.new` | M3 | P0 | no users, shown nowhere (as Blender from scripts); `COLOR_GRID` without its labels; WP 3.2 |
+| [x] | `image.open` | M3 | P0 | `files`/`directory` with sequence detection; no UDIM detection; WP 3.2 |
+| [x] | `image.pack` | M3 | P1 | poll fails headless as in Blender (no Image Editor / `edit_image`); use `bpy.data.images[...].pack()`; WP 3.2 |
+| [x] | `image.unpack` | M3 | P2 | poll fails headless as in Blender (no Image Editor / `edit_image`); use `bpy.data.images[...].unpack(method=…)`; WP 3.2 |
+| [x] | `image.reload` | M3 | P2 | `CANCELLED` headless as in Blender (no context image); use `bpy.data.images[...].reload()`; WP 3.2 |
+| [x] | `image.save` | M3 | P2 | poll fails headless as in Blender (no Image Editor / `edit_image`); use `bpy.data.images[...].save()`; WP 3.2 |
+| [x] | `image.save_as` | M3 | P2 | poll fails headless as in Blender (no Image Editor / `edit_image`); use `bpy.data.images[...].save(filepath=…)` / `.save_render(…)`; WP 3.2 |
 
 ### `world.*`
 
@@ -777,7 +777,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | ViewLayer, LayerObjects, LayerCollection | M1 | bases, active, selection per view layer |
 | [ ] | Collection, CollectionObjects, CollectionChildren | M1 | link/unlink |
 | [ ] | Depsgraph, DepsgraphObjectInstance (evaluated_get, to_mesh) | M1 | always fresh |
-| [ ] | Image, ImagePackedFile | M1 meta / M3 full | pixels, pack, save, save_render |
+| [x] | Image, ImagePackedFile | M1 meta / M3 full | pixels, pack, save, save_render; `PackedFile.data` (bytes) not readable; WP 3.2 |
 | [ ] | Texture, ImageTexture | M4 | DISPLACE only; field set frozen by M3+M4 W0 (`TextureFields`), bindings and `bpy.data.textures.new` WP 4.2 |
 | [ ] | VertexGroup, VertexGroups, VertexGroupElement | M6 | names on Mesh, RNA on Object |
 | [ ] | Key, ShapeKey | M6 |  |
@@ -806,7 +806,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [x] | `mesh.uv_layers.remove, mesh.vertex_colors.new` | M2 | moved from M1 (M1 stabilization); `attributes.remove` removes a UV map meanwhile; vertex_colors creates "Col" BYTE_COLOR CORNER; WP 2.9 (`funcs/{u_v_loop_layers_remove,loop_colors_new}.rs`, M2 W0 assignment) |
 | [ ] | `node_tree.nodes.new/remove, node_tree.links.new/remove` | M1 | links.new replaces existing input link |
 | [x] | `obj.modifiers.new(name, type)/remove/move/clear` | M4 (data from M1) | WP 4.1 (`funcs/object_modifiers_*.rs`); M4 golden prerequisite |
-| [ ] | `Image.pack/unpack/save/save_render/scale/reload, bpy.data.images.load` | M3 |  |
+| [x] | `Image.pack/unpack/save/save_render/scale/reload, bpy.data.images.load` | M3 | also `update`, `buffers_free`, `filepath_from_user`, `ImagePackedFile.save`; `pack(data=…)` raw bytes not supported; `Render Result.save_render()` reports no data (render with `write_still`); WP 3.2 |
 | [ ] | `Scene.frame_set(frame, subframe=0.0)` | M6 | writes animated values to originals |
 | [ ] | `bpy_struct.keyframe_insert(data_path, *, index=-1, frame=None, group="", options=set(), keytype='KEYFRAME')` | M6 | keyword-only after data_path |
 | [ ] | `bpy_struct.keyframe_delete(data_path, *, index=-1, frame=None, group="")` | M6 |  |

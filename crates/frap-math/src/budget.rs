@@ -192,11 +192,21 @@ pub struct ElementsExceeded {
     pub limit: u64,
     /// `true` when the limit is Blender's `int` range rather than `--max-elements`.
     pub index_range: bool,
+    /// `Some(what)` for a buffer that is not a mesh ([`reserve_buffer`]): `corners` and `limit`
+    /// are then bytes, and `what` names the buffer ("image buffer").
+    pub buffer: Option<&'static str>,
 }
 
 impl std::fmt::Display for ElementsExceeded {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.index_range {
+        if let Some(what) = self.buffer {
+            write!(
+                f,
+                "frap: limit exceeded (max_elements): the {what} would need {} bytes (limit {} \
+                 bytes, {BUFFER_BYTES_PER_ELEMENT} per --max-elements unit)",
+                self.corners, self.limit
+            )
+        } else if self.index_range {
             write!(
                 f,
                 "frap: limit exceeded (max_elements): the mesh would need more than {} elements, \
@@ -227,6 +237,7 @@ pub fn reserve_corners(
             corners: u64::MAX,
             limit: MAX_MESH_ELEMENTS,
             index_range: true,
+            buffer: None,
         });
     };
     if elements > MAX_MESH_ELEMENTS || corners > MAX_MESH_ELEMENTS {
@@ -234,6 +245,7 @@ pub fn reserve_corners(
             corners,
             limit: MAX_MESH_ELEMENTS,
             index_range: true,
+            buffer: None,
         });
     }
     let max = max_elements();
@@ -242,6 +254,7 @@ pub fn reserve_corners(
             corners,
             limit: max,
             index_range: false,
+            buffer: None,
         });
     }
     Ok(())
@@ -268,7 +281,39 @@ fn exceed_corners(corners: u64, limit: u64) -> ! {
         corners,
         limit,
         index_range: false,
+        buffer: None,
     }))
+}
+
+/// Bytes of memory one `--max-elements` unit allows for a buffer that is not a mesh (image
+/// pixels): the default 50,000,000 allows 1.6 GB, an 8192 × 8192 float RGBA image is 1 GiB.
+pub const BUFFER_BYTES_PER_ELEMENT: u64 = 32;
+
+/// Pre-check before allocating a large non-mesh buffer of `bytes` bytes (`None`: the size
+/// overflowed): fails above `--max-elements` × [`BUFFER_BYTES_PER_ELEMENT`] bytes. Unlimited
+/// outside a scope, except for sizes that do not fit the address space.
+pub fn reserve_buffer(what: &'static str, bytes: Option<u64>) -> Result<(), ElementsExceeded> {
+    let limit = max_elements()
+        .saturating_mul(BUFFER_BYTES_PER_ELEMENT)
+        .min(isize::MAX as u64);
+    match bytes {
+        Some(b) if b <= limit => Ok(()),
+        b => Err(ElementsExceeded {
+            corners: b.unwrap_or(u64::MAX),
+            limit,
+            index_range: false,
+            buffer: Some(what),
+        }),
+    }
+}
+
+/// [`reserve_buffer`] that unwinds with the [`ElementsExceeded`] payload instead of returning
+/// it (the session answers `LIMIT_EXCEEDED`, like [`check_corners`]), for code that cannot
+/// return an error (property getters).
+pub fn check_buffer(what: &'static str, bytes: Option<u64>) {
+    if let Err(e) = reserve_buffer(what, bytes) {
+        std::panic::resume_unwind(Box::new(e));
+    }
 }
 
 /// The [`ElementsExceeded`] payload of a caught unwind ([`check_corners`]), if it is one.
@@ -363,5 +408,24 @@ mod tests {
                 .unwrap_err()
                 .index_range
         );
+        assert!(reserve_buffer("image buffer", Some(3200)).is_ok());
+        let e = reserve_buffer("image buffer", Some(3201)).unwrap_err();
+        assert_eq!(
+            e.to_string(),
+            "frap: limit exceeded (max_elements): the image buffer would need 3201 bytes (limit \
+             3200 bytes, 32 per --max-elements unit)"
+        );
+        assert!(reserve_buffer("image buffer", None).is_err());
+        let r = catch_unwind(AssertUnwindSafe(|| {
+            check_buffer("image buffer", Some(1 << 20))
+        }));
+        let p = r.expect_err("unwinds");
+        assert_eq!(elements_exceeded(&*p).unwrap().buffer, Some("image buffer"));
+    }
+
+    #[test]
+    fn buffers_are_unlimited_outside_a_scope() {
+        assert!(reserve_buffer("image buffer", Some(1 << 40)).is_ok());
+        assert!(reserve_buffer("image buffer", Some(u64::MAX)).is_err());
     }
 }

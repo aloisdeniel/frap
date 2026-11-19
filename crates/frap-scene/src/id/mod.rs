@@ -30,7 +30,10 @@ mod world;
 pub use armature::{Armature, Pose};
 pub use camera::Camera;
 pub use collection::Collection;
-pub use image::{EncodedImage, Image};
+pub use image::{
+    EncodedImage, IMAGE_DECODERS, IMAGE_PROBES, ImBuf, ImBufData, ImInfo, Image, ImageDecoder,
+    ImageProbe, LoadError, PathBase, decode_image, imbuf, io_message, probe_image,
+};
 pub use key::Key;
 pub use library::Library;
 pub use light::Light;

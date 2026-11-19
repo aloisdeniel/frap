@@ -224,6 +224,8 @@ pub(crate) struct HostImpl {
     eval: EvalCache,
     log: ChangeLog,
     reports: Vec<Report>,
+    /// `SessionOptions::cwd`, for the relative paths of RNA functions (`HostRead::cwd`).
+    cwd: PathBuf,
 }
 
 impl HostRead for HostImpl {
@@ -241,6 +243,9 @@ impl HostRead for HostImpl {
     }
     fn mesh_view(&self, mesh: IdRef<MeshId>) -> Arc<Mesh> {
         self.state.mesh_view(mesh)
+    }
+    fn cwd(&self) -> Option<&std::path::Path> {
+        Some(&self.cwd)
     }
 }
 
@@ -376,6 +381,7 @@ impl Session {
                 eval: EvalCache::new(),
                 log: ChangeLog::default(),
                 reports: Vec::new(),
+                cwd: opts.cwd.clone(),
             },
             services: SessionServices {
                 render: None,
@@ -775,15 +781,21 @@ impl Session {
         if frap_math::budget::interrupted(&*payload).is_some() {
             self.timeout_error()
         } else if let Some(e) = frap_math::budget::elements_exceeded(&*payload) {
-            // A growing BMesh hit `--max-elements` (`budget::check_corners`).
-            FrapError::new(
+            // A growing BMesh hit `--max-elements` (`budget::check_corners`), or a buffer was
+            // too large (`budget::check_buffer`: image pixels).
+            let err = FrapError::new(
                 PyExc::RuntimeError,
                 frap_op::errors::LIMIT_EXCEEDED,
                 format!("Error: {e}"),
             )
-            .with_detail("max_elements", self.opts.limits.max_elements)
-            .with_detail("corners", e.corners)
-            .with_hint("raise --max-elements, or build less geometry per statement")
+            .with_detail("max_elements", self.opts.limits.max_elements);
+            if e.buffer.is_some() {
+                err.with_detail("bytes", e.corners)
+                    .with_hint("raise --max-elements, or use a smaller image")
+            } else {
+                err.with_detail("corners", e.corners)
+                    .with_hint("raise --max-elements, or build less geometry per statement")
+            }
         } else {
             FrapError::internal_panic(payload)
         }

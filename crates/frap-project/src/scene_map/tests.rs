@@ -165,6 +165,8 @@ fn rich() -> (Main, WindowState, Preferences) {
     let mut img = Image::new("tex.png", 2, 2);
     img.source = "FILE".into();
     img.filepath = "//tex.png".into();
+    img.packed_filepath = "//orig/tex.png".into();
+    img.generated_depth = 32;
     img.packed_file = Some(Arc::new(EncodedImage {
         bytes: vec![0x89, b'P', b'N', b'G', 1, 2, 3],
         mime: "image/png".into(),
@@ -382,6 +384,11 @@ fn scene_json_shape() {
     assert_eq!(pos["len"], json!(100));
     assert!(buffers.len() > 3);
     assert_eq!(images.len(), 1);
+    // WP 3.2: the packed file's own path and the generated colour depth.
+    let im = &tree["images"]["tex.png"];
+    assert_eq!(im["packed_file"]["filepath"], json!("//orig/tex.png"));
+    assert_eq!(im["packed_file"]["mime"], json!("image/png"));
+    assert_eq!(im["generated_depth"], json!(32));
     let linked = &tree["node_groups"][LINKED]["Essentials"]["Smooth by Angle"];
     assert_eq!(linked["is_linked_packed"], json!(true));
     assert_eq!(
@@ -563,4 +570,62 @@ fn header_only_ids_are_reported() {
     let saved = save(&main, &win, &Preferences::default(), None).unwrap();
     assert_eq!(saved.header_only, vec!["actions[\"Kept\"]".to_owned()]);
     assert_eq!(saved.dropped, vec!["actions[\"Loose\"]".to_owned()]);
+}
+
+/// WP 3.2: packed images keep their original bytes and their packed path; a pre-M3 file
+/// without the packed path reads the image's own path; modified pixels are not saved (as
+/// Blender, which does not write unpacked pixel edits into `.blend` files).
+#[test]
+fn images_packed_bytes_and_buffers() {
+    let (mut main, win) = frap_scene::startup::factory();
+    let mut log = ChangeLog::default();
+    let mut img = Image::new("Painted", 2, 1);
+    img.generated_depth = 32;
+    let mut buf = img.generated_buffer().unwrap();
+    buf.set_pixels(&[1.0; 8]);
+    img.buffer = Some(Arc::new(buf));
+    // Unused images are dropped on save: give both a fake user.
+    img.header.use_fake_user = true;
+    main.images.insert("Painted", img, &mut log);
+    let mut packed = Image::new("p.png", 0, 0);
+    packed.header.use_fake_user = true;
+    packed.source = "FILE".into();
+    packed.filepath = "//p.png".into();
+    packed.packed_filepath = "//p.png".into();
+    let bytes = vec![0x89, b'P', b'N', b'G', 9, 8, 7];
+    packed.packed_file = Some(Arc::new(EncodedImage {
+        bytes: bytes.clone(),
+        mime: "image/png".into(),
+    }));
+    main.images.insert("p.png", packed, &mut log);
+    let prefs = Preferences::default();
+    let (mut tree, buffers, images, _) = to_json(&main, &win, &prefs, None).unwrap();
+    assert!(tree["images"]["Painted"].get("buffer").is_none());
+    let o = from_json(&tree, &buffers, &images, false).unwrap();
+    let find = |m: &Main, n: &str| {
+        m.images
+            .iter()
+            .find(|(_, i)| i.header.name == n)
+            .unwrap()
+            .1
+            .clone()
+    };
+    let painted = find(&o.main, "Painted");
+    assert!(painted.buffer.is_none() && !painted.is_dirty());
+    assert_eq!(painted.generated_depth, 32);
+    let p = find(&o.main, "p.png");
+    assert_eq!(
+        p.packed_file.as_ref().unwrap().bytes,
+        bytes,
+        "original bytes"
+    );
+    assert_eq!(p.packed_filepath, "//p.png");
+    // A file written before the packed path existed.
+    tree["images"]["p.png"]["packed_file"]
+        .as_object_mut()
+        .unwrap()
+        .remove("filepath");
+    tree["images"]["p.png"]["filepath"] = json!("//q.png");
+    let o = from_json(&tree, &buffers, &images, false).unwrap();
+    assert_eq!(find(&o.main, "p.png").packed_filepath, "//q.png");
 }

@@ -1357,6 +1357,9 @@ fn image(i: &mut Image, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
                     .map_err(|e| MapError::invalid(&path, e.to_string()))?;
                 let mut mime = SmolStr::default();
                 po.smol("mime", &mut mime)?;
+                // `ImagePackedFile.filepath` (absent before M3: the image's own path).
+                i.packed_filepath = i.filepath.clone();
+                po.string("filepath", &mut i.packed_filepath)?;
                 po.finish()?;
                 let bytes = cx
                     .images
@@ -1375,6 +1378,10 @@ fn image(i: &mut Image, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
     o.i32("generated_height", &mut i.generated_height)?;
     o.arr("generated_color", &mut i.generated_color)?;
     o.bool("use_generated_float", &mut i.use_generated_float)?;
+    let mut depth = i32::from(i.generated_depth);
+    o.i32("generated_depth", &mut depth)?;
+    i.generated_depth = u8::try_from(depth)
+        .map_err(|_| MapError::invalid(&o.sub("generated_depth"), "expected 0..=255"))?;
     if let Some(v) = o.opt("colorspace_settings") {
         i.colorspace_settings = de(v, &o.sub("colorspace_settings"), cx.strict)?;
     }

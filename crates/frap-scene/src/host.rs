@@ -30,6 +30,12 @@ pub trait HostRead {
     fn ctx(&self) -> Context<'_>;
     /// Read-only, cached view of a mesh in Edit Mode (§6.3); the original Mesh otherwise.
     fn mesh_view(&self, mesh: IdRef<MeshId>) -> Arc<Mesh>;
+    /// The session's working directory: relative file paths of RNA functions
+    /// (`bpy.data.images.load`, `Image.save`, …) resolve against it, as Blender's resolve
+    /// against the process's (WP 3.2). `None` (the default, test hosts): the process's.
+    fn cwd(&self) -> Option<&std::path::Path> {
+        None
+    }
 }
 
 /// Write access to the session state (inside a transaction).
