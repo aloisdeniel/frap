@@ -611,6 +611,9 @@ impl<'a> Writer<'a> {
             ),
         );
         m.insert("next_node_uid".into(), json!(t.next_node_uid));
+        if t.next_interface_uid != 0 {
+            m.insert("next_interface_uid".into(), json!(t.next_interface_uid));
+        }
         m.insert("animation_data".into(), self.anim(&t.animation_data));
         Ok(m)
     }

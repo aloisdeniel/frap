@@ -698,7 +698,7 @@ pub(crate) fn socket_of(t: &NodeTree, root: Root, p: &RnaPtr) -> Option<SocketAd
     let sockets = if is_output { &n.outputs } else { &n.inputs };
     let index = match seg {
         Seg::Index(i) => usize::try_from(*i).ok().filter(|i| *i < sockets.len())?,
-        Seg::Key(k) => frap_nodes::find_socket(sockets, k)?,
+        Seg::Key(k) => frap_nodes::rna::find_socket_by_key(n, is_output, k)?,
         Seg::Prop(_) => return None,
     };
     Some(SocketAddr {

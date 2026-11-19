@@ -1,0 +1,581 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Steps\" not found"
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Result\" not found"
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"W\" not found"
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Exponent\" not found"
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Detail\" not found"
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"W\" not found"
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Gain\" not found"
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Vector\" not found"
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Rotation\" not found"
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Angle\" not found"
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"IOR\" not found"
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Base Color\" not found"
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Anisotropy\" not found"
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 53,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 56,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"W\" not found"
+    },
+    {
+      "line": 58,
+      "ok": true
+    },
+    {
+      "line": 59,
+      "ok": true
+    },
+    {
+      "line": 60,
+      "ok": true
+    },
+    {
+      "line": 61,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Vector\" not found"
+    },
+    {
+      "line": 62,
+      "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": true
+    },
+    {
+      "line": 65,
+      "ok": true
+    },
+    {
+      "line": 66,
+      "ok": true
+    },
+    {
+      "line": 67,
+      "ok": true
+    },
+    {
+      "line": 68,
+      "ok": true
+    },
+    {
+      "line": 69,
+      "ok": true
+    },
+    {
+      "line": 70,
+      "ok": true
+    },
+    {
+      "line": 71,
+      "ok": true
+    },
+    {
+      "line": 72,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Coat\" not found"
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.68592066, -0.32401347, 0.6515582, 7.3588915],
+        [0.72767633, 0.30542085, -0.6141704, -6.925791],
+        [0.0, 0.89539564, 0.4452714, 4.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.3588915, -6.925791, 4.958309],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086465, -0.7711008, 0.5663932, 4.0762453],
+        [0.95517117, -0.19988336, 0.2183912, 1.005454],
+        [-0.05518906, 0.60452473, 0.79467225, 5.903862],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0762453, 1.005454, 5.903862],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {
+    "Material": {
+      "nodes": {
+        "Gabor Texture": {
+          "bl_idname": "ShaderNodeTexGabor",
+          "inputs": {
+            "Anisotropy": 1.0,
+            "Frequency": 2.0,
+            "Orientation 2D": 0.7853982,
+            "Orientation 3D": [0.0, 1.0, 0.0],
+            "Scale": 5.0,
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Map Range": {
+          "bl_idname": "ShaderNodeMapRange",
+          "inputs": {
+            "From Max": 1.0,
+            "From Min": 0.0,
+            "From_Max_FLOAT3": [1.0, 1.0, 1.0],
+            "From_Min_FLOAT3": [0.5, 0.5, 0.5],
+            "Steps": 3.0,
+            "Steps_FLOAT3": [4.0, 5.0, 6.0],
+            "To Max": 1.0,
+            "To Min": 0.0,
+            "To_Max_FLOAT3": [1.0, 1.0, 1.0],
+            "To_Min_FLOAT3": [0.0, 0.0, 0.0],
+            "Value": 1.0,
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Material Output": {
+          "bl_idname": "ShaderNodeOutputMaterial",
+          "inputs": {
+            "Displacement": [0.0, 0.0, 0.0],
+            "Thickness": 0.0
+          },
+          "mute": false
+        },
+        "Metallic BSDF": {
+          "bl_idname": "ShaderNodeBsdfMetallic",
+          "inputs": {
+            "Anisotropy": 0.0,
+            "Base Color": [0.617, 0.577, 0.54, 1.0],
+            "Edge Tint": [0.695, 0.726, 0.77, 1.0],
+            "Extinction": [3.867, 3.404, 3.009],
+            "IOR": [1.0, 2.0, 3.0],
+            "Normal": [0.0, 0.0, 0.0],
+            "Rotation": 0.0,
+            "Roughness": 0.5,
+            "Tangent": [0.0, 0.0, 0.0],
+            "Thin Film IOR": 1.33,
+            "Thin Film Thickness": 0.0,
+            "Weight": 0.0
+          },
+          "mute": false
+        },
+        "Mix": {
+          "bl_idname": "ShaderNodeMix",
+          "inputs": {
+            "A_Color": [0.5, 0.5, 0.5, 1.0],
+            "A_Float": 0.0,
+            "A_Rotation": [0.0, 0.0, 0.0],
+            "A_Vector": [1.0, 1.0, 1.0],
+            "B_Color": [0.5, 0.5, 0.5, 1.0],
+            "B_Float": 0.0,
+            "B_Rotation": [0.0, 0.0, 0.0],
+            "B_Vector": [0.0, 0.0, 0.0],
+            "Factor_Float": 1.0,
+            "Factor_Vector": [0.1, 0.2, 0.3]
+          },
+          "mute": false
+        },
+        "Noise Texture": {
+          "bl_idname": "ShaderNodeTexNoise",
+          "inputs": {
+            "Detail": 2.0,
+            "Distortion": 0.0,
+            "Gain": 3.0,
+            "Lacunarity": 2.0,
+            "Offset": 0.5,
+            "Roughness": 0.5,
+            "Scale": 5.0,
+            "Vector": [0.0, 0.0, 0.0],
+            "W": 0.0
+          },
+          "mute": false
+        },
+        "Principled BSDF": {
+          "bl_idname": "ShaderNodeBsdfPrincipled",
+          "inputs": {
+            "Alpha": 1.0,
+            "Anisotropic": 0.0,
+            "Anisotropic Rotation": 0.0,
+            "Base Color": [0.8, 0.8, 0.8, 1.0],
+            "Coat IOR": 1.5,
+            "Coat Normal": [0.0, 0.0, 0.0],
+            "Coat Roughness": 0.03,
+            "Coat Tint": [1.0, 1.0, 1.0, 1.0],
+            "Coat Weight": 0.0,
+            "Diffuse Roughness": 0.0,
+            "Emission Color": [1.0, 1.0, 1.0, 1.0],
+            "Emission Strength": 0.0,
+            "IOR": 1.5,
+            "Metallic": 0.0,
+            "Normal": [0.0, 0.0, 0.0],
+            "Roughness": 0.5,
+            "Sheen Roughness": 0.5,
+            "Sheen Tint": [1.0, 1.0, 1.0, 1.0],
+            "Sheen Weight": 0.0,
+            "Specular IOR Level": 0.5,
+            "Specular Tint": [1.0, 1.0, 1.0, 1.0],
+            "Subsurface Anisotropy": 0.0,
+            "Subsurface IOR": 1.4,
+            "Subsurface Radius": [1.0, 0.2, 0.1],
+            "Subsurface Scale": 0.005,
+            "Subsurface Weight": 0.0,
+            "Tangent": [0.0, 0.0, 0.0],
+            "Thin Film IOR": 1.33,
+            "Thin Film Thickness": 0.0,
+            "Thin Wall": false,
+            "Transmission Weight": 0.0,
+            "Weight": 0.0
+          },
+          "mute": false
+        },
+        "Principled Hair BSDF": {
+          "bl_idname": "ShaderNodeBsdfHairPrincipled",
+          "inputs": {
+            "Absorption Coefficient": [0.245531, 0.52, 1.365],
+            "Aspect Ratio": 0.85,
+            "Coat": 0.0,
+            "Color": [0.017513, 0.005763, 0.002059, 1.0],
+            "IOR": 1.55,
+            "Melanin": 0.3,
+            "Melanin Redness": 1.0,
+            "Offset": 0.034906585,
+            "R lobe": 0.5,
+            "Radial Roughness": 0.3,
+            "Random": 0.0,
+            "Random Color": 0.0,
+            "Random Roughness": 0.0,
+            "Roughness": 0.3,
+            "TRT lobe": 1.0,
+            "TT lobe": 1.0,
+            "Tint": [1.0, 1.0, 1.0, 1.0],
+            "Weight": 0.0
+          },
+          "mute": false
+        },
+        "Sky Texture": {
+          "bl_idname": "ShaderNodeTexSky",
+          "inputs": {
+            "Vector": [0.0, 0.0, 1.0]
+          },
+          "mute": false
+        },
+        "Vector Rotate": {
+          "bl_idname": "ShaderNodeVectorRotate",
+          "inputs": {
+            "Angle": 0.0,
+            "Axis": [0.0, 0.0, 1.0],
+            "Center": [0.0, 0.0, 0.0],
+            "Rotation": [0.1, 0.2, 0.3],
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Volume Scatter": {
+          "bl_idname": "ShaderNodeVolumeScatter",
+          "inputs": {
+            "Alpha": 0.5,
+            "Anisotropy": 0.0,
+            "Backscatter": 0.1,
+            "Color": [0.8, 0.8, 0.8, 1.0],
+            "Density": 1.0,
+            "Diameter": 7.0,
+            "IOR": 1.33,
+            "Weight": 0.0
+          },
+          "mute": false
+        },
+        "Voronoi Texture": {
+          "bl_idname": "ShaderNodeTexVoronoi",
+          "inputs": {
+            "Detail": 0.0,
+            "Exponent": 4.0,
+            "Lacunarity": 2.0,
+            "Randomness": 1.0,
+            "Roughness": 0.5,
+            "Scale": 5.0,
+            "Smoothness": 0.25,
+            "Vector": [0.0, 0.0, 0.0],
+            "W": 2.0
+          },
+          "mute": false
+        },
+        "White Noise Texture": {
+          "bl_idname": "ShaderNodeTexWhiteNoise",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0],
+            "W": 0.5
+          },
+          "mute": false
+        }
+      },
+      "links": [
+        ["Principled BSDF", "BSDF", "Material Output", "Surface"]
+      ]
+    }
+  },
+  "actions": {},
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

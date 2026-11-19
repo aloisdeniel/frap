@@ -5,7 +5,13 @@
 //! entry of the node's type after node creation and after every node property write, so new
 //! node types only add a file (§22.1).
 
+use frap_rna::Value;
+
 use crate::Node;
+
+// WP 3.1: group input/output and group node sockets from a group interface.
+mod group;
+pub use group::*;
 
 /// Recomputes `enabled` on the sockets of one node type.
 #[derive(Debug)]
@@ -34,6 +40,11 @@ impl Node {
         if let Some(a) = availability_of(self.bl_idname) {
             (a.update)(self);
         }
+    }
+
+    /// A boolean node property (`sun_disc`, …); false when absent or of another kind.
+    pub fn prop_bool(&self, identifier: &str) -> bool {
+        matches!(self.prop(identifier), Some(Value::Bool(true)))
     }
 
     /// Sets `enabled` on the input with this identifier (no-op if absent).

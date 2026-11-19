@@ -1321,6 +1321,7 @@ fn tree(t: &mut NodeTree, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
             .collect::<Result<_, MapError>>()?;
     }
     o.u32("next_node_uid", &mut t.next_node_uid)?;
+    o.u32("next_interface_uid", &mut t.next_interface_uid)?;
     cx.anim(o, &mut t.animation_data)
 }
 

@@ -271,6 +271,8 @@ fn rich() -> (Main, WindowState, Preferences) {
     main.node_groups.insert("Smooth by Angle", linked, &mut log);
     let mut local = NodeTree::new("Smooth by Angle", NodeTreeType::Geometry, false);
     local.header.use_fake_user = true;
+    // An interface emptied by `clear()`: the identifier counter survives (WP 3.1).
+    local.next_interface_uid = 3;
     main.node_groups.insert("Smooth by Angle", local, &mut log);
 
     // An orphan: dropped on save.
