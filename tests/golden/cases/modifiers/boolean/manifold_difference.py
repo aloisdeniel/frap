@@ -1,6 +1,6 @@
 # WP 4.6: BOOLEAN modifier, solver MANIFOLD (T2): a rotated, scaled cube cut out of the
 # default cube; the result keeps the cube's UVs (interpolated at the new corners) and flat
-# shading. Needs `obj.modifiers.new` (WP 4.1): enable by renaming to `.py` once it lands.
+# shading.
 # golden: startup=factory compare=objects,evaluated:Cube tier=T2 tol=1e-4
 import bpy
 bpy.ops.mesh.primitive_cube_add(size=1, location=(0.6, 0.4, 0.5), rotation=(0.3, 0.2, 0.1), scale=(1.2, 0.8, 1))

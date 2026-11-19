@@ -367,3 +367,34 @@ impl From<RnaError> for FrapError {
         e.into_frap("", RnaErrorKind::default_code)
     }
 }
+
+fn levenshtein(a: &str, b: &str) -> usize {
+    let b: Vec<char> = b.chars().collect();
+    let mut prev: Vec<usize> = (0..=b.len()).collect();
+    for (i, ca) in a.chars().enumerate() {
+        let mut cur = vec![i + 1];
+        for (j, cb) in b.iter().enumerate() {
+            cur.push(
+                (prev[j] + (ca != *cb) as usize)
+                    .min(prev[j + 1] + 1)
+                    .min(cur[j] + 1),
+            );
+        }
+        prev = cur;
+    }
+    prev[b.len()]
+}
+
+/// `detail.did_you_mean`: up to three candidates within a small edit distance (a third of the
+/// word, at least 2), closest first (ties by name). Shared by unknown operators, keywords,
+/// attributes and enum items.
+pub fn suggest<'a>(word: &str, candidates: impl Iterator<Item = &'a str>) -> Vec<&'a str> {
+    let max = (word.chars().count() / 3).max(2);
+    let mut v: Vec<(usize, &str)> = candidates
+        .map(|c| (levenshtein(word, c), c))
+        .filter(|(d, _)| *d <= max)
+        .collect();
+    v.sort();
+    v.dedup();
+    v.into_iter().take(3).map(|(_, c)| c).collect()
+}

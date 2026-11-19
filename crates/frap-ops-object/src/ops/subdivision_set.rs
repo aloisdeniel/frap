@@ -100,7 +100,12 @@ fn exec(cx: &mut OpCtx, p: object::SubdivisionSet) -> OpResult {
                         if let ModifierSettings::Subsurf(s) = &mut o.modifiers[i].settings {
                             s.levels = level.clamp(0, LEVELS_MAX);
                         }
-                        *cx.object_mut(ob)? = o;
+                        // Keep the generation `object_mut` just bumped (`o` carries the
+                        // old one): the evaluated-object cache keys on it.
+                        let dst = cx.object_mut(ob)?;
+                        let generation = dst.header.generation;
+                        *dst = o;
+                        dst.header.generation = generation;
                     }
                     Err(_) => cx.report(
                         ReportType::Warning,

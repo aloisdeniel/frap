@@ -186,6 +186,7 @@ pub fn import_bytes(
         warned: BTreeSet::new(),
         materials: HashMap::new(),
         images: HashMap::new(),
+        roughness_images: HashMap::new(),
         mesh_cache: HashMap::new(),
         scene,
         view_layer: win.view_layer.clone(),
@@ -259,6 +260,9 @@ pub(crate) struct Gltf<'a> {
     pub materials: HashMap<(usize, bool), IdRef<MaterialId>>,
     /// `pyimage.blender_image_name`.
     pub images: HashMap<usize, Option<IdRef<ImageId>>>,
+    /// `pyimage.blender_roughness_image_name`: the roughness image baked from a glTF image
+    /// for `KHR_materials_pbrSpecularGlossiness` (one per image, whatever the factor).
+    pub roughness_images: HashMap<usize, IdRef<ImageId>>,
     /// `pymesh.blender_name[cache_key]`: the Blender mesh, or point cloud with
     /// `import_point_as_pointcloud` (WP 3.7).
     pub mesh_cache: HashMap<MeshKey, frap_rna::IdAny>,
@@ -340,7 +344,6 @@ impl Gltf<'_> {
         for (ext, milestone) in [
             ("EXT_mesh_gpu_instancing", "M7"),
             ("KHR_materials_variants", "M7"),
-            ("KHR_materials_pbrSpecularGlossiness", "M3"),
         ] {
             if doc.extensions_used.iter().any(|e| e == ext) {
                 w.push((

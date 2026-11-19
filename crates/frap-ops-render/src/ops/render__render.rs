@@ -337,6 +337,13 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
                 format!("frap: the Workbench {effect} is not rendered yet"),
             );
         }
+        let color_type = cx.ctx().scene().display.shading.color_type.clone();
+        if let Some(w) = super::frap__render_contact_sheet::color_type_left_out(
+            &color_type,
+            &shading.shading_type,
+        ) {
+            cx.report(ReportType::Warning, w);
+        }
     }
     cx.result("engine", Value::Str(WORKBENCH.into()));
     cx.result(

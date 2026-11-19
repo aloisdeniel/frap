@@ -243,6 +243,29 @@ pub struct MaterialExts {
     pub dispersion: Option<f32>,
     /// `KHR_materials_diffuse_transmission`
     pub diffuse_transmission: Option<DiffuseTransmission>,
+    /// `KHR_materials_pbrSpecularGlossiness` (import only: the add-on raises it and never
+    /// exports it). When set, its pattern (the first raised) builds the importer's whole
+    /// spec-gloss graph and leaves [`RaiseCx::bsdf`] unset, so the other patterns add nothing;
+    /// the diffuse colour is [`LoweredMaterial::base_color`], and the importer sets no other
+    /// extension (the add-on ignores them).
+    pub pbr_specular_glossiness: Option<SpecularGlossiness>,
+}
+
+/// `KHR_materials_pbrSpecularGlossiness` as the glTF importer raises it
+/// (`blender/imp/KHR_materials_pbrSpecularGlossiness.py`): `Specular Tint` from the specular
+/// colour, `IOR` 1000 (F0 = the tint), `Roughness` = 1 − glossiness.
+#[derive(Clone, Debug, PartialEq)]
+pub struct SpecularGlossiness {
+    /// `specularFactor` / RGB of `specularGlossinessTexture` (`Specular Tint`).
+    pub specular: Channel<[f32; 3]>,
+    /// `glossinessFactor`.
+    pub glossiness_factor: f32,
+    /// The material has a `specularGlossinessTexture`.
+    pub has_texture: bool,
+    /// The importer's baked roughness image (a packed copy of the texture's image whose alpha
+    /// is 1 − glossinessFactor × A), read through its `Alpha` output; `None` when the
+    /// texture has no image.
+    pub roughness: Option<TexRef>,
 }
 
 /// How a colour attribute feeds the material (glTF `COLOR_0`): the add-on's `vc_info`.

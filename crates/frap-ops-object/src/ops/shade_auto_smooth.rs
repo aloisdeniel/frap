@@ -195,7 +195,12 @@ fn exec(cx: &mut OpCtx, p: object::ShadeAutoSmooth) -> OpResult {
         {
             input.value = GnValue::Float(angle);
         }
-        *cx.object_mut(ob)? = o;
+        // Keep the generation `object_mut` just bumped (`o` carries the old one): the
+        // evaluated-object cache keys on it.
+        let dst = cx.object_mut(ob)?;
+        let generation = dst.header.generation;
+        *dst = o;
+        dst.header.generation = generation;
     }
     Ok(OpStatus::Finished)
 }

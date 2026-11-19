@@ -473,6 +473,19 @@ source: crates/frap-schema/tests/snapshots.rs
           "select_mode": {
             "description": "Edit mode only: `[vertex, edge, face]` flags.",
             "default": null
+          },
+          "evaluated": {
+            "description": "`--verbosity full`: the active object's evaluated `{vertices, edges, faces}`.",
+            "default": null
+          },
+          "modifier_status": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": true,
+            "description": "`--verbosity full`, active object with modifiers: `[{name, status, message?}]`,\nstatus `EVALUATED`, `SKIPPED`, `PASSED_THROUGH`, `DISABLED` or `ERROR`.",
+            "default": null
           }
         },
         "required": [

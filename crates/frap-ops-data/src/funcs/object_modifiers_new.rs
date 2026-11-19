@@ -51,7 +51,11 @@ fn object_modifiers_new(
             }
             let (main, log) = h.main_mut();
             if let Some(dst) = main.objects.get_mut(ob, log) {
+                // Keep the generation `get_mut` just bumped (`o` carries the old one): the
+                // evaluated-object cache keys on it.
+                let generation = dst.header.generation;
                 *dst = o;
+                dst.header.generation = generation;
             }
             Ok(Value::Ptr(Box::new(p)))
         }

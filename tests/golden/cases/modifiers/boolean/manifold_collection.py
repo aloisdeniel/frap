@@ -1,6 +1,6 @@
 # WP 4.6: BOOLEAN modifier with a COLLECTION operand, MANIFOLD (T2): every mesh object of the
 # collection is subtracted; a non-manifold operand (a plane) gives Blender's modifier error and
-# the input mesh. Needs `obj.modifiers.new` (WP 4.1): enable by renaming to `.py` once it lands.
+# the input mesh.
 # golden: startup=factory compare=objects,evaluated:Cube,evaluated:Cube.001 tier=T2 tol=1e-4
 import bpy
 bpy.data.collections.new(name='Cutters')

@@ -192,7 +192,7 @@ fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
     };
     cx.output = Some(out);
     let color = cx.input(emission, "Color");
-    super::base_color::raise_base_color(lm, cx, [-200.0, 380.0], color, alpha_socket);
+    super::base_color::raise_base_color(lm, cx, [-200.0, 380.0], color, alpha_socket, "BASE COLOR");
 }
 
 #[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)

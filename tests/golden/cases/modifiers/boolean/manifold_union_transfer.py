@@ -1,7 +1,6 @@
 # WP 4.6: BOOLEAN modifier, MANIFOLD UNION with material_mode TRANSFER (T2): the operand's
 # material is appended to the result's slots and its faces use it; with INDEX the operand's
-# faces keep their slot index. Needs `obj.modifiers.new` (WP 4.1): enable by renaming to
-# `.py` once it lands.
+# faces keep their slot index.
 # golden: startup=factory compare=objects,materials,evaluated:Cube tier=T2 tol=1e-4
 import bpy
 bpy.data.materials.new(name='Red')

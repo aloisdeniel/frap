@@ -64,7 +64,7 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     }
 }
 
-fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
+pub(crate) fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
     let (Some(_), Some(tex)) = (cx.bsdf, &lm.occlusion) else {
         return;
     };

@@ -1,6 +1,5 @@
 # WP 4.6: BOOLEAN modifier, solver EXACT (the default; T3): Blender's exact mesh arrangement
-# is not ported (WP 8.6); frap's stand-in gives a closed result of the same shape. Needs
-# `obj.modifiers.new` (WP 4.1): enable by renaming to `.py` once it lands.
+# is not ported (WP 8.6); frap's stand-in gives a closed result of the same shape.
 # golden: startup=factory compare=objects,evaluated:Cube tier=T3 check=manifold,euler:2,faces:20-60
 import bpy
 bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=0.8, location=(0.9, 0.7, 0.6))

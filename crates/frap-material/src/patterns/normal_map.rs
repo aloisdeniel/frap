@@ -39,7 +39,7 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     out.normal = Some(NormalMap { texture, scale });
 }
 
-fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
+pub(crate) fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
     let (Some(bsdf), Some(n)) = (cx.bsdf, &lm.normal) else {
         return;
     };

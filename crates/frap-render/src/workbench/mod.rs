@@ -29,7 +29,9 @@
 //! - `shading.color_type`: MATERIAL (`RSettings::workbench_materials`: the material's viewport
 //!   `diffuse_color`/`metallic`/`roughness`; synthetic scenes: the lowered factors), OBJECT
 //!   (`Object.color`), SINGLE (`single_color`), RANDOM ([`color::random_color`] of
-//!   `RObject::random_hash`). VERTEX / TEXTURE / ATTRIBUTE render as MATERIAL until M3.
+//!   `RObject::random_hash`). VERTEX (Attribute) and TEXTURE render as MATERIAL until M5
+//!   (WP 5.5, with the texture and colour-attribute upload; `render.render` and
+//!   `frap.render_contact_sheet` report it with a WARNING, deviations.md §2).
 //! - `show_xray`/`xray_alpha`, materials with alpha < 1, `show_object_outline` /
 //!   `object_outline_color`, `show_shadows` / `shadow_intensity` with `display.light_direction`
 //!   / `shadow_shift` / `shadow_focus`, `show_backface_culling`, `show_specular_highlight`.
@@ -181,7 +183,7 @@ impl Shading {
             "OBJECT" => ColorType::Object,
             "SINGLE" => ColorType::Single,
             "RANDOM" => ColorType::Random,
-            // "MATERIAL", and VERTEX / TEXTURE / ATTRIBUTE until M3.
+            // "MATERIAL", and VERTEX / TEXTURE until M5 (WP 5.5; a WARNING says so).
             _ => ColorType::Material,
         };
         // `BKE_studiolight_find(studio_light, STUDIOLIGHT_TYPE_STUDIO)` falls back to the

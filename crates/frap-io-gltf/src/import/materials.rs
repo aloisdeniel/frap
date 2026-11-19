@@ -4,6 +4,9 @@
 //! [`LoweredMaterial`] read from the glTF material (textures resolved to imported images), and
 //! the node graph built from it by `frap_material::raise` (WP 1.11, §16.2). Materials without
 //! a glTF material but with `COLOR_0` get the add-on's "DefaultMaterial" graph.
+//! `KHR_materials_pbrSpecularGlossiness` materials are raised as the importer's spec-gloss
+//! graph (`frap_material::patterns::pbr_specular_glossiness`, with the roughness image baked
+//! here as `make_roughness_image` does).
 //! `KHR_materials_unlit` materials are raised as the importer's unlit graph (`unlit.rs`), an
 //! `occlusionTexture` into the "glTF Material Output" group node, whose `node_tree`
 //! `material_ext::bind_settings_nodes` links to `bpy.data.node_groups` (WP 3.5/3.6).
@@ -18,7 +21,8 @@ use frap_gltf::ext::khr_texture_transform::KhrTextureTransform;
 use frap_gltf::json::{AlphaMode as GAlphaMode, Extensions, MagFilter, MinFilter, WrapMode};
 use frap_material::{
     AlphaMode, Channel, ChannelSel, Filter, LoweredMaterial, MATERIAL_PATTERNS, MaterialExts,
-    NameAlloc, NormalMap, Sampler, TexRef, TexTransform, UvSource, VertexColorUse, Wrap,
+    NameAlloc, NormalMap, Sampler, SpecularGlossiness, TexRef, TexTransform, UvSource,
+    VertexColorUse, Wrap,
 };
 use frap_nodes::generated::{NodePropDefault, NodeTypeDef, SocketDefault, node_type};
 use frap_nodes::{Link, Node, NodeTree, PropBag, Socket, SocketValue};
@@ -133,7 +137,18 @@ fn lowered(
         },
         GAlphaMode::Blend => AlphaMode::Blend,
     };
-    let pbr = m.pbr_metallic_roughness.clone().unwrap_or_default();
+    let unlit = m.extensions.contains("KHR_materials_unlit");
+    // `BlenderMaterial.create`: unlit first, then spec-gloss, else metallic-roughness (the
+    // spec-gloss graph reads none of `pbrMetallicRoughness`, so its textures are not loaded).
+    let spec_gloss = (!unlit)
+        .then(|| m.extensions.get_raw(SPEC_GLOSS))
+        .flatten()
+        .cloned();
+    let pbr = if spec_gloss.is_some() {
+        Default::default()
+    } else {
+        m.pbr_metallic_roughness.clone().unwrap_or_default()
+    };
     let base_sel = if alpha_mode == AlphaMode::Opaque {
         ChannelSel::Rgb
     } else {
@@ -255,7 +270,7 @@ fn lowered(
         emissive_strength,
         alpha_mode,
         double_sided: m.double_sided.unwrap_or(false),
-        unlit: m.extensions.contains("KHR_materials_unlit"),
+        unlit,
         ext: MaterialExts::default(),
         // The importer's Color Attribute node names no layer (the active colour attribute,
         // which is the imported COLOR_0) and links its Alpha only when the material is not
@@ -267,6 +282,11 @@ fn lowered(
         }),
         diagnostics: Vec::new(),
     };
+    if let Some(raw) = spec_gloss {
+        // The add-on's spec-gloss graph ignores every other material extension.
+        spec_gloss_material(cx, main, log, &raw, base_sel, &mut lm)?;
+        return Ok(lm);
+    }
     // `KHR_materials_*` (M3 W0 extension point, `crate::material_ext`; WP 3.6 registers the
     // importers).
     let mut host = ExtHost { cx, main, log };
@@ -274,6 +294,203 @@ fn lowered(
         (imp.run)(&mut host, m, &mut lm)?;
     }
     Ok(lm)
+}
+
+/// `KHR_materials_pbrSpecularGlossiness`.
+const SPEC_GLOSS: &str = "KHR_materials_pbrSpecularGlossiness";
+
+/// A `textureInfo` of the raw extension JSON (`None` when absent or malformed).
+fn raw_texture_info(v: &serde_json::Value, key: &str) -> Option<frap_gltf::json::TextureInfo> {
+    serde_json::from_value(v.get(key)?.clone()).ok()
+}
+
+/// A number array of the raw extension JSON (`None` when absent or malformed).
+fn raw_factor<const N: usize>(v: &serde_json::Value, key: &str) -> Option<[f32; N]> {
+    let a = v.get(key)?.as_array()?;
+    if a.len() != N {
+        return None;
+    }
+    let mut out = [0.0; N];
+    for (o, x) in out.iter_mut().zip(a) {
+        *o = x.as_f64()? as f32;
+    }
+    Some(out)
+}
+
+/// `pbr_specular_glossiness(mh)`'s inputs: `diffuseFactor`/`diffuseTexture` as the base
+/// colour (`base_color(is_diffuse=True)`), `specularFactor` with the RGB of
+/// `specularGlossinessTexture`, `glossinessFactor`, and the baked roughness image
+/// (`make_roughness_image`) when the texture is used for glossiness. Ported from
+/// io_scene_gltf2 5.2.41 `blender/imp/KHR_materials_pbrSpecularGlossiness.py` (Apache-2.0,
+/// The glTF-Blender-IO authors).
+fn spec_gloss_material(
+    cx: &mut Gltf,
+    main: &mut Main,
+    log: &mut ChangeLog,
+    ext: &serde_json::Value,
+    base_sel: ChannelSel,
+    lm: &mut LoweredMaterial,
+) -> Result<(), ImportError> {
+    lm.base_color.factor = raw_factor::<4>(ext, "diffuseFactor").unwrap_or([1.0; 4]);
+    lm.base_color.texture = match raw_texture_info(ext, "diffuseTexture") {
+        Some(t) => tex_ref(
+            cx,
+            main,
+            log,
+            t.index,
+            t.tex_coord,
+            &t.extensions,
+            base_sel,
+            false,
+        )?,
+        None => None,
+    };
+    let sg_tex = raw_texture_info(ext, "specularGlossinessTexture");
+    let specular_texture = match &sg_tex {
+        Some(t) => tex_ref(
+            cx,
+            main,
+            log,
+            t.index,
+            t.tex_coord,
+            &t.extensions,
+            ChannelSel::Rgb,
+            false,
+        )?,
+        None => None,
+    };
+    let glossiness_factor = ext
+        .get("glossinessFactor")
+        .and_then(serde_json::Value::as_f64)
+        .unwrap_or(1.0) as f32;
+    let roughness = match &sg_tex {
+        Some(t) if glossiness_factor != 0.0 => {
+            match bake_roughness(cx, main, log, t.index, glossiness_factor)? {
+                Some(image) => tex_ref(
+                    cx,
+                    main,
+                    log,
+                    t.index,
+                    t.tex_coord,
+                    &t.extensions,
+                    ChannelSel::A,
+                    false,
+                )?
+                .map(|r| TexRef { image, ..r }),
+                None => None,
+            }
+        }
+        _ => None,
+    };
+    lm.ext = MaterialExts::default();
+    lm.ext.pbr_specular_glossiness = Some(SpecularGlossiness {
+        specular: Channel {
+            factor: raw_factor::<3>(ext, "specularFactor").unwrap_or([1.0; 3]),
+            texture: specular_texture,
+        },
+        glossiness_factor,
+        has_texture: sg_tex.is_some(),
+        roughness,
+    });
+    Ok(())
+}
+
+/// `make_roughness_image`: a packed copy of the texture's image (`image.copy()`, so
+/// `<name>.001`) whose alpha is 1 − `glossiness` × alpha, through `Image.pixels` (bytes
+/// rounded as `unit_float_to_uchar_clamp`), then `image.pack()` (PNG for a byte buffer in the
+/// image's colour mode, OpenEXR for a float one). Cached per glTF image, whatever the factor,
+/// as the add-on caches it.
+fn bake_roughness(
+    cx: &mut Gltf,
+    main: &mut Main,
+    log: &mut ChangeLog,
+    texture: u32,
+    glossiness: f32,
+) -> Result<Option<IdRef<frap_rna::ImageId>>, ImportError> {
+    let Some(src) = images::texture_source(cx, texture as usize) else {
+        return Ok(None);
+    };
+    let Some(orig) = images::create(cx, main, log, src)? else {
+        return Ok(None);
+    };
+    if let Some(&r) = cx.roughness_images.get(&src) {
+        return Ok(Some(r));
+    }
+    let Some(im) = main.images.get(orig) else {
+        return Ok(None);
+    };
+    let base = frap_scene::id::PathBase {
+        blend: main.filepath.clone(),
+        cwd: None,
+    };
+    let mut image = im.clone();
+    let name = image.header.name.clone();
+    image.header.use_fake_user = false;
+    image.header.library = None;
+    image.header.is_linked_packed = false;
+    if let Some(mut buf) = im.acquire(&base) {
+        let mut px = buf.pixels();
+        for p in px.chunks_exact_mut(4) {
+            // `pixels[:, :, 3] *= factor; *= -1; += 1` on a float32 array (NumPy casts the
+            // Python factor to float32).
+            let mut a = p[3];
+            if glossiness != 1.0 {
+                a *= glossiness;
+            }
+            p[3] = -a + 1.0;
+        }
+        buf.set_pixels(&px);
+        if let Some((bytes, mime, ff)) = memorypack(&buf) {
+            image.packed_file = Some(std::sync::Arc::new(frap_scene::id::EncodedImage {
+                bytes,
+                mime: SmolStr::new_static(mime),
+            }));
+            image.packed_filepath = image.filepath.clone();
+            image.file_format = SmolStr::new_static(ff);
+            buf.dirty = false;
+            buf.ftype = SmolStr::new_static(ff);
+        }
+        image.buffer = Some(std::sync::Arc::new(buf));
+    }
+    let r = main.images.insert(&name, image, log);
+    cx.roughness_images.insert(src, r);
+    Ok(Some(r))
+}
+
+/// `BKE_image_memorypack` of a modified buffer: PNG (8 bits, in the buffer's colour mode)
+/// for bytes, OpenEXR (32 bits) for floats; (bytes, MIME type, `file_format`).
+fn memorypack(buf: &frap_scene::id::ImBuf) -> Option<(Vec<u8>, &'static str, &'static str)> {
+    use frap_imbuf::{DecodedImage, EncodeFormat, PixelData};
+    use frap_scene::id::{ImBuf, ImBufData};
+    let row = buf.x as usize * 4;
+    let channels = match buf.planes {
+        8 => 1,
+        24 => 3,
+        _ => 4,
+    };
+    let (pixels, format, mime, ff) = match &buf.data {
+        ImBufData::Byte(b) => (
+            PixelData::U8(ImBuf::flip_rows(b, row)),
+            EncodeFormat::Png {
+                bit_depth: 8,
+                compression: 15,
+            },
+            "image/png",
+            "PNG",
+        ),
+        ImBufData::Float(f) => (
+            PixelData::F32(ImBuf::flip_rows(f, row)),
+            EncodeFormat::OpenExr { bit_depth: 32 },
+            "image/x-exr",
+            "OPEN_EXR",
+        ),
+    };
+    let img = DecodedImage::new(buf.x, buf.y, 4, pixels)
+        .ok()?
+        .with_channels(channels)
+        .ok()?;
+    let bytes = frap_imbuf::encode(&img, &format).ok()?;
+    Some((bytes, mime, ff))
 }
 
 /// [`crate::material_ext::ExtImportHost`] over the importer state.

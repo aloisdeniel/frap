@@ -443,3 +443,43 @@ fn side_only_lines_of_the_factory_seed() {
     assert!(blender_lines.contains(&blender_only));
     assert!(!blender_lines.contains(&frap_only));
 }
+
+/// M3 exit criterion (§22.5, decision log M34S-6): at least 60 static-glTF first exports
+/// under `tests/golden/cases/gltf/**` are compared (`compare=glb:…`) with the round trip of
+/// their own output (re-imported, exported again as `…_rt.<ext>`; WP 3.9's rule). The round
+/// trips are named after the export (`car.glb` → `car_rt.glb`), its folder
+/// (`out/web/crate.gltf` → `web_rt.glb`) or a variant (`survey_all.glb` → `survey_rt.glb`), and
+/// `modifier_stack_reimport.py` round-trips `modifier_stack.py`'s applied export, so the suite
+/// is checked by count: the M3 workflow suite (`gltf/m3_workflows/`) has at least one `_rt`
+/// export per first export, and at least 60 first exports.
+#[test]
+fn m3_static_gltf_goldens_with_round_trips() {
+    use frap_golden::case::CompareSpec;
+    let repo = Repo::locate();
+    let cases = repo.cases(Some("gltf/**")).unwrap();
+    let (mut first, mut rt) = (Vec::new(), Vec::new());
+    for c in cases.iter().filter(|c| c.area == "gltf/m3_workflows") {
+        for s in &c.compare {
+            if let CompareSpec::Glb(p) = s {
+                let stem = p.rsplit_once('.').map_or(p.as_str(), |(s, _)| s);
+                let id = format!("{}: {p}", c.id());
+                if stem.ends_with("_rt") {
+                    rt.push(id);
+                } else {
+                    first.push(id);
+                }
+            }
+        }
+    }
+    assert!(
+        first.len() >= 60,
+        "only {} static-glTF first exports in gltf/m3_workflows (M3 exit: ≥ 60): {first:?}",
+        first.len()
+    );
+    assert!(
+        rt.len() >= first.len(),
+        "{} first exports but {} round trips: {first:?} / {rt:?}",
+        first.len(),
+        rt.len()
+    );
+}

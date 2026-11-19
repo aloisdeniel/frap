@@ -835,7 +835,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [x] | KHR_texture_transform | M3 | M3 | marked required (Blender quirk); WP 3.5 |
 | [x] | KHR_materials_emissive_strength, unlit | M3 | M3 | WP 3.5 |
 | [x] | KHR_materials_transmission, clearcoat, sheen, ior, specular, volume, iridescence, anisotropy, dispersion | M3 | M3 | WP 3.6: export goldens per extension, import raise round-trip (`tests/golden/cases/gltf/materials_ext/`); grayscale anisotropy textures not baked (WARNING) |
-| [ ] | KHR_materials_pbrSpecularGlossiness | — | M3 | import only (archived) |
+| [x] | KHR_materials_pbrSpecularGlossiness | — | M3 | import only (archived); M3 stabilization: the add-on's graph (IOR 1000, Specular Tint, baked roughness image `<image>.001`), golden `tests/golden/cases/gltf/materials_core/spec_gloss.py`; read from the raw extension JSON (no typed `frap-gltf` struct) |
 | [ ] | Animations (TRS, weights; ACTIONS/ACTIVE_ACTIONS/BROADCAST/NLA_TRACKS/SCENE; LINEAR/STEP/CUBICSPLINE, sampling) | M6 | M6 |  |
 | [ ] | Skins (joints, inverse bind matrices, JOINTS_n/WEIGHTS_n) | M6 | M6 |  |
 | [ ] | Morph targets (POSITION/NORMAL deltas, sparse, default weights) | M6 | M6 |  |

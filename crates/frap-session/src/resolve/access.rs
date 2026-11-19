@@ -108,7 +108,7 @@ thread_local! {
 const READ_EVAL_MAX: usize = 64;
 
 /// The evaluated object (viewport), from the cache of this thread's reads.
-fn evaluated_for_read(
+pub(crate) fn evaluated_for_read(
     host: &dyn HostRead,
     ob: frap_rna::IdRef<frap_rna::ObjectId>,
 ) -> Result<std::sync::Arc<frap_scene::EvaluatedObject>, FrapError> {

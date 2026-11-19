@@ -1,0 +1,462 @@
+{
+ "asset": {
+  "version": "2.0",
+  "generator": "frap golden input (hand-written)"
+ },
+ "extensionsUsed": [
+  "KHR_materials_pbrSpecularGlossiness",
+  "KHR_materials_clearcoat",
+  "KHR_materials_unlit",
+  "KHR_texture_transform"
+ ],
+ "buffers": [
+  {
+   "byteLength": 96,
+   "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/"
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 36
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 36,
+   "byteLength": 36
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 72,
+   "byteLength": 24
+  }
+ ],
+ "accessors": [
+  {
+   "bufferView": 0,
+   "componentType": 5126,
+   "count": 3,
+   "type": "VEC3",
+   "min": [
+    0,
+    0,
+    0
+   ],
+   "max": [
+    1,
+    1,
+    0
+   ]
+  },
+  {
+   "bufferView": 1,
+   "componentType": 5126,
+   "count": 3,
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 2,
+   "componentType": 5126,
+   "count": 3,
+   "type": "VEC2"
+  }
+ ],
+ "meshes": [
+  {
+   "name": "M_Plain",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "material": 0
+    }
+   ]
+  },
+  {
+   "name": "M_Spec",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "material": 1
+    }
+   ]
+  },
+  {
+   "name": "M_Empty",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "material": 2
+    }
+   ]
+  },
+  {
+   "name": "M_Tex",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "material": 3
+    }
+   ]
+  },
+  {
+   "name": "M_Mask",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "material": 4
+    }
+   ]
+  },
+  {
+   "name": "M_Reuse",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "material": 5
+    }
+   ]
+  },
+  {
+   "name": "M_Gloss",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "material": 6
+    }
+   ]
+  },
+  {
+   "name": "M_Unlit",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "TEXCOORD_0": 2
+     },
+     "material": 7
+    }
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Plain",
+   "mesh": 0,
+   "translation": [
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "Spec",
+   "mesh": 1,
+   "translation": [
+    2,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "Empty",
+   "mesh": 2,
+   "translation": [
+    4,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "Tex",
+   "mesh": 3,
+   "translation": [
+    6,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "Mask",
+   "mesh": 4,
+   "translation": [
+    8,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "Reuse",
+   "mesh": 5,
+   "translation": [
+    10,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "Gloss",
+   "mesh": 6,
+   "translation": [
+    12,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "Unlit",
+   "mesh": 7,
+   "translation": [
+    14,
+    0,
+    0
+   ]
+  }
+ ],
+ "scenes": [
+  {
+   "nodes": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ]
+  }
+ ],
+ "scene": 0,
+ "materials": [
+  {
+   "name": "Plain",
+   "extensions": {
+    "KHR_materials_pbrSpecularGlossiness": {
+     "diffuseFactor": [
+      0.2,
+      0.6,
+      0.9,
+      1
+     ],
+     "glossinessFactor": 0.3
+    }
+   }
+  },
+  {
+   "name": "Spec",
+   "alphaMode": "BLEND",
+   "emissiveFactor": [
+    0.1,
+    0,
+    0
+   ],
+   "doubleSided": true,
+   "extensions": {
+    "KHR_materials_pbrSpecularGlossiness": {
+     "diffuseFactor": [
+      0.5,
+      0.5,
+      0.5,
+      0.5
+     ],
+     "specularFactor": [
+      0.1,
+      0.2,
+      0.3
+     ],
+     "glossinessFactor": 0.8
+    },
+    "KHR_materials_clearcoat": {
+     "clearcoatFactor": 0.7
+    }
+   }
+  },
+  {
+   "name": "Empty",
+   "extensions": {
+    "KHR_materials_pbrSpecularGlossiness": {}
+   }
+  },
+  {
+   "name": "Tex",
+   "extensions": {
+    "KHR_materials_pbrSpecularGlossiness": {
+     "diffuseTexture": {
+      "index": 0
+     },
+     "specularGlossinessTexture": {
+      "index": 0
+     },
+     "glossinessFactor": 0.5,
+     "specularFactor": [
+      0.5,
+      1,
+      1
+     ]
+    }
+   }
+  },
+  {
+   "name": "Mask",
+   "alphaMode": "MASK",
+   "alphaCutoff": 0.3,
+   "normalTexture": {
+    "index": 2,
+    "scale": 0.5
+   },
+   "occlusionTexture": {
+    "index": 1,
+    "strength": 0.8
+   },
+   "emissiveTexture": {
+    "index": 1
+   },
+   "emissiveFactor": [
+    1,
+    1,
+    1
+   ],
+   "extensions": {
+    "KHR_materials_pbrSpecularGlossiness": {
+     "diffuseFactor": [
+      1,
+      0.5,
+      0.25,
+      0.9
+     ],
+     "diffuseTexture": {
+      "index": 1,
+      "extensions": {
+       "KHR_texture_transform": {
+        "offset": [
+         0.25,
+         0.5
+        ],
+        "scale": [
+         2,
+         2
+        ]
+       }
+      }
+     },
+     "specularGlossinessTexture": {
+      "index": 3
+     },
+     "glossinessFactor": 0
+    }
+   }
+  },
+  {
+   "name": "Reuse",
+   "extensions": {
+    "KHR_materials_pbrSpecularGlossiness": {
+     "specularGlossinessTexture": {
+      "index": 0
+     },
+     "glossinessFactor": 0.25
+    }
+   }
+  },
+  {
+   "name": "Gloss",
+   "extensions": {
+    "KHR_materials_pbrSpecularGlossiness": {
+     "specularGlossinessTexture": {
+      "index": 3
+     }
+    }
+   }
+  },
+  {
+   "name": "Unlit",
+   "extensions": {
+    "KHR_materials_unlit": {},
+    "KHR_materials_pbrSpecularGlossiness": {
+     "diffuseFactor": [
+      0.3,
+      0.3,
+      0.3,
+      1
+     ]
+    }
+   },
+   "pbrMetallicRoughness": {
+    "baseColorFactor": [
+     0.9,
+     0.1,
+     0.1,
+     1
+    ]
+   }
+  }
+ ],
+ "images": [
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAF0lEQVR4nGP4z8DwHwgbGIC0w////xkAQBgHuub96GQAAAAASUVORK5CYII=",
+   "name": "SG"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGklEQVR4nGM4kWL0n0tE7gRDVIAbFwMDw38ANtsFW5BWurYAAAAASUVORK5CYII=",
+   "name": "Paint"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAEUlEQVR4nGNoaPj/H4QZYAwAZ9IL+XOQc0UAAAAASUVORK5CYII=",
+   "name": "Bumps"
+  },
+  {
+   "uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGklEQVR4nGM4kWL0n0tE7gRDVIAbFwMDw38ANtsFW5BWurYAAAAASUVORK5CYII=",
+   "name": "SG2"
+  }
+ ],
+ "samplers": [
+  {
+   "magFilter": 9728,
+   "minFilter": 9728
+  }
+ ],
+ "textures": [
+  {
+   "source": 0
+  },
+  {
+   "source": 1
+  },
+  {
+   "source": 2
+  },
+  {
+   "source": 3,
+   "sampler": 0
+  }
+ ]
+}

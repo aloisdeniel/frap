@@ -64,7 +64,7 @@ fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     }
 }
 
-fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
+pub(crate) fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
     let Some(bsdf) = cx.bsdf else { return };
     let mut factor = lm.emissive.factor;
     let mut strength = f64::from(lm.emissive_strength);

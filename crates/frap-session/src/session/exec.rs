@@ -172,6 +172,19 @@ fn set_code(k: RnaErrorKind) -> frap_rna::ErrorCode {
     }
 }
 
+/// `FUNC_NOT_CALLED` (§13.2): a statement that names a function without calling it
+/// (`bpy.data.images['X'].save`) reads the function object, as Python does; nothing ran.
+fn func_not_called_hint(t: &Target, path: Option<&str>) -> Option<J> {
+    if !matches!(t, Target::Func(_)) {
+        return None;
+    }
+    let f = path.unwrap_or("the function");
+    Some(json!({
+        "code": "FUNC_NOT_CALLED",
+        "message": format!("{f} is a function and was not called; add parentheses to call it: {f}()"),
+    }))
+}
+
 /// `ANGLE_LIKELY_DEGREES` (§13.2): a whole number above 2π assigned to a ROTATION property.
 fn angle_hint(prop: &PropDef, v: &Py) -> Option<J> {
     if prop.unit != Unit::Rotation {
@@ -369,6 +382,7 @@ impl Session {
                 resolve::encode(&self.host, &t, caps).map_err(|e| Fail::new("get", e))?;
             let mut r = self.base("get", line, Status::Finished);
             r.path = resolve::repr(&t, &self.host.state.main);
+            r.hints.extend(func_not_called_hint(&t, r.path.as_deref()));
             r.value = Some(value);
             r.rna = rna;
             return Ok(r);
@@ -377,9 +391,10 @@ impl Session {
             let t = s.eval_target(p)?;
             let (value, rna) = resolve::encode(&s.host, &t, caps)?;
             let path = resolve::repr(&t, &s.host.state.main);
-            Ok(((value, rna, path), false))
+            let hint = func_not_called_hint(&t, path.as_deref());
+            Ok(((value, rna, path, hint), false))
         });
-        let (value, rna, path) = txn.result.map_err(|e| Fail {
+        let (value, rna, path, hint) = txn.result.map_err(|e| Fail {
             kind: "get",
             op: None,
             err: e,
@@ -387,6 +402,7 @@ impl Session {
         })?;
         let mut r = self.base("get", line, Status::Finished);
         r.path = path;
+        r.hints.extend(hint);
         r.value = Some(value);
         r.rna = rna;
         r.reports = txn.reports;

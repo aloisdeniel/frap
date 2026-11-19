@@ -655,6 +655,12 @@ impl Session {
                 ctx.active_object().map(name).unwrap_or(J::Null),
             );
         }
+        if self.opts.verbosity == Verbosity::Full
+            && let J::Object(m) = &mut j
+            && let Some(ob) = ctx.active_object()
+        {
+            m.extend(self.evaluated_json(ob));
+        }
         if mode == frap_scene::ContextMode::EditMesh
             && let J::Object(m) = &mut j
         {
@@ -672,6 +678,63 @@ impl Session {
             );
         }
         j
+    }
+
+    /// `--verbosity full` (§13.2): the active object's evaluated element counts
+    /// (`evaluated: {vertices, edges, faces}`, viewport) and, when it has modifiers,
+    /// `modifier_status`: `[{name, status, message?}]` with status `EVALUATED`, `SKIPPED`
+    /// (hidden in the viewport), `PASSED_THROUGH` (no frap evaluator, WARNING), `DISABLED`
+    /// (Blender's `is_disabled`, e.g. a Boolean without operand) or `ERROR` (the modifier
+    /// error). Nothing when the object cannot be evaluated.
+    fn evaluated_json(
+        &self,
+        ob: frap_rna::IdRef<frap_rna::ObjectId>,
+    ) -> serde_json::Map<String, J> {
+        use frap_scene::ModifierStatus as S;
+        let mut m = serde_json::Map::new();
+        let Ok(eo) = crate::resolve::evaluated_for_read(&self.host, ob) else {
+            return m;
+        };
+        if let Some(mesh) = &eo.mesh {
+            m.insert(
+                "evaluated".into(),
+                json!({
+                    "vertices": mesh.verts_num(),
+                    "edges": mesh.edges_num(),
+                    "faces": mesh.faces_num(),
+                }),
+            );
+        }
+        let has_modifiers = self
+            .host
+            .state
+            .main
+            .objects
+            .get(ob)
+            .is_some_and(|o| !o.modifiers.is_empty());
+        if has_modifiers {
+            let list: Vec<J> = eo
+                .modifier_status
+                .iter()
+                .map(|(name, st)| {
+                    let (status, message) = match st {
+                        S::Evaluated => ("EVALUATED", None),
+                        S::Skipped => ("SKIPPED", None),
+                        S::PassedThrough => ("PASSED_THROUGH", None),
+                        S::Disabled(w) => ("DISABLED", Some(w.as_str())),
+                        S::Error(w) => ("ERROR", Some(w.as_str())),
+                        _ => ("UNKNOWN", None),
+                    };
+                    let mut e = json!({"name": name.as_str(), "status": status});
+                    if let (Some(msg), J::Object(o)) = (message, &mut e) {
+                        o.insert("message".into(), J::from(msg));
+                    }
+                    e
+                })
+                .collect();
+            m.insert("modifier_status".into(), J::Array(list));
+        }
+        m
     }
 
     pub(crate) fn changes_json(&self, log: &ChangeLog) -> J {

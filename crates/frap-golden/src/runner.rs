@@ -1149,6 +1149,7 @@ impl Dumper<'_> {
 
 /// Runs `case` through frap and dumps the state (§20.3).
 pub fn run_frap(case: &Case, props: &Props, opts: &RunOptions) -> Result<FrapRun, HarnessError> {
+    crate::blender::stage_inputs(&case.path, &opts.workdir)?;
     let mut so = SessionOptions::default();
     so.cwd = opts.workdir.clone();
     so.startup = match case.startup {

@@ -164,7 +164,8 @@ fn texture_uses(lm: &LoweredMaterial) -> (bool, bool) {
 }
 
 /// `base_color()` of the importer: see the module documentation. `alpha_socket` is `None`
-/// when the shader has no alpha input (an opaque unlit material).
+/// when the shader has no alpha input (an opaque unlit material); `label` is the Image
+/// Texture's (`"BASE COLOR"`, or `"DIFFUSE"` for `is_diffuse`, the spec-gloss diffuse).
 ///
 /// Lowered materials that the importer cannot produce are raised so that lowering the
 /// graph gives them back (`lower(raise(lower(x))) == lower(x)`): a texture whose alpha is not
@@ -176,6 +177,7 @@ pub(crate) fn raise_base_color(
     location: [f32; 2],
     color_socket: SocketAddr,
     alpha_socket: Option<SocketAddr>,
+    label: &str,
 ) {
     let [mut x, y] = location;
     let f = lm.base_color.factor;
@@ -351,11 +353,11 @@ pub(crate) fn raise_base_color(
             };
             cx.link(a, SocketAddr::output(sep, out));
             let c = cx.input(sep, "Color");
-            cx.texture(t, [x - 200.0, y], "BASE COLOR", Some(c), None);
+            cx.texture(t, [x - 200.0, y], label, Some(c), None);
         }
         _ => {
             let color_to = tex_color.then_some(tex_color_to);
-            cx.texture(t, [x, y], "BASE COLOR", color_to, alpha_to);
+            cx.texture(t, [x, y], label, color_to, alpha_to);
         }
     }
 }
@@ -369,7 +371,7 @@ fn raise(lm: &LoweredMaterial, cx: &mut RaiseCx) {
     if lm.base_color.texture.is_none() && lm.vertex_color.is_none() {
         cx.into.diffuse_color = lm.base_color.factor;
     }
-    raise_base_color(lm, cx, loc, color, Some(alpha));
+    raise_base_color(lm, cx, loc, color, Some(alpha), "BASE COLOR");
 }
 
 #[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)

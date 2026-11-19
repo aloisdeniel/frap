@@ -209,6 +209,27 @@ pub fn live() -> Live {
     )
 }
 
+/// Copies the case's input files into `workdir`: every file of the directory next to the case
+/// named after it with the extension `inputs` (`spec_gloss.py` → `spec_gloss.inputs/`), so
+/// both runners read the same hand-written files (glTF documents Blender cannot export, e.g.
+/// `KHR_materials_pbrSpecularGlossiness`) by relative path. No such directory: nothing to do.
+pub fn stage_inputs(case_file: &Path, workdir: &Path) -> Result<(), HarnessError> {
+    let dir = case_file.with_extension("inputs");
+    let Ok(rd) = std::fs::read_dir(&dir) else {
+        return Ok(());
+    };
+    std::fs::create_dir_all(workdir).map_err(|e| io("cannot create", workdir, e))?;
+    for e in rd.flatten() {
+        let p = e.path();
+        if p.is_file()
+            && let Some(name) = p.file_name()
+        {
+            std::fs::copy(&p, workdir.join(name)).map_err(|e| io("cannot copy", &p, e))?;
+        }
+    }
+    Ok(())
+}
+
 /// Runs `golden_runner.py` on `case_file` with `workdir` as the current directory and returns
 /// the parsed dump (output files referenced by absolute `$file` paths, unresolved).
 pub fn run_blender(
@@ -221,6 +242,7 @@ pub fn run_blender(
     let case_file =
         std::path::absolute(case_file).map_err(|e| io("cannot resolve", case_file, e))?;
     let case_file = case_file.as_path();
+    stage_inputs(case_file, workdir)?;
     let out = workdir.join(".golden-state.json");
     let _ = std::fs::remove_file(&out);
     let output = Command::new(blender)
@@ -482,6 +504,21 @@ pub fn roundtrip(blender: &Path, repo: &Repo, src: &Path) -> Result<Vec<u8>, Har
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn stage_inputs_copies_the_case_inputs() {
+        let d = ScratchDir::new("inputs").unwrap();
+        let case = d.path().join("cases/x/spec.py");
+        touch(&case);
+        let work = d.path().join("work");
+        // No `spec.inputs/`: nothing to do (the workdir is not even created).
+        stage_inputs(&case, &work).unwrap();
+        assert!(!work.exists());
+        std::fs::create_dir_all(d.path().join("cases/x/spec.inputs")).unwrap();
+        std::fs::write(d.path().join("cases/x/spec.inputs/a.gltf"), b"{}").unwrap();
+        stage_inputs(&case, &work).unwrap();
+        assert_eq!(std::fs::read(work.join("a.gltf")).unwrap(), b"{}");
+    }
 
     fn touch(p: &Path) {
         std::fs::create_dir_all(p.parent().unwrap()).unwrap();

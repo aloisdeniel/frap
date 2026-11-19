@@ -1,0 +1,830 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Empty": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 4.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Empty"],
+      "mode": "OBJECT"
+    },
+    "Gloss": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 12.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [12.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Gloss"],
+      "mode": "OBJECT"
+    },
+    "Mask": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 8.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [8.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Mask"],
+      "mode": "OBJECT"
+    },
+    "Plain": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Plain"],
+      "mode": "OBJECT"
+    },
+    "Reuse": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 10.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [10.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Reuse"],
+      "mode": "OBJECT"
+    },
+    "Spec": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 2.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [2.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Spec"],
+      "mode": "OBJECT"
+    },
+    "Tex": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 6.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [6.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Tex"],
+      "mode": "OBJECT"
+    },
+    "Unlit": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 14.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [14.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Unlit"],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {
+    "Empty": {
+      "nodes": {
+        "Material Output": {
+          "bl_idname": "ShaderNodeOutputMaterial",
+          "inputs": {
+            "Displacement": [0.0, 0.0, 0.0],
+            "Thickness": 0.0
+          },
+          "mute": false
+        },
+        "Principled BSDF": {
+          "bl_idname": "ShaderNodeBsdfPrincipled",
+          "inputs": {
+            "Alpha": 1.0,
+            "Anisotropic": 0.0,
+            "Anisotropic Rotation": 0.0,
+            "Base Color": [1.0, 1.0, 1.0, 1.0],
+            "Coat IOR": 1.5,
+            "Coat Normal": [0.0, 0.0, 0.0],
+            "Coat Roughness": 0.03,
+            "Coat Tint": [1.0, 1.0, 1.0, 1.0],
+            "Coat Weight": 0.0,
+            "Diffuse Roughness": 0.0,
+            "Emission Color": [1.0, 1.0, 1.0, 1.0],
+            "Emission Strength": 0.0,
+            "IOR": 1000.0,
+            "Metallic": 0.0,
+            "Normal": [0.0, 0.0, 0.0],
+            "Roughness": 0.0,
+            "Sheen Roughness": 0.5,
+            "Sheen Tint": [1.0, 1.0, 1.0, 1.0],
+            "Sheen Weight": 0.0,
+            "Specular IOR Level": 0.5,
+            "Specular Tint": [1.0, 1.0, 1.0, 1.0],
+            "Subsurface Anisotropy": 0.0,
+            "Subsurface IOR": 1.4,
+            "Subsurface Radius": [1.0, 0.2, 0.1],
+            "Subsurface Scale": 0.005,
+            "Subsurface Weight": 0.0,
+            "Tangent": [0.0, 0.0, 0.0],
+            "Thin Film IOR": 1.33,
+            "Thin Film Thickness": 0.0,
+            "Thin Wall": false,
+            "Transmission Weight": 0.0,
+            "Weight": 0.0
+          },
+          "mute": false
+        }
+      },
+      "links": [
+        ["Principled BSDF", "BSDF", "Material Output", "Surface"]
+      ]
+    },
+    "Gloss": {
+      "nodes": {
+        "Image Texture": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Image Texture.001": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Material Output": {
+          "bl_idname": "ShaderNodeOutputMaterial",
+          "inputs": {
+            "Displacement": [0.0, 0.0, 0.0],
+            "Thickness": 0.0
+          },
+          "mute": false
+        },
+        "Principled BSDF": {
+          "bl_idname": "ShaderNodeBsdfPrincipled",
+          "inputs": {
+            "Alpha": 1.0,
+            "Anisotropic": 0.0,
+            "Anisotropic Rotation": 0.0,
+            "Base Color": [1.0, 1.0, 1.0, 1.0],
+            "Coat IOR": 1.5,
+            "Coat Normal": [0.0, 0.0, 0.0],
+            "Coat Roughness": 0.03,
+            "Coat Tint": [1.0, 1.0, 1.0, 1.0],
+            "Coat Weight": 0.0,
+            "Diffuse Roughness": 0.0,
+            "Emission Color": [1.0, 1.0, 1.0, 1.0],
+            "Emission Strength": 0.0,
+            "IOR": 1000.0,
+            "Metallic": 0.0,
+            "Normal": [0.0, 0.0, 0.0],
+            "Roughness": 0.5,
+            "Sheen Roughness": 0.5,
+            "Sheen Tint": [1.0, 1.0, 1.0, 1.0],
+            "Sheen Weight": 0.0,
+            "Specular IOR Level": 0.5,
+            "Specular Tint": [1.0, 1.0, 1.0, 1.0],
+            "Subsurface Anisotropy": 0.0,
+            "Subsurface IOR": 1.4,
+            "Subsurface Radius": [1.0, 0.2, 0.1],
+            "Subsurface Scale": 0.005,
+            "Subsurface Weight": 0.0,
+            "Tangent": [0.0, 0.0, 0.0],
+            "Thin Film IOR": 1.33,
+            "Thin Film Thickness": 0.0,
+            "Thin Wall": false,
+            "Transmission Weight": 0.0,
+            "Weight": 0.0
+          },
+          "mute": false
+        }
+      },
+      "links": [
+        ["Image Texture", "Color", "Principled BSDF", "Specular Tint"],
+        ["Image Texture.001", "Alpha", "Principled BSDF", "Roughness"],
+        ["Principled BSDF", "BSDF", "Material Output", "Surface"]
+      ]
+    },
+    "Mask": {
+      "nodes": {
+        "Frame": {
+          "bl_idname": "NodeFrame",
+          "inputs": {},
+          "mute": false
+        },
+        "Group": {
+          "bl_idname": "ShaderNodeGroup",
+          "inputs": {
+            "Socket_0": 0.0,
+            "Socket_1": 0.0,
+            "Socket_2": 0.0,
+            "Socket_3": 0.0,
+            "Socket_4": 100.0
+          },
+          "mute": false
+        },
+        "Image Texture": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Image Texture.001": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Image Texture.002": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Image Texture.003": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Image Texture.004": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Mapping": {
+          "bl_idname": "ShaderNodeMapping",
+          "inputs": {
+            "Location": [0.25, -1.5, 0.0],
+            "Rotation": [0.0, 0.0, 0.0],
+            "Scale": [2.0, 2.0, 1.0],
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Material Output": {
+          "bl_idname": "ShaderNodeOutputMaterial",
+          "inputs": {
+            "Displacement": [0.0, 0.0, 0.0],
+            "Thickness": 0.0
+          },
+          "mute": false
+        },
+        "Math": {
+          "bl_idname": "ShaderNodeMath",
+          "inputs": {
+            "Value": 1.0,
+            "Value_001": 0.5,
+            "Value_002": 0.5
+          },
+          "mute": false
+        },
+        "Math.001": {
+          "bl_idname": "ShaderNodeMath",
+          "inputs": {
+            "Value": 0.5,
+            "Value_001": 0.3,
+            "Value_002": 0.5
+          },
+          "mute": false
+        },
+        "Math.002": {
+          "bl_idname": "ShaderNodeMath",
+          "inputs": {
+            "Value": 0.5,
+            "Value_001": 0.9,
+            "Value_002": 0.5
+          },
+          "mute": false
+        },
+        "Mix": {
+          "bl_idname": "ShaderNodeMix",
+          "inputs": {
+            "A_Color": [0.5, 0.5, 0.5, 1.0],
+            "A_Float": 0.0,
+            "A_Rotation": [0.0, 0.0, 0.0],
+            "A_Vector": [0.0, 0.0, 0.0],
+            "B_Color": [1.0, 0.5, 0.25, 1.0],
+            "B_Float": 0.0,
+            "B_Rotation": [0.0, 0.0, 0.0],
+            "B_Vector": [0.0, 0.0, 0.0],
+            "Factor_Float": 1.0,
+            "Factor_Vector": [0.5, 0.5, 0.5]
+          },
+          "mute": false
+        },
+        "Mix.001": {
+          "bl_idname": "ShaderNodeMix",
+          "inputs": {
+            "A_Color": [1.0, 1.0, 1.0, 1.0],
+            "A_Float": 0.0,
+            "A_Rotation": [0.0, 0.0, 0.0],
+            "A_Vector": [0.0, 0.0, 0.0],
+            "B_Color": [0.5, 0.5, 0.5, 1.0],
+            "B_Float": 0.0,
+            "B_Rotation": [0.0, 0.0, 0.0],
+            "B_Vector": [0.0, 0.0, 0.0],
+            "Factor_Float": 0.8,
+            "Factor_Vector": [0.5, 0.5, 0.5]
+          },
+          "mute": false
+        },
+        "Normal Map": {
+          "bl_idname": "ShaderNodeNormalMap",
+          "inputs": {
+            "Color": [0.5, 0.5, 1.0, 1.0],
+            "Strength": 0.5
+          },
+          "mute": false
+        },
+        "Principled BSDF": {
+          "bl_idname": "ShaderNodeBsdfPrincipled",
+          "inputs": {
+            "Alpha": 1.0,
+            "Anisotropic": 0.0,
+            "Anisotropic Rotation": 0.0,
+            "Base Color": [0.8, 0.8, 0.8, 1.0],
+            "Coat IOR": 1.5,
+            "Coat Normal": [0.0, 0.0, 0.0],
+            "Coat Roughness": 0.03,
+            "Coat Tint": [1.0, 1.0, 1.0, 1.0],
+            "Coat Weight": 0.0,
+            "Diffuse Roughness": 0.0,
+            "Emission Color": [1.0, 1.0, 1.0, 1.0],
+            "Emission Strength": 1.0,
+            "IOR": 1000.0,
+            "Metallic": 0.0,
+            "Normal": [0.0, 0.0, 0.0],
+            "Roughness": 1.0,
+            "Sheen Roughness": 0.5,
+            "Sheen Tint": [1.0, 1.0, 1.0, 1.0],
+            "Sheen Weight": 0.0,
+            "Specular IOR Level": 0.5,
+            "Specular Tint": [1.0, 1.0, 1.0, 1.0],
+            "Subsurface Anisotropy": 0.0,
+            "Subsurface IOR": 1.4,
+            "Subsurface Radius": [1.0, 0.2, 0.1],
+            "Subsurface Scale": 0.005,
+            "Subsurface Weight": 0.0,
+            "Tangent": [0.0, 0.0, 0.0],
+            "Thin Film IOR": 1.33,
+            "Thin Film Thickness": 0.0,
+            "Thin Wall": false,
+            "Transmission Weight": 0.0,
+            "Weight": 0.0
+          },
+          "mute": false
+        },
+        "Separate Color": {
+          "bl_idname": "ShaderNodeSeparateColor",
+          "inputs": {
+            "Color": [0.8, 0.8, 0.8, 1.0]
+          },
+          "mute": false
+        },
+        "UV Map": {
+          "bl_idname": "ShaderNodeUVMap",
+          "inputs": {},
+          "mute": false
+        }
+      },
+      "links": [
+        ["Image Texture", "Alpha", "Math.002", "Value"],
+        ["Image Texture", "Color", "Mix", "A_Color"],
+        ["Image Texture.001", "Color", "Principled BSDF", "Emission Color"],
+        ["Image Texture.002", "Color", "Normal Map", "Color"],
+        ["Image Texture.003", "Color", "Separate Color", "Color"],
+        ["Image Texture.004", "Color", "Principled BSDF", "Specular Tint"],
+        ["Mapping", "Vector", "Image Texture", "Vector"],
+        ["Math", "Value", "Principled BSDF", "Alpha"],
+        ["Math.001", "Value", "Math", "Value_001"],
+        ["Math.002", "Value", "Math.001", "Value"],
+        ["Mix", "Result_Color", "Principled BSDF", "Base Color"],
+        ["Mix.001", "Result_Color", "Group", "Socket_0"],
+        ["Normal Map", "Normal", "Principled BSDF", "Normal"],
+        ["Principled BSDF", "BSDF", "Material Output", "Surface"],
+        ["Separate Color", "Red", "Mix.001", "B_Color"],
+        ["UV Map", "UV", "Mapping", "Vector"]
+      ]
+    },
+    "Plain": {
+      "nodes": {
+        "Material Output": {
+          "bl_idname": "ShaderNodeOutputMaterial",
+          "inputs": {
+            "Displacement": [0.0, 0.0, 0.0],
+            "Thickness": 0.0
+          },
+          "mute": false
+        },
+        "Principled BSDF": {
+          "bl_idname": "ShaderNodeBsdfPrincipled",
+          "inputs": {
+            "Alpha": 1.0,
+            "Anisotropic": 0.0,
+            "Anisotropic Rotation": 0.0,
+            "Base Color": [0.2, 0.6, 0.9, 1.0],
+            "Coat IOR": 1.5,
+            "Coat Normal": [0.0, 0.0, 0.0],
+            "Coat Roughness": 0.03,
+            "Coat Tint": [1.0, 1.0, 1.0, 1.0],
+            "Coat Weight": 0.0,
+            "Diffuse Roughness": 0.0,
+            "Emission Color": [1.0, 1.0, 1.0, 1.0],
+            "Emission Strength": 0.0,
+            "IOR": 1000.0,
+            "Metallic": 0.0,
+            "Normal": [0.0, 0.0, 0.0],
+            "Roughness": 0.7,
+            "Sheen Roughness": 0.5,
+            "Sheen Tint": [1.0, 1.0, 1.0, 1.0],
+            "Sheen Weight": 0.0,
+            "Specular IOR Level": 0.5,
+            "Specular Tint": [1.0, 1.0, 1.0, 1.0],
+            "Subsurface Anisotropy": 0.0,
+            "Subsurface IOR": 1.4,
+            "Subsurface Radius": [1.0, 0.2, 0.1],
+            "Subsurface Scale": 0.005,
+            "Subsurface Weight": 0.0,
+            "Tangent": [0.0, 0.0, 0.0],
+            "Thin Film IOR": 1.33,
+            "Thin Film Thickness": 0.0,
+            "Thin Wall": false,
+            "Transmission Weight": 0.0,
+            "Weight": 0.0
+          },
+          "mute": false
+        }
+      },
+      "links": [
+        ["Principled BSDF", "BSDF", "Material Output", "Surface"]
+      ]
+    },
+    "Reuse": {
+      "nodes": {
+        "Image Texture": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Image Texture.001": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Material Output": {
+          "bl_idname": "ShaderNodeOutputMaterial",
+          "inputs": {
+            "Displacement": [0.0, 0.0, 0.0],
+            "Thickness": 0.0
+          },
+          "mute": false
+        },
+        "Principled BSDF": {
+          "bl_idname": "ShaderNodeBsdfPrincipled",
+          "inputs": {
+            "Alpha": 1.0,
+            "Anisotropic": 0.0,
+            "Anisotropic Rotation": 0.0,
+            "Base Color": [1.0, 1.0, 1.0, 1.0],
+            "Coat IOR": 1.5,
+            "Coat Normal": [0.0, 0.0, 0.0],
+            "Coat Roughness": 0.03,
+            "Coat Tint": [1.0, 1.0, 1.0, 1.0],
+            "Coat Weight": 0.0,
+            "Diffuse Roughness": 0.0,
+            "Emission Color": [1.0, 1.0, 1.0, 1.0],
+            "Emission Strength": 0.0,
+            "IOR": 1000.0,
+            "Metallic": 0.0,
+            "Normal": [0.0, 0.0, 0.0],
+            "Roughness": 0.5,
+            "Sheen Roughness": 0.5,
+            "Sheen Tint": [1.0, 1.0, 1.0, 1.0],
+            "Sheen Weight": 0.0,
+            "Specular IOR Level": 0.5,
+            "Specular Tint": [1.0, 1.0, 1.0, 1.0],
+            "Subsurface Anisotropy": 0.0,
+            "Subsurface IOR": 1.4,
+            "Subsurface Radius": [1.0, 0.2, 0.1],
+            "Subsurface Scale": 0.005,
+            "Subsurface Weight": 0.0,
+            "Tangent": [0.0, 0.0, 0.0],
+            "Thin Film IOR": 1.33,
+            "Thin Film Thickness": 0.0,
+            "Thin Wall": false,
+            "Transmission Weight": 0.0,
+            "Weight": 0.0
+          },
+          "mute": false
+        }
+      },
+      "links": [
+        ["Image Texture", "Color", "Principled BSDF", "Specular Tint"],
+        ["Image Texture.001", "Alpha", "Principled BSDF", "Roughness"],
+        ["Principled BSDF", "BSDF", "Material Output", "Surface"]
+      ]
+    },
+    "Spec": {
+      "nodes": {
+        "Material Output": {
+          "bl_idname": "ShaderNodeOutputMaterial",
+          "inputs": {
+            "Displacement": [0.0, 0.0, 0.0],
+            "Thickness": 0.0
+          },
+          "mute": false
+        },
+        "Principled BSDF": {
+          "bl_idname": "ShaderNodeBsdfPrincipled",
+          "inputs": {
+            "Alpha": 0.5,
+            "Anisotropic": 0.0,
+            "Anisotropic Rotation": 0.0,
+            "Base Color": [0.5, 0.5, 0.5, 1.0],
+            "Coat IOR": 1.5,
+            "Coat Normal": [0.0, 0.0, 0.0],
+            "Coat Roughness": 0.03,
+            "Coat Tint": [1.0, 1.0, 1.0, 1.0],
+            "Coat Weight": 0.0,
+            "Diffuse Roughness": 0.0,
+            "Emission Color": [0.1, 0.0, 0.0, 1.0],
+            "Emission Strength": 1.0,
+            "IOR": 1000.0,
+            "Metallic": 0.0,
+            "Normal": [0.0, 0.0, 0.0],
+            "Roughness": 0.2,
+            "Sheen Roughness": 0.5,
+            "Sheen Tint": [1.0, 1.0, 1.0, 1.0],
+            "Sheen Weight": 0.0,
+            "Specular IOR Level": 0.5,
+            "Specular Tint": [0.1, 0.2, 0.3, 1.0],
+            "Subsurface Anisotropy": 0.0,
+            "Subsurface IOR": 1.4,
+            "Subsurface Radius": [1.0, 0.2, 0.1],
+            "Subsurface Scale": 0.005,
+            "Subsurface Weight": 0.0,
+            "Tangent": [0.0, 0.0, 0.0],
+            "Thin Film IOR": 1.33,
+            "Thin Film Thickness": 0.0,
+            "Thin Wall": false,
+            "Transmission Weight": 0.0,
+            "Weight": 0.0
+          },
+          "mute": false
+        }
+      },
+      "links": [
+        ["Principled BSDF", "BSDF", "Material Output", "Surface"]
+      ]
+    },
+    "Tex": {
+      "nodes": {
+        "Image Texture": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Image Texture.001": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Image Texture.002": {
+          "bl_idname": "ShaderNodeTexImage",
+          "inputs": {
+            "Vector": [0.0, 0.0, 0.0]
+          },
+          "mute": false
+        },
+        "Material Output": {
+          "bl_idname": "ShaderNodeOutputMaterial",
+          "inputs": {
+            "Displacement": [0.0, 0.0, 0.0],
+            "Thickness": 0.0
+          },
+          "mute": false
+        },
+        "Mix": {
+          "bl_idname": "ShaderNodeMix",
+          "inputs": {
+            "A_Color": [0.5, 0.5, 0.5, 1.0],
+            "A_Float": 0.0,
+            "A_Rotation": [0.0, 0.0, 0.0],
+            "A_Vector": [0.0, 0.0, 0.0],
+            "B_Color": [0.5, 1.0, 1.0, 1.0],
+            "B_Float": 0.0,
+            "B_Rotation": [0.0, 0.0, 0.0],
+            "B_Vector": [0.0, 0.0, 0.0],
+            "Factor_Float": 1.0,
+            "Factor_Vector": [0.5, 0.5, 0.5]
+          },
+          "mute": false
+        },
+        "Principled BSDF": {
+          "bl_idname": "ShaderNodeBsdfPrincipled",
+          "inputs": {
+            "Alpha": 1.0,
+            "Anisotropic": 0.0,
+            "Anisotropic Rotation": 0.0,
+            "Base Color": [0.8, 0.8, 0.8, 1.0],
+            "Coat IOR": 1.5,
+            "Coat Normal": [0.0, 0.0, 0.0],
+            "Coat Roughness": 0.03,
+            "Coat Tint": [1.0, 1.0, 1.0, 1.0],
+            "Coat Weight": 0.0,
+            "Diffuse Roughness": 0.0,
+            "Emission Color": [1.0, 1.0, 1.0, 1.0],
+            "Emission Strength": 0.0,
+            "IOR": 1000.0,
+            "Metallic": 0.0,
+            "Normal": [0.0, 0.0, 0.0],
+            "Roughness": 0.5,
+            "Sheen Roughness": 0.5,
+            "Sheen Tint": [1.0, 1.0, 1.0, 1.0],
+            "Sheen Weight": 0.0,
+            "Specular IOR Level": 0.5,
+            "Specular Tint": [1.0, 1.0, 1.0, 1.0],
+            "Subsurface Anisotropy": 0.0,
+            "Subsurface IOR": 1.4,
+            "Subsurface Radius": [1.0, 0.2, 0.1],
+            "Subsurface Scale": 0.005,
+            "Subsurface Weight": 0.0,
+            "Tangent": [0.0, 0.0, 0.0],
+            "Thin Film IOR": 1.33,
+            "Thin Film Thickness": 0.0,
+            "Thin Wall": false,
+            "Transmission Weight": 0.0,
+            "Weight": 0.0
+          },
+          "mute": false
+        }
+      },
+      "links": [
+        ["Image Texture", "Color", "Principled BSDF", "Base Color"],
+        ["Image Texture.001", "Color", "Mix", "A_Color"],
+        ["Image Texture.002", "Alpha", "Principled BSDF", "Roughness"],
+        ["Mix", "Result_Color", "Principled BSDF", "Specular Tint"],
+        ["Principled BSDF", "BSDF", "Material Output", "Surface"]
+      ]
+    },
+    "Unlit": {
+      "nodes": {
+        "Emission": {
+          "bl_idname": "ShaderNodeEmission",
+          "inputs": {
+            "Color": [0.9, 0.1, 0.1, 1.0],
+            "Strength": 1.0,
+            "Weight": 0.0
+          },
+          "mute": false
+        },
+        "Light Path": {
+          "bl_idname": "ShaderNodeLightPath",
+          "inputs": {},
+          "mute": false
+        },
+        "Material Output": {
+          "bl_idname": "ShaderNodeOutputMaterial",
+          "inputs": {
+            "Displacement": [0.0, 0.0, 0.0],
+            "Thickness": 0.0
+          },
+          "mute": false
+        },
+        "Mix Shader": {
+          "bl_idname": "ShaderNodeMixShader",
+          "inputs": {
+            "Fac": 0.5
+          },
+          "mute": false
+        },
+        "Transparent BSDF": {
+          "bl_idname": "ShaderNodeBsdfTransparent",
+          "inputs": {
+            "Color": [1.0, 1.0, 1.0, 1.0],
+            "Weight": 0.0
+          },
+          "mute": false
+        }
+      },
+      "links": [
+        ["Emission", "Emission", "Mix Shader", "Shader_001"],
+        ["Light Path", "Is Camera Ray", "Mix Shader", "Fac"],
+        ["Mix Shader", "Shader", "Material Output", "Surface"],
+        ["Transparent BSDF", "BSDF", "Mix Shader", "Shader"]
+      ]
+    }
+  },
+  "actions": {},
+  "context": {
+    "active": "Plain",
+    "selected": ["Plain", "Spec", "Empty", "Tex", "Mask", "Reuse", "Gloss", "Unlit"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {
+    "out/rough.png": {
+      "kind": "image",
+      "width": 2,
+      "height": 2,
+      "pixels": {
+        "$file": "spec_gloss.out_rough.png"
+      }
+    }
+  }
+}

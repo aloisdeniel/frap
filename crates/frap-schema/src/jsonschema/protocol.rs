@@ -194,6 +194,13 @@ struct Context {
     /// Edit mode only: `[vertex, edge, face]` flags.
     #[serde(default)]
     select_mode: Option<J>,
+    /// `--verbosity full`: the active object's evaluated `{vertices, edges, faces}`.
+    #[serde(default)]
+    evaluated: Option<J>,
+    /// `--verbosity full`, active object with modifiers: `[{name, status, message?}]`,
+    /// status `EVALUATED`, `SKIPPED`, `PASSED_THROUGH`, `DISABLED` or `ERROR`.
+    #[serde(default)]
+    modifier_status: Option<Vec<J>>,
 }
 
 /// frap help attached to a response (`NO_OP_DEFAULT`, `ANGLE_LIKELY_DEGREES`, …).

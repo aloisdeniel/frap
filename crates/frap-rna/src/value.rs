@@ -508,6 +508,20 @@ fn enum_items_repr(items: &[EnumItem]) -> String {
         .join(", ")
 }
 
+/// `did_you_mean` of an unknown enum item: the closest identifiers, compared upper-cased
+/// (`'angel'` → `ANGLE`, `'SUBSURFACE'` → `SUBSURF`).
+fn enum_did_you_mean(s: &str, items: &[EnumItem]) -> serde_json::Value {
+    let upper = s.to_uppercase();
+    crate::error::suggest(
+        &upper,
+        items.iter().map(|i| i.identifier).filter(|i| !i.is_empty()),
+    )
+    .into_iter()
+    .map(serde_json::Value::from)
+    .collect::<Vec<_>>()
+    .into()
+}
+
 fn enum_valid_detail(items: &[EnumItem]) -> serde_json::Value {
     items
         .iter()
@@ -724,6 +738,8 @@ fn coerce_inner(def: &PropDef, input: Input, cx: &CoerceCx) -> Result<Coerced, R
                     format!("enum \"{s}\" not found in ({})", enum_items_repr(items)),
                 );
                 e.detail.insert("valid".into(), enum_valid_detail(items));
+                e.detail
+                    .insert("did_you_mean".into(), enum_did_you_mean(&s, items));
                 Err(e)
             }
         }
@@ -857,6 +873,8 @@ fn coerce_enum_flag(
                 format!(": '{s}' not found in ({})", enum_items_repr(items)),
             );
             e.detail.insert("valid".into(), enum_valid_detail(items));
+            e.detail
+                .insert("did_you_mean".into(), enum_did_you_mean(&s, items));
             return Err(e);
         }
         set.insert(s);

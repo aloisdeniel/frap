@@ -11,6 +11,7 @@
 //! canonical pointer again from its root (`access`, `write`).
 
 mod access;
+pub(crate) use access::evaluated_for_read;
 pub mod compat;
 mod context;
 mod write;
@@ -207,7 +208,7 @@ impl FuncTarget {
     /// Python repr of the owner, plus the function name (`bpy.data.objects['Cube'].select_set`).
     pub fn repr(&self, names: &dyn IdNames) -> String {
         let owner = match self {
-            FuncTarget::Rna { this, .. } | FuncTarget::Struct { this, .. } => this.repr(names),
+            FuncTarget::Rna { this, .. } | FuncTarget::Struct { this, .. } => ptr_repr(this, names),
             FuncTarget::Coll { coll, .. } => coll_repr(coll, names),
             FuncTarget::Math { recv, prop, .. } => match prop {
                 Some(p) => ArrayKind::of(p).py_name().to_owned(),
@@ -502,6 +503,15 @@ pub fn step(host: &dyn HostRead, cur: Target, seg: &PathSeg) -> Result<Target, F
         && let Some(t) = evaluated_data(host, p, a.as_str())
     {
         return Ok(t);
+    }
+    // `Depsgraph` (the view layer's `depsgraph`, which frap does not bind as a struct) has no
+    // bound property yet: name the property asked for, not the `ViewLayer.depsgraph` the
+    // walk would fail on (its functions answer their own NotImplementedError).
+    if let (Target::Struct(p), PathSeg::Attr(a)) = (&cur, seg)
+        && std::ptr::eq(p.srna, &frap_spec_rna::DEPSGRAPH)
+        && let Some(prop) = p.srna.find_prop(a.as_str())
+    {
+        return Err(access::not_bound(p.srna, prop));
     }
     let id_root = match &cur {
         Target::Struct(p) if p.srna.is_id && p.path.is_empty() => Some(p.root),
@@ -1553,11 +1563,35 @@ pub fn element(prop: &PropDef, whole: Value, elem: Elem) -> Result<Value, FrapEr
 
 // ------------------------------------------------------------------ repr
 
+/// The repr of a pointer as responses show it. A pointer into an object's evaluated mesh
+/// (`ob.evaluated_get(dg).data`, `ob.evaluated_get(dg).to_mesh()`: rooted at the object with
+/// path `data…` and detached) names the evaluated expression,
+/// `bpy.data.objects['X'].evaluated_get(bpy.context.evaluated_depsgraph_get()).data…`, so an
+/// agent following it reads the evaluated data, not the original mesh (Blender's repr names
+/// `bpy.data.meshes['X']`, the original, for both; deviations.md §2).
+pub fn ptr_repr(p: &RnaPtr, names: &dyn IdNames) -> String {
+    let full = p.repr(names);
+    if p.detached.is_none() || !matches!(p.path.first(), Some(Seg::Prop("data"))) {
+        return full;
+    }
+    let Root::Id(id) = p.root else {
+        return full;
+    };
+    if id.code != frap_rna::IdCode::OB {
+        return full;
+    }
+    let root = RnaPtr::id(id, &frap_spec_rna::OBJECT).repr(names);
+    match full.strip_prefix(root.as_str()) {
+        Some(rest) => format!("{root}.evaluated_get(bpy.context.evaluated_depsgraph_get()){rest}"),
+        None => full,
+    }
+}
+
 fn coll_repr(c: &CollPlace, names: &dyn IdNames) -> String {
     let base = match (c.ptr.root, c.ptr.path.is_empty()) {
         (Root::Data, true) => format!("bpy.data.{}", c.prop.identifier),
         (Root::Context, true) => format!("bpy.context.{}", c.prop.identifier),
-        _ => format!("{}.{}", c.ptr.repr(names), c.prop.identifier),
+        _ => format!("{}.{}", ptr_repr(&c.ptr, names), c.prop.identifier),
     };
     match c.range {
         Some((a, b)) => format!("{base}[{a}:{b}]"),
@@ -1569,7 +1603,7 @@ fn prop_repr(p: &PropPlace, names: &dyn IdNames) -> String {
     let base = match (p.ptr.root, p.ptr.path.is_empty()) {
         (Root::Data, true) => format!("bpy.data.{}", p.prop.identifier),
         (Root::Context, true) => format!("bpy.context.{}", p.prop.identifier),
-        _ => format!("{}.{}", p.ptr.repr(names), p.prop.identifier),
+        _ => format!("{}.{}", ptr_repr(&p.ptr, names), p.prop.identifier),
     };
     let fmt_opt = |x: Option<i64>| x.map(|v| v.to_string()).unwrap_or_default();
     match p.elem {
@@ -1587,7 +1621,7 @@ pub fn repr(t: &Target, names: &dyn IdNames) -> Option<String> {
     Some(match t {
         Target::Data => "bpy.data".into(),
         Target::Context => "bpy.context".into(),
-        Target::Struct(p) => p.repr(names),
+        Target::Struct(p) => ptr_repr(p, names),
         Target::Prop(p) => prop_repr(p, names),
         Target::Coll(c) => coll_repr(c, names),
         Target::Func(f) => f.repr(names),
@@ -1662,7 +1696,7 @@ fn struct_json(p: &RnaPtr, names: &dyn IdNames) -> J {
     if matches!(p.root, Root::Id(_)) && p.path.is_empty() {
         json!({"$ref": p.repr(names)})
     } else {
-        json!({"$ptr": p.repr(names), "type": p.srna.identifier})
+        json!({"$ptr": ptr_repr(p, names), "type": p.srna.identifier})
     }
 }
 

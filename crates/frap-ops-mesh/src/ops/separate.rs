@@ -747,7 +747,12 @@ fn exec(cx: &mut OpCtx, p: mesh::Separate) -> OpResult {
                     .cloned()
                     .ok_or_else(|| OpError::Runtime("mesh no longer exists".into()))?;
                 let new = bm.to_mesh(&template, &ToMeshParams::default());
-                *cx.mesh_mut(me)? = new;
+                // Keep the generation `mesh_mut` just bumped (`new` carries the template's):
+                // the evaluated-object cache keys on it.
+                let dst = cx.mesh_mut(me)?;
+                let generation = dst.header.generation;
+                *dst = new;
+                dst.header.generation = generation;
             }
             changed_multi |= changed;
         }
