@@ -1634,6 +1634,7 @@ name = "frap-schema"
 version = "0.1.0"
 dependencies = [
  "frap-math",
+ "frap-modifiers",
  "frap-nodes",
  "frap-op",
  "frap-ops-all",

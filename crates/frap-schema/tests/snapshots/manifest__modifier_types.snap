@@ -34,14 +34,14 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "NORMAL_EDIT",
     "name": "Normal Edit",
     "struct": "NormalEditModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "WEIGHTED_NORMAL",
     "name": "Weighted Normal",
     "struct": "WeightedNormalModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
@@ -125,63 +125,63 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "ARRAY",
     "name": "Array",
     "struct": "ArrayModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "BEVEL",
     "name": "Bevel",
     "struct": "BevelModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "BOOLEAN",
     "name": "Boolean",
     "struct": "BooleanModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "BUILD",
     "name": "Build",
     "struct": "BuildModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "DECIMATE",
     "name": "Decimate",
     "struct": "DecimateModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "EDGE_SPLIT",
     "name": "Edge Split",
     "struct": "EdgeSplitModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "NODES",
     "name": "Geometry Nodes",
     "struct": "NodesModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "MASK",
     "name": "Mask",
     "struct": "MaskModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "MIRROR",
     "name": "Mirror",
     "struct": "MirrorModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
@@ -209,7 +209,7 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "SCREW",
     "name": "Screw",
     "struct": "ScrewModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
@@ -223,21 +223,21 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "SOLIDIFY",
     "name": "Solidify",
     "struct": "SolidifyModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "SUBSURF",
     "name": "Subdivision Surface",
     "struct": "SubsurfModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "TRIANGULATE",
     "name": "Triangulate",
     "struct": "TriangulateModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
@@ -251,14 +251,14 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "WELD",
     "name": "Weld",
     "struct": "WeldModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "WIREFRAME",
     "name": "Wireframe",
     "struct": "WireframeModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
@@ -342,7 +342,7 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "CAST",
     "name": "Cast",
     "struct": "CastModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
@@ -356,7 +356,7 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "DISPLACE",
     "name": "Displace",
     "struct": "DisplaceModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
@@ -398,14 +398,14 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "SIMPLE_DEFORM",
     "name": "Simple Deform",
     "struct": "SimpleDeformModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
     "identifier": "SMOOTH",
     "name": "Smooth",
     "struct": "SmoothModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {
@@ -419,7 +419,7 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "LAPLACIANSMOOTH",
     "name": "Smooth Laplacian",
     "struct": "LaplacianSmoothModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M4"
   },
   {

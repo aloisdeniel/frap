@@ -2,7 +2,8 @@
 //! Workbench render goldens (WP 1.24, WP 2.3; ARCHITECTURE §20.1 "Render", §20.4
 //! `image_ssim`).
 //!
-//! Every case of `tests/golden/cases/render/m1/` and `…/render/m2/` with a
+//! Every case of `tests/golden/cases/render/m1/`, `…/render/m2/` and `…/modifiers/integration/`
+//! (WP 4.7: renders show modifiers) with a
 //! `# render-golden: image=<path> [min_ssim=<x>]` line is a render golden. Its render statements
 //! are `#@render` lines: comments for the generic golden suite (`cargo test -p frap-golden`,
 //! which compares the scene the case builds with Blender's and must run without a GPU),
@@ -41,7 +42,7 @@ use frap_golden::compare::image_ssim::{
 use frap_session::{Session, SessionOptions};
 
 /// Case areas of the render goldens.
-const AREAS: [&str; 2] = ["render/m1", "render/m2"];
+const AREAS: [&str; 3] = ["render/m1", "render/m2", "modifiers/integration"];
 /// Bless switch.
 const BLESS_ENV: &str = "FRAP_RENDER_BLESS";
 /// Directive naming the rendered image (case-relative output path).

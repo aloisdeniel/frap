@@ -277,6 +277,8 @@ pub fn context_members() -> J {
 /// evaluator are data only: the stack passes the mesh through with a WARNING (§7.2).
 pub fn modifier_types() -> J {
     use frap_scene::generated::modifier_settings::ModifierType;
+    // The types registered in `frap_modifiers::MODIFIER_TYPES` (WP 4.7, M34W1-10).
+    let evaluated = frap_modifiers::registry::evaluated_types();
     J::Array(
         ModifierType::ALL
             .iter()
@@ -286,8 +288,7 @@ pub fn modifier_types() -> J {
                     "identifier": t.identifier(),
                     "name": t.ui_name(),
                     "struct": row.and_then(|r| r.second),
-                    // frap-modifiers registers no evaluator before M4 (`MODIFIER_TYPES`).
-                    "evaluator": false,
+                    "evaluator": evaluated.binary_search(t).is_ok(),
                     "planned": row.map_or("OUT", |r| r.milestone),
                 })
             })
