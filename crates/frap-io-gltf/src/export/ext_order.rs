@@ -1,0 +1,346 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+//! The order of `extensionsUsed` / `extensionsRequired` (M3+M4 stabilization round 4).
+//!
+//! Ported from io_scene_gltf2 5.2.41 `blender/exp/exporter.py` (`GlTF2Exporter.__traverse`,
+//! `__traverse_property`), `blender/exp/material/materials.py` (`__gather_extensions`) and
+//! `blender/exp/export.py` (`__manage_extension_declaration`), Apache-2.0, The glTF-Blender-IO
+//! authors. The add-on declares an extension when its traversal of the gathered tree first
+//! meets it:
+//!
+//! - scenes in order, then depth first; every object's members in `dir()` order, which is
+//!   alphabetical (a node's `children` before its `extensions` and its `mesh`; a material's
+//!   `emissive_texture`, then `extensions`, then `normal_texture`, `occlusion_texture`,
+//!   `pbr_metallic_roughness`); a child-of-root object (node, mesh, material, texture) only at
+//!   its first reference;
+//! - an extension's own content (the `KHR_texture_transform` of its textures) before its name;
+//! - a material that is not unlit carries an `Extension` object for clearcoat, transmission,
+//!   emissive strength, specular, anisotropy and IOR **even when it is empty**, in
+//!   `__gather_extensions`' order; empty ones are dropped from the JSON at the end, and so are
+//!   their declarations when no material keeps them, but the declarations that stay keep the
+//!   traversal order. So two imported files whose first material is transmission and second
+//!   clearcoat declare `[clearcoat, transmission]` (verified on 5.2.4 with every import order).
+//!
+//! frap records the extensions while gathering (first-use order, [`Gather::use_extension`]);
+//! [`reorder`] then sorts the declared names by this traversal of the finished document.
+//! Approximation: every non-unlit material counts as having a Principled BSDF with unlinked
+//! Anisotropic and IOR sockets (the add-on skips specular, anisotropy and IOR otherwise), which
+//! only matters for the relative order of extensions that a later material keeps.
+//!
+//! [`Gather::use_extension`]: crate::export::gather::Gather::use_extension
+
+use std::collections::HashSet;
+
+use frap_gltf::json::{Document, Extensions, Index};
+use serde_json::Value;
+
+/// `__gather_extensions`' order for a material that is not unlit.
+const MATERIAL_EXTENSIONS: [&str; 10] = [
+    "KHR_materials_clearcoat",
+    "KHR_materials_transmission",
+    "KHR_materials_emissive_strength",
+    "KHR_materials_volume",
+    "KHR_materials_specular",
+    "KHR_materials_sheen",
+    "KHR_materials_anisotropy",
+    "KHR_materials_iridescence",
+    "KHR_materials_dispersion",
+    "KHR_materials_ior",
+];
+
+/// The ones the add-on creates (possibly empty) for every Principled material.
+const ALWAYS_CREATED: [&str; 6] = [
+    "KHR_materials_clearcoat",
+    "KHR_materials_transmission",
+    "KHR_materials_emissive_strength",
+    "KHR_materials_specular",
+    "KHR_materials_anisotropy",
+    "KHR_materials_ior",
+];
+
+const UNLIT: &str = "KHR_materials_unlit";
+
+struct Walk<'d> {
+    doc: &'d Document,
+    order: Vec<String>,
+    nodes: HashSet<Index>,
+    meshes: HashSet<Index>,
+    materials: HashSet<Index>,
+    textures: HashSet<Index>,
+}
+
+impl Walk<'_> {
+    fn declare(&mut self, name: &str) {
+        if !self.order.iter().any(|n| n == name) {
+            self.order.push(name.to_owned());
+        }
+    }
+
+    /// An `extensions` dict: each entry's content, then its name.
+    fn extensions(&mut self, e: &Extensions) {
+        for (name, v) in &e.0 {
+            self.json(v);
+            self.declare(name);
+        }
+    }
+
+    /// Extension content: nested `extensions` objects and texture references (a texture
+    /// info's `extensions` sort before its `index`).
+    fn json(&mut self, v: &Value) {
+        match v {
+            Value::Object(o) => {
+                let mut keys: Vec<&String> = o.keys().collect();
+                keys.sort();
+                for k in keys {
+                    match (k.as_str(), &o[k]) {
+                        ("extensions", Value::Object(ext)) => {
+                            for (name, inner) in ext {
+                                self.json(inner);
+                                self.declare(name);
+                            }
+                        }
+                        ("index", Value::Number(n)) => {
+                            if let Some(i) = n.as_u64() {
+                                self.texture(i as Index);
+                            }
+                        }
+                        (_, inner) => self.json(inner),
+                    }
+                }
+            }
+            Value::Array(a) => a.iter().for_each(|x| self.json(x)),
+            _ => {}
+        }
+    }
+
+    fn texture(&mut self, i: Index) {
+        if !self.textures.insert(i) {
+            return;
+        }
+        if let Some(t) = self.doc.textures.get(i as usize) {
+            self.extensions(&t.extensions);
+        }
+    }
+
+    fn texture_info(&mut self, extensions: &Extensions, index: Index) {
+        self.extensions(extensions);
+        self.texture(index);
+    }
+
+    fn node(&mut self, i: Index) {
+        if !self.nodes.insert(i) {
+            return;
+        }
+        let Some(n) = self.doc.nodes.get(i as usize) else {
+            return;
+        };
+        for &c in &n.children {
+            self.node(c);
+        }
+        self.extensions(&n.extensions);
+        if let Some(m) = n.mesh {
+            self.mesh(m);
+        }
+    }
+
+    fn mesh(&mut self, i: Index) {
+        if !self.meshes.insert(i) {
+            return;
+        }
+        let Some(m) = self.doc.meshes.get(i as usize) else {
+            return;
+        };
+        self.extensions(&m.extensions);
+        for p in &m.primitives {
+            self.extensions(&p.extensions);
+            if let Some(mat) = p.material {
+                self.material(mat);
+            }
+        }
+    }
+
+    fn material(&mut self, i: Index) {
+        if !self.materials.insert(i) {
+            return;
+        }
+        let Some(m) = self.doc.materials.get(i as usize) else {
+            return;
+        };
+        if let Some(t) = &m.emissive_texture {
+            self.texture_info(&t.extensions, t.index);
+        }
+        if m.extensions.0.contains_key(UNLIT) {
+            self.extensions(&m.extensions);
+        } else {
+            for name in MATERIAL_EXTENSIONS {
+                match m.extensions.0.get(name) {
+                    Some(v) => {
+                        self.json(v);
+                        self.declare(name);
+                    }
+                    None if ALWAYS_CREATED.contains(&name) => self.declare(name),
+                    None => {}
+                }
+            }
+            for (name, v) in &m.extensions.0 {
+                if !MATERIAL_EXTENSIONS.contains(&name.as_str()) {
+                    self.json(v);
+                    self.declare(name);
+                }
+            }
+        }
+        if let Some(t) = &m.normal_texture {
+            self.texture_info(&t.extensions, t.index);
+        }
+        if let Some(t) = &m.occlusion_texture {
+            self.texture_info(&t.extensions, t.index);
+        }
+        if let Some(pbr) = &m.pbr_metallic_roughness {
+            if let Some(t) = &pbr.base_color_texture {
+                self.texture_info(&t.extensions, t.index);
+            }
+            self.extensions(&pbr.extensions);
+            if let Some(t) = &pbr.metallic_roughness_texture {
+                self.texture_info(&t.extensions, t.index);
+            }
+        }
+    }
+}
+
+/// The add-on's traversal order of the extensions met in `doc` (see the module doc).
+fn traversal_order(doc: &Document) -> Vec<String> {
+    let mut w = Walk {
+        doc,
+        order: Vec::new(),
+        nodes: HashSet::new(),
+        meshes: HashSet::new(),
+        materials: HashSet::new(),
+        textures: HashSet::new(),
+    };
+    for s in &doc.scenes {
+        w.extensions(&s.extensions);
+        for &n in &s.nodes {
+            w.node(n);
+        }
+    }
+    // Objects no scene reaches (unused textures, other root members), then the root.
+    for i in 0..doc.materials.len() {
+        w.material(i as Index);
+    }
+    for i in 0..doc.textures.len() {
+        w.texture(i as Index);
+    }
+    w.extensions(&doc.extensions);
+    w.order
+}
+
+fn sort_by(names: &mut [String], order: &[String]) {
+    // Stable: names the traversal does not meet keep their place after the others.
+    names.sort_by_key(|n| order.iter().position(|o| o == n).unwrap_or(usize::MAX));
+}
+
+/// Puts `extensionsUsed` and `extensionsRequired` in the add-on's declaration order.
+pub fn reorder(doc: &mut Document) {
+    let order = traversal_order(doc);
+    sort_by(&mut doc.extensions_used, &order);
+    sort_by(&mut doc.extensions_required, &order);
+}
+
+#[cfg(test)]
+#[allow(clippy::field_reassign_with_default)] // documents built field by field
+mod tests {
+    use super::*;
+    use frap_gltf::json::{Material, Mesh, Node, Primitive, Scene};
+
+    fn material(name: &str, ext: &[&str]) -> Material {
+        let mut m = Material {
+            name: Some(name.into()),
+            ..Material::default()
+        };
+        for e in ext {
+            m.extensions.0.insert((*e).into(), serde_json::json!({}));
+        }
+        m
+    }
+
+    #[test]
+    fn principled_materials_declare_in_gather_order() {
+        // Transmission first in the file, clearcoat second: the first material's empty
+        // clearcoat object already declared clearcoat.
+        let mut doc = Document::default();
+        doc.materials = vec![
+            material("Frosted", &["KHR_materials_transmission"]),
+            material("Lacquer", &["KHR_materials_clearcoat"]),
+            material("Velvet", &["KHR_materials_sheen"]),
+        ];
+        doc.meshes = (0..3)
+            .map(|i| Mesh {
+                primitives: vec![Primitive {
+                    material: Some(i),
+                    ..Primitive::default()
+                }],
+                ..Mesh::default()
+            })
+            .collect();
+        doc.nodes = (0..3)
+            .map(|i| Node {
+                mesh: Some(i),
+                ..Node::default()
+            })
+            .collect();
+        doc.scenes = vec![Scene {
+            nodes: vec![2, 0, 1],
+            ..Scene::default()
+        }];
+        doc.extensions_used = vec![
+            "KHR_materials_sheen".into(),
+            "KHR_materials_transmission".into(),
+            "KHR_materials_clearcoat".into(),
+        ];
+        reorder(&mut doc);
+        assert_eq!(
+            doc.extensions_used,
+            [
+                "KHR_materials_clearcoat",
+                "KHR_materials_transmission",
+                "KHR_materials_sheen"
+            ]
+        );
+    }
+
+    #[test]
+    fn unlit_and_children_first() {
+        let mut doc = Document::default();
+        doc.materials = vec![
+            material("Flat", &[UNLIT]),
+            material("Lacquer", &["KHR_materials_clearcoat"]),
+        ];
+        doc.meshes = (0..2)
+            .map(|i| Mesh {
+                primitives: vec![Primitive {
+                    material: Some(i),
+                    ..Primitive::default()
+                }],
+                ..Mesh::default()
+            })
+            .collect();
+        // Node 0 (clearcoat) is the parent of node 1 (unlit): the child is traversed first.
+        doc.nodes = vec![
+            Node {
+                mesh: Some(1),
+                children: vec![1],
+                ..Node::default()
+            },
+            Node {
+                mesh: Some(0),
+                ..Node::default()
+            },
+        ];
+        doc.scenes = vec![Scene {
+            nodes: vec![0],
+            ..Scene::default()
+        }];
+        doc.extensions_used = vec!["KHR_materials_clearcoat".into(), UNLIT.into()];
+        reorder(&mut doc);
+        assert_eq!(doc.extensions_used, [UNLIT, "KHR_materials_clearcoat"]);
+    }
+}

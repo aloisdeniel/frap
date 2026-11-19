@@ -142,7 +142,7 @@ pub fn import_file(
 ) -> Result<ImportReport, ImportError> {
     let bytes = std::fs::read(path).map_err(|e| ImportError::Io {
         path: path.to_owned(),
-        message: e.to_string(),
+        message: frap_rna::error::strerror(&e),
     })?;
     import_bytes(main, win, &bytes, path, settings, log)
 }

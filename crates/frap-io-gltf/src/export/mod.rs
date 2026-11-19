@@ -16,6 +16,7 @@
 
 pub mod apply;
 pub mod cameras;
+pub mod ext_order;
 pub mod extras;
 pub mod filters;
 pub mod formats;

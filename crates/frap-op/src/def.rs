@@ -276,3 +276,24 @@ impl std::fmt::Debug for OperatorDef {
 #[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
 #[linkme::distributed_slice]
 pub static OPERATORS: [OperatorDef];
+
+/// A hint for an item of a dynamic enum that exists but is not offered in the current
+/// context (`export_scene.gltf(export_format='GLTF_EMBEDDED')` without the add-on preference):
+/// Blender's `enum "…" not found in (…)` TypeError gets it as `error.hint`, so an agent learns
+/// how to make the item available.
+#[derive(Debug)]
+pub struct DynEnumHint {
+    /// Operator `bl_idname` (`EXPORT_SCENE_OT_gltf`).
+    pub bl_idname: &'static str,
+    /// Property identifier.
+    pub prop: &'static str,
+    /// Enum item identifier.
+    pub item: &'static str,
+    /// The hint text.
+    pub hint: &'static str,
+}
+
+/// Every [`DynEnumHint`], registered next to the operator.
+#[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
+#[linkme::distributed_slice]
+pub static DYN_ENUM_HINTS: [DynEnumHint];

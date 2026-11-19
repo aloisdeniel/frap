@@ -15,9 +15,10 @@
 
 use frap_gltf::json::{Index, Scene};
 use frap_rna::{IdRef, SceneId};
-use frap_scene::Context;
+use frap_scene::{Context, Main};
 
 use crate::export::gather::Gather;
+use crate::export::settings::ExportSettings;
 use crate::export::{ExportError, extras, nodes, vtree};
 
 /// `use_active_scene` is honoured here (M3, WP 3.10).
@@ -25,15 +26,23 @@ use crate::export::{ExportError, extras, nodes, vtree};
 #[linkme::distributed_slice(crate::export::SUPPORTED_EXPORT_PROPS)]
 static PROPS: &[&str] = &["use_active_scene"];
 
-/// The scenes `gather_gltf2` exports: every scene, or only the user's scene with
-/// `use_active_scene` or a collection export.
-fn scenes_to_export(g: &Gather) -> Vec<IdRef<SceneId>> {
-    let user = g.ctx.win.scene;
-    if g.settings.collection.is_empty() && !g.settings.props.use_active_scene.value {
-        g.main.scenes.iter().map(|(r, _)| r).collect()
+/// The scenes `gather_gltf2` exports, in order: every scene, or only the user's scene `user`
+/// with `use_active_scene` or a collection export. The `export_apply` operator evaluates each
+/// of them in its own depsgraph.
+pub fn exported_scenes(
+    main: &Main,
+    user: IdRef<SceneId>,
+    settings: &ExportSettings,
+) -> Vec<IdRef<SceneId>> {
+    if settings.collection.is_empty() && !settings.props.use_active_scene.value {
+        main.scenes.iter().map(|(r, _)| r).collect()
     } else {
         vec![user]
     }
+}
+
+fn scenes_to_export(g: &Gather) -> Vec<IdRef<SceneId>> {
+    exported_scenes(g.main, g.ctx.win.scene, g.settings)
 }
 
 /// Gathers the scene(s) and their node trees into `g.doc`, setting `g.doc.scene` to the

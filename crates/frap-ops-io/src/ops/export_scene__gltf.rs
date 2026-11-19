@@ -126,31 +126,94 @@ fn set_scene_frame(cx: &mut OpCtx, frame: i32) -> Option<i32> {
     (sc.frame_current != frame).then(|| std::mem::replace(&mut sc.frame_current, frame))
 }
 
+/// `Scene.objects`: the objects of the scene's collection hierarchy, each once, in
+/// `FOREACH_SCENE_OBJECT` order (the collection's own objects, then its children).
+fn scene_objects(
+    main: &frap_scene::Main,
+    scene: &frap_scene::id::Scene,
+) -> Vec<frap_rna::IdRef<frap_rna::ObjectId>> {
+    fn walk(
+        main: &frap_scene::Main,
+        c: &frap_scene::id::Collection,
+        depth: usize,
+        out: &mut Vec<frap_rna::IdRef<frap_rna::ObjectId>>,
+    ) {
+        if depth > 256 {
+            return;
+        }
+        for o in &c.objects {
+            if !out.contains(o) {
+                out.push(*o);
+            }
+        }
+        for ch in &c.children {
+            if let Some(cc) = main.collections.get(*ch) {
+                walk(main, cc, depth + 1, out);
+            }
+        }
+    }
+    let mut out = Vec::new();
+    walk(main, &scene.collection, 0, &mut out);
+    out
+}
+
 /// `export_apply=True`: the viewport-evaluated mesh of every MESH object the viewport
 /// depsgraph evaluates (the add-on's `blender_object.evaluated_get(depsgraph).to_mesh()`), read
 /// by the exporter's `apply.rs`. Objects outside the depsgraph (`hide_viewport`, in a hidden
 /// collection: `apply::viewport_evaluated_objects`) and objects whose evaluation fails are
 /// left out: the exporter then uses the original mesh, as `to_mesh()` of an original object.
+///
+/// Each exported scene is evaluated in its own depsgraph: the add-on gathers a scene's meshes
+/// while `bpy.context.window.scene` is that scene (`VExportTree.construct`), so
+/// `evaluated_depsgraph_get()` is the depsgraph of that scene's view layer (the window's view
+/// layer name when the scene has it, else its first) at that scene's frame. An object in
+/// several scenes is decided by the first exported scene that contains it (the add-on's
+/// gathered meshes are cached across scenes). The window goes back to the user's scene.
 fn evaluated_meshes(
     cx: &mut OpCtx,
+    settings: &ExportSettings,
 ) -> std::collections::HashMap<frap_rna::IdRef<frap_rna::ObjectId>, std::sync::Arc<frap_mesh::Mesh>>
 {
-    let in_depsgraph =
-        frap_io_gltf::export::apply::viewport_evaluated_objects(cx.main(), &cx.ctx());
-    let obs: Vec<_> = cx
-        .main()
-        .objects
-        .iter()
-        .filter(|(r, o)| o.object_type() == "MESH" && in_depsgraph.contains(r))
-        .map(|(r, _)| r)
-        .collect();
+    let user_win = cx.ctx().win.clone();
+    let scenes = frap_io_gltf::export::scenes::exported_scenes(cx.main(), user_win.scene, settings);
+    let mut decided = std::collections::HashSet::new();
     let mut out = std::collections::HashMap::new();
-    for ob in obs {
-        if let Ok(ev) = cx.evaluated(ob)
-            && let Some(me) = ev.mesh.clone()
-        {
-            out.insert(ob, me);
+    for scene in scenes {
+        if scene != cx.ctx().win.scene {
+            let mut win = cx.ctx().win.clone();
+            if frap_scene::window::set_scene(cx.main(), &mut win, scene).is_err() {
+                continue;
+            }
+            *cx.win_mut() = win;
         }
+        let in_depsgraph =
+            frap_io_gltf::export::apply::viewport_evaluated_objects(cx.main(), &cx.ctx());
+        let obs: Vec<_> = {
+            let main = cx.main();
+            let Some(sc) = main.scenes.get(scene) else {
+                continue;
+            };
+            scene_objects(main, sc)
+                .into_iter()
+                .filter(|r| {
+                    main.objects
+                        .get(*r)
+                        .is_some_and(|o| o.object_type() == "MESH")
+                })
+                .filter(|r| decided.insert(*r))
+                .filter(|r| in_depsgraph.contains(r))
+                .collect()
+        };
+        for ob in obs {
+            if let Ok(ev) = cx.evaluated(ob)
+                && let Some(me) = ev.mesh.clone()
+            {
+                out.insert(ob, me);
+            }
+        }
+    }
+    if cx.ctx().win.scene != user_win.scene {
+        *cx.win_mut() = user_win;
     }
     out
 }
@@ -183,7 +246,7 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
         } else {
             set_scene_frame(cx, 0)
         };
-        let meshes = evaluated_meshes(cx);
+        let meshes = evaluated_meshes(cx, &settings);
         if let Some(frame) = restore {
             set_scene_frame(cx, frame);
         }
@@ -228,6 +291,15 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
     );
     Ok(OpStatus::Finished)
 }
+
+#[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
+#[linkme::distributed_slice(frap_op::DYN_ENUM_HINTS)]
+static EMBEDDED_HINT: frap_op::DynEnumHint = frap_op::DynEnumHint {
+    bl_idname: "EXPORT_SCENE_OT_gltf",
+    prop: "export_format",
+    item: "GLTF_EMBEDDED",
+    hint: "GLTF_EMBEDDED is offered only with the glTF add-on preference: run bpy.context.preferences.addons['io_scene_gltf2'].preferences.allow_embedded_format = True first",
+};
 
 #[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
 #[linkme::distributed_slice(OPERATORS)]

@@ -22,7 +22,8 @@
 //!   CUBICSPLINE per the glTF spec, slerp for rotations, quaternion sign ignored) on the union
 //!   of both key-time sets plus the midpoints between them, so baked and sparse keys, or
 //!   different interpolations of the same curve, compare equal;
-//! - `extensionsUsed` / `extensionsRequired` as sorted sets; `asset.generator` is ignored
+//! - `extensionsUsed` / `extensionsRequired` in file order (the add-on's traversal order is
+//!   deterministic); `asset.generator` is ignored
 //!   (GLTF §7.2); `extras` and unknown extensions are kept verbatim.
 //!
 //! This module carries its own minimal glTF reader on purpose: the judge must not share code
@@ -823,12 +824,14 @@ impl Canon<'_> {
             json!({"version": j.pointer("/asset/version").cloned().unwrap_or(Json::Null)}),
         );
         for k in ["extensionsUsed", "extensionsRequired"] {
-            let mut v: Vec<String> = arr(j, k)
-                .iter()
-                .filter_map(|x| x.as_str().map(str::to_owned))
-                .collect();
-            v.sort();
-            v.dedup();
+            // In file order: the add-on declares extensions in the deterministic order of its
+            // traversal (M3+M4 stabilization round 4), so the order is compared too.
+            let mut v: Vec<String> = Vec::new();
+            for x in arr(j, k).iter().filter_map(|x| x.as_str()) {
+                if !v.iter().any(|e| e == x) {
+                    v.push(x.to_owned());
+                }
+            }
             o.insert(k.into(), json!(v));
         }
         let scenes = arr(j, "scenes");
@@ -1436,7 +1439,7 @@ pub(crate) mod tests {
         assert_ne!(a, b);
         let (ca, cb) = (canon(&a), canon(&b));
         assert_eq!(compare("glb", &ca, &cb, 1e-5), vec![]);
-        // Children order and extension order are irrelevant too.
+        // Children order is irrelevant too.
         let mut d: Json = cb.clone();
         let kids = d["scenes"][0]["nodes"][0]["children"]
             .as_array_mut()
@@ -1445,7 +1448,11 @@ pub(crate) mod tests {
         assert_ne!(compare("glb", &ca, &d, 1e-5), vec![]); // raw reversal is visible …
         let e = canon(&b);
         assert_eq!(compare("glb", &ca, &e, 1e-5), vec![]); // … but canonicalisation sorts.
-        assert_eq!(ca["extensionsUsed"], json!(["A_ext", "B_ext"]));
+        assert_eq!(ca["extensionsUsed"], json!(["B_ext", "A_ext"]));
+        // The declaration order is compared.
+        let mut f = ca.clone();
+        f["extensionsUsed"] = json!(["A_ext", "B_ext"]);
+        assert_ne!(compare("glb", &ca, &f, 1e-5), vec![]);
         assert!(ca["asset"].get("generator").is_none());
         // Defaults are filled in.
         let mat = &ca["scenes"][0]["nodes"][0]["children"][1]["mesh"]["primitives"][0]["material"];

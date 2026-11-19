@@ -369,6 +369,20 @@ fn sub_operator(spec: &OperatorSpec, def: &PropDef) -> Option<&'static OperatorS
     }
 }
 
+/// The registered [`crate::DynEnumHint`] for an item of a dynamic enum the context does not
+/// offer.
+fn dyn_enum_hint(spec: &OperatorSpec, prop: &str, written: &Input) -> Option<&'static str> {
+    let item = match written {
+        Input::Str(s) => s.as_str(),
+        Input::Bare(s) => s.as_str(),
+        _ => return None,
+    };
+    crate::DYN_ENUM_HINTS
+        .iter()
+        .find(|h| h.bl_idname == spec.bl_idname && h.prop == prop && h.item == item)
+        .map(|h| h.hint)
+}
+
 fn dyn_enums_of(spec: &OperatorSpec) -> &'static [(&'static str, DynEnumFn)] {
     Registry::try_global()
         .ok()
@@ -456,11 +470,17 @@ fn convert_struct(
         let target: &PropDef = dynamic.as_ref().unwrap_or(def);
         let written = input.clone();
         let c = coerce(target, input, &cx).map_err(|e| {
-            let e = e.into_frap(PREFIX, |k| match k {
+            let unavailable = (e.kind == RnaErrorKind::Enum && dynamic.is_some())
+                .then(|| dyn_enum_hint(spec, def.identifier, &written))
+                .flatten();
+            let mut e = e.into_frap(PREFIX, |k| match k {
                 RnaErrorKind::Enum => OP_ARG_ENUM,
                 RnaErrorKind::Length => OP_ARG_LENGTH,
                 _ => OP_ARG_TYPE,
             });
+            if let Some(h) = unavailable {
+                e = e.with_hint(h);
+            }
             site.decorate(e, spec, def.identifier)
         })?;
         if c.clamped {

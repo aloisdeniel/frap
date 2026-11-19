@@ -500,17 +500,10 @@ fn has_extension(p: &str, ext: &str) -> bool {
         .is_some_and(|(_, e)| e.eq_ignore_ascii_case(ext))
 }
 
-/// `strerror(errno)` wording for the common cases.
+/// `strerror(errno)` wording, as Blender's file reports spell OS errors on every OS
+/// ([`frap_rna::error::strerror`]: the C texts on Windows too, never the Win32 text).
 pub fn io_message(e: &std::io::Error) -> String {
-    match e.kind() {
-        std::io::ErrorKind::NotFound => "No such file or directory".into(),
-        std::io::ErrorKind::PermissionDenied => "Permission denied".into(),
-        _ => {
-            let s = e.to_string();
-            // Rust appends " (os error N)".
-            s.split(" (os error").next().unwrap_or(&s).to_owned()
-        }
-    }
+    frap_rna::error::strerror(e)
 }
 
 /// `Image.type` (`ima->type`): what a source makes of the image.

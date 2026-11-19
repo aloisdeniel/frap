@@ -226,22 +226,37 @@ fn absolute(p: &Path, cwd: &Path) -> PathBuf {
 }
 
 /// Writes `bytes` to `path`, creating missing parent directories (as Blender does), through a
-/// temporary sibling renamed into place so a failed write never leaves a partial file.
+/// temporary sibling renamed into place so a failed write never leaves a partial file. OS
+/// errors read as C `strerror` (Blender's `strerror(errno)`), on Windows too.
 pub fn write_file(path: &Path, bytes: &[u8]) -> Result<(), String> {
+    use frap_rna::error::strerror;
     if let Some(dir) = path.parent().filter(|d| !d.as_os_str().is_empty()) {
-        std::fs::create_dir_all(dir)
-            .map_err(|e| format!("Couldn't create directory for file {}: {e}", path.display()))?;
+        std::fs::create_dir_all(dir).map_err(|e| {
+            format!(
+                "Couldn't create directory for file {}: {}",
+                path.display(),
+                strerror(&e)
+            )
+        })?;
     }
     let mut tmp = path.as_os_str().to_owned();
     tmp.push(".frap-tmp");
     let tmp = PathBuf::from(tmp);
     std::fs::write(&tmp, bytes).map_err(|e| {
         let _ = std::fs::remove_file(&tmp);
-        format!("Render error ({e}) cannot save: '{}'", path.display())
+        format!(
+            "Render error ({}) cannot save: '{}'",
+            strerror(&e),
+            path.display()
+        )
     })?;
     std::fs::rename(&tmp, path).map_err(|e| {
         let _ = std::fs::remove_file(&tmp);
-        format!("Render error ({e}) cannot save: '{}'", path.display())
+        format!(
+            "Render error ({}) cannot save: '{}'",
+            strerror(&e),
+            path.display()
+        )
     })
 }
 
