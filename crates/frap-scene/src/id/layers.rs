@@ -10,7 +10,13 @@
 //!   collection's own objects**, excluded subtrees skipped. An object already placed is moved
 //!   to the tail unless it is the first or the last base of the new list (Blender's
 //!   `ELEM(base, first, last)` test; verified on 5.2.4 with an object linked into two
-//!   collections). Existing bases keep their flags; new bases start unselected.
+//!   collections). Existing bases keep their flags; a new base is selected when the object's
+//!   stored base flag is (`object_base_new` reads `ob->base_flag & BASE_SELECTED`): an object
+//!   selected in one scene and linked into another is selected there too (verified on 5.2.4).
+//!   Blender syncs `ob->base_flag` from a base in `ED_object_base_select` (`select_set`) and
+//!   from the window's view layer at each depsgraph evaluation; frap keeps it in
+//!   `Main::base_selected`, written by [`select_set`] and, before each sync, from the bases of
+//!   every object whose bases all agree (so a conflict keeps the last `select_set`).
 //! - Unselectable bases are deselected (`BKE_base_eval_flags`): an object is selectable when it
 //!   is reached through a collection path without `hide_viewport`/`hide_select`, and it has
 //!   neither `hide_select` nor `hide_viewport` itself (verified: `hide_viewport`,
@@ -32,6 +38,17 @@ use crate::id::{Collection, Object, Scene};
 
 /// Deepest collection nesting followed (guards against a cyclic `children` graph).
 const MAX_DEPTH: usize = 256;
+
+/// `Main::base_selected`: the `BASE_SELECTED` bit of each object's `ob->base_flag`. Runtime
+/// state: `Debug` leaves the entries out, so a saved and reopened state prints the same.
+#[derive(Clone, Default)]
+pub struct BaseSelectedMemory(pub BTreeMap<IdRef<ObjectId>, bool>);
+
+impl std::fmt::Debug for BaseSelectedMemory {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("BaseSelectedMemory(runtime)")
+    }
+}
 
 /// Visibility facts of one base, from every collection path that reaches its object.
 #[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
@@ -176,16 +193,18 @@ pub fn visibility(
     out
 }
 
-/// The view layers of `scene` after a sync against the current collections and objects.
+/// The view layers of `scene` after a sync against the current collections and objects; new
+/// bases are selected as `base_selected` says (`Main::base_selected`).
 pub fn synced_view_layers(
     scene: &Scene,
     collections: &IdMap<Collection>,
     objects: &IdMap<Object>,
+    base_selected: &BaseSelectedMemory,
 ) -> Vec<ViewLayer> {
     scene
         .view_layers
         .iter()
-        .map(|vl| sync_view_layer(scene, vl, collections, objects))
+        .map(|vl| sync_view_layer(scene, vl, collections, objects, base_selected))
         .collect()
 }
 
@@ -194,6 +213,7 @@ fn sync_view_layer(
     vl: &ViewLayer,
     collections: &IdMap<Collection>,
     objects: &IdMap<Object>,
+    base_selected: &BaseSelectedMemory,
 ) -> ViewLayer {
     let active_lc = vl
         .layer_collection
@@ -219,11 +239,16 @@ fn sync_view_layer(
                 }
                 return;
             }
-            let flag = vl
-                .bases
-                .iter()
-                .find(|b| b.object == ob)
-                .map_or(BaseFlag::empty(), |b| b.flag);
+            let flag = vl.bases.iter().find(|b| b.object == ob).map_or_else(
+                || {
+                    if base_selected.0.get(&ob).copied().unwrap_or(false) {
+                        BaseFlag::SELECTED
+                    } else {
+                        BaseFlag::empty()
+                    }
+                },
+                |b| b.flag,
+            );
             bases.push(Base { object: ob, flag });
         },
     );
@@ -255,10 +280,43 @@ fn sync_view_layer(
 /// Resyncs the view layers of one scene; the scene is written (bumped, logged) only when
 /// something changed.
 pub fn sync_scene(main: &mut Main, scene: IdRef<SceneId>, log: &mut ChangeLog) {
+    remember_base_selection(main);
+    sync_scene_only(main, scene, log);
+}
+
+/// Stores the selection of every object whose bases (in every view layer of every scene) all
+/// agree into `Main::base_selected` (the depsgraph's `BKE_object_sync_to_original`, which
+/// copies the window view layer's base flags; frap does not know the window here, so an
+/// object selected in one scene and not in another keeps the value it had).
+fn remember_base_selection(main: &mut Main) {
+    let mut agree: BTreeMap<IdRef<ObjectId>, Option<bool>> = BTreeMap::new();
+    for (_, s) in main.scenes.iter() {
+        for vl in &s.view_layers {
+            for b in &vl.bases {
+                let sel = b.selected();
+                agree
+                    .entry(b.object)
+                    .and_modify(|e| {
+                        if *e != Some(sel) {
+                            *e = None;
+                        }
+                    })
+                    .or_insert(Some(sel));
+            }
+        }
+    }
+    for (ob, sel) in agree {
+        if let Some(sel) = sel {
+            main.base_selected.0.insert(ob, sel);
+        }
+    }
+}
+
+fn sync_scene_only(main: &mut Main, scene: IdRef<SceneId>, log: &mut ChangeLog) {
     let Some(s) = main.scenes.get(scene) else {
         return;
     };
-    let new = synced_view_layers(s, &main.collections, &main.objects);
+    let new = synced_view_layers(s, &main.collections, &main.objects, &main.base_selected);
     if new != s.view_layers
         && let Some(s) = main.scenes.get_mut(scene, log)
     {
@@ -270,9 +328,10 @@ pub fn sync_scene(main: &mut Main, scene: IdRef<SceneId>, log: &mut ChangeLog) {
 /// Resyncs every scene's view layers (after collection membership, collection or object
 /// visibility flags, or `exclude` changed).
 pub fn sync_all(main: &mut Main, log: &mut ChangeLog) {
+    remember_base_selection(main);
     let scenes: Vec<IdRef<SceneId>> = main.scenes.iter().map(|(r, _)| r).collect();
     for s in scenes {
-        sync_scene(main, s, log);
+        sync_scene_only(main, s, log);
     }
 }
 
@@ -322,6 +381,10 @@ pub fn select_set(
         || visibility(s, layer, &main.collections, &main.objects)
             .get(&ob)
             .is_some_and(|v| v.selectable);
+    // `BKE_scene_object_base_flag_sync_from_base`: the object remembers the resulting state.
+    main.base_selected
+        .0
+        .insert(ob, if can { state } else { base.selected() });
     if !can || base.selected() == state {
         return Ok(());
     }
@@ -477,7 +540,13 @@ impl ViewLayer {
             layer_collection: LayerCollection::new(None),
             active_layer_collection: LayerCollectionPath::default(),
         };
-        sync_view_layer(scene, &vl, collections, objects)
+        sync_view_layer(
+            scene,
+            &vl,
+            collections,
+            objects,
+            &BaseSelectedMemory::default(),
+        )
     }
     /// The base of `ob` in this view layer.
     pub fn base(&self, ob: IdRef<ObjectId>) -> Option<&Base> {

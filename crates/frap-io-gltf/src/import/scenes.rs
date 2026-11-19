@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Scene-level import: the Blender scenes and collections the glTF scenes map to, linking
 //! objects, view-layer bases, selection, the active object and the exclusion of non-default
-//! scenes.
+//! scenes. The default glTF scene (`scene`, else the first) imports into the context scene,
+//! which stays the window's scene; every other glTF scene becomes a new Blender scene
+//! (`bpy.data.scenes.new`, M3 WP 3.10: Blender's default settings, named after the glTF scene
+//! or `Scene <index>`).
 //!
 //! Ported from io_scene_gltf2 5.2.41 `blender/imp/scene.py` (`BlenderScene.create`,
 //! `select_imported_objects`, `set_active_object`) and the scene/collection part of
@@ -12,9 +15,7 @@
 
 use frap_rna::{CollectionId, IdRef, ObjectId, SceneId};
 use frap_scene::id::{Collection, Scene};
-use frap_scene::{
-    Base, BaseFlag, ChangeLog, LayerCollection, LayerCollectionPath, Main, ViewLayer,
-};
+use frap_scene::{Base, BaseFlag, ChangeLog, LayerCollection, Main, ViewLayer};
 use smol_str::SmolStr;
 
 use super::vnode::VKind;
@@ -74,18 +75,6 @@ fn new_collection(
     let c = main.collections.insert(name, Collection::new(""), log);
     link_child(main, parent, c, log);
     c
-}
-
-/// `bpy.data.scenes.new(name)`: an empty scene with one "ViewLayer".
-fn new_scene(main: &mut Main, name: &str, log: &mut ChangeLog) -> IdRef<SceneId> {
-    let vl = ViewLayer {
-        name: "ViewLayer".into(),
-        bases: Vec::new(),
-        active: None,
-        layer_collection: LayerCollection::new(None),
-        active_layer_collection: LayerCollectionPath::default(),
-    };
-    main.scenes.insert(name, Scene::new("", vec![vl]), log)
 }
 
 /// The view layer named `name` (the first one when missing, as `Context::view_layer` does).
@@ -223,7 +212,8 @@ pub(crate) fn create(
         if idx != default_scene.unwrap_or(0) {
             // `scene.name or "Scene %d"`
             let name = super::truthy_name(&sc.name).unwrap_or_else(|| format!("Scene {idx}"));
-            cx.blender_scenes.push(new_scene(main, &name, log));
+            cx.blender_scenes
+                .push(frap_scene::scenes::new_scene(main, &name, log));
         } else {
             cx.blender_scenes.push(scene);
         }
