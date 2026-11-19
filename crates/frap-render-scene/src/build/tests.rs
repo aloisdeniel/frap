@@ -1061,10 +1061,13 @@ fn workbench_material_sources() {
             material: None,
         },
     ];
-    assert_eq!(slot_material(&ob, &slots, 0), Some(steel));
-    assert_eq!(slot_material(&ob, &slots, 1), Some(red));
-    assert_eq!(slot_material(&ob, &slots, 2), None);
-    assert_eq!(slot_material(&ob, &slots, 3), None);
+    // An empty OBJECT-linked slot falls back to the data (`BKE_object_material_get_eval`).
+    let mut slot_mesh = Mesh::new("");
+    slot_mesh.materials = slots.to_vec();
+    assert_eq!(
+        super::evaluated::slot_materials(&ob, Some(&slot_mesh), None),
+        [Some(steel), Some(red), Some(steel)]
+    );
 
     // Through the builder (lowering stubbed: these values come from the material itself).
     fx.lower = fake_lower;

@@ -118,14 +118,17 @@ pub fn gather_mesh(g: &mut Gather, ob: &Object) -> Result<Option<Index>, ExportE
     if g.settings.evaluated_meshes.is_some()
         && apply::has_modifiers(ob)
         && let Some(ob_ref) = main.objects.find_in(&ob.header.name, ob.header.library)
-        && let Some(evaluated) = apply::evaluated(g, ob_ref)
     {
-        let mats = apply::evaluated_materials(ob, mesh, &evaluated);
+        // Not evaluated (outside the viewport depsgraph, or its evaluation failed): `to_mesh()`
+        // is a copy of the data, still a glTF mesh of the object's own.
+        let evaluated = apply::evaluated(g, ob_ref);
+        let data: &Mesh = evaluated.as_deref().unwrap_or(mesh);
+        let mats = apply::evaluated_materials(ob, mesh, data);
         let key = (ob_ref, mats);
         if let Some(i) = g.state::<AppliedMeshes>().0.get(&key) {
             return Ok(*i);
         }
-        let (index, _) = build_mesh(g, &evaluated, mesh, Some(ob_ref), &key.1, None)?;
+        let (index, _) = build_mesh(g, data, mesh, Some(ob_ref), &key.1, None)?;
         g.state::<AppliedMeshes>().0.insert(key, index);
         return Ok(index);
     }
@@ -564,11 +567,193 @@ mod tests {
         }
 
         #[test]
-        fn object_without_evaluation_exports_its_data() {
-            // The operator leaves out objects whose evaluation failed: their data is exported.
+        fn object_without_evaluation_exports_its_data_as_its_own_mesh() {
+            // The operator leaves out objects outside the viewport depsgraph (and objects whose
+            // evaluation failed): `to_mesh()` is their data, but an object with modifiers still
+            // gets a glTF mesh of its own, with fresh vertex accessors and the data's materials
+            // (verified on 5.2.4: export_apply_hidden.py).
             let s = scene();
             let d = s.export(Some(HashMap::new()));
-            assert_eq!(d.meshes.len(), 2);
+            let [cube, a, b, f] =
+                ["Cube", "Cube.001", "Cube.002", "F"].map(|n| mesh_of(&d, n).unwrap());
+            assert_eq!(d.meshes.len(), 4);
+            let attr = |m: usize, k: &str| d.meshes[m].primitives[0].attributes[k];
+            let indices = |m: usize| d.meshes[m].primitives[0].indices.unwrap();
+            assert_eq!(attr(cube, "POSITION"), attr(f, "POSITION"));
+            for m in [a, b] {
+                assert_ne!(attr(m, "POSITION"), attr(cube, "POSITION"));
+                assert_eq!(indices(m), indices(cube));
+                // The data (the factory cube, 1.0), not a subdivided mesh.
+                let pos = attr(m, "POSITION") as usize;
+                assert_eq!(d.accessors[pos].max.as_ref().unwrap()[0], 1.0);
+                assert_eq!(d.accessors[pos].count, 24);
+                assert_eq!(material_name(&d, m), "Material");
+            }
+            assert_ne!(attr(a, "POSITION"), attr(b, "POSITION"));
+        }
+
+        /// Per node with a mesh: its glTF mesh index and, per primitive, the accessor index of
+        /// every attribute, the index accessor and the material.
+        type Sharing = Vec<(
+            String,
+            usize,
+            Vec<(Vec<(String, u32)>, Option<u32>, Option<u32>)>,
+        )>;
+
+        fn sharing(d: &Document) -> Sharing {
+            let mut out: Sharing = d
+                .nodes
+                .iter()
+                .filter_map(|n| Some((n.name.clone()?, n.mesh? as usize)))
+                .map(|(name, m)| {
+                    let prims = d.meshes[m]
+                        .primitives
+                        .iter()
+                        .map(|p| {
+                            let attrs = p.attributes.iter().map(|(k, v)| (k.clone(), *v)).collect();
+                            (attrs, p.indices, p.material)
+                        })
+                        .collect();
+                    (name, m, prims)
+                })
+                .collect();
+            out.sort_by(|a, b| a.0.cmp(&b.0));
+            out
+        }
+
+        #[test]
+        fn accessor_sharing_matches_blender_for_unevaluated_objects() {
+            // The scene of `export_apply_hidden.py` at its first export: 'Cube' (Subdivision,
+            // OBJECT-linked 'Blue', hidden: not evaluated) and its linked duplicate 'Cube.001'
+            // (no modifiers). The accessor indices (vertex accessors per object, the index
+            // accessor shared by content) are compared with Blender's file, which the glb
+            // golden comparator does not do (it inlines accessor data).
+            let mut s = S::factory();
+            let blue = s
+                .main
+                .materials
+                .insert("Blue", Material::new(""), &mut s.log);
+            s.duplicate("Cube.001");
+            let cube = s.ob("Cube");
+            s.modifier(cube, ModifierType::Subsurf, true);
+            s.link_object_material(cube, blue);
+            let d = s.export(Some(HashMap::new()));
+            let path = concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../../tests/golden/fixtures/modifiers/integration/",
+                "export_apply_hidden.out_object.glb"
+            );
+            let blender = frap_gltf::read(&std::fs::read(path).unwrap())
+                .unwrap()
+                .document;
+            assert_eq!(sharing(&d), sharing(&blender));
+            assert_eq!(d.accessors.len(), blender.accessors.len());
+            for (a, b) in d.accessors.iter().zip(&blender.accessors) {
+                assert_eq!(a.count, b.count);
+            }
+        }
+
+        fn set_object_hidden(s: &mut S, name: &str) {
+            let ob = s.ob(name);
+            s.main
+                .objects
+                .get_mut(ob, &mut s.log)
+                .unwrap()
+                .hide_viewport = true;
+        }
+
+        /// The MESH objects of `viewport_evaluated_objects`, sorted by name.
+        fn in_depsgraph(s: &S) -> Vec<String> {
+            let ctx = Context {
+                main: &s.main,
+                win: &s.win,
+                prefs: &s.prefs,
+            };
+            let set = crate::export::apply::viewport_evaluated_objects(&s.main, &ctx);
+            let mut names: Vec<String> = set
+                .iter()
+                .map(|o| s.main.objects.get(*o).unwrap())
+                .filter(|o| o.object_type() == "MESH")
+                .map(|o| o.header.name.to_string())
+                .collect();
+            names.sort();
+            names
+        }
+
+        #[test]
+        fn viewport_depsgraph_skips_objects_disabled_in_viewports() {
+            let mut s = scene();
+            assert_eq!(in_depsgraph(&s), ["Cube", "Cube.001", "Cube.002", "F"]);
+            // `Object.hide_viewport`.
+            set_object_hidden(&mut s, "Cube.001");
+            assert_eq!(in_depsgraph(&s), ["Cube", "Cube.002", "F"]);
+            // `LayerCollection.hide_viewport` and `hide_set` still evaluate.
+            let sc = s.win.scene;
+            let scene = s.main.scenes.get_mut(sc, &mut s.log).unwrap();
+            scene.view_layers[0].layer_collection.children[0].hide_viewport = true;
+            for b in &mut scene.view_layers[0].bases {
+                b.flag.insert(BaseFlag::HIDDEN);
+            }
+            assert_eq!(in_depsgraph(&s), ["Cube", "Cube.002", "F"]);
+            // `Collection.hide_viewport`, also of a parent collection.
+            let coll = s.main.collections.find("Collection").unwrap();
+            s.main
+                .collections
+                .get_mut(coll, &mut s.log)
+                .unwrap()
+                .hide_viewport = true;
+            assert!(in_depsgraph(&s).is_empty());
+            // Linked from a visible collection too (the scene's master collection): evaluated.
+            let cube = s.ob("Cube");
+            let scene = s.main.scenes.get_mut(sc, &mut s.log).unwrap();
+            scene.collection.objects.push(cube);
+            assert_eq!(in_depsgraph(&s), ["Cube"]);
+            // An excluded layer collection.
+            let mut s = scene_with_hidden_operand(true);
+            let sc = s.win.scene;
+            let scene = s.main.scenes.get_mut(sc, &mut s.log).unwrap();
+            scene.view_layers[0].layer_collection.children[0].exclude = true;
+            assert!(in_depsgraph(&s).is_empty());
+        }
+
+        /// The factory scene plus a hidden 'Op' (Subdivision), the operand of a Boolean of
+        /// 'Cube' enabled in the viewport or not.
+        fn scene_with_hidden_operand(enabled: bool) -> S {
+            let mut s = S::factory();
+            let op = s.duplicate("Op");
+            s.modifier(op, ModifierType::Subsurf, true);
+            set_object_hidden(&mut s, "Op");
+            let cube = s.ob("Cube");
+            s.modifier(cube, ModifierType::Boolean, enabled);
+            let o = s.main.objects.get_mut(cube, &mut s.log).unwrap();
+            if let ModifierSettings::Boolean(b) = &mut o.modifiers[0].settings {
+                b.object = Some(op.any());
+            }
+            s
+        }
+
+        #[test]
+        fn viewport_depsgraph_evaluates_hidden_geometry_dependencies() {
+            // A hidden Boolean operand is evaluated (its geometry is read), unless the Boolean
+            // is disabled in the viewport or its owner is not evaluated either.
+            assert_eq!(
+                in_depsgraph(&scene_with_hidden_operand(true)),
+                ["Cube", "Op"]
+            );
+            assert_eq!(in_depsgraph(&scene_with_hidden_operand(false)), ["Cube"]);
+            let mut s = scene_with_hidden_operand(true);
+            set_object_hidden(&mut s, "Cube");
+            assert!(in_depsgraph(&s).is_empty());
+            // A collection operand: every object of the collection.
+            let mut s = scene_with_hidden_operand(true);
+            let coll = s.main.collections.find("Collection").unwrap();
+            let cube = s.ob("Cube");
+            let o = s.main.objects.get_mut(cube, &mut s.log).unwrap();
+            if let ModifierSettings::Boolean(b) = &mut o.modifiers[0].settings {
+                b.operand_type = "COLLECTION".into();
+                b.collection = Some(coll.any());
+            }
+            assert_eq!(in_depsgraph(&s), ["Cube", "Op"]);
         }
     }
 }

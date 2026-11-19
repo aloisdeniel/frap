@@ -115,19 +115,22 @@ pub(crate) fn unsupported_props(a: &OpArgs) -> Vec<&'static str> {
         .collect()
 }
 
-/// `export_apply=True`: the viewport-evaluated mesh of every MESH object (the add-on's
-/// `blender_object.evaluated_get(depsgraph).to_mesh()`), read by the exporter's `apply.rs`
-/// (M4 W0 plumbing; WP 4.7 implements the export side). Objects whose evaluation fails are left
-/// out (the exporter then uses the original mesh).
+/// `export_apply=True`: the viewport-evaluated mesh of every MESH object the viewport
+/// depsgraph evaluates (the add-on's `blender_object.evaluated_get(depsgraph).to_mesh()`), read
+/// by the exporter's `apply.rs`. Objects outside the depsgraph (`hide_viewport`, in a hidden
+/// collection: `apply::viewport_evaluated_objects`) and objects whose evaluation fails are
+/// left out: the exporter then uses the original mesh, as `to_mesh()` of an original object.
 fn evaluated_meshes(
     cx: &mut OpCtx,
 ) -> std::collections::HashMap<frap_rna::IdRef<frap_rna::ObjectId>, std::sync::Arc<frap_mesh::Mesh>>
 {
+    let in_depsgraph =
+        frap_io_gltf::export::apply::viewport_evaluated_objects(cx.main(), &cx.ctx());
     let obs: Vec<_> = cx
         .main()
         .objects
         .iter()
-        .filter(|(_, o)| o.object_type() == "MESH")
+        .filter(|(r, o)| o.object_type() == "MESH" && in_depsgraph.contains(r))
         .map(|(r, _)| r)
         .collect();
     let mut out = std::collections::HashMap::new();

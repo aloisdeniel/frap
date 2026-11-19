@@ -32,7 +32,7 @@ use frap_material::{ImageLookup, LoweredMaterial, TexRef};
 use frap_mesh::Mesh;
 use frap_nodes::NodeTree;
 use frap_rna::{IdKey, IdRef, MaterialId, MeshId, ObjectId};
-use frap_scene::id::{Material, Object, SlotLink};
+use frap_scene::id::{Material, Object};
 use frap_scene::{EvalMode, EvaluatedObject, Evaluator, HostRead, Main};
 use indexmap::IndexMap;
 
@@ -240,19 +240,6 @@ pub fn camera_params(main: &Main, ob: &Object) -> CameraParams {
         return CameraParams::from_light(light);
     }
     CameraParams::default()
-}
-
-/// The material of slot `i` (`MaterialSlot.material`): the object's own material when the
-/// slot links to the object, else the mesh's.
-pub fn slot_material(
-    ob: &Object,
-    mesh_materials: &[Option<IdRef<MaterialId>>],
-    i: usize,
-) -> Option<IdRef<MaterialId>> {
-    match ob.material_slot_overrides.get(i) {
-        Some(o) if o.link == SlotLink::Object => o.material,
-        _ => mesh_materials.get(i).copied().flatten(),
-    }
 }
 
 struct Builder<'a> {
