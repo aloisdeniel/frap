@@ -1125,8 +1125,9 @@ fn value_like(like: &Value, v: &J, path: &str, cx: &Cx) -> Result<Value, MapErro
 fn node(v: &J, path: &str, cx: &Cx) -> Result<Node, MapError> {
     let mut o = Obj::new(v, path, cx.strict)?;
     let bl = string(o.req("bl_idname")?, path)?;
-    let def = node_type(bl)
-        .ok_or_else(|| MapError::invalid(path, format!("unknown node type {bl:?}")))?;
+    let Some(def) = node_type(bl) else {
+        return builtin_group_node(bl, o, path, cx);
+    };
     let mut uid = 0u32;
     o.u32("uid", &mut uid)?;
     let name = SmolStr::new(string(o.req("name")?, path)?);
@@ -1179,6 +1180,66 @@ fn node(v: &J, path: &str, cx: &Cx) -> Result<Node, MapError> {
                 None if cx.strict => return Err(MapError::Unknown(kp)),
                 None => {}
             }
+        }
+    }
+    o.finish()?;
+    Ok(n)
+}
+
+/// A node of the built-in linked "Smooth by Angle" group whose geometry-node type is not in
+/// the generated table (WP 4.1): rebuilt from its stored sockets and properties.
+fn builtin_group_node(bl: &str, mut o: Obj, path: &str, cx: &Cx) -> Result<Node, MapError> {
+    use frap_nodes::builtin_groups::smooth_by_angle::{NODE_PROPS, NODE_TYPES};
+    let bl_idname = NODE_TYPES
+        .iter()
+        .copied()
+        .find(|t| *t == bl)
+        .ok_or_else(|| MapError::invalid(path, format!("unknown node type {bl:?}")))?;
+    let mut n = Node {
+        uid: 0,
+        name: SmolStr::default(),
+        label: String::new(),
+        bl_idname,
+        location: [0.0, 0.0],
+        width: 140.0,
+        parent: None,
+        mute: false,
+        hide: false,
+        inputs: Vec::new(),
+        outputs: Vec::new(),
+        props: Default::default(),
+    };
+    o.u32("uid", &mut n.uid)?;
+    n.name = SmolStr::new(string(o.req("name")?, path)?);
+    o.string("label", &mut n.label)?;
+    o.arr("location", &mut n.location)?;
+    o.f32("width", &mut n.width)?;
+    if let Some(p) = o.opt("parent") {
+        n.parent = p.as_u64().and_then(|x| u32::try_from(x).ok());
+    }
+    o.bool("mute", &mut n.mute)?;
+    o.bool("hide", &mut n.hide)?;
+    for (key, out) in [("inputs", &mut n.inputs), ("outputs", &mut n.outputs)] {
+        if let Some(v) = o.opt(key) {
+            let p = o.sub(key);
+            *out = array(v, &p)?
+                .iter()
+                .enumerate()
+                .map(|(i, s)| socket(s, &format!("{p}[{i}]"), cx))
+                .collect::<Result<_, _>>()?;
+        }
+    }
+    if let Some(J::Object(props)) = o.opt("props") {
+        for (k, x) in props {
+            let Some(key) = NODE_PROPS.iter().copied().find(|p| *p == k.as_str()) else {
+                continue;
+            };
+            let v = match x {
+                J::String(s) => Value::Enum(SmolStr::new(s)),
+                J::Bool(b) => Value::Bool(*b),
+                _ => continue,
+            };
+            n.props.values.insert(key, v);
         }
     }
     o.finish()?;

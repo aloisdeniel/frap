@@ -4,8 +4,11 @@
 //! [`frap_modifiers::stack::evaluate`].
 //!
 //! Created by M4 W0 so that evaluators registered by WPs 4.2–4.6 run as soon as they land;
-//! WP 4.1 owns this file (and `cache/{mesh,fingerprint}.rs`, reassigned) and completes it:
-//! `depends_on` targets in the fingerprint, edit-mode cage rules, image caching.
+//! WP 4.1 completed it: the stack walk's Edit Mode rules live in `frap_modifiers::stack`, the
+//! `depends_on` targets are part of the fingerprint (`cache/fingerprint.rs`), and
+//! [`EvalCache::apply_modifier`] evaluates one modifier alone on the original mesh for
+//! `object.modifier_apply`. Images are decoded per request (no cache: DISPLACE reads them once
+//! per evaluation, and the evaluation result itself is cached by fingerprint).
 //! Dependency cycles between modifier operands are broken here: an object whose stack is
 //! being evaluated is not evaluated again through an operand (`ModError::Dependency`).
 
@@ -66,6 +69,58 @@ pub(crate) fn evaluate(
         mesh: r.mesh,
         modifier_status: r.modifier_status,
         warnings,
+    }
+}
+
+/// What `object.modifier_apply` gets from [`EvalCache::apply_modifier`].
+#[derive(Clone, Debug)]
+pub struct AppliedModifier {
+    /// The modifier's result on the original mesh (`None`: the modifier is disabled,
+    /// `is_disabled`).
+    pub mesh: Option<Mesh>,
+    /// Reports of the evaluation (dependency problems, …).
+    pub reports: Vec<Report>,
+}
+
+impl EvalCache {
+    /// Evaluates modifier `index` of `ob` **alone on the original mesh**, as
+    /// `create_applied_mesh_for_modifier` does for `object.modifier_apply` (the stack before it
+    /// is ignored; viewport settings; `show_viewport` does not matter). Operand objects are
+    /// evaluated through this cache. `Err` is the modifier's error.
+    pub fn apply_modifier(
+        &mut self,
+        host: &dyn HostRead,
+        ob_ref: IdRef<ObjectId>,
+        index: usize,
+    ) -> Result<AppliedModifier, ModError> {
+        let main = host.main();
+        let ob = main
+            .objects
+            .get(ob_ref)
+            .ok_or_else(|| ModError::Error("frap: the object was removed".into()))?;
+        let m = ob
+            .modifiers
+            .get(index)
+            .ok_or_else(|| ModError::Error("frap: no such modifier".into()))?;
+        let base = ob
+            .data
+            .and_then(|d| d.typed::<frap_rna::MeshId>())
+            .and_then(|me| main.meshes.get(me))
+            .cloned()
+            .ok_or_else(|| ModError::Error("frap: the object has no mesh".into()))?;
+        self.in_progress.push(ob_ref.key());
+        let mut cx = GeoCx {
+            ev: self,
+            host,
+            ob_ref,
+            ob,
+            mode: EvalMode::Viewport,
+            reports: Vec::new(),
+        };
+        let r = frap_modifiers::stack::evaluate_one(m, base, &mut cx);
+        let reports = std::mem::take(&mut cx.reports);
+        self.in_progress.retain(|k| *k != ob_ref.key());
+        r.map(|mesh| AppliedModifier { mesh, reports })
     }
 }
 

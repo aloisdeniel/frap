@@ -10,15 +10,17 @@
 //! (`ob.to_mesh().vertices[0].co.x = 42` keeps `ob.data.vertices[0].co.x`), and the result
 //! reads `is_evaluated == False` (also from an evaluated object).
 //!
-//! frap has no temporary or evaluated meshes of its own (M4), so it returns the object's mesh
-//! datablock behind a [`Detached::Temporary`] pointer when the evaluated mesh *is* that data
-//! (no modifier, shape key or edit-mode change: the depsgraph-lite shares the original `Arc`).
-//! Reads see the mesh; the session refuses writes through the pointer, which would change
-//! the original (deviation: Blender accepts them on the copy; `users` reads the original's
-//! count instead of 0, and the result survives `to_mesh_clear()`; deviations.md).
-//! When the evaluated geometry differs, a separate result pointer is needed (M4, with the
-//! modifier evaluators) and frap raises `NotImplementedError` (`RNA_NOT_IMPLEMENTED`) instead
-//! of returning wrong data.
+//! frap has no temporary meshes of its own: for an original object, or when the evaluated mesh
+//! *is* the data (no modifier: the depsgraph-lite shares the original `Arc`), it returns the
+//! object's mesh datablock behind a [`Detached::Temporary`] pointer (reads see the mesh, or
+//! its edit mesh in Edit Mode). For an evaluated object with modifiers (WP 4.1) it returns
+//! `bpy.data.objects['X'].data` behind a [`Detached::Temporary`] pointer, which
+//! frap-session's `with_struct` reads as the object's evaluated mesh, always fresh (the same
+//! pointer `ob.evaluated_get(dg).data` resolves to). The stack's warnings were reported by
+//! `evaluated_get()`, where every evaluated read starts. The
+//! session refuses writes through either pointer, which would change the original
+//! (deviation: Blender accepts them on the copy; `users` reads the original's count instead
+//! of 0, and the result survives `to_mesh_clear()`; deviations.md D-41).
 
 use std::sync::Arc;
 
@@ -51,18 +53,32 @@ fn object_to_mesh(
         .meshes
         .get_arc(me)
         .ok_or_else(|| internal("to_mesh(): the mesh was removed"))?;
+    let data_ptr = || {
+        Value::Ptr(Box::new(detached(
+            RnaPtr::id(me.any(), &frap_spec_rna::MESH),
+            Detached::Temporary,
+        )))
+    };
+    // An original object gives its undeformed data (the edit mesh in Edit Mode, which the
+    // data pointer reads), whatever its modifiers.
+    if this.detached != Some(Detached::Evaluated) {
+        return Ok(data_ptr());
+    }
     let (host, ev) = h.eval();
     let evaluated = ev
         .object(host, ob, EvalMode::Viewport)
         .map_err(|e| report_error(e.message))?;
     match &evaluated.mesh {
-        Some(m) if Arc::ptr_eq(m, &original) => Ok(Value::Ptr(Box::new(detached(
-            RnaPtr::id(me.any(), &frap_spec_rna::MESH),
+        Some(m) if Arc::ptr_eq(m, &original) => Ok(data_ptr()),
+        // WP 4.1: the evaluated mesh (modifiers) is read through `objects['X'].data`
+        // (frap-session's `with_struct` evaluates it, always fresh).
+        Some(_) => Ok(Value::Ptr(Box::new(detached(
+            RnaPtr::id(ob.any(), &frap_spec_rna::OBJECT)
+                .child(frap_rna::Seg::Prop("data"), &frap_spec_rna::MESH),
             Detached::Temporary,
         )))),
-        _ => Err(not_implemented(
-            "to_mesh() of an object whose evaluated mesh differs from its data (modifiers, \
-             shape keys, Edit Mode) needs evaluated-mesh pointers, which arrive with M4",
+        None => Err(not_implemented(
+            "to_mesh() of an object without an evaluated mesh",
         )),
     }
 }

@@ -3,7 +3,11 @@
 //!
 //! The fingerprint of an object hashes its own `gen`, its data's `gen`, its shape-key `gen`,
 //! the edit BMesh generation (Edit Mode), the context scene's frame and, recursively, the
-//! fingerprint of its parent. Every write bumps a `gen` (§5.3), so a cached result is valid
+//! fingerprint of its parent and of every `depends_on` target of its modifiers (WP 4.1):
+//! operand objects (their fingerprints, so a moved or edited operand invalidates), the objects
+//! of operand collections, and the `gen` of other IDs (node groups, textures and their images).
+//! A dependency cycle through modifiers (A's Boolean uses B, B's uses A) is cut: the member
+//! being resolved contributes only its own and its data's `gen`. Every write bumps a `gen` (§5.3), so a cached result is valid
 //! exactly while its fingerprint is unchanged; computing one only reads.
 //!
 //! Parent cycles cannot be created through RNA (Blender's `Object.parent` setter refuses them,
@@ -16,7 +20,8 @@
 use std::hash::{Hash, Hasher};
 use std::sync::Arc;
 
-use frap_rna::{IdKey, IdRef, ObjectId};
+use frap_modifiers::{ModifierType, registry};
+use frap_rna::{IdAny, IdCode, IdKey, IdRef, IdType, ObjectId};
 use frap_scene::id::Object;
 use frap_scene::{EvalMode, HostRead};
 use rustc_hash::{FxHashMap, FxHasher};
@@ -42,6 +47,8 @@ pub(crate) struct FpCx<'h> {
     mode: EvalMode,
     frame: i32,
     memo: FxHashMap<IdKey, Node>,
+    /// Objects whose dependency hash is being computed (modifier dependency cycle guard).
+    resolving: Vec<IdKey>,
 }
 
 impl<'h> FpCx<'h> {
@@ -56,6 +63,7 @@ impl<'h> FpCx<'h> {
             mode,
             frame,
             memo: FxHashMap::default(),
+            resolving: Vec::new(),
         }
     }
 
@@ -103,8 +111,9 @@ impl<'h> FpCx<'h> {
         // The acyclic part, parents first: chain[i]'s parent is chain[i + 1] (or resolved).
         for &c in chain[..prefix_len].iter().rev() {
             let parent = self.parent_of(c);
+            let deps = self.deps_hash(c);
             let node = Node {
-                fp: self.hash(c, parent, None),
+                fp: self.hash(c, parent, None, deps),
                 parent,
                 cycle: None,
             };
@@ -128,8 +137,9 @@ impl<'h> FpCx<'h> {
         let order = std::iter::once(cycle[0]).chain(cycle[1..].iter().rev().copied());
         for (k, c) in order.enumerate() {
             let parent = if k == 0 { None } else { self.parent_of(c) };
+            let deps = self.deps_hash(c);
             let node = Node {
-                fp: self.hash(c, parent, Some(&cycle)),
+                fp: self.hash(c, parent, Some(&cycle), deps),
                 parent,
                 cycle: Some(cycle.clone()),
             };
@@ -137,15 +147,114 @@ impl<'h> FpCx<'h> {
         }
     }
 
+    /// The IDs the modifiers of `ob` depend on (`ModifierTypeInfo::depends_on` of the types
+    /// with an evaluator), in stack order.
+    fn deps_of(&self, ob: IdRef<ObjectId>) -> Vec<IdAny> {
+        let Some(o) = self.object(ob) else {
+            return Vec::new();
+        };
+        let mut out = Vec::new();
+        for m in &o.modifiers {
+            let info = ModifierType::from_identifier(m.settings.type_identifier())
+                .and_then(registry::find);
+            if let Some(info) = info {
+                out.extend((info.depends_on)(&m.settings));
+            }
+        }
+        out
+    }
+
+    /// Own and data `gen` of an object (the shallow hash of a dependency-cycle member).
+    fn shallow(&self, ob: IdRef<ObjectId>, h: &mut FxHasher) {
+        let main = self.host.main();
+        match self.object(ob) {
+            Some(o) => {
+                o.header.generation.hash(h);
+                o.data
+                    .and_then(|d| main.header(d))
+                    .map_or(0, |hd| hd.generation)
+                    .hash(h);
+            }
+            None => 0u8.hash(h),
+        }
+    }
+
+    /// The hash of an object dependency: its fingerprint, or its shallow hash inside a cycle.
+    fn object_dep(&mut self, ob: IdRef<ObjectId>, h: &mut FxHasher) {
+        if self.resolving.contains(&ob.key()) {
+            self.shallow(ob, h);
+            return;
+        }
+        match self.node(ob).map(|n| n.fp) {
+            Some(fp) => (1u8, fp).hash(h),
+            None => 0u8.hash(h),
+        }
+    }
+
+    /// The hash of every `depends_on` target of `ob`'s modifiers (module docs).
+    fn deps_hash(&mut self, ob: IdRef<ObjectId>) -> u64 {
+        let deps = self.deps_of(ob);
+        // Empty, or `ob` is already being resolved further up (a dependency cycle).
+        if deps.is_empty() || self.resolving.contains(&ob.key()) {
+            return 0;
+        }
+        self.resolving.push(ob.key());
+        let mut h = FxHasher::default();
+        for d in deps {
+            d.hash(&mut h);
+            let main = self.host.main();
+            match d.code {
+                IdCode::OB => match IdRef::<ObjectId>::from_any(d) {
+                    Some(o) => self.object_dep(o, &mut h),
+                    None => 0u8.hash(&mut h),
+                },
+                IdCode::GR => {
+                    // The collection and, recursively, the objects of it and its children.
+                    let mut objects = Vec::new();
+                    let mut stack = vec![d];
+                    let mut seen = Vec::new();
+                    while let Some(c) = stack.pop() {
+                        if seen.contains(&c) {
+                            continue;
+                        }
+                        seen.push(c);
+                        let Some(col) = c.typed().and_then(|r| main.collections.get(r)) else {
+                            continue;
+                        };
+                        col.header.generation.hash(&mut h);
+                        objects.extend(col.objects.iter().copied());
+                        stack.extend(col.children.iter().rev().map(|r| r.any()));
+                    }
+                    for o in objects {
+                        self.object_dep(o, &mut h);
+                    }
+                }
+                _ => {
+                    main.header(d).map_or(0, |hd| hd.generation).hash(&mut h);
+                    // A texture's image (DISPLACE): pixels change the image's `gen`.
+                    if let Some(t) = d.typed().and_then(|r| main.textures.get(r)) {
+                        t.for_each_ref(&mut |r| {
+                            main.header(r).map_or(0, |hd| hd.generation).hash(&mut h);
+                        });
+                    }
+                }
+            }
+        }
+        self.resolving.retain(|k| *k != ob.key());
+        h.finish()
+    }
+
     fn hash(
         &self,
         ob: IdRef<ObjectId>,
         parent: Option<IdRef<ObjectId>>,
         cycle: Option<&Cycle>,
+        deps: u64,
     ) -> u64 {
         let main = self.host.main();
         let o = self.object(ob).expect("invariant: resolved objects exist");
         let mut h = FxHasher::default();
+        deps.hash(&mut h);
         ob.key().hash(&mut h);
         o.header.generation.hash(&mut h);
         self.mode.hash(&mut h);

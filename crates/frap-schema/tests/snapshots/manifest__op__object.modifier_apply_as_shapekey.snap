@@ -1,0 +1,122 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+{
+  "idname": "object.modifier_apply_as_shapekey",
+  "bl_idname": "OBJECT_OT_modifier_apply_as_shapekey",
+  "label": "Apply Modifier as Shape Key",
+  "description": "Apply modifier as a new shape key and remove from the stack",
+  "bl_options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": null,
+    "text": "Blender 5.2's poll passes in: A (Object Mode, the factory 'Cube' (a mesh) active and selected); D (Pose Mode on an armature)",
+    "matrix": {
+      "plain": "YNNYN",
+      "view3d": "YNNYN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "keep_modifier",
+      "name": "Keep Modifier",
+      "description": "Do not remove the modifier from stack",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "modifier",
+      "name": "Modifier",
+      "description": "Name of the modifier to edit",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 64,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "NEVER_NULL",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "report",
+      "name": "Report",
+      "description": "Create a notification after the operation",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_selected_objects",
+      "name": "Selected Objects",
+      "description": "Affect all selected objects instead of just the active object",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "not_implemented",
+    "tier": null,
+    "support": null,
+    "support_note": null,
+    "headless": null,
+    "planned": "M6",
+    "extension": false,
+    "notes": [
+      "object.modifier_apply_as_shapekey exists in Blender 5.2; frap implements it in M6 (OP_NOT_IMPLEMENTED until then)"
+    ]
+  }
+}

@@ -498,6 +498,11 @@ pub fn resolve(host: &dyn HostRead, path: &frap_lang::PathExpr) -> Result<Target
 /// leads back to the ordinary pointer, and `ID.is_evaluated` reads True on an evaluated ID
 /// (WP 1.22 contract change).
 pub fn step(host: &dyn HostRead, cur: Target, seg: &PathSeg) -> Result<Target, FrapError> {
+    if let (Target::Struct(p), PathSeg::Attr(a)) = (&cur, seg)
+        && let Some(t) = evaluated_data(host, p, a.as_str())
+    {
+        return Ok(t);
+    }
     let id_root = match &cur {
         Target::Struct(p) if p.srna.is_id && p.path.is_empty() => Some(p.root),
         _ => None,
@@ -533,6 +538,40 @@ pub fn step(host: &dyn HostRead, cur: Target, seg: &PathSeg) -> Result<Target, F
     let mut t = step_inner(host, cur, seg)?;
     mark_detached(&mut t, d, parent_root);
     Ok(t)
+}
+
+/// WP 4.1 (D-41): `ob.evaluated_get(dg).data` of a mesh object with modifiers is its evaluated
+/// mesh, as in Blender. It is reached as `objects['X'].data` behind a
+/// [`Detached::Temporary`] pointer (the form `Object.to_mesh()` returns), which
+/// [`with_struct`] reads as the object's evaluated mesh; its `original` is itself and its
+/// `is_evaluated` reads False (verified on 5.2.4: `ev.data.original == ev.data`).
+/// `None`: resolve as usual.
+fn evaluated_data(host: &dyn HostRead, p: &RnaPtr, attr: &str) -> Option<Target> {
+    let Root::Id(id) = p.root else {
+        return None;
+    };
+    if id.code != frap_rna::IdCode::OB {
+        return None;
+    }
+    let ob = host.main().objects.get(id.typed()?)?;
+    let data = ob.data?;
+    match (p.path.as_slice(), attr) {
+        ([], "data") if p.detached == Some(Detached::Evaluated) => {
+            if data.code != frap_rna::IdCode::ME || ob.modifiers.is_empty() {
+                return None;
+            }
+            let mut ptr = RnaPtr::id(id, &frap_spec_rna::OBJECT)
+                .child(Seg::Prop("data"), &frap_spec_rna::MESH);
+            ptr.detached = Some(Detached::Temporary);
+            Some(Target::Struct(ptr))
+        }
+        // Blender's evaluated mesh is not a copy of an original: `original` is itself.
+        ([Seg::Prop("data")], "original") if p.srna.is_id => Some(Target::Struct(p.clone())),
+        ([Seg::Prop("data")], "is_evaluated") if p.srna.is_id => {
+            Some(Target::Value(Value::Bool(false)))
+        }
+        _ => None,
+    }
 }
 
 fn target_detached(t: &Target) -> Option<Detached> {

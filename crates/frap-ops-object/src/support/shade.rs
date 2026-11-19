@@ -206,6 +206,27 @@ pub fn run(cx: &mut frap_op::OpCtx, how: Shade, keep_sharp_edges: bool) -> frap_
         }
         (meshes, linked)
     };
+    // `shade_flat` / `shade_smooth` remove the first "Smooth by Angle" modifier of each
+    // selected mesh object (`is_smooth_by_angle_modifier`, WP 4.1).
+    if matches!(how, Shade::Smooth | Shade::Flat) {
+        let objects = cx.ctx().selected_editable_objects();
+        for ob in objects {
+            let i = {
+                let main = cx.main();
+                main.objects
+                    .get(ob)
+                    .filter(|o| o.object_type() == "MESH")
+                    .and_then(|o| {
+                        o.modifiers.iter().position(|m| {
+                            frap_modifiers::types::nodes::is_smooth_by_angle_modifier(main, m)
+                        })
+                    })
+            };
+            if let Some(i) = i {
+                frap_modifiers::stack::edit::remove(&mut cx.object_mut(ob)?.modifiers, i);
+            }
+        }
+    }
     for m in &meshes {
         let mesh = cx.mesh_mut(*m)?;
         match how {
