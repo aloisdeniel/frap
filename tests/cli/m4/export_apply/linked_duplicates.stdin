@@ -1,0 +1,8 @@
+bpy.ops.object.duplicate_move_linked(TRANSFORM_OT_translate={'value': (3, 0, 0)})
+bpy.context.object.modifiers.new(name='Subdivision', type='SUBSURF')
+bpy.ops.export_scene.gltf(filepath='data.glb')
+bpy.ops.export_scene.gltf(filepath='applied.glb', export_apply=True)
+bpy.context.object.evaluated_get(bpy.context.evaluated_depsgraph_get()).data.vertices
+bpy.data.objects['Cube'].modifiers.new(name='Build', type='BUILD')
+bpy.data.objects['Cube'].modifiers['Build'].frame_start = 10
+bpy.ops.export_scene.gltf(filepath='built.glb', export_apply=True)

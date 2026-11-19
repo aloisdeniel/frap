@@ -272,15 +272,17 @@ impl Builder<'_> {
         let main = self.main;
         let mesh_ref: Option<IdRef<MeshId>> = ob.data.and_then(|d| d.typed());
         let data = mesh_ref.and_then(|m| main.meshes.get(m));
-        let slot_materials: &[Option<IdRef<MaterialId>>] = data.map_or(&[], |m| &m.materials);
-        let slot_count = slot_materials.len();
         let evaluated = ev.mesh.clone().or_else(|| match (mesh_ref, data) {
             (Some(m), Some(_)) => Some(host.mesh_view(m)),
             _ => None,
         });
+        // Slots of the evaluated object (modifiers may add some; WP 4.7, `evaluated.rs`).
+        let slots = evaluated::slot_materials(ob, data, evaluated.as_deref());
+        let slot_count = slots.len();
         let mesh = evaluated.map(|m| self.mesh(m, slot_count));
-        let materials = (0..slot_count)
-            .map(|i| slot_material(ob, slot_materials, i).and_then(|m| self.material(m)))
+        let materials = slots
+            .into_iter()
+            .map(|m| m.and_then(|m| self.material(m)))
             .collect();
         RObject {
             name: ob.header.name.clone(),

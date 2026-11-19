@@ -1,0 +1,10 @@
+# WP 4.7: an agent gives a linked duplicate of the cube a Subdivision and exports. Without
+# export_apply both objects share one glTF mesh (`"meshes":1`, the data); with
+# export_apply=True the subdivided duplicate gets its own (`"meshes":2`, more bytes) and no
+# "not supported yet" WARNING is reported. A Build modifier that has built nothing at frame 1
+# leaves an empty evaluated mesh: the export warns `Mesh 'Cube' has no primitives and will be
+# omitted.` and writes the node without a mesh (all verified on Blender 5.2.4; the subdivided
+# evaluated mesh has 26 vertices). Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

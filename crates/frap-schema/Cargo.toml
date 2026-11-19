@@ -27,6 +27,8 @@ frap-spec-ops-frap.workspace = true
 frap-nodes.workspace = true
 frap-math.workspace = true
 frap-scene.workspace = true
+# WP 4.7 (M34W1-10): `modifier_types[].evaluator` reads the evaluator registry.
+frap-modifiers.workspace = true
 schemars.workspace = true
 serde.workspace = true
 serde_json.workspace = true
