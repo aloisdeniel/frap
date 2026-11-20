@@ -35,7 +35,8 @@
 //!    headless); its pixels go to the session's image cache. `write_still` writes
 //!    `scene.render.filepath` following [`crate::output`]'s rules, colour-managed (§19.5).
 //! 5. `animation=True` (`RE_RenderAnim`) renders `frame_start`, `frame_start + frame_step`, …
-//!    up to `frame_end` and writes each frame to its frame path (`#` runs replaced by the
+//!    up to `frame_end` (only `frame_start` with `frame_step = 0`) and writes each frame to its
+//!    frame path (`#` runs replaced by the
 //!    zero-padded frame, else a 4-digit frame appended, then the extension). Before a frame:
 //!    with `use_overwrite` off an existing file skips the frame (not rendered; when every frame
 //!    is skipped the INFO `No frames rendered, skipped to not overwrite` is reported and
@@ -47,7 +48,9 @@
 //! Output paths are computed before anything is rendered, so a template error fails without a
 //! render. Files are written before `Render Result` is updated: a failed write leaves the
 //! session untouched (the files of earlier frames stay, as in Blender). File errors name the
-//! path as Blender prints it (relative stays relative).
+//! path as Blender prints it (relative stays relative, normalised: `out/../out/a_` →
+//! `out/a_`); a directory that cannot be created fails as Blender's save does (`Render error
+//! (<strerror>) cannot save: '<path>'`).
 //!
 //! `result`: `engine` (the engine that rendered), `resolution`, `image` (`"Render Result"`),
 //! `frames` (frames rendered), and with files `filepath` (the last file) and `files` (every
@@ -132,12 +135,15 @@ struct AnimFiles {
     placeholder: bool,
 }
 
-/// The frames of an animation render: `start`, `start + step`, … up to `end` (`RE_RenderAnim`'s
-/// `nfra += tfra` walk; a `step` below 1 counts as 1, the RNA minimum).
+/// The frames of an animation render: `start`, `start + step`, … up to `end`. `RE_RenderAnim`
+/// walks `cfra` by 1 and renders when `cfra == nfra`, then `nfra += tfra`: with
+/// `frame_step = 0` (the RNA minimum) only `start` renders.
 fn animation_frames(start: i32, end: i32, step: i32) -> Vec<i32> {
-    let step = step.max(1) as usize;
+    if step <= 0 {
+        return if start <= end { vec![start] } else { Vec::new() };
+    }
     (i64::from(start)..=i64::from(end))
-        .step_by(step)
+        .step_by(step as usize)
         .map(|f| f as i32)
         .collect()
 }
@@ -443,7 +449,7 @@ fn store_render_result(cx: &mut OpCtx, film: Film) {
     notes = [
         "needs a GPU: GPU_UNAVAILABLE without an adapter or in a build without the gpu feature",
         "the scene is rendered from a copy: nothing changes except bpy.data.images['Render Result']",
-        "animation=True renders frame_start..frame_end by scene.frame_step, each frame from its own copy with the animation of that frame; frame_current is unchanged afterwards; render.use_overwrite/use_placeholder apply as in Blender",
+        "animation=True renders frame_start..frame_end by scene.frame_step (frame_step=0: frame_start only), each frame from its own copy with the animation of that frame; frame_current is unchanged afterwards; render.use_overwrite/use_placeholder apply as in Blender",
         "output paths follow Blender 5.2: templates ({scene_name}, {resolution_x:####}, ...), // relative to the saved .frap (else the cwd), relative paths against the cwd, # runs for animation frames, use_file_extension",
         "a path without a directory part ('shot.png') is written to the cwd (Blender 5.2.4 fails to save it)",
         "file formats: PNG 8/16, JPEG, WEBP, OPEN_EXR, HDR, TARGA, BMP"
@@ -568,8 +574,9 @@ mod tests {
         assert_eq!(animation_frames(-2, 1, 1), [-2, -1, 0, 1]);
         assert_eq!(animation_frames(3, 3, 9), [3]);
         assert_eq!(animation_frames(4, 5, 2), [4]);
-        // Below the RNA minimum: 1.
-        assert_eq!(animation_frames(1, 3, 0), [1, 2, 3]);
+        // `frame_step = 0` (Blender 5.2.4 writes only the first frame).
+        assert_eq!(animation_frames(1, 4, 0), [1]);
+        assert_eq!(animation_frames(5, 5, 0), [5]);
         assert_eq!(animation_frames(i32::MAX - 1, i32::MAX, 1), [i32::MAX - 1, i32::MAX]);
     }
 

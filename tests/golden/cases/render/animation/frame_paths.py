@@ -4,7 +4,9 @@
 # `#` runs replaced by the zero-padded frame (the last run only), else 4 digits appended before
 # the extension (also after a name that has one, and to a directory), negative frames, frames
 # past 9999, use_file_extension off; the frames walk frame_start..frame_end by
-# scene.frame_step, the operator's frame_start/frame_end replacing the scene's only when set.
+# scene.frame_step (frame_step=0: frame_start only, RE_RenderAnim's nfra walk), the operator's
+# frame_start/frame_end replacing the scene's only when set; paths normalised as
+# BLI_path_normalize does (`out/sub/../sub2/./../norm//n_` -> `out/norm/n_0001.png`).
 # Every file written is compared with Blender's (names, empty or not). frame_current and the
 # scene range are unchanged afterwards (cursor). `#@render` lines run in
 # crates/frap-ops-render-tests (tests/render_animation.rs).
@@ -20,7 +22,12 @@ bpy.context.scene.render.filepath = 'out/step_'
 #@render bpy.ops.render.render(animation=True)
 #@render bpy.ops.render.render(animation=True, frame_end=4)
 #@render bpy.ops.render.render(animation=True, frame_start=7)
+bpy.context.scene.frame_step = 0
+bpy.context.scene.render.filepath = 'out/zero_'
+#@render bpy.ops.render.render(animation=True, frame_start=1, frame_end=4)
 bpy.context.scene.frame_step = 1
+bpy.context.scene.render.filepath = 'out/sub/../sub2/./../norm//n_'
+#@render bpy.ops.render.render(animation=True, frame_start=1, frame_end=1)
 bpy.context.scene.render.filepath = 'out/a_##_b_###'
 #@render bpy.ops.render.render(animation=True, frame_start=9, frame_end=10)
 bpy.context.scene.render.filepath = 'out/d_##/x'
