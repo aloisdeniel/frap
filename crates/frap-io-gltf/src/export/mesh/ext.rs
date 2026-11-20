@@ -39,6 +39,9 @@ pub struct MeshExportCx<'a> {
     pub object: Option<IdRef<ObjectId>>,
     /// Export settings.
     pub settings: &'a ExportSettings,
+    /// The skin of `object`'s mesh (M6, WP 6.8: joints, vertex groups, armature-space
+    /// transforms; `export/skins.rs`), `None` when the mesh is not skinned.
+    pub skin: Option<&'a crate::export::skins::MeshSkin>,
 }
 
 impl<'a> MeshExportCx<'a> {
@@ -54,7 +57,14 @@ impl<'a> MeshExportCx<'a> {
             mesh,
             object,
             settings,
+            skin: None,
         }
+    }
+
+    /// The same context with the mesh skinned by `skin` (WP 6.8).
+    pub fn with_skin(mut self, skin: Option<&'a crate::export::skins::MeshSkin>) -> Self {
+        self.skin = skin;
+        self
     }
 }
 

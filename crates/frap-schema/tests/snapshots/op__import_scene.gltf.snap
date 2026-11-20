@@ -495,7 +495,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T2",
     "support": "partial",
-    "support_note": "M1: static meshes, hierarchy, cameras, lights, Principled materials and textures; skins, morph targets and animations (M6) and compressed meshes (M7) give a WARNING",
+    "support_note": "static meshes, hierarchy, cameras, lights, Principled materials and textures, skins and morph targets (M6); animations (M6) and compressed meshes (M7) give a WARNING",
     "headless": "native",
     "planned": "M1",
     "extension": false,

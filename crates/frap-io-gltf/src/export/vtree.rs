@@ -4,33 +4,43 @@
 //!
 //! Ported from blender/scripts/addons_core/io_scene_gltf2/blender/exp/tree.py (`VExportTree`:
 //! `construct`, `recursive_node_traverse`, `filter`, `recursive_filter_tag`,
-//! `recursive_filter`, `node_filter_*_is_kept`, `break_obj_hierarchy`):
+//! `recursive_filter`, `node_filter_*_is_kept`, `break_obj_hierarchy`, and from WP 6.8 the
+//! armature passes `search_missing_armature`, `check_if_we_can_remove_armature`,
+//! `break_bone_hierarchy`, `bake_armature_bone_list`, `add_leaf_bones`, `get_all_bones`,
+//! `get_root_bones_uuid`):
 //!
 //! - Roots are the scene's objects without a parent, in **natural, case-insensitive** name order
 //!   (`_natural_sort_key`: `Object2` < `Object10`), ties in scene order (Python's sort is
 //!   stable).
 //! - Children are every object of `bpy.data.objects` whose parent is the node, even objects that
 //!   are not in the exported scene (the add-on builds `blender_children` from `bpy.data.objects`),
-//!   in the same natural order. Objects parented to bones are left to M6 (skipped here).
+//!   in the same natural order, then (armatures) the root bones by name, (bones) the child bones
+//!   by name and the objects parented to the bone (`parent_type = 'BONE'`) by name. A bone node
+//!   is `armature.matrix_world @ bone.matrix_local` (`export_rest_position_armature`, the
+//!   default) or `@ pose_bone.matrix`, times the Y-up basis change; an object parented to a bone
+//!   is moved from the pose to the rest pose of its bone (the `delta` of `recursive_node_traverse`,
+//!   passed on to its descendants).
 //! - Filters (`use_selection`, `use_visible`, `use_renderable`, `collection`,
 //!   `use_active_collection[_with_nested]`, the `glTF_not_exported` collection, cameras and
-//!   lights) drop a node; its kept descendants move to the nearest kept ancestor (appended to
-//!   its children) or become roots (appended to the roots).
+//!   lights, `export_def_bones`, `export_armature_object_remove`) drop a node; its kept
+//!   descendants move to the nearest kept ancestor (appended to its children) or become roots
+//!   (appended to the roots). Bones are filtered with their armature object's selection and
+//!   visibility.
 //! - `matrix_world` is Blender's `parent.matrix_world @ matrix_parent_inverse @ matrix_basis`.
 //!
 //! Cameras and lights are kept with `export_cameras`/`export_lights` and their world matrix
-//! gets the add-on's correction rotation (`cameras.rs`, WP 3.4). M1 limits: collection
-//! hierarchies (`export_hierarchy_full_collections`), instancing and bones are later
-//! milestones.
+//! gets the add-on's correction rotation (`cameras.rs`, WP 3.4). Not supported: collection
+//! hierarchies (`export_hierarchy_full_collections`) and instancing (later milestones).
 
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};
 
-use frap_math::glam::Mat4;
+use frap_math::glam::{Mat4, Vec3, Vec4};
 use frap_math::matrix::{ObjectTransform, RotationMode, RotationValues};
-use frap_rna::{CollectionId, IdRef, ObjectId};
-use frap_scene::id::{Collection, Object};
+use frap_rna::{ArmatureId, CollectionId, IdRef, ObjectId};
+use frap_scene::id::{Armature, Collection, ModifierSettings, Object};
 use frap_scene::{BaseFlag, Context, LayerCollection, Main};
+use smol_str::SmolStr;
 
 use crate::export::ExportSettings;
 
@@ -38,19 +48,82 @@ use crate::export::ExportSettings;
 /// (`BLENDER_GLTF_SPECIAL_COLLECTION`).
 pub const SPECIAL_COLLECTION: &str = "glTF_not_exported";
 
+/// `VExportNode.blender_type`.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub enum VType {
+    /// `OBJECT` (meshes, empties, point clouds)
+    Object,
+    /// `ARMATURE`
+    Armature,
+    /// `BONE` (also the leaf bones of `export_leaf_bone`)
+    Bone,
+    /// `CAMERA`
+    Camera,
+    /// `LIGHT`
+    Light,
+}
+
 /// One node of the export tree.
 #[derive(Clone, Debug)]
 pub struct VNode {
-    /// The object.
+    /// The object (for a bone: its armature object).
     pub object: IdRef<ObjectId>,
     /// Parent node after filtering.
     pub parent: Option<usize>,
     /// Children after filtering, in export order.
     pub children: Vec<usize>,
-    /// `matrix_world` (Blender space).
+    /// `matrix_world` (Blender space; bones include the Y-up basis change).
     pub matrix_world: Mat4,
     /// Survived the filters.
     pub keep: bool,
+    /// `blender_type`.
+    pub kind: VType,
+    /// `blender_bone.name` (bones; `None` for leaf bones).
+    pub bone: Option<SmolStr>,
+    /// `armature`: a bone's armature node, or the armature node a skinned object (ARMATURE
+    /// modifier) is deformed by.
+    pub armature: Option<usize>,
+    /// `use_deform` of a bone.
+    pub use_deform: bool,
+    /// `parent_bone_uuid`: the bone node a bone or object hangs from.
+    pub parent_bone: Option<usize>,
+    /// `leaf_reference`: the bone a leaf bone ends (`export_leaf_bone`).
+    pub leaf_reference: Option<usize>,
+    /// `matrix_world_tail` (bones, `export_leaf_bone`).
+    pub matrix_world_tail: Option<Mat4>,
+    /// `original_matrix_world`: the pose-space world matrix of an object moved to the rest pose
+    /// of its parent bone (and of its descendants).
+    pub original_matrix_world: Option<Mat4>,
+    /// `arma_exported` (`export_armature_object_remove`: the armature passed the filters
+    /// before being removed).
+    pub arma_exported: bool,
+    /// `all_bones` of an armature (`get_all_bones`, cached at its first call).
+    pub all_bones: Option<Vec<usize>>,
+    /// `root_bones_uuid` of an armature (`get_root_bones_uuid`).
+    pub root_bones: Option<Vec<usize>>,
+}
+
+impl VNode {
+    fn new(object: IdRef<ObjectId>, kind: VType, parent: Option<usize>) -> VNode {
+        VNode {
+            object,
+            parent,
+            children: Vec::new(),
+            matrix_world: Mat4::IDENTITY,
+            keep: true,
+            kind,
+            bone: None,
+            armature: None,
+            use_deform: false,
+            parent_bone: None,
+            leaf_reference: None,
+            matrix_world_tail: None,
+            original_matrix_world: None,
+            arma_exported: false,
+            all_bones: None,
+            root_bones: None,
+        }
+    }
 }
 
 /// The export tree of one scene.
@@ -60,6 +133,11 @@ pub struct VTree {
     pub nodes: Vec<VNode>,
     /// Root nodes in export order.
     pub roots: Vec<usize>,
+    /// `gltf_armature_object_remove` as the tree was built (`check_if_we_can_remove_armature`
+    /// may have turned it off).
+    pub armature_object_remove: bool,
+    /// `check_if_we_can_remove_armature` turned `export_armature_object_remove` off.
+    pub armature_remove_refused: bool,
 }
 
 /// `_natural_sort_key` order: names split into text and digit runs (`re.split(r'(\d+)')`),
@@ -167,8 +245,9 @@ pub fn matmul(a: &Mat4, b: &Mat4) -> Mat4 {
 }
 
 /// `Object.matrix_world` of the original object: `parent.matrix_world @ matrix_parent_inverse
-/// @ matrix_basis`, associated as `BKE_object_where_is_calc` does (`mul_m4_series`); M1: every
-/// parent type is treated as `OBJECT`.
+/// @ matrix_basis`, associated as `BKE_object_where_is_calc` does (`mul_m4_series`). A
+/// `parent_type = 'BONE'` child of an armature reads the pose of its bone
+/// (`frap_scene::id::transform::parent_matrix_in`, WP 6.8); other parent types are `OBJECT`.
 pub fn matrix_world(main: &Main, ob: &Object) -> Mat4 {
     fn rec(main: &Main, ob: &Object, depth: usize) -> Mat4 {
         let basis = matrix_basis(ob);
@@ -176,7 +255,12 @@ pub fn matrix_world(main: &Main, ob: &Object) -> Mat4 {
         match ob.parent.and_then(|p| main.objects.get(p)) {
             Some(p) if depth < main.objects.len() => {
                 let pw = rec(main, p, depth + 1);
-                mul_m4(&mul_m4(&pw, &ob.matrix_parent_inverse), &basis)
+                let pm = if ob.parent_type == "BONE" {
+                    frap_scene::id::transform::parent_matrix_in(main, ob, p, pw)
+                } else {
+                    pw
+                };
+                mul_m4(&mul_m4(&pm, &ob.matrix_parent_inverse), &basis)
             }
             _ => basis,
         }
@@ -189,7 +273,9 @@ pub fn matrix_world(main: &Main, ob: &Object) -> Mat4 {
 // matrix_invert_with_det_n_internal).
 #[allow(clippy::too_many_arguments)]
 fn det3(a1: f32, a2: f32, a3: f32, b1: f32, b2: f32, b3: f32, c1: f32, c2: f32, c3: f32) -> f32 {
-    a1 * (b2 * c3 - b3 * c2) - a2 * (b1 * c3 - b3 * c1) + a3 * (b1 * c2 - b2 * c1)
+    // `determinant_m3`: expanded along the first column (`a1 * det2(b2, b3, c2, c3) - b1 *
+    // det2(a2, a3, c2, c3) + c1 * det2(a2, a3, b2, b3)`), as Blender rounds it.
+    a1 * (b2 * c3 - b3 * c2) - b1 * (a2 * c3 - a3 * c2) + c1 * (a2 * b3 - a3 * b2)
 }
 
 fn det4(m: &M4) -> f32 {
@@ -232,8 +318,8 @@ fn adjoint4(m: &M4) -> M4 {
 }
 
 /// `Matrix.inverted_safe()`: the adjoint divided by the determinant; a singular matrix gets
-/// `PSEUDOINVERSE_EPSILON` (1e-8) added to its diagonal first (and the determinant becomes that
-/// epsilon if it is still zero).
+/// `PSEUDOINVERSE_EPSILON` (1e-8) added to its diagonal first (and becomes the identity, with
+/// determinant 1, if it is still singular).
 pub fn inverted_safe(m: &Mat4) -> Mat4 {
     const EPS: f32 = 1e-8;
     let mut src = m4(m);
@@ -244,7 +330,8 @@ pub fn inverted_safe(m: &Mat4) -> Mat4 {
         }
         det = det4(&src);
         if det == 0.0 {
-            det = EPS;
+            src = m4(&Mat4::IDENTITY);
+            det = 1.0;
         }
     }
     let adj = adjoint4(&src);
@@ -407,17 +494,6 @@ impl<'a> Filters<'a> {
         }
     }
 
-    /// `node_filter_not_inheritable_is_kept`.
-    fn not_inheritable(&self, ob: &Object) -> bool {
-        // export_cameras / export_lights (WP 3.4, `cameras.rs` / `lights.rs`; both default to
-        // False).
-        match ob.object_type() {
-            "CAMERA" => crate::export::cameras::exported(self.s),
-            "LIGHT" => crate::export::lights::exported(self.s),
-            _ => true,
-        }
-    }
-
     /// `node_filter_inheritable_is_kept`.
     fn inheritable(&self, r: IdRef<ObjectId>, ob: &Object) -> bool {
         if self.s.use_selection && !select_get(self.ctx, r) {
@@ -451,8 +527,132 @@ impl<'a> Filters<'a> {
     }
 }
 
+/// The bone options of the export settings, as the add-on derives them
+/// (`ExportGLTF2.execute`): `export_def_bones` only with `export_skins`, and not when
+/// animations are exported without `export_force_sampling`.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct BoneSettings {
+    /// `gltf_skins`
+    pub skins: bool,
+    /// `gltf_def_bones`
+    pub def_bones: bool,
+    /// `gltf_flatten_bones_hierarchy`
+    pub flatten_bones: bool,
+    /// `gltf_armature_object_remove` (before `check_if_we_can_remove_armature`)
+    pub armature_object_remove: bool,
+    /// `gltf_leaf_bone`
+    pub leaf_bone: bool,
+    /// `gltf_rest_position_armature`
+    pub rest_position: bool,
+}
+
+impl BoneSettings {
+    /// The bone options of `s`.
+    pub fn new(s: &ExportSettings) -> BoneSettings {
+        let p = &s.props;
+        let skins = p.export_skins.value;
+        let def_bones = p.export_def_bones.value
+            && skins
+            && !(p.export_animations.value && !p.export_force_sampling.value);
+        BoneSettings {
+            skins,
+            def_bones,
+            flatten_bones: p.export_hierarchy_flatten_bones.value,
+            armature_object_remove: p.export_armature_object_remove.value,
+            leaf_bone: p.export_leaf_bone.value,
+            rest_position: p.export_rest_position_armature.value,
+        }
+    }
+}
+
+/// `axis_basis_change`: identity, or with `export_yup` the rotation taking Blender's +Z to
+/// glTF's +Y (rows `(1,0,0,0) (0,0,1,0) (0,-1,0,0) (0,0,0,1)`).
+pub fn axis_basis_change(export_yup: bool) -> Mat4 {
+    if export_yup {
+        Mat4::from_cols(
+            Vec4::new(1.0, 0.0, 0.0, 0.0),
+            Vec4::new(0.0, 0.0, -1.0, 0.0),
+            Vec4::new(0.0, 1.0, 0.0, 0.0),
+            Vec4::new(0.0, 0.0, 0.0, 1.0),
+        )
+    } else {
+        Mat4::IDENTITY
+    }
+}
+
+/// `Matrix.Translation(v)`.
+fn translation(v: Vec3) -> Mat4 {
+    Mat4::from_translation(v)
+}
+
+/// The armature data of an ARMATURE object.
+pub fn armature_of<'m>(main: &'m Main, ob: &Object) -> Option<&'m Armature> {
+    ob.data
+        .and_then(|d| d.typed::<ArmatureId>())
+        .and_then(|a| main.armatures.get(a))
+}
+
+/// What the tree reads of an armature: per bone index, the rest matrix (`Bone.matrix_local`,
+/// `EditBone.tail`) and the pose (`PoseBone.matrix`, `PoseBone.tail`).
+pub struct ArmatureMats {
+    /// `armature_finalize_restpose` per bone.
+    pub rest: Vec<frap_scene::edit_armature::rest::RestBone>,
+    /// `BKE_pose_where_is` per bone.
+    pub pose: Vec<frap_scene::edit_armature::posing::PoseMats>,
+}
+
+impl ArmatureMats {
+    /// The matrices of `arm` posed by `ob.pose`.
+    pub fn new(arm: &Armature, ob: &Object) -> ArmatureMats {
+        let rest = frap_scene::edit_armature::rest::rest_pose(arm);
+        let pose = frap_scene::edit_armature::posing::where_is(
+            arm,
+            &rest,
+            ob.pose.as_ref(),
+            arm.pose_position == "REST",
+        );
+        ArmatureMats { rest, pose }
+    }
+}
+
+/// The last ARMATURE modifier of `ob` (`{m.type: m for m in modifiers}["ARMATURE"]`) and its
+/// object.
+pub fn armature_modifier_object(ob: &Object) -> Option<Option<IdRef<ObjectId>>> {
+    ob.modifiers.iter().rev().find_map(|m| match &m.settings {
+        ModifierSettings::Armature(a) => Some(a.object.and_then(|o| o.typed::<ObjectId>())),
+        _ => None,
+    })
+}
+
+/// A node to create (`recursive_node_traverse`'s arguments).
+enum Item<'m> {
+    Object(IdRef<ObjectId>, &'m Object),
+    Bone {
+        arm_ob: IdRef<ObjectId>,
+        bone: usize,
+        arm_node: usize,
+    },
+}
+
 /// Builds the export tree of the context scene.
 pub fn build(main: &Main, ctx: &Context, s: &ExportSettings) -> VTree {
+    let b = BoneSettings::new(s);
+    build_ex(main, ctx, s, b.armature_object_remove)
+}
+
+/// [`build`] with `gltf_armature_object_remove` given (an earlier scene's
+/// `check_if_we_can_remove_armature` may have turned it off for the rest of the export).
+pub fn build_ex(
+    main: &Main,
+    ctx: &Context,
+    s: &ExportSettings,
+    armature_object_remove: bool,
+) -> VTree {
+    let bs = BoneSettings {
+        armature_object_remove,
+        ..BoneSettings::new(s)
+    };
+    let abc = axis_basis_change(s.export_yup);
     let mut children_of: BTreeMap<IdRef<ObjectId>, Vec<(IdRef<ObjectId>, &Object)>> =
         BTreeMap::new();
     for (r, ob) in main.objects.iter() {
@@ -468,61 +668,276 @@ pub fn build(main: &Main, ctx: &Context, s: &ExportSettings) -> VTree {
         .filter(|(_, o)| o.parent.and_then(|p| main.objects.get(p)).is_none())
         .collect();
     roots.sort_by(|a, b| natural_cmp(&a.1.header.name, &b.1.header.name));
+    fn sorted(mut v: Vec<(IdRef<ObjectId>, &Object)>) -> Vec<(IdRef<ObjectId>, &Object)> {
+        v.sort_by(|a, b| natural_cmp(&a.1.header.name, &b.1.header.name));
+        v
+    }
 
-    let mut tree = VTree::default();
+    let mut tree = VTree {
+        armature_object_remove: bs.armature_object_remove,
+        ..VTree::default()
+    };
     let mut visited = BTreeSet::new();
-    let filters = Filters::new(main, ctx, s);
-    // Construction + keep tags (`recursive_node_traverse`, `recursive_filter_tag`).
-    let mut stack: Vec<(IdRef<ObjectId>, &Object, Option<usize>)> =
-        roots.iter().rev().map(|(r, o)| (*r, *o, None)).collect();
-    while let Some((r, ob, parent)) = stack.pop() {
-        if !visited.insert(r) {
-            continue;
-        }
+    let mut mats: BTreeMap<IdRef<ObjectId>, ArmatureMats> = BTreeMap::new();
+    // `armature_needed`: skinned objects not parented to their armature (searched by name).
+    let mut armature_needed: Vec<(usize, SmolStr)> = Vec::new();
+    // Construction (`recursive_node_traverse`), pre-order.
+    let mut stack: Vec<(Item, Option<usize>, bool)> = roots
+        .iter()
+        .rev()
+        .map(|(r, o)| (Item::Object(*r, o), None, false))
+        .collect();
+    while let Some((item, parent, delta)) = stack.pop() {
         let i = tree.nodes.len();
-        tree.nodes.push(VNode {
-            object: r,
-            parent,
-            children: Vec::new(),
-            // Cameras and lights get the add-on's Y-up correction (WP 3.4, `cameras.rs`).
-            matrix_world: crate::export::cameras::correct_matrix_world(
-                s,
-                ob,
-                matrix_world(main, ob),
-            ),
-            keep: filters.not_inheritable(ob) && filters.inheritable(r, ob),
-        });
+        let mut new_delta = false;
+        let node = match item {
+            Item::Object(r, ob) => {
+                if !visited.insert(r) {
+                    continue;
+                }
+                let kind = match ob.object_type() {
+                    "ARMATURE" => VType::Armature,
+                    "CAMERA" => VType::Camera,
+                    "LIGHT" => VType::Light,
+                    _ => VType::Object,
+                };
+                let mut n = VNode::new(r, kind, parent);
+                if kind == VType::Object
+                    && let Some(Some(mod_ob)) = armature_modifier_object(ob)
+                {
+                    match parent {
+                        Some(p) if tree.nodes[p].kind == VType::Armature => n.armature = Some(p),
+                        _ => {
+                            if let Some(name) = main.objects.name_of(mod_ob) {
+                                armature_needed.push((i, SmolStr::new(name)));
+                            }
+                        }
+                    }
+                }
+                if let Some(p) = parent
+                    && tree.nodes[p].kind == VType::Bone
+                {
+                    n.parent_bone = Some(p);
+                }
+                let mut mw = matrix_world(main, ob);
+                // Rest position: an object parented to a bone keeps its offset to the bone's
+                // pose, applied to the bone's rest matrix.
+                if let Some(p) = parent
+                    && tree.nodes[p].kind == VType::Bone
+                    && bs.rest_position
+                    && let (Some(arm_node), Some(bone)) =
+                        (tree.nodes[p].armature, tree.nodes[p].bone.clone())
+                {
+                    let arm_ob = tree.nodes[arm_node].object;
+                    let arm_mw = tree.nodes[arm_node].matrix_world;
+                    if let Some(am) = mats.get(&arm_ob)
+                        && let Some(arm) =
+                            main.objects.get(arm_ob).and_then(|o| armature_of(main, o))
+                        && let Some(bi) = arm.bone_index(&bone)
+                    {
+                        let pose = matmul(&matmul(&arm_mw, &am.pose[bi].pose_mat), &abc);
+                        let rest = matmul(&matmul(&arm_mw, &am.rest[bi].arm_mat), &abc);
+                        let d = matmul(&inverted_safe(&pose), &mw);
+                        n.original_matrix_world = Some(mw);
+                        mw = matmul(&rest, &d);
+                        new_delta = true;
+                    }
+                }
+                // Cameras and lights get the add-on's Y-up correction (WP 3.4, `cameras.rs`).
+                n.matrix_world = crate::export::cameras::correct_matrix_world(s, ob, mw);
+                // Children: objects (not parented to a bone), then the root bones.
+                let kids: Vec<(IdRef<ObjectId>, &Object)> = children_of
+                    .get(&r)
+                    .map(|v| {
+                        v.iter()
+                            .filter(|(_, c)| {
+                                !(matches!(c.parent_type.as_str(), "BONE" | "BONE_RELATIVE")
+                                    && !c.parent_bone.is_empty())
+                            })
+                            .copied()
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                let mut items: Vec<Item> = sorted(kids)
+                    .into_iter()
+                    .map(|(cr, co)| Item::Object(cr, co))
+                    .collect();
+                if kind == VType::Armature
+                    && let Some(arm) = armature_of(main, ob)
+                {
+                    mats.entry(r).or_insert_with(|| ArmatureMats::new(arm, ob));
+                    let mut root_bones: Vec<usize> = (0..arm.bones.len())
+                        .filter(|&k| arm.bones[k].parent.is_none())
+                        .collect();
+                    root_bones
+                        .sort_by(|&a, &b| natural_cmp(&arm.bones[a].name, &arm.bones[b].name));
+                    items.extend(root_bones.into_iter().map(|bone| Item::Bone {
+                        arm_ob: r,
+                        bone,
+                        arm_node: i,
+                    }));
+                }
+                for it in items.into_iter().rev() {
+                    stack.push((it, Some(i), new_delta || delta));
+                }
+                n
+            }
+            Item::Bone {
+                arm_ob,
+                bone,
+                arm_node,
+            } => {
+                let Some(ob) = main.objects.get(arm_ob) else {
+                    continue;
+                };
+                let Some(arm) = armature_of(main, ob) else {
+                    continue;
+                };
+                let Some(am) = mats.get(&arm_ob) else {
+                    continue;
+                };
+                let mut n = VNode::new(arm_ob, VType::Bone, parent);
+                n.bone = Some(arm.bones[bone].name.clone());
+                n.use_deform = arm.bones[bone].use_deform;
+                n.armature = Some(arm_node);
+                if let Some(p) = parent
+                    && tree.nodes[p].kind == VType::Bone
+                {
+                    n.parent_bone = Some(p);
+                }
+                let arm_mw = tree.nodes[arm_node].matrix_world;
+                let mw = if bs.rest_position {
+                    matmul(&arm_mw, &am.rest[bone].arm_mat)
+                } else {
+                    if bs.leaf_bone {
+                        let tail = matmul(&arm_mw, &translation(am.pose[bone].tail));
+                        n.matrix_world_tail = Some(matmul(&tail, &abc));
+                    }
+                    matmul(&arm_mw, &am.pose[bone].pose_mat)
+                };
+                n.matrix_world = matmul(&mw, &abc);
+                // Children: the child bones, then the objects parented to this bone.
+                let mut child_bones: Vec<usize> = (0..arm.bones.len())
+                    .filter(|&k| arm.bones[k].parent == Some(bone))
+                    .collect();
+                child_bones.sort_by(|&a, &b| natural_cmp(&arm.bones[a].name, &arm.bones[b].name));
+                let mut items: Vec<Item> = child_bones
+                    .into_iter()
+                    .map(|cb| Item::Bone {
+                        arm_ob,
+                        bone: cb,
+                        arm_node,
+                    })
+                    .collect();
+                let bone_kids: Vec<(IdRef<ObjectId>, &Object)> = children_of
+                    .get(&arm_ob)
+                    .map(|v| {
+                        v.iter()
+                            .filter(|(_, c)| {
+                                c.parent_type == "BONE" && c.parent_bone == arm.bones[bone].name
+                            })
+                            .copied()
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                items.extend(
+                    sorted(bone_kids)
+                        .into_iter()
+                        .map(|(cr, co)| Item::Object(cr, co)),
+                );
+                for it in items.into_iter().rev() {
+                    stack.push((it, Some(i), delta));
+                }
+                n
+            }
+        };
+        let mut node = node;
+        if delta && let Some(p) = parent {
+            let pose_parent = tree.nodes[p]
+                .original_matrix_world
+                .unwrap_or(tree.nodes[p].matrix_world);
+            let rest_parent = tree.nodes[p].matrix_world;
+            let d = matmul(&inverted_safe(&pose_parent), &node.matrix_world);
+            node.original_matrix_world = Some(node.matrix_world);
+            node.matrix_world = matmul(&rest_parent, &d);
+        }
+        tree.nodes.push(node);
         match parent {
             Some(p) => tree.nodes[p].children.push(i),
             None => tree.roots.push(i),
         }
-        let mut kids: Vec<(IdRef<ObjectId>, &Object)> = children_of
-            .get(&r)
-            .map(|v| {
-                v.iter()
-                    .filter(|(_, c)| {
-                        // Objects parented to bones are gathered with their armature (M6).
-                        !(matches!(c.parent_type.as_str(), "BONE" | "BONE_RELATIVE")
-                            && !c.parent_bone.is_empty())
-                    })
-                    .copied()
-                    .collect()
-            })
-            .unwrap_or_default();
-        kids.sort_by(|a, b| natural_cmp(&a.1.header.name, &b.1.header.name));
-        // Pre-order: push in reverse so the first child is visited next.
-        for (cr, co) in kids.into_iter().rev() {
-            stack.push((cr, co, Some(i)));
+    }
+
+    // `search_missing_armature`: the first armature node with the modifier object's name.
+    for (i, name) in armature_needed {
+        tree.nodes[i].armature = (0..tree.nodes.len()).find(|&a| {
+            tree.nodes[a].kind == VType::Armature
+                && main
+                    .objects
+                    .get(tree.nodes[a].object)
+                    .is_some_and(|o| o.header.name == name)
+        });
+    }
+    // `check_if_we_can_remove_armature`: not with several root bones.
+    if tree.armature_object_remove {
+        let refuse = (0..tree.nodes.len())
+            .filter(|&a| tree.nodes[a].kind == VType::Armature)
+            .any(|a| tree.root_bones_of(a, bs.def_bones).len() > 1);
+        if refuse {
+            tree.armature_object_remove = false;
+            tree.armature_remove_refused = true;
         }
     }
+
+    // `filter_tag`.
+    let filters = Filters::new(main, ctx, s);
+    for i in 0..tree.nodes.len() {
+        let keep = filters.not_inheritable_node(&tree, i, &bs) && {
+            let r = tree.nodes[i].object;
+            match main.objects.get(r) {
+                Some(ob) if filters.inheritable(r, ob) => {
+                    if tree.armature_object_remove && tree.nodes[i].kind == VType::Armature {
+                        tree.nodes[i].arma_exported = true;
+                        false
+                    } else {
+                        true
+                    }
+                }
+                _ => false,
+            }
+        };
+        tree.nodes[i].keep = keep;
+    }
     filter(&mut tree);
+    if bs.flatten_bones {
+        tree.break_bone_hierarchy();
+    }
+    tree.bake_armature_bone_list(main, &bs, abc);
     if s.export_hierarchy_flatten_objs {
         flatten(&mut tree);
     }
     tree
 }
 
-/// `recursive_filter`: drops nodes with `keep == false`, moving kept descendants up.
+impl Filters<'_> {
+    /// `node_filter_not_inheritable_is_kept` of a tree node: cameras and lights by their
+    /// options; with `export_def_bones` a non-deforming bone only when objects hang from it.
+    fn not_inheritable_node(&self, tree: &VTree, i: usize, bs: &BoneSettings) -> bool {
+        let n = &tree.nodes[i];
+        match n.kind {
+            VType::Camera => crate::export::cameras::exported(self.s),
+            VType::Light => crate::export::lights::exported(self.s),
+            VType::Bone if bs.def_bones && !n.use_deform => n
+                .children
+                .iter()
+                .any(|&c| tree.nodes[c].kind != VType::Bone),
+            _ => true,
+        }
+    }
+}
+
+/// `recursive_filter`: drops nodes with `keep == false`, moving kept descendants up. A dropped
+/// armature of `export_armature_object_remove` also loses its parent (its data is still read).
 fn filter(tree: &mut VTree) {
     fn rec(tree: &mut VTree, i: usize, parent_kept: Option<usize>) {
         let children = tree.nodes[i].children.clone();
@@ -530,7 +945,12 @@ fn filter(tree: &mut VTree) {
         if !tree.nodes[i].keep {
             new_parent_kept = parent_kept;
             match tree.nodes[i].parent {
-                Some(p) => tree.nodes[p].children.retain(|c| *c != i),
+                Some(p) => {
+                    tree.nodes[p].children.retain(|c| *c != i);
+                    if tree.nodes[i].kind == VType::Armature && tree.armature_object_remove {
+                        tree.nodes[i].parent = None;
+                    }
+                }
                 None => tree.roots.retain(|c| *c != i),
             }
         } else {
@@ -555,11 +975,14 @@ fn filter(tree: &mut VTree) {
     }
 }
 
-/// `break_obj_hierarchy` (`export_hierarchy_flatten_objs`): every kept node becomes a root, in
-/// construction order.
+/// `break_obj_hierarchy` (`export_hierarchy_flatten_objs`): every node but the bones becomes a
+/// root, in construction order; a skinned object stays the child of its armature.
 fn flatten(tree: &mut VTree) {
     for i in 0..tree.nodes.len() {
-        if !tree.nodes[i].keep {
+        if !tree.exists(i) || tree.nodes[i].kind == VType::Bone {
+            continue;
+        }
+        if tree.nodes[i].armature.is_some() && tree.nodes[i].parent == tree.nodes[i].armature {
             continue;
         }
         if let Some(p) = tree.nodes[i].parent.take() {
@@ -570,8 +993,151 @@ fn flatten(tree: &mut VTree) {
 }
 
 impl VTree {
-    /// The node's matrix relative to its (kept) parent, as `__gather_trans_rot_scale` computes
-    /// it: `parent.matrix_world.inverted_safe() @ matrix_world`, or the world matrix of a root.
+    /// The node is still in the add-on's `nodes` after `remove_filtered_nodes`: kept, or an
+    /// armature removed by `export_armature_object_remove`.
+    pub fn exists(&self, i: usize) -> bool {
+        let n = &self.nodes[i];
+        n.keep || (n.kind == VType::Armature && self.armature_object_remove)
+    }
+
+    /// The bone children of an armature node (`get_root_bones_uuid` without the cache), only
+    /// the deforming ones with `def_bones`.
+    fn root_bones_of(&self, arm: usize, def_bones: bool) -> Vec<usize> {
+        self.nodes[arm]
+            .children
+            .iter()
+            .copied()
+            .filter(|&c| self.nodes[c].kind == VType::Bone)
+            .filter(|&c| !def_bones || self.nodes[c].use_deform)
+            .collect()
+    }
+
+    /// `get_all_bones`: the bones under an armature node, pre-order, cached at the first call.
+    fn ensure_all_bones(&mut self, arm: usize) -> Vec<usize> {
+        if let Some(b) = &self.nodes[arm].all_bones {
+            return b.clone();
+        }
+        fn rec(t: &VTree, i: usize, out: &mut Vec<usize>, depth: usize) {
+            if !t.exists(i) || t.nodes[i].kind != VType::Bone || depth > t.nodes.len() {
+                return;
+            }
+            out.push(i);
+            for &c in &t.nodes[i].children {
+                rec(t, c, out, depth + 1);
+            }
+        }
+        let mut out = Vec::new();
+        if self.nodes[arm].kind == VType::Armature {
+            for &c in &self.nodes[arm].children {
+                rec(self, c, &mut out, 0);
+            }
+        }
+        self.nodes[arm].all_bones = Some(out.clone());
+        out
+    }
+
+    /// The bones of an armature node (`get_all_bones`), the skin's joints in order.
+    pub fn all_bones(&self, arm: usize) -> &[usize] {
+        self.nodes[arm].all_bones.as_deref().unwrap_or(&[])
+    }
+
+    /// The root bones of an armature node (`get_root_bones_uuid`, cached by
+    /// `bake_armature_bone_list`): its joint children.
+    pub fn root_bones(&self, arm: usize) -> &[usize] {
+        self.nodes[arm].root_bones.as_deref().unwrap_or(&[])
+    }
+
+    /// `break_bone_hierarchy` (`export_hierarchy_flatten_bones`): every bone becomes a child
+    /// of its armature node.
+    fn break_bone_hierarchy(&mut self) {
+        for arm in 0..self.nodes.len() {
+            if !self.exists(arm) || self.nodes[arm].kind != VType::Armature {
+                continue;
+            }
+            for bone in self.ensure_all_bones(arm) {
+                if let Some(p) = self.nodes[bone].parent
+                    && p != arm
+                {
+                    self.nodes[p].children.retain(|c| *c != bone);
+                    self.nodes[bone].parent = Some(arm);
+                    self.nodes[arm].children.push(bone);
+                    self.nodes[bone].parent_bone = None;
+                }
+            }
+        }
+    }
+
+    /// `bake_armature_bone_list`: the leaf bones (`export_leaf_bone`), then each armature's
+    /// bone list and root bones.
+    fn bake_armature_bone_list(&mut self, main: &Main, bs: &BoneSettings, abc: Mat4) {
+        if bs.leaf_bone {
+            self.add_leaf_bones(main, bs, abc);
+        }
+        for arm in 0..self.nodes.len() {
+            if !self.exists(arm) || self.nodes[arm].kind != VType::Armature {
+                continue;
+            }
+            self.ensure_all_bones(arm);
+            let roots = self.root_bones_of(arm, bs.def_bones);
+            self.nodes[arm].root_bones = Some(roots);
+        }
+    }
+
+    /// `add_leaf_bones`: a `<bone>_leaf` joint at the tail of every bone without children.
+    fn add_leaf_bones(&mut self, main: &Main, bs: &BoneSettings, abc: Mat4) {
+        if bs.rest_position {
+            for b in 0..self.nodes.len() {
+                if !self.exists(b) || self.nodes[b].kind != VType::Bone {
+                    continue;
+                }
+                if self.nodes[b]
+                    .children
+                    .iter()
+                    .any(|&c| self.nodes[c].kind == VType::Bone)
+                {
+                    continue;
+                }
+                let Some(ob) = main.objects.get(self.nodes[b].object) else {
+                    continue;
+                };
+                let Some(arm) = armature_of(main, ob) else {
+                    continue;
+                };
+                let Some(bone) = self.nodes[b].bone.as_deref().and_then(|n| arm.bone(n)) else {
+                    continue;
+                };
+                let tail = Vec3::from_array(bone.tail_local);
+                let m = matmul(&matrix_world(main, ob), &translation(tail));
+                self.nodes[b].matrix_world_tail = Some(matmul(&m, &abc));
+            }
+        }
+        let leaves: Vec<usize> = (0..self.nodes.len())
+            .filter(|&b| {
+                self.exists(b)
+                    && self.nodes[b].kind == VType::Bone
+                    && self.nodes[b].children.is_empty()
+            })
+            .collect();
+        for b in leaves {
+            if bs.def_bones && !self.nodes[b].use_deform {
+                continue;
+            }
+            let Some(tail) = self.nodes[b].matrix_world_tail else {
+                continue;
+            };
+            let i = self.nodes.len();
+            let mut n = VNode::new(self.nodes[b].object, VType::Bone, Some(b));
+            n.parent_bone = Some(b);
+            n.armature = self.nodes[b].armature;
+            n.leaf_reference = Some(b);
+            n.matrix_world = tail;
+            self.nodes.push(n);
+            self.nodes[b].children.push(i);
+        }
+    }
+
+    /// The node's matrix relative to its (kept) parent: `parent.matrix_world.inverted_safe() @
+    /// matrix_world`, or the world matrix of a root.
     pub fn local_matrix(&self, i: usize) -> Mat4 {
         let n = &self.nodes[i];
         match n.parent {

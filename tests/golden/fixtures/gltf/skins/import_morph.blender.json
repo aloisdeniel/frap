@@ -1,0 +1,959 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"OnlyNormal\" not found"
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": true
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": true
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 53,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 56,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": true
+    },
+    {
+      "line": 58,
+      "ok": true
+    },
+    {
+      "line": 59,
+      "ok": true
+    },
+    {
+      "line": 60,
+      "ok": true
+    },
+    {
+      "line": 61,
+      "ok": true
+    },
+    {
+      "line": 62,
+      "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": true
+    },
+    {
+      "line": 65,
+      "ok": true
+    },
+    {
+      "line": 66,
+      "ok": true
+    },
+    {
+      "line": 67,
+      "ok": true
+    },
+    {
+      "line": 68,
+      "ok": true
+    },
+    {
+      "line": 69,
+      "ok": true
+    },
+    {
+      "line": 70,
+      "ok": true
+    },
+    {
+      "line": 71,
+      "ok": true
+    },
+    {
+      "line": 72,
+      "ok": true
+    },
+    {
+      "line": 73,
+      "ok": true
+    },
+    {
+      "line": 74,
+      "ok": true
+    },
+    {
+      "line": 75,
+      "ok": true
+    },
+    {
+      "line": 76,
+      "ok": true
+    },
+    {
+      "line": 77,
+      "ok": true
+    },
+    {
+      "line": 78,
+      "ok": true
+    },
+    {
+      "line": 79,
+      "ok": true
+    },
+    {
+      "line": 80,
+      "ok": true
+    },
+    {
+      "line": 81,
+      "ok": true
+    },
+    {
+      "line": 82,
+      "ok": true
+    },
+    {
+      "line": 83,
+      "ok": true
+    },
+    {
+      "line": 84,
+      "ok": true
+    },
+    {
+      "line": 85,
+      "ok": true
+    },
+    {
+      "line": 86,
+      "ok": true
+    },
+    {
+      "line": 87,
+      "ok": true
+    },
+    {
+      "line": 88,
+      "ok": true
+    },
+    {
+      "line": 89,
+      "ok": true
+    },
+    {
+      "line": 90,
+      "ok": true
+    },
+    {
+      "line": 91,
+      "ok": true
+    },
+    {
+      "line": 92,
+      "ok": true
+    },
+    {
+      "line": 93,
+      "ok": true
+    },
+    {
+      "line": 94,
+      "ok": true
+    },
+    {
+      "line": 95,
+      "ok": true
+    },
+    {
+      "line": 96,
+      "ok": true
+    },
+    {
+      "line": 97,
+      "ok": true
+    },
+    {
+      "line": 98,
+      "ok": true
+    },
+    {
+      "line": 99,
+      "ok": true
+    },
+    {
+      "line": 100,
+      "ok": true
+    },
+    {
+      "line": 101,
+      "ok": true
+    },
+    {
+      "line": 102,
+      "ok": true
+    },
+    {
+      "line": 103,
+      "ok": true
+    },
+    {
+      "line": 104,
+      "ok": true
+    },
+    {
+      "line": 105,
+      "ok": true
+    },
+    {
+      "line": 106,
+      "ok": true
+    },
+    {
+      "line": 107,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "A": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "B": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, -3.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, -3.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, -6.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, -6.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "D": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, -9.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, -9.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K00": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0806046, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [1.6829419, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, -1.0, 0.0],
+      "scale": [2.0, -0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K01": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0470113, 0.0, 0.0, 0.5],
+        [0.26734585, 0.0, 0.0, 0.0],
+        [1.6829419, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.5, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, -1.0, 0.25],
+      "scale": [2.0, -0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K02": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.12415547, 0.0, 0.0, 1.5],
+        [0.06782644, 0.0, 0.0, 0.0],
+        [1.99499, 0.0, 0.0, 1.5],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.5, 0.0, 1.5],
+      "rotation_mode": "XYZ",
+      "rotation": [1.5, -1.5, 0.5],
+      "scale": [2.0, -0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K03": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0806046, 0.0, 0.0, -0.25],
+        [0.0, 0.0, 0.0, -0.25],
+        [1.6829419, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [-0.25, -0.25, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, -1.0, 0.0],
+      "scale": [2.0, -0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K04": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0806046, 0.5489987, 0.0, 0.1],
+        [0.0, -0.2536504, 0.0, 0.0],
+        [1.6829419, -0.352508, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.1, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.2, -1.0, 0.0],
+      "scale": [2.0, -0.7, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K10": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0806046, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [1.6829419, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, -1.0, 0.0],
+      "scale": [2.0, -0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K11": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0470113, 0.0, 0.0, 0.1],
+        [0.26734585, 0.0, 0.0, 0.0],
+        [1.6829419, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.1, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, -1.0, 0.25],
+      "scale": [2.0, -0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K12": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.12415547, 0.0, 0.0, 0.2],
+        [0.06782644, 0.0, 0.0, 0.0],
+        [1.99499, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.2, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.5, -1.5, 0.5],
+      "scale": [2.0, -0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K13": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0806046, 0.0, 0.0, 0.3],
+        [0.0, 0.0, 0.0, 0.0],
+        [1.6829419, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.3, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, -1.0, 0.0],
+      "scale": [2.0, -0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K14": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0806046, 0.5489987, 0.0, 0.4],
+        [0.0, -0.2536504, 0.0, 0.0],
+        [1.6829419, -0.352508, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.4, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.2, -1.0, 0.0],
+      "scale": [2.0, -0.7, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K20": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0806046, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [1.6829419, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, -1.0, 0.0],
+      "scale": [2.0, -0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K21": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0470113, 0.0, 0.0, 0.1],
+        [0.26734585, 0.0, 0.0, 0.0],
+        [1.6829419, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.1, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, -1.0, 0.25],
+      "scale": [2.0, -0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K22": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.12415547, 0.0, 0.0, 0.2],
+        [0.06782644, 0.0, 0.0, 0.0],
+        [1.99499, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.2, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.5, -1.5, 0.5],
+      "scale": [2.0, -0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K23": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0806046, 0.0, 0.0, 0.3],
+        [0.0, 0.0, 0.0, 0.0],
+        [1.6829419, 0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.3, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, -1.0, 0.0],
+      "scale": [2.0, -0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "K24": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0806046, 0.5489987, 0.0, 0.4],
+        [0.0, -0.2536504, 0.0, 0.0],
+        [1.6829419, -0.352508, 0.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.4, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.2, -1.0, 0.0],
+      "scale": [2.0, -0.7, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {
+    "Plane": {
+      "positions": [
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, -1.0, 0.0],
+        [2.0, -0.0, 0.0],
+        [3.0, -0.0, 0.0],
+        [2.0, -1.0, 0.0]
+      ],
+      "edges": [
+        [0, 1],
+        [0, 2],
+        [1, 2],
+        [0, 3],
+        [2, 3],
+        [4, 6],
+        [4, 5],
+        [5, 6]
+      ],
+      "faces": [
+        [0, 2, 1],
+        [0, 3, 2],
+        [4, 5, 6]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0]
+      ],
+      "face_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, -0.0, 1.0],
+        [0.0, 0.0, -1.0]
+      ],
+      "uv_layers": {},
+      "attributes": {
+        "custom_normal": {
+          "data": [
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0]
+          ],
+          "data_type": "INT16_2D",
+          "domain": "CORNER"
+        },
+        "sharp_edge": {
+          "data": [false, false, false, false, false, false, false, false],
+          "data_type": "BOOLEAN",
+          "domain": "EDGE"
+        },
+        "sharp_face": {
+          "data": [true, true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "Plane.001": {
+      "positions": [
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, -1.0, 0.0],
+        [2.0, -0.0, 0.0],
+        [3.0, -0.0, 0.0],
+        [2.0, -1.0, 0.0]
+      ],
+      "edges": [
+        [0, 1],
+        [0, 2],
+        [1, 2],
+        [0, 3],
+        [2, 3],
+        [4, 6],
+        [4, 5],
+        [5, 6]
+      ],
+      "faces": [
+        [0, 2, 1],
+        [0, 3, 2],
+        [4, 5, 6]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0]
+      ],
+      "face_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, -0.0, 1.0],
+        [0.0, 0.0, -1.0]
+      ],
+      "uv_layers": {},
+      "attributes": {
+        "custom_normal": {
+          "data": [
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0]
+          ],
+          "data_type": "INT16_2D",
+          "domain": "CORNER"
+        },
+        "sharp_edge": {
+          "data": [false, false, false, false, false, false, false, false],
+          "data_type": "BOOLEAN",
+          "domain": "EDGE"
+        },
+        "sharp_face": {
+          "data": [true, true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    },
+    "Plane.002": {
+      "positions": [
+        [-1.0, 1.0, 0.0],
+        [1.0, 1.0, 0.0],
+        [1.0, -1.0, 0.0],
+        [-1.0, -1.0, 0.0],
+        [2.0, -0.0, 0.0],
+        [3.0, -0.0, 0.0],
+        [2.0, -1.0, 0.0]
+      ],
+      "edges": [
+        [0, 1],
+        [0, 2],
+        [1, 2],
+        [0, 3],
+        [2, 3],
+        [4, 6],
+        [4, 5],
+        [5, 6]
+      ],
+      "faces": [
+        [0, 2, 1],
+        [0, 3, 2],
+        [4, 5, 6]
+      ],
+      "corner_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0],
+        [0.0, 0.0, -1.0]
+      ],
+      "face_normals": [
+        [0.0, 0.0, 1.0],
+        [0.0, -0.0, 1.0],
+        [0.0, 0.0, -1.0]
+      ],
+      "uv_layers": {},
+      "attributes": {
+        "custom_normal": {
+          "data": [
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0]
+          ],
+          "data_type": "INT16_2D",
+          "domain": "CORNER"
+        },
+        "sharp_edge": {
+          "data": [false, false, false, false, false, false, false, false],
+          "data_type": "BOOLEAN",
+          "domain": "EDGE"
+        },
+        "sharp_face": {
+          "data": [true, true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    }
+  },
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "A",
+    "selected": ["A", "B", "C", "D"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

@@ -77,7 +77,7 @@ static DEF: OperatorDef = OperatorDef {
     dyn_enums: &[],
     tier: Tier::T2,
     support: Support::Partial(
-        "M1: static meshes, hierarchy, cameras, lights, Principled materials and textures; skins, morph targets and animations (M6) and compressed meshes (M7) give a WARNING",
+        "static meshes, hierarchy, cameras, lights, Principled materials and textures, skins and morph targets (M6); animations (M6) and compressed meshes (M7) give a WARNING",
     ),
     notes: &[
         "with files=[{'name': …}] every directory/<name> is imported, else filepath",

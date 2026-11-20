@@ -151,11 +151,14 @@ fn scene_objects(
 struct SceneView<'a> {
     inner: &'a dyn HostRead,
     win: WindowState,
+    /// `bpy.data` as evaluated instead of the host's (`export_skins`: ARMATURE modifiers
+    /// disabled, WP 6.8).
+    main: Option<&'a frap_scene::Main>,
 }
 
 impl HostRead for SceneView<'_> {
     fn main(&self) -> &frap_scene::Main {
-        self.inner.main()
+        self.main.unwrap_or_else(|| self.inner.main())
     }
     fn win(&self) -> &WindowState {
         &self.win
@@ -202,6 +205,33 @@ fn evaluated_meshes(
     let user_win = host.win().clone();
     let scenes =
         frap_io_gltf::export::scenes::exported_scenes(host.main(), user_win.scene, settings);
+    // `__gather_mesh`: with `export_skins` the ARMATURE modifiers are switched off in the
+    // viewport while the mesh is evaluated (the skin deforms it in glTF), on a copy here.
+    let unarmed = settings.props.export_skins.value.then(|| {
+        let mut main = host.main().clone();
+        let mut log = frap_scene::ChangeLog::default();
+        let obs: Vec<_> = main
+            .objects
+            .iter()
+            .filter(|(_, o)| {
+                o.modifiers
+                    .iter()
+                    .any(|m| matches!(m.settings, frap_scene::id::ModifierSettings::Armature(_)))
+            })
+            .map(|(r, _)| r)
+            .collect();
+        for r in &obs {
+            if let Some(o) = main.objects.get_mut(*r, &mut log) {
+                for m in o.modifiers.iter_mut() {
+                    if matches!(m.settings, frap_scene::id::ModifierSettings::Armature(_)) {
+                        m.show_viewport = false;
+                    }
+                }
+            }
+        }
+        (!obs.is_empty()).then_some(main)
+    });
+    let unarmed = unarmed.flatten();
     let mut out = EvaluatedMeshes::new();
     for scene in scenes {
         let mut win = user_win.clone();
@@ -210,7 +240,11 @@ fn evaluated_meshes(
         {
             continue;
         }
-        let view = SceneView { inner: host, win };
+        let view = SceneView {
+            inner: host,
+            win,
+            main: unarmed.as_ref(),
+        };
         let in_depsgraph =
             frap_io_gltf::export::apply::viewport_evaluated_objects(view.main(), &view.ctx());
         let obs: Vec<_> = {

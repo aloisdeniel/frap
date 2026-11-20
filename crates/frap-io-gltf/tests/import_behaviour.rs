@@ -100,17 +100,8 @@ fn refuses_what_blender_refuses() {
 
 #[test]
 fn later_milestone_features_import_their_static_part_with_warnings() {
+    // Skins and morph targets are imported since WP 6.8 (goldens `gltf/skins/import_*`).
     for (rel, expect) in [
-        ("RiggedSimple/glTF-Binary/RiggedSimple.glb", "skins"),
-        ("SimpleSkin/glTF-Embedded/SimpleSkin.gltf", "skins"),
-        (
-            "AnimatedMorphCube/glTF-Binary/AnimatedMorphCube.glb",
-            "morph targets",
-        ),
-        (
-            "AnimatedMorphCube/glTF-Quantized/AnimatedMorphCube.gltf",
-            "morph targets",
-        ),
         // Animations import since WP 6.7 (`import/animation/`): no WARNING any more.
         (
             "SimpleInstancing/glTF-Binary/SimpleInstancing.glb",

@@ -150,17 +150,19 @@ pub(crate) fn is_point_cloud(cx: &Gltf, mesh_idx: usize) -> bool {
             .all(|p| p.mode_or_default() == Mode::Points)
 }
 
-/// The Blender data of glTF mesh `mesh_idx`: a mesh, or a point cloud ([`is_point_cloud`]).
+/// The Blender data of glTF mesh `mesh_idx` (skinned by glTF skin `skin`): a mesh, or a point
+/// cloud ([`is_point_cloud`]).
 pub(crate) fn create_data(
     cx: &mut Gltf,
     main: &mut Main,
     log: &mut ChangeLog,
     mesh_idx: usize,
+    skin: Option<usize>,
 ) -> Result<IdAny, ImportError> {
     if is_point_cloud(cx, mesh_idx) {
         Ok(create_pointcloud(cx, main, log, mesh_idx)?.any())
     } else {
-        Ok(create_mesh(cx, main, log, mesh_idx)?.any())
+        Ok(create_mesh(cx, main, log, mesh_idx, skin)?.any())
     }
 }
 
@@ -301,28 +303,66 @@ pub(crate) fn create_pointcloud(
     Ok(main.pointclouds.insert(&name, pc, log))
 }
 
-/// `create_mesh`: a new Blender mesh for glTF mesh `mesh_idx`.
+/// `create_mesh`: a new Blender mesh for glTF mesh `mesh_idx`, skinned by glTF skin `skin`
+/// (vertex groups named after the joints' bones, vertices in the bind pose) and with its
+/// morph targets as shape keys (a key named like the mesh: `Basis`, then one block per
+/// target, value 0).
 pub(crate) fn create_mesh(
     cx: &mut Gltf,
     main: &mut Main,
     log: &mut ChangeLog,
     mesh_idx: usize,
+    skin: Option<usize>,
 ) -> Result<IdRef<MeshId>, ImportError> {
     let pymesh = cx.doc.meshes[mesh_idx].clone();
     // `pymesh.name or 'Mesh_%d'`
     let name = super::truthy_name(&pymesh.name).unwrap_or_else(|| format!("Mesh_{mesh_idx}"));
-    let mut mesh = do_primitives(cx, main, log, &pymesh)?;
+    let names = super::morph::shapekey_names(&cx.doc, mesh_idx);
+    let (mut mesh, shape_keys) = do_primitives(cx, main, log, &pymesh, skin, &names)?;
     extras::set_extras(&mut mesh.header, pymesh.extras.as_ref(), &["targetNames"]);
-    Ok(main.meshes.insert(&name, mesh, log))
+    let basis = mesh.positions().to_vec();
+    let me = main.meshes.insert(&name, mesh, log);
+    if !shape_keys.is_empty() {
+        // `ob.shape_key_add(name='Basis')`, `mesh.shape_keys.name = mesh.name`, then one
+        // block per target (`value = 0.0`).
+        let mesh_name = main.meshes.name_of(me).unwrap_or(&name).to_owned();
+        let mut key = frap_scene::id::Key::new("");
+        key.user = Some(me);
+        let b = key.add_block(Some("Basis"));
+        key.key_blocks[b].data = basis;
+        // Blender 5 creates shape keys at value 1.0; the importer resets only the targets.
+        key.key_blocks[b].value = 1.0;
+        for (sk_name, data) in shape_keys {
+            let i = key.add_block(Some(&sk_name));
+            key.key_blocks[i].data = data;
+            key.key_blocks[i].value = 0.0;
+        }
+        let k = main.shape_keys.insert(&mesh_name, key, log);
+        if let Some(m) = main.meshes.get_mut(me, log) {
+            m.shape_keys = Some(k);
+        }
+    }
+    Ok(me)
 }
 
-/// `do_primitives`: builds the mesh data of `pymesh`.
+/// One set of four joint influences per vertex (`JOINTS_n` / `WEIGHTS_n`).
+struct JointSet {
+    joints: Vec<[u32; 4]>,
+    weights: Vec<[f32; 4]>,
+}
+
+/// `do_primitives`: builds the mesh data of `pymesh` (with the vertex groups of `skin`), and
+/// returns the shape keys of its targets (`names`: `pymesh.shapekey_names`) as absolute
+/// positions.
+#[allow(clippy::type_complexity)]
 fn do_primitives(
     cx: &mut Gltf,
     main: &mut Main,
     log: &mut ChangeLog,
     pymesh: &frap_gltf::json::Mesh,
-) -> Result<Mesh, ImportError> {
+    skin: Option<usize>,
+    names: &[Option<String>],
+) -> Result<(Mesh, Vec<(String, Vec<[f32; 3]>)>), ImportError> {
     let shading = cx.settings.import_shading;
     let with_pos = |p: &&Primitive| p.attributes.contains_key("POSITION");
 
@@ -330,10 +370,20 @@ fn do_primitives(
     let mut has_normals = false;
     let mut num_uvs = 0usize;
     let mut num_cols = 0usize;
+    let mut num_joint_sets = 0usize;
     let mut customs: Vec<Custom> = Vec::new();
     for prim in pymesh.primitives.iter().filter(with_pos) {
         if shading == ImportShading::Normals && prim.attributes.contains_key("NORMAL") {
             has_normals = true;
+        }
+        if skin.is_some() {
+            let i = (0..)
+                .take_while(|i| {
+                    prim.attributes.contains_key(&format!("JOINTS_{i}"))
+                        && prim.attributes.contains_key(&format!("WEIGHTS_{i}"))
+                })
+                .count();
+            num_joint_sets = num_joint_sets.max(i);
         }
         let count = |prefix: &str, max: usize| {
             (0..max)
@@ -385,6 +435,14 @@ fn do_primitives(
     let mut loop_uvs: Vec<Vec<[f32; 2]>> = vec![Vec::new(); num_uvs];
     let mut loop_cols: Vec<Vec<[f32; 4]>> = vec![Vec::new(); num_cols];
     let mut prim_faces: Vec<PrimFaces> = Vec::new();
+    let mut joint_sets: Vec<JointSet> = (0..num_joint_sets)
+        .map(|_| JointSet {
+            joints: Vec::new(),
+            weights: Vec::new(),
+        })
+        .collect();
+    let num_shapekeys = names.iter().filter(|n| n.is_some()).count();
+    let mut sk_vert_locs: Vec<Vec<[f32; 3]>> = vec![Vec::new(); num_shapekeys];
 
     for (pi, prim) in pymesh.primitives.iter().enumerate() {
         let Some(&pos_acc) = prim.attributes.get("POSITION") else {
@@ -426,6 +484,39 @@ fn do_primitives(
                 }
                 None => vert_normals.extend(std::iter::repeat_n([0.0; 3], unique.len())),
             }
+        }
+        for (i, set) in joint_sets.iter_mut().enumerate() {
+            match (
+                prim.attributes.get(&format!("JOINTS_{i}")),
+                prim.attributes.get(&format!("WEIGHTS_{i}")),
+            ) {
+                (Some(&j), Some(&w)) => {
+                    let js = cx.accessor_f32::<4>(j)?;
+                    let ws = cx.accessor_f32::<4>(w)?;
+                    let js: Vec<[u32; 4]> = js.iter().map(|j| j.map(|x| x as u32)).collect();
+                    set.joints.extend(gather(&js, &unique, "JOINTS")?);
+                    set.weights.extend(gather(&ws, &unique, "WEIGHTS")?);
+                }
+                _ => {
+                    set.joints.extend(std::iter::repeat_n([0; 4], unique.len()));
+                    set.weights
+                        .extend(std::iter::repeat_n([0.0; 4], unique.len()));
+                }
+            }
+        }
+        let mut sk_i = 0;
+        for (sk, name) in names.iter().enumerate() {
+            if name.is_none() {
+                continue;
+            }
+            match prim.targets.get(sk).and_then(|t| t.get("POSITION")) {
+                Some(&a) => {
+                    let ds = cx.accessor_f32::<3>(a)?;
+                    sk_vert_locs[sk_i].extend(gather(&ds, &unique, "morph POSITION")?);
+                }
+                None => sk_vert_locs[sk_i].extend(std::iter::repeat_n([0.0; 3], unique.len())),
+            }
+            sk_i += 1;
         }
         let prim_vidxs: Vec<u32> = inverse.iter().map(|i| i + vert_index_base).collect();
         if is_edges {
@@ -507,6 +598,8 @@ fn do_primitives(
         merge_duplicate_verts(
             &mut vert_locs,
             &mut vert_normals,
+            &mut joint_sets,
+            &mut sk_vert_locs,
             &mut loop_vidxs,
             &mut edge_vidxs,
             &mut customs,
@@ -514,8 +607,38 @@ fn do_primitives(
     }
 
     // ---- glTF → Blender
+    // Morph targets are deltas: to absolute positions first.
+    for sk in sk_vert_locs.iter_mut() {
+        for (p, v) in sk.iter_mut().zip(&vert_locs) {
+            *p = [p[0] + v[0], p[1] + v[1], p[2] + v[2]];
+        }
+    }
     cx.units.locs_batch(&mut vert_locs);
     normals_batch(&mut vert_normals);
+    for sk in sk_vert_locs.iter_mut() {
+        cx.units.locs_batch(sk);
+    }
+    if num_joint_sets > 0
+        && let Some(skin) = skin
+    {
+        let mats = super::skins::joint_matrices(cx, skin)?;
+        let joints: Vec<Vec<[u32; 4]>> = joint_sets.iter().map(|s| s.joints.clone()).collect();
+        let mut weights: Vec<Vec<[f32; 4]>> =
+            joint_sets.iter().map(|s| s.weights.clone()).collect();
+        let mut locs: Vec<&mut Vec<[f32; 3]>> = std::iter::once(&mut vert_locs)
+            .chain(sk_vert_locs.iter_mut())
+            .collect();
+        super::skins::skin_into_bind_pose(
+            &mats,
+            &joints,
+            &mut weights,
+            &mut locs,
+            &mut vert_normals,
+        );
+        for (s, w) in joint_sets.iter_mut().zip(weights) {
+            s.weights = w;
+        }
+    }
     for uvs in loop_uvs.iter_mut() {
         uvs_batch(uvs);
     }
@@ -575,6 +698,58 @@ fn do_primitives(
         }
     }
 
+    // Skinning: one vertex group per joint (named after its bone), each non-zero weight added
+    // with 'REPLACE'.
+    if num_joint_sets > 0
+        && let Some(skin) = skin
+    {
+        let joints = cx.doc.skins[skin].joints.clone();
+        let mut group_names: Vec<SmolStr> = Vec::with_capacity(joints.len());
+        for &j in &joints {
+            let name = cx
+                .vtree
+                .nodes
+                .get(j as usize)
+                .and_then(|v| v.blender_bone_name.clone())
+                .unwrap_or_else(|| "Group".into());
+            let unique = frap_rna::naming::unique_subname(
+                &|n| group_names.iter().any(|g| g == n),
+                &name,
+                63,
+                "Group",
+            );
+            group_names.push(unique);
+        }
+        let n_groups = group_names.len() as u32;
+        mesh.vertex_group_names = group_names;
+        let dverts = mesh.deform_verts_mut();
+        for set in &joint_sets {
+            for (vi, (js, ws)) in set.joints.iter().zip(&set.weights).enumerate() {
+                for k in 0..4 {
+                    let (j, w) = (js[k], ws[k]);
+                    if w == 0.0 || j >= n_groups {
+                        continue;
+                    }
+                    let Some(dv) = dverts.get_mut(vi) else {
+                        continue;
+                    };
+                    match dv.weights.iter_mut().find(|(g, _)| *g == j) {
+                        Some(e) => e.1 = w,
+                        None => dv.weights.push((j, w)),
+                    }
+                }
+            }
+        }
+    }
+    // Shape keys (created on the mesh once it exists, `create_mesh`).
+    let mut shape_keys = Vec::with_capacity(num_shapekeys);
+    let mut sk_iter = sk_vert_locs.into_iter();
+    for name in names.iter().flatten() {
+        if let Some(data) = sk_iter.next() {
+            shape_keys.push((name.clone(), data));
+        }
+    }
+
     assign_materials(cx, main, log, pymesh, &prim_faces, num_faces, &mut mesh)?;
 
     for c in customs {
@@ -619,7 +794,7 @@ fn do_primitives(
     if has_normals {
         set_custom_normals(&mut mesh, &vert_normals);
     }
-    Ok(mesh)
+    Ok((mesh, shape_keys))
 }
 
 fn chunks<const N: usize>(v: &[f32]) -> Vec<[f32; N]> {
@@ -817,11 +992,14 @@ fn dot_key(p: [f32; 3], n: Option<[f32; 3]>) -> Vec<u32> {
     k
 }
 
-/// `merge_duplicate_verts`: welds vertices with equal position (and rounded normal); the
-/// result is in byte-sorted key order, each kept vertex taking its first occurrence's data.
+/// `merge_duplicate_verts`: welds vertices with equal position (and rounded normal, joints,
+/// weights and shape-key positions); the result is in byte-sorted key order, each kept vertex
+/// taking its first occurrence's data.
 fn merge_duplicate_verts(
     vert_locs: &mut Vec<[f32; 3]>,
     vert_normals: &mut Vec<[f32; 3]>,
+    joint_sets: &mut [JointSet],
+    sk_vert_locs: &mut [Vec<[f32; 3]>],
     loop_vidxs: &mut [u32],
     edge_vidxs: &mut [u32],
     customs: &mut [Custom],
@@ -837,8 +1015,19 @@ fn merge_duplicate_verts(
         }
     }
     let fold = |x: f32| if x == 0.0 { 0.0 } else { x };
+    let bits = |x: f32| if x == 0.0 { 0u32 } else { x.to_bits() };
     let keys: Vec<Vec<u32>> = (0..vert_locs.len())
-        .map(|i| dot_key(vert_locs[i], has_normals.then(|| vert_normals[i])))
+        .map(|i| {
+            let mut k = dot_key(vert_locs[i], has_normals.then(|| vert_normals[i]));
+            for s in joint_sets.iter() {
+                k.extend_from_slice(&s.joints[i]);
+                k.extend(s.weights[i].map(bits));
+            }
+            for sk in sk_vert_locs.iter() {
+                k.extend(sk[i].map(bits));
+            }
+            k
+        })
         .collect();
     let mut order: Vec<usize> = (0..keys.len()).collect();
     // Stable: the first occurrence of each key comes first (`return_index`).
@@ -869,6 +1058,13 @@ fn merge_duplicate_verts(
     if has_normals {
         *vert_normals = first.iter().map(|&i| vert_normals[i].map(fold)).collect();
     }
+    for s in joint_sets.iter_mut() {
+        s.joints = first.iter().map(|&i| s.joints[i]).collect();
+        s.weights = first.iter().map(|&i| s.weights[i].map(fold)).collect();
+    }
+    for sk in sk_vert_locs.iter_mut() {
+        *sk = first.iter().map(|&i| sk[i].map(fold)).collect();
+    }
 }
 
 #[cfg(test)]
@@ -894,7 +1090,15 @@ mod tests {
         normals[2] = [0.0, 1.0, 0.0];
         let mut loops = vec![0, 1, 2, 3];
         let mut edges = vec![];
-        merge_duplicate_verts(&mut locs, &mut normals, &mut loops, &mut edges, &mut []);
+        merge_duplicate_verts(
+            &mut locs,
+            &mut normals,
+            &mut [],
+            &mut [],
+            &mut loops,
+            &mut edges,
+            &mut [],
+        );
         // Keys sort byte-wise: 0.0 < 1.0; vertex 2 differs by its normal.
         assert_eq!(locs.len(), 3);
         assert_eq!(locs[0], [0.0, 0.0, 0.0]);
