@@ -1,0 +1,61 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "nla.action_pushdown",
+  "bl_idname": "NLA_OT_action_pushdown",
+  "label": "Push Down Action",
+  "description": "Push action down onto the top of the NLA stack as a new strip",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "track_index",
+      "name": "Track Index",
+      "description": "Index of NLA action track to perform pushdown operation on",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": -1,
+      "hard_min": -1,
+      "hard_max": 2147483647,
+      "soft_min": 0,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M6",
+    "extension": false,
+    "notes": []
+  }
+}

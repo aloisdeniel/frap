@@ -711,6 +711,7 @@ impl Session {
             }
             resolve::set_prop(&mut self.host, &p.ptr, prop, c.value.clone())
                 .map_err(set_hook_prefix(set_prefix(&p.ptr)))?;
+            self.host.tag_animation_write(&p.ptr, prop.identifier);
             // A long dynamic array (`Image.pixels`) echoes a capped `$array`.
             let echo = resolve::long_value_json(prop, &c.value, 0, self.opts.max_array)
                 .unwrap_or_else(|| value_json(&c.value, &self.host.state.main));
@@ -896,6 +897,7 @@ impl Session {
             Elem::Whole => unreachable!("handled above"),
         };
         resolve::set_prop(&mut self.host, &p.ptr, prop, cur)?;
+        self.host.tag_animation_write(&p.ptr, prop.identifier);
         let echo = resolve::long_value_json(prop, &echo, echo_start, self.opts.max_array)
             .unwrap_or_else(|| value_json(&echo, &self.host.state.main));
         Ok((echo, reports, hints))
@@ -1033,8 +1035,16 @@ impl Session {
             err: e,
             reports: vec![],
         };
-        // §10.2 step 1: lookup.
-        let def = frap_op::lookup(idname).map_err(fail)?;
+        // §10.2 step 1: lookup. `bpy.ops`' `__call__` updates the view layer before `_op_call`
+        // raises for an unknown operator, so pending animation is applied then too (WP 6.4).
+        let def = match frap_op::lookup(idname) {
+            Ok(def) => def,
+            Err(e) => {
+                frap_scene::Host::apply_pending_animation(&mut self.host)
+                    .map_err(|e| fail(FrapError::from(e)))?;
+                return Err(fail(e));
+            }
+        };
         // Steps 2, 5, 3 in Blender's order: the positionals (`_BPyOpsSubModOp._parse_args`, in
         // Python), poll (`pyop_call`), then the keywords with the context, so dynamic enums
         // list the items of the current context (`pyrna_pydict_to_props` after the poll).
@@ -1049,7 +1059,11 @@ impl Session {
             kw.push((k, v.to_input().map_err(fail)?));
         }
         let mut reports = frap_op::pipeline::check_positional(def.spec, &pos).map_err(fail)?;
-        // Step 4 (ensure evaluated) happens inside the operators that read evaluated data.
+        // Step 4 (ensure evaluated) happens inside the operators that read evaluated data;
+        // pending animation is applied here, as `bpy.ops`' `_view_layer_update` before the
+        // call does (§7.3, WP 6.4). It is not part of the operator's transaction.
+        frap_scene::Host::apply_pending_animation(&mut self.host)
+            .map_err(|e| fail(FrapError::from(e)))?;
         // Step 5: poll.
         frap_op::check_poll(def, &self.host.state.ctx()).map_err(fail)?;
         let converted =
@@ -1105,6 +1119,16 @@ impl Session {
             }
         };
         reports.extend(out.reports);
+        if !txn.cancelled {
+            // `bpy.ops` updates the view layer again after a FINISHED call: a time change made
+            // by the operator (`screen.frame_*`) is applied now (§7.3, WP 6.4).
+            frap_scene::Host::apply_pending_animation(&mut self.host).map_err(|e| Fail {
+                kind: "op",
+                op: op.clone(),
+                err: FrapError::from(e),
+                reports: reports.clone(),
+            })?;
+        }
         // Step 9: response.
         let status = if txn.cancelled {
             Status::Cancelled

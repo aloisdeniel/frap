@@ -195,12 +195,16 @@ impl Rna for Context<'_> {
             | "selected_editable_bones"
             | "editable_bones"
             | "visible_bones" => Field::Value(Value::None),
-            // The animation members are WP 6.4's (M56W0-12).
-            "active_editable_fcurve"
-            | "active_nla_strip"
-            | "active_nla_track"
-            | "active_action"
-            | "active_operator" => Field::Id(None),
+            // The animation members (WP 6.4, M56W0-12). Blender answers them from an animation
+            // editor's channel list (`screen_ctx_active_action` and `…_editable_fcurve` need a
+            // Dope Sheet / Graph Editor, `…_nla_track` / `…_nla_strip` an NLA editor through
+            // `ANIM_nla_context_*_ptr`); frap has no editors, so they are `None`, as in the
+            // 3D Viewport every frap statement runs in (verified on 5.2.4).
+            "active_action" => Field::Id(None),
+            "active_editable_fcurve" | "active_nla_strip" | "active_nla_track" => {
+                Field::Value(Value::None)
+            }
+            "active_operator" => Field::Id(None),
             other => {
                 return Err(if self.srna().find_prop(other).is_some() {
                     not_implemented(other)

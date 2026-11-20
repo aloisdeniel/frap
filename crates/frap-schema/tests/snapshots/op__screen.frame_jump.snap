@@ -1,0 +1,53 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "screen.frame_jump",
+  "bl_idname": "SCREEN_OT_frame_jump",
+  "label": "Jump to Endpoint",
+  "description": "Jump to first/last frame in frame range",
+  "bl_options": [
+    "UNDO_GROUPED"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "end",
+      "name": "Last Frame",
+      "description": "Jump to the last frame of the frame range",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M6",
+    "extension": false,
+    "notes": []
+  }
+}

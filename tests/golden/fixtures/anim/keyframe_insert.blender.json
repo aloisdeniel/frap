@@ -1,0 +1,682 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct.keyframe_insert()() takes at most 1 positional argument (3 given)"
+    },
+    {
+      "line": 29,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct.keyframe_insert() index out of range \"location\", given 3, array length is 3"
+    },
+    {
+      "line": 30,
+      "ok": false,
+      "exception": "ValueError",
+      "message": "bpy_struct.keyframe_insert() path includes index, must be a separate argument"
+    },
+    {
+      "line": 31,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct.keyframe_insert() property \"nope\" not found"
+    },
+    {
+      "line": 32,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct.keyframe_insert() property \"name\" not animatable"
+    },
+    {
+      "line": 33,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct.keyframe_insert() index 1 was given while property \"hide_render\" is not an array"
+    },
+    {
+      "line": 34,
+      "ok": false,
+      "exception": "ValueError",
+      "message": "bpy_struct.keyframe_insert() path spans ID blocks"
+    },
+    {
+      "line": 35,
+      "ok": false,
+      "exception": "ValueError",
+      "message": "bpy_struct.keyframe_insert(): 'NOPE' not found in ('KEYFRAME', 'BREAKDOWN', 'MOVING_HOLD', 'EXTREME', 'JITTER', 'GENERATED')"
+    },
+    {
+      "line": 36,
+      "ok": false,
+      "exception": "ValueError",
+      "message": "bpy_struct.keyframe_insert(): 'NOPE' not found in ('INSERTKEY_NEEDED', 'INSERTKEY_VISUAL', 'INSERTKEY_REPLACE', 'INSERTKEY_AVAILABLE', 'INSERTKEY_CYCLE_AWARE')"
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "'NoneType' object has no attribute 'name'"
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": true
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: No ID block and/or AnimData to delete keyframe from\n"
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: No action to delete keyframes from for ID = OBCamera\n"
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.68592066, -0.32401347, 0.6515582, 1.0],
+        [0.72767633, 0.30542085, -0.6141704, 11.0],
+        [0.0, 0.89539564, 0.4452714, 4.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 11.0, 4.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [0.5403023, -0.73846024, 0.40342268, 5.0],
+        [0.84147096, 0.4741599, -0.25903472, -0.216],
+        [0.0, 0.47942555, 0.87758255, 0.64800006],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [5.0, -0.216, 0.64800006],
+      "rotation_mode": "XYZ",
+      "rotation": [0.5, 0.0, 1.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086465, -0.7711008, 0.5663932, 4.0762453],
+        [0.95517117, -0.19988336, 0.2183912, 1.005454],
+        [-0.05518906, 0.60452473, 0.79467225, 5.903862],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0762453, 1.005454, 5.903862],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "ipo_CONSTANT": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "key_BREAKDOWN": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "slot_OBCube": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {
+    "CubeAction": {
+      "data": {
+        "fcurves": [
+          {
+            "array_index": 0,
+            "data_path": "hide_render",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [3.0, 1.0],
+                "CONSTANT",
+                [1.6666666, 1.0],
+                [4.3333335, 1.0]
+              ],
+              [
+                [7.0, 0.0],
+                "CONSTANT",
+                [5.6666665, 0.0],
+                [8.333333, 0.0]
+              ]
+            ],
+            "samples": [
+              [0.0, 1.0],
+              [0.5, 1.0],
+              [1.0, 1.0],
+              [1.5, 1.0],
+              [2.0, 1.0],
+              [2.5, 1.0],
+              [3.0, 1.0],
+              [3.5, 1.0],
+              [4.0, 1.0],
+              [4.5, 1.0],
+              [5.0, 1.0],
+              [5.5, 1.0],
+              [6.0, 1.0],
+              [6.5, 1.0],
+              [7.0, 0.0],
+              [7.5, 0.0],
+              [8.0, 0.0],
+              [8.5, 0.0],
+              [9.0, 0.0],
+              [9.5, 0.0],
+              [10.0, 0.0]
+            ]
+          },
+          {
+            "array_index": 0,
+            "data_path": "location",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [11.0, 5.0],
+                "BEZIER",
+                [7.666667, 5.0],
+                [14.333333, 5.0]
+              ]
+            ],
+            "samples": [
+              [8.0, 5.0],
+              [8.5, 5.0],
+              [9.0, 5.0],
+              [9.5, 5.0],
+              [10.0, 5.0],
+              [10.5, 5.0],
+              [11.0, 5.0],
+              [11.5, 5.0],
+              [12.0, 5.0],
+              [12.5, 5.0],
+              [13.0, 5.0],
+              [13.5, 5.0],
+              [14.0, 5.0]
+            ]
+          },
+          {
+            "array_index": 1,
+            "data_path": "location",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [1.0, 0.0],
+                "BEZIER",
+                [-2.3333333, 0.0],
+                [4.333333, 0.0]
+              ],
+              [
+                [11.0, -1.0],
+                "BEZIER",
+                [7.666667, -1.0],
+                [14.333333, -1.0]
+              ]
+            ],
+            "samples": [
+              [-2.0, 0.0],
+              [-1.5, 0.0],
+              [-1.0, 0.0],
+              [-0.5, 0.0],
+              [0.0, 0.0],
+              [0.5, 0.0],
+              [1.0, 0.0],
+              [1.5, -0.007250001],
+              [2.0, -0.028000005],
+              [2.5, -0.06075],
+              [3.0, -0.104],
+              [3.5, -0.15625],
+              [4.0, -0.216],
+              [4.5, -0.28174996],
+              [5.0, -0.352],
+              [5.5, -0.42525],
+              [6.0, -0.5],
+              [6.5, -0.57475],
+              [7.0, -0.648],
+              [7.5, -0.71825],
+              [8.0, -0.7839999],
+              [8.5, -0.84375],
+              [9.0, -0.896],
+              [9.5, -0.9392501],
+              [10.0, -0.972],
+              [10.5, -0.99275005],
+              [11.0, -1.0],
+              [11.5, -1.0],
+              [12.0, -1.0],
+              [12.5, -1.0],
+              [13.0, -1.0],
+              [13.5, -1.0],
+              [14.0, -1.0]
+            ]
+          },
+          {
+            "array_index": 2,
+            "data_path": "location",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [1.0, 0.0],
+                "BEZIER",
+                [-2.3333333, 0.0],
+                [4.333333, 0.0]
+              ],
+              [
+                [11.0, 3.0],
+                "BEZIER",
+                [7.666667, 3.0],
+                [14.333333, 3.0]
+              ]
+            ],
+            "samples": [
+              [-2.0, 0.0],
+              [-1.5, 0.0],
+              [-1.0, 0.0],
+              [-0.5, 0.0],
+              [0.0, 0.0],
+              [0.5, 0.0],
+              [1.0, 0.0],
+              [1.5, 0.021750005],
+              [2.0, 0.084000014],
+              [2.5, 0.18225001],
+              [3.0, 0.312],
+              [3.5, 0.46875],
+              [4.0, 0.64800006],
+              [4.5, 0.84524995],
+              [5.0, 1.056],
+              [5.5, 1.2757499],
+              [6.0, 1.5],
+              [6.5, 1.7242501],
+              [7.0, 1.9440001],
+              [7.5, 2.1547496],
+              [8.0, 2.3519998],
+              [8.5, 2.53125],
+              [9.0, 2.6880002],
+              [9.5, 2.81775],
+              [10.0, 2.916],
+              [10.5, 2.9782495],
+              [11.0, 3.0],
+              [11.5, 3.0],
+              [12.0, 3.0],
+              [12.5, 3.0],
+              [13.0, 3.0],
+              [13.5, 3.0],
+              [14.0, 3.0]
+            ]
+          },
+          {
+            "array_index": 0,
+            "data_path": "rotation_euler",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [4.0, 0.5],
+                "BEZIER",
+                [3.0, 0.5],
+                [5.0, 0.5]
+              ]
+            ],
+            "samples": [
+              [1.0, 0.5],
+              [1.5, 0.5],
+              [2.0, 0.5],
+              [2.5, 0.5],
+              [3.0, 0.5],
+              [3.5, 0.5],
+              [4.0, 0.5],
+              [4.5, 0.5],
+              [5.0, 0.5],
+              [5.5, 0.5],
+              [6.0, 0.5],
+              [6.5, 0.5],
+              [7.0, 0.5]
+            ]
+          },
+          {
+            "array_index": 1,
+            "data_path": "rotation_euler",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [4.0, 0.0],
+                "BEZIER",
+                [3.0, 0.0],
+                [5.0, 0.0]
+              ]
+            ],
+            "samples": [
+              [1.0, 0.0],
+              [1.5, 0.0],
+              [2.0, 0.0],
+              [2.5, 0.0],
+              [3.0, 0.0],
+              [3.5, 0.0],
+              [4.0, 0.0],
+              [4.5, 0.0],
+              [5.0, 0.0],
+              [5.5, 0.0],
+              [6.0, 0.0],
+              [6.5, 0.0],
+              [7.0, 0.0]
+            ]
+          },
+          {
+            "array_index": 2,
+            "data_path": "rotation_euler",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [4.0, 1.0],
+                "BEZIER",
+                [3.0, 1.0],
+                [5.0, 1.0]
+              ]
+            ],
+            "samples": [
+              [1.0, 1.0],
+              [1.5, 1.0],
+              [2.0, 1.0],
+              [2.5, 1.0],
+              [3.0, 1.0],
+              [3.5, 1.0],
+              [4.0, 1.0],
+              [4.5, 1.0],
+              [5.0, 1.0],
+              [5.5, 1.0],
+              [6.0, 1.0],
+              [6.5, 1.0],
+              [7.0, 1.0]
+            ]
+          },
+          {
+            "array_index": 0,
+            "data_path": "scale",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [20.0, 1.0],
+                "BEZIER",
+                [19.0, 1.0],
+                [21.0, 1.0]
+              ]
+            ],
+            "samples": [
+              [17.0, 1.0],
+              [17.5, 1.0],
+              [18.0, 1.0],
+              [18.5, 1.0],
+              [19.0, 1.0],
+              [19.5, 1.0],
+              [20.0, 1.0],
+              [20.5, 1.0],
+              [21.0, 1.0],
+              [21.5, 1.0],
+              [22.0, 1.0],
+              [22.5, 1.0],
+              [23.0, 1.0]
+            ]
+          },
+          {
+            "array_index": 1,
+            "data_path": "scale",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [20.0, 1.0],
+                "BEZIER",
+                [19.0, 1.0],
+                [21.0, 1.0]
+              ]
+            ],
+            "samples": [
+              [17.0, 1.0],
+              [17.5, 1.0],
+              [18.0, 1.0],
+              [18.5, 1.0],
+              [19.0, 1.0],
+              [19.5, 1.0],
+              [20.0, 1.0],
+              [20.5, 1.0],
+              [21.0, 1.0],
+              [21.5, 1.0],
+              [22.0, 1.0],
+              [22.5, 1.0],
+              [23.0, 1.0]
+            ]
+          },
+          {
+            "array_index": 2,
+            "data_path": "scale",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [20.0, 1.0],
+                "BEZIER",
+                [19.0, 1.0],
+                [21.0, 1.0]
+              ]
+            ],
+            "samples": [
+              [17.0, 1.0],
+              [17.5, 1.0],
+              [18.0, 1.0],
+              [18.5, 1.0],
+              [19.0, 1.0],
+              [19.5, 1.0],
+              [20.0, 1.0],
+              [20.5, 1.0],
+              [21.0, 1.0],
+              [21.5, 1.0],
+              [22.0, 1.0],
+              [22.5, 1.0],
+              [23.0, 1.0]
+            ]
+          }
+        ],
+        "slots": ["OBCube"]
+      }
+    }
+  },
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

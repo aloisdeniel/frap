@@ -20,7 +20,7 @@ use frap_op::{ImageCache, OpError, PathResolver, Services};
 use frap_render_scene::{GpuOptions, RenderError, RenderService};
 use frap_rna::{
     FrapError, IdCode, IdKey, IdRef, ImageId, Input, MeshId, PyExc, Report, RnaError, RnaErrorKind,
-    Root, Span, Value,
+    RnaPtr, Root, Span, Value,
 };
 use frap_scene::{
     ChangeLog, Context, EditState, Evaluator, Host, HostRead, Main, Preferences, Snapshot,
@@ -43,6 +43,11 @@ pub(crate) struct State {
     edit: EditState,
     prefs: Preferences,
     time_dirty: bool,
+    /// Datablocks an RNA edit tagged for an animation update since the last evaluation
+    /// boundary (`ID_RECALC_ANIMATION`; `frap_eval::animate::tags_animation_on_write` /
+    /// `tags_animation_on_call`, WP 6.4): the boundary re-applies their animation at the
+    /// current frame even when time is not dirty.
+    anim_tagged: Vec<Root>,
 }
 
 impl HostRead for State {
@@ -228,6 +233,32 @@ pub(crate) struct HostImpl {
     cwd: PathBuf,
 }
 
+impl HostImpl {
+    /// Tags the datablock `ptr` is rooted at for an animation update when the statement's
+    /// RNA write of `prop` (`Some`) or call of the RNA function `func` (`None`: see
+    /// `call`) is one Blender's update callback tags with `ID_RECALC_ANIMATION` (WP 6.4).
+    pub(crate) fn tag_animation_write(&mut self, ptr: &RnaPtr, prop: &str) {
+        if frap_eval::animate::tags_animation_on_write(ptr.srna, prop) {
+            self.tag_animation(ptr.root);
+        }
+    }
+
+    /// The same for a call of the RNA function `func` on `ptr`.
+    pub(crate) fn tag_animation_call(&mut self, ptr: &RnaPtr, func: &str) {
+        if frap_eval::animate::tags_animation_on_call(ptr.srna, func) {
+            self.tag_animation(ptr.root);
+        }
+    }
+
+    fn tag_animation(&mut self, root: Root) {
+        if matches!(root, Root::Id(_) | Root::Embedded { .. })
+            && !self.state.anim_tagged.contains(&root)
+        {
+            self.state.anim_tagged.push(root);
+        }
+    }
+}
+
 impl HostRead for HostImpl {
     fn main(&self) -> &Main {
         &self.state.main
@@ -279,10 +310,33 @@ impl Host for HostImpl {
         (&self.state, &mut self.eval)
     }
     fn snapshot_at(&mut self, frame: Option<i32>) -> Result<Snapshot, RnaError> {
-        // Animation (M6) is applied on the clone at `frame`; until then the clone is as-is.
-        let _ = frame;
+        // §7.3 / D-07 (WP 6.4): animation is applied on the clone at `frame` (the scene's
+        // frame when `None`), never on the session's originals.
+        let mut clone = HostImpl {
+            state: self.state.clone(),
+            eval: EvalCache::new(),
+            log: ChangeLog::default(),
+            reports: Vec::new(),
+            cwd: self.cwd.clone(),
+        };
+        let scene = clone.state.win.scene;
+        if let Some(f) = frame {
+            let mut untracked = ChangeLog::default();
+            if let Some(s) = clone.state.main.scenes.get_mut(scene, &mut untracked) {
+                s.frame_current = f;
+            }
+        }
+        let at = clone
+            .state
+            .main
+            .scenes
+            .get(scene)
+            .map_or(0, |s| s.frame_current);
+        frap_eval::animate::apply_animation_at(&mut clone, at as f32)?;
+        clone.state.time_dirty = false;
+        clone.state.anim_tagged.clear();
         Ok(Snapshot {
-            host: Box::new(self.state.clone()),
+            host: Box::new(clone.state),
             eval: Box::new(EvalCache::new()),
         })
     }
@@ -290,7 +344,11 @@ impl Host for HostImpl {
         self.state.time_dirty = true;
     }
     fn apply_pending_animation(&mut self) -> Result<(), RnaError> {
-        // No animation before M6 (§7.3): nothing is pending.
+        // §7.3 (WP 6.4): the boundary writes the animation of the scene's frame (of every
+        // animated datablock when time is dirty, else of those an RNA edit tagged).
+        let dirty = self.state.time_dirty;
+        let tagged = std::mem::take(&mut self.state.anim_tagged);
+        frap_eval::animate::apply_pending_animation_tagged(self, dirty, &tagged)?;
         self.state.time_dirty = false;
         Ok(())
     }
@@ -304,12 +362,31 @@ impl Host for HostImpl {
         index: i32,
         v: Value,
     ) -> Result<(), RnaError> {
-        let _ = (owner, data_path, index, v);
-        Err(RnaError::new(
-            RnaErrorKind::NotImplemented,
-            PyExc::NotImplementedError,
-            "frap: animation writes arrive in M6",
-        ))
+        // WP 6.4: `BKE_animsys_write_to_rna_path` on the original. The path is resolved from
+        // the (embedded) ID; the written value follows the property type (`channel_value`);
+        // an unchanged value is not written (no generation bump).
+        let not_found = || {
+            RnaError::new(
+                RnaErrorKind::NoAttribute,
+                PyExc::AttributeError,
+                format!("frap: animation path '{data_path}' does not resolve"),
+            )
+        };
+        let segs = frap_eval::animate::parse_path(data_path).ok_or_else(not_found)?;
+        let (ptr, prop, current) =
+            frap_eval::animate::read_path(&*self, owner, &segs).ok_or_else(not_found)?;
+        let value = match v {
+            Value::Float(f) => f,
+            Value::Double(d) => d as f32,
+            Value::Int(i) => i as f32,
+            Value::Bool(b) => f32::from(u8::from(b)),
+            _ => return Err(not_found()),
+        };
+        let Some(new) = frap_eval::animate::channel_value(prop, &current, index, value) else {
+            return Ok(());
+        };
+        crate::resolve::set_prop(self, &ptr, prop, new)
+            .map_err(|e| RnaError::new(RnaErrorKind::Other, PyExc::RuntimeError, e.message))
     }
 }
 
@@ -377,6 +454,7 @@ impl Session {
                     edit: EditState::default(),
                     prefs: Preferences::default(),
                     time_dirty: false,
+                    anim_tagged: Vec::new(),
                 },
                 eval: EvalCache::new(),
                 log: ChangeLog::default(),
@@ -434,8 +512,8 @@ impl Session {
     pub fn state_dump(&self) -> String {
         let s = &self.host.state;
         format!(
-            "{:?}\n{:?}\n{:?}\n{:?}\n{}",
-            s.main, s.win, s.edit, s.prefs.addons, s.time_dirty
+            "{:?}\n{:?}\n{:?}\n{:?}\n{} {:?}",
+            s.main, s.win, s.edit, s.prefs.addons, s.time_dirty, s.anim_tagged
         )
     }
 

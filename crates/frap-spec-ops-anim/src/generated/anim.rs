@@ -11,8 +11,30 @@ use smol_str::SmolStr;
 /// Enum item tables of this namespace (deduplicated).
 pub mod enums {
     use frap_rna::EnumItem;
-pub static E0: [EnumItem; 1] = [
+pub static E0: [EnumItem; 23] = [
     EnumItem { identifier: "DEFAULT", name: "Default", description: "", value: 0 },
+    EnumItem { identifier: "Available", name: "Available", description: "Insert a keyframe on each of the already existing F-Curves", value: -1 },
+    EnumItem { identifier: "Location", name: "Location", description: "Insert a keyframe on each of the location channels", value: -2 },
+    EnumItem { identifier: "Rotation", name: "Rotation", description: "Insert a keyframe on each of the rotation channels", value: -3 },
+    EnumItem { identifier: "Scaling", name: "Scale", description: "Insert a keyframe on each of the scale channels", value: -4 },
+    EnumItem { identifier: "BUILTIN_KSI_LocRot", name: "Location & Rotation", description: "Insert a keyframe on each of the location and rotation channels", value: -5 },
+    EnumItem { identifier: "LocRotScale", name: "Location, Rotation & Scale", description: "Insert a keyframe on each of the location, rotation, and scale channels", value: -6 },
+    EnumItem { identifier: "LocRotScaleCProp", name: "Location, Rotation, Scale & Custom Properties", description: "Key location/rotation/scale as well as custom properties", value: -7 },
+    EnumItem { identifier: "BUILTIN_KSI_LocScale", name: "Location & Scale", description: "Insert a keyframe on each of the location and scale channels", value: -8 },
+    EnumItem { identifier: "BUILTIN_KSI_RotScale", name: "Rotation & Scale", description: "Insert a keyframe on each of the rotation and scale channels", value: -9 },
+    EnumItem { identifier: "BUILTIN_KSI_DeltaLocation", name: "Delta Location", description: "Insert keyframes for additional location offset", value: -10 },
+    EnumItem { identifier: "BUILTIN_KSI_DeltaRotation", name: "Delta Rotation", description: "Insert keyframes for additional rotation offset", value: -11 },
+    EnumItem { identifier: "BUILTIN_KSI_DeltaScale", name: "Delta Scale", description: "Insert keyframes for additional scale factor", value: -12 },
+    EnumItem { identifier: "BUILTIN_KSI_VisualLoc", name: "Visual Location", description: "Insert a keyframe on each of the location channels, taking into account effects of constraints and relationships", value: -13 },
+    EnumItem { identifier: "BUILTIN_KSI_VisualRot", name: "Visual Rotation", description: "Insert a keyframe on each of the rotation channels, taking into account effects of constraints and relationships", value: -14 },
+    EnumItem { identifier: "BUILTIN_KSI_VisualScaling", name: "Visual Scale", description: "Insert a keyframe on each of the scale channels, taking into account effects of constraints and relationships", value: -15 },
+    EnumItem { identifier: "BUILTIN_KSI_VisualLocRot", name: "Visual Location & Rotation", description: "Insert a keyframe on each of the location and rotation channels, taking into account effects of constraints and relationships", value: -16 },
+    EnumItem { identifier: "BUILTIN_KSI_VisualLocRotScale", name: "Visual Location, Rotation & Scale", description: "Insert a keyframe on each of the location, rotation and scale channels, taking into account effects of constraints and relationships", value: -17 },
+    EnumItem { identifier: "BUILTIN_KSI_VisualLocScale", name: "Visual Location & Scale", description: "Insert a keyframe on each of the location and scale channels, taking into account effects of constraints and relationships", value: -18 },
+    EnumItem { identifier: "BUILTIN_KSI_VisualRotScale", name: "Visual Rotation & Scale", description: "Insert a keyframe on each of the rotation and scale channels, taking into account effects of constraints and relationships", value: -19 },
+    EnumItem { identifier: "BUILTIN_KSI_BendyBones", name: "B-Bone Shape", description: "Insert a keyframe for each of the B-Bone shape properties", value: -20 },
+    EnumItem { identifier: "WholeCharacter", name: "Whole Character", description: "Insert a keyframe for all properties that are likely to get animated in a character rig (useful when blocking out a shot)", value: -21 },
+    EnumItem { identifier: "WholeCharacterSelected", name: "Whole Character (Selected Bones Only)", description: "Insert a keyframe for all properties that are likely to get animated in a character rig (only selected bones)", value: -22 },
 ];
 }
 
@@ -54,7 +76,7 @@ impl OpProps for KeyframeClearV3d {
 // ---------------------------------------------------------------- anim.keyframe_delete
 /// Props of `anim.keyframe_delete`, RNA order.
 pub static KEYFRAME_DELETE_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Keying Set", description: "The Keying Set to use", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("DEFAULT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "type", name: "Keying Set", description: "The Keying Set to use", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("DEFAULT"), dynamic: Some("ANIM_OT_keyframe_delete.type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `ANIM_OT_keyframe_delete`
 pub static OPSPEC_ANIM_OT_KEYFRAME_DELETE: OperatorSpec = OperatorSpec {
@@ -67,48 +89,11 @@ pub static OPSPEC_ANIM_OT_KEYFRAME_DELETE: OperatorSpec = OperatorSpec {
     macro_steps: &[],
     poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
 };
-/// Enums of `anim.keyframe_delete`.
-pub mod keyframe_delete {
-    /// `Type`
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-    pub enum Type {
-        /// "DEFAULT"
-        Default,
-    }
-    impl Type {
-        /// Every variant, in RNA item order.
-        pub const ALL: [Type; 1] = [Type::Default];
-        /// Blender identifier.
-        pub const fn identifier(self) -> &'static str {
-            match self {
-                Type::Default => "DEFAULT",
-            }
-        }
-        /// Parses a Blender identifier.
-        pub fn from_identifier(s: &str) -> Option<Self> {
-            match s {
-                "DEFAULT" => Some(Type::Default),
-                _ => None,
-            }
-        }
-    }
-    impl Default for Type {
-        fn default() -> Self {
-            Type::Default
-        }
-    }
-    impl frap_rna::FromValue for Type {
-        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
-        fn from_value(v: &frap_rna::Value) -> Self {
-            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
-        }
-    }
-}
 /// Typed props of `anim.keyframe_delete` (Delete Keying-Set Keyframe).
 #[derive(Debug, Clone)]
 pub struct KeyframeDelete {
-    /// The Keying Set to use; default "DEFAULT": DEFAULT [HIDDEN, ANIMATABLE, SKIP_PRESET]
-    pub r#type: Prop<keyframe_delete::Type>,
+    /// The Keying Set to use; default "DEFAULT", dynamic: DEFAULT | Available | Location | Rotation | Scaling | BUILTIN_KSI_LocRot | LocRotScale | LocRotScaleCProp | … [HIDDEN, ANIMATABLE, DYNAMIC_ENUM, SKIP_PRESET]
+    pub r#type: Prop<SmolStr>,
 }
 impl OpProps for KeyframeDelete {
     const IDNAME: &'static str = "anim.keyframe_delete";
@@ -196,7 +181,7 @@ impl OpProps for KeyframeDeleteV3d {
 // ---------------------------------------------------------------- anim.keyframe_insert
 /// Props of `anim.keyframe_insert`, RNA order.
 pub static KEYFRAME_INSERT_PROPS: [PropDef; 1] = [
-    PropDef { identifier: "type", name: "Keying Set", description: "The Keying Set to use", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("DEFAULT"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "type", name: "Keying Set", description: "The Keying Set to use", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("DEFAULT"), dynamic: Some("ANIM_OT_keyframe_insert.type") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::DYNAMIC_ENUM).union(PropFlags::SKIP_PRESET), deprecated: None },
 ];
 /// `ANIM_OT_keyframe_insert`
 pub static OPSPEC_ANIM_OT_KEYFRAME_INSERT: OperatorSpec = OperatorSpec {
@@ -209,48 +194,11 @@ pub static OPSPEC_ANIM_OT_KEYFRAME_INSERT: OperatorSpec = OperatorSpec {
     macro_steps: &[],
     poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y, PollCell::Y] }),
 };
-/// Enums of `anim.keyframe_insert`.
-pub mod keyframe_insert {
-    /// `Type`
-    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-    pub enum Type {
-        /// "DEFAULT"
-        Default,
-    }
-    impl Type {
-        /// Every variant, in RNA item order.
-        pub const ALL: [Type; 1] = [Type::Default];
-        /// Blender identifier.
-        pub const fn identifier(self) -> &'static str {
-            match self {
-                Type::Default => "DEFAULT",
-            }
-        }
-        /// Parses a Blender identifier.
-        pub fn from_identifier(s: &str) -> Option<Self> {
-            match s {
-                "DEFAULT" => Some(Type::Default),
-                _ => None,
-            }
-        }
-    }
-    impl Default for Type {
-        fn default() -> Self {
-            Type::Default
-        }
-    }
-    impl frap_rna::FromValue for Type {
-        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
-        fn from_value(v: &frap_rna::Value) -> Self {
-            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
-        }
-    }
-}
 /// Typed props of `anim.keyframe_insert` (Insert Keyframe).
 #[derive(Debug, Clone)]
 pub struct KeyframeInsert {
-    /// The Keying Set to use; default "DEFAULT": DEFAULT [HIDDEN, ANIMATABLE, SKIP_PRESET]
-    pub r#type: Prop<keyframe_insert::Type>,
+    /// The Keying Set to use; default "DEFAULT", dynamic: DEFAULT | Available | Location | Rotation | Scaling | BUILTIN_KSI_LocRot | LocRotScale | LocRotScaleCProp | … [HIDDEN, ANIMATABLE, DYNAMIC_ENUM, SKIP_PRESET]
+    pub r#type: Prop<SmolStr>,
 }
 impl OpProps for KeyframeInsert {
     const IDNAME: &'static str = "anim.keyframe_insert";

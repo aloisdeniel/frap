@@ -559,8 +559,8 @@ fn header_only_ids_are_reported() {
             .header_only
             .is_empty()
     );
-    // An action kept by a fake user is written by name only, and named in `header_only`; an
-    // orphan action is dropped and not named.
+    // An action kept by a fake user is written in full since WP 6.4 (not named in
+    // `header_only`); an orphan action is dropped.
     let (mut main, win) = frap_scene::startup::factory();
     let mut log = ChangeLog::default();
     let mut kept = frap_anim::Action::new("Kept");
@@ -569,7 +569,7 @@ fn header_only_ids_are_reported() {
     main.actions
         .insert("Loose", frap_anim::Action::new("Loose"), &mut log);
     let saved = save(&main, &win, &Preferences::default(), None).unwrap();
-    assert_eq!(saved.header_only, vec!["actions[\"Kept\"]".to_owned()]);
+    assert!(saved.header_only.is_empty(), "{:?}", saved.header_only);
     assert_eq!(saved.dropped, vec!["actions[\"Loose\"]".to_owned()]);
 }
 
@@ -679,4 +679,176 @@ fn pointclouds_round_trip() {
     let names: Vec<_> = pc.attributes().iter().map(|a| a.name.as_str()).collect();
     assert_eq!(names, ["position", "radius", "_w", "Col"]);
     assert_eq!(pc.radii(), [0.01, 0.01, 0.25]);
+}
+
+/// WP 6.4: the M6 data round-trips: actions (slots, layers, strips, channelbags, groups,
+/// F-curves with every key setting), the full `AnimData` with NLA tracks and strips (whose
+/// actions are users, so they are not dropped as orphans), armatures with bones and bone
+/// collections, poses, shape keys with their key blocks, vertex groups and their locks.
+#[test]
+fn m6_data_round_trips() {
+    use frap_anim::{
+        Action, ActionGroup, ActionLayer, ActionSlot, ActionStrip, AnimData, Channelbag, Easing,
+        Extrapolation, FCurve, HandleType, Interpolation, Keyframe, KeyframeStrip, KeyframeType,
+        NlaStrip, NlaTrack,
+    };
+    use frap_scene::id::{Armature, Bone, BoneCollection, Key, Pose, PoseBone, ShapeKey};
+
+    let (mut main, win) = frap_scene::startup::factory();
+    let mut log = ChangeLog::default();
+
+    // An action with a typed slot, one layer, one strip, a group and two F-curves.
+    let mut act = Action::new("CubeAction");
+    act.last_slot_handle += 1;
+    let handle = act.last_slot_handle;
+    act.slots.push(ActionSlot::new(handle, "OBCube", "OBJECT"));
+    let mut fc = FCurve::new("location", 2);
+    fc.group = Some("Object Transforms".into());
+    fc.extrapolation = Extrapolation::Linear;
+    fc.color_mode = "AUTO_RGB".into();
+    for i in 0..70 {
+        // More than 64 keys: the arrays go to buffers.
+        let mut k = Keyframe::new(i as f32, (i * i) as f32 * 0.5);
+        k.handle_left = [i as f32 - 0.3, 1.0];
+        k.handle_right = [i as f32 + 0.3, 2.0];
+        k.interpolation = if i % 2 == 0 {
+            Interpolation::Bezier
+        } else {
+            Interpolation::Elastic
+        };
+        k.easing = Easing::EaseOut;
+        k.handle_left_type = HandleType::Vector;
+        k.r#type = KeyframeType::Breakdown;
+        k.select_left_handle = i % 3 == 0;
+        k.back = 2.5;
+        fc.keyframe_points.push(k);
+    }
+    let mut hide = FCurve::new("hide_render", 0);
+    hide.discrete_values = true;
+    hide.int_values = true;
+    hide.keyframe_points.push(Keyframe::new(1.0, 1.0));
+    let mut group = ActionGroup::new("Object Transforms");
+    group.lock = true;
+    let mut layer = ActionLayer::new("Layer");
+    layer.influence = 0.75;
+    layer.strips.push(ActionStrip::Keyframe(KeyframeStrip {
+        channelbags: vec![Channelbag {
+            slot_handle: handle,
+            groups: vec![group],
+            fcurves: vec![fc, hide],
+        }],
+    }));
+    act.layers.push(layer);
+    act.use_frame_range = true;
+    act.frame_range = [1.0, 40.0];
+    let a = main.actions.insert("CubeAction", act, &mut log);
+    let pushed = main
+        .actions
+        .insert("Pushed", Action::new("Pushed"), &mut log);
+
+    // The Cube animates with the action and an NLA track whose strip uses the other action.
+    let cube = main.objects.find("Cube").unwrap();
+    {
+        let ob = main.objects.get_mut(cube, &mut log).unwrap();
+        let mut adt = AnimData {
+            action: Some(a),
+            action_slot_handle: handle,
+            last_slot_identifier: "OBCube".into(),
+            action_blend_type: "ADD".into(),
+            action_extrapolation: "HOLD_FORWARD".into(),
+            action_influence: 0.5,
+            ..AnimData::default()
+        };
+        let mut track = NlaTrack::new("NlaTrack");
+        let mut strip = NlaStrip::new_clip("Pushed", Some(pushed), 3.0, [1.0, 9.0]);
+        strip.blend_type = "MULTIPLY".into();
+        strip.repeat = 2.0;
+        strip.use_reverse = true;
+        track.strips.push(strip);
+        adt.nla_tracks.push(track);
+        ob.animation_data = Some(adt);
+    }
+
+    // An armature with two bones and a collection, and its posed object.
+    let mut arm = Armature::new("Armature");
+    let mut b0 = Bone::new("Bone");
+    b0.collections = vec!["Bones".into()];
+    b0.select = [true, false, true];
+    let mut b1 = Bone::new("Bone.001");
+    b1.parent = Some(0);
+    b1.use_connect = true;
+    b1.head_local = [0.0, 0.0, 1.0];
+    b1.tail_local = [0.0, 0.5, 2.0];
+    b1.matrix_local[3] = [0.0, 0.0, 1.0, 1.0];
+    b1.roll = 0.25;
+    arm.bones = vec![b0, b1];
+    arm.active_bone = Some(1);
+    arm.collections.push(BoneCollection {
+        name: "Bones".into(),
+        parent: None,
+        is_visible: false,
+        is_solo: true,
+    });
+    arm.active_collection = Some(0);
+    arm.display_type = "STICK".into();
+    let ar = main.armatures.insert("Armature", arm, &mut log);
+    let rig = main.objects.insert(
+        "Rig",
+        Object::new("", Some(frap_rna::IdAny::from(ar))),
+        &mut log,
+    );
+    {
+        let ob = main.objects.get_mut(rig, &mut log).unwrap();
+        let mut pose = Pose::default();
+        let mut pb = PoseBone::new("Bone");
+        pb.location = [1.0, 2.0, 3.0];
+        pb.rotation_mode = "XZY".into();
+        pb.lock_rotation = [true, false, true];
+        pb.select = true;
+        pose.bones = vec![pb, PoseBone::new("Bone.001")];
+        pose.use_mirror_x = true;
+        ob.pose = Some(pose);
+        ob.mode = frap_scene::ObjectMode::Pose;
+    }
+
+    // Shape keys and vertex groups on the Cube's mesh.
+    let me = main.meshes.find("Cube").unwrap();
+    let verts = main.meshes.get(me).unwrap().positions().to_vec();
+    let mut key = Key::new("Key");
+    key.user = Some(me);
+    key.uidgen = 3;
+    let basis = ShapeKey::new("Basis", verts.clone());
+    let mut k1 = ShapeKey::new(
+        "Key 1",
+        verts.iter().map(|p| [p[0], p[1], p[2] + 1.0]).collect(),
+    );
+    k1.value = 0.4;
+    k1.vertex_group = "Group".into();
+    k1.uid = 2;
+    key.key_blocks = vec![basis, k1];
+    key.animation_data = Some(AnimData::default());
+    let k = main.shape_keys.insert("Key", key, &mut log);
+    {
+        let m = main.meshes.get_mut(me, &mut log).unwrap();
+        m.shape_keys = Some(k);
+        m.vertex_group_names = vec!["Group".into(), "Locked".into()];
+        m.vertex_group_locks = vec!["Locked".into()];
+    }
+    {
+        let s = main.scenes.get_mut(win.scene, &mut log).unwrap();
+        s.collection.objects.push(rig);
+        s.view_layers[0].bases.push(Base {
+            object: rig,
+            flag: BaseFlag::empty(),
+        });
+    }
+
+    let saved = save(&main, &win, &Preferences::default(), None).unwrap();
+    assert!(saved.dropped.is_empty(), "{:?}", saved.dropped);
+    assert!(saved.header_only.is_empty(), "{:?}", saved.header_only);
+    let o = open(&saved.bytes, false).unwrap();
+    assert_same(&normalized(&o.main, &o.win), &normalized(&main, &win));
+    // Saving the loaded state again is byte-identical.
+    let again = save(&o.main, &o.win, &Preferences::default(), None).unwrap();
+    assert_eq!(again.bytes, saved.bytes);
 }

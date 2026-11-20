@@ -159,6 +159,47 @@ items = [
   ["GLTF_SEPARATE", "glTF Separate (.gltf + .bin + textures)", "Exports multiple files, with separate JSON, binary and texture data. Easiest to edit later", 1],
 ]
 
+# Keying sets (WP 6.4): `ANIM_keying_sets_enum_itemf` lists `__ACTIVE__` (with an active
+# keying set), the scene's keying sets, then the built-in ones whose poll passes in the context
+# (values -1, -2, … in `keyingsets_builtins.py` class order). Without a context (and as the
+# unset default) it is `rna_enum_dummy_DEFAULT_items`. frap scenes have no keying sets of their
+# own; the operator narrows the list to the context (verified on 5.2.4 with a VIEW_3D override).
+["ANIM_OT_keyframe_insert.type"]
+source = "ANIM_keying_sets_enum_itemf + keyingsets_builtins.py (Blender 5.2.4); DEFAULT = rna_enum_dummy_DEFAULT_items"
+runtime = true
+default = "DEFAULT"
+items = [
+  ["DEFAULT", "Default", "", 0],
+  ["Available", "Available", "Insert a keyframe on each of the already existing F-Curves", -1],
+  ["Location", "Location", "Insert a keyframe on each of the location channels", -2],
+  ["Rotation", "Rotation", "Insert a keyframe on each of the rotation channels", -3],
+  ["Scaling", "Scale", "Insert a keyframe on each of the scale channels", -4],
+  ["BUILTIN_KSI_LocRot", "Location & Rotation", "Insert a keyframe on each of the location and rotation channels", -5],
+  ["LocRotScale", "Location, Rotation & Scale", "Insert a keyframe on each of the location, rotation, and scale channels", -6],
+  ["LocRotScaleCProp", "Location, Rotation, Scale & Custom Properties", "Key location/rotation/scale as well as custom properties", -7],
+  ["BUILTIN_KSI_LocScale", "Location & Scale", "Insert a keyframe on each of the location and scale channels", -8],
+  ["BUILTIN_KSI_RotScale", "Rotation & Scale", "Insert a keyframe on each of the rotation and scale channels", -9],
+  ["BUILTIN_KSI_DeltaLocation", "Delta Location", "Insert keyframes for additional location offset", -10],
+  ["BUILTIN_KSI_DeltaRotation", "Delta Rotation", "Insert keyframes for additional rotation offset", -11],
+  ["BUILTIN_KSI_DeltaScale", "Delta Scale", "Insert keyframes for additional scale factor", -12],
+  ["BUILTIN_KSI_VisualLoc", "Visual Location", "Insert a keyframe on each of the location channels, taking into account effects of constraints and relationships", -13],
+  ["BUILTIN_KSI_VisualRot", "Visual Rotation", "Insert a keyframe on each of the rotation channels, taking into account effects of constraints and relationships", -14],
+  ["BUILTIN_KSI_VisualScaling", "Visual Scale", "Insert a keyframe on each of the scale channels, taking into account effects of constraints and relationships", -15],
+  ["BUILTIN_KSI_VisualLocRot", "Visual Location & Rotation", "Insert a keyframe on each of the location and rotation channels, taking into account effects of constraints and relationships", -16],
+  ["BUILTIN_KSI_VisualLocRotScale", "Visual Location, Rotation & Scale", "Insert a keyframe on each of the location, rotation and scale channels, taking into account effects of constraints and relationships", -17],
+  ["BUILTIN_KSI_VisualLocScale", "Visual Location & Scale", "Insert a keyframe on each of the location and scale channels, taking into account effects of constraints and relationships", -18],
+  ["BUILTIN_KSI_VisualRotScale", "Visual Rotation & Scale", "Insert a keyframe on each of the rotation and scale channels, taking into account effects of constraints and relationships", -19],
+  ["BUILTIN_KSI_BendyBones", "B-Bone Shape", "Insert a keyframe for each of the B-Bone shape properties", -20],
+  ["WholeCharacter", "Whole Character", "Insert a keyframe for all properties that are likely to get animated in a character rig (useful when blocking out a shot)", -21],
+  ["WholeCharacterSelected", "Whole Character (Selected Bones Only)", "Insert a keyframe for all properties that are likely to get animated in a character rig (only selected bones)", -22],
+]
+
+["ANIM_OT_keyframe_delete.type"]
+source = "ANIM_keying_sets_enum_itemf (as ANIM_OT_keyframe_insert.type)"
+runtime = true
+default = "DEFAULT"
+items_from = "op:ANIM_OT_keyframe_insert.type"
+
 ["OBJECT_OT_mode_set.mode"]
 source = "full static list in -b; Blender narrows it to the active object's type (rna_enum_object_mode_items + itemf)"
 runtime = true
