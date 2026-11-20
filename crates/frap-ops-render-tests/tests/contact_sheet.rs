@@ -372,12 +372,12 @@ fn labels_background_and_warnings() {
     ) else {
         return;
     };
-    // `.png` added; the EEVEE fallback is reported.
+    // `.png` added; the tiles render with EEVEE (M5, WP 5.1): no fallback WARNING.
     assert_eq!(j["result"]["filepath"], "labels.png", "{j}");
-    assert_eq!(j["result"]["engine"], "BLENDER_WORKBENCH");
+    assert_eq!(j["result"]["engine"], "BLENDER_EEVEE");
     let reports = common::reports(&j);
     assert!(
-        reports
+        !reports
             .iter()
             .any(|(t, m)| t == "WARNING" && m.contains("BLENDER_EEVEE")),
         "{reports:?}"
@@ -537,8 +537,8 @@ bpy.context.scene.display.shading.show_cavity = True");
     e.ok("bpy.context.scene.display.shading.show_xray = True");
     let j = e.render("bpy.ops.render.render(write_still=True)").unwrap();
     assert!(!warned(&j, "cavity"), "X-ray disables cavity: {j}");
-    // EEVEE and CYCLES render with Workbench until M5 (WARNING), with the scene's display
-    // shading: the unrendered cavity is reported for them too (M2 leftover, M4 W0).
+    // EEVEE and CYCLES render with the EEVEE-like engine from M5 (WP 5.1; CYCLES with the D-12
+    // WARNING): Workbench effects are not reported for them.
     for engine in ["BLENDER_EEVEE", "CYCLES"] {
         e.ok(&format!(
             "bpy.context.scene.display.shading.show_xray = False
@@ -546,11 +546,19 @@ bpy.context.scene.render.engine = '{engine}'"
         ));
         let j = e.render("bpy.ops.render.render(write_still=True)").unwrap();
         assert!(
-            warned(&j, "rendered with BLENDER_WORKBENCH"),
+            !warned(&j, "rendered with BLENDER_WORKBENCH"),
+            "{engine}: {j}"
+        );
+        assert_eq!(
+            warned(
+                &j,
+                "Engine 'CYCLES' is not available in frap; rendered with BLENDER_EEVEE"
+            ),
+            engine == "CYCLES",
             "{engine}: {j}"
         );
         assert!(
-            warned(&j, "Workbench cavity is not rendered"),
+            !warned(&j, "Workbench cavity is not rendered"),
             "{engine}: {j}"
         );
     }
