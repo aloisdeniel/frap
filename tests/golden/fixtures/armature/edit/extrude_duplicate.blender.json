@@ -1,0 +1,642 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": true
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": true
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 53,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 56,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": true
+    },
+    {
+      "line": 58,
+      "ok": true
+    },
+    {
+      "line": 59,
+      "ok": true
+    },
+    {
+      "line": 60,
+      "ok": true
+    },
+    {
+      "line": 61,
+      "ok": true
+    },
+    {
+      "line": 62,
+      "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": true
+    },
+    {
+      "line": 65,
+      "ok": true
+    },
+    {
+      "line": 66,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.003\" not found"
+    },
+    {
+      "line": 67,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.003\" not found"
+    },
+    {
+      "line": 68,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.003\" not found"
+    },
+    {
+      "line": 69,
+      "ok": true
+    },
+    {
+      "line": 70,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.003\" not found"
+    },
+    {
+      "line": 71,
+      "ok": true
+    },
+    {
+      "line": 72,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.005\" not found"
+    },
+    {
+      "line": 73,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.004\" not found"
+    },
+    {
+      "line": 74,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.003\" not found"
+    },
+    {
+      "line": 75,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.004\" not found"
+    },
+    {
+      "line": 76,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.005\" not found"
+    },
+    {
+      "line": 77,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.004\" not found"
+    },
+    {
+      "line": 78,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.003\" not found"
+    },
+    {
+      "line": 79,
+      "ok": true
+    },
+    {
+      "line": 80,
+      "ok": false
+    },
+    {
+      "line": 81,
+      "ok": false
+    },
+    {
+      "line": 82,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.004\" not found"
+    },
+    {
+      "line": 83,
+      "ok": false
+    },
+    {
+      "line": 84,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.004\" not found"
+    },
+    {
+      "line": 85,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.005\" not found"
+    },
+    {
+      "line": 86,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.005\" not found"
+    },
+    {
+      "line": 87,
+      "ok": true
+    },
+    {
+      "line": 88,
+      "ok": true
+    },
+    {
+      "line": 89,
+      "ok": true
+    },
+    {
+      "line": 90,
+      "ok": true
+    },
+    {
+      "line": 91,
+      "ok": true
+    },
+    {
+      "line": 92,
+      "ok": true
+    },
+    {
+      "line": 93,
+      "ok": true
+    },
+    {
+      "line": 94,
+      "ok": true
+    },
+    {
+      "line": 95,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.004\" not found"
+    },
+    {
+      "line": 96,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.005\" not found"
+    },
+    {
+      "line": 97,
+      "ok": true
+    },
+    {
+      "line": 98,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Bone.005\" not found"
+    },
+    {
+      "line": 99,
+      "ok": true
+    },
+    {
+      "line": 100,
+      "ok": true
+    },
+    {
+      "line": 101,
+      "ok": false
+    },
+    {
+      "line": 102,
+      "ok": false
+    }
+  ],
+  "objects": {
+    "Armature": {
+      "type": "ARMATURE",
+      "parent": null,
+      "matrix_world": [
+        [1.910673, 0.0, 0.29552022, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [-0.59104043, 0.0, 0.9553365, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.3, 0.0],
+      "scale": [2.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "EDIT"
+    },
+    "C0": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.07875673, -0.26754257, 0.0, 0.091074005],
+        [0.022366775, 0.9622648, 0.0, 0.0],
+        [-0.009099102, 0.04967333, 0.0, 2.1030965],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.091074005, 0.0, 2.1030965],
+      "rotation_mode": "XYZ",
+      "rotation": [0.05, 0.11068498, 0.27671245],
+      "scale": [0.08237529, 1.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C1": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.01700337, 0.0, 0.28599143, 0.091074005],
+        [0.0018897413, 0.0, -0.2550393, 1.0],
+        [-0.0017165317, 0.0, 2.5521579, 2.1030965],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.091074005, 1.0, 2.1030965],
+      "rotation_mode": "XYZ",
+      "rotation": [0.11068498, 0.1, 0.11068498],
+      "scale": [0.017193958, 0.0, 2.5807648],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C2": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [-0.19081905, 0.023235207, 0.02345251, -0.023305543],
+        [-0.023577496, -0.19474658, 0.00222743, 1.0],
+        [0.08020814, -0.0019688336, 0.05644942, 2.1136162],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [-0.023305543, 1.0, 2.1136162],
+      "rotation_mode": "XYZ",
+      "rotation": [0.010876656, 0.3952146, 0.122936346],
+      "scale": [-0.20832944, -0.19613767, 0.061167955],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C3": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.9933384, 0.017381037, 0.11391534, 0.018821497],
+        [0.0, 0.98855925, -0.15083295, 1.4166666],
+        [-0.1152337, 0.14982815, 0.9819739, 1.8412457],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.018821497, 1.4166666, 1.8412457],
+      "rotation_mode": "XYZ",
+      "rotation": [0.1514108, 0.11549026, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C4": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C5": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C6": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.99476063, 0.083897814, 0.058415674, -0.10820889],
+        [-0.089578226, 0.9906822, 0.10258933, -0.08333333],
+        [-0.049264345, -0.107284606, 0.99300706, 2.003686],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [-0.10820889, -0.08333333, 2.003686],
+      "rotation_mode": "XYZ",
+      "rotation": [-0.10762267, 0.049284294, -0.0898078],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C7": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.68592066, -0.32401347, 0.6515582, 7.3588915],
+        [0.72767633, 0.30542085, -0.6141704, -6.925791],
+        [0.0, 0.89539564, 0.4452714, 4.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.3588915, -6.925791, 4.958309],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086465, -0.7711008, 0.5663932, 4.0762453],
+        [0.95517117, -0.19988336, 0.2183912, 1.005454],
+        [-0.05518906, 0.60452473, 0.79467225, 5.903862],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0762453, 1.005454, 5.903862],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Armature",
+    "selected": ["Armature"],
+    "mode": "EDIT_ARMATURE",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

@@ -25,6 +25,21 @@ use glam::{Mat3, Vec3};
 
 use super::armature__select_all::common;
 
+/// `BKE_scene_cursor_rot_to_mat3` (`View3DCursor::matrix<float3x3>()`): the cursor rotation
+/// in its rotation mode (the quaternion used as stored).
+fn cursor_rot_mat3(cur: &frap_scene::generated::plain::View3DCursor) -> Mat3 {
+    use frap_math::matrix::RotationMode;
+    match RotationMode::from_blender(&cur.rotation_mode) {
+        Some(RotationMode::AxisAngle) => {
+            let a = cur.rotation_axis_angle;
+            frap_math::quat::axis_angle_to_mat3([a[1], a[2], a[3]], a[0])
+        }
+        Some(RotationMode::Quaternion) => frap_math::quat::quat_to_mat3(cur.rotation_quaternion),
+        Some(RotationMode::Euler(order)) => frap_math::euler::eul_o_to_mat3(cur.rotation_euler, order),
+        None => frap_math::euler::eul_o_to_mat3(cur.rotation_euler, frap_math::EulerOrder::XYZ),
+    }
+}
+
 #[operator(poll = poll::EDITARMATURE, tier = T0)]
 fn exec(cx: &mut OpCtx, p: armature::BonePrimitiveAdd) -> OpResult {
     let Some((ob, arm)) = common::edit_armatures(cx).into_iter().next() else {
@@ -40,11 +55,7 @@ fn exec(cx: &mut OpCtx, p: armature::BonePrimitiveAdd) -> OpResult {
     let (cursor_mat, cursor_loc, view_inv) = {
         let c = cx.ctx();
         let cur = c.cursor();
-        let m = Mat3::from_cols_array_2d(&[
-            [cur.matrix[0][0], cur.matrix[1][0], cur.matrix[2][0]],
-            [cur.matrix[0][1], cur.matrix[1][1], cur.matrix[2][1]],
-            [cur.matrix[0][2], cur.matrix[1][2], cur.matrix[2][2]],
-        ]);
+        let m = cursor_rot_mat3(cur);
         let view = Mat3::from_mat4(c.win.view3d.view_matrix);
         let vinv = if view.determinant() != 0.0 { view.inverse() } else { Mat3::IDENTITY };
         (m, Vec3::from_array(cur.location), vinv)

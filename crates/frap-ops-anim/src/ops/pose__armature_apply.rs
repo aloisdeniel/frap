@@ -183,8 +183,9 @@ fn exec(cx: &mut OpCtx, p: pose::ArmatureApply) -> OpResult {
         )
     };
     if linked {
-        cx.report(ReportType::Error, "Cannot apply pose to lib-linked armature");
-        return Ok(OpStatus::Cancelled);
+        return Err(OpError::Runtime(
+            "Cannot apply pose to lib-linked armature".into(),
+        ));
     }
     if has_action {
         cx.report(

@@ -8,7 +8,7 @@
 //! with its children so its head is at the active bone's tail; `OFFSET` keeps them in place).
 //! A loop through the active bone's ancestors is cut. When only the active bone is selected
 //! and it has a parent, it is connected to that parent. Without an active bone:
-//! `Operation requires an active bone` (`CANCELLED`).
+//! `Operation requires an active bone` (Blender's error report: a `RuntimeError`).
 
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -27,10 +27,7 @@ fn exec(cx: &mut OpCtx, p: armature::ParentSet) -> OpResult {
     });
     match r {
         Some(Ok(())) => Ok(OpStatus::Finished),
-        Some(Err(msg)) => {
-            cx.report(ReportType::Error, msg);
-            Ok(OpStatus::Cancelled)
-        }
+        Some(Err(msg)) => Err(OpError::Runtime(msg.into())),
         None => Ok(OpStatus::Cancelled),
     }
 }

@@ -17,7 +17,7 @@ use frap_rna::traits::FromRnaValue;
 use frap_rna::{Field, PropDef, RnaError, RnaPtr, Value, rna_hook};
 
 use crate::edit_armature::paths::{
-    ItemKey, armature, bone_ptr, collection_of, collection_ptr, internal_error,
+    ItemKey, armature, collection_of, collection_ptr, internal_error, ref_coll,
 };
 use crate::edit_armature::{collection_visible_effectively, collection_visible_with_ancestors};
 use crate::id::Armature;
@@ -136,16 +136,13 @@ fn get_bones<'h>(
     if h.edit().armatures.contains_key(&arm.key()) {
         // Blender's iterator reports a WARNING and yields nothing; a read hook has no report
         // channel, so frap answers the empty collection only.
-        return Ok(Field::Value(Value::Tuple(Vec::new())));
+        return Ok(ref_coll::<crate::id::Bone>(Vec::new(), &frap_spec_rna::BONE));
     }
     let name = &a.collections[i].name;
-    Ok(Field::Value(Value::Tuple(
-        a.bones
-            .iter()
-            .filter(|b| b.collections.contains(name))
-            .map(|b| Value::Ptr(Box::new(bone_ptr(arm, &b.name))))
-            .collect(),
-    )))
+    Ok(ref_coll(
+        a.bones.iter().filter(|b| b.collections.contains(name)).collect(),
+        &frap_spec_rna::BONE,
+    ))
 }
 
 #[rna_hook(srna = "BoneCollection", prop = "children", krate = crate)]
@@ -156,13 +153,11 @@ fn get_children<'h>(
 ) -> Result<Field<'h>, RnaError> {
     let (arm, _) = collection_of(this)?;
     let (a, i) = located(h, this)?;
-    Ok(Field::Value(Value::Tuple(
-        a.collections
-            .iter()
-            .filter(|c| c.parent == Some(i))
-            .map(|c| Value::Ptr(Box::new(collection_ptr(arm, &c.name))))
-            .collect(),
-    )))
+    let _ = arm;
+    Ok(ref_coll(
+        a.collections.iter().filter(|c| c.parent == Some(i)).collect(),
+        &frap_spec_rna::BONE_COLLECTION,
+    ))
 }
 
 #[rna_hook(srna = "BoneCollection", prop = "parent", krate = crate)]

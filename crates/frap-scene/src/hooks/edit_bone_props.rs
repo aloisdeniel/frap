@@ -21,7 +21,7 @@ use frap_rna::{ArmatureId, Field, IdRef, MathTag, PropDef, RnaError, RnaPtr, Val
 use glam::{Mat4, Vec3};
 
 use crate::edit_armature::paths::{
-    armature, collection_ptr, edit_bone_of, edit_bone_ptr, stale_edit_bone,
+    armature, edit_bone_of, edit_bone_ptr, ref_coll, stale_edit_bone,
 };
 use crate::edit_armature::rename::rename_bone;
 use crate::edit_armature::{EditArmature, ROOT, SEL, TIP};
@@ -320,13 +320,15 @@ mod select_tail {
 #[rna_hook(srna = "EditBone", prop = "collections", krate = crate)]
 fn collections<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
     let (arm, ea, i) = located(h, this)?;
-    Ok(Field::Value(Value::Tuple(
+    let a = armature(h.main(), arm)?;
+    Ok(ref_coll(
         ea.edit_bones[i]
             .collections
             .iter()
-            .map(|c| Value::Ptr(Box::new(collection_ptr(arm, c))))
+            .filter_map(|c| a.collections.iter().find(|x| x.name == *c))
             .collect(),
-    )))
+        &frap_spec_rna::BONE_COLLECTION,
+    ))
 }
 
 #[allow(dead_code)]

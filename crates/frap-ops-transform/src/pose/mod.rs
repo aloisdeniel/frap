@@ -24,8 +24,8 @@
 //!
 //! Not implemented (`NotImplementedError` before anything changes): proportional editing,
 //! `Pose.use_mirror_x`, `Pose.use_auto_ik`, translating only connected bones (Blender then
-//! rotates instead), `pose_position = 'REST'` (Blender reports `Cannot change Pose when 'Rest
-//! Position' is enabled`, which frap reproduces as a cancelled operator).
+//! rotates instead), `pose_position = 'REST'` (Blender's error report `Cannot change Pose when 'Rest Position'
+//! is enabled`, a `RuntimeError`).
 
 pub mod edit_armature;
 
@@ -757,6 +757,9 @@ fn apply(cx: &mut OpCtx, op: TransformOp, args: &OpArgs) -> OpResult {
         }
     };
     for (level, msg) in reports {
+        if level == ReportType::Error {
+            return Err(OpError::Runtime(msg.into()));
+        }
         cx.report(level, msg);
     }
     let Some(results) = results else {

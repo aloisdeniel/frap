@@ -9,7 +9,7 @@ use smol_str::SmolStr;
 use frap_rna::traits::{FromRnaValue, ToRnaValue};
 use frap_rna::{Field, MathTag, PropDef, RnaError, RnaPtr, Value, rna_hook};
 
-use crate::edit_armature::paths::{bone_of, bone_ptr, collection_ptr, internal_error, armature};
+use crate::edit_armature::paths::{armature, bone_of, bone_ptr, internal_error, ref_coll};
 use crate::edit_armature::rename::rename_bone;
 use crate::edit_armature::rest::{RestBone, rest_pose};
 use crate::id::Armature;
@@ -67,25 +67,26 @@ fn parent<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Re
 fn children<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
     let (arm, _) = bone_of(this)?;
     let (a, i) = located(h, this)?;
-    Ok(Field::Value(Value::Tuple(
-        a.children_of(Some(i))
-            .into_iter()
-            .map(|c| Value::Ptr(Box::new(bone_ptr(arm, &a.bones[c].name))))
-            .collect(),
-    )))
+    let _ = arm;
+    Ok(ref_coll(
+        a.children_of(Some(i)).into_iter().map(|c| &a.bones[c]).collect(),
+        &frap_spec_rna::BONE,
+    ))
 }
 
 #[rna_hook(srna = "Bone", prop = "collections", krate = crate)]
 fn collections<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
     let (arm, _) = bone_of(this)?;
     let (a, i) = located(h, this)?;
-    Ok(Field::Value(Value::Tuple(
+    let _ = arm;
+    Ok(ref_coll(
         a.bones[i]
             .collections
             .iter()
-            .map(|c| Value::Ptr(Box::new(collection_ptr(arm, c))))
+            .filter_map(|c| a.collections.iter().find(|x| x.name == *c))
             .collect(),
-    )))
+        &frap_spec_rna::BONE_COLLECTION,
+    ))
 }
 
 #[rna_hook(srna = "Bone", prop = "name", krate = crate)]

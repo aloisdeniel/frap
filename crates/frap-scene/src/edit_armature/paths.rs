@@ -40,6 +40,10 @@ impl ItemKey {
     }
 }
 
+/// The item a bone (or bone collection) pointer names. The canonical pointer is
+/// `<prefix>[key]`; a pointer reached through a nested collection
+/// (`bones["A"].children["B"]`, `collections_all["C"].bones["B"]`) names its item by its last
+/// key (bone and collection names are unique within an armature).
 fn key_after(this: &RnaPtr, prefix: &[&str]) -> Result<ItemKey, RnaError> {
     let n = prefix.len();
     let ok = this.path.len() > n
@@ -54,13 +58,57 @@ fn key_after(this: &RnaPtr, prefix: &[&str]) -> Result<ItemKey, RnaError> {
             prefix.join(".")
         )));
     }
-    match &this.path[n] {
-        Seg::Key(k) => Ok(ItemKey::Name(k.clone())),
-        Seg::Index(i) => usize::try_from(*i)
+    match this.path.last() {
+        Some(Seg::Key(k)) => Ok(ItemKey::Name(k.clone())),
+        Some(Seg::Index(i)) => usize::try_from(*i)
             .map(ItemKey::Index)
             .map_err(|_| internal_error("negative bone index")),
-        Seg::Prop(_) => Err(internal_error("bone pointer without a key")),
+        _ => Err(internal_error("bone pointer without a key")),
     }
+}
+
+/// A read-only collection of borrowed structs (`Bone.children`, `BoneCollection.bones`, …).
+/// Items are reached through their name (`item_seg` is the default `Key(name)`), which the
+/// bone hooks resolve whatever the path above it.
+pub struct RefColl<'h, T: frap_rna::Rna> {
+    /// The items.
+    pub items: Vec<&'h T>,
+    /// Their struct type.
+    pub item_type: &'static frap_rna::StructDef,
+}
+
+impl<T: frap_rna::Rna> frap_rna::RnaColl for RefColl<'_, T> {
+    fn item_type(&self) -> &'static frap_rna::StructDef {
+        self.item_type
+    }
+    fn len(&self) -> usize {
+        self.items.len()
+    }
+    fn key_of(&self, i: usize) -> Option<smol_str::SmolStr> {
+        let item = *self.items.get(i)?;
+        let prop = item.srna().find_prop(item.srna().name_property?)?;
+        match item.get(prop).ok()? {
+            frap_rna::Field::Value(frap_rna::Value::Str(s)) => Some(s),
+            _ => None,
+        }
+    }
+    fn find(&self, key: &str) -> Option<usize> {
+        (0..self.items.len()).find(|i| self.key_of(*i).as_deref() == Some(key))
+    }
+    fn item(&self, i: usize) -> Result<frap_rna::Item<'_>, RnaError> {
+        self.items
+            .get(i)
+            .map(|t| frap_rna::Item::Struct(frap_rna::StructRef::Borrowed(*t)))
+            .ok_or_else(|| frap_rna::traits::index_out_of_range(i, self.items.len()))
+    }
+}
+
+/// A [`RefColl`] as a field.
+pub fn ref_coll<'h, T: frap_rna::Rna>(
+    items: Vec<&'h T>,
+    item_type: &'static frap_rna::StructDef,
+) -> frap_rna::Field<'h> {
+    frap_rna::Field::Coll(frap_rna::CollRef::Owned(Box::new(RefColl { items, item_type })))
 }
 
 /// The armature an `Armature`-rooted pointer belongs to.
@@ -85,7 +133,7 @@ pub fn object_of(this: &RnaPtr) -> Result<IdRef<ObjectId>, RnaError> {
 
 /// `(armature, bone)` of a `Bone` pointer (`….bones[key]`).
 pub fn bone_of(this: &RnaPtr) -> Result<(IdRef<ArmatureId>, ItemKey), RnaError> {
-    Ok((armature_of(this)?, key_after(this, &["bones"])?))
+    Ok((armature_of(this)?, key_after(this, &[])?))
 }
 
 /// `(armature, edit bone)` of an `EditBone` pointer (`….edit_bones[key]`).
@@ -101,10 +149,7 @@ pub fn pose_bone_of(this: &RnaPtr) -> Result<(IdRef<ObjectId>, ItemKey), RnaErro
 /// `(armature, collection)` of a `BoneCollection` pointer (`….collections_all[key]` or
 /// `….collections[key]`).
 pub fn collection_of(this: &RnaPtr) -> Result<(IdRef<ArmatureId>, ItemKey), RnaError> {
-    let arm = armature_of(this)?;
-    key_after(this, &["collections_all"])
-        .or_else(|_| key_after(this, &["collections"]))
-        .map(|k| (arm, k))
+    Ok((armature_of(this)?, key_after(this, &[])?))
 }
 
 /// `bpy.data.armatures[…].bones["name"]`.

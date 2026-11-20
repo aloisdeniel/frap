@@ -57,8 +57,7 @@ fn exec(cx: &mut OpCtx, p: armature::CalculateRoll) -> OpResult {
             )
         });
         if let Some(Err(msg)) = r {
-            cx.report(ReportType::Error, msg);
-            return Ok(OpStatus::Cancelled);
+            return Err(OpError::Runtime(msg.into()));
         }
     }
     Ok(OpStatus::Finished)
