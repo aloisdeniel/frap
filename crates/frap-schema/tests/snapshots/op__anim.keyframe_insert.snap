@@ -36,16 +36,149 @@ source: crates/frap-schema/tests/describe_ops.rs
           "name": "Default",
           "description": "",
           "value": 0
+        },
+        {
+          "identifier": "Available",
+          "name": "Available",
+          "description": "Insert a keyframe on each of the already existing F-Curves",
+          "value": -1
+        },
+        {
+          "identifier": "Location",
+          "name": "Location",
+          "description": "Insert a keyframe on each of the location channels",
+          "value": -2
+        },
+        {
+          "identifier": "Rotation",
+          "name": "Rotation",
+          "description": "Insert a keyframe on each of the rotation channels",
+          "value": -3
+        },
+        {
+          "identifier": "Scaling",
+          "name": "Scale",
+          "description": "Insert a keyframe on each of the scale channels",
+          "value": -4
+        },
+        {
+          "identifier": "BUILTIN_KSI_LocRot",
+          "name": "Location & Rotation",
+          "description": "Insert a keyframe on each of the location and rotation channels",
+          "value": -5
+        },
+        {
+          "identifier": "LocRotScale",
+          "name": "Location, Rotation & Scale",
+          "description": "Insert a keyframe on each of the location, rotation, and scale channels",
+          "value": -6
+        },
+        {
+          "identifier": "LocRotScaleCProp",
+          "name": "Location, Rotation, Scale & Custom Properties",
+          "description": "Key location/rotation/scale as well as custom properties",
+          "value": -7
+        },
+        {
+          "identifier": "BUILTIN_KSI_LocScale",
+          "name": "Location & Scale",
+          "description": "Insert a keyframe on each of the location and scale channels",
+          "value": -8
+        },
+        {
+          "identifier": "BUILTIN_KSI_RotScale",
+          "name": "Rotation & Scale",
+          "description": "Insert a keyframe on each of the rotation and scale channels",
+          "value": -9
+        },
+        {
+          "identifier": "BUILTIN_KSI_DeltaLocation",
+          "name": "Delta Location",
+          "description": "Insert keyframes for additional location offset",
+          "value": -10
+        },
+        {
+          "identifier": "BUILTIN_KSI_DeltaRotation",
+          "name": "Delta Rotation",
+          "description": "Insert keyframes for additional rotation offset",
+          "value": -11
+        },
+        {
+          "identifier": "BUILTIN_KSI_DeltaScale",
+          "name": "Delta Scale",
+          "description": "Insert keyframes for additional scale factor",
+          "value": -12
+        },
+        {
+          "identifier": "BUILTIN_KSI_VisualLoc",
+          "name": "Visual Location",
+          "description": "Insert a keyframe on each of the location channels, taking into account effects of constraints and relationships",
+          "value": -13
+        },
+        {
+          "identifier": "BUILTIN_KSI_VisualRot",
+          "name": "Visual Rotation",
+          "description": "Insert a keyframe on each of the rotation channels, taking into account effects of constraints and relationships",
+          "value": -14
+        },
+        {
+          "identifier": "BUILTIN_KSI_VisualScaling",
+          "name": "Visual Scale",
+          "description": "Insert a keyframe on each of the scale channels, taking into account effects of constraints and relationships",
+          "value": -15
+        },
+        {
+          "identifier": "BUILTIN_KSI_VisualLocRot",
+          "name": "Visual Location & Rotation",
+          "description": "Insert a keyframe on each of the location and rotation channels, taking into account effects of constraints and relationships",
+          "value": -16
+        },
+        {
+          "identifier": "BUILTIN_KSI_VisualLocRotScale",
+          "name": "Visual Location, Rotation & Scale",
+          "description": "Insert a keyframe on each of the location, rotation and scale channels, taking into account effects of constraints and relationships",
+          "value": -17
+        },
+        {
+          "identifier": "BUILTIN_KSI_VisualLocScale",
+          "name": "Visual Location & Scale",
+          "description": "Insert a keyframe on each of the location and scale channels, taking into account effects of constraints and relationships",
+          "value": -18
+        },
+        {
+          "identifier": "BUILTIN_KSI_VisualRotScale",
+          "name": "Visual Rotation & Scale",
+          "description": "Insert a keyframe on each of the rotation and scale channels, taking into account effects of constraints and relationships",
+          "value": -19
+        },
+        {
+          "identifier": "BUILTIN_KSI_BendyBones",
+          "name": "B-Bone Shape",
+          "description": "Insert a keyframe for each of the B-Bone shape properties",
+          "value": -20
+        },
+        {
+          "identifier": "WholeCharacter",
+          "name": "Whole Character",
+          "description": "Insert a keyframe for all properties that are likely to get animated in a character rig (useful when blocking out a shot)",
+          "value": -21
+        },
+        {
+          "identifier": "WholeCharacterSelected",
+          "name": "Whole Character (Selected Bones Only)",
+          "description": "Insert a keyframe for all properties that are likely to get animated in a character rig (only selected bones)",
+          "value": -22
         }
       ],
       "is_enum_flag": false,
-      "dynamic_enum": null,
-      "context_rule": null,
+      "dynamic_enum": "ANIM_OT_keyframe_insert.type",
+      "context_rule": "items depend on the context in Blender (ANIM_OT_keyframe_insert.type); frap narrows them to the live context, enum_items is the superset",
       "hidden": true,
       "skip_save": false,
       "flags": [
         "HIDDEN",
         "ANIMATABLE",
+        "DYNAMIC_ENUM",
         "SKIP_PRESET"
       ],
       "required": false,
@@ -62,6 +195,8 @@ source: crates/frap-schema/tests/describe_ops.rs
     "headless": "native",
     "planned": "M6",
     "extension": false,
-    "notes": []
+    "notes": [
+      "type lists the built-in keying sets whose poll passes in the context (frap scenes have no keying sets of their own); unset, the default channels (location, rotation, scale) are keyed"
+    ]
   }
 }

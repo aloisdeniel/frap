@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.anim.keyframe_insert(type='DEFAULT')`, tier T0 (WP 6.4). Port of
 //! `insert_key_exec` / `insert_key` (blender/source/blender/editors/animation/keyframing.cc),
-//! Blender 5.2.4, GPL-2.0-or-later: with no active keying set, the channels of the preference
+//! Blender 5.2.4, GPL-2.0-or-later. `type` is a dynamic enum (`ANIM_keying_sets_enum_itemf`):
+//! the built-in keying sets whose poll passes in the context (`Location`, `LocRotScale`,
+//! `Available`, …); a keying set keys its channels as `anim.keyframe_insert_by_name` does. Left
+//! unset (value 0, the active keying set) with no active keying set, the channels of the preference
 //! "Default Key Channels" (factory: location, rotation, scale; custom properties are not
 //! keyed by frap, deviations §2) are keyed on every selected object (Object Mode) or selected
 //! pose bone (Pose Mode) at the current frame, with the scene's keyframe type. The rotation
@@ -15,13 +18,17 @@ use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_anim::anim;
 
-use crate::keying::{CombinedKeyingResult, KeyFlags, KeyPath, KeyingResult, can_have_animdata,
-    id_code_name, insert_keyframes, targets};
+use crate::keying::{
+    CombinedKeyingResult, KeyFlags, KeyPath, KeyingResult, can_have_animdata, id_code_name,
+    insert_keyframes, targets,
+};
 
 /// Shared by the `anim.keyframe_*` operators.
 pub(crate) mod common {
     use frap_anim::KeyframeType;
+    use frap_op::EnumItemOwned;
     use frap_op::prelude::*;
+    use frap_scene::Context;
 
     use crate::keying::keyingsets::{self, KeyingSetInfo};
     use crate::keying::{KeyFlags, KeyPath, KeyingResult, delete_keyframe, insert_keyframes};
@@ -98,11 +105,36 @@ pub(crate) mod common {
         }
         Ok(OpStatus::Finished)
     }
+
+    /// `ANIM_keying_sets_enum_itemf`: the `type` items of `anim.keyframe_insert` /
+    /// `anim.keyframe_delete` in the context.
+    pub(crate) fn keying_set_items(c: &Context) -> Vec<EnumItemOwned> {
+        keyingsets::enum_items(c)
+            .into_iter()
+            .map(|(id, name, description)| EnumItemOwned {
+                identifier: id.into(),
+                name: name.into(),
+                description: description.into(),
+            })
+            .collect()
+    }
 }
 
-#[operator(poll = poll::ALWAYS, tier = T0)]
-fn exec(cx: &mut OpCtx, _p: anim::KeyframeInsert) -> OpResult {
-    // `type='DEFAULT'` with no active keying set (frap scenes have none): `insert_key`.
+#[operator(
+    poll = poll::ALWAYS,
+    tier = T0,
+    notes = [
+        "type lists the built-in keying sets whose poll passes in the context (frap scenes have no keying sets of their own); unset, the default channels (location, rotation, scale) are keyed",
+    ],
+    dyn_enums = [("type", common::keying_set_items)]
+)]
+fn exec(cx: &mut OpCtx, p: anim::KeyframeInsert) -> OpResult {
+    // `ANIM_keyingset_get_from_enum_type`: a keying set when one is named.
+    if p.r#type.value != "DEFAULT" {
+        let ks = common::find(&p.r#type.value)?;
+        return common::insert_with_keyingset(cx, ks);
+    }
+    // Unset (value 0) with no active keying set (frap scenes have none): `insert_key`.
     let Some(selection) = targets::selection(&cx.ctx()) else {
         return Err(OpError::Runtime("Unsupported context mode".into()));
     };
@@ -129,7 +161,15 @@ fn exec(cx: &mut OpCtx, _p: anim::KeyframeInsert) -> OpResult {
             KeyPath::all(t.rotation_path()),
             KeyPath::all(t.path("scale")),
         ];
-        let r = insert_keyframes(cx, t.root, None, &paths, frame, keytype, KeyFlags::default());
+        let r = insert_keyframes(
+            cx,
+            t.root,
+            None,
+            &paths,
+            frame,
+            keytype,
+            KeyFlags::default(),
+        );
         combined.merge(&r);
     }
     if combined.count(KeyingResult::Success) == 0 {

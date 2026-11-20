@@ -47,7 +47,21 @@ pub fn apply_pending_animation(
     host: &mut dyn Host,
     time_dirty: bool,
 ) -> Result<AnimationApplied, RnaError> {
-    if !time_dirty {
+    apply_pending_animation_tagged(host, time_dirty, &[])
+}
+
+/// [`apply_pending_animation`] with the datablocks an RNA edit tagged for an animation update
+/// since the last boundary ([`tags_animation_on_write`], [`tags_animation_on_call`]): even when
+/// time is not dirty, Blender's depsgraph re-evaluates the animation of a tagged ID (and of
+/// every user of a tagged action, directly or through an NLA strip) at the current frame and
+/// flushes it to the originals (`ID_RECALC_ANIMATION`, verified on 5.2.4: after
+/// `keyframe_points[1].co.y = 20`, `view_layer.update()` overwrites a manual `location.x`).
+pub fn apply_pending_animation_tagged(
+    host: &mut dyn Host,
+    time_dirty: bool,
+    tagged: &[Root],
+) -> Result<AnimationApplied, RnaError> {
+    if !time_dirty && tagged.is_empty() {
         return Ok(AnimationApplied::default());
     }
     let frame = host
@@ -55,7 +69,76 @@ pub fn apply_pending_animation(
         .scenes
         .get(host.win().scene)
         .map_or(0, |s| s.frame_current);
-    apply_animation_at(host, frame as f32)
+    if time_dirty {
+        return apply_animation_at(host, frame as f32);
+    }
+    let is_tagged = |root: Root, adt: &AnimData| {
+        let action_tagged =
+            |a: Option<IdRef<ActionId>>| a.is_some_and(|a| tagged.contains(&Root::Id(a.any())));
+        tagged.contains(&root)
+            || action_tagged(adt.action)
+            || adt
+                .nla_tracks
+                .iter()
+                .flat_map(|t| &t.strips)
+                .any(|s| action_tagged(s.action))
+    };
+    apply_animation_filtered(host, frame as f32, &is_tagged)
+}
+
+// Ported from blender/source/blender/makesrna/intern/{rna_fcurve,rna_animation,rna_nla,
+// rna_action}.cc (Blender 5.2.4, GPL-2.0-or-later): the properties whose RNA update callback
+// tags the owner ID (and so the users of an action) with `ID_RECALC_ANIMATION`
+// (`rna_tag_animation_update`, `rna_Keyframe_update`, `rna_FCurve_update_data/_eval`,
+// `rna_FModifier_update`, `rna_AnimData_update`, `rna_AnimData_dependency_update`,
+// `rna_AnimData_action_slot_update`, `rna_NlaStrip_update/_transform_update/
+// _dependency_update`, `rna_Action_tag_animupdate`). Properties with no update callback, or a
+// notifier-only one (selection, `lock`, `hide`, `color`, names, `data_path`, the Action's own
+// frame range), do not re-apply animation (verified on 5.2.4).
+/// Whether assigning `prop` of a struct of type `srna` tags the owner for an animation update.
+pub fn tags_animation_on_write(srna: &'static StructDef, prop: &str) -> bool {
+    if srna.is_a("Keyframe") {
+        !prop.starts_with("select")
+    } else if srna.is_a("FCurve") {
+        matches!(prop, "extrapolation" | "mute" | "auto_smoothing")
+    } else if srna.is_a("FModifier") {
+        !matches!(prop, "name" | "active" | "show_expanded")
+    } else if srna.is_a("FModifierEnvelopeControlPoint") {
+        true
+    } else if srna.is_a("AnimData") {
+        prop != "use_pin"
+    } else if srna.is_a("NlaStrip") {
+        !matches!(prop, "name" | "active" | "select")
+    } else if srna.is_a("NlaTrack") {
+        matches!(prop, "is_solo" | "mute")
+    } else if srna.is_a("ActionLayer") {
+        matches!(prop, "influence" | "mix_mode")
+    } else {
+        false
+    }
+}
+
+// Ported from the same files: the data-API functions that tag animation
+// (`rna_FKeyframe_points_*`, `rna_FCurve_update_data_ex`, `rna_ActionStrip_key_insert`,
+// `rna_Action_slots_remove`, `rna_Action_layers_remove`, `rna_ActionStrips_remove`,
+// `rna_Channelbags_remove`, `rna_NlaTrack_new/remove`, `rna_NlaStrip_new/remove`,
+// `rna_FModifierEnvelope_points_add/remove`). `bpy_struct.keyframe_insert/delete` (a C
+// method, not an RNA function) and `fcurves.new` / `modifiers.new` tag nothing (verified).
+/// Whether calling the RNA function `func` of a struct of type `srna` tags the owner for an
+/// animation update.
+pub fn tags_animation_on_call(srna: &'static StructDef, func: &str) -> bool {
+    match srna.identifier {
+        "FCurveKeyframePoints" => matches!(
+            func,
+            "insert" | "add" | "remove" | "clear" | "sort" | "deduplicate" | "handles_recalc"
+        ),
+        "ActionSlots" | "ActionLayers" | "ActionStrips" | "ActionChannelbags" => func == "remove",
+        "NlaTracks" | "NlaStrips" => matches!(func, "new" | "remove"),
+        "FModifierEnvelopeControlPoints" => matches!(func, "add" | "remove"),
+        _ if srna.is_a("FCurve") => func == "update",
+        _ if srna.is_a("ActionStrip") => func == "key_insert",
+        _ => false,
+    }
 }
 
 /// `bpy.data.actions` as the evaluator's action lookup.
@@ -121,6 +204,15 @@ pub fn anim_data(main: &Main, root: Root) -> Option<&AnimData> {
 /// Writes the animation of every animated ID at `frame` into `host`'s originals (a session
 /// boundary, or a render/export clone).
 pub fn apply_animation_at(host: &mut dyn Host, frame: f32) -> Result<AnimationApplied, RnaError> {
+    apply_animation_filtered(host, frame, &|_, _| true)
+}
+
+/// [`apply_animation_at`] for the animated datablocks `filter` accepts.
+fn apply_animation_filtered(
+    host: &mut dyn Host,
+    frame: f32,
+    filter: &dyn Fn(Root, &AnimData) -> bool,
+) -> Result<AnimationApplied, RnaError> {
     let mut work = Vec::new();
     {
         let read: &dyn HostRead = host;
@@ -130,6 +222,9 @@ pub fn apply_animation_at(host: &mut dyn Host, frame: f32) -> Result<AnimationAp
                 continue;
             };
             if adt.action.is_none() && adt.nla_tracks.is_empty() {
+                continue;
+            }
+            if !filter(root, adt) {
                 continue;
             }
             let srna = root_struct(read, root);
@@ -460,6 +555,34 @@ mod tests {
             None,
             "pass_index is clamped at 0, unchanged"
         );
+    }
+
+    /// The update callbacks that tag animation (verified on 5.2.4 for `co`, `interpolation`,
+    /// `mute`, `action_influence`, `action_slot`; `select`, `lock`, `data_path` do not).
+    #[test]
+    fn animation_tags_follow_blenders_update_callbacks() {
+        let s = |id: &str| frap_spec_rna::find_struct(id).unwrap();
+        assert!(tags_animation_on_write(s("Keyframe"), "co"));
+        assert!(tags_animation_on_write(s("Keyframe"), "interpolation"));
+        assert!(!tags_animation_on_write(
+            s("Keyframe"),
+            "select_control_point"
+        ));
+        assert!(tags_animation_on_write(s("FCurve"), "mute"));
+        assert!(!tags_animation_on_write(s("FCurve"), "select"));
+        assert!(!tags_animation_on_write(s("FCurve"), "data_path"));
+        assert!(tags_animation_on_write(s("AnimData"), "action_influence"));
+        assert!(tags_animation_on_write(s("AnimData"), "action_slot"));
+        assert!(!tags_animation_on_write(s("AnimData"), "use_pin"));
+        assert!(tags_animation_on_write(s("NlaStrip"), "frame_start"));
+        assert!(!tags_animation_on_write(s("NlaTrack"), "name"));
+        assert!(!tags_animation_on_write(s("Action"), "frame_start"));
+        assert!(!tags_animation_on_write(s("Object"), "location"));
+        assert!(tags_animation_on_call(s("FCurveKeyframePoints"), "insert"));
+        assert!(tags_animation_on_call(s("FCurve"), "update"));
+        assert!(tags_animation_on_call(s("NlaTracks"), "new"));
+        assert!(!tags_animation_on_call(s("ActionSlots"), "new"));
+        assert!(!tags_animation_on_call(s("Object"), "keyframe_insert"));
     }
 
     #[test]

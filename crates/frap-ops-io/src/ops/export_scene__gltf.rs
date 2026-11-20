@@ -17,7 +17,7 @@
 use frap_io_gltf::export::settings::{EvaluatedMeshes, ExportFormat, ExportSettings, is_supported};
 use frap_op::prelude::*;
 use frap_op::{EnumItemOwned, Support as S};
-use frap_scene::Context;
+use frap_scene::{Context, EvalMode, Evaluator, HostRead, WindowState};
 use frap_spec_ops_io::export_scene::{ExportSceneGltf as P, OPSPEC_EXPORT_SCENE_OT_GLTF};
 
 use super::wm__save_as_mainfile::common;
@@ -115,17 +115,6 @@ pub(crate) fn unsupported_props(a: &OpArgs) -> Vec<&'static str> {
         .collect()
 }
 
-/// Sets the context scene's `frame_current` for the duration of the export (`frame_set`);
-/// returns the previous frame when it changed. The change is not logged: the export puts the
-/// frame back, as the add-on does.
-fn set_scene_frame(cx: &mut OpCtx, frame: i32) -> Option<i32> {
-    let scene = cx.ctx().win.scene;
-    let (main, _) = cx.main_mut();
-    let mut untracked = frap_scene::ChangeLog::default();
-    let sc = main.scenes.get_mut(scene, &mut untracked)?;
-    (sc.frame_current != frame).then(|| std::mem::replace(&mut sc.frame_current, frame))
-}
-
 /// `Scene.objects`: the objects of the scene's collection hierarchy, each once, in
 /// `FOREACH_SCENE_OBJECT` order (the collection's own objects, then its children).
 fn scene_objects(
@@ -157,6 +146,41 @@ fn scene_objects(
     out
 }
 
+/// `host` seen with another window state: the add-on gathers each exported scene while
+/// `bpy.context.window.scene` is that scene.
+struct SceneView<'a> {
+    inner: &'a dyn HostRead,
+    win: WindowState,
+}
+
+impl HostRead for SceneView<'_> {
+    fn main(&self) -> &frap_scene::Main {
+        self.inner.main()
+    }
+    fn win(&self) -> &WindowState {
+        &self.win
+    }
+    fn edit(&self) -> &frap_scene::EditState {
+        self.inner.edit()
+    }
+    fn ctx(&self) -> Context<'_> {
+        Context {
+            main: self.inner.main(),
+            win: &self.win,
+            prefs: self.inner.ctx().prefs,
+        }
+    }
+    fn mesh_view(
+        &self,
+        mesh: frap_rna::IdRef<frap_rna::MeshId>,
+    ) -> std::sync::Arc<frap_mesh::Mesh> {
+        self.inner.mesh_view(mesh)
+    }
+    fn cwd(&self) -> Option<&std::path::Path> {
+        self.inner.cwd()
+    }
+}
+
 /// `export_apply=True`: the viewport-evaluated mesh of every MESH object the viewport
 /// depsgraph evaluates (the add-on's `blender_object.evaluated_get(depsgraph).to_mesh()`), read
 /// by the exporter's `apply.rs`. Objects outside the depsgraph (`hide_viewport`, in a hidden
@@ -169,23 +193,28 @@ fn scene_objects(
 /// layer name when the scene has it, else its first) at that scene's frame. An object linked
 /// into several scenes is evaluated once per scene, so a frame-dependent modifier (BUILD, WAVE)
 /// gives each scene's node that scene's result (M34S5-1: verified on 5.2.4, identical in every
-/// run). The window goes back to the user's scene.
-fn evaluated_meshes(cx: &mut OpCtx, settings: &ExportSettings) -> EvaluatedMeshes {
-    let user_win = cx.ctx().win.clone();
-    let scenes = frap_io_gltf::export::scenes::exported_scenes(cx.main(), user_win.scene, settings);
+/// run).
+fn evaluated_meshes(
+    host: &dyn HostRead,
+    eval: &mut dyn Evaluator,
+    settings: &ExportSettings,
+) -> EvaluatedMeshes {
+    let user_win = host.win().clone();
+    let scenes =
+        frap_io_gltf::export::scenes::exported_scenes(host.main(), user_win.scene, settings);
     let mut out = EvaluatedMeshes::new();
     for scene in scenes {
-        if scene != cx.ctx().win.scene {
-            let mut win = cx.ctx().win.clone();
-            if frap_scene::window::set_scene(cx.main(), &mut win, scene).is_err() {
-                continue;
-            }
-            *cx.win_mut() = win;
+        let mut win = user_win.clone();
+        if scene != user_win.scene
+            && frap_scene::window::set_scene(host.main(), &mut win, scene).is_err()
+        {
+            continue;
         }
+        let view = SceneView { inner: host, win };
         let in_depsgraph =
-            frap_io_gltf::export::apply::viewport_evaluated_objects(cx.main(), &cx.ctx());
+            frap_io_gltf::export::apply::viewport_evaluated_objects(view.main(), &view.ctx());
         let obs: Vec<_> = {
-            let main = cx.main();
+            let main = view.main();
             let Some(sc) = main.scenes.get(scene) else {
                 continue;
             };
@@ -200,15 +229,12 @@ fn evaluated_meshes(cx: &mut OpCtx, settings: &ExportSettings) -> EvaluatedMeshe
                 .collect()
         };
         for ob in obs {
-            if let Ok(ev) = cx.evaluated(ob)
+            if let Ok(ev) = eval.object(&view, ob, EvalMode::Viewport)
                 && let Some(me) = ev.mesh.clone()
             {
                 out.insert((scene, ob), me);
             }
         }
-    }
-    if cx.ctx().win.scene != user_win.scene {
-        *cx.win_mut() = user_win;
     }
     out
 }
@@ -232,19 +258,24 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
         .unwrap_or_else(|| "scene".into());
     settings.blend_dir = common::blend_dir(cx);
     settings.cwd = Some(cx.services().paths().cwd.clone());
+    // `export.save`: `if not export_current_frame: scene.frame_set(0)`, then
+    // `frame_set(original)` after the export: Blender exports the animation of frame 0 and
+    // re-applies the current frame's animation to the originals afterwards. frap exports a
+    // clone with frame 0 set and its animation applied, and leaves the originals (manual edits
+    // of animated channels included) as they are (D-07, §7.3, WP 6.4).
+    let mut snap = if p.export_current_frame.value {
+        None
+    } else {
+        Some(cx.snapshot_at(Some(0))?)
+    };
     if p.export_apply.value {
-        // `export.save`: `if not export_current_frame: scene.frame_set(0)`, restored after
-        // the export. Until animation (M6) only frame-dependent modifiers (BUILD, WAVE)
-        // see it, through the evaluated meshes.
-        let restore = if p.export_current_frame.value {
-            None
-        } else {
-            set_scene_frame(cx, 0)
+        let meshes = match &mut snap {
+            Some(s) => evaluated_meshes(&*s.host, &mut *s.eval, &settings),
+            None => {
+                let (host, eval) = cx.split_eval();
+                evaluated_meshes(host, eval, &settings)
+            }
         };
-        let meshes = evaluated_meshes(cx, &settings);
-        if let Some(frame) = restore {
-            set_scene_frame(cx, frame);
-        }
         settings.evaluated_meshes = Some(std::sync::Arc::new(meshes));
     }
     for prop in unsupported_props(a) {
@@ -255,7 +286,11 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
             ),
         );
     }
-    let out = frap_io_gltf::export(cx.main(), &cx.ctx(), &settings).map_err(|e| match e {
+    let out = match &snap {
+        Some(s) => frap_io_gltf::export(s.host.main(), &s.host.ctx(), &settings),
+        None => frap_io_gltf::export(cx.main(), &cx.ctx(), &settings),
+    }
+    .map_err(|e| match e {
         frap_io_gltf::ExportError::NotImplemented(m) => OpError::NotImplemented(m),
         e => OpError::Runtime(e.to_string()),
     })?;
@@ -315,6 +350,7 @@ static DEF: OperatorDef = OperatorDef {
         "'//' resolves relative to bpy.data.filepath (deviation D-08: the add-on writes it raw)",
         "GLTF_EMBEDDED needs the add-on preference allow_embedded_format (off in factory settings)",
         "an active object in another mode (Edit Mode) goes back to Object Mode first, writing its edits back, as the add-on does",
+        "export_current_frame=False exports the animation of frame 0 from a clone of the state; the scene's originals keep their values (deviation D-07: the add-on's frame_set re-applies the current frame's animation to them)",
     ],
 };
 

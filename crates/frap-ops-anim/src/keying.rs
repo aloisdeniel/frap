@@ -1065,7 +1065,7 @@ pub fn parse_struct_args(
             if spans {
                 value_err(format!("{prefix} path spans ID blocks"))
             } else {
-                not_found()
+                unread(read, root, &segs, prefix, data_path).unwrap_or_else(not_found)
             }
         })?;
         (prop, value, data_path.to_owned())
@@ -1076,7 +1076,9 @@ pub fn parse_struct_args(
             .into_iter()
             .chain([PathSeg::Prop(prop.identifier.into())])
             .collect::<Vec<_>>();
-        let (ptr, prop, value) = read_prop(read, root, &segs).ok_or_else(not_found)?;
+        let (ptr, prop, value) = read_prop(read, root, &segs).ok_or_else(|| {
+            unread(read, root, &segs, prefix, data_path).unwrap_or_else(not_found)
+        })?;
         let full = full_path(&ptr, prop.identifier)
             .ok_or_else(|| type_err(format!("{prefix} could not make path to \"{data_path}\"")))?;
         (prop, value, full)
@@ -1110,6 +1112,45 @@ pub fn parse_struct_args(
         root,
         path: full,
         index,
+    })
+}
+
+/// Why the property at `segs` (which [`read_prop`] does not reach) cannot be keyed, when the
+/// struct before it is reached and Blender has the property: a pointer or collection is "not
+/// animatable" (`RNA_property_animateable`, verified on 5.2.4 for `data`, `parent`,
+/// `modifiers`, `animation_data`); a value property frap does not bind yet
+/// (`lock_location`, `pass_index`, …) is `RNA_NOT_IMPLEMENTED`, not "not found".
+fn unread(
+    read: &dyn HostRead,
+    root: Root,
+    segs: &[PathSeg],
+    prefix: &str,
+    data_path: &str,
+) -> Option<RnaError> {
+    let (PathSeg::Prop(name), parent) = segs.split_last()? else {
+        return None;
+    };
+    let (srna, prop) = with_path(read, root, parent, &mut |leaf| match leaf {
+        Leaf::Struct { rna, .. } => {
+            let srna = rna.srna();
+            srna.find_prop(name).map(|p| (srna, p))
+        }
+        Leaf::Prop { .. } => None,
+    })?;
+    Some(match prop.kind {
+        PropKind::Pointer { .. } | PropKind::Collection { .. } => RnaError::new(
+            RnaErrorKind::Other,
+            PyExc::TypeError,
+            format!("{prefix} property \"{data_path}\" not animatable"),
+        ),
+        _ => RnaError::new(
+            RnaErrorKind::NotImplemented,
+            PyExc::NotImplementedError,
+            format!(
+                "frap: {}.{} exists in Blender 5.2 but is not bound by frap yet",
+                srna.identifier, prop.identifier
+            ),
+        ),
     })
 }
 
@@ -1386,6 +1427,190 @@ pub mod keyingsets {
         "WholeCharacter",
         "WholeCharacterSelected",
     ];
+
+    /// The `poll` of a built-in keying set (`_keyingsets_utils.RKS_POLL_*`, Blender 5.2.4).
+    #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+    enum Poll {
+        /// `RKS_POLL_selected_items` / `RKS_POLL_selected_bones_or_objects` (no sequencer
+        /// strips in the 3D Viewport).
+        Items,
+        /// `RKS_POLL_selected_objects`
+        Objects,
+        /// `RKS_POLL_selected_bones`
+        Bones,
+        /// `BUILTIN_KSI_Available.poll`: `bool(context.selected_objects)`.
+        Available,
+        /// `WholeCharacterMixin.poll`: the active object is in Pose Mode.
+        PoseMode,
+    }
+
+    // Ported from `classes` of scripts/startup/keyingsets_builtins.py (Blender 5.2.4,
+    // GPL-2.0-or-later): registration order (the enum order), labels, docstrings, polls.
+    /// Every built-in keying set in `ANIM_keying_sets_enum_itemf` order: idname, name,
+    /// description, poll.
+    const ENUM_ORDER: &[(&str, &str, &str, Poll)] = &[
+        (
+            "Available",
+            "Available",
+            "Insert a keyframe on each of the already existing F-Curves",
+            Poll::Available,
+        ),
+        (
+            "Location",
+            "Location",
+            "Insert a keyframe on each of the location channels",
+            Poll::Items,
+        ),
+        (
+            "Rotation",
+            "Rotation",
+            "Insert a keyframe on each of the rotation channels",
+            Poll::Items,
+        ),
+        (
+            "Scaling",
+            "Scale",
+            "Insert a keyframe on each of the scale channels",
+            Poll::Items,
+        ),
+        (
+            "BUILTIN_KSI_LocRot",
+            "Location & Rotation",
+            "Insert a keyframe on each of the location and rotation channels",
+            Poll::Items,
+        ),
+        (
+            "LocRotScale",
+            "Location, Rotation & Scale",
+            "Insert a keyframe on each of the location, rotation, and scale channels",
+            Poll::Items,
+        ),
+        (
+            "LocRotScaleCProp",
+            "Location, Rotation, Scale & Custom Properties",
+            "Key location/rotation/scale as well as custom properties",
+            Poll::Items,
+        ),
+        (
+            "BUILTIN_KSI_LocScale",
+            "Location & Scale",
+            "Insert a keyframe on each of the location and scale channels",
+            Poll::Items,
+        ),
+        (
+            "BUILTIN_KSI_RotScale",
+            "Rotation & Scale",
+            "Insert a keyframe on each of the rotation and scale channels",
+            Poll::Items,
+        ),
+        (
+            "BUILTIN_KSI_DeltaLocation",
+            "Delta Location",
+            "Insert keyframes for additional location offset",
+            Poll::Objects,
+        ),
+        (
+            "BUILTIN_KSI_DeltaRotation",
+            "Delta Rotation",
+            "Insert keyframes for additional rotation offset",
+            Poll::Objects,
+        ),
+        (
+            "BUILTIN_KSI_DeltaScale",
+            "Delta Scale",
+            "Insert keyframes for additional scale factor",
+            Poll::Objects,
+        ),
+        (
+            "BUILTIN_KSI_VisualLoc",
+            "Visual Location",
+            "Insert a keyframe on each of the location channels, taking into account effects of constraints and relationships",
+            Poll::Items,
+        ),
+        (
+            "BUILTIN_KSI_VisualRot",
+            "Visual Rotation",
+            "Insert a keyframe on each of the rotation channels, taking into account effects of constraints and relationships",
+            Poll::Items,
+        ),
+        (
+            "BUILTIN_KSI_VisualScaling",
+            "Visual Scale",
+            "Insert a keyframe on each of the scale channels, taking into account effects of constraints and relationships",
+            Poll::Items,
+        ),
+        (
+            "BUILTIN_KSI_VisualLocRot",
+            "Visual Location & Rotation",
+            "Insert a keyframe on each of the location and rotation channels, taking into account effects of constraints and relationships",
+            Poll::Items,
+        ),
+        (
+            "BUILTIN_KSI_VisualLocRotScale",
+            "Visual Location, Rotation & Scale",
+            "Insert a keyframe on each of the location, rotation and scale channels, taking into account effects of constraints and relationships",
+            Poll::Items,
+        ),
+        (
+            "BUILTIN_KSI_VisualLocScale",
+            "Visual Location & Scale",
+            "Insert a keyframe on each of the location and scale channels, taking into account effects of constraints and relationships",
+            Poll::Items,
+        ),
+        (
+            "BUILTIN_KSI_VisualRotScale",
+            "Visual Rotation & Scale",
+            "Insert a keyframe on each of the rotation and scale channels, taking into account effects of constraints and relationships",
+            Poll::Items,
+        ),
+        (
+            "BUILTIN_KSI_BendyBones",
+            "B-Bone Shape",
+            "Insert a keyframe for each of the B-Bone shape properties",
+            Poll::Bones,
+        ),
+        (
+            "WholeCharacter",
+            "Whole Character",
+            "Insert a keyframe for all properties that are likely to get animated in a character rig (useful when blocking out a shot)",
+            Poll::PoseMode,
+        ),
+        (
+            "WholeCharacterSelected",
+            "Whole Character (Selected Bones Only)",
+            "Insert a keyframe for all properties that are likely to get animated in a character rig (only selected bones)",
+            Poll::PoseMode,
+        ),
+    ];
+
+    fn polls(c: &Context, poll: Poll) -> bool {
+        let active = c.active_object().and_then(|o| c.main.objects.get(o));
+        let posed = active.is_some_and(|o| o.mode.as_str() == "POSE");
+        let objects = match active {
+            Some(o) => o.mode.as_str() == "OBJECT",
+            None => !c.selected_objects().is_empty(),
+        };
+        let bones =
+            posed && (c.active_pose_bone().is_some() || !c.selected_pose_bones().is_empty());
+        match poll {
+            Poll::Items => bones || objects,
+            Poll::Objects => objects,
+            Poll::Bones => bones,
+            Poll::Available => !c.selected_objects().is_empty(),
+            Poll::PoseMode => posed,
+        }
+    }
+
+    /// `ANIM_keying_sets_enum_itemf` in `c`: the built-in keying sets whose poll passes
+    /// (identifier, name, description); frap scenes have no keying sets of their own, so no
+    /// `__ACTIVE__` item.
+    pub fn enum_items(c: &Context) -> Vec<(&'static str, &'static str, &'static str)> {
+        ENUM_ORDER
+            .iter()
+            .filter(|(.., poll)| polls(c, *poll))
+            .map(|(id, name, desc, _)| (*id, *name, *desc))
+            .collect()
+    }
 
     /// `ANIM_keyingset_get_from_idname` among the built-in sets.
     pub fn find(idname: &str) -> Option<&'static KeyingSetInfo> {

@@ -48,11 +48,7 @@ fn nla_strips_new(h: &mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Resul
             .ok_or_else(|| adt::removed("Action"))?;
         nla::strip_new(a, act, id_type, &id_name, None)
     };
-    let action_name = h
-        .main()
-        .actions
-        .get(a)
-        .map(|x| x.header.name.to_string());
+    let action_name = h.main().actions.get(a).map(|x| x.header.name.to_string());
     strip.frame_end += start - strip.frame_start;
     strip.frame_start = start;
     strip.name = name.into();

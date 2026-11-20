@@ -4,6 +4,9 @@
 # keyframe_delete_by_name and keyframe_delete_v3d remove the keys at the current frame;
 # keyframe_clear_v3d removes the F-curves; DEFAULT keying-set deletion and unknown keying sets
 # raise Blender's errors; with nothing selected the insert operator is cancelled.
+# anim.keyframe_insert / keyframe_delete(type=…) take the keying sets the context offers
+# (a dynamic enum): a named set keys or deletes its channels; 'DEFAULT', unknown names and sets
+# whose poll fails in Object Mode (WholeCharacter) raise Blender's enum TypeError.
 # golden: startup=factory tier=T1 tol=1e-5 compare=anim:CubeAction,anim:LightAction,objects
 import bpy
 bpy.ops.object.select_all(action='DESELECT')
@@ -39,3 +42,15 @@ bpy.data.objects['Light'].select_set(True)
 bpy.ops.anim.keyframe_clear_v3d()
 bpy.ops.anim.keyframe_clear_v3d()
 bpy.data.objects['Camera'].location = (bpy.data.objects['Light'].animation_data.action.users, bpy.context.scene.frame_current, bpy.data.actions['CubeAction'].layers[0].strips[0].channelbags[0].fcurves.find('delta_scale', index=1).keyframe_points[0].co.y)
+bpy.data.objects['Cube'].select_set(True)
+bpy.context.scene.frame_current = 30
+bpy.ops.anim.keyframe_insert(type='Location')
+bpy.ops.anim.keyframe_insert(type='BUILTIN_KSI_LocRot')
+bpy.ops.anim.keyframe_insert(type='Nope')
+bpy.ops.anim.keyframe_insert(type='DEFAULT')
+bpy.ops.anim.keyframe_insert(type='WholeCharacter')
+bpy.ops.anim.keyframe_delete(type='Rotation')
+bpy.ops.anim.keyframe_delete(type='DEFAULT')
+bpy.context.scene.frame_current = 32
+bpy.ops.anim.keyframe_insert(type='LocRotScale')
+bpy.ops.anim.keyframe_delete(type='Scaling')

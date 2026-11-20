@@ -20,7 +20,7 @@ use frap_op::{ImageCache, OpError, PathResolver, Services};
 use frap_render_scene::{GpuOptions, RenderError, RenderService};
 use frap_rna::{
     FrapError, IdCode, IdKey, IdRef, ImageId, Input, MeshId, PyExc, Report, RnaError, RnaErrorKind,
-    Root, Span, Value,
+    RnaPtr, Root, Span, Value,
 };
 use frap_scene::{
     ChangeLog, Context, EditState, Evaluator, Host, HostRead, Main, Preferences, Snapshot,
@@ -43,6 +43,11 @@ pub(crate) struct State {
     edit: EditState,
     prefs: Preferences,
     time_dirty: bool,
+    /// Datablocks an RNA edit tagged for an animation update since the last evaluation
+    /// boundary (`ID_RECALC_ANIMATION`; `frap_eval::animate::tags_animation_on_write` /
+    /// `tags_animation_on_call`, WP 6.4): the boundary re-applies their animation at the
+    /// current frame even when time is not dirty.
+    anim_tagged: Vec<Root>,
 }
 
 impl HostRead for State {
@@ -228,6 +233,32 @@ pub(crate) struct HostImpl {
     cwd: PathBuf,
 }
 
+impl HostImpl {
+    /// Tags the datablock `ptr` is rooted at for an animation update when the statement's
+    /// RNA write of `prop` (`Some`) or call of the RNA function `func` (`None`: see
+    /// `call`) is one Blender's update callback tags with `ID_RECALC_ANIMATION` (WP 6.4).
+    pub(crate) fn tag_animation_write(&mut self, ptr: &RnaPtr, prop: &str) {
+        if frap_eval::animate::tags_animation_on_write(ptr.srna, prop) {
+            self.tag_animation(ptr.root);
+        }
+    }
+
+    /// The same for a call of the RNA function `func` on `ptr`.
+    pub(crate) fn tag_animation_call(&mut self, ptr: &RnaPtr, func: &str) {
+        if frap_eval::animate::tags_animation_on_call(ptr.srna, func) {
+            self.tag_animation(ptr.root);
+        }
+    }
+
+    fn tag_animation(&mut self, root: Root) {
+        if matches!(root, Root::Id(_) | Root::Embedded { .. })
+            && !self.state.anim_tagged.contains(&root)
+        {
+            self.state.anim_tagged.push(root);
+        }
+    }
+}
+
 impl HostRead for HostImpl {
     fn main(&self) -> &Main {
         &self.state.main
@@ -303,6 +334,7 @@ impl Host for HostImpl {
             .map_or(0, |s| s.frame_current);
         frap_eval::animate::apply_animation_at(&mut clone, at as f32)?;
         clone.state.time_dirty = false;
+        clone.state.anim_tagged.clear();
         Ok(Snapshot {
             host: Box::new(clone.state),
             eval: Box::new(EvalCache::new()),
@@ -312,9 +344,11 @@ impl Host for HostImpl {
         self.state.time_dirty = true;
     }
     fn apply_pending_animation(&mut self) -> Result<(), RnaError> {
-        // §7.3 (WP 6.4): the boundary writes the animation of the scene's frame.
+        // §7.3 (WP 6.4): the boundary writes the animation of the scene's frame (of every
+        // animated datablock when time is dirty, else of those an RNA edit tagged).
         let dirty = self.state.time_dirty;
-        frap_eval::animate::apply_pending_animation(self, dirty)?;
+        let tagged = std::mem::take(&mut self.state.anim_tagged);
+        frap_eval::animate::apply_pending_animation_tagged(self, dirty, &tagged)?;
         self.state.time_dirty = false;
         Ok(())
     }
@@ -420,6 +454,7 @@ impl Session {
                     edit: EditState::default(),
                     prefs: Preferences::default(),
                     time_dirty: false,
+                    anim_tagged: Vec::new(),
                 },
                 eval: EvalCache::new(),
                 log: ChangeLog::default(),
@@ -477,8 +512,8 @@ impl Session {
     pub fn state_dump(&self) -> String {
         let s = &self.host.state;
         format!(
-            "{:?}\n{:?}\n{:?}\n{:?}\n{}",
-            s.main, s.win, s.edit, s.prefs.addons, s.time_dirty
+            "{:?}\n{:?}\n{:?}\n{:?}\n{} {:?}",
+            s.main, s.win, s.edit, s.prefs.addons, s.time_dirty, s.anim_tagged
         )
     }
 

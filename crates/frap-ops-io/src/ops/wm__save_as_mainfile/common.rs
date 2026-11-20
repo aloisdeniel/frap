@@ -255,6 +255,10 @@ pub(crate) fn open(cx: &mut OpCtx, path: &Path) -> OpResult {
     main.filepath = Some(path.to_string_lossy().into_owned());
     main.is_dirty = false;
     replace_state(cx, main, opened.win)?;
+    // Blender evaluates the loaded file: the animation of the scene's frame is written into
+    // the originals (verified on 5.2.4). The operator's closing boundary applies it (§7.3,
+    // WP 6.4).
+    cx.mark_time_dirty();
     // The glTF add-on preferences are saved state in frap (§15).
     if let Some(p) = cx.prefs_mut() {
         *p = opened.prefs;

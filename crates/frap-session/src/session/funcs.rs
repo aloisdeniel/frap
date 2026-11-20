@@ -157,6 +157,75 @@ fn cpython_arity(
     Ok(())
 }
 
+/// CPython's `PyArg_ParseTupleAndKeywords` checks for `pyrna_struct_keyframe_parse`
+/// (blender/source/blender/python/intern/bpy_rna_anim.cc, Blender 5.2.4: format
+/// `s|$iO&sO!s`, keywords `data_path, index, frame, group, options, keytype`), with CPython
+/// 3.13's messages (verified on 5.2.4): `takes at most 6 arguments (7 given)`, `argument 1
+/// must be str, not None`, `'float' object cannot be interpreted as an integer`, `must be real
+/// number, not str`, `argument 5 must be set, not list`.
+fn keyframe_parse_check(
+    fname: &str,
+    params: &[PropDef],
+    args: &[CallArg],
+    npos: usize,
+) -> Result<(), FrapError> {
+    const KWLIST: [&str; 6] = ["data_path", "index", "frame", "group", "options", "keytype"];
+    if args.len() > KWLIST.len() {
+        return Err(type_err(format!(
+            "{fname}() takes at most {} arguments ({} given)",
+            KWLIST.len(),
+            args.len()
+        )));
+    }
+    if npos > 1 {
+        return Err(type_err(format!(
+            "{fname}() takes at most 1 positional argument ({npos} given)"
+        )));
+    }
+    let tn = |i: &Input| match i {
+        Input::None => "None",
+        other => other.py_type_name(),
+    };
+    for (n, name) in KWLIST.iter().enumerate() {
+        let found = if n < npos {
+            args.get(n)
+        } else {
+            args.iter().find(|a| a.name.as_deref() == Some(*name))
+        };
+        let Some(a) = found else { continue };
+        if !params.iter().any(|p| p.identifier == *name) {
+            continue;
+        }
+        let input = a.value.to_input()?;
+        let err = match (*name, &input) {
+            ("data_path" | "group" | "keytype", Input::Str(_) | Input::Bare(_)) => None,
+            ("data_path" | "group" | "keytype", other) => Some(type_err(format!(
+                "{fname}() argument {} must be str, not {}",
+                n + 1,
+                tn(other)
+            ))),
+            ("index", Input::Int(_) | Input::Bool(_)) => None,
+            ("index", other) => Some(type_err(format!(
+                "'{}' object cannot be interpreted as an integer",
+                tn(other)
+            ))),
+            ("frame", Input::None | Input::Int(_) | Input::Float(_) | Input::Bool(_)) => None,
+            ("frame", other) => Some(type_err(format!("must be real number, not {}", tn(other)))),
+            ("options", Input::Set(_)) => None,
+            ("options", other) => Some(type_err(format!(
+                "{fname}() argument {} must be set, not {}",
+                n + 1,
+                tn(other)
+            ))),
+            _ => None,
+        };
+        if let Some(e) = err {
+            return Err(e.with_span(a.span));
+        }
+    }
+    Ok(())
+}
+
 /// Binds positional and keyword arguments against `FuncDef.params` (Blender's
 /// `pyrna_func_call` order of checks), coercing each one.
 pub(crate) fn bind_args(
@@ -194,6 +263,13 @@ pub(crate) fn bind_args(
     };
     if cpython {
         cpython_arity(&fname, params, args, npos)?;
+    }
+    // `bpy_struct.keyframe_insert/keyframe_delete` parse with `PyArg_ParseTupleAndKeywords`
+    // (`pyrna_struct_keyframe_parse`, format `s|$iO&sO!s`): CPython's messages (WP 6.4).
+    let keyframe_c =
+        python_only && !cpython && matches!(def.identifier, "keyframe_insert" | "keyframe_delete");
+    if keyframe_c {
+        keyframe_parse_check(&fname, params, args, npos)?;
     }
     if let Some(k) = def.keyword_only_from {
         let k = k as usize;
@@ -235,7 +311,24 @@ pub(crate) fn bind_args(
         };
         match found {
             Some(a) => {
-                let input = a.value.to_input()?;
+                let mut input = a.value.to_input()?;
+                if keyframe_c {
+                    match (p.identifier, &input) {
+                        // `PyC_ParseOptionalFloat`: `None` is the current frame (unset).
+                        ("frame", Input::None) => {
+                            values.insert(p.identifier, Value::default_for(p));
+                            continue;
+                        }
+                        // A non-finite frame is kept as given (no clamping).
+                        ("frame", Input::Float(f)) if !f.is_finite() => {
+                            values.insert(p.identifier, Value::Float(*f as f32));
+                            is_set.insert(i);
+                            continue;
+                        }
+                        ("frame" | "index", Input::Bool(b)) => input = Input::Int(i64::from(*b)),
+                        _ => {}
+                    }
+                }
                 // A `bpy_struct` C method parses its enum arguments with
                 // `pyrna_enum_value_from_id` / `pyrna_enum_bitfield_from_set` (WP 6.4,
                 // `keyframe_insert(keytype=…, options=…)`): `ValueError: <fname>: 'X' not found
@@ -429,6 +522,7 @@ impl Session {
                 k => k.default_code(),
             })
         })?;
+        self.host.tag_animation_call(&this, def.identifier);
         let ret = def.returns.first();
         let py = match v {
             Value::Id(Some(id)) => Py::Rna(Target::Struct(RnaPtr::id(

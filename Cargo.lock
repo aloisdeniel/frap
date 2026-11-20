@@ -967,6 +967,7 @@ dependencies = [
  "frap-modifiers",
  "frap-rna",
  "frap-scene",
+ "frap-spec-rna",
  "frap-subdiv",
  "glam",
  "insta",

@@ -75,7 +75,9 @@ fn exec(cx: &mut OpCtx, _p: anim::KeyframeDeleteV3d) -> OpResult {
         };
         for layer in &mut act.layers {
             for strip in &mut layer.strips {
-                let Some(k) = strip.keyframe_mut() else { continue };
+                let Some(k) = strip.keyframe_mut() else {
+                    continue;
+                };
                 for bag in k
                     .channelbags
                     .iter_mut()

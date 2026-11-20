@@ -24,6 +24,7 @@ frap-imbuf.workspace = true
 frap-anim.workspace = true
 
 [dev-dependencies]
+frap-spec-rna.workspace = true
 proptest.workspace = true
 approx.workspace = true
 serde_json.workspace = true

@@ -32,7 +32,11 @@ fn scene_of(this: &RnaPtr) -> Result<IdRef<SceneId>, RnaError> {
 const MAXFRAME: f64 = 1_048_574.0;
 
 #[rna_func(srna = "Scene", func = "frame_set")]
-fn scene_frame_set(h: &mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Result<Value, RnaError> {
+fn scene_frame_set(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    args: &mut FuncArgs,
+) -> Result<Value, RnaError> {
     let scene = scene_of(this)?;
     let frame = match args.get("frame") {
         Some(Value::Int(i)) => *i as f64,
@@ -43,7 +47,8 @@ fn scene_frame_set(h: &mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Resu
         .and_then(Value::as_f32)
         .map_or(0.0, f64::from);
     let cfra = (frame + subframe).clamp(-MAXFRAME, MAXFRAME);
-    let whole = cfra.floor();
+    // `BKE_scene_frame_set`: `modf` (the whole part truncates toward zero).
+    let whole = cfra.trunc();
     {
         let (main, log) = h.main_mut();
         if let Some(s) = main.scenes.get_mut(scene, log) {

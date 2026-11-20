@@ -711,6 +711,7 @@ impl Session {
             }
             resolve::set_prop(&mut self.host, &p.ptr, prop, c.value.clone())
                 .map_err(set_hook_prefix(set_prefix(&p.ptr)))?;
+            self.host.tag_animation_write(&p.ptr, prop.identifier);
             // A long dynamic array (`Image.pixels`) echoes a capped `$array`.
             let echo = resolve::long_value_json(prop, &c.value, 0, self.opts.max_array)
                 .unwrap_or_else(|| value_json(&c.value, &self.host.state.main));
@@ -896,6 +897,7 @@ impl Session {
             Elem::Whole => unreachable!("handled above"),
         };
         resolve::set_prop(&mut self.host, &p.ptr, prop, cur)?;
+        self.host.tag_animation_write(&p.ptr, prop.identifier);
         let echo = resolve::long_value_json(prop, &echo, echo_start, self.opts.max_array)
             .unwrap_or_else(|| value_json(&echo, &self.host.state.main));
         Ok((echo, reports, hints))
@@ -1033,8 +1035,16 @@ impl Session {
             err: e,
             reports: vec![],
         };
-        // §10.2 step 1: lookup.
-        let def = frap_op::lookup(idname).map_err(fail)?;
+        // §10.2 step 1: lookup. `bpy.ops`' `__call__` updates the view layer before `_op_call`
+        // raises for an unknown operator, so pending animation is applied then too (WP 6.4).
+        let def = match frap_op::lookup(idname) {
+            Ok(def) => def,
+            Err(e) => {
+                frap_scene::Host::apply_pending_animation(&mut self.host)
+                    .map_err(|e| fail(FrapError::from(e)))?;
+                return Err(fail(e));
+            }
+        };
         // Steps 2, 5, 3 in Blender's order: the positionals (`_BPyOpsSubModOp._parse_args`, in
         // Python), poll (`pyop_call`), then the keywords with the context, so dynamic enums
         // list the items of the current context (`pyrna_pydict_to_props` after the poll).
