@@ -199,13 +199,14 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T4",
     "support": "partial",
-    "support_note": "CYCLES renders with BLENDER_EEVEE (WARNING); animation=True renders every frame of the range but animation is evaluated from M6 (WP 6.4); scene=/layer= other than the context ones and use_sequencer_scene=True are not supported",
+    "support_note": "CYCLES renders with BLENDER_EEVEE (WARNING); scene=/layer= other than the context ones and use_sequencer_scene=True are not supported",
     "headless": "native",
     "planned": "M1",
     "extension": false,
     "notes": [
       "needs a GPU: GPU_UNAVAILABLE without an adapter or in a build without the gpu feature",
       "the scene is rendered from a copy: nothing changes except bpy.data.images['Render Result']",
+      "animation=True renders frame_start..frame_end by scene.frame_step (frame_step=0: frame_start only), each frame from its own copy with the animation of that frame; frame_current is unchanged afterwards; render.use_overwrite/use_placeholder apply as in Blender",
       "output paths follow Blender 5.2: templates ({scene_name}, {resolution_x:####}, ...), // relative to the saved .frap (else the cwd), relative paths against the cwd, # runs for animation frames, use_file_extension",
       "a path without a directory part ('shot.png') is written to the cwd (Blender 5.2.4 fails to save it)",
       "file formats: PNG 8/16, JPEG, WEBP, OPEN_EXR, HDR, TARGA, BMP"

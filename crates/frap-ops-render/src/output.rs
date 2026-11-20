@@ -9,7 +9,8 @@
 //! 1. path templates (`{scene_name}`, …; [`template`](crate::output::template)): parse errors
 //!    fail the render;
 //! 2. `//` is made absolute against the directory of `bpy.data.filepath`; unsaved, `//` is
-//!    dropped and the rest is relative to the cwd (`//out/a` → `out/a.png`);
+//!    dropped and the rest is relative to the cwd (`//out/a` → `out/a.png`); the path is then
+//!    normalised (`BLI_path_normalize`: `out/../out/a_` → `out/a_`, `./a` → `a`, `a//b` → `a/b`);
 //! 3. animation frames only (`BLI_path_frame`, 4 digits): the **last** run of `#` in the file
 //!    name (not in directory names) becomes the frame, zero-padded to the run's length with the
 //!    sign in front (`-002`); without a `#` the frame is appended with 4 digits (`anim_0003`,
@@ -175,7 +176,7 @@ pub fn output_path(
 ) -> Result<OutputPath, String> {
     let p = template::apply(rules.filepath, rules.vars)
         .map_err(|e| template::error_message(rules.filepath, &e))?;
-    let mut p = match p.strip_prefix("//") {
+    let p = match p.strip_prefix("//") {
         Some(rest) => match rules.blend_file {
             Some(blend) => {
                 let blend = absolute(Path::new(blend), cwd);
@@ -186,6 +187,8 @@ pub fn output_path(
         },
         None => p,
     };
+    // `BLI_path_abs` ends with `BLI_path_normalize` (`out/../out/a_` → `out/a_`).
+    let mut p = normalize_path(&p);
     if let Some(f) = frame {
         p = frame_path(&p, f, 4);
     }
@@ -204,6 +207,142 @@ pub fn output_path(
         path: p,
         absolute: abs,
     })
+}
+
+/// The separators `BLI_path_normalize` collapses: `SEP` (`/`), and `\\` too on Windows where
+/// `BLI_path_abs` turns `/` into `\\` first.
+fn is_native_sep(c: u8) -> bool {
+    c == b'/' || (cfg!(windows) && c == b'\\')
+}
+
+/// `BLI_path_normalize`: `//` and `/./` become `/`, a leading `./` is dropped, `dir/..` is
+/// collapsed (leading `..` of a relative path are kept, those of an absolute path dropped), an
+/// empty relative result is `.`. A leading `//` (blend-relative) is left alone.
+// Ported from blender/source/blender/blenlib/intern/path_utils.cc (`path_normalize_impl`,
+// Blender 5.2.4, GPL-2.0-or-later).
+pub fn normalize_path(path: &str) -> String {
+    let mut b = path.as_bytes().to_vec();
+    let mut prefix = 0usize;
+    if b.len() >= 2 && b[0] == b'/' && b[1] == b'/' {
+        prefix = 2;
+        let n = b[2..].iter().take_while(|&&c| is_native_sep(c)).count();
+        b.drain(2..2 + n);
+    }
+    if cfg!(windows) && prefix == 0 && b.len() >= 2 && b[0].is_ascii_alphabetic() && b[1] == b':' {
+        prefix = 2;
+    }
+    let mut s = b.split_off(prefix);
+    normalize_tail(&mut s, prefix == 0);
+    b.extend_from_slice(&s);
+    // Only ASCII bytes were removed, at ASCII boundaries.
+    String::from_utf8(b).unwrap_or_else(|_| path.to_owned())
+}
+
+/// `path_normalize_impl` after the prefix (`//`, a drive): `at_start` when nothing was skipped.
+fn normalize_tail(s: &mut Vec<u8>, at_start: bool) {
+    let sep = is_native_sep;
+    let is_relative = s.first().is_some_and(|&c| !sep(c));
+    // Inline replacement: `/./` → `/`, `//` → `/`.
+    if s.len() > 1 {
+        let mut i = s.len() - 1;
+        while i > 0 {
+            if sep(s[i]) {
+                let i_end = i;
+                while i > 0 {
+                    if sep(s[i - 1]) {
+                        i -= 1;
+                    } else if i >= 2 && s[i - 1] == b'.' && sep(s[i - 2]) {
+                        i -= 2;
+                    } else {
+                        break;
+                    }
+                }
+                if i < i_end {
+                    s.drain(i..i_end);
+                }
+            }
+            if i == 0 {
+                break;
+            }
+            i -= 1;
+        }
+    }
+    // A redundant leading `./`.
+    if is_relative && s.len() > 2 && s[0] == b'.' && sep(s[1]) {
+        s.drain(0..2);
+    }
+    // Collapse parent directories (`<parent>/<child>/../` → `<parent>/`).
+    let at = |s: &[u8], k: usize| s.get(k).copied().unwrap_or(0);
+    let is_parent = |s: &[u8], k: usize| {
+        at(s, k) == b'.' && at(s, k + 1) == b'.' && (sep(at(s, k + 2)) || at(s, k + 2) == 0)
+    };
+    let first_non_slash = s.iter().take_while(|&&c| sep(c)).count();
+    let mut start_base = first_non_slash;
+    while is_parent(s, start_base) {
+        start_base += 3;
+    }
+    if start_base < s.len() {
+        let mut start = start_base;
+        loop {
+            let len = s.len();
+            let found = (start..len.saturating_sub(3))
+                .find(|&k| sep(s[k]) && s[k + 1] == b'.' && s[k + 2] == b'.' && sep(s[k + 3]))
+                .or_else(|| {
+                    // The path ends with `/..`.
+                    let tail = len.checked_sub(3)?;
+                    (start <= tail && sep(s[tail]) && s[tail + 1] == b'.' && s[tail + 2] == b'.')
+                        .then_some(tail)
+                });
+            let Some(found) = found else { break };
+            start = found + 1;
+            let mut end_all = start;
+            loop {
+                end_all += 3;
+                if !is_parent(s, end_all) {
+                    break;
+                }
+            }
+            let mut end = start;
+            loop {
+                loop {
+                    start -= 1;
+                    if !(start_base < start && !sep(s[start - 1])) {
+                        break;
+                    }
+                }
+                end += 3;
+                if !(start != start_base && end < end_all) {
+                    break;
+                }
+            }
+            if end > len {
+                end -= 1;
+                end_all -= 1;
+            }
+            s.drain(start..end);
+            if start == start_base && end != end_all {
+                start_base += end_all - end;
+                start = if start_base < s.len() {
+                    start_base
+                } else {
+                    start_base - 1
+                };
+            }
+        }
+    }
+    if is_relative {
+        if s.is_empty() && at_start {
+            s.push(b'.');
+        }
+    } else if start_base != first_non_slash {
+        // `/../home/me` → `/home/me`.
+        let st = if start_base > s.len() {
+            start_base - 1
+        } else {
+            start_base
+        };
+        s.drain(first_non_slash..st);
+    }
 }
 
 fn join_str(dir: &Path, rest: &str) -> String {
@@ -231,11 +370,13 @@ fn absolute(p: &Path, cwd: &Path) -> PathBuf {
 pub fn write_file(path: &Path, bytes: &[u8]) -> Result<(), String> {
     use frap_rna::error::strerror;
     if let Some(dir) = path.parent().filter(|d| !d.as_os_str().is_empty()) {
+        // Blender only logs `Couldn't create directory for file …`; the save that follows fails
+        // and reports this, with the `errno` the directory left (`Read-only file system`).
         std::fs::create_dir_all(dir).map_err(|e| {
             format!(
-                "Couldn't create directory for file {}: {}",
-                path.display(),
-                strerror(&e)
+                "Render error ({}) cannot save: '{}'",
+                strerror(&e),
+                path.display()
             )
         })?;
     }
@@ -296,6 +437,52 @@ mod tests {
         output_path(&r, Path::new("/cwd"), Some(frame))
             .unwrap()
             .path
+    }
+
+    /// `BLI_path_normalize` (Blender 5.2.4's `path_normalize_impl`, compiled on its own and run
+    /// on ~74k generated paths, agrees with this port everywhere it does not read out of
+    /// bounds; these are a sample).
+    #[test]
+    fn normalize_like_blender() {
+        for (p, n) in [
+            ("", ""),
+            (".", "."),
+            ("..", ".."),
+            ("a/..", "."),
+            ("/..", "/"),
+            ("/../home/me", "/home/me"),
+            ("out/../out/r_", "out/r_"),
+            ("./out/./n_", "out/n_"),
+            ("out//dd_", "out/dd_"),
+            ("out/sub/..", "out/"),
+            ("out/sub/../", "out/"),
+            ("../up/out/x_", "../up/out/x_"),
+            ("a/../../b", "../b"),
+            ("../../x/../y", "../../y"),
+            ("out/a/../../out/b/../c_", "out/c_"),
+            ("//a/../b", "//b"),
+            ("//./x", "//x"),
+            ("./", "./"),
+            ("a/./", "a/"),
+            ("/a//b/./c/", "/a/b/c/"),
+        ] {
+            assert_eq!(normalize_path(p), n, "{p:?}");
+        }
+    }
+
+    /// Observed on Blender 5.2.4 (`Saved: '…'`).
+    #[test]
+    fn paths_are_normalised() {
+        assert_eq!(anim("out/../out/r_", 1), "out/r_0001.png");
+        assert_eq!(anim("./out/./n_", 1), "out/n_0001.png");
+        assert_eq!(anim("out//dd_", 1), "out/dd_0001.png");
+        assert_eq!(anim("out/a/../../out/b/../c_", 1), "out/c_0001.png");
+        assert_eq!(anim("//out/q/../g_", 1), "out/g_0001.png");
+        assert_eq!(anim("../wp/out/up_", 1), "../wp/out/up_0001.png");
+        assert_eq!(anim("out/sub/..", 1), "out/0001.png");
+        assert_eq!(still("out/sub/../s2"), "out/s2.png");
+        assert_eq!(still("out/sub/.."), "out/Untitled.png");
+        assert_eq!(still("out/sub/../"), "out/Untitled.png");
     }
 
     // Every expectation below was observed on Blender 5.2.4 (file names written by

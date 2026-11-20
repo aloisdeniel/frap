@@ -1,22 +1,32 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.render.render(animation=False, write_still=False, use_viewport=False,
 //! use_sequencer_scene=False, layer='', scene='', frame_start=0, frame_end=0)`, tier T4
-//! (ARCHITECTURE §19.4; WP 1.24). Behaviour of `screen_render_exec` / `RE_RenderFrame` /
-//! `RE_RenderAnim` (`editors/render/render_internal.cc`, `render/intern/pipeline.cc`, Blender
-//! 5.2.4, GPL-2.0-or-later), verified on 5.2.4:
+//! (ARCHITECTURE §19.4; WP 1.24, animation render WP 6.6). Behaviour of `screen_render_exec` /
+//! `RE_RenderFrame` / `RE_RenderAnim` (`editors/render/render_internal.cc`,
+//! `render/intern/pipeline.cc`, Blender 5.2.4, GPL-2.0-or-later), verified on 5.2.4:
 //!
 //! 1. Checks, in Blender's order (each a `RuntimeError: Error: …`, none needs a GPU):
-//!    `write_still` with a video `media_type`: `Cannot write a single file with an animation
-//!    format selected`; `animation=True` with `frame_start > frame_end` (the operator's
-//!    `frame_start`/`frame_end` override the scene's only when set): `Start frame is larger
-//!    than end frame`; a resolution that rounds to zero: `Image too small`; no `scene.camera`:
-//!    `Cannot render, no camera`; then the output path templates (`Parse errors in path …`).
-//!    `scene=`/`layer=` naming no scene/view layer are ignored, as in Blender; naming another
-//!    one is `NotImplementedError` (frap renders the context scene and view layer).
-//! 2. The state is cloned with animation applied at the frame (`OpCtx::snapshot_at`, §7.3), the
+//!    `frame_start`/`frame_end` set without `animation`: `Frame start/end specified in a
+//!    non-animation render` (set, not non-zero: `frame_start=0` counts); `animation=True` with
+//!    `frame_start > frame_end` (the operator's `frame_start`/`frame_end` override the scene's
+//!    only when set, `get_render_operator_frame_range`): `Start frame is larger than end
+//!    frame`; `write_still` with a video `media_type`: `Cannot write a single file with an
+//!    animation format selected`; `animation=True` with `render.save_output` off
+//!    (`RE_disable_save_output_allowed`; frap has no compositing node group, so no File Output
+//!    node can take over): `Render output and compositing disabled in Output properties`, or
+//!    with `use_compositing` `Render output disabled in Output properties and no active
+//!    compositing File Output nodes`; a resolution that rounds to zero: `Image too small`; no
+//!    `scene.camera`: `Cannot render, no camera`; then the output path templates (`Parse errors
+//!    in path …`). `scene=`/`layer=` naming no scene/view layer are ignored, as in Blender;
+//!    naming another one is `NotImplementedError` (frap renders the context scene and view
+//!    layer).
+//! 2. Each frame renders from its own COW clone of the state with animation applied at that
+//!    frame (`OpCtx::snapshot_at`, §7.3: one clone per frame, dropped after the frame): the
 //!    `RenderScene` is built from the clone and rendered through `cx.services().render()` (the
 //!    only way to the GPU: `GPU_UNAVAILABLE` when there is no adapter or no `gpu` feature).
-//!    Nothing of the session changes except the `Render Result` image (D-07).
+//!    Nothing of the session changes except the `Render Result` image (D-07: Blender's
+//!    `ED_update_for_newframe` after the render re-applies the animation of `frame_current` to
+//!    the originals, overwriting manual edits of animated channels; frap keeps them).
 //! 3. `BLENDER_EEVEE` renders with frap's EEVEE-like renderer (M5); `CYCLES` renders with
 //!    `BLENDER_EEVEE`, with a WARNING (D-12). A render service without EEVEE falls back to
 //!    Workbench, with a WARNING. EEVEE renders also report what the world graph leaves out.
@@ -24,17 +34,30 @@
 //!    with Blender's values: `source='VIEWER'`, `type='RENDER_RESULT'`, `size` `(0, 0)`
 //!    headless); its pixels go to the session's image cache. `write_still` writes
 //!    `scene.render.filepath` following [`crate::output`]'s rules, colour-managed (§19.5).
-//! 5. `animation=True` renders `frame_start..=frame_end` step `frame_step`, each frame on a
-//!    fresh clone, and always writes. `frame_current` is unchanged afterwards (verified).
+//! 5. `animation=True` (`RE_RenderAnim`) renders `frame_start`, `frame_start + frame_step`, …
+//!    up to `frame_end` (only `frame_start` with `frame_step = 0`) and writes each frame to its
+//!    frame path (`#` runs replaced by the
+//!    zero-padded frame, else a 4-digit frame appended, then the extension). Before a frame:
+//!    with `use_overwrite` off an existing file skips the frame (not rendered; when every frame
+//!    is skipped the INFO `No frames rendered, skipped to not overwrite` is reported and
+//!    `Render Result` is left empty); with `use_placeholder` an empty file is created first
+//!    (with its directories) and removed again, when still empty, if the frame fails. Still
+//!    renders ignore both settings, as in Blender. `frame_current` is the same afterwards
+//!    (Blender restores `cfra` and `subframe`, verified).
 //!
 //! Output paths are computed before anything is rendered, so a template error fails without a
 //! render. Files are written before `Render Result` is updated: a failed write leaves the
-//! session untouched (the files of earlier frames stay, as in Blender).
+//! session untouched (the files of earlier frames stay, as in Blender). File errors name the
+//! path as Blender prints it (relative stays relative, normalised: `out/../out/a_` →
+//! `out/a_`); a directory that cannot be created fails as Blender's save does (`Render error
+//! (<strerror>) cannot save: '<path>'`).
 //!
 //! `result`: `engine` (the engine that rendered), `resolution`, `image` (`"Render Result"`),
-//! `frames`, and with files `filepath` (the last file) and `files` (every file, as Blender
-//! prints them: relative to the cwd unless absolute or `//`).
+//! `frames` (frames rendered), and with files `filepath` (the last file) and `files` (every
+//! file written, as Blender prints them: relative to the cwd unless absolute or `//`); with
+//! `use_overwrite` off, `skipped` lists the existing files whose frames were skipped.
 
+use std::path::Path;
 use std::sync::Arc;
 
 use frap_imbuf::{DecodedImage, PixelData};
@@ -90,12 +113,57 @@ fn engine_fallback(engine: &str, eevee: bool) -> Option<String> {
 /// Everything read from the context before rendering.
 struct Plan {
     engine: String,
+    /// `[x, y]` render size (`render_resolution`).
+    resolution: [i32; 2],
     frames: Vec<Option<i32>>,
     /// Output file per frame (`None`: nothing is written).
     outputs: Vec<Option<OutputPath>>,
     write: Option<format::WriteSettings>,
     cm: format::ColorManagement,
     dither: f32,
+    /// `RE_RenderAnim`'s per-frame file options (animation renders only).
+    anim_files: AnimFiles,
+}
+
+/// `render.use_overwrite` / `render.use_placeholder` as `RE_RenderAnim` applies them: only to
+/// animation renders that write image files (`R_NO_OVERWRITE`, `R_TOUCH`).
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+struct AnimFiles {
+    /// `!use_overwrite`: a frame whose file exists is skipped.
+    skip_existing: bool,
+    /// `use_placeholder`: an empty file is created before the frame renders.
+    placeholder: bool,
+}
+
+/// The frames of an animation render: `start`, `start + step`, … up to `end`. `RE_RenderAnim`
+/// walks `cfra` by 1 and renders when `cfra == nfra`, then `nfra += tfra`: with
+/// `frame_step = 0` (the RNA minimum) only `start` renders.
+fn animation_frames(start: i32, end: i32, step: i32) -> Vec<i32> {
+    if step <= 0 {
+        return if start <= end { vec![start] } else { Vec::new() };
+    }
+    (i64::from(start)..=i64::from(end))
+        .step_by(step as usize)
+        .map(|f| f as i32)
+        .collect()
+}
+
+/// `RE_disable_save_output_allowed` for a scene without sequencer strips or compositing node
+/// group (frap has neither): `Err` is the message of the error report.
+fn save_output_allowed(
+    animation: bool,
+    save_output: bool,
+    use_compositing: bool,
+) -> Result<(), &'static str> {
+    match (animation, save_output, use_compositing) {
+        (true, false, false) => Err("Render output and compositing disabled in Output properties"),
+        // `node_tree_has_linked_file_output(nullptr)` is false.
+        (true, false, true) => Err(
+            "Render output disabled in Output properties and no active compositing File Output \
+             nodes",
+        ),
+        _ => Ok(()),
+    }
 }
 
 fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
@@ -106,6 +174,12 @@ fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
     if p.use_sequencer_scene.value {
         return Err(OpError::NotImplemented(
             "frap: render.render(use_sequencer_scene=True) is not supported yet".into(),
+        ));
+    }
+    // `render_operator_has_custom_frame_range`: set, whatever the value.
+    if !p.animation.value && (p.frame_start.is_set || p.frame_end.is_set) {
+        return Err(OpError::Runtime(
+            "Frame start/end specified in a non-animation render".into(),
         ));
     }
     let other_scene = c
@@ -132,12 +206,6 @@ fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
             p.layer.value
         )));
     }
-    if p.write_still.value && !p.animation.value && r.image_settings.media_type == "VIDEO" {
-        return Err(OpError::Runtime(
-            "Cannot write a single file with an animation format selected".into(),
-        ));
-    }
-
     let frames: Vec<Option<i32>> = if p.animation.value {
         let (start, end) = helpers::frame_range_or_scene(cx, &p.frame_start, &p.frame_end);
         if start > end {
@@ -145,14 +213,20 @@ fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
                 "Start frame is larger than end frame".into(),
             ));
         }
-        let step = scene.frame_step.max(1) as usize;
-        (i64::from(start)..=i64::from(end))
-            .step_by(step)
-            .map(|f| Some(f as i32))
+        animation_frames(start, end, scene.frame_step)
+            .into_iter()
+            .map(Some)
             .collect()
     } else {
         vec![None]
     };
+    if p.write_still.value && !p.animation.value && r.image_settings.media_type == "VIDEO" {
+        return Err(OpError::Runtime(
+            "Cannot write a single file with an animation format selected".into(),
+        ));
+    }
+    save_output_allowed(p.animation.value, r.save_output, r.use_compositing)
+        .map_err(|m| OpError::Runtime(m.into()))?;
     let resolution = frap_render_scene::build::camera::render_resolution(r);
     if resolution[0] < 1 || resolution[1] < 1 {
         return Err(OpError::Runtime("Image too small".into()));
@@ -208,14 +282,85 @@ fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
         outputs.resize(frames.len(), None);
     }
 
+    let anim_files = if p.animation.value {
+        AnimFiles {
+            skip_existing: !r.use_overwrite,
+            placeholder: r.use_placeholder,
+        }
+    } else {
+        AnimFiles::default()
+    };
     Ok(Plan {
         engine: r.engine.to_string(),
+        resolution,
         frames,
         outputs,
         write,
         cm,
         dither: r.dither_intensity,
+        anim_files,
     })
+}
+
+/// `touch_file` (`render/intern/pipeline.cc`): creates an empty file (and its directories)
+/// unless one exists. Failures are only logged by Blender, so they are ignored here.
+fn touch_file(path: &Path) {
+    if path.exists() {
+        return;
+    }
+    if let Some(dir) = path.parent().filter(|d| !d.as_os_str().is_empty())
+        && std::fs::create_dir_all(dir).is_err()
+    {
+        return;
+    }
+    let _ = std::fs::OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .open(path);
+}
+
+/// After a failed frame, `RE_RenderAnim` removes the placeholder when it is still empty
+/// (`BLI_file_size(filepath) == 0`).
+fn remove_empty_placeholder(path: &Path) {
+    if std::fs::metadata(path).is_ok_and(|m| m.is_file() && m.len() == 0) {
+        let _ = std::fs::remove_file(path);
+    }
+}
+
+/// A file error as Blender reports it: the path as computed (`OutputPath::path`, relative
+/// stays relative), not the absolute path frap wrote to.
+fn printed_path_error(msg: String, out: &OutputPath) -> String {
+    let abs = out.absolute.display().to_string();
+    if abs == out.path {
+        msg
+    } else {
+        msg.replace(&abs, &out.path)
+    }
+}
+
+/// Renders one frame and writes its file (when it has one).
+fn render_and_write(
+    cx: &mut OpCtx,
+    plan: &Plan,
+    frame: Option<i32>,
+    out: Option<&OutputPath>,
+    engine: &str,
+) -> Result<Film, OpError> {
+    let film = render_frame(cx, frame, engine)?;
+    if let (Some(out), Some(ws)) = (out, &plan.write) {
+        format::write_render(
+            &out.absolute,
+            &film.rgba,
+            film.width,
+            film.height,
+            ws,
+            &plan.cm,
+            plan.dither,
+        )
+        .map_err(|e| OpError::Runtime(printed_path_error(e, out)))?;
+    }
+    Ok(film)
 }
 
 /// Renders one frame on a fresh clone of the state.
@@ -298,13 +443,13 @@ fn store_render_result(cx: &mut OpCtx, film: Film) {
     tier = T4,
     spec = render::OPSPEC_RENDER_OT_RENDER,
     support = Partial(
-        "CYCLES renders with BLENDER_EEVEE (WARNING); animation=True renders every frame of \
-         the range but animation is evaluated from M6 (WP 6.4); scene=/layer= other than the \
-         context ones and use_sequencer_scene=True are not supported"
+        "CYCLES renders with BLENDER_EEVEE (WARNING); scene=/layer= other than the context \
+         ones and use_sequencer_scene=True are not supported"
     ),
     notes = [
         "needs a GPU: GPU_UNAVAILABLE without an adapter or in a build without the gpu feature",
         "the scene is rendered from a copy: nothing changes except bpy.data.images['Render Result']",
+        "animation=True renders frame_start..frame_end by scene.frame_step (frame_step=0: frame_start only), each frame from its own copy with the animation of that frame; frame_current is unchanged afterwards; render.use_overwrite/use_placeholder apply as in Blender",
         "output paths follow Blender 5.2: templates ({scene_name}, {resolution_x:####}, ...), // relative to the saved .frap (else the cwd), relative paths against the cwd, # runs for animation frames, use_file_extension",
         "a path without a directory part ('shot.png') is written to the cwd (Blender 5.2.4 fails to save it)",
         "file formats: PNG 8/16, JPEG, WEBP, OPEN_EXR, HDR, TARGA, BMP"
@@ -316,27 +461,52 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
     let engine = effective_engine(&plan.engine, eevee);
     let warning = engine_fallback(&plan.engine, eevee);
     let mut files: Vec<Value> = Vec::new();
+    let mut skipped: Vec<Value> = Vec::new();
+    let mut rendered = 0usize;
     let mut last: Option<Film> = None;
     for (frame, out) in plan.frames.iter().zip(&plan.outputs) {
-        let film = render_frame(cx, *frame, engine)?;
-        if let (Some(out), Some(ws)) = (out, &plan.write) {
-            format::write_render(
-                &out.absolute,
-                &film.rgba,
-                film.width,
-                film.height,
-                ws,
-                &plan.cm,
-                plan.dither,
-            )
-            .map_err(OpError::Runtime)?;
+        if let Some(out) = out {
+            if plan.anim_files.skip_existing && out.absolute.exists() {
+                skipped.push(Value::Str(out.path.as_str().into()));
+                continue;
+            }
+            if plan.anim_files.placeholder {
+                touch_file(&out.absolute);
+            }
+        }
+        // One COW clone per frame (`render_frame`), dropped before the next frame.
+        let film = match render_and_write(cx, &plan, *frame, out.as_ref(), engine) {
+            Ok(film) => film,
+            Err(e) => {
+                if let Some(out) = out.as_ref().filter(|_| plan.anim_files.placeholder) {
+                    remove_empty_placeholder(&out.absolute);
+                }
+                return Err(e);
+            }
+        };
+        rendered += 1;
+        if let Some(out) = out {
             files.push(Value::Str(out.path.as_str().into()));
         }
         last = Some(film);
     }
-    let film = last.expect("invariant: at least one frame is rendered");
-    let resolution = (film.width, film.height);
-    store_render_result(cx, film);
+    let resolution = match last {
+        Some(film) => {
+            let r = (film.width, film.height);
+            store_render_result(cx, film);
+            r
+        }
+        None => {
+            // Every frame was skipped: `RE_InitState` left an empty render result.
+            let r = ensure_render_result(cx);
+            cx.services().images().evict(r.key());
+            cx.report(
+                ReportType::Info,
+                "No frames rendered, skipped to not overwrite",
+            );
+            (plan.resolution[0] as u32, plan.resolution[1] as u32)
+        }
+    };
 
     if let Some(w) = warning {
         cx.report(ReportType::Warning, w);
@@ -378,12 +548,82 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
         ]),
     );
     cx.result("image", Value::Str(RENDER_RESULT.into()));
-    cx.result("frames", Value::Int(plan.frames.len() as i64));
+    cx.result("frames", Value::Int(rendered as i64));
     if let Some(Value::Str(f)) = files.last() {
         cx.result("filepath", Value::Str(f.clone()));
     }
     if !files.is_empty() {
         cx.result("files", Value::Tuple(files));
     }
+    if !skipped.is_empty() {
+        cx.result("skipped", Value::Tuple(skipped));
+    }
     Ok(OpStatus::Finished)
+}
+
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    #[test]
+    fn frames_walk_by_step() {
+        assert_eq!(animation_frames(1, 5, 2), [1, 3, 5]);
+        assert_eq!(animation_frames(1, 20, 7), [1, 8, 15]);
+        assert_eq!(animation_frames(-2, 1, 1), [-2, -1, 0, 1]);
+        assert_eq!(animation_frames(3, 3, 9), [3]);
+        assert_eq!(animation_frames(4, 5, 2), [4]);
+        // `frame_step = 0` (Blender 5.2.4 writes only the first frame).
+        assert_eq!(animation_frames(1, 4, 0), [1]);
+        assert_eq!(animation_frames(5, 5, 0), [5]);
+        assert_eq!(animation_frames(i32::MAX - 1, i32::MAX, 1), [i32::MAX - 1, i32::MAX]);
+    }
+
+    #[test]
+    fn save_output_checks() {
+        assert_eq!(save_output_allowed(false, false, false), Ok(()));
+        assert_eq!(save_output_allowed(true, true, false), Ok(()));
+        assert_eq!(
+            save_output_allowed(true, false, false),
+            Err("Render output and compositing disabled in Output properties")
+        );
+        assert_eq!(
+            save_output_allowed(true, false, true),
+            Err(
+                "Render output disabled in Output properties and no active compositing File \
+                 Output nodes"
+            )
+        );
+    }
+
+    #[test]
+    fn printed_paths_in_file_errors() {
+        let out = OutputPath {
+            path: "out/w_0001.webp".into(),
+            absolute: PathBuf::from("/work/out/w_0001.webp"),
+        };
+        let abs = out.absolute.display().to_string();
+        assert_eq!(
+            printed_path_error(format!("Render error (x) cannot save: '{abs}'"), &out),
+            "Render error (x) cannot save: 'out/w_0001.webp'"
+        );
+    }
+
+    #[test]
+    fn placeholders() {
+        let dir = std::env::temp_dir().join(format!("frap_render_touch_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let f = dir.join("a/b/c_0001.png");
+        touch_file(&f);
+        assert_eq!(std::fs::metadata(&f).unwrap().len(), 0);
+        remove_empty_placeholder(&f);
+        assert!(!f.exists());
+        // A file with content is kept, and touching it leaves the content.
+        std::fs::write(&f, b"png").unwrap();
+        touch_file(&f);
+        remove_empty_placeholder(&f);
+        assert_eq!(std::fs::read(&f).unwrap(), b"png");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 }
