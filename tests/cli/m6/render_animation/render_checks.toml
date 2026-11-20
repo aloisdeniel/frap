@@ -1,0 +1,9 @@
+# WP 6.6: render.render's animation checks in Blender's order, none of which renders (no GPU
+# needed): frame_start/frame_end set without animation=True (even to 0), the frame range with the
+# operator's overrides replacing the scene's only when set, render.save_output off with and
+# without use_compositing, then the size before the camera. frame_current and the scene range
+# are unchanged afterwards. Every message verified on Blender 5.2.4. Statements on stdin (raw
+# mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

@@ -318,10 +318,9 @@ bpy.context.scene.render.filepath = 'out/bw'");
     let msg = j["error"]["message"].as_str().unwrap();
     let path = e.path("out/bw.webp");
     assert!(msg.starts_with("Error: Render error ("), "{msg}");
-    assert!(
-        msg.ends_with(&format!(") cannot save: '{}'", path.display())),
-        "{msg}"
-    );
+    // The path as Blender computes it: a relative `filepath` stays relative (WP 6.6, verified
+    // on 5.2.4: `cannot save: 'out/w_0001.webp'`).
+    assert!(msg.ends_with(") cannot save: 'out/bw.webp'"), "{msg}");
     #[cfg(target_os = "macos")]
     assert!(msg.contains("(Undefined error: 0)"), "{msg}");
     assert!(!path.exists());

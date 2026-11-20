@@ -1,0 +1,17 @@
+bpy.context.scene.render.engine = 'BLENDER_WORKBENCH'
+bpy.context.scene.render.resolution_x = 50
+bpy.context.scene.frame_current = 7
+bpy.ops.render.render(frame_end=0)
+bpy.ops.render.render(animation=True, frame_start=251)
+bpy.ops.render.render(animation=True, frame_end=-3, frame_start=-2)
+bpy.context.scene.render.save_output = False
+bpy.ops.render.render(animation=True)
+bpy.context.scene.render.use_compositing = False
+bpy.ops.render.render(animation=True)
+bpy.context.scene.render.save_output = True
+bpy.context.scene.camera = None
+bpy.context.scene.render.resolution_percentage = 1
+bpy.ops.render.render(animation=True)
+bpy.context.scene.render.resolution_percentage = 100
+bpy.ops.render.render(animation=True, frame_start=1, frame_end=1)
+bpy.context.scene.frame_current
