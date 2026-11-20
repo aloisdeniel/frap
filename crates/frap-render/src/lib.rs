@@ -6,9 +6,12 @@
 //!
 //! Ownership (M1): WP 1.7 owns everything except this file. CONTRACT (frozen at M1 W0):
 //! `new_service`, `Engine`, `Gpu`, `Gpu::new` (in `gpu.rs`, `engine.rs`, `service.rs`).
+//! M5+M6 W0: the [`eevee`] module (its `mod.rs` is the integrator's contract; the files are
+//! WPs 5.1, 5.2 and 5.5's) and the engine dispatch in `service.rs`.
 #![deny(unsafe_code)]
 
 pub mod composite;
+pub mod eevee;
 mod engine;
 mod gpu;
 pub mod readback;

@@ -24,7 +24,16 @@
 //!   volume, sheen, then dispersion materials declare `[…, dispersion, sheen]` (the volume
 //!   material's empty dispersion object comes first; M34S5-2).
 //!
-//! frap records the extensions while gathering (first-use order, [`Gather::use_extension`]);
+//! - `export_iridescence` also returns a (possibly empty) object for every material with a
+//!   Principled BSDF and a glTF Material Output group with the iridescence sockets (the group
+//!   the importer creates for any glTF material that needed one), so such a material declares
+//!   iridescence at its place in the traversal even when its own object is dropped;
+//!   `export_dispersion` returns one whenever the material has a volume and the group's
+//!   Dispersion socket.
+//!
+//! frap records the extensions while gathering (first-use order, [`Gather::use_extension`]),
+//! and per glTF material the empty objects the add-on would create beyond the always-created
+//! ones ([`CreatedEmpty`], filled by `materials::gather` from the lowered material);
 //! [`reorder`] then sorts the declared names by this traversal of the finished document.
 //! Approximation: every non-unlit material counts as having a Principled BSDF with unlinked
 //! Anisotropic and IOR sockets (the add-on skips specular, anisotropy and IOR otherwise), which
@@ -32,7 +41,7 @@
 //!
 //! [`Gather::use_extension`]: crate::export::gather::Gather::use_extension
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use frap_gltf::json::{Document, Extensions, Index};
 use serde_json::Value;
@@ -65,8 +74,16 @@ const UNLIT: &str = "KHR_materials_unlit";
 const VOLUME: &str = "KHR_materials_volume";
 const DISPERSION: &str = "KHR_materials_dispersion";
 
+/// Per glTF material index: the extensions whose (possibly empty) object the add-on's
+/// `__gather_extensions` creates for it besides [`ALWAYS_CREATED`] (iridescence for a
+/// material with a Principled BSDF and the glTF Material Output group's iridescence sockets,
+/// dispersion for one with a volume and the group's Dispersion socket). A `Gather` state.
+#[derive(Clone, Debug, Default)]
+pub struct CreatedEmpty(pub HashMap<Index, Vec<&'static str>>);
+
 struct Walk<'d> {
     doc: &'d Document,
+    created: Option<&'d CreatedEmpty>,
     order: Vec<String>,
     nodes: HashSet<Index>,
     meshes: HashSet<Index>,
@@ -184,10 +201,22 @@ impl Walk<'_> {
                         self.declare(name);
                     }
                     None if ALWAYS_CREATED.contains(&name) => self.declare(name),
-                    // `export_dispersion`: a (possibly empty) object whenever the material
-                    // has a volume (and a glTF Material Output node with a Dispersion socket,
-                    // which every material a volume comes from has).
-                    None if name == DISPERSION && m.extensions.0.contains_key(VOLUME) => {
+                    // Recorded by the material gatherer (iridescence, dispersion).
+                    None if self
+                        .created
+                        .and_then(|c| c.0.get(&i))
+                        .is_some_and(|c| c.contains(&name)) =>
+                    {
+                        self.declare(name)
+                    }
+                    // Without a record (a document built by hand): `export_dispersion`
+                    // creates a (possibly empty) object whenever the material has a volume
+                    // (and a glTF Material Output node with a Dispersion socket, which every
+                    // material a volume comes from has).
+                    None if self.created.is_none()
+                        && name == DISPERSION
+                        && m.extensions.0.contains_key(VOLUME) =>
+                    {
                         self.declare(name)
                     }
                     None => {}
@@ -219,9 +248,10 @@ impl Walk<'_> {
 }
 
 /// The add-on's traversal order of the extensions met in `doc` (see the module doc).
-fn traversal_order(doc: &Document) -> Vec<String> {
+fn traversal_order(doc: &Document, created: Option<&CreatedEmpty>) -> Vec<String> {
     let mut w = Walk {
         doc,
+        created,
         order: Vec::new(),
         nodes: HashSet::new(),
         meshes: HashSet::new(),
@@ -252,7 +282,12 @@ fn sort_by(names: &mut [String], order: &[String]) {
 
 /// Puts `extensionsUsed` and `extensionsRequired` in the add-on's declaration order.
 pub fn reorder(doc: &mut Document) {
-    let order = traversal_order(doc);
+    reorder_with(doc, None);
+}
+
+/// [`reorder`] with the material gatherer's record of empty extension objects.
+pub fn reorder_with(doc: &mut Document, created: Option<&CreatedEmpty>) {
+    let order = traversal_order(doc, created);
     sort_by(&mut doc.extensions_used, &order);
     sort_by(&mut doc.extensions_required, &order);
 }

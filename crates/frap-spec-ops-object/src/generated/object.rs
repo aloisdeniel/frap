@@ -250,6 +250,118 @@ pub static E15: [EnumItem; 16] = [
     EnumItem { identifier: "CAMERA", name: "Camera", description: "", value: 11 },
     EnumItem { identifier: "SPEAKER", name: "Speaker", description: "", value: 12 },
 ];
+pub static E16: [EnumItem; 4] = [
+    EnumItem { identifier: "TOP", name: "Top", description: "Top of the list", value: -2 },
+    EnumItem { identifier: "UP", name: "Up", description: "", value: -1 },
+    EnumItem { identifier: "DOWN", name: "Down", description: "", value: 1 },
+    EnumItem { identifier: "BOTTOM", name: "Bottom", description: "Bottom of the list", value: 2 },
+];
+pub static E17: [EnumItem; 4] = [
+    EnumItem { identifier: "ACTIVE", name: "Active Group", description: "The active Vertex Group", value: 0 },
+    EnumItem { identifier: "BONE_SELECT", name: "Selected Pose Bones", description: "All Vertex Groups assigned to Selection", value: 1 },
+    EnumItem { identifier: "BONE_DEFORM", name: "Deform Pose Bones", description: "All Vertex Groups assigned to Deform Bones", value: 2 },
+    EnumItem { identifier: "ALL", name: "All Groups", description: "All Vertex Groups", value: 3 },
+];
+}
+
+// ---------------------------------------------------------------- object.armature_add
+/// Props of `object.armature_add`, RNA order.
+pub static ARMATURE_ADD_PROPS: [PropDef; 6] = [
+    PropDef { identifier: "radius", name: "Radius", description: "", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (0.0, 999999995904.0), soft: (0.0010000000474974513, 100.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "enter_editmode", name: "Enter Edit Mode", description: "Enter edit mode when adding this object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "align", name: "Align", description: "The alignment of the new object", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("WORLD"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "location", name: "Location", description: "Location for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "rotation", name: "Rotation", description: "Rotation for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-6.2831854820251465, 6.2831854820251465), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Euler, unit: Unit::Rotation, array: ArrayShape::Fixed(3), flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "scale", name: "Scale", description: "Scale for the newly added object", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-999999995904.0, 999999995904.0), soft: (-1000.0, 1000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::XyzLength, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_armature_add`
+pub static OPSPEC_OBJECT_OT_ARMATURE_ADD: OperatorSpec = OperatorSpec {
+    idname: "object.armature_add",
+    bl_idname: "OBJECT_OT_armature_add",
+    label: "Add Armature",
+    description: "Add an armature object to the scene",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &ARMATURE_ADD_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::Y, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::Y, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Enums of `object.armature_add`.
+pub mod armature_add {
+    /// `Align`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Align {
+        /// "WORLD"
+        World,
+        /// "VIEW"
+        View,
+        /// "CURSOR"
+        Cursor,
+    }
+    impl Align {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Align; 3] = [Align::World, Align::View, Align::Cursor];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Align::World => "WORLD",
+                Align::View => "VIEW",
+                Align::Cursor => "CURSOR",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "WORLD" => Some(Align::World),
+                "VIEW" => Some(Align::View),
+                "CURSOR" => Some(Align::Cursor),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Align {
+        fn default() -> Self {
+            Align::World
+        }
+    }
+    impl frap_rna::FromValue for Align {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `object.armature_add` (Add Armature).
+#[derive(Debug, Clone)]
+pub struct ArmatureAdd {
+    /// default 1 [ANIMATABLE]
+    pub radius: Prop<f32>,
+    /// Enter edit mode when adding this object; default false [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub enter_editmode: Prop<bool>,
+    /// The alignment of the new object; default "WORLD": WORLD | VIEW | CURSOR [ANIMATABLE]
+    pub align: Prop<armature_add::Align>,
+    /// Location for the newly added object; default [0.0, 0.0, 0.0] [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub location: Prop<[f32; 3]>,
+    /// Rotation for the newly added object; default [0.0, 0.0, 0.0] [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub rotation: Prop<[f32; 3]>,
+    /// Scale for the newly added object; default [0.0, 0.0, 0.0] [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub scale: Prop<[f32; 3]>,
+}
+impl OpProps for ArmatureAdd {
+    const IDNAME: &'static str = "object.armature_add";
+    const BL_IDNAME: &'static str = "OBJECT_OT_armature_add";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_ARMATURE_ADD
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ArmatureAdd {
+            radius: a.prop(0, "radius"),
+            enter_editmode: a.prop(1, "enter_editmode"),
+            align: a.prop(2, "align"),
+            location: a.prop(3, "location"),
+            rotation: a.prop(4, "rotation"),
+            scale: a.prop(5, "scale"),
+        }
+    }
 }
 
 // ---------------------------------------------------------------- object.camera_add
@@ -1195,6 +1307,41 @@ impl OpProps for Join {
     }
 }
 
+// ---------------------------------------------------------------- object.join_shapes
+/// Props of `object.join_shapes`, RNA order.
+pub static JOIN_SHAPES_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "use_mirror", name: "Mirror", description: "Mirror the new shape key values", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_join_shapes`
+pub static OPSPEC_OBJECT_OT_JOIN_SHAPES: OperatorSpec = OperatorSpec {
+    idname: "object.join_shapes",
+    bl_idname: "OBJECT_OT_join_shapes",
+    label: "Join as Shapes",
+    description: "Add the vertex positions of selected objects as shape keys or update existing shape keys with matching names",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &JOIN_SHAPES_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.join_shapes` (Join as Shapes).
+#[derive(Debug, Clone)]
+pub struct JoinShapes {
+    /// Mirror the new shape key values; default false [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub use_mirror: Prop<bool>,
+}
+impl OpProps for JoinShapes {
+    const IDNAME: &'static str = "object.join_shapes";
+    const BL_IDNAME: &'static str = "OBJECT_OT_join_shapes";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_JOIN_SHAPES
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        JoinShapes {
+            use_mirror: a.prop(0, "use_mirror"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- object.light_add
 /// Props of `object.light_add`, RNA order.
 pub static LIGHT_ADD_PROPS: [PropDef; 6] = [
@@ -2053,6 +2200,53 @@ impl OpProps for ModifierApply {
     }
 }
 
+// ---------------------------------------------------------------- object.modifier_apply_as_shapekey
+/// Props of `object.modifier_apply_as_shapekey`, RNA order.
+pub static MODIFIER_APPLY_AS_SHAPEKEY_PROPS: [PropDef; 4] = [
+    PropDef { identifier: "keep_modifier", name: "Keep Modifier", description: "Do not remove the modifier from stack", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "modifier", name: "Modifier", description: "Name of the modifier to edit", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::NEVER_NULL).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "report", name: "Report", description: "Create a notification after the operation", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "use_selected_objects", name: "Selected Objects", description: "Affect all selected objects instead of just the active object", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_SAVE).union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_modifier_apply_as_shapekey`
+pub static OPSPEC_OBJECT_OT_MODIFIER_APPLY_AS_SHAPEKEY: OperatorSpec = OperatorSpec {
+    idname: "object.modifier_apply_as_shapekey",
+    bl_idname: "OBJECT_OT_modifier_apply_as_shapekey",
+    label: "Apply Modifier as Shape Key",
+    description: "Apply modifier as a new shape key and remove from the stack",
+    options: OpOptions::INTERNAL.union(OpOptions::REGISTER).union(OpOptions::UNDO),
+    props: &MODIFIER_APPLY_AS_SHAPEKEY_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `object.modifier_apply_as_shapekey` (Apply Modifier as Shape Key).
+#[derive(Debug, Clone)]
+pub struct ModifierApplyAsShapekey {
+    /// Do not remove the modifier from stack; default false [ANIMATABLE]
+    pub keep_modifier: Prop<bool>,
+    /// Name of the modifier to edit; default "" [HIDDEN, NEVER_NULL, SKIP_PRESET]
+    pub modifier: Prop<SmolStr>,
+    /// Create a notification after the operation; default false [HIDDEN, ANIMATABLE, SKIP_PRESET]
+    pub report: Prop<bool>,
+    /// Affect all selected objects instead of just the active object; default false [HIDDEN, SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub use_selected_objects: Prop<bool>,
+}
+impl OpProps for ModifierApplyAsShapekey {
+    const IDNAME: &'static str = "object.modifier_apply_as_shapekey";
+    const BL_IDNAME: &'static str = "OBJECT_OT_modifier_apply_as_shapekey";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_MODIFIER_APPLY_AS_SHAPEKEY
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ModifierApplyAsShapekey {
+            keep_modifier: a.prop(0, "keep_modifier"),
+            modifier: a.prop(1, "modifier"),
+            report: a.prop(2, "report"),
+            use_selected_objects: a.prop(3, "use_selected_objects"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- object.modifier_copy
 /// Props of `object.modifier_copy`, RNA order.
 pub static MODIFIER_COPY_PROPS: [PropDef; 2] = [
@@ -2730,6 +2924,37 @@ impl OpProps for ParentSet {
     }
 }
 
+// ---------------------------------------------------------------- object.posemode_toggle
+/// Props of `object.posemode_toggle`, RNA order.
+pub static POSEMODE_TOGGLE_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_posemode_toggle`
+pub static OPSPEC_OBJECT_OT_POSEMODE_TOGGLE: OperatorSpec = OperatorSpec {
+    idname: "object.posemode_toggle",
+    bl_idname: "OBJECT_OT_posemode_toggle",
+    label: "Toggle Pose Mode",
+    description: "Enable or disable posing/selecting bones",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &POSEMODE_TOGGLE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.posemode_toggle` (Toggle Pose Mode).
+#[derive(Debug, Clone)]
+pub struct PosemodeToggle {
+}
+impl OpProps for PosemodeToggle {
+    const IDNAME: &'static str = "object.posemode_toggle";
+    const BL_IDNAME: &'static str = "OBJECT_OT_posemode_toggle";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_POSEMODE_TOGGLE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        PosemodeToggle {
+        }
+    }
+}
+
 // ---------------------------------------------------------------- object.rotation_clear
 /// Props of `object.rotation_clear`, RNA order.
 pub static ROTATION_CLEAR_PROPS: [PropDef; 1] = [
@@ -3211,6 +3436,195 @@ impl OpProps for ShadeSmoothByAngle {
     }
 }
 
+// ---------------------------------------------------------------- object.shape_key_add
+/// Props of `object.shape_key_add`, RNA order.
+pub static SHAPE_KEY_ADD_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "from_mix", name: "From Mix", description: "Create the new shape key from the existing mix of keys", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `OBJECT_OT_shape_key_add`
+pub static OPSPEC_OBJECT_OT_SHAPE_KEY_ADD: OperatorSpec = OperatorSpec {
+    idname: "object.shape_key_add",
+    bl_idname: "OBJECT_OT_shape_key_add",
+    label: "Add Shape Key",
+    description: "Add shape key to the object",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SHAPE_KEY_ADD_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::N, PollCell::Y, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::N, PollCell::Y, PollCell::N] }),
+};
+/// Typed props of `object.shape_key_add` (Add Shape Key).
+#[derive(Debug, Clone)]
+pub struct ShapeKeyAdd {
+    /// Create the new shape key from the existing mix of keys; default true [ANIMATABLE]
+    pub from_mix: Prop<bool>,
+}
+impl OpProps for ShapeKeyAdd {
+    const IDNAME: &'static str = "object.shape_key_add";
+    const BL_IDNAME: &'static str = "OBJECT_OT_shape_key_add";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_SHAPE_KEY_ADD
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ShapeKeyAdd {
+            from_mix: a.prop(0, "from_mix"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.shape_key_clear
+/// Props of `object.shape_key_clear`, RNA order.
+pub static SHAPE_KEY_CLEAR_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_shape_key_clear`
+pub static OPSPEC_OBJECT_OT_SHAPE_KEY_CLEAR: OperatorSpec = OperatorSpec {
+    idname: "object.shape_key_clear",
+    bl_idname: "OBJECT_OT_shape_key_clear",
+    label: "Clear Shape Keys",
+    description: "Reset the weights of all shape keys to 0 or to the closest value respecting the limits",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SHAPE_KEY_CLEAR_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::Y, PollCell::Y] }),
+};
+/// Typed props of `object.shape_key_clear` (Clear Shape Keys).
+#[derive(Debug, Clone)]
+pub struct ShapeKeyClear {
+}
+impl OpProps for ShapeKeyClear {
+    const IDNAME: &'static str = "object.shape_key_clear";
+    const BL_IDNAME: &'static str = "OBJECT_OT_shape_key_clear";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_SHAPE_KEY_CLEAR
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ShapeKeyClear {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.shape_key_move
+/// Props of `object.shape_key_move`, RNA order.
+pub static SHAPE_KEY_MOVE_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "type", name: "Type", description: "", kind: PropKind::Enum { items: &enums::E16, default: EnumDefault::Item("TOP"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `OBJECT_OT_shape_key_move`
+pub static OPSPEC_OBJECT_OT_SHAPE_KEY_MOVE: OperatorSpec = OperatorSpec {
+    idname: "object.shape_key_move",
+    bl_idname: "OBJECT_OT_shape_key_move",
+    label: "Move Shape Key",
+    description: "Move selected shape keys up/down in the list",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SHAPE_KEY_MOVE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Enums of `object.shape_key_move`.
+pub mod shape_key_move {
+    /// `Type`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum Type {
+        /// "TOP"
+        Top,
+        /// "UP"
+        Up,
+        /// "DOWN"
+        Down,
+        /// "BOTTOM"
+        Bottom,
+    }
+    impl Type {
+        /// Every variant, in RNA item order.
+        pub const ALL: [Type; 4] = [Type::Top, Type::Up, Type::Down, Type::Bottom];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                Type::Top => "TOP",
+                Type::Up => "UP",
+                Type::Down => "DOWN",
+                Type::Bottom => "BOTTOM",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "TOP" => Some(Type::Top),
+                "UP" => Some(Type::Up),
+                "DOWN" => Some(Type::Down),
+                "BOTTOM" => Some(Type::Bottom),
+                _ => None,
+            }
+        }
+    }
+    impl Default for Type {
+        fn default() -> Self {
+            Type::Top
+        }
+    }
+    impl frap_rna::FromValue for Type {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+}
+/// Typed props of `object.shape_key_move` (Move Shape Key).
+#[derive(Debug, Clone)]
+pub struct ShapeKeyMove {
+    /// default "TOP": TOP | UP | DOWN | BOTTOM [ANIMATABLE]
+    pub r#type: Prop<shape_key_move::Type>,
+}
+impl OpProps for ShapeKeyMove {
+    const IDNAME: &'static str = "object.shape_key_move";
+    const BL_IDNAME: &'static str = "OBJECT_OT_shape_key_move";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_SHAPE_KEY_MOVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ShapeKeyMove {
+            r#type: a.prop(0, "type"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.shape_key_remove
+/// Props of `object.shape_key_remove`, RNA order.
+pub static SHAPE_KEY_REMOVE_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "all", name: "All", description: "Remove all shape keys", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "apply_mix", name: "Apply Mix", description: "Apply current mix of shape keys to the geometry before removing them", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `OBJECT_OT_shape_key_remove`
+pub static OPSPEC_OBJECT_OT_SHAPE_KEY_REMOVE: OperatorSpec = OperatorSpec {
+    idname: "object.shape_key_remove",
+    bl_idname: "OBJECT_OT_shape_key_remove",
+    label: "Remove Shape Key",
+    description: "Remove shape key from the object",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SHAPE_KEY_REMOVE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.shape_key_remove` (Remove Shape Key).
+#[derive(Debug, Clone)]
+pub struct ShapeKeyRemove {
+    /// Remove all shape keys; default false [ANIMATABLE]
+    pub all: Prop<bool>,
+    /// Apply current mix of shape keys to the geometry before removing them; default false [ANIMATABLE]
+    pub apply_mix: Prop<bool>,
+}
+impl OpProps for ShapeKeyRemove {
+    const IDNAME: &'static str = "object.shape_key_remove";
+    const BL_IDNAME: &'static str = "OBJECT_OT_shape_key_remove";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_SHAPE_KEY_REMOVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ShapeKeyRemove {
+            all: a.prop(0, "all"),
+            apply_mix: a.prop(1, "apply_mix"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- object.subdivision_set
 /// Props of `object.subdivision_set`, RNA order.
 pub static SUBDIVISION_SET_PROPS: [PropDef; 3] = [
@@ -3305,6 +3719,426 @@ impl OpProps for TransformApply {
             properties: a.prop(3, "properties"),
             corrective_flip_normals: a.prop(4, "corrective_flip_normals"),
             isolate_users: a.prop(5, "isolate_users"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.vertex_group_add
+/// Props of `object.vertex_group_add`, RNA order.
+pub static VERTEX_GROUP_ADD_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_vertex_group_add`
+pub static OPSPEC_OBJECT_OT_VERTEX_GROUP_ADD: OperatorSpec = OperatorSpec {
+    idname: "object.vertex_group_add",
+    bl_idname: "OBJECT_OT_vertex_group_add",
+    label: "Add Vertex Group",
+    description: "Add a new vertex group to the active object",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &VERTEX_GROUP_ADD_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::Y, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.vertex_group_add` (Add Vertex Group).
+#[derive(Debug, Clone)]
+pub struct VertexGroupAdd {
+}
+impl OpProps for VertexGroupAdd {
+    const IDNAME: &'static str = "object.vertex_group_add";
+    const BL_IDNAME: &'static str = "OBJECT_OT_vertex_group_add";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_VERTEX_GROUP_ADD
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VertexGroupAdd {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.vertex_group_assign
+/// Props of `object.vertex_group_assign`, RNA order.
+pub static VERTEX_GROUP_ASSIGN_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_vertex_group_assign`
+pub static OPSPEC_OBJECT_OT_VERTEX_GROUP_ASSIGN: OperatorSpec = OperatorSpec {
+    idname: "object.vertex_group_assign",
+    bl_idname: "OBJECT_OT_vertex_group_assign",
+    label: "Assign to Vertex Group",
+    description: "Assign the selected vertices to the active vertex group",
+    options: OpOptions::UNDO,
+    props: &VERTEX_GROUP_ASSIGN_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.vertex_group_assign` (Assign to Vertex Group).
+#[derive(Debug, Clone)]
+pub struct VertexGroupAssign {
+}
+impl OpProps for VertexGroupAssign {
+    const IDNAME: &'static str = "object.vertex_group_assign";
+    const BL_IDNAME: &'static str = "OBJECT_OT_vertex_group_assign";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_VERTEX_GROUP_ASSIGN
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VertexGroupAssign {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.vertex_group_assign_new
+/// Props of `object.vertex_group_assign_new`, RNA order.
+pub static VERTEX_GROUP_ASSIGN_NEW_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_vertex_group_assign_new`
+pub static OPSPEC_OBJECT_OT_VERTEX_GROUP_ASSIGN_NEW: OperatorSpec = OperatorSpec {
+    idname: "object.vertex_group_assign_new",
+    bl_idname: "OBJECT_OT_vertex_group_assign_new",
+    label: "Assign to New Group",
+    description: "Assign the selected vertices to a new vertex group",
+    options: OpOptions::UNDO,
+    props: &VERTEX_GROUP_ASSIGN_NEW_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.vertex_group_assign_new` (Assign to New Group).
+#[derive(Debug, Clone)]
+pub struct VertexGroupAssignNew {
+}
+impl OpProps for VertexGroupAssignNew {
+    const IDNAME: &'static str = "object.vertex_group_assign_new";
+    const BL_IDNAME: &'static str = "OBJECT_OT_vertex_group_assign_new";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_VERTEX_GROUP_ASSIGN_NEW
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VertexGroupAssignNew {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.vertex_group_clean
+/// Props of `object.vertex_group_clean`, RNA order.
+pub static VERTEX_GROUP_CLEAN_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "group_select_mode", name: "Subset", description: "Define which subset of groups shall be used", kind: PropKind::Enum { items: &enums::E17, default: EnumDefault::Item(""), dynamic: Some("OBJECT_OT_vertex_group_clean.group_select_mode") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+    PropDef { identifier: "limit", name: "Limit", description: "Remove vertices which weight is below or equal to this limit", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1.0), soft: (0.0, 0.9900000095367432), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "keep_single", name: "Keep Single", description: "Keep verts assigned to at least one group when cleaning", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `OBJECT_OT_vertex_group_clean`
+pub static OPSPEC_OBJECT_OT_VERTEX_GROUP_CLEAN: OperatorSpec = OperatorSpec {
+    idname: "object.vertex_group_clean",
+    bl_idname: "OBJECT_OT_vertex_group_clean",
+    label: "Clean Vertex Group Weights",
+    description: "Remove vertex group assignments which are not required",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &VERTEX_GROUP_CLEAN_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.vertex_group_clean` (Clean Vertex Group Weights).
+#[derive(Debug, Clone)]
+pub struct VertexGroupClean {
+    /// Define which subset of groups shall be used; default "", dynamic: ACTIVE | BONE_SELECT | BONE_DEFORM | ALL [ANIMATABLE, DYNAMIC_ENUM]
+    pub group_select_mode: Prop<SmolStr>,
+    /// Remove vertices which weight is below or equal to this limit; default 0 [ANIMATABLE]
+    pub limit: Prop<f32>,
+    /// Keep verts assigned to at least one group when cleaning; default false [ANIMATABLE]
+    pub keep_single: Prop<bool>,
+}
+impl OpProps for VertexGroupClean {
+    const IDNAME: &'static str = "object.vertex_group_clean";
+    const BL_IDNAME: &'static str = "OBJECT_OT_vertex_group_clean";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_VERTEX_GROUP_CLEAN
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VertexGroupClean {
+            group_select_mode: a.prop(0, "group_select_mode"),
+            limit: a.prop(1, "limit"),
+            keep_single: a.prop(2, "keep_single"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.vertex_group_deselect
+/// Props of `object.vertex_group_deselect`, RNA order.
+pub static VERTEX_GROUP_DESELECT_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_vertex_group_deselect`
+pub static OPSPEC_OBJECT_OT_VERTEX_GROUP_DESELECT: OperatorSpec = OperatorSpec {
+    idname: "object.vertex_group_deselect",
+    bl_idname: "OBJECT_OT_vertex_group_deselect",
+    label: "Deselect Vertex Group",
+    description: "Deselect all selected vertices assigned to the active vertex group",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &VERTEX_GROUP_DESELECT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.vertex_group_deselect` (Deselect Vertex Group).
+#[derive(Debug, Clone)]
+pub struct VertexGroupDeselect {
+}
+impl OpProps for VertexGroupDeselect {
+    const IDNAME: &'static str = "object.vertex_group_deselect";
+    const BL_IDNAME: &'static str = "OBJECT_OT_vertex_group_deselect";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_VERTEX_GROUP_DESELECT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VertexGroupDeselect {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.vertex_group_limit_total
+/// Props of `object.vertex_group_limit_total`, RNA order.
+pub static VERTEX_GROUP_LIMIT_TOTAL_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "group_select_mode", name: "Subset", description: "Define which subset of groups shall be used", kind: PropKind::Enum { items: &enums::E17, default: EnumDefault::Item(""), dynamic: Some("OBJECT_OT_vertex_group_limit_total.group_select_mode") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+    PropDef { identifier: "limit", name: "Limit", description: "Maximum number of deform weights", kind: PropKind::Int { default: Defaults::Scalar(4), hard: (1, 32), soft: (1, 32) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `OBJECT_OT_vertex_group_limit_total`
+pub static OPSPEC_OBJECT_OT_VERTEX_GROUP_LIMIT_TOTAL: OperatorSpec = OperatorSpec {
+    idname: "object.vertex_group_limit_total",
+    bl_idname: "OBJECT_OT_vertex_group_limit_total",
+    label: "Limit Number of Weights per Vertex",
+    description: "Limit deform weights associated with a vertex to a specified number by removing lowest weights",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &VERTEX_GROUP_LIMIT_TOTAL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.vertex_group_limit_total` (Limit Number of Weights per Vertex).
+#[derive(Debug, Clone)]
+pub struct VertexGroupLimitTotal {
+    /// Define which subset of groups shall be used; default "", dynamic: ACTIVE | BONE_SELECT | BONE_DEFORM | ALL [ANIMATABLE, DYNAMIC_ENUM]
+    pub group_select_mode: Prop<SmolStr>,
+    /// Maximum number of deform weights; default 4 [ANIMATABLE]
+    pub limit: Prop<i32>,
+}
+impl OpProps for VertexGroupLimitTotal {
+    const IDNAME: &'static str = "object.vertex_group_limit_total";
+    const BL_IDNAME: &'static str = "OBJECT_OT_vertex_group_limit_total";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_VERTEX_GROUP_LIMIT_TOTAL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VertexGroupLimitTotal {
+            group_select_mode: a.prop(0, "group_select_mode"),
+            limit: a.prop(1, "limit"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.vertex_group_normalize
+/// Props of `object.vertex_group_normalize`, RNA order.
+pub static VERTEX_GROUP_NORMALIZE_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_vertex_group_normalize`
+pub static OPSPEC_OBJECT_OT_VERTEX_GROUP_NORMALIZE: OperatorSpec = OperatorSpec {
+    idname: "object.vertex_group_normalize",
+    bl_idname: "OBJECT_OT_vertex_group_normalize",
+    label: "Normalize Vertex Group",
+    description: "Normalize weights of the active vertex group, so that the highest ones are now 1.0",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &VERTEX_GROUP_NORMALIZE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.vertex_group_normalize` (Normalize Vertex Group).
+#[derive(Debug, Clone)]
+pub struct VertexGroupNormalize {
+}
+impl OpProps for VertexGroupNormalize {
+    const IDNAME: &'static str = "object.vertex_group_normalize";
+    const BL_IDNAME: &'static str = "OBJECT_OT_vertex_group_normalize";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_VERTEX_GROUP_NORMALIZE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VertexGroupNormalize {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.vertex_group_normalize_all
+/// Props of `object.vertex_group_normalize_all`, RNA order.
+pub static VERTEX_GROUP_NORMALIZE_ALL_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "group_select_mode", name: "Subset", description: "Define which subset of groups shall be used", kind: PropKind::Enum { items: &enums::E17, default: EnumDefault::Item(""), dynamic: Some("OBJECT_OT_vertex_group_normalize_all.group_select_mode") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+    PropDef { identifier: "lock_active", name: "Lock Active", description: "Keep the values of the active group while normalizing others", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `OBJECT_OT_vertex_group_normalize_all`
+pub static OPSPEC_OBJECT_OT_VERTEX_GROUP_NORMALIZE_ALL: OperatorSpec = OperatorSpec {
+    idname: "object.vertex_group_normalize_all",
+    bl_idname: "OBJECT_OT_vertex_group_normalize_all",
+    label: "Normalize All Vertex Groups",
+    description: "Normalize all weights of all vertex groups, so that for each vertex, the sum of all weights is 1.0",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &VERTEX_GROUP_NORMALIZE_ALL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.vertex_group_normalize_all` (Normalize All Vertex Groups).
+#[derive(Debug, Clone)]
+pub struct VertexGroupNormalizeAll {
+    /// Define which subset of groups shall be used; default "", dynamic: ACTIVE | BONE_SELECT | BONE_DEFORM | ALL [ANIMATABLE, DYNAMIC_ENUM]
+    pub group_select_mode: Prop<SmolStr>,
+    /// Keep the values of the active group while normalizing others; default true [ANIMATABLE]
+    pub lock_active: Prop<bool>,
+}
+impl OpProps for VertexGroupNormalizeAll {
+    const IDNAME: &'static str = "object.vertex_group_normalize_all";
+    const BL_IDNAME: &'static str = "OBJECT_OT_vertex_group_normalize_all";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_VERTEX_GROUP_NORMALIZE_ALL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VertexGroupNormalizeAll {
+            group_select_mode: a.prop(0, "group_select_mode"),
+            lock_active: a.prop(1, "lock_active"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.vertex_group_remove
+/// Props of `object.vertex_group_remove`, RNA order.
+pub static VERTEX_GROUP_REMOVE_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "all", name: "All", description: "Remove all vertex groups", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "all_unlocked", name: "All Unlocked", description: "Remove all unlocked vertex groups", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_vertex_group_remove`
+pub static OPSPEC_OBJECT_OT_VERTEX_GROUP_REMOVE: OperatorSpec = OperatorSpec {
+    idname: "object.vertex_group_remove",
+    bl_idname: "OBJECT_OT_vertex_group_remove",
+    label: "Remove Vertex Group",
+    description: "Delete the active or all vertex groups from the active object",
+    options: OpOptions::UNDO,
+    props: &VERTEX_GROUP_REMOVE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.vertex_group_remove` (Remove Vertex Group).
+#[derive(Debug, Clone)]
+pub struct VertexGroupRemove {
+    /// Remove all vertex groups; default false [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub all: Prop<bool>,
+    /// Remove all unlocked vertex groups; default false [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub all_unlocked: Prop<bool>,
+}
+impl OpProps for VertexGroupRemove {
+    const IDNAME: &'static str = "object.vertex_group_remove";
+    const BL_IDNAME: &'static str = "OBJECT_OT_vertex_group_remove";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_VERTEX_GROUP_REMOVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VertexGroupRemove {
+            all: a.prop(0, "all"),
+            all_unlocked: a.prop(1, "all_unlocked"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.vertex_group_remove_from
+/// Props of `object.vertex_group_remove_from`, RNA order.
+pub static VERTEX_GROUP_REMOVE_FROM_PROPS: [PropDef; 2] = [
+    PropDef { identifier: "use_all_groups", name: "All Groups", description: "Remove from all groups", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "use_all_verts", name: "All Vertices", description: "Clear the active group", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::SKIP_SAVE.union(PropFlags::ANIMATABLE).union(PropFlags::SKIP_PRESET), deprecated: None },
+];
+/// `OBJECT_OT_vertex_group_remove_from`
+pub static OPSPEC_OBJECT_OT_VERTEX_GROUP_REMOVE_FROM: OperatorSpec = OperatorSpec {
+    idname: "object.vertex_group_remove_from",
+    bl_idname: "OBJECT_OT_vertex_group_remove_from",
+    label: "Remove from Vertex Group",
+    description: "Remove the selected vertices from active or all vertex group(s)",
+    options: OpOptions::UNDO,
+    props: &VERTEX_GROUP_REMOVE_FROM_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.vertex_group_remove_from` (Remove from Vertex Group).
+#[derive(Debug, Clone)]
+pub struct VertexGroupRemoveFrom {
+    /// Remove from all groups; default false [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub use_all_groups: Prop<bool>,
+    /// Clear the active group; default false [SKIP_SAVE, ANIMATABLE, SKIP_PRESET]
+    pub use_all_verts: Prop<bool>,
+}
+impl OpProps for VertexGroupRemoveFrom {
+    const IDNAME: &'static str = "object.vertex_group_remove_from";
+    const BL_IDNAME: &'static str = "OBJECT_OT_vertex_group_remove_from";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_VERTEX_GROUP_REMOVE_FROM
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VertexGroupRemoveFrom {
+            use_all_groups: a.prop(0, "use_all_groups"),
+            use_all_verts: a.prop(1, "use_all_verts"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.vertex_group_select
+/// Props of `object.vertex_group_select`, RNA order.
+pub static VERTEX_GROUP_SELECT_PROPS: [PropDef; 0] = [
+];
+/// `OBJECT_OT_vertex_group_select`
+pub static OPSPEC_OBJECT_OT_VERTEX_GROUP_SELECT: OperatorSpec = OperatorSpec {
+    idname: "object.vertex_group_select",
+    bl_idname: "OBJECT_OT_vertex_group_select",
+    label: "Select Vertex Group",
+    description: "Select all the vertices assigned to the active vertex group",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &VERTEX_GROUP_SELECT_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.vertex_group_select` (Select Vertex Group).
+#[derive(Debug, Clone)]
+pub struct VertexGroupSelect {
+}
+impl OpProps for VertexGroupSelect {
+    const IDNAME: &'static str = "object.vertex_group_select";
+    const BL_IDNAME: &'static str = "OBJECT_OT_vertex_group_select";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_VERTEX_GROUP_SELECT
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VertexGroupSelect {
+        }
+    }
+}
+
+// ---------------------------------------------------------------- object.vertex_group_set_active
+/// Props of `object.vertex_group_set_active`, RNA order.
+pub static VERTEX_GROUP_SET_ACTIVE_PROPS: [PropDef; 1] = [
+    PropDef { identifier: "group", name: "Group", description: "Vertex group to set as active", kind: PropKind::Enum { items: &[], default: EnumDefault::Item(""), dynamic: Some("OBJECT_OT_vertex_group_set_active.group") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+];
+/// `OBJECT_OT_vertex_group_set_active`
+pub static OPSPEC_OBJECT_OT_VERTEX_GROUP_SET_ACTIVE: OperatorSpec = OperatorSpec {
+    idname: "object.vertex_group_set_active",
+    bl_idname: "OBJECT_OT_vertex_group_set_active",
+    label: "Set Active Vertex Group",
+    description: "Set the active vertex group",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &VERTEX_GROUP_SET_ACTIVE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::N, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `object.vertex_group_set_active` (Set Active Vertex Group).
+#[derive(Debug, Clone)]
+pub struct VertexGroupSetActive {
+    /// Vertex group to set as active; default "", dynamic:  [ANIMATABLE, DYNAMIC_ENUM]
+    pub group: Prop<SmolStr>,
+}
+impl OpProps for VertexGroupSetActive {
+    const IDNAME: &'static str = "object.vertex_group_set_active";
+    const BL_IDNAME: &'static str = "OBJECT_OT_vertex_group_set_active";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_OBJECT_OT_VERTEX_GROUP_SET_ACTIVE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        VertexGroupSetActive {
+            group: a.prop(0, "group"),
         }
     }
 }

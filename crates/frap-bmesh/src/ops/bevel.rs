@@ -26,7 +26,8 @@
 //! iteration order. Operator type flags: `NORMALS_CALC | SELECT_FLUSH | SELECT_VALIDATE`.
 //!
 //! Not supported: `profile_type='CUSTOM'` (a CurveProfile; [`bevel`] answers
-//! [`BmError::Invalid`]) and `harden_normals` (custom normals are left unchanged).
+//! [`BmError::Invalid`]). `harden_normals` writes the `custom_normal` layer as Blender does
+//! (`bevel_harden_normals`, ported in the M5+M6 W0 as an M3+M4 leftover).
 
 mod boundary;
 mod build;
@@ -305,8 +306,8 @@ pub struct MeshBevelWeights {
 // Ported from blender/source/blender/bmesh/tools/bmesh_bevel.cc (BM_mesh_bevel).
 /// `BM_mesh_bevel` on the vertices and edges the caller tagged `BM_ELEM_TAG` (the BEVEL
 /// modifier tags beveled edges together with both their vertices), as the modifier calls it:
-/// `i.geom` and `i.clamp_overlap` are ignored, `limit_offset` is the clamp. `profile_type='CUSTOM'` answers [`BmError::Invalid`];
-/// `harden_normals` is not applied (as in [`bevel`]).
+/// `i.geom` and `i.clamp_overlap` are ignored, `limit_offset` is the clamp. `profile_type='CUSTOM'`
+/// answers [`BmError::Invalid`].
 pub fn mesh_bevel_tagged(
     bm: &mut BMesh,
     i: &BevelIn,
@@ -327,6 +328,7 @@ fn mesh_bevel(
     limit_offset: bool,
     weights: MeshBevelWeights,
 ) {
+    let harden_normals = i.harden_normals;
     let seg = i.segments.max(1);
     let profile = i.profile;
     let mut bp = Bevel {
@@ -482,6 +484,9 @@ fn mesh_bevel(
 
     bp.bevel_merge_uvs(bm);
 
+    if harden_normals {
+        bp.bevel_harden_normals(bm);
+    }
     if bp.face_strength_mode != FaceStrength::None {
         bp.bevel_set_weighted_normal_face_strength(bm);
     }

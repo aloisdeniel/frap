@@ -113,7 +113,7 @@ impl SoaKind for Polygons {
                 "select" => Value::Bool(columns::flag(m, SELECT_POLY, Domain::Face, i)),
                 "hide" => Value::Bool(columns::flag(m, HIDE_POLY, Domain::Face, i)),
                 "use_smooth" => Value::Bool(!columns::flag(m, SHARP_FACE, Domain::Face, i)),
-                "normal" => m.face_normals()[i].to_rna_value(prop, tag(prop)),
+                "normal" => crate::normals::rna_face_normal(m, i).to_rna_value(prop, tag(prop)),
                 "center" => columns::face_center(m, i).to_rna_value(prop, tag(prop)),
                 "area" => columns::face_area(m, i).to_rna_value(prop, MathTag::None),
                 "index" => (i as i32).to_rna_value(prop, MathTag::None),
@@ -201,7 +201,10 @@ impl SoaKind for Polygons {
                     .map(|s| !s)
                     .collect(),
             ),
-            "normal" => bulk::f32_rows(&m.face_normals(), range),
+            "normal" => {
+                let n = crate::normals::rna_face_normals(m, range.clone());
+                bulk::f32_rows(&n, 0..n.len())
+            }
             "index" => bulk::indices(range),
             _ => return bulk::generic_get::<Self>(m, ctx, prop, range),
         })

@@ -379,6 +379,21 @@ pub fn compare(what: &str, frap: &GMesh, blender: &GMesh, tol: f32) -> Vec<Misma
             ),
         )),
     }
+    if let (Some(f), Some(b)) = (&frap.face_normals, &blender.face_normals) {
+        if f.len() == fmap.len() && b.len() == fmap.len() {
+            let mut o = vec![[0.0; 3]; f.len()];
+            for (i, &j) in fmap.iter().enumerate() {
+                o[j] = f[i];
+            }
+            floats(NAME, &format!("{what}.face_normals"), &o, b, tol, &mut out);
+        } else {
+            out.push(Mismatch::new(
+                NAME,
+                format!("{what}.face_normals"),
+                format!("frap has {} face normals, blender {}", f.len(), b.len()),
+            ));
+        }
+    }
     let fk: Vec<&String> = frap.uv_layers.keys().collect();
     let bk: Vec<&String> = blender.uv_layers.keys().collect();
     if fk != bk {
@@ -561,6 +576,7 @@ pub(crate) mod tests {
             edges,
             faces,
             corner_normals: cn,
+            face_normals: None,
             uv_layers: uv,
             attributes,
             selection: m.selection.clone(),
@@ -639,6 +655,7 @@ pub(crate) mod tests {
             edges: vec![[0, 1], [1, 2], [0, 2], [3, 4], [4, 5], [3, 5]],
             faces: vec![vec![0, 1, 2], vec![3, 4, 5]],
             corner_normals: vec![[0.0, 0.0, 1.0]; 6],
+            face_normals: None,
             uv_layers: BTreeMap::new(),
             attributes: BTreeMap::new(),
             selection: Json::Null,

@@ -59,6 +59,10 @@ pub(crate) struct VNode {
     pub gltf_node: Option<usize>,
     /// The created object.
     pub blender_object: Option<IdRef<ObjectId>>,
+    /// The bone this node became (`vnode.blender_bone_name`; set by skin import, WP 6.8, and
+    /// read by animation import, WP 6.7, to target pose bones). M5+M6 W0 contract.
+    #[allow(dead_code)] // filled by WP 6.8, read by WP 6.7
+    pub blender_bone_name: Option<smol_str::SmolStr>,
 }
 
 impl VNode {
@@ -78,6 +82,7 @@ impl VNode {
             scenes: Vec::new(),
             gltf_node: None,
             blender_object: None,
+            blender_bone_name: None,
         }
     }
 

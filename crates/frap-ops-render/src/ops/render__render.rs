@@ -57,15 +57,30 @@ fn render_error(e: RenderError) -> OpError {
     }
 }
 
-/// The WARNING for an engine frap renders with Workbench (deviations.md D-12; §2 until M5).
-fn engine_fallback(engine: &str) -> Option<String> {
+/// `BLENDER_EEVEE`.
+const EEVEE: &str = "BLENDER_EEVEE";
+
+/// The engine that renders `requested` (M5+M6 W0): `CYCLES` renders with `BLENDER_EEVEE` once
+/// the render service supports it (§19.3, D-12), `BLENDER_EEVEE` with itself; anything the
+/// service does not support falls back to `BLENDER_WORKBENCH`.
+pub(crate) fn effective_engine(requested: &str, eevee: bool) -> &'static str {
+    match requested {
+        "BLENDER_EEVEE" | "CYCLES" if eevee => EEVEE,
+        _ => WORKBENCH,
+    }
+}
+
+/// The WARNING for an engine frap renders with another one (deviations.md D-12; §2 until M5).
+fn engine_fallback(engine: &str, eevee: bool) -> Option<String> {
+    let used = effective_engine(engine, eevee);
     match engine {
         WORKBENCH => None,
+        EEVEE if eevee => None,
         "CYCLES" => Some(format!(
-            "Engine 'CYCLES' is not available in frap; rendered with {WORKBENCH}"
+            "Engine 'CYCLES' is not available in frap; rendered with {used}"
         )),
         other => Some(format!(
-            "Engine '{other}' is not available in frap yet (M5); rendered with {WORKBENCH}"
+            "Engine '{other}' is not available in frap yet (M5); rendered with {used}"
         )),
     }
 }
@@ -202,7 +217,7 @@ fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
 }
 
 /// Renders one frame on a fresh clone of the state.
-fn render_frame(cx: &mut OpCtx, frame: Option<i32>) -> Result<Film, OpError> {
+fn render_frame(cx: &mut OpCtx, frame: Option<i32>, engine: &str) -> Result<Film, OpError> {
     let snap = cx.snapshot_at(frame)?;
     let req = RenderRequest {
         frame,
@@ -211,8 +226,8 @@ fn render_frame(cx: &mut OpCtx, frame: Option<i32>) -> Result<Film, OpError> {
     let mut eval = snap.eval;
     let mut scene =
         frap_render_scene::build(&*snap.host, &mut *eval, &req).map_err(render_error)?;
-    // M1: every engine renders with Workbench (§19.3; the WARNING is reported once).
-    scene.settings.engine = WORKBENCH.into();
+    // The engine the service renders with (§19.3; the fallback WARNING is reported once).
+    scene.settings.engine = engine.into();
     let film = cx
         .services()
         .render()?
@@ -296,11 +311,13 @@ fn store_render_result(cx: &mut OpCtx, film: Film) {
 )]
 fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
     let plan = plan(cx, &p)?;
-    let warning = engine_fallback(&plan.engine);
+    let eevee = cx.services().render()?.supports_engine(EEVEE);
+    let engine = effective_engine(&plan.engine, eevee);
+    let warning = engine_fallback(&plan.engine, eevee);
     let mut files: Vec<Value> = Vec::new();
     let mut last: Option<Film> = None;
     for (frame, out) in plan.frames.iter().zip(&plan.outputs) {
-        let film = render_frame(cx, *frame)?;
+        let film = render_frame(cx, *frame, engine)?;
         if let (Some(out), Some(ws)) = (out, &plan.write) {
             let bytes = format::encode(
                 &film.rgba,
@@ -327,9 +344,9 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
         cx.report(ReportType::Warning, w.clone());
     }
     // Workbench effects frap does not render yet, as `frap.render_contact_sheet` reports them
-    // (WP 2.3). Every engine renders with Workbench until M5 (the fallback above), so the
-    // warning applies to EEVEE and CYCLES too (M2 leftover, M4 W0).
-    {
+    // (WP 2.3), whenever Workbench renders (also as the fallback of EEVEE and CYCLES until M5;
+    // M2 leftover, M4 W0).
+    if engine == WORKBENCH {
         let shading = frap_render_scene::build::workbench::shading(cx.ctx().scene());
         for effect in super::frap__render_contact_sheet::workbench_left_out(&shading) {
             cx.report(

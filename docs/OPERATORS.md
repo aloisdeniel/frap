@@ -72,7 +72,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.extrude_repeat` | M2 | P2 | offset is a vector in 5.x |
 | [x] | `mesh.extrude_manifold` | M2 | P2 | macro; the translate step's `use_automerge_and_split` (`EDBM_automerge_and_split`, `BM_mesh_intersect_edges`) since M4 (WP 4.6), golden `macros/manifold.py` |
 | [x] | `mesh.inset` | M2 | P0 | T1 |
-| [x] | `mesh.bevel` | M2 | P0 | seg 1 T1, N segments T2; offset=0 no-op hint (NO_OP_DEFAULT). Partial: `profile_type='CUSTOM'` OP_NOT_IMPLEMENTED; harden_normals and Auto Merge not applied (WARNING), D-80 |
+| [x] | `mesh.bevel` | M2 | P0 | seg 1 T1, N segments T2; offset=0 no-op hint (NO_OP_DEFAULT). Partial: `profile_type='CUSTOM'` OP_NOT_IMPLEMENTED; harden_normals and Auto Merge applied (M5+M6 W0, M4 W0), D-80 |
 | [x] | `mesh.subdivide` | M2 | P0 | uniform T1 |
 | [x] | `mesh.loopcut` | M2 | P0 | headless-extended: object_index/edge_index; Blender -b runs it under the golden runner's VIEW_3D override, so goldens call it directly (WP 2.6) |
 | [x] | `mesh.loopcut_slide` | M2 | P0 | macro; headless-extended (edge_slide step: WP 2.12) |
@@ -137,8 +137,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `mesh.decimate` | M4 | P2 | shares DECIMATE COLLAPSE (WP 4.5) |
 | [x] | `mesh.intersect` | M4 | P2 | shares Boolean solver |
 | [x] | `mesh.intersect_boolean` | M4 | P2 | solver FLOAT/EXACT (5.x renamed FAST) |
-| [ ] | `mesh.blend_from_shape` | M6 | P2 | shape keys |
-| [ ] | `mesh.shape_propagate_to_all` | M6 | P2 | shape keys |
+| [ ] | `mesh.blend_from_shape` | M6 | P2 | shape keys; WP 6.3 (M5+M6 W0) |
+| [ ] | `mesh.shape_propagate_to_all` | M6 | P2 | shape keys; WP 6.3 (M5+M6 W0) |
 | [ ] | `mesh.normals_tools` | M8 | P2 |  |
 | [ ] | `mesh.smooth_normals` | M8 | P2 |  |
 | [ ] | `mesh.average_normals` | M8 | P2 |  |
@@ -194,7 +194,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 |---|---|---|---|---|
 | [x] | `object.mode_set` | M1 | P0 | prereq (WP 1.19); dispatcher + `modes/object.rs` M1; `modes/edit_mesh.rs` M2 (WP 2.2); `modes/{edit_armature,pose}.rs` M6 (WP 6.2) |
 | [x] | `object.editmode_toggle` | M2 | P1 |  |
-| [ ] | `object.posemode_toggle` | M6 | P1 |  |
+| [ ] | `object.posemode_toggle` | M6 | P1 | WP 6.2 (M5+M6 W0) |
 | [ ] | `object.mode_set_with_submode` | M8 | P2 |  |
 | [x] | `object.select_all` | M1 | P0 | prereq (WP 1.19) |
 | [x] | `object.select_by_type` | M1 | P1 |  |
@@ -211,7 +211,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.camera_add` | M1 | P0 | sets scene.camera when None (virtual 3D View); object and data uniquified independently |
 | [x] | `object.light_add` | M1 | P0 | 10 W (factory Light is 1000 W) |
 | [x] | `object.empty_add` | M1 | P0 |  |
-| [ ] | `object.armature_add` | M6 | P0 |  |
+| [ ] | `object.armature_add` | M6 | P0 | WP 6.2 (M5+M6 W0) |
 | [ ] | `object.add` | M8 | P2 |  |
 | [ ] | `object.add_named` | M8 | P2 |  |
 | [ ] | `object.collection_instance_add` | M8 | P2 |  |
@@ -221,7 +221,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.duplicate_move_linked` | M1 | P1 | macro |
 | [x] | `object.join` | M1 | P0 | CANCELLED with WARNING reports |
 | [x] | `object.convert` | M4 | P1 | apply modifiers to mesh |
-| [ ] | `object.join_shapes` | M6 | P2 |  |
+| [ ] | `object.join_shapes` | M6 | P2 | WP 6.3 (M5+M6 W0) |
 | [ ] | `object.duplicates_make_real` | M8 | P2 |  |
 | [x] | `object.parent_set` | M1 | P0 | OBJECT/KEEP types M1; ARMATURE_* M6 |
 | [x] | `object.parent_clear` | M1 | P0 |  |
@@ -251,7 +251,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.modifier_set_active` | M4 | P1 |  |
 | [x] | `object.modifiers_clear` | M4 | P1 |  |
 | [x] | `object.subdivision_set` | M4 | P1 |  |
-| [ ] | `object.modifier_apply_as_shapekey` | M6 | P2 |  |
+| [ ] | `object.modifier_apply_as_shapekey` | M6 | P2 | WP 6.3 (M5+M6 W0) |
 | [ ] | `object.modifier_copy_to_selected` | M8 | P2 |  |
 | [ ] | `object.modifiers_copy_to_selected` | M8 | P2 |  |
 | [x] | `object.material_slot_add` | M1 | P0 |  |
@@ -263,18 +263,18 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.material_slot_deselect` | M2 | P1 | edit mode; WP 2.4 (M2 W0 assignment) |
 | [x] | `object.material_slot_move` | M3 | P2 | WP 3.1 (M3+M4 W0 assignment) |
 | [ ] | `object.material_slot_copy` | M8 | P2 |  |
-| [ ] | `object.vertex_group_add` | M6 | P0 |  |
-| [ ] | `object.vertex_group_remove` | M6 | P0 |  |
-| [ ] | `object.vertex_group_assign` | M6 | P0 | edit mode |
-| [ ] | `object.vertex_group_remove_from` | M6 | P0 | edit mode |
-| [ ] | `object.vertex_group_normalize_all` | M6 | P0 |  |
-| [ ] | `object.vertex_group_limit_total` | M6 | P0 | glTF 4-influence limit |
-| [ ] | `object.vertex_group_assign_new` | M6 | P1 |  |
-| [ ] | `object.vertex_group_select` | M6 | P1 |  |
-| [ ] | `object.vertex_group_deselect` | M6 | P1 |  |
-| [ ] | `object.vertex_group_set_active` | M6 | P1 | dynamic enum |
-| [ ] | `object.vertex_group_normalize` | M6 | P1 |  |
-| [ ] | `object.vertex_group_clean` | M6 | P1 |  |
+| [ ] | `object.vertex_group_add` | M6 | P0 | WP 6.3 (M5+M6 W0) |
+| [ ] | `object.vertex_group_remove` | M6 | P0 | WP 6.3 (M5+M6 W0) |
+| [ ] | `object.vertex_group_assign` | M6 | P0 | edit mode; WP 6.3 (M5+M6 W0) |
+| [ ] | `object.vertex_group_remove_from` | M6 | P0 | edit mode; WP 6.3 (M5+M6 W0) |
+| [ ] | `object.vertex_group_normalize_all` | M6 | P0 | WP 6.3 (M5+M6 W0) |
+| [ ] | `object.vertex_group_limit_total` | M6 | P0 | glTF 4-influence limit; WP 6.3 (M5+M6 W0) |
+| [ ] | `object.vertex_group_assign_new` | M6 | P1 | WP 6.3 (M5+M6 W0) |
+| [ ] | `object.vertex_group_select` | M6 | P1 | WP 6.3 (M5+M6 W0) |
+| [ ] | `object.vertex_group_deselect` | M6 | P1 | WP 6.3 (M5+M6 W0) |
+| [ ] | `object.vertex_group_set_active` | M6 | P1 | dynamic enum; WP 6.3 (M5+M6 W0) |
+| [ ] | `object.vertex_group_normalize` | M6 | P1 | WP 6.3 (M5+M6 W0) |
+| [ ] | `object.vertex_group_clean` | M6 | P1 | WP 6.3 (M5+M6 W0) |
 | [ ] | `object.vertex_group_copy` | M8 | P2 |  |
 | [ ] | `object.vertex_group_copy_to_selected` | M8 | P2 |  |
 | [ ] | `object.vertex_group_invert` | M8 | P2 |  |
@@ -290,10 +290,10 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `object.vertex_weight_normalize_active_vertex` | M8 | P2 |  |
 | [ ] | `object.vertex_weight_paste` | M8 | P2 |  |
 | [ ] | `object.vertex_weight_set_active` | M8 | P2 |  |
-| [ ] | `object.shape_key_add` | M6 | P0 |  |
-| [ ] | `object.shape_key_remove` | M6 | P0 |  |
-| [ ] | `object.shape_key_clear` | M6 | P1 |  |
-| [ ] | `object.shape_key_move` | M6 | P1 |  |
+| [ ] | `object.shape_key_add` | M6 | P0 | WP 6.3 (M5+M6 W0) |
+| [ ] | `object.shape_key_remove` | M6 | P0 | WP 6.3 (M5+M6 W0) |
+| [ ] | `object.shape_key_clear` | M6 | P1 | WP 6.3 (M5+M6 W0) |
+| [ ] | `object.shape_key_move` | M6 | P1 | WP 6.3 (M5+M6 W0) |
 | [ ] | `object.shape_key_mirror` | M8 | P2 |  |
 | [ ] | `object.shape_key_copy` | M8 | P2 |  |
 | [ ] | `object.shape_key_lock` | M8 | P2 |  |
@@ -452,12 +452,12 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `anim.keyframe_insert` | M6 | P0 | keying-set operator; scripts usually use bpy_struct.keyframe_insert |
-| [ ] | `anim.keyframe_insert_by_name` | M6 | P1 |  |
-| [ ] | `anim.keyframe_delete` | M6 | P1 |  |
-| [ ] | `anim.keyframe_delete_v3d` | M6 | P1 |  |
-| [ ] | `anim.keyframe_clear_v3d` | M6 | P1 |  |
-| [ ] | `anim.keyframe_delete_by_name` | M6 | P2 |  |
+| [ ] | `anim.keyframe_insert` | M6 | P0 | keying-set operator; scripts usually use bpy_struct.keyframe_insert; WP 6.4 (M5+M6 W0) |
+| [ ] | `anim.keyframe_insert_by_name` | M6 | P1 | WP 6.4 (M5+M6 W0) |
+| [ ] | `anim.keyframe_delete` | M6 | P1 | WP 6.4 (M5+M6 W0) |
+| [ ] | `anim.keyframe_delete_v3d` | M6 | P1 | WP 6.4 (M5+M6 W0) |
+| [ ] | `anim.keyframe_clear_v3d` | M6 | P1 | WP 6.4 (M5+M6 W0) |
+| [ ] | `anim.keyframe_delete_by_name` | M6 | P2 | WP 6.4 (M5+M6 W0) |
 | [ ] | `anim.keying_set_active_set` | M8 | P2 |  |
 | [ ] | `anim.channels_bake` | M8 | P2 |  |
 
@@ -465,28 +465,28 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `screen.frame_jump` | M6 | P1 |  |
-| [ ] | `screen.frame_offset` | M6 | P1 |  |
-| [ ] | `screen.keyframe_jump` | M6 | P2 |  |
+| [ ] | `screen.frame_jump` | M6 | P1 | WP 6.4 (M5+M6 W0) |
+| [ ] | `screen.frame_offset` | M6 | P1 | WP 6.4 (M5+M6 W0) |
+| [ ] | `screen.keyframe_jump` | M6 | P2 | WP 6.4 (M5+M6 W0) |
 
 ### `armature.* (edit bones)`
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `armature.bone_primitive_add` | M6 | P1 |  |
-| [ ] | `armature.extrude` | M6 | P1 |  |
-| [ ] | `armature.extrude_move` | M6 | P1 | macro |
-| [ ] | `armature.duplicate` | M6 | P1 |  |
-| [ ] | `armature.duplicate_move` | M6 | P1 | macro |
-| [ ] | `armature.delete` | M6 | P1 |  |
-| [ ] | `armature.subdivide` | M6 | P1 |  |
-| [ ] | `armature.parent_set` | M6 | P1 |  |
-| [ ] | `armature.parent_clear` | M6 | P1 |  |
-| [ ] | `armature.select_all` | M6 | P1 |  |
-| [ ] | `armature.calculate_roll` | M6 | P1 |  |
-| [ ] | `armature.roll_clear` | M6 | P1 |  |
-| [ ] | `armature.switch_direction` | M6 | P1 |  |
-| [ ] | `armature.symmetrize` | M6 | P1 |  |
+| [ ] | `armature.bone_primitive_add` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.extrude` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.extrude_move` | M6 | P1 | macro; WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.duplicate` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.duplicate_move` | M6 | P1 | macro; WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.delete` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.subdivide` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.parent_set` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.parent_clear` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.select_all` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.calculate_roll` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.roll_clear` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.switch_direction` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `armature.symmetrize` | M6 | P1 | WP 6.2 (M5+M6 W0) |
 | [ ] | `armature.extrude_forked` | M8 | P2 |  |
 | [ ] | `armature.dissolve` | M8 | P2 |  |
 | [ ] | `armature.split` | M8 | P2 |  |
@@ -518,13 +518,13 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `pose.select_all` | M6 | P1 |  |
-| [ ] | `pose.transforms_clear` | M6 | P1 |  |
-| [ ] | `pose.loc_clear` | M6 | P1 |  |
-| [ ] | `pose.rot_clear` | M6 | P1 |  |
-| [ ] | `pose.scale_clear` | M6 | P1 |  |
-| [ ] | `pose.armature_apply` | M6 | P1 | apply pose as rest pose |
-| [ ] | `pose.rotation_mode_set` | M6 | P1 |  |
+| [ ] | `pose.select_all` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `pose.transforms_clear` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `pose.loc_clear` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `pose.rot_clear` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `pose.scale_clear` | M6 | P1 | WP 6.2 (M5+M6 W0) |
+| [ ] | `pose.armature_apply` | M6 | P1 | apply pose as rest pose; WP 6.2 (M5+M6 W0) |
+| [ ] | `pose.rotation_mode_set` | M6 | P1 | WP 6.2 (M5+M6 W0) |
 | [ ] | `pose.user_transforms_clear` | M8 | P2 |  |
 | [ ] | `pose.visual_transform_apply` | M8 | P2 |  |
 | [ ] | `pose.copy` | M8 | P2 |  |
@@ -549,8 +549,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `nla.action_pushdown` | M6 | P1 | headless-extended: active object's AnimData; feeds NLA_TRACKS export |
-| [ ] | `nla.tracks_add` | M6 | P2 | headless-extended |
+| [ ] | `nla.action_pushdown` | M6 | P1 | headless-extended: active object's AnimData; feeds NLA_TRACKS export; WP 6.4 (M5+M6 W0) |
+| [ ] | `nla.tracks_add` | M6 | P2 | headless-extended; WP 6.4 (M5+M6 W0) |
 | [ ] | `nla.tracks_delete` | M8 | P2 |  |
 | [ ] | `nla.actionclip_add` | M8 | P2 |  |
 

@@ -132,6 +132,9 @@ def dump_mesh(me, p, edit=False):
         "edges": [list(e) for e in items(me, pm["edges"])],
         "faces": [list(f) for f in items(me, pm["faces"])],
         "corner_normals": [fvec(n) for n in items(me, pm["corner_normals"])],
+        "face_normals": (
+            [fvec(n) for n in items(me, pm["face_normals"])] if "face_normals" in pm else None
+        ),
         "uv_layers": {
             l.name: [fvec(uv) for uv in items(l, pm["uv_value"])]
             for l in resolve(me, pm["uv_layers"])
@@ -202,23 +205,40 @@ def dump_material(mat, p):
     return {"nodes": nodes, "links": links}
 
 
+def sample_frames(keys):
+    """Frames an F-curve is sampled at (M5+M6 W0, mirrored by the frap runner): every whole and
+    half frame from 3 frames before the first key to 3 after the last."""
+    if not keys:
+        return []
+    lo = math.floor(min(k.co[0] for k in keys)) - 3
+    hi = math.ceil(max(k.co[0] for k in keys)) + 3
+    out = []
+    for f in range(int(lo), int(hi) + 1):
+        out.append(float(f))
+        if f < hi:
+            out.append(f + 0.5)
+    return out
+
+
 def dump_action(act):
     fcurves = []
-    curves = list(getattr(act, "fcurves", []) or [])
-    if not curves:
-        for layer in getattr(act, "layers", []):
-            for strip in layer.strips:
-                for bag in getattr(strip, "channelbags", []):
-                    curves.extend(bag.fcurves)
+    curves = []
+    for layer in getattr(act, "layers", []):
+        for strip in layer.strips:
+            for bag in getattr(strip, "channelbags", []):
+                curves.extend(bag.fcurves)
     for fc in curves:
+        keys = list(fc.keyframe_points)
         fcurves.append(
             {
                 "data_path": fc.data_path,
                 "array_index": fc.array_index,
+                "extrapolation": fc.extrapolation,
                 "keyframes": [
                     [fvec(k.co), k.interpolation, fvec(k.handle_left), fvec(k.handle_right)]
-                    for k in fc.keyframe_points
+                    for k in keys
                 ],
+                "samples": [[f32(f), f32(fc.evaluate(f))] for f in sample_frames(keys)],
             }
         )
     fcurves.sort(key=lambda c: (c["data_path"], c["array_index"]))

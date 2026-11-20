@@ -339,9 +339,16 @@ fn disabled_unsupported_and_reports() {
         modify_mesh(&custom, cube(), 0),
         Err(ModError::Error(m)) if m.contains("CUSTOM")
     ));
+    // `harden_normals` writes custom normals (M5+M6 W0), without a WARNING.
     let harden = modify_mesh(&settings(|s| s.harden_normals = true), cube(), 0).unwrap();
-    assert_eq!(harden.warnings.len(), 1);
-    assert!(harden.warnings[0].contains("harden_normals"));
+    assert!(harden.warnings.is_empty());
+    assert!(
+        harden
+            .mesh
+            .attributes()
+            .get(frap_mesh::CUSTOM_NORMAL)
+            .is_some()
+    );
     // An empty mesh passes through.
     let empty = Mesh::new("Empty");
     assert_eq!(

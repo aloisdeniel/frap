@@ -34,6 +34,7 @@ positions = "vertices/co"
 edges = "edges/vertices"
 faces = "polygons/vertices"
 corner_normals = "corner_normals/vector"
+face_normals = "polygons/normal"       # MeshPolygon.normal (face_normal_calc); optional in old fixtures
 uv_layers = "uv_layers"                # per layer: data/uv (per corner)
 uv_value = "data/uv"
 attributes = "attributes"              # every attribute except internal (`.`-prefixed) ones,

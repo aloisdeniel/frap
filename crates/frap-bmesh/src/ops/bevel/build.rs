@@ -1609,6 +1609,131 @@ impl Bevel {
         }
     }
 
+    // Ported from blender/source/blender/bmesh/tools/bmesh_bevel.cc (bevel_edges_sharp_boundary).
+    /// Marks sharp the edges between a smooth reconstructed face and a new bevel face, so that
+    /// the custom normal spaces made next respect the old smooth/sharp split.
+    fn bevel_edges_sharp_boundary(&self, bm: &mut BMesh) {
+        for f in bm.face_ids() {
+            if !bm.face(f).flag.contains(ElemFlag::SMOOTH) || self.get_face_kind(f) != FKind::Recon
+            {
+                continue;
+            }
+            for l in bm.face_loops(f) {
+                // Cases we care about have exactly one adjacent face.
+                let lother = bm.lp(l).radial_next;
+                if lother != l
+                    && matches!(
+                        self.get_face_kind(bm.lp(lother).f),
+                        FKind::Edge | FKind::Vert
+                    )
+                {
+                    let e = bm.lp(l).e;
+                    bm.edge_mut(e).flag.remove(ElemFlag::SMOOTH);
+                }
+            }
+        }
+    }
+
+    // Ported from blender/source/blender/bmesh/tools/bmesh_bevel.cc (bevel_harden_normals).
+    /// `harden_normals`: the new edge and vertex faces get custom normals that make them shade
+    /// as if they were smooth continuations of their reconstructed neighbours (the `custom_normal`
+    /// layer is created when missing, zeros elsewhere, as `BM_lnorspace_update` does).
+    pub(crate) fn bevel_harden_normals(&self, bm: &mut BMesh) {
+        if self.offset == 0.0 {
+            return;
+        }
+        // Recalculate all face and vertex normals.
+        bm.normals_update();
+        let had_layer = crate::clnor::has_layer(bm);
+        // Without a custom normal layer, making one would not respect the old auto-smooth
+        // split between smooth faces: sharpen the edges that were only sharp by angle.
+        if !had_layer {
+            self.bevel_edges_sharp_boundary(bm);
+        }
+        let spaces = crate::clnor::update(bm);
+        let fno = |bm: &BMesh, f: FaceId| bm.face(f).no;
+        let add_norm = |a: [f32; 3], b: [f32; 3]| -> [f32; 3] {
+            frap_geom::normals::normalize([a[0] + b[0], a[1] + b[1], a[2] + b[2]])
+        };
+        let mut writes: Vec<(crate::types::LoopId, [f32; 3])> = Vec::new();
+        for f in bm.face_ids() {
+            let fkind = self.get_face_kind(f);
+            if matches!(fkind, FKind::Orig | FKind::Recon) {
+                continue;
+            }
+            for l in bm.face_loops(f) {
+                // CW walk around l->v's fan.
+                let mut estep = bm.lp(bm.lp(l).prev).e;
+                let lprev = bm.vert_step_fan_loop(l, &mut estep);
+                // CCW walk.
+                let mut estep = bm.lp(l).e;
+                let lnext = bm.vert_step_fan_loop(l, &mut estep);
+                let kind =
+                    |x: Option<crate::types::LoopId>| x.map(|x| self.get_face_kind(bm.lp(x).f));
+                let fprevkind = kind(lprev);
+                let fnextkind = kind(lnext);
+                let long = |x: crate::types::LoopId| bm.lp(x).flag.contains(LONG_TAG);
+                let mut pnorm: Option<[f32; 3]> = None;
+                if fkind == FKind::Edge {
+                    if fprevkind == Some(FKind::Edge) && long(l) {
+                        pnorm = Some(add_norm(fno(bm, f), fno(bm, bm.lp(lprev.unwrap()).f)));
+                    } else if fnextkind == Some(FKind::Edge) && long(lnext.unwrap()) {
+                        pnorm = Some(add_norm(fno(bm, f), fno(bm, bm.lp(lnext.unwrap()).f)));
+                    } else if fprevkind == Some(FKind::Recon) && long(l) {
+                        pnorm = Some(fno(bm, bm.lp(lprev.unwrap()).f));
+                    } else if fnextkind == Some(FKind::Recon) && long(bm.lp(l).prev) {
+                        pnorm = Some(fno(bm, bm.lp(lnext.unwrap()).f));
+                    }
+                } else if fkind == FKind::Vert {
+                    if fprevkind == Some(FKind::Vert) && fnextkind == Some(FKind::Vert) {
+                        pnorm = Some(bm.vert(bm.lp(l).v).no);
+                    } else if fprevkind == Some(FKind::Recon) {
+                        pnorm = Some(fno(bm, bm.lp(lprev.unwrap()).f));
+                    } else if fnextkind == Some(FKind::Recon) {
+                        pnorm = Some(fno(bm, bm.lp(lnext.unwrap()).f));
+                    } else {
+                        let lprevprev = lprev.and_then(|lp| {
+                            let mut e = bm.lp(bm.lp(lp).prev).e;
+                            bm.vert_step_fan_loop(lp, &mut e)
+                        });
+                        let lnextnext = lnext.and_then(|ln| {
+                            let mut e = bm.lp(ln).e;
+                            bm.vert_step_fan_loop(ln, &mut e)
+                        });
+                        let fprevprevkind = kind(lprevprev);
+                        let fnextnextkind = kind(lnextnext);
+                        if fprevkind == Some(FKind::Edge) && fprevprevkind == Some(FKind::Recon) {
+                            pnorm = Some(fno(bm, bm.lp(lprevprev.unwrap()).f));
+                        } else if fprevkind == Some(FKind::Edge)
+                            && fnextkind == Some(FKind::Vert)
+                            && fprevprevkind == Some(FKind::Edge)
+                        {
+                            pnorm = Some(add_norm(
+                                fno(bm, bm.lp(lprev.unwrap()).f),
+                                fno(bm, bm.lp(lprevprev.unwrap()).f),
+                            ));
+                        } else if fnextkind == Some(FKind::Edge)
+                            && fprevkind == Some(FKind::Vert)
+                            && fnextnextkind == Some(FKind::Edge)
+                        {
+                            pnorm = Some(add_norm(
+                                fno(bm, bm.lp(lnext.unwrap()).f),
+                                fno(bm, bm.lp(lnextnext.unwrap()).f),
+                            ));
+                        }
+                    }
+                }
+                if let Some(n) = pnorm {
+                    writes.push((l, n));
+                }
+            }
+        }
+        for (l, n) in writes {
+            let v = spaces.encode(l, n);
+            crate::clnor::set(bm, l, v);
+        }
+    }
+
     /// Clears `BM_ELEM_LONG_TAG` on the loops of the edge faces.
     pub(crate) fn clear_long_tags(&self, bm: &mut BMesh) {
         for f in bm.face_ids() {

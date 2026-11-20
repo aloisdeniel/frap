@@ -8,6 +8,7 @@ use std::sync::Arc;
 
 use frap_imbuf::DecodedImage;
 use frap_material::LoweredMaterial;
+use frap_rna::{IdKey, IdRef, ImageId};
 use glam::Mat4;
 use indexmap::IndexMap;
 use smol_str::SmolStr;
@@ -105,6 +106,13 @@ pub struct RMesh {
     pub submeshes: Vec<(u32, Range<u32>)>,
     /// Wireframe edges.
     pub edges: Vec<[u32; 2]>,
+    /// Name of each UV layer of [`RMesh::uvs`] (M5+M6 W0: the EEVEE-like engine resolves a
+    /// `UvSource::Named` texture coordinate by name).
+    pub uv_names: Vec<SmolStr>,
+    /// Index into [`RMesh::uvs`] of the active-render UV map (`UvSource::ActiveRender`).
+    pub uv_active_render: Option<usize>,
+    /// Name of each colour layer of [`RMesh::colors`] (Color Attribute nodes, vertex colours).
+    pub color_names: Vec<SmolStr>,
 }
 
 /// Light type with its shape parameters (Blender units preserved).
@@ -149,6 +157,68 @@ pub struct RLight {
     pub use_shadow: bool,
     /// `matrix_world`
     pub matrix_world: Mat4,
+    /// The EEVEE-only light settings (M5+M6 W0 contract delta, read by WP 5.1).
+    pub eevee: RLightEevee,
+}
+
+/// `Light` settings the EEVEE-like engine reads beyond [`RLight`]'s (Blender units; defaults
+/// are `lights.new(…, 'POINT')`'s). M5+M6 W0 contract delta: the builder fills every field,
+/// WP 5.1 (`frap-render/src/eevee/lights.rs`, `shadows.rs`) interprets them.
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
+pub struct RLightEevee {
+    /// `use_temperature` (the colour is then `color × blackbody(temperature)`).
+    pub use_temperature: bool,
+    /// `temperature` (K)
+    pub temperature: f32,
+    /// `diffuse_factor`
+    pub diffuse_factor: f32,
+    /// `specular_factor`
+    pub specular_factor: f32,
+    /// `transmission_factor`
+    pub transmission_factor: f32,
+    /// `volume_factor`
+    pub volume_factor: f32,
+    /// `use_soft_falloff` (point and spot lights)
+    pub use_soft_falloff: bool,
+    /// `normalize` (area lights: energy independent of the size)
+    pub normalize: bool,
+    /// `use_custom_distance` / `cutoff_distance`
+    pub cutoff_distance: Option<f32>,
+    /// `shadow_filter_radius`
+    pub shadow_filter_radius: f32,
+    /// `shadow_maximum_resolution`
+    pub shadow_maximum_resolution: f32,
+    /// `use_absolute_resolution`
+    pub use_absolute_resolution: bool,
+    /// `use_shadow_jitter`
+    pub use_shadow_jitter: bool,
+    /// `shadow_jitter_overblur` (percent)
+    pub shadow_jitter_overblur: f32,
+    /// `spread` (area lights, radians)
+    pub spread: f32,
+}
+
+impl Default for RLightEevee {
+    fn default() -> Self {
+        RLightEevee {
+            use_temperature: false,
+            temperature: 6500.0,
+            diffuse_factor: 1.0,
+            specular_factor: 1.0,
+            transmission_factor: 1.0,
+            volume_factor: 1.0,
+            use_soft_falloff: true,
+            normalize: true,
+            cutoff_distance: None,
+            shadow_filter_radius: 1.0,
+            shadow_maximum_resolution: 0.001,
+            use_absolute_resolution: false,
+            use_shadow_jitter: false,
+            shadow_jitter_overblur: 10.0,
+            spread: std::f32::consts::PI,
+        }
+    }
 }
 
 /// World background.
@@ -221,6 +291,54 @@ pub struct RSettings {
     /// The rest of `scene.display` / `scene.display.shading` the complete Workbench reads
     /// (matcap, X-ray, wireframe, outline, shadows, cavity; M2 W0 contract delta, WP 2.3).
     pub workbench: RWorkbenchShading,
+    /// `scene.eevee` and the film settings the EEVEE-like engine reads (M5+M6 W0 contract
+    /// delta, WP 5.1).
+    pub eevee: REeveeSettings,
+}
+
+/// `scene.eevee` / `scene.render` values of the EEVEE-like engine (§19.3). Defaults are the
+/// factory scene's (verified on 5.2.4, `spec/blender-5.2/startup.json`). `taa_render_samples`,
+/// `use_shadows` and `film_transparent` stay in [`RSettings`].
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
+pub struct REeveeSettings {
+    /// `eevee.shadow_ray_count`
+    pub shadow_ray_count: u32,
+    /// `eevee.shadow_step_count`
+    pub shadow_step_count: u32,
+    /// `eevee.shadow_resolution_scale`
+    pub shadow_resolution_scale: f32,
+    /// `eevee.light_threshold`
+    pub light_threshold: f32,
+    /// `eevee.clamp_surface_direct` (0 = off)
+    pub clamp_surface_direct: f32,
+    /// `eevee.clamp_surface_indirect` (0 = off)
+    pub clamp_surface_indirect: f32,
+    /// `eevee.use_raytracing`
+    pub use_raytracing: bool,
+    /// `eevee.use_fast_gi`
+    pub use_fast_gi: bool,
+    /// `render.filter_size` (pixels, Blackman-Harris width of the film filter)
+    pub filter_size: f32,
+    /// `render.dither_intensity` (applied by the output, kept here for the film)
+    pub dither_intensity: f32,
+}
+
+impl Default for REeveeSettings {
+    fn default() -> Self {
+        REeveeSettings {
+            shadow_ray_count: 1,
+            shadow_step_count: 6,
+            shadow_resolution_scale: 1.0,
+            light_threshold: 0.01,
+            clamp_surface_direct: 0.0,
+            clamp_surface_indirect: 10.0,
+            use_raytracing: false,
+            use_fast_gi: false,
+            filter_size: 1.5,
+            dither_intensity: 1.0,
+        }
+    }
 }
 
 /// `scene.display` and `scene.display.shading` values of the complete Workbench engine
@@ -398,6 +516,7 @@ impl Default for RSettings {
             workbench_materials: IndexMap::new(),
             workbench_background: None,
             workbench: RWorkbenchShading::default(),
+            eevee: REeveeSettings::default(),
         }
     }
 }
@@ -423,6 +542,19 @@ pub struct RenderScene {
     pub world: RWorld,
     /// Settings.
     pub settings: RSettings,
+    /// The [`ImageKey`] of every image in [`RenderScene::images`] by datablock (`TexRef::image`
+    /// of the lowered materials, the world's environment image), so engines can resolve a
+    /// texture reference (M5+M6 W0 contract delta). See [`RenderScene::image`].
+    pub image_ids: IndexMap<IdKey, ImageKey>,
+}
+
+impl RenderScene {
+    /// The decoded image a material texture (or the world) references, if it was collected.
+    pub fn image(&self, image: IdRef<ImageId>) -> Option<&Arc<DecodedImage>> {
+        self.image_ids
+            .get(&image.key())
+            .and_then(|k| self.images.get(k))
+    }
 }
 
 /// Rendered pixels: scene-linear, straight alpha, top row first.
@@ -496,6 +628,14 @@ pub trait RenderService: Send {
     }
     /// The adapter in use.
     fn adapter_info(&self) -> AdapterSummary;
+    /// Whether this service renders `engine` (`render.engine`) itself rather than falling back to
+    /// Workbench (M5+M6 W0 contract delta, additive): `BLENDER_WORKBENCH` always;
+    /// `BLENDER_EEVEE` once WP 5.1 enables its engine (`frap-render`'s
+    /// `eevee::pipeline::IMPLEMENTED`). `render.render` and `frap.render_contact_sheet` ask
+    /// before choosing the engine and its WARNING.
+    fn supports_engine(&self, engine: &str) -> bool {
+        engine == "BLENDER_WORKBENCH"
+    }
 }
 
 /// Backend selection (§19.2): `FRAP_WGPU_BACKEND` (`metal|vulkan|dx12|gl`), `FRAP_ADAPTER`,

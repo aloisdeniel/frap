@@ -27,14 +27,14 @@ mod texture;
 pub mod transform;
 mod world;
 
-pub use armature::{Armature, Pose};
+pub use armature::{Armature, Bone, BoneCollection, Pose, PoseBone};
 pub use camera::Camera;
 pub use collection::Collection;
 pub use image::{
     EncodedImage, IMAGE_DECODERS, IMAGE_PROBES, ImBuf, ImBufData, ImInfo, Image, ImageDecoder,
     ImageProbe, LoadError, PathBase, decode_image, imbuf, io_message, probe_image,
 };
-pub use key::Key;
+pub use key::{Key, ShapeKey};
 pub use library::Library;
 pub use light::Light;
 pub use material::{Material, SHADER_NODETREE_NAME};
@@ -181,46 +181,5 @@ macro_rules! name_only_rna {
     };
 }
 
-/// `IdType` for a type whose only outgoing references are listed by `$refs`.
-macro_rules! id_type {
-    ($ty:ident, $kind:ident) => {
-        impl frap_rna::IdType for $ty {
-            type Kind = frap_rna::$kind;
-            fn header(&self) -> &frap_rna::IdHeader {
-                &self.header
-            }
-            fn header_mut(&mut self) -> &mut frap_rna::IdHeader {
-                &mut self.header
-            }
-            fn for_each_ref(&self, _f: &mut dyn FnMut(frap_rna::IdAny)) {}
-            fn remap_ref(&mut self, _from: frap_rna::IdAny, _to: Option<frap_rna::IdAny>) {}
-        }
-    };
-}
-
-/// Header-only datablock placeholder (fields arrive with the WP that implements the type).
-macro_rules! header_only_id {
-    ($(#[$m:meta])* $ty:ident, $srna:path, $kind:ident) => {
-        $(#[$m])*
-        #[derive(Clone, Debug)]
-        pub struct $ty {
-            /// ID header.
-            pub header: frap_rna::IdHeader,
-        }
-        impl $ty {
-            /// New datablock (name is uniquified by `IdMap::insert`).
-            pub fn new(name: impl Into<smol_str::SmolStr>) -> Self {
-                $ty {
-                    header: frap_rna::IdHeader::new(name),
-                }
-            }
-        }
-        crate::id::name_only_rna!($ty, $srna, $kind);
-        crate::id::id_type!($ty, $kind);
-    };
-}
-
-pub(crate) use header_only_id;
 pub(crate) use id_rna;
-pub(crate) use id_type;
 pub(crate) use name_only_rna;

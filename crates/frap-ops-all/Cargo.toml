@@ -49,6 +49,7 @@ smallvec.workspace = true
 linkme.workspace = true
 serde_json.workspace = true
 frap-uv.workspace = true
+frap-color.workspace = true
 frap-geom.workspace = true
 
 [features]

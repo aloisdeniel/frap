@@ -5,6 +5,7 @@ use frap_render_scene::{
     AdapterSummary, Film, GpuOptions, RenderError, RenderScene, RenderService, SheetLayout,
 };
 
+use crate::eevee::Eevee;
 use crate::engine::{Engine, GpuCache};
 use crate::gpu::Gpu;
 use crate::workbench::Workbench;
@@ -15,6 +16,7 @@ pub struct Renderer {
     gpu: Option<Gpu>,
     cache: GpuCache,
     workbench: Workbench,
+    eevee: Eevee,
 }
 
 /// Creates the render service used by `frap-session` (feature `gpu`).
@@ -30,6 +32,10 @@ impl Renderer {
             gpu: None,
             cache: GpuCache::default(),
             workbench: Workbench::new(),
+            eevee: {
+                crate::eevee::link();
+                Eevee::new()
+            },
         }
     }
 
@@ -66,7 +72,15 @@ impl RenderService for Renderer {
         let gpu = self.gpu.as_ref().expect("invariant: created above");
         // Every engine renders with Workbench until M5. `render.render` reports the EEVEE/CYCLES
         // fallback WARNING (WP 1.24); the EEVEE-like engine arrives in M5.
-        let engine: &mut dyn Engine = &mut self.workbench;
+        // `render.engine` picks the engine (M5+M6 W0): EEVEE once WP 5.1 enables it; the
+        // callers set `BLENDER_WORKBENCH` for any engine `supports_engine` denies.
+        let engine: &mut dyn Engine = if self.supports_engine(&scene.settings.engine)
+            && scene.settings.engine != "BLENDER_WORKBENCH"
+        {
+            &mut self.eevee
+        } else {
+            &mut self.workbench
+        };
         // wgpu reports validation and allocation failures to an error scope instead of the
         // default panicking handler.
         let oom = gpu.device.push_error_scope(wgpu::ErrorFilter::OutOfMemory);
@@ -93,5 +107,12 @@ impl RenderService for Renderer {
     }
     fn adapter_info(&self) -> AdapterSummary {
         self.gpu.as_ref().map(Gpu::summary).unwrap_or_default()
+    }
+    fn supports_engine(&self, engine: &str) -> bool {
+        match engine {
+            "BLENDER_WORKBENCH" => true,
+            "BLENDER_EEVEE" => crate::eevee::pipeline::IMPLEMENTED,
+            _ => false,
+        }
     }
 }

@@ -10,6 +10,7 @@ publish.workspace = true
 
 [dependencies]
 frap-render-scene.workspace = true
+frap-material.workspace = true
 frap-color.workspace = true
 frap-imbuf.workspace = true
 frap-math.workspace = true
@@ -18,10 +19,12 @@ pollster.workspace = true
 bytemuck.workspace = true
 glam.workspace = true
 smol_str.workspace = true
+linkme.workspace = true
+automod.workspace = true
+half.workspace = true
 
 [dev-dependencies]
 image-compare.workspace = true
-frap-material.workspace = true
 
 [lints]
 workspace = true

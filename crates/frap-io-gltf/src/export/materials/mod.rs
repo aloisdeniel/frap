@@ -90,6 +90,25 @@ pub fn textures(lm: &LoweredMaterial) -> Vec<&TexRef> {
     .collect()
 }
 
+/// The extension objects `__gather_extensions` creates for `lm` beyond the always-created ones,
+/// possibly empty (they declare the extension in the add-on's traversal order even when the
+/// JSON drops them; `ext_order`): iridescence for a Principled material with the glTF Material
+/// Output group's `Iridescence Factor` (`export_iridescence`), dispersion for one with a volume
+/// and the group's `Dispersion` (`export_dispersion`).
+fn created_empty(lm: &LoweredMaterial, m: &GMaterial) -> Vec<&'static str> {
+    let mut out = Vec::new();
+    if lm.unlit {
+        return out;
+    }
+    if lm.ext.iridescence.is_some() {
+        out.push("KHR_materials_iridescence");
+    }
+    if lm.ext.dispersion.is_some() && m.extensions.0.contains_key("KHR_materials_volume") {
+        out.push("KHR_materials_dispersion");
+    }
+    out
+}
+
 /// f32 → JSON number as the add-on writes it (the float32 value widened to double).
 pub fn num(x: f32) -> f64 {
     f64::from(x)
@@ -129,8 +148,15 @@ pub fn gather(
                 return Ok(*i);
             }
             let m = build(g, r, mat, &lm, mesh)?;
+            let created = created_empty(&lm, &m);
             g.doc.materials.push(m);
             let i = Some((g.doc.materials.len() - 1) as Index);
+            if !created.is_empty() {
+                let idx = (g.doc.materials.len() - 1) as Index;
+                g.state::<crate::export::ext_order::CreatedEmpty>()
+                    .0
+                    .insert(idx, created);
+            }
             g.materials.written.insert(key, i);
             Ok(i)
         }

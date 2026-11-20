@@ -5,6 +5,44 @@
 
 use frap_rna::OperatorSpec;
 
+pub mod anim;
+pub mod armature;
+pub mod nla;
+pub mod pose;
+pub mod screen;
 
 /// Every typed operator spec of this group, sorted by idname.
-pub static ALL_OPS: [&OperatorSpec; 0] = [];
+pub static ALL_OPS: [&OperatorSpec; 32] = [
+    &anim::OPSPEC_ANIM_OT_KEYFRAME_CLEAR_V3D,
+    &anim::OPSPEC_ANIM_OT_KEYFRAME_DELETE,
+    &anim::OPSPEC_ANIM_OT_KEYFRAME_DELETE_BY_NAME,
+    &anim::OPSPEC_ANIM_OT_KEYFRAME_DELETE_V3D,
+    &anim::OPSPEC_ANIM_OT_KEYFRAME_INSERT,
+    &anim::OPSPEC_ANIM_OT_KEYFRAME_INSERT_BY_NAME,
+    &armature::OPSPEC_ARMATURE_OT_BONE_PRIMITIVE_ADD,
+    &armature::OPSPEC_ARMATURE_OT_CALCULATE_ROLL,
+    &armature::OPSPEC_ARMATURE_OT_DELETE,
+    &armature::OPSPEC_ARMATURE_OT_DUPLICATE,
+    &armature::OPSPEC_ARMATURE_OT_DUPLICATE_MOVE,
+    &armature::OPSPEC_ARMATURE_OT_EXTRUDE,
+    &armature::OPSPEC_ARMATURE_OT_EXTRUDE_MOVE,
+    &armature::OPSPEC_ARMATURE_OT_PARENT_CLEAR,
+    &armature::OPSPEC_ARMATURE_OT_PARENT_SET,
+    &armature::OPSPEC_ARMATURE_OT_ROLL_CLEAR,
+    &armature::OPSPEC_ARMATURE_OT_SELECT_ALL,
+    &armature::OPSPEC_ARMATURE_OT_SUBDIVIDE,
+    &armature::OPSPEC_ARMATURE_OT_SWITCH_DIRECTION,
+    &armature::OPSPEC_ARMATURE_OT_SYMMETRIZE,
+    &nla::OPSPEC_NLA_OT_ACTION_PUSHDOWN,
+    &nla::OPSPEC_NLA_OT_TRACKS_ADD,
+    &pose::OPSPEC_POSE_OT_ARMATURE_APPLY,
+    &pose::OPSPEC_POSE_OT_LOC_CLEAR,
+    &pose::OPSPEC_POSE_OT_ROT_CLEAR,
+    &pose::OPSPEC_POSE_OT_ROTATION_MODE_SET,
+    &pose::OPSPEC_POSE_OT_SCALE_CLEAR,
+    &pose::OPSPEC_POSE_OT_SELECT_ALL,
+    &pose::OPSPEC_POSE_OT_TRANSFORMS_CLEAR,
+    &screen::OPSPEC_SCREEN_OT_FRAME_JUMP,
+    &screen::OPSPEC_SCREEN_OT_FRAME_OFFSET,
+    &screen::OPSPEC_SCREEN_OT_KEYFRAME_JUMP,
+];

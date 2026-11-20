@@ -6,11 +6,13 @@
 //! [`decode`] sniffs the format and keeps the file's sample type; [`encode`] converts to what
 //! the target stores with Blender's rounding ([`convert`]). [`Imbuf`] is the `ImageCodec`.
 //!
-//! Module layout frozen by M1 W0; contents owned by WP 1.6.
+//! Module layout frozen by M1 W0; contents owned by WP 1.6. M5+M6 W0: the encoders moved to
+//! [`encode`] (WP 5.4, `encode/**`); `formats::png_zlib_level` stays a re-export.
 #![deny(unsafe_code)]
 
 pub mod codec;
 pub mod convert;
+pub mod encode;
 pub mod formats;
 
 pub use codec::{DecodedImage, EncodeFormat, ImageCodec, ImageError, PixelData};

@@ -37,8 +37,8 @@ use frap_scene::{EvalMode, EvaluatedObject, Evaluator, HostRead, Main};
 use indexmap::IndexMap;
 
 use crate::types::{
-    MatKey, MeshKey, RCamera, RLight, RMesh, RObject, RSettings, RWorkbenchMaterial, RenderError,
-    RenderRequest, RenderScene,
+    MatKey, MeshKey, RCamera, REeveeSettings, RLight, RMesh, RObject, RSettings,
+    RWorkbenchMaterial, RenderError, RenderRequest, RenderScene,
 };
 use camera::CameraParams;
 use images::Images;
@@ -160,6 +160,18 @@ pub(crate) fn build_with(
         workbench_materials: b.workbench_materials,
         workbench_background: Some(workbench::background(scene, world_data)),
         workbench: workbench::shading(scene),
+        eevee: REeveeSettings {
+            shadow_ray_count: scene.eevee.shadow_ray_count.max(0) as u32,
+            shadow_step_count: scene.eevee.shadow_step_count.max(0) as u32,
+            shadow_resolution_scale: scene.eevee.shadow_resolution_scale,
+            light_threshold: scene.eevee.light_threshold,
+            clamp_surface_direct: scene.eevee.clamp_surface_direct,
+            clamp_surface_indirect: scene.eevee.clamp_surface_indirect,
+            use_raytracing: scene.eevee.use_raytracing,
+            use_fast_gi: scene.eevee.use_fast_gi,
+            filter_size: r.filter_size,
+            dither_intensity: r.dither_intensity,
+        },
     };
 
     Ok(RenderScene {
@@ -168,6 +180,7 @@ pub(crate) fn build_with(
         objects,
         meshes: b.meshes,
         materials: b.materials,
+        image_ids: b.images.ids(),
         images: b.images.map,
         lights,
         world,

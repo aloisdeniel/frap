@@ -21,7 +21,8 @@ use crate::export::{ExportError, ExportFormat, ExportOutput};
 /// Finishes the document (its scenes were gathered by `scenes.rs`) and serializes it.
 pub fn finish(mut g: Gather) -> Result<ExportOutput, ExportError> {
     let s = g.settings;
-    crate::export::ext_order::reorder(&mut g.doc);
+    let created = g.state::<crate::export::ext_order::CreatedEmpty>().clone();
+    crate::export::ext_order::reorder_with(&mut g.doc, Some(&created));
     g.doc.asset = Asset {
         generator: Some(s.generator.clone()),
         copyright: (!s.export_copyright.is_empty()).then(|| s.export_copyright.clone()),

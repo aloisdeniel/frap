@@ -17,9 +17,8 @@
 //!
 //! **`offset=0` (the default) bevels nothing** and the operator still finishes, as in
 //! Blender: frap adds the response hint `NO_OP_DEFAULT` naming `offset` (`offset_pct` for
-//! `PERCENT`). Not supported: `profile_type='CUSTOM'`
-//! (`OP_NOT_IMPLEMENTED`) and `harden_normals` (the bevel is made, normals are not hardened, a
-//! WARNING says so). With `tool_settings.use_mesh_automerge` the selection is welded to
+//! `PERCENT`). Not supported: `profile_type='CUSTOM'` (`OP_NOT_IMPLEMENTED`).
+//! `harden_normals` writes custom normals (`bevel_harden_normals`, M5+M6 W0). With `tool_settings.use_mesh_automerge` the selection is welded to
 //! connected unselected vertices within `double_threshold` after the bevel
 //! (`EDBM_automerge_connected`, M4 W0).
 
@@ -97,7 +96,7 @@ fn bm_error(e: BmError) -> OpError {
 #[operator(
     poll = poll::EDITMESH,
     tier = T2,
-    support = Partial("profile_type='CUSTOM' answers OP_NOT_IMPLEMENTED; harden_normals is not applied (WARNING)"),
+    support = Partial("profile_type='CUSTOM' answers OP_NOT_IMPLEMENTED"),
     notes = [
         "offset defaults to 0, which bevels nothing: pass offset (or offset_pct with offset_type='PERCENT'); frap answers the hint NO_OP_DEFAULT",
         "segments=1 matches Blender at T1; more segments match within 1e-5 in Blender's element order (T2)",
@@ -212,13 +211,6 @@ fn exec(cx: &mut OpCtx, p: mesh::Bevel) -> OpResult {
     if let Some(message) = no_op_hint(offset, percent) {
         // Blender finishes silently; frap answers the `NO_OP_DEFAULT` hint (§13.2).
         cx.hint(NO_OP_DEFAULT, message);
-    }
-    if p.harden_normals.value && offset > 0.0 {
-        cx.report(
-            ReportType::Warning,
-            "frap: harden_normals is not supported yet: the bevel was made without hardening \
-             the normals",
-        );
     }
     Ok(OpStatus::Finished)
 }

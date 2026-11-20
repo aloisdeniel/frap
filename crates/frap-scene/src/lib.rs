@@ -10,6 +10,7 @@
 
 mod context;
 mod data;
+pub mod edit_armature;
 mod eval;
 mod host;
 pub mod id;

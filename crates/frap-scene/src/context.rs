@@ -207,11 +207,7 @@ pub struct EditMesh {
     pub view: ViewCache,
 }
 
-/// Armature in Edit Mode (edit bones; M6).
-#[derive(Clone, Debug, Default)]
-pub struct EditArmature {
-    _private: (),
-}
+pub use crate::edit_armature::EditArmature;
 
 /// Edit-mode state; part of the snapshot.
 #[derive(Clone, Debug, Default)]

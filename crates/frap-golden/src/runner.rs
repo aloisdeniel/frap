@@ -66,6 +66,8 @@ pub struct MeshProps {
     pub edges: String,
     pub faces: String,
     pub corner_normals: String,
+    #[serde(default)]
+    pub face_normals: Option<String>,
     pub uv_layers: String,
     pub uv_value: String,
     pub attributes: String,
@@ -648,6 +650,16 @@ pub fn native_mesh(m: &Mesh) -> GMesh {
             })
             .collect(),
         corner_normals: m.corner_normals().to_vec(),
+        face_normals: Some(
+            (0..m.faces_num())
+                .map(|i| {
+                    frap_geom::normals::face_normal_calc(
+                        m.positions(),
+                        &m.corner_verts()[m.face(i)],
+                    )
+                })
+                .collect(),
+        ),
         uv_layers: uv
             .iter()
             .map(|(n, d)| (n.to_string(), d.to_vec()))
@@ -726,6 +738,87 @@ fn socket_json(main: &Main, v: &SocketValue) -> Option<J> {
             .map(|(n, _)| J::from(n.as_str()))
             .unwrap_or(J::Null),
         _ => return None,
+    })
+}
+
+/// The frames an F-curve is sampled at: every whole and half frame from 3 frames before the
+/// first key to 3 after the last (`dump_state.py::sample_frames`).
+fn sample_frames(keys: &[frap_anim::Keyframe]) -> Vec<f64> {
+    if keys.is_empty() {
+        return Vec::new();
+    }
+    let lo = keys
+        .iter()
+        .map(|k| f64::from(k.co[0]))
+        .fold(f64::INFINITY, f64::min)
+        .floor()
+        - 3.0;
+    let hi = keys
+        .iter()
+        .map(|k| f64::from(k.co[0]))
+        .fold(f64::NEG_INFINITY, f64::max)
+        .ceil()
+        + 3.0;
+    let mut out = Vec::new();
+    let mut f = lo;
+    while f <= hi {
+        out.push(f);
+        if f < hi {
+            out.push(f + 0.5);
+        }
+        f += 1.0;
+    }
+    out
+}
+
+/// Native action dump (mirrors `dump_state.py::dump_action`).
+fn native_action(main: &Main, name: &str) -> Option<GAction> {
+    let r = main.actions.find(name)?;
+    let act = main.actions.get(r)?;
+    let mut fcurves: Vec<J> = Vec::new();
+    for layer in &act.layers {
+        for strip in &layer.strips {
+            let frap_anim::ActionStrip::Keyframe(ks) = strip else {
+                continue;
+            };
+            for bag in &ks.channelbags {
+                for fc in &bag.fcurves {
+                    let keys = &fc.keyframe_points;
+                    fcurves.push(json!({
+                        "data_path": fc.data_path.as_str(),
+                        "array_index": fc.array_index,
+                        "extrapolation": fc.extrapolation.identifier(),
+                        "keyframes": keys.iter().map(|k| json!([
+                            fjs(&k.co),
+                            k.interpolation.identifier(),
+                            fjs(&k.handle_left),
+                            fjs(&k.handle_right),
+                        ])).collect::<Vec<_>>(),
+                        "samples": sample_frames(keys).into_iter().map(|f| json!([
+                            fj(f as f32),
+                            fj(frap_anim::eval::evaluate_fcurve(fc, f as f32)),
+                        ])).collect::<Vec<_>>(),
+                    }));
+                }
+            }
+        }
+    }
+    fcurves.sort_by(|a, b| {
+        let k = |v: &J| {
+            (
+                v["data_path"].as_str().unwrap_or("").to_owned(),
+                v["array_index"].as_i64(),
+            )
+        };
+        k(a).cmp(&k(b))
+    });
+    let slots: Vec<J> = act
+        .slots
+        .iter()
+        .map(|s| J::from(s.identifier.as_str()))
+        .collect();
+    Some(GAction {
+        data: json!({"slots": slots, "fcurves": fcurves}),
     })
 }
 
@@ -985,6 +1078,15 @@ impl Dumper<'_> {
             .into_iter()
             .map(|v| [v[0], v[1], v[2]])
             .collect();
+        let face_normals = match &p.face_normals {
+            Some(path) => Some(
+                to(self.read_items(base, path)?, 3)?
+                    .into_iter()
+                    .map(|v| [v[0], v[1], v[2]])
+                    .collect(),
+            ),
+            None => None,
+        };
         let uv_coll = format!("{base}.{}", p.uv_layers);
         let uv_names = coll_items(&self.read(&uv_coll)?)?;
         let mut uv_layers = BTreeMap::new();
@@ -1025,6 +1127,7 @@ impl Dumper<'_> {
             edges,
             faces,
             corner_normals,
+            face_normals,
             uv_layers,
             attributes,
             selection: J::Null,
@@ -1300,9 +1403,11 @@ pub fn run_frap(case: &Case, props: &Props, opts: &RunOptions) -> Result<FrapRun
                 }
             }
             CompareSpec::Anim(name) => {
-                return Err(HarnessError::Frap(format!(
-                    "anim:{name}: the frap action dump arrives with M6"
-                )));
+                // M5+M6 W0: the action read natively (slots, every channelbag's F-curves with
+                // their keys and sampled values), mirroring `dump_state.py::dump_action`.
+                if let Some(a) = native_action(d.session.main(), name) {
+                    state.actions.insert(name.clone(), a);
+                }
             }
             CompareSpec::Glb(path) => {
                 let p = opts.workdir.join(path);

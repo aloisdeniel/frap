@@ -15,6 +15,8 @@
 //! KHR_materials_variants and compressed meshes (M7) are not imported yet; a file using them imports its static part and the report lists one
 //! WARNING per missing feature.
 
+/// glTF animations (WP 6.7; M5+M6 W0 stub).
+mod animation;
 mod cameras;
 mod convert;
 mod extras;
@@ -27,9 +29,15 @@ pub mod materials_ext {
     automod::dir!(pub "src/import/materials_ext");
 }
 mod mesh;
+/// Morph targets (WP 6.8; M5+M6 W0 stub).
+mod morph;
 mod nodes;
+/// `KHR_animation_pointer` (WP 6.9; M5+M6 W0 stub).
+mod pointer;
 mod scenes;
 pub mod settings;
+/// Skins (WP 6.8; M5+M6 W0 stub).
+mod skins;
 mod vnode;
 
 use std::collections::{BTreeSet, HashMap};
@@ -197,6 +205,9 @@ pub fn import_bytes(
     };
     cx.warn_unsupported();
     scenes::create(&mut cx, main, log)?;
+    if animation::IMPLEMENTED {
+        animation::create(&mut cx, main, log)?;
+    }
     if settings.import_unused_materials {
         materials::create_unused(&mut cx, main, log)?;
     }
@@ -318,22 +329,23 @@ impl Gltf<'_> {
     fn warn_unsupported(&mut self) {
         let doc = &self.doc;
         let mut w: Vec<(&str, String)> = Vec::new();
-        if !doc.skins.is_empty() {
+        if !doc.skins.is_empty() && !skins::IMPLEMENTED {
             w.push((
                 "skins",
                 "glTF import: skins are imported from M6; joints become empties and meshes are not skinned".into(),
             ));
         }
-        if !doc.animations.is_empty() {
+        if !doc.animations.is_empty() && !animation::IMPLEMENTED {
             w.push((
                 "animations",
                 "glTF import: animations are imported from M6; they were skipped".into(),
             ));
         }
-        if doc
-            .meshes
-            .iter()
-            .any(|m| m.primitives.iter().any(|p| !p.targets.is_empty()))
+        if !morph::IMPLEMENTED
+            && doc
+                .meshes
+                .iter()
+                .any(|m| m.primitives.iter().any(|p| !p.targets.is_empty()))
         {
             w.push((
                 "morph",

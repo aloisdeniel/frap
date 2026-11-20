@@ -9,7 +9,7 @@ pub mod geometry;
 pub mod mesh;
 
 /// Every typed operator spec of this group, sorted by idname.
-pub static ALL_OPS: [&OperatorSpec; 118] = [
+pub static ALL_OPS: [&OperatorSpec; 120] = [
     &geometry::OPSPEC_GEOMETRY_OT_ATTRIBUTE_ADD,
     &geometry::OPSPEC_GEOMETRY_OT_ATTRIBUTE_CONVERT,
     &geometry::OPSPEC_GEOMETRY_OT_ATTRIBUTE_REMOVE,
@@ -22,6 +22,7 @@ pub static ALL_OPS: [&OperatorSpec; 118] = [
     &mesh::OPSPEC_MESH_OT_BEAUTIFY_FILL,
     &mesh::OPSPEC_MESH_OT_BEVEL,
     &mesh::OPSPEC_MESH_OT_BISECT,
+    &mesh::OPSPEC_MESH_OT_BLEND_FROM_SHAPE,
     &mesh::OPSPEC_MESH_OT_BRIDGE_EDGE_LOOPS,
     &mesh::OPSPEC_MESH_OT_CONVEX_HULL,
     &mesh::OPSPEC_MESH_OT_CUSTOMDATA_CUSTOM_SPLITNORMALS_ADD,
@@ -111,6 +112,7 @@ pub static ALL_OPS: [&OperatorSpec; 118] = [
     &mesh::OPSPEC_MESH_OT_SEPARATE,
     &mesh::OPSPEC_MESH_OT_SET_NORMALS_FROM_FACES,
     &mesh::OPSPEC_MESH_OT_SET_SHARPNESS_BY_ANGLE,
+    &mesh::OPSPEC_MESH_OT_SHAPE_PROPAGATE_TO_ALL,
     &mesh::OPSPEC_MESH_OT_SHORTEST_PATH_SELECT,
     &mesh::OPSPEC_MESH_OT_SOLIDIFY,
     &mesh::OPSPEC_MESH_OT_SPIN,

@@ -14,6 +14,8 @@ frap-lang.workspace = true
 frap-session.workspace = true
 frap-scene.workspace = true
 frap-mesh.workspace = true
+frap-geom.workspace = true
+frap-anim.workspace = true
 # WP 1.8: the frap-side dumper's fallback reads node trees (socket values) natively.
 frap-nodes.workspace = true
 frap-gltf.workspace = true

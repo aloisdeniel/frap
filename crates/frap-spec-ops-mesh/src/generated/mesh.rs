@@ -795,6 +795,49 @@ impl OpProps for Bisect {
     }
 }
 
+// ---------------------------------------------------------------- mesh.blend_from_shape
+/// Props of `mesh.blend_from_shape`, RNA order.
+pub static BLEND_FROM_SHAPE_PROPS: [PropDef; 3] = [
+    PropDef { identifier: "shape", name: "Shape", description: "Shape key to use for blending", kind: PropKind::Enum { items: &[], default: EnumDefault::Item(""), dynamic: Some("MESH_OT_blend_from_shape.shape") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE.union(PropFlags::DYNAMIC_ENUM), deprecated: None },
+    PropDef { identifier: "blend", name: "Blend", description: "Blending factor", kind: PropKind::Float { default: Defaults::Scalar(1.0), hard: (-1000.0, 1000.0), soft: (-2.0, 2.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "add", name: "Add", description: "Add rather than blend between shapes", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
+];
+/// `MESH_OT_blend_from_shape`
+pub static OPSPEC_MESH_OT_BLEND_FROM_SHAPE: OperatorSpec = OperatorSpec {
+    idname: "mesh.blend_from_shape",
+    bl_idname: "MESH_OT_blend_from_shape",
+    label: "Blend from Shape",
+    description: "Blend in shape from a shape key",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &BLEND_FROM_SHAPE_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.blend_from_shape` (Blend from Shape).
+#[derive(Debug, Clone)]
+pub struct BlendFromShape {
+    /// Shape key to use for blending; default "", dynamic:  [ANIMATABLE, DYNAMIC_ENUM]
+    pub shape: Prop<SmolStr>,
+    /// Blending factor; default 1 [ANIMATABLE]
+    pub blend: Prop<f32>,
+    /// Add rather than blend between shapes; default true [ANIMATABLE]
+    pub add: Prop<bool>,
+}
+impl OpProps for BlendFromShape {
+    const IDNAME: &'static str = "mesh.blend_from_shape";
+    const BL_IDNAME: &'static str = "MESH_OT_blend_from_shape";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_BLEND_FROM_SHAPE
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        BlendFromShape {
+            shape: a.prop(0, "shape"),
+            blend: a.prop(1, "blend"),
+            add: a.prop(2, "add"),
+        }
+    }
+}
+
 // ---------------------------------------------------------------- mesh.bridge_edge_loops
 /// Props of `mesh.bridge_edge_loops`, RNA order.
 pub static BRIDGE_EDGE_LOOPS_PROPS: [PropDef; 9] = [
@@ -6261,6 +6304,37 @@ impl OpProps for SetSharpnessByAngle {
         SetSharpnessByAngle {
             angle: a.prop(0, "angle"),
             extend: a.prop(1, "extend"),
+        }
+    }
+}
+
+// ---------------------------------------------------------------- mesh.shape_propagate_to_all
+/// Props of `mesh.shape_propagate_to_all`, RNA order.
+pub static SHAPE_PROPAGATE_TO_ALL_PROPS: [PropDef; 0] = [
+];
+/// `MESH_OT_shape_propagate_to_all`
+pub static OPSPEC_MESH_OT_SHAPE_PROPAGATE_TO_ALL: OperatorSpec = OperatorSpec {
+    idname: "mesh.shape_propagate_to_all",
+    bl_idname: "MESH_OT_shape_propagate_to_all",
+    label: "Shape Propagate",
+    description: "Apply selected vertex locations to all other shape keys",
+    options: OpOptions::REGISTER.union(OpOptions::UNDO),
+    props: &SHAPE_PROPAGATE_TO_ALL_PROPS,
+    macro_steps: &[],
+    poll_matrix: Some(PollMatrix { plain: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N], view3d: [PollCell::N, PollCell::N, PollCell::Y, PollCell::N, PollCell::N] }),
+};
+/// Typed props of `mesh.shape_propagate_to_all` (Shape Propagate).
+#[derive(Debug, Clone)]
+pub struct ShapePropagateToAll {
+}
+impl OpProps for ShapePropagateToAll {
+    const IDNAME: &'static str = "mesh.shape_propagate_to_all";
+    const BL_IDNAME: &'static str = "MESH_OT_shape_propagate_to_all";
+    fn spec() -> &'static OperatorSpec {
+        &OPSPEC_MESH_OT_SHAPE_PROPAGATE_TO_ALL
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        ShapePropagateToAll {
         }
     }
 }

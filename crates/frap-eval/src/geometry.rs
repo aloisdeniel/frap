@@ -200,10 +200,20 @@ impl ModEvalCx for GeoCx<'_, '_> {
     }
 
     fn pose(&mut self, arm: IdRef<ObjectId>) -> Result<Arc<EvaluatedPose>, ModError> {
-        let _ = arm;
-        Err(ModError::Dependency(
-            "frap: armature poses are evaluated from M6".into(),
-        ))
+        // M5+M6 W0: the armature object's evaluated pose (`pose.rs`, WP 6.2) through the cache,
+        // as `evaluated_mesh` reads operand geometry (the ARMATURE modifier, WP 6.5).
+        if self.cycle(arm) {
+            return Err(ModError::Dependency(
+                "Dependency cycle detected between modifier operands".into(),
+            ));
+        }
+        let r = self
+            .ev
+            .object(self.host, arm, self.mode)
+            .map_err(|e| ModError::Dependency(e.message))?;
+        r.pose
+            .clone()
+            .ok_or_else(|| ModError::Dependency("the object has no evaluated pose".into()))
     }
 
     fn image(&mut self, im: IdRef<ImageId>) -> Option<Arc<DecodedImage>> {

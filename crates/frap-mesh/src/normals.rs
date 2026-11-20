@@ -39,6 +39,22 @@ pub(crate) fn face_normals_true(m: &Mesh) -> Vec<V3> {
     gn::normals_calc_faces(m.positions(), m.face_offsets(), m.corner_verts())
 }
 
+/// `MeshPolygon.normal`: `rna_MeshPolygon_normal_get` calls `face_normal_calc` on the face's
+/// positions (the triangle and quad special cases, Newell for n-gons) whatever custom normals the
+/// mesh has, whereas `Mesh.polygon_normals` (`Mesh::face_normals()`) uses Newell for every face
+/// and mixes custom normals.
+pub(crate) fn rna_face_normal(m: &Mesh, f: usize) -> V3 {
+    let o = m.face_offsets();
+    let r = o[f] as usize..o[f + 1] as usize;
+    gn::face_normal_calc(m.positions(), &m.corner_verts()[r])
+}
+
+/// [`rna_face_normal`] of every face in `range` (`foreach_get('normal')` reads the getter per
+/// item).
+pub(crate) fn rna_face_normals(m: &Mesh, range: std::ops::Range<usize>) -> Vec<V3> {
+    range.map(|f| rna_face_normal(m, f)).collect()
+}
+
 fn vert_map(m: &Mesh) -> VertToFaceMap {
     VertToFaceMap::new(m.verts_num(), m.face_offsets(), m.corner_verts())
 }

@@ -132,7 +132,7 @@ NORMALISE = {
         "triangulate them before float-accumulating edits",
     ),
     "D-78": ("cases", "cases do not pass unknown mesh.merge types in vertex select mode"),
-    "D-79": ("cases", "cases do not set harden_normals or Auto Merge with bevel"),
+    "D-79": None,
     "D-80": ("comparator", "the two-bevel cases compare at T2 (canonical order)"),
     "D-81": None,
     "D-82": None,
@@ -177,6 +177,7 @@ NORMALISE = {
     "D-121": ("cases", "SUBSURF cases past the isolation level use meshes without UV maps (modifiers/subsurf/simple_end_caps*, levels_above_quality)"),
     "D-122": ("comparator", "stacks with these modifiers compare normals at tol=1e-4"),
     "D-123": None,
+    "D-124": ("comparator", "the glTF comparator matches triangles of corner tuples, not vertex counts"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

@@ -29,6 +29,15 @@ pub struct Images {
     by_id: HashMap<IdKey, ImageKey>,
 }
 
+impl Images {
+    /// Datablock → key of every collected image (`RenderScene::image_ids`).
+    pub fn ids(&self) -> IndexMap<IdKey, ImageKey> {
+        let mut v: Vec<(IdKey, ImageKey)> = self.by_id.iter().map(|(a, b)| (*a, *b)).collect();
+        v.sort_by_key(|(_, k)| self.map.get_index_of(k));
+        v.into_iter().collect()
+    }
+}
+
 /// Blender's missing-texture colour.
 pub fn missing() -> DecodedImage {
     DecodedImage {

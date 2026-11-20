@@ -425,23 +425,29 @@ impl ViewLut {
     }
 }
 
-/// The LUTs checked in under `assets/luts/` (view transform, look, display, file contents).
-const BAKED: &[(&str, &str, &str, &str)] = &[(
-    "AgX",
-    "None",
-    "sRGB",
-    include_str!("../../../assets/luts/agx.cube"),
-)];
+/// One baked LUT: `(view transform, look, display, .cube file contents)`. Each view-transform
+/// module (`agx`, `filmic`, `pbr_neutral`, `aces`, `false_color`; WP 5.3) lists its own.
+pub type BakedLut = (&'static str, &'static str, &'static str, &'static str);
+
+/// Every LUT checked in under `assets/luts/`, from the view-transform modules (M5+M6 W0: the
+/// extension point WP 5.3 fills without editing this file).
+fn all_baked() -> impl Iterator<Item = &'static BakedLut> {
+    crate::agx::BAKED
+        .iter()
+        .chain(crate::filmic::BAKED)
+        .chain(crate::pbr_neutral::BAKED)
+        .chain(crate::aces::BAKED)
+        .chain(crate::false_color::BAKED)
+}
 
 /// The baked LUT for `(view_transform, look, display)`, parsed on first use.
 ///
 /// `None` when that combination has not been baked (M1 bakes AgX on the sRGB display; WP 5.3
-/// adds every view transform × look).
+/// adds every view transform × look through the modules' `BAKED` lists).
 pub fn baked(view_transform: &str, look: &str, display: &str) -> Option<&'static ViewLut> {
     static PARSED: OnceLock<Vec<ViewLut>> = OnceLock::new();
     let all = PARSED.get_or_init(|| {
-        BAKED
-            .iter()
+        all_baked()
             .map(|(v, l, d, text)| {
                 let lut = CubeFile::parse(text)
                     .and_then(ViewLut::from_cube)

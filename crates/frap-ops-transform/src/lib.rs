@@ -18,6 +18,8 @@ pub mod core;
 pub mod edit;
 /// Object-mode `TRANSFORM_MODE_HANDLERS` entry (WP 1.21).
 pub mod object;
+/// Pose-mode `TRANSFORM_MODE_HANDLERS` entry (WP 6.2; M5+M6 W0 stub).
+pub mod pose;
 
 /// Referenced by `frap_ops_all::link()` so the linker keeps this crate's `linkme` entries (§10.5).
 #[inline(never)]

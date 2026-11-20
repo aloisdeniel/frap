@@ -71,6 +71,10 @@ pub struct GMesh {
     pub faces: Vec<Vec<u32>>,
     /// Corner normals.
     pub corner_normals: Vec<[f32; 3]>,
+    /// `MeshPolygon.normal` per face (`face_normal_calc`, not `polygon_normals`). Fixtures
+    /// blessed before the M5+M6 W0 lack it; the comparators skip it unless both sides have it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub face_normals: Option<Vec<[f32; 3]>>,
     /// UV layers by name (per corner).
     pub uv_layers: BTreeMap<String, Vec<[f32; 2]>>,
     /// Other attributes by name: `{"domain", "data_type", "data"}`.

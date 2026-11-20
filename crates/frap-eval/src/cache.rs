@@ -142,7 +142,7 @@ impl EvalCache {
                 matrix_world,
                 mesh: geo.mesh,
                 bounds,
-                pose: None, // M6 (`pose.rs`)
+                pose: crate::pose::evaluate(host, o),
                 modifier_status: geo.modifier_status,
                 warnings,
             });

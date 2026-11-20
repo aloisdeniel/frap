@@ -14,12 +14,15 @@
 //! §12): a cancelled statement is rolled back by the session, so an op may unwind half-way.
 #![deny(unsafe_code)]
 
+/// Custom split normals of a BMesh (`custom_normal` layer, `MLoopNorSpaceArray`), M5+M6 W0.
+pub mod clnor;
 pub mod convert;
 pub mod customdata;
 pub mod kernel;
 pub mod pool;
 pub mod query;
 pub mod select;
+pub mod shape;
 pub mod types;
 pub mod validate;
 pub mod walkers;

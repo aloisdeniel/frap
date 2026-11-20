@@ -420,7 +420,13 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
         objects,
     };
     let mut base = frap_render_scene::build(&*snap.host, &mut *eval, &req).map_err(render_error)?;
-    base.settings.engine = WORKBENCH.into();
+    let eevee_ok = cx.services().render()?.supports_engine("BLENDER_EEVEE");
+    let engine = if p.engine.value == rcs::Engine::BlenderEevee && eevee_ok {
+        "BLENDER_EEVEE"
+    } else {
+        WORKBENCH
+    };
+    base.settings.engine = engine.into();
     let points = scene_points(&base);
 
     // One tile at a time: render, colour-manage and quantise, then drop the float film, so
@@ -512,7 +518,7 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
     .map_err(|e| OpError::Io(e.to_string()))?;
     output::write_file(&filepath.absolute, &png).map_err(OpError::Runtime)?;
 
-    if p.engine.value == rcs::Engine::BlenderEevee {
+    if p.engine.value == rcs::Engine::BlenderEevee && engine == WORKBENCH {
         cx.report(
             ReportType::Warning,
             format!("Engine 'BLENDER_EEVEE' is not available in frap yet (M5); rendered with {WORKBENCH}"),
@@ -583,7 +589,7 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
             Value::Int(i64::from(layout.size[1])),
         ]),
     );
-    cx.result("engine", Value::Str(WORKBENCH.into()));
+    cx.result("engine", Value::Str(engine.into()));
     cx.result("tiles", Value::Structs(tile_results));
     Ok(OpStatus::Finished)
 }

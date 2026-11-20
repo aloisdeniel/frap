@@ -563,7 +563,18 @@ fn map_doubles(
         let mut v: Vec<(usize, [f32; 3], f32)> = (start..start + n)
             .map(|i| (i, positions[i], sum(positions[i])))
             .collect();
-        v.sort_by(|a, b| a.2.partial_cmp(&b.2).unwrap_or(std::cmp::Ordering::Equal));
+        // `qsort(…, svert_sum_cmp)`: the C library's unstable sort (macOS libc, where the
+        // fixtures are blessed, D-67). Inputs with coincident vertices (a MIRROR without
+        // bisect) tie on the sum, and the order of ties decides which twin a source maps to.
+        frap_bmesh::ops::contextual_create::bli::c_qsort(&mut v, &|a, b| {
+            if a.2 > b.2 {
+                1
+            } else if a.2 < b.2 {
+                -1
+            } else {
+                0
+            }
+        });
         v
     };
     let targets = sorted(target_start, target_verts_num);

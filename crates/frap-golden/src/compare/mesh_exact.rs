@@ -152,6 +152,9 @@ pub fn compare(what: &str, frap: &GMesh, blender: &GMesh, tol: f32) -> Vec<Misma
         tol,
         &mut out,
     );
+    if let (Some(f), Some(b)) = (&frap.face_normals, &blender.face_normals) {
+        floats(NAME, &format!("{what}.face_normals"), f, b, tol, &mut out);
+    }
     let fk: Vec<&String> = frap.uv_layers.keys().collect();
     let bk: Vec<&String> = blender.uv_layers.keys().collect();
     if fk != bk {
@@ -264,6 +267,7 @@ pub(crate) mod tests {
             edges,
             faces,
             corner_normals,
+            face_normals: None,
             uv_layers,
             attributes,
             selection: Json::Null,

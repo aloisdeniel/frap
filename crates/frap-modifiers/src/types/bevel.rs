@@ -20,8 +20,9 @@
 //! disables the modifier. A weight attribute of another type or domain is converted to a
 //! temporary FLOAT attribute as Blender does (`lookup<float>`: domain adaptation in the source
 //! type, then type conversion); QUATERNION, FLOAT4X4 and STRING attributes, which have no
-//! conversion, are treated as missing (weight 0, WARNING). `harden_normals` is not applied (WARNING, D-79) and `profile_type='CUSTOM'` is a
-//! modifier error (no custom profile curve yet).
+//! conversion, are treated as missing (weight 0, WARNING). `harden_normals` writes custom normals as Blender does
+//! (`bevel_harden_normals`, M5+M6 W0) and `profile_type='CUSTOM'` is a modifier error (no custom
+//! profile curve yet).
 
 use frap_bmesh::ops::bevel::{BevelIn, MeshBevelWeights, mesh_bevel_tagged};
 use frap_bmesh::{BMesh, BmError, ElemFlag, FromMeshParams, ToMeshParams};
@@ -320,13 +321,6 @@ pub(crate) fn modify_mesh(
         BmError::Invalid(m) => ModError::Error(m),
         e => ModError::Error(e.to_string()),
     })?;
-    if s.harden_normals && value(s) > 0.0 {
-        warnings.push(
-            "harden_normals is not supported yet: the bevel was made without hardening the \
-             normals"
-                .into(),
-        );
-    }
 
     let mut result = bm.to_mesh(&mesh, &ToMeshParams::default());
     for (name, converted) in [vert_weight, edge_weight].into_iter().flatten() {

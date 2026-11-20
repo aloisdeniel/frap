@@ -50,7 +50,8 @@ pub(crate) fn evaluate(
     let in_edit_mode = host.edit().meshes.contains_key(&me.key());
     // Edit Mode: the cached read-only view of the edit BMesh (§6.3); otherwise the original.
     let base = host.mesh_view(me);
-    // Shape-key mixing (relative keys) arrives with M6 (`key_eval.rs`); `Key` has no blocks yet.
+    // Shape keys before the modifiers (`key_eval.rs`, WP 6.3).
+    let base = crate::key_eval::apply(host, ob, base);
     let out = crate::geometry::evaluate(ev, host, ob_ref, ob, base, mode, in_edit_mode);
     MeshResult {
         mesh: Some(out.mesh),

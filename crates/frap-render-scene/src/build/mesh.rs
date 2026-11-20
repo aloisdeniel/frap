@@ -82,8 +82,17 @@ pub fn extract(mesh: &Mesh, slot_count: usize) -> RMesh {
         ..RMesh::default()
     };
 
-    out.uvs = mesh
-        .uv_maps()
+    let uv_maps = mesh.uv_maps();
+    out.uv_names = uv_maps
+        .iter()
+        .map(|(n, _)| smol_str::SmolStr::new(n))
+        .collect();
+    out.uv_active_render = mesh
+        .uv_active_render
+        .as_deref()
+        .and_then(|a| out.uv_names.iter().position(|n| n == a))
+        .or_else(|| (!out.uv_names.is_empty()).then_some(0));
+    out.uvs = uv_maps
         .into_iter()
         .map(|(_, uv)| split.vert_corner.iter().map(|&c| uv[c as usize]).collect())
         .collect();
@@ -103,6 +112,7 @@ pub fn extract(mesh: &Mesh, slot_count: usize) -> RMesh {
             ColorCol::Float(v) => v[i as usize],
             ColorCol::Byte(v) => byte_to_linear(v[i as usize]),
         };
+        out.color_names.push(a.name.clone());
         if a.domain == Domain::Corner {
             out.colors
                 .push(split.vert_corner.iter().map(|&c| value(c)).collect());

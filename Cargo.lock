@@ -1013,6 +1013,8 @@ name = "frap-golden"
 version = "0.1.0"
 dependencies = [
  "automod",
+ "frap-anim",
+ "frap-geom",
  "frap-gltf",
  "frap-imbuf",
  "frap-lang",
@@ -1230,6 +1232,7 @@ dependencies = [
  "frap-anim",
  "frap-bmesh",
  "frap-boolean",
+ "frap-color",
  "frap-eval",
  "frap-geom",
  "frap-gltf",
@@ -1271,6 +1274,29 @@ dependencies = [
 [[package]]
 name = "frap-ops-anim"
 version = "0.1.0"
+dependencies = [
+ "approx",
+ "automod",
+ "frap-anim",
+ "frap-eval",
+ "frap-math",
+ "frap-mesh",
+ "frap-op",
+ "frap-rna",
+ "frap-scene",
+ "frap-spec-ops-anim",
+ "frap-spec-rna",
+ "glam",
+ "indexmap",
+ "insta",
+ "libm",
+ "linkme",
+ "proptest",
+ "rustc-hash 2.1.3",
+ "serde_json",
+ "smallvec",
+ "smol_str",
+]
 
 [[package]]
 name = "frap-ops-data"
@@ -1549,6 +1575,7 @@ dependencies = [
 name = "frap-render"
 version = "0.1.0"
 dependencies = [
+ "automod",
  "bytemuck",
  "frap-color",
  "frap-imbuf",
@@ -1556,7 +1583,9 @@ dependencies = [
  "frap-math",
  "frap-render-scene",
  "glam",
+ "half",
  "image-compare",
+ "linkme",
  "pollster",
  "smol_str",
  "wgpu",

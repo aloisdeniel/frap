@@ -98,7 +98,13 @@ pub fn gather_node(g: &mut Gather, tree: &VTree, i: usize) -> Result<Index, Expo
     node.scale = scale;
     node.translation = translation;
     g.doc.nodes.push(node);
-    Ok((g.doc.nodes.len() - 1) as Index)
+    let index = (g.doc.nodes.len() - 1) as Index;
+    // The object → node map the M6 exporters resolve channel targets with (M5+M6 W0).
+    let scene = g.scene;
+    g.state::<crate::export::node_map::NodeMap>()
+        .objects
+        .insert((scene, r), index);
+    Ok(index)
 }
 
 #[cfg(test)]

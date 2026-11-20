@@ -14,6 +14,8 @@
 //! other in the add-on's traversal order so array order and BIN layout follow Blender's.
 //! Byte identity with Blender is a non-goal (goldens compare canonically, WP 1.23).
 
+/// glTF animations (WP 6.7; M5+M6 W0 stub, called after the scenes).
+pub mod animation;
 pub mod apply;
 pub mod cameras;
 pub mod ext_order;
@@ -25,9 +27,14 @@ pub mod images;
 pub mod lights;
 pub mod materials;
 pub mod mesh;
+pub mod node_map;
 pub mod nodes;
+/// `KHR_animation_pointer` (WP 6.9; M5+M6 W0 stub).
+pub mod pointer;
 pub mod scenes;
 pub mod settings;
+/// Skins (WP 6.8; M5+M6 W0 stub).
+pub mod skins;
 pub mod vtree;
 pub mod write;
 
@@ -84,6 +91,7 @@ pub fn export(
 ) -> Result<ExportOutput, ExportError> {
     let mut g = gather::Gather::new(main, ctx, settings);
     scenes::gather(&mut g)?;
+    animation::gather(&mut g)?;
     if let Some(m) = g.state::<extras::NonFinite>().0.take() {
         return Err(ExportError::Json(m));
     }

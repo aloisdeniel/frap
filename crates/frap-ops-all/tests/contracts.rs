@@ -1626,3 +1626,150 @@ fn m3_m4_contract_delta_cheap_parts_run() {
         m3_m4_data as fn(&mut Main, &mut WindowState, &mut ChangeLog),
     );
 }
+
+// ---------------------------------------------------------------- M5+M6 W0 contract delta
+
+/// M6 animation data model (`frap-anim`, WP 6.1) and evaluation signatures.
+fn m6_anim() {
+    use frap_anim::eval::{evaluate_action, evaluate_anim, evaluate_fcurve, recalc_handles};
+    use frap_anim::{
+        ActionGroup, ActionLayer, ActionLookup, ActionSlot, ActionStrip, AnimChannel, Channelbag,
+        Easing, Extrapolation, FCurve, HandleType, Interpolation, Keyframe, KeyframeStrip,
+        KeyframeType, NlaStrip, NlaTrack,
+    };
+    let _: fn(&FCurve, f32) -> f32 = evaluate_fcurve;
+    let _: fn(&mut FCurve) = recalc_handles;
+    let _: fn(&Action, i32, f32) -> Vec<AnimChannel> = evaluate_action;
+    let _: fn(&AnimData, &dyn ActionLookup, f32) -> Vec<AnimChannel> = evaluate_anim;
+    let _ = |a: &Action| {
+        let _: (&[ActionSlot], &[ActionLayer], Option<&Channelbag>) =
+            (&a.slots, &a.layers, a.channelbag(1));
+    };
+    let _ = |l: &ActionLayer| {
+        let _: &[ActionStrip] = &l.strips;
+    };
+    let _ = |s: &KeyframeStrip| {
+        let _: &[Channelbag] = &s.channelbags;
+    };
+    let _ = |c: &Channelbag| {
+        let _: (i32, &[ActionGroup], &[FCurve]) = (c.slot_handle, &c.groups, &c.fcurves);
+    };
+    let _ = |f: &FCurve| {
+        let _: (&SmolStr, i32, &[Keyframe], Extrapolation) = (
+            &f.data_path,
+            f.array_index,
+            &f.keyframe_points,
+            f.extrapolation,
+        );
+    };
+    let _ = |k: &Keyframe| {
+        let _: ([f32; 2], HandleType, Interpolation, Easing, KeyframeType) = (
+            k.co,
+            k.handle_left_type,
+            k.interpolation,
+            k.easing,
+            k.r#type,
+        );
+    };
+    let _ = |d: &AnimData| {
+        let _: (&[NlaTrack], Option<IdRef<ActionId>>) = (&d.nla_tracks, d.action);
+    };
+    let _ = |t: &NlaTrack| {
+        let _: &[NlaStrip] = &t.strips;
+    };
+}
+
+/// M6 scene data: armatures, poses, edit bones, shape keys; evaluation hooks.
+fn m6_scene() {
+    use frap_scene::edit_armature::{EditArmature, EditBone};
+    use frap_scene::id::{Armature, Bone, BoneCollection, Key, Pose, PoseBone, ShapeKey};
+    let _ = |a: &Armature| {
+        let _: (&[Bone], &[BoneCollection], Option<&Bone>) =
+            (&a.bones, &a.collections, a.bone("Bone"));
+    };
+    let _ = |p: &Pose| {
+        let _: &[PoseBone] = &p.bones;
+    };
+    let _: fn(&str) -> PoseBone = |n| PoseBone::new(n);
+    let _ = |k: &Key| {
+        let _: (&[ShapeKey], Option<IdRef<MeshId>>) = (&k.key_blocks, k.user);
+    };
+    let _ = |e: &EditArmature| {
+        let _: &[EditBone] = &e.edit_bones;
+    };
+    let _ = |s: &EditState| {
+        let _: &BTreeMap<IdKey, Arc<EditArmature>> = &s.armatures;
+    };
+    let _ = |o: &EvaluatedObject| {
+        let _: Option<&Arc<frap_scene::EvaluatedPose>> = o.pose.as_ref();
+    };
+}
+
+/// M5 render contract: engine support query, EEVEE settings, texture lookup, EEVEE module.
+fn m5_render(s: &dyn RenderService, sc: &RenderScene, r: IdRef<ImageId>) {
+    use frap_render_scene::{REeveeSettings, RLight, RLightEevee};
+    let _: bool = s.supports_engine("BLENDER_EEVEE");
+    let _: Option<&Arc<frap_imbuf::DecodedImage>> = sc.image(r);
+    let _: &IndexMap<IdKey, frap_render_scene::ImageKey> = &sc.image_ids;
+    let _: &REeveeSettings = &sc.settings.eevee;
+    let _ = |l: &RLight| {
+        let _: &RLightEevee = &l.eevee;
+    };
+    use frap_render::eevee::{EEVEE_FEATURES, Eevee, EeveeFeature, ibl, pipeline};
+    let _: &[EeveeFeature] = &EEVEE_FEATURES;
+    let _: fn() -> Eevee = Eevee::new;
+    let _: bool = pipeline::IMPLEMENTED;
+    let _: fn(&frap_render::Gpu, &RenderScene) -> Result<Option<ibl::WorldLighting>, RenderError> =
+        ibl::world_lighting;
+    let _ =
+        |f: &EeveeFeature| -> fn(&LoweredMaterial, &RenderScene, &mut pipeline::MaterialParams) {
+            f.pack
+        };
+    let _: &[frap_color::lut::BakedLut] = frap_color::agx::BAKED;
+}
+
+/// M6 glTF extension points.
+fn m6_gltf() {
+    use frap_io_gltf::export::node_map::NodeMap;
+    let _: fn(&mut frap_io_gltf::export::gather::Gather) -> Result<(), frap_io_gltf::ExportError> =
+        frap_io_gltf::export::animation::gather;
+    let _ = |m: &NodeMap, s: IdRef<SceneId>, o: IdRef<ObjectId>| {
+        let _: (Option<u32>, Option<u32>) = (m.object(s, o), m.bone(s, o, "Bone"));
+    };
+}
+
+#[test]
+fn m5_m6_contract_delta_cheap_parts_run() {
+    let ad = AnimData::default();
+    assert!(ad.use_nla && ad.action_influence == 1.0 && ad.action_blend_type == "REPLACE");
+    let k = frap_anim::Keyframe::new(1.0, 2.0);
+    assert_eq!(k.interpolation, frap_anim::Interpolation::Bezier);
+    assert_eq!(k.handle_left_type, frap_anim::HandleType::AutoClamped);
+    assert_eq!(
+        frap_anim::Interpolation::from_identifier("ELASTIC"),
+        Some(frap_anim::Interpolation::Elastic)
+    );
+    assert_eq!(Action::new("A").slots.len(), 0);
+    assert_eq!(
+        frap_scene::id::PoseBone::new("Bone").rotation_mode,
+        "QUATERNION"
+    );
+    assert_eq!(
+        frap_scene::id::Armature::new("Armature").display_type,
+        "OCTAHEDRAL"
+    );
+    assert!(frap_scene::id::Key::new("Key").use_relative);
+    let rs = frap_render_scene::RSettings::default();
+    assert_eq!(rs.eevee.filter_size, 1.5);
+    assert!(
+        frap_render::eevee::features()
+            .iter()
+            .all(|f| !f.name.is_empty())
+    );
+    let _ = (
+        m6_anim as fn(),
+        m6_scene as fn(),
+        m5_render as fn(&dyn RenderService, &RenderScene, IdRef<ImageId>),
+        m6_gltf as fn(),
+    );
+}
