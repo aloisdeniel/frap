@@ -3,7 +3,7 @@
 # M5 exit scene (WP 5.6): an image texture (`checker.png`, an 8 x 8 sRGB checker with coloured
 # squares, Linear interpolation) on the Base Color of a cube and of the floor, lit by the factory
 # point light and a fill sun, Standard view transform.
-# Dither off (`render.dither_intensity = 0`): two renders' 8-bit dither noise is uncorrelated.
+# Dither off (`render.dither_intensity = 0`); `night_low_contrast_dither.py` says why.
 import bpy
 bpy.ops.object.delete()
 bpy.data.images.load('checker.png')

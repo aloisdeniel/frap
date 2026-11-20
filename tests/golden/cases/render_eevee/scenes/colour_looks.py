@@ -2,8 +2,8 @@
 # render-golden: image=out/colour_look_agx_punchy.png,out/colour_look_agx_greyscale.png,out/colour_look_agx_very_high_contrast.png,out/colour_look_agx_high_contrast.png,out/colour_look_agx_medium_high_contrast.png,out/colour_look_agx_base_contrast.png,out/colour_look_agx_medium_low_contrast.png,out/colour_look_agx_low_contrast.png,out/colour_look_agx_very_low_contrast.png probes=136,16;110,20;89,21;70,21;49,20;23,16;136,45;110,45;89,45;70,45;49,45;23,45;136,73;110,69;89,68;70,68;49,69;23,73
 # M5 exit colour golden (WP 5.6): every look of the factory view transform (AgX) on the swatches
 # of `colour_view_transforms.py`. Every probe must be within CIE76 ΔE < 1 of Blender's EEVEE.
-# The looks of the other view transforms are not reachable yet: frap's `view_settings.look`
-# items are the AgX ones whatever the view transform (open follow-up of WP 5.3).
+# The looks of the other view transforms (and the look remap) are not reachable yet: gap in
+# docs/deviations.md §2 ("EEVEE looks of view transforms other than AgX", WP 5.3 follow-up).
 import bpy
 bpy.ops.object.delete()
 bpy.data.images.load('patches.exr')

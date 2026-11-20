@@ -3,7 +3,7 @@
 # M5 exit scene (WP 5.6): ico spheres and a cube lit by a RECTANGLE area light (1 m x 0.3 m) and
 # a DISK area light (0.5 m), soft shadows, black world, ACES 2.0 view transform. The lights stay
 # small: frap's penumbras of large lights are wider and darker near contact (D-125).
-# Dither off (`render.dither_intensity = 0`): two renders' 8-bit dither noise is uncorrelated.
+# Dither off (`render.dither_intensity = 0`); `night_low_contrast_dither.py` says why.
 import bpy
 bpy.ops.object.delete()
 bpy.data.objects.remove(bpy.data.objects['Light'])

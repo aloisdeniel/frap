@@ -3,7 +3,7 @@
 # M5 exit scene (WP 5.6): a white cylinder on a white floor under three coloured point lights
 # (red, green, blue; 600 W each, radius 0.1 m), so the shadows are coloured; black world, Khronos
 # PBR Neutral view transform.
-# Dither off (`render.dither_intensity = 0`): two renders' 8-bit dither noise is uncorrelated.
+# Dither off (`render.dither_intensity = 0`); `night_low_contrast_dither.py` says why.
 import bpy
 bpy.ops.object.delete()
 bpy.data.objects.remove(bpy.data.objects['Light'])

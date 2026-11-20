@@ -3,7 +3,7 @@
 # M5 exit scene (WP 5.6): a camera with an 18 mm lens inside a room (a scaled cube seen from
 # inside, EEVEE draws back faces), a warm point light under the ceiling (radius 0.3 m) casting
 # shadows of a table-like box and a sphere on the walls and floor, Filmic view transform.
-# Dither off (`render.dither_intensity = 0`): two renders' 8-bit dither noise is uncorrelated.
+# Dither off (`render.dither_intensity = 0`); `night_low_contrast_dither.py` says why.
 import bpy
 bpy.ops.object.delete()
 bpy.data.objects.remove(bpy.data.objects['Light'])

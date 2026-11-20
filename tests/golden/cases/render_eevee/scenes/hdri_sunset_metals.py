@@ -3,7 +3,7 @@
 # M5 exit scene (WP 5.6): Blender's bundled `sunset.exr` (CC0, Poly Haven) as the world
 # (Environment Texture, strength 1.2, Mapping-free) lighting a metallic Suzanne (roughness 0.2, subdivided, smooth) and
 # a dielectric sphere (roughness 0.1), AgX view transform.
-# Dither off (`render.dither_intensity = 0`): two renders' 8-bit dither noise is uncorrelated.
+# Dither off (`render.dither_intensity = 0`); `night_low_contrast_dither.py` says why.
 import bpy
 bpy.ops.object.delete()
 bpy.data.lights['Light'].energy = 0.0

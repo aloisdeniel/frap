@@ -2,7 +2,7 @@
 # render-golden: image=out/spot_stage_punchy.png
 # M5 exit scene (WP 5.6): a cone and a torus on a stage lit by a SPOT light (45°, blend 0.3)
 # from above and in front, a dim world, AgX with the "AgX - Punchy" look.
-# Dither off (`render.dither_intensity = 0`): two renders' 8-bit dither noise is uncorrelated.
+# Dither off (`render.dither_intensity = 0`); `night_low_contrast_dither.py` says why.
 import bpy
 bpy.ops.object.delete()
 bpy.data.objects.remove(bpy.data.objects['Light'])

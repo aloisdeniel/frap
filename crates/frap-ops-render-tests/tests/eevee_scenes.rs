@@ -183,21 +183,34 @@ fn fixture(repo: &Repo, image: &str, side: &str) -> PathBuf {
 
 /// Runs in `dir` and restores the previous process directory when dropped, also on a panic
 /// (`frap-render-scene` build/images.rs resolves relative image paths against the process
-/// directory, not the session's; WP 5.5 follow-up). No other test of this binary depends on
-/// the process directory.
-struct CwdGuard(PathBuf);
+/// directory, not the session's; WP 5.5 follow-up, then this guard goes). The process directory
+/// is global, so the guard holds [`CWD_LOCK`] while it is changed: any test of this binary that
+/// reads or changes the process directory (or resolves a relative path) must take the lock too.
+/// Today no other test does.
+struct CwdGuard {
+    prev: PathBuf,
+    _lock: std::sync::MutexGuard<'static, ()>,
+}
+
+/// Serialises the tests of this binary that depend on the process directory.
+static CWD_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
 
 impl CwdGuard {
     fn enter(dir: &Path) -> CwdGuard {
+        // A panic while the lock was held already restored the directory (Drop): not poisoned
+        // in any way that matters here.
+        let lock = CWD_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         let prev = std::env::current_dir().unwrap();
         std::env::set_current_dir(dir).unwrap();
-        CwdGuard(prev)
+        CwdGuard { prev, _lock: lock }
     }
 }
 
 impl Drop for CwdGuard {
     fn drop(&mut self) {
-        let _ = std::env::set_current_dir(&self.0);
+        let _ = std::env::set_current_dir(&self.prev);
     }
 }
 
@@ -424,6 +437,20 @@ fn scenes_cases_and_fixtures() {
             }
         }
     }
+    // Blender's default dither (1.0) stays gated: the factory scene and a dark, low-contrast
+    // scene render with it (the others turn it off, `night_low_contrast_dither.py` says why).
+    let default_dither = scenes
+        .iter()
+        .filter(|c| {
+            !c.text
+                .lines()
+                .any(|l| !l.starts_with('#') && l.contains("render.dither_intensity"))
+        })
+        .count();
+    assert!(
+        default_dither >= 2,
+        "{default_dither} scene goldens keep the default dither, 2 expected"
+    );
     for vt in VIEW_TRANSFORMS {
         assert!(
             transforms.contains(vt),

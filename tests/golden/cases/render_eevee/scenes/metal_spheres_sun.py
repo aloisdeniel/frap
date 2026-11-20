@@ -3,7 +3,7 @@
 # M5 exit scene (WP 5.6): five metallic spheres (gold, copper, silver, iron, violet tints) from
 # roughness 0.05 to 0.95 on a floor, a SUN light of strength 3 with its default angle, a blue-grey
 # world colour (ambient and reflections), Standard view transform.
-# Dither off (`render.dither_intensity = 0`): two renders' 8-bit dither noise is uncorrelated.
+# Dither off (`render.dither_intensity = 0`); `night_low_contrast_dither.py` says why.
 import bpy
 bpy.ops.object.delete()
 bpy.data.objects.remove(bpy.data.objects['Light'])

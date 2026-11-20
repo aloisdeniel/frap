@@ -3,7 +3,7 @@
 # M5 exit scene (WP 5.6): Suzanne with a level-2 Subdivision Surface modifier and smooth shading
 # (evaluated mesh, smooth normals) in a red glossy material on a grey floor, lit by the factory
 # point light, Filmic view transform.
-# Dither off (`render.dither_intensity = 0`): two renders' 8-bit dither noise is uncorrelated.
+# Dither off (`render.dither_intensity = 0`); `night_low_contrast_dither.py` says why.
 import bpy
 bpy.ops.object.delete()
 bpy.ops.mesh.primitive_monkey_add(size=2.0, location=(0.0, 0.0, 0.0))

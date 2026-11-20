@@ -3,7 +3,7 @@
 # M5 exit scene (WP 5.6): an orthographic camera (ortho_scale 9) over a torus, a cylinder, a cone
 # and an ico sphere in four colours, a sun and a point light, AgX with the "AgX - High Contrast"
 # look, exposure 0.5 and gamma 1.1.
-# Dither off (`render.dither_intensity = 0`): two renders' 8-bit dither noise is uncorrelated.
+# Dither off (`render.dither_intensity = 0`); `night_low_contrast_dither.py` says why.
 import bpy
 bpy.ops.object.delete()
 bpy.data.objects.remove(bpy.data.objects['Light'])

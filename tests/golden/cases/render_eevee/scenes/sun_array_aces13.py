@@ -3,7 +3,7 @@
 # M5 exit scene (WP 5.6): a cube with an Array modifier (5 copies, relative offset 1.8) and a
 # Bevel modifier, long shadows from a low SUN light (strength 4, angle 2°), sky-blue world, ACES
 # 1.3 view transform.
-# Dither off (`render.dither_intensity = 0`): two renders' 8-bit dither noise is uncorrelated.
+# Dither off (`render.dither_intensity = 0`); `night_low_contrast_dither.py` says why.
 import bpy
 bpy.ops.object.delete()
 bpy.data.objects.remove(bpy.data.objects['Light'])

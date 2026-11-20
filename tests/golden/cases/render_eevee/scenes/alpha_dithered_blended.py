@@ -3,9 +3,9 @@
 # M5 exit scene (WP 5.6): transparency over an opaque scene: a red plane with Alpha 0.4 rendered
 # DITHERED (Blender's default: TAA averages the hashed samples) and a blue plane with Alpha 0.6
 # rendered BLENDED, both in front of a white cube on a floor, factory light, AgX. Both cast opaque
-# shadows: frap has no transparent shadows yet (`Material.use_transparent_shadow` is not bound), so
-# Blender's side turns them off (`#@blender` lines).
-# Dither off (`render.dither_intensity = 0`): two renders' 8-bit dither noise is uncorrelated.
+# shadows: frap has no transparent shadows yet (gap in docs/deviations.md §2, WP 5.5), so Blender's
+# side turns them off (`#@blender` lines; re-bless without them once they land).
+# Dither off (`render.dither_intensity = 0`); `night_low_contrast_dither.py` says why.
 import bpy
 bpy.ops.object.delete()
 bpy.ops.mesh.primitive_cube_add(size=1.5, location=(0.0, 1.0, 0.75))

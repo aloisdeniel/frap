@@ -3,7 +3,7 @@
 # M5 exit scene (WP 5.6): `render.film_transparent` with RGBA PNG output: Suzanne (flat shaded)
 # and a sphere with no floor over a transparent background (alpha compared as its own channel),
 # the world still lighting them, Standard view transform.
-# Dither off (`render.dither_intensity = 0`): two renders' 8-bit dither noise is uncorrelated.
+# Dither off (`render.dither_intensity = 0`); `night_low_contrast_dither.py` says why.
 import bpy
 bpy.ops.object.delete()
 bpy.ops.mesh.primitive_monkey_add(size=1.8, location=(-0.9, 0.0, 0.0))
