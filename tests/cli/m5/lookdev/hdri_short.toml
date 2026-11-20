@@ -1,0 +1,14 @@
+# WP 5.6 (M5 exit transcript): HDRI look development in short form only (§11.4). An agent gives
+# a smooth UV sphere a chrome material, loads `sky.exr` (a 64 x 32 equirectangular sky with a
+# small bright sun, written by Blender 5.2.4; in the sandbox from `hdri_short.in/`) after a
+# misspelt `skyy.exr` (`Error: Cannot read 'skyy.exr': No such file or directory`), links it to
+# the world's Background through an Environment Texture, turns the factory light off and renders
+# with EEVEE through the Khronos PBR Neutral view transform at gamma 1.2. `exposure = 'bright'`
+# is a TypeError (float expected) and `writestill=true` an unknown keyword with a suggestion.
+# The render is written as WEBP, HDR, TARGA and, after `color_mode = 'BW'`, as a grey BMP. The
+# same statements in bpy-line form give the same outcomes in Blender 5.2.4 (checked with
+# `frap-golden diff`); the images are GPU-dependent and not compared here. Needs a GPU adapter
+# (Metal, lavapipe, WARP), as every render test. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

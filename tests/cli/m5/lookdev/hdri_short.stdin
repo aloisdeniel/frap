@@ -1,0 +1,31 @@
+object.delete
+mesh.primitive_uv_sphere_add segments=32 ring_count=16 radius=1
+object.shade_smooth
+data.materials.new Chrome
+context.object.data.materials.append data.materials['Chrome']
+data.materials['Chrome'].node_tree.nodes['Principled BSDF'].inputs['Metallic'].default_value = 1
+data.materials['Chrome'].node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value = 0.15
+data.images.load skyy.exr
+data.images.load sky.exr
+data.worlds['World'].node_tree.nodes.new ShaderNodeTexEnvironment
+data.worlds['World'].node_tree.nodes['Environment Texture'].image = data.images['sky.exr']
+data.worlds['World'].node_tree.links.new(data.worlds['World'].node_tree.nodes['Environment Texture'].outputs['Color'], data.worlds['World'].node_tree.nodes['Background'].inputs['Color'])
+data.lights['Light'].energy = 0
+context.scene.render.resolution_x = 96
+context.scene.render.resolution_y = 54
+context.scene.eevee.taa_render_samples = 4
+context.scene.view_settings.view_transform = 'Khronos PBR Neutral'
+context.scene.view_settings.gamma = 1.2
+context.scene.view_settings.exposure = 'bright'
+context.scene.render.image_settings.file_format = 'WEBP'
+context.scene.render.filepath = 'out/chrome'
+render.render write_still=true
+render.render writestill=true
+context.scene.render.image_settings.file_format = 'HDR'
+render.render write_still=true
+context.scene.render.image_settings.file_format = 'TARGA'
+render.render write_still=true
+context.scene.render.image_settings.file_format = 'BMP'
+context.scene.render.image_settings.color_mode = 'BW'
+render.render write_still=true
+context.scene.render.image_settings.color_mode
