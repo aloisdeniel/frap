@@ -68,8 +68,8 @@ source: crates/frap-schema/tests/describe_ops.rs
   "frap": {
     "status": "implemented",
     "tier": "T1",
-    "support": "partial",
-    "support_note": "shape keys are not carried into the new meshes (M6)",
+    "support": "full",
+    "support_note": null,
     "headless": "native",
     "planned": "M2",
     "extension": false,

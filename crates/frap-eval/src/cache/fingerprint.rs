@@ -264,9 +264,14 @@ impl<'h> FpCx<'h> {
                 d.hash(&mut h);
                 hd.generation.hash(&mut h);
                 if let Some(me) = d.typed().and_then(|m| main.meshes.get(m)) {
-                    // Shape keys and the edit BMesh of the mesh.
-                    match me.shape_keys.and_then(|k| main.shape_keys.get(k)) {
-                        Some(k) => (1u8, k.header.generation).hash(&mut h),
+                    // Shape keys (the `Key` ID and its generation: block data, values,
+                    // relative keys, vertex-group names, WP 6.3) and the edit BMesh of the
+                    // mesh.
+                    match me
+                        .shape_keys
+                        .and_then(|k| Some((k, main.shape_keys.get(k)?)))
+                    {
+                        Some((r, k)) => (1u8, r.key(), k.header.generation).hash(&mut h),
                         None => 0u8.hash(&mut h),
                     }
                     match self.host.edit().meshes.get(&d.key) {

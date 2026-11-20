@@ -1,0 +1,124 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.modifier_apply_as_shapekey",
+  "bl_idname": "OBJECT_OT_modifier_apply_as_shapekey",
+  "label": "Apply Modifier as Shape Key",
+  "description": "Apply modifier as a new shape key and remove from the stack",
+  "bl_options": [
+    "INTERNAL",
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT",
+      "ACTIVE_EDITABLE",
+      "MODE_OBJECT"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active), the active object is editable (not linked), Object Mode (bpy.ops.object.mode_set(mode='OBJECT'))",
+    "matrix": {
+      "plain": "YNNYN",
+      "view3d": "YNNYN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "keep_modifier",
+      "name": "Keep Modifier",
+      "description": "Do not remove the modifier from stack",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "modifier",
+      "name": "Modifier",
+      "description": "Name of the modifier to edit",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "length_max": 64,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "NEVER_NULL",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "report",
+      "name": "Report",
+      "description": "Create a notification after the operation",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": false,
+      "flags": [
+        "HIDDEN",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_selected_objects",
+      "name": "Selected Objects",
+      "description": "Affect all selected objects instead of just the active object",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T2",
+    "support": "partial",
+    "support_note": "meshes only; a type without a frap evaluator cannot be applied (NotImplementedError)",
+    "headless": "native",
+    "planned": "M6",
+    "extension": false,
+    "notes": []
+  }
+}

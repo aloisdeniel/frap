@@ -1,0 +1,88 @@
+# WP 6.3: the vertex-group operators. Edit Mode: `vertex_group_assign` (with
+# `tool_settings.vertex_group_weight`), `assign_new`, `remove_from` (active / all groups / all
+# vertices), `select` / `deselect` (selection flushed to edges and faces), `set_active`;
+# Object Mode: `add`, `remove` (active, all), `normalize`, `normalize_all` (lock_active),
+# `clean` (limit, keep_single), `limit_total`, and the polls. Weights are read back with
+# `VertexGroup.weight()` into object locations (`objects`), through a vertex-group-weighted
+# shape key (`evaluated:Cube`) and the edit selection (`mesh:Cube` while in Edit Mode at the end).
+# golden: startup=factory tier=T1 compare=objects,evaluated:Cube.001,mesh:Cube
+import bpy
+bpy.ops.object.vertex_group_remove()
+bpy.ops.object.vertex_group_add()
+bpy.ops.object.vertex_group_add()
+bpy.ops.object.vertex_group_add()
+bpy.ops.object.vertex_group_remove()
+bpy.data.objects['Cube'].vertex_groups.keys()
+#@blender assert bpy.data.objects['Cube'].vertex_groups.keys() == ['Group', 'Group.001']
+bpy.ops.object.vertex_group_assign()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.frap.select_elements(type='VERT', indices=[0, 1, 2, 3])
+bpy.context.scene.tool_settings.vertex_group_weight = 0.25
+bpy.ops.object.vertex_group_set_active(group='Group')
+bpy.ops.object.vertex_group_set_active(group='Nope')
+bpy.ops.object.vertex_group_assign()
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.frap.select_elements(type='VERT', indices=[2, 3, 4, 5, 6])
+bpy.context.scene.tool_settings.vertex_group_weight = 0.75
+bpy.ops.object.vertex_group_set_active(group='Group.001')
+bpy.ops.object.vertex_group_assign()
+bpy.ops.object.vertex_group_assign_new()
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.frap.select_elements(type='VERT', indices=[6])
+bpy.ops.object.vertex_group_remove_from()
+bpy.ops.object.vertex_group_set_active(group='Group')
+bpy.ops.frap.select_elements(type='VERT', indices=[0, 6, 7])
+bpy.ops.object.vertex_group_remove_from()
+bpy.ops.object.vertex_group_set_active(group='Group.001')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.object.vertex_group_select()
+bpy.ops.object.vertex_group_set_active(group='Group')
+bpy.ops.object.vertex_group_deselect()
+bpy.data.objects['Cube'].vertex_groups['Group'].weight(2)
+bpy.data.objects['Cube'].vertex_groups['Group.002'].weight(5)
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.data.objects['Camera'].location = (bpy.data.objects['Cube'].vertex_groups['Group'].weight(1), bpy.data.objects['Cube'].vertex_groups['Group.001'].weight(3), bpy.data.objects['Cube'].vertex_groups['Group.002'].weight(4))
+bpy.data.objects['Cube'].vertex_groups['Group.001'].weight(6)
+bpy.ops.object.vertex_group_set_active(group='Group.001')
+bpy.ops.object.vertex_group_normalize()
+bpy.data.objects['Light'].location = (bpy.data.objects['Cube'].vertex_groups['Group.001'].weight(2), bpy.data.objects['Cube'].vertex_groups['Group'].weight(2), bpy.data.objects['Cube'].vertex_groups.active_index)
+bpy.data.objects['Cube'].vertex_groups['Group'].add([2], 0.2, 'REPLACE')
+bpy.data.objects['Cube'].vertex_groups['Group.002'].add([2], 0.3, 'REPLACE')
+bpy.ops.object.vertex_group_normalize_all(lock_active=False)
+bpy.ops.object.duplicate()
+bpy.context.view_layer.objects.active = bpy.data.objects['Cube']
+bpy.ops.object.select_all(action='DESELECT')
+bpy.data.objects['Cube'].select_set(True)
+bpy.data.objects['Camera'].rotation_euler = (bpy.data.objects['Cube'].vertex_groups['Group'].weight(2), bpy.data.objects['Cube'].vertex_groups['Group.001'].weight(2), bpy.data.objects['Cube'].vertex_groups['Group.002'].weight(2))
+bpy.data.objects['Cube'].vertex_groups['Group.002'].add([2], 0.5, 'REPLACE')
+bpy.ops.object.vertex_group_normalize_all(lock_active=True)
+bpy.data.objects['Light'].rotation_euler = (bpy.data.objects['Cube'].vertex_groups['Group'].weight(2), bpy.data.objects['Cube'].vertex_groups['Group.001'].weight(2), bpy.data.objects['Cube'].vertex_groups['Group.002'].weight(2))
+bpy.data.objects['Cube'].vertex_groups['Group'].add([0, 1, 3], 0.05, 'REPLACE')
+bpy.ops.object.vertex_group_clean(group_select_mode='ALL', limit=0.1, keep_single=True)
+bpy.data.objects['Camera'].scale = (bpy.data.objects['Cube'].vertex_groups['Group'].weight(3), bpy.data.objects['Cube'].vertex_groups.active_index, 1)
+bpy.data.objects['Cube'].vertex_groups['Group'].weight(0)
+bpy.data.objects['Cube'].vertex_groups['Group'].weight(1)
+bpy.data.objects['Cube'].vertex_groups['Group.001'].weight(3)
+bpy.data.objects['Cube'].vertex_groups['Group'].add([4], 0.4, 'REPLACE')
+bpy.data.objects['Cube'].vertex_groups['Group.002'].add([4], 0.4, 'REPLACE')
+bpy.ops.object.vertex_group_limit_total(limit=1)
+bpy.data.objects['Light'].scale = (bpy.data.objects['Cube'].vertex_groups['Group.001'].weight(4), bpy.data.objects['Cube'].vertex_groups['Group'].weight(2) + bpy.data.objects['Cube'].vertex_groups['Group.002'].weight(2), 1)
+bpy.data.objects['Cube'].vertex_groups['Group'].weight(4)
+bpy.data.objects['Cube'].vertex_groups['Group.002'].weight(4)
+bpy.ops.object.vertex_group_limit_total(limit=1)
+bpy.ops.object.vertex_group_remove(all=True)
+bpy.data.objects['Cube'].vertex_groups.active_index
+bpy.ops.object.vertex_group_normalize()
+bpy.data.objects['Cube.001'].shape_key_add(name='Basis')
+bpy.data.objects['Cube.001'].shape_key_add(name='Up', from_mix=False)
+bpy.data.shape_keys['Key'].key_blocks['Up'].data.foreach_set('co', [1, 1, 2, 1, 1, 0, 1, -1, 2, 1, -1, 0, -1, 1, 2, -1, 1, 0, -1, -1, 2, -1, -1, 0])
+bpy.data.shape_keys['Key'].key_blocks['Up'].vertex_group = 'Group.001'
+bpy.data.shape_keys['Key'].key_blocks['Up'].value = 1.0
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_all(action='DESELECT')
+bpy.ops.object.vertex_group_assign()
+bpy.ops.object.vertex_group_add()
+bpy.ops.frap.select_elements(type='VERT', indices=[1, 7])
+bpy.ops.object.vertex_group_assign()
+bpy.ops.object.vertex_group_select()

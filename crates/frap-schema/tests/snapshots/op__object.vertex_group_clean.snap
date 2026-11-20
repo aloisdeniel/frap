@@ -1,0 +1,131 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.vertex_group_clean",
+  "bl_idname": "OBJECT_OT_vertex_group_clean",
+  "label": "Clean Vertex Group Weights",
+  "description": "Remove vertex group assignments which are not required",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT",
+      "ACTIVE_EDITABLE",
+      "ACTIVE_TYPE(MESH)"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active), the active object is editable (not linked), the active object is of type MESH",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "group_select_mode",
+      "name": "Subset",
+      "description": "Define which subset of groups shall be used",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "enum_items": [
+        {
+          "identifier": "ACTIVE",
+          "name": "Active Group",
+          "description": "The active Vertex Group",
+          "value": 0
+        },
+        {
+          "identifier": "BONE_SELECT",
+          "name": "Selected Pose Bones",
+          "description": "All Vertex Groups assigned to Selection",
+          "value": 1
+        },
+        {
+          "identifier": "BONE_DEFORM",
+          "name": "Deform Pose Bones",
+          "description": "All Vertex Groups assigned to Deform Bones",
+          "value": 2
+        },
+        {
+          "identifier": "ALL",
+          "name": "All Groups",
+          "description": "All Vertex Groups",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": "OBJECT_OT_vertex_group_clean.group_select_mode",
+      "context_rule": "items depend on the context in Blender (OBJECT_OT_vertex_group_clean.group_select_mode); frap narrows them to the live context, enum_items is the superset",
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE",
+        "DYNAMIC_ENUM"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "limit",
+      "name": "Limit",
+      "description": "Remove vertices which weight is below or equal to this limit",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": 0,
+      "hard_max": 1,
+      "soft_min": 0,
+      "soft_max": 0.99,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "keep_single",
+      "name": "Keep Single",
+      "description": "Keep verts assigned to at least one group when cleaning",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M6",
+    "extension": false,
+    "notes": []
+  }
+}

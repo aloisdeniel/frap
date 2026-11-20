@@ -1,0 +1,11 @@
+# WP 6.3: vertex groups and shape keys in bpy-line form. `VertexGroups.new`, `VertexGroup.add`
+# (REPLACE/ADD; an unknown assign mode is the argument TypeError), `weight()` and its `Vertex
+# not in group` error, a camera refusing vertex groups; `Object.shape_key_add` (Basis, a block
+# from the mesh, a block from the mix), a vertex-group-weighted block seen in the evaluated
+# mesh, `shape_key_move` (the active block moves up), Edit Mode (`vertex_group_select`,
+# `shape_key_add` refused by its poll, `blend_from_shape`), `vertex_group_limit_total` and
+# `shape_key_remove(all=True, apply_mix=True)` freeing the key. Every outcome verified on
+# Blender 5.2.4 (`tests/golden/cases/weights_shapes/`). Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

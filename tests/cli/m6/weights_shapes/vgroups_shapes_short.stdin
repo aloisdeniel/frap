@@ -1,0 +1,22 @@
+object.vertex_group_add
+object.vertex_group_add
+context.object.vertex_groups.keys()
+object.vertex_group_set_active group=Group
+object.mode_set mode=EDIT
+mesh.select_all action=SELECT
+context.scene.tool_settings.vertex_group_weight = 0.4
+object.vertex_group_assign
+object.vertex_group_set_active group=Group.001
+object.vertex_group_assign_new
+object.vertex_group_remove_from use_all_groups=True
+object.mode_set mode=OBJECT
+object.vertex_group_normalize_all lock_active=False
+object.vertex_group_clean group_select_mode=ALL limit=0.5
+object.shape_key_add from_mix=False
+object.shape_key_add from_mix=False
+context.object.data.shape_keys.key_blocks['Key 1'].value = 0.25
+object.shape_key_clear
+context.object.data.shape_keys.key_blocks['Key 1'].value
+object.join_shapes
+object.shape_key_remove
+context.object.data.shape_keys.key_blocks.keys()

@@ -32,8 +32,12 @@
 //! remaining part is written back to its mesh); `SELECTED` is `RuntimeError: Error: Selection
 //! not supported in object mode`. Nothing separated: `CANCELLED`.
 //!
-//! Shape keys are not carried into the new meshes (frap has no key-block data before M6;
-//! WARNING); custom split normals are not carried (deviations §2).
+//! Shape keys (WP 6.3): the edit mesh's shape layers travel with the separated elements; a
+//! part's mesh copy gets a copy of the key (`Key.001`) whose blocks take the part's layers
+//! (`bm_to_mesh_shape` without an active block: the edits of the active block made since
+//! entering Edit Mode stay in the vertex positions, as in Blender). In Object Mode the key of
+//! the remaining mesh is rewritten the same way. Custom split normals are not carried
+//! (deviations §2).
 
 use std::collections::BTreeMap;
 
@@ -461,7 +465,6 @@ fn add_part_object(
         let visible = base_maybe_visible_in_viewport(c.main, c.scene(), vl, src_ob);
         (c.win.scene, vl_index, visible, c.collection())
     };
-    let mut shape_keys_dropped = false;
     let ob_new = {
         let (main, log) = cx.main_mut();
         let template = main
@@ -469,16 +472,30 @@ fn add_part_object(
             .get(src_me)
             .cloned()
             .ok_or_else(|| OpError::Runtime("mesh no longer exists".into()))?;
-        let mut new_mesh: Mesh = part.bm.to_mesh(&template, &ToMeshParams::default());
+        let mut part_bm = part.bm;
+        let mut new_mesh: Mesh = part_bm.to_mesh(&template, &ToMeshParams::default());
         let h = &mut new_mesh.header;
         h.use_fake_user = false;
         h.library = None;
         h.is_linked_packed = false;
-        if new_mesh.shape_keys.take().is_some() {
-            shape_keys_dropped = true;
-        }
+        // `USER_DUP_MESH`: the mesh copy owns a copy of the key.
+        let key_copy = new_mesh
+            .shape_keys
+            .take()
+            .and_then(|k| main.shape_keys.get(k).cloned());
         let mesh_name = template.header.name.clone();
         let me_new = main.meshes.insert(&mesh_name, new_mesh, log);
+        if let Some(mut key) = key_copy {
+            key.header.use_fake_user = false;
+            key.header.library = None;
+            key.user = Some(me_new);
+            key.write_layers_from_bmesh(&mut part_bm);
+            let key_name = key.header.name.clone();
+            let k_new = main.shape_keys.insert(&key_name, key, log);
+            if let Some(m) = main.meshes.get_mut(me_new, log) {
+                m.shape_keys = Some(k_new);
+            }
+        }
         let mut ob = main
             .objects
             .get(src_ob)
@@ -513,12 +530,6 @@ fn add_part_object(
         log.context_changed = true;
         ob_new
     };
-    if shape_keys_dropped {
-        cx.report(
-            ReportType::Warning,
-            "frap: shape keys are not carried into separated meshes yet (M6)",
-        );
-    }
     Ok(ob_new)
 }
 
@@ -680,7 +691,6 @@ fn run(
 #[operator(
     poll = poll::SCENE_EDITABLE,
     tier = T1,
-    support = Partial("shape keys are not carried into the new meshes (M6)"),
     notes = ["the new objects are copies of the edit object (mesh copied, materials shared), selected but not in Edit Mode; the edit object stays active"]
 )]
 fn exec(cx: &mut OpCtx, p: mesh::Separate) -> OpResult {
@@ -738,6 +748,10 @@ fn exec(cx: &mut OpCtx, p: mesh::Separate) -> OpResult {
                     active_shapekey: 0,
                 },
             );
+            let key = mesh.shape_keys;
+            if let Some(k) = key.and_then(|k| cx.main().shape_keys.get(k)) {
+                k.load_layers_into_bmesh(&mut bm);
+            }
             let changed = run(cx, ty, ob, me, &mut bm)?;
             if changed {
                 let template = cx
@@ -753,6 +767,12 @@ fn exec(cx: &mut OpCtx, p: mesh::Separate) -> OpResult {
                 let generation = dst.header.generation;
                 *dst = new;
                 dst.header.generation = generation;
+                if let Some(k) = template.shape_keys {
+                    let (main, log) = cx.main_mut();
+                    if let Some(key) = main.shape_keys.get_mut(k, log) {
+                        key.write_layers_from_bmesh(&mut bm);
+                    }
+                }
             }
             changed_multi |= changed;
         }

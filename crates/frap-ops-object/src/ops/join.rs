@@ -20,9 +20,12 @@
 //! - when the active object's parent is joined into it, it is unparented keeping its world
 //!   transform.
 //!
-//! Shape keys arrive in M6: joining meshes with shape keys answers `OP_NOT_IMPLEMENTED`.
+//! - shape keys (WP 6.3, `join/shapes.rs`): the active key keeps its blocks, gains the blocks
+//!   only joined meshes have, and every joined part contributes its block of the same name
+//!   (or its positions); the active mesh gets a key when only a joined mesh has one.
 
 mod mesh;
+mod shapes;
 
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -77,7 +80,7 @@ const JOIN_POLL: Poll = Poll {
 #[operator(
     poll = JOIN_POLL,
     tier = T0,
-    support = Partial("meshes only: armatures arrive in M6; meshes with shape keys or with one attribute name stored with two domains/types answer OP_NOT_IMPLEMENTED"),
+    support = Partial("meshes only: armatures arrive in M6; one attribute name stored with two domains/types answers OP_NOT_IMPLEMENTED"),
     notes = ["CANCELLED with Blender's WARNING reports when the active object is not a selected mesh or nothing would be joined"]
 )]
 fn exec(cx: &mut OpCtx, _p: object::Join) -> OpResult {
@@ -151,14 +154,6 @@ fn exec(cx: &mut OpCtx, _p: object::Join) -> OpResult {
         );
         return Ok(OpStatus::Cancelled);
     }
-    if meshes
-        .iter()
-        .any(|(_, me)| main.meshes.get(*me).is_some_and(|m| m.shape_keys.is_some()))
-    {
-        return Err(OpError::NotImplemented(
-            "frap: joining meshes with shape keys arrives with shape keys in M6".into(),
-        ));
-    }
     // The active object first, then the others in base order.
     let order: Vec<(IdRef<ObjectId>, IdRef<MeshId>)> = std::iter::once((active, me_active))
         .chain(meshes.iter().copied().filter(|(o, _)| *o != active))
@@ -213,17 +208,45 @@ fn exec(cx: &mut OpCtx, _p: object::Join) -> OpResult {
             .collect();
         join(&parts, matar.len() > 1).map_err(OpError::NotImplemented)?
     };
+    let joined_keys = {
+        let key_of = |me: IdRef<MeshId>| {
+            main.meshes
+                .get(me)
+                .and_then(|m| m.shape_keys)
+                .and_then(|k| main.shape_keys.get(k))
+        };
+        let parts: Vec<shapes::KeyPart> = order
+            .iter()
+            .filter_map(|(o, me)| {
+                Some(shapes::KeyPart {
+                    mesh: main.meshes.get(*me)?,
+                    key: key_of(*me),
+                    xform: (*o != active).then(|| inv * world_matrix(&main.objects, *o)),
+                })
+            })
+            .collect();
+        shapes::join_shape_keys(&parts)
+    };
     let others: Vec<IdRef<ObjectId>> = order.iter().skip(1).map(|(o, _)| *o).collect();
     let (main, log) = cx.main_mut();
     if join_parent && let Some(o) = main.objects.get_mut(active, log) {
         o.parent = None;
         o.set_matrix_world(&active_world, None);
     }
+    let active_key = main.meshes.get(me_active).and_then(|m| m.shape_keys);
     if let Some(m) = main.meshes.get_mut(me_active, log) {
         let header = m.header.clone();
         *m = joined;
         m.header = header;
         m.materials = matar.clone();
+        m.shape_keys = active_key;
+    }
+    if let Some((blocks, _)) = joined_keys
+        && let Some(k) = frap_scene::id::Key::ensure_for_mesh(main, log, me_active)
+        && let Some(key) = main.shape_keys.get_mut(k, log)
+    {
+        key.key_blocks = blocks;
+        key.sort_absolute();
     }
     // Every slot of the active object links `DATA` now; objects sharing the mesh follow its
     // new slot count.
