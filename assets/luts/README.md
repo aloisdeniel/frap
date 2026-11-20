@@ -1,4 +1,4 @@
-# View-transform LUTs (generated, do not edit)
+# Colour-management data (generated, do not edit)
 
 Written by `tools/blender/bake_view_luts.py` from Blender 5.2.4 LTS (ARCHITECTURE §19.5):
 
@@ -8,11 +8,10 @@ $BLENDER_BIN -b --factory-startup --python tools/blender/bake_view_luts.py -- --
 
 | File | Content |
 |---|---|
-| `agx.cube` | AgX, look None, sRGB display. 57³ lattice over Blender's own AgX shaper (Rec.709 → E-Gamut matrix, then OCIO `lg2` allocation `[-12.47393, 12.5260688117]`), so its nodes coincide with the nodes of Blender's `AgX_Base_sRGB.cube`. Values are Rec.1886-encoded; `# frap-post: rec1886_to_srgb` converts them to the sRGB display after tetrahedral interpolation, as Blender does. Every node was measured through `Image.save_render` (16-bit PNG, dither 0); no Blender LUT file is copied. |
-| `heldout.json` | 400 random HDR colours (seed 20261116, never on a lattice) with Blender's 16-bit display outputs for Standard, Raw and AgX at several exposure/gamma settings, plus a dithered flat render that pins `render.dither_intensity`. `crates/frap-color/tests/heldout.rs` gates on CIEDE2000 < 1 against these colours only. |
+| `<family>.ops` (`standard`, `aces`, `pbr_neutral`, `agx`, `filmic`, `false_color`) | One `[display\|view\|look]` section per combination Blender renders (displays sRGB, Display P3, Rec.1886, Rec.2020; every view of frap's `ViewTransform` the display offers; every look Blender applies to the view), holding the op list of the OCIO processor Blender builds for it (`create_ocio_display_transform`: `LookTransform` into the look's process space, then `DisplayViewTransform`), read from Blender's bundled OpenColorIO 2.5 with `OPTIMIZATION_LOSSLESS`. `crates/frap-color/src/display/ocio.rs` interprets them with ports of OCIO's CPU renderers, including the `OPTIMIZATION_FAST_LOG_EXP_POW` approximations Blender's default processors use. |
+| `*.cube`, `*.lut1d` | The LUTs those ops reference, read back from Blender's OCIO processors and named after their `datafiles/colormanagement` file: AgX base LUTs (`agx` = `AgX_Base_sRGB`, `agx_base_p3`, `agx_base_rec2020`), `luminance_compensation_bt2020` ("AgX Log"), `filmic_desat_33` and the `filmic_to_*` curves (Filmic and the generic contrast looks), `pbr_neutral`, `agx_false_color`. 3D LUTs list red fastest. `agx.cube` also carries `# frap-*:` headers so `frap_color::lut::baked("AgX", "None", "sRGB")` reads it as a single-LUT view. |
+| `heldout.json` | 400 random HDR colours (seed 20261116) with Blender's 16-bit display outputs through `Image.save_render` (dither 0) for every baked combination plus exposure/gamma variants, and a dithered flat render that pins `render.dither_intensity`. `crates/frap-color/tests/heldout.rs` gates on CIEDE2000 < 1 against these renders. |
 
-The `# frap-*:` header comments of a `.cube` carry what frap needs to apply it
-(`frap-view-transform`, `frap-look`, `frap-display`, `frap-matrix`, `frap-shaper`,
-`frap-interpolation`, `frap-post`). Re-running the script reproduces both files byte for byte.
-Standard and Raw are analytic in `frap-color` and need no LUT. More view transforms and looks
-(Filmic, Khronos PBR Neutral, ACES, False Color, AgX looks) are added to `LUT_SPECS` by WP 5.3.
+Re-running the script reproduces every file byte for byte. The HDR displays (Rec.2100-PQ/HLG)
+are not baked (Blender re-encodes HDR image files to the 203-nit convention, which frap does not
+implement yet).

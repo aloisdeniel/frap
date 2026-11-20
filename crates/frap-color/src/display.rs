@@ -1,23 +1,26 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `display_transform()`: exposure, view transform, look, gamma, display encode, dither
-//! (`render.dither_intensity`). WP 1.6.
+//! (`render.dither_intensity`). WP 1.6; every view transform × look × SDR display by WP 5.3.
 //!
 //! The order is Blender 5.2.4's display processor
 //! (`source/blender/imbuf/opencolorio/intern/libocio/libocio_display_processor.cc`,
 //! `create_ocio_display_processor`, GPL-2.0-or-later):
 //!
 //! 1. exposure: scene-linear RGB × `powf(2, exposure)` (skipped when `exposure == 0`);
-//! 2. look (when it applies to the view, `colormanage_use_look`) + view + display transform;
+//! 2. look (when it applies to the view, `colormanage_use_look`) + view + display transform:
+//!    the OCIO op pipeline baked from Blender for that display × view × look (`display/ocio.rs`,
+//!    `assets/luts/*.ops`);
 //! 3. gamma: `ExponentTransform` with exponent `min(1 / max(FLT_EPSILON, gamma), 100)`
-//!    (negatives clamp to 0), skipped when the exponent is 1.
+//!    (negatives clamp to 0; OCIO's fast `ssePower`), skipped when the exponent is 1.
 //!
 //! Byte output then goes through `IMB_buffer_byte_from_float`, whose dither
 //! (`float_to_byte_dither_v4` + `dither_random_value`) is ported in [`DisplayImage::to_rgba8`].
 //! Alpha is straight and passes through unchanged (Blender un-premultiplies around the
 //! processor, so straight input gives the same result).
 
-use crate::lut::{self, ViewLut};
-use crate::spaces::linear_to_srgb;
+pub(crate) mod ocio;
+
+use ocio::Pipeline;
 
 /// `view_settings.view_transform` items of Blender 5.2 (sRGB display order).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -123,64 +126,11 @@ impl DisplayDevice {
     }
 }
 
-/// The looks of Blender 5.2.4's `config.ocio` (besides "None"). A look named `"<View> - <Name>"`
-/// applies only to the view `<View>`; the others apply to views that have no view-specific look.
-pub const LOOKS: &[&str] = &[
-    "Very High Contrast",
-    "High Contrast",
-    "Medium High Contrast",
-    "Medium Contrast",
-    "Medium Low Contrast",
-    "Low Contrast",
-    "Very Low Contrast",
-    "AgX - Punchy",
-    "AgX - Greyscale",
-    "AgX - Very High Contrast",
-    "AgX - High Contrast",
-    "AgX - Medium High Contrast",
-    "AgX - Base Contrast",
-    "AgX - Medium Low Contrast",
-    "AgX - Low Contrast",
-    "AgX - Very Low Contrast",
-    "False Color - Punchy",
-    "False Color - Greyscale",
-    "False Color - Very High Contrast",
-    "False Color - High Contrast",
-    "False Color - Medium High Contrast",
-    "False Color - Base Contrast",
-    "False Color - Medium Low Contrast",
-    "False Color - Low Contrast",
-    "False Color - Very Low Contrast",
-    "ACES 1.3 - Reference Gamut Compression",
-    "ACES 2.0 - Reference Gamut Compression",
-];
+pub use crate::looks::{LOOKS, look_applies};
 
-fn look_view(look: &str) -> &str {
-    look.split_once(" - ").map(|(v, _)| v).unwrap_or("")
-}
-
-/// Whether Blender applies `look` with `view` (port of `colormanage_use_look` and
-/// `view_filter_for_look`, `imbuf/intern/colormanagement.cc`). `"None"` never applies.
-pub fn look_applies(view: ViewTransform, look: &str) -> Result<bool, ColorError> {
-    if look == "None" {
-        return Ok(false);
-    }
-    if !LOOKS.contains(&look) {
-        return Err(ColorError::UnknownLook(look.to_owned()));
-    }
-    let name = view.name();
-    let filter = if LOOKS.iter().any(|l| look_view(l) == name) {
-        name
-    } else {
-        let short = name.split_once(" - ").map(|(s, _)| s).unwrap_or("");
-        if !short.is_empty() && LOOKS.iter().any(|l| look_view(l) == short) {
-            short
-        } else {
-            ""
-        }
-    };
-    Ok(look_view(look) == filter)
-}
+/// The Standard and Raw op pipelines (every SDR display, every look Blender applies to them).
+pub(crate) const STANDARD_PIPELINES: ocio::OpsFile =
+    include_str!("../../../assets/luts/standard.ops");
 
 /// `scene.view_settings` (the parts frap applies).
 #[derive(Clone, Debug, PartialEq)]
@@ -228,7 +178,8 @@ impl Default for DisplaySettings {
 pub enum ColorError {
     /// `look` is not a look of Blender 5.2's config.
     UnknownLook(String),
-    /// The combination exists in Blender but frap has no implementation (no baked LUT) yet.
+    /// The combination has no frap implementation: an HDR display (Rec.2100-PQ/HLG), or a
+    /// view the display does not offer in Blender.
     NotAvailable {
         /// View transform name.
         view_transform: &'static str,
@@ -237,6 +188,8 @@ pub enum ColorError {
         /// Display name.
         display: &'static str,
     },
+    /// A baked pipeline under `assets/luts/` failed to load (a build defect).
+    Pipeline(String),
 }
 
 impl std::fmt::Display for ColorError {
@@ -252,52 +205,41 @@ impl std::fmt::Display for ColorError {
                 "view transform '{view_transform}' with look '{look}' on display '{display}' \
                  is not available in frap yet"
             ),
+            ColorError::Pipeline(e) => write!(f, "corrupt colour-management data: {e}"),
         }
     }
 }
 
 impl std::error::Error for ColorError {}
 
-#[derive(Clone, Copy, Debug)]
-enum Kind {
-    /// Standard on sRGB: OCIO's piecewise sRGB encode.
-    StandardSrgb,
-    /// Raw: the data colour space, no conversion.
-    Raw,
-    /// A baked LUT.
-    Lut(&'static ViewLut),
-}
-
 /// A ready-to-apply display transform (Blender's display `CPUProcessor`).
 #[derive(Clone, Debug)]
 pub struct DisplayProcessor {
     scale: f32,
     exponent: f32,
-    kind: Kind,
+    pipeline: &'static Pipeline,
 }
 
 impl DisplayProcessor {
-    /// Builds the processor for `view` on `display`.
+    /// Builds the processor for `view` on `display`: the baked OCIO op pipeline of the
+    /// view × look Blender applies (a look the view ignores, or a no-op look, renders as
+    /// "None") on that display, between exposure and gamma.
     ///
-    /// Errors with [`ColorError::NotAvailable`] for combinations frap cannot reproduce yet
-    /// (M1: Standard and Raw on every display are analytic only on sRGB; AgX without a look is
-    /// baked for sRGB). Callers may fall back to Standard with a warning.
+    /// Errors with [`ColorError::NotAvailable`] on the HDR displays (Rec.2100-PQ/HLG) and for
+    /// views the display does not offer; callers may fall back to Standard with a warning.
     pub fn new(view: &ViewSettings, display: &DisplaySettings) -> Result<Self, ColorError> {
-        let use_look = look_applies(view.view_transform, &view.look)?;
-        let not_available = || ColorError::NotAvailable {
+        let look = crate::looks::effective_look(view.view_transform, &view.look)?;
+        let pipeline = ocio::pipeline(
+            display.display_device.name(),
+            view.view_transform.name(),
+            look,
+        )
+        .ok_or_else(|| ColorError::NotAvailable {
             view_transform: view.view_transform.name(),
             look: view.look.clone(),
             display: display.display_device.name(),
-        };
-        let kind = match (view.view_transform, display.display_device, use_look) {
-            // Raw is the data colour space: looks are skipped (`create_ocio_display_transform`).
-            (ViewTransform::Raw, _, _) => Kind::Raw,
-            (ViewTransform::Standard, DisplayDevice::Srgb, false) => Kind::StandardSrgb,
-            (vt, dd, look) => {
-                let look_name = if look { view.look.as_str() } else { "None" };
-                Kind::Lut(lut::baked(vt.name(), look_name, dd.name()).ok_or_else(not_available)?)
-            }
-        };
+        })?
+        .map_err(ColorError::Pipeline)?;
         let scale = if view.exposure == 0.0 {
             1.0
         } else {
@@ -307,7 +249,7 @@ impl DisplayProcessor {
         Ok(DisplayProcessor {
             scale,
             exponent,
-            kind,
+            pipeline,
         })
     }
 
@@ -319,17 +261,13 @@ impl DisplayProcessor {
         } else {
             rgb.map(|v| v * self.scale)
         };
-        let d = match self.kind {
-            Kind::StandardSrgb => x.map(linear_to_srgb),
-            Kind::Raw => x,
-            Kind::Lut(l) => l.apply(x),
-        };
+        let d = self.pipeline.apply(x);
         if self.exponent == 1.0 {
             d
         } else {
             d.map(|v| {
                 if v > 0.0 {
-                    libm::powf(v, self.exponent)
+                    ocio::sse_power(v, self.exponent)
                 } else {
                     0.0
                 }
@@ -456,6 +394,7 @@ pub fn dither_random_value(x: i32, y: i32) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::spaces::linear_to_srgb;
 
     #[test]
     fn names_round_trip() {
@@ -470,22 +409,35 @@ mod tests {
     }
 
     #[test]
-    fn look_rules_follow_blender() {
-        use ViewTransform::*;
-        assert!(!look_applies(AgX, "None").unwrap());
-        assert!(look_applies(AgX, "AgX - Punchy").unwrap());
-        // View-specific looks only for their view; generic looks never on a view that has some.
-        assert!(!look_applies(Standard, "AgX - Punchy").unwrap());
-        assert!(!look_applies(AgX, "High Contrast").unwrap());
-        // Generic (Filmic) looks apply to views without view-specific looks.
-        assert!(look_applies(Filmic, "High Contrast").unwrap());
-        assert!(look_applies(Standard, "High Contrast").unwrap());
-        assert!(look_applies(FalseColor, "False Color - Punchy").unwrap());
-        assert!(look_applies(Aces13, "ACES 1.3 - Reference Gamut Compression").unwrap());
-        assert!(matches!(
-            look_applies(AgX, "Punchy"),
-            Err(ColorError::UnknownLook(_))
-        ));
+    fn every_view_and_look_is_available_on_every_sdr_display_that_offers_it() {
+        for d in [
+            DisplayDevice::Srgb,
+            DisplayDevice::DisplayP3,
+            DisplayDevice::Rec1886,
+            DisplayDevice::Rec2020,
+        ] {
+            let ds = DisplaySettings { display_device: d };
+            for vt in ViewTransform::ALL {
+                // Blender 5.2.4's config: only sRGB offers Filmic, Filmic Log and Khronos PBR
+                // Neutral.
+                let offered = d == DisplayDevice::Srgb
+                    || !matches!(
+                        vt,
+                        ViewTransform::Filmic
+                            | ViewTransform::FilmicLog
+                            | ViewTransform::KhronosPbrNeutral
+                    );
+                for look in crate::looks::looks_for(vt) {
+                    let v = ViewSettings {
+                        view_transform: vt,
+                        look: look.to_owned(),
+                        ..ViewSettings::default()
+                    };
+                    let p = DisplayProcessor::new(&v, &ds);
+                    assert_eq!(p.is_ok(), offered, "{} {} {look}", d.name(), vt.name());
+                }
+            }
+        }
     }
 
     #[test]
@@ -494,26 +446,32 @@ mod tests {
         let mut v = ViewSettings::default();
         assert!(DisplayProcessor::new(&v, &d).is_ok());
         v.look = "AgX - Punchy".into();
-        let e = DisplayProcessor::new(&v, &d).unwrap_err();
-        assert_eq!(
-            e.to_string(),
-            "view transform 'AgX' with look 'AgX - Punchy' on display 'sRGB' is not available in frap yet"
-        );
+        assert!(DisplayProcessor::new(&v, &d).is_ok());
         // A look that does not apply to the view is ignored, as in Blender.
         v.look = "High Contrast".into();
-        assert!(DisplayProcessor::new(&v, &d).is_ok());
-        v.view_transform = ViewTransform::Filmic;
+        let ignored = DisplayProcessor::new(&v, &d).unwrap();
         v.look = "None".into();
-        assert!(DisplayProcessor::new(&v, &d).is_err());
-        v.view_transform = ViewTransform::Raw;
-        v.look = "AgX - Punchy".into();
-        assert!(DisplayProcessor::new(&v, &d).is_ok());
-        let p3 = DisplaySettings {
-            display_device: DisplayDevice::DisplayP3,
+        let none = DisplayProcessor::new(&v, &d).unwrap();
+        assert_eq!(
+            ignored.apply_rgb([0.3, 0.2, 0.1]),
+            none.apply_rgb([0.3, 0.2, 0.1])
+        );
+        v.look = "Punchy".into();
+        assert!(matches!(
+            DisplayProcessor::new(&v, &d),
+            Err(ColorError::UnknownLook(_))
+        ));
+        // The HDR displays are not baked.
+        let pq = DisplaySettings {
+            display_device: DisplayDevice::Rec2100Pq,
         };
         v.view_transform = ViewTransform::Standard;
         v.look = "None".into();
-        assert!(DisplayProcessor::new(&v, &p3).is_err());
+        let e = DisplayProcessor::new(&v, &pq).unwrap_err();
+        assert_eq!(
+            e.to_string(),
+            "view transform 'Standard' with look 'None' on display 'Rec.2100-PQ' is not available in frap yet"
+        );
     }
 
     #[test]
@@ -524,12 +482,12 @@ mod tests {
             ..ViewSettings::default()
         };
         let p = DisplayProcessor::new(&v, &d).unwrap();
-        assert!((p.apply_rgb([0.18; 3])[0] - linear_to_srgb(0.18)).abs() < 1e-7);
+        assert!((p.apply_rgb([0.18; 3])[0] - linear_to_srgb(0.18)).abs() < 1e-4);
         v.exposure = 1.0;
         v.gamma = 2.0;
         let p = DisplayProcessor::new(&v, &d).unwrap();
-        let want = libm::powf(linear_to_srgb(0.36), 0.5);
-        assert!((p.apply_rgb([0.18; 3])[0] - want).abs() < 1e-6);
+        let want = ocio::sse_power(linear_to_srgb(0.36), 0.5);
+        assert!((p.apply_rgb([0.18; 3])[0] - want).abs() < 1e-4);
         // Negative display values clamp before the exponent.
         assert_eq!(p.apply_rgb([-1.0, 0.0, 0.0])[0], 0.0);
         v.view_transform = ViewTransform::Raw;

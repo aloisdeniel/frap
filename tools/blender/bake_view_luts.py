@@ -1,38 +1,41 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
-"""Bake Blender's view transforms into `.cube` LUTs and a held-out colour set (ARCHITECTURE §19.5).
+"""Bake Blender's colour management into frap's OCIO op pipelines, LUT data and a held-out colour
+set (ARCHITECTURE §19.5).
 
 Runs INSIDE Blender:
 
     $BLENDER_BIN -b --factory-startup --python tools/blender/bake_view_luts.py -- \
-        --out assets/luts [--only AgX] [--heldout 400] [--seed 20261116] [--size N]
+        --out assets/luts [--heldout 400] [--seed 20261116]
 
-Method (no Blender LUT file is copied; everything is measured through `Image.save_render`):
+Method:
 
-1. For every entry of LUT_SPECS, build a float image whose pixels are the lattice points of the
-   LUT, expressed in scene-linear Rec.709. A lattice point (i, j, k) of size N is the shaper
-   input s = (i, j, k) / (N - 1); its scene-linear value is `inv(matrix) @ 2^(lo + s*(hi - lo))`
-   (the spec's log2 shaper and optional 3x3 input matrix; the shaper of a view transform is chosen
-   to be the one Blender's OCIO config uses, so the baked lattice lands on Blender's own LUT
-   nodes and tetrahedral interpolation between them reproduces Blender, see `fit` below).
-2. Save it with `image.save_render()` as a 16-bit RGB PNG with the scene's `view_settings`
-   (`view_transform`, `look`, exposure 0, gamma 1) and `display_settings.display_device`,
-   `render.dither_intensity = 0`, and decode the PNG back here (pure-Python PNG reader).
-3. Fit: the display-encoded 16-bit outputs are mapped through the inverse of the spec's `post`
-   transfer (e.g. AgX's LUT is Rec.1886-encoded and Blender converts it to the sRGB display after
-   interpolation), giving the LUT node values, written as `assets/luts/<slug>.cube` with the
-   shaper/matrix/post parameters in `# frap-*:` header comments.
-4. Held-out set: random HDR colours (fixed seed, never on the lattice) are rendered the same way
-   for every entry of HELDOUT_CASES (incl. Standard and Raw, which frap computes analytically,
-   and non-default exposure/gamma) and written with Blender's 16-bit outputs to
-   `assets/luts/heldout.json`. frap's tests measure accuracy on these colours only, never on the
-   lattice the LUT was fitted to.
-5. Dither: `Image.save_render` does not dither (only render results carry
+1. Pipelines. For every SDR display of Blender 5.2.4's `config.ocio` (sRGB, Display P3, Rec.1886,
+   Rec.2020), every view of that display that frap's `ViewTransform` names, and every look that
+   Blender applies to that view (`colormanage_use_look` + `view_filter_for_look`), this script
+   builds the very transform Blender builds for a render/save (`create_ocio_display_transform`,
+   `imbuf/opencolorio/intern/libocio/libocio_display_processor.cc`: a `LookTransform` into the
+   look's process space, then a `DisplayViewTransform` with looks bypassed; exposure and gamma are
+   applied by frap around it), asks Blender's bundled OpenColorIO (PyOpenColorIO 2.5) for the
+   processor with `OPTIMIZATION_LOSSLESS` (matrices composed, identities removed, nothing
+   approximated), and writes its op list as one `[display|view|look]` section of
+   `assets/luts/<family>.ops`. `frap-color` interprets those ops with ports of OCIO's CPU
+   renderers (`crates/frap-color/src/display/ocio.rs`).
+2. LUT data. The 1D/3D LUTs those ops reference are written once each, under the name of the
+   config file they come from (`<name>.cube` with red varying fastest, `<name>.lut1d`), read back
+   from Blender's own OCIO processors; AgX's base sRGB LUT keeps the `agx.cube` name and its
+   `# frap-*:` header so `frap_color::lut::baked("AgX", "None", "sRGB")` still reads it.
+3. Held-out set: random HDR colours (fixed seed, scene-linear Rec.709) are pushed through
+   `Image.save_render` (16-bit PNG, dither 0) for every baked combination, a few exposure/gamma
+   settings and a few looks Blender ignores, and written with Blender's 16-bit display outputs to
+   `assets/luts/heldout.json`. frap's tests gate on CIEDE2000 < 1 against these renders only (the
+   pipelines are not fitted to anything, so every colour is held out).
+4. Dither: `Image.save_render` does not dither (only render results carry
    `render.dither_intensity`), so a flat Workbench render (world colour only) is written twice
    with `render.render(write_still=True)`: as an 8-bit PNG with `dither_intensity = 1` and as a
    16-bit PNG (undithered display values). This pins Blender's noise pattern and amplitude.
 
-The OCIO parameters quoted below come from Blender 5.2.4's
-`datafiles/colormanagement/config.ocio` (provenance comments at each constant).
+Every number written is read from Blender 5.2.4's processors; no OCIO data is typed by hand. The
+script is deterministic: re-running it reproduces every file byte for byte.
 """
 
 import json
@@ -44,6 +47,27 @@ import tempfile
 import zlib
 
 import bpy
+import PyOpenColorIO as OCIO
+
+CONFIG_DIR = os.path.join(bpy.utils.resource_path("LOCAL"), "datafiles", "colormanagement")
+CONFIG = OCIO.Config.CreateFromFile(os.path.join(CONFIG_DIR, "config.ocio"))
+
+# frap's `ViewTransform` items (the sRGB display's views, Blender's enum order) and the module
+# (`crates/frap-color/src/<family>.rs`) whose `.ops` file holds them.
+FAMILY = {
+    "Standard": "standard",
+    "ACES 1.3": "aces",
+    "ACES 2.0": "aces",
+    "Khronos PBR Neutral": "pbr_neutral",
+    "AgX": "agx",
+    "Filmic": "filmic",
+    "Filmic Log": "filmic",
+    "False Color": "false_color",
+    "Raw": "standard",
+}
+# The SDR displays (`DisplayDevice`); the HDR ones (Rec.2100-PQ/HLG) re-encode image files to
+# the 203-nit convention (`adjust_for_hdr_image_file`) and are not baked.
+DISPLAYS = ["sRGB", "Display P3", "Rec.1886", "Rec.2020"]
 
 # config.ocio, colorspace "Linear Rec.709": XYZ D65 -> Linear Rec.709.
 XYZ_TO_REC709 = [
@@ -77,71 +101,330 @@ def mat_inv(m):
     ]
 
 
-def mat_vec(m, v):
-    return [m[i][0] * v[0] + m[i][1] * v[1] + m[i][2] * v[2] for i in range(3)]
-
-
 REC709_TO_EGAMUT = mat_mul(XYZ_TO_EGAMUT, mat_inv(XYZ_TO_REC709))
 
-# One entry per baked LUT. `post` names the per-channel transfer applied after the LUT:
-#   "rec1886_to_srgb": out = srgb_encode(max(v, 0) ^ 2.4)  (AgX Base Rec.1886 on the sRGB display)
-#   "none":            out = v
-# `size` 57 puts every lattice point on a node of Blender's own 57^3 AgX LUT, so tetrahedral
-# interpolation between baked nodes is Blender's interpolation (a 29^3 lattice on every second
-# node measured CIEDE2000 up to 2.0 on saturated held-out colours; 57^3 measures < 0.01).
-LUT_SPECS = [
-    {
-        "view_transform": "AgX",
-        "look": "None",
-        "display_device": "sRGB",
-        "matrix": REC709_TO_EGAMUT,
-        "shaper": AGX_LG2,
-        "size": 57,
-        "post": "rec1886_to_srgb",
-    },
-]
-
-# (view_transform, look, exposure, gamma) on the sRGB display.
-HELDOUT_CASES = [
-    ("Standard", "None", 0.0, 1.0),
-    ("Standard", "None", -0.75, 1.6),
-    ("Raw", "None", 0.0, 1.0),
-    ("Raw", "None", 0.5, 1.3),
-    ("AgX", "None", 0.0, 1.0),
-    ("AgX", "None", 1.25, 0.8),
+# (display, view, look, exposure, gamma): extra held-out cases besides every baked combination at
+# exposure 0 / gamma 1. (Blender's `view_settings.look` enum only offers the looks of the current
+# view, so a look the view ignores cannot be set and is not measured.)
+EXTRA_CASES = [
+    ("sRGB", "Standard", "None", -0.75, 1.6),
+    ("sRGB", "Raw", "None", 0.5, 1.3),
+    ("sRGB", "AgX", "None", 1.25, 0.8),
+    ("sRGB", "AgX", "AgX - Punchy", -1.5, 1.2),
+    ("sRGB", "Filmic", "High Contrast", 2.0, 1.0),
+    ("sRGB", "ACES 2.0", "None", 0.0, 2.2),
+    ("Display P3", "False Color", "False Color - Punchy", 0.5, 1.0),
 ]
 
 
-def slug(spec):
-    s = spec["view_transform"].lower().replace(" ", "_").replace(".", "")
-    if spec["look"] != "None":
-        s += "__" + spec["look"].lower().replace(" ", "_").replace(".", "")
-    if spec["display_device"] != "sRGB":
-        s += "@" + spec["display_device"].lower().replace(" ", "_").replace(".", "")
-    return s
+# --- Blender's look rules and display transform -------------------------------------------------
+
+LOOK_NAMES = [lk.getName() for lk in CONFIG.getLooks()]
 
 
-# --- OCIO ExponentWithLinearTransform {gamma: 2.4, offset: 0.055} (the sRGB display) ---------
-SRGB_G = 2.4
-SRGB_O = 0.055
-SRGB_EBREAK = SRGB_O / (SRGB_G - 1.0)
-SRGB_LBREAK = ((SRGB_EBREAK + SRGB_O) / (1.0 + SRGB_O)) ** SRGB_G
-SRGB_SLOPE = SRGB_EBREAK / SRGB_LBREAK
+def look_view(look):
+    return look.split(" - ", 1)[0] if " - " in look else ""
 
 
-def srgb_decode(e):
-    if e < SRGB_EBREAK:
-        return e / SRGB_SLOPE
-    return ((e + SRGB_O) / (1.0 + SRGB_O)) ** SRGB_G
+def look_applies(view, look):
+    """`colormanage_use_look` + `view_filter_for_look` (imbuf/intern/colormanagement.cc)."""
+    if look == "None":
+        return False
+    if any(look_view(lk) == view for lk in LOOK_NAMES):
+        flt = view
+    else:
+        short = view.split(" - ", 1)[0] if " - " in view else ""
+        flt = short if short and any(look_view(lk) == short for lk in LOOK_NAMES) else ""
+    return look_view(look) == flt
 
 
-def post_inverse(post, v):
-    if post == "none":
-        return v
-    if post == "rec1886_to_srgb":
-        lin = srgb_decode(v)
-        return max(lin, 0.0) ** (1.0 / 2.4)
-    raise ValueError(post)
+def look_result_space(look):
+    """`LookTransform::GetLooksResultColorSpace`: the look's process space. A look whose
+    transform is an empty group ("Medium Contrast") still converts into its process space and
+    back (verified against `Image.save_render`), so it is not a no-op."""
+    return CONFIG.getLook(look).getProcessSpace()
+
+
+def blender_transform(display, view, look, src="Linear Rec.709"):
+    """`create_ocio_display_transform` (libocio_display_processor.cc), look already filtered."""
+    group = OCIO.GroupTransform()
+    use_look = look != "None"
+    if use_look:
+        out = look_result_space(look)
+        if out:
+            lt = OCIO.LookTransform()
+            lt.setSrc(src)
+            view_cs = CONFIG.getDisplayViewColorSpaceName(display, view)
+            cs = CONFIG.getColorSpace(view_cs) if view_cs else None
+            if cs is not None and cs.isData():
+                lt.setDst(src)
+            else:
+                lt.setDst(out)
+                src = out
+            lt.setLooks(look)
+            group.appendTransform(lt)
+        else:
+            use_look = False
+    dvt = OCIO.DisplayViewTransform()
+    dvt.setSrc(src)
+    dvt.setLooksBypass(use_look)
+    dvt.setView(view)
+    dvt.setDisplay(display)
+    group.appendTransform(dvt)
+    return group
+
+
+def effective_look(view, look):
+    """The look Blender actually applies ("None" when the view filters it out)."""
+    return look if look_applies(view, look) else "None"
+
+
+# --- LUT data -------------------------------------------------------------------------------------
+
+
+def lut_key(t):
+    if isinstance(t, OCIO.Lut3DTransform):
+        n = t.getGridSize()
+        vals = [t.getValue(r, g, b) for b in range(n) for g in range(n) for r in range(n)]
+        return ("3d", n, tuple(tuple(v) for v in vals))
+    n = t.getLength()
+    vals = [tuple(t.getValue(i)) for i in range(n)]
+    return ("1d", n, tuple(vals))
+
+
+def data_name(stem):
+    if stem == "AgX_Base_sRGB":
+        return "agx"
+    return stem.lower().replace("-", "_").replace(".", "_").replace("pbrneutral", "pbr_neutral")
+
+
+def known_luts():
+    """Every LUT file of the config's search path, loaded by Blender's OCIO: key -> name."""
+    known = {}
+    for sub in ("luts", "filmic"):
+        folder = os.path.join(CONFIG_DIR, sub)
+        for fname in sorted(os.listdir(folder)):
+            stem, ext = os.path.splitext(fname)
+            if ext not in (".cube", ".spi1d"):
+                continue
+            ft = OCIO.FileTransform(src=fname, interpolation=OCIO.INTERP_LINEAR)
+            proc = CONFIG.getProcessor(ft).getOptimizedProcessor(OCIO.OPTIMIZATION_NONE)
+            for t in proc.createGroupTransform():
+                if isinstance(t, (OCIO.Lut1DTransform, OCIO.Lut3DTransform)):
+                    known[lut_key(t)] = (data_name(stem), fname)
+    return known
+
+
+# 3D LUTs whose values are written with 5 decimals (below the 16-bit display step) to keep
+# the files small; the others (the Rec.2020 base and the luminance compensation feed the
+# banded False Color LUT, where 1e-5 moves a band edge) keep 8 significant digits.
+COARSE_3D = {"agx", "agx_base_p3", "pbr_neutral", "filmic_desat_33"}
+
+
+def fmt5(v):
+    """5 decimals (below the 16-bit display step), trailing zeros stripped."""
+    s = "%.5f" % v
+    s = s.rstrip("0").rstrip(".")
+    return "0" if s in ("", "-0") else s
+
+
+def fmt8(v):
+    s = "%.8g" % v
+    return "0" if s in ("-0",) else s
+
+
+def header_lines(title, source):
+    build = bpy.app.build_hash
+    build = build.decode() if isinstance(build, bytes) else build
+    return [
+        "TITLE \"frap %s\"" % title,
+        "# Generated by tools/blender/bake_view_luts.py from Blender %s (%s); do not edit."
+        % (bpy.app.version_string, build),
+        "# Read from Blender's OpenColorIO processor (colormanagement LUT \"%s\"); "
+        "see ARCHITECTURE.md 19.5." % source,
+    ]
+
+
+def write_lut(out_dir, name, key, source):
+    kind, n, vals = key
+    if kind == "3d":
+        lines = header_lines(name, source)
+        if name == "agx":
+            # `lut::baked("AgX", "None", "sRGB")`: the base sRGB LUT is the whole AgX view on
+            # the sRGB display (E-Gamut matrix, lg2 shaper, Rec.1886 values shown on sRGB).
+            lines += [
+                "# frap-view-transform: AgX",
+                "# frap-look: None",
+                "# frap-display: sRGB",
+                "# frap-matrix: " + " ".join(repr(x) for row in REC709_TO_EGAMUT for x in row),
+                "# frap-shaper: lg2 %r %r" % AGX_LG2,
+                "# frap-interpolation: tetrahedral",
+                "# frap-post: rec1886_to_srgb",
+            ]
+        lines += ["DOMAIN_MIN 0 0 0", "DOMAIN_MAX 1 1 1", "LUT_3D_SIZE %d" % n]
+        fmt = fmt5 if name in COARSE_3D else fmt8
+        lines += [" ".join(fmt(c) for c in v) for v in vals]
+        path = os.path.join(out_dir, name + ".cube")
+    else:
+        single = all(v[0] == v[1] == v[2] for v in vals)
+        lines = header_lines(name, source)
+        lines += ["LUT_1D_SIZE %d" % n, "CHANNELS %d" % (1 if single else 3)]
+        lines += [fmt8(v[0]) if single else " ".join(fmt8(c) for c in v) for v in vals]
+        path = os.path.join(out_dir, name + ".lut1d")
+    with open(path, "w", newline="\n") as f:
+        f.write("\n".join(lines) + "\n")
+    print("wrote", path)
+
+
+# --- op serialisation -----------------------------------------------------------------------------
+
+
+def num(v):
+    return repr(float(v))
+
+
+def direction(t):
+    return "fwd" if t.getDirection() == OCIO.TRANSFORM_DIR_FORWARD else "inv"
+
+
+def rgbm(v):
+    return [v.red, v.green, v.blue, v.master]
+
+
+def serialise(t, luts, known):
+    """One OCIO transform of an optimised processor -> one `.ops` line."""
+    if isinstance(t, OCIO.MatrixTransform):
+        m = t.getMatrix()
+        o = t.getOffset()
+        assert m[3] == m[7] == m[11] == m[12] == m[13] == m[14] == 0.0 and m[15] == 1.0, m
+        assert o[3] == 0.0 and t.getDirection() == OCIO.TRANSFORM_DIR_FORWARD
+        vals = [m[0], m[1], m[2], m[4], m[5], m[6], m[8], m[9], m[10], o[0], o[1], o[2]]
+        return "matrix " + " ".join(num(x) for x in vals)
+    if isinstance(t, OCIO.LogTransform):
+        return "log %s %s" % (num(t.getBase()), direction(t))
+    if isinstance(t, (OCIO.Lut1DTransform, OCIO.Lut3DTransform)):
+        key = lut_key(t)
+        name, source = known[key]
+        luts[name] = (key, source)
+        if isinstance(t, OCIO.Lut3DTransform):
+            assert t.getInterpolation() == OCIO.INTERP_TETRAHEDRAL
+            assert t.getDirection() == OCIO.TRANSFORM_DIR_FORWARD
+            return "lut3d %s" % name
+        assert t.getInterpolation() in (OCIO.INTERP_LINEAR, OCIO.INTERP_DEFAULT)
+        assert not t.getInputHalfDomain() and t.getHueAdjust() == OCIO.HUE_NONE
+        return "lut1d %s %s" % (name, direction(t))
+    if isinstance(t, OCIO.ExponentTransform):
+        v = t.getValue()
+        assert v[3] == 1.0
+        style = {OCIO.NEGATIVE_CLAMP: "clamp", OCIO.NEGATIVE_MIRROR: "mirror",
+                 OCIO.NEGATIVE_PASS_THRU: "pass_thru"}[t.getNegativeStyle()]
+        return "exponent %s %s %s" % (" ".join(num(x) for x in v[:3]), style, direction(t))
+    if isinstance(t, OCIO.ExponentWithLinearTransform):
+        g = t.getGamma()
+        o = t.getOffset()
+        style = {OCIO.NEGATIVE_LINEAR: "linear", OCIO.NEGATIVE_MIRROR: "mirror"}[
+            t.getNegativeStyle()]
+        return "moncurve %s %s %s %s" % (" ".join(num(x) for x in g[:3]),
+                                         " ".join(num(x) for x in o[:3]), style, direction(t))
+    if isinstance(t, OCIO.RangeTransform):
+        assert t.getStyle() == OCIO.RANGE_CLAMP and t.getDirection() == OCIO.TRANSFORM_DIR_FORWARD
+        vals = [
+            num(t.getMinInValue()) if t.hasMinInValue() else "-",
+            num(t.getMaxInValue()) if t.hasMaxInValue() else "-",
+            num(t.getMinOutValue()) if t.hasMinOutValue() else "-",
+            num(t.getMaxOutValue()) if t.hasMaxOutValue() else "-",
+        ]
+        return "range " + " ".join(vals)
+    if isinstance(t, OCIO.CDLTransform):
+        style = "noclamp" if t.getStyle() == OCIO.CDL_NO_CLAMP else "clamp"
+        vals = list(t.getSlope()) + list(t.getOffset()) + list(t.getPower()) + [t.getSat()]
+        return "cdl %s %s %s" % (" ".join(num(x) for x in vals), style, direction(t))
+    if isinstance(t, OCIO.GradingPrimaryTransform):
+        assert t.getStyle() == OCIO.GRADING_LOG
+        v = t.getValue()
+        vals = (rgbm(v.brightness) + rgbm(v.contrast) + rgbm(v.gamma) +
+                [v.saturation, v.pivot, v.pivotBlack, v.pivotWhite, v.clampBlack, v.clampWhite])
+        return "primary_log %s %s" % (" ".join(num(x) for x in vals), direction(t))
+    if isinstance(t, OCIO.GradingToneTransform):
+        assert t.getStyle() == OCIO.GRADING_LOG
+        v = t.getValue()
+        vals = []
+        for z in (v.blacks, v.shadows, v.midtones, v.highlights, v.whites):
+            vals += [z.red, z.green, z.blue, z.master, z.start, z.width]
+        vals.append(v.scontrast)
+        return "tone_log %s %s" % (" ".join(num(x) for x in vals), direction(t))
+    if isinstance(t, OCIO.GradingRGBCurveTransform):
+        assert t.getStyle() == OCIO.GRADING_LOG and not t.getBypassLinToLog()
+        v = t.getValue()
+        parts = []
+        for c in (v.red, v.green, v.blue, v.master):
+            assert c.getSplineType() == OCIO.B_SPLINE
+            cps = list(c.getControlPoints())
+            slopes = list(c.getSlopes())
+            if len(slopes) != len(cps):
+                slopes = [0.0] * len(cps)
+            parts.append(str(len(cps)))
+            for cp, s in zip(cps, slopes):
+                parts += [num(cp.x), num(cp.y), num(s)]
+        return "curve_log %s %s" % (" ".join(parts), direction(t))
+    if isinstance(t, OCIO.FixedFunctionTransform):
+        style = {
+            OCIO.FIXED_FUNCTION_ACES_GLOW_10: "aces_glow_10",
+            OCIO.FIXED_FUNCTION_ACES_RED_MOD_10: "aces_red_mod_10",
+            OCIO.FIXED_FUNCTION_ACES_DARK_TO_DIM_10: "aces_dark_to_dim_10",
+            OCIO.FIXED_FUNCTION_ACES_GAMUT_COMP_13: "aces_gamut_comp_13",
+            OCIO.FIXED_FUNCTION_ACES_OUTPUT_TRANSFORM_20: "aces_output_transform_20",
+        }[t.getStyle()]
+        params = " ".join(num(x) for x in t.getParams())
+        return ("fixed %s %s %s" % (style, direction(t), params)).rstrip()
+    raise ValueError("unsupported OCIO transform %r" % t)
+
+
+def pipeline_ops(display, view, look, luts, known):
+    proc = CONFIG.getProcessor(blender_transform(display, view, look))
+    proc = proc.getOptimizedProcessor(OCIO.OPTIMIZATION_LOSSLESS)
+    return [serialise(t, luts, known) for t in proc.createGroupTransform()]
+
+
+def combinations():
+    """(display, view, look) for every baked pipeline, in a stable order."""
+    out = []
+    for display in DISPLAYS:
+        for view in CONFIG.getViews(display):
+            if view not in FAMILY:
+                continue
+            for look in ["None"] + LOOK_NAMES:
+                if look == "None" or effective_look(view, look) == look:
+                    out.append((display, view, look))
+    return out
+
+
+def bake_pipelines(out_dir):
+    known = known_luts()
+    luts = {}
+    files = {}
+    for display, view, look in combinations():
+        ops = pipeline_ops(display, view, look, luts, known)
+        files.setdefault(FAMILY[view], []).append((display, view, look, ops))
+    for family, sections in sorted(files.items()):
+        build = bpy.app.build_hash
+        build = build.decode() if isinstance(build, bytes) else build
+        lines = [
+            "# frap OCIO op pipelines (%s): Blender %s (%s) display transforms, generated by"
+            % (family, bpy.app.version_string, build),
+            "# tools/blender/bake_view_luts.py; do not edit. One [display|view|look] section per",
+            "# combination, one op per line (crates/frap-color/src/display/ocio.rs).",
+        ]
+        for display, view, look, ops in sections:
+            lines.append("")
+            lines.append("[%s|%s|%s]" % (display, view, look))
+            lines += ops
+        path = os.path.join(out_dir, family + ".ops")
+        with open(path, "w", newline="\n") as f:
+            f.write("\n".join(lines) + "\n")
+        print("wrote", path)
+    for name, entry in sorted(luts.items()):
+        write_lut(out_dir, name, entry[0], entry[1])
 
 
 # --- PNG (8/16-bit RGB) reader ----------------------------------------------------------------
@@ -242,6 +525,8 @@ def render_colors(colors, view_transform, look, display_device, exposure, gamma,
     scene.view_settings.use_curve_mapping = False
     scene.view_settings.use_white_balance = False
     scene.render.dither_intensity = dither
+    assert (scene.display_settings.display_device, scene.view_settings.view_transform,
+            scene.view_settings.look) == (display_device, view_transform, look)
     fmt = scene.render.image_settings
     fmt.file_format = "PNG"
     fmt.color_mode = "RGB"
@@ -255,58 +540,6 @@ def render_colors(colors, view_transform, look, display_device, exposure, gamma,
     assert (w, h) == (width, height)
     os.remove(path)
     return out[:n]
-
-
-def lattice_inputs(spec):
-    n = spec["size"]
-    lo, hi = spec["shaper"]
-    inv = mat_inv(spec["matrix"]) if spec["matrix"] else None
-    colors = []
-    for b in range(n):
-        for g in range(n):
-            for r in range(n):
-                shaped = [2.0 ** (lo + (k / (n - 1)) * (hi - lo)) for k in (r, g, b)]
-                lin = mat_vec(inv, shaped) if inv else shaped
-                colors.append([f32(x) for x in lin])
-    return colors
-
-
-def fmt5(v):
-    """5 decimals (below the 16-bit measurement step), trailing zeros stripped."""
-    s = "%.5f" % v
-    s = s.rstrip("0").rstrip(".")
-    return "0" if s in ("", "-0") else s
-
-
-def bake_lut(spec, out_dir, tmpdir):
-    colors = lattice_inputs(spec)
-    out = render_colors(colors, spec["view_transform"], spec["look"], spec["display_device"],
-                        0.0, 1.0, tmpdir)
-    path = os.path.join(out_dir, slug(spec) + ".cube")
-    lines = [
-        'TITLE "frap %s"' % slug(spec),
-        "# Generated by tools/blender/bake_view_luts.py from Blender %s (%s); do not edit."
-        % (bpy.app.version_string, bpy.app.build_hash.decode() if isinstance(bpy.app.build_hash, bytes)
-           else bpy.app.build_hash),
-        "# Measured through Image.save_render (16-bit PNG, dither 0); see ARCHITECTURE.md 19.5.",
-        "# frap-view-transform: %s" % spec["view_transform"],
-        "# frap-look: %s" % spec["look"],
-        "# frap-display: %s" % spec["display_device"],
-    ]
-    if spec["matrix"]:
-        lines.append("# frap-matrix: " + " ".join(repr(x) for row in spec["matrix"] for x in row))
-    lines.append("# frap-shaper: lg2 %r %r" % tuple(spec["shaper"]))
-    lines.append("# frap-interpolation: tetrahedral")
-    lines.append("# frap-post: %s" % spec["post"])
-    lines.append("DOMAIN_MIN 0 0 0")
-    lines.append("DOMAIN_MAX 1 1 1")
-    lines.append("LUT_3D_SIZE %d" % spec["size"])
-    for rgb in out:
-        vals = [post_inverse(spec["post"], v / 65535.0) for v in rgb]
-        lines.append(" ".join(fmt5(v) for v in vals))
-    with open(path, "w", newline="\n") as f:
-        f.write("\n".join(lines) + "\n")
-    print("wrote", path)
 
 
 def heldout_inputs(count, seed):
@@ -379,39 +612,33 @@ def bake_dither(tmpdir):
 def main():
     argv = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
     out_dir = "assets/luts"
-    only = None
     count = 400
     seed = 20261116
     i = 0
     while i < len(argv):
         if argv[i] == "--out":
             out_dir = argv[i + 1]
-        elif argv[i] == "--only":
-            only = argv[i + 1].split(",")
         elif argv[i] == "--heldout":
             count = int(argv[i + 1])
         elif argv[i] == "--seed":
             seed = int(argv[i + 1])
-        elif argv[i] == "--size":
-            for spec in LUT_SPECS:
-                spec["size"] = int(argv[i + 1])
         else:
             raise SystemExit("unknown argument " + argv[i])
         i += 2
     os.makedirs(out_dir, exist_ok=True)
     tmpdir = tempfile.mkdtemp(prefix="frap_bake_")
-    for spec in LUT_SPECS:
-        if only is None or spec["view_transform"] in only:
-            bake_lut(spec, out_dir, tmpdir)
+    bake_pipelines(out_dir)
 
     inputs = heldout_inputs(count, seed)
     cases = []
-    for view, look, exposure, gamma in HELDOUT_CASES:
-        out = render_colors(inputs, view, look, "sRGB", exposure, gamma, tmpdir)
+    settings = [(d, v, lk, 0.0, 1.0) for d, v, lk in combinations()]
+    settings += EXTRA_CASES
+    for display, view, look, exposure, gamma in settings:
+        out = render_colors(inputs, view, look, display, exposure, gamma, tmpdir)
         cases.append({
             "view_transform": view,
             "look": look,
-            "display_device": "sRGB",
+            "display_device": display,
             "exposure": exposure,
             "gamma": gamma,
             "outputs_u16": [list(v) for v in out],
@@ -422,8 +649,9 @@ def main():
         "generator": "tools/blender/bake_view_luts.py",
         "blender": bpy.app.version_string,
         "seed": seed,
-        "note": "Held-out colours (scene-linear Rec.709, f32-exact) and Blender's 16-bit sRGB "
-                "display outputs through Image.save_render (dither 0). Never on a LUT lattice.",
+        "note": "Held-out colours (scene-linear Rec.709, f32-exact) and Blender's 16-bit display "
+                "outputs through Image.save_render (dither 0), per display/view/look/exposure/"
+                "gamma.",
         "inputs": inputs,
         "cases": cases,
         "dither": dither,
@@ -432,7 +660,7 @@ def main():
     with open(path, "w", newline="\n") as f:
         json.dump(doc, f, indent=None, separators=(",", ":"))
         f.write("\n")
-    print("wrote", path)
+    print("wrote", path, "(%d cases)" % len(cases))
     os.rmdir(tmpdir)
 
 

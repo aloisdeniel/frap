@@ -1,15 +1,73 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! WP 1.6 acceptance: Standard and AgX within ΔE < 1 of Blender 5.2.4 on the **held-out** colour
-//! set (`assets/luts/heldout.json`, written by `tools/blender/bake_view_luts.py`), never on the
-//! lattice the LUT was fitted to (ARCHITECTURE §19.5). CPU only.
+//! WP 1.6 / WP 5.3 acceptance: every view transform × look (on every SDR display) within
+//! ΔE < 1 of Blender 5.2.4 on the **held-out** colour set (`assets/luts/heldout.json`, written
+//! by `tools/blender/bake_view_luts.py` from `Image.save_render`), CPU only (ARCHITECTURE §19.5).
 //!
-//! ΔE is CIEDE2000 on the sRGB display values (the gate); CIE76 is printed alongside.
+//! ΔE is CIEDE2000 on the display values decoded with the display's EOTF and primaries (the
+//! gate); CIE76 is printed alongside. Exposure and gamma variants are included.
 
-use frap_color::delta_e::{delta_e_76, delta_e_2000, srgb_to_lab};
-use frap_color::{DisplayProcessor, DisplaySettings, ViewSettings, ViewTransform};
+use frap_color::delta_e::{Lab, delta_e_76, delta_e_2000, xyz_to_lab};
+use frap_color::spaces::srgb_to_linear;
+use frap_color::{DisplayDevice, DisplayProcessor, DisplaySettings, ViewSettings, ViewTransform};
 use serde_json::Value;
 
 const HELDOUT: &str = include_str!("../../../assets/luts/heldout.json");
+
+/// RGB → XYZ (D65) of the display primaries (`config.ocio`: the inverses of its XYZ → linear
+/// matrices for Rec.709, DCI-P3 D65 and Rec.2020).
+fn primaries_to_xyz(d: DisplayDevice) -> [[f64; 3]; 3] {
+    let inv = |m: [[f64; 3]; 3]| {
+        let [[a, b, c], [d, e, f], [g, h, i]] = m;
+        let det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
+        [
+            [
+                (e * i - f * h) / det,
+                (c * h - b * i) / det,
+                (b * f - c * e) / det,
+            ],
+            [
+                (f * g - d * i) / det,
+                (a * i - c * g) / det,
+                (c * d - a * f) / det,
+            ],
+            [
+                (d * h - e * g) / det,
+                (b * g - a * h) / det,
+                (a * e - b * d) / det,
+            ],
+        ]
+    };
+    match d {
+        DisplayDevice::DisplayP3 => inv([
+            [2.4934969, -0.9313836, -0.4027108],
+            [-0.8294890, 1.7626641, 0.0236247],
+            [0.0358458, -0.0761724, 0.9568845],
+        ]),
+        DisplayDevice::Rec2020 => inv([
+            [1.7166512, -0.3556708, -0.2533663],
+            [-0.6666844, 1.6164812, 0.0157685],
+            [0.0176399, -0.0427706, 0.9421031],
+        ]),
+        _ => inv([
+            [3.2409699, -1.5373832, -0.4986108],
+            [-0.9692436, 1.8759675, 0.0415551],
+            [0.0556301, -0.2039770, 1.0569715],
+        ]),
+    }
+}
+
+/// Display-encoded RGB (clamped as a file stores it) → CIELAB.
+fn display_to_lab(d: DisplayDevice, rgb: [f32; 3]) -> Lab {
+    let lin = rgb.map(|v| {
+        let v = v.clamp(0.0, 1.0);
+        f64::from(match d {
+            DisplayDevice::Srgb | DisplayDevice::DisplayP3 => srgb_to_linear(v),
+            _ => libm::powf(v, 2.4),
+        })
+    });
+    let m = primaries_to_xyz(d);
+    xyz_to_lab([0, 1, 2].map(|i| m[i][0] * lin[0] + m[i][1] * lin[1] + m[i][2] * lin[2]))
+}
 
 struct Stats {
     max00: f64,
@@ -18,22 +76,29 @@ struct Stats {
     worst: String,
 }
 
-fn run_case(inputs: &[[f32; 3]], case: &Value) -> (String, Stats) {
+fn run_case(inputs: &[[f32; 3]], case: &Value) -> (String, ViewTransform, String, Stats) {
+    let display = DisplayDevice::from_name(case["display_device"].as_str().unwrap()).unwrap();
     let view = ViewSettings {
         view_transform: ViewTransform::from_name(case["view_transform"].as_str().unwrap()).unwrap(),
         look: case["look"].as_str().unwrap().to_owned(),
         exposure: case["exposure"].as_f64().unwrap() as f32,
         gamma: case["gamma"].as_f64().unwrap() as f32,
     };
-    assert_eq!(case["display_device"], "sRGB");
     let label = format!(
-        "{} look={} exposure={} gamma={}",
+        "{} | {} | {} exposure={} gamma={}",
+        display.name(),
         view.view_transform.name(),
         view.look,
         view.exposure,
         view.gamma
     );
-    let p = DisplayProcessor::new(&view, &DisplaySettings::default()).unwrap();
+    let p = DisplayProcessor::new(
+        &view,
+        &DisplaySettings {
+            display_device: display,
+        },
+    )
+    .unwrap_or_else(|e| panic!("{label}: {e}"));
     let outs = case["outputs_u16"].as_array().unwrap();
     assert_eq!(outs.len(), inputs.len());
     let mut s = Stats {
@@ -43,18 +108,20 @@ fn run_case(inputs: &[[f32; 3]], case: &Value) -> (String, Stats) {
         worst: String::new(),
     };
     for (inp, out) in inputs.iter().zip(outs) {
-        let blender: Vec<f32> = out
+        let b: Vec<f32> = out
             .as_array()
             .unwrap()
             .iter()
             .map(|v| v.as_u64().unwrap() as f32 / 65535.0)
             .collect();
-        let blender = [blender[0], blender[1], blender[2]];
-        // Files clamp to [0, 1]; compare what would be written.
+        let blender = [b[0], b[1], b[2]];
         let frap = p.apply_rgb(*inp).map(|v| v.clamp(0.0, 1.0));
-        let (a, b) = (srgb_to_lab(frap), srgb_to_lab(blender));
-        let d00 = delta_e_2000(a, b);
-        s.max76 = s.max76.max(delta_e_76(a, b));
+        let (x, y) = (
+            display_to_lab(display, frap),
+            display_to_lab(display, blender),
+        );
+        let d00 = delta_e_2000(x, y);
+        s.max76 = s.max76.max(delta_e_76(x, y));
         s.mean00 += d00;
         if d00 > s.max00 {
             s.max00 = d00;
@@ -62,11 +129,11 @@ fn run_case(inputs: &[[f32; 3]], case: &Value) -> (String, Stats) {
         }
     }
     s.mean00 /= inputs.len() as f64;
-    (label, s)
+    (label, view.view_transform, view.look, s)
 }
 
 #[test]
-fn view_transforms_match_blender_on_heldout_colours() {
+fn every_view_transform_and_look_matches_blender_on_heldout_colours() {
     let doc: Value = serde_json::from_str(HELDOUT).unwrap();
     let inputs: Vec<[f32; 3]> = doc["inputs"]
         .as_array()
@@ -78,30 +145,38 @@ fn view_transforms_match_blender_on_heldout_colours() {
         })
         .collect();
     assert!(inputs.len() >= 300, "held-out set too small");
-    let cases = doc["cases"].as_array().unwrap();
-    let mut seen = std::collections::BTreeSet::new();
+    let mut seen = std::collections::HashSet::new();
     let mut failures = Vec::new();
-    for case in cases {
-        let (label, s) = run_case(&inputs, case);
+    for case in doc["cases"].as_array().unwrap() {
+        let (label, vt, look, s) = run_case(&inputs, case);
         println!(
             "{label}: ΔE00 max {:.4} mean {:.4}; ΔE76 max {:.4}; worst {}",
             s.max00, s.mean00, s.max76, s.worst
         );
-        seen.insert(case["view_transform"].as_str().unwrap().to_owned());
+        if case["display_device"] == "sRGB" {
+            seen.insert((vt, look));
+        }
         if s.max00 >= 1.0 {
             failures.push(format!("{label}: ΔE00 {:.4} ({})", s.max00, s.worst));
         }
     }
-    for required in ["Standard", "AgX"] {
-        assert!(seen.contains(required), "held-out set lacks {required}");
+    // Coverage: every view transform × every look Blender offers for it, on sRGB.
+    for vt in ViewTransform::ALL {
+        for look in frap_color::looks::looks_for(vt) {
+            assert!(
+                seen.contains(&(vt, look.to_owned())),
+                "held-out set lacks {} / {look}",
+                vt.name()
+            );
+        }
     }
     assert!(failures.is_empty(), "ΔE ≥ 1:\n{}", failures.join("\n"));
 }
 
 #[test]
-fn heldout_colours_are_off_the_lattice() {
-    // The gate must not be measured on fitted points: no held-out input maps to a lattice node
-    // of the baked AgX LUT on all three axes.
+fn heldout_colours_are_off_the_agx_lattice() {
+    // The colours are random HDR values: none lands on a lattice node of the AgX base LUT on
+    // all three axes, so interpolation is exercised (nothing is fitted to them).
     let agx = frap_color::lut::baked("AgX", "None", "sRGB").unwrap();
     let n = (agx.lut.size - 1) as f32;
     let doc: Value = serde_json::from_str(HELDOUT).unwrap();
@@ -114,8 +189,6 @@ fn heldout_colours_are_off_the_lattice() {
             .collect();
         let m = agx.matrix.unwrap();
         let v = frap_color::spaces::mat3_mul(&m, [c[0], c[1], c[2]]);
-        // Unclamped: inputs below the shaper floor are clamped by Blender too, but they are not
-        // lattice inputs the bake rendered.
         let on_node = v.iter().all(|x| {
             if *x <= 0.0 {
                 return false;
@@ -124,6 +197,22 @@ fn heldout_colours_are_off_the_lattice() {
             (s - s.round()).abs() < 1e-3
         });
         assert!(!on_node, "held-out colour {c:?} lies on the lattice");
+    }
+}
+
+#[test]
+fn single_lut_agx_matches_the_pipeline() {
+    // `lut::baked("AgX", "None", "sRGB")` (the M1 single-LUT path) and the op pipeline agree.
+    let agx = frap_color::lut::baked("AgX", "None", "sRGB").unwrap();
+    let p = DisplayProcessor::new(&ViewSettings::default(), &DisplaySettings::default()).unwrap();
+    let doc: Value = serde_json::from_str(HELDOUT).unwrap();
+    for c in doc["inputs"].as_array().unwrap() {
+        let c = c.as_array().unwrap();
+        let rgb = [0, 1, 2].map(|i| c[i].as_f64().unwrap() as f32);
+        let (a, b) = (agx.apply(rgb), p.apply_rgb(rgb));
+        for k in 0..3 {
+            assert!((a[k] - b[k]).abs() < 2e-4, "{rgb:?}: {a:?} vs {b:?}");
+        }
     }
 }
 
