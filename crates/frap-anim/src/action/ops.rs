@@ -154,6 +154,22 @@ impl ActionGroup {
     }
 }
 
+impl ActionStrip {
+    /// The keyframe data (every 5.2 strip is a keyframe strip).
+    pub fn keyframe(&self) -> Option<&KeyframeStrip> {
+        match self {
+            ActionStrip::Keyframe(k) => Some(k),
+        }
+    }
+
+    /// The keyframe data, mutably.
+    pub fn keyframe_mut(&mut self) -> Option<&mut KeyframeStrip> {
+        match self {
+            ActionStrip::Keyframe(k) => Some(k),
+        }
+    }
+}
+
 impl KeyframeStrip {
     /// `channelbag_for_slot`
     pub fn channelbag_index(&self, slot_handle: i32) -> Option<usize> {
@@ -332,6 +348,41 @@ impl Action {
             }
         }
         Some(new)
+    }
+
+    /// `generic_slot_for_autoassign`: the slot an ID of `id_type` named `id_name` (with its
+    /// two-letter code, `OBCube`) gets when this action is assigned to it, given the
+    /// `last_slot_identifier` it remembers: that identifier (preferring a typed variant of an
+    /// untyped one, falling back to the untyped variant of a typed one), then the ID's name,
+    /// then the only slot when it is untyped.
+    pub fn slot_for_autoassign(&self, id_type: &str, id_name: &str, last: &str) -> Option<i32> {
+        let suitable = |identifier: &str| {
+            self.slot_by_identifier(identifier)
+                .filter(|s| s.is_suitable_for(id_type))
+                .map(|s| s.handle)
+        };
+        if !last.is_empty() {
+            let rest = last.get(2..).unwrap_or("");
+            let typed = !last.starts_with(UNTYPED_PREFIX);
+            if !typed
+                && let Some(h) = suitable(&format!("{}{rest}", id_name.get(..2).unwrap_or("")))
+            {
+                return Some(h);
+            }
+            if let Some(h) = suitable(last) {
+                return Some(h);
+            }
+            if typed && let Some(h) = suitable(&format!("{UNTYPED_PREFIX}{rest}")) {
+                return Some(h);
+            }
+        }
+        if let Some(h) = suitable(id_name) {
+            return Some(h);
+        }
+        match self.slots.as_slice() {
+            [only] if !only.has_idtype() => Some(only.handle),
+            _ => None,
+        }
     }
 
     /// `Action::slot_active_set`
