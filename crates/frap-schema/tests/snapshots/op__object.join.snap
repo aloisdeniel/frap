@@ -29,7 +29,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T0",
     "support": "partial",
-    "support_note": "meshes only: armatures arrive in M6; meshes with shape keys or with one attribute name stored with two domains/types answer OP_NOT_IMPLEMENTED",
+    "support_note": "meshes only: armatures arrive in M6; one attribute name stored with two domains/types answers OP_NOT_IMPLEMENTED",
     "headless": "native",
     "planned": "M1",
     "extension": false,

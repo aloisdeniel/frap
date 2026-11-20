@@ -1,0 +1,63 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.vertex_group_set_active",
+  "bl_idname": "OBJECT_OT_vertex_group_set_active",
+  "label": "Set Active Vertex Group",
+  "description": "Set the active vertex group",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "ACTIVE_OBJECT",
+      "ACTIVE_EDITABLE",
+      "ACTIVE_TYPE(MESH)"
+    ],
+    "text": "requires an active object (bpy.context.view_layer.objects.active), the active object is editable (not linked), the active object is of type MESH",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "group",
+      "name": "Group",
+      "description": "Vertex group to set as active",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "",
+      "enum_items": [],
+      "is_enum_flag": false,
+      "dynamic_enum": "OBJECT_OT_vertex_group_set_active.group",
+      "context_rule": "items depend on the context in Blender (OBJECT_OT_vertex_group_set_active.group); frap narrows them to the live context, enum_items is the superset",
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE",
+        "DYNAMIC_ENUM"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M6",
+    "extension": false,
+    "notes": []
+  }
+}

@@ -1,0 +1,26 @@
+bpy.data.objects['Cube'].vertex_groups.new(name='Arm')
+bpy.data.objects['Cube'].vertex_groups['Arm'].add([0, 1, 2, 3], 0.5, 'REPLACE')
+bpy.data.objects['Cube'].vertex_groups['Arm'].add([3], 0.75, 'ADD')
+bpy.data.objects['Cube'].vertex_groups['Arm'].weight(3)
+bpy.data.objects['Cube'].vertex_groups['Arm'].weight(4)
+bpy.data.objects['Cube'].vertex_groups['Arm'].add([0], 0.5, 'TOGGLE')
+bpy.data.objects['Cube'].vertex_groups.active_index
+bpy.data.objects['Camera'].vertex_groups.new()
+bpy.data.objects['Cube'].shape_key_add(name='Basis')
+bpy.data.objects['Cube'].shape_key_add(name='Bulge', from_mix=False)
+bpy.data.shape_keys['Key'].key_blocks['Bulge'].data[0].co = (2, 2, 2)
+bpy.data.shape_keys['Key'].key_blocks['Bulge'].vertex_group = 'Arm'
+bpy.data.shape_keys['Key'].key_blocks['Bulge'].value
+bpy.data.objects['Cube'].evaluated_get(bpy.context.evaluated_depsgraph_get()).to_mesh().vertices[0].co
+bpy.data.objects['Cube'].shape_key_add(name='Mixed', from_mix=True)
+bpy.data.shape_keys['Key'].key_blocks['Mixed'].data[0].co
+bpy.ops.object.shape_key_move(type='UP')
+bpy.data.shape_keys['Key'].key_blocks.keys()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.object.vertex_group_select()
+bpy.ops.object.shape_key_add()
+bpy.ops.mesh.blend_from_shape(shape='Bulge', blend=0.5)
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.object.vertex_group_limit_total(limit=1)
+bpy.ops.object.shape_key_remove(all=True, apply_mix=True)
+bpy.data.meshes['Cube'].shape_keys

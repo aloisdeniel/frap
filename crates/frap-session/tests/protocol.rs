@@ -1256,7 +1256,7 @@ fn rna_function_binding_errors() {
     );
     assert_eq!(r["value"], false, "{r}");
     // A well-formed call of a function frap does not implement yet.
-    let r = one(&mut s, "bpy.data.objects['Cube'].shape_key_add(name='X')");
+    let r = one(&mut s, "bpy.data.objects['Cube'].shape_keys_selected()");
     assert_eq!(r["error"]["code"], "NOT_IMPLEMENTED", "{r}");
     assert_eq!(r["kind"], "call");
 }

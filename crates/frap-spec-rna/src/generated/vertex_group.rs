@@ -16,7 +16,7 @@ pub static RNA_FUNCS: [FuncDef; 3] = [
         identifier: "add",
         description: "Add vertices to the group",
         params: &[
-            PropDef { identifier: "index", name: "", description: "List of indices", kind: PropKind::Int { default: Defaults::Array(&[0]), hard: (-2147483648, 2147483647), soft: (0, 0) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Fixed(1), flags: PropFlags::REQUIRED, deprecated: None },
+            PropDef { identifier: "index", name: "", description: "List of indices", kind: PropKind::Int { default: Defaults::Array(&[0]), hard: (-2147483648, 2147483647), soft: (0, 0) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Dynamic, flags: PropFlags::REQUIRED, deprecated: None },
             PropDef { identifier: "weight", name: "", description: "Vertex weight", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (0.0, 1.0), soft: (0.0, 1.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::REQUIRED, deprecated: None },
             PropDef { identifier: "type", name: "", description: "Vertex assign mode", kind: PropKind::Enum { items: &crate::generated::enums::E320, default: EnumDefault::Item("REPLACE"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::REQUIRED, deprecated: None },
         ],
@@ -28,7 +28,7 @@ pub static RNA_FUNCS: [FuncDef; 3] = [
         identifier: "remove",
         description: "Remove vertices from the group",
         params: &[
-            PropDef { identifier: "index", name: "", description: "List of indices", kind: PropKind::Int { default: Defaults::Array(&[0]), hard: (-2147483648, 2147483647), soft: (0, 0) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Fixed(1), flags: PropFlags::REQUIRED, deprecated: None },
+            PropDef { identifier: "index", name: "", description: "List of indices", kind: PropKind::Int { default: Defaults::Array(&[0]), hard: (-2147483648, 2147483647), soft: (0, 0) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Dynamic, flags: PropFlags::REQUIRED, deprecated: None },
         ],
         returns: &[],
         keyword_only_from: None,

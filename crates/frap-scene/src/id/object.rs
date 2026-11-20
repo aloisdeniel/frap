@@ -232,7 +232,7 @@ crate::id::id_rna! { Object as frap_spec_rna::OBJECT, "OBJECT" {
     show_all_edges => show_all_edges,
     show_in_front => show_in_front,
     show_only_shape_key => show_only_shape_key,
-    active_shape_key_index => active_shape_key_index,
+    active_shape_key_index => get(|o| o.active_shape_key_index.max(0)) set(|o, v: i32| o.active_shape_key_index = v),
     children => python_only hook_coll,
     children_recursive => python_only hook_coll,
     users_collection => python_only hook_coll,

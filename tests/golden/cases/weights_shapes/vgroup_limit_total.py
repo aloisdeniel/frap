@@ -1,0 +1,43 @@
+# WP 6.3: `object.vertex_group_limit_total` drops the lowest weights of each vertex, ties
+# decided by Blender's `qsort` comparator (`inv_cmp_mdef_vert_weights`), on every selected
+# mesh object; `vertex_group_clean` on the active group only by default. Which groups a vertex
+# keeps is compared through `weight()` outcomes (`Vertex not in group`), the weights through
+# the camera's location.
+# golden: startup=factory tier=T0 compare=objects
+import bpy
+bpy.data.objects['Cube'].vertex_groups.new(name='A')
+bpy.data.objects['Cube'].vertex_groups.new(name='B')
+bpy.data.objects['Cube'].vertex_groups.new(name='C')
+bpy.data.objects['Cube'].vertex_groups['A'].add([0, 1, 2, 3], 0.5, 'REPLACE')
+bpy.data.objects['Cube'].vertex_groups['B'].add([0, 2, 3], 0.5, 'REPLACE')
+bpy.data.objects['Cube'].vertex_groups['C'].add([1, 2, 3], 0.5, 'REPLACE')
+bpy.data.objects['Cube'].vertex_groups['B'].add([1], 0.7, 'REPLACE')
+bpy.data.objects['Cube'].vertex_groups['C'].add([3], 0.25, 'REPLACE')
+bpy.data.objects['Cube'].vertex_groups['A'].add([4], 0.1, 'REPLACE')
+bpy.ops.object.vertex_group_limit_total(limit=2)
+bpy.data.objects['Cube'].vertex_groups['A'].weight(1)
+bpy.data.objects['Cube'].vertex_groups['B'].weight(1)
+bpy.data.objects['Cube'].vertex_groups['C'].weight(1)
+bpy.data.objects['Cube'].vertex_groups['A'].weight(2)
+bpy.data.objects['Cube'].vertex_groups['B'].weight(2)
+bpy.data.objects['Cube'].vertex_groups['C'].weight(2)
+bpy.data.objects['Cube'].vertex_groups['A'].weight(3)
+bpy.data.objects['Cube'].vertex_groups['B'].weight(3)
+bpy.data.objects['Cube'].vertex_groups['C'].weight(3)
+bpy.ops.object.vertex_group_limit_total(limit=1)
+bpy.data.objects['Cube'].vertex_groups['A'].weight(0)
+bpy.data.objects['Cube'].vertex_groups['B'].weight(0)
+bpy.data.objects['Cube'].vertex_groups['A'].weight(2)
+bpy.data.objects['Cube'].vertex_groups['B'].weight(2)
+bpy.data.objects['Cube'].vertex_groups['C'].weight(2)
+bpy.data.objects['Cube'].vertex_groups['B'].weight(1)
+bpy.data.objects['Camera'].location = (bpy.data.objects['Cube'].vertex_groups['B'].weight(1), bpy.data.objects['Cube'].vertex_groups['A'].weight(4), 0)
+bpy.ops.object.vertex_group_limit_total(limit=0)
+bpy.data.objects['Cube'].vertex_groups['A'].weight(4)
+bpy.ops.object.vertex_group_clean(limit=0.2)
+bpy.ops.object.vertex_group_set_active(group='A')
+bpy.data.objects['Cube'].vertex_groups['A'].add([5], 0.1, 'REPLACE')
+bpy.data.objects['Cube'].vertex_groups['C'].add([5], 0.1, 'REPLACE')
+bpy.ops.object.vertex_group_clean(limit=0.2)
+bpy.data.objects['Cube'].vertex_groups['A'].weight(5)
+bpy.data.objects['Cube'].vertex_groups['C'].weight(5)

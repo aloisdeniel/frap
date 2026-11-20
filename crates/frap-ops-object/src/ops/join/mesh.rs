@@ -196,12 +196,16 @@ pub(crate) fn join(parts: &[Part], write_material_index: bool) -> Result<Mesh, S
         out.attributes_mut()
             .insert(Attribute { name, domain, data });
     }
-    // Vertex groups by name.
+    // Vertex groups by name; a group copied from another mesh keeps its lock.
     let mut groups: Vec<SmolStr> = base.vertex_group_names.clone();
+    let mut locks: Vec<SmolStr> = base.vertex_group_locks.clone();
     for p in parts {
-        for g in &p.mesh.vertex_group_names {
+        for (i, g) in p.mesh.vertex_group_names.iter().enumerate() {
             if !groups.contains(g) {
                 groups.push(g.clone());
+                if p.mesh.vertex_group_locked(i) {
+                    locks.push(g.clone());
+                }
             }
         }
     }
@@ -227,6 +231,7 @@ pub(crate) fn join(parts: &[Part], write_material_index: bool) -> Result<Mesh, S
     }
     out.header = base.header.clone();
     out.vertex_group_names = groups;
+    out.vertex_group_locks = locks;
     out.uv_active = base.uv_active.clone();
     out.uv_active_render = base.uv_active_render.clone();
     out.color_active = base.color_active.clone();

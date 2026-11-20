@@ -1,0 +1,36 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "mesh.shape_propagate_to_all",
+  "bl_idname": "MESH_OT_shape_propagate_to_all",
+  "label": "Shape Propagate",
+  "description": "Apply selected vertex locations to all other shape keys",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_MESH"
+    ],
+    "text": "requires Edit Mode on a mesh (bpy.ops.object.mode_set(mode='EDIT') with a mesh active)",
+    "matrix": {
+      "plain": "NNYNN",
+      "view3d": "NNYNN"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M6",
+    "extension": false,
+    "notes": []
+  }
+}

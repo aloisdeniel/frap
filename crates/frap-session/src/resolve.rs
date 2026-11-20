@@ -570,8 +570,8 @@ pub fn step(host: &dyn HostRead, cur: Target, seg: &PathSeg) -> Result<Target, F
     Ok(t)
 }
 
-/// WP 4.1 (D-41): `ob.evaluated_get(dg).data` of a mesh object with modifiers is its evaluated
-/// mesh, as in Blender. It is reached as `objects['X'].data` behind a
+/// WP 4.1 (D-41): `ob.evaluated_get(dg).data` of a mesh object with modifiers (or, WP 6.3, a
+/// key with blocks) is its evaluated mesh, as in Blender. It is reached as `objects['X'].data` behind a
 /// [`Detached::Temporary`] pointer (the form `Object.to_mesh()` returns), which
 /// [`with_struct`] reads as the object's evaluated mesh; its `original` is itself and its
 /// `is_evaluated` reads False (verified on 5.2.4: `ev.data.original == ev.data`).
@@ -587,7 +587,18 @@ fn evaluated_data(host: &dyn HostRead, p: &RnaPtr, attr: &str) -> Option<Target>
     let data = ob.data?;
     match (p.path.as_slice(), attr) {
         ([], "data") if p.detached == Some(Detached::Evaluated) => {
-            if data.code != frap_rna::IdCode::ME || ob.modifiers.is_empty() {
+            if data.code != frap_rna::IdCode::ME {
+                return None;
+            }
+            // Shape keys change the evaluated mesh as modifiers do (WP 6.3).
+            let main = host.main();
+            let keyed = data
+                .typed::<frap_rna::MeshId>()
+                .and_then(|me| main.meshes.get(me))
+                .and_then(|m| m.shape_keys)
+                .and_then(|k| main.shape_keys.get(k))
+                .is_some_and(|k| !k.key_blocks.is_empty());
+            if ob.modifiers.is_empty() && !keyed {
                 return None;
             }
             let mut ptr = RnaPtr::id(id, &frap_spec_rna::OBJECT)

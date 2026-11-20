@@ -685,14 +685,26 @@ impl Session {
             let input = v.to_input()?;
             let mut c = coerce(prop, input.clone(), &CoerceCx::RnaSet { owner })
                 .map_err(|e| e.into_frap(set_prefix(&p.ptr), set_code))?;
-            // Setters that apply their own range get the raw integer (`Scene.frame_current`:
-            // Blender 5.2.4 keeps `= 1000000000`, the hook clamps negatives to 0).
-            if c.clamped
-                && frap_scene::id::Scene::UNCLAMPED.contains(&(owner, prop.identifier))
-                && let Input::Int(i) = input
-            {
-                c.value = Value::Int(i);
-                c.clamped = false;
+            // Setters that apply their own range get the raw number (`Scene.frame_current`:
+            // Blender 5.2.4 keeps `= 1000000000`, the hook clamps negatives to 0;
+            // `ShapeKey.value` clamps to its sliders).
+            let unclamped = frap_scene::id::Scene::UNCLAMPED.contains(&(owner, prop.identifier));
+            if c.clamped && unclamped {
+                match (&c.value, &input) {
+                    (Value::Int(_), Input::Int(i)) => {
+                        c.value = Value::Int(*i);
+                        c.clamped = false;
+                    }
+                    (Value::Float(_), Input::Int(i)) => {
+                        c.value = Value::Float(*i as f32);
+                        c.clamped = false;
+                    }
+                    (Value::Float(_), Input::Float(f)) => {
+                        c.value = Value::Float(*f as f32);
+                        c.clamped = false;
+                    }
+                    _ => {}
+                }
             }
             if c.clamped {
                 reports.push(info(frap_rna::clamp_report(prop, &input)));
@@ -704,7 +716,11 @@ impl Session {
                 .unwrap_or_else(|| value_json(&c.value, &self.host.state.main));
             // A pointer setter may refuse the value silently (`ArrayModifier.start_cap` = a
             // camera, D-97): echo what the pointer holds now.
+            // A setter with its own range likewise (`ShapeKey.value` clamped to its sliders).
             let echo = match prop.kind {
+                _ if unclamped => resolve::read_value(&self.host, p)
+                    .map(|v| value_json(&v, &self.host.state.main))
+                    .unwrap_or(echo),
                 PropKind::Pointer { .. } => resolve::read_value(&self.host, p)
                     .map(|v| value_json(&v, &self.host.state.main))
                     .unwrap_or(echo),

@@ -398,9 +398,16 @@ impl CustomData {
 const VERT_EDGE_KEEP: ElemFlag = ElemFlag::SELECT;
 
 impl BMesh {
-    /// Copies vertex shape-key coordinates (`CD_SHAPEKEY`) from `src` to `dst`.
+    /// Copies vertex shape-key coordinates (`CD_SHAPEKEY`) and the original key index
+    /// (`CD_SHAPE_KEYINDEX`) from `src` to `dst`; `None` sets the layer defaults.
     pub(crate) fn shape_copy(&mut self, src: Option<VertId>, dst: VertId) {
         let d = dst.slot();
+        if let Some(ki) = &mut self.shape_keyindex {
+            if ki.len() <= d {
+                ki.resize(d + 1, 0);
+            }
+            ki[d] = src.and_then(|v| ki.get(v.slot()).copied()).unwrap_or(0);
+        }
         for s in &mut self.shape_layers {
             if s.co.len() <= d {
                 s.co.resize(d + 1, [0.0; 3]);
@@ -555,14 +562,14 @@ impl BMesh {
         if fac <= 0.0 {
             if v_src1 != v_dst {
                 self.vdata.copy_elem(v_src1.0, v_dst.0);
-                if !self.shape_layers.is_empty() {
+                if !self.shape_layers.is_empty() || self.shape_keyindex.is_some() {
                     self.shape_copy(Some(v_src1), v_dst);
                 }
             }
         } else if fac >= 1.0 {
             if v_src2 != v_dst {
                 self.vdata.copy_elem(v_src2.0, v_dst.0);
-                if !self.shape_layers.is_empty() {
+                if !self.shape_layers.is_empty() || self.shape_keyindex.is_some() {
                     self.shape_copy(Some(v_src2), v_dst);
                 }
             }

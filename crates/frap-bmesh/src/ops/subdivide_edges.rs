@@ -840,6 +840,7 @@ fn exec(
     let mut tmp = ShapeLayer {
         name: "".into(),
         co: vec![[0.0; 3]; bm.verts.capacity()],
+        uid: 0,
     };
     for (s, v) in bm.verts.iter() {
         tmp.co[s as usize] = v.co;

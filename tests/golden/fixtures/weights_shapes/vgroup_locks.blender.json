@@ -1,0 +1,223 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.object.vertex_group_assign.poll() The active vertex group is locked"
+    },
+    {
+      "line": 23,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.object.vertex_group_remove_from.poll() The active vertex group is locked"
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: All groups are locked\n"
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 2 out of range, size 2"
+    },
+    {
+      "line": 36,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"B\" not found"
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.87758255, 0.0, 0.42073548, 0.5],
+        [0.0, 0.0, -0.47942555, 0.25],
+        [-0.47942555, 0.0, 0.77015114, 0.25],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.5, 0.25, 0.25],
+      "rotation_mode": "XYZ",
+      "rotation": [0.5, 0.5, 0.0],
+      "scale": [1.0, 0.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [2.0, 0.0, 0.0, 1.0],
+        [0.0, 0.5403023, 0.84147096, 1.0],
+        [0.0, -0.84147096, 0.5403023, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 1.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [-1.0, 0.0, 0.0],
+      "scale": [2.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

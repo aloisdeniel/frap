@@ -1,0 +1,9 @@
+# WP 6.3: the vertex-group and shape-key operators in short form (§11.4): `vertex_group_add`,
+# `set_active`, Edit Mode `assign` with `tool_settings.vertex_group_weight`, `assign_new`,
+# `remove_from` (every group), `normalize_all`, `clean` (every group below the limit),
+# `shape_key_add` (Basis, Key 1), `shape_key_clear`, `join_shapes` without another selected
+# mesh (CANCELLED with Blender's WARNING) and `shape_key_remove` of the active block. Outcomes
+# verified on Blender 5.2.4. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true
