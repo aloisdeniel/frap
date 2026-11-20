@@ -29,7 +29,7 @@ pub mod materials;
 pub mod mesh;
 pub mod node_map;
 pub mod nodes;
-/// `KHR_animation_pointer` (WP 6.9; M5+M6 W0 stub).
+/// `KHR_animation_pointer` (WP 6.9).
 pub mod pointer;
 pub mod scenes;
 pub mod settings;
@@ -92,6 +92,9 @@ pub fn export(
     let mut g = gather::Gather::new(main, ctx, settings);
     scenes::gather(&mut g)?;
     animation::gather(&mut g)?;
+    // `KHR_animation_pointer` (WP 6.9): after the animations, whose scene / track
+    // animations its channels join.
+    pointer::gather(&mut g)?;
     if let Some(m) = g.state::<extras::NonFinite>().0.take() {
         return Err(ExportError::Json(m));
     }

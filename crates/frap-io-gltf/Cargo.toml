@@ -10,6 +10,8 @@ publish.workspace = true
 
 [dependencies]
 frap-rna.workspace = true
+# WP 6.9: KHR_animation_pointer samples and creates animation data.
+frap-anim.workspace = true
 frap-gltf.workspace = true
 frap-scene.workspace = true
 frap-mesh.workspace = true
