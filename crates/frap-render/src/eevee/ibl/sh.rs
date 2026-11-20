@@ -6,6 +6,13 @@
 //! Basis (Blender's, with the Condon-Shortley phase): `Y00 = 0.282094792`,
 //! `Y1-1 = -0.488602512 y`, `Y10 = 0.488602512 z`, `Y11 = -0.488602512 x`. Coefficients are
 //! projections of the radiance (`Σ L(ω) Y(ω) dω`).
+//!
+//! `WorldLighting::sh9` is exported in the conventional real basis instead (no Condon-Shortley
+//! phase, Ramamoorthi & Hanrahan 2001: `Y1-1 = 0.488603 y`, `Y10 = 0.488603 z`,
+//! `Y11 = 0.488603 x`, band 2 in the order `xy, yz, 3z²-1, xz, x²-y²`), in the world's frame
+//! ([`ShL1::to_sh9`]); [`sh9_irradiance`] is the consumer's formula. For the L1 band,
+//! `sh9_irradiance(N) / π` is exactly EEVEE's `evaluate_lambert(N)`:
+//! `π·Y00 = 0.886227` and `π · 2/3 · Y1 = 1.023328`.
 
 /// `L0.M0`
 pub const L0_M0: f32 = 0.282_094_8;
@@ -103,14 +110,58 @@ impl ShL1 {
         out
     }
 
-    /// The coefficients as the `sh9` of `WorldLighting` (band 2 zero).
-    pub fn to_sh9(&self) -> [[f32; 4]; 9] {
+    /// The coefficients as the `sh9` of `WorldLighting`: the conventional real basis (entries
+    /// `L00, L1-1 (y), L10 (z), L11 (x)`, band 2 zero) of the radiance of a world whose
+    /// environment lookup is `Rz(rotation) · direction`, `self` being the harmonics of the
+    /// environment. The L1 coefficients form a vector `a` (`L(d) ≈ … + a·d`) per channel; the
+    /// world sees `a · Rz(rotation)·d = (Rz(-rotation)·a) · d`.
+    pub fn to_sh9(&self, rotation: f32) -> [[f32; 4]; 9] {
+        let (s, c) = rotation.sin_cos();
+        // Blender's basis → conventional: `L11 = -Mp1`, `L1-1 = -Mn1`, `L10 = M0`.
+        let ax = self.l1p1.map(|v| -v);
+        let ay = self.l1n1.map(|v| -v);
+        // Rz(-rotation)
+        let wx: [f32; 3] = std::array::from_fn(|i| c * ax[i] + s * ay[i]);
+        let wy: [f32; 3] = std::array::from_fn(|i| -s * ax[i] + c * ay[i]);
+        let v4 = |v: [f32; 3]| [v[0], v[1], v[2], 0.0];
         let mut out = [[0.0; 4]; 9];
-        for (k, c) in self.coefs().iter().enumerate() {
-            out[k] = [c[0], c[1], c[2], 0.0];
-        }
+        out[0] = v4(self.l0);
+        out[1] = v4(wy);
+        out[2] = v4(self.l10);
+        out[3] = v4(wx);
         out
     }
+
+    /// The inverse of [`ShL1::to_sh9`] at rotation 0 (the L1 part of `sh9`, Blender's basis).
+    pub fn from_sh9(sh9: &[[f32; 4]; 9]) -> ShL1 {
+        let c = |k: usize, sign: f32| [sh9[k][0], sh9[k][1], sh9[k][2]].map(|x| x * sign);
+        ShL1::from_coefs([c(0, 1.0), c(1, -1.0), c(2, 1.0), c(3, -1.0)])
+    }
+}
+
+/// The irradiance `E(N)` of `sh9` (`WorldLighting::sh9`), Ramamoorthi & Hanrahan 2001,
+/// clamped at 0: the formula every consumer evaluates (the diffuse world radiance of a closure
+/// is `diffuse_color · E(N) / π`; WGSL `ibl_sh9_irradiance`).
+pub fn sh9_irradiance(sh9: &[[f32; 4]; 9], n: [f32; 3]) -> [f32; 3] {
+    let [x, y, z] = n;
+    let w = [
+        0.886_227,
+        1.023_328 * y,
+        1.023_328 * z,
+        1.023_328 * x,
+        0.858_086 * x * y,
+        0.858_086 * y * z,
+        0.247_708 * (3.0 * z * z - 1.0),
+        0.858_086 * x * z,
+        0.429_043 * (x * x - y * y),
+    ];
+    std::array::from_fn(|i| {
+        w.iter()
+            .zip(sh9)
+            .map(|(w, c)| w * c[i])
+            .sum::<f32>()
+            .max(0.0)
+    })
 }
 
 #[cfg(test)]
@@ -195,8 +246,42 @@ mod tests {
         // Lit side unchanged in direction, dark side non-negative.
         assert!(d.evaluate_lambert([1.0, 0.0, 0.0])[0] > d.evaluate_lambert([-1.0, 0.0, 0.0])[0]);
         assert!(d.evaluate_lambert([-1.0, 0.0, 0.0])[0] >= 0.0);
-        let s9 = d.to_sh9();
-        assert_eq!(s9[3][0], d.l1p1[0]);
+        let s9 = d.to_sh9(0.0);
+        assert_eq!(s9[3][0], -d.l1p1[0]);
         assert!(s9[4..].iter().all(|c| *c == [0.0; 4]));
+        assert_eq!(ShL1::from_sh9(&s9), d);
+    }
+
+    #[test]
+    fn sh9_is_the_conventional_basis_in_the_world_frame() {
+        // An environment brighter towards +X (Blender's basis: `Mp1` negative).
+        let env = project(|d| [1.0 + d[0].max(0.0) * 3.0, 1.0, 1.0 + d[1].max(0.0)]);
+        assert!(env.l1p1[0] < 0.0);
+        let pi = std::f32::consts::PI;
+        for rotation in [0.0, 0.7, -2.0] {
+            let sh9 = env.to_sh9(rotation);
+            // Conventional sign: the +X-bright channel has a positive x coefficient at 0.
+            if rotation == 0.0 {
+                assert!(sh9[3][0] > 0.0 && sh9[1][2] > 0.0, "{sh9:?}");
+            }
+            for n in [
+                [1.0, 0.0, 0.0],
+                [0.0, -1.0, 0.0],
+                [0.6, 0.0, 0.8],
+                [-0.48, 0.6, -0.64],
+            ] {
+                // The world at N is the environment at `Rz(rotation) · N`.
+                let (s, c) = rotation.sin_cos();
+                let lookup = [c * n[0] - s * n[1], s * n[0] + c * n[1], n[2]];
+                let want = env.evaluate_lambert(lookup);
+                let got = sh9_irradiance(&sh9, n).map(|e| e / pi);
+                for i in 0..3 {
+                    assert!(
+                        (got[i] - want[i]).abs() < 1e-5,
+                        "{rotation} {n:?}: {got:?} {want:?}"
+                    );
+                }
+            }
+        }
     }
 }

@@ -4,7 +4,8 @@
 // probe, world sun with hard ray-traced shadows, background), with the film's
 // Gaussian-fitted Blackman-Harris filter (`film_filter_weight`, radius `filter_size` 1.5 px)
 // over a 6 x 6 sample grid. It validates the world lighting against Blender's EEVEE renders
-// before the forward engine (WP 5.1) is wired to it.
+// before the forward engine (WP 5.1) is wired to it, and consumes every `WorldLighting` field
+// exactly as its documentation tells consumers to (the contract test of the goldens).
 
 struct Uniforms {
     cam_right: vec4<f32>,
@@ -13,15 +14,13 @@ struct Uniforms {
     cam_pos: vec4<f32>,
     // tan of the half field of view (x, y), image size (z, w).
     frustum: vec4<f32>,
-    sh0: vec4<f32>,
-    sh1: vec4<f32>,
-    sh2: vec4<f32>,
-    sh3: vec4<f32>,
+    // `WorldLighting::sh9`.
+    sh: array<vec4<f32>, 9>,
     // Direction to the sun (xyz), 1 when there is a sun (w).
     sun_dir: vec4<f32>,
     // Sun irradiance (rgb).
     sun_color: vec4<f32>,
-    // rotation, spheres, quads, -
+    // rotation, spheres, quads, strength
     misc: vec4<f32>,
 }
 
@@ -105,8 +104,9 @@ fn smith_vis(nl: f32, nv: f32, a2: f32) -> f32 {
 fn shade(o: vec3<f32>, d: vec3<f32>) -> vec3<f32> {
     let hit = trace(o, d, 1e30);
     if (hit.t >= 1e30) {
+        // `WorldLighting::background`: the environment at strength 1.
         let tc = ibl_equirect_tex_coord(d, u.misc.x);
-        return textureSampleLevel(background_tx, bg_sampler, tc, 0.0).rgb;
+        return textureSampleLevel(background_tx, bg_sampler, tc, 0.0).rgb * u.misc.w;
     }
     let p = o + d * hit.t;
     let n = hit.n;
@@ -114,8 +114,7 @@ fn shade(o: vec3<f32>, d: vec3<f32>) -> vec3<f32> {
     let nv = dot(n, v);
     let cl = ibl_principled(brdf_tx, bsdf_tx, lut_sampler, hit.mat0.rgb, hit.mat0.w, hit.mat1.x,
                             hit.mat1.y, nv);
-    var c = ibl_world_radiance(specular_tx, lut_sampler, u.sh0.xyz, u.sh1.xyz, u.sh2.xyz,
-                               u.sh3.xyz, cl, n, v);
+    var c = ibl_world_radiance(specular_tx, lut_sampler, u.sh, u.misc.x, u.misc.w, cl, n, v);
     if (u.sun_dir.w > 0.0) {
         let l = u.sun_dir.xyz;
         let nl = dot(n, l);

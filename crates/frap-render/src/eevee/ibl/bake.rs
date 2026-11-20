@@ -3,20 +3,26 @@
 //! update (blender/source/blender/draw/engines/eevee/eevee_lightprobe_sphere.cc,
 //! `SphereProbeModule::remap_to_octahedral_projection`):
 //!
-//! 1. the world (environment × strength) is drawn into a cube map of `probe_extent / 2` per
-//!    face (`update_info_from_probe`: `cube_target_extent = area_extent / 2`);
+//! 1. the environment (unrotated, at strength 1) is drawn into a cube map of
+//!    `probe_extent / 2` per face (`update_info_from_probe`: `cube_target_extent =
+//!    area_extent / 2`);
 //! 2. `remap` writes the octahedral mip 0 (`probe_extent`², radiance split at the world's
 //!    `sun_threshold`, clamped by `clamp_surface_indirect`) and per-work-group partial sums of
-//!    the L1 harmonics and of the sun;
+//!    the L1 harmonics and of the sun. EEVEE applies both limits to the world radiance
+//!    (environment × strength `s`); `clamp(s·L, t) = s·clamp(L, t/|s|)` (the clamps scale by
+//!    the brightest channel), so the bake divides the limits by `|s|` and works in units of
+//!    the environment texture: the specular cube map then needs no strength, as the
+//!    `WorldLighting` contract says;
 //! 3. `convolve` fills mips 1–4 from the previous mip (196 spherical-gaussian samples);
 //! 4. each octahedral mip is resampled into the matching mip of the specular cube map (the
 //!    `WorldLighting::specular` contract), face size `probe_extent / 2 >> mip`;
 //! 5. the partial sums are read back and reduced on the CPU in a fixed order (`irradiance_sum`,
-//!    `sun_extraction`), then the harmonics are deringed (`load_world`).
+//!    `sun_extraction`), scaled by `s`, and the harmonics are deringed (`load_world`). The sun
+//!    direction is turned from the environment's frame into the world's (`Rz(-rotation)`).
 
 use bytemuck::{Pod, Zeroable};
 use frap_render_scene::{RLight, RLightEevee, RLightKind, RenderError};
-use glam::{Mat4, Vec3, Vec4};
+use glam::{Mat3, Mat4, Vec3, Vec4};
 use wgpu::util::DeviceExt;
 
 use super::equirect::LinearImage;
@@ -86,7 +92,7 @@ struct Params {
     mip0_extent: i32,
     read_lod: i32,
     groups_x: i32,
-    rotation: f32,
+    _unused: f32,
     sun_threshold: f32,
     clamp_indirect: f32,
     _pad: f32,
@@ -106,16 +112,18 @@ const REMAP_GROUP: u32 = 16;
 
 /// The baked world probe.
 pub(crate) struct Baked {
-    /// The environment as uploaded (equirectangular, `Rgba16Float`).
+    /// The environment as uploaded (equirectangular, `Rgba16Float`, strength 1).
     pub background: wgpu::Texture,
-    /// The prefiltered specular cube map (6 layers, [`MIPMAP_LEVELS`] mips).
+    /// The prefiltered specular cube map (6 layers, [`MIPMAP_LEVELS`] mips; the environment's
+    /// frame, strength 1).
     pub specular: wgpu::Texture,
-    /// The octahedral probe ([`MIPMAP_LEVELS`] mips), kept for tests.
+    /// The octahedral probe ([`MIPMAP_LEVELS`] mips, as `specular`), kept for tests.
     #[cfg_attr(not(test), allow(dead_code))]
     pub octahedral: wgpu::Texture,
-    /// Deringed L1 harmonics of the (sun-clamped) world radiance.
+    /// Deringed L1 harmonics of the (sun-clamped) world radiance, × strength, in the
+    /// environment's frame (Blender's basis).
     pub sh: ShL1,
-    /// The extracted world sun.
+    /// The extracted world sun (world frame, × strength).
     pub sun: Option<RLight>,
 }
 
@@ -262,7 +270,8 @@ pub(crate) fn upload_background(gpu: &Gpu, image: &LinearImage) -> wgpu::Texture
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
             format: wgpu::TextureFormat::Rgba16Float,
-            usage: wgpu::TextureUsages::TEXTURE_BINDING,
+            // COPY_SRC: diagnostics and the contract tests read it back.
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_SRC,
             view_formats: &[],
         },
         wgpu::util::TextureDataOrder::LayerMajor,
@@ -270,11 +279,13 @@ pub(crate) fn upload_background(gpu: &Gpu, image: &LinearImage) -> wgpu::Texture
     )
 }
 
-/// Bakes the world probe of `image` (already × strength) seen through `Rz(rotation)`.
+/// Bakes the world probe of `image` (at strength 1) for a world of `strength` whose lookup is
+/// `Rz(rotation) · direction` (finite `strength`).
 pub(crate) fn bake(
     gpu: &Gpu,
     image: &LinearImage,
     rotation: f32,
+    strength: f32,
     settings: &WorldProbeSettings,
 ) -> Result<Baked, RenderError> {
     let dev = &gpu.device;
@@ -314,9 +325,9 @@ pub(crate) fn bake(
         mip0_extent: extent as i32,
         read_lod: 0,
         groups_x: groups_x as i32,
-        rotation,
-        sun_threshold: clamp_value_load(settings.sun_threshold),
-        clamp_indirect: clamp_value_load(settings.clamp_surface_indirect),
+        _unused: 0.0,
+        sun_threshold: env_limit(settings.sun_threshold, strength),
+        clamp_indirect: env_limit(settings.clamp_surface_indirect, strength),
         _pad: 0.0,
     };
 
@@ -412,8 +423,19 @@ pub(crate) fn bake(
 
     let parts: Vec<Partial> = map_read(gpu, &staging, |b| bytemuck::cast_slice(b).to_vec())?;
     let (sh, sun) = reduce(&parts);
+    let sh = ShL1::from_coefs(sh.coefs().map(|c| c.map(|x| x * strength)));
     let sun = if settings.sun_threshold > 0.0 {
-        sun.and_then(|s| world_sun(s.color, s.direction, settings))
+        sun.and_then(|s| {
+            // Environment frame → world frame: the world looks up `Rz(rotation) · d`, so the
+            // environment's direction `e` is seen from `Rz(-rotation) · e`.
+            let d = Mat3::from_rotation_z(-rotation)
+                * Vec3::new(s.direction[0], s.direction[1], s.direction[2]);
+            world_sun(
+                s.color.map(|c| c * strength),
+                [d.x, d.y, d.z, s.direction[3]],
+                settings,
+            )
+        })
     } else {
         None
     };
@@ -424,6 +446,13 @@ pub(crate) fn bake(
         sh: sh.dering(),
         sun,
     })
+}
+
+/// A radiance limit of the world (`clamp_value_load`) in units of the environment texture:
+/// `limit / |strength|`, capped at 1e30 (strength 0: no limit).
+fn env_limit(limit: f32, strength: f32) -> f32 {
+    let v = clamp_value_load(limit) / strength.abs();
+    if v.is_nan() { 1e30 } else { v.min(1e30) }
 }
 
 /// Maps `buf` for reading after the submitted work completes.
@@ -493,7 +522,7 @@ fn reduce(parts: &[Partial]) -> (ShL1, Option<SunSum>) {
 }
 
 /// The second half of `sun_extraction` and `LightModule::add_world_sun_light`: the world sun
-/// as a sun light. Its colour is the extracted irradiance (`sunlight_buf.color`, at strength 1);
+/// as a sun light. Its colour × energy is the extracted irradiance (`sunlight_buf.color`);
 /// the angle and shadow settings are the World's (`sun_angle` from the UI, not the automatic
 /// size, as EEVEE does).
 fn world_sun(color: [f32; 3], dir_sum: [f32; 4], s: &WorldProbeSettings) -> Option<RLight> {
@@ -510,6 +539,10 @@ fn world_sun(color: [f32; 3], dir_sum: [f32; 4], s: &WorldProbeSettings) -> Opti
     let x = Vec3::new(1.0 + z_sign * z.x * z.x * a, z_sign * b, -z_sign * z.x);
     let y = Vec3::new(b, z_sign + z.y * z.y * a, -z.y);
     let energy = color[0].max(color[1]).max(color[2]);
+    // A world of strength ≤ 0 has no sun (nothing passes the threshold in Blender either).
+    if !energy.is_finite() || energy <= 0.0 {
+        return None;
+    }
     let mut eevee = RLightEevee::default();
     eevee.shadow_filter_radius = s.sun_shadow_filter_radius;
     eevee.shadow_maximum_resolution = s.sun_shadow_maximum_resolution;
@@ -608,6 +641,7 @@ mod tests {
             (m.x_axis.truncate().cross(m.y_axis.truncate()) - m.z_axis.truncate()).length() < 1e-5
         );
         assert!(world_sun([1.0; 3], [0.0, 0.0, 0.0, 1.0], &s).is_none());
+        assert!(world_sun([-1.0; 3], [0.0, 0.0, 1.0, 1.0], &s).is_none());
     }
 
     #[test]
@@ -629,5 +663,9 @@ mod tests {
         );
         assert_eq!(clamp_value_load(0.0), 1e20);
         assert_eq!(clamp_value_load(3.0), 3.0);
+        assert_eq!(env_limit(10.0, 2.0), 5.0);
+        assert_eq!(env_limit(10.0, -0.5), 20.0);
+        assert_eq!(env_limit(10.0, 0.0), 1e30);
+        assert_eq!(env_limit(0.0, 1e-30), 1e30);
     }
 }

@@ -139,15 +139,18 @@ fn ibl_principled(lut: texture_2d<f32>, bsdf: texture_2d_array<f32>, s: sampler,
 
 // World lighting of the two closures: `diffuse_color * evaluate_lambert(N)` and
 // `reflection_color * mix(probe(R, lod), evaluate_lambert(R), mix_fac)`
-// (`LightprobeRenderData::eval`, world probe, normalization factor 1).
-fn ibl_world_radiance(specular: texture_cube<f32>, s: sampler, sh0: vec3<f32>,
-                      sh1: vec3<f32>, sh2: vec3<f32>, sh3: vec3<f32>, cl: IblPrincipled,
-                      n: vec3<f32>, v: vec3<f32>) -> vec3<f32> {
-    let diffuse = cl.diffuse_color * ibl_sh_lambert(sh0, sh1, sh2, sh3, n);
+// (`LightprobeRenderData::eval`, world probe, normalization factor 1), from the
+// `WorldLighting` fields as documented: `sh` in the world's frame with strength applied, the
+// specular probe in the environment's frame at strength 1.
+fn ibl_world_radiance(specular: texture_cube<f32>, s: sampler, sh: array<vec4<f32>, 9>,
+                      rotation: f32, strength: f32, cl: IblPrincipled, n: vec3<f32>,
+                      v: vec3<f32>) -> vec3<f32> {
+    let diffuse = cl.diffuse_color * ibl_sh_lambert(sh, n);
     let r = ibl_dominant_direction_reflection(n, v, cl.roughness);
     let lod = ibl_roughness_to_lod(cl.roughness);
-    let probe = textureSampleLevel(specular, s, r, lod).rgb;
+    let probe = textureSampleLevel(specular, s, ibl_world_lookup(r, rotation), lod).rgb *
+                strength;
     let fac = ibl_roughness_to_mix_fac(cl.roughness);
-    let spec = mix(probe, ibl_sh_lambert(sh0, sh1, sh2, sh3, r), fac);
+    let spec = mix(probe, ibl_sh_lambert(sh, r), fac);
     return diffuse + cl.reflection_color * spec;
 }

@@ -6,7 +6,7 @@
 // `cubemap_tx_` (`SphereProbeModule::ensure_cubemap_render_target`).
 //
 // Entry points (one pipeline each, auto layouts):
-// - `world_to_cube`: the world (environment texture × strength) into the 6 cube faces;
+// - `world_to_cube`: the environment texture (unrotated, strength 1) into the 6 cube faces;
 // - `remap`: cube → octahedral mip 0, splitting the radiance above `sun_threshold` into the
 //   world sun, clamping by `clamp_surface_indirect`, and writing one partial sum per work
 //   group (L1 spherical harmonics of the clamped radiance, sun radiance, sun direction);
@@ -22,11 +22,11 @@ struct Params {
     read_lod: i32,
     // remap: work groups per row.
     groups_x: i32,
-    // world_to_cube: Mapping Z rotation.
-    rotation: f32,
-    // remap: `uniform_buf.clamp.sun_threshold` (1e20 when off).
+    _unused: f32,
+    // remap: `uniform_buf.clamp.sun_threshold` (1e20 when off), in units of the environment
+    // texture (divided by |strength|: the bake works at strength 1).
     sun_threshold: f32,
-    // remap: `uniform_buf.clamp.surface_indirect` (1e20 when off).
+    // remap: `uniform_buf.clamp.surface_indirect` (1e20 when off), divided by |strength|.
     clamp_indirect: f32,
     _pad: f32,
 }
@@ -75,7 +75,7 @@ fn world_to_cube(@builtin(global_invocation_id) id: vec3<u32>) {
         return;
     }
     let dir = cube_texel_direction(id);
-    let tc = ibl_equirect_tex_coord(dir, params.rotation);
+    let tc = ibl_equirect_tex_coord(dir, 0.0);
     let c = textureSampleLevel(equirect_tx, lin_sampler, tc, 0.0).rgb;
     textureStore(cube_out, vec2<i32>(id.xy), i32(id.z), vec4<f32>(c, 1.0));
 }

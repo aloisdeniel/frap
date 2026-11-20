@@ -2,7 +2,7 @@
 //! The environment image as the world shader sees it: Blender's equirectangular mapping
 //! (blender/source/blender/gpu/shaders/material/gpu_shader_material_tex_environment.glsl,
 //! `node_tex_environment_equirectangular`) after the Mapping node's Z rotation, and the image
-//! decoded to scene-linear RGB × the Background strength.
+//! decoded to scene-linear RGB (the bake and the background use it at strength 1).
 //!
 //! Colour: float images (EXR, HDR) are scene-linear as stored; 8- and 16-bit images are
 //! decoded from sRGB, Blender's default colour space for them (frap's `DecodedImage` carries
@@ -63,7 +63,8 @@ impl LinearImage {
                 x.clamp(-HALF_MAX, HALF_MAX)
             }
         };
-        let n = image.width as usize * image.height as usize;
+        // A short pixel buffer yields an invalid image (`is_valid`), not a panic.
+        let n = (image.width as usize * image.height as usize).min(samples.len() / ch);
         let rgb = (0..n)
             .map(|i| {
                 let px = &samples[i * ch..(i + 1) * ch];
@@ -78,6 +79,22 @@ impl LinearImage {
             height: image.height,
             rgb,
         }
+    }
+
+    /// Blender's missing-texture colour (`node_tex_environment_empty`: magenta), 1 × 1.
+    pub fn missing() -> LinearImage {
+        LinearImage {
+            width: 1,
+            height: 1,
+            rgb: vec![[1.0, 0.0, 1.0]],
+        }
+    }
+
+    /// Whether the image has texels, as many as its size says.
+    pub fn is_valid(&self) -> bool {
+        self.width > 0
+            && self.height > 0
+            && self.rgb.len() as u64 == u64::from(self.width) * u64::from(self.height)
     }
 
     /// Halves the resolution (2 × 2 box) until both sides fit in `max_side`.
@@ -204,5 +221,19 @@ mod tests {
         assert_eq!((big.width, big.height), (2, 1));
         assert_eq!(big.rgb, vec![[1.0; 3]; 2]);
         assert_eq!(l.to_rgba16f().len(), 16);
+        assert!(l.is_valid() && LinearImage::missing().is_valid());
+        let empty = LinearImage {
+            width: 0,
+            height: 0,
+            rgb: vec![],
+        };
+        assert!(!empty.is_valid());
+        let empty = DecodedImage {
+            width: 0,
+            height: 3,
+            channels: 4,
+            pixels: PixelData::F32(vec![]),
+        };
+        assert!(!LinearImage::from_decoded(&empty, 1.0).is_valid());
     }
 }

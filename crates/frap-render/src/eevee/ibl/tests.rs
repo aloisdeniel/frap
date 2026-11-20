@@ -17,7 +17,7 @@ use frap_render_scene::{GpuOptions, ImageKey, RWorld, RenderScene};
 use super::bake::read_rgba16f;
 use super::equirect::{self, LinearImage};
 use super::preview::{self, Material, Shape};
-use super::sh::ShL1;
+use super::sh::{ShL1, sh9_irradiance};
 use super::{WorldProbeSettings, build, octahedral, world_lighting};
 use crate::gpu::Gpu;
 
@@ -96,12 +96,15 @@ fn constant_world() {
         probe_extent: 256,
         ..Default::default()
     };
-    let wl = build(&gpu, &img, 0.3, &s).unwrap();
+    // Strength 3: the harmonics include it, the probe (at strength 1) does not.
+    let wl = build(&gpu, &img, 0.3, 3.0, &s).unwrap();
     assert!(wl.sun.is_none(), "nothing passes the threshold");
     assert_eq!(wl.specular_mips, 5);
+    assert_eq!((wl.rotation, wl.strength), (0.3, 3.0));
     for n in [[0.0, 0.0, 1.0], [0.6, -0.8, 0.0], [0.0, 0.0, -1.0]] {
-        let e = wl.sh().evaluate_lambert(n);
-        assert!(close3(e, [0.5, 1.0, 2.0], 5e-3), "{n:?}: {e:?}");
+        let e = sh9_irradiance(&wl.sh9, n).map(|e| e / std::f32::consts::PI);
+        assert!(close3(e, [1.5, 3.0, 6.0], 5e-3), "{n:?}: {e:?}");
+        assert!(close3(wl.sh().evaluate_lambert(n), e, 1e-5));
     }
     assert!(wl.sh9[4..].iter().all(|c| *c == [0.0; 4]));
     // Every probe mip and every cube mip hold the constant.
@@ -130,7 +133,7 @@ fn constant_world() {
 }
 
 #[test]
-fn cube_faces_and_rotation_follow_blender_mapping() {
+fn cube_faces_stay_in_the_environment_frame() {
     let Some(gpu) = gpu() else { return };
     // Colour = positive direction components: +X red, +Y green, +Z blue.
     let img = image_from(512, 256, |d| d.map(|c| c.max(0.0)));
@@ -138,40 +141,45 @@ fn cube_faces_and_rotation_follow_blender_mapping() {
         probe_extent: 256,
         ..Default::default()
     };
-    // Face centres (+X, -X, +Y, -Y, +Z, -Z), rotation 0 then 90°: the lookup is `Rz(rot) · d`,
-    // so the +X face sees the image's +Y.
-    let expect = |rot: bool| -> [[f32; 3]; 6] {
-        if rot {
-            [
-                [0.0, 1.0, 0.0],
-                [0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0],
-                [1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0],
-                [0.0; 3],
-            ]
-        } else {
-            [
-                [1.0, 0.0, 0.0],
-                [0.0; 3],
-                [0.0, 1.0, 0.0],
-                [0.0; 3],
-                [0.0, 0.0, 1.0],
-                [0.0; 3],
-            ]
-        }
-    };
+    // Face centres (+X, -X, +Y, -Y, +Z, -Z) hold the environment's own directions whatever
+    // the rotation (the consumer looks up `Rz(rot) · R`); the harmonics turn with it: at 90°
+    // the world's -Y sees the environment's +X (red) and its +X the environment's +Y.
+    let expect: [[f32; 3]; 6] = [
+        [1.0, 0.0, 0.0],
+        [0.0; 3],
+        [0.0, 1.0, 0.0],
+        [0.0; 3],
+        [0.0, 0.0, 1.0],
+        [0.0; 3],
+    ];
     for rot in [false, true] {
         let r = if rot {
             std::f32::consts::FRAC_PI_2
         } else {
             0.0
         };
-        let wl = build(&gpu, &img, r, &s).unwrap();
+        let wl = build(&gpu, &img, r, 1.0, &s).unwrap();
+        let red_at = if rot {
+            [0.0, -1.0, 0.0]
+        } else {
+            [1.0, 0.0, 0.0]
+        };
+        let green_at = if rot {
+            [1.0, 0.0, 0.0]
+        } else {
+            [0.0, 1.0, 0.0]
+        };
+        let e = |n: [f32; 3]| sh9_irradiance(&wl.sh9, n);
+        let neg = |n: [f32; 3]| n.map(|c| -c);
+        assert!(e(red_at)[0] > 2.0 * e(neg(red_at))[0], "rot {rot}: red");
+        assert!(
+            e(green_at)[1] > 2.0 * e(neg(green_at))[1],
+            "rot {rot}: green"
+        );
         let spec = wl.specular.texture().clone();
         let faces = read_rgba16f(&gpu, &spec, 0).unwrap();
         let size = spec.size().width as usize;
-        for (f, want) in expect(rot).iter().enumerate() {
+        for (f, want) in expect.iter().enumerate() {
             // Average the 2 x 2 centre texels (the exact axis hits the `x == 0 || y == 0`
             // guard of Blender's mapping).
             let mut c = [0.0f32; 3];
@@ -209,7 +217,7 @@ fn harmonics_match_a_cpu_projection_and_are_deringed() {
         probe_extent: 512,
         ..Default::default()
     };
-    let wl = build(&gpu, &img, 0.0, &s).unwrap();
+    let wl = build(&gpu, &img, 0.0, 1.0, &s).unwrap();
     let want = cpu_sh(&img, 1e20).dering();
     let got = wl.sh();
     for (g, w) in got.coefs().iter().zip(want.coefs()) {
@@ -238,16 +246,33 @@ fn sun_extraction() {
         }
     });
     let s = WorldProbeSettings::default();
-    let wl = build(&gpu, &img, 0.0, &s).unwrap();
+    let wl = build(&gpu, &img, 0.0, 1.0, &s).unwrap();
     let l = wl.sun.as_ref().expect("a sun passes the threshold");
     let dir = l.matrix_world.z_axis.truncate();
     assert!(dir.dot(sun) > (0.5f32).to_radians().cos(), "{dir} vs {sun}");
+    // Rotated and dimmed world: the sun turns to `Rz(-rotation) · sun` (the direction whose
+    // lookup is the environment's sun) and its irradiance scales with the strength.
+    let rotated = build(&gpu, &img, 1.1, 0.5, &s).unwrap();
+    let lr = rotated.sun.as_ref().expect("a sun at strength 0.5");
+    let want_dir = glam::Mat3::from_rotation_z(-1.1) * sun;
+    let dir_r = lr.matrix_world.z_axis.truncate();
+    assert!(
+        dir_r.dot(want_dir) > (0.5f32).to_radians().cos(),
+        "{dir_r} vs {want_dir}"
+    );
     // Irradiance: (L - clamp(L)) over the disk; clamp keeps a radiance of max 10.
     let omega = std::f32::consts::TAU * (1.0 - cos_r);
     let k = 10.0 / 2000.0;
     let want = [2000.0, 1800.0, 1500.0].map(|c: f32| c * (1.0 - k) * omega);
     let got = l.color.map(|c| c * l.energy);
     assert!(close3(got, want, 0.03), "{got:?} vs {want:?}");
+    // At strength 0.5 the threshold (10) keeps radiance 10 of the world's 1000.
+    let k = 10.0 / 1000.0;
+    let want_r = [2000.0, 1800.0, 1500.0].map(|c: f32| 0.5 * c * (1.0 - k) * omega);
+    let got_r = lr.color.map(|c| c * lr.energy);
+    assert!(close3(got_r, want_r, 0.03), "{got_r:?} vs {want_r:?}");
+    // A world of strength 0 has no sun.
+    assert!(build(&gpu, &img, 0.0, 0.0, &s).unwrap().sun.is_none());
     assert!(l.use_shadow);
     // The probe keeps only the clamped radiance: the diffuse world is ~0.2 plus the clamped disk.
     let e = wl.sh().evaluate_lambert([0.0, 0.0, -1.0]);
@@ -257,6 +282,7 @@ fn sun_extraction() {
         &gpu,
         &img,
         0.0,
+        1.0,
         &WorldProbeSettings {
             sun_threshold: 0.0,
             ..WorldProbeSettings::default()
@@ -291,7 +317,7 @@ fn probe_mips_blur_with_roughness() {
         probe_extent: 512,
         ..Default::default()
     };
-    let wl = build(&gpu, &img, 0.0, &s).unwrap();
+    let wl = build(&gpu, &img, 0.0, 1.0, &s).unwrap();
     let mut prev = f32::INFINITY;
     for mip in 0..5 {
         let t = &read_rgba16f(&gpu, &wl.octahedral, mip).unwrap()[0];
@@ -333,10 +359,148 @@ fn world_lighting_from_scenes() {
         [0.5; 3],
         5e-3
     ));
+    assert_eq!(wl.strength, 2.0);
     sc.images.clear();
     let wl = world_lighting(&gpu, &sc).unwrap().expect("hdri");
     let e = wl.sh().evaluate_lambert([0.0, 0.0, 1.0]);
     assert!(close3(e, [2.0, 0.0, 2.0], 5e-3), "{e:?}");
+    // A 0 x 0 image is magenta too, not a wgpu validation panic.
+    for (w, h) in [(0, 0), (0, 4), (4, 0)] {
+        sc.images.insert(
+            ImageKey(7),
+            Arc::new(DecodedImage {
+                width: w,
+                height: h,
+                channels: 4,
+                pixels: PixelData::F32(vec![]),
+            }),
+        );
+        let wl = world_lighting(&gpu, &sc).unwrap().expect("hdri");
+        let e = wl.sh().evaluate_lambert([0.0, 0.0, 1.0]);
+        assert!(close3(e, [2.0, 0.0, 2.0], 5e-3), "{w}x{h}: {e:?}");
+        assert_eq!(wl.background.texture().size().width, 1);
+    }
+    // Degenerate strengths and rotations stay finite.
+    for (rotation, strength) in [
+        (f32::NAN, f32::NAN),
+        (f32::INFINITY, f32::INFINITY),
+        (0.0, -1.0),
+    ] {
+        sc.world = RWorld::Hdri {
+            image: ImageKey(8),
+            rotation,
+            strength,
+        };
+        let wl = world_lighting(&gpu, &sc).unwrap().expect("hdri");
+        assert!(wl.strength.is_finite() && wl.rotation.is_finite());
+        assert!(
+            wl.sh9.iter().flatten().all(|c| c.is_finite()),
+            "{:?}",
+            wl.sh9
+        );
+    }
+}
+
+/// Direction of the centre of texel `(x, y)` of cube face `face` (`bake.wgsl::cube_direction`,
+/// the cube-texture convention: +X, -X, +Y, -Y, +Z, -Z).
+fn cube_texel_direction(face: usize, x: usize, y: usize, size: usize) -> [f32; 3] {
+    let u = (x as f32 + 0.5) / size as f32 * 2.0 - 1.0;
+    let v = (y as f32 + 0.5) / size as f32 * 2.0 - 1.0;
+    let d = match face {
+        0 => [1.0, -v, -u],
+        1 => [-1.0, -v, u],
+        2 => [u, 1.0, v],
+        3 => [u, -1.0, -v],
+        4 => [u, -v, 1.0],
+        _ => [-u, -v, -1.0],
+    };
+    let l = (d[0] * d[0] + d[1] * d[1] + d[2] * d[2]).sqrt();
+    d.map(|c| c / l)
+}
+
+/// The contract of `WorldLighting` (module documentation): evaluating `sh9`, `specular` and
+/// `background` exactly as the consumer formulas say gives Blender's world (radiance at world
+/// direction `R` = strength × the environment at `node_tex_environment_equirectangular` of
+/// `Rz(rotation) · R`).
+#[test]
+fn consumer_formulas_reproduce_the_world() {
+    let Some(gpu) = gpu() else { return };
+    // Smooth and directional in every channel, below the sun threshold at any strength used.
+    let img = image_from(256, 128, |d| {
+        [
+            1.0 + d[0] + 0.3 * d[2],
+            1.0 + 0.8 * d[1],
+            0.6 + 0.5 * d[2] * d[2] + 0.2 * d[0] * d[1],
+        ]
+    });
+    let s = WorldProbeSettings {
+        probe_extent: 256,
+        clamp_surface_indirect: 0.0,
+        ..Default::default()
+    };
+    let (rotation, strength) = (0.9f32, 0.7f32);
+    let wl = build(&gpu, &img, rotation, strength, &s).unwrap();
+    let (sn, cs) = rotation.sin_cos();
+    // R = Rz(-rotation) · e: the world direction that looks up the environment's `e`.
+    let world_dir = |e: [f32; 3]| [cs * e[0] + sn * e[1], -sn * e[0] + cs * e[1], e[2]];
+    let blender = |r: [f32; 3]| img.sample(equirect::uv(r, rotation)).map(|c| c * strength);
+
+    // Diffuse: E(N) / π from `sh9` vs EEVEE's deringed L1 Lambert of the world radiance.
+    let world_sh =
+        ShL1::from_coefs(cpu_sh(&img, 1e20).coefs().map(|c| c.map(|x| x * strength))).dering();
+    for n in [
+        [1.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0],
+        [0.0, 0.0, -1.0],
+        [-0.6, 0.0, 0.8],
+        [0.48, -0.6, 0.64],
+    ] {
+        let lookup = [cs * n[0] - sn * n[1], sn * n[0] + cs * n[1], n[2]];
+        let want = world_sh.evaluate_lambert(lookup);
+        let got = sh9_irradiance(&wl.sh9, n).map(|e| e / std::f32::consts::PI);
+        assert!(
+            close3(got, want, 0.01),
+            "diffuse {n:?}: {got:?} vs {want:?}"
+        );
+    }
+
+    // Specular, mip 0: strength × the texel the consumer samples for R (its direction is
+    // `Rz(rotation) · R`) is Blender's world at R.
+    let faces = read_rgba16f(&gpu, wl.specular.texture(), 0).unwrap();
+    let size = wl.specular.texture().size().width as usize;
+    for (f, face) in faces.iter().enumerate() {
+        for (x, y) in [(3, 5), (size / 2 + 1, size / 3), (size - 7, size - 2)] {
+            let e = cube_texel_direction(f, x, y, size);
+            let r = world_dir(e);
+            let t = face[y * size + x];
+            let got = [t[0], t[1], t[2]].map(|c| c * wl.strength);
+            let want = blender(r);
+            assert!(
+                close3(got, want, 0.03),
+                "specular face {f} {e:?}: {got:?} vs {want:?}"
+            );
+        }
+    }
+
+    // Background: strength × the texel at `ibl_equirect_tex_coord(R, rotation)`.
+    let bg = &read_rgba16f(&gpu, wl.background.texture(), 0).unwrap()[0];
+    let (w, h) = (img.width as usize, img.height as usize);
+    for (x, y) in [(5usize, 7usize), (100, 64), (250, 120)] {
+        let r = world_dir(pixel_direction(x as u32, y as u32, w as u32, h as u32));
+        let uv = equirect::uv(r, rotation);
+        let (px, py) = (
+            ((uv[0] * w as f32) as usize).min(w - 1),
+            (((1.0 - uv[1]) * h as f32) as usize).min(h - 1),
+        );
+        assert_eq!((px, py), (x, y), "the lookup returns to the texel");
+        let t = bg[py * w + px];
+        let got = [t[0], t[1], t[2]].map(|c| c * wl.strength);
+        let want = img.rgb[py * w + px].map(|c| c * strength);
+        assert!(
+            close3(got, want, 2e-3),
+            "background {x},{y}: {got:?} vs {want:?}"
+        );
+    }
 }
 
 // --- Blender goldens -----------------------------------------------------------------------
@@ -622,8 +786,15 @@ fn hdri_scenes_match_blender_eevee() {
         let input = path.with_extension("inputs").join(&c.hdri);
         let decoded =
             frap_imbuf::load(&input).unwrap_or_else(|e| panic!("{}: {e:?}", input.display()));
-        let img = LinearImage::from_decoded(&decoded, c.strength);
-        let wl = build(&gpu, &img, c.rotation, &WorldProbeSettings::default()).unwrap();
+        let img = LinearImage::from_decoded(&decoded, 1.0);
+        let wl = build(
+            &gpu,
+            &img,
+            c.rotation,
+            c.strength,
+            &WorldProbeSettings::default(),
+        )
+        .unwrap();
         let film = preview::render(&gpu, &wl, &c.scene).unwrap();
         let ours = to_rgba8(&c, &film);
         if let Some(dir) = &keep {

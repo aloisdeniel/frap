@@ -121,14 +121,21 @@ fn ibl_brightness_clamp_max(color: vec3<f32>, limit: f32) -> vec3<f32> {
     return color * saturate(limit / max(1e-8, m));
 }
 
-// Environment Texture, EQUIRECTANGULAR (`node_tex_environment_equirectangular`), after the
-// Mapping node's Z rotation (`lookup = Rz(rotation) · direction`). Returns Blender's image
-// coordinates (`v = 0` is the bottom row).
-fn ibl_equirect_uv(direction: vec3<f32>, rotation: f32) -> vec2<f32> {
+// The environment's direction a world direction looks up: the Mapping node's Z rotation,
+// `Rz(rotation) · direction` (`RWorld::Hdri::rotation`, `WorldLighting::rotation`). The
+// specular cube map and the background are stored in the environment's frame.
+fn ibl_world_lookup(direction: vec3<f32>, rotation: f32) -> vec3<f32> {
     let c = cos(rotation);
     let s = sin(rotation);
-    let d = vec3<f32>(c * direction.x - s * direction.y, s * direction.x + c * direction.y,
-                      direction.z);
+    return vec3<f32>(c * direction.x - s * direction.y, s * direction.x + c * direction.y,
+                     direction.z);
+}
+
+// Environment Texture, EQUIRECTANGULAR (`node_tex_environment_equirectangular`), after the
+// Mapping node's Z rotation (`ibl_world_lookup`). Returns Blender's image coordinates
+// (`v = 0` is the bottom row).
+fn ibl_equirect_uv(direction: vec3<f32>, rotation: f32) -> vec2<f32> {
+    let d = ibl_world_lookup(direction, rotation);
     let l = length(d);
     if (l == 0.0) {
         return vec2<f32>(0.0);
@@ -147,13 +154,25 @@ fn ibl_equirect_tex_coord(direction: vec3<f32>, rotation: f32) -> vec2<f32> {
     return vec2<f32>(uv.x, 1.0 - uv.y);
 }
 
+// The irradiance E(N) of `WorldLighting::sh9` (conventional real SH in the world's frame,
+// Ramamoorthi & Hanrahan 2001), clamped at 0. `sh::sh9_irradiance` on the CPU.
+fn ibl_sh9_irradiance(sh: array<vec4<f32>, 9>, n: vec3<f32>) -> vec3<f32> {
+    var e = sh[0].rgb * 0.886227;
+    e += sh[1].rgb * (1.023328 * n.y);
+    e += sh[2].rgb * (1.023328 * n.z);
+    e += sh[3].rgb * (1.023328 * n.x);
+    e += sh[4].rgb * (0.858086 * n.x * n.y);
+    e += sh[5].rgb * (0.858086 * n.y * n.z);
+    e += sh[6].rgb * (0.247708 * (3.0 * n.z * n.z - 1.0));
+    e += sh[7].rgb * (0.858086 * n.x * n.z);
+    e += sh[8].rgb * (0.429043 * (n.x * n.x - n.y * n.y));
+    return max(e, vec3<f32>(0.0));
+}
+
 // `SphericalHarmonicL1::evaluate_lambert`: the Lambertian radiance (irradiance / π) of the
-// world for unit albedo, from the L1 coefficients `sh[0..4]` = L0.M0, L1.Mn1, L1.M0, L1.Mp1.
-fn ibl_sh_lambert(sh0: vec3<f32>, sh1: vec3<f32>, sh2: vec3<f32>, sh3: vec3<f32>,
-                  n: vec3<f32>) -> vec3<f32> {
-    let l0 = 0.282094792 * sh0;
-    let l1 = -0.488602512 * n.y * sh1 + 0.488602512 * n.z * sh2 - 0.488602512 * n.x * sh3;
-    return max(vec3<f32>(0.0), l0 + l1 * (2.0 / 3.0));
+// world for unit albedo (EEVEE's L1 band is exactly `ibl_sh9_irradiance / π`).
+fn ibl_sh_lambert(sh: array<vec4<f32>, 9>, n: vec3<f32>) -> vec3<f32> {
+    return ibl_sh9_irradiance(sh, n) / IBL_PI;
 }
 
 // `bxdf_ggx_dominant_direction_reflection` (linear UI roughness).

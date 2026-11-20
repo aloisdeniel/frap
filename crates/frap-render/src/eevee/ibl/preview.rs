@@ -63,7 +63,7 @@ struct Uniforms {
     cam_back: [f32; 4],
     cam_pos: [f32; 4],
     frustum: [f32; 4],
-    sh: [[f32; 4]; 4],
+    sh: [[f32; 4]; 9],
     sun_dir: [f32; 4],
     sun_color: [f32; 4],
     misc: [f32; 4],
@@ -154,14 +154,14 @@ pub fn render(
         cam_back: v4(rot * Vec3::Z),
         cam_pos: v4(Vec3::from(scene.cam_location)),
         frustum: [tx, ty, scene.width as f32, scene.height as f32],
-        sh: std::array::from_fn(|k| world.sh9[k]),
+        sh: world.sh9,
         sun_dir,
         sun_color,
         misc: [
             world.rotation,
             spheres.len() as f32,
             quads.len() as f32,
-            0.0,
+            world.strength,
         ],
     };
     // Storage buffers may not be empty.
