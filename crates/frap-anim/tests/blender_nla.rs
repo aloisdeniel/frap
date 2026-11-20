@@ -58,14 +58,18 @@ fn action(d: &J) -> Action {
             ..Channelbag::default()
         };
         for c in b["fcurves"].as_array().expect("fcurves") {
-            let mut fc = FCurve::new(s(&c["data_path"]), c["array_index"].as_i64().expect("i") as i32);
+            let mut fc = FCurve::new(
+                s(&c["data_path"]),
+                c["array_index"].as_i64().expect("i") as i32,
+            );
             fc.extrapolation = Extrapolation::from_identifier(s(&c["extrapolation"])).expect("ex");
             for k in c["keys"].as_array().expect("keys") {
                 let co = pair(&k["co"]);
                 fc.keyframe_points.push(Keyframe {
                     handle_left: pair(&k["handle_left"]),
                     handle_right: pair(&k["handle_right"]),
-                    interpolation: Interpolation::from_identifier(s(&k["interpolation"])).expect("ipo"),
+                    interpolation: Interpolation::from_identifier(s(&k["interpolation"]))
+                        .expect("ipo"),
                     easing: Easing::from_identifier(s(&k["easing"])).expect("easing"),
                     ..Keyframe::new(co[0], co[1])
                 });
@@ -95,7 +99,12 @@ fn anim_data(d: &J, actions: &Actions) -> AnimData {
         track.mute = t["mute"].as_bool().expect("mute");
         track.is_solo = t["is_solo"].as_bool().expect("solo");
         for x in t["strips"].as_array().expect("strips") {
-            let mut st = NlaStrip::new_clip(s(&x["name"]), actions.by_name(&x["action"]), 0.0, [0.0, 1.0]);
+            let mut st = NlaStrip::new_clip(
+                s(&x["name"]),
+                actions.by_name(&x["action"]),
+                0.0,
+                [0.0, 1.0],
+            );
             st.r#type = s(&x["type"]).into();
             st.extrapolation = s(&x["extrapolation"]).into();
             st.blend_type = s(&x["blend_type"]).into();
@@ -149,7 +158,11 @@ fn nla_matches_blender() {
         for smp in sc["samples"].as_array().expect("samples") {
             let frame = f(&smp[0]);
             let got = evaluate_anim_for(&adt, &actions, frame, Some(&frap_spec_rna::OBJECT));
-            assert_eq!(got, evaluate_anim(&adt, &actions, frame), "{name}: root from the slots");
+            assert_eq!(
+                got,
+                evaluate_anim(&adt, &actions, frame),
+                "{name}: root from the slots"
+            );
             if got.is_empty() {
                 failures.push(format!("{name} @ {frame}: nothing evaluated"));
             }

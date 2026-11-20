@@ -10,7 +10,9 @@
 //! `modifiers["Bevel"].width`, whose item struct is the `Modifier` base) falls back to one
 //! scalar channel per array index, additive, with default 0.
 
-use frap_rna::{ArrayShape, Defaults, EnumDefault, PropDef, PropFlags, PropKind, StructDef, Subtype};
+use frap_rna::{
+    ArrayShape, Defaults, EnumDefault, PropDef, PropFlags, PropKind, StructDef, Subtype,
+};
 use smol_str::SmolStr;
 
 /// `NEC_MIX_*`
@@ -196,12 +198,14 @@ fn is_proportional(owner: &'static StructDef, prop: &str) -> bool {
         ("RenderSettings", "pixel_aspect_x"),
         ("RenderSettings", "pixel_aspect_y"),
     ];
-    LIST.iter()
-        .any(|(s, p)| *p == prop && owner.is_a(s))
+    LIST.iter().any(|(s, p)| *p == prop && owner.is_a(s))
 }
 
 /// Resolves `path` from `root` to the final property and the struct that owns it.
-pub fn resolve(root: &'static StructDef, path: &str) -> Option<(&'static StructDef, &'static PropDef)> {
+pub fn resolve(
+    root: &'static StructDef,
+    path: &str,
+) -> Option<(&'static StructDef, &'static PropDef)> {
     let segs = parse_path(path)?;
     let mut cur = root;
     let mut i = 0;

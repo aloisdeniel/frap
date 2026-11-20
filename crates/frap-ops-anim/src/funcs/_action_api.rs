@@ -179,6 +179,44 @@ pub(crate) fn adt_slot_mut<'m>(
     }
 }
 
+/// The IDs whose `AnimData` uses slot `handle` of action `a`, directly or through an NLA strip
+/// (`foreach_action_slot_use`), in `bpy.data` order.
+pub(crate) fn slot_users(main: &Main, a: IdRef<ActionId>, handle: i32) -> Vec<frap_rna::IdAny> {
+    fn uses(adt: &AnimData, a: IdRef<ActionId>, handle: i32) -> bool {
+        (adt.action == Some(a) && adt.action_slot_handle == handle)
+            || adt
+                .nla_tracks
+                .iter()
+                .flat_map(|t| &t.strips)
+                .any(|s| s.action == Some(a) && s.action_slot_handle == handle)
+    }
+    fn of(main: &Main, id: frap_rna::IdAny) -> Option<&AnimData> {
+        fn t<K: frap_rna::IdKind>(a: frap_rna::IdAny) -> Option<IdRef<K>> {
+            a.typed()
+        }
+        let adt = match id.code {
+            IdCode::OB => &main.objects.get(t(id)?)?.animation_data,
+            IdCode::MA => &main.materials.get(t(id)?)?.animation_data,
+            IdCode::CA => &main.cameras.get(t(id)?)?.animation_data,
+            IdCode::LA => &main.lights.get(t(id)?)?.animation_data,
+            IdCode::WO => &main.worlds.get(t(id)?)?.animation_data,
+            IdCode::IM => &main.images.get(t(id)?)?.animation_data,
+            IdCode::AR => &main.armatures.get(t(id)?)?.animation_data,
+            IdCode::SC => &main.scenes.get(t(id)?)?.animation_data,
+            IdCode::KE => &main.shape_keys.get(t(id)?)?.animation_data,
+            IdCode::NT => &main.node_groups.get(t(id)?)?.animation_data,
+            IdCode::TE => &main.textures.get(t(id)?)?.animation_data,
+            IdCode::PT => &main.pointclouds.get(t(id)?)?.animation_data,
+            _ => return None,
+        };
+        adt.as_ref()
+    }
+    main.all_ids()
+        .into_iter()
+        .filter(|id| of(main, *id).is_some_and(|adt| uses(adt, a, handle)))
+        .collect()
+}
+
 /// The `(action, slot handle)` of an `ActionSlot` pointer argument (from any action).
 pub(crate) fn slot_arg(main: &Main, p: &RnaPtr) -> Option<(IdRef<ActionId>, i32)> {
     let a = action_of(p).ok()?;

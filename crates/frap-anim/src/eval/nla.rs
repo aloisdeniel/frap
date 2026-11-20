@@ -257,19 +257,16 @@ fn evaluatable(fc: &FCurve, group_muted: bool) -> bool {
 
 /// Every evaluatable F-curve of `slot` in `action` (`fcurves_for_action_slot`).
 fn slot_fcurves(action: &Action, slot: i32) -> impl Iterator<Item = &FCurve> {
-    action
-        .channelbag(slot)
-        .into_iter()
-        .flat_map(|bag| {
-            bag.fcurves.iter().filter(move |fc| {
-                let group_muted = fc
-                    .group
-                    .as_ref()
-                    .and_then(|g| bag.groups.iter().find(|x| &x.name == g))
-                    .is_some_and(|g| g.mute);
-                evaluatable(fc, group_muted)
-            })
+    action.channelbag(slot).into_iter().flat_map(|bag| {
+        bag.fcurves.iter().filter(move |fc| {
+            let group_muted = fc
+                .group
+                .as_ref()
+                .and_then(|g| bag.groups.iter().find(|x| &x.name == g))
+                .is_some_and(|g| g.mute);
+            evaluatable(fc, group_muted)
         })
+    })
 }
 
 /// One NLA channel (`NlaEvalChannel`): a property, or one array index of a property the RNA
@@ -397,14 +394,13 @@ impl Nla {
         if lower.len() < self.channels.len() {
             lower.resize(self.channels.len(), None);
         }
-        for i in 0..self.channels.len() {
+        for (i, slot) in lower.iter_mut().enumerate().take(self.channels.len()) {
             let up = upper.get(i).and_then(Option::as_ref);
-            if up.is_none() && lower[i].is_none() {
+            if up.is_none() && slot.is_none() {
                 continue;
             }
-            let low = lower[i].clone().unwrap_or_else(|| self.base(i));
-            let out = self.blend_or_combine(i, &low, up, mode, influence);
-            lower[i] = Some(out);
+            let low = slot.clone().unwrap_or_else(|| self.base(i));
+            *slot = Some(self.blend_or_combine(i, &low, up, mode, influence));
         }
     }
 
@@ -545,7 +541,9 @@ pub(crate) fn frame_range_of_keys(action: &Action) -> [f32; 2] {
             let crate::action::ActionStrip::Keyframe(k) = strip;
             for bag in &k.channelbags {
                 for fc in &bag.fcurves {
-                    if let (Some(f), Some(l)) = (fc.keyframe_points.first(), fc.keyframe_points.last()) {
+                    if let (Some(f), Some(l)) =
+                        (fc.keyframe_points.first(), fc.keyframe_points.last())
+                    {
                         min = min.min(f.co[0]);
                         max = max.max(l.co[0]);
                         found = true;

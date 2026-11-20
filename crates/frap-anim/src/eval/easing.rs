@@ -142,13 +142,20 @@ pub fn elastic_ease_in(
         return begin + change;
     }
     time -= 1.0;
-    let period = if period == 0.0 { duration * 0.3 } else { period };
+    let period = if period == 0.0 {
+        duration * 0.3
+    } else {
+        period
+    };
     let (s, amplitude) = if amplitude == 0.0 || amplitude < change.abs() {
         let s = period / 4.0;
         f = elastic_blend(time, change, duration, amplitude, s, f);
         (s, change)
     } else {
-        (period / (2.0 * PI) * libm::asinf(change / amplitude), amplitude)
+        (
+            period / (2.0 * PI) * libm::asinf(change / amplitude),
+            amplitude,
+        )
     };
     (-f * (amplitude
         * libm::powf(2.0, 10.0 * time)
@@ -174,13 +181,20 @@ pub fn elastic_ease_out(
         return begin + change;
     }
     time = -time;
-    let period = if period == 0.0 { duration * 0.3 } else { period };
+    let period = if period == 0.0 {
+        duration * 0.3
+    } else {
+        period
+    };
     let (s, amplitude) = if amplitude == 0.0 || amplitude < change.abs() {
         let s = period / 4.0;
         f = elastic_blend(time, change, duration, amplitude, s, f);
         (s, change)
     } else {
-        (period / (2.0 * PI) * libm::asinf(change / amplitude), amplitude)
+        (
+            period / (2.0 * PI) * libm::asinf(change / amplitude),
+            amplitude,
+        )
     };
     (f * (amplitude
         * libm::powf(2.0, 10.0 * time)
@@ -217,13 +231,17 @@ pub fn elastic_ease_in_out(
         f = elastic_blend(time, change, duration, amplitude, s, f);
         (s, change)
     } else {
-        (period / (2.0 * PI) * libm::asinf(change / amplitude), amplitude)
+        (
+            period / (2.0 * PI) * libm::asinf(change / amplitude),
+            amplitude,
+        )
     };
     if time < 0.0 {
         f *= -0.5;
-        return (f * (amplitude
-            * libm::powf(2.0, 10.0 * time)
-            * libm::sinf((time * duration - s) * (2.0 * PI) / period)))
+        return (f
+            * (amplitude
+                * libm::powf(2.0, 10.0 * time)
+                * libm::sinf((time * duration - s) * (2.0 * PI) / period)))
             + begin;
     }
     time = -time;

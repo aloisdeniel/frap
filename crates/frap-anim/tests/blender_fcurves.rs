@@ -52,10 +52,16 @@ fn build(case: &J) -> FCurve {
         for (name, v) in p.as_object().expect("props") {
             let s = || v.as_str().expect("enum");
             match name.as_str() {
-                "interpolation" => key.interpolation = Interpolation::from_identifier(s()).expect("ipo"),
+                "interpolation" => {
+                    key.interpolation = Interpolation::from_identifier(s()).expect("ipo")
+                }
                 "easing" => key.easing = Easing::from_identifier(s()).expect("easing"),
-                "handle_left_type" => key.handle_left_type = HandleType::from_identifier(s()).expect("h"),
-                "handle_right_type" => key.handle_right_type = HandleType::from_identifier(s()).expect("h"),
+                "handle_left_type" => {
+                    key.handle_left_type = HandleType::from_identifier(s()).expect("h")
+                }
+                "handle_right_type" => {
+                    key.handle_right_type = HandleType::from_identifier(s()).expect("h")
+                }
                 "back" => key.back = f(v),
                 "amplitude" => key.amplitude = f(v),
                 "period" => key.period = f(v),
@@ -92,7 +98,11 @@ fn fcurves_match_blender() {
         let fc = build(case);
         let want = c["keys"].as_array().expect("keys");
         if want.len() != fc.keyframe_points.len() {
-            failures.push(format!("{name}: {} keys, Blender {}", fc.keyframe_points.len(), want.len()));
+            failures.push(format!(
+                "{name}: {} keys, Blender {}",
+                fc.keyframe_points.len(),
+                want.len()
+            ));
             continue;
         }
         for (i, (k, w)) in fc.keyframe_points.iter().zip(want).enumerate() {
@@ -106,9 +116,21 @@ fn fcurves_match_blender() {
                 }
             }
             for (what, got, exp) in [
-                ("handle_left_type", k.handle_left_type.identifier(), &w["handle_left_type"]),
-                ("handle_right_type", k.handle_right_type.identifier(), &w["handle_right_type"]),
-                ("interpolation", k.interpolation.identifier(), &w["interpolation"]),
+                (
+                    "handle_left_type",
+                    k.handle_left_type.identifier(),
+                    &w["handle_left_type"],
+                ),
+                (
+                    "handle_right_type",
+                    k.handle_right_type.identifier(),
+                    &w["handle_right_type"],
+                ),
+                (
+                    "interpolation",
+                    k.interpolation.identifier(),
+                    &w["interpolation"],
+                ),
             ] {
                 if Some(got) != exp.as_str() {
                     failures.push(format!("{name}: key {i} {what} {got}, Blender {exp}"));

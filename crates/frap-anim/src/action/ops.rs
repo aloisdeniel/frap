@@ -17,9 +17,7 @@
 use frap_rna::naming::unique_subname;
 use smol_str::SmolStr;
 
-use super::{
-    Action, ActionGroup, ActionLayer, ActionSlot, ActionStrip, Channelbag, KeyframeStrip,
-};
+use super::{Action, ActionGroup, ActionLayer, ActionSlot, ActionStrip, Channelbag, KeyframeStrip};
 use crate::fcurve::FCurve;
 
 /// `DNA_DEFAULT_ACTION_LAST_SLOT_HANDLE`: slot handles start above it, so they are never
@@ -324,17 +322,17 @@ impl Action {
         true
     }
 
-    /// `animrig::duplicate_slot`: a copy of the slot (identifier made unique, the channels of
-    /// every keyframe strip copied); the new handle.
+    /// `animrig::duplicate_slot`: a copy of the slot (identifier made unique, type and flags
+    /// kept, the channels of every keyframe strip copied); the new handle.
     pub fn slot_duplicate(&mut self, handle: i32) -> Option<i32> {
         let src = self.slot(handle)?.clone();
         self.last_slot_handle += 1;
         let new = self.last_slot_handle;
         let identifier = self.unique_slot_identifier(&src.identifier, None);
+        // `clone_slot` copies everything but the handle (flags included).
         self.slots.push(ActionSlot {
             handle: new,
             identifier,
-            active: false,
             ..src
         });
         for layer in &mut self.layers {
@@ -517,7 +515,12 @@ impl Channelbag {
 
     /// `Channelbag::fcurve_create`: a new F-curve (in `group` when given, which is created if
     /// needed: at the end of the group's range); its index.
-    pub fn fcurve_create(&mut self, data_path: &str, array_index: i32, group: Option<&str>) -> usize {
+    pub fn fcurve_create(
+        &mut self,
+        data_path: &str,
+        array_index: i32,
+        group: Option<&str>,
+    ) -> usize {
         let mut fc = FCurve::new(data_path, array_index);
         match group {
             Some(g) => {
@@ -548,7 +551,12 @@ impl Channelbag {
     }
 
     /// `fcurve_ensure`
-    pub fn fcurve_ensure(&mut self, data_path: &str, array_index: i32, group: Option<&str>) -> usize {
+    pub fn fcurve_ensure(
+        &mut self,
+        data_path: &str,
+        array_index: i32,
+        group: Option<&str>,
+    ) -> usize {
         match self.fcurve_find(data_path, array_index) {
             Some(i) => i,
             None => self.fcurve_create(data_path, array_index, group),
@@ -675,7 +683,10 @@ mod tests {
         assert_eq!(h, 929_201_142);
         assert_eq!(a.slot(h).map(|s| s.identifier.as_str()), Some("OBCube"));
         let h2 = a.slot_add_for_id_type("OBJECT", "Cube");
-        assert_eq!(a.slot(h2).map(|s| s.identifier.as_str()), Some("OBCube.001"));
+        assert_eq!(
+            a.slot(h2).map(|s| s.identifier.as_str()),
+            Some("OBCube.001")
+        );
         let h3 = a.slot_add_for_id_type("UNSPECIFIED", "Any");
         assert_eq!(a.slot(h3).map(|s| s.identifier.as_str()), Some("XXAny"));
         a.slot_setup_for_id(h3, "MATERIAL");
@@ -700,7 +711,10 @@ mod tests {
         assert_eq!(b.fcurve_create_unique("location", 0, None), None);
         b.fcurve_assign_to_group(1, 1);
         assert_eq!(
-            b.fcurves.iter().map(|f| f.group.as_deref()).collect::<Vec<_>>(),
+            b.fcurves
+                .iter()
+                .map(|f| f.group.as_deref())
+                .collect::<Vec<_>>(),
             vec![Some("G"), Some("G.001")]
         );
         // Removing the last F-curve of a group removes the group.

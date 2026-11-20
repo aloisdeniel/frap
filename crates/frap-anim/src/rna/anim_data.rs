@@ -145,7 +145,11 @@ impl RnaMut for AnimData {
         set(self, AdtLoc::Root, prop, v)
     }
     fn struct_mut(&mut self, prop: &'static PropDef) -> Result<RnaMutGuard<'_>, RnaError> {
-        Err(wrong_access(&frap_spec_rna::ANIM_DATA, prop.identifier, "a struct"))
+        Err(wrong_access(
+            &frap_spec_rna::ANIM_DATA,
+            prop.identifier,
+            "a struct",
+        ))
     }
     fn coll_mut(&mut self, prop: &'static PropDef) -> Result<RnaCollMutGuard<'_>, RnaError> {
         coll_mut(self, AdtLoc::Root, prop)
@@ -258,10 +262,17 @@ fn stale() -> RnaError {
 }
 
 /// Reads `prop` of the struct at `loc`.
-pub fn get<'a>(adt: &'a AnimData, loc: AdtLoc, prop: &'static PropDef) -> Result<Field<'a>, RnaError> {
+pub fn get<'a>(
+    adt: &'a AnimData,
+    loc: AdtLoc,
+    prop: &'static PropDef,
+) -> Result<Field<'a>, RnaError> {
     let id = prop.identifier;
     if let Some(c) = coll_of(loc, id) {
-        return Ok(Field::Coll(CollRef::Owned(Box::new(AdtCollView { adt, c }))));
+        return Ok(Field::Coll(CollRef::Owned(Box::new(AdtCollView {
+            adt,
+            c,
+        }))));
     }
     let srna = srna_of(loc);
     match loc {
@@ -319,11 +330,15 @@ pub fn get<'a>(adt: &'a AnimData, loc: AdtLoc, prop: &'static PropDef) -> Result
                 "action_frame_end" => float(prop, x.action_frame_end),
                 "repeat" => float(prop, x.repeat),
                 "scale" => float(prop, x.scale),
-                "fcurves" => Field::Coll(CollRef::Owned(Box::new(EmptyColl(&frap_spec_rna::F_CURVE)))),
+                "fcurves" => {
+                    Field::Coll(CollRef::Owned(Box::new(EmptyColl(&frap_spec_rna::F_CURVE))))
+                }
                 "modifiers" => Field::Coll(CollRef::Owned(Box::new(EmptyColl(
                     &frap_spec_rna::F_MODIFIER,
                 )))),
-                "strips" => Field::Coll(CollRef::Owned(Box::new(EmptyColl(&frap_spec_rna::NLA_STRIP)))),
+                "strips" => Field::Coll(CollRef::Owned(Box::new(EmptyColl(
+                    &frap_spec_rna::NLA_STRIP,
+                )))),
                 "influence" => float(prop, x.influence),
                 "strip_time" => float(prop, x.strip_time),
                 "use_animated_influence" => boolean(x.use_animated_influence),
@@ -405,7 +420,12 @@ fn recalculate_bounds(track: &mut NlaTrack, s: usize) {
 }
 
 /// Writes `prop` of the struct at `loc`.
-pub fn set(adt: &mut AnimData, loc: AdtLoc, prop: &'static PropDef, v: Value) -> Result<SetOutcome, RnaError> {
+pub fn set(
+    adt: &mut AnimData,
+    loc: AdtLoc,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<SetOutcome, RnaError> {
     let id = prop.identifier;
     let srna = srna_of(loc);
     let done = Ok(SetOutcome::Done);
@@ -471,7 +491,12 @@ pub fn set(adt: &mut AnimData, loc: AdtLoc, prop: &'static PropDef, v: Value) ->
     }
 }
 
-fn strip_set(track: &mut NlaTrack, s: usize, prop: &'static PropDef, v: Value) -> Result<SetOutcome, RnaError> {
+fn strip_set(
+    track: &mut NlaTrack,
+    s: usize,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<SetOutcome, RnaError> {
     let id = prop.identifier;
     let done = Ok(SetOutcome::Done);
     let (lp, ln) = (limit_prev(track, s), limit_next(track, s));
@@ -512,7 +537,11 @@ fn strip_set(track: &mut NlaTrack, s: usize, prop: &'static PropDef, v: Value) -
             // `rna_NlaStrip_frame_end_ui_set`: changes the action range or the repeats.
             let x = &mut track.strips[s];
             let old_end = x.frame_end;
-            x.frame_end = clamp(as_f32(prop, &v)?, x.frame_start + NLASTRIP_MIN_LEN_THRESH, ln);
+            x.frame_end = clamp(
+                as_f32(prop, &v)?,
+                x.frame_start + NLASTRIP_MIN_LEN_THRESH,
+                ln,
+            );
             if x.r#type == "CLIP" || x.r#type == "SOUND" {
                 let actlen = clip_length(x);
                 let delta = (old_end - x.frame_end) / x.scale;
@@ -613,26 +642,72 @@ pub const BOUND: &[(&str, &[&str])] = &[
     (
         "AnimData",
         &[
-            "nla_tracks", "action", "action_extrapolation", "action_blend_type",
-            "action_influence", "action_tweak_storage", "action_slot_handle_tweak_storage",
-            "drivers", "use_nla", "use_tweak_mode", "use_pin", "action_slot_handle",
-            "last_slot_identifier", "action_slot", "action_suitable_slots",
+            "nla_tracks",
+            "action",
+            "action_extrapolation",
+            "action_blend_type",
+            "action_influence",
+            "action_tweak_storage",
+            "action_slot_handle_tweak_storage",
+            "drivers",
+            "use_nla",
+            "use_tweak_mode",
+            "use_pin",
+            "action_slot_handle",
+            "last_slot_identifier",
+            "action_slot",
+            "action_suitable_slots",
         ],
     ),
     (
         "NlaTrack",
-        &["strips", "is_override_data", "name", "active", "is_solo", "select", "mute", "lock"],
+        &[
+            "strips",
+            "is_override_data",
+            "name",
+            "active",
+            "is_solo",
+            "select",
+            "mute",
+            "lock",
+        ],
     ),
     (
         "NlaStrip",
         &[
-            "name", "type", "extrapolation", "blend_type", "frame_start", "frame_end",
-            "frame_start_raw", "frame_end_raw", "blend_in", "blend_out", "use_auto_blend",
-            "action", "action_slot_handle", "last_slot_identifier", "action_slot",
-            "action_suitable_slots", "action_frame_start", "action_frame_end", "repeat", "scale",
-            "fcurves", "modifiers", "strips", "influence", "strip_time", "use_animated_influence",
-            "use_animated_time", "use_animated_time_cyclic", "active", "select", "mute",
-            "use_reverse", "use_sync_length",
+            "name",
+            "type",
+            "extrapolation",
+            "blend_type",
+            "frame_start",
+            "frame_end",
+            "frame_start_raw",
+            "frame_end_raw",
+            "blend_in",
+            "blend_out",
+            "use_auto_blend",
+            "action",
+            "action_slot_handle",
+            "last_slot_identifier",
+            "action_slot",
+            "action_suitable_slots",
+            "action_frame_start",
+            "action_frame_end",
+            "repeat",
+            "scale",
+            "fcurves",
+            "modifiers",
+            "strips",
+            "influence",
+            "strip_time",
+            "use_animated_influence",
+            "use_animated_time",
+            "use_animated_time_cyclic",
+            "active",
+            "select",
+            "mute",
+            "use_reverse",
+            "use_sync_length",
         ],
     ),
 ];
@@ -643,8 +718,15 @@ pub const WRITABLE: &[(&str, &[&str])] = &[
     (
         "AnimData",
         &[
-            "action", "action_extrapolation", "action_blend_type", "action_influence",
-            "use_nla", "use_tweak_mode", "use_pin", "action_slot_handle", "last_slot_identifier",
+            "action",
+            "action_extrapolation",
+            "action_blend_type",
+            "action_influence",
+            "use_nla",
+            "use_tweak_mode",
+            "use_pin",
+            "action_slot_handle",
+            "last_slot_identifier",
             "action_slot",
         ],
     ),
@@ -652,12 +734,33 @@ pub const WRITABLE: &[(&str, &[&str])] = &[
     (
         "NlaStrip",
         &[
-            "name", "extrapolation", "blend_type", "frame_start", "frame_end", "frame_start_raw",
-            "frame_end_raw", "blend_in", "blend_out", "use_auto_blend", "action",
-            "action_slot_handle", "last_slot_identifier", "action_slot", "action_frame_start",
-            "action_frame_end", "repeat", "scale", "influence", "strip_time",
-            "use_animated_influence", "use_animated_time", "use_animated_time_cyclic", "select",
-            "mute", "use_reverse", "use_sync_length",
+            "name",
+            "extrapolation",
+            "blend_type",
+            "frame_start",
+            "frame_end",
+            "frame_start_raw",
+            "frame_end_raw",
+            "blend_in",
+            "blend_out",
+            "use_auto_blend",
+            "action",
+            "action_slot_handle",
+            "last_slot_identifier",
+            "action_slot",
+            "action_frame_start",
+            "action_frame_end",
+            "repeat",
+            "scale",
+            "influence",
+            "strip_time",
+            "use_animated_influence",
+            "use_animated_time",
+            "use_animated_time_cyclic",
+            "select",
+            "mute",
+            "use_reverse",
+            "use_sync_length",
         ],
     ),
 ];

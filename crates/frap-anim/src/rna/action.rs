@@ -136,7 +136,9 @@ fn coll_len(a: &Action, c: Coll) -> usize {
         Coll::Keys(l, s, b, f) => bag(a, l, s, b)
             .and_then(|x| x.fcurves.get(f))
             .map_or(0, |fc| fc.keyframe_points.len()),
-        Coll::GroupChannels(l, s, b, g) => bag(a, l, s, b).map_or(0, |x| group_channels(x, g).len()),
+        Coll::GroupChannels(l, s, b, g) => {
+            bag(a, l, s, b).map_or(0, |x| group_channels(x, g).len())
+        }
     }
 }
 
@@ -224,7 +226,9 @@ pub fn locate<'s>(a: &Action, path: &'s [Seg]) -> Option<(Loc, Option<&'s str>)>
                     let n = if *n < 0 { *n + len } else { *n };
                     usize::try_from(n).ok()?
                 }
-                Seg::Key(k) => (0..coll_len(a, c)).find(|&j| coll_key(a, c, j).as_deref() == Some(k))?,
+                Seg::Key(k) => {
+                    (0..coll_len(a, c)).find(|&j| coll_key(a, c, j).as_deref() == Some(k))?
+                }
                 Seg::Prop(_) => return Some((loc, Some(name))),
             };
             loc = item_loc(a, c, index)?;
@@ -315,7 +319,10 @@ impl RnaColl for CollView<'_> {
     }
     fn item(&self, i: usize) -> Result<Item<'_>, RnaError> {
         let loc = item_loc(self.a, self.c, i).ok_or_else(|| index_out_of_range(i, self.len()))?;
-        Ok(Item::Struct(StructRef::Owned(Box::new(Node { a: self.a, loc }))))
+        Ok(Item::Struct(StructRef::Owned(Box::new(Node {
+            a: self.a,
+            loc,
+        }))))
     }
 }
 
@@ -334,7 +341,10 @@ impl RnaColl for CollViewMut<'_> {
     }
     fn item(&self, i: usize) -> Result<Item<'_>, RnaError> {
         let loc = item_loc(self.a, self.c, i).ok_or_else(|| index_out_of_range(i, self.len()))?;
-        Ok(Item::Struct(StructRef::Owned(Box::new(Node { a: self.a, loc }))))
+        Ok(Item::Struct(StructRef::Owned(Box::new(Node {
+            a: self.a,
+            loc,
+        }))))
     }
 }
 
@@ -342,7 +352,10 @@ impl RnaCollMut for CollViewMut<'_> {
     fn item_mut(&mut self, i: usize) -> Result<RnaMutGuard<'_>, RnaError> {
         let len = self.len();
         let loc = item_loc(self.a, self.c, i).ok_or_else(|| index_out_of_range(i, len))?;
-        Ok(Box::new(NodeMut { a: &mut *self.a, loc }))
+        Ok(Box::new(NodeMut {
+            a: &mut *self.a,
+            loc,
+        }))
     }
 }
 
@@ -519,7 +532,12 @@ fn enum_of<T>(prop: &PropDef, v: &Value, f: fn(&str) -> Option<T>) -> Result<T, 
 }
 
 /// Writes `prop` of the struct at `loc`.
-pub fn set(a: &mut Action, loc: Loc, prop: &'static PropDef, v: Value) -> Result<SetOutcome, RnaError> {
+pub fn set(
+    a: &mut Action,
+    loc: Loc,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<SetOutcome, RnaError> {
     let id = prop.identifier;
     let srna = srna_of(loc);
     let done = Ok(SetOutcome::Done);
@@ -776,41 +794,106 @@ pub const BOUND: &[(&str, &[&str])] = &[
     (
         "Action",
         &[
-            "name", "name_full", "users", "id_type", "session_uid", "is_evaluated",
-            "is_missing", "is_library_indirect", "use_fake_user", "is_embedded_data",
-            "is_linked_packed", "is_editable", "library", "is_empty", "is_action_legacy",
-            "is_action_layered", "use_frame_range", "use_cyclic", "frame_start", "frame_end",
-            "frame_range", "curve_frame_range", "pose_markers", "slots", "layers",
+            "name",
+            "name_full",
+            "users",
+            "id_type",
+            "session_uid",
+            "is_evaluated",
+            "is_missing",
+            "is_library_indirect",
+            "use_fake_user",
+            "is_embedded_data",
+            "is_linked_packed",
+            "is_editable",
+            "library",
+            "is_empty",
+            "is_action_legacy",
+            "is_action_layered",
+            "use_frame_range",
+            "use_cyclic",
+            "frame_start",
+            "frame_end",
+            "frame_range",
+            "curve_frame_range",
+            "pose_markers",
+            "slots",
+            "layers",
         ],
     ),
     (
         "ActionSlot",
-        &["identifier", "target_id_type", "name_display", "handle", "active", "select", "show_expanded"],
+        &[
+            "identifier",
+            "target_id_type",
+            "name_display",
+            "handle",
+            "active",
+            "select",
+            "show_expanded",
+        ],
     ),
     ("ActionLayer", &["name", "strips"]),
     ("ActionKeyframeStrip", &["type", "channelbags"]),
-    ("ActionChannelbag", &["slot_handle", "slot", "fcurves", "groups"]),
+    (
+        "ActionChannelbag",
+        &["slot_handle", "slot", "fcurves", "groups"],
+    ),
     (
         "ActionGroup",
         &[
-            "name", "channels", "select", "lock", "mute", "show_expanded",
-            "show_expanded_graph", "use_pin", "color_set", "is_custom_color_set",
+            "name",
+            "channels",
+            "select",
+            "lock",
+            "mute",
+            "show_expanded",
+            "show_expanded_graph",
+            "use_pin",
+            "color_set",
+            "is_custom_color_set",
         ],
     ),
     (
         "FCurve",
         &[
-            "extrapolation", "driver", "group", "data_path", "array_index", "color_mode",
-            "color", "select", "lock", "mute", "hide", "auto_smoothing", "is_valid", "is_empty",
-            "sampled_points", "keyframe_points", "modifiers",
+            "extrapolation",
+            "driver",
+            "group",
+            "data_path",
+            "array_index",
+            "color_mode",
+            "color",
+            "select",
+            "lock",
+            "mute",
+            "hide",
+            "auto_smoothing",
+            "is_valid",
+            "is_empty",
+            "sampled_points",
+            "keyframe_points",
+            "modifiers",
         ],
     ),
     (
         "Keyframe",
         &[
-            "select_left_handle", "select_right_handle", "select_control_point",
-            "handle_left_type", "handle_right_type", "interpolation", "type", "easing", "back",
-            "amplitude", "period", "handle_left", "co", "co_ui", "handle_right",
+            "select_left_handle",
+            "select_right_handle",
+            "select_control_point",
+            "handle_left_type",
+            "handle_right_type",
+            "interpolation",
+            "type",
+            "easing",
+            "back",
+            "amplitude",
+            "period",
+            "handle_left",
+            "co",
+            "co_ui",
+            "handle_right",
         ],
     ),
 ];

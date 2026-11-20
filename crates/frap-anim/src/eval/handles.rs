@@ -328,7 +328,14 @@ impl System {
 
 /// `bezier_clamp`: auto clamp keeps a point from going the wrong way and adjacent handles
 /// from overshooting.
-fn clamp(hmax: &mut [f32], hmin: &mut [f32], i: usize, dy: f32, no_reverse: bool, no_overshoot: bool) {
+fn clamp(
+    hmax: &mut [f32],
+    hmin: &mut [f32],
+    i: usize,
+    dy: f32,
+    no_reverse: bool,
+    no_overshoot: bool,
+) {
     if dy > 0.0 {
         if no_overshoot {
             hmax[i] = hmax[i].min(dy);
@@ -396,11 +403,8 @@ fn smooth_run(keys: &mut [Keyframe], locked: &[Locked], start: usize, count: usi
     }
     let first = start;
     let last = start + count - 1;
-    let solve_first = check_solve_end_handle(
-        keys[first].handle_right_type,
-        start == 0,
-        locked[first],
-    );
+    let solve_first =
+        check_solve_end_handle(keys[first].handle_right_type, start == 0, locked[first]);
     let solve_last = check_solve_end_handle(
         keys[last].handle_left_type,
         start + count == total,
@@ -436,8 +440,22 @@ fn smooth_run(keys: &mut [Keyframe], locked: &[Locked], start: usize, count: usi
         let j = start + i;
         let clamped_prev = clamped_cur;
         clamped_cur = clamped(&keys[j]);
-        clamp(&mut hmax, &mut hmin, i - 1, dy[i], clamped_prev, clamped_prev);
-        clamp(&mut hmax, &mut hmin, i, dy[i] * l[i], clamped_cur, clamped_cur);
+        clamp(
+            &mut hmax,
+            &mut hmin,
+            i - 1,
+            dy[i],
+            clamped_prev,
+            clamped_prev,
+        );
+        clamp(
+            &mut hmax,
+            &mut hmin,
+            i,
+            dy[i] * l[i],
+            clamped_cur,
+            clamped_cur,
+        );
     }
     let mut sys = System {
         a: vec![0.0; count],
@@ -653,15 +671,13 @@ mod tests {
     /// (4, 0) and (7, 5) (13, 5)).
     #[test]
     fn two_keys_flat_ends() {
-        for s in ["CONT_ACCEL"] {
-            let mut fc = curve(&[(1.0, 0.0), (10.0, 5.0)], s);
-            recalc(&mut fc);
-            let k = &fc.keyframe_points;
-            assert_eq!(k[0].handle_left, [-2.0, 0.0], "{s}");
-            assert_eq!(k[0].handle_right, [4.0, 0.0], "{s}");
-            assert_eq!(k[1].handle_left, [7.0, 5.0], "{s}");
-            assert_eq!(k[1].handle_right, [13.0, 5.0], "{s}");
-        }
+        let mut fc = curve(&[(1.0, 0.0), (10.0, 5.0)], "CONT_ACCEL");
+        recalc(&mut fc);
+        let k = &fc.keyframe_points;
+        assert_eq!(k[0].handle_left, [-2.0, 0.0]);
+        assert_eq!(k[0].handle_right, [4.0, 0.0]);
+        assert_eq!(k[1].handle_left, [7.0, 5.0]);
+        assert_eq!(k[1].handle_right, [13.0, 5.0]);
     }
 
     #[test]

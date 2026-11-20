@@ -111,7 +111,7 @@ fn write_use(h: &mut dyn Host, root: Root, owner: Owner, u: Use) -> Result<(), R
     Ok(())
 }
 
-fn action<'m>(main: &'m Main, a: Option<IdRef<ActionId>>) -> Option<&'m Action> {
+fn action(main: &Main, a: Option<IdRef<ActionId>>) -> Option<&Action> {
     main.actions.get(a?)
 }
 

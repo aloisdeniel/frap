@@ -345,7 +345,10 @@ pub fn update(fc: &mut FCurve) {
 
 /// `BKE_fcurve_calc_range(fcu, …, selected_keys_only = false)`: the first and last key times.
 pub fn range(fc: &FCurve) -> Option<[f32; 2]> {
-    Some([fc.keyframe_points.first()?.co[0], fc.keyframe_points.last()?.co[0]])
+    Some([
+        fc.keyframe_points.first()?.co[0],
+        fc.keyframe_points.last()?.co[0],
+    ])
 }
 
 #[cfg(test)]
@@ -371,8 +374,14 @@ mod tests {
             InsertResult::Success(1)
         );
         let k = &f.keyframe_points;
-        assert_eq!((k[0].handle_left, k[0].handle_right), ([-2.0, 0.0], [4.0, 0.0]));
-        assert_eq!((k[1].handle_left, k[1].handle_right), ([7.0, 5.0], [13.0, 5.0]));
+        assert_eq!(
+            (k[0].handle_left, k[0].handle_right),
+            ([-2.0, 0.0], [4.0, 0.0])
+        );
+        assert_eq!(
+            (k[1].handle_left, k[1].handle_right),
+            ([7.0, 5.0], [13.0, 5.0])
+        );
         // Replacing moves the key and its handles.
         assert_eq!(
             insert_vert(&mut f, [10.0, 6.0], &s, InsertFlags::default()),

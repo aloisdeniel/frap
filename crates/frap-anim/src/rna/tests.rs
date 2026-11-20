@@ -11,16 +11,24 @@ use crate::anim_data::{AnimData, NlaStrip, NlaTrack};
 
 #[test]
 fn bound_properties_exist_in_the_definitions() {
-    for (s, props) in action::BOUND.iter().chain(anim_data::BOUND).chain(anim_data::WRITABLE) {
+    for (s, props) in action::BOUND
+        .iter()
+        .chain(anim_data::BOUND)
+        .chain(anim_data::WRITABLE)
+    {
         let def = frap_spec_rna::find_struct(s).unwrap_or_else(|| panic!("struct {s}"));
         for p in *props {
-            assert!(def.find_prop(p).is_some(), "{s}.{p} is not in the definitions");
+            assert!(
+                def.find_prop(p).is_some(),
+                "{s}.{p} is not in the definitions"
+            );
         }
     }
 }
 
 fn prop(s: &'static StructDef, p: &str) -> &'static PropDef {
-    s.find_prop(p).unwrap_or_else(|| panic!("{}.{p}", s.identifier))
+    s.find_prop(p)
+        .unwrap_or_else(|| panic!("{}.{p}", s.identifier))
 }
 
 fn sample() -> Action {
@@ -30,12 +38,7 @@ fn sample() -> Action {
     let f = bag.fcurve_create("location", 1, Some("Object Transforms"));
     let fc = &mut bag.fcurves[f];
     for (t, v) in [(1.0, 0.0), (10.0, 5.0)] {
-        crate::fcurve::keys::insert_vert(
-            fc,
-            [t, v],
-            &Default::default(),
-            Default::default(),
-        );
+        crate::fcurve::keys::insert_vert(fc, [t, v], &Default::default(), Default::default());
     }
     a
 }
@@ -89,7 +92,10 @@ fn writes_with_side_effects() {
     ));
     let k0 = &a.layers[0].strips[0];
     let crate::action::ActionStrip::Keyframe(k) = k0;
-    assert_ne!(k.channelbags[0].fcurves[0].keyframe_points[0].handle_right[1], 0.0);
+    assert_ne!(
+        k.channelbags[0].fcurves[0].keyframe_points[0].handle_right[1],
+        0.0
+    );
     let co_ui = prop(&frap_spec_rna::KEYFRAME, "co_ui");
     let v = Value::FloatArray {
         data: [2.0_f32, 1.0].into_iter().collect(),
@@ -116,8 +122,10 @@ fn writes_with_side_effects() {
 fn nla_strip_setters_clamp_like_blender() {
     let mut adt = AnimData::default();
     let mut t = NlaTrack::new("NlaTrack");
-    t.strips.push(NlaStrip::new_clip("A", None, 1.0, [1.0, 11.0]));
-    t.strips.push(NlaStrip::new_clip("B", None, 20.0, [1.0, 11.0]));
+    t.strips
+        .push(NlaStrip::new_clip("A", None, 1.0, [1.0, 11.0]));
+    t.strips
+        .push(NlaStrip::new_clip("B", None, 20.0, [1.0, 11.0]));
     adt.nla_tracks.push(t);
     let p = |n| prop(&frap_spec_rna::NLA_STRIP, n);
     let loc = anim_data::AdtLoc::Strip(0, 0);
@@ -132,7 +140,19 @@ fn nla_strip_setters_clamp_like_blender() {
     assert_eq!(adt.nla_tracks[0].strips[0].blend_in, 25.0);
     let solo = prop(&frap_spec_rna::NLA_TRACK, "is_solo");
     adt.nla_tracks.push(NlaTrack::new("T2"));
-    anim_data::set(&mut adt, anim_data::AdtLoc::Track(0), solo, Value::Bool(true)).expect("solo");
-    anim_data::set(&mut adt, anim_data::AdtLoc::Track(1), solo, Value::Bool(true)).expect("solo");
+    anim_data::set(
+        &mut adt,
+        anim_data::AdtLoc::Track(0),
+        solo,
+        Value::Bool(true),
+    )
+    .expect("solo");
+    anim_data::set(
+        &mut adt,
+        anim_data::AdtLoc::Track(1),
+        solo,
+        Value::Bool(true),
+    )
+    .expect("solo");
     assert!(!adt.nla_tracks[0].is_solo && adt.nla_tracks[1].is_solo);
 }
