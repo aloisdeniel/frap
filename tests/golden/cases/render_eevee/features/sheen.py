@@ -1,7 +1,7 @@
 # golden: startup=factory compare=objects tier=T0
 # render-golden: image=out/sheen.png min_ssim=0.88
 # EEVEE shading feature golden (WP 5.5): sheen. Dark blue velvet-like spheres (Base Color
-# 0.02, 0.03, 0.1, Roughness 1) with Sheen Weight 1 and a pale pink Sheen Tint, Sheen
+# 0.02, 0.03, 0.1, Roughness 1) with a pale pink Sheen Tint, Sheen Weight 1 and 0.5, Sheen
 # Roughness 0.2 and 0.8, next to the same sphere without sheen: the sheen brightens the
 # grazing angles.
 import bpy
@@ -26,7 +26,7 @@ bpy.ops.object.shade_smooth()
 bpy.data.materials.new('Sheen8')
 bpy.data.materials['Sheen8'].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0.02, 0.03, 0.1, 1.0)
 bpy.data.materials['Sheen8'].node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value = 1.0
-bpy.data.materials['Sheen8'].node_tree.nodes['Principled BSDF'].inputs['Sheen Weight'].default_value = 1.0
+bpy.data.materials['Sheen8'].node_tree.nodes['Principled BSDF'].inputs['Sheen Weight'].default_value = 0.5
 bpy.data.materials['Sheen8'].node_tree.nodes['Principled BSDF'].inputs['Sheen Roughness'].default_value = 0.8
 bpy.data.materials['Sheen8'].node_tree.nodes['Principled BSDF'].inputs['Sheen Tint'].default_value = (1.0, 0.7, 0.8, 1.0)
 bpy.context.object.data.materials.append(bpy.data.materials['Sheen8'])

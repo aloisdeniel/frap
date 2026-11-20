@@ -310,9 +310,7 @@ pub fn object_color_type(scene: &RenderScene, obj: &RObject, shading: &Shading) 
         {
             ColorType::Material
         }
-        ColorType::Vertex if mesh.is_none_or(|m| m.color_active.is_none()) => {
-            ColorType::Material
-        }
+        ColorType::Vertex if mesh.is_none_or(|m| m.color_active.is_none()) => ColorType::Material,
         t => t,
     }
 }
@@ -1738,7 +1736,7 @@ mod tests {
         let m = Shading::from_settings(&s);
         assert_eq!(
             (m.lighting, m.color_type, m.matcap),
-            (Lighting::Matcap, ColorType::Material, "basic_bright.exr")
+            (Lighting::Matcap, ColorType::Texture, "basic_bright.exr")
         );
         assert!(m.use_specular, "basic_bright has a specular pass");
         s.workbench.studio_light = "check_normal+y.exr".into();
@@ -1843,5 +1841,92 @@ mod tests {
         // An empty slot keeps the default material.
         let s = surface(&sc, &obj, 1, &shading);
         assert_eq!(s.base_color, [0.8, 0.8, 0.8, 1.0]);
+    }
+
+    #[test]
+    fn vertex_and_texture_colour_sources() {
+        use frap_render_scene::{
+            ImageKey, MatKey, MeshKey, RMaterialSettings, RMesh, RWorkbenchMaterial,
+            RWorkbenchTexture,
+        };
+        let mut sc = RenderScene::default();
+        let mut mesh = RMesh::default();
+        sc.meshes.insert(MeshKey(1), Arc::new(mesh.clone()));
+        let mut obj = RObject {
+            name: "Cube".into(),
+            matrix_world: Mat4::IDENTITY,
+            mesh: Some(MeshKey(1)),
+            materials: vec![Some(MatKey(7)), None],
+            color: [1.0; 4],
+            random_hash: 0,
+            display_type: "TEXTURED".into(),
+        };
+        sc.settings.workbench_materials.insert(
+            MatKey(7),
+            RWorkbenchMaterial {
+                diffuse_color: [0.2, 0.4, 0.6, 1.0],
+                metallic: 0.5,
+                roughness: 0.25,
+            },
+        );
+        let gb = |r: f32, m: f32| color::gbuffer_roughness_metallic(r, m);
+
+        // VERTEX without a colour attribute: the MATERIAL colour.
+        sc.settings.shading_color_type = "VERTEX".into();
+        let shading = Shading::from_settings(&sc.settings);
+        assert_eq!(shading.color_type, ColorType::Vertex);
+        assert_eq!(object_color_type(&sc, &obj, &shading), ColorType::Material);
+        let s = surface(&sc, &obj, 0, &shading);
+        assert_eq!((s.source, s.base_color[0]), (ColorSource::Uniform, 0.2));
+        // With one: the attribute, `Material(float3(-1))`'s alpha 1, roughness 0.4, metallic 0.
+        mesh.colors = vec![vec![[1.0; 4]]];
+        mesh.color_names = vec!["Col".into()];
+        mesh.color_active = Some(0);
+        sc.meshes.insert(MeshKey(1), Arc::new(mesh.clone()));
+        let s = surface(&sc, &obj, 0, &shading);
+        assert_eq!(s.source, ColorSource::Attribute);
+        assert_eq!((s.roughness, s.metallic), gb(0.4, 0.0));
+        assert_eq!(s.base_color[3], 1.0);
+        assert!(!s.is_transparent);
+
+        // TEXTURE: a UV map, TEXTURED display and an active image are all needed.
+        sc.settings.shading_color_type = "TEXTURE".into();
+        let shading = Shading::from_settings(&sc.settings);
+        assert_eq!(object_color_type(&sc, &obj, &shading), ColorType::Material);
+        mesh.uvs = vec![vec![[0.0; 2]]];
+        mesh.uv_names = vec!["UVMap".into()];
+        mesh.uv_active = Some(0);
+        sc.meshes.insert(MeshKey(1), Arc::new(mesh));
+        assert_eq!(object_color_type(&sc, &obj, &shading), ColorType::Texture);
+        // No image on the material yet: its own colour and values.
+        let s = surface(&sc, &obj, 0, &shading);
+        assert_eq!(s.source, ColorSource::Uniform);
+        assert_eq!((s.roughness, s.metallic), gb(0.25, 0.5));
+        let mut settings = RMaterialSettings::default();
+        settings.workbench_texture =
+            Some(RWorkbenchTexture::new(ImageKey(3), false, "REPEAT", true));
+        sc.settings.material_settings.insert(MatKey(7), settings);
+        // The image must be in the scene.
+        assert_eq!(surface(&sc, &obj, 0, &shading).source, ColorSource::Uniform);
+        sc.images.insert(
+            ImageKey(3),
+            Arc::new(frap_imbuf::DecodedImage {
+                width: 1,
+                height: 1,
+                channels: 4,
+                pixels: frap_imbuf::PixelData::U8(vec![255; 4]),
+            }),
+        );
+        let s = surface(&sc, &obj, 0, &shading);
+        assert_eq!(s.source, ColorSource::Image);
+        // The material's metallic / roughness stay.
+        assert_eq!((s.roughness, s.metallic), gb(0.25, 0.5));
+        assert!(slot_texture(&sc, &obj, 0).is_some());
+        // The empty slot has no image.
+        assert_eq!(surface(&sc, &obj, 1, &shading).source, ColorSource::Uniform);
+        // `display_type` SOLID: MATERIAL.
+        obj.display_type = "SOLID".into();
+        assert_eq!(object_color_type(&sc, &obj, &shading), ColorType::Material);
+        assert_eq!(surface(&sc, &obj, 0, &shading).source, ColorSource::Uniform);
     }
 }

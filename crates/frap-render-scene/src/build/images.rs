@@ -250,3 +250,222 @@ fn active_texture_depth<'a>(main: &'a Main, tree: &'a NodeTree, depth: u32) -> O
         .filter_map(|r| main.node_groups.get(r))
         .find_map(|g| active_texture_depth(main, g, depth + 1))
 }
+
+#[cfg(test)]
+mod tests {
+    use frap_nodes::{NodeTreeType, PropBag};
+    use frap_scene::ChangeLog;
+    use smol_str::SmolStr;
+
+    use super::*;
+
+    fn node(uid: u32, bl_idname: &'static str) -> Node {
+        Node {
+            uid,
+            name: bl_idname.into(),
+            label: String::new(),
+            bl_idname,
+            location: [0.0, 0.0],
+            width: 140.0,
+            parent: None,
+            mute: false,
+            hide: false,
+            inputs: vec![],
+            outputs: vec![],
+            props: PropBag::default(),
+        }
+    }
+
+    fn enum_prop(n: &mut Node, name: &'static str, v: &str) {
+        n.props.values.insert(name, Value::Enum(SmolStr::new(v)));
+    }
+
+    #[test]
+    fn imbuf_rows_flip_and_floats_unpremultiply() {
+        let mut b = ImBuf::new(1, 2, 32, true);
+        // Bottom row first: the bottom pixel is half-transparent premultiplied red.
+        b.data = ImBufData::Float(vec![0.5, 0.0, 0.0, 0.5, 0.0, 1.0, 0.0, 1.0]);
+        let d = from_imbuf(&b, true);
+        assert_eq!((d.width, d.height, d.channels), (1, 2, 4));
+        assert_eq!(
+            d.pixels,
+            PixelData::F32(vec![0.0, 1.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.5])
+        );
+        // Channel-packed or data floats are kept as stored.
+        let d = from_imbuf(&b, false);
+        assert_eq!(
+            d.pixels,
+            PixelData::F32(vec![0.0, 1.0, 0.0, 1.0, 0.5, 0.0, 0.0, 0.5])
+        );
+        let mut im = Image::new("", 1, 1);
+        assert!(float_premultiplied(&im));
+        im.alpha_mode = "CHANNEL_PACKED".into();
+        assert!(!float_premultiplied(&im));
+        // Byte buffers keep their bytes, rows flipped.
+        let mut b = ImBuf::new(1, 2, 32, false);
+        b.data = ImBufData::Byte(vec![1, 2, 3, 4, 5, 6, 7, 8]);
+        assert_eq!(
+            from_imbuf(&b, true).pixels,
+            PixelData::U8(vec![5, 6, 7, 8, 1, 2, 3, 4])
+        );
+    }
+
+    #[test]
+    fn generated_images_and_session_relative_paths() {
+        // A generated image reads through `Image::acquire` (its generator).
+        let mut im = Image::new("", 4, 2);
+        im.generated_color = [0.25, 0.5, 0.75, 1.0];
+        let d = acquire(&im, &PathBase::default()).expect("generated");
+        assert_eq!((d.width, d.height), (4, 2));
+        // A relative file path resolves against the session's directory, not the process's.
+        let dir = std::env::temp_dir().join(format!("frap_wp55_images_{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let png = frap_imbuf::encode(
+            &DecodedImage {
+                width: 2,
+                height: 1,
+                channels: 4,
+                pixels: PixelData::U8(vec![255, 0, 0, 255, 0, 0, 255, 255]),
+            },
+            &frap_imbuf::EncodeFormat::Png {
+                bit_depth: 8,
+                compression: 15,
+            },
+        )
+        .unwrap();
+        std::fs::write(dir.join("tex.png"), png).unwrap();
+        let mut f = Image::new("", 0, 0);
+        f.source = "FILE".into();
+        f.filepath = "tex.png".into();
+        let base = PathBase {
+            blend: None,
+            cwd: Some(dir.clone()),
+        };
+        let d = acquire(&f, &base).expect("relative to the session cwd");
+        assert_eq!((d.width, d.height), (2, 1));
+        let mut main = Main::default();
+        let r = main.images.insert("Tex", f, &mut ChangeLog::default());
+        let mut imgs = Images::new(base);
+        let k = imgs.key(&main, r);
+        assert_eq!((imgs.map[&k].width, imgs.map[&k].height), (2, 1));
+        assert_eq!(imgs.ids()[&r.key()], k);
+        // Missing: magenta.
+        let mut imgs = Images::new(PathBase {
+            blend: None,
+            cwd: Some(dir.join("nowhere")),
+        });
+        let k = imgs.key(&main, r);
+        assert_eq!(*imgs.map[&k], missing());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn workbench_texture_is_the_first_texture_node() {
+        let mut main = Main::default();
+        let mut im = Image::new("", 2, 2);
+        im.alpha_mode = "STRAIGHT".into();
+        let img = main.images.insert("Grid", im, &mut ChangeLog::default());
+        let mut tree = NodeTree::new("Shader Nodetree", NodeTreeType::Shader, true);
+        tree.nodes.push(node(1, "ShaderNodeBsdfPrincipled"));
+        // Texture Coordinate is an input node, not a texture.
+        tree.nodes.push(node(2, "ShaderNodeTexCoord"));
+        let mut tex = node(3, "ShaderNodeTexImage");
+        tex.props.values.insert("image", Value::Id(Some(img.any())));
+        enum_prop(&mut tex, "interpolation", "Closest");
+        enum_prop(&mut tex, "extension", "MIRROR");
+        tree.nodes.push(tex);
+        let mut imgs = Images::default();
+        assert_eq!(active_texture(&main, &tree).map(|n| n.uid), Some(3));
+        let t = imgs.workbench_texture(&main, &tree).expect("image");
+        assert_eq!(
+            (t.linear, t.extension.as_str(), t.alpha_cutoff, t.is_data),
+            (false, "MIRROR", true, false)
+        );
+        assert_eq!(imgs.map.len(), 1);
+        assert_eq!(imgs.ids()[&img.key()], t.image);
+        // A procedural texture before it is the active one: no image.
+        let mut noise = node(4, "ShaderNodeTexNoise");
+        noise.uid = 4;
+        tree.nodes.insert(1, noise);
+        assert_eq!(active_texture(&main, &tree).map(|n| n.uid), Some(4));
+        assert!(imgs.workbench_texture(&main, &tree).is_none());
+        // An Image Texture without an image: none; a NONE alpha has no cutoff.
+        tree.nodes.remove(1);
+        tree.nodes[2].props.values.insert("image", Value::Id(None));
+        assert!(imgs.workbench_texture(&main, &tree).is_none());
+        tree.nodes[2]
+            .props
+            .values
+            .insert("image", Value::Id(Some(img.any())));
+        main.images
+            .get_mut(img, &mut ChangeLog::default())
+            .unwrap()
+            .alpha_mode = "NONE".into();
+        let t = Images::default().workbench_texture(&main, &tree).unwrap();
+        assert!(!t.alpha_cutoff);
+        // Environment Texture: EXTEND (its interpolation still Closest).
+        tree.nodes[2].bl_idname = "ShaderNodeTexEnvironment";
+        let t = Images::default().workbench_texture(&main, &tree).unwrap();
+        assert_eq!((t.extension.as_str(), t.linear), ("EXTEND", false));
+        // Inside a node group when the tree has no texture node.
+        let group_tree = tree.clone();
+        let g = main
+            .node_groups
+            .insert("Group", group_tree, &mut ChangeLog::default());
+        let mut outer = NodeTree::new("Shader Nodetree", NodeTreeType::Shader, true);
+        let mut gn = node(9, "ShaderNodeGroup");
+        gn.props
+            .values
+            .insert("node_tree", Value::Id(Some(g.any())));
+        outer.nodes.push(gn);
+        assert_eq!(active_texture(&main, &outer).map(|n| n.uid), Some(3));
+    }
+
+    #[test]
+    fn principled_values_the_lowered_material_drops() {
+        use frap_nodes::{Link, Socket, SocketType, SocketValue};
+        let socket = |name: &str, ty: SocketType, v: SocketValue| Socket {
+            name: name.into(),
+            identifier: name.into(),
+            ty,
+            enabled: true,
+            hide_value: false,
+            default_value: v,
+        };
+        let mut tree = NodeTree::new("Shader Nodetree", NodeTreeType::Shader, true);
+        let mut p = node(1, "ShaderNodeBsdfPrincipled");
+        p.inputs = vec![
+            socket("Sheen Weight", SocketType::Value, SocketValue::Float(0.25)),
+            socket("Coat IOR", SocketType::Value, SocketValue::Float(1.8)),
+            socket(
+                "Coat Tint",
+                SocketType::Rgba,
+                SocketValue::Color([0.9, 0.8, 0.7, 1.0]),
+            ),
+        ];
+        tree.nodes.push(p);
+        let mut s = crate::types::RMaterialSettings::default();
+        assert_eq!(
+            (s.sheen_weight, s.coat_ior, s.coat_tint),
+            (1.0, 1.5, [1.0; 3])
+        );
+        super::super::principled_values(&tree, &mut s);
+        assert_eq!(
+            (s.sheen_weight, s.coat_ior, s.coat_tint),
+            (0.25, 1.8, [0.9, 0.8, 0.7])
+        );
+        // A linked socket keeps the default.
+        let mut v = node(2, "ShaderNodeValue");
+        v.outputs = vec![socket("Value", SocketType::Value, SocketValue::Float(0.5))];
+        tree.nodes.push(v);
+        tree.links.push(Link {
+            from_node: 2,
+            from_socket: "Value".into(),
+            to_node: 1,
+            to_socket: "Sheen Weight".into(),
+        });
+        let mut s = crate::types::RMaterialSettings::default();
+        super::super::principled_values(&tree, &mut s);
+        assert_eq!((s.sheen_weight, s.coat_ior), (1.0, 1.8));
+    }
+}

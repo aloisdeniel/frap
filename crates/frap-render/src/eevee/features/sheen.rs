@@ -4,13 +4,14 @@
 //! or the one a Separate Color names). The core evaluates it as EEVEE does (`principled_sheen`
 //! albedo fit, added to the diffuse closure, every layer below scaled by `1 − max(sheen)`).
 //!
-//! The lowered material is glTF-shaped: it has a sheen only when `Sheen Weight` is not 0, and
-//! keeps no weight, so the layer renders at weight 1 (deviations.md §2).
+//! The lowered material is glTF-shaped: it has a sheen only when `Sheen Weight` is not 0 and
+//! keeps no weight; the weight comes from `RMaterialSettings::sheen_weight` (the Principled
+//! BSDF's unlinked value; 1 when linked).
 
 use frap_material::LoweredMaterial;
 use frap_render_scene::RenderScene;
 
-use super::_common::{channel, extra, set_extra};
+use super::_common::{channel, extra, set_extra, settings};
 use crate::eevee::EeveeFeature;
 use crate::eevee::pipeline::{MaterialParams, tex};
 
@@ -41,7 +42,7 @@ pub fn applies(m: &LoweredMaterial) -> bool {
 
 fn pack(m: &LoweredMaterial, scene: &RenderScene, p: &mut MaterialParams) {
     let Some(sh) = &m.ext.sheen else { return };
-    p.sheen_weight = 1.0;
+    p.sheen_weight = settings(m, scene).sheen_weight;
     p.sheen_tint = sh.color.factor;
     p.sheen_roughness = sh.roughness.factor;
     if let Some(t) = &sh.color.texture {

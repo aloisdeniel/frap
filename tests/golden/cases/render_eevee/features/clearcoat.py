@@ -1,8 +1,9 @@
 # golden: startup=factory compare=objects tier=T0
 # render-golden: image=out/clearcoat.png min_ssim=0.88
 # EEVEE shading feature golden (WP 5.5): clearcoat. Three rough red spheres (Roughness 0.6)
-# with Coat Weight 0, 0.5 and 1 (Coat Roughness 0.05): the coat adds a sharp highlight of the
-# point light and of the world, and darkens the layer below by its Fresnel share.
+# with Coat Weight 0, 0.5 (yellow Coat Tint) and 1 (Coat IOR 2), Coat Roughness 0.05: the coat
+# adds a sharp highlight of the point light and of the world, and darkens (and tints) the
+# layer below by its Fresnel share.
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=0.8, location=(-1.9, 0.0, 0.0))
@@ -18,6 +19,7 @@ bpy.data.materials['Coat5'].node_tree.nodes['Principled BSDF'].inputs['Base Colo
 bpy.data.materials['Coat5'].node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value = 0.6
 bpy.data.materials['Coat5'].node_tree.nodes['Principled BSDF'].inputs['Coat Weight'].default_value = 0.5
 bpy.data.materials['Coat5'].node_tree.nodes['Principled BSDF'].inputs['Coat Roughness'].default_value = 0.05
+bpy.data.materials['Coat5'].node_tree.nodes['Principled BSDF'].inputs['Coat Tint'].default_value = (0.9, 0.9, 0.4, 1.0)
 bpy.context.object.data.materials.append(bpy.data.materials['Coat5'])
 bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=24, radius=0.8, location=(1.9, 0.0, 0.0))
 bpy.ops.object.shade_smooth()
@@ -26,6 +28,7 @@ bpy.data.materials['Coat1'].node_tree.nodes['Principled BSDF'].inputs['Base Colo
 bpy.data.materials['Coat1'].node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value = 0.6
 bpy.data.materials['Coat1'].node_tree.nodes['Principled BSDF'].inputs['Coat Weight'].default_value = 1.0
 bpy.data.materials['Coat1'].node_tree.nodes['Principled BSDF'].inputs['Coat Roughness'].default_value = 0.05
+bpy.data.materials['Coat1'].node_tree.nodes['Principled BSDF'].inputs['Coat IOR'].default_value = 2.0
 bpy.context.object.data.materials.append(bpy.data.materials['Coat1'])
 bpy.data.worlds['World'].node_tree.nodes['Background'].inputs['Color'].default_value = (0.3, 0.3, 0.35, 1.0)
 bpy.data.objects['Camera'].location = (0.0, -6.5, 1.5)

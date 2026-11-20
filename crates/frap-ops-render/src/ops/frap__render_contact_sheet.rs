@@ -261,8 +261,9 @@ pub(crate) fn workbench_left_out(w: &frap_render_scene::RWorkbenchShading) -> Ve
 /// The colour types of Blender 5.2.4's `shading.color_type` (all rendered: VERTEX and TEXTURE
 /// since WP 5.5, M5+M6 W2, which brought the colour attribute and the active texture image to
 /// the Workbench).
-pub(crate) const RENDERED_COLOR_TYPES: [&str; 6] =
-    ["MATERIAL", "OBJECT", "RANDOM", "SINGLE", "VERTEX", "TEXTURE"];
+pub(crate) const RENDERED_COLOR_TYPES: [&str; 6] = [
+    "MATERIAL", "OBJECT", "RANDOM", "SINGLE", "VERTEX", "TEXTURE",
+];
 
 /// The WARNING for a `shading.color_type` frap would render as `MATERIAL`: `None` for every
 /// colour type of [`RENDERED_COLOR_TYPES`] and in wireframe mode, which colours by object.

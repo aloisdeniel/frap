@@ -272,7 +272,10 @@ pub fn corner_tangents(mesh: &Mesh, uv: &[[f32; 2]], corner_normals: &[[f32; 3]]
         .zip(looptris.iter())
         .filter(|(f, _)| {
             let f = **f as usize;
-            offsets.get(f + 1).zip(offsets.get(f)).is_some_and(|(b, a)| b - a > 4)
+            offsets
+                .get(f + 1)
+                .zip(offsets.get(f))
+                .is_some_and(|(b, a)| b - a > 4)
         })
         .map(|(_, tri)| *tri)
         .collect();
@@ -289,4 +292,141 @@ pub fn corner_tangents(mesh: &Mesh, uv: &[[f32; 2]], corner_normals: &[[f32; 3]]
         }
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use frap_mesh::{AttrData, Attribute, Domain, Mesh};
+
+    use super::*;
+
+    fn cube() -> Mesh {
+        frap_mesh::primitives::cube(2.0, true, [1.0; 3])
+    }
+
+    fn dot(a: [f32; 3], b: [f32; 3]) -> f32 {
+        a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
+    }
+
+    #[test]
+    fn active_uv_and_colour_indices() {
+        let mut m = cube();
+        let r = extract(&m, 1);
+        assert_eq!(r.uv_names, ["UVMap"]);
+        assert_eq!(r.uv_active_render, Some(0));
+        assert!(r.tangents.is_none());
+        assert_eq!((r.color_active, r.color_default), (None, None));
+        let corners = m.corners_num();
+        let verts = m.verts_num();
+        m.attributes_mut().insert(Attribute {
+            name: "Paint".into(),
+            domain: Domain::Corner,
+            data: AttrData::ByteColor(vec![[255, 0, 0, 255]; corners].into()),
+        });
+        m.attributes_mut().insert(Attribute {
+            name: "Height".into(),
+            domain: Domain::Point,
+            data: AttrData::FloatColor(vec![[0.0, 1.0, 0.0, 1.0]; verts].into()),
+        });
+        // `mesh_has_color_attribute`: the active colour, else the default one.
+        m.color_active = None;
+        m.color_default = Some("Height".into());
+        let r = extract(&m, 1);
+        assert_eq!(r.color_names, ["Paint", "Height"]);
+        assert_eq!((r.color_active, r.color_default), (Some(1), Some(1)));
+        m.color_active = Some("Paint".into());
+        let r = extract(&m, 1);
+        assert_eq!((r.color_active, r.color_default), (Some(0), Some(1)));
+        // Byte colours are decoded from sRGB, float colours kept.
+        assert_eq!(r.colors[0][0], [1.0, 0.0, 0.0, 1.0]);
+        assert_eq!(r.colors[1][0], [0.0, 1.0, 0.0, 1.0]);
+        // An active name that is no colour attribute: none (no fallback).
+        m.color_active = Some("Missing".into());
+        assert_eq!(extract(&m, 1).color_active, None);
+        // A second UV map made active.
+        let uv = m.uv_maps()[0].1.to_vec();
+        m.attributes_mut().insert(Attribute {
+            name: "Second".into(),
+            domain: Domain::Corner,
+            data: AttrData::Float2(uv.into()),
+        });
+        m.uv_active = Some("Second".into());
+        m.uv_active_render = Some("UVMap".into());
+        let r = extract(&m, 1);
+        assert_eq!(r.uv_names, ["UVMap", "Second"]);
+        assert_eq!((r.uv_active, r.uv_active_render), (Some(1), Some(0)));
+        // No active UV map: the active-render one.
+        m.uv_active = None;
+        assert_eq!(extract(&m, 1).uv_active, Some(0));
+    }
+
+    #[test]
+    fn tangents_are_mikktspace_of_the_named_uv_map() {
+        let m = cube();
+        let r = extract_with_tangents(&m, 1, Some("UVMap"));
+        let t = r.tangents.as_ref().expect("tangents");
+        assert_eq!(t.len(), r.positions.len());
+        // Unit tangents orthogonal to the corner normal, bitangent sign ±1.
+        for (i, tan) in t.iter().enumerate() {
+            let n = r.normals[i];
+            let xyz = [tan[0], tan[1], tan[2]];
+            assert!((dot(xyz, xyz) - 1.0).abs() < 1e-4, "{tan:?}");
+            assert!(dot(xyz, n).abs() < 1e-4, "{tan:?} {n:?}");
+            assert_eq!(tan[3].abs(), 1.0);
+        }
+        // The same tangents as `Mesh.calc_tangents()` (quads are MikkTSpace faces).
+        let uv = m.uv_maps()[0].1.to_vec();
+        let reference = frap_geom::mikktspace::calc_uv_tangent_tris_quads(
+            m.positions(),
+            m.face_offsets(),
+            m.corner_verts(),
+            &m.corner_normals(),
+            &uv,
+        )
+        .unwrap();
+        let split = corner_split(&m);
+        for (i, &c) in split.vert_corner.iter().enumerate() {
+            assert_eq!(t[i], reference[c as usize]);
+        }
+        // An unknown UV map: none.
+        assert!(
+            extract_with_tangents(&m, 1, Some("Nope"))
+                .tangents
+                .is_none()
+        );
+        // The tangents are part of the mesh key.
+        assert_ne!(
+            super::super::keys::mesh_key(&r),
+            super::super::keys::mesh_key(&extract(&m, 1))
+        );
+    }
+
+    #[test]
+    fn ngons_enter_mikktspace_as_loop_triangles() {
+        let mut m = Mesh::new("");
+        let p: Vec<[f32; 3]> = (0..5)
+            .map(|i| {
+                let a = i as f32 * std::f32::consts::TAU / 5.0;
+                [a.cos(), a.sin(), 0.0]
+            })
+            .collect();
+        m.from_pydata(&p, &[], &[vec![0, 1, 2, 3, 4]], false);
+        let uv: Vec<[f32; 2]> = p
+            .iter()
+            .map(|v| [v[0] * 0.5 + 0.5, v[1] * 0.5 + 0.5])
+            .collect();
+        let normals = m.corner_normals();
+        let t = corner_tangents(&m, &uv, &normals);
+        assert_eq!(t.len(), 5);
+        // UVs aligned with X/Y: tangent +X, bitangent +Y (sign 1).
+        for tan in t {
+            assert!(
+                (tan[0] - 1.0).abs() < 1e-4 && tan[1].abs() < 1e-4,
+                "{tan:?}"
+            );
+            assert_eq!(tan[3], 1.0);
+        }
+        // A UV map of the wrong length: no tangent anywhere.
+        assert_eq!(corner_tangents(&m, &uv[..2], &normals), vec![NO_TANGENT; 5]);
+    }
 }

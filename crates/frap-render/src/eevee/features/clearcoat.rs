@@ -6,13 +6,14 @@
 //! (`node_bsdf_principled`: the coat's Fresnel reflectance takes its share of every layer
 //! below and tints them by `Coat Tint` through the slab).
 //!
-//! The lowered material is glTF-shaped: `Coat IOR` and `Coat Tint` are not in it and render
-//! at their defaults (1.5, white); deviations.md §2.
+//! The lowered material is glTF-shaped: `Coat IOR` and `Coat Tint` are not in it; they come
+//! from `RMaterialSettings::{coat_ior, coat_tint}` (the Principled BSDF's unlinked values;
+//! 1.5 and white when linked).
 
 use frap_material::LoweredMaterial;
 use frap_render_scene::RenderScene;
 
-use super::_common::{channel, extra, set_extra};
+use super::_common::{channel, extra, set_extra, settings};
 use crate::eevee::EeveeFeature;
 use crate::eevee::pipeline::{MaterialParams, tex};
 
@@ -52,6 +53,9 @@ fn pack(m: &LoweredMaterial, scene: &RenderScene, p: &mut MaterialParams) {
     let Some(c) = &m.ext.clearcoat else { return };
     p.coat_weight = c.factor.factor;
     p.coat_roughness = c.roughness.factor;
+    let s = settings(m, scene);
+    p.coat_ior = s.coat_ior;
+    p.coat_tint = s.coat_tint;
     if let Some(t) = &c.factor.texture {
         p.set_texture(tex::COAT, t, scene);
         set_extra(p, extra::COAT_WEIGHT_CHANNEL, channel(t.channel));

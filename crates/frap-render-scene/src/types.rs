@@ -330,6 +330,12 @@ pub struct RMaterialSettings {
     /// node (`ED_object_get_active_image`), `None` when that node is no Image or Environment
     /// Texture with an image.
     pub workbench_texture: Option<RWorkbenchTexture>,
+    /// The Principled BSDF's `Sheen Weight` (glTF's sheen has no weight; 1 when linked).
+    pub sheen_weight: f32,
+    /// The Principled BSDF's `Coat IOR` (not in `KHR_materials_clearcoat`; 1.5 when linked).
+    pub coat_ior: f32,
+    /// The Principled BSDF's `Coat Tint` (linear RGB; white when linked).
+    pub coat_tint: [f32; 3],
 }
 
 impl Default for RMaterialSettings {
@@ -339,6 +345,9 @@ impl Default for RMaterialSettings {
             use_transparency_overlap: true,
             use_raytrace_refraction: false,
             workbench_texture: None,
+            sheen_weight: 1.0,
+            coat_ior: 1.5,
+            coat_tint: [1.0; 3],
         }
     }
 }
