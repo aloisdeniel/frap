@@ -62,8 +62,11 @@ pub(crate) struct Target {
     pub props: IndexMap<SmolStr, Vec<Option<FCurve>>>,
 }
 
-/// A group that must be sampled: `(type, channel, bone)`.
-pub(crate) type ToSample = (TType, &'static str, Option<SmolStr>);
+/// A group that must be sampled: `(type, channel, bone)`. The channel is
+/// `get_channel_from_target(get_target(prop))`: `None` for the shape keys and for an object
+/// property that is not a transform (`hide_render`, `color`, …), which the add-on then samples
+/// as nothing.
+pub(crate) type ToSample = (TType, Option<&'static str>, Option<SmolStr>);
 
 /// What `get_channel_groups` returns.
 #[derive(Clone, Debug, Default)]
@@ -288,11 +291,9 @@ pub(crate) fn channel_groups(
         for (prop, chans) in std::mem::take(&mut t.props) {
             let gt = get_target(&prop);
             if paths.iter().filter(|p| **p == gt).count() > 1 {
-                if let Some(c) = gt.as_ref().and_then(channel_from_target) {
-                    push(&mut to_be_sampled, (t.ty, c, None));
-                } else if t.ty == TType::Sk {
-                    push(&mut to_be_sampled, (t.ty, "value", None));
-                }
+                // `None`, because no delta exists on bones.
+                let c = gt.as_ref().and_then(channel_from_target);
+                push(&mut to_be_sampled, (t.ty, c, None));
             } else {
                 kept.insert(prop, chans);
             }
@@ -300,10 +301,7 @@ pub(crate) fn channel_groups(
         let mut props = IndexMap::new();
         for (prop, chans) in kept {
             if !no_sample_option && needs_baking(exp, &chans) {
-                let c = get_target(&prop)
-                    .as_ref()
-                    .and_then(channel_from_target)
-                    .unwrap_or("value");
+                let c = get_target(&prop).as_ref().and_then(channel_from_target);
                 push(&mut to_be_sampled, (t.ty, c, t.bone.clone()));
             } else {
                 props.insert(prop, chans);

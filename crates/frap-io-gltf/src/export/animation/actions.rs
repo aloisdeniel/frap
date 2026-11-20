@@ -590,7 +590,9 @@ fn animated_object_channels(
         }
     }
     for (ty, c, _) in &groups.to_be_sampled {
-        if *ty == TType::Object {
+        if *ty == TType::Object
+            && let Some(c) = c
+        {
             out.insert(*c, exp.s.fallback);
         }
     }
@@ -630,11 +632,11 @@ fn animated_armature_channels(
         }
     }
     for (ty, c, bone) in &groups.to_be_sampled {
-        match (ty, bone) {
-            (TType::Bone, Some(b)) => {
+        match (ty, bone, c) {
+            (TType::Bone, Some(b), Some(c)) => {
                 bones.insert((b.clone(), *c), exp.s.fallback);
             }
-            (TType::Object, _) => object.push((*c, exp.s.fallback)),
+            (TType::Object, _, Some(c)) => object.push((*c, exp.s.fallback)),
             _ => {}
         }
     }
@@ -783,14 +785,16 @@ fn gather_object(
                 let (chs, to_be_sampled) = fcurve_channels(exp, ob, &act, slot.handle);
                 channels.extend(chs);
                 for (ty, prop, bone) in to_be_sampled {
-                    let c = match (ty, bone) {
-                        (TType::Bone, Some(b)) => {
-                            exp.bone_channel(ob, &b, prop, &key, &sl, Some(exp.s.fallback))
+                    // `gather_sampled_*_channel` with a `None` channel (a non-TRS object
+                    // property) has no target path and exports nothing.
+                    let c = match (ty, bone, prop) {
+                        (TType::Bone, Some(b), Some(p)) => {
+                            exp.bone_channel(ob, &b, p, &key, &sl, Some(exp.s.fallback))
                         }
-                        (TType::Object, _) => {
-                            exp.object_channel(ob, prop, &key, &sl, Some(exp.s.fallback))
+                        (TType::Object, _, Some(p)) => {
+                            exp.object_channel(ob, p, &key, &sl, Some(exp.s.fallback))
                         }
-                        (TType::Sk, _) => exp.sk_channel(ob, &key, &sl),
+                        (TType::Sk, _, _) => exp.sk_channel(ob, &key, &sl),
                         _ => None,
                     };
                     channels.extend(c);

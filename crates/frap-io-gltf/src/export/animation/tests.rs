@@ -493,3 +493,47 @@ fn merged_tracks_skip_duplicate_channels() {
             .any(|w| w.contains("same channel animation"))
     );
 }
+
+#[test]
+fn non_transform_properties_are_never_sampled_as_a_channel() {
+    // `get_channel_from_target(get_target('hide_render'))` is None: a group of a non-TRS
+    // object property queued for sampling adds no channel (golden non_transform).
+    let curves_fs = |s: &mut Scene, ob, extra: Vec<FCurve>| {
+        let mut curves = vec![curve(
+            "hide_render",
+            0,
+            &[(3.0, 0.0)],
+            Interpolation::Constant,
+        )];
+        curves.extend(extra);
+        let a = s.action("CubeAction", "OBCube", "OBJECT", curves);
+        s.assign(ob, a);
+    };
+    let st = settings_with(|a| set(a, "export_force_sampling", Value::Bool(false)));
+    let mut s = Scene::empty();
+    let ob = s.link(Object::new("", None), "Cube");
+    curves_fs(&mut s, ob, Vec::new());
+    let (doc, _, _) = export_with(&s, &st, |_| {});
+    assert!(doc.animations.is_empty(), "{:?}", doc.animations);
+
+    let mut s = Scene::empty();
+    let ob = s.link(Object::new("", None), "Cube");
+    let scale = (0..3)
+        .map(|i| {
+            curve(
+                "scale",
+                i,
+                &[(1.0, 1.0), (10.0, 1.0 + i as f32)],
+                Interpolation::Bezier,
+            )
+        })
+        .collect();
+    curves_fs(&mut s, ob, scale);
+    let (doc, _, _) = export_with(&s, &st, |_| {});
+    assert_eq!(doc.animations.len(), 1);
+    let chans = &doc.animations[0].channels;
+    assert_eq!(chans.len(), 1, "one channel per (node, path)");
+    assert_eq!(chans[0].target.path, AnimationPath::Scale);
+    let smp = &doc.animations[0].samplers[chans[0].sampler as usize];
+    assert_eq!(smp.interpolation_or_default(), GInterp::CubicSpline);
+}

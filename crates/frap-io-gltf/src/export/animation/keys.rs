@@ -335,6 +335,25 @@ pub(crate) fn optimize(
     }
 }
 
+// Ported from blender/source/blender/python/mathutils/mathutils.cc (Blender 5.2.4,
+// GPL-2.0-or-later): `EXPP_FloatsAreEqual`, `EXPP_VectorsAreEqual`.
+/// `EXPP_FloatsAreEqual(af, bf, max_diff)`: the floats are at most `max_diff` ULPs apart.
+fn floats_are_equal(af: f32, bf: f32, max_diff: i32) -> bool {
+    let ai = af.to_bits() as i32;
+    let bi = bf.to_bits() as i32;
+    let test = -(((ai ^ bi) as u32 >> 31) as i32);
+    let diff = (ai ^ (test & 0x7fff_ffff)).wrapping_sub(bi);
+    let v1 = max_diff.wrapping_add(diff);
+    let v2 = max_diff.wrapping_sub(diff);
+    (v1 | v2) >= 0
+}
+
+/// `Vector.__eq__` / `Quaternion.__eq__` (`EXPP_VectorsAreEqual(a, b, size, 1)`; vectors of
+/// different sizes are not equal).
+pub(crate) fn mathutils_eq(a: &[f32], b: &[f32]) -> bool {
+    a.len() == b.len() && a.iter().zip(b).all(|(x, y)| floats_are_equal(*x, *y, 1))
+}
+
 /// `__gather_interpolation` of the sampled object and bone samplers.
 pub(crate) fn sampled_interpolation(
     animated: bool,
@@ -360,7 +379,9 @@ pub(crate) fn sampled_interpolation(
             }
         }
         _ => {
-            if !animated || keys[0].value == keys[1].value {
+            // `keyframes[0].value == keyframes[1].value` compares mathutils Vectors or
+            // Quaternions: equal within one ULP per component.
+            if !animated || mathutils_eq(&keys[0].value, &keys[1].value) {
                 Interp::Step
             } else {
                 fallback
@@ -465,6 +486,28 @@ mod tests {
             sampled_interpolation(false, Interp::Cubic, &[k(0.)], l),
             Interp::Step
         );
+    }
+
+    #[test]
+    fn mathutils_equality_is_one_ulp() {
+        let a = 0.090_628_445_f32;
+        let b = f32::from_bits(a.to_bits() - 1);
+        let c = f32::from_bits(a.to_bits() - 2);
+        // Verified on 5.2.4: `Quaternion((1,0,a,0)) == Quaternion((1,0,b,0))` is True one ULP
+        // apart, False two ULPs apart; `Vector((0,0,0)) == Vector((1e-7,0,0))` is False.
+        assert!(mathutils_eq(&[1.0, 0.0, a, 0.0], &[1.0, 0.0, b, 0.0]));
+        assert!(!mathutils_eq(&[1.0, 0.0, a, 0.0], &[1.0, 0.0, c, 0.0]));
+        assert!(!mathutils_eq(&[0.0, 0.0, 0.0], &[1e-7, 0.0, 0.0]));
+        assert!(!mathutils_eq(&[5.0, 0.0, 0.0], &[5.000_001, 0.0, 0.0]));
+        assert!(mathutils_eq(&[0.0], &[-0.0]));
+        assert!(!mathutils_eq(&[1.0, 2.0], &[1.0, 2.0, 3.0]));
+        let l = Interp::Linear;
+        let q = |z: f32| Key::new(0.0, vec![1.0, 0.0, z, 0.0]);
+        assert_eq!(
+            sampled_interpolation(true, l, &[q(a), q(b)], l),
+            Interp::Step
+        );
+        assert_eq!(sampled_interpolation(true, l, &[q(a), q(c)], l), l);
     }
 
     #[test]

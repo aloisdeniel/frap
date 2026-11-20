@@ -154,6 +154,15 @@ pub(crate) fn create(
         track_names.push(name);
         for (ci, ch) in a.channels.iter().enumerate() {
             if let Some(n) = ch.target.node {
+                // `gltf.data.nodes[channel.target.node]`.
+                if n as usize >= cx.doc.nodes.len() {
+                    return Err(bad_channel(
+                        cx,
+                        ai,
+                        ci,
+                        &format!("node {n} does not exist (IndexError: list index out of range)"),
+                    ));
+                }
                 node_anims.entry((n as usize, ai)).or_default().push(ci);
             }
         }
@@ -195,7 +204,8 @@ pub(crate) fn create(
             }
         }
     }
-    restore_animation(cx, main, log, &track_names[0]);
+    let restored = restore_animation(cx, main, log, &track_names[0]);
+    apply_restored(main, log, cx.scene, &restored);
     Ok(())
 }
 
@@ -313,31 +323,50 @@ fn make_fcurve(
     keys::update(fc);
 }
 
-/// A decoded sampler: key times, per-key values, interpolation.
+/// A decoded sampler: key times, per-key values (each element at the output accessor's own
+/// width), interpolation.
 type Decoded = (Vec<f32>, Vec<Vec<f64>>, GInterp);
 
-/// Decodes a sampler: key times and per-key values (CUBICSPLINE: the values only).
-fn sampler_data(
-    cx: &Gltf,
-    ai: usize,
-    sampler: u32,
-    width: usize,
-) -> Result<Option<Decoded>, ImportError> {
-    let anim = &cx.doc.animations[ai];
-    let Some(s) = anim.samplers.get(sampler as usize) else {
-        return Ok(None);
-    };
-    let times: Vec<f32> = cx.accessor(s.input)?.to_f32();
-    let flat = cx.accessor(s.output)?.to_f32();
-    let mut vals: Vec<Vec<f64>> = flat
-        .chunks(width.max(1))
+/// The add-on's Python failure on malformed animation data, as an import error naming the
+/// animation and channel (Blender's operator fails with the traceback, verified on 5.2.4).
+fn bad_channel(cx: &Gltf, ai: usize, ci: usize, what: &str) -> ImportError {
+    let name = cx.doc.animations[ai].name.as_deref().unwrap_or("");
+    ImportError::Data(format!("animation {ai} ('{name}') channel {ci}: {what}"))
+}
+
+/// The elements of accessor `i` at its own width (`BinaryData.get_data_from_accessor`).
+fn elements(cx: &Gltf, i: u32) -> Result<Vec<Vec<f64>>, ImportError> {
+    let a = cx.accessor(i)?;
+    let n = a.type_.components().max(1);
+    Ok(a.to_f32()
+        .chunks(n)
         .map(|c| c.iter().map(|v| f64::from(*v)).collect())
+        .collect())
+}
+
+/// Decodes the sampler of channel `ci`: key times and per-key values (CUBICSPLINE: the values
+/// only, `values[1::3]`). A missing sampler is the add-on's `IndexError`.
+fn sampler_data(cx: &Gltf, ai: usize, ci: usize) -> Result<Decoded, ImportError> {
+    let anim = &cx.doc.animations[ai];
+    let sampler = anim.channels[ci].sampler;
+    let Some(s) = anim.samplers.get(sampler as usize) else {
+        return Err(bad_channel(
+            cx,
+            ai,
+            ci,
+            &format!("sampler {sampler} does not exist (IndexError: list index out of range)"),
+        ));
+    };
+    let times: Vec<f32> = elements(cx, s.input)?
+        .iter()
+        .map(|k| k.first().copied().unwrap_or(0.0) as f32)
         .collect();
+    let mut vals = elements(cx, s.output)?;
     let interp = s.interpolation_or_default();
     if interp == GInterp::CubicSpline {
         vals = vals.into_iter().skip(1).step_by(3).collect();
     }
-    Ok(Some((times, vals, interp)))
+    Ok((times, vals, interp))
 }
 
 /// The edit-mode rest transform of `bone` relative to its parent bone (`editbone_trans`,
@@ -384,15 +413,41 @@ fn node_channel(
     let Some((action, handle)) = action_and_slot(main, log, st, ob, false) else {
         return Ok(());
     };
-    let Some((times, vals, interp)) = sampler_data(cx, ai, ch.sampler, width)? else {
-        return Ok(());
-    };
+    let (times, vals, interp) = sampler_data(cx, ai, ci)?;
+    // `gltf.loc_gltf_to_blender(vals)` and the quaternion / scale conversions index the
+    // element's components; `make_fcurve`'s `coords[1::2] = …` needs one value per key.
+    if let Some(e) = vals.iter().find(|e| e.len() < width) {
+        return Err(bad_channel(
+            cx,
+            ai,
+            ci,
+            &format!(
+                "{} output elements have {} components, {width} needed (IndexError: list index out of range)",
+                prop,
+                e.len()
+            ),
+        ));
+    }
+    if vals.len() != times.len() {
+        return Err(bad_channel(
+            cx,
+            ai,
+            ci,
+            &format!(
+                "{} output values for {} keys (ValueError: attempt to assign sequence of size {} to extended slice of size {})",
+                vals.len(),
+                times.len(),
+                vals.len(),
+                times.len()
+            ),
+        ));
+    }
     let vn = &cx.vtree.nodes[v];
     let (ra, rb) = (vn.rotation_after, vn.rotation_before);
     let mut values: Vec<Vec<f32>> = vals
         .iter()
         .map(|x| {
-            let g = |i: usize| x.get(i).copied().unwrap_or(0.0);
+            let g = |i: usize| x[i];
             match width {
                 4 if prop == "rotation_quaternion" => {
                     let q = quat([g(0), g(1), g(2), g(3)]);
@@ -488,12 +543,8 @@ fn weight_channel(
     let Some((action, handle)) = action_and_slot(main, log, st, ob, true) else {
         return Ok(());
     };
-    let Some((times, _, interp)) = sampler_data(cx, ai, anim.channels[ci].sampler, 1)? else {
-        return Ok(());
-    };
-    let flat = cx
-        .accessor(anim.samplers[anim.channels[ci].sampler as usize].output)?
-        .to_f32();
+    let (times, _, interp) = sampler_data(cx, ai, ci)?;
+    let values = elements(cx, anim.samplers[anim.channels[ci].sampler as usize].output)?;
     let nb = names.len();
     let (offset, stride) = if interp == GInterp::CubicSpline {
         (nb, 3 * nb)
@@ -510,14 +561,23 @@ fn weight_channel(
     };
     for (sk, name) in names.iter().enumerate() {
         let Some(name) = name else { continue };
-        let co: Vec<[f32; 2]> = times
-            .iter()
-            .enumerate()
-            .map(|(i, t)| {
-                let v = flat.get(offset + stride * i + sk).copied().unwrap_or(0.0);
-                [(f64::from(*t) * fps) as f32, v]
-            })
-            .collect();
+        // `values[offset + stride * i + sk][0]`.
+        let mut co: Vec<[f32; 2]> = Vec::with_capacity(times.len());
+        for (i, t) in times.iter().enumerate() {
+            let Some(v) = values.get(offset + stride * i + sk).and_then(|e| e.first()) else {
+                return Err(bad_channel(
+                    cx,
+                    ai,
+                    ci,
+                    &format!(
+                        "weights output has {} values, too few for {} keys of {nb} targets (IndexError: list index out of range)",
+                        values.len(),
+                        times.len()
+                    ),
+                ));
+            };
+            co.push([(f64::from(*t) * fps) as f32, *v as f32]);
+        }
         let path = format!("key_blocks[\"{}\"].value", escape(name));
         make_fcurve(main, log, action, handle, &co, &path, 0, "", interp);
         // The slider range grows to the first weight (the add-on reads `coords[1:2]`).
@@ -727,8 +787,10 @@ fn restore_on(main: &mut Main, log: &mut ChangeLog, owner: Owner, name: &str) {
 }
 
 /// `BlenderAnimation.restore_animation(gltf, name)`: every imported object (an armature for
-/// its bones) and its shape keys get the first animation's action.
-fn restore_animation(cx: &Gltf, main: &mut Main, log: &mut ChangeLog, name: &str) {
+/// its bones) and its shape keys get the first animation's action. Returns the owners whose
+/// animation data it touched.
+fn restore_animation(cx: &Gltf, main: &mut Main, log: &mut ChangeLog, name: &str) -> Vec<Owner> {
+    let mut owners = Vec::new();
     let mut done: HashSet<IdRef<ObjectId>> = HashSet::new();
     for v in 0..cx.vtree.nodes.len() {
         let Some((ob, _)) = animated_object(cx, main, v) else {
@@ -738,6 +800,7 @@ fn restore_animation(cx: &Gltf, main: &mut Main, log: &mut ChangeLog, name: &str
             continue;
         }
         restore_on(main, log, Owner::Object(ob), name);
+        owners.push(Owner::Object(ob));
         let key = main
             .objects
             .get(ob)
@@ -745,6 +808,132 @@ fn restore_animation(cx: &Gltf, main: &mut Main, log: &mut ChangeLog, name: &str
             .and_then(|m| main.meshes.get(m)?.shape_keys);
         if let Some(k) = key {
             restore_on(main, log, Owner::Key(k), name);
+            owners.push(Owner::Key(k));
         }
     }
+    owners
+}
+
+/// The animation of the restored owners at `scene.frame_current`, written into the originals.
+///
+/// In Blender the new objects and shape keys are tagged for a full depsgraph update and
+/// `bpy.ops` updates the view layer after the FINISHED import, so the depsgraph evaluates the
+/// restored action at the current frame and flushes it to the originals
+/// (`animsys_write_orig_anim_rna`; verified on 5.2.4: AnimatedTriangle imported at
+/// `frame_current=30` has `rotation_quaternion == (-1, 0, 0, 0)` right after the import, not
+/// its rest rotation). The importer writes only these paths: the object's and the pose bones'
+/// `location` / `rotation_quaternion` / `scale` and `key_blocks["…"].value` (clamped to the
+/// slider range, as the RNA setter does).
+fn apply_restored(
+    main: &mut Main,
+    log: &mut ChangeLog,
+    scene: frap_rna::IdRef<frap_rna::SceneId>,
+    owners: &[Owner],
+) {
+    let Some(frame) = main.scenes.get(scene).map(|s| s.frame_current as f32) else {
+        return;
+    };
+    for &owner in owners {
+        let adt = match owner {
+            Owner::Object(o) => main.objects.get(o).and_then(|x| x.animation_data.as_ref()),
+            Owner::Key(k) => main
+                .shape_keys
+                .get(k)
+                .and_then(|x| x.animation_data.as_ref()),
+        };
+        let Some(adt) = adt else { continue };
+        if adt.action.is_none() && adt.nla_tracks.is_empty() {
+            continue;
+        }
+        let channels =
+            frap_anim::eval::evaluate_anim(adt, &frap_eval::animate::MainActions(main), frame);
+        if channels.is_empty() {
+            continue;
+        }
+        match owner {
+            Owner::Object(o) => {
+                let Some(ob) = main.objects.get_mut(o, log) else {
+                    continue;
+                };
+                for c in &channels {
+                    let (bone, prop) = match split_bone_path(&c.data_path) {
+                        Some((b, p)) => (Some(b), p),
+                        None => (None, c.data_path.to_string()),
+                    };
+                    let target: Option<&mut [f32]> = match &bone {
+                        None => match prop.as_str() {
+                            "location" => Some(&mut ob.location[..]),
+                            "rotation_quaternion" => Some(&mut ob.rotation_quaternion[..]),
+                            "scale" => Some(&mut ob.scale[..]),
+                            _ => None,
+                        },
+                        Some(b) => ob
+                            .pose
+                            .as_mut()
+                            .and_then(|p| p.bones.iter_mut().find(|pb| pb.name == *b))
+                            .and_then(|pb| match prop.as_str() {
+                                "location" => Some(&mut pb.location[..]),
+                                "rotation_quaternion" => Some(&mut pb.rotation_quaternion[..]),
+                                "scale" => Some(&mut pb.scale[..]),
+                                _ => None,
+                            }),
+                    };
+                    if let Some(slot) =
+                        target.and_then(|t| t.get_mut(usize::try_from(c.array_index).ok()?))
+                    {
+                        *slot = c.value;
+                    }
+                }
+            }
+            Owner::Key(k) => {
+                let Some(key) = main.shape_keys.get_mut(k, log) else {
+                    continue;
+                };
+                for c in &channels {
+                    let Some(name) = c
+                        .data_path
+                        .strip_prefix("key_blocks[\"")
+                        .and_then(|r| r.strip_suffix("\"].value"))
+                        .map(unescape)
+                    else {
+                        continue;
+                    };
+                    if let Some(kb) = key.key_blocks.iter_mut().find(|b| b.name == name) {
+                        kb.set_value(c.value);
+                    }
+                }
+            }
+        }
+    }
+}
+
+/// `pose.bones["name"].prop` → `(name, prop)`.
+fn split_bone_path(path: &str) -> Option<(String, String)> {
+    let rest = path.strip_prefix("pose.bones[\"")?;
+    let mut name = String::new();
+    let mut chars = rest.char_indices();
+    while let Some((i, c)) = chars.next() {
+        match c {
+            '\\' => name.push(chars.next()?.1),
+            '"' => {
+                let prop = rest[i + 1..].strip_prefix("].")?;
+                return Some((name, prop.to_owned()));
+            }
+            c => name.push(c),
+        }
+    }
+    None
+}
+
+/// Inverse of [`escape`].
+fn unescape(s: &str) -> String {
+    let mut out = String::new();
+    let mut chars = s.chars();
+    while let Some(c) = chars.next() {
+        match c {
+            '\\' => out.extend(chars.next()),
+            c => out.push(c),
+        }
+    }
+    out
 }

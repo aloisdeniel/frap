@@ -93,6 +93,17 @@ fn run(
     objects: &[Option<IdRef<ObjectId>>],
     bones: &[(usize, &str)],
 ) {
+    try_run(main, doc, buffers, objects, bones).unwrap();
+}
+
+/// [`run`], returning `create`'s result.
+fn try_run(
+    main: &mut Main,
+    doc: Document,
+    buffers: Vec<Vec<u8>>,
+    objects: &[Option<IdRef<ObjectId>>],
+    bones: &[(usize, &str)],
+) -> Result<(), ImportError> {
     let settings = ImportSettings::default();
     let scene = main.scenes.iter().next().unwrap().0;
     let units = Units::new(1.0);
@@ -123,7 +134,7 @@ fn run(
         cx.vtree.nodes[i].blender_bone_name = Some(b.into());
     }
     let mut log = ChangeLog::default();
-    create(&mut cx, main, &mut log).unwrap();
+    create(&mut cx, main, &mut log)
 }
 
 fn node(name: &str) -> Node {
@@ -653,5 +664,177 @@ fn khronos_samples_reexport_like_blender() {
         got.sort();
         let want: Vec<(String, usize)> = want.iter().map(|(n, c)| ((*n).to_owned(), *c)).collect();
         assert_eq!(got, want, "{rel}");
+    }
+}
+
+/// Malformed animation data fails the import, as the add-on's Python errors make Blender's
+/// operator fail (verified on 5.2.4: `ValueError` from `coords[1::2] = …` when the output
+/// count is not one value per key, `IndexError` for a missing node or sampler and for
+/// elements with too few components). A VEC4 scale output is accepted (the first three
+/// components are used).
+#[test]
+fn malformed_animations_fail_like_blender() {
+    let t = |p, i, times: Vec<f32>, v: Vec<f32>| (0u32, p, i, times, v);
+    let tr = AnimationPath::Translation;
+    type Built = (Document, Vec<Vec<u8>>);
+    let cases: Vec<(&str, Built, &str)> = vec![
+        (
+            "short",
+            doc(
+                vec![node("N")],
+                vec![(
+                    Some("A"),
+                    vec![t(
+                        tr.clone(),
+                        GInterp::Linear,
+                        vec![0.0, 1.0, 2.0],
+                        vec![0.0; 6],
+                    )],
+                )],
+            ),
+            "2 output values for 3 keys",
+        ),
+        (
+            "long",
+            doc(
+                vec![node("N")],
+                vec![(
+                    Some("A"),
+                    vec![t(tr.clone(), GInterp::Linear, vec![0.0, 1.0], vec![0.0; 9])],
+                )],
+            ),
+            "3 output values for 2 keys",
+        ),
+        (
+            "cubic",
+            doc(
+                vec![node("N")],
+                vec![(
+                    Some("A"),
+                    vec![t(
+                        tr.clone(),
+                        GInterp::CubicSpline,
+                        vec![0.0, 1.0],
+                        vec![0.0; 6],
+                    )],
+                )],
+            ),
+            "1 output values for 2 keys",
+        ),
+        (
+            "node",
+            {
+                let (mut d, b) = doc(
+                    vec![node("N")],
+                    vec![(
+                        Some("A"),
+                        vec![t(tr.clone(), GInterp::Linear, vec![0.0, 1.0], vec![0.0; 6])],
+                    )],
+                );
+                d.animations[0].channels[0].target.node = Some(5);
+                (d, b)
+            },
+            "node 5 does not exist",
+        ),
+        (
+            "sampler",
+            {
+                let (mut d, b) = doc(
+                    vec![node("N")],
+                    vec![(
+                        Some("A"),
+                        vec![t(tr.clone(), GInterp::Linear, vec![0.0, 1.0], vec![0.0; 6])],
+                    )],
+                );
+                d.animations[0].channels[0].sampler = 3;
+                (d, b)
+            },
+            "sampler 3 does not exist",
+        ),
+        (
+            "rotation as VEC3",
+            {
+                let (mut d, b) = doc(
+                    vec![node("N")],
+                    vec![(
+                        Some("A"),
+                        vec![t(tr.clone(), GInterp::Linear, vec![0.0, 1.0], vec![0.0; 6])],
+                    )],
+                );
+                d.animations[0].channels[0].target.path = AnimationPath::Rotation;
+                (d, b)
+            },
+            "3 components, 4 needed",
+        ),
+    ];
+    for (what, (d, b), msg) in cases {
+        let (mut main, _) = startup::empty();
+        let mut log = ChangeLog::default();
+        let ob = main.objects.insert("N", Object::new("", None), &mut log);
+        let err = try_run(&mut main, d, b, &[Some(ob)], &[])
+            .expect_err(what)
+            .to_string();
+        assert!(
+            err.contains("animation 0 ('A') channel 0") && err.contains(msg),
+            "{what}: {err}"
+        );
+    }
+    // VEC4 scale: accepted, the first three components.
+    let (mut d, b) = doc(
+        vec![node("N")],
+        vec![(
+            Some("A"),
+            vec![t(
+                AnimationPath::Rotation,
+                GInterp::Linear,
+                vec![0.0, 1.0],
+                vec![0.0, 0.0, 0.0, 1.0, 2.0, 2.0, 2.0, 2.0],
+            )],
+        )],
+    );
+    d.animations[0].channels[0].target.path = AnimationPath::Scale;
+    let (mut main, _) = startup::empty();
+    let mut log = ChangeLog::default();
+    let ob = main.objects.insert("N", Object::new("", None), &mut log);
+    try_run(&mut main, d, b, &[Some(ob)], &[]).unwrap();
+    let a = main.actions.get(main.actions.find("A").unwrap()).unwrap();
+    let fcs = &a.channelbag(a.slots[0].handle).unwrap().fcurves;
+    assert_eq!(fcs.len(), 3);
+    assert_eq!(fcs[0].keyframe_points[1].co[1], 2.0);
+}
+
+/// Blender 5.2.4: right after `import_scene.gltf` the restored first animation is applied at
+/// `scene.frame_current` (AnimatedTriangle's `Mesh_0.rotation_quaternion`, frame 1: (0.951167,
+/// 0, -0.117833, 0); frame 7: (0.589167, 0, -0.755833, 0); frame 30, past the last key: (-1,
+/// 0, 0, 0)).
+#[test]
+fn import_applies_the_first_animation_at_the_current_frame() {
+    let root =
+        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../../tests/data/gltf-samples");
+    let path = root.join("AnimatedTriangle/glTF-Embedded/AnimatedTriangle.gltf");
+    for (frame, want) in [
+        (1, [0.951_167, 0.0, -0.117_833, 0.0]),
+        (7, [0.589_167, 0.0, -0.755_833, 0.0]),
+        (30, [-1.0, 0.0, 0.0, 0.0]),
+    ] {
+        let (mut main, win) = startup::empty();
+        let mut log = ChangeLog::default();
+        main.scenes
+            .get_mut(win.scene, &mut log)
+            .unwrap()
+            .frame_current = frame;
+        crate::import::import_file(&mut main, &win, &path, &ImportSettings::default(), &mut log)
+            .unwrap();
+        let ob = main
+            .objects
+            .get(main.objects.find("Mesh_0").unwrap())
+            .unwrap();
+        for (g, w) in ob.rotation_quaternion.iter().zip(want) {
+            assert!(
+                (g - w).abs() < 1e-5,
+                "frame {frame}: {:?}",
+                ob.rotation_quaternion
+            );
+        }
     }
 }

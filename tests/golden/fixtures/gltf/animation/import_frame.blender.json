@@ -1,0 +1,145 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [-0.00000013435886, -0.99999994, 0.0, 2.0],
+        [0.99999994, -0.00000013435886, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [2.0, 0.0, 1.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.7071067, 0.0, 0.0, 0.7071068],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Cube.001": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [-0.00000013435886, -0.99999994, 0.0, 2.0],
+        [0.99999994, -0.00000013435886, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [2.0, 0.0, 1.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.7071067, 0.0, 0.0, 0.7071068],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material.001"],
+      "mode": "OBJECT"
+    },
+    "Probe": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.70710677, -0.7071068, 0.0, 1.0],
+        [0.7071068, 0.70710677, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.5],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 0.0, 0.5],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.92387956, 0.0, 0.0, 0.38268346],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Cube.001",
+    "selected": ["Cube.001"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}
