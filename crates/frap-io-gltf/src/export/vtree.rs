@@ -273,7 +273,9 @@ pub fn matrix_world(main: &Main, ob: &Object) -> Mat4 {
 // matrix_invert_with_det_n_internal).
 #[allow(clippy::too_many_arguments)]
 fn det3(a1: f32, a2: f32, a3: f32, b1: f32, b2: f32, b3: f32, c1: f32, c2: f32, c3: f32) -> f32 {
-    a1 * (b2 * c3 - b3 * c2) - a2 * (b1 * c3 - b3 * c1) + a3 * (b1 * c2 - b2 * c1)
+    // `determinant_m3`: expanded along the first column (`a1 * det2(b2, b3, c2, c3) - b1 *
+    // det2(a2, a3, c2, c3) + c1 * det2(a2, a3, b2, b3)`), as Blender rounds it.
+    a1 * (b2 * c3 - b3 * c2) - b1 * (a2 * c3 - a3 * c2) + c1 * (a2 * b3 - a3 * b2)
 }
 
 fn det4(m: &M4) -> f32 {
@@ -316,8 +318,8 @@ fn adjoint4(m: &M4) -> M4 {
 }
 
 /// `Matrix.inverted_safe()`: the adjoint divided by the determinant; a singular matrix gets
-/// `PSEUDOINVERSE_EPSILON` (1e-8) added to its diagonal first (and the determinant becomes that
-/// epsilon if it is still zero).
+/// `PSEUDOINVERSE_EPSILON` (1e-8) added to its diagonal first (and becomes the identity, with
+/// determinant 1, if it is still singular).
 pub fn inverted_safe(m: &Mat4) -> Mat4 {
     const EPS: f32 = 1e-8;
     let mut src = m4(m);
@@ -328,7 +330,8 @@ pub fn inverted_safe(m: &Mat4) -> Mat4 {
         }
         det = det4(&src);
         if det == 0.0 {
-            det = EPS;
+            src = m4(&Mat4::IDENTITY);
+            det = 1.0;
         }
     }
     let adj = adjoint4(&src);

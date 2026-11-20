@@ -107,7 +107,10 @@ struct AppliedMeshes(HashMap<AppliedKey, Option<Index>>);
 /// (object, materials): the add-on's cache key holds the object's modifiers, so such an object
 /// never shares its mesh, and a skinned mesh is in world space.
 #[derive(Default)]
-struct SkinnedMeshes(HashMap<(IdRef<ObjectId>, Vec<Option<IdRef<MaterialId>>>), Option<Index>>);
+struct SkinnedMeshes(HashMap<SkinnedKey, Option<Index>>);
+
+/// A skinned glTF mesh's identity: the object and its material per slot.
+type SkinnedKey = (IdRef<ObjectId>, Vec<Option<IdRef<MaterialId>>>);
 
 /// The glTF mesh of a MESH object (`None` for other types and meshes without primitives).
 ///

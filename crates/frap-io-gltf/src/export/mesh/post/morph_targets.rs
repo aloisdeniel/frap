@@ -232,7 +232,7 @@ fn ortho(v: [f32; 3]) -> [f32; 3] {
 }
 
 /// `Vector.rotation_difference(other)` (both normalised first).
-fn rotation_difference(a: [f32; 3], b: [f32; 3]) -> [f32; 4] {
+pub(crate) fn rotation_difference(a: [f32; 3], b: [f32; 3]) -> [f32; 4] {
     let (v1, _) = frap_math::matrix::normalize_v3(a);
     let (v2, _) = frap_math::matrix::normalize_v3(b);
     let cross = [

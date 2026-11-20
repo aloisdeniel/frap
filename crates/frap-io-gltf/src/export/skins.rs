@@ -443,9 +443,12 @@ fn needs_neutral_bone(g: &Gather, tree: &VTree, arm: usize) -> bool {
         })
 }
 
+/// glTF `translation`, `rotation` (xyzw) and `scale`, each `None` at the identity.
+type Trs = (Option<[f64; 3]>, Option<[f64; 4]>, Option<[f64; 3]>);
+
 /// TRS of a joint (`gather_joint_vnode`, `get_objects_parented_to_bones`): decomposed and
 /// swizzled without `round_if_near`.
-fn joint_trs(m: &Mat4, yup: bool) -> (Option<[f64; 3]>, Option<[f64; 4]>, Option<[f64; 3]>) {
+fn joint_trs(m: &Mat4, yup: bool) -> Trs {
     let (t, q, s) = decompose_wxyz(m);
     let (t, q, s) = if yup {
         ([t.x, t.z, -t.y], [q[0], q[1], q[3], -q[2]], [s.x, s.z, s.y])

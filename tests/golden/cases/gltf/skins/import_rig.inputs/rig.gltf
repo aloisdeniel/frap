@@ -1,0 +1,324 @@
+{
+ "scene": 0,
+ "scenes": [
+  {
+   "name": "Scene",
+   "nodes": [
+    0,
+    6,
+    7
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Root",
+   "children": [
+    1,
+    5
+   ],
+   "translation": [
+    0,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "Spine",
+   "children": [
+    2,
+    4
+   ],
+   "matrix": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    1,
+    0,
+    1
+   ]
+  },
+  {
+   "name": "Head",
+   "children": [
+    3
+   ],
+   "translation": [
+    0,
+    1,
+    0
+   ],
+   "rotation": [
+    0.0,
+    0.0,
+    0.19866933079506122,
+    0.9800665778412416
+   ]
+  },
+  {
+   "name": "Hat",
+   "mesh": 1,
+   "translation": [
+    0,
+    0.3,
+    0
+   ]
+  },
+  {
+   "name": "Arm",
+   "mesh": 1,
+   "translation": [
+    0.5,
+    0.5,
+    0
+   ],
+   "rotation": [
+    0.14943813247359922,
+    0.0,
+    0.0,
+    0.9887710779360422
+   ],
+   "scale": [
+    1,
+    2,
+    1
+   ]
+  },
+  {
+   "name": "Cam",
+   "camera": 0,
+   "translation": [
+    0,
+    0,
+    2
+   ]
+  },
+  {
+   "name": "Body",
+   "mesh": 0,
+   "skin": 0,
+   "translation": [
+    5,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "Body2",
+   "mesh": 0,
+   "skin": 0,
+   "children": [
+    8
+   ]
+  },
+  {
+   "name": "Child",
+   "translation": [
+    0,
+    1,
+    0
+   ]
+  }
+ ],
+ "meshes": [
+  {
+   "name": "BodyMesh",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0,
+      "NORMAL": 1,
+      "JOINTS_0": 3,
+      "WEIGHTS_0": 4,
+      "JOINTS_1": 5,
+      "WEIGHTS_1": 6
+     },
+     "indices": 2
+    }
+   ]
+  },
+  {
+   "name": "Tri",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 7
+     }
+    }
+   ]
+  }
+ ],
+ "cameras": [
+  {
+   "type": "perspective",
+   "perspective": {
+    "yfov": 0.8,
+    "znear": 0.1
+   }
+  }
+ ],
+ "skins": [
+  {
+   "name": "Rig",
+   "joints": [
+    0,
+    1,
+    2,
+    4
+   ],
+   "inverseBindMatrices": 8
+  }
+ ],
+ "asset": {
+  "version": "2.0",
+  "generator": "frap WP 6.8 golden input"
+ },
+ "buffers": [
+  {
+   "byteLength": 776,
+   "uri": "data:application/octet-stream;base64,zcxMvgAAAAAAAAAAzcxMPgAAAAAAAAAAzcxMvgAAgD8AAAAAzcxMPgAAgD8AAAAAzcxMvgAAAEAAAAAAzcxMPgAAAEAAAAAAzcxMvgAAQEAAAAAAzcxMPgAAQEAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAAAAAAAAAAAAIA/AAABAAMAAAADAAIAAgADAAUAAgAFAAQABAAFAAcABAAHAAYAAAEAAAABAAABAgAAAQIAAAIDAQACAwEAAwAAAAAAAAD/AAAAgH8AAMg3AABkZDcAWlpLAEBAQD//AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD8AAIA+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM3MzD0AAAAAAAAAAAAAAADNzMw9AAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAACAvwAAAAAAAIA/AACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAMAAAAAAAACAPwAAgD8AAAAAAAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAAAAAAIA/AAAAAAAAAL8AAMC/AAAAAAAAgD8="
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 96,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 96,
+   "byteLength": 96,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 192,
+   "byteLength": 36,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 228,
+   "byteLength": 32,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 260,
+   "byteLength": 32,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 292,
+   "byteLength": 64,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 356,
+   "byteLength": 128,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 484,
+   "byteLength": 36,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 520,
+   "byteLength": 256
+  }
+ ],
+ "accessors": [
+  {
+   "bufferView": 0,
+   "componentType": 5126,
+   "count": 8,
+   "type": "VEC3",
+   "min": [
+    -0.2,
+    0.0,
+    0.0
+   ],
+   "max": [
+    0.2,
+    3.0,
+    0.0
+   ]
+  },
+  {
+   "bufferView": 1,
+   "componentType": 5126,
+   "count": 8,
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 2,
+   "componentType": 5123,
+   "count": 18,
+   "type": "SCALAR"
+  },
+  {
+   "bufferView": 3,
+   "componentType": 5121,
+   "count": 8,
+   "type": "VEC4"
+  },
+  {
+   "bufferView": 4,
+   "componentType": 5121,
+   "count": 8,
+   "type": "VEC4",
+   "normalized": true
+  },
+  {
+   "bufferView": 5,
+   "componentType": 5123,
+   "count": 8,
+   "type": "VEC4"
+  },
+  {
+   "bufferView": 6,
+   "componentType": 5126,
+   "count": 8,
+   "type": "VEC4"
+  },
+  {
+   "bufferView": 7,
+   "componentType": 5126,
+   "count": 3,
+   "type": "VEC3",
+   "min": [
+    0,
+    0,
+    0
+   ],
+   "max": [
+    0.1,
+    0.1,
+    0
+   ]
+  },
+  {
+   "bufferView": 8,
+   "componentType": 5126,
+   "count": 4,
+   "type": "MAT4"
+  }
+ ]
+}

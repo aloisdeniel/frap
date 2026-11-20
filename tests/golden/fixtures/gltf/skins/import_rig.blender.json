@@ -1,0 +1,729 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "'NoneType' object has no attribute 'name'"
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": true
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": true
+    },
+    {
+      "line": 51,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Vertex not in group\n"
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 53,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Vertex not in group\n"
+    },
+    {
+      "line": 56,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": true
+    },
+    {
+      "line": 58,
+      "ok": true
+    },
+    {
+      "line": 59,
+      "ok": true
+    },
+    {
+      "line": 60,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Vertex not in group\n"
+    },
+    {
+      "line": 61,
+      "ok": true
+    },
+    {
+      "line": 62,
+      "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": true
+    },
+    {
+      "line": 65,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Vertex not in group\n"
+    },
+    {
+      "line": 66,
+      "ok": true
+    },
+    {
+      "line": 67,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Body": {
+      "type": "MESH",
+      "parent": "Rig",
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [
+        ["Armature", "ARMATURE"]
+      ],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Body2": {
+      "type": "EMPTY",
+      "parent": "Rig",
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "BodyMesh": {
+      "type": "MESH",
+      "parent": "Rig",
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [
+        ["Armature", "ARMATURE"]
+      ],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cam": {
+      "type": "CAMERA",
+      "parent": "Rig",
+      "matrix_world": [
+        [1.0, 0.0, 0.000000034228545, 0.000000068457084],
+        [0.000000034228545, 0.000000034228545, -1.0, -1.9999999],
+        [-0.0000000000000011715933, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, -1.0, 1.9999999],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.99999994, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Child": {
+      "type": "EMPTY",
+      "parent": "Body2",
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 1.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Hat": {
+      "type": "MESH",
+      "parent": "Rig",
+      "matrix_world": [
+        [0.921061, -0.000000032658956, -0.38941842, -0.116825536],
+        [0.00000009160168, 1.0000001, 0.00000013279235, 0.000000067987116],
+        [0.3894183, -0.00000012375267, 0.921061, 2.276318],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, -0.40710676, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.70710677, -0.70710677, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Icosphere": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "P_Arm": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.9106729, -0.2955203, 0.0],
+        [0.0, 0.5910406, 0.95533645, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.3000001, -0.0, 0.0],
+      "scale": [1.0, 2.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "P_Head": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.921061, -0.38941833, 0.0, 0.0],
+        [0.38941833, 0.921061, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, -0.0, 0.4],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "P_Root": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, -0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "P_Spine": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, -0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "R_Arm": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.7071068, -0.000000000000006415867, 0.00000008498075, 0.49999994],
+        [0.000000060090464, 0.000000075497894, -1.0, 0.000000051342813],
+        [0.0, 0.9999999, 0.0000000754979, 1.4999998],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.49999994, 0.000000051342813, 1.4999998],
+      "rotation_mode": "XYZ",
+      "rotation": [1.5707963, -0.0, 0.00000008498075],
+      "scale": [0.7071068, 0.9999999, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "R_Head": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.7071068, -0.000000000000006415867, 0.00000008498075, -0.000000000000000000000027893718],
+        [0.000000060090464, 0.000000075497894, -1.0, 0.00000006845707],
+        [0.0, 0.9999999, 0.0000000754979, 1.9999998],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [-0.000000000000000000000027893718, 0.00000006845707, 1.9999998],
+      "rotation_mode": "XYZ",
+      "rotation": [1.5707963, -0.0, 0.00000008498075],
+      "scale": [0.7071068, 0.9999999, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "R_Root": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, -0.0000000000000025841832, 0.000000034228545, 0.0],
+        [0.000000034228545, 0.0000000754979, -1.0, 0.0],
+        [0.0, 1.0, 0.0000000754979, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.5707963, -0.0, 0.000000034228545],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "R_Spine": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.7071067, -0.000000000000006415866, 0.00000008498073, 0.0],
+        [0.00000006009044, 0.000000075497894, -1.0, 0.00000003422854],
+        [0.0, 0.99999994, 0.0000000754979, 0.9999999],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.00000003422854, 0.9999999],
+      "rotation_mode": "XYZ",
+      "rotation": [1.5707963, -0.0, 0.00000008498073],
+      "scale": [0.7071067, 0.99999994, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Rig": {
+      "type": "ARMATURE",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Tri": {
+      "type": "MESH",
+      "parent": "Rig",
+      "matrix_world": [
+        [1.0, -0.00000008118523, 0.000000050227072, 0.49999994],
+        [0.000000084980755, 0.95533663, -0.5910405, 0.000000029802322],
+        [-0.0000000000000011715938, 0.29552004, 1.9106729, 1.4999999],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, -0.70710677, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.70710677, -0.70710677, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "W_Arm": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.3529412],
+        [0.0, 0.0, 1.0, 0.5],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.3529412, 0.5],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "W_Head": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.3529412],
+        [0.0, 0.0, 1.0, 0.25],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.3529412, 0.25],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "W_Root": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 1.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.24705882],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 0.0, 0.24705882],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "W_Spine": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.29411766],
+        [0.0, 0.0, 1.0, 0.2509804],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.29411766, 0.2509804],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {
+    "BodyMesh": {
+      "positions": [
+        [-0.2, 0.0, 0.0],
+        [0.2, 0.0, 0.0],
+        [-0.2, 0.0, 1.0],
+        [0.2, 0.0, 1.0],
+        [-0.2, 0.0, 2.0],
+        [0.2, 0.0, 2.0],
+        [-0.2, 0.0, 3.0],
+        [0.2, 0.0, 3.0]
+      ],
+      "edges": [
+        [0, 3],
+        [0, 1],
+        [1, 3],
+        [0, 2],
+        [2, 3],
+        [2, 5],
+        [3, 5],
+        [2, 4],
+        [4, 5],
+        [4, 7],
+        [5, 7],
+        [4, 6],
+        [6, 7]
+      ],
+      "faces": [
+        [0, 1, 3],
+        [0, 3, 2],
+        [2, 3, 5],
+        [2, 5, 4],
+        [4, 5, 7],
+        [4, 7, 6]
+      ],
+      "corner_normals": [
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0]
+      ],
+      "face_normals": [
+        [-0.0, -1.0, -0.0],
+        [0.0, -1.0, -0.0],
+        [-0.0, -1.0, -0.0],
+        [0.0, -1.0, -0.0],
+        [-0.0, -1.0, -0.0],
+        [0.0, -1.0, -0.0]
+      ],
+      "uv_layers": {},
+      "attributes": {
+        "custom_normal": {
+          "data": [
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0],
+            [0, 0]
+          ],
+          "data_type": "INT16_2D",
+          "domain": "CORNER"
+        },
+        "sharp_edge": {
+          "data": [false, false, false, false, false, false, false, false, false, false, false, false, false],
+          "data_type": "BOOLEAN",
+          "domain": "EDGE"
+        },
+        "sharp_face": {
+          "data": [true, true, true, true, true, true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    }
+  },
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Rig",
+    "selected": ["Rig", "Hat", "Tri", "Cam", "Body", "Body2", "Child", "BodyMesh"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}
