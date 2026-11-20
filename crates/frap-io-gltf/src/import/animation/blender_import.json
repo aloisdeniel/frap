@@ -1,0 +1,3506 @@
+{
+ "AnimatedTriangle/glTF-Embedded/AnimatedTriangle.gltf": {
+  "actions": {
+   "Anim_0": {
+    "fcurves": [
+     {
+      "array_index": 0,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "LINEAR",
+        [
+         -2.0,
+         1.0
+        ],
+        [
+         2.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         6.0,
+         0.7070000171661377
+        ],
+        "LINEAR",
+        [
+         4.0,
+         0.891714334487915
+        ],
+        [
+         8.0,
+         0.5222856998443604
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         10.0,
+         0.26114287972450256
+        ],
+        [
+         14.0,
+         -0.26114287972450256
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         18.0,
+         -0.7070000171661377
+        ],
+        "LINEAR",
+        [
+         16.0,
+         -0.5222856998443604
+        ],
+        [
+         20.0,
+         -0.891714334487915
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         -1.0
+        ],
+        "LINEAR",
+        [
+         22.0,
+         -1.0
+        ],
+        [
+         26.0,
+         -1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBMesh_0"
+     },
+     {
+      "array_index": 1,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         -2.0,
+         0.0
+        ],
+        [
+         2.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         6.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         4.0,
+         0.0
+        ],
+        [
+         8.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         10.0,
+         0.0
+        ],
+        [
+         14.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         18.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         16.0,
+         0.0
+        ],
+        [
+         20.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         -0.0
+        ],
+        "LINEAR",
+        [
+         22.0,
+         -0.0
+        ],
+        [
+         26.0,
+         -0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBMesh_0"
+     },
+     {
+      "array_index": 2,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         -2.0,
+         0.0
+        ],
+        [
+         2.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         6.0,
+         -0.7070000171661377
+        ],
+        "LINEAR",
+        [
+         4.0,
+         -0.4570000171661377
+        ],
+        [
+         8.0,
+         -0.9570000171661377
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         -1.0
+        ],
+        "LINEAR",
+        [
+         10.0,
+         -1.0
+        ],
+        [
+         14.0,
+         -1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         18.0,
+         -0.7070000171661377
+        ],
+        "LINEAR",
+        [
+         16.0,
+         -0.9570000171661377
+        ],
+        [
+         20.0,
+         -0.4570000171661377
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         -0.0
+        ],
+        "LINEAR",
+        [
+         22.0,
+         -0.0
+        ],
+        [
+         26.0,
+         -0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBMesh_0"
+     },
+     {
+      "array_index": 3,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         -2.0,
+         0.0
+        ],
+        [
+         2.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         6.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         4.0,
+         0.0
+        ],
+        [
+         8.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         10.0,
+         0.0
+        ],
+        [
+         14.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         18.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         16.0,
+         0.0
+        ],
+        [
+         20.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         -0.0
+        ],
+        "LINEAR",
+        [
+         22.0,
+         -0.0
+        ],
+        [
+         26.0,
+         -0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBMesh_0"
+     }
+    ],
+    "frame_range": [
+     0.0,
+     24.0
+    ],
+    "slots": [
+     "OBMesh_0"
+    ]
+   }
+  },
+  "objects": {
+   "Mesh_0": {
+    "action": "Anim_0",
+    "slot": "OBMesh_0",
+    "tracks": [
+     {
+      "lock": true,
+      "mute": true,
+      "name": "Anim_0",
+      "strips": [
+       {
+        "action": "Anim_0",
+        "action_frame_end": 24.0,
+        "action_frame_start": 0.0,
+        "frame_end": 25.0,
+        "frame_start": 1.0,
+        "name": "Anim_0",
+        "slot": "OBMesh_0"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "InterpolationTest/glTF-Binary/InterpolationTest.glb": {
+  "actions": {
+   "CubicSpline Rotation": {
+    "fcurves": [
+     {
+      "array_index": 0,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "BEZIER",
+        [
+         -4.0,
+         1.0
+        ],
+        [
+         4.0,
+         1.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         12.0,
+         0.9238795042037964
+        ],
+        "BEZIER",
+        [
+         8.0,
+         0.9763031005859375
+        ],
+        [
+         16.0,
+         0.8714559078216553
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         24.0,
+         0.7071067690849304
+        ],
+        "BEZIER",
+        [
+         20.0,
+         0.7903056740760803
+        ],
+        [
+         28.0,
+         0.6239078640937805
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         36.0,
+         0.3826834261417389
+        ],
+        "BEZIER",
+        [
+         32.0,
+         0.5386604070663452
+        ],
+        [
+         40.0,
+         0.22670646011829376
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         48.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         44.0,
+         0.0
+        ],
+        [
+         52.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ]
+      ],
+      "slot": "OBCube.004"
+     },
+     {
+      "array_index": 1,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         -4.0,
+         0.0
+        ],
+        [
+         4.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         24.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         20.0,
+         0.0
+        ],
+        [
+         28.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         48.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         44.0,
+         0.0
+        ],
+        [
+         52.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ]
+      ],
+      "slot": "OBCube.004"
+     },
+     {
+      "array_index": 2,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         -4.0,
+         0.0
+        ],
+        [
+         4.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         12.0,
+         0.3826834261417389
+        ],
+        "BEZIER",
+        [
+         8.0,
+         0.22670646011829376
+        ],
+        [
+         16.0,
+         0.5386604070663452
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         24.0,
+         0.7071067690849304
+        ],
+        "BEZIER",
+        [
+         20.0,
+         0.6239078640937805
+        ],
+        [
+         28.0,
+         0.7903056740760803
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         36.0,
+         0.9238795042037964
+        ],
+        "BEZIER",
+        [
+         32.0,
+         0.8714559078216553
+        ],
+        [
+         40.0,
+         0.9763031005859375
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         48.0,
+         1.0
+        ],
+        "BEZIER",
+        [
+         44.0,
+         1.0
+        ],
+        [
+         52.0,
+         1.0
+        ],
+        "AUTO",
+        "AUTO"
+       ]
+      ],
+      "slot": "OBCube.004"
+     },
+     {
+      "array_index": 3,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         -4.0,
+         0.0
+        ],
+        [
+         4.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         24.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         20.0,
+         0.0
+        ],
+        [
+         28.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         48.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         44.0,
+         0.0
+        ],
+        [
+         52.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ]
+      ],
+      "slot": "OBCube.004"
+     }
+    ],
+    "frame_range": [
+     0.0,
+     48.0
+    ],
+    "slots": [
+     "OBCube.004"
+    ]
+   },
+   "CubicSpline Scale": {
+    "fcurves": [
+     {
+      "array_index": 0,
+      "data_path": "scale",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "BEZIER",
+        [
+         -4.0,
+         1.0
+        ],
+        [
+         4.0,
+         1.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         24.0,
+         1.0
+        ],
+        "BEZIER",
+        [
+         20.0,
+         1.0
+        ],
+        [
+         28.0,
+         1.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         48.0,
+         1.0
+        ],
+        "BEZIER",
+        [
+         44.0,
+         1.0
+        ],
+        [
+         52.0,
+         1.0
+        ],
+        "AUTO",
+        "AUTO"
+       ]
+      ],
+      "slot": "OBCube.002"
+     },
+     {
+      "array_index": 1,
+      "data_path": "scale",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "BEZIER",
+        [
+         -4.0,
+         1.0
+        ],
+        [
+         4.0,
+         1.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         24.0,
+         1.0
+        ],
+        "BEZIER",
+        [
+         20.0,
+         1.0
+        ],
+        [
+         28.0,
+         1.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         48.0,
+         1.0
+        ],
+        "BEZIER",
+        [
+         44.0,
+         1.0
+        ],
+        [
+         52.0,
+         1.0
+        ],
+        "AUTO",
+        "AUTO"
+       ]
+      ],
+      "slot": "OBCube.002"
+     },
+     {
+      "array_index": 2,
+      "data_path": "scale",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "BEZIER",
+        [
+         -4.0,
+         1.0
+        ],
+        [
+         4.0,
+         1.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         24.0,
+         1.0
+        ],
+        "BEZIER",
+        [
+         20.0,
+         1.0
+        ],
+        [
+         28.0,
+         1.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         48.0,
+         1.0
+        ],
+        "BEZIER",
+        [
+         44.0,
+         1.0
+        ],
+        [
+         52.0,
+         1.0
+        ],
+        "AUTO",
+        "AUTO"
+       ]
+      ],
+      "slot": "OBCube.002"
+     }
+    ],
+    "frame_range": [
+     0.0,
+     48.0
+    ],
+    "slots": [
+     "OBCube.002"
+    ]
+   },
+   "CubicSpline Translation": {
+    "fcurves": [
+     {
+      "array_index": 0,
+      "data_path": "location",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         3.4000000953674316
+        ],
+        "BEZIER",
+        [
+         -4.0,
+         3.4000000953674316
+        ],
+        [
+         4.0,
+         3.4000000953674316
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         12.0,
+         3.4000000953674316
+        ],
+        "BEZIER",
+        [
+         8.0,
+         3.4000000953674316
+        ],
+        [
+         16.0,
+         3.4000000953674316
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         24.0,
+         3.4000000953674316
+        ],
+        "BEZIER",
+        [
+         20.0,
+         3.4000000953674316
+        ],
+        [
+         28.0,
+         3.4000000953674316
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         36.0,
+         3.4000000953674316
+        ],
+        "BEZIER",
+        [
+         32.0,
+         3.4000000953674316
+        ],
+        [
+         40.0,
+         3.4000000953674316
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         48.0,
+         3.4000000953674316
+        ],
+        "BEZIER",
+        [
+         44.0,
+         3.4000000953674316
+        ],
+        [
+         52.0,
+         3.4000000953674316
+        ],
+        "AUTO",
+        "AUTO"
+       ]
+      ],
+      "slot": "OBCube.008"
+     },
+     {
+      "array_index": 1,
+      "data_path": "location",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         -4.0,
+         0.0
+        ],
+        [
+         4.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         24.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         20.0,
+         0.0
+        ],
+        [
+         28.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         48.0,
+         0.0
+        ],
+        "BEZIER",
+        [
+         44.0,
+         0.0
+        ],
+        [
+         52.0,
+         0.0
+        ],
+        "AUTO",
+        "AUTO"
+       ]
+      ],
+      "slot": "OBCube.008"
+     },
+     {
+      "array_index": 2,
+      "data_path": "location",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         6.800000190734863
+        ],
+        "BEZIER",
+        [
+         -4.0,
+         6.800000190734863
+        ],
+        [
+         4.0,
+         6.800000190734863
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         12.0,
+         10.800000190734863
+        ],
+        "BEZIER",
+        [
+         8.0,
+         10.800000190734863
+        ],
+        [
+         16.0,
+         10.800000190734863
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         24.0,
+         6.800000190734863
+        ],
+        "BEZIER",
+        [
+         20.0,
+         6.800000190734863
+        ],
+        [
+         28.0,
+         6.800000190734863
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         36.0,
+         10.800000190734863
+        ],
+        "BEZIER",
+        [
+         32.0,
+         10.800000190734863
+        ],
+        [
+         40.0,
+         10.800000190734863
+        ],
+        "AUTO",
+        "AUTO"
+       ],
+       [
+        [
+         48.0,
+         6.800000190734863
+        ],
+        "BEZIER",
+        [
+         44.0,
+         6.800000190734863
+        ],
+        [
+         52.0,
+         6.800000190734863
+        ],
+        "AUTO",
+        "AUTO"
+       ]
+      ],
+      "slot": "OBCube.008"
+     }
+    ],
+    "frame_range": [
+     0.0,
+     48.0
+    ],
+    "slots": [
+     "OBCube.008"
+    ]
+   },
+   "Linear Rotation": {
+    "fcurves": [
+     {
+      "array_index": 0,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "LINEAR",
+        [
+         -4.0,
+         1.0
+        ],
+        [
+         4.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.9238795042037964
+        ],
+        "LINEAR",
+        [
+         8.0,
+         0.9763031005859375
+        ],
+        [
+         16.0,
+         0.8714559078216553
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         0.7071067690849304
+        ],
+        "LINEAR",
+        [
+         20.0,
+         0.7903056740760803
+        ],
+        [
+         28.0,
+         0.6239078640937805
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.3826834261417389
+        ],
+        "LINEAR",
+        [
+         32.0,
+         0.5386604070663452
+        ],
+        [
+         40.0,
+         0.22670646011829376
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         44.0,
+         0.0
+        ],
+        [
+         52.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.005"
+     },
+     {
+      "array_index": 1,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         -4.0,
+         0.0
+        ],
+        [
+         4.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         20.0,
+         0.0
+        ],
+        [
+         28.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         44.0,
+         0.0
+        ],
+        [
+         52.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.005"
+     },
+     {
+      "array_index": 2,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         -4.0,
+         0.0
+        ],
+        [
+         4.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.3826834261417389
+        ],
+        "LINEAR",
+        [
+         8.0,
+         0.22670646011829376
+        ],
+        [
+         16.0,
+         0.5386604070663452
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         0.7071067690849304
+        ],
+        "LINEAR",
+        [
+         20.0,
+         0.6239078640937805
+        ],
+        [
+         28.0,
+         0.7903056740760803
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.9238795042037964
+        ],
+        "LINEAR",
+        [
+         32.0,
+         0.8714559078216553
+        ],
+        [
+         40.0,
+         0.9763031005859375
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         1.0
+        ],
+        "LINEAR",
+        [
+         44.0,
+         1.0
+        ],
+        [
+         52.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.005"
+     },
+     {
+      "array_index": 3,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         -4.0,
+         0.0
+        ],
+        [
+         4.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         20.0,
+         0.0
+        ],
+        [
+         28.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         44.0,
+         0.0
+        ],
+        [
+         52.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.005"
+     }
+    ],
+    "frame_range": [
+     0.0,
+     48.0
+    ],
+    "slots": [
+     "OBCube.005"
+    ]
+   },
+   "Linear Scale": {
+    "fcurves": [
+     {
+      "array_index": 0,
+      "data_path": "scale",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "LINEAR",
+        [
+         -4.0,
+         1.0
+        ],
+        [
+         4.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         1.0
+        ],
+        "LINEAR",
+        [
+         20.0,
+         1.0
+        ],
+        [
+         28.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         1.0
+        ],
+        "LINEAR",
+        [
+         44.0,
+         1.0
+        ],
+        [
+         52.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.001"
+     },
+     {
+      "array_index": 1,
+      "data_path": "scale",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "LINEAR",
+        [
+         -4.0,
+         1.0
+        ],
+        [
+         4.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         1.0
+        ],
+        "LINEAR",
+        [
+         20.0,
+         1.0
+        ],
+        [
+         28.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         1.0
+        ],
+        "LINEAR",
+        [
+         44.0,
+         1.0
+        ],
+        [
+         52.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.001"
+     },
+     {
+      "array_index": 2,
+      "data_path": "scale",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "LINEAR",
+        [
+         -4.0,
+         1.0
+        ],
+        [
+         4.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         1.0
+        ],
+        "LINEAR",
+        [
+         20.0,
+         1.0
+        ],
+        [
+         28.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "LINEAR",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         1.0
+        ],
+        "LINEAR",
+        [
+         44.0,
+         1.0
+        ],
+        [
+         52.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.001"
+     }
+    ],
+    "frame_range": [
+     0.0,
+     48.0
+    ],
+    "slots": [
+     "OBCube.001"
+    ]
+   },
+   "Linear Translation": {
+    "fcurves": [
+     {
+      "array_index": 0,
+      "data_path": "location",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         -3.4000000953674316
+        ],
+        "LINEAR",
+        [
+         -4.0,
+         -3.4000000953674316
+        ],
+        [
+         4.0,
+         -3.4000000953674316
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         -3.4000000953674316
+        ],
+        "LINEAR",
+        [
+         8.0,
+         -3.4000000953674316
+        ],
+        [
+         16.0,
+         -3.4000000953674316
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         -3.4000000953674316
+        ],
+        "LINEAR",
+        [
+         20.0,
+         -3.4000000953674316
+        ],
+        [
+         28.0,
+         -3.4000000953674316
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         -3.4000000953674316
+        ],
+        "LINEAR",
+        [
+         32.0,
+         -3.4000000953674316
+        ],
+        [
+         40.0,
+         -3.4000000953674316
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         -3.4000000953674316
+        ],
+        "LINEAR",
+        [
+         44.0,
+         -3.4000000953674316
+        ],
+        [
+         52.0,
+         -3.4000000953674316
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.009"
+     },
+     {
+      "array_index": 1,
+      "data_path": "location",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         -0.0
+        ],
+        "LINEAR",
+        [
+         -4.0,
+         -0.0
+        ],
+        [
+         4.0,
+         -0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         -0.0
+        ],
+        "LINEAR",
+        [
+         8.0,
+         -0.0
+        ],
+        [
+         16.0,
+         -0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         -0.0
+        ],
+        "LINEAR",
+        [
+         20.0,
+         -0.0
+        ],
+        [
+         28.0,
+         -0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         -0.0
+        ],
+        "LINEAR",
+        [
+         32.0,
+         -0.0
+        ],
+        [
+         40.0,
+         -0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         -0.0
+        ],
+        "LINEAR",
+        [
+         44.0,
+         -0.0
+        ],
+        [
+         52.0,
+         -0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.009"
+     },
+     {
+      "array_index": 2,
+      "data_path": "location",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         6.800000190734863
+        ],
+        "LINEAR",
+        [
+         -4.0,
+         6.800000190734863
+        ],
+        [
+         4.0,
+         6.800000190734863
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         10.800000190734863
+        ],
+        "LINEAR",
+        [
+         8.0,
+         10.800000190734863
+        ],
+        [
+         16.0,
+         10.800000190734863
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         6.800000190734863
+        ],
+        "LINEAR",
+        [
+         20.0,
+         6.800000190734863
+        ],
+        [
+         28.0,
+         6.800000190734863
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         10.800000190734863
+        ],
+        "LINEAR",
+        [
+         32.0,
+         10.800000190734863
+        ],
+        [
+         40.0,
+         10.800000190734863
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         6.800000190734863
+        ],
+        "LINEAR",
+        [
+         44.0,
+         6.800000190734863
+        ],
+        [
+         52.0,
+         6.800000190734863
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.009"
+     }
+    ],
+    "frame_range": [
+     0.0,
+     48.0
+    ],
+    "slots": [
+     "OBCube.009"
+    ]
+   },
+   "Step Rotation": {
+    "fcurves": [
+     {
+      "array_index": 0,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "CONSTANT",
+        [
+         -4.0,
+         1.0
+        ],
+        [
+         4.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.9238795042037964
+        ],
+        "CONSTANT",
+        [
+         8.0,
+         0.9763031005859375
+        ],
+        [
+         16.0,
+         0.8714559078216553
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         0.7071067690849304
+        ],
+        "CONSTANT",
+        [
+         20.0,
+         0.7903056740760803
+        ],
+        [
+         28.0,
+         0.6239078640937805
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.3826834261417389
+        ],
+        "CONSTANT",
+        [
+         32.0,
+         0.5386604070663452
+        ],
+        [
+         40.0,
+         0.22670646011829376
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         44.0,
+         0.0
+        ],
+        [
+         52.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.003"
+     },
+     {
+      "array_index": 1,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         -4.0,
+         0.0
+        ],
+        [
+         4.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         20.0,
+         0.0
+        ],
+        [
+         28.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         44.0,
+         0.0
+        ],
+        [
+         52.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.003"
+     },
+     {
+      "array_index": 2,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         -4.0,
+         0.0
+        ],
+        [
+         4.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.3826834261417389
+        ],
+        "CONSTANT",
+        [
+         8.0,
+         0.22670646011829376
+        ],
+        [
+         16.0,
+         0.5386604070663452
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         0.7071067690849304
+        ],
+        "CONSTANT",
+        [
+         20.0,
+         0.6239078640937805
+        ],
+        [
+         28.0,
+         0.7903056740760803
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.9238795042037964
+        ],
+        "CONSTANT",
+        [
+         32.0,
+         0.8714559078216553
+        ],
+        [
+         40.0,
+         0.9763031005859375
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         1.0
+        ],
+        "CONSTANT",
+        [
+         44.0,
+         1.0
+        ],
+        [
+         52.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.003"
+     },
+     {
+      "array_index": 3,
+      "data_path": "rotation_quaternion",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         -4.0,
+         0.0
+        ],
+        [
+         4.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         20.0,
+         0.0
+        ],
+        [
+         28.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         44.0,
+         0.0
+        ],
+        [
+         52.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.003"
+     }
+    ],
+    "frame_range": [
+     0.0,
+     48.0
+    ],
+    "slots": [
+     "OBCube.003"
+    ]
+   },
+   "Step Scale": {
+    "fcurves": [
+     {
+      "array_index": 0,
+      "data_path": "scale",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "CONSTANT",
+        [
+         -4.0,
+         1.0
+        ],
+        [
+         4.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         1.0
+        ],
+        "CONSTANT",
+        [
+         20.0,
+         1.0
+        ],
+        [
+         28.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         1.0
+        ],
+        "CONSTANT",
+        [
+         44.0,
+         1.0
+        ],
+        [
+         52.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube"
+     },
+     {
+      "array_index": 1,
+      "data_path": "scale",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "CONSTANT",
+        [
+         -4.0,
+         1.0
+        ],
+        [
+         4.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         1.0
+        ],
+        "CONSTANT",
+        [
+         20.0,
+         1.0
+        ],
+        [
+         28.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         1.0
+        ],
+        "CONSTANT",
+        [
+         44.0,
+         1.0
+        ],
+        [
+         52.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube"
+     },
+     {
+      "array_index": 2,
+      "data_path": "scale",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         1.0
+        ],
+        "CONSTANT",
+        [
+         -4.0,
+         1.0
+        ],
+        [
+         4.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         1.0
+        ],
+        "CONSTANT",
+        [
+         20.0,
+         1.0
+        ],
+        [
+         28.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         1.0
+        ],
+        "CONSTANT",
+        [
+         44.0,
+         1.0
+        ],
+        [
+         52.0,
+         1.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube"
+     }
+    ],
+    "frame_range": [
+     0.0,
+     48.0
+    ],
+    "slots": [
+     "OBCube"
+    ]
+   },
+   "Step Translation": {
+    "fcurves": [
+     {
+      "array_index": 0,
+      "data_path": "location",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         -4.0,
+         0.0
+        ],
+        [
+         4.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         20.0,
+         0.0
+        ],
+        [
+         28.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         44.0,
+         0.0
+        ],
+        [
+         52.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.006"
+     },
+     {
+      "array_index": 1,
+      "data_path": "location",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         -4.0,
+         0.0
+        ],
+        [
+         4.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         8.0,
+         0.0
+        ],
+        [
+         16.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         20.0,
+         0.0
+        ],
+        [
+         28.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         32.0,
+         0.0
+        ],
+        [
+         40.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         0.0
+        ],
+        "CONSTANT",
+        [
+         44.0,
+         0.0
+        ],
+        [
+         52.0,
+         0.0
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.006"
+     },
+     {
+      "array_index": 2,
+      "data_path": "location",
+      "group": "Object Transforms",
+      "keys": [
+       [
+        [
+         0.0,
+         6.800000190734863
+        ],
+        "CONSTANT",
+        [
+         -4.0,
+         6.800000190734863
+        ],
+        [
+         4.0,
+         6.800000190734863
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         12.0,
+         10.800000190734863
+        ],
+        "CONSTANT",
+        [
+         8.0,
+         10.800000190734863
+        ],
+        [
+         16.0,
+         10.800000190734863
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         24.0,
+         6.800000190734863
+        ],
+        "CONSTANT",
+        [
+         20.0,
+         6.800000190734863
+        ],
+        [
+         28.0,
+         6.800000190734863
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         36.0,
+         10.800000190734863
+        ],
+        "CONSTANT",
+        [
+         32.0,
+         10.800000190734863
+        ],
+        [
+         40.0,
+         10.800000190734863
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ],
+       [
+        [
+         48.0,
+         6.800000190734863
+        ],
+        "CONSTANT",
+        [
+         44.0,
+         6.800000190734863
+        ],
+        [
+         52.0,
+         6.800000190734863
+        ],
+        "AUTO_CLAMPED",
+        "AUTO_CLAMPED"
+       ]
+      ],
+      "slot": "OBCube.006"
+     }
+    ],
+    "frame_range": [
+     0.0,
+     48.0
+    ],
+    "slots": [
+     "OBCube.006"
+    ]
+   }
+  },
+  "objects": {
+   "Cube": {
+    "action": "Step Scale",
+    "slot": "OBCube",
+    "tracks": [
+     {
+      "lock": true,
+      "mute": true,
+      "name": "Step Scale",
+      "strips": [
+       {
+        "action": "Step Scale",
+        "action_frame_end": 48.0,
+        "action_frame_start": 0.0,
+        "frame_end": 49.0,
+        "frame_start": 1.0,
+        "name": "Step Scale",
+        "slot": "OBCube"
+       }
+      ]
+     }
+    ]
+   },
+   "Cube.001": {
+    "action": null,
+    "slot": null,
+    "tracks": [
+     {
+      "lock": true,
+      "mute": true,
+      "name": "Linear Scale",
+      "strips": [
+       {
+        "action": "Linear Scale",
+        "action_frame_end": 48.0,
+        "action_frame_start": 0.0,
+        "frame_end": 49.0,
+        "frame_start": 1.0,
+        "name": "Linear Scale",
+        "slot": "OBCube.001"
+       }
+      ]
+     }
+    ]
+   },
+   "Cube.002": {
+    "action": null,
+    "slot": null,
+    "tracks": [
+     {
+      "lock": true,
+      "mute": true,
+      "name": "CubicSpline Scale",
+      "strips": [
+       {
+        "action": "CubicSpline Scale",
+        "action_frame_end": 48.0,
+        "action_frame_start": 0.0,
+        "frame_end": 49.0,
+        "frame_start": 1.0,
+        "name": "CubicSpline Scale",
+        "slot": "OBCube.002"
+       }
+      ]
+     }
+    ]
+   },
+   "Cube.003": {
+    "action": null,
+    "slot": null,
+    "tracks": [
+     {
+      "lock": true,
+      "mute": true,
+      "name": "Step Rotation",
+      "strips": [
+       {
+        "action": "Step Rotation",
+        "action_frame_end": 48.0,
+        "action_frame_start": 0.0,
+        "frame_end": 49.0,
+        "frame_start": 1.0,
+        "name": "Step Rotation",
+        "slot": "OBCube.003"
+       }
+      ]
+     }
+    ]
+   },
+   "Cube.004": {
+    "action": null,
+    "slot": null,
+    "tracks": [
+     {
+      "lock": true,
+      "mute": true,
+      "name": "CubicSpline Rotation",
+      "strips": [
+       {
+        "action": "CubicSpline Rotation",
+        "action_frame_end": 48.0,
+        "action_frame_start": 0.0,
+        "frame_end": 49.0,
+        "frame_start": 1.0,
+        "name": "CubicSpline Rotation",
+        "slot": "OBCube.004"
+       }
+      ]
+     }
+    ]
+   },
+   "Cube.005": {
+    "action": null,
+    "slot": null,
+    "tracks": [
+     {
+      "lock": true,
+      "mute": true,
+      "name": "Linear Rotation",
+      "strips": [
+       {
+        "action": "Linear Rotation",
+        "action_frame_end": 48.0,
+        "action_frame_start": 0.0,
+        "frame_end": 49.0,
+        "frame_start": 1.0,
+        "name": "Linear Rotation",
+        "slot": "OBCube.005"
+       }
+      ]
+     }
+    ]
+   },
+   "Cube.006": {
+    "action": null,
+    "slot": null,
+    "tracks": [
+     {
+      "lock": true,
+      "mute": true,
+      "name": "Step Translation",
+      "strips": [
+       {
+        "action": "Step Translation",
+        "action_frame_end": 48.0,
+        "action_frame_start": 0.0,
+        "frame_end": 49.0,
+        "frame_start": 1.0,
+        "name": "Step Translation",
+        "slot": "OBCube.006"
+       }
+      ]
+     }
+    ]
+   },
+   "Cube.008": {
+    "action": null,
+    "slot": null,
+    "tracks": [
+     {
+      "lock": true,
+      "mute": true,
+      "name": "CubicSpline Translation",
+      "strips": [
+       {
+        "action": "CubicSpline Translation",
+        "action_frame_end": 48.0,
+        "action_frame_start": 0.0,
+        "frame_end": 49.0,
+        "frame_start": 1.0,
+        "name": "CubicSpline Translation",
+        "slot": "OBCube.008"
+       }
+      ]
+     }
+    ]
+   },
+   "Cube.009": {
+    "action": null,
+    "slot": null,
+    "tracks": [
+     {
+      "lock": true,
+      "mute": true,
+      "name": "Linear Translation",
+      "strips": [
+       {
+        "action": "Linear Translation",
+        "action_frame_end": 48.0,
+        "action_frame_start": 0.0,
+        "frame_end": 49.0,
+        "frame_start": 1.0,
+        "name": "Linear Translation",
+        "slot": "OBCube.009"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+}

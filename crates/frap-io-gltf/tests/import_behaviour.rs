@@ -111,10 +111,7 @@ fn later_milestone_features_import_their_static_part_with_warnings() {
             "AnimatedMorphCube/glTF-Quantized/AnimatedMorphCube.gltf",
             "morph targets",
         ),
-        (
-            "InterpolationTest/glTF-Binary/InterpolationTest.glb",
-            "animations",
-        ),
+        // Animations import since WP 6.7 (`import/animation/`): no WARNING any more.
         (
             "SimpleInstancing/glTF-Binary/SimpleInstancing.glb",
             "EXT_mesh_gpu_instancing",
