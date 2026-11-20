@@ -137,6 +137,12 @@ pub fn member(host: &dyn HostRead, prop: &'static PropDef) -> Result<Member, Fra
                 }
             });
         }
+        // The animation members (WP 6.4): Blender answers them from an animation editor
+        // (Dope Sheet, Graph Editor, NLA); in the 3D Viewport every frap statement runs in
+        // they are `None` (verified on 5.2.4; `frap_scene::Context` documents the same).
+        "active_action" | "active_editable_fcurve" | "active_nla_track" | "active_nla_strip" => {
+            Target::None
+        }
         // The bone members (WP 6.2): edit bones need the edit state, so frap-scene answers
         // them from the host.
         other => match frap_scene::edit_armature::ctx::bone_member(host, other) {

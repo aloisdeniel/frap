@@ -1049,7 +1049,11 @@ impl Session {
             kw.push((k, v.to_input().map_err(fail)?));
         }
         let mut reports = frap_op::pipeline::check_positional(def.spec, &pos).map_err(fail)?;
-        // Step 4 (ensure evaluated) happens inside the operators that read evaluated data.
+        // Step 4 (ensure evaluated) happens inside the operators that read evaluated data;
+        // pending animation is applied here, as `bpy.ops`' `_view_layer_update` before the
+        // call does (§7.3, WP 6.4). It is not part of the operator's transaction.
+        frap_scene::Host::apply_pending_animation(&mut self.host)
+            .map_err(|e| fail(FrapError::from(e)))?;
         // Step 5: poll.
         frap_op::check_poll(def, &self.host.state.ctx()).map_err(fail)?;
         let converted =
@@ -1105,6 +1109,16 @@ impl Session {
             }
         };
         reports.extend(out.reports);
+        if !txn.cancelled {
+            // `bpy.ops` updates the view layer again after a FINISHED call: a time change made
+            // by the operator (`screen.frame_*`) is applied now (§7.3, WP 6.4).
+            frap_scene::Host::apply_pending_animation(&mut self.host).map_err(|e| Fail {
+                kind: "op",
+                op: op.clone(),
+                err: FrapError::from(e),
+                reports: reports.clone(),
+            })?;
+        }
         // Step 9: response.
         let status = if txn.cancelled {
             Status::Cancelled

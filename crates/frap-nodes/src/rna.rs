@@ -149,6 +149,9 @@ impl Rna for NodeTree {
             "type" => val(Value::Enum(tree_type_str(self.ty).0.into())),
             "bl_idname" => str_val(tree_type_str(self.ty).1),
             "animation_data" if self.animation_data.is_none() => val(Value::None),
+            // The `ID.animation_data` hook serves it (embedded trees through `Root::Embedded`;
+            // WP 6.4: material node-tree keys).
+            "animation_data" => Ok(Field::NeedsHook),
             "interface" => Ok(Field::Struct(StructRef::Owned(Box::new(
                 interface::InterfaceRef { tree: self },
             )))),

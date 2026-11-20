@@ -156,6 +156,11 @@ impl<'h> OpCtx<'h> {
     pub fn snapshot_at(&mut self, frame: Option<i32>) -> Result<Snapshot, OpError> {
         self.host.snapshot_at(frame).map_err(OpError::Rna)
     }
+    /// The scene's `frame_current` changed (`screen.frame_*`, WP 6.4): animation is applied
+    /// at the next evaluation boundary, as after `Scene.frame_current = …` (§7.3).
+    pub fn mark_time_dirty(&mut self) {
+        self.host.mark_time_dirty();
+    }
     /// Creates an object (requested name, uniquified), links it to `context.collection`,
     /// and, in the **context view layer only**, deselects every other base, selects it and makes
     /// it active (`ED_object_add_type`). Other view layers of the scene get an unselected base

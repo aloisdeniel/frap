@@ -7,8 +7,8 @@
 
 use frap_lang::{Command, PathSeg};
 use frap_rna::{
-    ArrayShape, BitSet, Bulk, CoerceCx, FrapError, FuncDef, FuncFlags, MathTag, PropDef, PropFlags,
-    PropKind, PyExc, Report, RnaErrorKind, RnaPtr, Root, Span, Value, coerce,
+    ArrayShape, BitSet, Bulk, CoerceCx, FrapError, FuncDef, FuncFlags, Input, MathTag, PropDef,
+    PropFlags, PropKind, PyExc, Report, RnaErrorKind, RnaPtr, Root, Span, Value, coerce,
 };
 use frap_scene::{FuncArgs, RNA_FUNCS, find_func};
 use indexmap::IndexMap;
@@ -236,6 +236,41 @@ pub(crate) fn bind_args(
         match found {
             Some(a) => {
                 let input = a.value.to_input()?;
+                // A `bpy_struct` C method parses its enum arguments with
+                // `pyrna_enum_value_from_id` / `pyrna_enum_bitfield_from_set` (WP 6.4,
+                // `keyframe_insert(keytype=…, options=…)`): `ValueError: <fname>: 'X' not found
+                // in ('A', 'B')`.
+                if python_only
+                    && !cpython
+                    && let PropKind::Enum { items, .. } = &p.kind
+                {
+                    let given: Vec<&str> = match &input {
+                        Input::Str(s) => vec![s.as_str()],
+                        Input::Set(v) | Input::List(v) | Input::Tuple(v) => v
+                            .iter()
+                            .filter_map(|x| match x {
+                                Input::Str(s) => Some(s.as_str()),
+                                _ => None,
+                            })
+                            .collect(),
+                        _ => Vec::new(),
+                    };
+                    if let Some(bad) = given
+                        .iter()
+                        .find(|g| !items.iter().any(|it| it.identifier == **g))
+                    {
+                        let all: Vec<String> = items
+                            .iter()
+                            .map(|it| format!("'{}'", it.identifier))
+                            .collect();
+                        return Err(FrapError::new(
+                            PyExc::ValueError,
+                            RNA_ENUM,
+                            format!("{fname}: '{bad}' not found in ({})", all.join(", ")),
+                        )
+                        .with_span(a.span));
+                    }
+                }
                 // `pyrna_func_call` names keyword arguments by keyword; a Python method's
                 // own checks have no prefix.
                 let prefix = match (cpython, &a.name) {

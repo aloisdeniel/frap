@@ -279,10 +279,32 @@ impl Host for HostImpl {
         (&self.state, &mut self.eval)
     }
     fn snapshot_at(&mut self, frame: Option<i32>) -> Result<Snapshot, RnaError> {
-        // Animation (M6) is applied on the clone at `frame`; until then the clone is as-is.
-        let _ = frame;
+        // §7.3 / D-07 (WP 6.4): animation is applied on the clone at `frame` (the scene's
+        // frame when `None`), never on the session's originals.
+        let mut clone = HostImpl {
+            state: self.state.clone(),
+            eval: EvalCache::new(),
+            log: ChangeLog::default(),
+            reports: Vec::new(),
+            cwd: self.cwd.clone(),
+        };
+        let scene = clone.state.win.scene;
+        if let Some(f) = frame {
+            let mut untracked = ChangeLog::default();
+            if let Some(s) = clone.state.main.scenes.get_mut(scene, &mut untracked) {
+                s.frame_current = f;
+            }
+        }
+        let at = clone
+            .state
+            .main
+            .scenes
+            .get(scene)
+            .map_or(0, |s| s.frame_current);
+        frap_eval::animate::apply_animation_at(&mut clone, at as f32)?;
+        clone.state.time_dirty = false;
         Ok(Snapshot {
-            host: Box::new(self.state.clone()),
+            host: Box::new(clone.state),
             eval: Box::new(EvalCache::new()),
         })
     }
@@ -290,7 +312,9 @@ impl Host for HostImpl {
         self.state.time_dirty = true;
     }
     fn apply_pending_animation(&mut self) -> Result<(), RnaError> {
-        // No animation before M6 (§7.3): nothing is pending.
+        // §7.3 (WP 6.4): the boundary writes the animation of the scene's frame.
+        let dirty = self.state.time_dirty;
+        frap_eval::animate::apply_pending_animation(self, dirty)?;
         self.state.time_dirty = false;
         Ok(())
     }
@@ -304,12 +328,31 @@ impl Host for HostImpl {
         index: i32,
         v: Value,
     ) -> Result<(), RnaError> {
-        let _ = (owner, data_path, index, v);
-        Err(RnaError::new(
-            RnaErrorKind::NotImplemented,
-            PyExc::NotImplementedError,
-            "frap: animation writes arrive in M6",
-        ))
+        // WP 6.4: `BKE_animsys_write_to_rna_path` on the original. The path is resolved from
+        // the (embedded) ID; the written value follows the property type (`channel_value`);
+        // an unchanged value is not written (no generation bump).
+        let not_found = || {
+            RnaError::new(
+                RnaErrorKind::NoAttribute,
+                PyExc::AttributeError,
+                format!("frap: animation path '{data_path}' does not resolve"),
+            )
+        };
+        let segs = frap_eval::animate::parse_path(data_path).ok_or_else(not_found)?;
+        let (ptr, prop, current) =
+            frap_eval::animate::read_path(&*self, owner, &segs).ok_or_else(not_found)?;
+        let value = match v {
+            Value::Float(f) => f,
+            Value::Double(d) => d as f32,
+            Value::Int(i) => i as f32,
+            Value::Bool(b) => f32::from(u8::from(b)),
+            _ => return Err(not_found()),
+        };
+        let Some(new) = frap_eval::animate::channel_value(prop, &current, index, value) else {
+            return Ok(());
+        };
+        crate::resolve::set_prop(self, &ptr, prop, new)
+            .map_err(|e| RnaError::new(RnaErrorKind::Other, PyExc::RuntimeError, e.message))
     }
 }
 

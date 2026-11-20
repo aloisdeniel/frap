@@ -959,6 +959,7 @@ name = "frap-eval"
 version = "0.1.0"
 dependencies = [
  "approx",
+ "frap-anim",
  "frap-boolean",
  "frap-imbuf",
  "frap-math",

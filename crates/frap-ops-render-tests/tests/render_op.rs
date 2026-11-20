@@ -185,9 +185,12 @@ fn render_result_and_nothing_else() {
     after.images = before_main.images.clone();
     after.is_dirty = before_main.is_dirty;
     assert_eq!(format!("{after:?}"), format!("{before_main:?}"));
+    // The operator call is an evaluation boundary (`bpy.ops` updates the view layer first,
+    // §7.3, WP 6.4): the pending `frame_current = 7` is consumed, nothing else changes.
+    assert!(before_rest.ends_with("\ntrue"), "{before_rest}");
     assert_eq!(
         e.session.state_dump().split_once('\n').unwrap().1,
-        before_rest
+        format!("{}false", before_rest.strip_suffix("true").unwrap())
     );
 
     for (path, want) in [

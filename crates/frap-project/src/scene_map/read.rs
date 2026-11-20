@@ -6,7 +6,11 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use frap_anim::{Action, AnimData};
+use frap_anim::{
+    Action, ActionGroup, ActionLayer, ActionSlot, ActionStrip, AnimData, Channelbag, Easing,
+    Extrapolation, FCurve, HandleType, Interpolation, Keyframe, KeyframeStrip, KeyframeType,
+    NlaStrip, NlaTrack,
+};
 use frap_mesh::{AttrData, Attribute, AttributeSet, DeformVert, Domain, Mesh};
 use frap_nodes::generated::node_type;
 use frap_nodes::{
@@ -15,8 +19,9 @@ use frap_nodes::{
 use frap_rna::{IdAny, IdCode, IdHeader, IdKind, IdRef, IdType, LibraryId, Value};
 use frap_scene::generated::modifier_settings::{ModifierSettings, ModifierType};
 use frap_scene::id::{
-    Armature, Camera, Collection, EncodedImage, Image, Key, Library, Light, Material, Modifier,
-    Object, PointCloud, Pose, Scene, SlotLink, SlotOverride, Texture, World,
+    Armature, Bone, BoneCollection, Camera, Collection, EncodedImage, Image, Key, Library, Light,
+    Material, Modifier, Object, PointCloud, Pose, PoseBone, Scene, ShapeKey, SlotLink,
+    SlotOverride, Texture, World,
 };
 use frap_scene::{
     Base, BaseFlag, ChangeLog, IdMap, LayerCollection, LayerCollectionPath, Main, ObjectMode,
@@ -168,6 +173,17 @@ impl Cx<'_> {
         a.smol("last_slot_identifier", &mut ad.last_slot_identifier)?;
         a.bool("use_nla", &mut ad.use_nla)?;
         a.f32("action_influence", &mut ad.action_influence)?;
+        // WP 6.4: the rest of the AnimData and the NLA (absent from files written before).
+        a.smol("action_blend_type", &mut ad.action_blend_type)?;
+        a.smol("action_extrapolation", &mut ad.action_extrapolation)?;
+        a.bool("use_tweak_mode", &mut ad.use_tweak_mode)?;
+        a.bool("use_pin", &mut ad.use_pin)?;
+        if let Some(v) = a.opt("nla_tracks") {
+            let p = a.sub("nla_tracks");
+            for (i, t) in array(v, &p)?.iter().enumerate() {
+                ad.nla_tracks.push(self.nla_track(t, &format!("{p}[{i}]"))?);
+            }
+        }
         a.finish()?;
         *out = Some(ad);
         Ok(())
@@ -444,19 +460,10 @@ pub(crate) fn read(
         cx.anim(o, &mut w.animation_data)
     })?;
     fill(&mut main.images, root, "images", cx, l, image)?;
-    // Header-only datablocks (their fields arrive with M3/M6).
-    fill(&mut main.actions, root, "actions", cx, l, |_, _, _| Ok(()))?;
-    fill(&mut main.armatures, root, "armatures", cx, l, |_, _, _| {
-        Ok(())
-    })?;
-    fill(
-        &mut main.shape_keys,
-        root,
-        "shape_keys",
-        cx,
-        l,
-        |_, _, _| Ok(()),
-    )?;
+    // The M6 datablocks (WP 6.4).
+    fill(&mut main.actions, root, "actions", cx, l, action)?;
+    fill(&mut main.armatures, root, "armatures", cx, l, armature)?;
+    fill(&mut main.shape_keys, root, "shape_keys", cx, l, key)?;
     fill(&mut main.textures, root, "textures", cx, l, |t, o, cx| {
         // Files written before M4 W0 have no texture fields: keep the fresh values.
         if o.opt("type").is_none() {
@@ -772,7 +779,11 @@ fn object(ob: &mut Object, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
         &mut ob.vertex_groups_active_index,
     )?;
     if let Some(v) = o.opt("pose") {
-        ob.pose = (!v.is_null()).then(Pose::default);
+        ob.pose = if v.is_null() {
+            None
+        } else {
+            Some(cx.pose(v, &o.sub("pose"))?)
+        };
     }
     o.bool("hide_viewport", &mut ob.hide_viewport)?;
     o.bool("hide_render", &mut ob.hide_render)?;
@@ -1021,6 +1032,9 @@ fn mesh(me: &mut Mesh, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
             .iter()
             .map(|x| Ok(SmolStr::new(string(x, &p)?)))
             .collect::<Result<_, MapError>>()?;
+    }
+    if let Some(v) = o.opt("vertex_group_locks") {
+        m.vertex_group_locks = strings(v, &o.sub("vertex_group_locks"))?;
     }
     cx.opt_typed(o, "shape_keys", &mut m.shape_keys)?;
     o.opt_smol("uv_active", &mut m.uv_active)?;
@@ -1430,4 +1444,430 @@ fn image(i: &mut Image, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
     o.smol("alpha_mode", &mut i.alpha_mode)?;
     o.iarr("size", &mut i.size)?;
     cx.anim(o, &mut i.animation_data)
+}
+
+// ------------------------------------------------------------------ M6 data (WP 6.4)
+
+/// `[bool; N]` from a JSON array.
+fn barr<const N: usize>(o: &mut Obj, key: &str, out: &mut [bool; N]) -> Result<(), MapError> {
+    if let Some(v) = o.opt(key) {
+        let p = o.sub(key);
+        let a = array(v, &p)?;
+        if a.len() != N {
+            return Err(MapError::invalid(&p, format!("expected {N} booleans")));
+        }
+        for (x, j) in out.iter_mut().zip(a) {
+            *x = j
+                .as_bool()
+                .ok_or_else(|| MapError::invalid(&p, "expected a boolean"))?;
+        }
+    }
+    Ok(())
+}
+
+/// An optional index (`null` or an unsigned integer).
+fn opt_index(o: &mut Obj, key: &str, out: &mut Option<usize>) -> Result<(), MapError> {
+    if let Some(v) = o.opt(key) {
+        let p = o.sub(key);
+        *out = match v {
+            J::Null => None,
+            v => Some(
+                v.as_u64()
+                    .and_then(|x| usize::try_from(x).ok())
+                    .ok_or_else(|| MapError::invalid(&p, "expected an index"))?,
+            ),
+        };
+    }
+    Ok(())
+}
+
+/// The strings of a JSON array.
+fn strings(v: &J, path: &str) -> Result<Vec<SmolStr>, MapError> {
+    array(v, path)?
+        .iter()
+        .map(|x| string(x, path).map(SmolStr::new))
+        .collect()
+}
+
+/// An RNA enum identifier of one of frap-anim's enums.
+fn ident<T>(v: &J, path: &str, parse: fn(&str) -> Option<T>) -> Result<T, MapError> {
+    let s = string(v, path)?;
+    parse(s).ok_or_else(|| MapError::invalid(path, format!("unknown identifier {s:?}")))
+}
+
+impl Cx<'_> {
+    fn nla_track(&self, v: &J, path: &str) -> Result<NlaTrack, MapError> {
+        let mut o = Obj::new(v, path, self.strict)?;
+        let mut t = NlaTrack::new("");
+        o.smol("name", &mut t.name)?;
+        o.bool("mute", &mut t.mute)?;
+        o.bool("is_solo", &mut t.is_solo)?;
+        o.bool("lock", &mut t.lock)?;
+        o.bool("select", &mut t.select)?;
+        o.bool("active", &mut t.active)?;
+        if let Some(v) = o.opt("strips") {
+            let p = o.sub("strips");
+            for (i, s) in array(v, &p)?.iter().enumerate() {
+                t.strips.push(self.nla_strip(s, &format!("{p}[{i}]"))?);
+            }
+        }
+        o.finish()?;
+        Ok(t)
+    }
+
+    fn nla_strip(&self, v: &J, path: &str) -> Result<NlaStrip, MapError> {
+        let mut o = Obj::new(v, path, self.strict)?;
+        let mut s = NlaStrip::new_clip("", None, 0.0, [0.0, 1.0]);
+        o.smol("name", &mut s.name)?;
+        o.smol("type", &mut s.r#type)?;
+        self.opt_typed(&mut o, "action", &mut s.action)?;
+        o.i32("action_slot_handle", &mut s.action_slot_handle)?;
+        o.smol("last_slot_identifier", &mut s.last_slot_identifier)?;
+        o.f32("frame_start", &mut s.frame_start)?;
+        o.f32("frame_end", &mut s.frame_end)?;
+        o.f32("action_frame_start", &mut s.action_frame_start)?;
+        o.f32("action_frame_end", &mut s.action_frame_end)?;
+        o.f32("scale", &mut s.scale)?;
+        o.f32("repeat", &mut s.repeat)?;
+        o.smol("blend_type", &mut s.blend_type)?;
+        o.smol("extrapolation", &mut s.extrapolation)?;
+        o.f32("blend_in", &mut s.blend_in)?;
+        o.f32("blend_out", &mut s.blend_out)?;
+        o.bool("use_auto_blend", &mut s.use_auto_blend)?;
+        o.f32("influence", &mut s.influence)?;
+        o.bool("use_animated_influence", &mut s.use_animated_influence)?;
+        o.f32("strip_time", &mut s.strip_time)?;
+        o.bool("use_animated_time", &mut s.use_animated_time)?;
+        o.bool("use_animated_time_cyclic", &mut s.use_animated_time_cyclic)?;
+        o.bool("mute", &mut s.mute)?;
+        o.bool("use_reverse", &mut s.use_reverse)?;
+        o.bool("use_sync_length", &mut s.use_sync_length)?;
+        o.bool("select", &mut s.select)?;
+        o.bool("active", &mut s.active)?;
+        o.finish()?;
+        Ok(s)
+    }
+
+    fn fcurve(&self, v: &J, path: &str) -> Result<FCurve, MapError> {
+        let mut o = Obj::new(v, path, self.strict)?;
+        let mut fc = FCurve::new("", 0);
+        o.smol("data_path", &mut fc.data_path)?;
+        o.i32("array_index", &mut fc.array_index)?;
+        o.opt_smol("group", &mut fc.group)?;
+        if let Some(v) = o.opt("extrapolation") {
+            fc.extrapolation = ident(v, &o.sub("extrapolation"), Extrapolation::from_identifier)?;
+        }
+        o.smol("auto_smoothing", &mut fc.auto_smoothing)?;
+        o.bool("mute", &mut fc.mute)?;
+        o.bool("hide", &mut fc.hide)?;
+        o.bool("lock", &mut fc.lock)?;
+        o.bool("select", &mut fc.select)?;
+        o.bool("is_valid", &mut fc.is_valid)?;
+        o.smol("color_mode", &mut fc.color_mode)?;
+        o.arr("color", &mut fc.color)?;
+        o.bool("discrete_values", &mut fc.discrete_values)?;
+        o.bool("int_values", &mut fc.int_values)?;
+        if o.opt("keyframe_points").is_some() {
+            let mut k = o.obj("keyframe_points")?;
+            let co: Vec<[f32; 2]> = self.decode(k.req("co")?, &k.sub("co"))?;
+            let n = co.len();
+            let len_check = |len: usize, p: &str| {
+                if len == n {
+                    Ok(())
+                } else {
+                    Err(MapError::invalid(p, format!("expected {n} values")))
+                }
+            };
+            let hl: Vec<[f32; 2]> = self.decode(k.req("handle_left")?, &k.sub("handle_left"))?;
+            let hr: Vec<[f32; 2]> = self.decode(k.req("handle_right")?, &k.sub("handle_right"))?;
+            let pr: Vec<[f32; 3]> = self.decode(
+                k.req("back_amplitude_period")?,
+                &k.sub("back_amplitude_period"),
+            )?;
+            let sel: Vec<[bool; 3]> = self.decode(
+                k.req("select_left_control_right")?,
+                &k.sub("select_left_control_right"),
+            )?;
+            len_check(hl.len(), &k.sub("handle_left"))?;
+            len_check(hr.len(), &k.sub("handle_right"))?;
+            len_check(pr.len(), &k.sub("back_amplitude_period"))?;
+            len_check(sel.len(), &k.sub("select_left_control_right"))?;
+            let names = |k: &mut Obj, key: &str| -> Result<Vec<J>, MapError> {
+                let p = k.sub(key);
+                let a = array(k.req(key)?, &p)?.clone();
+                len_check(a.len(), &p)?;
+                Ok(a)
+            };
+            let hlt = names(&mut k, "handle_left_type")?;
+            let hrt = names(&mut k, "handle_right_type")?;
+            let ipo = names(&mut k, "interpolation")?;
+            let ease = names(&mut k, "easing")?;
+            let ty = names(&mut k, "type")?;
+            let p = k.path.clone();
+            for i in 0..n {
+                let mut key = Keyframe::new(co[i][0], co[i][1]);
+                key.handle_left = hl[i];
+                key.handle_right = hr[i];
+                [key.back, key.amplitude, key.period] = pr[i];
+                [
+                    key.select_left_handle,
+                    key.select_control_point,
+                    key.select_right_handle,
+                ] = sel[i];
+                key.handle_left_type = ident(&hlt[i], &p, HandleType::from_identifier)?;
+                key.handle_right_type = ident(&hrt[i], &p, HandleType::from_identifier)?;
+                key.interpolation = ident(&ipo[i], &p, Interpolation::from_identifier)?;
+                key.easing = ident(&ease[i], &p, Easing::from_identifier)?;
+                key.r#type = ident(&ty[i], &p, KeyframeType::from_identifier)?;
+                fc.keyframe_points.push(key);
+            }
+            k.finish()?;
+        }
+        o.finish()?;
+        Ok(fc)
+    }
+
+    fn pose(&self, v: &J, path: &str) -> Result<Pose, MapError> {
+        let mut o = Obj::new(v, path, self.strict)?;
+        let mut pose = Pose::default();
+        if let Some(v) = o.opt("bones") {
+            let p = o.sub("bones");
+            for (i, b) in array(v, &p)?.iter().enumerate() {
+                let mut bo = Obj::new(b, format!("{p}[{i}]"), self.strict)?;
+                let mut pb = PoseBone::new("");
+                bo.smol("name", &mut pb.name)?;
+                bo.arr("location", &mut pb.location)?;
+                bo.smol("rotation_mode", &mut pb.rotation_mode)?;
+                bo.arr("rotation_quaternion", &mut pb.rotation_quaternion)?;
+                bo.arr("rotation_euler", &mut pb.rotation_euler)?;
+                bo.arr("rotation_axis_angle", &mut pb.rotation_axis_angle)?;
+                bo.arr("scale", &mut pb.scale)?;
+                barr(&mut bo, "lock_location", &mut pb.lock_location)?;
+                barr(&mut bo, "lock_rotation", &mut pb.lock_rotation)?;
+                bo.bool("lock_rotation_w", &mut pb.lock_rotation_w)?;
+                barr(&mut bo, "lock_scale", &mut pb.lock_scale)?;
+                bo.bool("lock_rotations_4d", &mut pb.lock_rotations_4d)?;
+                self.opt_typed(&mut bo, "custom_shape", &mut pb.custom_shape)?;
+                bo.bool("select", &mut pb.select)?;
+                bo.bool("hide", &mut pb.hide)?;
+                bo.bool("select_head", &mut pb.select_head)?;
+                bo.bool("select_tail", &mut pb.select_tail)?;
+                bo.finish()?;
+                pose.bones.push(pb);
+            }
+        }
+        o.bool("use_mirror_x", &mut pose.use_mirror_x)?;
+        o.bool("use_mirror_relative", &mut pose.use_mirror_relative)?;
+        o.bool("use_auto_ik", &mut pose.use_auto_ik)?;
+        o.finish()?;
+        Ok(pose)
+    }
+}
+
+/// An action (WP 6.4). Files written before M6 have no fields: the action stays empty.
+fn action(a: &mut Action, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
+    if let Some(v) = o.opt("slots") {
+        let p = o.sub("slots");
+        a.slots.clear();
+        for (i, s) in array(v, &p)?.iter().enumerate() {
+            let mut so = Obj::new(s, format!("{p}[{i}]"), cx.strict)?;
+            let mut slot = ActionSlot::new(0, "", "UNSPECIFIED");
+            so.i32("handle", &mut slot.handle)?;
+            so.smol("identifier", &mut slot.identifier)?;
+            so.smol("target_id_type", &mut slot.target_id_type)?;
+            so.bool("select", &mut slot.select)?;
+            so.bool("show_expanded", &mut slot.show_expanded)?;
+            so.bool("active", &mut slot.active)?;
+            so.finish()?;
+            a.slots.push(slot);
+        }
+    }
+    if let Some(v) = o.opt("layers") {
+        let p = o.sub("layers");
+        a.layers.clear();
+        for (i, l) in array(v, &p)?.iter().enumerate() {
+            let lp = format!("{p}[{i}]");
+            let mut lo = Obj::new(l, &lp, cx.strict)?;
+            let mut layer = ActionLayer::new("");
+            lo.smol("name", &mut layer.name)?;
+            lo.f32("influence", &mut layer.influence)?;
+            lo.smol("mix_mode", &mut layer.mix_mode)?;
+            if let Some(v) = lo.opt("strips") {
+                let sp = lo.sub("strips");
+                for (j, st) in array(v, &sp)?.iter().enumerate() {
+                    let stp = format!("{sp}[{j}]");
+                    let mut so = Obj::new(st, &stp, cx.strict)?;
+                    if let Some(t) = so.opt("type")
+                        && string(t, &stp)? != "KEYFRAME"
+                    {
+                        return Err(MapError::invalid(&stp, "unknown strip type"));
+                    }
+                    let mut strip = KeyframeStrip::default();
+                    if let Some(v) = so.opt("channelbags") {
+                        let bp = so.sub("channelbags");
+                        for (b, bag) in array(v, &bp)?.iter().enumerate() {
+                            let bgp = format!("{bp}[{b}]");
+                            let mut bo = Obj::new(bag, &bgp, cx.strict)?;
+                            let mut cb = Channelbag::default();
+                            bo.i32("slot_handle", &mut cb.slot_handle)?;
+                            if let Some(v) = bo.opt("groups") {
+                                let gp = bo.sub("groups");
+                                for (g, gv) in array(v, &gp)?.iter().enumerate() {
+                                    let mut go = Obj::new(gv, format!("{gp}[{g}]"), cx.strict)?;
+                                    let mut grp = ActionGroup::new("");
+                                    go.smol("name", &mut grp.name)?;
+                                    go.smol("color_set", &mut grp.color_set)?;
+                                    go.bool("show_expanded", &mut grp.show_expanded)?;
+                                    go.bool("mute", &mut grp.mute)?;
+                                    go.bool("lock", &mut grp.lock)?;
+                                    go.bool("select", &mut grp.select)?;
+                                    go.bool("show_expanded_graph", &mut grp.show_expanded_graph)?;
+                                    go.bool("use_pin", &mut grp.use_pin)?;
+                                    go.finish()?;
+                                    cb.groups.push(grp);
+                                }
+                            }
+                            if let Some(v) = bo.opt("fcurves") {
+                                let fp = bo.sub("fcurves");
+                                for (f, fv) in array(v, &fp)?.iter().enumerate() {
+                                    cb.fcurves.push(cx.fcurve(fv, &format!("{fp}[{f}]"))?);
+                                }
+                            }
+                            bo.finish()?;
+                            strip.channelbags.push(cb);
+                        }
+                    }
+                    so.finish()?;
+                    layer.strips.push(ActionStrip::Keyframe(strip));
+                }
+            }
+            lo.finish()?;
+            a.layers.push(layer);
+        }
+    }
+    o.i32("last_slot_handle", &mut a.last_slot_handle)?;
+    o.bool("use_frame_range", &mut a.use_frame_range)?;
+    o.arr("frame_range", &mut a.frame_range)?;
+    o.bool("use_cyclic", &mut a.use_cyclic)?;
+    Ok(())
+}
+
+/// An armature (WP 6.4).
+fn armature(a: &mut Armature, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
+    if let Some(v) = o.opt("bones") {
+        let p = o.sub("bones");
+        a.bones.clear();
+        for (i, b) in array(v, &p)?.iter().enumerate() {
+            let bp = format!("{p}[{i}]");
+            let mut bo = Obj::new(b, &bp, cx.strict)?;
+            let mut bone = Bone::new("");
+            bo.smol("name", &mut bone.name)?;
+            opt_index(&mut bo, "parent", &mut bone.parent)?;
+            bo.arr("head_local", &mut bone.head_local)?;
+            bo.arr("tail_local", &mut bone.tail_local)?;
+            if let Some(v) = bo.opt("matrix_local") {
+                let mp = bo.sub("matrix_local");
+                let rows = array(v, &mp)?;
+                if rows.len() != 4 {
+                    return Err(MapError::invalid(&mp, "expected 4 rows"));
+                }
+                for (r, row) in rows.iter().enumerate() {
+                    bone.matrix_local[r] = farr(row, &mp)?;
+                }
+            }
+            bo.f32("roll", &mut bone.roll)?;
+            bo.bool("use_connect", &mut bone.use_connect)?;
+            bo.bool("use_deform", &mut bone.use_deform)?;
+            bo.bool("use_inherit_rotation", &mut bone.use_inherit_rotation)?;
+            bo.smol("inherit_scale", &mut bone.inherit_scale)?;
+            bo.bool("use_local_location", &mut bone.use_local_location)?;
+            bo.bool("use_relative_parent", &mut bone.use_relative_parent)?;
+            bo.f32("envelope_distance", &mut bone.envelope_distance)?;
+            bo.f32("envelope_weight", &mut bone.envelope_weight)?;
+            bo.bool("use_envelope_multiply", &mut bone.use_envelope_multiply)?;
+            bo.f32("head_radius", &mut bone.head_radius)?;
+            bo.f32("tail_radius", &mut bone.tail_radius)?;
+            bo.i32("bbone_segments", &mut bone.bbone_segments)?;
+            bo.bool("hide", &mut bone.hide)?;
+            bo.bool("hide_select", &mut bone.hide_select)?;
+            barr(&mut bo, "select", &mut bone.select)?;
+            if let Some(v) = bo.opt("collections") {
+                bone.collections = strings(v, &bo.sub("collections"))?;
+            }
+            bo.finish()?;
+            a.bones.push(bone);
+        }
+    }
+    opt_index(o, "active_bone", &mut a.active_bone)?;
+    if let Some(v) = o.opt("collections") {
+        let p = o.sub("collections");
+        a.collections.clear();
+        for (i, c) in array(v, &p)?.iter().enumerate() {
+            let mut co = Obj::new(c, format!("{p}[{i}]"), cx.strict)?;
+            let mut bc = BoneCollection {
+                name: SmolStr::default(),
+                parent: None,
+                is_visible: true,
+                is_solo: false,
+            };
+            co.smol("name", &mut bc.name)?;
+            opt_index(&mut co, "parent", &mut bc.parent)?;
+            co.bool("is_visible", &mut bc.is_visible)?;
+            co.bool("is_solo", &mut bc.is_solo)?;
+            co.finish()?;
+            a.collections.push(bc);
+        }
+    }
+    opt_index(o, "active_collection", &mut a.active_collection)?;
+    o.smol("display_type", &mut a.display_type)?;
+    o.smol("pose_position", &mut a.pose_position)?;
+    o.bool("show_names", &mut a.show_names)?;
+    o.bool("show_axes", &mut a.show_axes)?;
+    o.bool("use_mirror_x", &mut a.use_mirror_x)?;
+    o.bool("show_bone_custom_shapes", &mut a.show_bone_custom_shapes)?;
+    o.bool("show_bone_colors", &mut a.show_bone_colors)?;
+    o.f32("axes_position", &mut a.axes_position)?;
+    o.smol("relation_line_position", &mut a.relation_line_position)?;
+    cx.anim(o, &mut a.animation_data)
+}
+
+/// A shape-key datablock (WP 6.4).
+fn key(k: &mut Key, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
+    cx.opt_typed(o, "user", &mut k.user)?;
+    o.bool("use_relative", &mut k.use_relative)?;
+    o.f32("eval_time", &mut k.eval_time)?;
+    o.i32("uidgen", &mut k.uidgen)?;
+    if let Some(v) = o.opt("key_blocks") {
+        let p = o.sub("key_blocks");
+        k.key_blocks.clear();
+        for (i, b) in array(v, &p)?.iter().enumerate() {
+            let bp = format!("{p}[{i}]");
+            let mut bo = Obj::new(b, &bp, cx.strict)?;
+            let mut sk = ShapeKey::new("", Vec::new());
+            bo.smol("name", &mut sk.name)?;
+            if let Some(d) = bo.opt("data") {
+                sk.data = cx.decode(d, &bo.sub("data"))?;
+            }
+            bo.f32("value", &mut sk.value)?;
+            bo.f32("slider_min", &mut sk.slider_min)?;
+            bo.f32("slider_max", &mut sk.slider_max)?;
+            bo.bool("mute", &mut sk.mute)?;
+            if let Some(v) = bo.opt("relative_key") {
+                let rp = bo.sub("relative_key");
+                sk.relative_key = v
+                    .as_u64()
+                    .and_then(|x| usize::try_from(x).ok())
+                    .ok_or_else(|| MapError::invalid(&rp, "expected an index"))?;
+            }
+            bo.smol("vertex_group", &mut sk.vertex_group)?;
+            bo.smol("interpolation", &mut sk.interpolation)?;
+            bo.bool("lock_shape", &mut sk.lock_shape)?;
+            bo.bool("select", &mut sk.select)?;
+            bo.f32("pos", &mut sk.pos)?;
+            bo.i32("uid", &mut sk.uid)?;
+            bo.finish()?;
+            k.key_blocks.push(sk);
+        }
+    }
+    cx.anim(o, &mut k.animation_data)
 }

@@ -961,6 +961,46 @@ impl Main {
         generic(&self.node_groups, f);
         generic(&self.textures, f);
         generic(&self.pointclouds, f);
+        // NLA strips use their actions (`BKE_animdata_foreach_id`: `IDWALK_CB_USER` for every
+        // strip's action; WP 6.4). The `AnimData.action` users are counted above.
+        fn strips(me: IdAny, adt: &Option<frap_anim::AnimData>, f: &mut dyn FnMut(IdAny, IdAny)) {
+            for s in adt
+                .iter()
+                .flat_map(|a| &a.nla_tracks)
+                .flat_map(|t| &t.strips)
+            {
+                if let Some(a) = s.action {
+                    f(me, a.any());
+                }
+            }
+        }
+        macro_rules! nla_users {
+            ($($m:ident),*) => {$(
+                for (r, t) in self.$m.iter() {
+                    strips(r.any(), &t.animation_data, f);
+                }
+            )*};
+        }
+        nla_users!(
+            objects,
+            scenes,
+            materials,
+            cameras,
+            lights,
+            worlds,
+            images,
+            armatures,
+            shape_keys,
+            node_groups,
+            textures,
+            pointclouds
+        );
+        for (r, m) in self.materials.iter() {
+            strips(r.any(), &m.node_tree.animation_data, f);
+        }
+        for (r, w) in self.worlds.iter() {
+            strips(r.any(), &w.node_tree.animation_data, f);
+        }
     }
 
     /// `ID.users` of every ID with at least one user (§5.5): user-counting references
