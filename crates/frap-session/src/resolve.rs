@@ -1296,7 +1296,18 @@ fn step_coll(host: &dyn HostRead, c: CollPlace, seg: &PathSeg) -> Result<Target,
         }
         PathSeg::KeyLib(name, lib) => step_key_lib(host, c, name, lib.as_deref()),
         PathSeg::Attr(a) => {
-            if let Some(which) = CollFunc::parse(a) {
+            // An RNA function of the collection's API struct wins over the `bpy_prop_collection`
+            // method of the same name (`pyrna_prop_collection_getattro`:
+            // `ActionChannelbagFCurves.find(data_path, index)`).
+            let api_func = match c.prop.kind {
+                PropKind::Collection { api: Some(api), .. } => {
+                    frap_spec_rna::find_struct(api).filter(|s| s.find_func(a).is_some())
+                }
+                _ => None,
+            };
+            if api_func.is_none()
+                && let Some(which) = CollFunc::parse(a)
+            {
                 return Ok(Target::Func(FuncTarget::Coll { coll: c, which }));
             }
             if let PropKind::Collection { api: Some(api), .. } = c.prop.kind

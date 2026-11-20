@@ -1,6 +1,6 @@
 [package]
 name = "frap-anim"
-description = "frap L3: Actions, slots, layers, strips, channelbags, F-curves, NLA; F-curve evaluation (ARCHITECTURE §18). M1: the Action datablock type only"
+description = "frap L3: Actions, slots, layers, strips, channelbags, F-curves, NLA; F-curve evaluation (ARCHITECTURE §18). RNA bindings"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -13,6 +13,10 @@ frap-rna.workspace = true
 frap-spec-rna.workspace = true
 smol_str.workspace = true
 serde.workspace = true
+libm.workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true
 
 [lints]
 workspace = true

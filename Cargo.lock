@@ -875,7 +875,9 @@ version = "0.1.0"
 dependencies = [
  "frap-rna",
  "frap-spec-rna",
+ "libm",
  "serde",
+ "serde_json",
  "smol_str",
 ]
 
@@ -1304,6 +1306,7 @@ version = "0.1.0"
 dependencies = [
  "approx",
  "automod",
+ "frap-anim",
  "frap-bmesh",
  "frap-color",
  "frap-eval",

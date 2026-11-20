@@ -1,0 +1,698 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Invalid slot name '': name must not be empty.\n"
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "ActionSlots.new(): error with keyword argument \"id_type\" -  enum \"UNSPECIFIED\" not found in ('ACTION', 'ARMATURE', 'BRUSH', 'CACHEFILE', 'CAMERA', 'COLLECTION', 'CURVE', 'CURVES', 'FONT', 'GREASEPENCIL', 'GREASEPENCIL_V3', 'IMAGE', 'KEY', 'LATTICE', 'LIBRARY', 'LIGHT', 'LIGHT_PROBE', 'LINESTYLE', 'MASK', 'MATERIAL', 'MESH', 'META', 'MOVIECLIP', 'NODETREE', 'OBJECT', 'PAINTCURVE', 'PALETTE', 'PARTICLE', 'POINTCLOUD', 'SCENE', 'SCREEN', 'SOUND', 'SPEAKER', 'TEXT', 'TEXTURE', 'VOLUME', 'WINDOWMANAGER', 'WORKSPACE', 'WORLD')"
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"XXAny\" not found"
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: An Action may not have more than one layer\n"
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: A layer may not have more than one strip\n"
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: A channelbag for this slot already exists\n"
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: F-Curve 'location[0]' already exists in this channelbag\n"
+    },
+    {
+      "line": 29,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: F-Curve data path empty, invalid argument\n"
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: F-Curve data path empty, invalid argument\n"
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": true
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: F-Curve 'diffuse_color[3]' already exists in this channelbag\n"
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": true
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 53,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 56,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": true
+    },
+    {
+      "line": 58,
+      "ok": true
+    },
+    {
+      "line": 59,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: This strip does not belong to this layer\n"
+    },
+    {
+      "line": 60,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: This layer does not belong to this Action\n"
+    },
+    {
+      "line": 61,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: This slot does not belong to this Action\n"
+    },
+    {
+      "line": 62,
+      "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": true
+    },
+    {
+      "line": 65,
+      "ok": true
+    },
+    {
+      "line": 66,
+      "ok": true
+    },
+    {
+      "line": 67,
+      "ok": true
+    },
+    {
+      "line": 68,
+      "ok": true
+    },
+    {
+      "line": 69,
+      "ok": true
+    },
+    {
+      "line": 70,
+      "ok": true
+    },
+    {
+      "line": 71,
+      "ok": true
+    },
+    {
+      "line": 72,
+      "ok": true
+    },
+    {
+      "line": 73,
+      "ok": true
+    },
+    {
+      "line": 74,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.0, -0.64802694, 5.864024, 7.3588915],
+        [0.0, 0.6108417, -5.5275335, -6.925791],
+        [0.0, 1.7907913, 4.0074425, 4.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.3588915, -6.925791, 4.958309],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [0.0, 2.0, 9.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Group": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Group.001": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Late": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-1.0806046, -1.4161469, -0.9092974, 1.0],
+        [0.0, -1.0806046, 1.6829419, 9.0],
+        [1.6829419, -0.9092974, -0.5838532, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 9.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.0, 1.0, 0.0],
+      "scale": [-2.0, -2.0, -2.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "MAMat": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Object Transforms.001": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "rotation_euler": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {
+    "Act": {
+      "data": {
+        "fcurves": [
+          {
+            "array_index": 2,
+            "data_path": "delta_location",
+            "extrapolation": "CONSTANT",
+            "keyframes": [],
+            "samples": []
+          },
+          {
+            "array_index": 3,
+            "data_path": "diffuse_color",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [2.0, 0.5],
+                "BEZIER",
+                [1.0, 0.5],
+                [3.0, 0.5]
+              ]
+            ],
+            "samples": [
+              [-1.0, 0.5],
+              [-0.5, 0.5],
+              [0.0, 0.5],
+              [0.5, 0.5],
+              [1.0, 0.5],
+              [1.5, 0.5],
+              [2.0, 0.5],
+              [2.5, 0.5],
+              [3.0, 0.5],
+              [3.5, 0.5],
+              [4.0, 0.5],
+              [4.5, 0.5],
+              [5.0, 0.5]
+            ]
+          },
+          {
+            "array_index": 0,
+            "data_path": "location",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [1.0, 2.0],
+                "BEZIER",
+                [-0.33333337, 2.0],
+                [2.3333335, 2.0]
+              ],
+              [
+                [5.0, -1.0],
+                "BEZIER",
+                [3.6666665, -1.0],
+                [6.3333335, -1.0]
+              ],
+              [
+                [9.0, 4.0],
+                "BEZIER",
+                [7.6666665, 4.0],
+                [10.333333, 4.0]
+              ]
+            ],
+            "samples": [
+              [-2.0, 2.0],
+              [-1.5, 2.0],
+              [-1.0, 2.0],
+              [-0.5, 2.0],
+              [0.0, 2.0],
+              [0.5, 2.0],
+              [1.0, 2.0],
+              [1.5, 1.8710938],
+              [2.0, 1.53125],
+              [2.5, 1.0507812],
+              [3.0, 0.5],
+              [3.5, -0.05078125],
+              [4.0, -0.53125],
+              [4.5, -0.87109375],
+              [5.0, -1.0],
+              [5.5, -0.78515625],
+              [6.0, -0.21875009],
+              [6.5, 0.58203125],
+              [7.0, 1.5],
+              [7.5, 2.4179688],
+              [8.0, 3.21875],
+              [8.5, 3.7851562],
+              [9.0, 4.0],
+              [9.5, 4.0],
+              [10.0, 4.0],
+              [10.5, 4.0],
+              [11.0, 4.0],
+              [11.5, 4.0],
+              [12.0, 4.0]
+            ]
+          },
+          {
+            "array_index": 1,
+            "data_path": "location",
+            "extrapolation": "CONSTANT",
+            "keyframes": [],
+            "samples": []
+          },
+          {
+            "array_index": 0,
+            "data_path": "metallic",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [1.0, 2.0],
+                "BEZIER",
+                [-0.33333337, 2.0],
+                [2.3333335, 2.0]
+              ],
+              [
+                [5.0, -1.0],
+                "BEZIER",
+                [3.6666665, -1.0],
+                [6.3333335, -1.0]
+              ],
+              [
+                [9.0, 4.0],
+                "BEZIER",
+                [7.6666665, 4.0],
+                [10.333333, 4.0]
+              ]
+            ],
+            "samples": [
+              [-2.0, 2.0],
+              [-1.5, 2.0],
+              [-1.0, 2.0],
+              [-0.5, 2.0],
+              [0.0, 2.0],
+              [0.5, 2.0],
+              [1.0, 2.0],
+              [1.5, 1.8710938],
+              [2.0, 1.53125],
+              [2.5, 1.0507812],
+              [3.0, 0.5],
+              [3.5, -0.05078125],
+              [4.0, -0.53125],
+              [4.5, -0.87109375],
+              [5.0, -1.0],
+              [5.5, -0.78515625],
+              [6.0, -0.21875009],
+              [6.5, 0.58203125],
+              [7.0, 1.5],
+              [7.5, 2.4179688],
+              [8.0, 3.21875],
+              [8.5, 3.7851562],
+              [9.0, 4.0],
+              [9.5, 4.0],
+              [10.0, 4.0],
+              [10.5, 4.0],
+              [11.0, 4.0],
+              [11.5, 4.0],
+              [12.0, 4.0]
+            ]
+          },
+          {
+            "array_index": 2,
+            "data_path": "rotation_euler",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [3.0, 1.5],
+                "BEZIER",
+                [2.0, 1.5],
+                [4.0, 1.5]
+              ]
+            ],
+            "samples": [
+              [0.0, 1.5],
+              [0.5, 1.5],
+              [1.0, 1.5],
+              [1.5, 1.5],
+              [2.0, 1.5],
+              [2.5, 1.5],
+              [3.0, 1.5],
+              [3.5, 1.5],
+              [4.0, 1.5],
+              [4.5, 1.5],
+              [5.0, 1.5],
+              [5.5, 1.5],
+              [6.0, 1.5]
+            ]
+          }
+        ],
+        "slots": ["OBCube", "MAMat", "OBLate"]
+      }
+    },
+    "Copy": {
+      "data": {
+        "fcurves": [
+          {
+            "array_index": 1,
+            "data_path": "location",
+            "extrapolation": "CONSTANT",
+            "keyframes": [
+              [
+                [1.0, 1.0],
+                "BEZIER",
+                [0.0, 1.0],
+                [2.0, 1.0]
+              ]
+            ],
+            "samples": [
+              [-2.0, 1.0],
+              [-1.5, 1.0],
+              [-1.0, 1.0],
+              [-0.5, 1.0],
+              [0.0, 1.0],
+              [0.5, 1.0],
+              [1.0, 1.0],
+              [1.5, 1.0],
+              [2.0, 1.0],
+              [2.5, 1.0],
+              [3.0, 1.0],
+              [3.5, 1.0],
+              [4.0, 1.0]
+            ]
+          }
+        ],
+        "slots": ["OBCube"]
+      }
+    }
+  },
+  "context": {
+    "active": "Cube",
+    "selected": ["Cube"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}
