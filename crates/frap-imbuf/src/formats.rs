@@ -145,6 +145,9 @@ pub fn decode(bytes: &[u8]) -> Result<DecodedImage, ImageError> {
     match FileFormat::detect(bytes) {
         Some(FileFormat::Png) => decode_png(bytes),
         Some(FileFormat::OpenExr) => decode_exr(bytes),
+        // 32-bit BMPs carry alpha in OIIO's (and Blender's) reading (WP 5.4).
+        Some(FileFormat::Bmp) => crate::encode::decode_bmp_v3_32(bytes)
+            .unwrap_or_else(|| decode_with_image(bytes, FileFormat::Bmp)),
         Some(f) => decode_with_image(bytes, f),
         None => Err(ImageError::Unsupported(
             "unrecognised image data (not PNG, JPEG, WebP, OpenEXR, HDR, BMP or TGA)".into(),
@@ -224,6 +227,10 @@ pub fn probe(bytes: &[u8]) -> Result<ImageInfo, ImageError> {
             }
             let size = header.layer_size;
             (size.width() as u32, size.height() as u32, channels, 32)
+        }
+        FileFormat::Bmp if crate::encode::probe_bmp_v3_32(bytes).is_some() => {
+            let (w, h) = crate::encode::probe_bmp_v3_32(bytes).unwrap_or_default();
+            (w, h, 4, 8)
         }
         f => {
             use image::ImageDecoder;
