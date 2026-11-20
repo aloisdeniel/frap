@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! The vertex-group options of the WP 4.2 modifiers against Blender 5.2.4
 //! (`testdata/vertex_groups.json`, written by Blender from a 4×3 grid with the groups `Arm.L`,
-//! `Arm.R` and `Other`). frap has no vertex-group API before M6, so these are unit tests, not
-//! goldens.
+//! `Arm.R` and `Other`). Written before frap had a vertex-group API (M4); since WP 6.10 the
+//! options are also golden cases (`tests/golden/cases/modifiers/vgroups/`).
 
 use std::collections::BTreeMap;
 
