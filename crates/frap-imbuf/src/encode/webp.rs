@@ -1,5 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! WebP: lossless (`image` crate), lossy behind the `webp-lossy` feature (WP 5.4).
+//!
+//! Blender 5.2.4 (`format_webp.cc` → OIIO / libwebp) promotes grey + alpha to RGBA, writes
+//! quality 100 lossless and anything else lossy at that quality (method 4). Blender cannot write
+//! one-channel WebP (`render.render` with `color_mode='BW'` fails to save); this encoder still
+//! accepts grey images for other callers.
 
 use super::raw8::color_type_8;
 use crate::codec::{DecodedImage, ImageError};
@@ -10,6 +15,13 @@ pub(crate) fn encode_webp(
     quality: u8,
 ) -> Result<Vec<u8>, ImageError> {
     use image::ImageEncoder;
+    let promoted;
+    let image = if image.channels == 2 {
+        promoted = image.with_channels(4)?;
+        &promoted
+    } else {
+        image
+    };
     if !lossless {
         return encode_webp_lossy(image, quality);
     }

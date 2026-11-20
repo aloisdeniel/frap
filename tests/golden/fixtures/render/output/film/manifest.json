@@ -1,0 +1,638 @@
+{
+ "generator": "tests/golden/fixtures/render/output/film/generate.py",
+ "blender": "5.2.4 LTS",
+ "width": 64,
+ "height": 48,
+ "outputs": [
+  {
+   "name": "film_transparent",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR",
+    "color_mode": "RGBA",
+    "color_depth": "32",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "film_transparent.exr"
+  },
+  {
+   "name": "film_opaque",
+   "film": "film_opaque.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR",
+    "color_mode": "RGBA",
+    "color_depth": "32",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "film_opaque.exr"
+  },
+  {
+   "name": "png8_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png8_rgba.png"
+  },
+  {
+   "name": "png8_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "RGB",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png8_rgb.png"
+  },
+  {
+   "name": "png8_bw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "BW",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png8_bw.png"
+  },
+  {
+   "name": "png8_rgba_nodither",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 0.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png8_rgba_nodither.png"
+  },
+  {
+   "name": "png8_rgba_opaque",
+   "film": "film_opaque.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png8_rgba_opaque.png"
+  },
+  {
+   "name": "png8_rgba_agx",
+   "film": "film_transparent.exr",
+   "view_transform": "AgX",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png8_rgba_agx.png"
+  },
+  {
+   "name": "png16_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "RGBA",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png16_rgba.png"
+  },
+  {
+   "name": "png16_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "RGB",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png16_rgb.png"
+  },
+  {
+   "name": "png16_bw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "BW",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png16_bw.png"
+  },
+  {
+   "name": "png16_rgba_agx",
+   "film": "film_transparent.exr",
+   "view_transform": "AgX",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "RGBA",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png16_rgba_agx.png"
+  },
+  {
+   "name": "png8_rgba_raw",
+   "film": "film_transparent.exr",
+   "view_transform": "Raw",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png8_rgba_raw.png"
+  },
+  {
+   "name": "png16_rgba_raw",
+   "film": "film_transparent.exr",
+   "view_transform": "Raw",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "RGBA",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png16_rgba_raw.png"
+  },
+  {
+   "name": "png16_rgb_raw",
+   "film": "film_transparent.exr",
+   "view_transform": "Raw",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "RGB",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png16_rgb_raw.png"
+  },
+  {
+   "name": "png16_bw_raw",
+   "film": "film_transparent.exr",
+   "view_transform": "Raw",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "PNG",
+    "color_mode": "BW",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "png16_bw_raw.png"
+  },
+  {
+   "name": "jpeg_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "JPEG",
+    "color_mode": "RGB",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "jpeg_rgb.jpg"
+  },
+  {
+   "name": "jpeg_bw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "JPEG",
+    "color_mode": "BW",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "jpeg_bw.jpg"
+  },
+  {
+   "name": "jpeg_rgb_q5",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "JPEG",
+    "color_mode": "RGB",
+    "color_depth": "8",
+    "quality": 5,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "jpeg_rgb_q5.jpg"
+  },
+  {
+   "name": "jpeg_rgb_q100",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "JPEG",
+    "color_mode": "RGB",
+    "color_depth": "8",
+    "quality": 100,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "jpeg_rgb_q100.jpg"
+  },
+  {
+   "name": "webp_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "WEBP",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 100,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "webp_rgba.webp"
+  },
+  {
+   "name": "webp_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "WEBP",
+    "color_mode": "RGB",
+    "color_depth": "8",
+    "quality": 100,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "webp_rgb.webp"
+  },
+  {
+   "name": "webp_bw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "WEBP",
+    "color_mode": "BW",
+    "color_depth": "8",
+    "quality": 100,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "error": "Error: Render error (Undefined error: 0) cannot save: 'webp_bw.webp'"
+  },
+  {
+   "name": "webp_rgba_q80",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "WEBP",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 80,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "webp_rgba_q80.webp"
+  },
+  {
+   "name": "exr16_rgba_zip",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR",
+    "color_mode": "RGBA",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "exr16_rgba_zip.exr"
+  },
+  {
+   "name": "exr32_rgb_none",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR",
+    "color_mode": "RGB",
+    "color_depth": "32",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "NONE"
+   },
+   "file": "exr32_rgb_none.exr"
+  },
+  {
+   "name": "exr32_bw_piz",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR",
+    "color_mode": "BW",
+    "color_depth": "32",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "PIZ"
+   },
+   "file": "exr32_bw_piz.exr"
+  },
+  {
+   "name": "exr16_bw_rle",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR",
+    "color_mode": "BW",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "RLE"
+   },
+   "file": "exr16_bw_rle.exr"
+  },
+  {
+   "name": "exr32_rgba_zips",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR",
+    "color_mode": "RGBA",
+    "color_depth": "32",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIPS"
+   },
+   "file": "exr32_rgba_zips.exr"
+  },
+  {
+   "name": "exr32_rgba_pxr24",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR",
+    "color_mode": "RGBA",
+    "color_depth": "32",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "PXR24"
+   },
+   "file": "exr32_rgba_pxr24.exr"
+  },
+  {
+   "name": "exr16_rgba_b44",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR",
+    "color_mode": "RGBA",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "B44"
+   },
+   "file": "exr16_rgba_b44.exr"
+  },
+  {
+   "name": "exr16_rgba_dwaa",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR",
+    "color_mode": "RGBA",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "DWAA"
+   },
+   "file": "exr16_rgba_dwaa.exr"
+  },
+  {
+   "name": "hdr_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "HDR",
+    "color_mode": "RGB",
+    "color_depth": "32",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "hdr_rgb.hdr"
+  },
+  {
+   "name": "hdr_bw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "HDR",
+    "color_mode": "BW",
+    "color_depth": "32",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "hdr_bw.hdr"
+  },
+  {
+   "name": "tga_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TARGA",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "tga_rgba.tga"
+  },
+  {
+   "name": "tga_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TARGA",
+    "color_mode": "RGB",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "tga_rgb.tga"
+  },
+  {
+   "name": "tga_bw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TARGA",
+    "color_mode": "BW",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "tga_bw.tga"
+  },
+  {
+   "name": "tgaraw_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TARGA_RAW",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "tgaraw_rgba.tga"
+  },
+  {
+   "name": "tgaraw_bw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TARGA_RAW",
+    "color_mode": "BW",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "tgaraw_bw.tga"
+  },
+  {
+   "name": "bmp_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "BMP",
+    "color_mode": "RGB",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "bmp_rgb.bmp"
+  },
+  {
+   "name": "bmp_bw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "BMP",
+    "color_mode": "BW",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "bmp_bw.bmp"
+  },
+  {
+   "name": "bmp_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "BMP",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP"
+   },
+   "file": "bmp_rgba.bmp"
+  }
+ ]
+}

@@ -162,7 +162,7 @@ fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
 
     let writes = p.animation.value || p.write_still.value;
     let write = if writes {
-        Some(format::write_settings(&r.image_settings).map_err(OpError::NotImplemented)?)
+        Some(format::render_write_settings(r).map_err(OpError::NotImplemented)?)
     } else {
         None
     };
@@ -319,7 +319,8 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
     for (frame, out) in plan.frames.iter().zip(&plan.outputs) {
         let film = render_frame(cx, *frame, engine)?;
         if let (Some(out), Some(ws)) = (out, &plan.write) {
-            let bytes = format::encode(
+            format::write_render(
+                &out.absolute,
                 &film.rgba,
                 film.width,
                 film.height,
@@ -327,8 +328,7 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
                 &plan.cm,
                 plan.dither,
             )
-            .map_err(OpError::Io)?;
-            output::write_file(&out.absolute, &bytes).map_err(OpError::Runtime)?;
+            .map_err(OpError::Runtime)?;
             files.push(Value::Str(out.path.as_str().into()));
         }
         last = Some(film);
