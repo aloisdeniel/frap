@@ -29,8 +29,8 @@
 //!   (`coat_N` included), `sheen_*`, `transmission_weight`. `Inputs` carries the world
 //!   position `P`, normals `N`/`Ng`, view vector `V`, `uv0`/`uv1` (the material's first two UV
 //!   sources, see [`MaterialParams::uv_sources`]), `color` (the colour attribute of
-//!   [`MaterialParams::color_attribute`], white when absent), `tangent` (world, sign in `w`),
-//!   `frag` and `front`.
+//!   [`MaterialParams::color_attribute`], `(0, 0, 0, 1)` when missing, as Blender), `tangent`
+//!   (world, sign in `w`), `frag` and `front`.
 //!
 //! The core lights every closure the Principled BSDF produces from the `Surface`
 //! (`node_bsdf_principled`: sheen, coat, emission, metallic, transmission, specular, diffuse),
@@ -204,7 +204,8 @@ pub struct MaterialParams {
     /// The material's textures (at most [`MAX_TEXTURES`]).
     pub textures: Vec<TextureSlot>,
     /// Colour attribute bound as `Inputs.color` (`None`: the mesh's default colour attribute,
-    /// else its first one; white without any).
+    /// else its first one; `(0, 0, 0, 1)` when the attribute is missing, as Blender reads a
+    /// missing attribute).
     pub color_attribute: Option<SmolStr>,
     /// Refraction traces the opaque surfaces behind (screen space, `use_raytrace_refraction`
     /// with `scene.eevee.use_raytracing`; set by the transmission feature, WP 5.5); otherwise
@@ -541,7 +542,9 @@ struct MeshAttrs {
     colors: Vec<wgpu::Buffer>,
     tangents: Option<wgpu::Buffer>,
     zero_uv: wgpu::Buffer,
-    white: wgpu::Buffer,
+    /// `(0, 0, 0, 1)`: a missing colour attribute (Blender 5.2.4 renders a Color Attribute
+    /// node naming a missing attribute black with alpha 1).
+    missing_color: wgpu::Buffer,
     zero_tangent: wgpu::Buffer,
     color_names: Vec<SmolStr>,
     color_default: Option<usize>,
@@ -1198,7 +1201,11 @@ fn mesh_attrs(gpu: &Gpu, m: &RMesh) -> MeshAttrs {
             .as_ref()
             .map(|t| vertex_buffer(gpu, "frap eevee tangent", &fit4(t, [1.0, 0.0, 0.0, 1.0]))),
         zero_uv: vertex_buffer(gpu, "frap eevee zero uv", &vec![[0.0f32; 2]; n]),
-        white: vertex_buffer(gpu, "frap eevee white", &vec![[1.0f32; 4]; n]),
+        missing_color: vertex_buffer(
+            gpu,
+            "frap eevee missing colour",
+            &vec![[0.0f32, 0.0, 0.0, 1.0]; n],
+        ),
         zero_tangent: vertex_buffer(gpu, "frap eevee tangent", &vec![[1.0f32, 0.0, 0.0, 1.0]; n]),
         color_names: m.color_names.clone(),
         color_default: m.color_default,
@@ -1225,7 +1232,8 @@ impl MeshAttrs {
             // A Color Attribute node without a name reads the default colour attribute.
             None => self.color_default.or(Some(0)),
         };
-        idx.and_then(|i| self.colors.get(i)).unwrap_or(&self.white)
+        idx.and_then(|i| self.colors.get(i))
+            .unwrap_or(&self.missing_color)
     }
 }
 
@@ -1336,6 +1344,7 @@ pub fn render(
     // Shadow casters: `(mesh, draw record, index range)`; a transparent material slot casts
     // through its own draw record carrying its alpha (`transparent_shadow_draw`).
     let mut casters: Vec<(MeshKey, usize, std::ops::Range<u32>)> = vec![];
+    let mut transparent_casters = false;
     let mut bounds = Aabb::EMPTY;
     for obj in &scene.objects {
         let Some(key) = obj.mesh else { continue };
@@ -1390,6 +1399,7 @@ pub fn render(
                     d.flags[3] = 1;
                     draws.push(d);
                     casters.push((key, draws.len() - 1, cmd.range.clone()));
+                    transparent_casters = true;
                 }
                 Some(_) => {}
             }
@@ -1426,7 +1436,10 @@ pub fn render(
         max,
     );
     let shadow_size = plan.size;
-    let rerender_shadows = shadows::jittered(&plan, &records);
+    // Jittered lights and hashed transparent casters re-render their maps every sample
+    // (`has_jittered_transparency` with `use_jitter`, always on for image renders,
+    // eevee_shadow.cc).
+    let rerender_shadows = shadows::jittered(&plan, &records) || transparent_casters;
 
     // Textures and samplers of the materials.
     {

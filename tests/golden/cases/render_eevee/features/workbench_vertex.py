@@ -1,5 +1,5 @@
 # golden: startup=factory compare=objects tier=T0
-# render-golden: image=out/workbench_vertex.png min_ssim=0.95
+# render-golden: image=out/workbench_vertex.png min_ssim=0.995 max_delta_e=0.1
 # Workbench colour type VERTEX (WP 5.5): each object draws its active colour attribute (a
 # painted BYTE_COLOR corner colour on a grid, a FLOAT_COLOR point colour on the cube); the
 # sphere has none and draws its material colour.

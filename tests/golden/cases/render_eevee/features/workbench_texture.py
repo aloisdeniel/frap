@@ -1,5 +1,5 @@
 # golden: startup=factory compare=objects tier=T0
-# render-golden: image=out/workbench_texture.png min_ssim=0.95
+# render-golden: image=out/workbench_texture.png min_ssim=0.995 max_delta_e=0.1
 # Workbench colour type TEXTURE (WP 5.5): each material draws the image of its active texture
 # node (the first texture node: none is flagged) on the active UV map. The cube shows a
 # generated 64 x 64 UV_GRID image (linear filtering), the plane a 32 x 32 one (Closest, REPEAT,

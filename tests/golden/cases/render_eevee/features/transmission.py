@@ -1,5 +1,5 @@
 # golden: startup=factory compare=objects tier=T0
-# render-golden: image=out/transmission.png min_ssim=0.85
+# render-golden: image=out/transmission.png min_ssim=0.91 max_delta_e=0.9
 # EEVEE shading feature golden (WP 5.5): transmission. A clear glass sphere (Transmission
 # Weight 1, Roughness 0.05, IOR 1.45) and a frosted green one (Roughness 0.4) in front of a
 # red wall, under a blue world. Without ray-traced refraction (Blender's default) the

@@ -1,5 +1,5 @@
 # golden: startup=factory compare=objects tier=T0
-# render-golden: image=out/clearcoat.png min_ssim=0.88
+# render-golden: image=out/clearcoat.png min_ssim=0.985 max_delta_e=0.5
 # EEVEE shading feature golden (WP 5.5): clearcoat. Three rough red spheres (Roughness 0.6)
 # with Coat Weight 0, 0.5 (yellow Coat Tint) and 1 (Coat IOR 2), Coat Roughness 0.05: the coat
 # adds a sharp highlight of the point light and of the world, and darkens (and tints) the

@@ -8,8 +8,7 @@
 use std::sync::Arc;
 
 use frap_material::{
-    AlphaMode, Channel, ChannelSel, Clearcoat, LoweredMaterial, Sheen, Transmission,
-    VertexColorUse,
+    AlphaMode, Channel, ChannelSel, Clearcoat, LoweredMaterial, Sheen, Transmission, VertexColorUse,
 };
 use frap_render_scene::{MatKey, RMaterialSettings, RenderScene};
 
@@ -119,7 +118,10 @@ fn clearcoat_sheen_transmission_pack_their_factors() {
     for f in ["clearcoat", "sheen", "transmission"] {
         assert_ne!(p.flags & bit(f), 0, "{f}");
     }
-    assert_eq!((p.coat_weight, p.coat_roughness, p.coat_ior), (0.75, 0.1, 1.5));
+    assert_eq!(
+        (p.coat_weight, p.coat_roughness, p.coat_ior),
+        (0.75, 0.1, 1.5)
+    );
     assert_eq!(p.coat_tint, [1.0; 3]);
     assert_eq!(
         (p.sheen_weight, p.sheen_tint, p.sheen_roughness),

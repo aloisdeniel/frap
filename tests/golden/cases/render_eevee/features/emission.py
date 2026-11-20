@@ -1,5 +1,5 @@
 # golden: startup=factory compare=objects tier=T0
-# render-golden: image=out/emission.png min_ssim=0.88
+# render-golden: image=out/emission.png min_ssim=0.98 max_delta_e=0.8
 # EEVEE shading feature golden (WP 5.5): emission. An orange sphere emitting at strength 2, a
 # cyan one at strength 6 (above 1: glTF's emissive strength split), and a plane whose
 # Emission Color is a generated UV_GRID image at strength 1, in a dark world.

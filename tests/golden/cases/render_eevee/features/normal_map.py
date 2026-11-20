@@ -1,5 +1,5 @@
 # golden: startup=factory compare=objects tier=T0
-# render-golden: image=out/normal_map.png min_ssim=0.85
+# render-golden: image=out/normal_map.png min_ssim=0.97 max_delta_e=0.5
 # EEVEE shading feature golden (WP 5.5): a tangent-space normal map (a 4 x 4 grid of bumps,
 # `bumps.png`, Non-Color) through a Normal Map node into the Principled BSDF's Normal, on a
 # plane and on a smooth UV sphere (MikkTSpace tangents of the UV map), lit by a low sun.

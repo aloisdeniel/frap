@@ -1,5 +1,5 @@
 # golden: startup=factory compare=objects tier=T0
-# render-golden: image=out/vertex_colors.png min_ssim=0.85
+# render-golden: image=out/vertex_colors.png min_ssim=0.98 max_delta_e=0.6
 # EEVEE shading feature golden (WP 5.5): vertex colours. A subdivided grid with a painted
 # BYTE_COLOR corner colour read by a Color Attribute node naming it straight into Base Color,
 # and the factory cube with a FLOAT_COLOR point colour, the render (default) colour, read by a
