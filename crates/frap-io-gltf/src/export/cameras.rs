@@ -190,14 +190,22 @@ mod tests {
         }
     }
 
-    // Values dumped from Blender 5.2.4 (`export_scene.gltf(export_cameras=True)`).
+    /// Within one f32 ulp: the angle goes through the platform `atanf`/`tanf` (as in
+    /// Blender), and glibc / the MSVC CRT differ from macOS libm by one ulp here.
+    fn assert_ulps(got: f64, want: f64) {
+        let (g, w) = (got as f32, want as f32);
+        let d = (g.to_bits() as i64 - w.to_bits() as i64).abs();
+        assert!(d <= 1, "{got} vs {want}: {d} f32 ulps apart");
+    }
+
+    // Values dumped from Blender 5.2.4 on macOS (`export_scene.gltf(export_cameras=True)`).
     #[test]
     fn perspective_portrait_auto_keeps_angle() {
         let cam = Camera::new("Camera");
         let c = camera_to_gltf(&cam, &render(1000, 1500)).unwrap();
         let p = c.perspective.unwrap();
         assert_eq!(p.aspect_ratio, Some(0.6666666666666666));
-        assert_eq!(p.yfov, 0.691111147403717);
+        assert_ulps(p.yfov, 0.691111147403717);
         assert_eq!(p.znear, 0.10000000149011612);
     }
 
@@ -207,7 +215,7 @@ mod tests {
         cam.fields.sensor_fit = "VERTICAL".into();
         cam.fields.lens = 40.0;
         let c = camera_to_gltf(&cam, &render(1000, 1500)).unwrap();
-        assert_eq!(c.perspective.unwrap().yfov, 0.5829135775566101);
+        assert_ulps(c.perspective.unwrap().yfov, 0.5829135775566101);
     }
 
     #[test]

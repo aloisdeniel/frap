@@ -359,9 +359,14 @@ impl PathBase {
     pub fn abs(&self, filepath: &str) -> String {
         use std::path::Path;
         match filepath.strip_prefix("//") {
-            Some(rel) => match self.blend.as_deref().and_then(|b| Path::new(b).parent()) {
-                Some(dir) => dir.join(rel).to_string_lossy().into_owned(),
-                None => rel.to_owned(),
+            // Joined with `/` on every platform so transcripts do not depend on the
+            // host's separator.
+            Some(rel) => match self.blend.as_deref() {
+                Some(b) if Path::new(b).parent().is_some() => match b.rfind(['/', '\\']) {
+                    Some(i) => format!("{}/{rel}", &b[..i]),
+                    None => rel.to_owned(),
+                },
+                _ => rel.to_owned(),
             },
             None => filepath.to_owned(),
         }
