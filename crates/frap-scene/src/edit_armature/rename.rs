@@ -18,6 +18,10 @@ use smol_str::SmolStr;
 use crate::Host;
 use crate::generated::modifier_settings::ModifierSettings;
 
+/// An object a bone rename may touch: `(object, uses the armature, bone-parented to the
+/// renamed bone, deformed by the armature, its mesh)`.
+type Affected = (IdRef<ObjectId>, bool, bool, bool, Option<IdRef<MeshId>>);
+
 /// Renames bone `old` of `arm` to (a unique version of) `new`; returns the name it got, or
 /// `None` when nothing is named `old` (or the names are equal).
 pub fn rename_bone(
@@ -50,7 +54,7 @@ pub fn rename_bone(
         main.armatures.get_mut(arm, log)?.bones[i].name = unique.clone();
         unique
     };
-    let objects: Vec<(IdRef<ObjectId>, bool, bool, bool, Option<IdRef<MeshId>>)> = {
+    let objects: Vec<Affected> = {
         let main = h.main();
         main.objects
             .iter()
@@ -92,7 +96,7 @@ pub fn rename_bone(
                 let main = h.main();
                 let m = main.meshes.get(me);
                 (
-                    m.is_some_and(|m| m.vertex_group_names.iter().any(|g| *g == name)),
+                    m.is_some_and(|m| m.vertex_group_names.contains(&name)),
                     m.is_some_and(|m| m.vertex_group_names.iter().any(|g| g == old)),
                     main.objects
                         .get(ob)

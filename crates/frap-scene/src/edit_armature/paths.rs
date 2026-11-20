@@ -108,7 +108,10 @@ pub fn ref_coll<'h, T: frap_rna::Rna>(
     items: Vec<&'h T>,
     item_type: &'static frap_rna::StructDef,
 ) -> frap_rna::Field<'h> {
-    frap_rna::Field::Coll(frap_rna::CollRef::Owned(Box::new(RefColl { items, item_type })))
+    frap_rna::Field::Coll(frap_rna::CollRef::Owned(Box::new(RefColl {
+        items,
+        item_type,
+    })))
 }
 
 /// The armature an `Armature`-rooted pointer belongs to.
@@ -190,7 +193,7 @@ pub fn object_armature(main: &Main, ob: IdRef<ObjectId>) -> Option<IdRef<Armatur
 }
 
 /// The armature `arm`, or an error naming the removed datablock.
-pub fn armature<'m>(main: &'m Main, arm: IdRef<ArmatureId>) -> Result<&'m Armature, RnaError> {
+pub fn armature(main: &Main, arm: IdRef<ArmatureId>) -> Result<&Armature, RnaError> {
     main.armatures
         .get(arm)
         .ok_or_else(|| internal_error("the armature was removed"))

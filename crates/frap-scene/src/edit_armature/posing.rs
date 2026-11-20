@@ -193,8 +193,10 @@ mod tests {
             bone("Child", Some(0), [0.0, 0.0, 1.0], [0.0, 0.0, 2.0]),
         ];
         let rest = rest_pose(&arm);
-        let mut pose = Pose::default();
-        pose.bones = vec![PoseBone::new("Root"), PoseBone::new("Child")];
+        let mut pose = Pose {
+            bones: vec![PoseBone::new("Root"), PoseBone::new("Child")],
+            ..Pose::default()
+        };
         // 90° about the bone's local X: the bone (along +Z) tips towards -Y... in bone space.
         let h = std::f32::consts::FRAC_1_SQRT_2;
         pose.bones[0].rotation_quaternion = [h, h, 0.0, 0.0];

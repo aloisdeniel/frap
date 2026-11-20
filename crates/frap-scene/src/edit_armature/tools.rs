@@ -16,6 +16,8 @@
 //! (`ED_armature_ebone_transform_mirror_update`, `armature_select_mirrored`,
 //! `armature_tag_select_mirrored`), Blender 5.2.4, GPL-2.0-or-later.
 
+#![allow(clippy::needless_range_loop)] // index loops mirror Blender's edit-bone pointer walks
+
 use glam::{Mat3, Vec3};
 
 use super::math::{normalize, vec_roll_to_mat3_normalized};
@@ -1111,5 +1113,140 @@ mod tests {
         // Bone along +Z: its Z axis is -Y; aligning to +X needs a quarter turn.
         let r = roll_to_vector(&b, Vec3::X, false);
         assert!((r.abs() - std::f32::consts::FRAC_PI_2).abs() < 1e-6, "{r}");
+    }
+
+    /// `Bone` (0,0,0)→(0,0,1) with a connected child (0,0,1)→(0,1,1), both selected.
+    fn two_bone_chain() -> (Armature, EditArmature) {
+        let (arm, mut ea) = chain();
+        let b = ea.add_bone("Bone");
+        ea.edit_bones[b].head = [0.0, 0.0, 1.0];
+        ea.edit_bones[b].tail = [0.0, 1.0, 1.0];
+        ea.edit_bones[b].parent = Some(0);
+        ea.edit_bones[b].use_connect = true;
+        for e in &mut ea.edit_bones {
+            e.select = [true; 3];
+        }
+        (arm, ea)
+    }
+
+    #[test]
+    fn duplicate_copies_selection_and_parents() {
+        let (arm, mut ea) = two_bone_chain();
+        ea.active = Some(1);
+        let pairs = ea.duplicate_selected(&arm, false);
+        assert_eq!(pairs, vec![(0, 2), (1, 3)]);
+        assert_eq!(ea.edit_bones[2].name, "Bone.002");
+        assert_eq!(ea.edit_bones[3].name, "Bone.003");
+        // The child copy is parented to the parent copy and stays connected.
+        assert_eq!(ea.edit_bones[3].parent, Some(2));
+        assert!(ea.edit_bones[3].use_connect);
+        assert_eq!(ea.active, Some(3));
+        assert_eq!(ea.edit_bones[0].select, [false; 3]);
+        assert_eq!(ea.edit_bones[2].select, [true; 3]);
+    }
+
+    #[test]
+    fn delete_reparents_children() {
+        let (arm, mut ea) = two_bone_chain();
+        ea.edit_bones[1].select = [false; 3];
+        let doomed = ea.bones_to_delete(&arm);
+        assert_eq!(doomed, vec![0]);
+        ea.delete_bones(&doomed);
+        assert_eq!(ea.edit_bones.len(), 1);
+        assert_eq!(ea.edit_bones[0].parent, None);
+        assert!(!ea.edit_bones[0].use_connect);
+    }
+
+    #[test]
+    fn switch_direction_reverses_the_chain() {
+        let (arm, mut ea) = two_bone_chain();
+        ea.switch_direction(&arm);
+        assert_eq!(ea.edit_bones[1].head, [0.0, 1.0, 1.0]);
+        assert_eq!(ea.edit_bones[1].parent, None);
+        assert_eq!(ea.edit_bones[0].head, [0.0, 0.0, 1.0]);
+        assert_eq!(ea.edit_bones[0].parent, Some(1));
+        assert!(ea.edit_bones[0].use_connect);
+    }
+
+    #[test]
+    fn parent_set_connects_and_moves_children() {
+        let (arm, mut ea) = chain();
+        let b = ea.add_bone("Arm");
+        ea.edit_bones[b].head = [1.0, 0.0, 0.0];
+        ea.edit_bones[b].tail = [2.0, 0.0, 0.0];
+        ea.edit_bones[b].select = [true; 3];
+        ea.edit_bones[0].select = [true; 3];
+        ea.active = Some(0);
+        ea.parent_set(&arm, true).expect("active bone");
+        assert_eq!(ea.edit_bones[b].parent, Some(0));
+        assert_eq!(ea.edit_bones[b].head, [0.0, 0.0, 1.0]);
+        assert_eq!(ea.edit_bones[b].tail, [1.0, 0.0, 1.0]);
+        ea.active = None;
+        assert!(ea.parent_set(&arm, true).is_err());
+    }
+
+    #[test]
+    fn symmetrize_mirrors_side_bones() {
+        let (arm, mut ea) = chain();
+        let l = ea.add_bone("arm.L");
+        ea.edit_bones[l].head = [0.5, 0.0, 1.0];
+        ea.edit_bones[l].tail = [1.5, 0.2, 1.0];
+        ea.edit_bones[l].roll = 0.4;
+        ea.edit_bones[l].parent = Some(0);
+        ea.edit_bones[l].select = [true; 3];
+        let mut colls = arm.collections.clone();
+        let out = ea.symmetrize(&arm, &mut colls, -1);
+        assert_eq!(out.len(), 1);
+        let r = ea.find("arm.R").expect("mirror");
+        assert_eq!(ea.edit_bones[r].head, [-0.5, 0.0, 1.0]);
+        assert_eq!(ea.edit_bones[r].tail, [-1.5, 0.2, 1.0]);
+        assert_eq!(ea.edit_bones[r].roll, -0.4);
+        assert_eq!(ea.edit_bones[r].parent, Some(0));
+        assert_eq!(ea.edit_bones[r].select, [true; 3]);
+        assert_eq!(ea.edit_bones[l].select, [false; 3]);
+    }
+
+    #[test]
+    fn select_all_toggle_and_invert() {
+        let (arm, mut ea) = two_bone_chain();
+        assert!(ea.any_visible_selected(&arm));
+        ea.select_all(&arm, SelectAction::Deselect);
+        assert!(!ea.any_visible_selected(&arm));
+        ea.edit_bones[0].select = [true; 3];
+        ea.select_all(&arm, SelectAction::Invert);
+        // The parent is deselected, then selecting its connected child selects its tip.
+        assert_eq!(ea.edit_bones[0].select, [false, false, true]);
+        assert_eq!(ea.edit_bones[1].select, [true; 3]);
+    }
+
+    #[test]
+    fn calc_roll_global_axis() {
+        let (arm, mut ea) = chain();
+        ea.edit_bones[0].select = [true; 3];
+        ea.calc_roll(
+            &arm,
+            "GLOBAL_POS_X",
+            false,
+            false,
+            &Mat3::IDENTITY,
+            Vec3::ZERO,
+            Vec3::Z,
+            None,
+        )
+        .expect("roll");
+        assert!((ea.edit_bones[0].roll - std::f32::consts::FRAC_PI_2).abs() < 1e-6);
+        assert!(
+            ea.calc_roll(
+                &arm,
+                "ACTIVE",
+                false,
+                false,
+                &Mat3::IDENTITY,
+                Vec3::ZERO,
+                Vec3::Z,
+                None
+            )
+            .is_err()
+        );
     }
 }

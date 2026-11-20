@@ -165,10 +165,10 @@ fn exit(cx: &mut OpCtx, objects: &[IdRef<ObjectId>]) -> OpResult {
         if o.mode != ObjectMode::Edit {
             continue;
         }
-        if let Some(arm) = o.data.and_then(|d| d.typed::<ArmatureId>()) {
-            if load(cx, arm)? {
-                flush_selection_to_pose(cx, ob, arm)?;
-            }
+        if let Some(arm) = o.data.and_then(|d| d.typed::<ArmatureId>())
+            && load(cx, arm)?
+        {
+            flush_selection_to_pose(cx, ob, arm)?;
         }
         cx.object_mut(ob)?.mode = ObjectMode::Object;
         cx.main_mut().1.context_changed = true;
