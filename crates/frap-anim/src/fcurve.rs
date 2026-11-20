@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `FCurve` and `Keyframe` (RNA `FCurve`, `Keyframe`, `FCurveKeyframePoints`) with Blender's
 //! enum identifiers. M5+M6 W0 contract; WP 6.1 owns the file. Evaluation is in
-//! [`crate::eval`].
+//! [`crate::eval`], the keyframe-array edits (`insert_vert_fcurve`, `sort_time_fcurve`,
+//! `BKE_fcurve_deduplicate_keys`, …) in [`keys`].
 
 use smol_str::SmolStr;
+
+pub mod keys;
 
 /// An enum with Blender's RNA identifiers.
 macro_rules! rna_enum {
@@ -95,6 +98,13 @@ rna_enum! {
     } default AutoClamped
 }
 
+impl HandleType {
+    /// `HD_AUTO` or `HD_AUTO_ANIM`.
+    pub fn is_auto(self) -> bool {
+        matches!(self, HandleType::Auto | HandleType::AutoClamped)
+    }
+}
+
 rna_enum! {
     /// `Keyframe.type` (`BEZT_KEYTYPE_*`).
     KeyframeType {
@@ -158,6 +168,31 @@ pub struct Keyframe {
 }
 
 impl Keyframe {
+    /// A zero-initialised key as `keyframe_points.add(count)` appends it (`ED_keyframes_add`:
+    /// `MEM_realloc_zeroed`, then BEZIER, AUTO_CLAMPED and selected; `back`, `amplitude` and
+    /// `period` stay 0; verified on 5.2.4).
+    pub fn zeroed() -> Keyframe {
+        Keyframe {
+            co: [0.0; 2],
+            handle_left: [0.0; 2],
+            handle_right: [0.0; 2],
+            back: 0.0,
+            amplitude: 0.0,
+            period: 0.0,
+            ..Keyframe::new(0.0, 0.0)
+        }
+    }
+
+    /// `BEZT_IS_AUTOH`: both handles AUTO or AUTO_CLAMPED.
+    pub fn is_auto_h(&self) -> bool {
+        self.handle_left_type.is_auto() && self.handle_right_type.is_auto()
+    }
+
+    /// `BEZT_ISSEL_ANY`.
+    pub fn is_selected_any(&self) -> bool {
+        self.select_control_point || self.select_left_handle || self.select_right_handle
+    }
+
     /// A key at `(frame, value)` with handles on the key (recalculated by
     /// `eval::recalc_handles`).
     pub fn new(frame: f32, value: f32) -> Keyframe {
@@ -193,7 +228,8 @@ pub struct FCurve {
     pub keyframe_points: Vec<Keyframe>,
     /// `extrapolation`
     pub extrapolation: Extrapolation,
-    /// `auto_smoothing` (`NONE`, `CONT_ACCEL`)
+    /// `auto_smoothing` (`NONE`, `CONT_ACCEL`; `fcurves.new` takes the preference
+    /// "F-Curve smoothing", `CONT_ACCEL` in the factory settings, verified on 5.2.4)
     pub auto_smoothing: SmolStr,
     /// `mute`
     pub mute: bool,
@@ -209,10 +245,17 @@ pub struct FCurve {
     pub color_mode: SmolStr,
     /// `color`
     pub color: [f32; 3],
+    /// `FCURVE_DISCRETE_VALUES`: the curve animates a boolean or enum property (constant
+    /// interpolation and extrapolation; `update_autoflags`, keying). Not an RNA property.
+    pub discrete_values: bool,
+    /// `FCURVE_INT_VALUES`: the curve animates an integer, boolean or enum property (evaluation
+    /// rounds to whole numbers). Not an RNA property.
+    pub int_values: bool,
 }
 
 impl FCurve {
-    /// An empty F-curve for `data_path[array_index]` (`fcurves.new`).
+    /// An empty F-curve for `data_path[array_index]` (`fcurves.new`:
+    /// `create_fcurve_for_channel` with the factory preferences).
     pub fn new(data_path: impl Into<SmolStr>, array_index: i32) -> FCurve {
         FCurve {
             data_path: data_path.into(),
@@ -220,7 +263,7 @@ impl FCurve {
             group: None,
             keyframe_points: Vec::new(),
             extrapolation: Extrapolation::Constant,
-            auto_smoothing: "NONE".into(),
+            auto_smoothing: "CONT_ACCEL".into(),
             mute: false,
             hide: false,
             lock: false,
@@ -228,6 +271,18 @@ impl FCurve {
             is_valid: true,
             color_mode: "AUTO_RAINBOW".into(),
             color: [0.0, 0.0, 0.0],
+            discrete_values: false,
+            int_values: false,
         }
+    }
+
+    /// `fcu->auto_smoothing != FCURVE_SMOOTH_NONE`.
+    pub fn smooths(&self) -> bool {
+        self.auto_smoothing != "NONE"
+    }
+
+    /// `BKE_fcurve_is_empty` (no keys; frap has no samples, drivers or F-modifiers).
+    pub fn is_empty(&self) -> bool {
+        self.keyframe_points.is_empty()
     }
 }

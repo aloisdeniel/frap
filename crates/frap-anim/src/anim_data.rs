@@ -77,6 +77,8 @@ pub struct NlaStrip {
     pub action: Option<IdRef<ActionId>>,
     /// `action_slot_handle`
     pub action_slot_handle: i32,
+    /// `last_slot_identifier`
+    pub last_slot_identifier: SmolStr,
     /// `frame_start` / `frame_end`
     pub frame_start: f32,
     /// `frame_end`
@@ -107,6 +109,8 @@ pub struct NlaStrip {
     pub strip_time: f32,
     /// `use_animated_time`
     pub use_animated_time: bool,
+    /// `use_animated_time_cyclic`
+    pub use_animated_time_cyclic: bool,
     /// `mute`
     pub mute: bool,
     /// `use_reverse`
@@ -117,4 +121,66 @@ pub struct NlaStrip {
     pub select: bool,
     /// `active`
     pub active: bool,
+}
+
+impl NlaTrack {
+    /// A new track (`nla_tracks.new()`: `NlaTrack`, selected and active; verified on 5.2.4).
+    pub fn new(name: impl Into<SmolStr>) -> NlaTrack {
+        NlaTrack {
+            name: name.into(),
+            strips: Vec::new(),
+            mute: false,
+            is_solo: false,
+            lock: false,
+            select: true,
+            active: true,
+        }
+    }
+}
+
+impl NlaStrip {
+    /// An action-clip strip starting at `start` over the action frame range `range`
+    /// (`BKE_nlastrip_new` + `rna_NlaStrip_new`: REPLACE, HOLD, scale and repeat 1, selected,
+    /// syncing the action length, influence 0 until evaluated; verified on 5.2.4). The slot is
+    /// the caller's (`nla::assign_action`'s auto-assignment).
+    pub fn new_clip(
+        name: impl Into<SmolStr>,
+        action: Option<IdRef<ActionId>>,
+        start: f32,
+        range: [f32; 2],
+    ) -> NlaStrip {
+        let (actstart, mut actend) = (range[0], range[1]);
+        // `BKE_nla_clip_length_ensure_nonzero`
+        if actend <= actstart {
+            actend = actstart + 1.0;
+        }
+        NlaStrip {
+            name: name.into(),
+            r#type: "CLIP".into(),
+            action,
+            action_slot_handle: 0,
+            last_slot_identifier: SmolStr::default(),
+            frame_start: start,
+            frame_end: actend + (start - actstart),
+            action_frame_start: actstart,
+            action_frame_end: actend,
+            scale: 1.0,
+            repeat: 1.0,
+            blend_type: "REPLACE".into(),
+            extrapolation: "HOLD".into(),
+            blend_in: 0.0,
+            blend_out: 0.0,
+            use_auto_blend: false,
+            influence: 0.0,
+            use_animated_influence: false,
+            strip_time: 0.0,
+            use_animated_time: false,
+            use_animated_time_cyclic: false,
+            mute: false,
+            use_reverse: false,
+            use_sync_length: true,
+            select: true,
+            active: false,
+        }
+    }
 }

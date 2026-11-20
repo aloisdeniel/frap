@@ -13,6 +13,10 @@ use smol_str::SmolStr;
 
 use crate::fcurve::FCurve;
 
+mod ops;
+
+pub use ops::{DEFAULT_LAST_SLOT_HANDLE, id_type_of_prefix, id_type_prefix};
+
 /// `bpy.types.Action`.
 #[derive(Clone, Debug)]
 pub struct Action {
@@ -22,8 +26,8 @@ pub struct Action {
     pub slots: Vec<ActionSlot>,
     /// `Action.layers`
     pub layers: Vec<ActionLayer>,
-    /// The handle the next new slot gets (`Action::last_slot_handle` + 1; handles are never
-    /// reused).
+    /// The handle of the last slot added (the next one gets `last_slot_handle + 1`; handles
+    /// are never reused). Starts at [`DEFAULT_LAST_SLOT_HANDLE`].
     pub last_slot_handle: i32,
     /// `Action.use_frame_range`
     pub use_frame_range: bool,
@@ -40,9 +44,9 @@ impl Action {
             header: IdHeader::new(name),
             slots: Vec::new(),
             layers: Vec::new(),
-            last_slot_handle: 0,
+            last_slot_handle: DEFAULT_LAST_SLOT_HANDLE,
             use_frame_range: false,
-            frame_range: [1.0, 1.0],
+            frame_range: [0.0, 0.0],
             use_cyclic: false,
         }
     }
@@ -132,6 +136,10 @@ pub struct ActionGroup {
     pub lock: bool,
     /// `select`
     pub select: bool,
+    /// `show_expanded_graph`
+    pub show_expanded_graph: bool,
+    /// `use_pin`
+    pub use_pin: bool,
 }
 
 impl Rna for Action {
