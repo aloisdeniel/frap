@@ -1,0 +1,148 @@
+# WP 6.10: SOLIDIFY Complex (NON_MANIFOLD) with `vertex_group` (the thickness scaled by
+# `thickness_vertex_group + weight * (1 - thickness_vertex_group)`), inverted, with unassigned
+# vertices, `use_flat_faces`, and `shell_vertex_group` / `rim_vertex_group`, whose weights are
+# checked through a MASK on each group after the solidify.
+# golden: startup=factory compare=evaluated:A,evaluated:B,evaluated:C,evaluated:D,evaluated:E,evaluated:Sh,evaluated:Ri,evaluated:Bo,evaluated:Cy tier=T1 order=canonical
+import bpy
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=6, y_subdivisions=5, size=2)
+bpy.context.object.name = 'A'
+bpy.data.objects['A'].vertex_groups.new(name='G')
+bpy.data.objects['A'].vertex_groups['G'].add([0, 7, 14, 21, 28, 35], 0.0, 'REPLACE')
+bpy.data.objects['A'].vertex_groups['G'].add([1, 8, 15, 22, 29, 36], 0.15, 'REPLACE')
+bpy.data.objects['A'].vertex_groups['G'].add([2, 9, 16, 23, 30, 37], 0.35, 'REPLACE')
+bpy.data.objects['A'].vertex_groups['G'].add([3, 10, 17, 24, 31, 38], 0.5, 'REPLACE')
+bpy.data.objects['A'].vertex_groups['G'].add([4, 11, 18, 25, 32, 39], 0.65, 'REPLACE')
+bpy.data.objects['A'].vertex_groups['G'].add([5, 12, 19, 26, 33, 40], 0.85, 'REPLACE')
+bpy.data.objects['A'].vertex_groups['G'].add([6, 13, 20, 27, 34, 41], 1.0, 'REPLACE')
+bpy.data.objects['A'].modifiers.new(name='M', type='SOLIDIFY')
+bpy.data.objects['A'].modifiers['M'].solidify_mode = 'NON_MANIFOLD'
+bpy.data.objects['A'].modifiers['M'].thickness = 0.3
+bpy.data.objects['A'].modifiers['M'].vertex_group = 'G'
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=6, y_subdivisions=5, size=2)
+bpy.context.object.name = 'B'
+bpy.data.objects['B'].vertex_groups.new(name='G')
+bpy.data.objects['B'].vertex_groups['G'].add([0, 7, 14, 21, 28, 35], 0.0, 'REPLACE')
+bpy.data.objects['B'].vertex_groups['G'].add([1, 8, 15, 22, 29, 36], 0.15, 'REPLACE')
+bpy.data.objects['B'].vertex_groups['G'].add([2, 9, 16, 23, 30, 37], 0.35, 'REPLACE')
+bpy.data.objects['B'].vertex_groups['G'].add([3, 10, 17, 24, 31, 38], 0.5, 'REPLACE')
+bpy.data.objects['B'].vertex_groups['G'].add([4, 11, 18, 25, 32, 39], 0.65, 'REPLACE')
+bpy.data.objects['B'].vertex_groups['G'].add([5, 12, 19, 26, 33, 40], 0.85, 'REPLACE')
+bpy.data.objects['B'].vertex_groups['G'].add([6, 13, 20, 27, 34, 41], 1.0, 'REPLACE')
+bpy.data.objects['B'].modifiers.new(name='M', type='SOLIDIFY')
+bpy.data.objects['B'].modifiers['M'].solidify_mode = 'NON_MANIFOLD'
+bpy.data.objects['B'].modifiers['M'].thickness = 0.3
+bpy.data.objects['B'].modifiers['M'].vertex_group = 'G'
+bpy.data.objects['B'].modifiers['M'].invert_vertex_group = True
+bpy.data.objects['B'].modifiers['M'].thickness_vertex_group = 0.25
+bpy.ops.mesh.primitive_monkey_add(size=2)
+bpy.context.object.name = 'C'
+bpy.data.objects['C'].vertex_groups.new(name='G')
+bpy.data.objects['C'].vertex_groups['G'].add([5, 10, 20, 25, 35, 40, 50, 55, 65, 70, 80, 85, 95, 100, 110, 115, 125, 130, 140, 145, 155, 160, 170, 175, 185, 190, 200, 205, 215, 220, 230, 235, 245, 250, 260, 265, 275, 280, 290, 295, 305, 310, 320, 325, 335, 340, 350, 355, 365, 370, 380, 385, 395, 400, 410, 415, 425, 430, 440, 445, 455, 460, 470, 475, 485, 490, 500, 505], 0.25, 'REPLACE')
+bpy.data.objects['C'].vertex_groups['G'].add([8, 13, 23, 28, 38, 43, 53, 58, 68, 73, 83, 88, 98, 103, 113, 118, 128, 133, 143, 148, 158, 163, 173, 178, 188, 193, 203, 208, 218, 223, 233, 238, 248, 253, 263, 268, 278, 283, 293, 298, 308, 313, 323, 328, 338, 343, 353, 358, 368, 373, 383, 388, 398, 403, 413, 418, 428, 433, 443, 448, 458, 463, 473, 478, 488, 493, 503], 0.4, 'REPLACE')
+bpy.data.objects['C'].vertex_groups['G'].add([1, 11, 16, 26, 31, 41, 46, 56, 61, 71, 76, 86, 91, 101, 106, 116, 121, 131, 136, 146, 151, 161, 166, 176, 181, 191, 196, 206, 211, 221, 226, 236, 241, 251, 256, 266, 271, 281, 286, 296, 301, 311, 316, 326, 331, 341, 346, 356, 361, 371, 376, 386, 391, 401, 406, 416, 421, 431, 436, 446, 451, 461, 466, 476, 481, 491, 496, 506], 0.5, 'REPLACE')
+bpy.data.objects['C'].vertex_groups['G'].add([4, 14, 19, 29, 34, 44, 49, 59, 64, 74, 79, 89, 94, 104, 109, 119, 124, 134, 139, 149, 154, 164, 169, 179, 184, 194, 199, 209, 214, 224, 229, 239, 244, 254, 259, 269, 274, 284, 289, 299, 304, 314, 319, 329, 334, 344, 349, 359, 364, 374, 379, 389, 394, 404, 409, 419, 424, 434, 439, 449, 454, 464, 469, 479, 484, 494, 499], 0.6, 'REPLACE')
+bpy.data.objects['C'].vertex_groups['G'].add([2, 7, 17, 22, 32, 37, 47, 52, 62, 67, 77, 82, 92, 97, 107, 112, 122, 127, 137, 142, 152, 157, 167, 172, 182, 187, 197, 202, 212, 217, 227, 232, 242, 247, 257, 262, 272, 277, 287, 292, 302, 307, 317, 322, 332, 337, 347, 352, 362, 367, 377, 382, 392, 397, 407, 412, 422, 427, 437, 442, 452, 457, 467, 472, 482, 487, 497, 502], 0.75, 'REPLACE')
+bpy.data.objects['C'].modifiers.new(name='M', type='SOLIDIFY')
+bpy.data.objects['C'].modifiers['M'].solidify_mode = 'NON_MANIFOLD'
+bpy.data.objects['C'].modifiers['M'].thickness = 0.3
+bpy.data.objects['C'].modifiers['M'].vertex_group = 'G'
+bpy.data.objects['C'].modifiers['M'].offset = 0.0
+bpy.data.objects['C'].modifiers['M'].thickness_vertex_group = 0.5
+bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=1)
+bpy.context.object.name = 'D'
+bpy.data.objects['D'].vertex_groups.new(name='G')
+bpy.data.objects['D'].vertex_groups['G'].add([6], 0.0, 'REPLACE')
+bpy.data.objects['D'].vertex_groups['G'].add([5, 11, 16, 21, 26, 31, 36, 41, 46, 51, 56, 61], 0.05, 'REPLACE')
+bpy.data.objects['D'].vertex_groups['G'].add([4, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60], 0.25, 'REPLACE')
+bpy.data.objects['D'].vertex_groups['G'].add([3, 9, 14, 19, 24, 29, 34, 39, 44, 49, 54, 59], 0.5, 'REPLACE')
+bpy.data.objects['D'].vertex_groups['G'].add([2, 8, 13, 18, 23, 28, 33, 38, 43, 48, 53, 58], 0.75, 'REPLACE')
+bpy.data.objects['D'].vertex_groups['G'].add([1, 7, 12, 17, 22, 27, 32, 37, 42, 47, 52, 57], 0.95, 'REPLACE')
+bpy.data.objects['D'].vertex_groups['G'].add([0], 1.0, 'REPLACE')
+bpy.data.objects['D'].modifiers.new(name='M', type='SOLIDIFY')
+bpy.data.objects['D'].modifiers['M'].solidify_mode = 'NON_MANIFOLD'
+bpy.data.objects['D'].modifiers['M'].thickness = 0.3
+bpy.data.objects['D'].modifiers['M'].vertex_group = 'G'
+bpy.data.objects['D'].modifiers['M'].use_flat_faces = True
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=6, y_subdivisions=5, size=2)
+bpy.context.object.name = 'E'
+bpy.data.objects['E'].vertex_groups.new(name='G')
+bpy.data.objects['E'].vertex_groups['G'].add([0, 6, 35, 41], 0.15, 'REPLACE')
+bpy.data.objects['E'].vertex_groups['G'].add([1, 5, 7, 13, 28, 34, 36, 40], 0.3, 'REPLACE')
+bpy.data.objects['E'].vertex_groups['G'].add([2, 4, 37, 39], 0.35, 'REPLACE')
+bpy.data.objects['E'].vertex_groups['G'].add([3, 14, 20, 21, 27, 38], 0.4, 'REPLACE')
+bpy.data.objects['E'].vertex_groups['G'].add([8, 12, 29, 33], 0.45, 'REPLACE')
+bpy.data.objects['E'].vertex_groups['G'].add([9, 11, 15, 19, 22, 26, 30, 32], 0.6, 'REPLACE')
+bpy.data.objects['E'].vertex_groups['G'].add([10, 31], 0.65, 'REPLACE')
+bpy.data.objects['E'].vertex_groups['G'].add([16, 18, 23, 25], 0.75, 'REPLACE')
+bpy.data.objects['E'].vertex_groups['G'].add([17, 24], 0.9, 'REPLACE')
+bpy.data.objects['E'].modifiers.new(name='M', type='SOLIDIFY')
+bpy.data.objects['E'].modifiers['M'].solidify_mode = 'NON_MANIFOLD'
+bpy.data.objects['E'].modifiers['M'].thickness = 0.3
+bpy.data.objects['E'].modifiers['M'].vertex_group = 'G'
+bpy.data.objects['E'].modifiers['M'].use_flat_faces = True
+bpy.data.objects['E'].modifiers['M'].offset = 0.5
+bpy.data.objects['E'].modifiers['M'].use_even_offset = True
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=6, y_subdivisions=5, size=2)
+bpy.context.object.name = 'Sh'
+bpy.data.objects['Sh'].vertex_groups.new(name='G')
+bpy.data.objects['Sh'].vertex_groups['G'].add([0, 7, 14, 21, 28, 35], 0.0, 'REPLACE')
+bpy.data.objects['Sh'].vertex_groups['G'].add([1, 8, 15, 22, 29, 36], 0.15, 'REPLACE')
+bpy.data.objects['Sh'].vertex_groups['G'].add([2, 9, 16, 23, 30, 37], 0.35, 'REPLACE')
+bpy.data.objects['Sh'].vertex_groups['G'].add([3, 10, 17, 24, 31, 38], 0.5, 'REPLACE')
+bpy.data.objects['Sh'].vertex_groups['G'].add([4, 11, 18, 25, 32, 39], 0.65, 'REPLACE')
+bpy.data.objects['Sh'].vertex_groups['G'].add([5, 12, 19, 26, 33, 40], 0.85, 'REPLACE')
+bpy.data.objects['Sh'].vertex_groups['G'].add([6, 13, 20, 27, 34, 41], 1.0, 'REPLACE')
+bpy.data.objects['Sh'].vertex_groups.new(name='Out')
+bpy.data.objects['Sh'].modifiers.new(name='M', type='SOLIDIFY')
+bpy.data.objects['Sh'].modifiers['M'].solidify_mode = 'NON_MANIFOLD'
+bpy.data.objects['Sh'].modifiers['M'].thickness = 0.3
+bpy.data.objects['Sh'].modifiers['M'].vertex_group = 'G'
+bpy.data.objects['Sh'].modifiers['M'].shell_vertex_group = 'Out'
+bpy.data.objects['Sh'].modifiers.new(name='K', type='MASK')
+bpy.data.objects['Sh'].modifiers['K'].vertex_group = 'Out'
+bpy.data.objects['Sh'].modifiers['K'].threshold = 0.5
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=6, y_subdivisions=5, size=2)
+bpy.context.object.name = 'Ri'
+bpy.data.objects['Ri'].vertex_groups.new(name='G')
+bpy.data.objects['Ri'].vertex_groups['G'].add([0, 7, 14, 21, 28, 35], 0.0, 'REPLACE')
+bpy.data.objects['Ri'].vertex_groups['G'].add([1, 8, 15, 22, 29, 36], 0.15, 'REPLACE')
+bpy.data.objects['Ri'].vertex_groups['G'].add([2, 9, 16, 23, 30, 37], 0.35, 'REPLACE')
+bpy.data.objects['Ri'].vertex_groups['G'].add([3, 10, 17, 24, 31, 38], 0.5, 'REPLACE')
+bpy.data.objects['Ri'].vertex_groups['G'].add([4, 11, 18, 25, 32, 39], 0.65, 'REPLACE')
+bpy.data.objects['Ri'].vertex_groups['G'].add([5, 12, 19, 26, 33, 40], 0.85, 'REPLACE')
+bpy.data.objects['Ri'].vertex_groups['G'].add([6, 13, 20, 27, 34, 41], 1.0, 'REPLACE')
+bpy.data.objects['Ri'].vertex_groups.new(name='Out')
+bpy.data.objects['Ri'].modifiers.new(name='M', type='SOLIDIFY')
+bpy.data.objects['Ri'].modifiers['M'].solidify_mode = 'NON_MANIFOLD'
+bpy.data.objects['Ri'].modifiers['M'].thickness = 0.3
+bpy.data.objects['Ri'].modifiers['M'].vertex_group = 'G'
+bpy.data.objects['Ri'].modifiers['M'].rim_vertex_group = 'Out'
+bpy.data.objects['Ri'].modifiers.new(name='K', type='MASK')
+bpy.data.objects['Ri'].modifiers['K'].vertex_group = 'Out'
+bpy.data.objects['Ri'].modifiers['K'].threshold = 0.5
+bpy.ops.mesh.primitive_cube_add(size=2)
+bpy.context.object.name = 'Bo'
+bpy.data.objects['Bo'].vertex_groups.new(name='S')
+bpy.data.objects['Bo'].vertex_groups.new(name='R')
+bpy.data.objects['Bo'].modifiers.new(name='M', type='SOLIDIFY')
+bpy.data.objects['Bo'].modifiers['M'].solidify_mode = 'NON_MANIFOLD'
+bpy.data.objects['Bo'].modifiers['M'].thickness = 0.2
+bpy.data.objects['Bo'].modifiers['M'].shell_vertex_group = 'S'
+bpy.data.objects['Bo'].modifiers['M'].rim_vertex_group = 'R'
+bpy.data.objects['Bo'].modifiers.new(name='K', type='MASK')
+bpy.data.objects['Bo'].modifiers['K'].vertex_group = 'S'
+bpy.data.objects['Bo'].modifiers['K'].invert_vertex_group = True
+bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=1, depth=2)
+bpy.context.object.name = 'Cy'
+bpy.data.objects['Cy'].vertex_groups.new(name='S')
+bpy.data.objects['Cy'].vertex_groups.new(name='R')
+bpy.data.objects['Cy'].vertex_groups.new(name='G')
+bpy.data.objects['Cy'].vertex_groups['G'].add([1, 3, 5, 7, 9, 11, 13, 15], 1.0, 'REPLACE')
+bpy.data.objects['Cy'].modifiers.new(name='M', type='SOLIDIFY')
+bpy.data.objects['Cy'].modifiers['M'].solidify_mode = 'NON_MANIFOLD'
+bpy.data.objects['Cy'].modifiers['M'].thickness = 0.2
+bpy.data.objects['Cy'].modifiers['M'].shell_vertex_group = 'S'
+bpy.data.objects['Cy'].modifiers['M'].rim_vertex_group = 'R'
+bpy.data.objects['Cy'].modifiers['M'].vertex_group = 'G'
+bpy.data.objects['Cy'].modifiers.new(name='K', type='MASK')
+bpy.data.objects['Cy'].modifiers['K'].vertex_group = 'S'

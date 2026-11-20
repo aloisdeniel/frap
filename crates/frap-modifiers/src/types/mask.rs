@@ -6,13 +6,17 @@
 //! interpolated vertices and closing edges. A mesh without vertex-group weights becomes empty
 //! (unchanged when inverted).
 //!
-//! ARMATURE mode reads the pose channels' selection; frap has no bones before M6, so every
-//! armature selects nothing (as in Blender for an armature without bones).
+//! ARMATURE mode reads the pose channels' selection (`PoseBone.select`) of the armature: a
+//! vertex group counts when a selected channel with a bone has its name. An armature object
+//! always has a pose when it is evaluated (the depsgraph's `BKE_pose_rebuild`), so one whose
+//! pose was never built selects nothing.
 //!
 //! Ported from blender/source/blender/modifiers/intern/MOD_mask.cc (Blender 5.2.4).
 
 use frap_mesh::DeformVert;
-use frap_rna::{IdAny, IdRef, ObjectId};
+use frap_rna::{ArmatureId, IdAny, IdRef, ObjectId};
+use frap_scene::Main;
+use frap_scene::id::Object;
 use frap_scene::generated::modifier_settings::MaskSettings;
 use smallvec::{SmallVec, smallvec};
 
@@ -48,25 +52,47 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
         .and_then(|r| cx.main().objects.get(r))
     {
         Some(ob) if ob.object_type() != "ARMATURE" => return Ok(mesh),
-        Some(ob) => Some(ArmatureInfo {
-            has_pose: ob.pose.is_some(),
-        }),
+        Some(ob) => Some(ArmatureInfo::of(cx.main(), ob)),
         None => None,
     };
     Ok(mask(s, armature.as_ref(), mesh))
 }
 
 /// What ARMATURE mode reads of the armature object.
+#[derive(Clone, Debug, Default)]
 pub(crate) struct ArmatureInfo {
     /// `armature_ob->pose != nullptr`.
     has_pose: bool,
+    /// The names of the selected pose channels that have a bone.
+    selected: Vec<smol_str::SmolStr>,
 }
 
 impl ArmatureInfo {
+    /// The evaluated armature object `ob`: its pose is rebuilt from the armature's bones when
+    /// missing (`BKE_pose_rebuild` in the depsgraph's `build_rig`), so it always has one, with
+    /// new channels unselected.
+    fn of(main: &Main, ob: &Object) -> ArmatureInfo {
+        let arm = ob
+            .data
+            .and_then(IdRef::<ArmatureId>::from_any)
+            .and_then(|r| main.armatures.get(r));
+        let selected = ob.pose.as_ref().map_or_else(Vec::new, |pose| {
+            pose.bones
+                .iter()
+                .filter(|pb| pb.select && arm.is_some_and(|a| a.bone(&pb.name).is_some()))
+                .map(|pb| pb.name.clone())
+                .collect()
+        });
+        ArmatureInfo {
+            has_pose: arm.is_some() || ob.pose.is_some(),
+            selected,
+        }
+    }
+
     /// `pchan && pchan->bone_get(ob) && (pchan->flag & POSE_SELECTED)` for the channel named
-    /// like the group: frap has no pose channels before M6.
-    fn selected_bone_uses_group(&self, _group: &str) -> bool {
-        false
+    /// like the group (`BKE_pose_channel_find_name`).
+    fn selected_bone_uses_group(&self, group: &str) -> bool {
+        self.selected.iter().any(|n| n == group)
     }
 }
 
@@ -440,7 +466,10 @@ mod tests {
             mode: "ARMATURE".into(),
             ..MaskSettings::default()
         };
-        let arm = ArmatureInfo { has_pose: true };
+        let arm = ArmatureInfo {
+            has_pose: true,
+            selected: Vec::new(),
+        };
         assert_eq!(mask(&s, Some(&arm), m.clone()).verts_num(), 0);
         let inv = MaskSettings {
             invert_vertex_group: true,
@@ -449,5 +478,85 @@ mod tests {
         assert_eq!(mask(&inv, Some(&arm), m.clone()).verts_num(), 8);
         // No armature: unchanged.
         assert_eq!(mask(&s, None, m).verts_num(), 8);
+    }
+
+    /// Two groups named like bones, the cube's top in "Top" (0.8) and its +X half in "Side"
+    /// (0.2 or 0.6), and one group without a bone.
+    fn cube_with_bone_groups() -> Mesh {
+        let mut m = frap_mesh::primitives::cube(2.0, false, [1.0; 3]);
+        m.vertex_group_names = vec!["Top".into(), "Side".into(), "Loose".into()];
+        let pos = m.positions().to_vec();
+        *m.deform_verts_mut() = pos
+            .iter()
+            .map(|p| {
+                let mut w = SmallVec::new();
+                if p[2] > 0.0 {
+                    w.push((0, 0.8));
+                }
+                if p[0] > 0.0 {
+                    w.push((1, if p[1] > 0.0 { 0.6 } else { 0.2 }));
+                }
+                w.push((2, 1.0));
+                DeformVert { weights: w }
+            })
+            .collect();
+        m
+    }
+
+    #[test]
+    fn armature_mode_keeps_vertices_of_selected_bones_above_threshold() {
+        let m = cube_with_bone_groups();
+        let s = MaskSettings {
+            mode: "ARMATURE".into(),
+            threshold: 0.5,
+            ..MaskSettings::default()
+        };
+        let arm = |names: &[&str]| ArmatureInfo {
+            has_pose: true,
+            selected: names.iter().map(|n| (*n).into()).collect(),
+        };
+        // "Top": the 4 top vertices.
+        assert_eq!(mask(&s, Some(&arm(&["Top"])), m.clone()).verts_num(), 4);
+        // "Side": only the 2 vertices weighing 0.6 (0.2 is below the threshold).
+        assert_eq!(mask(&s, Some(&arm(&["Side"])), m.clone()).verts_num(), 2);
+        // Both: the union (top 4 plus the bottom (+X, +Y) vertex).
+        assert_eq!(mask(&s, Some(&arm(&["Top", "Side"])), m.clone()).verts_num(), 5);
+        // Inverted: the complement.
+        let inv = MaskSettings {
+            invert_vertex_group: true,
+            ..s.clone()
+        };
+        assert_eq!(mask(&inv, Some(&arm(&["Top", "Side"])), m.clone()).verts_num(), 3);
+        // `use_smooth` is VERTEX_GROUP only: no interpolated vertices.
+        let smooth = MaskSettings {
+            use_smooth: true,
+            ..s.clone()
+        };
+        assert_eq!(mask(&smooth, Some(&arm(&["Top"])), m).verts_num(), 4);
+    }
+
+    #[test]
+    fn armature_info_reads_selected_channels_with_bones() {
+        use frap_scene::id::{Armature, Bone, Pose};
+        let mut main = Main::default();
+        let mut log = frap_scene::ChangeLog::default();
+        let mut a = Armature::new("Arm");
+        a.bones = vec![Bone::new("Top"), Bone::new("Side")];
+        let ar = main.armatures.insert("Arm", a.clone(), &mut log);
+        let mut ob = Object::new("Arm", Some(ar.any()));
+        // Never built: the evaluated object has a pose, with nothing selected.
+        let info = ArmatureInfo::of(&main, &ob);
+        assert!(info.has_pose);
+        assert!(info.selected.is_empty());
+        Pose::rebuild(&mut ob.pose, &a);
+        let pose = ob.pose.as_mut().unwrap();
+        pose.bones[0].select = true;
+        // A selected channel without a bone does not count.
+        pose.ensure("Ghost").select = true;
+        let info = ArmatureInfo::of(&main, &ob);
+        assert_eq!(info.selected, vec![smol_str::SmolStr::from("Top")]);
+        assert!(info.selected_bone_uses_group("Top"));
+        assert!(!info.selected_bone_uses_group("Side"));
+        assert!(!info.selected_bone_uses_group("Ghost"));
     }
 }
