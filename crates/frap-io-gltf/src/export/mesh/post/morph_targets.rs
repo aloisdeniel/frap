@@ -269,13 +269,21 @@ fn mul_qt_v3(q: [f32; 4], r: [f32; 3]) -> [f32; 3] {
 /// `__calc_morph_tangents` for one vertex (glTF space): the base tangent rotated from the
 /// morphed normal to the base normal, minus the base tangent.
 pub fn morph_tangent(n: [f32; 3], morph_delta: [f32; 3], t: [f32; 3]) -> [f32; 3] {
-    let morph_n = [n[0] + morph_delta[0], n[1] + morph_delta[1], n[2] + morph_delta[2]];
+    let morph_n = [
+        n[0] + morph_delta[0],
+        n[1] + morph_delta[1],
+        n[2] + morph_delta[2],
+    ];
     let q = rotation_difference(morph_n, n);
     let tm = mul_qt_v3(q, t);
     [tm[0] - t[0], tm[1] - t[1], tm[2] - t[2]]
 }
 
-fn run(cx: &MeshExportCx, d: &mut PrimitiveDraft, _: &mut BufferBuilder) -> Result<(), ExportError> {
+fn run(
+    cx: &MeshExportCx,
+    d: &mut PrimitiveDraft,
+    _: &mut BufferBuilder,
+) -> Result<(), ExportError> {
     let Some(keys) = exported_keys(cx.main, cx.settings, cx.mesh) else {
         return Ok(());
     };
@@ -303,10 +311,13 @@ fn run(cx: &MeshExportCx, d: &mut PrimitiveDraft, _: &mut BufferBuilder) -> Resu
     }
     let normal_deltas = morph_normals.map(|m| m.deltas);
     let tangents = match (&normal_deltas, d.attributes.get("TANGENT")) {
-        (Some(_), Some(AttrColumn {
-            values: AttrValues::F32x4(t),
-            ..
-        })) if cx.settings.props.export_morph_tangent.value => Some(t.clone()),
+        (
+            Some(_),
+            Some(AttrColumn {
+                values: AttrValues::F32x4(t),
+                ..
+            }),
+        ) if cx.settings.props.export_morph_tangent.value => Some(t.clone()),
         _ => None,
     };
     d.targets.clear();
@@ -318,7 +329,8 @@ fn run(cx: &MeshExportCx, d: &mut PrimitiveDraft, _: &mut BufferBuilder) -> Resu
             .map(|&v| {
                 let p = place(data[v as usize]);
                 let o = base[v as usize];
-                let dlt = [p[0] - o[0], p[1] - o[1], p[2] - o[2]].map(|x| if x.is_nan() { 0.0 } else { x });
+                let dlt = [p[0] - o[0], p[1] - o[1], p[2] - o[2]]
+                    .map(|x| if x.is_nan() { 0.0 } else { x });
                 axis(dlt, yup)
             })
             .collect();
@@ -485,7 +497,11 @@ pub fn set_mesh_weights(g: &mut Gather, ob_ref: IdRef<ObjectId>, ob: &Object, me
     let Some(key) = data.shape_keys.and_then(|k| main.shape_keys.get(k)) else {
         return;
     };
-    if key.key_blocks.iter().any(|b| b.data.len() != data.verts_num()) || key.key_blocks.len() < 2
+    if key
+        .key_blocks
+        .iter()
+        .any(|b| b.data.len() != data.verts_num())
+        || key.key_blocks.len() < 2
     {
         return;
     }
@@ -512,9 +528,9 @@ pub fn set_mesh_weights(g: &mut Gather, ob_ref: IdRef<ObjectId>, ob: &Object, me
         })
         .unwrap_or_default();
     extras.insert("targetNames".into(), serde_json::Value::Array(names));
-    m.extras = Some(frap_gltf::json::Extras::from_value(&serde_json::Value::Object(
-        extras,
-    )));
+    m.extras = Some(frap_gltf::json::Extras::from_value(
+        &serde_json::Value::Object(extras),
+    ));
 }
 
 #[cfg(test)]
@@ -545,16 +561,28 @@ mod tests {
             TargetLayout::Sparse(vec![3, 50])
         );
         // 10 rows: dense (120 bytes) is smaller.
-        assert_eq!(target_layout(10, 12, vec![3], true, false), TargetLayout::Dense);
+        assert_eq!(
+            target_layout(10, 12, vec![3], true, false),
+            TargetLayout::Dense
+        );
         // Not trying: dense.
-        assert_eq!(target_layout(100, 12, vec![3], false, false), TargetLayout::Dense);
+        assert_eq!(
+            target_layout(100, 12, vec![3], false, false),
+            TargetLayout::Dense
+        );
         // All zero: one zero index when that is smaller, else no data; omitted on request.
         assert_eq!(
             target_layout(100, 12, vec![], true, false),
             TargetLayout::Sparse(vec![0])
         );
-        assert_eq!(target_layout(10, 12, vec![], true, false), TargetLayout::Empty);
-        assert_eq!(target_layout(100, 12, vec![], true, true), TargetLayout::Empty);
+        assert_eq!(
+            target_layout(10, 12, vec![], true, false),
+            TargetLayout::Empty
+        );
+        assert_eq!(
+            target_layout(100, 12, vec![], true, true),
+            TargetLayout::Empty
+        );
         // Index width: past 255 the indices take two bytes.
         let idx: Vec<u32> = (0..30).map(|i| i * 10).collect();
         // 30 * 2 + 30 * 12 + 234 = 654 < 3600.
@@ -571,7 +599,10 @@ mod tests {
         assert_eq!(t, [0.0; 3]);
         let t = morph_tangent([0.0, 1.0, 0.0], [1.0, -1.0, 0.0], [1.0, 0.0, 0.0]);
         // morph n = +X, base n = +Y: rotation X→Y applied to +X gives +Y.
-        assert!((t[0] + 1.0).abs() < 1e-6 && (t[1] - 1.0).abs() < 1e-6, "{t:?}");
+        assert!(
+            (t[0] + 1.0).abs() < 1e-6 && (t[1] - 1.0).abs() < 1e-6,
+            "{t:?}"
+        );
         // Opposite normals: a half turn about an orthogonal axis.
         let q = rotation_difference([0.0, 0.0, 1.0], [0.0, 0.0, -1.0]);
         assert!(q[0].abs() < 1e-6);

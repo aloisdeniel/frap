@@ -261,7 +261,10 @@ mod tests {
         let (j, w) = joint_weight_columns(&[a], 2, 3, true);
         assert_eq!(j.len(), 2);
         assert_eq!(j[1].values, AttrValues::U8x4(vec![[5, 0, 0, 0]]));
-        let total: f32 = weights(&w[0])[0].iter().chain(weights(&w[1])[0].iter()).sum();
+        let total: f32 = weights(&w[0])[0]
+            .iter()
+            .chain(weights(&w[1])[0].iter())
+            .sum();
         assert!((total - 1.0).abs() < 1e-6);
         // Asking for more than needed keeps what exists.
         let (j, _) = joint_weight_columns(&[a], 2, 12, false);

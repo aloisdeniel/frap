@@ -108,7 +108,14 @@ fn morph_targets_import_as_shape_keys() {
             .all(|k| k.data.len() == me.verts_num())
     );
     assert_eq!(key.key_blocks[0].value, 1.0);
-    assert!(key.key_blocks[1..].iter().all(|k| k.value == 0.0));
+    // The restored animation (`Square`, WP 6.7) at frame 1 drives the weights; Blender 5.2.4
+    // reads thin 0.0022289131, angle 0.0 right after the import.
+    assert!(
+        (key.key_blocks[1].value - 0.002_228_913).abs() < 1e-6,
+        "{}",
+        key.key_blocks[1].value
+    );
+    assert_eq!(key.key_blocks[2].value, 0.0);
 }
 
 #[test]

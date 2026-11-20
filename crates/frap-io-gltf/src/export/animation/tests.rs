@@ -332,9 +332,19 @@ fn bone_channels_are_sampled_per_exported_bone() {
         }
     }
     assert_eq!(a.channels.len(), 3);
-    // Without the joint node (WP 6.8 not recording it) no bone channel is written.
+    // Since the M5+M6 W3 merge WP 6.8's joint nodes are recorded by the skin exporter itself:
+    // without the hook the same three channels land on the armature's bone node.
     let (doc, _, _) = export_with(&s, &settings_with(|_| {}), |_| {});
-    assert!(doc.animations.is_empty());
+    assert_eq!(doc.animations.len(), 1);
+    let a = &doc.animations[0];
+    assert_eq!(a.channels.len(), 3);
+    let node = a.channels[0].target.node.unwrap() as usize;
+    assert_eq!(doc.nodes[node].name.as_deref(), Some("Bone"));
+    assert!(
+        a.channels
+            .iter()
+            .all(|c| c.target.node == Some(node as Index))
+    );
 }
 
 #[test]

@@ -17,7 +17,10 @@
 //! `get_or_create_action_and_slot`), and `blender/com/gltf2_blender_utils.py`
 //! (`find_unused_name`). Bone channels target `pose.bones["<name>"]` of the armature through
 //! `VNode::blender_bone_name` (WP 6.8), relative to the bone's edit-mode rest transform.
-//! `KHR_animation_pointer` channels are WP 6.9's (`import/pointer/`).
+//! `KHR_animation_pointer` channels into node TRS and morph weights (`/nodes/<i>/…`,
+//! `/meshes/<i>/weights`) join the node's channel lists as in `pre_compute`; the camera, light
+//! and material ones are WP 6.9's `import/pointer/`, called per animation with the same action
+//! (`BlenderPointerAnim.anim`) and restored with the objects (M5+M6 W3 integration).
 
 use std::collections::{HashMap, HashSet};
 
@@ -36,6 +39,7 @@ use frap_scene::{ChangeLog, Main};
 use smol_str::SmolStr;
 
 use super::convert::{qconj, qmul, qrot, quat, scale, scale_rot_swap};
+use super::pointer;
 use crate::import::{Gltf, ImportError};
 
 #[cfg(test)]
@@ -147,23 +151,58 @@ pub(crate) fn create(
     let mut used: HashSet<String> = HashSet::new();
     let mut track_names = Vec::with_capacity(cx.doc.animations.len());
     let mut node_anims: HashMap<(usize, usize), Vec<usize>> = HashMap::new();
+    let mut mesh_weights: HashMap<usize, (usize, usize)> = HashMap::new();
     for (ai, a) in cx.doc.animations.iter().enumerate() {
         let desired = crate::import::truthy_name(&a.name).unwrap_or_else(|| format!("Anim_{ai}"));
         let name = find_unused_name(&used, &desired);
         used.insert(name.clone());
         track_names.push(name);
         for (ci, ch) in a.channels.iter().enumerate() {
-            if let Some(n) = ch.target.node {
-                // `gltf.data.nodes[channel.target.node]`.
-                if n as usize >= cx.doc.nodes.len() {
-                    return Err(bad_channel(
-                        cx,
-                        ai,
-                        ci,
-                        &format!("node {n} does not exist (IndexError: list index out of range)"),
-                    ));
+            // Core channels, and `dispatch_animation_pointer` for the node TRS / weights
+            // pointers of a channel without a node.
+            let n = match (ch.target.node, pointer::dispatch(ch)) {
+                (Some(n), _) => n as usize,
+                (None, Some(pointer::Target::Node { node, .. })) => node,
+                (None, Some(pointer::Target::MeshWeights { mesh })) => {
+                    // `gltf.data.meshes[int(pointer_tab[2])].weight_animation_on_mesh`: the
+                    // last such channel of the file wins.
+                    if mesh >= cx.doc.meshes.len() {
+                        return Err(bad_channel(
+                            cx,
+                            ai,
+                            ci,
+                            &format!(
+                                "mesh {mesh} does not exist (IndexError: list index out of range)"
+                            ),
+                        ));
+                    }
+                    mesh_weights.insert(mesh, (ai, ci));
+                    continue;
                 }
-                node_anims.entry((n as usize, ai)).or_default().push(ci);
+                (None, _) => continue,
+            };
+            // `gltf.data.nodes[channel.target.node]`.
+            if n >= cx.doc.nodes.len() {
+                return Err(bad_channel(
+                    cx,
+                    ai,
+                    ci,
+                    &format!("node {n} does not exist (IndexError: list index out of range)"),
+                ));
+            }
+            node_anims.entry((n, ai)).or_default().push(ci);
+        }
+    }
+    // Mesh weight pointers are broadcast to the nodes instancing the mesh.
+    if cx
+        .doc
+        .extensions_used
+        .iter()
+        .any(|e| e == "KHR_animation_pointer")
+    {
+        for (n, node) in cx.doc.nodes.iter().enumerate() {
+            if let Some(&(ai, ci)) = node.mesh.and_then(|m| mesh_weights.get(&(m as usize))) {
+                node_anims.entry((n, ai)).or_default().push(ci);
             }
         }
     }
@@ -174,6 +213,8 @@ pub(crate) fn create(
             s.frame_start as f32,
         )
     });
+    // The camera, light and material datablocks and their channel records (WP 6.9).
+    let mut pointer_st = pointer::ImportState::of(cx, main);
     // NLA tracks are added bottom to top: the last animation first.
     for ai in (0..cx.doc.animations.len()).rev() {
         let mut st = AnimState {
@@ -190,6 +231,22 @@ pub(crate) fn create(
             }
             weight_channel(cx, main, log, &mut st, ai, v, &node_anims, &sk_names, fps)?;
         }
+        // `BlenderPointerAnim.anim` for the cameras, lights and materials, into the same
+        // action (`gltf.action_cache` is shared).
+        let mut cache = pointer::ActionCache {
+            action: st.action,
+            ..Default::default()
+        };
+        pointer::anim(
+            cx,
+            main,
+            log,
+            ai,
+            &st.track_name,
+            &mut pointer_st,
+            &mut cache,
+        )?;
+        st.action = st.action.or(cache.action);
         if let Some(action) = st.action {
             for (owner, handle) in std::mem::take(&mut st.needs_stash) {
                 stash(
@@ -203,8 +260,20 @@ pub(crate) fn create(
                 );
             }
         }
+        for (root, action, slot) in cache.needs_stash {
+            pointer::simulate_stash(
+                main,
+                log,
+                root,
+                &st.track_name,
+                action,
+                slot,
+                frame_start as i32,
+            );
+        }
     }
     let restored = restore_animation(cx, main, log, &track_names[0]);
+    pointer::restore(main, log, &pointer_st.created, &track_names[0]);
     apply_restored(main, log, cx.scene, &restored);
     Ok(())
 }
@@ -401,10 +470,10 @@ fn node_channel(
     fps: f64,
 ) -> Result<(), ImportError> {
     let ch = &cx.doc.animations[ai].channels[ci];
-    let (prop, width) = match ch.target.path {
-        AnimationPath::Translation => ("location", 3),
-        AnimationPath::Rotation => ("rotation_quaternion", 4),
-        AnimationPath::Scale => ("scale", 3),
+    let (prop, width) = match channel_path(ch).as_deref() {
+        Some("translation") => ("location", 3),
+        Some("rotation") => ("rotation_quaternion", 4),
+        Some("scale") => ("scale", 3),
         _ => return Ok(()),
     };
     let Some((ob, bone)) = animated_object(cx, main, v) else {
@@ -506,6 +575,23 @@ fn node_channel(
     Ok(())
 }
 
+/// The glTF path a channel animates: its `target.path`, or for a `KHR_animation_pointer`
+/// channel the node property of `/nodes/<i>/<path>` (`weights` for `/meshes/<i>/weights`).
+fn channel_path(ch: &frap_gltf::json::animation::Channel) -> Option<String> {
+    match ch.target.path {
+        AnimationPath::Translation => Some("translation".into()),
+        AnimationPath::Rotation => Some("rotation".into()),
+        AnimationPath::Scale => Some("scale".into()),
+        AnimationPath::Weights => Some("weights".into()),
+        AnimationPath::Pointer => match pointer::dispatch(ch)? {
+            pointer::Target::Node { path, .. } => Some(path),
+            pointer::Target::MeshWeights { .. } => Some("weights".into()),
+            _ => None,
+        },
+        AnimationPath::Other(_) => None,
+    }
+}
+
 /// `BlenderWeightAnim.anim`: the `weights` channel of a mesh node into its shape keys.
 #[allow(clippy::too_many_arguments)]
 fn weight_channel(
@@ -532,7 +618,7 @@ fn weight_channel(
     let anim = &cx.doc.animations[ai];
     let Some(&ci) = chans
         .iter()
-        .find(|&&c| anim.channels[c].target.path == AnimationPath::Weights)
+        .find(|&&c| channel_path(&anim.channels[c]).as_deref() == Some("weights"))
     else {
         return Ok(());
     };

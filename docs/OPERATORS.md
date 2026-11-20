@@ -836,10 +836,10 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [x] | KHR_materials_emissive_strength, unlit | M3 | M3 | WP 3.5 |
 | [x] | KHR_materials_transmission, clearcoat, sheen, ior, specular, volume, iridescence, anisotropy, dispersion | M3 | M3 | WP 3.6: export goldens per extension, import raise round-trip (`tests/golden/cases/gltf/materials_ext/`); grayscale anisotropy textures not baked (WARNING) |
 | [x] | KHR_materials_pbrSpecularGlossiness | — | M3 | import only (archived); M3 stabilization: the add-on's graph (IOR 1000, Specular Tint, baked roughness image `<image>.001`), golden `tests/golden/cases/gltf/materials_core/spec_gloss.py`; read from the raw extension JSON (no typed `frap-gltf` struct) |
-| [ ] | Animations (TRS, weights; ACTIONS/ACTIVE_ACTIONS/BROADCAST/NLA_TRACKS/SCENE; LINEAR/STEP/CUBICSPLINE, sampling) | M6 | M6 |  |
+| [x] | Animations (TRS, weights; ACTIONS/ACTIVE_ACTIONS/BROADCAST/NLA_TRACKS/SCENE; LINEAR/STEP/CUBICSPLINE, sampling) | M6 | M6 | WP 6.7: every `export_animation_mode`, sampling and optimisation option, bone and shape-key channels (with WP 6.8); import of one action per animation stashed on NLA tracks, the first restored and evaluated at the current frame; goldens `tests/golden/cases/gltf/animation/` (deviations §2) |
 | [x] | Skins (joints, inverse bind matrices, JOINTS_n/WEIGHTS_n) | M6 | M6 | WP 6.8: every skin option (def bones, flatten, leaf bones, rest/pose, armature removal, influences), neutral bone, unused skins, `export_apply` without ARMATURE modifiers; import with every `bone_heuristic` and `guess_original_bind_pose`; goldens `tests/golden/cases/gltf/skins/` (deviations §2) |
 | [x] | Morph targets (POSITION/NORMAL deltas, sparse, default weights) | M6 | M6 | WP 6.8: POSITION/NORMAL/TANGENT targets, the sparse heuristic, weights and targetNames; import of shape keys and weights (no mesh sharing for animated weights); weights animation channels are WP 6.7's |
-| [ ] | KHR_animation_pointer | M6 | M6 |  |
+| [x] | KHR_animation_pointer | M6 | M6 | WP 6.9: camera, light and material channels both ways, `export_convert_animation_pointer` for TRS/weights; import of node TRS / weights pointers (M5+M6 W3); goldens `tests/golden/cases/gltf/pointer/` (gaps in deviations §2) |
 | [ ] | KHR_mesh_quantization | M7 | M7 | frap_mesh_quantization or gltfpack path |
 | [ ] | EXT_meshopt_compression, KHR_meshopt_compression | M7 | M7 |  |
 | [ ] | KHR_draco_mesh_compression | M7 | M7 | spike gate |

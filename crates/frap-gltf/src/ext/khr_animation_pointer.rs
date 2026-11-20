@@ -251,7 +251,13 @@ mod tests {
     fn tokens_unescape_and_split_like_the_add_on() {
         assert_eq!(
             tokens("/extensions/KHR_lights_punctual/lights/0/spot.innerConeAngle").unwrap(),
-            ["extensions", "KHR_lights_punctual", "lights", "0", "spot.innerConeAngle"]
+            [
+                "extensions",
+                "KHR_lights_punctual",
+                "lights",
+                "0",
+                "spot.innerConeAngle"
+            ]
         );
         assert_eq!(tokens("/a~1b/c~0d").unwrap(), ["a/b", "c~d"]);
         assert_eq!(tokens("materials/0"), None);

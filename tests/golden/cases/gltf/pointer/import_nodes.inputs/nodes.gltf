@@ -1,0 +1,349 @@
+{
+ "asset": {
+  "version": "2.0",
+  "generator": "frap M5+M6 W3 hand-written"
+ },
+ "extensionsUsed": [
+  "KHR_animation_pointer"
+ ],
+ "scene": 0,
+ "scenes": [
+  {
+   "nodes": [
+    0,
+    1,
+    2
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Tri",
+   "mesh": 0
+  },
+  {
+   "name": "Empty",
+   "translation": [
+    0,
+    0,
+    3
+   ]
+  },
+  {
+   "name": "Cam",
+   "camera": 0,
+   "translation": [
+    0,
+    -5,
+    0
+   ]
+  }
+ ],
+ "cameras": [
+  {
+   "type": "perspective",
+   "perspective": {
+    "yfov": 0.5,
+    "znear": 0.1,
+    "zfar": 100
+   }
+  }
+ ],
+ "meshes": [
+  {
+   "name": "TriMesh",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0
+     },
+     "indices": 2,
+     "targets": [
+      {
+       "POSITION": 1
+      }
+     ]
+    }
+   ],
+   "weights": [
+    0.0
+   ],
+   "extras": {
+    "targetNames": [
+     "Up"
+    ]
+   }
+  }
+ ],
+ "animations": [
+  {
+   "name": "Move",
+   "samplers": [
+    {
+     "input": 3,
+     "output": 5,
+     "interpolation": "LINEAR"
+    },
+    {
+     "input": 4,
+     "output": 6,
+     "interpolation": "STEP"
+    },
+    {
+     "input": 3,
+     "output": 7,
+     "interpolation": "LINEAR"
+    },
+    {
+     "input": 3,
+     "output": 8,
+     "interpolation": "LINEAR"
+    },
+    {
+     "input": 3,
+     "output": 9,
+     "interpolation": "LINEAR"
+    }
+   ],
+   "channels": [
+    {
+     "sampler": 0,
+     "target": {
+      "path": "pointer",
+      "extensions": {
+       "KHR_animation_pointer": {
+        "pointer": "/nodes/1/translation"
+       }
+      }
+     }
+    },
+    {
+     "sampler": 1,
+     "target": {
+      "path": "pointer",
+      "extensions": {
+       "KHR_animation_pointer": {
+        "pointer": "/nodes/1/rotation"
+       }
+      }
+     }
+    },
+    {
+     "sampler": 2,
+     "target": {
+      "node": 1,
+      "path": "scale"
+     }
+    },
+    {
+     "sampler": 3,
+     "target": {
+      "path": "pointer",
+      "extensions": {
+       "KHR_animation_pointer": {
+        "pointer": "/meshes/0/weights"
+       }
+      }
+     }
+    },
+    {
+     "sampler": 4,
+     "target": {
+      "path": "pointer",
+      "extensions": {
+       "KHR_animation_pointer": {
+        "pointer": "/cameras/0/perspective/yfov"
+       }
+      }
+     }
+    }
+   ]
+  },
+  {
+   "name": "Spin",
+   "samplers": [
+    {
+     "input": 3,
+     "output": 10,
+     "interpolation": "LINEAR"
+    }
+   ],
+   "channels": [
+    {
+     "sampler": 0,
+     "target": {
+      "path": "pointer",
+      "extensions": {
+       "KHR_animation_pointer": {
+        "pointer": "/nodes/0/rotation"
+       }
+      }
+     }
+    }
+   ]
+  }
+ ],
+ "accessors": [
+  {
+   "bufferView": 0,
+   "componentType": 5126,
+   "count": 3,
+   "type": "VEC3",
+   "min": [
+    0,
+    0,
+    0
+   ],
+   "max": [
+    1,
+    1,
+    0
+   ]
+  },
+  {
+   "bufferView": 1,
+   "componentType": 5126,
+   "count": 3,
+   "type": "VEC3",
+   "min": [
+    0,
+    0,
+    0
+   ],
+   "max": [
+    0,
+    0,
+    1
+   ]
+  },
+  {
+   "bufferView": 2,
+   "componentType": 5123,
+   "count": 3,
+   "type": "SCALAR"
+  },
+  {
+   "bufferView": 3,
+   "componentType": 5126,
+   "count": 2,
+   "type": "SCALAR",
+   "min": [
+    0.0
+   ],
+   "max": [
+    1.0
+   ]
+  },
+  {
+   "bufferView": 4,
+   "componentType": 5126,
+   "count": 3,
+   "type": "SCALAR",
+   "min": [
+    0.0
+   ],
+   "max": [
+    1.0
+   ]
+  },
+  {
+   "bufferView": 5,
+   "componentType": 5126,
+   "count": 2,
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 6,
+   "componentType": 5126,
+   "count": 3,
+   "type": "VEC4"
+  },
+  {
+   "bufferView": 7,
+   "componentType": 5126,
+   "count": 2,
+   "type": "VEC3"
+  },
+  {
+   "bufferView": 8,
+   "componentType": 5126,
+   "count": 2,
+   "type": "SCALAR"
+  },
+  {
+   "bufferView": 9,
+   "componentType": 5126,
+   "count": 2,
+   "type": "SCALAR"
+  },
+  {
+   "bufferView": 10,
+   "componentType": 5126,
+   "count": 2,
+   "type": "VEC4"
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 36
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 36,
+   "byteLength": 36
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 72,
+   "byteLength": 6
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 80,
+   "byteLength": 8
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 88,
+   "byteLength": 12
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 100,
+   "byteLength": 24
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 124,
+   "byteLength": 48
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 172,
+   "byteLength": 24
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 196,
+   "byteLength": 8
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 204,
+   "byteLength": 8
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 212,
+   "byteLength": 32
+  }
+ ],
+ "buffers": [
+  {
+   "byteLength": 244,
+   "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAIA/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAIAAAAAAAAAAACAPwAAAAAAAAA/AACAPwAAAAAAAAAAAAAAAAAAAEAAAIA/AAAAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAPQENT/0BDU/AAAAAAAAAAAAAIA/AAAAAAAAgD8AAIA/AACAPwAAAEAAAEBAAACAQAAAAADNzEw/AAAAPwAAgD8AAAAAAAAAAAAAAAAAAIA/9AQ1PwAAAAAAAAAA9AQ1Pw=="
+  }
+ ]
+}

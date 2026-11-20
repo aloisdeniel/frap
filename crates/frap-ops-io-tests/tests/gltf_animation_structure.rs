@@ -35,6 +35,15 @@ const UNORDERED_TAIL: &[(&str, &str, Heads)] = &[(
     &[("CubeAction", 1)],
 )];
 
+/// `(case, output, animation, channel)`: two-key channels whose interpolation follows the
+/// add-on's exact `keyframes[0].value == keyframes[1].value` test (STEP when equal) on values
+/// that frap and Blender compute to within a few ulps (deviations §2, glTF animation details):
+/// the re-exported, re-imported `Top` bone of `rig` has scale (1, 1, 1) at both keys in Blender
+/// and (1, 1, 1) / (0.99999988, 1, 0.99999988) in frap. The key times and counts are still
+/// compared; the values by the golden's T2 comparator.
+const ULP_INTERPOLATION: &[(&str, &str, &str, &str)] =
+    &[("rig", "out/again.glb", "Wave", "Top.Scale")];
+
 /// One channel: target node name, path, interpolation, key times, output element count.
 #[derive(Clone, Debug, PartialEq)]
 struct Chan {
@@ -105,12 +114,17 @@ fn compare(what: &str, frap: &[(String, Vec<Chan>)], blender: &[(String, Vec<Cha
                 .iter()
                 .find(|c| c.label() == bc.label())
                 .unwrap_or_else(|| panic!("{what}: {name} has no {}", bc.label()));
-            assert_eq!(
-                fc.interpolation,
-                bc.interpolation,
-                "{what}: {name} {} interpolation",
-                bc.label()
-            );
+            let ulp = ULP_INTERPOLATION
+                .iter()
+                .any(|(c, o, a, l)| what == format!("{c} {o}") && name == a && bc.label() == *l);
+            if !ulp {
+                assert_eq!(
+                    fc.interpolation,
+                    bc.interpolation,
+                    "{what}: {name} {} interpolation",
+                    bc.label()
+                );
+            }
             assert_eq!(
                 fc.times.len(),
                 bc.times.len(),

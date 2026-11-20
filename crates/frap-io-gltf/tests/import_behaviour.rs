@@ -100,14 +100,13 @@ fn refuses_what_blender_refuses() {
 
 #[test]
 fn later_milestone_features_import_their_static_part_with_warnings() {
-    // Skins and morph targets are imported since WP 6.8 (goldens `gltf/skins/import_*`).
-    for (rel, expect) in [
-        // Animations import since WP 6.7 (`import/animation/`): no WARNING any more.
-        (
+    // Skins and morph targets are imported since WP 6.8 (goldens `gltf/skins/import_*`) and
+    // animations since WP 6.7 (`import/animation/`): no WARNING any more.
+    {
+        let (rel, expect) = (
             "SimpleInstancing/glTF-Binary/SimpleInstancing.glb",
             "EXT_mesh_gpu_instancing",
-        ),
-    ] {
+        );
         let (mut main, win) = startup::factory();
         let mut log = ChangeLog::default();
         let r = import_file(
