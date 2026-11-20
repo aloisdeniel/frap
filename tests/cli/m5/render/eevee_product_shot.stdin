@@ -1,0 +1,43 @@
+bpy.ops.object.delete()
+bpy.ops.mesh.primitive_monkey_add(size=2.0, location=(0.0, 0.0, 1.0))
+bpy.ops.object.shade_smooth()
+bpy.ops.object.modifier_add(type='SUBSURF')
+bpy.data.materials.new('Brass')
+bpy.context.object.data.materials.append(bpy.data.materials['Brass'])
+bpy.data.materials['Brass'].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0.8, 0.6, 0.25, 1.0)
+bpy.data.materials['Brass'].node_tree.nodes['Principled BSDF'].inputs['Metallic'].default_value = 1.0
+bpy.data.materials['Brass'].node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value = 0.3
+bpy.ops.object.light_add(type='AREA', location=(2.0, -2.0, 4.0))
+bpy.context.object.data.energy = 500.0
+bpy.context.object.data.shape = 'DISK'
+bpy.context.object.data.size = 1.5
+bpy.data.worlds['World'].node_tree.nodes['Background'].inputs['Color'].default_value = (0.2, 0.22, 0.25, 1.0)
+bpy.context.scene.render.engine
+bpy.context.scene.render.resolution_x = 160
+bpy.context.scene.render.resolution_y = 90
+bpy.context.scene.eevee.taa_render_samples = 8
+bpy.context.scene.view_settings.view_transform = 'Filmic Base'
+bpy.context.scene.view_settings.view_transform = 'Khronos PBR Neutral'
+bpy.context.scene.view_settings.view_transform = 'AgX'
+bpy.context.scene.view_settings.look = 'Punchy'
+bpy.context.scene.view_settings.look = 'AgX - Punchy'
+bpy.context.scene.view_settings.look
+bpy.context.scene.view_settings.exposure = 0.5
+bpy.context.scene.render.filepath = 'out/brass'
+bpy.ops.render.render(write_still=True)
+bpy.context.scene.render.image_settings.file_format = 'JPEG'
+bpy.context.scene.render.image_settings.quality = 85
+bpy.ops.render.render(write_still=True)
+bpy.context.scene.render.image_settings.file_format = 'OPEN_EXR'
+bpy.context.scene.render.image_settings.color_depth = '32'
+bpy.ops.render.render(write_still=True)
+bpy.context.scene.render.film_transparent = True
+bpy.context.scene.render.image_settings.file_format = 'PNG'
+bpy.context.scene.render.image_settings.color_mode = 'RGBA'
+bpy.context.scene.render.image_settings.color_depth = '16'
+bpy.context.scene.render.filepath = 'out/brass_cutout'
+bpy.ops.render.render(write_still=True)
+bpy.context.scene.render.engine = 'CYCLES'
+bpy.ops.render.render(write_still=True)
+bpy.context.scene.camera = None
+bpy.ops.render.render(write_still=True)

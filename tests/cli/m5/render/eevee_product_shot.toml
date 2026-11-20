@@ -1,0 +1,17 @@
+# WP 5.6 (M5 exit transcript): an agent sets up an EEVEE product shot in bpy-line form: Suzanne
+# with smooth shading and a Subdivision Surface modifier, a brass Principled material (metallic
+# 1, roughness 0.3), a DISK area light and a grey world. `render.engine` already reads
+# BLENDER_EEVEE (the factory engine). A misspelt view transform (`Filmic Base`) and a look
+# without its view prefix (`Punchy`) are TypeErrors listing the items; `AgX - Punchy` is read
+# back. The shot renders with EEVEE as PNG, JPEG (quality 85), 32-bit OPEN_EXR and, with
+# `film_transparent`, as a 16-bit RGBA PNG (`out/brass_cutout.png`); every response names the
+# engine and the written file. With `render.engine = 'CYCLES'` frap renders with EEVEE and says
+# so in a WARNING (D-12; Blender renders with Cycles). Without a camera the render fails with
+# Blender's `Error: Cannot render, no camera` (up to the trailing newline of Blender's
+# RuntimeError text, deviations §3). Every other outcome equals Blender 5.2.4's (checked with
+# `frap-golden diff`); the images are GPU-dependent and not compared here (their pixels are
+# compared in `tests/golden/cases/render_eevee/`). Needs a GPU adapter (Metal, lavapipe, WARP),
+# as every render test. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true
