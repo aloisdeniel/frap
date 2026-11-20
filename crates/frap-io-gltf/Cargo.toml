@@ -12,6 +12,9 @@ publish.workspace = true
 frap-rna.workspace = true
 frap-gltf.workspace = true
 frap-scene.workspace = true
+# WP 6.7: animation export samples F-curves and object matrices; import builds actions.
+frap-anim.workspace = true
+frap-eval.workspace = true
 frap-mesh.workspace = true
 # WP 1.17 `merge_vertices` welding uses the spatial hash of §3.2 directly.
 frap-geom.workspace = true

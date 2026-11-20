@@ -1057,6 +1057,8 @@ version = "0.1.0"
 dependencies = [
  "approx",
  "automod",
+ "frap-anim",
+ "frap-eval",
  "frap-geom",
  "frap-gltf",
  "frap-imbuf",
