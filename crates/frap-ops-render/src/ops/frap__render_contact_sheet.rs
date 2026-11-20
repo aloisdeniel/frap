@@ -258,12 +258,18 @@ pub(crate) fn workbench_left_out(w: &frap_render_scene::RWorkbenchShading) -> Ve
     out
 }
 
-/// The WARNING for a `shading.color_type` frap renders as `MATERIAL` (deviations.md §2: the
-/// Workbench `VERTEX` (Attribute) and `TEXTURE` colours come with M5's texture and colour
-/// attribute upload, WP 5.5); `None` for the colour types frap renders, and in wireframe
-/// mode, which colours by object.
+/// The colour types of Blender 5.2.4's `shading.color_type` (all rendered: VERTEX and TEXTURE
+/// since WP 5.5, M5+M6 W2, which brought the colour attribute and the active texture image to
+/// the Workbench).
+pub(crate) const RENDERED_COLOR_TYPES: [&str; 6] = [
+    "MATERIAL", "OBJECT", "RANDOM", "SINGLE", "VERTEX", "TEXTURE",
+];
+
+/// The WARNING for a `shading.color_type` frap would render as `MATERIAL`: `None` for every
+/// colour type of [`RENDERED_COLOR_TYPES`] and in wireframe mode, which colours by object.
+/// `render.render` and the sheet keep asking, for colour types a later Blender may add.
 pub(crate) fn color_type_left_out(color_type: &str, shading_type: &str) -> Option<String> {
-    if shading_type == "WIREFRAME" || !matches!(color_type, "VERTEX" | "TEXTURE") {
+    if shading_type == "WIREFRAME" || RENDERED_COLOR_TYPES.contains(&color_type) {
         return None;
     }
     Some(format!(
@@ -601,17 +607,18 @@ mod tests {
 
     #[test]
     fn colour_types_rendered_as_material_are_reported() {
-        assert_eq!(color_type_left_out("MATERIAL", "SOLID"), None);
-        assert_eq!(color_type_left_out("RANDOM", "SOLID"), None);
-        assert_eq!(color_type_left_out("TEXTURE", "WIREFRAME"), None);
+        // Every colour type renders since WP 5.5, VERTEX and TEXTURE included.
+        for t in RENDERED_COLOR_TYPES {
+            assert_eq!(color_type_left_out(t, "SOLID"), None, "{t}");
+        }
+        assert_eq!(color_type_left_out("ATTRIBUTE", "WIREFRAME"), None);
         assert_eq!(
-            color_type_left_out("TEXTURE", "SOLID").as_deref(),
+            color_type_left_out("ATTRIBUTE", "SOLID").as_deref(),
             Some(
-                "frap: the Workbench colour type 'TEXTURE' is not rendered yet; rendered as \
+                "frap: the Workbench colour type 'ATTRIBUTE' is not rendered yet; rendered as \
                  'MATERIAL' (the material's viewport colour)"
             )
         );
-        assert!(color_type_left_out("VERTEX", "SOLID").is_some());
     }
 
     fn look_dir(rot: &Mat3) -> Vec3 {

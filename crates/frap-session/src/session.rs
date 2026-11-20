@@ -48,6 +48,9 @@ pub(crate) struct State {
     /// `tags_animation_on_call`, WP 6.4): the boundary re-applies their animation at the
     /// current frame even when time is not dirty.
     anim_tagged: Vec<Root>,
+    /// `SessionOptions::cwd`, so that render snapshots (clones of the state) resolve relative
+    /// image paths against the session's directory too (WP 5.5, `HostRead::cwd`).
+    cwd: Option<PathBuf>,
 }
 
 impl HostRead for State {
@@ -70,6 +73,9 @@ impl HostRead for State {
     fn mesh_view(&self, mesh: IdRef<MeshId>) -> Arc<Mesh> {
         // §6.3: the cached edit-mode view while the mesh is in Edit Mode (WP 2.2).
         crate::edit::mesh_view(&self.main, &self.edit, mesh)
+    }
+    fn cwd(&self) -> Option<&std::path::Path> {
+        self.cwd.as_deref()
     }
 }
 
@@ -455,6 +461,7 @@ impl Session {
                     prefs: Preferences::default(),
                     time_dirty: false,
                     anim_tagged: Vec::new(),
+                    cwd: Some(opts.cwd.clone()),
                 },
                 eval: EvalCache::new(),
                 log: ChangeLog::default(),

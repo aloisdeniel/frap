@@ -28,16 +28,16 @@ mod tests;
 use std::collections::HashMap;
 use std::sync::Arc;
 
-use frap_material::{ImageLookup, LoweredMaterial, TexRef};
+use frap_material::{ImageLookup, LoweredMaterial, TexRef, UvSource};
 use frap_mesh::Mesh;
 use frap_nodes::NodeTree;
 use frap_rna::{IdKey, IdRef, MaterialId, MeshId, ObjectId};
-use frap_scene::id::{Material, Object};
+use frap_scene::id::{Material, Object, PathBase};
 use frap_scene::{EvalMode, EvaluatedObject, Evaluator, HostRead, Main};
 use indexmap::IndexMap;
 
 use crate::types::{
-    MatKey, MeshKey, RCamera, REeveeSettings, RLight, RMesh, RObject, RSettings,
+    MatKey, MeshKey, RCamera, REeveeSettings, RLight, RMaterialSettings, RMesh, RObject, RSettings,
     RWorkbenchMaterial, RenderError, RenderRequest, RenderScene,
 };
 use camera::CameraParams;
@@ -97,8 +97,11 @@ pub(crate) fn build_with(
         mesh_memo: HashMap::new(),
         materials: IndexMap::new(),
         workbench_materials: IndexMap::new(),
+        material_settings: IndexMap::new(),
         mat_memo: HashMap::new(),
-        images: Images::default(),
+        images: Images::new(PathBase::of(host)),
+        // The active texture node's image is read only when Workbench TEXTURE may draw it.
+        workbench_textures: scene.display.shading.color_type == "TEXTURE",
     };
 
     let mut visible: Vec<(IdRef<ObjectId>, &Object)> =
@@ -172,6 +175,7 @@ pub(crate) fn build_with(
             filter_size: r.filter_size,
             dither_intensity: r.dither_intensity,
         },
+        material_settings: b.material_settings,
     };
 
     Ok(RenderScene {
@@ -255,16 +259,22 @@ pub fn camera_params(main: &Main, ob: &Object) -> CameraParams {
     CameraParams::default()
 }
 
+/// `(evaluated mesh pointer, slot count, tangent UV map)`.
+type MeshMemo = (usize, usize, Option<smol_str::SmolStr>);
+
 struct Builder<'a> {
     main: &'a Main,
     lower: LowerFn,
     meshes: IndexMap<MeshKey, Arc<RMesh>>,
-    /// `(evaluated mesh pointer, slot count)` → key; the `Arc` keeps the pointer valid.
-    mesh_memo: HashMap<(usize, usize), (Arc<Mesh>, MeshKey)>,
+    /// `(evaluated mesh pointer, slot count, tangent UV map)` → key; the `Arc` keeps the
+    /// pointer valid.
+    mesh_memo: HashMap<MeshMemo, (Arc<Mesh>, MeshKey)>,
     materials: IndexMap<MatKey, Arc<LoweredMaterial>>,
     workbench_materials: IndexMap<MatKey, RWorkbenchMaterial>,
+    material_settings: IndexMap<MatKey, RMaterialSettings>,
     mat_memo: HashMap<IdKey, MatKey>,
     images: Images,
+    workbench_textures: bool,
 }
 
 impl Builder<'_> {
@@ -279,11 +289,28 @@ impl Builder<'_> {
         // Slots of the evaluated object (modifiers may add some; WP 4.7, `evaluated.rs`).
         let slots = evaluated::slot_materials(ob, data, evaluated.as_deref());
         let slot_count = slots.len();
-        let mesh = evaluated.map(|m| self.mesh(m, slot_count));
-        let materials = slots
+        let materials: Vec<Option<MatKey>> = slots
             .into_iter()
             .map(|m| m.and_then(|m| self.material(m)))
             .collect();
+        // EEVEE's normal maps need the tangents of their UV map (WP 5.5).
+        let normal_uv = materials
+            .iter()
+            .flatten()
+            .filter_map(|k| self.materials.get(k))
+            .find_map(|lm| normal_map_uv(lm));
+        let tangent_uv = evaluated
+            .as_deref()
+            .zip(normal_uv)
+            .and_then(|(m, uv)| match uv {
+                UvSource::Named(n) => Some(n),
+                UvSource::Index(i) => m.uv_maps().get(i as usize).map(|(n, _)| (*n).into()),
+                _ => m
+                    .uv_active_render
+                    .clone()
+                    .or_else(|| m.uv_maps().first().map(|(n, _)| (*n).into())),
+            });
+        let mesh = evaluated.map(|m| self.mesh(m, slot_count, tangent_uv));
         RObject {
             name: ob.header.name.clone(),
             matrix_world: ev.matrix_world,
@@ -295,12 +322,17 @@ impl Builder<'_> {
         }
     }
 
-    fn mesh(&mut self, m: Arc<Mesh>, slot_count: usize) -> MeshKey {
-        let memo = (Arc::as_ptr(&m) as usize, slot_count);
+    fn mesh(
+        &mut self,
+        m: Arc<Mesh>,
+        slot_count: usize,
+        tangent_uv: Option<smol_str::SmolStr>,
+    ) -> MeshKey {
+        let memo = (Arc::as_ptr(&m) as usize, slot_count, tangent_uv.clone());
         if let Some((_, k)) = self.mesh_memo.get(&memo) {
             return *k;
         }
-        let rm = mesh::extract(&m, slot_count);
+        let rm = mesh::extract_with_tangents(&m, slot_count, tangent_uv.as_deref());
         let k = keys::mesh_key(&rm);
         self.meshes.entry(k).or_insert_with(|| Arc::new(rm));
         self.mesh_memo.insert(memo, (m, k));
@@ -321,12 +353,23 @@ impl Builder<'_> {
         }
         self.materials.insert(k, Arc::new(lowered));
         self.workbench_materials.insert(k, workbench::material(m));
+        let mut settings = RMaterialSettings::with_render_method(&m.surface_render_method);
+        principled_values(&m.node_tree, &mut settings);
+        if self.workbench_textures {
+            settings.workbench_texture = self.images.workbench_texture(main, &m.node_tree);
+        }
+        self.material_settings.insert(k, settings);
         Some(k)
     }
 }
 
-/// Every texture a lowered material samples.
+/// Every texture a lowered material samples (the extensions' too: the EEVEE shading features
+/// of WP 5.5 read them).
 fn textures(m: &LoweredMaterial) -> impl Iterator<Item = &TexRef> {
+    let e = &m.ext;
+    let coat = e.clearcoat.as_ref();
+    let sheen = e.sheen.as_ref();
+    let spec = e.specular.as_ref();
     [
         m.base_color.texture.as_ref(),
         m.metallic.texture.as_ref(),
@@ -334,7 +377,53 @@ fn textures(m: &LoweredMaterial) -> impl Iterator<Item = &TexRef> {
         m.normal.as_ref().map(|n| &n.texture),
         m.occlusion.as_ref(),
         m.emissive.texture.as_ref(),
+        coat.and_then(|c| c.factor.texture.as_ref()),
+        coat.and_then(|c| c.roughness.texture.as_ref()),
+        coat.and_then(|c| c.normal.as_ref().map(|n| &n.texture)),
+        sheen.and_then(|s| s.color.texture.as_ref()),
+        sheen.and_then(|s| s.roughness.texture.as_ref()),
+        e.transmission
+            .as_ref()
+            .and_then(|t| t.factor.texture.as_ref()),
+        spec.and_then(|s| s.factor.texture.as_ref()),
+        spec.and_then(|s| s.color.texture.as_ref()),
     ]
     .into_iter()
     .flatten()
+}
+
+/// The Principled BSDF values the glTF-shaped lowered material drops (`Sheen Weight`, `Coat
+/// IOR`, `Coat Tint`), read from the tree's first Principled BSDF where the socket is not
+/// linked (WP 5.5); linked or absent sockets keep the defaults.
+pub fn principled_values(tree: &NodeTree, s: &mut RMaterialSettings) {
+    use frap_nodes::SocketValue;
+    let Some(p) = tree
+        .nodes
+        .iter()
+        .find(|n| n.bl_idname == "ShaderNodeBsdfPrincipled")
+    else {
+        return;
+    };
+    let unlinked = |name: &str| {
+        let i = p.input_index(name)?;
+        (!tree.is_linked(frap_nodes::SocketAddr::input(p.uid, i))).then(|| &p.inputs[i])
+    };
+    if let Some(SocketValue::Float(v)) = unlinked("Sheen Weight").map(|s| &s.default_value) {
+        s.sheen_weight = *v;
+    }
+    if let Some(SocketValue::Float(v)) = unlinked("Coat IOR").map(|s| &s.default_value) {
+        s.coat_ior = *v;
+    }
+    if let Some(SocketValue::Color(c)) = unlinked("Coat Tint").map(|s| &s.default_value) {
+        s.coat_tint = [c[0], c[1], c[2]];
+    }
+}
+
+/// The UV map of a lowered material's normal map (or coat normal map), whose tangents the
+/// mesh needs.
+fn normal_map_uv(m: &LoweredMaterial) -> Option<UvSource> {
+    m.normal
+        .as_ref()
+        .or_else(|| m.ext.clearcoat.as_ref().and_then(|c| c.normal.as_ref()))
+        .map(|n| n.texture.uv.clone())
 }

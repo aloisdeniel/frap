@@ -29,8 +29,8 @@
 //!   (`coat_N` included), `sheen_*`, `transmission_weight`. `Inputs` carries the world
 //!   position `P`, normals `N`/`Ng`, view vector `V`, `uv0`/`uv1` (the material's first two UV
 //!   sources, see [`MaterialParams::uv_sources`]), `color` (the colour attribute of
-//!   [`MaterialParams::color_attribute`], white when absent), `tangent` (world, sign in `w`),
-//!   `frag` and `front`.
+//!   [`MaterialParams::color_attribute`], `(0, 0, 0, 1)` when missing, as Blender), `tangent`
+//!   (world, sign in `w`), `frag` and `front`.
 //!
 //! The core lights every closure the Principled BSDF produces from the `Surface`
 //! (`node_bsdf_principled`: sheen, coat, emission, metallic, transmission, specular, diffuse),
@@ -203,8 +203,14 @@ pub struct MaterialParams {
     pub multiscatter: bool,
     /// The material's textures (at most [`MAX_TEXTURES`]).
     pub textures: Vec<TextureSlot>,
-    /// Colour attribute bound as `Inputs.color` (`None`: the first one, white without any).
+    /// Colour attribute bound as `Inputs.color` (`None`: the mesh's default colour attribute,
+    /// else its first one; `(0, 0, 0, 1)` when the attribute is missing, as Blender reads a
+    /// missing attribute).
     pub color_attribute: Option<SmolStr>,
+    /// Refraction traces the opaque surfaces behind (screen space, `use_raytrace_refraction`
+    /// with `scene.eevee.use_raytracing`; set by the transmission feature, WP 5.5); otherwise
+    /// it samples the world probe, as Blender's default.
+    pub screen_refraction: bool,
 }
 
 impl Default for MaterialParams {
@@ -240,6 +246,7 @@ impl Default for MaterialParams {
             multiscatter: true,
             textures: Vec::new(),
             color_attribute: None,
+            screen_refraction: false,
         }
     }
 }
@@ -366,6 +373,9 @@ impl MaterialParams {
         if self.multiscatter {
             bits |= 4;
         }
+        if self.screen_refraction {
+            bits |= 8;
+        }
         let rgb = |c: [f32; 3], w: f32| [c[0], c[1], c[2], w];
         GpuMaterial {
             base_color: self.base_color,
@@ -398,9 +408,11 @@ impl MaterialParams {
         }
     }
 
-    /// Whether the material needs the opaque colour behind it (transmission).
+    /// Whether the material needs the opaque colour behind it (screen-space refraction).
     pub fn refracts(&self) -> bool {
-        self.transmission_weight > 0.0 || self.tex[tex::TRANSMISSION.0][tex::TRANSMISSION.1] >= 0
+        self.screen_refraction
+            && (self.transmission_weight > 0.0
+                || self.tex[tex::TRANSMISSION.0][tex::TRANSMISSION.1] >= 0)
     }
 }
 
@@ -476,6 +488,15 @@ struct FrameU {
     sh: [[f32; 4]; 9],
 }
 
+/// Per-shadow-map uniforms of the shadow pass (`Layer` in `eevee_shadow.wgsl`).
+#[repr(C)]
+#[derive(Copy, Clone, Pod, Zeroable)]
+struct ShadowLayerU {
+    view_proj: [f32; 16],
+    /// x: the sample's transparency random (transparent shadows, WP 5.5).
+    params: [f32; 4],
+}
+
 /// Per-draw uniforms (`Draw`).
 #[repr(C)]
 #[derive(Copy, Clone, Pod, Zeroable)]
@@ -521,9 +542,12 @@ struct MeshAttrs {
     colors: Vec<wgpu::Buffer>,
     tangents: Option<wgpu::Buffer>,
     zero_uv: wgpu::Buffer,
-    white: wgpu::Buffer,
+    /// `(0, 0, 0, 1)`: a missing colour attribute (Blender 5.2.4 renders a Color Attribute
+    /// node naming a missing attribute black with alpha 1).
+    missing_color: wgpu::Buffer,
     zero_tangent: wgpu::Buffer,
     color_names: Vec<SmolStr>,
+    color_default: Option<usize>,
     uv_names: Vec<SmolStr>,
     uv_active_render: Option<usize>,
     bounds: Aabb,
@@ -747,8 +771,8 @@ fn create_resources(gpu: &Gpu) -> Resources {
         label: Some("frap eevee shadow layer"),
         entries: &[layout_entry(
             0,
-            wgpu::ShaderStages::VERTEX,
-            uniform_ty(true, 64),
+            vf,
+            uniform_ty(true, std::mem::size_of::<ShadowLayerU>()),
         )],
     });
 
@@ -895,7 +919,13 @@ fn create_resources(gpu: &Gpu) -> Resources {
             },
         }),
         multisample: wgpu::MultisampleState::default(),
-        fragment: None,
+        // Hashed transparent shadows (WP 5.5): discards by the caster's alpha.
+        fragment: Some(wgpu::FragmentState {
+            module: &shadow_module,
+            entry_point: Some("fs_shadow"),
+            compilation_options: Default::default(),
+            targets: &[],
+        }),
         multiview_mask: None,
         cache: None,
     });
@@ -1171,9 +1201,14 @@ fn mesh_attrs(gpu: &Gpu, m: &RMesh) -> MeshAttrs {
             .as_ref()
             .map(|t| vertex_buffer(gpu, "frap eevee tangent", &fit4(t, [1.0, 0.0, 0.0, 1.0]))),
         zero_uv: vertex_buffer(gpu, "frap eevee zero uv", &vec![[0.0f32; 2]; n]),
-        white: vertex_buffer(gpu, "frap eevee white", &vec![[1.0f32; 4]; n]),
+        missing_color: vertex_buffer(
+            gpu,
+            "frap eevee missing colour",
+            &vec![[0.0f32, 0.0, 0.0, 1.0]; n],
+        ),
         zero_tangent: vertex_buffer(gpu, "frap eevee tangent", &vec![[1.0f32, 0.0, 0.0, 1.0]; n]),
         color_names: m.color_names.clone(),
+        color_default: m.color_default,
         uv_names: m.uv_names.clone(),
         uv_active_render: m.uv_active_render,
         bounds,
@@ -1194,9 +1229,11 @@ impl MeshAttrs {
     fn color(&self, name: Option<&SmolStr>) -> &wgpu::Buffer {
         let idx = match name {
             Some(n) => self.color_names.iter().position(|x| x == n),
-            None => Some(0),
+            // A Color Attribute node without a name reads the default colour attribute.
+            None => self.color_default.or(Some(0)),
         };
-        idx.and_then(|i| self.colors.get(i)).unwrap_or(&self.white)
+        idx.and_then(|i| self.colors.get(i))
+            .unwrap_or(&self.missing_color)
     }
 }
 
@@ -1304,7 +1341,10 @@ pub fn render(
     let mut opaque: Vec<DrawCmd> = vec![];
     let mut refractive: Vec<DrawCmd> = vec![];
     let mut blended: Vec<DrawCmd> = vec![];
-    let mut casters: Vec<(MeshKey, usize, u32)> = vec![];
+    // Shadow casters: `(mesh, draw record, index range)`; a transparent material slot casts
+    // through its own draw record carrying its alpha (`transparent_shadow_draw`).
+    let mut casters: Vec<(MeshKey, usize, std::ops::Range<u32>)> = vec![];
+    let mut transparent_casters = false;
     let mut bounds = Aabb::EMPTY;
     for obj in &scene.objects {
         let Some(key) = obj.mesh else { continue };
@@ -1337,7 +1377,6 @@ pub fn render(
             flags: [u32::from(det < 0.0), draws.len() as u32, 0, 0],
         });
         let draw = draws.len() - 1;
-        casters.push((key, draw, count));
         let depth = view.transform_point3(obj.matrix_world.w_axis.truncate()).z;
         for (slot, range) in submeshes(rmesh, count) {
             let mkey = material_key(obj, slot);
@@ -1350,6 +1389,20 @@ pub fn render(
                 depth,
             };
             let p = &mats[material];
+            // `use_transparent_shadow` (Blender's default): a transparent material casts a
+            // hashed shadow of its alpha (WP 5.5).
+            match transparent_shadow_alpha(p) {
+                None => casters.push((key, draw, cmd.range.clone())),
+                Some(a) if a > 0.0 => {
+                    let mut d = draws[draw];
+                    d.flags[2] = a.to_bits();
+                    d.flags[3] = 1;
+                    draws.push(d);
+                    casters.push((key, draws.len() - 1, cmd.range.clone()));
+                    transparent_casters = true;
+                }
+                Some(_) => {}
+            }
             if p.blend == BlendMode::Blended {
                 blended.push(cmd);
             } else if p.refracts() {
@@ -1383,7 +1436,10 @@ pub fn render(
         max,
     );
     let shadow_size = plan.size;
-    let rerender_shadows = shadows::jittered(&plan, &records);
+    // Jittered lights and hashed transparent casters re-render their maps every sample
+    // (`has_jittered_transparency` with `use_jitter`, always on for image renders,
+    // eevee_shadow.cc).
+    let rerender_shadows = shadows::jittered(&plan, &records) || transparent_casters;
 
     // Textures and samplers of the materials.
     {
@@ -1444,7 +1500,7 @@ pub fn render(
         usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         mapped_at_creation: false,
     });
-    let layer_stride = align_up(64, align);
+    let layer_stride = align_up(std::mem::size_of::<ShadowLayerU>() as u64, align);
     let layer_buf = dev.create_buffer(&wgpu::BufferDescriptor {
         label: Some("frap eevee shadow layers"),
         size: u64::from(maps) * layer_stride,
@@ -1599,7 +1655,7 @@ pub fn render(
             resource: wgpu::BindingResource::Buffer(wgpu::BufferBinding {
                 buffer: &layer_buf,
                 offset: 0,
-                size: wgpu::BufferSize::new(64),
+                size: wgpu::BufferSize::new(std::mem::size_of::<ShadowLayerU>() as u64),
             }),
         }],
     });
@@ -1762,9 +1818,16 @@ pub fn render(
         let mats_flat: Vec<[f32; 16]> = matrices.iter().map(Mat4::to_cols_array).collect();
         gpu.queue
             .write_buffer(&shadow_mat_buf, 0, bytemuck::cast_slice(&mats_flat));
+        let layers_u: Vec<ShadowLayerU> = mats_flat
+            .iter()
+            .map(|m| ShadowLayerU {
+                view_proj: *m,
+                params: [sample.transparency, 0.0, 0.0, 0.0],
+            })
+            .collect();
         if draw_shadows {
             gpu.queue
-                .write_buffer(&layer_buf, 0, &strided(&mats_flat, layer_stride));
+                .write_buffer(&layer_buf, 0, &strided(&layers_u, layer_stride));
         }
 
         let mut enc = dev.create_command_encoder(&wgpu::CommandEncoderDescriptor {
@@ -1808,12 +1871,12 @@ pub fn render(
                     );
                     pass.set_scissor_rect(x, y, shadow_size, shadow_size);
                     pass.set_bind_group(0, &layer_bg, &[(u64::from(m) * layer_stride) as u32]);
-                    for (key, draw, count) in &casters {
+                    for (key, draw, range) in &casters {
                         let gm = cache.get(*key).expect("invariant: uploaded above");
                         pass.set_bind_group(1, &draw_bg, &[(*draw as u64 * draw_stride) as u32]);
                         pass.set_vertex_buffer(0, gm.vertices.slice(..));
                         pass.set_index_buffer(gm.indices.slice(..), wgpu::IndexFormat::Uint32);
-                        pass.draw_indexed(0..*count, 0, 0..1);
+                        pass.draw_indexed(range.clone(), 0, 0..1);
                     }
                 }
             }
@@ -1894,6 +1957,20 @@ pub fn render(
         gpu.queue.submit([enc.finish()]);
     }
     film_targets.resolve(gpu)
+}
+
+/// The alpha a material slot's shadow is hashed with (`use_transparent_shadow`, on by
+/// default: the shadow pass discards a fragment when its hash exceeds the alpha, and the TAA
+/// samples, which re-render jittered shadows, average to an alpha-weighted shadow); `None` for
+/// an opaque (or alpha-clipped) material, which casts a full shadow. The alpha is the
+/// material's `Alpha` factor (textures and vertex colours are not read by the shadow pass).
+pub fn transparent_shadow_alpha(p: &MaterialParams) -> Option<f32> {
+    match p.blend {
+        BlendMode::Dithered | BlendMode::Blended if p.base_color[3] < 1.0 => {
+            Some(p.base_color[3].max(0.0))
+        }
+        _ => None,
+    }
 }
 
 /// The `(material slot, index range)` draws of a mesh (one draw for the whole mesh without
