@@ -234,8 +234,8 @@ fn reports_empty(j: &serde_json::Value) -> bool {
     common::reports(j).is_empty()
 }
 
-/// `BLENDER_EEVEE` (factory) and `CYCLES` render with Workbench and a WARNING; the pixels are
-/// the Workbench ones.
+/// `BLENDER_EEVEE` (factory) renders with the EEVEE-like engine from M5 (WP 5.1), `CYCLES` with
+/// it and the D-12 WARNING; the pixels of both are the EEVEE ones.
 #[test]
 fn engine_fallback_warns() {
     let mut e = Env::new("render_engines");
@@ -243,15 +243,10 @@ fn engine_fallback_warns() {
     let mut pngs = Vec::new();
     for (engine, warning) in [
         ("BLENDER_WORKBENCH", None),
-        (
-            "BLENDER_EEVEE",
-            Some(
-                "Engine 'BLENDER_EEVEE' is not available in frap yet (M5); rendered with BLENDER_WORKBENCH",
-            ),
-        ),
+        ("BLENDER_EEVEE", None),
         (
             "CYCLES",
-            Some("Engine 'CYCLES' is not available in frap; rendered with BLENDER_WORKBENCH"),
+            Some("Engine 'CYCLES' is not available in frap; rendered with BLENDER_EEVEE"),
         ),
     ] {
         e.ok(&format!("bpy.context.scene.render.engine = '{engine}'"));
@@ -262,15 +257,14 @@ fn engine_fallback_warns() {
             return;
         };
         assert_eq!(j["ok"], true, "{j}");
-        assert_eq!(j["result"]["engine"], "BLENDER_WORKBENCH");
         let want: Vec<(String, String)> = warning
             .map(|w| vec![("WARNING".to_owned(), w.to_owned())])
             .unwrap_or_default();
         assert_eq!(common::reports(&j), want, "{engine}");
         pngs.push(frap_imbuf::load(&e.path(&format!("out/{engine}.png"))).unwrap());
     }
-    assert_eq!(pngs[0], pngs[1]);
-    assert_eq!(pngs[0], pngs[2]);
+    assert_ne!(pngs[0], pngs[1]);
+    assert_eq!(pngs[1], pngs[2]);
 }
 
 /// Output paths: cwd-relative, `//` (unsaved: the cwd), templates, `use_file_extension`, a
