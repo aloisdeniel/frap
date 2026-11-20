@@ -12,6 +12,7 @@ publish.workspace = true
 frap-rna.workspace = true
 frap-scene.workspace = true
 frap-mesh.workspace = true
+frap-geom.workspace = true
 frap-material.workspace = true
 frap-nodes.workspace = true
 frap-imbuf.workspace = true

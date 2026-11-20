@@ -1600,6 +1600,7 @@ version = "0.1.0"
 dependencies = [
  "approx",
  "frap-color",
+ "frap-geom",
  "frap-imbuf",
  "frap-material",
  "frap-math",

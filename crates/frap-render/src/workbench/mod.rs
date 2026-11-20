@@ -29,9 +29,13 @@
 //! - `shading.color_type`: MATERIAL (`RSettings::workbench_materials`: the material's viewport
 //!   `diffuse_color`/`metallic`/`roughness`; synthetic scenes: the lowered factors), OBJECT
 //!   (`Object.color`), SINGLE (`single_color`), RANDOM ([`color::random_color`] of
-//!   `RObject::random_hash`). VERTEX (Attribute) and TEXTURE render as MATERIAL until M5
-//!   (WP 5.5, with the texture and colour-attribute upload; `render.render` and
-//!   `frap.render_contact_sheet` report it with a WARNING, deviations.md §2).
+//!   `RObject::random_hash`), VERTEX (Attribute: the colour attribute `RMesh::color_active`,
+//!   with Blender's `Material(float3(-1))` values: alpha 1, roughness 0.4, metallic 0) and
+//!   TEXTURE (the material's values with the colour of its active texture node's image on
+//!   `RMesh::uv_active`, [`texture`]; WP 5.5). Per object, as `ObjectState`: VERTEX without a
+//!   colour attribute and TEXTURE without a UV map or with a `display_type` other than
+//!   TEXTURED draw the MATERIAL colour; a material without an active image draws its own
+//!   colour.
 //! - `show_xray`/`xray_alpha`, materials with alpha < 1, `show_object_outline` /
 //!   `object_outline_color`, `show_shadows` / `shadow_intensity` with `display.light_direction`
 //!   / `shadow_shift` / `shadow_focus`, `show_backface_culling`, `show_specular_highlight`.
@@ -50,6 +54,7 @@ pub mod outline;
 pub mod shadow;
 pub mod studio_light;
 pub mod taa;
+pub mod texture;
 pub mod wire;
 pub mod xray;
 
@@ -58,7 +63,9 @@ use std::ops::Range;
 use std::sync::Arc;
 
 use bytemuck::{Pod, Zeroable};
-use frap_render_scene::{Film, MeshKey, RObject, RSettings, RWorld, RenderError, RenderScene};
+use frap_render_scene::{
+    Film, MeshKey, RObject, RSettings, RWorkbenchTexture, RWorld, RenderError, RenderScene,
+};
 use glam::{Mat3, Mat4, Vec3, Vec4};
 
 use crate::engine::{Engine, GpuCache, VERTEX_STRIDE};
@@ -124,6 +131,35 @@ pub enum ColorType {
     Single,
     /// RANDOM
     Random,
+    /// VERTEX (the colour attribute)
+    Vertex,
+    /// TEXTURE (the active texture node's image)
+    Texture,
+}
+
+/// Where a draw's surface colour comes from (`Draw.ids.y` in `workbench.wgsl`).
+#[derive(Copy, Clone, Debug, Default, PartialEq, Eq)]
+#[non_exhaustive]
+pub enum ColorSource {
+    /// [`Surface::base_color`] (MATERIAL, OBJECT, SINGLE, RANDOM; VERTEX and TEXTURE where
+    /// they fall back).
+    #[default]
+    Uniform,
+    /// The colour attribute `RMesh::color_active` (VERTEX).
+    Attribute,
+    /// The image of the material's `RMaterialSettings::workbench_texture` on
+    /// `RMesh::uv_active` (TEXTURE).
+    Image,
+}
+
+impl ColorSource {
+    fn shader_value(self) -> u32 {
+        match self {
+            ColorSource::Uniform => 0,
+            ColorSource::Attribute => 1,
+            ColorSource::Image => 2,
+        }
+    }
 }
 
 /// The resolved `scene.display` / `display.shading` of one render (`SceneState::init`,
@@ -183,7 +219,8 @@ impl Shading {
             "OBJECT" => ColorType::Object,
             "SINGLE" => ColorType::Single,
             "RANDOM" => ColorType::Random,
-            // "MATERIAL", and VERTEX / TEXTURE until M5 (WP 5.5; a WARNING says so).
+            "VERTEX" => ColorType::Vertex,
+            "TEXTURE" => ColorType::Texture,
             _ => ColorType::Material,
         };
         // `BKE_studiolight_find(studio_light, STUDIOLIGHT_TYPE_STUDIO)` falls back to the
@@ -259,13 +296,54 @@ pub struct Surface {
     pub transparent_roughness_metallic: (f32, f32),
     /// `Material::is_transparent`: drawn in the transparent passes.
     pub is_transparent: bool,
+    /// Where the colour comes from (the per-fragment sources replace `base_color`'s RGB).
+    pub source: ColorSource,
+}
+
+/// The colour type `obj` draws with (`ObjectState::ObjectState`): TEXTURE needs a UV map and
+/// `display_type = 'TEXTURED'`, VERTEX a colour attribute; otherwise MATERIAL.
+pub fn object_color_type(scene: &RenderScene, obj: &RObject, shading: &Shading) -> ColorType {
+    let mesh = obj.mesh.and_then(|k| scene.meshes.get(&k));
+    match shading.color_type {
+        ColorType::Texture
+            if mesh.is_none_or(|m| m.uv_active.is_none()) || obj.display_type != "TEXTURED" =>
+        {
+            ColorType::Material
+        }
+        ColorType::Vertex if mesh.is_none_or(|m| m.color_active.is_none()) => {
+            ColorType::Material
+        }
+        t => t,
+    }
+}
+
+/// The TEXTURE image of `obj`'s material `slot` (`MaterialTexture(ob, slot)`): `None` for an
+/// empty slot or a material without an active image.
+pub fn slot_texture<'a>(
+    scene: &'a RenderScene,
+    obj: &RObject,
+    slot: u32,
+) -> Option<&'a RWorkbenchTexture> {
+    let key = obj.materials.get(slot as usize).copied().flatten()?;
+    scene
+        .settings
+        .material_settings
+        .get(&key)?
+        .workbench_texture
+        .as_ref()
+        .filter(|t| scene.images.contains_key(&t.image))
 }
 
 /// Blender's surface values for `obj`'s material `slot` under `shading`
 /// (`workbench_materials.cc`, `Instance::get_material`).
 pub fn surface(scene: &RenderScene, obj: &RObject, slot: u32, shading: &Shading) -> Surface {
-    let (rgb, alpha, metallic, roughness) = match shading.color_type {
-        ColorType::Material => {
+    let color_type = object_color_type(scene, obj, shading);
+    let mut source = ColorSource::Uniform;
+    let (rgb, alpha, metallic, roughness) = match color_type {
+        ColorType::Material | ColorType::Texture => {
+            if color_type == ColorType::Texture && slot_texture(scene, obj, slot).is_some() {
+                source = ColorSource::Image;
+            }
             let key = obj.materials.get(slot as usize).copied().flatten();
             // Blender's Workbench reads `Material.diffuse_color` / `.metallic` / `.roughness`
             // (viewport display values, fresh-material roughness 0.4), not the Principled node:
@@ -299,6 +377,12 @@ pub fn surface(scene: &RenderScene, obj: &RObject, slot: u32, shading: &Shading)
         ),
         ColorType::Single => (shading.single_color, 1.0, 0.0, 0.4),
         ColorType::Random => (color::random_color(obj.random_hash), obj.color[3], 0.0, 0.4),
+        // `material_attribute_color = Material(float3(-1.0f))`: the colour comes from the
+        // attribute; alpha 1, roughness 0.4, metallic 0.
+        ColorType::Vertex => {
+            source = ColorSource::Attribute;
+            ([-1.0; 3], 1.0, 0.0, 0.4)
+        }
     };
     let (g_roughness, g_metallic) = color::gbuffer_roughness_metallic(roughness, metallic);
     Surface {
@@ -307,6 +391,7 @@ pub fn surface(scene: &RenderScene, obj: &RObject, slot: u32, shading: &Shading)
         roughness: g_roughness,
         transparent_roughness_metallic: color::packed_roughness_metallic(roughness, metallic),
         is_transparent: xray::is_transparent(alpha),
+        source,
     }
 }
 
@@ -371,6 +456,12 @@ struct DrawCmd {
     mesh: MeshKey,
     range: Range<u32>,
     uniform: usize,
+    /// Index into the render's image bind groups (0: the white placeholder).
+    image: usize,
+    /// The colour attribute is bound (else the zero buffer).
+    attribute: bool,
+    /// The UV map is bound (else the zero buffer).
+    uv: bool,
 }
 
 struct Pipelines {
@@ -378,6 +469,7 @@ struct Pipelines {
     frame_bgl: wgpu::BindGroupLayout,
     draw_bgl: wgpu::BindGroupLayout,
     fs_bgl: wgpu::BindGroupLayout,
+    image_bgl: wgpu::BindGroupLayout,
     opaque: wgpu::RenderPipeline,
     transparent: wgpu::RenderPipeline,
     object_id: wgpu::RenderPipeline,
@@ -402,6 +494,8 @@ pub struct Workbench {
     pipeline_builds: u32,
     matcap: Option<MatcapTexture>,
     adjacency: HashMap<MeshKey, Arc<Adjacency>>,
+    /// Colour-attribute and UV buffers, images and samplers of VERTEX / TEXTURE draws.
+    textures: texture::Cache,
 }
 
 impl Default for Workbench {
@@ -419,6 +513,7 @@ impl Workbench {
             pipeline_builds: 0,
             matcap: None,
             adjacency: HashMap::new(),
+            textures: texture::Cache::default(),
         }
     }
 
@@ -457,6 +552,7 @@ impl Workbench {
             self.pipes = Some(create_pipelines(gpu));
             self.pipeline_builds += 1;
             self.matcap = None;
+            self.textures = texture::Cache::default();
         }
         self.pipes.as_ref().expect("invariant: just created")
     }
@@ -635,9 +731,21 @@ fn create_pipelines(gpu: &Gpu) -> Pipelines {
             texture_entry(2, wgpu::TextureSampleType::Uint, d2),
         ],
     });
+    let image_bgl = dev.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+        label: Some("frap workbench image"),
+        entries: &[
+            texture_entry(0, float(true), d2),
+            wgpu::BindGroupLayoutEntry {
+                binding: 1,
+                visibility: wgpu::ShaderStages::FRAGMENT,
+                ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                count: None,
+            },
+        ],
+    });
     let geom_layout = dev.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
         label: Some("frap workbench geometry"),
-        bind_group_layouts: &[Some(&frame_bgl), Some(&draw_bgl)],
+        bind_group_layouts: &[Some(&frame_bgl), Some(&draw_bgl), Some(&image_bgl)],
         immediate_size: 0,
     });
     let frame_layout = dev.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
@@ -662,11 +770,33 @@ fn create_pipelines(gpu: &Gpu) -> Pipelines {
             shader_location: 1,
         },
     ];
-    let mesh_buffers = [Some(wgpu::VertexBufferLayout {
-        array_stride: VERTEX_STRIDE,
-        step_mode: wgpu::VertexStepMode::Vertex,
-        attributes: &attributes,
-    })];
+    let color_attributes = [wgpu::VertexAttribute {
+        format: wgpu::VertexFormat::Float32x4,
+        offset: 0,
+        shader_location: 2,
+    }];
+    let uv_attributes = [wgpu::VertexAttribute {
+        format: wgpu::VertexFormat::Float32x2,
+        offset: 0,
+        shader_location: 3,
+    }];
+    let mesh_buffers = [
+        Some(wgpu::VertexBufferLayout {
+            array_stride: VERTEX_STRIDE,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &attributes,
+        }),
+        Some(wgpu::VertexBufferLayout {
+            array_stride: 16,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &color_attributes,
+        }),
+        Some(wgpu::VertexBufferLayout {
+            array_stride: 8,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &uv_attributes,
+        }),
+    ];
     let shadow_attributes = [wgpu::VertexAttribute {
         format: wgpu::VertexFormat::Float32x3,
         offset: 0,
@@ -853,6 +983,7 @@ fn create_pipelines(gpu: &Gpu) -> Pipelines {
         frame_bgl,
         draw_bgl,
         fs_bgl,
+        image_bgl,
         opaque,
         transparent,
         object_id,
@@ -1067,6 +1198,7 @@ impl Engine for Workbench {
         let mut transparent: Vec<DrawCmd> = vec![];
         let mut draw_data: Vec<DrawU> = vec![];
         let mut casters: Vec<(MeshKey, Mat4)> = vec![];
+        let mut image_slots = texture::Slots::default();
         for (index, obj) in scene.objects.iter().enumerate() {
             let Some(key) = obj.mesh else { continue };
             let rmesh = scene.meshes.get(&key).ok_or_else(|| {
@@ -1103,23 +1235,32 @@ impl Engine for Workbench {
                     continue;
                 }
                 let s = surface(scene, obj, *slot, &shading);
+                let tex = (s.source == ColorSource::Image)
+                    .then(|| slot_texture(scene, obj, *slot))
+                    .flatten();
+                let (cutoff, image_bits) = tex.map_or((texture::NO_CUTOFF, 0), |t| {
+                    (texture::cutoff(t), texture::image_bits(t))
+                });
                 draw_data.push(DrawU {
                     model: obj.matrix_world.to_cols_array(),
                     normal_matrix: normal_matrix.to_cols_array(),
                     base_color: s.base_color,
-                    params: [s.metallic, s.roughness, flip, 0.0],
+                    params: [s.metallic, s.roughness, flip, cutoff],
                     params2: [
                         s.transparent_roughness_metallic.0,
                         s.transparent_roughness_metallic.1,
                         0.0,
                         0.0,
                     ],
-                    ids: [object_id, 0, 0, 0],
+                    ids: [object_id, s.source.shader_value(), image_bits, 0],
                 });
                 let cmd = DrawCmd {
                     mesh: key,
                     range,
                     uniform: draw_data.len() - 1,
+                    image: tex.map_or(0, |t| image_slots.slot(t)),
+                    attribute: s.source == ColorSource::Attribute,
+                    uv: s.source == ColorSource::Image,
                 };
                 if xray_mode || s.is_transparent {
                     transparent.push(cmd);
@@ -1149,7 +1290,29 @@ impl Engine for Workbench {
         let matcap = (shading.lighting == Lighting::Matcap).then_some(shading.matcap);
         self.pipelines(gpu);
         self.matcap_view(gpu, matcap)?;
+        // Colour attributes, UV maps and images of the VERTEX / TEXTURE draws.
+        self.textures.begin_render();
+        for cmd in opaque.iter().chain(&transparent) {
+            let rmesh = &scene.meshes[&cmd.mesh];
+            if cmd.attribute {
+                self.textures.attribute(gpu, cmd.mesh, rmesh);
+            }
+            if cmd.uv {
+                self.textures.uv(gpu, cmd.mesh, rmesh);
+            }
+        }
+        let max_vertices = opaque
+            .iter()
+            .chain(&transparent)
+            .map(|c| scene.meshes[&c.mesh].positions.len())
+            .max()
+            .unwrap_or(0);
+        self.textures.ensure_zeros(gpu, max_vertices);
         let pipes = self.pipes.as_ref().expect("invariant: built above");
+        let image_bgs = self
+            .textures
+            .bind_groups(gpu, &pipes.image_bgl, scene, &image_slots);
+        let textures = &self.textures;
         let matcap_view = &self.matcap.as_ref().expect("invariant: set above").view;
         let dev = &gpu.device;
         let align = u64::from(dev.limits().min_uniform_buffer_offset_alignment);
@@ -1315,7 +1478,21 @@ impl Engine for Workbench {
                     .get(cmd.mesh)
                     .expect("invariant: uploaded while building the draw list");
                 pass.set_bind_group(1, &draw_bg, &[(cmd.uniform as u64 * draw_stride) as u32]);
+                pass.set_bind_group(2, &image_bgs[cmd.image], &[]);
                 pass.set_vertex_buffer(0, gm.vertices.slice(..));
+                let zeros = textures.zeros();
+                let color = if cmd.attribute {
+                    textures.attribute_buffer(cmd.mesh).unwrap_or(zeros)
+                } else {
+                    zeros
+                };
+                let uv = if cmd.uv {
+                    textures.uv_buffer(cmd.mesh).unwrap_or(zeros)
+                } else {
+                    zeros
+                };
+                pass.set_vertex_buffer(1, color.slice(..));
+                pass.set_vertex_buffer(2, uv.slice(..));
                 pass.set_index_buffer(gm.indices.slice(..), wgpu::IndexFormat::Uint32);
                 pass.draw_indexed(cmd.range.clone(), 0, 0..1);
             }

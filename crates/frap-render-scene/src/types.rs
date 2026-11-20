@@ -113,6 +113,18 @@ pub struct RMesh {
     pub uv_active_render: Option<usize>,
     /// Name of each colour layer of [`RMesh::colors`] (Color Attribute nodes, vertex colours).
     pub color_names: Vec<SmolStr>,
+    /// Index into [`RMesh::uvs`] of `active_or_default_uv_map_name()`: the active UV map
+    /// (`uv_layers.active`), else the active-render one. Workbench TEXTURE samples it
+    /// (M5+M6 W2, WP 5.5).
+    pub uv_active: Option<usize>,
+    /// Index into [`RMesh::colors`] of the colour Workbench VERTEX draws
+    /// (`mesh_has_color_attribute`: `color_attributes.active_color`, else the default
+    /// colour; `None` when that name is no colour attribute). WP 5.5.
+    pub color_active: Option<usize>,
+    /// Index into [`RMesh::colors`] of the default (render) colour attribute
+    /// (`color_attributes.default_color_name`), which a Color Attribute node with an empty
+    /// name reads (`GPU_attribute_default_color`). WP 5.5.
+    pub color_default: Option<usize>,
 }
 
 /// Light type with its shape parameters (Blender units preserved).
@@ -294,6 +306,83 @@ pub struct RSettings {
     /// `scene.eevee` and the film settings the EEVEE-like engine reads (M5+M6 W0 contract
     /// delta, WP 5.1).
     pub eevee: REeveeSettings,
+    /// What the engines read from each material besides its `LoweredMaterial` (M5+M6 W2,
+    /// WP 5.5): EEVEE's render method and refraction settings, the Workbench TEXTURE image.
+    /// A key missing here (synthetic scenes) reads [`RMaterialSettings::default`].
+    pub material_settings: IndexMap<MatKey, RMaterialSettings>,
+}
+
+/// Per-material settings of the `Material` datablock and its node tree that the
+/// glTF-shaped `LoweredMaterial` does not carry (WP 5.5). Defaults: a new material's
+/// (verified on 5.2.4).
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
+pub struct RMaterialSettings {
+    /// `Material.surface_render_method`: `'DITHERED'` (hashed transparency) or `'BLENDED'`
+    /// (sorted, blended after the opaque surfaces).
+    pub surface_render_method: SmolStr,
+    /// `Material.use_transparency_overlap` (`show_transparent_back`).
+    pub use_transparency_overlap: bool,
+    /// `Material.use_raytrace_refraction`: with `scene.eevee.use_raytracing`, refraction
+    /// traces the opaque surfaces behind; otherwise it samples the light probes (the world).
+    pub use_raytrace_refraction: bool,
+    /// The Workbench TEXTURE colour source: the image of the material's active texture
+    /// node (`ED_object_get_active_image`), `None` when that node is no Image or Environment
+    /// Texture with an image.
+    pub workbench_texture: Option<RWorkbenchTexture>,
+}
+
+impl Default for RMaterialSettings {
+    fn default() -> Self {
+        RMaterialSettings {
+            surface_render_method: SmolStr::new_static("DITHERED"),
+            use_transparency_overlap: true,
+            use_raytrace_refraction: false,
+            workbench_texture: None,
+        }
+    }
+}
+
+impl RMaterialSettings {
+    /// Settings with the given render method, the rest at their defaults.
+    pub fn with_render_method(method: &str) -> Self {
+        RMaterialSettings {
+            surface_render_method: SmolStr::new(method),
+            ..RMaterialSettings::default()
+        }
+    }
+}
+
+/// The image Workbench TEXTURE draws for a material (`MaterialTexture`,
+/// `workbench_materials.cc`) and how it samples it.
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
+pub struct RWorkbenchTexture {
+    /// The image ([`RenderScene::images`]).
+    pub image: ImageKey,
+    /// Linear filtering (`interpolation` other than `Closest`).
+    pub linear: bool,
+    /// Image Texture `extension` (`REPEAT`, `EXTEND`, `MIRROR`, `CLIP`; `EXTEND` for an
+    /// Environment Texture).
+    pub extension: SmolStr,
+    /// Pixels with alpha below 0.1 are discarded (`alpha_mode` other than `NONE` and
+    /// `CHANNEL_PACKED`).
+    pub alpha_cutoff: bool,
+    /// The image's colour space is data (`Non-Color`): byte pixels are not sRGB decoded.
+    pub is_data: bool,
+}
+
+impl RWorkbenchTexture {
+    /// A texture of `image` with the given sampling.
+    pub fn new(image: ImageKey, linear: bool, extension: &str, alpha_cutoff: bool) -> Self {
+        RWorkbenchTexture {
+            image,
+            linear,
+            extension: SmolStr::new(extension),
+            alpha_cutoff,
+            is_data: false,
+        }
+    }
 }
 
 /// `scene.eevee` / `scene.render` values of the EEVEE-like engine (§19.3). Defaults are the
@@ -517,6 +606,7 @@ impl Default for RSettings {
             workbench_background: None,
             workbench: RWorkbenchShading::default(),
             eevee: REeveeSettings::default(),
+            material_settings: IndexMap::new(),
         }
     }
 }

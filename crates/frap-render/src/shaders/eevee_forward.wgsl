@@ -53,6 +53,9 @@ const BLEND_BLENDED: u32 = 3u;
 const MAT_DOUBLE_SIDED: u32 = 1u;
 const MAT_UNLIT: u32 = 2u;
 const MAT_MULTISCATTER: u32 = 4u;
+// Refraction traces the opaque pass (`use_raytrace_refraction` with scene ray tracing, WP 5.5);
+// otherwise it samples the world probe.
+const MAT_SCREEN_REFRACTION: u32 = 8u;
 
 // `frame.counts.w` bits.
 const FRAME_FILM_TRANSPARENT: u32 = 1u;
@@ -1148,11 +1151,38 @@ fn view_vector(P: vec3<f32>) -> vec3<f32> {
     return -frame.camera_fwd.xyz;
 }
 
-// The interleaved blue noise of the utility texture, decorrelated per sample.
-fn hashed_alpha_threshold(frag: vec2<f32>) -> f32 {
-    let t = vec2<i32>(frag) % vec2<i32>(64);
-    let n = textureLoad(util_tx, t, UTIL_BLUE_NOISE_LAYER, 0).r;
-    return fract(n + frame.clamp.z);
+// Hashed alpha testing (Wyman and McGuire), ported from Blender 5.2.4's
+// `eevee_transparency.bsl.hh` (GPL-2.0-or-later, WP 5.5): a threshold hashed from the world
+// position at two log-discretised scales around `hash_scale` (0.1 in final renders: sub-pixel,
+// so the TAA samples converge), mapped to a uniform distribution and jittered per sample by
+// `hash_offset` (`frame.clamp.z`). Front and back faces at one pixel get independent
+// thresholds, as in Blender.
+fn hashed_transparency_hash(a: vec2<f32>) -> f32 {
+    return fract(1e4 * sin(17.0 * a.x + 0.1 * a.y) * (0.1 + abs(sin(13.0 * a.y + a.x))));
+}
+
+fn hashed_transparency_hash_3d(a: vec3<f32>) -> f32 {
+    return hashed_transparency_hash(vec2<f32>(hashed_transparency_hash(a.xy), a.z));
+}
+
+fn hashed_alpha_threshold(hash_scale: f32, hash_offset: f32, P: vec3<f32>, dPdx: vec3<f32>,
+                          dPdy: vec3<f32>) -> f32 {
+    let max_deriv = max(length(dPdx), length(dPdy));
+    let pix_scale = 1.0 / (hash_scale * max_deriv);
+    let pix_scale_log = log2(pix_scale);
+    let pix_scales = vec2<f32>(exp2(floor(pix_scale_log)), exp2(ceil(pix_scale_log)));
+    let alpha = vec2<f32>(hashed_transparency_hash_3d(floor(pix_scales.x * P)),
+                          hashed_transparency_hash_3d(floor(pix_scales.y * P)));
+    let fac = fract(log2(pix_scale));
+    let x = mix(alpha.x, alpha.y, fac);
+    let a = min(fac, 1.0 - fac);
+    let one_a = 1.0 - a;
+    let denom = 1.0 / (2.0 * a * one_a);
+    let one_x = 1.0 - x;
+    let cases = vec3<f32>((x * x) * denom, (x - 0.5 * a) / one_a, 1.0 - (one_x * one_x * denom));
+    var threshold = select(cases.z, select(cases.y, cases.x, x < a), x < one_a);
+    threshold = fract(threshold + hash_offset);
+    return clamp(threshold, 1.0e-6, 1.0);
 }
 
 // Direct lighting of the closures by every light.
@@ -1211,6 +1241,12 @@ struct FragOut {
     @location(0) color: vec4<f32>,
 };
 
+// Set by `shade` for a fragment to discard; `fs_forward` discards at its very end (WP 5.5).
+// A `discard` before the shading lets Metal's compiler sink the position derivatives past it,
+// where the quad's discarded lanes no longer contribute: `Ng` (and everything lit with it)
+// came out NaN next to DITHERED and alpha-clipped fragments.
+var<private> frag_discard: bool;
+
 fn shade(vin: VertexOut, front_facing: bool) -> vec4<f32> {
     // Derivatives first, in uniform control flow.
     let dPdx = dpdx(vin.world_pos);
@@ -1224,7 +1260,7 @@ fn shade(vin: VertexOut, front_facing: bool) -> vec4<f32> {
     let front = front_facing != flip;
     let m = material;
     if (!front && (m.ints.w & MAT_DOUBLE_SIDED) == 0u) {
-        discard;
+        frag_discard = true;
     }
     v.P = vin.world_pos;
     v.V = view_vector(vin.world_pos);
@@ -1257,12 +1293,13 @@ fn shade(vin: VertexOut, front_facing: bool) -> vec4<f32> {
         alpha = 1.0;
     } else if (mode == BLEND_CLIP) {
         if (alpha < m.specular_tint.w) {
-            discard;
+            frag_discard = true;
         }
         alpha = 1.0;
     } else if (mode == BLEND_DITHERED) {
-        if (alpha <= hashed_alpha_threshold(vin.clip.xy)) {
-            discard;
+        // `surf_depth`: discarded when the transparency exceeds the threshold.
+        if (1.0 - alpha > hashed_alpha_threshold(0.1, frame.clamp.z, vin.world_pos, dPdx, dPdy)) {
+            frag_discard = true;
         }
         alpha = 1.0;
     }
@@ -1280,12 +1317,55 @@ fn shade(vin: VertexOut, front_facing: bool) -> vec4<f32> {
         world_specular(c.reflection_N, V, c.reflection_roughness) * c.reflection_color +
         world_specular(c.coat_N, V, c.coat_roughness) * c.coat_color;
     if (reduce_max(c.refraction_color) > 0.0) {
-        radiance_indirect += refraction_radiance(vin.clip.xy, c.refraction_roughness) * c.refraction_color;
+        if ((m.ints.w & MAT_SCREEN_REFRACTION) != 0u) {
+            radiance_indirect += refraction_radiance(vin.clip.xy, c.refraction_roughness) * c.refraction_color;
+        } else {
+            // Two transmission events through the object's thickness (`eevee_forward_lib`:
+            // the closure colour is applied twice).
+            radiance_indirect += refraction_probe(s.N, V, c.refraction_roughness, max(s.ior, 1e-5)) *
+                                 c.refraction_color * c.refraction_color;
+        }
     }
     radiance_direct = brightness_clamp_max(radiance_direct, frame.clamp.x);
     radiance_indirect = brightness_clamp_max(radiance_indirect, frame.clamp.y);
     let radiance = radiance_direct + radiance_indirect + c.emission;
     return vec4<f32>(radiance * alpha, alpha);
+}
+
+// `bxdf_ggx_perceived_roughness_transmission` (eevee_bxdf_microfacet, WP 5.5).
+fn refraction_perceived_roughness(roughness: f32, ior: f32) -> f32 {
+    let x = select(saturate(1.0 - ior) * 0.64, 1.0 - 1.0 / ior, ior > 1.0);
+    return roughness * world_sqrt_fast(x);
+}
+
+// `bxdf_ggx_dominant_direction_transmission`.
+fn refraction_dominant_direction(N: vec3<f32>, V: vec3<f32>, ior: f32, roughness: f32) -> vec3<f32> {
+    let m = roughness * roughness;
+    let R = refract(-V, N, 1.0 / ior);
+    let smoothness = 1.0 - m;
+    let fac = smoothness * (sqrt(smoothness) + m);
+    return normalize(mix(-N, R, fac));
+}
+
+// The world probe seen through a refraction closure (`LightProbe::eval` of a GGX refraction,
+// the default without ray-traced refraction): `bxdf_ggx_context_amend_transmission` with the
+// sphere thickness model (`Thickness::sphere_intersect`) moves the closure to the exit point,
+// then `bxdf_ggx_lightprobe_transmission` refracts out (IOR inverted) and the probe is sampled
+// like a reflection (`roughness_to_lod`, mixed with the SH by `roughness_to_mix_fac`).
+fn refraction_probe(N: vec3<f32>, V: vec3<f32>, roughness: f32, ior: f32) -> vec3<f32> {
+    let pr = refraction_perceived_roughness(roughness, ior);
+    let L = refraction_dominant_direction(N, V, ior, pr);
+    let cos_alpha = dot(L, -N);
+    let hit_N = normalize(N + L * (cos_alpha * 2.0));
+    let D = refraction_dominant_direction(-hit_N, -L, 1.0 / ior, pr);
+    if ((frame.counts.w & FRAME_WORLD_HDRI) != 0u) {
+        let mips = f32(max(frame.counts.z, 1u) - 1u);
+        let lod = world_roughness_to_lod(pr, mips);
+        let probe = textureSampleLevel(world_spec_tx, linear_samp, world_rotate(D), lod).rgb *
+                    frame.world_params.z;
+        return mix(probe, world_sh_irradiance(D) * M_1_PI, world_roughness_to_mix_fac(pr));
+    }
+    return frame.world_color.rgb;
 }
 
 // Screen-space refraction of the opaque pass (transmission): the opaque colour behind the
@@ -1302,7 +1382,11 @@ fn refraction_radiance(frag: vec2<f32>, roughness: f32) -> vec3<f32> {
 @fragment
 fn fs_forward(vin: VertexOut, @builtin(front_facing) front_facing: bool) -> FragOut {
     var o: FragOut;
+    frag_discard = false;
     o.color = shade(vin, front_facing);
+    if (frag_discard) {
+        discard;
+    }
     return o;
 }
 

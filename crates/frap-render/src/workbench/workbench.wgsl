@@ -77,18 +77,33 @@ struct Draw {
     // rgb: base colour, a: alpha (8-bit quantised, as `Material::pack_data`)
     base_color: vec4<f32>,
     // x: metallic, y: roughness (both already G-buffer quantised), z: 1 when the object -> view
-    // transform mirrors (front faces wind clockwise), w: unused
+    // transform mirrors (front faces wind clockwise), w: image alpha cutoff (TEXTURE colour,
+    // `image_transparency_cutoff`: 0.1, or -1e30 without a cutoff)
     params: vec4<f32>,
     // x: roughness, y: metallic as the transparent pass sees them (8-bit packed only)
     params2: vec4<f32>,
-    // x: object id (`resource_id + 1`, 0 is the background)
+    // x: object id (`resource_id + 1`, 0 is the background), y: colour source (`COLOR_*`),
+    // z: `IMAGE_*` bits of the TEXTURE colour
     ids: vec4<u32>,
 };
+
+// `Draw.ids.y`: where the surface colour comes from (WP 5.5).
+const COLOR_UNIFORM: u32 = 0u;
+// VERTEX: the colour attribute (`material_attribute_color`, `ac`).
+const COLOR_ATTRIBUTE: u32 = 1u;
+// TEXTURE: the material's active image on the active UV map (`image_color`).
+const COLOR_IMAGE: u32 = 2u;
+// `Draw.ids.z` bits: the image's `extension` is CLIP (transparent black outside [0, 1]).
+const IMAGE_CLIP: u32 = 1u;
 
 @group(0) @binding(0) var<uniform> frame: Frame;
 @group(0) @binding(1) var matcap_tx: texture_2d_array<f32>;
 @group(0) @binding(2) var matcap_sampler: sampler;
 @group(1) @binding(0) var<uniform> draw: Draw;
+// The TEXTURE colour's image (straight alpha, linear) and its sampler; a 1 x 1 white image
+// for the other draws (WP 5.5).
+@group(2) @binding(0) var image_tx: texture_2d<f32>;
+@group(2) @binding(1) var image_sampler: sampler;
 
 // Half-float storage of a value (G-buffer, colour and accumulation targets are half floats in
 // Blender), rounded toward zero: what the Apple GPUs Blender's references were rendered on do
@@ -135,11 +150,17 @@ struct GeomOut {
     @builtin(position) position: vec4<f32>,
     @location(0) normal_vs: vec3<f32>,
     @location(1) position_vs: vec3<f32>,
+    // The colour attribute (`ac`, linear) and the UV map (`au`).
+    @location(2) color: vec4<f32>,
+    @location(3) uv: vec2<f32>,
 };
 
 @vertex
-fn vs_geom(@location(0) pos: vec3<f32>, @location(1) nor: vec3<f32>) -> GeomOut {
+fn vs_geom(@location(0) pos: vec3<f32>, @location(1) nor: vec3<f32>,
+           @location(2) color: vec4<f32>, @location(3) uv: vec2<f32>) -> GeomOut {
     var out: GeomOut;
+    out.color = color;
+    out.uv = uv;
     let world = draw.model * vec4<f32>(pos, 1.0);
     let view = frame.view * world;
     out.position = frame.proj * view;
@@ -327,6 +348,35 @@ struct OpaqueOut {
     @location(2) object_id: u32,
 };
 
+// `workbench::color::image_color` (workbench_image.bsl.hh): the image at the UV (Blender's
+// UVs have v up, the image rows are stored top first), straight alpha; fragments under the
+// alpha cutoff are discarded.
+fn image_color(uv_in: vec2<f32>) -> vec3<f32> {
+    let uv = vec2<f32>(uv_in.x, 1.0 - uv_in.y);
+    var color = textureSampleLevel(image_tx, image_sampler, uv, 0.0);
+    if ((draw.ids.z & IMAGE_CLIP) != 0u &&
+        (any(uv_in < vec2<f32>(0.0)) || any(uv_in > vec2<f32>(1.0)))) {
+        color = vec4<f32>(0.0);
+    }
+    if (color.a < draw.params.w) {
+        discard;
+    }
+    return color.rgb;
+}
+
+// The surface colour of a fragment: the material/object/single colour, the colour attribute
+// (`material_data_get` with the -1 marker) or the image (WP 5.5).
+fn surface_color(in: GeomOut) -> vec3<f32> {
+    let source = draw.ids.y;
+    if (source == COLOR_ATTRIBUTE) {
+        return in.color.rgb;
+    }
+    if (source == COLOR_IMAGE) {
+        return image_color(in.uv);
+    }
+    return draw.base_color.rgb;
+}
+
 @fragment
 fn fs_opaque(in: GeomOut, @builtin(front_facing) front_facing: bool) -> OpaqueOut {
     let front = is_front(front_facing);
@@ -339,7 +389,7 @@ fn fs_opaque(in: GeomOut, @builtin(front_facing) front_facing: bool) -> OpaqueOu
     }
     let I = incident(in.position_vs);
     // `material_tx` is a half-float target.
-    let base_color = q16(vec4<f32>(draw.base_color.rgb, 0.0)).rgb;
+    let base_color = q16(vec4<f32>(surface_color(in), 0.0)).rgb;
     let color = shade(base_color, draw.params.y, draw.params.x, N, I);
     var out: OpaqueOut;
     out.color = q16(vec4<f32>(color * get_shadow(N, false), 1.0));
@@ -374,7 +424,7 @@ fn fs_transparent(in: GeomOut, @builtin(front_facing) front_facing: bool) -> Tra
     // No back-face flip in the transparent pass.
     let N = normalize(in.normal_vs);
     let I = incident(in.position_vs);
-    var shaded = shade(draw.base_color.rgb, draw.params2.x, draw.params2.y, N, I);
+    var shaded = shade(surface_color(in), draw.params2.x, draw.params2.y, N, I);
     shaded *= get_shadow(N, false);
     let alpha = draw.base_color.a * frame.params.x;
     let weight = transparent_weight(in.position_vs.z) * alpha;
