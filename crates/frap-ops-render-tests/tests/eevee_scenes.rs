@@ -181,49 +181,14 @@ fn fixture(repo: &Repo, image: &str, side: &str) -> PathBuf {
         .join(format!("{}.{side}.png", stem(image)))
 }
 
-/// Runs in `dir` and restores the previous process directory when dropped, also on a panic
-/// (`frap-render-scene` build/images.rs resolves relative image paths against the process
-/// directory, not the session's; WP 5.5 follow-up, then this guard goes). The process directory
-/// is global, so the guard holds [`CWD_LOCK`] while it is changed: any test of this binary that
-/// reads or changes the process directory (or resolves a relative path) must take the lock too.
-/// Today no other test does.
-struct CwdGuard {
-    prev: PathBuf,
-    _lock: std::sync::MutexGuard<'static, ()>,
-}
-
-/// Serialises the tests of this binary that depend on the process directory.
-static CWD_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
-
-impl CwdGuard {
-    fn enter(dir: &Path) -> CwdGuard {
-        // A panic while the lock was held already restored the directory (Drop): not poisoned
-        // in any way that matters here.
-        let lock = CWD_LOCK
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
-        let prev = std::env::current_dir().unwrap();
-        std::env::set_current_dir(dir).unwrap();
-        CwdGuard { prev, _lock: lock }
-    }
-}
-
-impl Drop for CwdGuard {
-    fn drop(&mut self) {
-        let _ = std::env::set_current_dir(&self.prev);
-    }
-}
-
 /// Renders a case through frap in `work`; `Ok(false)`: no GPU (skipped).
 fn render_frap(case: &Case, work: &Path) -> Result<bool, String> {
     stage_inputs(&case.path, work).map_err(|e| e.to_string())?;
     let mut opts = SessionOptions::default();
     opts.cwd = work.to_owned();
     let mut s = Session::new(opts).map_err(|e| e.message)?;
-    let responses = {
-        let _cwd = CwdGuard::enter(work);
-        s.exec_source(&frap_source(&case.text))
-    };
+    // Relative image paths resolve against the session's directory (`opts.cwd`).
+    let responses = s.exec_source(&frap_source(&case.text));
     if common::any_gpu_unavailable(&responses) {
         return Ok(false);
     }

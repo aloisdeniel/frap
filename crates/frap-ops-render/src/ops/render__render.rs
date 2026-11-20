@@ -140,7 +140,11 @@ struct AnimFiles {
 /// `frame_step = 0` (the RNA minimum) only `start` renders.
 fn animation_frames(start: i32, end: i32, step: i32) -> Vec<i32> {
     if step <= 0 {
-        return if start <= end { vec![start] } else { Vec::new() };
+        return if start <= end {
+            vec![start]
+        } else {
+            Vec::new()
+        };
     }
     (i64::from(start)..=i64::from(end))
         .step_by(step as usize)
@@ -577,7 +581,10 @@ mod tests {
         // `frame_step = 0` (Blender 5.2.4 writes only the first frame).
         assert_eq!(animation_frames(1, 4, 0), [1]);
         assert_eq!(animation_frames(5, 5, 0), [5]);
-        assert_eq!(animation_frames(i32::MAX - 1, i32::MAX, 1), [i32::MAX - 1, i32::MAX]);
+        assert_eq!(
+            animation_frames(i32::MAX - 1, i32::MAX, 1),
+            [i32::MAX - 1, i32::MAX]
+        );
     }
 
     #[test]

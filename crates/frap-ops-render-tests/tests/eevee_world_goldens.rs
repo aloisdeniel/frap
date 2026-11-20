@@ -53,25 +53,6 @@ fn frap_source(text: &str) -> String {
         .join("\n")
 }
 
-/// Runs in `dir` and restores the previous process directory when dropped, also on a panic
-/// (workaround until `frap-render-scene` build/images.rs resolves relative paths against the
-/// session's directory).
-struct CwdGuard(PathBuf);
-
-impl CwdGuard {
-    fn enter(dir: &Path) -> CwdGuard {
-        let prev = std::env::current_dir().unwrap();
-        std::env::set_current_dir(dir).unwrap();
-        CwdGuard(prev)
-    }
-}
-
-impl Drop for CwdGuard {
-    fn drop(&mut self) {
-        let _ = std::env::set_current_dir(&self.0);
-    }
-}
-
 fn cases(repo: &Repo) -> Vec<PathBuf> {
     let dir = repo.cases_dir().join(AREA);
     let mut v: Vec<PathBuf> = std::fs::read_dir(&dir)
@@ -127,13 +108,8 @@ fn hdri_worlds_match_blender_eevee() {
         let mut opts = SessionOptions::default();
         opts.cwd = work.path().to_owned();
         let mut s = Session::new(opts).unwrap();
-        // The render build resolves relative image paths against the process directory, not
-        // the session's (`frap-render-scene` build/images.rs): run from the work directory. No
-        // other test of this binary depends on the process directory.
-        let responses = {
-            let _cwd = CwdGuard::enter(work.path());
-            s.exec_source(&frap_source(&text))
-        };
+        // Relative image paths resolve against the session's directory (`opts.cwd`).
+        let responses = s.exec_source(&frap_source(&text));
         if common::any_gpu_unavailable(&responses) {
             return;
         }

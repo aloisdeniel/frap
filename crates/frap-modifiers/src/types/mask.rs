@@ -16,8 +16,8 @@
 use frap_mesh::DeformVert;
 use frap_rna::{ArmatureId, IdAny, IdRef, ObjectId};
 use frap_scene::Main;
-use frap_scene::id::Object;
 use frap_scene::generated::modifier_settings::MaskSettings;
+use frap_scene::id::Object;
 use smallvec::{SmallVec, smallvec};
 
 use super::smooth::common::{Sources, Src, Topology, defgroup_index, find_weight, rebuild};
@@ -520,13 +520,19 @@ mod tests {
         // "Side": only the 2 vertices weighing 0.6 (0.2 is below the threshold).
         assert_eq!(mask(&s, Some(&arm(&["Side"])), m.clone()).verts_num(), 2);
         // Both: the union (top 4 plus the bottom (+X, +Y) vertex).
-        assert_eq!(mask(&s, Some(&arm(&["Top", "Side"])), m.clone()).verts_num(), 5);
+        assert_eq!(
+            mask(&s, Some(&arm(&["Top", "Side"])), m.clone()).verts_num(),
+            5
+        );
         // Inverted: the complement.
         let inv = MaskSettings {
             invert_vertex_group: true,
             ..s.clone()
         };
-        assert_eq!(mask(&inv, Some(&arm(&["Top", "Side"])), m.clone()).verts_num(), 3);
+        assert_eq!(
+            mask(&inv, Some(&arm(&["Top", "Side"])), m.clone()).verts_num(),
+            3
+        );
         // `use_smooth` is VERTEX_GROUP only: no interpolated vertices.
         let smooth = MaskSettings {
             use_smooth: true,

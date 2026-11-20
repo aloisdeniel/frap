@@ -452,12 +452,12 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `anim.keyframe_insert` | M6 | P0 | keying-set operator; scripts usually use bpy_struct.keyframe_insert; WP 6.4 (M5+M6 W0) |
-| [ ] | `anim.keyframe_insert_by_name` | M6 | P1 | WP 6.4 (M5+M6 W0) |
-| [ ] | `anim.keyframe_delete` | M6 | P1 | WP 6.4 (M5+M6 W0) |
-| [ ] | `anim.keyframe_delete_v3d` | M6 | P1 | WP 6.4 (M5+M6 W0) |
-| [ ] | `anim.keyframe_clear_v3d` | M6 | P1 | WP 6.4 (M5+M6 W0) |
-| [ ] | `anim.keyframe_delete_by_name` | M6 | P2 | WP 6.4 (M5+M6 W0) |
+| [x] | `anim.keyframe_insert` | M6 | P0 | keying-set operator; scripts usually use bpy_struct.keyframe_insert; WP 6.4 (M5+M6 W0) |
+| [x] | `anim.keyframe_insert_by_name` | M6 | P1 | WP 6.4 (M5+M6 W0) |
+| [x] | `anim.keyframe_delete` | M6 | P1 | WP 6.4 (M5+M6 W0) |
+| [x] | `anim.keyframe_delete_v3d` | M6 | P1 | WP 6.4 (M5+M6 W0) |
+| [x] | `anim.keyframe_clear_v3d` | M6 | P1 | WP 6.4 (M5+M6 W0) |
+| [x] | `anim.keyframe_delete_by_name` | M6 | P2 | WP 6.4 (M5+M6 W0) |
 | [ ] | `anim.keying_set_active_set` | M8 | P2 |  |
 | [ ] | `anim.channels_bake` | M8 | P2 |  |
 
@@ -465,9 +465,9 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `screen.frame_jump` | M6 | P1 | WP 6.4 (M5+M6 W0) |
-| [ ] | `screen.frame_offset` | M6 | P1 | WP 6.4 (M5+M6 W0) |
-| [ ] | `screen.keyframe_jump` | M6 | P2 | WP 6.4 (M5+M6 W0) |
+| [x] | `screen.frame_jump` | M6 | P1 | WP 6.4 (M5+M6 W0) |
+| [x] | `screen.frame_offset` | M6 | P1 | WP 6.4 (M5+M6 W0) |
+| [x] | `screen.keyframe_jump` | M6 | P2 | WP 6.4 (M5+M6 W0) |
 
 ### `armature.* (edit bones)`
 
@@ -549,8 +549,8 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `nla.action_pushdown` | M6 | P1 | headless-extended: active object's AnimData; feeds NLA_TRACKS export; WP 6.4 (M5+M6 W0) |
-| [ ] | `nla.tracks_add` | M6 | P2 | headless-extended; WP 6.4 (M5+M6 W0) |
+| [x] | `nla.action_pushdown` | M6 | P1 | headless-extended: active object's AnimData; feeds NLA_TRACKS export; WP 6.4 (M5+M6 W0) |
+| [x] | `nla.tracks_add` | M6 | P2 | headless-extended; WP 6.4 (M5+M6 W0) |
 | [ ] | `nla.tracks_delete` | M8 | P2 |  |
 | [ ] | `nla.actionclip_add` | M8 | P2 |  |
 
@@ -779,11 +779,11 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | Depsgraph, DepsgraphObjectInstance (evaluated_get, to_mesh) | M1 | always fresh |
 | [x] | Image, ImagePackedFile | M1 meta / M3 full | pixels, pack, save, save_render; `PackedFile.data` (bytes) not readable; WP 3.2 |
 | [x] | Texture, ImageTexture | M4 | DISPLACE only; field set frozen by M3+M4 W0 (`TextureFields`), bindings and `bpy.data.textures.new` WP 4.2 |
-| [ ] | VertexGroup, VertexGroups, VertexGroupElement | M6 | names on Mesh, RNA on Object |
-| [ ] | Key, ShapeKey | M6 |  |
-| [ ] | Armature, Bone, EditBone, ArmatureEditBones, Pose, PoseBone, BoneCollection | M6 |  |
-| [ ] | Action, ActionSlot, ActionLayer, ActionStrip, ActionKeyframeStrip, ActionChannelbag, FCurve, Keyframe, FCurveKeyframePoints, ActionGroup | M6 | slotted actions; action.fcurves → 5.x hint |
-| [ ] | AnimData, NlaTrack, NlaTracks, NlaStrip, NlaStrips | M6 |  |
+| [x] | VertexGroup, VertexGroups, VertexGroupElement | M6 | names on Mesh, RNA on Object |
+| [x] | Key, ShapeKey | M6 |  |
+| [x] | Armature, Bone, EditBone, ArmatureEditBones, Pose, PoseBone, BoneCollection | M6 |  |
+| [x] | Action, ActionSlot, ActionLayer, ActionStrip, ActionKeyframeStrip, ActionChannelbag, FCurve, Keyframe, FCurveKeyframePoints, ActionGroup | M6 | slotted actions; action.fcurves → 5.x hint |
+| [x] | AnimData, NlaTrack, NlaTracks, NlaStrip, NlaStrips | M6 |  |
 | [x] | Preferences (edit.use_duplicate_*, edit.keyframe_new_*) | M2 read-only | moved from M1 (M1 stabilization) with `bpy.context.preferences` |
 
 ## E. RNA functions and Python-only members
@@ -807,13 +807,13 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | `node_tree.nodes.new/remove, node_tree.links.new/remove` | M1 | links.new replaces existing input link |
 | [x] | `obj.modifiers.new(name, type)/remove/move/clear` | M4 (data from M1) | WP 4.1 (`funcs/object_modifiers_*.rs`); M4 golden prerequisite |
 | [x] | `Image.pack/unpack/save/save_render/scale/reload, bpy.data.images.load` | M3 | also `update`, `buffers_free`, `filepath_from_user`, `ImagePackedFile.save`; `pack(data=…)` raw bytes not supported; `Render Result.save_render()` reports no data (render with `write_still`); WP 3.2 |
-| [ ] | `Scene.frame_set(frame, subframe=0.0)` | M6 | writes animated values to originals |
-| [ ] | `bpy_struct.keyframe_insert(data_path, *, index=-1, frame=None, group="", options=set(), keytype='KEYFRAME')` | M6 | keyword-only after data_path |
-| [ ] | `bpy_struct.keyframe_delete(data_path, *, index=-1, frame=None, group="")` | M6 |  |
-| [ ] | `action.layers/strips/channelbag(slot, ensure=False), channelbag.fcurves.new/remove, fcurve.keyframe_points.insert/add` | M6 |  |
-| [ ] | `AnimData: animation_data_create(), action, action_slot; nla_tracks.new(), track.strips.new(name, start, action)` | M6 |  |
-| [ ] | `obj.vertex_groups.new/remove, VertexGroup.add(index, weight, type)/remove/weight(index)` | M6 | works in object mode |
-| [ ] | `Object.shape_key_add(name, from_mix)/shape_key_remove/shape_key_clear` | M6 |  |
+| [x] | `Scene.frame_set(frame, subframe=0.0)` | M6 | writes animated values to originals |
+| [x] | `bpy_struct.keyframe_insert(data_path, *, index=-1, frame=None, group="", options=set(), keytype='KEYFRAME')` | M6 | keyword-only after data_path |
+| [x] | `bpy_struct.keyframe_delete(data_path, *, index=-1, frame=None, group="")` | M6 |  |
+| [x] | `action.layers/strips/channelbag(slot, ensure=False), channelbag.fcurves.new/remove, fcurve.keyframe_points.insert/add` | M6 |  |
+| [x] | `AnimData: animation_data_create(), action, action_slot; nla_tracks.new(), track.strips.new(name, start, action)` | M6 |  |
+| [x] | `obj.vertex_groups.new/remove, VertexGroup.add(index, weight, type)/remove/weight(index)` | M6 | works in object mode |
+| [x] | `Object.shape_key_add(name, from_mix)/shape_key_remove/shape_key_clear` | M6 |  |
 | [ ] | `bpy_struct.path_resolve / path_from_id, repr` | M1 | byte-identical to Blender, incl. embedded roots |
 | [ ] | `<collection>.foreach_get(attr[, seq]) / foreach_set(attr, seq)`, slices `coll[a:b]` | M1 | one-argument `foreach_get` is a frap extension; bulk `$array` encoding |
 | [ ] | `bpy.ops.<ns>.<op>.poll() / get_rna_type() / idname() / idname_py()` | M1 | poll returns bool + `unmet` requirements |
