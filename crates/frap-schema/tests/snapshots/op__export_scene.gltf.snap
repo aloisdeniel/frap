@@ -2495,7 +2495,8 @@ source: crates/frap-schema/tests/describe_ops.rs
       "'//' resolves relative to bpy.data.filepath (deviation D-08: the add-on writes it raw)",
       "GLTF_EMBEDDED needs the add-on preference allow_embedded_format (off in factory settings)",
       "an active object in another mode (Edit Mode) goes back to Object Mode first, writing its edits back, as the add-on does",
-      "export_current_frame=False exports the animation of frame 0 from a clone of the state; the scene's originals keep their values (deviation D-07: the add-on's frame_set re-applies the current frame's animation to them)"
+      "export_current_frame=False exports the animation of frame 0 from a clone of the state; the scene's originals keep their values (deviation D-07: the add-on's frame_set re-applies the current frame's animation to them)",
+      "export_current_frame=True leaves scene.frame_current unchanged (deviation D-07: Blender's animation sampler leaves it on the last sampled frame)"
     ]
   }
 }

@@ -13,9 +13,7 @@
 //! `object.pose.bones`, in their collection order; `children_recursive` sorts by depth
 //! (stable). Collections answer tuples of the bones' canonical pointers.
 
-use frap_rna::{
-    Field, MathTag, PropDef, PyExc, RnaError, RnaErrorKind, RnaPtr, Value, rna_hook,
-};
+use frap_rna::{Field, MathTag, PropDef, PyExc, RnaError, RnaErrorKind, RnaPtr, Value, rna_hook};
 use glam::{Mat3, Vec3};
 
 use crate::edit_armature::family::{Family, Kind, basename, family};
@@ -56,7 +54,9 @@ fn read(h: &dyn HostRead, this: &RnaPtr, name: &str) -> Result<Vec<f32>, RnaErro
         .ok_or_else(|| internal_error(format!("{} has no {name}", this.srna.identifier)))?;
     let get = find_hook(this.srna, name)
         .and_then(|r| r.get)
-        .ok_or_else(|| internal_error(format!("{}.{name} has no get hook", this.srna.identifier)))?;
+        .ok_or_else(|| {
+            internal_error(format!("{}.{name} has no get hook", this.srna.identifier))
+        })?;
     floats(get(h, this, prop)?)
 }
 
@@ -165,7 +165,10 @@ pub fn member(h: &dyn HostRead, this: &RnaPtr, prop: &PropDef) -> Result<Value, 
             return Err(RnaError::new(
                 RnaErrorKind::NoAttribute,
                 PyExc::AttributeError,
-                format!("'{}' object has no attribute '{other}'", this.srna.identifier),
+                format!(
+                    "'{}' object has no attribute '{other}'",
+                    this.srna.identifier
+                ),
             ));
         }
     })

@@ -255,3 +255,83 @@ Other workflows in the same directory: a round table on a pedestal (inset + two 
 
 - `bpy.ops.frap.scene_summary(objects='SELECTED')` answers, in one response, every object with its mode, transform, materials, modifiers, element counts and world-space bounds (`bounds_min`, `bounds_max`), plus totals. A mesh in Edit Mode is summarised from its edit mesh. Use it after a modelling step to check sizes and counts.
 - `bpy.ops.frap.render_contact_sheet(filepath='out/sheet.png', views={'FRONT', 'RIGHT', 'TOP', 'ISO'}, view_size=256)` renders the scene with Workbench from several synthetic orthographic views (and `'CAMERA'`, the scene camera) into one labelled PNG, without adding cameras to `bpy.data`. The response lists each tile's rectangle and camera. When there is nothing to frame (`objects='SELECTED'` with nothing selected, or no mesh in the set) the sheet still renders, framed on a 2 m cube around the origin, with the WARNING `frap: no objects to frame (…)`: select something or use `objects='VISIBLE'`. Look at the image when your harness can show it to you.
+
+## 12. Rendering
+
+`bpy.ops.render.render(write_still=True)` renders the scene camera with `scene.render.engine` (`'BLENDER_EEVEE'` in the factory scene; `'BLENDER_WORKBENCH'` also works) and writes `scene.render.filepath` plus the format's extension. Without `write_still=True` nothing is written: the image stays in `bpy.data.images['Render Result']`, which, as in `blender -b`, has no pixels to `save_render`. The response's `result` names the engine, the resolution and every file written. The golden cases under `tests/golden/cases/render_eevee/scenes/` are complete scenes to copy (`tests/cli/m5/render/eevee_product_shot.stdin` is a whole session).
+
+```
+bpy.context.scene.render.resolution_x = 640
+bpy.context.scene.render.resolution_y = 360
+bpy.context.scene.eevee.taa_render_samples = 16
+bpy.context.scene.view_settings.view_transform = 'AgX'
+bpy.context.scene.view_settings.look = 'AgX - Punchy'
+bpy.context.scene.view_settings.exposure = 0.5
+bpy.context.scene.render.filepath = 'out/shot'
+bpy.ops.render.render(write_still=True)                           # writes out/shot.png
+```
+
+- View transforms are `'Standard'`, `'AgX'` (factory), `'Filmic'`, `'Filmic Log'`, `'ACES 1.3'`, `'ACES 2.0'`, `'Khronos PBR Neutral'`, `'False Color'` and `'Raw'`. Looks carry the transform's prefix (`'AgX - Punchy'`, `'AgX - High Contrast'`); a wrong name answers `RNA_ENUM` with the valid list in `detail.valid`. Set the view transform before the look.
+- Formats: `scene.render.image_settings.file_format = 'PNG' | 'JPEG' | 'OPEN_EXR'` with `color_mode` (`'RGB'`, `'RGBA'`), `color_depth` (`'8'`, `'16'`; `'16'`/`'32'` for EXR) and `quality` for JPEG. For a cut-out, set `scene.render.film_transparent = True` and `color_mode = 'RGBA'`.
+- Lights and world: `object.light_add(type='SUN' | 'POINT' | 'SPOT' | 'AREA', …)` and then `bpy.context.object.data.energy` (W, or W/m² for a sun); the world colour is `bpy.data.worlds['World'].node_tree.nodes['Background'].inputs['Color'].default_value`.
+- `render.engine = 'CYCLES'` renders with EEVEE and a WARNING (deviation D-12). No scene camera answers `Error: Cannot render, no camera`.
+- Cost grows with `resolution_x * resolution_y * taa_render_samples`. The factory 1920x1080 at 64 samples is slow in a debug build, and a very large sample count (`taa_render_samples = 100000`) keeps the statement busy for minutes with no progress events. Use 8 to 64 samples while iterating, and run with `--stmt-timeout` when an agent may set large values (`TIMEOUT` rolls the statement back).
+- Animation: `bpy.ops.render.render(animation=True)` renders `frame_start..frame_end` by `frame_step`, each frame with its own animation, to `filepath` with the frame number replacing the last `#` run or appended as 4 digits (`out/anim_` gives `out/anim_0001.png`, …). `frame_start=` / `frame_end=` on the operator override the scene range. `frame_current` and the scene's own values are unchanged afterwards (D-07).
+
+## 13. Keyframes and actions
+
+`keyframe_insert` on any animatable struct creates the action, its slot, layer, strip and F-curves as Blender does (action `CubeAction`, slot `OBCube`, group `Object Transforms`):
+
+```
+bpy.data.objects['Cube'].keyframe_insert('location', frame=1)
+bpy.data.objects['Cube'].location = (2.0, 0.0, 0.0)
+bpy.data.objects['Cube'].keyframe_insert('location', frame=24)
+bpy.data.objects['Cube'].keyframe_insert('rotation_euler', index=2, frame=24)
+bpy.context.scene.frame_set(12)                                     # evaluates the animation
+bpy.data.objects['Cube'].location
+```
+
+- Blender 5 actions are slotted: `Action.fcurves` is gone (`RNA_REMOVED_IN_5X` with a hint). The F-curves are under `bpy.data.actions['CubeAction'].layers[0].strips[0].channelbags[0].fcurves`; find one with `.fcurves.find('location', index=0)` and edit its keys through `.keyframe_points[i]` (`co`, `interpolation = 'LINEAR'`, `handle_left_type`, `easing`). `keyframe_points.insert(frame, value)` adds a key to an existing curve.
+- To build an action from scratch (as the render goldens do): `actions.new('Move')`, `.slots.new(id_type='OBJECT', name='Cube')`, `.layers.new('Layer')`, `.layers[0].strips.new(type='KEYFRAME')`, `.strips[0].channelbag(<slot>, ensure=True)`, `.channelbags[0].fcurves.new('location', index=0)`; then `bpy.data.objects['Cube'].animation_data_create()`, `.animation_data.action = …` and `.animation_data.action_slot = <slot>`.
+- Keying-set operators act on the selected objects: `bpy.ops.anim.keyframe_insert()` keys location, rotation and scale; `bpy.ops.anim.keyframe_insert_by_name(type='Location' | 'BUILTIN_KSI_LocRot' | 'Scaling' | 'Available' | …)` applies one built-in set. `keyframe_insert(…, options={'INSERTKEY_NEEDED'})` and `keytype='BREAKDOWN'` take Blender's values.
+- Reading a property shows the value now stored. Assigning `scene.frame_current = 12` does not evaluate by itself; `scene.frame_set(12)` or `bpy.context.view_layer.update()` writes the animated values of that frame to the originals, overwriting a manual edit of an animated channel, as in Blender.
+- In the short form, a function without arguments still needs `()`: `data.objects['Cube'].animation_data_create()`. Without it the statement reads the function (`{"$func": …}`) and the response carries the hint `FUNC_NOT_CALLED`.
+
+## 14. Rigging
+
+Bones are edited in Edit Mode on `edit_bones`, posed in Pose Mode on `pose.bones` (the golden cases under `tests/golden/cases/armature/` and the session `tests/cli/m6/armature/rig_short.stdin` show more):
+
+```
+bpy.ops.object.armature_add(location=(0, 0, 0))                   # one bone 'Bone', 0..1 on Z
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.data.armatures['Armature'].edit_bones.new('Top')
+bpy.data.armatures['Armature'].edit_bones['Top'].head = (0, 0, 1.0)
+bpy.data.armatures['Armature'].edit_bones['Top'].tail = (0, 0, 2.0)
+bpy.data.armatures['Armature'].edit_bones['Top'].parent = bpy.data.armatures['Armature'].edit_bones['Bone']
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.3, depth=2.0, location=(0, 0, 1.0))
+bpy.data.objects['Armature'].select_set(True)
+bpy.context.view_layer.objects.active = bpy.data.objects['Armature']
+bpy.ops.object.parent_set(type='ARMATURE_NAME')                  # ARMATURE modifier + empty groups 'Bone', 'Top'
+bpy.data.objects['Cylinder'].vertex_groups['Bone'].add([0, 2, 4, 6, 8, 10, 12, 14], 1.0, 'REPLACE')
+bpy.data.objects['Cylinder'].vertex_groups['Top'].add([1, 3, 5, 7, 9, 11, 13, 15], 1.0, 'REPLACE')
+bpy.ops.object.select_all(action='DESELECT')
+bpy.data.objects['Armature'].select_set(True)
+bpy.ops.object.mode_set(mode='POSE')
+bpy.data.objects['Armature'].pose.bones['Top'].rotation_quaternion = (0.9239, 0.3827, 0.0, 0.0)
+bpy.data.objects['Armature'].pose.bones['Top'].keyframe_insert('rotation_quaternion', frame=10)
+bpy.ops.object.mode_set(mode='OBJECT')
+```
+
+- `parent_set` parents the selected objects to the active one, so the armature must be active. `type='ARMATURE'` only adds the modifier, `'ARMATURE_NAME'` also adds an empty vertex group per deforming bone, and `'ARMATURE_ENVELOPE'` fills them from the bone envelopes. `'ARMATURE_AUTO'` (bone heat) answers `NotImplementedError` (M8): use `ARMATURE_NAME` or `ARMATURE_ENVELOPE` and set the weights with `vertex_groups[…].add(indices, weight, 'REPLACE')`. `type='BONE'` parents an object to the active bone.
+- Pose bones use `rotation_quaternion` by default (`rotation_mode = 'XYZ'` for Euler). Pose bone values are relative to the rest pose; `pose.armature_apply` makes the current pose the rest pose. `bpy.context.view_layer.update()` refreshes the evaluated pose before you read `pose.bones[…].matrix`, `head` or `tail`.
+- The deformed mesh is the evaluated one: `bpy.ops.frap.scene_summary()` reports its bounds (`evaluated=True` by default), and `export_scene.gltf` writes the armature as a skin.
+- Shape keys: `bpy.data.objects['Cube'].shape_key_add(name='Basis')`, then another `shape_key_add(name='Smile')`, edit it in Edit Mode or through `bpy.data.meshes['Cube'].shape_keys.key_blocks['Smile'].data[i].co`, and animate `key_blocks['Smile'].value` with `keyframe_insert('value', frame=…)`.
+
+## 15. Exporting animation to glTF
+
+`bpy.ops.export_scene.gltf(filepath='out/rig.glb')` exports actions, skins and shape-key weights by default (`export_animations=True`). The golden cases under `tests/golden/cases/gltf/animation/` compare each option with Blender.
+
+- `export_animation_mode`: `'ACTIONS'` (default: one glTF animation per action, actions shared by several objects merged), `'ACTIVE_ACTIONS'` (the assigned actions in one animation), `'BROADCAST'` (every action on every animated object), `'NLA_TRACKS'` (one animation per NLA track) and `'SCENE'` (the scene range baked into one animation per object).
+- `export_frame_range=True` limits the baking to the scene's `frame_start..frame_end`; `export_force_sampling` (default on) bakes every frame; a channel that mixes interpolations is baked with the WARNING `Baking animation because there are keyframes with different interpolation methods in one channel`, as in Blender.
+- The scene is exported as it is at frame 0 (with its animation applied), or at `frame_current` with `export_current_frame=True`. The export never changes the scene: `frame_current` and the originals keep their values (D-07; after an `export_current_frame=True` export of an animated scene, Blender instead leaves `frame_current` on the last frame it sampled).

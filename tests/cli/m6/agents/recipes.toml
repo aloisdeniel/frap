@@ -1,0 +1,11 @@
+# M5+M6 stabilization round 2: the keyframe, rigging and glTF-animation recipes of
+# docs/agents.md §13-§15 on the factory scene (raw stdin, §13.1). keyframe_insert creates
+# CubeAction; Action.fcurves answers RNA_REMOVED_IN_5X with the slotted-action hint and the
+# F-curve is read through layers[0].strips[0].channelbags[0]; frame_current alone does not
+# evaluate while frame_set does; a no-argument function read without `()` in the short form
+# carries FUNC_NOT_CALLED. The rig: two bones, ARMATURE_NAME parenting (ARMATURE modifier and
+# one group per bone), weights, a keyed pose bone, and an ACTIONS export that keeps
+# frame_current. Every value verified on Blender 5.2.4.
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

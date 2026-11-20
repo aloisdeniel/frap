@@ -177,3 +177,42 @@ fn an_exported_rig_imports_back_to_the_same_armature() {
         }
     }
 }
+
+/// The add-on's `@cached gather_accessor` keys on the accessor bytes: two skins with equal
+/// inverse bind matrices (the same rig imported twice) share one accessor, as in Blender.
+#[test]
+fn equal_inverse_bind_matrices_share_one_accessor() {
+    let (mut main, win, _) = import("RiggedSimple/glTF-Binary/RiggedSimple.glb");
+    let mut log = ChangeLog::default();
+    import_file(
+        &mut main,
+        &win,
+        &samples().join("RiggedSimple/glTF-Binary/RiggedSimple.glb"),
+        &ImportSettings::default(),
+        &mut log,
+    )
+    .unwrap();
+    let prefs = Preferences::default();
+    let ctx = Context {
+        main: &main,
+        win: &win,
+        prefs: &prefs,
+    };
+    let settings = ExportSettings {
+        generator: "frap test".into(),
+        ..ExportSettings::default()
+    };
+    let doc = export(&main, &ctx, &settings).unwrap().document;
+    assert_eq!(doc.skins.len(), 2);
+    assert!(doc.skins[0].inverse_bind_matrices.is_some());
+    assert_eq!(
+        doc.skins[0].inverse_bind_matrices,
+        doc.skins[1].inverse_bind_matrices
+    );
+    let mat4 = doc
+        .accessors
+        .iter()
+        .filter(|a| a.type_ == frap_gltf::json::AccessorType::Mat4)
+        .count();
+    assert_eq!(mat4, 1);
+}

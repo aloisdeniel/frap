@@ -82,6 +82,10 @@ pub struct SkinState {
     skinned: HashSet<(IdRef<SceneId>, usize)>,
     /// Armature nodes whose neutral bone still has to be appended to their glTF node.
     pending_neutral: HashMap<(IdRef<SceneId>, usize), Index>,
+    /// Inverse bind matrix accessors by content (f32 bits): the add-on's `@cached
+    /// gather_accessor` keys on the `BinaryData` bytes, so skins with equal matrices share
+    /// one accessor.
+    ibm_accessors: HashMap<Vec<u32>, Index>,
     /// `check_if_we_can_remove_armature` refused once: no armature is removed for the rest of
     /// the export (the add-on sets `gltf_armature_object_remove = False`).
     pub remove_refused: bool,
@@ -593,13 +597,22 @@ fn gather_skin_ex(
             .unwrap_or(Mat4::IDENTITY);
         ibms.push(inverted_safe(&matmul(&abc, &arm_mw)).to_cols_array());
     }
-    let data = AccessorData::new(
-        AccessorType::Mat4,
-        false,
-        frap_gltf::accessor::Components::F32(ibms.into_iter().flatten().collect()),
-    )
-    .map_err(|e| ExportError::Invalid(e.to_string()))?;
-    let ibm = g.buf.push_accessor(&data, &AccessorOpts::default());
+    let flat: Vec<f32> = ibms.into_iter().flatten().collect();
+    let key: Vec<u32> = flat.iter().map(|v| v.to_bits()).collect();
+    let ibm = match g.state::<SkinState>().ibm_accessors.get(&key) {
+        Some(&i) => i,
+        None => {
+            let data = AccessorData::new(
+                AccessorType::Mat4,
+                false,
+                frap_gltf::accessor::Components::F32(flat),
+            )
+            .map_err(|e| ExportError::Invalid(e.to_string()))?;
+            let i = g.buf.push_accessor(&data, &AccessorOpts::default());
+            g.state::<SkinState>().ibm_accessors.insert(key, i);
+            i
+        }
+    };
     // Joints, written in `skin.joints` order (each after its child joints).
     let mut joints = Vec::new();
     for &b in tree.all_bones(arm) {

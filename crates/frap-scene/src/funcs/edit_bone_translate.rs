@@ -7,6 +7,10 @@ use frap_rna::{RnaError, RnaPtr, Value, rna_func};
 use crate::{FuncArgs, Host};
 
 #[rna_func(srna = "EditBone", func = "translate", krate = crate)]
-fn edit_bone_translate(h: &mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Result<Value, RnaError> {
+fn edit_bone_translate(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    args: &mut FuncArgs,
+) -> Result<Value, RnaError> {
     crate::edit_armature::family::translate(h, this, args)
 }

@@ -7,6 +7,10 @@ use frap_rna::{RnaError, RnaPtr, Value, rna_func};
 use crate::{FuncArgs, Host};
 
 #[rna_func(srna = "EditBone", func = "parent_index", krate = crate)]
-fn edit_bone_parent_index(h: &mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Result<Value, RnaError> {
+fn edit_bone_parent_index(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    args: &mut FuncArgs,
+) -> Result<Value, RnaError> {
     crate::edit_armature::family::parent_index(h, this, args)
 }
