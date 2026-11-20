@@ -76,8 +76,8 @@ fn finish(pose_mat: Mat4, r: &RestBone) -> PoseMats {
     }
 }
 
-/// `BKE_pose_where_is` for every bone of `arm` (index = bone index). `rest_position` (Edit
-/// Mode or `pose_position = 'REST'`) reads the rest bones.
+/// `BKE_pose_where_is` for every bone of `arm` (index = bone index). `rest_position`
+/// (`pose_position = 'REST'`) reads the rest bones.
 pub fn where_is(
     arm: &Armature,
     rest: &[RestBone],

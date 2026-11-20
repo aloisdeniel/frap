@@ -19,7 +19,12 @@
 //!   Z axis follows the rotation (`ED_armature_ebone_roll_to_vector`, `angle_compat_rad`);
 //!   `use_mirror_x` mirrors the result.
 //!
-//! Proportional editing is not implemented in armature Edit Mode (`NotImplementedError`).
+//! - With one element (only a tip selected, as after `armature.extrude_move`), a rotate or
+//!   resize about the median, bounds or active element uses local origins
+//!   (`transform_around_single_fallback`): the tip turns about its bone's head.
+//!
+//! Proportional editing is ignored: every element is selected (`TD_SELECTED`), so the
+//! falloff never reaches anything. `cursor_transform=True` is not implemented.
 
 use std::sync::Arc;
 
@@ -261,11 +266,6 @@ fn recalc(ea: &mut EditArmature, a: &frap_scene::id::Armature, tds: &[Td], old_l
 
 fn apply(cx: &mut OpCtx, op: TransformOp, args: &OpArgs) -> OpResult {
     let p = TransformParams::from_args(op, args);
-    if p.proportional.is_some() {
-        return Err(OpError::NotImplemented(
-            "frap: proportional editing in armature Edit Mode is not implemented yet".into(),
-        ));
-    }
     if p.cursor_transform {
         return Err(OpError::NotImplemented(
             "frap: cursor_transform=True in armature Edit Mode is not implemented yet".into(),
@@ -275,14 +275,32 @@ fn apply(cx: &mut OpCtx, op: TransformOp, args: &OpArgs) -> OpResult {
     let (objects, results) = {
         let (c, edit) = cx.split_edit();
         let objects = edit_objects(&c);
-        let pivot = PivotPoint::from_identifier(&c.tool_settings().transform_pivot_point);
-        let local_origins = pivot == PivotPoint::IndividualOrigins;
-        let mut tds: Vec<Td> = Vec::new();
-        for &(ob, arm) in &objects {
-            if let Some(ea) = edit.armatures.get(&arm.key()) {
-                tds.extend(create(&c, ea, ob, arm, op, local_origins));
+        let mut pivot = PivotPoint::from_identifier(&c.tool_settings().transform_pivot_point);
+        let collect = |local_origins: bool| {
+            let mut tds: Vec<Td> = Vec::new();
+            for &(ob, arm) in &objects {
+                if let Some(ea) = edit.armatures.get(&arm.key()) {
+                    tds.extend(create(&c, ea, ob, arm, op, local_origins));
+                }
             }
+            tds
+        };
+        let mut tds = collect(pivot.is_local());
+        // `transform_around_single_fallback` (transform_convert.cc): one element transformed
+        // about the median, bounds or active element falls back to local origins (a lone
+        // selected tip then rotates about its bone's head).
+        if tds.len() == 1
+            && matches!(
+                pivot,
+                PivotPoint::BoundingBoxCenter | PivotPoint::MedianPoint | PivotPoint::ActiveElement
+            )
+            && matches!(op, TransformOp::Rotate | TransformOp::Resize)
+            && p.center_override.is_none()
+        {
+            pivot = PivotPoint::IndividualOrigins;
+            tds = collect(true);
         }
+        let local_origins = pivot.is_local();
         if tds.is_empty() {
             (objects, None)
         } else {

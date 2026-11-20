@@ -144,20 +144,26 @@ pub fn mul_mat3_m4_v3(m: &Mat4, v: Vec3) -> Vec3 {
     m.transform_vector3(v)
 }
 
-/// `invert_m4_m4` (identity when singular, as Blender leaves the result undefined; frap picks
-/// the identity).
+/// `invert_m4_m4`: a singular matrix gives the zero matrix (`EIG_invert_m4_m4`,
+/// intern/eigen/intern/matrix.cc, zeroes the result when the matrix is not invertible).
 pub fn invert_m4(m: &Mat4) -> Mat4 {
     if m.determinant() == 0.0 {
-        Mat4::IDENTITY
+        Mat4::ZERO
     } else {
         m.inverse()
     }
 }
 
-/// `invert_m3_m3` (identity when singular).
+/// `invert_m3_m3`: a singular matrix gives its adjugate (Blender computes the adjoint and
+/// only divides by a non-zero determinant, blenlib/intern/math_matrix_c.cc).
 pub fn invert_m3(m: &Mat3) -> Mat3 {
     if m.determinant() == 0.0 {
-        Mat3::IDENTITY
+        Mat3::from_cols(
+            m.y_axis.cross(m.z_axis),
+            m.z_axis.cross(m.x_axis),
+            m.x_axis.cross(m.y_axis),
+        )
+        .transpose()
     } else {
         m.inverse()
     }

@@ -22,10 +22,13 @@
 //! - Transform locks (`lock_location`, `lock_rotation[_w]`, `lock_rotations_4d`, `lock_scale`)
 //!   are honoured.
 //!
-//! Not implemented (`NotImplementedError` before anything changes): proportional editing,
-//! `Pose.use_mirror_x`, `Pose.use_auto_ik`, translating only connected bones (Blender then
-//! rotates instead), `pose_position = 'REST'` (Blender's error report `Cannot change Pose when 'Rest Position'
-//! is enabled`, a `RuntimeError`).
+//! Proportional editing is ignored (the pose `TransData` hold only the transformed bones); a
+//! translate of only connected (or location-locked) bones finishes without a change, as
+//! Blender's exec path does. `pose_position = 'REST'` gives Blender's error report `Cannot
+//! change Pose when 'Rest Position' is enabled` (a `RuntimeError`).
+//!
+//! Not implemented (`NotImplementedError` before anything changes): `Pose.use_mirror_x`,
+//! `Pose.use_auto_ik`, `cursor_transform=True`.
 
 pub mod edit_armature;
 
@@ -589,9 +592,9 @@ fn unsupported(
     c: &Context,
     objects: &[(IdRef<ObjectId>, IdRef<ArmatureId>)],
 ) -> Result<(), OpError> {
-    let what = if p.proportional.is_some() {
-        "proportional editing"
-    } else if p.cursor_transform {
+    // Proportional editing is ignored: the pose `TransData` hold only the transformed bones,
+    // so there is nothing for the falloff to reach.
+    let what = if p.cursor_transform {
         "cursor_transform=True"
     } else if objects.iter().any(|(ob, _)| {
         c.main
@@ -656,9 +659,8 @@ fn apply(cx: &mut OpCtx, op: TransformOp, args: &OpArgs) -> OpResult {
                     }
                 })
             {
-                return Err(OpError::NotImplemented(
-                "frap: translating only connected (or location-locked) pose bones is not implemented yet (Blender rotates them instead)".into(),
-            ));
+                // Blender's exec path finishes without changing any channel.
+                return Ok(OpStatus::Finished);
             }
             let src = orient_source(&c, pivot, &tds);
             let orient = Orientation::from_props(

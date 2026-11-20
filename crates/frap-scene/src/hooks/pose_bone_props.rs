@@ -7,8 +7,9 @@
 //! `rna_PoseChannel_length_get`, `rna_PoseChannel_bone_get`), Blender 5.2.4,
 //! GPL-2.0-or-later.
 //!
-//! In Edit Mode and with `Armature.pose_position = 'REST'` the matrices are the rest
-//! matrices (`BKE_pose_where_is`).
+//! With `Armature.pose_position = 'REST'` the matrices are the rest matrices
+//! (`BKE_pose_where_is`). In Edit Mode they stay the pose of the stored (pre-edit) bones and
+//! the channels: Blender's pose evaluation skips armatures with edit bones.
 
 use smol_str::SmolStr;
 use frap_rna::traits::{FromRnaValue, IdField, ToRnaValue};
@@ -66,9 +67,11 @@ fn located<'h>(h: &'h dyn HostRead, this: &RnaPtr) -> Result<Located<'h>, RnaErr
     })
 }
 
-/// Whether the pose reads the rest bones (Edit Mode or `pose_position = 'REST'`).
-fn rest_position(h: &dyn HostRead, l: &Located) -> bool {
-    l.armature.pose_position == "REST" || h.edit().armatures.contains_key(&l.arm.key())
+/// Whether the pose reads the rest bones (`pose_position = 'REST'`). Edit Mode keeps the
+/// pose: Blender's pose evaluation returns early while `arm->edbo` is set
+/// (armature_update.cc), so the channels keep the matrices of the stored (pre-edit) bones.
+fn rest_position(_h: &dyn HostRead, l: &Located) -> bool {
+    l.armature.pose_position == "REST"
 }
 
 /// Rest data and evaluated pose matrices of the whole armature.

@@ -3,7 +3,8 @@
 //! armature-space matrix from its rest matrix, its local transform (`location`,
 //! `rotation_mode` rotation, `scale`) and its parent's, with `use_connect`,
 //! `use_inherit_rotation`, `inherit_scale` and `use_local_location`; `pose_position='REST'`
-//! (and Edit Mode) gives the rest pose. The ARMATURE modifier (WP 6.5) and glTF skins (WP 6.8)
+//! gives the rest pose; Edit Mode keeps the pose of the stored (pre-edit) bones and the
+//! current channels, as Blender's pose evaluation skips armatures with edit bones. The ARMATURE modifier (WP 6.5) and glTF skins (WP 6.8)
 //! read the result through `EvaluatedObject::pose`.
 //!
 //! The maths are `frap_scene::edit_armature::{rest, posing}` (shared with the `PoseBone` RNA
@@ -24,8 +25,9 @@ pub(crate) fn evaluate(host: &dyn HostRead, ob: &Object) -> Option<Arc<Evaluated
     let arm_ref = ob.data?.typed::<ArmatureId>()?;
     let arm = host.main().armatures.get(arm_ref)?;
     let rest = rest_pose(arm);
-    let rest_position =
-        arm.pose_position == "REST" || host.edit().armatures.contains_key(&arm_ref.key());
+    // Edit Mode keeps the pose of the stored bones (`BKE_pose_eval_*` return early while
+    // `arm->edbo` is set, armature_update.cc), so only `pose_position` selects the rest pose.
+    let rest_position = arm.pose_position == "REST";
     let mats = where_is(arm, &rest, ob.pose.as_ref(), rest_position);
     Some(Arc::new(EvaluatedPose {
         bones: arm

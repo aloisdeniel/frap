@@ -40,6 +40,25 @@ fn ensure_pose(cx: &mut OpCtx, ob: IdRef<ObjectId>, arm: IdRef<ArmatureId>) -> R
 }
 
 fn enter(cx: &mut OpCtx, objects: &[IdRef<ObjectId>]) -> OpResult {
+    // `posemode_exec`: after the active object, every selected, editable armature still in
+    // Object Mode enters too, including the ones sharing an Armature with another (the pose
+    // is per object; the dispatcher lists each object data once, as Edit Mode needs).
+    let mut objects = objects.to_vec();
+    {
+        let c = cx.ctx();
+        for r in c.selected_objects() {
+            if objects.contains(&r) {
+                continue;
+            }
+            if c.main.objects.get(r).is_some_and(|o| {
+                o.object_type() == "ARMATURE"
+                    && o.mode == ObjectMode::Object
+                    && o.header.library.is_none()
+            }) {
+                objects.push(r);
+            }
+        }
+    }
     for (i, &ob) in objects.iter().enumerate() {
         let Some(o) = cx.main().objects.get(ob) else {
             continue;
