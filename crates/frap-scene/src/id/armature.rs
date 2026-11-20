@@ -17,6 +17,9 @@ pub struct Armature {
     pub header: IdHeader,
     /// `Armature.bones`, parents before children (Blender's `bonebase` depth-first order).
     pub bones: Vec<Bone>,
+    /// `Armature.bones.active` (`act_bone`, index into `bones`; the edit-mode active bone is
+    /// `EditArmature::active` while in Edit Mode, copied back on leaving it).
+    pub active_bone: Option<usize>,
     /// `Armature.collections_all`
     pub collections: Vec<BoneCollection>,
     /// `Armature.display_type` (`OCTAHEDRAL`, `STICK`, `BBONE`, `ENVELOPE`, `WIRE`)
@@ -37,6 +40,7 @@ impl Armature {
         Armature {
             header: IdHeader::new(name),
             bones: Vec::new(),
+            active_bone: None,
             collections: Vec::new(),
             display_type: "OCTAHEDRAL".into(),
             pose_position: "POSE".into(),
@@ -91,9 +95,13 @@ pub struct Bone {
     pub tail_radius: f32,
     /// `bbone_segments`
     pub bbone_segments: i32,
-    /// `hide`
+    /// `hide` (edit/object visibility; pose-mode hiding is `PoseBone::hide`)
     pub hide: bool,
-    /// `select` / `select_head` / `select_tail`
+    /// `hide_select`
+    pub hide_select: bool,
+    /// The edit-bone `select` / `select_head` / `select_tail` kept across Edit Mode toggles
+    /// (`BONE_SELECTED`/`BONE_ROOTSEL`/`BONE_TIPSEL`; not RNA on `Bone` since Blender 5.0, pose
+    /// selection is `PoseBone::select`).
     pub select: [bool; 3],
     /// Names of the bone collections the bone is assigned to.
     pub collections: Vec<SmolStr>,
@@ -147,6 +155,10 @@ pub struct PoseBone {
     pub lock_scale: [bool; 3],
     /// `custom_shape`
     pub custom_shape: Option<frap_rna::IdRef<ObjectId>>,
+    /// `select` (pose-mode selection, stored on the pose bone since Blender 5.0)
+    pub select: bool,
+    /// `hide` (pose-mode hiding)
+    pub hide: bool,
 }
 
 impl PoseBone {
@@ -165,6 +177,8 @@ impl PoseBone {
             lock_rotation_w: false,
             lock_scale: [false; 3],
             custom_shape: None,
+            select: false,
+            hide: false,
         }
     }
 }

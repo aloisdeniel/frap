@@ -39,7 +39,7 @@ pub mod hooks {
 pub use context::{
     Base, BaseFlag, BoneRef, Context, ContextMode, EditArmature, EditMesh, EditState,
     LayerCollection, LayerCollectionPath, ObjectMode, Preferences, ViewCache, ViewLayer,
-    VirtualView3D, WindowState,
+    VirtualView3D, WindowState, bone_in_visible_collection,
 };
 pub use data::{ChangeLog, IdMap, Main, RenameMode, RenameResult};
 pub use eval::{EvaluatedObject, EvaluatedPose, ModifierStatus};

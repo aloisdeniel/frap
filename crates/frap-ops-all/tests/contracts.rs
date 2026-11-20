@@ -886,6 +886,10 @@ fn context(c: Context<'_>, w: &WindowState, e: &EditState) {
     let _f = || -> Option<frap_scene::BoneRef> { c.active_pose_bone() };
     let _f = || -> Vec<frap_scene::BoneRef> { c.selected_pose_bones() };
     let _f = || -> Option<IdRef<ObjectId>> { c.pose_object() };
+    let _f = |e: &frap_scene::EditState| -> Option<frap_scene::BoneRef> { c.active_edit_bone(e) };
+    let _f = |a: &frap_scene::id::Armature, b: &frap_scene::id::Bone| -> bool {
+        frap_scene::bone_in_visible_collection(a, b)
+    };
     let _: (IdRef<SceneId>, &SmolStr, &frap_scene::VirtualView3D) =
         (w.scene, &w.view_layer, &w.view3d);
     let vl = c.view_layer();

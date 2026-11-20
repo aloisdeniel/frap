@@ -385,20 +385,127 @@ impl<'a> Context<'a> {
     pub fn cursor(&self) -> &'a View3DCursor {
         &self.scene().cursor
     }
-    /// `context.active_bone` (M6).
+    /// The active object's armature (`obact->data` when it is an `ARMATURE`).
+    fn active_armature(&self) -> Option<(IdRef<ObjectId>, &'a crate::id::Armature)> {
+        let (a, _, arm) = self.active_armature_ref()?;
+        Some((a, arm))
+    }
+    fn active_armature_ref(
+        &self,
+    ) -> Option<(
+        IdRef<ObjectId>,
+        IdRef<frap_rna::ArmatureId>,
+        &'a crate::id::Armature,
+    )> {
+        let a = self.active_object()?;
+        let ob = self.main.objects.get(a)?;
+        let r = ob.data?.typed::<frap_rna::ArmatureId>()?;
+        Some((a, r, self.main.armatures.get(r)?))
+    }
+    /// `context.active_bone` outside Edit Mode: `Armature.bones.active` of the active armature
+    /// (`screen_ctx_active_bone`). In Edit Mode Blender answers the active *edit* bone, which
+    /// lives in the `EditState` a `Context` does not borrow: use [`Context::active_edit_bone`].
     pub fn active_bone(&self) -> Option<BoneRef> {
-        todo!("M6")
+        let (ob, arm) = self.active_armature()?;
+        if self.main.objects.get(ob)?.mode == ObjectMode::Edit {
+            return None;
+        }
+        let b = arm.bones.get(arm.active_bone?)?;
+        Some(BoneRef {
+            object: ob,
+            bone: b.name.clone(),
+        })
     }
-    /// `context.active_pose_bone` (M6).
+    /// `context.active_bone` in Edit Mode: the active edit bone of the active armature.
+    pub fn active_edit_bone(&self, edit: &EditState) -> Option<BoneRef> {
+        let (ob, r, _) = self.active_armature_ref()?;
+        let ea = edit.armatures.get(&r.key())?;
+        let b = ea.edit_bones.get(ea.active?)?;
+        Some(BoneRef {
+            object: ob,
+            bone: b.name.clone(),
+        })
+    }
+    /// `context.active_pose_bone`: the pose channel of `Armature.bones.active` of the pose
+    /// object, if its bone is visible (`BKE_pose_channel_active_if_bonecoll_visible`).
     pub fn active_pose_bone(&self) -> Option<BoneRef> {
-        todo!("M6")
+        let ob = self.pose_object()?;
+        let o = self.main.objects.get(ob)?;
+        let arm = self
+            .main
+            .armatures
+            .get(o.data?.typed::<frap_rna::ArmatureId>()?)?;
+        let b = arm.bones.get(arm.active_bone?)?;
+        if !bone_in_visible_collection(arm, b) {
+            return None;
+        }
+        o.pose.as_ref()?.bones.iter().find(|p| p.name == b.name)?;
+        Some(BoneRef {
+            object: ob,
+            bone: b.name.clone(),
+        })
     }
-    /// `context.selected_pose_bones` (M6).
+    /// `context.selected_pose_bones`: the selected, visible pose bones of every object in Pose
+    /// Mode (`objects_in_mode` order, pose-bone order within an object; `PBONE_VISIBLE` and
+    /// `PoseBone::select`).
     pub fn selected_pose_bones(&self) -> Vec<BoneRef> {
-        todo!("M6")
+        let mut out = Vec::new();
+        if self.pose_object().is_none() {
+            return out;
+        }
+        for ob in self.objects_in_mode() {
+            let Some(o) = self.main.objects.get(ob) else {
+                continue;
+            };
+            let (Some(pose), Some(arm)) = (
+                o.pose.as_ref(),
+                o.data
+                    .and_then(|d| d.typed::<frap_rna::ArmatureId>())
+                    .and_then(|a| self.main.armatures.get(a)),
+            ) else {
+                continue;
+            };
+            for pb in &pose.bones {
+                let Some(b) = arm.bone(&pb.name) else {
+                    continue;
+                };
+                if pb.select && !pb.hide && bone_in_visible_collection(arm, b) {
+                    out.push(BoneRef {
+                        object: ob,
+                        bone: pb.name.clone(),
+                    });
+                }
+            }
+        }
+        out
     }
-    /// `context.pose_object` (M6).
+    /// `context.pose_object`: the active object when it is an armature in Pose Mode
+    /// (`BKE_object_pose_armature_get`; a mesh's armature in weight paint comes with M8).
     pub fn pose_object(&self) -> Option<IdRef<ObjectId>> {
-        todo!("M6")
+        let (ob, _) = self.active_armature()?;
+        let o = self.main.objects.get(ob)?;
+        (o.mode == ObjectMode::Pose && o.pose.is_some()).then_some(ob)
     }
+}
+
+/// `ANIM_bone_in_visible_collection`: a bone without collections is visible; otherwise one of
+/// its collections must be visible together with all its ancestors (`is_visible_effectively`).
+pub fn bone_in_visible_collection(arm: &crate::id::Armature, bone: &crate::id::Bone) -> bool {
+    if bone.collections.is_empty() {
+        return true;
+    }
+    bone.collections.iter().any(|name| {
+        let mut cur = arm.collections.iter().position(|c| &c.name == name);
+        if cur.is_none() {
+            return false;
+        }
+        while let Some(i) = cur {
+            let c = &arm.collections[i];
+            if !c.is_visible {
+                return false;
+            }
+            cur = c.parent;
+        }
+        true
+    })
 }

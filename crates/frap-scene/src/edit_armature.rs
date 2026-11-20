@@ -49,4 +49,10 @@ pub struct EditBone {
     pub select: [bool; 3],
     /// `hide`
     pub hide: bool,
+    /// `hide_select`
+    pub hide_select: bool,
+    /// `lock`
+    pub lock: bool,
+    /// Names of the bone collections the bone is assigned to (`EditBone.collections`).
+    pub collections: Vec<SmolStr>,
 }
