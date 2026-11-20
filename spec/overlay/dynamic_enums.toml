@@ -55,20 +55,38 @@ items = [
 ]
 
 ["ColorManagedViewSettings.look"]
-source = "OCIO looks of 5.2.4 for view 'AgX' (class-level dump: placeholder 'NONE')"
+source = "OCIO looks of 5.2.4, the union over every view transform (class-level dump: placeholder 'NONE'), in config order; each view offers its subset (`frap_color::looks::looks_for`), checked by the hand-written setter (frap-scene `color_view.rs`; `rna_ColorManagedViewSettings_look_itemf`), verified per view on 5.2.4 (frap-color `tests/data/look_items_5_2_4.json`)"
 runtime = true
 default = "None"
 items = [
   ["None", "None", "", 0],
-  ["AgX - Punchy", "Punchy", "A darkening punchy look", 1],
-  ["AgX - Greyscale", "Greyscale", "A Black and White Look", 2],
-  ["AgX - Very High Contrast", "Very High Contrast", "A Very High Contrast Look", 3],
-  ["AgX - High Contrast", "High Contrast", "A High Contrast Look", 4],
-  ["AgX - Medium High Contrast", "Medium High Contrast", "A Medium High Contrast Look", 5],
-  ["AgX - Base Contrast", "Base Contrast", "A Base Contrast Look", 6],
-  ["AgX - Medium Low Contrast", "Medium Low Contrast", "A Medium Low Contrast Look", 7],
-  ["AgX - Low Contrast", "Low Contrast", "A Low Contrast Look", 8],
-  ["AgX - Very Low Contrast", "Very Low Contrast", "A Very Low Contrast Look", 9],
+  ["Very High Contrast", "Very High Contrast", "", 1],
+  ["High Contrast", "High Contrast", "", 2],
+  ["Medium High Contrast", "Medium High Contrast", "", 3],
+  ["Medium Contrast", "Medium Contrast", "", 4],
+  ["Medium Low Contrast", "Medium Low Contrast", "", 5],
+  ["Low Contrast", "Low Contrast", "", 6],
+  ["Very Low Contrast", "Very Low Contrast", "", 7],
+  ["AgX - Punchy", "Punchy", "A darkening punchy look", 8],
+  ["AgX - Greyscale", "Greyscale", "A Black and White Look", 9],
+  ["AgX - Very High Contrast", "Very High Contrast", "A Very High Contrast Look", 10],
+  ["AgX - High Contrast", "High Contrast", "A High Contrast Look", 11],
+  ["AgX - Medium High Contrast", "Medium High Contrast", "A Medium High Contrast Look", 12],
+  ["AgX - Base Contrast", "Base Contrast", "A Base Contrast Look", 13],
+  ["AgX - Medium Low Contrast", "Medium Low Contrast", "A Medium Low Contrast Look", 14],
+  ["AgX - Low Contrast", "Low Contrast", "A Low Contrast Look", 15],
+  ["AgX - Very Low Contrast", "Very Low Contrast", "A Very Low Contrast Look", 16],
+  ["False Color - Punchy", "Punchy", "A darkening punchy look", 17],
+  ["False Color - Greyscale", "Greyscale", "A Black and White Look", 18],
+  ["False Color - Very High Contrast", "Very High Contrast", "A Very High Contrast Look", 19],
+  ["False Color - High Contrast", "High Contrast", "A High Contrast Look", 20],
+  ["False Color - Medium High Contrast", "Medium High Contrast", "A Medium High Contrast Look", 21],
+  ["False Color - Base Contrast", "Base Contrast", "A Base Contrast Look", 22],
+  ["False Color - Medium Low Contrast", "Medium Low Contrast", "A Medium Low Contrast Look", 23],
+  ["False Color - Low Contrast", "Low Contrast", "A Low Contrast Look", 24],
+  ["False Color - Very Low Contrast", "Very Low Contrast", "A Very Low Contrast Look", 25],
+  ["ACES 1.3 - Reference Gamut Compression", "Reference Gamut Compression", "Compress scene-referred values from common cameras into the ACEScg gamut", 26],
+  ["ACES 2.0 - Reference Gamut Compression", "Reference Gamut Compression", "Compress scene-referred values from common cameras into the ACEScg gamut", 27],
 ]
 
 ["ColorManagedDisplaySettings.display_device"]

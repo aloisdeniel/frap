@@ -14,7 +14,8 @@
 # `users_collection` (tuple), `users_scene` (tuple).
 #
 # Schema:
-#   [[prop]]  struct, identifier, description, type ("COLLECTION" | "POINTER"), fixed_type
+#   [[prop]]  struct, identifier, description, type ("COLLECTION" | "POINTER" | "FLOAT" |
+#             "STRING"), fixed_type; FLOAT vectors take `array = [3]`, `subtype`, `default`
 #   [[func]]  struct ("bpy_struct" for every struct), identifier, description,
 #             keyword_only_from (index of the first keyword-only param), positional_only
 #             (Python `/`: no keyword arguments; documentation only), params, returns
@@ -119,3 +120,287 @@ params = [
   { identifier = "property", type = "STRING", default = "" },
 ]
 returns = [{ identifier = "result", type = "STRING", default = "" }]
+
+# ---------------------------------------------------------------- bones (`_GenericBone`, M5+M6 stabilization)
+# Verified on 5.2.4: `_bpy_types.py` `_GenericBone`, `PoseBone.children`, `EditBone.children`.
+
+[[prop]]
+struct = "Bone"
+identifier = "x_axis"
+description = "Vector pointing down the x-axis of the bone"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "Bone"
+identifier = "y_axis"
+description = "Vector pointing down the y-axis of the bone"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "Bone"
+identifier = "z_axis"
+description = "Vector pointing down the z-axis of the bone"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "Bone"
+identifier = "basename"
+description = "The name of this bone before any '.' character"
+type = "STRING"
+
+[[prop]]
+struct = "Bone"
+identifier = "parent_recursive"
+description = "A list of parents, starting with the immediate parent"
+type = "COLLECTION"
+fixed_type = "Bone"
+
+[[prop]]
+struct = "Bone"
+identifier = "center"
+description = "The midpoint between the head and the tail"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "Bone"
+identifier = "vector"
+description = "The direction this bone is pointing. Utility function for (tail - head)"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "Bone"
+identifier = "children_recursive"
+description = "A list of all children from this bone"
+type = "COLLECTION"
+fixed_type = "Bone"
+
+[[prop]]
+struct = "Bone"
+identifier = "children_recursive_basename"
+description = "Returns a chain of children with the same base name as this bone"
+type = "COLLECTION"
+fixed_type = "Bone"
+
+[[func]]
+struct = "Bone"
+identifier = "translate"
+description = "Utility function to add vec to the head and tail of this bone"
+params = [
+  { identifier = "vec", type = "FLOAT", array = [3], subtype = "TRANSLATION", default = [0.0, 0.0, 0.0], required = true },
+]
+
+[[func]]
+struct = "Bone"
+identifier = "parent_index"
+description = "The same as 'bone in other_bone.parent_recursive' but saved generating a list"
+params = [
+  { identifier = "parent_test", type = "POINTER", fixed_type = "AnyType", required = true },
+]
+returns = [{ identifier = "result", type = "INT", default = 0 }]
+
+[[prop]]
+struct = "EditBone"
+identifier = "x_axis"
+description = "Vector pointing down the x-axis of the bone"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "EditBone"
+identifier = "y_axis"
+description = "Vector pointing down the y-axis of the bone"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "EditBone"
+identifier = "z_axis"
+description = "Vector pointing down the z-axis of the bone"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "EditBone"
+identifier = "basename"
+description = "The name of this bone before any '.' character"
+type = "STRING"
+
+[[prop]]
+struct = "EditBone"
+identifier = "parent_recursive"
+description = "A list of parents, starting with the immediate parent"
+type = "COLLECTION"
+fixed_type = "EditBone"
+
+[[prop]]
+struct = "EditBone"
+identifier = "center"
+description = "The midpoint between the head and the tail"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "EditBone"
+identifier = "vector"
+description = "The direction this bone is pointing. Utility function for (tail - head)"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "EditBone"
+identifier = "children_recursive"
+description = "A list of all children from this bone"
+type = "COLLECTION"
+fixed_type = "EditBone"
+
+[[prop]]
+struct = "EditBone"
+identifier = "children_recursive_basename"
+description = "Returns a chain of children with the same base name as this bone"
+type = "COLLECTION"
+fixed_type = "EditBone"
+
+[[prop]]
+struct = "EditBone"
+identifier = "children"
+description = "A list of all the bones children"
+type = "COLLECTION"
+fixed_type = "EditBone"
+
+[[func]]
+struct = "EditBone"
+identifier = "translate"
+description = "Utility function to add vec to the head and tail of this bone"
+params = [
+  { identifier = "vec", type = "FLOAT", array = [3], subtype = "TRANSLATION", default = [0.0, 0.0, 0.0], required = true },
+]
+
+[[func]]
+struct = "EditBone"
+identifier = "parent_index"
+description = "The same as 'bone in other_bone.parent_recursive' but saved generating a list"
+params = [
+  { identifier = "parent_test", type = "POINTER", fixed_type = "AnyType", required = true },
+]
+returns = [{ identifier = "result", type = "INT", default = 0 }]
+
+[[prop]]
+struct = "PoseBone"
+identifier = "x_axis"
+description = "Vector pointing down the x-axis of the bone"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "PoseBone"
+identifier = "y_axis"
+description = "Vector pointing down the y-axis of the bone"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "PoseBone"
+identifier = "z_axis"
+description = "Vector pointing down the z-axis of the bone"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "PoseBone"
+identifier = "basename"
+description = "The name of this bone before any '.' character"
+type = "STRING"
+
+[[prop]]
+struct = "PoseBone"
+identifier = "parent_recursive"
+description = "A list of parents, starting with the immediate parent"
+type = "COLLECTION"
+fixed_type = "PoseBone"
+
+[[prop]]
+struct = "PoseBone"
+identifier = "center"
+description = "The midpoint between the head and the tail"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "PoseBone"
+identifier = "vector"
+description = "The direction this bone is pointing. Utility function for (tail - head)"
+type = "FLOAT"
+array = [3]
+subtype = "XYZ"
+default = [0.0, 0.0, 0.0]
+
+[[prop]]
+struct = "PoseBone"
+identifier = "children_recursive"
+description = "A list of all children from this bone"
+type = "COLLECTION"
+fixed_type = "PoseBone"
+
+[[prop]]
+struct = "PoseBone"
+identifier = "children_recursive_basename"
+description = "Returns a chain of children with the same base name as this bone"
+type = "COLLECTION"
+fixed_type = "PoseBone"
+
+[[prop]]
+struct = "PoseBone"
+identifier = "children"
+description = "A list of all the bones children"
+type = "COLLECTION"
+fixed_type = "PoseBone"
+
+[[func]]
+struct = "PoseBone"
+identifier = "translate"
+description = "Utility function to add vec to the head and tail of this bone"
+params = [
+  { identifier = "vec", type = "FLOAT", array = [3], subtype = "TRANSLATION", default = [0.0, 0.0, 0.0], required = true },
+]
+
+[[func]]
+struct = "PoseBone"
+identifier = "parent_index"
+description = "The same as 'bone in other_bone.parent_recursive' but saved generating a list"
+params = [
+  { identifier = "parent_test", type = "POINTER", fixed_type = "AnyType", required = true },
+]
+returns = [{ identifier = "result", type = "INT", default = 0 }]

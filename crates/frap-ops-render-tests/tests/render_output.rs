@@ -5,7 +5,8 @@
 //! compares each file with Blender 5.2.4's render of the same case
 //! (`tests/golden/fixtures/render/output/<case>/<file name>`):
 //!
-//! - the same format (sniffed from the bytes), size, channel count and sample type;
+//! - the same format (sniffed from the bytes; TIFF, IRIS, DPX, Cineon and multilayer OpenEXR by
+//!   their own readers), size, channel count and sample type;
 //! - for alpha files, the same transparent background (`film_transparent`): every pixel whose
 //!   alpha is 0 in Blender's file is 0 in frap's, and the share of transparent pixels agrees;
 //! - the pixels: SSIM ≥ 0.95 and mean ΔE ≤ 2 in the centre crop (Workbench renders, floats
@@ -151,14 +152,71 @@ fn alpha(img: &DecodedImage) -> Option<Vec<f32>> {
     })
 }
 
+/// The format of an output file: `FileFormat`'s sniffing, plus the render-only formats.
+fn format_of(bytes: &[u8]) -> Option<String> {
+    use frap_imbuf::encode::{is_cineon, is_dpx, is_sgi};
+    if let Some(f) = FileFormat::detect(bytes) {
+        let multilayer = f == FileFormat::OpenExr
+            && frap_imbuf::decode_exr_channels(bytes)
+                .is_ok_and(|(_, _, c)| c.iter().any(|(n, _)| n.contains('.')));
+        return Some(if multilayer {
+            "OpenExrMultilayer".into()
+        } else {
+            format!("{f:?}")
+        });
+    }
+    Some(
+        if bytes.starts_with(b"II*\0") || bytes.starts_with(b"MM\0*") {
+            "Tiff"
+        } else if is_sgi(bytes) {
+            "Iris"
+        } else if is_dpx(bytes) {
+            "Dpx"
+        } else if is_cineon(bytes) {
+            "Cineon"
+        } else {
+            return None;
+        }
+        .into(),
+    )
+}
+
+/// Decodes an output file (DPX and Cineon as their stored codes; a multilayer OpenEXR as the
+/// RGBA of its Combined pass).
+fn decode_output(bytes: &[u8]) -> Result<DecodedImage, frap_imbuf::ImageError> {
+    use frap_imbuf::encode::{decode_cineon, decode_dpx, decode_sgi, decode_tiff};
+    match format_of(bytes).as_deref() {
+        Some("Tiff") => decode_tiff(bytes),
+        Some("Iris") => decode_sgi(bytes),
+        Some("Dpx") => decode_dpx(bytes),
+        Some("Cineon") => decode_cineon(bytes),
+        Some("OpenExrMultilayer") => {
+            let (w, h, channels) = frap_imbuf::decode_exr_channels(bytes)?;
+            let plane = |c: &str| {
+                channels
+                    .iter()
+                    .find(|(n, _)| n.ends_with(&format!(".Combined.{c}")))
+                    .map(|(_, v)| v.clone())
+                    .unwrap_or_default()
+            };
+            let [r, g, b, a] = ["R", "G", "B", "A"].map(plane);
+            let data = (0..r.len())
+                .flat_map(|i| [r[i], g[i], b[i], a[i]])
+                .collect();
+            DecodedImage::new(w, h, 4, PixelData::F32(data))
+        }
+        _ => frap_imbuf::decode(bytes),
+    }
+}
+
 /// Compares one output file; returns the failures.
 fn compare_file(what: &str, ours: &[u8], theirs: &[u8]) -> Vec<String> {
     let mut fails = Vec::new();
-    let (fo, ft) = (FileFormat::detect(ours), FileFormat::detect(theirs));
+    let (fo, ft) = (format_of(ours), format_of(theirs));
     if fo != ft {
         return vec![format!("{what}: format {fo:?}, Blender's {ft:?}")];
     }
-    let (a, b) = match (frap_imbuf::decode(ours), frap_imbuf::decode(theirs)) {
+    let (a, b) = match (decode_output(ours), decode_output(theirs)) {
         (Ok(a), Ok(b)) => (a, b),
         (a, b) => return vec![format!("{what}: decode {:?} / {:?}", a.err(), b.err())],
     };
@@ -243,11 +301,24 @@ fn cases_and_fixtures() {
         for f in &c.files {
             let p = fixture(&repo, c, f);
             let bytes = std::fs::read(&p).unwrap_or_else(|e| panic!("{}: {e}", p.display()));
-            formats.insert(format!("{:?}", FileFormat::detect(&bytes).unwrap()));
+            formats.insert(format_of(&bytes).unwrap());
         }
     }
     // Every output format against Blender.
-    for f in ["Png", "Jpeg", "WebP", "OpenExr", "Hdr", "Targa", "Bmp"] {
+    for f in [
+        "Png",
+        "Jpeg",
+        "WebP",
+        "OpenExr",
+        "Hdr",
+        "Targa",
+        "Bmp",
+        "Tiff",
+        "Iris",
+        "Dpx",
+        "Cineon",
+        "OpenExrMultilayer",
+    ] {
         assert!(
             formats.contains(f),
             "no render/output golden writes {f}: {formats:?}"

@@ -497,7 +497,7 @@ fn deep_hierarchies_do_not_recurse() {
 }
 
 #[test]
-fn animation_boundary_is_a_no_op_until_m6() {
+fn animation_boundary_without_animation_is_a_no_op() {
     let (mut h, _) = scene();
     let gens = h.generations();
     assert_eq!(

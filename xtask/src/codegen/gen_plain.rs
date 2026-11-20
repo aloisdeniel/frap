@@ -38,6 +38,9 @@ struct PlainSpec {
     own_only: bool,
     /// Implements `Rna`/`RnaMut` (`false` for the field sets of an ID, which its binding wraps).
     rna_impl: bool,
+    /// With `rna_impl`: the struct is an RNA struct (nested by others), but its `Rna`/`RnaMut`
+    /// impls are hand-written in frap-scene (`ColorManagedViewSettings`, `color_view.rs`).
+    impl_by_hand: bool,
     /// Stored props whose RNA get/set go through registered hooks (`Field::NeedsHook`): the
     /// field is DNA-like storage the hook routes to (`View3DShading.studio_light`).
     hooked: &'static [&'static str],
@@ -83,6 +86,7 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        impl_by_hand: false,
         hooked: &[],
         extra: &[],
         doc: "`bpy.types.View3DCursor` (`scene.cursor`).",
@@ -117,6 +121,7 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        impl_by_hand: false,
         hooked: &[],
         // M3 W2 (WP 3.8): the UV calculation settings the `uv.*` operators remember between
         // calls (`unwrap_options_sync_toolsettings`, `pack_islands_exec`, `smart_project_exec`);
@@ -170,6 +175,7 @@ const PLAIN: &[PlainSpec] = &[
         rna_impl: true,
         // `rna_View3DShading_studio_light_get/set`: one enum over three DNA names, routed by
         // `type` and `light` (frap-scene `hooks/view3_d_shading_studio_light.rs`, WP 2.3).
+        impl_by_hand: false,
         hooked: &["studio_light"],
         extra: &[
             Extra {
@@ -194,6 +200,10 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        // `look` items depend on `view_transform`, and the `view_transform` setter remaps the
+        // look (`rna_ColorManagedViewSettings_look_itemf`, `_view_transform_set`): the
+        // `Rna`/`RnaMut` impls are hand-written in frap-scene `color_view.rs`.
+        impl_by_hand: true,
         hooked: &[],
         extra: &[],
         doc: "`bpy.types.ColorManagedViewSettings` (`scene.view_settings`).",
@@ -205,6 +215,7 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        impl_by_hand: false,
         hooked: &[],
         extra: &[],
         doc: "`bpy.types.ColorManagedDisplaySettings` (`scene.display_settings`).",
@@ -216,6 +227,7 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        impl_by_hand: false,
         hooked: &[],
         extra: &[],
         doc: "`bpy.types.ColorManagedInputColorspaceSettings` (`image.colorspace_settings`).",
@@ -227,6 +239,9 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        // `file_format` / `media_type` setters adjust the other settings, and the enum items
+        // depend on the format (`BKE_image_format_set`): frap-scene `image_format.rs`.
+        impl_by_hand: true,
         hooked: &[],
         extra: &[],
         doc: "`bpy.types.ImageFormatSettings` (`scene.render.image_settings`).",
@@ -238,6 +253,7 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        impl_by_hand: false,
         hooked: &[],
         extra: &[],
         doc: "`bpy.types.RenderSettings` (`scene.render`).",
@@ -249,6 +265,7 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        impl_by_hand: false,
         hooked: &[],
         extra: &[],
         doc: "`bpy.types.SceneDisplay` (`scene.display`: Workbench render settings, incl. `shading`).",
@@ -260,6 +277,7 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        impl_by_hand: false,
         hooked: &[],
         extra: &[],
         doc: "`bpy.types.SceneEEVEE` (`scene.eevee`).",
@@ -271,6 +289,7 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        impl_by_hand: false,
         hooked: &[],
         extra: &[],
         doc: "`bpy.types.UnitSettings` (`scene.unit_settings`).",
@@ -282,6 +301,7 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &[],
         own_only: false,
         rna_impl: true,
+        impl_by_hand: false,
         hooked: &[],
         extra: &[],
         doc: "`bpy.types.CameraDOFSettings` (`camera.dof`).",
@@ -293,6 +313,7 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &["angle", "angle_x", "angle_y"],
         own_only: true,
         rna_impl: false,
+        impl_by_hand: false,
         hooked: &[],
         extra: &[],
         doc: "The plain fields of `bpy.types.Camera` (`Default` = `bpy.data.cameras.new()`). The\n/// derived `angle`/`angle_x`/`angle_y` are hooks over `lens` and the sensor (§5.6); the ID\n/// binding (`frap-scene/src/id/camera.rs`) delegates the other props to `rna_get`/`rna_set`.",
@@ -304,6 +325,7 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &["type", "node_tree"],
         own_only: true,
         rna_impl: false,
+        impl_by_hand: false,
         hooked: &[],
         extra: &[],
         doc: "The plain fields of `bpy.types.Texture` and `ImageTexture` (M4 W0: what DISPLACE reads;\n/// `Default` = `bpy.data.textures.new(name, 'IMAGE')`). One struct holds the union, as for\n/// `LightFields`; the ID binding (`frap-scene/src/id/texture.rs`, WP 4.2) exposes the fields of\n/// the current `type` and delegates to `rna_get`/`rna_set`.",
@@ -315,6 +337,7 @@ const PLAIN: &[PlainSpec] = &[
         exclude: &["type"],
         own_only: true,
         rna_impl: false,
+        impl_by_hand: false,
         hooked: &[],
         extra: &[],
         doc: "The plain fields of `bpy.types.Light` and its subclasses (`PointLight`, `SunLight`,\n/// `SpotLight`, `AreaLight`). One struct holds the union, as Blender's DNA does, so re-typing a\n/// light keeps every value; RNA exposes only the fields of the current type (`Light::srna()`\n/// refines by `type`). `Default` = `lights.new(…, 'POINT')`; each subclass's own fields take\n/// that subclass's fresh value (`lights.new(…, type)`).",
@@ -901,7 +924,7 @@ pub fn generate(spec: &Spec, files: &mut Files) -> Res<()> {
             ps.doc,
             &screaming(ps.srnas[0]),
             &fields,
-            ps.rna_impl,
+            ps.rna_impl && !ps.impl_by_hand,
             ps.hooked,
             ps.extra,
             &[],

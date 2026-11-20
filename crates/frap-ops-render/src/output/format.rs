@@ -37,7 +37,7 @@ use frap_color::{
     ColorError, DisplayDevice, DisplayImage, DisplayProcessor, DisplaySettings, ViewSettings,
     ViewTransform,
 };
-use frap_imbuf::encode::{ExrCodec, WriteOptions};
+use frap_imbuf::encode::{ExrCodec, TiffCodec, WriteOptions};
 use frap_imbuf::{DecodedImage, EncodeFormat, PixelData};
 use frap_scene::generated::plain::{
     ColorManagedDisplaySettings, ColorManagedViewSettings, ImageFormatSettings, RenderSettings,
@@ -56,9 +56,12 @@ pub struct WriteSettings {
     pub bw: bool,
     /// Writer options (Targa compression, OpenEXR codec, pixels per metre, sRGB chunks).
     pub options: WriteOptions,
-    /// Blender's writer cannot write this combination (`WEBP` + `BW`): writing fails like
-    /// Blender's, after rendering.
+    /// Blender's writer cannot write this combination (`WEBP` or `CINEON` + `BW`): writing
+    /// fails like Blender's, after rendering.
     pub write_fails: bool,
+    /// `OPEN_EXR_MULTILAYER`: the Combined pass of the view layer, premultiplied RGBA whatever
+    /// `color_mode` is.
+    pub multilayer: bool,
 }
 
 /// Why `image_settings` cannot be written (`NotImplementedError` in the operator).
@@ -84,22 +87,32 @@ pub fn render_ppm(r: &RenderSettings) -> Option<[f64; 2]> {
 }
 
 /// [`write_settings`] for the render settings: the image settings plus the render's pixels per
-/// metre.
-pub fn render_write_settings(r: &RenderSettings) -> Result<WriteSettings, String> {
+/// metre, and the part name of a multilayer OpenEXR (`<view layer>.Combined`).
+pub fn render_write_settings(
+    r: &RenderSettings,
+    view_layer: &str,
+) -> Result<WriteSettings, String> {
     let mut ws = write_settings(&r.image_settings)?;
     ws.options.ppm = render_ppm(r);
+    if ws.multilayer {
+        ws.options.exr_layer = Some(format!("{view_layer}.Combined"));
+    }
     Ok(ws)
 }
 
 /// Maps `image_settings` to an encoder (`Err`: a format frap does not write yet, message for
 /// `NotImplementedError`). No pixels per metre: see [`render_write_settings`].
 pub fn write_settings(s: &ImageFormatSettings) -> Result<WriteSettings, String> {
-    if s.media_type != "IMAGE" {
-        return Err(unsupported(&format!(
-            "image_settings.media_type='{}'",
-            s.media_type
-        )));
-    }
+    let multilayer = match (s.media_type.as_str(), s.file_format.as_str()) {
+        ("IMAGE", _) => false,
+        ("MULTI_LAYER_IMAGE", "OPEN_EXR_MULTILAYER") => true,
+        _ => {
+            return Err(unsupported(&format!(
+                "image_settings.media_type='{}' (file_format='{}')",
+                s.media_type, s.file_format
+            )));
+        }
+    };
     let depth = s.color_depth.as_str();
     let quality = s.quality.clamp(0, 100) as u8;
     let mut options = WriteOptions::default();
@@ -126,7 +139,7 @@ pub fn write_settings(s: &ImageFormatSettings) -> Result<WriteSettings, String> 
             },
             false,
         ),
-        "OPEN_EXR" => {
+        "OPEN_EXR" | "OPEN_EXR_MULTILAYER" => {
             options.exr_codec =
                 ExrCodec::from_identifier(&s.exr_codec, quality).ok_or_else(|| {
                     unsupported(&format!("image_settings.exr_codec='{}'", s.exr_codec))
@@ -147,6 +160,31 @@ pub fn write_settings(s: &ImageFormatSettings) -> Result<WriteSettings, String> 
             (EncodeFormat::Targa, false)
         }
         "BMP" => (EncodeFormat::Bmp, false),
+        "TIFF" => {
+            let codec = TiffCodec::from_identifier(&s.tiff_codec).ok_or_else(|| {
+                unsupported(&format!("image_settings.tiff_codec='{}'", s.tiff_codec))
+            })?;
+            let bit_depth = if depth == "16" { 16 } else { 8 };
+            // `prepare_save_tiff`: 16-bit RGBA keeps the associated (premultiplied) display
+            // samples.
+            options.tiff_associated_alpha = bit_depth == 16;
+            (EncodeFormat::Tiff { bit_depth, codec }, false)
+        }
+        "IRIS" => (EncodeFormat::Iris, false),
+        // `BKE_imtype_requires_linear_float`: DPX and Cineon get the scene-linear buffer.
+        "DPX" => (
+            EncodeFormat::Dpx {
+                bit_depth: match depth {
+                    "10" => 10,
+                    "12" => 12,
+                    "16" => 16,
+                    _ => 8,
+                },
+                log: s.use_cineon_log,
+            },
+            true,
+        ),
+        "CINEON" => (EncodeFormat::Cineon, true),
         other => {
             return Err(unsupported(&format!(
                 "image_settings.file_format='{other}'"
@@ -170,12 +208,19 @@ pub fn write_settings(s: &ImageFormatSettings) -> Result<WriteSettings, String> 
         _ => 4,
     };
     let channels = match encode {
+        // A multilayer file holds the whole Combined pass, whatever `color_mode` says.
+        _ if multilayer => 4,
         EncodeFormat::Jpeg { .. } if channels == 4 => 3,
         // Radiance stores RGB: grey is written as grey RGB.
         EncodeFormat::Hdr => 3,
+        // Cineon stores RGB (alpha is under black for `color_mode='RGB'`).
+        EncodeFormat::Cineon => 3,
         _ => channels,
     };
-    let write_fails = bw && matches!(encode, EncodeFormat::WebP { .. });
+    let bw = bw && !multilayer;
+    // Blender's writers refuse a one-channel WebP and a grey Cineon (`cineonCreate` writes RGB
+    // only).
+    let write_fails = bw && matches!(encode, EncodeFormat::WebP { .. } | EncodeFormat::Cineon);
     Ok(WriteSettings {
         encode,
         channels,
@@ -183,6 +228,7 @@ pub fn write_settings(s: &ImageFormatSettings) -> Result<WriteSettings, String> 
         bw,
         options,
         write_fails,
+        multilayer,
     })
 }
 
@@ -281,6 +327,17 @@ fn channel_sum(p: [f32; 4]) -> f32 {
     sum
 }
 
+/// OpenImageIO's float → 8-bit conversion (`convert_type<float, uint8_t>`: round to nearest,
+/// clamp; no dither).
+fn oiio_float_to_u8(v: f32) -> u8 {
+    let s = (v * 255.0).round_ties_even();
+    if s.is_nan() {
+        0
+    } else {
+        s.clamp(0.0, 255.0) as u8
+    }
+}
+
 /// OpenImageIO's float → 16-bit conversion (`convert_type<float, uint16_t>`: round to nearest,
 /// clamp).
 fn oiio_float_to_u16(v: f32) -> u16 {
@@ -308,6 +365,12 @@ pub fn file_pixels_premultiplied(
             "{width}x{height} film has {n} pixels instead of {}",
             width as usize * height as usize
         ));
+    }
+    // A multilayer OpenEXR holds the render buffer as it is.
+    if ws.multilayer {
+        let data = premul.iter().flatten().copied().collect();
+        return DecodedImage::new(width, height, 4, PixelData::F32(data))
+            .map_err(|e| e.to_string());
     }
     // OpenEXR BW is the luma of the render buffer, alpha dropped (`image_exr_from_rgb_to_bw`).
     if matches!(ws.encode, EncodeFormat::OpenExr { .. }) {
@@ -339,10 +402,32 @@ pub fn file_pixels_premultiplied(
         })
         .collect();
     if ws.linear {
-        // Radiance HDR: RGB of the (grey) buffer.
-        let data = buf.iter().flat_map(|p| [p[0], p[1], p[2]]).collect();
-        return DecodedImage::new(width, height, 3, PixelData::F32(data))
-            .map_err(|e| e.to_string());
+        let c = usize::from(ws.channels);
+        return match ws.encode {
+            // DPX: OpenImageIO converts the scene-linear (premultiplied) floats to the file's
+            // 8- or 16-bit samples (round to nearest, clamp); grey is the channel sum.
+            EncodeFormat::Dpx { bit_depth, .. } => {
+                let mut f = Vec::with_capacity(n * c);
+                for p in &buf {
+                    match c {
+                        1 => f.push(channel_sum(*p)),
+                        3 => f.extend_from_slice(&p[..3]),
+                        _ => f.extend_from_slice(p),
+                    }
+                }
+                let pixels = if bit_depth == 8 {
+                    PixelData::U8(f.iter().map(|&v| oiio_float_to_u8(v)).collect())
+                } else {
+                    PixelData::U16(f.iter().map(|&v| oiio_float_to_u16(v)).collect())
+                };
+                DecodedImage::new(width, height, ws.channels, pixels).map_err(|e| e.to_string())
+            }
+            // Radiance HDR and Cineon: RGB of the (grey) buffer.
+            _ => {
+                let data = buf.iter().flat_map(|p| [p[0], p[1], p[2]]).collect();
+                DecodedImage::new(width, height, 3, PixelData::F32(data)).map_err(|e| e.to_string())
+            }
+        };
     }
     // `apply_predivide`.
     let display: Vec<[f32; 4]> = buf
@@ -359,7 +444,13 @@ pub fn file_pixels_premultiplied(
         })
         .collect();
     let c = usize::from(ws.channels);
-    let pixels = if let EncodeFormat::Png { bit_depth: 16, .. } = ws.encode {
+    let sixteen = matches!(
+        ws.encode,
+        EncodeFormat::Png { bit_depth: 16, .. } | EncodeFormat::Tiff { bit_depth: 16, .. }
+    );
+    // PNG output deassociates; 16-bit TIFF keeps the associated samples (`prepare_save_tiff`).
+    let deassociate = !matches!(ws.encode, EncodeFormat::Tiff { .. });
+    let pixels = if sixteen {
         let mut out = Vec::with_capacity(n * c);
         for p in &display {
             match c {
@@ -368,7 +459,7 @@ pub fn file_pixels_premultiplied(
                 _ => {
                     // PNG output deassociates (`c / a` for alpha other than 0 and 1).
                     let a = p[3];
-                    let straight = if a != 0.0 && a != 1.0 {
+                    let straight = if deassociate && a != 0.0 && a != 1.0 {
                         [p[0] / a, p[1] / a, p[2] / a, a]
                     } else {
                         *p
@@ -462,8 +553,25 @@ pub fn write_render(
     if ws.write_fails {
         return Err(cannot_save(path));
     }
+    let named;
+    let ws = if matches!(ws.encode, EncodeFormat::Dpx { .. } | EncodeFormat::Cineon) {
+        // The header records the file's name.
+        let mut w = ws.clone();
+        w.options.file_name = path
+            .file_name()
+            .map(|f| f.to_string_lossy().into_owned())
+            .unwrap_or_default();
+        named = w;
+        &named
+    } else {
+        ws
+    };
     let bytes = encode(rgba, width, height, ws, cm, dither_intensity)?;
-    crate::output::write_file(path, &bytes)
+    if matches!(ws.encode, EncodeFormat::OpenExr { .. }) {
+        crate::output::write_exr_file(path, &bytes)
+    } else {
+        crate::output::write_file(path, &bytes)
+    }
 }
 
 #[cfg(test)]

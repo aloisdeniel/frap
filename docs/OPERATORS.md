@@ -558,7 +558,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [x] | `render.render` | M1 | P0 | still M1 (Workbench); EEVEE M5; animation=True M6 |
+| [x] | `render.render` | M1 | P0 | still M1 (Workbench); EEVEE M5; animation=True M6; output formats: every image format but JPEG2000 and AVIF, multilayer OpenEXR; video (FFMPEG) M8 (decision log M56S-2) |
 | [ ] | `render.opengl` | M8 | P2 | maps to Workbench from scene camera |
 
 ### `wm.* (files)`
@@ -798,7 +798,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | `Object.children / children_recursive / users_collection / users_scene (Python-only)` | M1 |  |
 | [ ] | `ID.rename(name, mode), ID.copy(), ID.user_clear()` | M1 |  |
 | [ ] | `Mesh.from_pydata(vertices, edges, faces), Mesh.shade_smooth()/shade_flat() (Python-only)` | M1 |  |
-| [ ] | `Mesh.update(), validate(), calc_loop_triangles(), transform(matrix), clear_geometry()` | M1 | `validate()` answers `False` for a valid mesh and refuses to repair (`RNA_NOT_IMPLEMENTED`); `transform` ignores `shape_keys` (M6) |
+| [ ] | `Mesh.update(), validate(), calc_loop_triangles(), transform(matrix), clear_geometry()` | M1 | `validate()` answers `False` for a valid mesh and refuses to repair (`RNA_NOT_IMPLEMENTED`); `transform(shape_keys=True)` transforms the shape keys (WP 6.3) |
 | [x] | `Mesh.set_sharp_from_angle(angle), flip_normals(), split_faces()` | M2 | moved from M1 (M1 stabilization); `object.shade_smooth_by_angle` covers sharp-from-angle meanwhile; WP 2.9 (`frap-ops-data/src/funcs/mesh_*.rs`, M2 W0 assignment) |
 | [x] | `Mesh.calc_tangents(uvmap)` | M3 | bevy_mikktspace (`frap-geom/src/mikktspace.rs`); WP 3.7 (M3+M4 W0 assignment) |
 | [ ] | `mesh.materials.append/pop/clear, MaterialSlot.material/link` | M1 |  |
@@ -814,6 +814,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [x] | `AnimData: animation_data_create(), action, action_slot; nla_tracks.new(), track.strips.new(name, start, action)` | M6 |  |
 | [x] | `obj.vertex_groups.new/remove, VertexGroup.add(index, weight, type)/remove/weight(index)` | M6 | works in object mode |
 | [x] | `Object.shape_key_add(name, from_mix)/shape_key_remove/shape_key_clear` | M6 |  |
+| [x] | `Bone/EditBone/PoseBone` `.vector/.center/.x_axis/.y_axis/.z_axis/.basename/.parent_recursive/.children/.children_recursive/.children_recursive_basename`, `.translate(vec)`, `.parent_index(bone)` (Python-only), `EditBone.align_roll(vector)`, `bpy_struct.id_data` | M6 | M5+M6 stabilization (decision log M56S-3); `EditBone/Armature.transform`, `Bone.convert_local_to_pose`, `evaluate_envelope`, `Object.convert_space` are M8 (deviations §2) |
 | [ ] | `bpy_struct.path_resolve / path_from_id, repr` | M1 | byte-identical to Blender, incl. embedded roots |
 | [ ] | `<collection>.foreach_get(attr[, seq]) / foreach_set(attr, seq)`, slices `coll[a:b]` | M1 | one-argument `foreach_get` is a frap extension; bulk `$array` encoding |
 | [ ] | `bpy.ops.<ns>.<op>.poll() / get_rna_type() / idname() / idname_py()` | M1 | poll returns bool + `unmet` requirements |

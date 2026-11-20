@@ -16,4 +16,6 @@ pub mod encode;
 pub mod formats;
 
 pub use codec::{DecodedImage, EncodeFormat, ImageCodec, ImageError, PixelData};
-pub use formats::{FileFormat, ImageInfo, Imbuf, decode, encode, load, probe, save};
+pub use formats::{
+    FileFormat, ImageInfo, Imbuf, decode, decode_exr_channels, encode, load, probe, save,
+};

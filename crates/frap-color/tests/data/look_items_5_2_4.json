@@ -1,0 +1,1049 @@
+{
+ "_source": "Blender 5.2.4 -b --factory-startup, display sRGB: items = the TypeError list of view_settings.look per view_transform, names/descriptions via UILayout.enum_item_name/description; remap[\"<view>|<look>\"][<new view>] = view_settings.look after view_transform = <new view>",
+ "items": {
+  "Standard": [
+   [
+    "None",
+    "None",
+    ""
+   ],
+   [
+    "Very High Contrast",
+    "Very High Contrast",
+    ""
+   ],
+   [
+    "High Contrast",
+    "High Contrast",
+    ""
+   ],
+   [
+    "Medium High Contrast",
+    "Medium High Contrast",
+    ""
+   ],
+   [
+    "Medium Contrast",
+    "Medium Contrast",
+    ""
+   ],
+   [
+    "Medium Low Contrast",
+    "Medium Low Contrast",
+    ""
+   ],
+   [
+    "Low Contrast",
+    "Low Contrast",
+    ""
+   ],
+   [
+    "Very Low Contrast",
+    "Very Low Contrast",
+    ""
+   ]
+  ],
+  "ACES 1.3": [
+   [
+    "None",
+    "None",
+    ""
+   ],
+   [
+    "ACES 1.3 - Reference Gamut Compression",
+    "Reference Gamut Compression",
+    "Compress scene-referred values from common cameras into the ACEScg gamut"
+   ]
+  ],
+  "ACES 2.0": [
+   [
+    "None",
+    "None",
+    ""
+   ],
+   [
+    "ACES 2.0 - Reference Gamut Compression",
+    "Reference Gamut Compression",
+    "Compress scene-referred values from common cameras into the ACEScg gamut"
+   ]
+  ],
+  "Khronos PBR Neutral": [
+   [
+    "None",
+    "None",
+    ""
+   ],
+   [
+    "Very High Contrast",
+    "Very High Contrast",
+    ""
+   ],
+   [
+    "High Contrast",
+    "High Contrast",
+    ""
+   ],
+   [
+    "Medium High Contrast",
+    "Medium High Contrast",
+    ""
+   ],
+   [
+    "Medium Contrast",
+    "Medium Contrast",
+    ""
+   ],
+   [
+    "Medium Low Contrast",
+    "Medium Low Contrast",
+    ""
+   ],
+   [
+    "Low Contrast",
+    "Low Contrast",
+    ""
+   ],
+   [
+    "Very Low Contrast",
+    "Very Low Contrast",
+    ""
+   ]
+  ],
+  "AgX": [
+   [
+    "None",
+    "None",
+    ""
+   ],
+   [
+    "AgX - Punchy",
+    "Punchy",
+    "A darkening punchy look"
+   ],
+   [
+    "AgX - Greyscale",
+    "Greyscale",
+    "A Black and White Look"
+   ],
+   [
+    "AgX - Very High Contrast",
+    "Very High Contrast",
+    "A Very High Contrast Look"
+   ],
+   [
+    "AgX - High Contrast",
+    "High Contrast",
+    "A High Contrast Look"
+   ],
+   [
+    "AgX - Medium High Contrast",
+    "Medium High Contrast",
+    "A Medium High Contrast Look"
+   ],
+   [
+    "AgX - Base Contrast",
+    "Base Contrast",
+    "A Base Contrast Look"
+   ],
+   [
+    "AgX - Medium Low Contrast",
+    "Medium Low Contrast",
+    "A Medium Low Contrast Look"
+   ],
+   [
+    "AgX - Low Contrast",
+    "Low Contrast",
+    "A Low Contrast Look"
+   ],
+   [
+    "AgX - Very Low Contrast",
+    "Very Low Contrast",
+    "A Very Low Contrast Look"
+   ]
+  ],
+  "Filmic": [
+   [
+    "None",
+    "None",
+    ""
+   ],
+   [
+    "Very High Contrast",
+    "Very High Contrast",
+    ""
+   ],
+   [
+    "High Contrast",
+    "High Contrast",
+    ""
+   ],
+   [
+    "Medium High Contrast",
+    "Medium High Contrast",
+    ""
+   ],
+   [
+    "Medium Contrast",
+    "Medium Contrast",
+    ""
+   ],
+   [
+    "Medium Low Contrast",
+    "Medium Low Contrast",
+    ""
+   ],
+   [
+    "Low Contrast",
+    "Low Contrast",
+    ""
+   ],
+   [
+    "Very Low Contrast",
+    "Very Low Contrast",
+    ""
+   ]
+  ],
+  "Filmic Log": [
+   [
+    "None",
+    "None",
+    ""
+   ],
+   [
+    "Very High Contrast",
+    "Very High Contrast",
+    ""
+   ],
+   [
+    "High Contrast",
+    "High Contrast",
+    ""
+   ],
+   [
+    "Medium High Contrast",
+    "Medium High Contrast",
+    ""
+   ],
+   [
+    "Medium Contrast",
+    "Medium Contrast",
+    ""
+   ],
+   [
+    "Medium Low Contrast",
+    "Medium Low Contrast",
+    ""
+   ],
+   [
+    "Low Contrast",
+    "Low Contrast",
+    ""
+   ],
+   [
+    "Very Low Contrast",
+    "Very Low Contrast",
+    ""
+   ]
+  ],
+  "False Color": [
+   [
+    "None",
+    "None",
+    ""
+   ],
+   [
+    "False Color - Punchy",
+    "Punchy",
+    "A darkening punchy look"
+   ],
+   [
+    "False Color - Greyscale",
+    "Greyscale",
+    "A Black and White Look"
+   ],
+   [
+    "False Color - Very High Contrast",
+    "Very High Contrast",
+    "A Very High Contrast Look"
+   ],
+   [
+    "False Color - High Contrast",
+    "High Contrast",
+    "A High Contrast Look"
+   ],
+   [
+    "False Color - Medium High Contrast",
+    "Medium High Contrast",
+    "A Medium High Contrast Look"
+   ],
+   [
+    "False Color - Base Contrast",
+    "Base Contrast",
+    "A Base Contrast Look"
+   ],
+   [
+    "False Color - Medium Low Contrast",
+    "Medium Low Contrast",
+    "A Medium Low Contrast Look"
+   ],
+   [
+    "False Color - Low Contrast",
+    "Low Contrast",
+    "A Low Contrast Look"
+   ],
+   [
+    "False Color - Very Low Contrast",
+    "Very Low Contrast",
+    "A Very Low Contrast Look"
+   ]
+  ],
+  "Raw": [
+   [
+    "None",
+    "None",
+    ""
+   ],
+   [
+    "Very High Contrast",
+    "Very High Contrast",
+    ""
+   ],
+   [
+    "High Contrast",
+    "High Contrast",
+    ""
+   ],
+   [
+    "Medium High Contrast",
+    "Medium High Contrast",
+    ""
+   ],
+   [
+    "Medium Contrast",
+    "Medium Contrast",
+    ""
+   ],
+   [
+    "Medium Low Contrast",
+    "Medium Low Contrast",
+    ""
+   ],
+   [
+    "Low Contrast",
+    "Low Contrast",
+    ""
+   ],
+   [
+    "Very Low Contrast",
+    "Very Low Contrast",
+    ""
+   ]
+  ]
+ },
+ "remap": {
+  "Standard|None": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "None",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "None",
+   "Raw": "None"
+  },
+  "Standard|Very High Contrast": {
+   "Standard": "Very High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very High Contrast",
+   "AgX": "AgX - Very High Contrast",
+   "Filmic": "Very High Contrast",
+   "Filmic Log": "Very High Contrast",
+   "False Color": "False Color - Very High Contrast",
+   "Raw": "Very High Contrast"
+  },
+  "Standard|High Contrast": {
+   "Standard": "High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "High Contrast",
+   "AgX": "AgX - High Contrast",
+   "Filmic": "High Contrast",
+   "Filmic Log": "High Contrast",
+   "False Color": "False Color - High Contrast",
+   "Raw": "High Contrast"
+  },
+  "Standard|Medium High Contrast": {
+   "Standard": "Medium High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium High Contrast",
+   "AgX": "AgX - Medium High Contrast",
+   "Filmic": "Medium High Contrast",
+   "Filmic Log": "Medium High Contrast",
+   "False Color": "False Color - Medium High Contrast",
+   "Raw": "Medium High Contrast"
+  },
+  "Standard|Medium Contrast": {
+   "Standard": "Medium Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium Contrast",
+   "AgX": "None",
+   "Filmic": "Medium Contrast",
+   "Filmic Log": "Medium Contrast",
+   "False Color": "None",
+   "Raw": "Medium Contrast"
+  },
+  "Standard|Medium Low Contrast": {
+   "Standard": "Medium Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium Low Contrast",
+   "AgX": "AgX - Medium Low Contrast",
+   "Filmic": "Medium Low Contrast",
+   "Filmic Log": "Medium Low Contrast",
+   "False Color": "False Color - Medium Low Contrast",
+   "Raw": "Medium Low Contrast"
+  },
+  "Standard|Low Contrast": {
+   "Standard": "Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Low Contrast",
+   "AgX": "AgX - Low Contrast",
+   "Filmic": "Low Contrast",
+   "Filmic Log": "Low Contrast",
+   "False Color": "False Color - Low Contrast",
+   "Raw": "Low Contrast"
+  },
+  "Standard|Very Low Contrast": {
+   "Standard": "Very Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very Low Contrast",
+   "AgX": "AgX - Very Low Contrast",
+   "Filmic": "Very Low Contrast",
+   "Filmic Log": "Very Low Contrast",
+   "False Color": "False Color - Very Low Contrast",
+   "Raw": "Very Low Contrast"
+  },
+  "ACES 1.3|None": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "None",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "None",
+   "Raw": "None"
+  },
+  "ACES 1.3|ACES 1.3 - Reference Gamut Compression": {
+   "Standard": "None",
+   "ACES 1.3": "ACES 1.3 - Reference Gamut Compression",
+   "ACES 2.0": "ACES 2.0 - Reference Gamut Compression",
+   "Khronos PBR Neutral": "None",
+   "AgX": "None",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "None",
+   "Raw": "None"
+  },
+  "ACES 2.0|None": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "None",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "None",
+   "Raw": "None"
+  },
+  "ACES 2.0|ACES 2.0 - Reference Gamut Compression": {
+   "Standard": "None",
+   "ACES 1.3": "ACES 1.3 - Reference Gamut Compression",
+   "ACES 2.0": "ACES 2.0 - Reference Gamut Compression",
+   "Khronos PBR Neutral": "None",
+   "AgX": "None",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "None",
+   "Raw": "None"
+  },
+  "Khronos PBR Neutral|None": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "None",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "None",
+   "Raw": "None"
+  },
+  "Khronos PBR Neutral|Very High Contrast": {
+   "Standard": "Very High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very High Contrast",
+   "AgX": "AgX - Very High Contrast",
+   "Filmic": "Very High Contrast",
+   "Filmic Log": "Very High Contrast",
+   "False Color": "False Color - Very High Contrast",
+   "Raw": "Very High Contrast"
+  },
+  "Khronos PBR Neutral|High Contrast": {
+   "Standard": "High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "High Contrast",
+   "AgX": "AgX - High Contrast",
+   "Filmic": "High Contrast",
+   "Filmic Log": "High Contrast",
+   "False Color": "False Color - High Contrast",
+   "Raw": "High Contrast"
+  },
+  "Khronos PBR Neutral|Medium High Contrast": {
+   "Standard": "Medium High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium High Contrast",
+   "AgX": "AgX - Medium High Contrast",
+   "Filmic": "Medium High Contrast",
+   "Filmic Log": "Medium High Contrast",
+   "False Color": "False Color - Medium High Contrast",
+   "Raw": "Medium High Contrast"
+  },
+  "Khronos PBR Neutral|Medium Contrast": {
+   "Standard": "Medium Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium Contrast",
+   "AgX": "None",
+   "Filmic": "Medium Contrast",
+   "Filmic Log": "Medium Contrast",
+   "False Color": "None",
+   "Raw": "Medium Contrast"
+  },
+  "Khronos PBR Neutral|Medium Low Contrast": {
+   "Standard": "Medium Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium Low Contrast",
+   "AgX": "AgX - Medium Low Contrast",
+   "Filmic": "Medium Low Contrast",
+   "Filmic Log": "Medium Low Contrast",
+   "False Color": "False Color - Medium Low Contrast",
+   "Raw": "Medium Low Contrast"
+  },
+  "Khronos PBR Neutral|Low Contrast": {
+   "Standard": "Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Low Contrast",
+   "AgX": "AgX - Low Contrast",
+   "Filmic": "Low Contrast",
+   "Filmic Log": "Low Contrast",
+   "False Color": "False Color - Low Contrast",
+   "Raw": "Low Contrast"
+  },
+  "Khronos PBR Neutral|Very Low Contrast": {
+   "Standard": "Very Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very Low Contrast",
+   "AgX": "AgX - Very Low Contrast",
+   "Filmic": "Very Low Contrast",
+   "Filmic Log": "Very Low Contrast",
+   "False Color": "False Color - Very Low Contrast",
+   "Raw": "Very Low Contrast"
+  },
+  "AgX|None": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "None",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "None",
+   "Raw": "None"
+  },
+  "AgX|AgX - Punchy": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "AgX - Punchy",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "False Color - Punchy",
+   "Raw": "None"
+  },
+  "AgX|AgX - Greyscale": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "AgX - Greyscale",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "False Color - Greyscale",
+   "Raw": "None"
+  },
+  "AgX|AgX - Very High Contrast": {
+   "Standard": "Very High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very High Contrast",
+   "AgX": "AgX - Very High Contrast",
+   "Filmic": "Very High Contrast",
+   "Filmic Log": "Very High Contrast",
+   "False Color": "False Color - Very High Contrast",
+   "Raw": "Very High Contrast"
+  },
+  "AgX|AgX - High Contrast": {
+   "Standard": "High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "High Contrast",
+   "AgX": "AgX - High Contrast",
+   "Filmic": "High Contrast",
+   "Filmic Log": "High Contrast",
+   "False Color": "False Color - High Contrast",
+   "Raw": "High Contrast"
+  },
+  "AgX|AgX - Medium High Contrast": {
+   "Standard": "Medium High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium High Contrast",
+   "AgX": "AgX - Medium High Contrast",
+   "Filmic": "Medium High Contrast",
+   "Filmic Log": "Medium High Contrast",
+   "False Color": "False Color - Medium High Contrast",
+   "Raw": "Medium High Contrast"
+  },
+  "AgX|AgX - Base Contrast": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "AgX - Base Contrast",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "False Color - Base Contrast",
+   "Raw": "None"
+  },
+  "AgX|AgX - Medium Low Contrast": {
+   "Standard": "Medium Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium Low Contrast",
+   "AgX": "AgX - Medium Low Contrast",
+   "Filmic": "Medium Low Contrast",
+   "Filmic Log": "Medium Low Contrast",
+   "False Color": "False Color - Medium Low Contrast",
+   "Raw": "Medium Low Contrast"
+  },
+  "AgX|AgX - Low Contrast": {
+   "Standard": "Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Low Contrast",
+   "AgX": "AgX - Low Contrast",
+   "Filmic": "Low Contrast",
+   "Filmic Log": "Low Contrast",
+   "False Color": "False Color - Low Contrast",
+   "Raw": "Low Contrast"
+  },
+  "AgX|AgX - Very Low Contrast": {
+   "Standard": "Very Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very Low Contrast",
+   "AgX": "AgX - Very Low Contrast",
+   "Filmic": "Very Low Contrast",
+   "Filmic Log": "Very Low Contrast",
+   "False Color": "False Color - Very Low Contrast",
+   "Raw": "Very Low Contrast"
+  },
+  "Filmic|None": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "None",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "None",
+   "Raw": "None"
+  },
+  "Filmic|Very High Contrast": {
+   "Standard": "Very High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very High Contrast",
+   "AgX": "AgX - Very High Contrast",
+   "Filmic": "Very High Contrast",
+   "Filmic Log": "Very High Contrast",
+   "False Color": "False Color - Very High Contrast",
+   "Raw": "Very High Contrast"
+  },
+  "Filmic|High Contrast": {
+   "Standard": "High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "High Contrast",
+   "AgX": "AgX - High Contrast",
+   "Filmic": "High Contrast",
+   "Filmic Log": "High Contrast",
+   "False Color": "False Color - High Contrast",
+   "Raw": "High Contrast"
+  },
+  "Filmic|Medium High Contrast": {
+   "Standard": "Medium High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium High Contrast",
+   "AgX": "AgX - Medium High Contrast",
+   "Filmic": "Medium High Contrast",
+   "Filmic Log": "Medium High Contrast",
+   "False Color": "False Color - Medium High Contrast",
+   "Raw": "Medium High Contrast"
+  },
+  "Filmic|Medium Contrast": {
+   "Standard": "Medium Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium Contrast",
+   "AgX": "None",
+   "Filmic": "Medium Contrast",
+   "Filmic Log": "Medium Contrast",
+   "False Color": "None",
+   "Raw": "Medium Contrast"
+  },
+  "Filmic|Medium Low Contrast": {
+   "Standard": "Medium Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium Low Contrast",
+   "AgX": "AgX - Medium Low Contrast",
+   "Filmic": "Medium Low Contrast",
+   "Filmic Log": "Medium Low Contrast",
+   "False Color": "False Color - Medium Low Contrast",
+   "Raw": "Medium Low Contrast"
+  },
+  "Filmic|Low Contrast": {
+   "Standard": "Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Low Contrast",
+   "AgX": "AgX - Low Contrast",
+   "Filmic": "Low Contrast",
+   "Filmic Log": "Low Contrast",
+   "False Color": "False Color - Low Contrast",
+   "Raw": "Low Contrast"
+  },
+  "Filmic|Very Low Contrast": {
+   "Standard": "Very Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very Low Contrast",
+   "AgX": "AgX - Very Low Contrast",
+   "Filmic": "Very Low Contrast",
+   "Filmic Log": "Very Low Contrast",
+   "False Color": "False Color - Very Low Contrast",
+   "Raw": "Very Low Contrast"
+  },
+  "Filmic Log|None": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "None",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "None",
+   "Raw": "None"
+  },
+  "Filmic Log|Very High Contrast": {
+   "Standard": "Very High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very High Contrast",
+   "AgX": "AgX - Very High Contrast",
+   "Filmic": "Very High Contrast",
+   "Filmic Log": "Very High Contrast",
+   "False Color": "False Color - Very High Contrast",
+   "Raw": "Very High Contrast"
+  },
+  "Filmic Log|High Contrast": {
+   "Standard": "High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "High Contrast",
+   "AgX": "AgX - High Contrast",
+   "Filmic": "High Contrast",
+   "Filmic Log": "High Contrast",
+   "False Color": "False Color - High Contrast",
+   "Raw": "High Contrast"
+  },
+  "Filmic Log|Medium High Contrast": {
+   "Standard": "Medium High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium High Contrast",
+   "AgX": "AgX - Medium High Contrast",
+   "Filmic": "Medium High Contrast",
+   "Filmic Log": "Medium High Contrast",
+   "False Color": "False Color - Medium High Contrast",
+   "Raw": "Medium High Contrast"
+  },
+  "Filmic Log|Medium Contrast": {
+   "Standard": "Medium Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium Contrast",
+   "AgX": "None",
+   "Filmic": "Medium Contrast",
+   "Filmic Log": "Medium Contrast",
+   "False Color": "None",
+   "Raw": "Medium Contrast"
+  },
+  "Filmic Log|Medium Low Contrast": {
+   "Standard": "Medium Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium Low Contrast",
+   "AgX": "AgX - Medium Low Contrast",
+   "Filmic": "Medium Low Contrast",
+   "Filmic Log": "Medium Low Contrast",
+   "False Color": "False Color - Medium Low Contrast",
+   "Raw": "Medium Low Contrast"
+  },
+  "Filmic Log|Low Contrast": {
+   "Standard": "Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Low Contrast",
+   "AgX": "AgX - Low Contrast",
+   "Filmic": "Low Contrast",
+   "Filmic Log": "Low Contrast",
+   "False Color": "False Color - Low Contrast",
+   "Raw": "Low Contrast"
+  },
+  "Filmic Log|Very Low Contrast": {
+   "Standard": "Very Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very Low Contrast",
+   "AgX": "AgX - Very Low Contrast",
+   "Filmic": "Very Low Contrast",
+   "Filmic Log": "Very Low Contrast",
+   "False Color": "False Color - Very Low Contrast",
+   "Raw": "Very Low Contrast"
+  },
+  "False Color|None": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "None",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "None",
+   "Raw": "None"
+  },
+  "False Color|False Color - Punchy": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "AgX - Punchy",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "False Color - Punchy",
+   "Raw": "None"
+  },
+  "False Color|False Color - Greyscale": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "AgX - Greyscale",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "False Color - Greyscale",
+   "Raw": "None"
+  },
+  "False Color|False Color - Very High Contrast": {
+   "Standard": "Very High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very High Contrast",
+   "AgX": "AgX - Very High Contrast",
+   "Filmic": "Very High Contrast",
+   "Filmic Log": "Very High Contrast",
+   "False Color": "False Color - Very High Contrast",
+   "Raw": "Very High Contrast"
+  },
+  "False Color|False Color - High Contrast": {
+   "Standard": "High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "High Contrast",
+   "AgX": "AgX - High Contrast",
+   "Filmic": "High Contrast",
+   "Filmic Log": "High Contrast",
+   "False Color": "False Color - High Contrast",
+   "Raw": "High Contrast"
+  },
+  "False Color|False Color - Medium High Contrast": {
+   "Standard": "Medium High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium High Contrast",
+   "AgX": "AgX - Medium High Contrast",
+   "Filmic": "Medium High Contrast",
+   "Filmic Log": "Medium High Contrast",
+   "False Color": "False Color - Medium High Contrast",
+   "Raw": "Medium High Contrast"
+  },
+  "False Color|False Color - Base Contrast": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "AgX - Base Contrast",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "False Color - Base Contrast",
+   "Raw": "None"
+  },
+  "False Color|False Color - Medium Low Contrast": {
+   "Standard": "Medium Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium Low Contrast",
+   "AgX": "AgX - Medium Low Contrast",
+   "Filmic": "Medium Low Contrast",
+   "Filmic Log": "Medium Low Contrast",
+   "False Color": "False Color - Medium Low Contrast",
+   "Raw": "Medium Low Contrast"
+  },
+  "False Color|False Color - Low Contrast": {
+   "Standard": "Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Low Contrast",
+   "AgX": "AgX - Low Contrast",
+   "Filmic": "Low Contrast",
+   "Filmic Log": "Low Contrast",
+   "False Color": "False Color - Low Contrast",
+   "Raw": "Low Contrast"
+  },
+  "False Color|False Color - Very Low Contrast": {
+   "Standard": "Very Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very Low Contrast",
+   "AgX": "AgX - Very Low Contrast",
+   "Filmic": "Very Low Contrast",
+   "Filmic Log": "Very Low Contrast",
+   "False Color": "False Color - Very Low Contrast",
+   "Raw": "Very Low Contrast"
+  },
+  "Raw|None": {
+   "Standard": "None",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "None",
+   "AgX": "None",
+   "Filmic": "None",
+   "Filmic Log": "None",
+   "False Color": "None",
+   "Raw": "None"
+  },
+  "Raw|Very High Contrast": {
+   "Standard": "Very High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very High Contrast",
+   "AgX": "AgX - Very High Contrast",
+   "Filmic": "Very High Contrast",
+   "Filmic Log": "Very High Contrast",
+   "False Color": "False Color - Very High Contrast",
+   "Raw": "Very High Contrast"
+  },
+  "Raw|High Contrast": {
+   "Standard": "High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "High Contrast",
+   "AgX": "AgX - High Contrast",
+   "Filmic": "High Contrast",
+   "Filmic Log": "High Contrast",
+   "False Color": "False Color - High Contrast",
+   "Raw": "High Contrast"
+  },
+  "Raw|Medium High Contrast": {
+   "Standard": "Medium High Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium High Contrast",
+   "AgX": "AgX - Medium High Contrast",
+   "Filmic": "Medium High Contrast",
+   "Filmic Log": "Medium High Contrast",
+   "False Color": "False Color - Medium High Contrast",
+   "Raw": "Medium High Contrast"
+  },
+  "Raw|Medium Contrast": {
+   "Standard": "Medium Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium Contrast",
+   "AgX": "None",
+   "Filmic": "Medium Contrast",
+   "Filmic Log": "Medium Contrast",
+   "False Color": "None",
+   "Raw": "Medium Contrast"
+  },
+  "Raw|Medium Low Contrast": {
+   "Standard": "Medium Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Medium Low Contrast",
+   "AgX": "AgX - Medium Low Contrast",
+   "Filmic": "Medium Low Contrast",
+   "Filmic Log": "Medium Low Contrast",
+   "False Color": "False Color - Medium Low Contrast",
+   "Raw": "Medium Low Contrast"
+  },
+  "Raw|Low Contrast": {
+   "Standard": "Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Low Contrast",
+   "AgX": "AgX - Low Contrast",
+   "Filmic": "Low Contrast",
+   "Filmic Log": "Low Contrast",
+   "False Color": "False Color - Low Contrast",
+   "Raw": "Low Contrast"
+  },
+  "Raw|Very Low Contrast": {
+   "Standard": "Very Low Contrast",
+   "ACES 1.3": "None",
+   "ACES 2.0": "None",
+   "Khronos PBR Neutral": "Very Low Contrast",
+   "AgX": "AgX - Very Low Contrast",
+   "Filmic": "Very Low Contrast",
+   "Filmic Log": "Very Low Contrast",
+   "False Color": "False Color - Very Low Contrast",
+   "Raw": "Very Low Contrast"
+  }
+ }
+}

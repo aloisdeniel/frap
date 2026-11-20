@@ -5,7 +5,10 @@
 //!
 //! - one scanline part, increasing Y, the codec of `image_settings.exr_codec` (ZIP by default;
 //!   DWAA/DWAB at `openexr_jpg_like_quality_to_dwa_compression_level(quality)`);
-//! - channels `R`, `G`, `B` (+ `A`); a grey image is one channel (`V` in render output);
+//! - channels `R`, `G`, `B` (+ `A`); a grey image is one channel (`V` in render output); a
+//!   multilayer file (`OPEN_EXR_MULTILAYER`, `WriteOptions::exr_layer`) names them after the
+//!   pass, `ViewLayer.Combined.R`…, with the part name and Blender's `BlenderMultiChannel`
+//!   attribute;
 //! - half samples: NaN → 0, clamped to ±`HALF_MAX` (less a margin for DWA, so its overshoot
 //!   stays finite: `compression_half_max`), then rounded to nearest even
 //!   (`float_to_half_clamp_array`); float samples are written as they are;
@@ -99,7 +102,10 @@ pub(crate) fn encode_exr(
             } else {
                 FlatSamples::F32(plane.collect())
             };
-            AnyChannel::new(*name, samples)
+            match &options.exr_layer {
+                Some(layer) => AnyChannel::new(format!("{layer}.{name}").as_str(), samples),
+                None => AnyChannel::new(*name, samples),
+            }
         })
         .collect();
     let size = (image.width as usize, image.height as usize);
@@ -113,6 +119,14 @@ pub(crate) fn encode_exr(
         layer_attributes.other.insert(
             Text::from("colorInteropID"),
             AttributeValue::Text(Text::from(id)),
+        );
+    }
+    if let Some(layer) = &options.exr_layer {
+        // `IMB_exr_begin_write` of a multilayer file: the part name and Blender's marker.
+        layer_attributes.layer_name = Some(Text::from(layer.as_str()));
+        layer_attributes.other.insert(
+            Text::from("BlenderMultiChannel"),
+            AttributeValue::Text(Text::from("Blender V2.55.1 and newer")),
         );
     }
     let layer = Layer::new(

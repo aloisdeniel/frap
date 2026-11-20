@@ -264,6 +264,10 @@ pub(crate) fn mime_of(bytes: &[u8]) -> &'static str {
         Some(FileFormat::Hdr) => "image/vnd.radiance",
         Some(FileFormat::Bmp) => "image/bmp",
         Some(FileFormat::Targa) => "image/x-tga",
+        Some(FileFormat::Tiff) => "image/tiff",
+        Some(FileFormat::Iris) => "image/sgi",
+        Some(FileFormat::Dpx) => "image/x-dpx",
+        Some(FileFormat::Cineon) => "image/cineon",
         None => "application/octet-stream",
     }
 }

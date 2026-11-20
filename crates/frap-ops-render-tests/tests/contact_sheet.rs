@@ -212,10 +212,10 @@ fn tiles_equal_individual_renders() {
             // `render.render` of the scene camera at the tile size gives the tile.
             e.ok("bpy.context.scene.render.resolution_x = 96
 bpy.context.scene.render.resolution_y = 54
-bpy.context.scene.render.filepath = '//real_CAMERA'");
+bpy.context.scene.render.filepath = '//out/real_CAMERA'");
             let j = e.render("bpy.ops.render.render(write_still=True)").unwrap();
             assert_eq!(j["ok"], true, "{j}");
-            let real = rgba8(&load(&e.path("real_CAMERA.png")));
+            let real = rgba8(&load(&e.path("out/real_CAMERA.png")));
             assert_eq!(real.len(), tile.len(), "CAMERA: tile size");
             let max = tile
                 .iter()
@@ -263,7 +263,7 @@ bpy.data.objects['Tile_{view}'].rotation_euler = ({r0}, {r1}, {r2})
 bpy.context.scene.camera = bpy.data.objects['Tile_{view}']
 bpy.context.scene.render.resolution_x = 96
 bpy.context.scene.render.resolution_y = 96
-bpy.context.scene.render.filepath = '//real_{view}'",
+bpy.context.scene.render.filepath = '//out/real_{view}'",
             s = t["ortho_scale"],
             cs = t["clip_start"],
             ce = t["clip_end"],
@@ -277,7 +277,7 @@ bpy.context.scene.render.filepath = '//real_{view}'",
         e.ok(&src);
         let j = e.render("bpy.ops.render.render(write_still=True)").unwrap();
         assert_eq!(j["ok"], true, "{j}");
-        let real = rgba8(&load(&e.path(&format!("real_{view}.png"))));
+        let real = rgba8(&load(&e.path(&format!("out/real_{view}.png"))));
         let max = tile
             .iter()
             .zip(&real)
@@ -521,7 +521,7 @@ fn unrendered_workbench_effects_warn_in_both_ops() {
     e.ok("bpy.context.scene.render.engine = 'BLENDER_WORKBENCH'
 bpy.context.scene.render.resolution_x = 32
 bpy.context.scene.render.resolution_y = 18
-bpy.context.scene.render.filepath = '//cav'
+bpy.context.scene.render.filepath = '//out/cav'
 bpy.context.scene.display.shading.show_cavity = True");
     let warned = |j: &J, what: &str| {
         common::reports(j)

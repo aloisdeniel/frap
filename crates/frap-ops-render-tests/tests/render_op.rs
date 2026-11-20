@@ -106,14 +106,14 @@ fn checks_in_blender_order_without_gpu() {
         runtime("Cannot write a single file with an animation format selected"),
     );
     e.ok("bpy.context.scene.render.image_settings.media_type = 'IMAGE'");
-    e.ok("bpy.context.scene.render.image_settings.file_format = 'TIFF'");
+    e.ok("bpy.context.scene.render.image_settings.file_format = 'JPEG2000'");
     fails(
         &mut e,
         "bpy.ops.render.render(write_still=True)",
         (
             "NotImplementedError".into(),
             "OP_NOT_IMPLEMENTED".into(),
-            "frap: render output image_settings.file_format='TIFF' is not supported yet".into(),
+            "frap: render output image_settings.file_format='JPEG2000' is not supported yet".into(),
         ),
     );
 
@@ -277,8 +277,8 @@ fn engine_fallback_warns() {
     assert_eq!(pngs[1], pngs[2]);
 }
 
-/// Output paths: cwd-relative, `//` (unsaved: the cwd), templates, `use_file_extension`, a
-/// path without a directory (deviation: Blender 5.2.4 fails to save it).
+/// Output paths: cwd-relative, `//` (unsaved: the cwd), templates, `use_file_extension`; a
+/// path without a folder fails to save, as in Blender 5.2.4 (M5+M6 stabilization).
 #[test]
 fn output_paths() {
     let mut e = Env::new("render_paths");
@@ -294,7 +294,6 @@ fn output_paths() {
         ),
         ("out/hash_##", "out/hash_##.png", ""),
         ("out/dir/", "out/dir/Untitled.png", ""),
-        ("shot", "shot.png", ""),
         (
             "out/noext",
             "out/noext",
@@ -314,6 +313,21 @@ fn output_paths() {
         let img =
             frap_imbuf::load(&e.path(written)).unwrap_or_else(|err| panic!("{written}: {err}"));
         assert_eq!((img.width, img.height, img.channels), (64, 36, 4));
+    }
+    // A path without a folder: `Render error (No such file or directory) cannot save:
+    // 'shot.png'` (verified on 5.2.4, also for `//shot` unsaved and `./shot`).
+    e.ok("bpy.context.scene.render.use_file_extension = True");
+    for filepath in ["shot", "//shot", "./shot"] {
+        e.ok(&format!("bpy.context.scene.render.filepath = '{filepath}'"));
+        let Some(j) = e.render("bpy.ops.render.render(write_still=True)") else {
+            return;
+        };
+        assert_eq!(j["ok"], false, "{filepath}: {j}");
+        let msg = j["error"]["message"].as_str().unwrap();
+        assert!(msg.ends_with(") cannot save: 'shot.png'"), "{msg}");
+        #[cfg(unix)]
+        assert!(msg.contains("(No such file or directory)"), "{msg}");
+        assert!(!e.path("shot.png").exists());
     }
     // An absolute path is used as is.
     let abs = e.path("abs/z");
@@ -411,7 +425,13 @@ fn file_formats() {
         ),
         (&["file_format = 'HDR'"], "out/x.hdr", 3, 32),
         (
-            &["file_format = 'WEBP'", "color_depth = '8'", "quality = 100"],
+            // HDR left `color_mode` RGB (`BKE_image_format_set`): RGBA again.
+            &[
+                "file_format = 'WEBP'",
+                "color_mode = 'RGBA'",
+                "color_depth = '8'",
+                "quality = 100",
+            ],
             "out/x.webp",
             4,
             8,

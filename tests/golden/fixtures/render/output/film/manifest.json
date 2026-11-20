@@ -15,7 +15,10 @@
     "color_depth": "32",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "film_transparent.exr"
   },
@@ -30,7 +33,10 @@
     "color_depth": "32",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "film_opaque.exr"
   },
@@ -45,7 +51,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png8_rgba.png"
   },
@@ -60,7 +69,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png8_rgb.png"
   },
@@ -75,7 +87,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png8_bw.png"
   },
@@ -90,7 +105,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png8_rgba_nodither.png"
   },
@@ -105,7 +123,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png8_rgba_opaque.png"
   },
@@ -120,7 +141,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png8_rgba_agx.png"
   },
@@ -135,7 +159,10 @@
     "color_depth": "16",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png16_rgba.png"
   },
@@ -150,7 +177,10 @@
     "color_depth": "16",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png16_rgb.png"
   },
@@ -165,7 +195,10 @@
     "color_depth": "16",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png16_bw.png"
   },
@@ -180,7 +213,10 @@
     "color_depth": "16",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png16_rgba_agx.png"
   },
@@ -195,7 +231,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png8_rgba_raw.png"
   },
@@ -210,7 +249,10 @@
     "color_depth": "16",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png16_rgba_raw.png"
   },
@@ -225,7 +267,10 @@
     "color_depth": "16",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png16_rgb_raw.png"
   },
@@ -240,7 +285,10 @@
     "color_depth": "16",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "png16_bw_raw.png"
   },
@@ -255,7 +303,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "jpeg_rgb.jpg"
   },
@@ -270,7 +321,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "jpeg_bw.jpg"
   },
@@ -285,7 +339,10 @@
     "color_depth": "8",
     "quality": 5,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "jpeg_rgb_q5.jpg"
   },
@@ -300,7 +357,10 @@
     "color_depth": "8",
     "quality": 100,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "jpeg_rgb_q100.jpg"
   },
@@ -315,7 +375,10 @@
     "color_depth": "8",
     "quality": 100,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "webp_rgba.webp"
   },
@@ -330,7 +393,10 @@
     "color_depth": "8",
     "quality": 100,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "webp_rgb.webp"
   },
@@ -345,7 +411,10 @@
     "color_depth": "8",
     "quality": 100,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "error": "Error: Render error (Undefined error: 0) cannot save: 'webp_bw.webp'"
   },
@@ -360,7 +429,10 @@
     "color_depth": "8",
     "quality": 80,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "webp_rgba_q80.webp"
   },
@@ -375,7 +447,10 @@
     "color_depth": "16",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "exr16_rgba_zip.exr"
   },
@@ -390,7 +465,10 @@
     "color_depth": "32",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "NONE"
+    "exr_codec": "NONE",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "exr32_rgb_none.exr"
   },
@@ -405,7 +483,10 @@
     "color_depth": "32",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "PIZ"
+    "exr_codec": "PIZ",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "exr32_bw_piz.exr"
   },
@@ -420,7 +501,10 @@
     "color_depth": "16",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "RLE"
+    "exr_codec": "RLE",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "exr16_bw_rle.exr"
   },
@@ -435,7 +519,10 @@
     "color_depth": "32",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIPS"
+    "exr_codec": "ZIPS",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "exr32_rgba_zips.exr"
   },
@@ -450,7 +537,10 @@
     "color_depth": "32",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "PXR24"
+    "exr_codec": "PXR24",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "exr32_rgba_pxr24.exr"
   },
@@ -465,7 +555,10 @@
     "color_depth": "16",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "B44"
+    "exr_codec": "B44",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "exr16_rgba_b44.exr"
   },
@@ -480,7 +573,10 @@
     "color_depth": "16",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "DWAA"
+    "exr_codec": "DWAA",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "exr16_rgba_dwaa.exr"
   },
@@ -495,7 +591,10 @@
     "color_depth": "32",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "hdr_rgb.hdr"
   },
@@ -510,7 +609,10 @@
     "color_depth": "32",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "hdr_bw.hdr"
   },
@@ -525,7 +627,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "tga_rgba.tga"
   },
@@ -540,7 +645,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "tga_rgb.tga"
   },
@@ -555,7 +663,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "tga_bw.tga"
   },
@@ -570,7 +681,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "tgaraw_rgba.tga"
   },
@@ -585,7 +699,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "tgaraw_bw.tga"
   },
@@ -600,7 +717,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "bmp_rgb.bmp"
   },
@@ -615,7 +735,10 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "bmp_bw.bmp"
   },
@@ -630,9 +753,534 @@
     "color_depth": "8",
     "quality": 90,
     "compression": 15,
-    "exr_codec": "ZIP"
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
    },
    "file": "bmp_rgba.bmp"
+  },
+  {
+   "name": "tiff8_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TIFF",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "tiff8_rgba.tif"
+  },
+  {
+   "name": "tiff8_rgb_none",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TIFF",
+    "color_mode": "RGB",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "NONE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "tiff8_rgb_none.tif"
+  },
+  {
+   "name": "tiff8_bw_lzw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TIFF",
+    "color_mode": "BW",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "LZW",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "tiff8_bw_lzw.tif"
+  },
+  {
+   "name": "tiff8_rgba_packbits",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TIFF",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "PACKBITS",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "tiff8_rgba_packbits.tif"
+  },
+  {
+   "name": "tiff16_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TIFF",
+    "color_mode": "RGBA",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "tiff16_rgba.tif"
+  },
+  {
+   "name": "tiff16_rgb_lzw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TIFF",
+    "color_mode": "RGB",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "LZW",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "tiff16_rgb_lzw.tif"
+  },
+  {
+   "name": "tiff16_bw_packbits",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TIFF",
+    "color_mode": "BW",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "PACKBITS",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "tiff16_bw_packbits.tif"
+  },
+  {
+   "name": "tiff16_rgba_none",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TIFF",
+    "color_mode": "RGBA",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "NONE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "tiff16_rgba_none.tif"
+  },
+  {
+   "name": "tiff16_rgba_agx",
+   "film": "film_transparent.exr",
+   "view_transform": "AgX",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "TIFF",
+    "color_mode": "RGBA",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "tiff16_rgba_agx.tif"
+  },
+  {
+   "name": "iris_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "IRIS",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "iris_rgba.rgb"
+  },
+  {
+   "name": "iris_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "IRIS",
+    "color_mode": "RGB",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "iris_rgb.rgb"
+  },
+  {
+   "name": "iris_bw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "IRIS",
+    "color_mode": "BW",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "iris_bw.rgb"
+  },
+  {
+   "name": "iris_rgba_opaque",
+   "film": "film_opaque.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "IRIS",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "iris_rgba_opaque.rgb"
+  },
+  {
+   "name": "dpx8_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "DPX",
+    "color_mode": "RGBA",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "dpx8_rgba.dpx"
+  },
+  {
+   "name": "dpx8_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "DPX",
+    "color_mode": "RGB",
+    "color_depth": "8",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "dpx8_rgb.dpx"
+  },
+  {
+   "name": "dpx10_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "DPX",
+    "color_mode": "RGB",
+    "color_depth": "10",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "dpx10_rgb.dpx"
+  },
+  {
+   "name": "dpx10_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "DPX",
+    "color_mode": "RGBA",
+    "color_depth": "10",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "dpx10_rgba.dpx"
+  },
+  {
+   "name": "dpx10_bw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "DPX",
+    "color_mode": "BW",
+    "color_depth": "10",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "dpx10_bw.dpx"
+  },
+  {
+   "name": "dpx12_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "DPX",
+    "color_mode": "RGB",
+    "color_depth": "12",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "dpx12_rgb.dpx"
+  },
+  {
+   "name": "dpx16_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "DPX",
+    "color_mode": "RGBA",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "dpx16_rgba.dpx"
+  },
+  {
+   "name": "dpx16_bw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "DPX",
+    "color_mode": "BW",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "dpx16_bw.dpx"
+  },
+  {
+   "name": "dpx10_rgb_log",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "DPX",
+    "color_mode": "RGB",
+    "color_depth": "10",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": true,
+    "media_type": "IMAGE"
+   },
+   "file": "dpx10_rgb_log.dpx"
+  },
+  {
+   "name": "cineon_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "CINEON",
+    "color_mode": "RGB",
+    "color_depth": "10",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "file": "cineon_rgb.cin"
+  },
+  {
+   "name": "cineon_bw",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "CINEON",
+    "color_mode": "BW",
+    "color_depth": "10",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "IMAGE"
+   },
+   "error": "Error: Render error (Undefined error: 0) cannot save: 'cineon_bw.cin'"
+  },
+  {
+   "name": "cineon_rgb_log",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "CINEON",
+    "color_mode": "RGB",
+    "color_depth": "10",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": true,
+    "media_type": "IMAGE"
+   },
+   "file": "cineon_rgb_log.cin"
+  },
+  {
+   "name": "exrml32_rgba",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR_MULTILAYER",
+    "color_mode": "RGBA",
+    "color_depth": "32",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "MULTI_LAYER_IMAGE"
+   },
+   "file": "exrml32_rgba.exr"
+  },
+  {
+   "name": "exrml16_rgb",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR_MULTILAYER",
+    "color_mode": "RGB",
+    "color_depth": "16",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "MULTI_LAYER_IMAGE"
+   },
+   "file": "exrml16_rgb.exr"
+  },
+  {
+   "name": "exrml32_bw_piz",
+   "film": "film_transparent.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR_MULTILAYER",
+    "color_mode": "BW",
+    "color_depth": "32",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "PIZ",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "MULTI_LAYER_IMAGE"
+   },
+   "file": "exrml32_bw_piz.exr"
+  },
+  {
+   "name": "exrml32_opaque",
+   "film": "film_opaque.exr",
+   "view_transform": "Standard",
+   "dither_intensity": 1.0,
+   "image_settings": {
+    "file_format": "OPEN_EXR_MULTILAYER",
+    "color_mode": "RGBA",
+    "color_depth": "32",
+    "quality": 90,
+    "compression": 15,
+    "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": false,
+    "media_type": "MULTI_LAYER_IMAGE"
+   },
+   "file": "exrml32_opaque.exr"
   }
  ]
 }

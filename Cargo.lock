@@ -1042,6 +1042,7 @@ name = "frap-imbuf"
 version = "0.1.0"
 dependencies = [
  "exr",
+ "flate2",
  "half",
  "image",
  "png",
@@ -1649,6 +1650,7 @@ dependencies = [
  "bitflags",
  "frap-anim",
  "frap-bmesh",
+ "frap-color",
  "frap-math",
  "frap-mesh",
  "frap-nodes",

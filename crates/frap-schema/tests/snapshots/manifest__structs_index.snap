@@ -1,5 +1,6 @@
 ---
 source: crates/frap-schema/tests/snapshots.rs
+assertion_line: 24
 ---
 [
   "Action < ID | 12 props | 3 funcs",
@@ -69,7 +70,7 @@ source: crates/frap-schema/tests/snapshots.rs
   "BlendDataWindowManagers < - | 0 props | 1 funcs",
   "BlendDataWorkSpaces < - | 0 props | 1 funcs",
   "BlendDataWorlds < - | 0 props | 3 funcs",
-  "Bone < - | 52 props | 5 funcs",
+  "Bone < - | 61 props | 7 funcs",
   "BoneCollection < - | 13 props | 3 funcs",
   "BoneCollectionMemberships < - | 0 props | 1 funcs",
   "BoneCollections < - | 4 props | 3 funcs",
@@ -122,7 +123,7 @@ source: crates/frap-schema/tests/snapshots.rs
   "DisplaceModifier < Modifier | 11 props | 0 funcs",
   "DynamicPaintModifier < Modifier | 3 props | 0 funcs",
   "EdgeSplitModifier < Modifier | 3 props | 0 funcs",
-  "EditBone < - | 53 props | 2 funcs",
+  "EditBone < - | 63 props | 4 funcs",
   "ExplodeModifier < Modifier | 9 props | 0 funcs",
   "FCurve < - | 17 props | 7 funcs",
   "FCurveKeyframePoints < - | 0 props | 7 funcs",
@@ -348,7 +349,7 @@ source: crates/frap-schema/tests/snapshots.rs
   "PointCloud < ID | 5 props | 1 funcs",
   "PointLight < Light | 9 props | 0 funcs",
   "Pose < - | 7 props | 5 funcs",
-  "PoseBone < - | 68 props | 5 funcs",
+  "PoseBone < - | 78 props | 7 funcs",
   "PoseBoneConstraints < - | 1 props | 4 funcs",
   "Preferences < - | 22 props | 0 funcs",
   "PreferencesEdit < - | 55 props | 0 funcs",

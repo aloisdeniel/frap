@@ -749,7 +749,9 @@ fn coerce_inner(def: &PropDef, input: Input, cx: &CoerceCx) -> Result<Coerced, R
             ))),
             Input::None => done(if *is_id { Value::Id(None) } else { Value::None }),
             Input::Ptr(p) => {
-                if !p.srna.is_a(fixed_type) {
+                // `AnyType` (Python-only parameters such as `parent_index(parent_test)`)
+                // takes any struct.
+                if *fixed_type != "AnyType" && !p.srna.is_a(fixed_type) {
                     return Err(type_err(format!(
                         "{qual} expected a {fixed_type} type, not {}",
                         p.srna.identifier

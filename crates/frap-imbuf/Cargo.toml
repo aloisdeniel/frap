@@ -1,6 +1,6 @@
 [package]
 name = "frap-imbuf"
-description = "frap L3: Image decode/encode (PNG 8/16, JPEG, WebP, HDR, EXR, TGA, BMP) behind ImageCodec (ARCHITECTURE §3.2)"
+description = "frap L3: Image decode/encode (PNG 8/16, JPEG, WebP, HDR, EXR, TGA, BMP; render-output TIFF, IRIS, DPX, Cineon) behind ImageCodec (ARCHITECTURE §3.2)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -13,6 +13,7 @@ image.workspace = true
 png.workspace = true
 exr.workspace = true
 half.workspace = true
+flate2.workspace = true
 thiserror.workspace = true
 
 [dependencies.webp]

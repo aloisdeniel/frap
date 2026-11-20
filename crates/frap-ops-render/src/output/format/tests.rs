@@ -3,8 +3,8 @@
 //! outputs of one film in every format (`tests/golden/fixtures/render/output/film/`, written by
 //! its `generate.py`, listed in `manifest.json`). The film is Blender's own premultiplied render
 //! buffer, so these compare frap's output path alone, without a renderer or a GPU: bytes for
-//! Targa, BMP, Radiance HDR and JPEG (without Blender's stamp `COM` markers), samples for PNG,
-//! WebP and OpenEXR.
+//! Targa, BMP, Radiance HDR and JPEG (without Blender's stamp `COM` markers), IRIS, and the
+//! image data of DPX and Cineon; samples for PNG, WebP, TIFF and (multilayer) OpenEXR.
 
 use super::*;
 use frap_scene::generated::plain::ColorManagedViewSettings;
@@ -40,7 +40,8 @@ fn factory_png_rgba8() {
     );
     assert!(ws.options.srgb);
     assert_eq!(ws.options.ppm, None);
-    let ws = render_write_settings(&RenderSettings::default()).unwrap();
+    let ws = render_write_settings(&RenderSettings::default(), "ViewLayer").unwrap();
+    assert_eq!(ws.options.exr_layer, None);
     let ppm = 72.0 / f64::from(0.0254f32);
     assert_eq!(
         ws.options.ppm,
@@ -123,9 +124,51 @@ fn formats() {
     s.color_mode = "BW".into();
     assert!(write_settings(&s).unwrap().write_fails);
     assert_eq!(
-        write_settings(&settings("TIFF", "RGBA", "8")).unwrap_err(),
-        "frap: render output image_settings.file_format='TIFF' is not supported yet"
+        write_settings(&settings("JPEG2000", "RGBA", "8")).unwrap_err(),
+        "frap: render output image_settings.file_format='JPEG2000' is not supported yet"
     );
+    assert!(write_settings(&settings("AVIF", "RGBA", "8")).is_err());
+    let tiff = w("TIFF", "RGBA", "16");
+    assert_eq!(
+        tiff.encode,
+        EncodeFormat::Tiff {
+            bit_depth: 16,
+            codec: TiffCodec::Deflate
+        }
+    );
+    assert!(tiff.options.tiff_associated_alpha && !tiff.linear);
+    assert!(!w("TIFF", "RGBA", "8").options.tiff_associated_alpha);
+    assert_eq!(w("IRIS", "RGB", "8").encode, EncodeFormat::Iris);
+    let dpx = w("DPX", "RGB", "10");
+    assert_eq!(
+        dpx.encode,
+        EncodeFormat::Dpx {
+            bit_depth: 10,
+            log: false
+        }
+    );
+    assert!(dpx.linear);
+    assert!(w("CINEON", "BW", "10").write_fails);
+    assert_eq!(w("CINEON", "RGB", "10").channels, 3);
+    let ml = write_settings(&ImageFormatSettings {
+        media_type: "MULTI_LAYER_IMAGE".into(),
+        ..settings("OPEN_EXR_MULTILAYER", "BW", "16")
+    })
+    .unwrap();
+    assert!(ml.multilayer && !ml.bw && ml.linear);
+    assert_eq!(ml.channels, 4);
+    let ml = render_write_settings(
+        &RenderSettings {
+            image_settings: ImageFormatSettings {
+                media_type: "MULTI_LAYER_IMAGE".into(),
+                ..settings("OPEN_EXR_MULTILAYER", "RGBA", "32")
+            },
+            ..RenderSettings::default()
+        },
+        "Layer 2",
+    )
+    .unwrap();
+    assert_eq!(ml.options.exr_layer.as_deref(), Some("Layer 2.Combined"));
     let video = ImageFormatSettings {
         media_type: "VIDEO".into(),
         ..ImageFormatSettings::default()
@@ -267,14 +310,35 @@ fn entry_settings(e: &Value) -> ImageFormatSettings {
     let s = &e["image_settings"];
     let text = |k: &str| s[k].as_str().unwrap().to_owned();
     ImageFormatSettings {
+        media_type: text("media_type").into(),
         file_format: text("file_format").into(),
         color_mode: text("color_mode").into(),
         color_depth: text("color_depth").into(),
         exr_codec: text("exr_codec").into(),
+        tiff_codec: text("tiff_codec").into(),
+        use_cineon_log: s["use_cineon_log"].as_bool().unwrap(),
         quality: s["quality"].as_i64().unwrap() as i32,
         compression: s["compression"].as_i64().unwrap() as i32,
         ..ImageFormatSettings::default()
     }
+}
+
+/// Decodes one of the outputs `frap_imbuf::decode` does not load (TIFF, IRIS, DPX, Cineon).
+fn decode_output(fmt: &str, bytes: &[u8]) -> DecodedImage {
+    match fmt {
+        "TIFF" => frap_imbuf::encode::decode_tiff(bytes),
+        "IRIS" => frap_imbuf::encode::decode_sgi(bytes),
+        "DPX" => frap_imbuf::encode::decode_dpx(bytes),
+        "CINEON" => frap_imbuf::encode::decode_cineon(bytes),
+        _ => frap_imbuf::decode(bytes),
+    }
+    .unwrap_or_else(|e| panic!("{fmt}: {e}"))
+}
+
+/// The image data of a DPX (after its 8 KiB header and padding) or Cineon (after its 2 KiB
+/// header) file.
+fn image_data<'a>(fmt: &str, bytes: &'a [u8]) -> &'a [u8] {
+    &bytes[if fmt == "DPX" { 0x2000 } else { 2048 }..]
 }
 
 /// Blender's JPEG without its stamp `COM` markers.
@@ -353,11 +417,28 @@ fn render_outputs_match_blender() {
         let cm = color_management(&view, &ColorManagedDisplaySettings::default());
         assert!(cm.warnings.is_empty(), "{name}: {:?}", cm.warnings);
         let dither = e["dither_intensity"].as_f64().unwrap() as f32;
-        let mut ws = write_settings(&s).unwrap_or_else(|err| panic!("{name}: {err}"));
-        ws.options.ppm = render_ppm(&RenderSettings::default());
+        let mut ws = render_write_settings(
+            &RenderSettings {
+                image_settings: s.clone(),
+                ..RenderSettings::default()
+            },
+            "ViewLayer",
+        )
+        .unwrap_or_else(|err| panic!("{name}: {err}"));
+        if matches!(s.file_format.as_str(), "DPX" | "CINEON") {
+            ws.options.file_name = e["file"].as_str().unwrap_or_default().to_owned();
+        }
         if let Some(err) = e["error"].as_str() {
             assert!(ws.write_fails, "{name}: Blender failed to write: {err}");
-            let ours = format!("Error: {}", cannot_save(Path::new(&format!("{name}.webp"))));
+            let ext = if s.file_format == "CINEON" {
+                "cin"
+            } else {
+                "webp"
+            };
+            let ours = format!(
+                "Error: {}",
+                cannot_save(Path::new(&format!("{name}.{ext}")))
+            );
             if cfg!(target_os = "macos") {
                 assert_eq!(ours, err, "{name}");
             }
@@ -389,6 +470,47 @@ fn render_outputs_match_blender() {
                     fails.push(format!("{name}: bytes differ from Blender's {file}"));
                 }
             }
+            // Ports of Blender's (OIIO's) writers: the same bytes.
+            "IRIS" => {
+                if bytes != blender {
+                    fails.push(format!("{name}: bytes differ from Blender's {file}"));
+                }
+            }
+            "OPEN_EXR_MULTILAYER" => {
+                // The Combined pass under Blender's channel names, sample for sample.
+                let got = frap_imbuf::decode_exr_channels(&bytes).unwrap();
+                let want = frap_imbuf::decode_exr_channels(&blender).unwrap();
+                let names = |c: &(u32, u32, Vec<(String, Vec<f32>)>)| {
+                    c.2.iter().map(|(n, _)| n.clone()).collect::<Vec<_>>()
+                };
+                assert_eq!(names(&got), names(&want), "{name}: channels");
+                assert_eq!(
+                    names(&want),
+                    ["A", "B", "G", "R"].map(|c| format!("ViewLayer.Combined.{c}"))
+                );
+                if got != want {
+                    fails.push(format!("{name}: samples differ from Blender's {file}"));
+                }
+            }
+            fmt @ ("DPX" | "CINEON") => {
+                // The headers differ in the creator and date only; the image data is Blender's.
+                if image_data(fmt, &bytes) != image_data(fmt, &blender)
+                    || bytes.len() != blender.len()
+                {
+                    fails.push(format!("{name}: image data differs from Blender's {file}"));
+                }
+                let (got, want) = (decode_output(fmt, &bytes), decode_output(fmt, &blender));
+                assert_eq!(got, want, "{name}");
+                if fmt == "DPX" {
+                    // Element: descriptor, transfer, colorimetric, depth, packing, high quantity;
+                    // black and white levels.
+                    for r in [796..806, 1952..1956, 1964..1968, 16..20] {
+                        if bytes[r.clone()] != blender[r.clone()] {
+                            fails.push(format!("{name}: header bytes {r:?} differ"));
+                        }
+                    }
+                }
+            }
             fmt => {
                 // Targa and BMP: same layout as Blender's (their writers are byte-exact on
                 // Blender's samples, `frap-imbuf` `encode/tests.rs`).
@@ -402,11 +524,19 @@ fn render_outputs_match_blender() {
                         ));
                     }
                 }
-                let got = frap_imbuf::decode(&bytes).unwrap();
-                let want = frap_imbuf::decode(&blender).unwrap();
+                let got = decode_output(fmt, &bytes);
+                let want = decode_output(fmt, &blender);
+                if fmt == "TIFF" {
+                    use frap_imbuf::encode::tiff_extra_samples;
+                    assert_eq!(
+                        tiff_extra_samples(&bytes),
+                        tiff_extra_samples(&blender),
+                        "{name}: alpha kind"
+                    );
+                }
                 // libwebp rewrites the colour of fully transparent pixels.
                 let skip_transparent = fmt == "WEBP";
-                let lossy_exr = fmt == "OPEN_EXR"
+                let lossy_exr = matches!(fmt, "OPEN_EXR" | "OPEN_EXR_MULTILAYER")
                     && matches!(s.exr_codec.as_str(), "DWAA" | "DWAB" | "B44" | "B44A");
                 if lossy_exr {
                     // Lossy codecs: the `exr` crate's encoders, not OpenEXR's. Both files must be
@@ -428,7 +558,7 @@ fn render_outputs_match_blender() {
                 let (limit, share) = if fmt == "WEBP" && s.quality < 100 {
                     // Lossy WebP: another libwebp version than Blender's.
                     (24.0, 1.0)
-                } else if fmt == "OPEN_EXR" || e["view_transform"] == "Raw" {
+                } else if fmt.starts_with("OPEN_EXR") || e["view_transform"] == "Raw" {
                     // Lossless floats, and the Raw view (no transform): exact.
                     (0.0, 0.0)
                 } else if agx {
@@ -454,5 +584,5 @@ fn render_outputs_match_blender() {
         checked += 1;
     }
     assert!(fails.is_empty(), "{}", fails.join("\n"));
-    assert!(checked >= 35, "{checked} outputs checked");
+    assert!(checked >= 65, "{checked} outputs checked");
 }

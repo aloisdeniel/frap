@@ -8,12 +8,18 @@
 //! CONTRACT files (frozen at M1 W0): `data.rs`, `context.rs`, `host.rs`, `eval.rs`.
 #![deny(unsafe_code)]
 
+/// `ColorManagedViewSettings`: look items per view transform, the look remap (M5+M6
+/// stabilization).
+pub mod color_view;
 mod context;
 mod data;
 pub mod edit_armature;
 mod eval;
 mod host;
 pub mod id;
+/// `ImageFormatSettings`: the format setters' side effects and per-format items (M5+M6
+/// stabilization).
+pub mod image_format;
 /// Multiple scenes (M3, WP 3.10).
 pub mod scenes;
 pub mod startup;

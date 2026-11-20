@@ -5,7 +5,7 @@
 use frap_rna::{ArrayShape, Defaults, Deprecation, EnumDefault, FloatStorage, FuncDef, FuncFlags, PropDef, PropFlags, PropKind, StructDef, Subtype, Unit};
 
 /// Own properties of `PoseBone` (base-chain properties live in the base struct).
-pub static RNA_PROPS: [PropDef; 68] = [
+pub static RNA_PROPS: [PropDef; 78] = [
     PropDef { identifier: "constraints", name: "Constraints", description: "Constraints that act on this pose channel", kind: PropKind::Collection { item_type: "Constraint", api: Some("PoseBoneConstraints") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
     PropDef { identifier: "name", name: "Name", description: "", kind: PropKind::String { default: "", max_bytes: 64 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::NEVER_NULL, deprecated: None },
     PropDef { identifier: "motion_path", name: "Motion Path", description: "Motion Path for this element", kind: PropKind::Pointer { fixed_type: "MotionPath", is_id: false }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
@@ -74,9 +74,19 @@ pub static RNA_PROPS: [PropDef; 68] = [
     PropDef { identifier: "lock_rotation_w", name: "Lock Rotation (4D Angle)", description: "Lock editing of 'angle' component of four-component rotations when transforming", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "lock_rotations_4d", name: "Lock Rotations (4D)", description: "Lock editing of four component rotations by components (instead of as Eulers)", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "lock_scale", name: "Lock Scale", description: "Lock editing of scale when transforming", kind: PropKind::Bool { default: Defaults::Array(&[false, false, false]) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::ANIMATABLE, deprecated: None },
+    PropDef { identifier: "x_axis", name: "x_axis", description: "Vector pointing down the x-axis of the bone", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "y_axis", name: "y_axis", description: "Vector pointing down the y-axis of the bone", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "z_axis", name: "z_axis", description: "Vector pointing down the z-axis of the bone", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "basename", name: "basename", description: "The name of this bone before any '.' character", kind: PropKind::String { default: "", max_bytes: 0 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "parent_recursive", name: "parent_recursive", description: "A list of parents, starting with the immediate parent", kind: PropKind::Collection { item_type: "PoseBone", api: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "center", name: "center", description: "The midpoint between the head and the tail", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "vector", name: "vector", description: "The direction this bone is pointing. Utility function for (tail - head)", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "children_recursive", name: "children_recursive", description: "A list of all children from this bone", kind: PropKind::Collection { item_type: "PoseBone", api: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "children_recursive_basename", name: "children_recursive_basename", description: "Returns a chain of children with the same base name as this bone", kind: PropKind::Collection { item_type: "PoseBone", api: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "children", name: "children", description: "A list of all the bones children", kind: PropKind::Collection { item_type: "PoseBone", api: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
 ];
 /// Own functions of `PoseBone`.
-pub static RNA_FUNCS: [FuncDef; 5] = [
+pub static RNA_FUNCS: [FuncDef; 7] = [
     FuncDef {
         identifier: "bl_system_properties_get",
         description: "DEBUG ONLY. Internal access to runtime-defined RNA data storage, intended solely for testing and debugging purposes. Do not access it in regular scripting work, and in particular, do not assume that it contains writable data",
@@ -143,6 +153,28 @@ pub static RNA_FUNCS: [FuncDef; 5] = [
         ],
         keyword_only_from: None,
         flags: FuncFlags::empty(),
+    },
+    FuncDef {
+        identifier: "translate",
+        description: "Utility function to add vec to the head and tail of this bone",
+        params: &[
+            PropDef { identifier: "vec", name: "vec", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Translation, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::REQUIRED, deprecated: None },
+        ],
+        returns: &[],
+        keyword_only_from: None,
+        flags: FuncFlags::PYTHON_ONLY,
+    },
+    FuncDef {
+        identifier: "parent_index",
+        description: "The same as 'bone in other_bone.parent_recursive' but saved generating a list",
+        params: &[
+            PropDef { identifier: "parent_test", name: "parent_test", description: "", kind: PropKind::Pointer { fixed_type: "AnyType", is_id: false }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::REQUIRED, deprecated: None },
+        ],
+        returns: &[
+            PropDef { identifier: "result", name: "result", description: "", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (-2147483648, 2147483647), soft: (-2147483648, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::OUTPUT, deprecated: None },
+        ],
+        keyword_only_from: None,
+        flags: FuncFlags::PYTHON_ONLY,
     },
 ];
 
@@ -282,3 +314,23 @@ pub const LOCK_ROTATION_W: &PropDef = &RNA_PROPS[65];
 pub const LOCK_ROTATIONS_4D: &PropDef = &RNA_PROPS[66];
 /// `PoseBone.lock_scale`
 pub const LOCK_SCALE: &PropDef = &RNA_PROPS[67];
+/// `PoseBone.x_axis`
+pub const X_AXIS: &PropDef = &RNA_PROPS[68];
+/// `PoseBone.y_axis`
+pub const Y_AXIS: &PropDef = &RNA_PROPS[69];
+/// `PoseBone.z_axis`
+pub const Z_AXIS: &PropDef = &RNA_PROPS[70];
+/// `PoseBone.basename`
+pub const BASENAME: &PropDef = &RNA_PROPS[71];
+/// `PoseBone.parent_recursive`
+pub const PARENT_RECURSIVE: &PropDef = &RNA_PROPS[72];
+/// `PoseBone.center`
+pub const CENTER: &PropDef = &RNA_PROPS[73];
+/// `PoseBone.vector`
+pub const VECTOR: &PropDef = &RNA_PROPS[74];
+/// `PoseBone.children_recursive`
+pub const CHILDREN_RECURSIVE: &PropDef = &RNA_PROPS[75];
+/// `PoseBone.children_recursive_basename`
+pub const CHILDREN_RECURSIVE_BASENAME: &PropDef = &RNA_PROPS[76];
+/// `PoseBone.children`
+pub const CHILDREN: &PropDef = &RNA_PROPS[77];

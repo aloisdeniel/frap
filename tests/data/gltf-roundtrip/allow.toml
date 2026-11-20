@@ -2,11 +2,12 @@
 #   gltf_canonical(frap import → frap export) == gltf_canonical(Blender import → Blender export)
 # with default options. Paths are relative to tests/data/. Blender's re-exports are committed
 # under tests/golden/fixtures/gltf/m1/roundtrip/ (re-bless with FRAP_ROUNDTRIP_BLESS=1, see
-# crates/frap-ops-io-tests/tests/gltf_roundtrip.rs). Files with content frap does not import or
-# export yet (skins, morph targets, animation, instancing) are not listed; the M3 static
-# content (strips/fans, lines, points, vertex colours, texture transforms, scenes, lights,
-# cameras, unlit, emissive strength) was added by WP 3.9. LightVisibility is left out:
-# Blender 5.2.4's add-on refuses its required KHR_node_visibility.
+# crates/frap-ops-io-tests/tests/gltf_roundtrip.rs). The M3 static content (strips/fans, lines,
+# points, vertex colours, texture transforms, scenes, lights, cameras, unlit, emissive
+# strength) was added by WP 3.9; the M6 animated, skinned and morph-target samples by the
+# M5+M6 stabilization. Files with content frap does not import or export yet (instancing:
+# SimpleInstancing, M7) are not listed. LightVisibility is left out: Blender 5.2.4's add-on
+# refuses its required KHR_node_visibility.
 
 [[file]]
 path = "gltf-blender/fixtures/cube.glb"
@@ -95,3 +96,27 @@ note = "Khronos: KHR_materials_unlit (M3)"
 [[file]]
 path = "gltf-samples/EmissiveStrengthTest/glTF-Binary/EmissiveStrengthTest.glb"
 note = "Khronos: KHR_materials_emissive_strength (M3)"
+
+[[file]]
+path = "gltf-samples/AnimatedTriangle/glTF-Embedded/AnimatedTriangle.gltf"
+note = "M6: node rotation animation (LINEAR)"
+
+[[file]]
+path = "gltf-samples/InterpolationTest/glTF-Binary/InterpolationTest.glb"
+note = "M6: STEP, LINEAR and CUBICSPLINE samplers on translation, rotation and scale"
+
+[[file]]
+path = "gltf-samples/AnimatedMorphCube/glTF-Binary/AnimatedMorphCube.glb"
+note = "M6: morph targets and weights animation"
+
+[[file]]
+path = "gltf-samples/SimpleMorph/glTF-Embedded/SimpleMorph.gltf"
+note = "M6: morph targets with default weights"
+
+[[file]]
+path = "gltf-samples/SimpleSkin/glTF-Embedded/SimpleSkin.gltf"
+note = "M6: two-joint skin, joint rotation animation"
+
+[[file]]
+path = "gltf-samples/RiggedSimple/glTF-Binary/RiggedSimple.glb"
+note = "M6: skinned cylinder, animated bone chain"

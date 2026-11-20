@@ -242,7 +242,7 @@ fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
 
     let writes = p.animation.value || p.write_still.value;
     let write = if writes {
-        Some(format::render_write_settings(r).map_err(OpError::NotImplemented)?)
+        Some(format::render_write_settings(r, view_layer).map_err(OpError::NotImplemented)?)
     } else {
         None
     };
@@ -353,6 +353,22 @@ fn render_and_write(
 ) -> Result<Film, OpError> {
     let film = render_frame(cx, frame, engine)?;
     if let (Some(out), Some(ws)) = (out, &plan.write) {
+        // A path without a folder (`filepath='st_'`): `BLI_file_ensure_parent_dir_exists`
+        // cannot make the folder `''` and the image writers give up (`ENOENT`); the OpenEXR
+        // writer ignores that and opens the file in the working directory (verified on 5.2.4:
+        // `Render error (No such file or directory) cannot save: 'st_0001.png'`, `e_.exr`
+        // written).
+        let folderless = Path::new(&out.path)
+            .parent()
+            .is_none_or(|p| p.as_os_str().is_empty());
+        if folderless && !matches!(ws.encode, frap_imbuf::EncodeFormat::OpenExr { .. }) {
+            let e = std::io::Error::from_raw_os_error(2);
+            return Err(OpError::Runtime(format!(
+                "Render error ({}) cannot save: '{}'",
+                frap_rna::error::strerror(&e),
+                out.path
+            )));
+        }
         format::write_render(
             &out.absolute,
             &film.rgba,

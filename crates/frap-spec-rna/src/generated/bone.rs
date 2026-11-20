@@ -5,7 +5,7 @@
 use frap_rna::{ArrayShape, Defaults, Deprecation, EnumDefault, FloatStorage, FuncDef, FuncFlags, PropDef, PropFlags, PropKind, StructDef, Subtype, Unit};
 
 /// Own properties of `Bone` (base-chain properties live in the base struct).
-pub static RNA_PROPS: [PropDef; 52] = [
+pub static RNA_PROPS: [PropDef; 61] = [
     PropDef { identifier: "parent", name: "Parent", description: "Parent bone (in same Armature)", kind: PropKind::Pointer { fixed_type: "Bone", is_id: false }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
     PropDef { identifier: "children", name: "Children", description: "Bones which are children of this bone", kind: PropKind::Collection { item_type: "Bone", api: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
     PropDef { identifier: "collections", name: "Collections", description: "Bone Collections that contain this bone", kind: PropKind::Collection { item_type: "BoneCollection", api: Some("BoneCollectionMemberships") }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY, deprecated: None },
@@ -58,9 +58,18 @@ pub static RNA_PROPS: [PropDef; 52] = [
     PropDef { identifier: "head", name: "Head", description: "Location of head end of the bone relative to its parent", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 5, storage: FloatStorage::F32 }, subtype: Subtype::Translation, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::READONLY.union(PropFlags::ANIMATABLE), deprecated: None },
     PropDef { identifier: "head_local", name: "Armature-Relative Head", description: "Location of head end of the bone relative to armature", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 5, storage: FloatStorage::F32 }, subtype: Subtype::Translation, unit: Unit::Length, array: ArrayShape::Fixed(3), flags: PropFlags::READONLY.union(PropFlags::ANIMATABLE), deprecated: None },
     PropDef { identifier: "length", name: "Length", description: "Length of the bone", kind: PropKind::Float { default: Defaults::Scalar(0.0), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-10000.0, 10000.0), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Distance, unit: Unit::Length, array: ArrayShape::Scalar, flags: PropFlags::READONLY.union(PropFlags::ANIMATABLE), deprecated: None },
+    PropDef { identifier: "x_axis", name: "x_axis", description: "Vector pointing down the x-axis of the bone", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "y_axis", name: "y_axis", description: "Vector pointing down the y-axis of the bone", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "z_axis", name: "z_axis", description: "Vector pointing down the z-axis of the bone", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "basename", name: "basename", description: "The name of this bone before any '.' character", kind: PropKind::String { default: "", max_bytes: 0 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "parent_recursive", name: "parent_recursive", description: "A list of parents, starting with the immediate parent", kind: PropKind::Collection { item_type: "Bone", api: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "center", name: "center", description: "The midpoint between the head and the tail", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "vector", name: "vector", description: "The direction this bone is pointing. Utility function for (tail - head)", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Xyz, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "children_recursive", name: "children_recursive", description: "A list of all children from this bone", kind: PropKind::Collection { item_type: "Bone", api: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
+    PropDef { identifier: "children_recursive_basename", name: "children_recursive_basename", description: "Returns a chain of children with the same base name as this bone", kind: PropKind::Collection { item_type: "Bone", api: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::READONLY.union(PropFlags::PYTHON_ONLY), deprecated: None },
 ];
 /// Own functions of `Bone`.
-pub static RNA_FUNCS: [FuncDef; 5] = [
+pub static RNA_FUNCS: [FuncDef; 7] = [
     FuncDef {
         identifier: "bl_system_properties_get",
         description: "DEBUG ONLY. Internal access to runtime-defined RNA data storage, intended solely for testing and debugging purposes. Do not access it in regular scripting work, and in particular, do not assume that it contains writable data",
@@ -127,6 +136,28 @@ pub static RNA_FUNCS: [FuncDef; 5] = [
         ],
         keyword_only_from: None,
         flags: FuncFlags::NO_SELF,
+    },
+    FuncDef {
+        identifier: "translate",
+        description: "Utility function to add vec to the head and tail of this bone",
+        params: &[
+            PropDef { identifier: "vec", name: "vec", description: "", kind: PropKind::Float { default: Defaults::Array(&[0.0, 0.0, 0.0]), hard: (-3.4028234663852886e38, 3.4028234663852886e38), soft: (-3.4028234663852886e38, 3.4028234663852886e38), precision: 3, storage: FloatStorage::F32 }, subtype: Subtype::Translation, unit: Unit::None, array: ArrayShape::Fixed(3), flags: PropFlags::REQUIRED, deprecated: None },
+        ],
+        returns: &[],
+        keyword_only_from: None,
+        flags: FuncFlags::PYTHON_ONLY,
+    },
+    FuncDef {
+        identifier: "parent_index",
+        description: "The same as 'bone in other_bone.parent_recursive' but saved generating a list",
+        params: &[
+            PropDef { identifier: "parent_test", name: "parent_test", description: "", kind: PropKind::Pointer { fixed_type: "AnyType", is_id: false }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::REQUIRED, deprecated: None },
+        ],
+        returns: &[
+            PropDef { identifier: "result", name: "result", description: "", kind: PropKind::Int { default: Defaults::Scalar(0), hard: (-2147483648, 2147483647), soft: (-2147483648, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::OUTPUT, deprecated: None },
+        ],
+        keyword_only_from: None,
+        flags: FuncFlags::PYTHON_ONLY,
     },
 ];
 
@@ -234,3 +265,21 @@ pub const HEAD: &PropDef = &RNA_PROPS[49];
 pub const HEAD_LOCAL: &PropDef = &RNA_PROPS[50];
 /// `Bone.length`
 pub const LENGTH: &PropDef = &RNA_PROPS[51];
+/// `Bone.x_axis`
+pub const X_AXIS: &PropDef = &RNA_PROPS[52];
+/// `Bone.y_axis`
+pub const Y_AXIS: &PropDef = &RNA_PROPS[53];
+/// `Bone.z_axis`
+pub const Z_AXIS: &PropDef = &RNA_PROPS[54];
+/// `Bone.basename`
+pub const BASENAME: &PropDef = &RNA_PROPS[55];
+/// `Bone.parent_recursive`
+pub const PARENT_RECURSIVE: &PropDef = &RNA_PROPS[56];
+/// `Bone.center`
+pub const CENTER: &PropDef = &RNA_PROPS[57];
+/// `Bone.vector`
+pub const VECTOR: &PropDef = &RNA_PROPS[58];
+/// `Bone.children_recursive`
+pub const CHILDREN_RECURSIVE: &PropDef = &RNA_PROPS[59];
+/// `Bone.children_recursive_basename`
+pub const CHILDREN_RECURSIVE_BASENAME: &PropDef = &RNA_PROPS[60];

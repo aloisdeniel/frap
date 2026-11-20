@@ -30,6 +30,15 @@ pub enum FileFormat {
     Targa,
     /// `'BMP'`
     Bmp,
+    /// `'TIFF'`: written by render output only (not in [`FileFormat::ALL`], not sniffed by
+    /// [`FileFormat::detect`]: frap does not load TIFF images yet; M5+M6 stabilization).
+    Tiff,
+    /// `'IRIS'` (render output only, as `Tiff`).
+    Iris,
+    /// `'DPX'` (render output only, as `Tiff`).
+    Dpx,
+    /// `'CINEON'` (render output only, as `Tiff`).
+    Cineon,
 }
 
 impl FileFormat {
@@ -54,6 +63,10 @@ impl FileFormat {
             FileFormat::Hdr => "HDR",
             FileFormat::Targa => "TARGA",
             FileFormat::Bmp => "BMP",
+            FileFormat::Tiff => "TIFF",
+            FileFormat::Iris => "IRIS",
+            FileFormat::Dpx => "DPX",
+            FileFormat::Cineon => "CINEON",
         }
     }
 
@@ -73,6 +86,10 @@ impl FileFormat {
             FileFormat::Hdr => ".hdr",
             FileFormat::Targa => ".tga",
             FileFormat::Bmp => ".bmp",
+            FileFormat::Tiff => ".tif",
+            FileFormat::Iris => ".rgb",
+            FileFormat::Dpx => ".dpx",
+            FileFormat::Cineon => ".cin",
         }
     }
 
@@ -122,6 +139,10 @@ impl EncodeFormat {
             EncodeFormat::Hdr => FileFormat::Hdr,
             EncodeFormat::Targa => FileFormat::Targa,
             EncodeFormat::Bmp => FileFormat::Bmp,
+            EncodeFormat::Tiff { .. } => FileFormat::Tiff,
+            EncodeFormat::Iris => FileFormat::Iris,
+            EncodeFormat::Dpx { .. } => FileFormat::Dpx,
+            EncodeFormat::Cineon => FileFormat::Cineon,
         }
     }
 }
@@ -347,6 +368,45 @@ fn decode_png(bytes: &[u8]) -> Result<DecodedImage, ImageError> {
 
 // --- OpenEXR ---------------------------------------------------------------------------------
 
+/// The channels of an OpenEXR layer: `(name, samples)` in the file's order.
+pub type ExrChannels = Vec<(String, Vec<f32>)>;
+
+/// Every channel of the first flat layer of an OpenEXR file, by name (in the file's order),
+/// with its samples as floats, and the layer's size: what a multilayer file holds
+/// (`ViewLayer.Combined.R`, …), which [`decode`] does not map to RGBA.
+pub fn decode_exr_channels(bytes: &[u8]) -> Result<(u32, u32, ExrChannels), ImageError> {
+    use exr::prelude::FlatSamples;
+    use exr::prelude::traits::*;
+    let img = read()
+        .no_deep_data()
+        .largest_resolution_level()
+        .all_channels()
+        .first_valid_layer()
+        .all_attributes()
+        .non_parallel()
+        .from_buffered(Cursor::new(bytes))
+        .map_err(|e| ImageError::Decode(format!("OpenEXR: {e}")))?;
+    let layer = img.layer_data;
+    let channels = layer
+        .channel_data
+        .list
+        .iter()
+        .map(|c| {
+            let v: Vec<f32> = match &c.sample_data {
+                FlatSamples::F16(v) => v.iter().map(|x| x.to_f32()).collect(),
+                FlatSamples::F32(v) => v.clone(),
+                FlatSamples::U32(v) => v.iter().map(|&x| x as f32).collect(),
+            };
+            (c.name.to_string(), v)
+        })
+        .collect();
+    Ok((
+        layer.size.width() as u32,
+        layer.size.height() as u32,
+        channels,
+    ))
+}
+
 fn decode_exr(bytes: &[u8]) -> Result<DecodedImage, ImageError> {
     use exr::prelude::traits::*;
     use exr::prelude::{AnyChannel, FlatSamples, Vec2};
@@ -423,6 +483,10 @@ fn image_format(f: FileFormat) -> image::ImageFormat {
         FileFormat::Hdr => image::ImageFormat::Hdr,
         FileFormat::Targa => image::ImageFormat::Tga,
         FileFormat::Bmp => image::ImageFormat::Bmp,
+        // Never sniffed (`FileFormat::detect`), so never decoded through `image`.
+        FileFormat::Tiff | FileFormat::Iris | FileFormat::Dpx | FileFormat::Cineon => {
+            image::ImageFormat::Tiff
+        }
     }
 }
 

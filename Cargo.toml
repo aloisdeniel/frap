@@ -233,3 +233,32 @@ panic = "unwind"
 [profile.dev]
 # Keep test binaries small and quick to link.
 debug = "line-tables-only"
+
+# Render output in debug builds (M5+M6 stabilization): the per-pixel colour management, the
+# output conversions and the PNG / zlib encoders dominate a `render.render(write_still=True)`
+# (a 1920x1080 PNG took about 6 s unoptimised), so they are optimised in dev and test builds
+# too. Rust does not contract or reorder float arithmetic, so the samples are the same.
+[profile.dev.package.frap-color]
+opt-level = 3
+# `frap-color`'s processors are generic / inlined into the caller's codegen units.
+[profile.dev.package.frap-ops-render]
+opt-level = 2
+# The film readback (`workbench::color`).
+[profile.dev.package.frap-render]
+opt-level = 2
+[profile.dev.package.frap-imbuf]
+opt-level = 3
+[profile.dev.package.png]
+opt-level = 3
+[profile.dev.package.fdeflate]
+opt-level = 3
+[profile.dev.package.flate2]
+opt-level = 3
+[profile.dev.package.zlib-rs]
+opt-level = 3
+[profile.dev.package.miniz_oxide]
+opt-level = 3
+[profile.dev.package.crc32fast]
+opt-level = 3
+[profile.dev.package.adler2]
+opt-level = 3

@@ -61,6 +61,24 @@ pub enum EncodeFormat {
     Targa,
     /// BMP.
     Bmp,
+    /// TIFF (render output, M5+M6 stabilization).
+    Tiff {
+        /// 8 | 16
+        bit_depth: u8,
+        /// `image_settings.tiff_codec`.
+        codec: crate::encode::TiffCodec,
+    },
+    /// SGI / IRIS, 8-bit RLE (render output).
+    Iris,
+    /// DPX (render output; 8-bit samples for 8 bits, 16-bit samples for 10, 12 and 16).
+    Dpx {
+        /// 8 | 10 | 12 | 16
+        bit_depth: u8,
+        /// `use_cineon_log`: the header's transfer is printing density.
+        log: bool,
+    },
+    /// Cineon, 10-bit printing density from scene-linear float samples (render output).
+    Cineon,
 }
 
 /// Image I/O failure.

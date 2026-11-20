@@ -179,32 +179,3 @@ impl ImageFormatSettings {
     }
 }
 
-impl Rna for ImageFormatSettings {
-    fn srna(&self) -> &'static StructDef {
-        &frap_spec_rna::IMAGE_FORMAT_SETTINGS
-    }
-    fn get(&self, prop: &'static PropDef) -> Result<Field<'_>, RnaError> {
-        match self.rna_get(prop) {
-            Some(f) => Ok(f),
-            None => unstored_get(self.srna(), prop),
-        }
-    }
-}
-
-impl RnaMut for ImageFormatSettings {
-    fn set(&mut self, prop: &'static PropDef, v: Value) -> Result<SetOutcome, RnaError> {
-        let srna = self.srna();
-        match self.rna_set(prop, v) {
-            Some(r) => r,
-            None => unstored_set(srna, prop),
-        }
-    }
-    fn struct_mut(&mut self, prop: &'static PropDef) -> Result<RnaMutGuard<'_>, RnaError> {
-        let srna = self.srna();
-        self.rna_struct_mut(prop).ok_or_else(|| not_a_struct(srna, prop))
-    }
-    fn coll_mut(&mut self, prop: &'static PropDef) -> Result<RnaCollMutGuard<'_>, RnaError> {
-        Err(not_a_struct(self.srna(), prop))
-    }
-}
-

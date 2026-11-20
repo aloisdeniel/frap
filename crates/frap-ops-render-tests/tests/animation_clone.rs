@@ -36,7 +36,7 @@ fn render_clone_keeps_manual_edits_of_animated_channels() {
 
     // A manual edit of the animated channel, far out of the camera's view.
     e.ok("bpy.data.objects['Cube'].location.x = 400.0");
-    e.ok("bpy.context.scene.render.filepath = 'edited.png'");
+    e.ok("bpy.context.scene.render.filepath = 'out/edited.png'");
     let Some(r) = e.render("bpy.ops.render.render(write_still=True)") else {
         return;
     };
@@ -46,19 +46,19 @@ fn render_clone_keeps_manual_edits_of_animated_channels() {
     // The same frame without the manual edit renders the same pixels: the clone applied the
     // animated value (x = 2), not the edit.
     e.ok("bpy.data.objects['Cube'].location.x = 2.0");
-    e.ok("bpy.context.scene.render.filepath = 'animated.png'");
+    e.ok("bpy.context.scene.render.filepath = 'out/animated.png'");
     e.render("bpy.ops.render.render(write_still=True)")
         .expect("GPU available above");
-    let edited = std::fs::read(e.path("edited.png")).expect("edited.png written");
-    let animated = std::fs::read(e.path("animated.png")).expect("animated.png written");
+    let edited = std::fs::read(e.path("out/edited.png")).expect("edited.png written");
+    let animated = std::fs::read(e.path("out/animated.png")).expect("animated.png written");
     assert_eq!(edited, animated, "the clone renders the animated value");
     // Without animation the edit is what renders (the cube leaves the view).
     e.ok("bpy.data.objects['Cube'].animation_data_clear()");
     e.ok("bpy.data.objects['Cube'].location.x = 400.0");
-    e.ok("bpy.context.scene.render.filepath = 'static.png'");
+    e.ok("bpy.context.scene.render.filepath = 'out/static.png'");
     e.render("bpy.ops.render.render(write_still=True)")
         .expect("GPU available above");
-    let stat = std::fs::read(e.path("static.png")).expect("static.png written");
+    let stat = std::fs::read(e.path("out/static.png")).expect("static.png written");
     assert_ne!(stat, animated, "the edit moves the cube out of view");
     assert_eq!(location_x(&mut e), 400.0);
 }

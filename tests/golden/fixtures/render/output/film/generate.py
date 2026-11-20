@@ -75,6 +75,8 @@ DEFAULTS = {
     "quality": 90,
     "compression": 15,
     "exr_codec": "ZIP",
+    "tiff_codec": "DEFLATE",
+    "use_cineon_log": False,
 }
 
 manifest = []
@@ -87,9 +89,11 @@ def render(name, transparent=True, view="Standard", dither=1.0, **settings):
     scene.view_settings.view_transform = view
     s = scene.render.image_settings
     merged = dict(DEFAULTS, **settings)
-    # file_format first: setting it adjusts color_mode and color_depth.
+    # media_type, then file_format: setting it adjusts color_mode and color_depth.
+    s.media_type = "MULTI_LAYER_IMAGE" if merged["file_format"] == "OPEN_EXR_MULTILAYER" else "IMAGE"
     s.file_format = merged["file_format"]
-    for key in ("color_mode", "color_depth", "quality", "compression", "exr_codec"):
+    for key in ("color_mode", "color_depth", "quality", "compression", "exr_codec", "tiff_codec",
+                "use_cineon_log"):
         setattr(s, key, merged[key])
     scene.render.filepath = os.path.join(OUT, name)
     entry = {
@@ -97,7 +101,7 @@ def render(name, transparent=True, view="Standard", dither=1.0, **settings):
         "film": "film_transparent.exr" if transparent else "film_opaque.exr",
         "view_transform": view,
         "dither_intensity": dither,
-        "image_settings": {k: getattr(s, k) for k in DEFAULTS},
+        "image_settings": dict({k: getattr(s, k) for k in DEFAULTS}, media_type=s.media_type),
     }
     try:
         bpy.ops.render.render(write_still=True)
@@ -105,8 +109,7 @@ def render(name, transparent=True, view="Standard", dither=1.0, **settings):
         # The message names the output path: keep it relative to the fixture directory.
         entry["error"] = str(e).strip().replace(os.path.join(OUT, ""), "")
     else:
-        entry["file"] = name + "." + s.file_format.lower().replace("open_exr", "exr").replace(
-            "targa_raw", "tga").replace("targa", "tga").replace("jpeg", "jpg")
+        entry["file"] = name + scene.render.file_extension
     manifest.append(entry)
 
 
@@ -156,6 +159,36 @@ render("tgaraw_bw", file_format="TARGA_RAW", color_mode="BW")
 render("bmp_rgb", file_format="BMP", color_mode="RGB")
 render("bmp_bw", file_format="BMP", color_mode="BW")
 render("bmp_rgba", file_format="BMP", color_mode="RGBA")
+# M5+M6 stabilization: TIFF, IRIS, DPX, Cineon and multilayer OpenEXR.
+render("tiff8_rgba", file_format="TIFF")
+render("tiff8_rgb_none", file_format="TIFF", color_mode="RGB", tiff_codec="NONE")
+render("tiff8_bw_lzw", file_format="TIFF", color_mode="BW", tiff_codec="LZW")
+render("tiff8_rgba_packbits", file_format="TIFF", tiff_codec="PACKBITS")
+render("tiff16_rgba", file_format="TIFF", color_depth="16")
+render("tiff16_rgb_lzw", file_format="TIFF", color_mode="RGB", color_depth="16", tiff_codec="LZW")
+render("tiff16_bw_packbits", file_format="TIFF", color_mode="BW", color_depth="16", tiff_codec="PACKBITS")
+render("tiff16_rgba_none", file_format="TIFF", color_depth="16", tiff_codec="NONE")
+render("tiff16_rgba_agx", file_format="TIFF", color_depth="16", view="AgX")
+render("iris_rgba", file_format="IRIS")
+render("iris_rgb", file_format="IRIS", color_mode="RGB")
+render("iris_bw", file_format="IRIS", color_mode="BW")
+render("iris_rgba_opaque", transparent=False, file_format="IRIS")
+render("dpx8_rgba", file_format="DPX")
+render("dpx8_rgb", file_format="DPX", color_mode="RGB")
+render("dpx10_rgb", file_format="DPX", color_mode="RGB", color_depth="10")
+render("dpx10_rgba", file_format="DPX", color_depth="10")
+render("dpx10_bw", file_format="DPX", color_mode="BW", color_depth="10")
+render("dpx12_rgb", file_format="DPX", color_mode="RGB", color_depth="12")
+render("dpx16_rgba", file_format="DPX", color_depth="16")
+render("dpx16_bw", file_format="DPX", color_mode="BW", color_depth="16")
+render("dpx10_rgb_log", file_format="DPX", color_mode="RGB", color_depth="10", use_cineon_log=True)
+render("cineon_rgb", file_format="CINEON", color_mode="RGB", color_depth="10")
+render("cineon_bw", file_format="CINEON", color_mode="BW", color_depth="10")
+render("cineon_rgb_log", file_format="CINEON", color_mode="RGB", color_depth="10", use_cineon_log=True)
+render("exrml32_rgba", file_format="OPEN_EXR_MULTILAYER", color_depth="32")
+render("exrml16_rgb", file_format="OPEN_EXR_MULTILAYER", color_mode="RGB", color_depth="16")
+render("exrml32_bw_piz", file_format="OPEN_EXR_MULTILAYER", color_mode="BW", color_depth="32", exr_codec="PIZ")
+render("exrml32_opaque", transparent=False, file_format="OPEN_EXR_MULTILAYER", color_depth="32")
 
 
 
@@ -182,6 +215,7 @@ for i in range(NW * NH):
 noise.pixels.foreach_set(pixels)
 scene.view_settings.view_transform = "Standard"
 s = scene.render.image_settings
+s.media_type = "IMAGE"
 s.file_format = "PNG"
 s.color_mode = "RGB"
 s.color_depth = "8"

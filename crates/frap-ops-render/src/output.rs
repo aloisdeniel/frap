@@ -401,9 +401,63 @@ pub fn write_file(path: &Path, bytes: &[u8]) -> Result<(), String> {
     })
 }
 
+/// [`write_file`] for an OpenEXR render result (`BKE_image_render_write_exr`): when the folder
+/// cannot be made, the OpenEXR writer still opens the file and fails with that `errno`
+/// (`No such file or directory`), reported twice as Blender does (verified on 5.2.4 for
+/// `filepath='/nonexistent_dir/x/y'`: `Error writing render result, No such file or directory
+/// (see console)`, then `Render error (No such file or directory) cannot save: '…'`).
+pub fn write_exr_file(path: &Path, bytes: &[u8]) -> Result<(), String> {
+    use frap_rna::error::strerror;
+    let dir_failed = path
+        .parent()
+        .filter(|d| !d.as_os_str().is_empty())
+        .is_some_and(|d| std::fs::create_dir_all(d).is_err());
+    let open = if dir_failed {
+        std::fs::File::create(path).map(|_| ())
+    } else {
+        write_file(path, bytes).map_err(std::io::Error::other)
+    };
+    match open {
+        Ok(()) if dir_failed => {
+            // The folder appeared meanwhile: write normally.
+            write_file(path, bytes)
+        }
+        Ok(()) => Ok(()),
+        Err(e) if dir_failed => {
+            let e = strerror(&e);
+            Err(format!(
+                "Error writing render result, {e} (see console)\nError: Render error ({e}) \
+                 cannot save: '{}'",
+                path.display()
+            ))
+        }
+        Err(e) => Err(e.to_string()),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn exr_write_error_reports_the_open_errno_twice() {
+        // A folder that cannot be created (a regular file stands in its way).
+        let dir = std::env::temp_dir().join(format!("frap_exr_err_{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let blocker = dir.join("blocker");
+        std::fs::write(&blocker, b"x").unwrap();
+        let path = blocker.join("x").join("y.exr");
+        let e = write_exr_file(&path, b"exr").unwrap_err();
+        let first = e.lines().next().unwrap();
+        assert!(first.starts_with("Error writing render result, "), "{e}");
+        assert!(first.ends_with(" (see console)"), "{e}");
+        assert!(e.contains("\nError: Render error ("), "{e}");
+        assert!(
+            e.ends_with(&format!("cannot save: '{}'", path.display())),
+            "{e}"
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     fn vars() -> TemplateVars {
         TemplateVars::render(None, "Scene", Some("Camera"), [16, 8], 24, 1.0)

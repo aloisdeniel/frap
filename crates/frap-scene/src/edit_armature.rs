@@ -15,6 +15,7 @@
 //! 5.2.4, GPL-2.0-or-later.
 
 pub mod ctx;
+pub mod family;
 pub mod math;
 pub mod names;
 pub mod paths;

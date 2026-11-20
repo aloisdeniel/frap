@@ -67,6 +67,18 @@ impl Scene {
         ("ShapeKey", "value"),
     ];
 
+    /// `(struct, property)` enums whose items depend on the data (`runtime` in
+    /// `spec/overlay/dynamic_enums.toml`) and whose setter validates against the live items:
+    /// a caller passes an unknown string identifier on to the setter instead of failing with
+    /// the RNA union, so the `TypeError` lists the items Blender lists (M5+M6 stabilization).
+    pub const LIVE_ENUMS: &'static [(&'static str, &'static str)] = &[
+        ("ColorManagedViewSettings", "look"),
+        ("View3DShading", "studio_light"),
+        ("ImageFormatSettings", "file_format"),
+        ("ImageFormatSettings", "color_mode"),
+        ("ImageFormatSettings", "color_depth"),
+    ];
+
     /// Blender's `frame_current` setter on a raw Python int (`rna_Scene_frame_current_set`
     /// with "Allow Negative Frames" off: negative frames become 0, large ones are kept).
     pub fn frame_from_input(v: i64) -> i32 {

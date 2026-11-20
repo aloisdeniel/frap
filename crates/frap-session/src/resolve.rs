@@ -802,6 +802,34 @@ fn step_python(t: Target, seg: &PathSeg) -> Result<Target, FrapError> {
     }
 }
 
+/// `bpy_struct.id_data`: the ID the struct belongs to (`ptr->owner_id`): the datablock of an
+/// ID-rooted pointer, the embedded ID (`material.node_tree`) of an embedded-rooted one
+/// (M5+M6 stabilization; `PoseBone.id_data` is the armature object).
+fn id_data(host: &dyn HostRead, ptr: &RnaPtr) -> Result<Target, FrapError> {
+    match ptr.root {
+        Root::Id(id) => Ok(Target::Struct(RnaPtr::id(id, id_srna(host, id)?))),
+        Root::Embedded { owner, slot } => {
+            // The embedded ID's struct type: the owner's property holding that slot.
+            let owner_ptr = RnaPtr::id(owner, id_srna(host, owner)?);
+            let mut found = None;
+            with_struct(host, &owner_ptr, &mut |s| {
+                for prop in owner_ptr.srna.all_props() {
+                    if let Ok(Field::Embedded(sl, r)) = s.get(prop)
+                        && sl == slot
+                    {
+                        found = Some(r.srna());
+                        break;
+                    }
+                }
+                Ok(())
+            })?;
+            let srna = found.ok_or_else(|| stale("an embedded ID that no longer exists"))?;
+            Ok(Target::Struct(RnaPtr::new(ptr.root, srna)))
+        }
+        _ => Ok(Target::None),
+    }
+}
+
 fn step_struct(host: &dyn HostRead, ptr: RnaPtr, seg: &PathSeg) -> Result<Target, FrapError> {
     let srna = ptr.srna;
     match seg {
@@ -850,6 +878,9 @@ fn step_struct(host: &dyn HostRead, ptr: RnaPtr, seg: &PathSeg) -> Result<Target
                 };
                 if let Some(which) = which {
                     return Ok(Target::Func(FuncTarget::Struct { this: ptr, which }));
+                }
+                if a.as_str() == "id_data" {
+                    return id_data(host, &ptr);
                 }
                 if let Some(def) = frap_spec_rna::BPY_STRUCT_FUNCS
                     .iter()

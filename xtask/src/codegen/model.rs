@@ -637,6 +637,14 @@ fn toml_prop(t: &toml::Table, key: &str, extra_flags: &[&str]) -> Res<Prop> {
         "type": ty, "subtype": "NONE", "unit": "NONE", "flags": flags,
     });
     let o = p.as_object_mut().expect("invariant: object literal");
+    // `array = [3]` and `subtype = "XYZ"`: Python-only vector members (`Bone.vector`, M5+M6
+    // stabilization).
+    if let Some(a) = t.get("array") {
+        o.insert("array".into(), tj(a));
+    }
+    if let Some(st) = t.get("subtype") {
+        o.insert("subtype".into(), tj(st));
+    }
     let dflt = t.get("default").map(tj);
     match ty {
         "BOOLEAN" => {

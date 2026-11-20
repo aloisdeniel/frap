@@ -85,6 +85,36 @@ pub fn looks_for(view: ViewTransform) -> Vec<&'static str> {
         .collect()
 }
 
+/// The UI name of a look (`ocio::Look::ui_name`): the part after `"<View> - "` for a
+/// view-specific look, the whole name otherwise (`"AgX - Punchy"` → `"Punchy"`).
+pub fn ui_name(look: &str) -> &str {
+    look.split_once(" - ").map(|(_, n)| n).unwrap_or(look)
+}
+
+/// The look `view_settings.look` holds after `view_transform` becomes `view` (port of
+/// `IMB_colormanagement_look_validate_for_view`, blender/source/blender/imbuf/intern/
+/// colormanagement.cc, called by `rna_ColorManagedViewSettings_view_transform_set`): an unknown
+/// name is kept; a look `view` offers is kept; otherwise the first look of the config with the
+/// same UI name that `view` offers (`AgX - Low Contrast` → `Low Contrast` on Standard,
+/// `High Contrast` → `False Color - High Contrast` on False Color); otherwise `"None"`.
+pub fn validate_for_view(view: ViewTransform, look: &str) -> &str {
+    if look == "None" {
+        return "None";
+    }
+    let Some(&known) = LOOKS.iter().find(|l| **l == look) else {
+        return look;
+    };
+    if look_applies(view, known).unwrap_or(false) {
+        return known;
+    }
+    let ui = ui_name(known);
+    LOOKS
+        .iter()
+        .copied()
+        .find(|l| ui_name(l) == ui && look_applies(view, l).unwrap_or(false))
+        .unwrap_or("None")
+}
+
 /// The look Blender actually renders `look` with on `view`: the look itself, or `"None"` when
 /// the view ignores it. ("Medium Contrast" is an empty group, but Blender still converts into
 /// its process space, Filmic Log, and back, which clips and desaturates highlights; it is a

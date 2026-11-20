@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Encoders per output format (ARCHITECTURE §19.4: PNG 8/16, JPEG, WEBP, OPEN_EXR, HDR, TARGA,
-//! BMP). Owned by WP 5.4 (`crates/frap-imbuf/src/encode/**`, reassigned in M5; the M5+M6 W0
+//! BMP; TIFF, IRIS, DPX, CINEON and multilayer OpenEXR since the M5+M6 stabilization). Owned by WP 5.4 (`crates/frap-imbuf/src/encode/**`, reassigned in M5; the M5+M6 W0
 //! integrator moved the M1 encoders here from `formats.rs`). [`encode`] is called by
 //! `formats::encode` after the buffer check, so every encoder receives a consistent image.
 //!
@@ -17,25 +17,37 @@
 //! | PNG | `png` crate (other deflate stream), OIIO's colour and resolution chunks | samples |
 //! | WebP | `image` lossless / libwebp lossy (`webp-lossy` feature) | samples (lossless) |
 //! | OpenEXR | `exr` crate, Blender's codecs, channel names and half clamping | samples |
+//! | TIFF | frap's baseline writer (OIIO's tags, strips, predictor, alpha kind) | samples |
+//! | IRIS | port of OIIO's `sgioutput.cpp` (RLE) | bytes |
+//! | DPX | port of OIIO's `dpxoutput.cpp` / libdpx (header, packing) | image data bytes |
+//! | Cineon | port of Blender's `cineonlib.cc` / `logImageCore.cc` | image data bytes |
 //!
 //! [`WriteOptions`] carries what [`EncodeFormat`] does not (Targa compression, the OpenEXR
 //! codec, the render's pixels per metre, the colour space of display-referred samples);
 //! [`encode`] uses [`WriteOptions::default`], Blender's defaults for an image save.
 
 mod bmp;
+mod cineon;
+mod dpx;
 mod exr;
 mod hdr;
 mod jpeg;
 mod png;
 mod raw8;
+mod sgi;
 mod tga;
+mod tiff;
 mod webp;
 
 #[cfg(test)]
 mod tests;
 
 pub use bmp::{decode_bmp_v3_32, probe_bmp_v3_32};
+pub use cineon::{decode_cineon, is_cineon};
+pub use dpx::{DpxSettings, decode_dpx, is_dpx};
 pub use png::png_zlib_level;
+pub use sgi::{decode_sgi, is_sgi};
+pub use tiff::{TiffCodec, decode_tiff, tiff_extra_samples};
 
 use crate::codec::{DecodedImage, EncodeFormat, ImageError};
 
@@ -105,6 +117,15 @@ pub struct WriteOptions {
     /// The samples are sRGB display-encoded: PNG gets `sRGB`, `gAMA` and `cHRM` chunks (OIIO's
     /// `png_set_sRGB_gAMA_and_cHRM` for `srgb_rec709_scene`).
     pub srgb: bool,
+    /// TIFF: the alpha of a 4-channel file is associated (`ExtraSamples` 1; Blender's 16-bit
+    /// RGBA) rather than unassociated (2).
+    pub tiff_associated_alpha: bool,
+    /// Multilayer OpenEXR: the part (`"ViewLayer.Combined"`) whose name prefixes the channel
+    /// names (`"ViewLayer.Combined.R"`), as Blender's `OPEN_EXR_MULTILAYER` render output
+    /// writes the Combined pass.
+    pub exr_layer: Option<String>,
+    /// DPX / Cineon: the file name the header records (Blender writes the output's name).
+    pub file_name: String,
 }
 
 impl Default for WriteOptions {
@@ -116,6 +137,9 @@ impl Default for WriteOptions {
             exr_interop_id: None,
             ppm: None,
             srgb: false,
+            tiff_associated_alpha: false,
+            exr_layer: None,
+            file_name: String::new(),
         }
     }
 }
@@ -152,5 +176,45 @@ fn encode_checked(
         EncodeFormat::Hdr => hdr::encode_hdr(image),
         EncodeFormat::Targa => tga::encode_tga(image, options.targa_rle),
         EncodeFormat::Bmp => bmp::encode_bmp(image, options.ppm),
+        EncodeFormat::Tiff { bit_depth, codec } => {
+            let image = to_bits(image, *bit_depth)?;
+            tiff::encode_tiff(&image, *codec, options)
+        }
+        EncodeFormat::Iris => sgi::encode_sgi(&*to_bits(image, 8)?),
+        EncodeFormat::Dpx { bit_depth, log } => {
+            let image = to_bits(image, if *bit_depth == 8 { 8 } else { 16 })?;
+            let s = DpxSettings {
+                bits: *bit_depth,
+                log: *log,
+            };
+            dpx::encode_dpx(&image, s, &options.file_name)
+        }
+        EncodeFormat::Cineon => cineon::encode_cineon(image, &options.file_name),
     }
+}
+
+/// `image` with 8- or 16-bit samples (converted with Blender's rounding when the type differs).
+fn to_bits(
+    image: &DecodedImage,
+    bits: u8,
+) -> Result<std::borrow::Cow<'_, DecodedImage>, ImageError> {
+    use crate::codec::PixelData;
+    use std::borrow::Cow;
+    Ok(match (&image.pixels, bits) {
+        (PixelData::U8(_), 8) | (PixelData::U16(_), 16) => Cow::Borrowed(image),
+        _ => {
+            let f = image.to_f32();
+            let pixels = if bits == 8 {
+                PixelData::U8(f.iter().map(|&v| crate::convert::f32_to_u8(v)).collect())
+            } else {
+                PixelData::U16(f.iter().map(|&v| crate::convert::f32_to_u16(v)).collect())
+            };
+            Cow::Owned(DecodedImage::new(
+                image.width,
+                image.height,
+                image.channels,
+                pixels,
+            )?)
+        }
+    })
 }

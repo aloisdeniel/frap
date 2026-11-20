@@ -683,8 +683,23 @@ impl Session {
         }
         if p.elem == Elem::Whole {
             let input = v.to_input()?;
-            let mut c = coerce(prop, input.clone(), &CoerceCx::RnaSet { owner })
-                .map_err(|e| e.into_frap(set_prefix(&p.ptr), set_code))?;
+            let live = frap_scene::id::Scene::LIVE_ENUMS.contains(&(owner, prop.identifier));
+            let mut c = match coerce(prop, input.clone(), &CoerceCx::RnaSet { owner }) {
+                Ok(c) => c,
+                // A data-dependent enum: its setter checks the live items and lists them.
+                Err(e) if live && e.kind == frap_rna::RnaErrorKind::Enum => match &input {
+                    Input::Str(s) => frap_rna::Coerced {
+                        value: Value::Enum(s.as_str().into()),
+                        clamped: false,
+                    },
+                    Input::Bare(s) => frap_rna::Coerced {
+                        value: Value::Enum(s.clone()),
+                        clamped: false,
+                    },
+                    _ => return Err(e.into_frap(set_prefix(&p.ptr), set_code)),
+                },
+                Err(e) => return Err(e.into_frap(set_prefix(&p.ptr), set_code)),
+            };
             // Setters that apply their own range get the raw number (`Scene.frame_current`:
             // Blender 5.2.4 keeps `= 1000000000`, the hook clamps negatives to 0;
             // `ShapeKey.value` clamps to its sliders).
