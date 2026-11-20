@@ -12,7 +12,10 @@
 //! - `use_deform_preserve_volume` blends dual quaternions instead of matrices;
 //! - `use_multi_modifier` deforms the input of the previous ARMATURE modifier (the chain of
 //!   ARMATURE modifiers right before it) and mixes the result with the current positions by
-//!   `vertex_group` (`MOD_previous_vcos_store`).
+//!   `vertex_group` (`MOD_previous_vcos_store`; the coordinates travel in the evaluation's
+//!   [`ModEvalCx::prev_coords_slot`], never on mesh data, so `modifier_apply` cannot leak them).
+//!
+//! An armature in Edit Mode (`arm->edbo`) does not deform (`verify_armature_deform_valid`).
 //!
 //! The armature-parent "virtual" modifier (`parent_type = 'ARMATURE'`, Blender's `PARSKEL`)
 //! runs [`evaluate_virtual`] before the stack with `bArmature::deformflag`'s default
@@ -30,12 +33,12 @@ mod dquat;
 
 use std::sync::Arc;
 
-use frap_mesh::{AttrData, Attribute, DeformVert, Domain};
+use frap_mesh::DeformVert;
 use frap_rna::{ArmatureId, IdAny, IdRef, ObjectId, Report, ReportType};
+use frap_scene::Main;
 use frap_scene::ObjectMode;
 use frap_scene::edit_armature::rest::rest_pose;
 use frap_scene::id::{Armature, Object};
-use frap_scene::Main;
 use glam::{Mat4, Vec3};
 use smol_str::SmolStr;
 
@@ -92,21 +95,16 @@ fn eval(md: &Modifier, mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, ModEr
         .iter()
         .position(|m| m.name == md.name)
         .map_or(&[][..], |i| &order[i + 1..]);
-    let mut mesh = mesh;
     // `amd->vert_coords_prev`: stored by an earlier ARMATURE modifier of the chain when this
-    // one is `use_multi_modifier` (`MOD_previous_vcos_store`).
-    let prev = if s.use_multi_modifier {
-        take_prev(&mut mesh)
-    } else {
-        drop_prev(&mut mesh);
-        None
-    };
+    // one is `use_multi_modifier` (`MOD_previous_vcos_store`); freed after use either way.
+    let stored = cx.prev_coords_slot().and_then(Option::take);
+    let prev = stored.filter(|p| s.use_multi_modifier && p.len() == mesh.verts_num());
     // `MOD_previous_vcos_store(md, positions)`: this modifier's input goes to the multi
     // modifiers right after it, unless they already hold the chain's input.
     if chain_runs(rest, cx) {
-        match &prev {
-            Some(p) => store_prev_coords(&mut mesh, p.clone()),
-            None => store_prev(&mut mesh),
+        let p = prev.clone().unwrap_or_else(|| mesh.positions().to_vec());
+        if let Some(slot) = cx.prev_coords_slot() {
+            *slot = Some(p);
         }
     }
     deform_mesh(mesh, arm, flags, &s.vertex_group, prev.as_deref(), cx)
@@ -153,13 +151,20 @@ pub fn virtual_parent(main: &Main, ob: &Object) -> Option<IdRef<ObjectId>> {
 
 /// Runs the armature-parent virtual modifier on `base` (the stack walk calls it first; the
 /// virtual modifier is not shown in Edit Mode, `eModifierMode_Editmode` is off).
-pub fn evaluate_virtual(base: Arc<Mesh>, arm: IdRef<ObjectId>, cx: &mut dyn ModEvalCx) -> Arc<Mesh> {
-    let mut mesh = Arc::unwrap_or_clone(base);
+pub fn evaluate_virtual(
+    base: Arc<Mesh>,
+    arm: IdRef<ObjectId>,
+    cx: &mut dyn ModEvalCx,
+) -> Arc<Mesh> {
+    let mesh = Arc::unwrap_or_clone(base);
     let order: Vec<Modifier> = crate::stack::stack_order(&cx.object().modifiers)
         .cloned()
         .collect();
     if chain_runs(&order, cx) {
-        store_prev(&mut mesh);
+        let p = mesh.positions().to_vec();
+        if let Some(slot) = cx.prev_coords_slot() {
+            *slot = Some(p);
+        }
     }
     let fallback = mesh.clone();
     match deform_mesh(mesh, arm, ARMATURE_DEFORMFLAG, "", None, cx) {
@@ -173,10 +178,6 @@ pub fn evaluate_virtual(base: Arc<Mesh>, arm: IdRef<ObjectId>, cx: &mut dyn ModE
         }
     }
 }
-
-/// The hidden point attribute that carries `amd->vert_coords_prev` from one ARMATURE modifier
-/// to the next `use_multi_modifier` one (removed by its reader).
-const PREV_COORDS: &str = ".frap_armature_prev_co";
 
 /// Whether one of the `use_multi_modifier` ARMATURE modifiers at the start of `after` (the
 /// modifiers `MOD_previous_vcos_store` hands the coordinates to) runs in this evaluation.
@@ -197,33 +198,6 @@ fn chain_runs(after: &[Modifier], cx: &dyn ModEvalCx) -> bool {
         }
     }
     false
-}
-
-fn store_prev(mesh: &mut Mesh) {
-    let p = mesh.positions().to_vec();
-    store_prev_coords(mesh, p);
-}
-
-fn store_prev_coords(mesh: &mut Mesh, p: Vec<[f32; 3]>) {
-    mesh.attributes_mut().insert(Attribute {
-        name: PREV_COORDS.into(),
-        domain: Domain::Point,
-        data: AttrData::Float3(Arc::new(p)),
-    });
-}
-
-fn take_prev(mesh: &mut Mesh) -> Option<Vec<[f32; 3]>> {
-    mesh.attributes().get(PREV_COORDS)?;
-    match mesh.attributes_mut().remove(PREV_COORDS).map(|a| a.data) {
-        Some(AttrData::Float3(v)) if v.len() == mesh.verts_num() => Some(v.to_vec()),
-        _ => None,
-    }
-}
-
-fn drop_prev(mesh: &mut Mesh) {
-    if mesh.attributes().get(PREV_COORDS).is_some() {
-        mesh.attributes_mut().remove(PREV_COORDS);
-    }
 }
 
 /// `distfactor_to_bone`: the envelope influence of a bone from `head` to `tail` (armature or
@@ -298,9 +272,28 @@ fn invert_m4(m: &Mat4) -> Mat4 {
     }
 }
 
+/// `invert_m4_m4_safe` (`Object::world_to_object()`, `BKE_object_eval_transform_final`): a
+/// singular matrix is inverted with 1e-8 added to its diagonal, else gives the identity.
+fn invert_m4_safe(m: &Mat4) -> Mat4 {
+    if m.determinant() != 0.0 {
+        return m.inverse();
+    }
+    let mut t = *m;
+    t.x_axis.x += 1e-8;
+    t.y_axis.y += 1e-8;
+    t.z_axis.z += 1e-8;
+    if t.determinant() != 0.0 {
+        t.inverse()
+    } else {
+        Mat4::IDENTITY
+    }
+}
+
 /// `math::transform_point`: the 3×3 part times `p`, plus the location.
 fn transform_point(m: &Mat4, p: Vec3) -> Vec3 {
-    m.x_axis.truncate() * p.x + m.y_axis.truncate() * p.y + m.z_axis.truncate() * p.z
+    m.x_axis.truncate() * p.x
+        + m.y_axis.truncate() * p.y
+        + m.z_axis.truncate() * p.z
         + m.w_axis.truncate()
 }
 
@@ -379,7 +372,8 @@ pub fn deform_mesh(
     prev: Option<&[[f32; 3]]>,
     cx: &mut dyn ModEvalCx,
 ) -> Result<Mesh, ModError> {
-    if !is_armature_object(cx.main(), arm) {
+    // `verify_armature_deform_valid`: not in armature Edit Mode (`arm->edbo`).
+    if !is_armature_object(cx.main(), arm) || cx.armature_in_edit_mode(arm) {
         return Ok(mesh);
     }
     let pose = cx.pose(arm)?;
@@ -409,7 +403,7 @@ pub fn deform_mesh(
         ));
     }
     // `ob_target.world_to_object() * ob_arm.object_to_world()` and its inverse.
-    let armature_to_target = invert_m4(&target_world) * arm_world;
+    let armature_to_target = invert_m4_safe(&target_world) * arm_world;
     let target_to_armature = invert_m4(&armature_to_target);
     let names = &mesh.vertex_group_names;
     let dverts: Option<&[DeformVert]> = mesh.deform_verts().filter(|d| !d.is_empty());
@@ -417,7 +411,12 @@ pub fn deform_mesh(
     let by_group: Vec<Option<usize>> = if use_dverts {
         names
             .iter()
-            .map(|n| channels.iter().position(|c| c.name == *n).filter(|&i| channels[i].deform))
+            .map(|n| {
+                channels
+                    .iter()
+                    .position(|c| c.name == *n)
+                    .filter(|&i| channels[i].deform)
+            })
             .collect()
     } else {
         Vec::new()
@@ -425,7 +424,10 @@ pub fn deform_mesh(
     let def_nr: Option<u32> = if defgrp_name.is_empty() {
         None
     } else {
-        names.iter().position(|n| n == defgrp_name).map(|i| i as u32)
+        names
+            .iter()
+            .position(|n| n == defgrp_name)
+            .map(|i| i as u32)
     };
     let mut cos = mesh.positions().to_vec();
     let p = Params {
@@ -704,7 +706,10 @@ mod tests {
         let dv = DeformVert {
             weights: vec![(0, 1.0), (1, 0.5)].into(),
         };
-        assert_eq!(vert_task(&p, [0.0; 3], None, false, Some(&dv)), [0.5, 0.0, 0.0]);
+        assert_eq!(
+            vert_task(&p, [0.0; 3], None, false, Some(&dv)),
+            [0.5, 0.0, 0.0]
+        );
         p.invert_vgroup = true;
         let dv0 = DeformVert {
             weights: vec![(0, 1.0), (1, 1.0)].into(),

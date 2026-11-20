@@ -225,7 +225,7 @@ pub fn parent_matrix(ob: &Object, parent_world: &Mat4, parent_mesh: Option<&Mesh
 /// tail, or times the bone's deform matrix (`chan_mat = pose_mat · arm_mat⁻¹`) when the bone
 /// has `use_relative_parent` (`BONE_RELATIVE_PARENTING`). A parent that is not an armature, or
 /// a `parent_bone` the armature does not have, gives the parent's world matrix.
-/// `parent_bone_head_tail_factor` is not stored by frap: its default 1 (the tail) is used.
+/// `parent_bone_head_tail_factor` places the child along the bone (1: the tail).
 pub fn bone_parent_matrix(
     ob: &Object,
     parent_world: &Mat4,

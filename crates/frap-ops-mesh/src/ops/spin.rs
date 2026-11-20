@@ -17,7 +17,7 @@
 use frap_bmesh::ops::spin::{SpinIn, spin};
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use frap_spec_ops_mesh::mesh;
 
 use super::split::edbm;
@@ -50,7 +50,7 @@ fn exec(cx: &mut OpCtx, p: mesh::Spin) -> OpResult {
         super::_growth::extrude_steps_corners(bm, steps_u, dupli)
     })?;
     for (ob, me) in helpers::iter_edit_meshes(cx) {
-        let space = world_matrix(&cx.main().objects, ob).to_cols_array_2d();
+        let space = world_matrix_in(cx.main(), ob).to_cols_array_2d();
         let bm = cx.bmesh_mut(me)?;
         let geom = edbm::selected_geom(bm);
         let r = spin(

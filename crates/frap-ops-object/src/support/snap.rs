@@ -126,7 +126,10 @@ pub fn selected_to_location(
             dest -= wloc;
             let mut originmat_inv = Mat3::IDENTITY;
             if let Some(p) = o.parent.filter(|p| c.main.objects.contains(*p)) {
-                let originmat = Mat3::from_mat4(worlds.get(p) * o.matrix_parent_inverse);
+                let pm = worlds
+                    .parent_matrix(c.main, o)
+                    .unwrap_or_else(|| worlds.get(p));
+                let originmat = Mat3::from_mat4(pm * o.matrix_parent_inverse);
                 originmat_inv = originmat.inverse();
                 dest = originmat_inv * dest;
             }
@@ -171,7 +174,10 @@ pub fn selected_to_grid(cx: &mut OpCtx, gridf: f32) -> OpResult {
                     Vec3::from_array(crate::support::cursor::snap_to_grid(wloc.to_array(), gridf));
                 let mut vec = snapped - wloc;
                 if let Some(p) = o.parent.filter(|p| c.main.objects.contains(*p)) {
-                    let originmat = Mat3::from_mat4(worlds.get(p) * o.matrix_parent_inverse);
+                    let pm = worlds
+                        .parent_matrix(c.main, o)
+                        .unwrap_or_else(|| worlds.get(p));
+                    let originmat = Mat3::from_mat4(pm * o.matrix_parent_inverse);
                     vec = originmat.inverse() * vec;
                 }
                 Some((ob, (Vec3::from_array(o.location) + vec).to_array()))

@@ -135,7 +135,7 @@ pub(crate) fn check_uvedit(cx: &mut OpCtx) -> Result<(), OpError> {
 
 /// The world matrix of `ob` in Blender's `float[4][4]` layout (`m[col][row]`).
 pub(crate) fn object_to_world(main: &Main, ob: IdRef<ObjectId>) -> [[f32; 4]; 4] {
-    frap_scene::id::transform::world_matrix(&main.objects, ob).to_cols_array_2d()
+    frap_scene::id::transform::world_matrix_in(main, ob).to_cols_array_2d()
 }
 
 /// The image path base of the session (for image sizes).
@@ -1203,7 +1203,7 @@ pub(crate) fn transform_center(
             [r[0] * inv, r[1] * inv, r[2] * inv]
         }
         "CURSOR" => {
-            let m = frap_scene::id::transform::world_matrix(&c.main.objects, ob).inverse();
+            let m = frap_scene::id::transform::world_matrix_in(c.main, ob).inverse();
             m.transform_point3(glam::Vec3::from(c.cursor().location))
                 .to_array()
         }

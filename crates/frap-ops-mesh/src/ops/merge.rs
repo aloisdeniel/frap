@@ -33,7 +33,7 @@ use frap_op::operator;
 use frap_op::prelude::*;
 use frap_rna::{PropKind, PyExc, RnaError, RnaErrorKind};
 use frap_scene::Context;
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use frap_spec_ops_mesh::mesh::{self, merge::Type};
 
 use super::delete::common::{Removed, bm_err, edit_bm, sel_edges, sel_verts, totals};
@@ -149,7 +149,7 @@ fn exec(cx: &mut OpCtx, p: mesh::Merge) -> OpResult {
         }
         // `invert_m4_m4(world_to_object, object_to_world)` for the cursor in object space.
         let cursor_local = {
-            let world = world_matrix(&cx.main().objects, ob);
+            let world = world_matrix_in(cx.main(), ob);
             let inv = world.inverse();
             inv.transform_point3(Vec3::from(cursor)).to_array()
         };

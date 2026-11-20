@@ -94,7 +94,9 @@ impl Object {
 }
 
 /// `Object.matrix_world` of `ob`, fresh: the parent chain composed with each object's
-/// `matrix_parent_inverse` and `matrix_basis`. Unknown objects give the identity.
+/// `matrix_parent_inverse` and `matrix_basis`. Unknown objects give the identity. Every parent
+/// type reads as `OBJECT` here (no armature data at hand): operators use [`world_matrix_in`],
+/// which follows `parent_type = 'BONE'` as `Object.matrix_world` does.
 pub fn world_matrix(objects: &IdMap<Object>, ob: IdRef<ObjectId>) -> Mat4 {
     let mut chain = Vec::new();
     let mut cur = Some(ob);
@@ -122,9 +124,9 @@ pub fn world_matrix(objects: &IdMap<Object>, ob: IdRef<ObjectId>) -> Mat4 {
 
 /// `ob_parbone` (WP 6.5): the bone part of a `parent_type = 'BONE'` parent matrix, given the
 /// parent armature and the armature-space pose matrix of `ob.parent_bone` — the pose matrix
-/// moved to the bone's tail, or the bone's deform matrix (`pose_mat · arm_mat⁻¹`) with
-/// `use_relative_parent`. Identity when the bone or its pose is missing (Blender only logs).
-/// `parent_bone_head_tail_factor` is not stored by frap (its default 1, the tail, is used).
+/// moved along the bone by `length · parent_bone_head_tail_factor` (1: the tail), or the
+/// bone's deform matrix (`pose_mat · arm_mat⁻¹`) with `use_relative_parent`. Identity when
+/// the bone or its pose is missing (Blender only logs).
 pub fn bone_parent_offset(ob: &Object, arm: &crate::id::Armature, pose_mat: Option<Mat4>) -> Mat4 {
     let (Some(i), Some(pose_mat)) = (arm.bone_index(&ob.parent_bone), pose_mat) else {
         return Mat4::IDENTITY;
@@ -137,7 +139,8 @@ pub fn bone_parent_offset(ob: &Object, arm: &crate::id::Armature, pose_mat: Opti
         pose_mat * crate::edit_armature::math::invert_m4(&r.arm_mat)
     } else {
         let mut m = pose_mat;
-        m.w_axis += (m.y_axis.truncate() * r.length).extend(0.0);
+        m.w_axis +=
+            (m.y_axis.truncate() * (r.length * ob.parent_bone_head_tail_factor)).extend(0.0);
         m
     }
 }

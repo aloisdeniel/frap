@@ -70,6 +70,9 @@ pub struct Object {
     pub parent_bone: SmolStr,
     /// `Object.parent_vertices`
     pub parent_vertices: [i32; 3],
+    /// `Object.parent_bone_head_tail_factor` (where along the parent bone a `BONE` child sits:
+    /// 0 head, 1 tail; WP 6.5)
+    pub parent_bone_head_tail_factor: f32,
     /// `Object.matrix_parent_inverse` (glam is column-major; RNA reads it row-major, §13.3)
     pub matrix_parent_inverse: Mat4,
 
@@ -146,6 +149,7 @@ impl Object {
             parent_type: "OBJECT".into(),
             parent_bone: SmolStr::default(),
             parent_vertices: [0; 3],
+            parent_bone_head_tail_factor: 1.0,
             matrix_parent_inverse: Mat4::IDENTITY,
             modifiers: Vec::new(),
             material_slot_overrides: Vec::new(),
@@ -195,6 +199,7 @@ crate::id::id_rna! { Object as frap_spec_rna::OBJECT, "OBJECT" {
     parent_type => parent_type (set = hook),
     parent_vertices => parent_vertices,
     parent_bone => parent_bone (set = hook),
+    parent_bone_head_tail_factor => parent_bone_head_tail_factor,
     material_slots => hook_coll,
     active_material => hook,
     active_material_index => active_material_index (set = hook),

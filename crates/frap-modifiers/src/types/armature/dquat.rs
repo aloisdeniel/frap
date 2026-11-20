@@ -51,7 +51,11 @@ fn mat4_to_size(m: &Mat4) -> Vec3 {
 /// `normalize_v3` in place (a zero vector stays zero).
 fn normalize(v: Vec3) -> Vec3 {
     let d = v.dot(v);
-    if d > 1.0e-35 { v * (1.0 / d.sqrt()) } else { Vec3::ZERO }
+    if d > 1.0e-35 {
+        v * (1.0 / d.sqrt())
+    } else {
+        Vec3::ZERO
+    }
 }
 
 /// `is_orthonormal_m3` on the upper 3×3 of `m`.
@@ -199,7 +203,12 @@ fn mul_v3_m4v3(m: &Mat4, v: Vec3) -> Vec3 {
 
 /// `add_weighted_dq_dq_pivot(dq_sum, dq, pivot, weight, compute_scale_matrix = false)` (the
 /// modifier never asks for deform matrices).
-pub(crate) fn add_weighted_dq_dq_pivot(sum: &mut DualQuat, dq: &DualQuat, pivot: Vec3, weight: f32) {
+pub(crate) fn add_weighted_dq_dq_pivot(
+    sum: &mut DualQuat,
+    dq: &DualQuat,
+    pivot: Vec3,
+    weight: f32,
+) {
     if dq.scale_weight != 0.0 {
         let mut mdq = *dq;
         let dst = mul_v3_m4v3(&mdq.scale, pivot) - pivot;

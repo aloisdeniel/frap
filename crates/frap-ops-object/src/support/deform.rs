@@ -269,20 +269,64 @@ fn mat4_to_scale(m: &Mat4) -> f32 {
     m.transform_vector3(Vec3::splat(s)).length()
 }
 
-/// `mesh_get_x_mirror_vert_spatial`: the vertex nearest to `positions[i]` mirrored along X,
-/// within `KD_THRESH` (`ED_mesh_mirror_spatial_table_lookup`).
-fn mirror_vert(positions: &[[f32; 3]], i: usize) -> Option<usize> {
-    const KD_THRESH: f32 = 0.00002;
-    let p = positions[i];
-    let v = Vec3::new(-p[0], p[1], p[2]);
-    let mut best: Option<(usize, f32)> = None;
-    for (j, q) in positions.iter().enumerate() {
-        let d = Vec3::from_array(*q).distance(v);
-        if best.is_none_or(|(_, bd)| d < bd) {
-            best = Some((j, d));
-        }
+/// `KD_THRESH` of `ED_mesh_mirror_spatial_table_lookup`.
+const KD_THRESH: f32 = 0.00002;
+
+/// `ED_mesh_mirror_spatial_table_begin`: the vertices hashed in cubes of `KD_THRESH`, so that
+/// [`MirrorTable::mirror_vert`] only looks at the 27 cubes around the mirrored position (a
+/// match must be closer than `KD_THRESH`). Blender queries a KD-tree; the result is the same:
+/// the nearest vertex when it is within the threshold.
+struct MirrorTable<'a> {
+    positions: &'a [[f32; 3]],
+    cells: std::collections::HashMap<[i64; 3], Vec<usize>>,
+}
+
+impl<'a> MirrorTable<'a> {
+    fn cell(p: Vec3) -> [i64; 3] {
+        // Saturating casts: huge or non-finite coordinates land in the outermost cells, where
+        // the distance test still decides.
+        let f = |x: f32| (x / KD_THRESH).floor() as i64;
+        [f(p.x), f(p.y), f(p.z)]
     }
-    best.filter(|(_, d)| *d < KD_THRESH).map(|(j, _)| j)
+
+    fn new(positions: &'a [[f32; 3]]) -> Self {
+        let mut cells: std::collections::HashMap<[i64; 3], Vec<usize>> =
+            std::collections::HashMap::with_capacity(positions.len());
+        for (j, q) in positions.iter().enumerate() {
+            cells
+                .entry(Self::cell(Vec3::from_array(*q)))
+                .or_default()
+                .push(j);
+        }
+        MirrorTable { positions, cells }
+    }
+
+    /// `mesh_get_x_mirror_vert_spatial`: the vertex nearest to `positions[i]` mirrored along
+    /// X, within `KD_THRESH` (ties: the lowest index).
+    fn mirror_vert(&self, i: usize) -> Option<usize> {
+        let p = self.positions[i];
+        let v = Vec3::new(-p[0], p[1], p[2]);
+        let c = Self::cell(v);
+        let mut best: Option<(usize, f32)> = None;
+        for dx in -1i64..=1 {
+            for dy in -1i64..=1 {
+                for dz in -1i64..=1 {
+                    let key = [
+                        c[0].saturating_add(dx),
+                        c[1].saturating_add(dy),
+                        c[2].saturating_add(dz),
+                    ];
+                    for &j in self.cells.get(&key).into_iter().flatten() {
+                        let d = Vec3::from_array(self.positions[j]).distance(v);
+                        if best.is_none_or(|(bj, bd)| d < bd || (d == bd && j < bj)) {
+                            best = Some((j, d));
+                        }
+                    }
+                }
+            }
+        }
+        best.filter(|(_, d)| *d < KD_THRESH).map(|(j, _)| j)
+    }
 }
 
 /// What [`envelope_weights`] reads besides the mesh.
@@ -351,14 +395,13 @@ pub fn envelope_weights(me: &mut Mesh, inp: &EnvelopeInput<'_>) -> Option<usize>
         .iter()
         .map(|p| mul_m4_v3(&inp.ob_world, Vec3::from_array(*p)))
         .collect();
-    let any_flip = flips.iter().any(Option::is_some);
+    let mirror = flips
+        .iter()
+        .any(Option::is_some)
+        .then(|| MirrorTable::new(&local));
     let dverts = me.deform_verts_mut();
     for (i, v) in verts.iter().enumerate() {
-        let iflip = if any_flip {
-            mirror_vert(&local, i)
-        } else {
-            None
-        };
+        let iflip = mirror.as_ref().and_then(|t| t.mirror_vert(i));
         for (j, &bi) in bones.iter().enumerate() {
             let b = &arm.bones[bi];
             let distance = distfactor_to_bone(
@@ -535,5 +578,49 @@ mod tests {
         assert!(w(1, 2) > 0.0 && w(2, 1) > 0.0);
         assert_eq!(w(1, 2), w(2, 1));
         assert!(d[3].weights.is_empty());
+    }
+
+    #[test]
+    fn mirror_table_matches_brute_force() {
+        // A grid symmetric in X with a few near-misses and an off-grid point.
+        let mut pts = Vec::new();
+        for x in -20..=20 {
+            for y in 0..10 {
+                pts.push([x as f32 * 0.1, y as f32 * 0.1, 0.0]);
+            }
+        }
+        pts.push([0.30001, 0.0, 0.0]); // 1e-5 from the mirror image of (-0.3, 0, 0): a near tie
+        pts.push([0.123, 0.4, 0.7]); // no mirror partner
+        pts.push([-0.1, 0.3, 0.0]); // duplicate of a grid point: ties go to the lower index
+        let brute = |i: usize| {
+            let p = pts[i];
+            let v = Vec3::new(-p[0], p[1], p[2]);
+            let mut best: Option<(usize, f32)> = None;
+            for (j, q) in pts.iter().enumerate() {
+                let d = Vec3::from_array(*q).distance(v);
+                if best.is_none_or(|(_, bd)| d < bd) {
+                    best = Some((j, d));
+                }
+            }
+            best.filter(|(_, d)| *d < KD_THRESH).map(|(j, _)| j)
+        };
+        let t = MirrorTable::new(&pts);
+        for i in 0..pts.len() {
+            assert_eq!(t.mirror_vert(i), brute(i), "vertex {i}");
+        }
+        assert_eq!(t.mirror_vert(pts.len() - 2), None);
+    }
+
+    #[test]
+    fn mirror_table_is_fast_on_large_grids() {
+        let n = 400;
+        let pts: Vec<[f32; 3]> = (0..n * n)
+            .map(|k| [(k % n) as f32 * 0.01 - 2.0, (k / n) as f32 * 0.01, 0.0])
+            .collect();
+        let t = MirrorTable::new(&pts);
+        let found = (0..pts.len())
+            .filter(|&i| t.mirror_vert(i).is_some())
+            .count();
+        assert!(found > 0);
     }
 }

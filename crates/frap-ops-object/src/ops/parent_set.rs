@@ -183,10 +183,7 @@ fn exec(cx: &mut OpCtx, p: object::ParentSet) -> OpResult {
         }
         o.parent = Some(par);
         o.matrix_parent_inverse = Mat4::IDENTITY;
-        o.parent_bone = bone
-            .as_ref()
-            .map(|(_, n)| n.clone())
-            .unwrap_or_default();
+        o.parent_bone = bone.as_ref().map(|(_, n)| n.clone()).unwrap_or_default();
         o.parent_type = match ty {
             Type::Bone | Type::BoneRelative => "BONE".into(),
             _ => "OBJECT".into(),
@@ -207,14 +204,15 @@ fn exec(cx: &mut OpCtx, p: object::ParentSet) -> OpResult {
             }
         }
         // Vertex groups from the armature (mesh child, armature parent).
-        let me: Option<IdRef<MeshId>> = o.data.filter(|d| d.code == IdCode::ME).and_then(|d| d.typed());
+        let me: Option<IdRef<MeshId>> = o
+            .data
+            .filter(|d| d.code == IdCode::ME)
+            .and_then(|d| d.typed());
         if let (Some(a), Some(me)) = (arm_ref, me) {
             let arm = cx.main().armatures.get(a).cloned();
             if let Some(arm) = arm {
                 let active = match ty {
-                    Type::ArmatureName => {
-                        deform::groups_from_bone_names(cx.mesh_mut(me)?, &arm)
-                    }
+                    Type::ArmatureName => deform::groups_from_bone_names(cx.mesh_mut(me)?, &arm),
                     Type::ArmatureEnvelope => {
                         let inp = deform::EnvelopeInput {
                             arm: &arm,

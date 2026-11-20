@@ -32,7 +32,7 @@ use frap_op::prelude::*;
 use frap_op::{Poll, PollFail, PollReq};
 use frap_rna::{IdRef, MaterialId, MeshId, ObjectId};
 use frap_scene::id::slots;
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use frap_scene::{Context, ObjectMode};
 use frap_spec_ops_object::object;
 
@@ -158,7 +158,7 @@ fn exec(cx: &mut OpCtx, _p: object::Join) -> OpResult {
     let order: Vec<(IdRef<ObjectId>, IdRef<MeshId>)> = std::iter::once((active, me_active))
         .chain(meshes.iter().copied().filter(|(o, _)| *o != active))
         .collect();
-    let active_world = world_matrix(&main.objects, active);
+    let active_world = world_matrix_in(main, active);
     let inv = active_world.inverse();
     // Materials: union of the effective slot materials, an object without slots counting as
     // one empty slot; nothing when no object has a slot.
@@ -198,7 +198,7 @@ fn exec(cx: &mut OpCtx, _p: object::Join) -> OpResult {
             .zip(matmaps)
             .filter_map(|((o, me), matmap)| {
                 let mesh = main.meshes.get(*me)?;
-                let xform = (*o != active).then(|| inv * world_matrix(&main.objects, *o));
+                let xform = (*o != active).then(|| inv * world_matrix_in(main, *o));
                 Some(Part {
                     mesh,
                     xform,
@@ -221,7 +221,7 @@ fn exec(cx: &mut OpCtx, _p: object::Join) -> OpResult {
                 Some(shapes::KeyPart {
                     mesh: main.meshes.get(*me)?,
                     key: key_of(*me),
-                    xform: (*o != active).then(|| inv * world_matrix(&main.objects, *o)),
+                    xform: (*o != active).then(|| inv * world_matrix_in(main, *o)),
                 })
             })
             .collect();

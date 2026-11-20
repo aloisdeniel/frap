@@ -16,7 +16,7 @@ use std::sync::Arc;
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_scene::edit_armature::tools::roll_to_vector;
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use frap_spec_ops_anim::armature::{
     self,
     bone_primitive_add::{Align, Space},
@@ -47,7 +47,7 @@ fn exec(cx: &mut OpCtx, p: armature::BonePrimitiveAdd) -> OpResult {
     let Some((ob, arm)) = common::edit_armatures(cx).into_iter().next() else {
         return Ok(OpStatus::Cancelled);
     };
-    let obmat = world_matrix(&cx.main().objects, ob);
+    let obmat = world_matrix_in(cx.main(), ob);
     let iobmat = if obmat.determinant() != 0.0 {
         obmat.inverse()
     } else {

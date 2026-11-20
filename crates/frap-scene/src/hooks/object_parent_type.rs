@@ -12,7 +12,9 @@
 //! - `parent_bone` resets `matrix_parent_inverse` too; without a parent (or with a parent that
 //!   would close a loop) both clear the parent data: no parent, `OBJECT`, `parent_bone` empty.
 
-use frap_rna::{IdCode, IdRef, ObjectId, PropDef, PyExc, RnaError, RnaErrorKind, RnaPtr, Value, rna_hook};
+use frap_rna::{
+    IdCode, IdRef, ObjectId, PropDef, PyExc, RnaError, RnaErrorKind, RnaPtr, Value, rna_hook,
+};
 use smol_str::SmolStr;
 
 use crate::Host;
@@ -40,9 +42,8 @@ fn parent_set(h: &mut dyn Host, ob: IdRef<ObjectId>, partype: Option<&str>, subs
         return;
     };
     let parent = o.parent;
-    let valid = parent.is_some_and(|p| {
-        main.objects.get(p).is_some() && !would_cycle(&main.objects, ob, p)
-    });
+    let valid =
+        parent.is_some_and(|p| main.objects.get(p).is_some() && !would_cycle(&main.objects, ob, p));
     if let Some(o) = main.objects.get_mut(ob, log) {
         o.matrix_parent_inverse = glam::Mat4::IDENTITY;
         if !valid {
@@ -136,7 +137,10 @@ mod tests {
     fn items_follow_the_parent_type() {
         assert_eq!(items(None), ["OBJECT"]);
         assert_eq!(items(Some(None)), ["OBJECT"]);
-        assert_eq!(items(Some(Some(IdCode::AR))), ["OBJECT", "ARMATURE", "BONE"]);
+        assert_eq!(
+            items(Some(Some(IdCode::AR))),
+            ["OBJECT", "ARMATURE", "BONE"]
+        );
         assert_eq!(
             items(Some(Some(IdCode::ME))),
             ["OBJECT", "VERTEX", "VERTEX_3"]

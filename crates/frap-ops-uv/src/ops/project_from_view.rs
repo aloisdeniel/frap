@@ -215,7 +215,7 @@ fn exec(cx: &mut OpCtx, p: uv::ProjectFromView) -> OpResult {
         } else if let Some((cam_ob, cam_data)) = camera {
             let main = cx.main();
             let cam = &main.cameras.get(cam_data).expect("checked above").fields;
-            let cam_world = frap_scene::id::transform::world_matrix(&main.objects, cam_ob);
+            let cam_world = frap_scene::id::transform::world_matrix_in(main, cam_ob);
             let rot = glam::Mat4::from_cols_array_2d(&obmat);
             if let Some(uci) = camera_info(cam, cam_world, rot, winx, winy) {
                 for &f in &selected {
