@@ -6,9 +6,10 @@
 //! (blenkernel `node_shader_tree.cc`): an output whose target is EEVEE beats one whose target
 //! is ALL; between equals the active output (`is_active_output`) wins, else the first one.
 //! Recognised graphs: Background → output (`Color { Color, Strength }`) and Environment
-//! Texture (optionally behind a Mapping node, whose Z rotation is kept) → Background
-//! (`Hdri`). Anything else falls back to `World.color` at strength 1. A scene without a
-//! world renders black.
+//! Texture (optionally behind a Mapping node, whose Z rotation is kept, mirrored for the
+//! `TEXTURE` type: [`mapping_z_rotation`]) → Background (`Hdri`), which the EEVEE-like engine
+//! lights with `frap_render::eevee::ibl::world_lighting` (WP 5.2). Anything else falls back to
+//! `World.color` at strength 1. A scene without a world renders black.
 
 use frap_nodes::{Node, NodeTree, SocketValue};
 use frap_rna::{IdRef, ImageId, Value};
@@ -93,6 +94,28 @@ fn float_input(node: &Node, socket: &str, default: f32) -> f32 {
     }
 }
 
+/// The Z rotation a Mapping node applies to the environment lookup (`RWorld::Hdri::rotation`,
+/// `lookup = Rz(rotation) · direction`). `POINT`, `VECTOR` and `NORMAL` rotate the vector by the
+/// Euler angles (`mapping_point`/`mapping_vector`/`mapping_normal` in
+/// blender/source/blender/gpu/shaders/material/gpu_shader_material_mapping.glsl); `TEXTURE` is
+/// the inverse transform, so it turns the other way. A linked Rotation counts as 0; the X and
+/// Y angles, the location and the scale are not represented in `RWorld` (WP 5.2).
+pub fn mapping_z_rotation(tree: &NodeTree, mapping: &Node) -> f32 {
+    if linked_from(tree, mapping, "Rotation").is_some() {
+        return 0.0;
+    }
+    let z = match input_value(mapping, "Rotation") {
+        Some(SocketValue::Vector(v)) => v[2],
+        Some(SocketValue::Rotation(v)) => v[2],
+        _ => 0.0,
+    };
+    let inverse = matches!(
+        prop(mapping, "vector_type"),
+        Some(Value::Enum(s)) | Some(Value::Str(s)) if s == "TEXTURE"
+    );
+    if inverse { -z } else { z }
+}
+
 /// The world of the render; `image` resolves an Environment Texture's image to its key.
 pub fn world(w: Option<&World>, image: &mut dyn FnMut(IdRef<ImageId>) -> ImageKey) -> RWorld {
     let Some(w) = w else {
@@ -138,11 +161,7 @@ pub fn world(w: Option<&World>, image: &mut dyn FnMut(IdRef<ImageId>) -> ImageKe
             };
             let rotation = linked_from(tree, env, "Vector")
                 .filter(|m| m.bl_idname == "ShaderNodeMapping")
-                .and_then(|m| match input_value(m, "Rotation") {
-                    Some(SocketValue::Vector(v)) => Some(v[2]),
-                    Some(SocketValue::Rotation(v)) => Some(v[2]),
-                    _ => None,
-                })
+                .map(|m| mapping_z_rotation(tree, m))
                 .unwrap_or(0.0);
             RWorld::Hdri {
                 image: image(img),
@@ -151,5 +170,72 @@ pub fn world(w: Option<&World>, image: &mut dyn FnMut(IdRef<ImageId>) -> ImageKe
             }
         }
         Some(_) => fallback,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use frap_nodes::{Link, PropBag, Socket, SocketType};
+
+    use super::*;
+
+    fn socket(name: &str, ty: SocketType, v: SocketValue) -> Socket {
+        Socket {
+            name: name.into(),
+            identifier: name.into(),
+            ty,
+            enabled: true,
+            hide_value: false,
+            default_value: v,
+        }
+    }
+
+    fn mapping(uid: u32, vector_type: &str, rotation: [f32; 4]) -> Node {
+        let mut props = PropBag::default();
+        props
+            .values
+            .insert("vector_type", Value::Enum(vector_type.into()));
+        Node {
+            uid,
+            name: "Mapping".into(),
+            label: String::new(),
+            bl_idname: "ShaderNodeMapping",
+            location: [0.0, 0.0],
+            width: 140.0,
+            parent: None,
+            mute: false,
+            hide: false,
+            inputs: vec![socket(
+                "Rotation",
+                SocketType::Vector,
+                SocketValue::Vector(rotation),
+            )],
+            outputs: vec![socket("Vector", SocketType::Vector, SocketValue::None)],
+            props,
+        }
+    }
+
+    #[test]
+    fn mapping_types_turn_the_lookup() {
+        let mut tree = NodeTree::new("Shader Nodetree", frap_nodes::NodeTreeType::Shader, true);
+        for (ty, want) in [
+            ("POINT", 0.5),
+            ("VECTOR", 0.5),
+            ("NORMAL", 0.5),
+            ("TEXTURE", -0.5),
+        ] {
+            let m = mapping(1, ty, [0.3, 0.2, 0.5, 0.0]);
+            assert_eq!(mapping_z_rotation(&tree, &m), want, "{ty}");
+        }
+        // A linked Rotation is not a constant: no rotation.
+        let m = mapping(1, "POINT", [0.0, 0.0, 0.5, 0.0]);
+        tree.nodes = vec![m.clone(), mapping(2, "POINT", [0.0; 4])];
+        tree.links = vec![Link {
+            from_node: 2,
+            from_socket: "Vector".into(),
+            to_node: 1,
+            to_socket: "Rotation".into(),
+        }];
+        assert_eq!(mapping_z_rotation(&tree, &m), 0.0);
     }
 }
