@@ -67,7 +67,7 @@ fn exec(cx: &mut OpCtx, p: mesh::Bisect) -> OpResult {
         if edbm::with_bm(cx, me, |bm| bm.selected_counts().1) == Some(0) {
             continue;
         }
-        let obmat = frap_scene::id::transform::world_matrix(&cx.main().objects, ob);
+        let obmat = frap_scene::id::transform::world_matrix_in(cx.main(), ob);
         let m = obmat.to_cols_array_2d();
         let imat = obmat.inverse().to_cols_array_2d();
         let co_local = mul_m4_v3(&imat, plane_co);

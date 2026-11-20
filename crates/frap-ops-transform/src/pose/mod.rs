@@ -44,7 +44,7 @@ use frap_rna::{ArmatureId, IdRef, ObjectId, OpArgs};
 use frap_scene::edit_armature::math::{BoneParentTransform, Channels};
 use frap_scene::edit_armature::posing::{parent_transform, where_is};
 use frap_scene::edit_armature::rest::rest_pose;
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use frap_scene::{Context, ContextMode, ObjectMode};
 use glam::{Mat3, Mat4, Vec3};
 
@@ -348,7 +348,7 @@ fn create(
     };
     let rest = rest_pose(arm);
     let mats = where_is(arm, &rest, Some(pose), false);
-    let obmat = world_matrix(&c.main.objects, ob);
+    let obmat = world_matrix_in(c.main, ob);
     let omat = Mat3::from_mat4(obmat);
     let iomat = invert_m3_safe_ortho(&omat);
     transformed_bones(arm, pose, op, local_origins)
@@ -415,7 +415,7 @@ fn orient_source(c: &Context, pivot: PivotPoint, tds: &[PoseTd]) -> OrientSource
     let Some(active) = c.active_object() else {
         return src;
     };
-    let obmat = Mat3::from_mat4(world_matrix(&c.main.objects, active));
+    let obmat = Mat3::from_mat4(world_matrix_in(c.main, active));
     let active_bone = c.active_pose_bone().filter(|b| b.object == active);
     let (mut normal, mut plane) = (Vec3::ZERO, Vec3::ZERO);
     let mut ok = false;
@@ -678,12 +678,12 @@ fn apply(cx: &mut OpCtx, op: TransformOp, args: &OpArgs) -> OpResult {
             let world_centers: Vec<Vec3> = tds
                 .iter()
                 .filter(|t| !t.no_center)
-                .map(|t| world_matrix(&c.main.objects, t.ob).transform_point3(t.center))
+                .map(|t| world_matrix_in(c.main, t.ob).transform_point3(t.center))
                 .collect();
             let active_center = c.active_pose_bone().and_then(|b| {
                 tds.iter()
                     .find(|t| t.ob == b.object && t.name == b.bone)
-                    .map(|t| world_matrix(&c.main.objects, t.ob).transform_point3(t.center))
+                    .map(|t| world_matrix_in(c.main, t.ob).transform_point3(t.center))
                     .or_else(|| active_bone_center(&c, b.object, &b.bone))
             });
             let center = pivot::center(
@@ -696,7 +696,7 @@ fn apply(cx: &mut OpCtx, op: TransformOp, args: &OpArgs) -> OpResult {
             let centers_local = objects
                 .iter()
                 .map(|&(ob, _)| {
-                    let m: Mat4 = world_matrix(&c.main.objects, ob);
+                    let m: Mat4 = world_matrix_in(c.main, ob);
                     let im = if m.determinant() != 0.0 {
                         m.inverse()
                     } else {
@@ -800,7 +800,7 @@ fn active_bone_center(c: &Context, ob: IdRef<ObjectId>, bone: &str) -> Option<Ve
     let rest = rest_pose(arm);
     let mats = where_is(arm, &rest, o.pose.as_ref(), false);
     let i = arm.bone_index(bone)?;
-    Some(world_matrix(&c.main.objects, ob).transform_point3(mats[i].pose_mat.w_axis.truncate()))
+    Some(world_matrix_in(c.main, ob).transform_point3(mats[i].pose_mat.w_axis.truncate()))
 }
 
 #[cfg(test)]

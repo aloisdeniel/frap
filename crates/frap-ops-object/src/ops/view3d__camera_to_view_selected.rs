@@ -39,7 +39,7 @@
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_rna::{CameraId, IdRef, LightId, MeshId, ObjectId};
-use frap_scene::id::transform::{parent_world_matrix, world_matrix};
+use frap_scene::id::transform::{parent_world_matrix_in, world_matrix_in};
 use frap_scene::{Context, EvaluatedObject, Main, ModifierStatus};
 use frap_spec_ops_object::view3d;
 use glam::{Mat3, Mat4, Vec3, Vec4};
@@ -458,7 +458,7 @@ fn exec(cx: &mut OpCtx, _p: view3d::CameraToViewSelected) -> OpResult {
     };
     let mut params = params_from_object(cx.main(), camera);
     compute_viewplane_and_matrix(&mut params, res.0, res.1, res.2, res.3);
-    let camera_world = world_matrix(&cx.main().objects, camera);
+    let camera_world = world_matrix_in(cx.main(), camera);
     let mut data = FrameData::new(&params, &camera_world);
 
     // BKE_scene_foreach_display_point over the selected visible objects.
@@ -479,7 +479,7 @@ fn exec(cx: &mut OpCtx, _p: view3d::CameraToViewSelected) -> OpResult {
     };
 
     let (main, log) = cx.main_mut();
-    let pw = parent_world_matrix(&main.objects, camera);
+    let pw = parent_world_matrix_in(main, camera);
     let is_ortho_camera = params.is_ortho
         && main
             .objects

@@ -22,7 +22,7 @@ use frap_math::quat::QuatWxyz;
 use frap_rna::{IdRef, ObjectId};
 use frap_scene::Context;
 use frap_scene::id::Object;
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use glam::{Mat3, Vec3};
 
 use crate::core::math::{axes_of, invert_m3_safe_ortho, orthogonalize_m3_zero_axes};
@@ -112,13 +112,13 @@ impl Channels {
 /// `ObjectToTransData`.
 pub fn object_td(c: &Context, ob: IdRef<ObjectId>, o: &Object) -> ObjectTd {
     let objects = &c.main.objects;
-    let world = world_matrix(objects, ob);
+    let world = world_matrix_in(c.main, ob);
     let world3 = Mat3::from_mat4(world);
     let axismtx = axes_of(&world3);
     let parent_world = o
         .parent
         .filter(|p| objects.contains(*p))
-        .map(|p| Mat3::from_mat4(world_matrix(objects, p)));
+        .map(|p| Mat3::from_mat4(world_matrix_in(c.main, p)));
     let gimbal = gimbal_axis_object(
         o.rotation_mode_enum(),
         o.rotation_euler,

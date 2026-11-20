@@ -20,7 +20,7 @@ use frap_bmesh::{BMesh, ElemFlag, VertId};
 use frap_math::glam::{DMat4, Mat3, Vec3};
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use frap_spec_ops_mesh::mesh;
 
 use super::extrude_region::common;
@@ -131,7 +131,7 @@ fn exec(cx: &mut OpCtx, p: mesh::ExtrudeRepeat) -> OpResult {
     reserve(cx, steps as u64)?;
     for (ob, me) in helpers::iter_edit_meshes(cx) {
         // `copy_m3_m4`, `invert_m3`, `mul_v3_m3v3`.
-        let tmat = Mat3::from_mat4(world_matrix(&cx.main().objects, ob));
+        let tmat = Mat3::from_mat4(world_matrix_in(cx.main(), ob));
         let tmat = if tmat.determinant() != 0.0 {
             tmat.inverse()
         } else {

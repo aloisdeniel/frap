@@ -33,7 +33,7 @@ use frap_op::prelude::*;
 use frap_op::{TRANSFORM_MODE_HANDLERS, TransformModeHandler, TransformOp};
 use frap_rna::OpArgs;
 use frap_scene::generated::plain::View3DCursor;
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use frap_scene::{Context, ContextMode};
 use glam::{Mat3, Vec3};
 
@@ -85,9 +85,9 @@ pub fn orient_source(c: &Context) -> OrientSource {
     let parent_world = active
         .and_then(|(_, o)| o.parent)
         .filter(|p| objects.contains(*p))
-        .map(|p| Mat3::from_mat4(world_matrix(objects, p)));
+        .map(|p| Mat3::from_mat4(world_matrix_in(c.main, p)));
     OrientSource {
-        active_world: active.map(|(r, _)| Mat3::from_mat4(world_matrix(objects, r))),
+        active_world: active.map(|(r, _)| Mat3::from_mat4(world_matrix_in(c.main, r))),
         active_gimbal: active.and_then(|(_, o)| {
             gimbal_axis_object(
                 o.rotation_mode_enum(),
@@ -278,7 +278,7 @@ fn setup(c: &Context, p: &TransformParams, tds: &[ObjectTd]) -> Setup {
     let active_center = c
         .active_object()
         .filter(|a| c.main.objects.contains(*a))
-        .map(|a| world_matrix(&c.main.objects, a).w_axis.truncate());
+        .map(|a| world_matrix_in(c.main, a).w_axis.truncate());
     let center = pivot::center(
         pivot,
         &centers,

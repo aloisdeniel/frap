@@ -94,7 +94,9 @@ impl Object {
 }
 
 /// `Object.matrix_world` of `ob`, fresh: the parent chain composed with each object's
-/// `matrix_parent_inverse` and `matrix_basis`. Unknown objects give the identity.
+/// `matrix_parent_inverse` and `matrix_basis`. Unknown objects give the identity. Every parent
+/// type reads as `OBJECT` here (no armature data at hand): operators use [`world_matrix_in`],
+/// which follows `parent_type = 'BONE'` as `Object.matrix_world` does.
 pub fn world_matrix(objects: &IdMap<Object>, ob: IdRef<ObjectId>) -> Mat4 {
     let mut chain = Vec::new();
     let mut cur = Some(ob);
@@ -118,6 +120,94 @@ pub fn world_matrix(objects: &IdMap<Object>, ob: IdRef<ObjectId>) -> Mat4 {
         };
     }
     m
+}
+
+/// `ob_parbone` (WP 6.5): the bone part of a `parent_type = 'BONE'` parent matrix, given the
+/// parent armature and the armature-space pose matrix of `ob.parent_bone` — the pose matrix
+/// moved along the bone by `length · parent_bone_head_tail_factor` (1: the tail), or the
+/// bone's deform matrix (`pose_mat · arm_mat⁻¹`) with `use_relative_parent`. Identity when
+/// the bone or its pose is missing (Blender only logs).
+pub fn bone_parent_offset(ob: &Object, arm: &crate::id::Armature, pose_mat: Option<Mat4>) -> Mat4 {
+    let (Some(i), Some(pose_mat)) = (arm.bone_index(&ob.parent_bone), pose_mat) else {
+        return Mat4::IDENTITY;
+    };
+    let rest = crate::edit_armature::rest::rest_pose(arm);
+    let Some(r) = rest.get(i) else {
+        return Mat4::IDENTITY;
+    };
+    if arm.bones[i].use_relative_parent {
+        pose_mat * crate::edit_armature::math::invert_m4(&r.arm_mat)
+    } else {
+        let mut m = pose_mat;
+        m.w_axis +=
+            (m.y_axis.truncate() * (r.length * ob.parent_bone_head_tail_factor)).extend(0.0);
+        m
+    }
+}
+
+/// The matrix a child's `matrix_parent_inverse · matrix_basis` is multiplied by
+/// (`BKE_object_get_parent_matrix`), from the originals: the parent's `world` matrix, times
+/// [`bone_parent_offset`] with the pose of the original channels for `parent_type = 'BONE'`
+/// on an armature parent (WP 6.5; other parent types read as `OBJECT` here, `frap-eval`
+/// evaluates them).
+pub fn parent_matrix_in(main: &crate::Main, child: &Object, parent: &Object, world: Mat4) -> Mat4 {
+    if child.parent_type != "BONE" {
+        return world;
+    }
+    let Some(arm) = parent
+        .data
+        .and_then(|d| d.typed::<frap_rna::ArmatureId>())
+        .and_then(|a| main.armatures.get(a))
+    else {
+        return world;
+    };
+    let pose_mat = arm.bone_index(&child.parent_bone).map(|i| {
+        let rest = crate::edit_armature::rest::rest_pose(arm);
+        let mats = crate::edit_armature::posing::where_is(
+            arm,
+            &rest,
+            parent.pose.as_ref(),
+            arm.pose_position == "REST",
+        );
+        mats[i].pose_mat
+    });
+    world * bone_parent_offset(child, arm, pose_mat)
+}
+
+/// [`world_matrix`] with bone parents ([`parent_matrix_in`]); `Object.matrix_world` reads it.
+pub fn world_matrix_in(main: &crate::Main, ob: IdRef<ObjectId>) -> Mat4 {
+    let objects = &main.objects;
+    let mut chain = Vec::new();
+    let mut cur = Some(ob);
+    while let Some(r) = cur {
+        let Some(o) = objects.get(r) else {
+            break;
+        };
+        if chain.len() >= MAX_PARENT_DEPTH || chain.contains(&r) {
+            break;
+        }
+        chain.push(r);
+        cur = o.parent;
+    }
+    let mut m = Mat4::IDENTITY;
+    for (i, r) in chain.iter().enumerate().rev() {
+        let o = objects.get(*r).expect("invariant: in the chain");
+        m = if i + 1 == chain.len() {
+            o.matrix_basis()
+        } else {
+            let p = objects.get(chain[i + 1]).expect("invariant: in the chain");
+            parent_matrix_in(main, o, p, m) * o.matrix_parent_inverse * o.matrix_basis()
+        };
+    }
+    m
+}
+
+/// [`parent_world_matrix`] with bone parents: the parent matrix of `ob`, if it has a parent.
+pub fn parent_world_matrix_in(main: &crate::Main, ob: IdRef<ObjectId>) -> Option<Mat4> {
+    let o = main.objects.get(ob)?;
+    let p = o.parent?;
+    let po = main.objects.get(p)?;
+    Some(parent_matrix_in(main, o, po, world_matrix_in(main, p)))
 }
 
 /// The world matrix of `ob`'s parent, if it has one.

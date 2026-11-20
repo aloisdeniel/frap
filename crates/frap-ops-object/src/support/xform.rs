@@ -9,13 +9,17 @@
 //! take a [`Worlds`] snapshot first: it is the state Blender's operator sees (verified, e.g.
 //! `parent_set(keep_transform=True)` of a parent and its child keeps the child's world matrix
 //! from before the operator).
+//!
+//! Bone children (`parent_type = 'BONE'`) see their parent through the posed bone, as
+//! `BKE_object_get_parent_matrix` does: [`Worlds::of`] and [`Worlds::parent_matrix`] read
+//! `world_matrix_in` / `parent_matrix_in` (WP 6.5).
 
 use std::collections::BTreeMap;
 
 use frap_math::matrix::ObjectTransform;
 use frap_rna::{IdRef, ObjectId};
 use frap_scene::id::Object;
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::{parent_matrix_in, world_matrix_in};
 use frap_scene::{ChangeLog, Main};
 use glam::{Mat3, Mat4};
 
@@ -29,13 +33,20 @@ impl Worlds {
         Worlds(
             main.objects
                 .iter()
-                .map(|(r, _)| (r, world_matrix(&main.objects, r)))
+                .map(|(r, _)| (r, world_matrix_in(main, r)))
                 .collect(),
         )
     }
     /// The evaluated world matrix of `ob` (identity for an unknown object).
     pub fn get(&self, ob: IdRef<ObjectId>) -> Mat4 {
         self.0.get(&ob).copied().unwrap_or(Mat4::IDENTITY)
+    }
+    /// `BKE_object_get_parent_matrix` of `o` from the snapshot: its parent's world matrix,
+    /// times the posed bone for `parent_type = 'BONE'` (`None` without an existing parent).
+    pub fn parent_matrix(&self, main: &Main, o: &Object) -> Option<Mat4> {
+        let p = o.parent?;
+        let po = main.objects.get(p)?;
+        Some(parent_matrix_in(main, o, po, self.get(p)))
     }
     /// Records a newly evaluated matrix (`BKE_object_where_is_calc` on the evaluated copy).
     pub fn set(&mut self, ob: IdRef<ObjectId>, m: Mat4) {
@@ -68,7 +79,8 @@ pub fn where_is(o: &Object, parent_world: Option<&Mat4>) -> Mat4 {
 /// `ignore_parent_tx`: after `parent` changed (its new evaluated world matrix is
 /// `parent_world`), every child is re-expressed so that its world matrix stays the one of
 /// `worlds`: the child's channels take the decomposition of its world matrix (compatible Euler)
-/// and its `matrix_parent_inverse` becomes the inverse of `parent_world`. The children's new
+/// and its `matrix_parent_inverse` becomes the inverse of its parent matrix (`parent_world`,
+/// times the posed bone for a bone child). The children's new
 /// matrices are recorded in `worlds` (unchanged by construction). Children are visited in
 /// `bpy.data.objects` order.
 pub fn ignore_parent_tx(
@@ -84,9 +96,14 @@ pub fn ignore_parent_tx(
         .filter(|(_, o)| o.parent == Some(parent))
         .map(|(r, _)| r)
         .collect();
-    let inv = parent_world.inverse();
     for c in children {
         let w = worlds.get(c);
+        // `BKE_object_calc_parent`: the parent matrix of this child (the posed bone of a
+        // `parent_type = 'BONE'` child).
+        let inv = match (main.objects.get(c), main.objects.get(parent)) {
+            (Some(o), Some(po)) => parent_matrix_in(main, o, po, *parent_world).inverse(),
+            _ => parent_world.inverse(),
+        };
         if let Some(o) = main.objects.get_mut(c, log) {
             apply_mat4(o, &w, true, None);
             o.matrix_parent_inverse = inv;

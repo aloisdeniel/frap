@@ -10,7 +10,11 @@
 //! `object.modifier_apply`. Images are decoded per request (no cache: DISPLACE reads them once
 //! per evaluation, and the evaluation result itself is cached by fingerprint).
 //! Dependency cycles between modifier operands are broken here: an object whose stack is
-//! being evaluated is not evaluated again through an operand (`ModError::Dependency`).
+//! being evaluated is not evaluated again through an operand (`ModError::Dependency`). Its
+//! world matrix is known before its geometry, so an operand that only needs its transform (a
+//! child of it: an armature parented to the mesh it deforms, a SIMPLE_DEFORM origin parented
+//! to the mesh) reads the in-progress matrix ([`InProgress`], `cache.rs`) instead of
+//! evaluating the object again (WP 6.5).
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -35,7 +39,10 @@ pub(crate) struct StackOut {
     pub warnings: Vec<Report>,
 }
 
-/// Evaluates the modifier stack of `ob` on `base`.
+/// Evaluates the modifier stack of `ob` on `base`, after the armature-parent virtual modifier
+/// (`parent_type = 'ARMATURE'`, WP 6.5; not in Edit Mode, where the virtual modifier is not
+/// enabled). `matrix_world` is the object's evaluated world matrix (deform modifiers read it).
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn evaluate(
     ev: &mut EvalCache,
     host: &dyn HostRead,
@@ -44,30 +51,40 @@ pub(crate) fn evaluate(
     base: Arc<Mesh>,
     mode: EvalMode,
     in_edit_mode: bool,
+    matrix_world: Mat4,
 ) -> StackOut {
-    if ob.modifiers.is_empty() {
+    let virtual_arm = (!in_edit_mode)
+        .then(|| frap_modifiers::types::armature::virtual_parent(host.main(), ob))
+        .flatten();
+    if ob.modifiers.is_empty() && virtual_arm.is_none() {
         return StackOut {
             mesh: base,
             modifier_status: Vec::new(),
             warnings: Vec::new(),
         };
     }
-    ev.in_progress.push(ob_ref.key());
+    ev.in_progress.push(ob_ref.key(), matrix_world);
     let mut cx = GeoCx {
         ev,
         host,
         ob_ref,
         ob,
         mode,
+        own_world: matrix_world,
         reports: Vec::new(),
+        prev_coords: None,
     };
     // A modifier may unwind (TIMEOUT, LIMIT_EXCEEDED); the cache outlives the statement, so the
     // cycle guard is cleared before the unwind goes on (else a later read reports a false cycle).
     let r = guarded(&mut cx, |cx| {
+        let base = match virtual_arm {
+            Some(arm) => frap_modifiers::types::armature::evaluate_virtual(base, arm, cx),
+            None => base,
+        };
         frap_modifiers::stack::evaluate(base, in_edit_mode, cx)
     });
     let mut warnings = std::mem::take(&mut cx.reports);
-    cx.ev.in_progress.retain(|k| *k != ob_ref.key());
+    cx.ev.in_progress.remove(ob_ref.key());
     warnings.extend(r.warnings);
     StackOut {
         mesh: r.mesh,
@@ -112,20 +129,25 @@ impl EvalCache {
             .and_then(|me| main.meshes.get(me))
             .cloned()
             .ok_or_else(|| ModError::Error("frap: the object has no mesh".into()))?;
-        self.in_progress.push(ob_ref.key());
+        let own_world = self
+            .object(host, ob_ref, EvalMode::Viewport)
+            .map_or_else(|_| crate::world_matrix(ob, None), |r| r.matrix_world);
+        self.in_progress.push(ob_ref.key(), own_world);
         let mut cx = GeoCx {
             ev: self,
             host,
             ob_ref,
             ob,
             mode: EvalMode::Viewport,
+            own_world,
             reports: Vec::new(),
+            prev_coords: None,
         };
         let r = guarded(&mut cx, |cx| {
             frap_modifiers::stack::evaluate_one(m, base, cx)
         });
         let reports = std::mem::take(&mut cx.reports);
-        self.in_progress.retain(|k| *k != ob_ref.key());
+        self.in_progress.remove(ob_ref.key());
         r.map(|mesh| AppliedModifier { mesh, reports })
     }
 }
@@ -135,8 +157,7 @@ fn guarded<R>(cx: &mut GeoCx<'_, '_>, f: impl FnOnce(&mut GeoCx<'_, '_>) -> R) -
     match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| f(&mut *cx))) {
         Ok(r) => r,
         Err(payload) => {
-            let key = cx.ob_ref.key();
-            cx.ev.in_progress.retain(|k| *k != key);
+            cx.ev.in_progress.remove(cx.ob_ref.key());
             std::panic::resume_unwind(payload)
         }
     }
@@ -149,12 +170,16 @@ struct GeoCx<'e, 'h> {
     ob_ref: IdRef<ObjectId>,
     ob: &'h Object,
     mode: EvalMode,
+    /// The evaluated `matrix_world` of `ob` (computed before its geometry, WP 6.5).
+    own_world: Mat4,
     reports: Vec<Report>,
+    /// `ArmatureModifierData::vert_coords_prev` of this evaluation (WP 6.5).
+    prev_coords: Option<Vec<[f32; 3]>>,
 }
 
 impl GeoCx<'_, '_> {
     fn cycle(&self, ob: IdRef<ObjectId>) -> bool {
-        self.ev.in_progress.contains(&ob.key())
+        self.ev.in_progress.contains(ob.key())
     }
 }
 
@@ -187,11 +212,12 @@ impl ModEvalCx for GeoCx<'_, '_> {
     }
 
     fn object_matrix_world(&mut self, ob: IdRef<ObjectId>) -> Mat4 {
-        if ob == self.ob_ref || self.cycle(ob) {
-            // The object's own matrix does not depend on its geometry.
-            if let Some(o) = self.host.main().objects.get(ob) {
-                return crate::world_matrix(o, None);
-            }
+        if ob == self.ob_ref {
+            return self.own_world;
+        }
+        // An object whose stack is being evaluated: its matrix is known before its geometry.
+        if let Some(w) = self.ev.in_progress.world(ob.key()) {
+            return w;
         }
         self.ev
             .object(self.host, ob, self.mode)
@@ -247,6 +273,19 @@ impl ModEvalCx for GeoCx<'_, '_> {
     fn boolean_solver(&self) -> &dyn BooleanSolver {
         frap_boolean::default_solver()
     }
+
+    fn armature_in_edit_mode(&self, arm: IdRef<ObjectId>) -> bool {
+        let main = self.host.main();
+        main.objects
+            .get(arm)
+            .and_then(|o| o.data)
+            .and_then(|d| d.typed::<frap_rna::ArmatureId>())
+            .is_some_and(|a| self.host.edit().armatures.contains_key(&a.key()))
+    }
+
+    fn prev_coords_slot(&mut self) -> Option<&mut Option<Vec<[f32; 3]>>> {
+        Some(&mut self.prev_coords)
+    }
 }
 
 /// Where an image file is read from (`//` relative to the saved file's folder).
@@ -292,5 +331,33 @@ fn decode(im: &Image, blend_path: Option<&str>) -> Option<DecodedImage> {
     }
 }
 
-/// Keys of the objects whose stacks are being evaluated (cycle guard).
-pub(crate) type InProgress = Vec<IdKey>;
+/// The objects whose stacks are being evaluated (cycle guard), with their evaluated world
+/// matrices (computed before their geometry).
+#[derive(Clone, Debug, Default)]
+pub(crate) struct InProgress(Vec<(IdKey, Mat4)>);
+
+impl InProgress {
+    pub(crate) fn push(&mut self, key: IdKey, world: Mat4) {
+        self.0.push((key, world));
+    }
+
+    /// Forgets `key` (the innermost entry: entries are pushed and removed like a stack).
+    pub(crate) fn remove(&mut self, key: IdKey) {
+        if let Some(i) = self.0.iter().rposition(|(k, _)| *k == key) {
+            self.0.remove(i);
+        }
+    }
+
+    pub(crate) fn contains(&self, key: IdKey) -> bool {
+        self.0.iter().any(|(k, _)| *k == key)
+    }
+
+    /// The world matrix of an object whose stack is being evaluated.
+    pub(crate) fn world(&self, key: IdKey) -> Option<Mat4> {
+        self.0
+            .iter()
+            .rev()
+            .find(|(k, _)| *k == key)
+            .map(|(_, w)| *w)
+    }
+}

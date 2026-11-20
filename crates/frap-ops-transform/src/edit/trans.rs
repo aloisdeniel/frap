@@ -31,7 +31,7 @@ use frap_math::BliRng;
 use frap_mesh::AttrData;
 use frap_op::prelude::*;
 use frap_rna::{IdRef, MeshId, ObjectId};
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use glam::{Mat3, Mat4, Vec3};
 use smol_str::SmolStr;
 
@@ -971,7 +971,7 @@ pub fn orientation(
                 let em = edit.meshes.get(&me.key())?;
                 Some(normal_orientation(
                     &em.bm,
-                    &world_matrix(&c.main.objects, a),
+                    &world_matrix_in(c.main, a),
                     around == PivotPoint::ActiveElement,
                 ))
             })
@@ -1068,7 +1068,7 @@ pub fn run(cx: &mut OpCtx, req: Request) -> OpResult {
                 continue;
             };
             let bm = &em.bm;
-            let mat = world_matrix(&c.main.objects, *ob);
+            let mat = world_matrix_in(c.main, *ob);
             let mtx = Mat3::from_mat4(mat);
             let mut tc = Tc {
                 ob: *ob,

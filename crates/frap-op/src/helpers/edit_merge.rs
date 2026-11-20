@@ -50,7 +50,7 @@ use frap_mesh::primitives::trace::{CircleTopology, ConeTopology};
 use frap_mesh::{AttrData, Mesh};
 use frap_rna::{IdRef, MeshId, ObjectId};
 use frap_scene::id::Object;
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use smol_str::SmolStr;
 
 use crate::ctx::{OpCtx, Placement};
@@ -149,7 +149,7 @@ pub fn merge_into_edit_mesh(
 /// `inverse(edit object world) · object_matrix(at)`: from the space the generator built the
 /// mesh in (an object freshly added at `at`) to the edit object's local space.
 fn edit_space(cx: &OpCtx, edit_ob: IdRef<ObjectId>, at: &Placement) -> Mat4 {
-    let world = world_matrix(&cx.main().objects, edit_ob);
+    let world = world_matrix_in(cx.main(), edit_ob);
     let mut ob = Object::new("", None);
     ob.location = at.location;
     ob.rotation_euler = at.rotation;

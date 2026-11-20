@@ -49,7 +49,7 @@ pub(crate) mod common {
     use frap_op::prelude::*;
     use frap_rna::{IdRef, MeshId, ObjectId};
     use frap_scene::id::ModifierSettings;
-    use frap_scene::id::transform::world_matrix;
+    use frap_scene::id::transform::world_matrix_in;
     use glam::{Mat4, Vec3};
 
     /// A bmesh-op failure as an operator error (only reachable with a corrupt BMesh).
@@ -166,8 +166,8 @@ pub(crate) mod common {
             let mtx = m.mirror_object.and_then(|id| {
                 let mob = id.typed::<ObjectId>()?;
                 main.objects.get(mob)?;
-                let imtx = world_matrix(&main.objects, mob).inverse();
-                Some(imtx * world_matrix(&main.objects, ob))
+                let imtx = world_matrix_in(main, mob).inverse();
+                Some(imtx * world_matrix_in(main, ob))
             });
             out.push(MirrorClip {
                 axes: m.use_axis,

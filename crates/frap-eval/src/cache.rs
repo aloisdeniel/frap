@@ -14,12 +14,15 @@ mod transform;
 
 use std::sync::Arc;
 
-use frap_rna::{IdKey, IdRef, ObjectId, Report, ReportType};
+use frap_rna::{ArmatureId, IdKey, IdRef, ObjectId, Report, ReportType};
+use frap_scene::id::Object;
 use frap_scene::{EvalError, EvalMode, EvaluatedObject, Evaluator, HostRead};
 use rustc_hash::FxHashMap;
 
 pub use bounds::{bound_box, dimensions, scale_for_dimensions};
-pub use transform::{matrix_basis, object_transform, parent_matrix, world_matrix};
+pub use transform::{
+    bone_parent_matrix, matrix_basis, object_transform, parent_matrix, world_matrix,
+};
 
 use fingerprint::{Cycle, FpCx};
 
@@ -49,6 +52,48 @@ fn cycle_report(host: &dyn HostRead, cycle: &Cycle) -> Report {
         msg.push_str(&format!("\n  OB{}/TRANSFORM_FINAL() via 'Parent'", name(m)));
     }
     Report::new(ReportType::Warning, msg)
+}
+
+/// The parent matrix of `o` from its evaluated parent `p` (object `pr`):
+/// [`bone_parent_matrix`] for `parent_type = 'BONE'` (WP 6.5), [`parent_matrix`] otherwise.
+pub(crate) fn parent_matrix_of(
+    host: &dyn HostRead,
+    o: &Object,
+    pr: IdRef<ObjectId>,
+    p: &EvaluatedObject,
+) -> glam::Mat4 {
+    if o.parent_type == "BONE" {
+        let main = host.main();
+        let arm = main
+            .objects
+            .get(pr)
+            .and_then(|po| po.data)
+            .and_then(|d| d.typed::<ArmatureId>())
+            .and_then(|a| main.armatures.get(a));
+        return bone_parent_matrix(o, &p.matrix_world, p.pose.as_deref(), arm);
+    }
+    parent_matrix(o, &p.matrix_world, p.mesh.as_deref())
+}
+
+/// `Dependency cycle detected` report of a child that needs the geometry of an ancestor whose
+/// modifier stack depends on the child (a vertex parent of a mesh that the child deforms).
+fn geometry_cycle_report(
+    host: &dyn HostRead,
+    child: IdRef<ObjectId>,
+    parent: IdRef<ObjectId>,
+) -> Report {
+    let objects = &host.main().objects;
+    let name = |ob: IdRef<ObjectId>| objects.name_of(ob).unwrap_or("").to_owned();
+    Report::new(
+        ReportType::Warning,
+        format!(
+            "Dependency cycle detected:\n  OB{}/TRANSFORM_PARENT() depends on\n  OB{}/GEOMETRY_EVAL() via 'Vertex Parent'\n  OB{}/GEOMETRY_EVAL() depends on\n  OB{}/TRANSFORM_FINAL() via 'Modifier'",
+            name(child),
+            name(parent),
+            name(parent),
+            name(child)
+        ),
+    )
 }
 
 fn missing(ob: IdRef<ObjectId>) -> EvalError {
@@ -102,6 +147,9 @@ impl EvalCache {
         // The stale part of the ancestor chain, child first.
         let mut stale = Vec::new();
         let mut parent_result = None;
+        // The ancestor whose stack is being evaluated further up this call (`geometry.rs`):
+        // its world matrix and pose are known, its geometry is not.
+        let mut in_progress_parent = None;
         let mut cur = Some(ob);
         while let Some(c) = cur {
             let node = cx.node(c).ok_or_else(|| missing(c))?;
@@ -109,21 +157,46 @@ impl EvalCache {
                 parent_result = Some(r);
                 break;
             }
+            if let Some(w) = self.in_progress.world(c.key()) {
+                let o = host.main().objects.get(c).ok_or_else(|| missing(c))?;
+                parent_result = Some(Arc::new(EvaluatedObject {
+                    matrix_world: w,
+                    mesh: mesh::mesh_of(host, o).map(|me| host.mesh_view(me)),
+                    bounds: None,
+                    pose: crate::pose::evaluate(host, o),
+                    modifier_status: Vec::new(),
+                    warnings: Vec::new(),
+                }));
+                in_progress_parent = Some(c);
+                break;
+            }
             let next = node.parent;
             stale.push((c, node.clone()));
             cur = next;
         }
         // `parent_result` belongs to the first fresh ancestor, which is the parent of the last
-        // stale object; with no stale object it is `ob`'s own cached result.
+        // stale object; with no stale object it is `ob`'s own cached result (or its in-progress
+        // stand-in, never cached).
         if stale.is_empty() {
             return parent_result.ok_or_else(|| missing(ob));
         }
+        // Set once a result was computed from the unevaluated geometry of an in-progress
+        // ancestor (a real dependency cycle): it and its descendants are not cached.
+        let mut tainted = false;
         for (c, node) in stale.into_iter().rev() {
             let o = host.main().objects.get(c).ok_or_else(|| missing(c))?;
             let parent = parent_result.as_deref().filter(|_| node.parent.is_some());
+            let mut cycle_warning = None;
+            if let (Some(pr), Some(ip)) = (node.parent, in_progress_parent)
+                && pr == ip
+                && matches!(o.parent_type.as_str(), "VERTEX" | "VERTEX_3")
+            {
+                tainted = true;
+                cycle_warning = Some(geometry_cycle_report(host, c, ip));
+            }
             let matrix_world = match (node.parent, parent) {
-                (Some(_), Some(p)) => {
-                    let pm = parent_matrix(o, &p.matrix_world, p.mesh.as_deref());
+                (Some(pr), Some(p)) => {
+                    let pm = parent_matrix_of(host, o, pr, p);
                     world_matrix(o, Some(&pm))
                 }
                 // The member of a cycle evaluated first: its parent is not evaluated yet.
@@ -132,11 +205,14 @@ impl EvalCache {
                 }
                 _ => world_matrix(o, None),
             };
-            let geo = mesh::evaluate(self, host, c, o, mode);
+            let geo = mesh::evaluate(self, host, c, o, mode, matrix_world);
             let bounds = geo.mesh.as_ref().and_then(|m| m.bounds());
             let mut warnings = geo.warnings;
             if let Some(cycle) = &node.cycle {
                 warnings.insert(0, cycle_report(host, cycle));
+            }
+            if let Some(w) = cycle_warning {
+                warnings.insert(0, w);
             }
             let result = Arc::new(EvaluatedObject {
                 matrix_world,
@@ -146,13 +222,15 @@ impl EvalCache {
                 modifier_status: geo.modifier_status,
                 warnings,
             });
-            self.objects.insert(
-                (c.key(), mode),
-                CacheEntry {
-                    fingerprint: node.fp,
-                    result: result.clone(),
-                },
-            );
+            if !tainted {
+                self.objects.insert(
+                    (c.key(), mode),
+                    CacheEntry {
+                        fingerprint: node.fp,
+                        result: result.clone(),
+                    },
+                );
+            }
             parent_result = Some(result);
         }
         parent_result.ok_or_else(|| missing(ob))

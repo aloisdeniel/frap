@@ -154,13 +154,12 @@ fn single_user(main: &mut Main, log: &mut ChangeLog, ob: IdRef<ObjectId>, data: 
 
 /// The new evaluated world matrix Blender gives an object after the apply: its new channels
 /// with the **old** delta channels (`BKE_object_transform_copy` copies no deltas).
-fn eval_world(o: &Object, old: &Object, worlds: &Worlds) -> Mat4 {
+fn eval_world(o: &Object, old: &Object, pw: Option<Mat4>) -> Mat4 {
     let mut ev = o.clone();
     ev.delta_location = old.delta_location;
     ev.delta_rotation_euler = old.delta_rotation_euler;
     ev.delta_rotation_quaternion = old.delta_rotation_quaternion;
     ev.delta_scale = old.delta_scale;
-    let pw = o.parent.map(|p| worlds.get(p));
     xform::where_is(&ev, pw.as_ref())
 }
 
@@ -314,11 +313,15 @@ fn exec(cx: &mut OpCtx, p: object::TransformApply) -> OpResult {
             // Cameras (no motion-tracking clip in frap) and other data are skipped.
             Some(_) => continue,
         }
+        let pw = main
+            .objects
+            .get(ob)
+            .and_then(|o| worlds.parent_matrix(main, o));
         let Some(o) = main.objects.get_mut(ob, log) else {
             continue;
         };
         reset_channels(o, loc, rot, sca);
-        let new = eval_world(o, &old, &worlds);
+        let new = eval_world(o, &old, pw);
         worlds.set(ob, new);
         xform::ignore_parent_tx(main, log, ob, &new, &worlds);
         changed = true;
@@ -330,8 +333,7 @@ fn exec(cx: &mut OpCtx, p: object::TransformApply) -> OpResult {
             let pw = main
                 .objects
                 .get(ob)
-                .and_then(|o| o.parent)
-                .map(|p| worlds.get(p));
+                .and_then(|o| worlds.parent_matrix(main, o));
             let Some(o) = main.objects.get_mut(ob, log) else {
                 continue;
             };

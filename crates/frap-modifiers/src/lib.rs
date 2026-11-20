@@ -172,6 +172,18 @@ pub trait ModEvalCx {
     fn subdivider(&self) -> &dyn Subdivider;
     /// The boolean backend (BOOLEAN).
     fn boolean_solver(&self) -> &dyn BooleanSolver;
+    /// Whether the armature data of `arm` is in Edit Mode (`arm->edbo`: the ARMATURE deform
+    /// is skipped, WP 6.5). Default: never.
+    fn armature_in_edit_mode(&self, _arm: IdRef<ObjectId>) -> bool {
+        false
+    }
+    /// `ArmatureModifierData::vert_coords_prev` of this stack evaluation (WP 6.5): the
+    /// coordinates an ARMATURE modifier hands to the `use_multi_modifier` ones after it
+    /// (`MOD_previous_vcos_store`). Lives only for one evaluation of one object's stack, never
+    /// on mesh data. Default: no slot (nothing is stored).
+    fn prev_coords_slot(&mut self) -> Option<&mut Option<Vec<[f32; 3]>>> {
+        None
+    }
 }
 
 /// What a `types/<type>.rs` file needs.

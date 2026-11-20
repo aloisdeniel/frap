@@ -16,6 +16,6 @@ mod key_eval;
 pub mod pose;
 
 pub use cache::{
-    EvalCache, bound_box, dimensions, matrix_basis, object_transform, parent_matrix,
-    scale_for_dimensions, world_matrix,
+    EvalCache, bone_parent_matrix, bound_box, dimensions, matrix_basis, object_transform,
+    parent_matrix, scale_for_dimensions, world_matrix,
 };

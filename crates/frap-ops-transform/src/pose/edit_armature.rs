@@ -34,7 +34,7 @@ use frap_op::{TRANSFORM_MODE_HANDLERS, TransformModeHandler, TransformOp};
 use frap_rna::{ArmatureId, IdRef, ObjectId, OpArgs};
 use frap_scene::edit_armature::tools::roll_to_vector;
 use frap_scene::edit_armature::{EditArmature, ROOT, TIP};
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use frap_scene::{Context, ContextMode, ObjectMode};
 use glam::{Mat3, Vec3};
 
@@ -108,7 +108,7 @@ fn create(
     let Some(a) = c.main.armatures.get(arm) else {
         return Vec::new();
     };
-    let obmat = world_matrix(&c.main.objects, ob);
+    let obmat = world_matrix_in(c.main, ob);
     let mtx = Mat3::from_mat4(obmat);
     let smtx = invert_m3_safe_ortho(&mtx);
     let mut out = Vec::new();
@@ -309,7 +309,7 @@ fn apply(cx: &mut OpCtx, op: TransformOp, args: &OpArgs) -> OpResult {
             if let Some((ob, arm)) = objects.first()
                 && let Some(ea) = edit.armatures.get(&arm.key())
             {
-                let obm = Mat3::from_mat4(world_matrix(&c.main.objects, *ob));
+                let obm = Mat3::from_mat4(world_matrix_in(c.main, *ob));
                 if p.orient_type.as_deref() == Some("NORMAL")
                     && let Some(act) = ea.active.filter(|&i| i < ea.edit_bones.len())
                 {
@@ -345,7 +345,7 @@ fn apply(cx: &mut OpCtx, op: TransformOp, args: &OpArgs) -> OpResult {
                 let ea = edit.armatures.get(&arm.key())?;
                 let b = ea.edit_bones.get(ea.active?)?;
                 (b.select[0] || b.select[ROOT])
-                    .then(|| world_matrix(&c.main.objects, *ob).transform_point3(b.head_v()))
+                    .then(|| world_matrix_in(c.main, *ob).transform_point3(b.head_v()))
             });
             let center = pivot::center(
                 pivot,

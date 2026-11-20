@@ -14,7 +14,7 @@
 
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use frap_spec_ops_anim::armature;
 use glam::{Mat3, Vec3};
 
@@ -41,7 +41,7 @@ fn exec(cx: &mut OpCtx, p: armature::CalculateRoll) -> OpResult {
         (viewinv.z_axis, Vec3::from_array(c.cursor().location))
     };
     for (ob, arm) in arms {
-        let obmat = world_matrix(&cx.main().objects, ob);
+        let obmat = world_matrix_in(cx.main(), ob);
         let ob3 = Mat3::from_mat4(obmat);
         let cursor_local = if obmat.determinant() != 0.0 {
             obmat.inverse().transform_point3(cursor)

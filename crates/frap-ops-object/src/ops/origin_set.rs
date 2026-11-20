@@ -156,12 +156,15 @@ fn exec(cx: &mut OpCtx, p: object::OriginSet) -> OpResult {
             continue;
         }
         // Offset the object (in its parent space) so that nothing moves in world space.
+        let pw = main
+            .objects
+            .get(ob)
+            .and_then(|o| worlds.parent_matrix(main, o));
         let Some(o) = main.objects.get_mut(ob, log) else {
             continue;
         };
         let centn = o.transform().to_mat3() * cent;
         o.location = (Vec3::from_array(o.location) + centn).to_array();
-        let pw = o.parent.map(|p| worlds.get(p));
         let new = xform::where_is(o, pw.as_ref());
         worlds.set(ob, new);
         xform::ignore_parent_tx(main, log, ob, &new, &worlds);
@@ -175,11 +178,14 @@ fn exec(cx: &mut OpCtx, p: object::OriginSet) -> OpResult {
         for other in others {
             done.push(other);
             let w = Mat3::from_mat4(worlds.get(other));
+            let pw = main
+                .objects
+                .get(other)
+                .and_then(|o| worlds.parent_matrix(main, o));
             let Some(oo) = main.objects.get_mut(other, log) else {
                 continue;
             };
             oo.location = (Vec3::from_array(oo.location) + w * cent).to_array();
-            let pw = oo.parent.map(|p| worlds.get(p));
             let new = xform::where_is(oo, pw.as_ref());
             worlds.set(other, new);
             xform::ignore_parent_tx(main, log, other, &new, &worlds);

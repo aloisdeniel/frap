@@ -18,7 +18,7 @@ use frap_bmesh::ops::spin::{SpinIn, spin};
 use frap_bmesh::{ElemFlag, VertId};
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_scene::id::transform::world_matrix;
+use frap_scene::id::transform::world_matrix_in;
 use frap_spec_ops_mesh::mesh;
 
 use super::split::edbm;
@@ -80,7 +80,7 @@ fn exec(cx: &mut OpCtx, p: mesh::Screw) -> OpResult {
             failed_verts_len += 1;
             continue;
         };
-        let obmat = world_matrix(&cx.main().objects, ob);
+        let obmat = world_matrix_in(cx.main(), ob);
         let nor = obmat.z_axis.truncate().to_array();
         let m = obmat.to_cols_array_2d();
         let mul_m4 = |c: [f32; 3]| -> [f32; 3] {

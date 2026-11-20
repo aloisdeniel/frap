@@ -335,7 +335,7 @@ source: crates/frap-schema/tests/snapshots.rs
     "identifier": "ARMATURE",
     "name": "Armature",
     "struct": "ArmatureModifier",
-    "evaluator": false,
+    "evaluator": true,
     "planned": "M6"
   },
   {
