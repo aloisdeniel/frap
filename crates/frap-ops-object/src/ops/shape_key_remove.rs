@@ -123,7 +123,7 @@ fn exec(cx: &mut OpCtx, p: object::ShapeKeyRemove) -> OpResult {
         shapenr = 1;
     }
     if changed {
-        cx.object_mut(ob)?.active_shape_key_index = (shapenr - 1).max(0) as i32;
+        cx.object_mut(ob)?.active_shape_key_index = (shapenr - 1) as i32;
         Ok(OpStatus::Finished)
     } else {
         Ok(OpStatus::Cancelled)

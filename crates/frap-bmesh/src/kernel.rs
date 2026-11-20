@@ -73,6 +73,11 @@ impl BMesh {
                 sl.co.resize(i + 1, [0.0; 3]);
             }
         }
+        if let Some(ki) = &mut self.shape_keyindex
+            && ki.len() <= i
+        {
+            ki.resize(i + 1, 0);
+        }
         self.index.dirty |= ElemTypes::VERT;
         self.lnor_spacearr.dirty_all = true;
         VertId(s)
@@ -316,6 +321,10 @@ impl BMesh {
                 // Handles `v->no` too.
                 self.vert_attrs_copy(ex, v);
                 self.shape_copy(Some(ex), v);
+                // Exception: don't copy the original shape-key index.
+                if let Some(ki) = &mut self.shape_keyindex {
+                    ki[v.slot()] = crate::types::ORIGINDEX_NONE;
+                }
             } else {
                 self.vdata.set_default(v.0);
                 self.shape_copy(None, v);

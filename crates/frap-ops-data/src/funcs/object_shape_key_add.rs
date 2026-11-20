@@ -30,7 +30,9 @@ fn object_shape_key_add(
     let (main, log) = h.main_mut();
     let Some((k, i)) = Key::object_insert(main, log, ob, Some(&name), from_mix) else {
         let n = main.objects.name_of(ob).unwrap_or_default().to_owned();
-        return Err(report_error(format!("Object '{n}' does not support shapes")));
+        return Err(report_error(format!(
+            "Object '{n}' does not support shapes"
+        )));
     };
     let key = main
         .shape_keys

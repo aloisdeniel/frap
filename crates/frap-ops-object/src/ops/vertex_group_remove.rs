@@ -2,7 +2,7 @@
 //! `bpy.ops.object.vertex_group_remove(all=False, all_unlocked=False)`, tier T0. Port of
 //! `vertex_group_remove_exec` (`vgroup_delete_active` / `BKE_object_defgroup_remove_all_ex`,
 //! `editors/object/object_vgroup.cc`, Blender 5.2.4, GPL-2.0-or-later): removes the active
-//! group (or every group; frap has no group locks, so `all_unlocked` removes every group too).
+//! group, every group (`all`) or every unlocked group (`all_unlocked`, which wins over `all`).
 //! The weights go with the group (from the edit BMesh in Edit Mode), higher groups shift down
 //! and the active index follows. Poll `vertex_group_poll` (`Object has no vertex groups`).
 
@@ -34,13 +34,21 @@ fn exec(cx: &mut OpCtx, p: object::VertexGroupRemove) -> OpResult {
         return Ok(OpStatus::Cancelled);
     };
     if p.all.value || p.all_unlocked.value {
-        while cx
+        // `BKE_object_defgroup_remove_all_ex(ob, only_unlocked)`: the groups in order.
+        let only_unlocked = p.all_unlocked.value;
+        let mut g = 0;
+        while let Some(locked) = cx
             .main()
             .meshes
             .get(me)
-            .is_some_and(|m| !m.vertex_group_names.is_empty())
+            .filter(|m| g < m.vertex_group_names.len())
+            .map(|m| m.vertex_group_locked(g))
         {
-            common::remove_group(cx, ob, me, 0)?;
+            if only_unlocked && locked {
+                g += 1;
+            } else {
+                common::remove_group(cx, ob, me, g)?;
+            }
         }
     } else if let Some(g) = act {
         common::remove_group(cx, ob, me, g)?;

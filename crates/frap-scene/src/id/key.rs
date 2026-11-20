@@ -41,6 +41,8 @@ pub struct Key {
     /// `Key.animation_data` (shape-key values are keyed into the object's action under a `KE`
     /// slot; this is the key's own AnimData, ARCHITECTURE §18)
     pub animation_data: Option<AnimData>,
+    /// `Key.uidgen`: the next [`ShapeKey::uid`] (`BKE_key_add` starts at 1).
+    pub uidgen: i32,
 }
 
 impl Key {
@@ -53,6 +55,7 @@ impl Key {
             use_relative: true,
             eval_time: 0.0,
             animation_data: None,
+            uidgen: 1,
         }
     }
 }
@@ -84,6 +87,10 @@ pub struct ShapeKey {
     pub select: bool,
     /// `KeyBlock.pos`: the position of an absolute key (`frame / 100`).
     pub pos: f32,
+    /// `KeyBlock.uid`: unique in the key (from `Key.uidgen`), matches the block to its Edit
+    /// Mode shape layer. 0 until the block is added to a key ([`Key::add_block`],
+    /// [`Key::ensure_uids`]).
+    pub uid: i32,
 }
 
 impl ShapeKey {
@@ -102,6 +109,7 @@ impl ShapeKey {
             lock_shape: false,
             select: false,
             pos: 0.0,
+            uid: 0,
         }
     }
 
@@ -167,8 +175,40 @@ impl Key {
         let name = self.unique_block_name(None, &requested);
         let mut kb = ShapeKey::new(name, Vec::new());
         kb.pos = curpos + 0.1;
+        kb.uid = self.next_uid();
         self.key_blocks.push(kb);
         self.key_blocks.len() - 1
+    }
+
+    /// `key->uidgen++`.
+    fn next_uid(&mut self) -> i32 {
+        let uid = self.uidgen.max(1);
+        self.uidgen = uid + 1;
+        uid
+    }
+
+    /// Whether every block has a uid of its own (blocks built outside [`Key::add_block`], by
+    /// `object.join` or a file reader, start at 0).
+    pub fn uids_valid(&self) -> bool {
+        self.key_blocks.iter().enumerate().all(|(i, k)| {
+            k.uid > 0 && k.uid < self.uidgen && !self.key_blocks[..i].iter().any(|o| o.uid == k.uid)
+        })
+    }
+
+    /// Gives every block without a uid of its own (0 or a duplicate) a new one (the uid check
+    /// of `BM_mesh_bm_from_me` and file reading).
+    pub fn ensure_uids(&mut self) {
+        if self.uids_valid() {
+            return;
+        }
+        let max = self.key_blocks.iter().map(|k| k.uid).max().unwrap_or(0);
+        self.uidgen = self.uidgen.max(max + 1).max(1);
+        for i in 0..self.key_blocks.len() {
+            let uid = self.key_blocks[i].uid;
+            if uid <= 0 || self.key_blocks[..i].iter().any(|o| o.uid == uid) {
+                self.key_blocks[i].uid = self.next_uid();
+            }
+        }
     }
 
     /// `BKE_keyblock_add_ctime(key, name, do_force = false)`: [`Key::add_block`], then for an
@@ -562,37 +602,49 @@ impl Key {
                 name: &k.name,
                 data: &k.data,
                 relative: k.relative_key,
+                uid: k.uid,
             })
             .collect()
     }
 
     /// Entering Edit Mode (`BM_mesh_bm_from_me` with `use_shapekey`): one shape layer per
-    /// block, the vertex positions from the active block (`active`, 0-based).
+    /// block, the vertex positions from the active block (`active`, 0-based), which becomes
+    /// `bm->shapenr`. The blocks need their uids ([`Key::ensure_uids`]).
     pub fn load_into_bmesh(&self, bm: &mut frap_bmesh::BMesh, active: Option<usize>) {
         frap_bmesh::shape::load_layers(bm, &self.block_refs(), active, true);
     }
 
     /// `BM_mesh_bm_from_me` without `use_shapekey` (Object Mode BMesh tools): one shape layer
-    /// per block, the vertex positions left alone.
+    /// per block, the vertex positions left alone, no active block.
     pub fn load_layers_into_bmesh(&self, bm: &mut frap_bmesh::BMesh) {
         frap_bmesh::shape::load_layers(bm, &self.block_refs(), None, false);
     }
 
-    /// `bm_to_mesh_shape` of a BMesh without an active block (`bm->shapenr == 0`: an Object
-    /// Mode conversion, or a BMesh made by a tool): every block takes its layer.
+    /// `bm_to_mesh_shape` of a BMesh without an active block (an Object Mode conversion, or a
+    /// BMesh made by a tool): every block takes its layer.
     pub fn write_layers_from_bmesh(&mut self, bm: &mut frap_bmesh::BMesh) {
-        self.write_back_from_bmesh(bm, None);
+        bm.shapenr = 0;
+        self.write_back_from_bmesh(bm);
     }
 
-    /// Leaving Edit Mode (`bm_to_mesh_shape`): every block takes its layer (the active one
-    /// the edited coordinates, the blocks depending on an edited basis its offset). Returns
-    /// the positions the mesh must take instead of the edited ones (the reference key's,
-    /// when another block was edited).
-    pub fn write_back_from_bmesh(
-        &mut self,
-        bm: &mut frap_bmesh::BMesh,
-        active: Option<usize>,
-    ) -> Option<Vec<[f32; 3]>> {
+    /// Leaving Edit Mode (`bm_to_mesh_shape`): the edited block is `bm->shapenr` (the block
+    /// the BMesh was made with, by position in the current block list); a layer whose block
+    /// was removed while editing is re-added as a new block (`BKE_keyblock_add` with the
+    /// layer's name and uid); every block takes its layer, matched by uid (the active one the
+    /// edited coordinates, the blocks depending on an edited basis its offset when no vertex
+    /// was created while editing); a block without a layer is rebuilt from its data through
+    /// the original vertex indices. Returns the positions the mesh must take instead of the
+    /// edited ones (the reference key's, when another block was edited).
+    pub fn write_back_from_bmesh(&mut self, bm: &mut frap_bmesh::BMesh) -> Option<Vec<[f32; 3]>> {
+        let active = usize::try_from(bm.shapenr - 1)
+            .ok()
+            .filter(|&a| a < self.key_blocks.len());
+        let uids: Vec<i32> = self.key_blocks.iter().map(|k| k.uid).collect();
+        for (name, uid) in frap_bmesh::shape::orphan_layers(bm, &uids) {
+            let i = self.add_block(Some(&name));
+            self.key_blocks[i].uid = uid;
+            self.uidgen = self.uidgen.max(uid + 1);
+        }
         let wb = frap_bmesh::shape::write_back(bm, &self.block_refs(), active, self.use_relative);
         for (kb, data) in self.key_blocks.iter_mut().zip(wb.blocks) {
             kb.data = data;
@@ -733,6 +785,15 @@ impl Key {
             Some(m) => m.unwrap_or_default(),
             None => positions,
         };
+        // "Set the first active when none is set when called from RNA" (`shapenr <= 0`).
+        if main
+            .objects
+            .get(ob)
+            .is_some_and(|o| o.active_shape_key_index < 0)
+            && let Some(o) = main.objects.get_mut(ob, log)
+        {
+            o.active_shape_key_index = 0;
+        }
         Some((k, i))
     }
 
@@ -770,7 +831,8 @@ impl Key {
         }
         if let Some(o) = main.objects.get_mut(ob, log) {
             if empty {
-                o.active_shape_key_index = 0;
+                // `shapenr = 0`: unset.
+                o.active_shape_key_index = -1;
             } else if o.active_shape_key_index > 0 {
                 o.active_shape_key_index -= 1;
             }

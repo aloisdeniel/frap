@@ -246,6 +246,8 @@ fn exec(cx: &mut OpCtx, _p: object::Join) -> OpResult {
         && let Some(key) = main.shape_keys.get_mut(k, log)
     {
         key.key_blocks = blocks;
+        // The blocks appended from other keys get uids of the active key (`BKE_keyblock_add`).
+        key.ensure_uids();
         key.sort_absolute();
     }
     // Every slot of the active object links `DATA` now; objects sharing the mesh follow its

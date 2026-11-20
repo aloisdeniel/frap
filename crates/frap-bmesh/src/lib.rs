@@ -39,7 +39,7 @@ pub use customdata::{CdLayer, CustomData};
 pub use pool::Pool;
 pub use types::{
     BMEdge, BMElem, BMFace, BMLoop, BMVert, BMesh, BmError, CreateFlag, DiskLink, EdgeId, ElemFlag,
-    ElemTypes, FaceId, LoopId, SelectMode, ShapeLayer, VertId,
+    ElemTypes, FaceId, LoopId, ORIGINDEX_NONE, SelectMode, ShapeLayer, VertId,
 };
 
 /// The identity matrix in Blender's `float[4][4]` layout (`m[col][row]`), the default of

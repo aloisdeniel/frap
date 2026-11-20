@@ -24,7 +24,11 @@ pub(crate) fn arg_indices(args: &FuncArgs) -> Vec<i64> {
 }
 
 #[rna_func(srna = "VertexGroup", func = "add")]
-fn vertex_group_add(h: &mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Result<Value, RnaError> {
+fn vertex_group_add(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    args: &mut FuncArgs,
+) -> Result<Value, RnaError> {
     super::_common::refuse_detached(this, "add")?;
     let ob = super::vertex_groups_new::object_of(this)?;
     let Some(me) = mesh_of_object(h.main(), ob) else {
@@ -50,7 +54,11 @@ fn vertex_group_add(h: &mut dyn Host, this: &RnaPtr, args: &mut FuncArgs) -> Res
     let n = m.verts_num();
     let dverts = m.deform_verts_mut();
     for i in indices {
-        if let Some(dv) = usize::try_from(i).ok().filter(|&i| i < n).map(|i| &mut dverts[i]) {
+        if let Some(dv) = usize::try_from(i)
+            .ok()
+            .filter(|&i| i < n)
+            .map(|i| &mut dverts[i])
+        {
             deform::vert_add(dv, g as u32, weight, mode);
         }
     }

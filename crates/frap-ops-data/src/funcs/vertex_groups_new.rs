@@ -61,7 +61,11 @@ pub(crate) fn mesh_of_object(main: &Main, ob: IdRef<ObjectId>) -> Option<IdRef<M
 }
 
 /// `check_object_vgroup_support_and_warn`: the mesh, or Blender's report as an error.
-pub(crate) fn supported(main: &Main, ob: IdRef<ObjectId>, op: &str) -> Result<IdRef<MeshId>, RnaError> {
+pub(crate) fn supported(
+    main: &Main,
+    ob: IdRef<ObjectId>,
+    op: &str,
+) -> Result<IdRef<MeshId>, RnaError> {
     mesh_of_object(main, ob).ok_or_else(|| {
         let ty = main.objects.get(ob).map_or("EMPTY", |o| o.object_type());
         report_error(format!(
@@ -160,9 +164,7 @@ pub(crate) fn remove_group(
     if !edit {
         deform::remove_group_mesh(m, g as u32);
     }
-    if g < m.vertex_group_names.len() {
-        m.vertex_group_names.remove(g);
-    }
+    m.remove_vertex_group_name(g);
     let empty = m.vertex_group_names.is_empty();
     if let Some(o) = main.objects.get_mut(ob, log) {
         // `actdef > def_nr` → `actdef - 1`, then a valid active index while groups remain.

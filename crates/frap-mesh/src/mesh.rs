@@ -356,6 +356,11 @@ pub struct Mesh {
     pub materials: Vec<Option<IdRef<MaterialId>>>,
     /// Vertex-group names (DNA-level on the Mesh; RNA exposes them via `Object.vertex_groups`).
     pub vertex_group_names: Vec<SmolStr>,
+    /// The names of the locked vertex groups (`bDeformGroup.flag & DG_LOCK_WEIGHT`,
+    /// `VertexGroup.lock_weight`, WP 6.3). Kept by name so the code that rebuilds
+    /// `vertex_group_names` needs no change; [`Mesh::remove_vertex_group_name`] and
+    /// [`Mesh::rename_vertex_group`] keep it in step.
+    pub vertex_group_locks: Vec<SmolStr>,
     /// `Mesh.shape_keys`
     pub shape_keys: Option<IdRef<KeyId>>,
     /// Active UV map name.
@@ -431,6 +436,7 @@ impl Mesh {
             deform_verts: None,
             materials: Vec::new(),
             vertex_group_names: Vec::new(),
+            vertex_group_locks: Vec::new(),
             shape_keys: None,
             uv_active: None,
             uv_active_render: None,
@@ -482,6 +488,55 @@ impl Mesh {
     /// `polygons[i].loop_start` table, length `faces + 1`.
     pub fn face_offsets(&self) -> &[i32] {
         &self.face_offsets
+    }
+
+    /// `VertexGroup.lock_weight` of group `i` (false past the last group).
+    pub fn vertex_group_locked(&self, i: usize) -> bool {
+        self.vertex_group_names
+            .get(i)
+            .is_some_and(|n| self.vertex_group_locks.contains(n))
+    }
+
+    /// The lock flags of every group (`BKE_object_defgroup_lock_flags_get`), `None` when no
+    /// group is locked.
+    pub fn vertex_group_lock_flags(&self) -> Option<Vec<bool>> {
+        let flags: Vec<bool> = (0..self.vertex_group_names.len())
+            .map(|i| self.vertex_group_locked(i))
+            .collect();
+        flags.contains(&true).then_some(flags)
+    }
+
+    /// Sets `VertexGroup.lock_weight` of group `i` (ignored past the last group).
+    pub fn set_vertex_group_locked(&mut self, i: usize, locked: bool) {
+        let Some(name) = self.vertex_group_names.get(i).cloned() else {
+            return;
+        };
+        self.vertex_group_locks.retain(|n| *n != name);
+        if locked {
+            self.vertex_group_locks.push(name);
+        }
+    }
+
+    /// Removes the name (and lock) of group `i`; the weights are the caller's.
+    pub fn remove_vertex_group_name(&mut self, i: usize) {
+        if i < self.vertex_group_names.len() {
+            let name = self.vertex_group_names.remove(i);
+            if !self.vertex_group_names.contains(&name) {
+                self.vertex_group_locks.retain(|n| *n != name);
+            }
+        }
+    }
+
+    /// Renames group `i` to `name` (already unique), keeping its lock.
+    pub fn rename_vertex_group(&mut self, i: usize, name: SmolStr) {
+        let locked = self.vertex_group_locked(i);
+        if let Some(n) = self.vertex_group_names.get_mut(i) {
+            let old = std::mem::replace(n, name);
+            self.vertex_group_locks.retain(|l| *l != old);
+        }
+        if locked {
+            self.set_vertex_group_locked(i, true);
+        }
     }
 
     /// Vertex-group weights (`MDeformVert`), if any.

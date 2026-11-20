@@ -30,10 +30,8 @@ fn set(h: &mut dyn Host, this: &RnaPtr, _prop: &'static PropDef, v: Value) -> Re
         .map(|m| m.vertex_group_names.clone())
         .unwrap_or_default();
     let name = frap_bmesh::shape::deform::unique_group_name(&names, Some(i), &requested);
-    if let Some(m) = main.meshes.get_mut(me, log)
-        && let Some(n) = m.vertex_group_names.get_mut(i)
-    {
-        *n = name;
+    if let Some(m) = main.meshes.get_mut(me, log) {
+        m.rename_vertex_group(i, name);
     }
     Ok(())
 }

@@ -33,7 +33,12 @@ fn vertex_group_remove(
     let Some((_, g)) = group_of(h.main(), this) else {
         return Ok(Value::None);
     };
-    if h.main().meshes.get(me).and_then(|m| m.deform_verts()).is_none() {
+    if h.main()
+        .meshes
+        .get(me)
+        .and_then(|m| m.deform_verts())
+        .is_none()
+    {
         return Ok(Value::None);
     }
     let (main, log) = h.main_mut();
@@ -44,7 +49,11 @@ fn vertex_group_remove(
     let n = m.verts_num();
     let dverts = m.deform_verts_mut();
     for i in indices {
-        if let Some(dv) = usize::try_from(i).ok().filter(|&i| i < n).map(|i| &mut dverts[i]) {
+        if let Some(dv) = usize::try_from(i)
+            .ok()
+            .filter(|&i| i < n)
+            .map(|i| &mut dverts[i])
+        {
             deform::remove_group(dv, g as u32);
         }
     }

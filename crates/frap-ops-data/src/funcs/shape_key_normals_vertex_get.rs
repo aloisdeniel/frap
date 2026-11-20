@@ -18,7 +18,11 @@ pub(crate) enum Normals {
 }
 
 /// The normals of the block `this` names, on its key's mesh (`Key.user`).
-pub(crate) fn block_normals(h: &dyn Host, this: &RnaPtr, which: Normals) -> Result<Value, RnaError> {
+pub(crate) fn block_normals(
+    h: &dyn Host,
+    this: &RnaPtr,
+    which: Normals,
+) -> Result<Value, RnaError> {
     let main = h.main();
     let (k, i) = Key::block_of(main, this).ok_or_else(|| internal("not a shape key pointer"))?;
     let key = main

@@ -3,8 +3,9 @@
 //! WP 6.3): the 0-based index of the active vertex group, `-1` without groups. frap keeps it
 //! on the object (`Object::vertex_groups_active_index`, Blender's `actdef - 1`; Blender 5.x
 //! stores `vertex_group_active_index` on the mesh, so linked duplicates share it there). The
-//! setter stores what it is given within the dumped hard range, as Blender stores it
-//! unchecked (verified on 5.2.4: `5` with three groups reads back `5`).
+//! setter stores what it is given (any `int`, the dumped `0..` hard range is skipped through
+//! `Scene::UNCLAMPED`), as Blender stores it unchecked (verified on 5.2.4: `5` with three
+//! groups reads back `5`, `-3` reads back `-3`).
 
 use frap_rna::{Field, PropDef, RnaError, RnaPtr, Value, rna_hook};
 
@@ -54,8 +55,7 @@ mod hook {
         };
         let (main, log) = h.main_mut();
         if let Some(o) = main.objects.get_mut(ob, log) {
-            o.vertex_groups_active_index =
-                i.clamp(i64::from(i32::MIN), i64::from(i32::MAX)) as i32;
+            o.vertex_groups_active_index = i.clamp(i64::from(i32::MIN), i64::from(i32::MAX)) as i32;
         }
         Ok(())
     }

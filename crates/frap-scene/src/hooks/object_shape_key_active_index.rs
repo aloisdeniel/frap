@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `Object.active_shape_key_index` writes (`rna_Object_active_shape_key_index_set`, then
-//! `rna_Object_active_shape_update`, WP 6.3): the index is stored as given (verified on 5.2.4:
-//! `99` with two blocks reads back `99`, `active_shape_key` is then `None`; the range function
-//! only limits the UI), a negative one as 0 (Blender stores it and reads `max(shapenr - 1, 0)`
-//! = 0), and a mesh in Edit Mode is written back and re-entered so the edit BMesh shows the
-//! new block (`EDBM_mesh_load` + `EDBM_mesh_make`). Reads stay with `Object`'s binding.
+//! `rna_Object_active_shape_update`, WP 6.3): `ob->shapenr = value + 1` is stored as given
+//! (verified on 5.2.4: `99` with two blocks reads back `99`, `active_shape_key` is then `None`;
+//! the range function only limits the UI). frap keeps `shapenr - 1` in
+//! `Object::active_shape_key_index`, so `-1` (`shapenr` 0) survives: the property reads
+//! `max(shapenr - 1, 0)` = 0 (`Object`'s binding) while `active_shape_key` is `None`. A mesh
+//! in Edit Mode is written back and re-entered so the edit BMesh shows the new block
+//! (`EDBM_mesh_load` + `EDBM_mesh_make`).
 
 use std::sync::Arc;
 
@@ -24,9 +26,10 @@ static DECL: frap_rna::testing::HookDecl = frap_rna::testing::HookDecl {
     coll: false,
 };
 
-/// `EDBM_mesh_load` + `EDBM_mesh_make` of `me` with the active block going from `old` to
-/// `new` (both 0-based).
-fn reload_edit_mesh(h: &mut dyn Host, me: IdRef<MeshId>, old: usize, new: usize) {
+/// `EDBM_mesh_load` + `EDBM_mesh_make` of `me` for an object whose `shapenr` is now
+/// `new_shapenr`: the old BMesh writes back the block it was made with (`bm->shapenr`, the
+/// basis when the object's `shapenr` is 0), the new one loads block `new_shapenr - 1`.
+fn reload_edit_mesh(h: &mut dyn Host, me: IdRef<MeshId>, new_shapenr: i32) {
     let Some(em) = h.edit_mut().meshes.remove(&me.key()) else {
         return;
     };
@@ -45,9 +48,14 @@ fn reload_edit_mesh(h: &mut dyn Host, me: IdRef<MeshId>, old: usize, new: usize)
     );
     if let Some(k) = template.shape_keys
         && let Some(key) = main.shape_keys.get_mut(k, log)
-        && let Some(pos) = key.write_back_from_bmesh(&mut bm, Some(old))
+        && !key.key_blocks.is_empty()
     {
-        loaded.set_positions(pos);
+        if new_shapenr == 0 {
+            bm.shapenr = 1;
+        }
+        if let Some(pos) = key.write_back_from_bmesh(&mut bm) {
+            loaded.set_positions(pos);
+        }
     }
     if let Some(m) = main.meshes.get_mut(me, log) {
         let header = m.header.clone();
@@ -58,8 +66,17 @@ fn reload_edit_mesh(h: &mut dyn Host, me: IdRef<MeshId>, old: usize, new: usize)
         return;
     };
     let mut bm = BMesh::from_mesh(mesh, &FromMeshParams::default());
-    if let Some(key) = mesh.shape_keys.and_then(|k| main.shape_keys.get(k)) {
-        key.load_into_bmesh(&mut bm, Some(new));
+    if let Some(key) = mesh
+        .shape_keys
+        .and_then(|k| main.shape_keys.get(k))
+        .filter(|k| !k.key_blocks.is_empty())
+    {
+        let active = match new_shapenr {
+            0 => Some(0),
+            n => usize::try_from(n - 1).ok(),
+        };
+        key.load_into_bmesh(&mut bm, active);
+        bm.normals_update();
     }
     bm.select_mode = select_mode;
     bm.select_flush_mode();
@@ -81,13 +98,7 @@ fn set(h: &mut dyn Host, this: &RnaPtr, _prop: &'static PropDef, v: Value) -> Re
     };
     let main = h.main();
     let me = object_mesh(main, ob);
-    let totkey = me
-        .and_then(|me| main.meshes.get(me))
-        .and_then(|m| m.shape_keys)
-        .and_then(|k| main.shape_keys.get(k))
-        .map_or(0, |k| k.key_blocks.len());
-    let new = i.clamp(0, i64::from(i16::MAX)) as i32;
-    let old = main.objects.get(ob).map_or(0, |o| o.active_shape_key_index);
+    let new = i.clamp(i64::from(i16::MIN), i64::from(i16::MAX) - 1) as i32;
     let in_edit = me.is_some_and(|m| h.edit().meshes.contains_key(&m.key()));
     {
         let (main, log) = h.main_mut();
@@ -95,11 +106,8 @@ fn set(h: &mut dyn Host, this: &RnaPtr, _prop: &'static PropDef, v: Value) -> Re
             o.active_shape_key_index = new;
         }
     }
-    if in_edit
-        && totkey > 0
-        && let Some(me) = me
-    {
-        reload_edit_mesh(h, me, old.max(0) as usize, new as usize);
+    if in_edit && let Some(me) = me {
+        reload_edit_mesh(h, me, new + 1);
     }
     Ok(())
 }

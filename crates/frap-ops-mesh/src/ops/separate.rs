@@ -136,8 +136,15 @@ fn copy_to_new(src: &BMesh, verts: &[VertId], edges: &[EdgeId], faces: &[FaceId]
                 .iter()
                 .map(|&i| s.co.get(i).copied().unwrap_or([0.0; 3]))
                 .collect(),
+            uid: s.uid,
         })
         .collect();
+    dst.shape_keyindex = src.shape_keyindex.as_ref().map(|ki| {
+        vslots
+            .iter()
+            .map(|&i| ki.get(i).copied().unwrap_or(0))
+            .collect()
+    });
     dst.select_mode = src.select_mode;
     dst
 }

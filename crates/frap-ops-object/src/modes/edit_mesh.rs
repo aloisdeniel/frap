@@ -20,11 +20,14 @@
 //! reuses the generation of an earlier one (evaluation caches key on it).
 //!
 //! **Shape keys** (WP 6.3, `BM_mesh_bm_from_me` / `bm_to_mesh_shape`): entering loads every
-//! key block as a shape layer and takes the vertex positions from the object's active block
-//! (`active_shape_key_index`; `object_shapenr_basis_index_ensured` makes "none" the basis);
-//! leaving writes the edited positions into the active block, offsets the blocks that use an
-//! edited basis by the edit (edit-mode basis propagation), and keeps the mesh positions at the
-//! reference key's when another block was edited (`frap_bmesh::shape`).
+//! key block as a shape layer (tagged with the block's uid) and takes the vertex positions
+//! from the object's active block (`active_shape_key_index`;
+//! `object_shapenr_basis_index_ensured` makes "none" the basis), which the BMesh keeps
+//! (`bm->shapenr`); leaving writes the edited positions into that block, offsets the blocks
+//! that use an edited basis by the edit (edit-mode basis propagation, skipped once a vertex
+//! was created from an example), and keeps the mesh positions at the reference key's when
+//! another block was edited (`frap_bmesh::shape`). Blocks added or removed through RNA while
+//! editing are matched by uid.
 
 use std::sync::Arc;
 
@@ -112,13 +115,23 @@ fn enter_one(
             .get(me)
             .ok_or_else(|| OpError::Runtime("mesh no longer exists".into()))?;
         let mut bm = BMesh::from_mesh(mesh, &FromMeshParams::default());
-        if let Some(key) = mesh
-            .shape_keys
-            .and_then(|k| cx.main().shape_keys.get(k))
-            .filter(|k| !k.key_blocks.is_empty())
-        {
-            key.load_into_bmesh(&mut bm, Some(active_block(cx, ob)));
-            bm.normals_update();
+        if let Some(k) = mesh.shape_keys {
+            // `BM_mesh_bm_from_me`'s uid check (blocks made by `object.join` or a reader).
+            if cx.main().shape_keys.get(k).is_some_and(|k| !k.uids_valid()) {
+                let (main, log) = cx.main_mut();
+                if let Some(key) = main.shape_keys.get_mut(k, log) {
+                    key.ensure_uids();
+                }
+            }
+            if let Some(key) = cx
+                .main()
+                .shape_keys
+                .get(k)
+                .filter(|k| !k.key_blocks.is_empty())
+            {
+                key.load_into_bmesh(&mut bm, active_block(cx, ob));
+                bm.normals_update();
+            }
         }
         bm
     };
@@ -165,18 +178,27 @@ fn enter(cx: &mut OpCtx, objects: &[IdRef<ObjectId>]) -> OpResult {
     Ok(OpStatus::Finished)
 }
 
-/// The 0-based active key block of `ob` (`object_shapenr_basis_index_ensured`: no active
-/// block means the basis).
-fn active_block(cx: &OpCtx, ob: IdRef<ObjectId>) -> usize {
+/// `ob->shapenr` (`active_shape_key_index + 1`).
+fn shapenr(cx: &OpCtx, ob: IdRef<ObjectId>) -> i32 {
     cx.main()
         .objects
         .get(ob)
-        .map_or(0, |o| o.active_shape_key_index.max(0) as usize)
+        .map_or(0, |o| o.active_shape_key_index.saturating_add(1))
 }
 
-/// `EDBM_mesh_load_ex` + free: writes the edit BMesh of `me` back and drops it. `active` is
-/// the active key block of the object leaving Edit Mode (`bm->shapenr - 1`).
-fn load(cx: &mut OpCtx, me: IdRef<MeshId>, active: usize) -> Result<(), OpError> {
+/// The 0-based active key block of `ob` on entering (`object_shapenr_basis_index_ensured`:
+/// `shapenr == 0` means the basis; a negative one none).
+fn active_block(cx: &OpCtx, ob: IdRef<ObjectId>) -> Option<usize> {
+    match shapenr(cx, ob) {
+        0 => Some(0),
+        n => usize::try_from(n - 1).ok(),
+    }
+}
+
+/// `EDBM_mesh_load_ex` + free: writes the edit BMesh of `me` back and drops it. The edited
+/// block is the one the BMesh was made with (`bm->shapenr`); `ob_shapenr` is the `shapenr` of
+/// the object leaving Edit Mode, whose 0 makes it the basis (the #42360 workaround).
+fn load(cx: &mut OpCtx, me: IdRef<MeshId>, ob_shapenr: i32) -> Result<(), OpError> {
     let em = cx.split_edit().1.meshes.remove(&me.key());
     if let Some(em) = em
         && let Some(template) = cx.main().meshes.get(me)
@@ -193,9 +215,13 @@ fn load(cx: &mut OpCtx, me: IdRef<MeshId>, active: usize) -> Result<(), OpError>
                 .shape_keys
                 .get_mut(k, log)
                 .filter(|k| !k.key_blocks.is_empty())
-                && let Some(pos) = key.write_back_from_bmesh(&mut bm, Some(active))
             {
-                loaded.set_positions(pos);
+                if ob_shapenr == 0 {
+                    bm.shapenr = 1;
+                }
+                if let Some(pos) = key.write_back_from_bmesh(&mut bm) {
+                    loaded.set_positions(pos);
+                }
             }
         }
         let m = cx.mesh_mut(me)?;
@@ -220,8 +246,8 @@ fn exit(cx: &mut OpCtx, objects: &[IdRef<ObjectId>]) -> OpResult {
             continue;
         }
         if let Some(me) = o.data.and_then(|d| d.typed::<MeshId>()) {
-            let active = active_block(cx, ob);
-            load(cx, me, active)?;
+            let nr = shapenr(cx, ob);
+            load(cx, me, nr)?;
         }
         cx.object_mut(ob)?.mode = ObjectMode::Object;
         cx.main_mut().1.context_changed = true;
@@ -246,8 +272,8 @@ fn exit(cx: &mut OpCtx, objects: &[IdRef<ObjectId>]) -> OpResult {
             .iter()
             .find(|(_, o)| o.data == Some(me.any()))
             .map(|(r, _)| r);
-        let active = user.map_or(0, |ob| active_block(cx, ob));
-        load(cx, me, active)?;
+        let nr = user.map_or(0, |ob| shapenr(cx, ob));
+        load(cx, me, nr)?;
     }
     Ok(OpStatus::Finished)
 }

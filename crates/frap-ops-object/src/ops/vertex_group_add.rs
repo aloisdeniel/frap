@@ -62,9 +62,7 @@ pub(crate) mod common {
             return Err(PollFail {
                 message: msg(idname, "Object type does not support vertex groups"),
                 unmet: smallvec![PollReq::ActiveType("MESH")],
-                hint: Some(
-                    "vertex groups belong to meshes: make a mesh object active".into(),
-                ),
+                hint: Some("vertex groups belong to meshes: make a mesh object active".into()),
             });
         }
         if ob
@@ -117,9 +115,25 @@ pub(crate) mod common {
         Ok(())
     }
 
-    /// `vertex_group_vert_select_unlocked_poll`: [`vert_select_poll`] (frap has no group locks).
+    /// `vertex_group_vert_select_unlocked_poll`: [`vert_select_poll`] and the active group
+    /// (if any) not locked.
     pub(crate) fn vert_select_unlocked_poll(c: &Context, idname: &str) -> Result<(), PollFail> {
-        vert_select_poll(c, idname)
+        vert_select_poll(c, idname)?;
+        let (_, ob) = poll::active(c).expect("invariant: checked by supported_poll");
+        let locked = usize::try_from(ob.vertex_groups_active_index)
+            .ok()
+            .zip(mesh_of(c, ob).and_then(|me| c.main.meshes.get(me)))
+            .is_some_and(|(g, m)| m.vertex_group_locked(g));
+        if locked {
+            return Err(PollFail {
+                message: msg(idname, "The active vertex group is locked"),
+                unmet: smallvec![],
+                hint: Some(
+                    "unlock it: bpy.context.object.vertex_groups.active.lock_weight = False".into(),
+                ),
+            });
+        }
+        Ok(())
     }
 
     /// The mesh of a mesh object.
@@ -130,7 +144,9 @@ pub(crate) mod common {
 
     /// The active object, its mesh and its active group (`actdef - 1`, `None` when out of
     /// range).
-    pub(crate) fn active_group(cx: &OpCtx) -> Option<(IdRef<ObjectId>, IdRef<MeshId>, Option<usize>)> {
+    pub(crate) fn active_group(
+        cx: &OpCtx,
+    ) -> Option<(IdRef<ObjectId>, IdRef<MeshId>, Option<usize>)> {
         let c = cx.ctx();
         let (ob, o) = poll::active(&c)?;
         let me = mesh_of(&c, o)?;
@@ -196,7 +212,11 @@ pub(crate) mod common {
     }
 
     /// The same as [`for_each_dvert`] for reading.
-    pub(crate) fn read_dverts(cx: &mut OpCtx, me: IdRef<MeshId>, use_vert_sel: bool) -> Option<Vec<DeformVert>> {
+    pub(crate) fn read_dverts(
+        cx: &mut OpCtx,
+        me: IdRef<MeshId>,
+        use_vert_sel: bool,
+    ) -> Option<Vec<DeformVert>> {
         if in_edit(cx, me) {
             let (_, edit) = cx.split_edit();
             let em = edit.meshes.get(&me.key())?;
@@ -232,7 +252,11 @@ pub(crate) mod common {
     }
 
     /// `BKE_object_defgroup_add_name(ob, "Group")`: a new group, made active. Returns its index.
-    pub(crate) fn add_group(cx: &mut OpCtx, ob: IdRef<ObjectId>, me: IdRef<MeshId>) -> Result<usize, OpError> {
+    pub(crate) fn add_group(
+        cx: &mut OpCtx,
+        ob: IdRef<ObjectId>,
+        me: IdRef<MeshId>,
+    ) -> Result<usize, OpError> {
         let m = cx.mesh_mut(me)?;
         let name = deform::unique_group_name(&m.vertex_group_names, None, "Group");
         m.vertex_group_names.push(name);
@@ -243,7 +267,12 @@ pub(crate) mod common {
 
     /// `BKE_object_defgroup_remove`: group `g`'s weights (from the edit BMesh in Edit Mode)
     /// and name go, higher groups shift down, the active index follows.
-    pub(crate) fn remove_group(cx: &mut OpCtx, ob: IdRef<ObjectId>, me: IdRef<MeshId>, g: usize) -> Result<(), OpError> {
+    pub(crate) fn remove_group(
+        cx: &mut OpCtx,
+        ob: IdRef<ObjectId>,
+        me: IdRef<MeshId>,
+        g: usize,
+    ) -> Result<(), OpError> {
         let edit = in_edit(cx, me);
         if edit {
             let bm: &mut BMesh = cx.bmesh_mut(me)?;
@@ -253,9 +282,7 @@ pub(crate) mod common {
         if !edit {
             deform::remove_group_mesh(m, g as u32);
         }
-        if g < m.vertex_group_names.len() {
-            m.vertex_group_names.remove(g);
-        }
+        m.remove_vertex_group_name(g);
         let empty = m.vertex_group_names.is_empty();
         let o = cx.object_mut(ob)?;
         if o.vertex_groups_active_index + 1 > g as i32 {
@@ -269,7 +296,12 @@ pub(crate) mod common {
 
     /// `BKE_object_defgroup_clear`: removes group `g` from every vertex with weights (the
     /// selected ones with `use_selection`). True when a vertex with weights was visited.
-    pub(crate) fn clear_group(cx: &mut OpCtx, me: IdRef<MeshId>, g: usize, use_selection: bool) -> Result<bool, OpError> {
+    pub(crate) fn clear_group(
+        cx: &mut OpCtx,
+        me: IdRef<MeshId>,
+        g: usize,
+        use_selection: bool,
+    ) -> Result<bool, OpError> {
         if in_edit(cx, me) {
             let has = {
                 let (_, edit) = cx.split_edit();
@@ -329,14 +361,20 @@ pub(crate) mod common {
                     .into_iter()
                     .find_map(|(k, r)| (k == "object").then_some(r).flatten())
                 && let Some(r) = a.typed::<ObjectId>()
-                && c.main.objects.get(r).is_some_and(|o| o.object_type() == "ARMATURE")
+                && c.main
+                    .objects
+                    .get(r)
+                    .is_some_and(|o| o.object_type() == "ARMATURE")
             {
                 return Some(r);
             }
         }
         let p = ob.parent?;
         (ob.parent_type.as_str() == "ARMATURE"
-            && c.main.objects.get(p).is_some_and(|o| o.object_type() == "ARMATURE"))
+            && c.main
+                .objects
+                .get(p)
+                .is_some_and(|o| o.object_type() == "ARMATURE"))
         .then_some(p)
     }
 
@@ -400,7 +438,9 @@ pub(crate) mod common {
                 };
                 if !supports_vgroup(o)
                     || o.header.library.is_some()
-                    || o.data.and_then(|d| c.main.header(d)).is_none_or(|h| h.library.is_some())
+                    || o.data
+                        .and_then(|d| c.main.header(d))
+                        .is_none_or(|h| h.library.is_some())
                 {
                     return false;
                 }

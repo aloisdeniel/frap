@@ -56,9 +56,16 @@ pub struct Scene {
 
 impl Scene {
     /// `(struct, property)` pairs whose setter applies its own range: a caller coerces these
-    /// without the generic hard-range clamp and passes the raw integer to the set hook
-    /// (`Scene.frame_current`: `= 1000000000` reads back 1000000000 in Blender 5.2.4).
-    pub const UNCLAMPED: &'static [(&'static str, &'static str)] = &[("Scene", "frame_current")];
+    /// without the generic hard-range clamp and passes the raw number to the setter
+    /// (`Scene.frame_current`: `= 1000000000` reads back 1000000000 in Blender 5.2.4;
+    /// `VertexGroups.active_index`: `= -3` reads back -3; `ShapeKey.value`: clamped to the
+    /// block's `slider_min..slider_max`, the dumped `0..1` being the range at default sliders,
+    /// WP 6.3).
+    pub const UNCLAMPED: &'static [(&'static str, &'static str)] = &[
+        ("Scene", "frame_current"),
+        ("VertexGroups", "active_index"),
+        ("ShapeKey", "value"),
+    ];
 
     /// Blender's `frame_current` setter on a raw Python int (`rna_Scene_frame_current_set`
     /// with "Allow Negative Frames" off: negative frames become 0, large ones are kept).

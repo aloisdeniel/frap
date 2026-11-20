@@ -49,7 +49,10 @@ pub(crate) fn active_block_locked(cx: &OpCtx, ob: frap_rna::IdRef<frap_rna::Obje
         .and_then(|d| d.typed::<MeshId>())
         .and_then(|me| main.meshes.get(me)?.shape_keys)
         .and_then(|k| main.shape_keys.get(k))
-        .and_then(|k| k.key_blocks.get(usize::try_from(o.active_shape_key_index).ok()?))
+        .and_then(|k| {
+            k.key_blocks
+                .get(usize::try_from(o.active_shape_key_index).ok()?)
+        })
         .is_some_and(|kb| kb.lock_shape)
 }
 
@@ -138,10 +141,7 @@ fn exec(cx: &mut OpCtx, p: mesh::BlendFromShape) -> OpResult {
             let mut co = bm.shape_layers[shape].co[s];
             let eco = bm.vert(v).co;
             let new = if use_add {
-                let rco = bm
-                    .shape_layers
-                    .get(relative)
-                    .map_or([0.0; 3], |l| l.co[s]);
+                let rco = bm.shape_layers.get(relative).map_or([0.0; 3], |l| l.co[s]);
                 co = [co[0] - rco[0], co[1] - rco[1], co[2] - rco[2]];
                 [
                     eco[0] + co[0] * blend,

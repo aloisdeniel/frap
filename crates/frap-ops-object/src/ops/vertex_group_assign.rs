@@ -34,7 +34,12 @@ const ASSIGN_POLL: Poll = Poll {
 };
 
 /// `vgroup_assign_verts` on the edit mesh of `me` (`def_nr = g`).
-pub(crate) fn assign_verts(cx: &mut OpCtx, me: IdRef<MeshId>, g: usize, weight: f32) -> Result<(), OpError> {
+pub(crate) fn assign_verts(
+    cx: &mut OpCtx,
+    me: IdRef<MeshId>,
+    g: usize,
+    weight: f32,
+) -> Result<(), OpError> {
     let bm = cx.bmesh_mut(me)?;
     let ids = bm.vert_ids();
     let selected: Vec<_> = ids

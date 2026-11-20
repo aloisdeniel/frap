@@ -8,8 +8,8 @@
 //! `group_select_mode` is overwritten with `ALL`, or `BONE_DEFORM` when an armature deforms the
 //! object and one of its deform bones has a group. A vertex with a single weight gets 1.
 //!
-//! `lock_active` with the active group as the only one: `RuntimeError: Error: All groups are
-//! locked` (nothing changes). frap has no per-group locks (`lock_weight` reads `False`).
+//! Locked groups (`lock_weight`) keep their weights; `lock_active` locks the active group too.
+//! Every group locked: `RuntimeError: Error: All groups are locked` (nothing changes).
 
 use frap_bmesh::shape::deform;
 use frap_op::operator;
@@ -62,15 +62,24 @@ fn exec(cx: &mut OpCtx, p: object::VertexGroupNormalizeAll) -> OpResult {
     if subset_count == 0 {
         return Err(OpError::Runtime("No vertex groups to operate on".into()));
     }
-    let lock_flags: Vec<bool> = if p.lock_active.value {
-        let mut l = vec![false; vgroup_tot];
-        if let Some(a) = def_nr {
-            l[a] = true;
+    // `BKE_object_defgroup_lock_flags_get` (`None` when no group is locked), then the active
+    // group with `lock_active`.
+    let mut lock_flags: Vec<bool> = common::mesh_of(&c, o)
+        .and_then(|me| c.main.meshes.get(me))
+        .and_then(|m| m.vertex_group_lock_flags())
+        .map(|mut l| {
+            l.resize(vgroup_tot, false);
+            l
+        })
+        .unwrap_or_default();
+    if p.lock_active.value {
+        if lock_flags.is_empty() {
+            lock_flags = vec![false; vgroup_tot];
         }
-        l
-    } else {
-        Vec::new()
-    };
+        if let Some(a) = def_nr {
+            lock_flags[a] = true;
+        }
+    }
     if !lock_flags.is_empty() && !lock_flags.contains(&false) {
         return Err(OpError::Runtime("All groups are locked".into()));
     }

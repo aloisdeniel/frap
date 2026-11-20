@@ -353,7 +353,7 @@ bitflags! {
     }
 }
 
-/// One shape key while editing (`CD_SHAPEKEY` layer): the key block's name and its
+/// One shape key while editing (`CD_SHAPEKEY` layer): the key block's name, its `uid` and its
 /// coordinates by vertex slot.
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct ShapeLayer {
@@ -361,7 +361,14 @@ pub struct ShapeLayer {
     pub name: SmolStr,
     /// Coordinates by vertex slot (free slots hold garbage).
     pub co: Vec<[f32; 3]>,
+    /// `CustomDataLayer.uid`: the `KeyBlock.uid` of the block the layer was loaded from (the
+    /// write-back matches layers to blocks by it, WP 6.3). 0 for scratch layers.
+    pub uid: i32,
 }
+
+/// `ORIGINDEX_NONE`: a [`BMesh::shape_keyindex`] entry of a vertex that did not exist when
+/// the BMesh was made.
+pub const ORIGINDEX_NONE: i32 = -1;
 
 /// The edit-mode mesh (`BMesh`).
 #[derive(Clone, Debug, Default)]
@@ -390,6 +397,13 @@ pub struct BMesh {
     pub act_face: Option<FaceId>,
     /// One per key block while editing.
     pub shape_layers: Vec<ShapeLayer>,
+    /// `CD_SHAPE_KEYINDEX` by vertex slot (`None`: no such layer): the mesh index of a vertex
+    /// that existed when the BMesh was made from a mesh with shape keys, [`ORIGINDEX_NONE`]
+    /// for one created from an example vertex (`BM_vert_create`), 0 for one created without
+    /// (the layer default). Copied with the vertex data, never interpolated.
+    pub shape_keyindex: Option<Vec<i32>>,
+    /// `bm->shapenr`: the 1-based active key block the BMesh was made with (0: none).
+    pub shapenr: i32,
     /// Element indices (`BM_elem_index_get/set`) and their dirty flags.
     pub index: ElemIndex,
     /// Operator tool flags (`BMO_elem_flag_*`), one layer per running operator.

@@ -4,13 +4,13 @@
 //! duplicates share them; §5.6). Objects of other types answer an empty collection, as
 //! Blender does for types without vertex-group support.
 //!
-//! Items are `VertexGroup` proxies (`name`, `index`, `lock_weight`); `VertexGroup.name`
-//! writes go through `hooks/vertex_group_name.rs`. frap's mesh has no per-group flags, so
-//! `lock_weight` reads `False` and cannot be written yet (`DG_LOCK_WEIGHT`, M8).
+//! Items are `VertexGroup` proxies (`name`, `index`, `lock_weight`); `VertexGroup.name` and
+//! `VertexGroup.lock_weight` writes go through `hooks/vertex_group_{name,lock_weight}.rs`
+//! (the lock is `Mesh::vertex_group_locks`, `DG_LOCK_WEIGHT`).
 
 use frap_rna::{
-    CollRef, Field, IdCode, IdRef, Item, MeshId, ObjectId, PropDef, Rna, RnaColl, RnaError,
-    RnaPtr, Seg, StructDef, StructRef, Value, rna_hook,
+    CollRef, Field, IdCode, IdRef, Item, MeshId, ObjectId, PropDef, Rna, RnaColl, RnaError, RnaPtr,
+    Seg, StructDef, StructRef, Value, rna_hook,
 };
 use smol_str::SmolStr;
 
@@ -77,9 +77,18 @@ pub(crate) fn group_ptr(ob: IdRef<ObjectId>, name: &str) -> RnaPtr {
         .child(Seg::Key(name.into()), &frap_spec_rna::VERTEX_GROUP)
 }
 
+/// The locked vertex-group names of an object (empty for unsupported types).
+pub(crate) fn group_locks(main: &Main, ob: IdRef<ObjectId>) -> &[SmolStr] {
+    object_mesh(main, ob)
+        .and_then(|me| main.meshes.get(me))
+        .map_or(&[], |m| m.vertex_group_locks.as_slice())
+}
+
 /// `Object.vertex_groups`.
 pub(crate) struct VertexGroups<'h> {
     pub names: &'h [SmolStr],
+    /// `Mesh::vertex_group_locks`.
+    pub locks: &'h [SmolStr],
 }
 
 impl RnaColl for VertexGroups<'_> {
@@ -100,6 +109,7 @@ impl RnaColl for VertexGroups<'_> {
             Some(n) => Ok(Item::Struct(StructRef::Owned(Box::new(VertexGroupRef {
                 name: n.clone(),
                 index: i,
+                lock_weight: self.locks.contains(n),
             })))),
             None => Err(frap_rna::traits::index_out_of_range(i, self.names.len())),
         }
@@ -110,6 +120,7 @@ impl RnaColl for VertexGroups<'_> {
 pub(crate) struct VertexGroupRef {
     pub name: SmolStr,
     pub index: usize,
+    pub lock_weight: bool,
 }
 
 impl Rna for VertexGroupRef {
@@ -120,7 +131,7 @@ impl Rna for VertexGroupRef {
         Ok(Field::Value(match prop.identifier {
             "name" => Value::Str(self.name.clone()),
             "index" => Value::Int(self.index as i64),
-            "lock_weight" => Value::Bool(false),
+            "lock_weight" => Value::Bool(self.lock_weight),
             _ => return Err(frap_rna::traits::no_attribute(self.srna(), prop.identifier)),
         }))
     }
@@ -139,6 +150,7 @@ fn get<'h>(
     }
     Ok(Field::Coll(CollRef::Owned(Box::new(VertexGroups {
         names: group_names(main, ob),
+        locks: group_locks(main, ob),
     }))))
 }
 

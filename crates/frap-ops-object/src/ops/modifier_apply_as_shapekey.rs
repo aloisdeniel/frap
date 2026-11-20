@@ -79,7 +79,9 @@ fn apply_shape(cx: &mut OpCtx, ob: IdRef<ObjectId>, i: usize) -> Result<(), OpEr
         (ty, disabled, m.name.clone())
     };
     if disabled {
-        return Err(OpError::Runtime("Modifier is disabled, skipping apply".into()));
+        return Err(OpError::Runtime(
+            "Modifier is disabled, skipping apply".into(),
+        ));
     }
     let Some(me) = mesh_of(cx, ob) else {
         return Err(OpError::Runtime(
@@ -93,8 +95,12 @@ fn apply_shape(cx: &mut OpCtx, ob: IdRef<ObjectId>, i: usize) -> Result<(), OpEr
         ));
     }
     // The shape-key virtual modifier first: evaluate on the key mix.
-    let mix = Key::evaluate_object(cx.main(), ob)
-        .filter(|m| cx.main().meshes.get(me).is_some_and(|x| x.positions() != m.as_slice()));
+    let mix = Key::evaluate_object(cx.main(), ob).filter(|m| {
+        cx.main()
+            .meshes
+            .get(me)
+            .is_some_and(|x| x.positions() != m.as_slice())
+    });
     let saved = match mix {
         Some(m) => {
             let mesh = cx.mesh_mut(me)?;

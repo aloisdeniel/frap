@@ -82,7 +82,7 @@ fn exec(cx: &mut OpCtx, p: object::ShapeKeyMove) -> OpResult {
         return Ok(OpStatus::Cancelled);
     }
     if let Some(o) = main.objects.get_mut(ob, log) {
-        o.active_shape_key_index = active.max(0) as i32;
+        o.active_shape_key_index = active as i32;
     }
     Ok(OpStatus::Finished)
 }

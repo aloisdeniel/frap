@@ -72,7 +72,8 @@ fn set(h: &mut dyn Host, this: &RnaPtr, _prop: &'static PropDef, v: Value) -> Re
 /// `from…` → `to…` when `path` starts with `from` followed by the end or `.`/`[`.
 fn rename_path(path: &str, from: &str, to: &str) -> Option<String> {
     let rest = path.strip_prefix(from)?;
-    (rest.is_empty() || rest.starts_with('.') || rest.starts_with('[')).then(|| format!("{to}{rest}"))
+    (rest.is_empty() || rest.starts_with('.') || rest.starts_with('['))
+        .then(|| format!("{to}{rest}"))
 }
 
 #[cfg(test)]
