@@ -1,0 +1,88 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "pose.select_all",
+  "bl_idname": "POSE_OT_select_all",
+  "label": "(De)select All",
+  "description": "Toggle selection status of all bones",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_POSE"
+    ],
+    "text": "requires Pose Mode (bpy.ops.object.mode_set(mode='POSE'))",
+    "matrix": {
+      "plain": "NNNYN",
+      "view3d": "NNNYN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "action",
+      "name": "Action",
+      "description": "Selection action to execute",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "TOGGLE",
+      "enum_items": [
+        {
+          "identifier": "TOGGLE",
+          "name": "Toggle",
+          "description": "Toggle selection for all elements",
+          "value": 0
+        },
+        {
+          "identifier": "SELECT",
+          "name": "Select",
+          "description": "Select all elements",
+          "value": 1
+        },
+        {
+          "identifier": "DESELECT",
+          "name": "Deselect",
+          "description": "Deselect all elements",
+          "value": 2
+        },
+        {
+          "identifier": "INVERT",
+          "name": "Invert",
+          "description": "Invert selection of all elements",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M6",
+    "extension": false,
+    "notes": []
+  }
+}

@@ -1,0 +1,23 @@
+object.armature_add location=0,0,1
+context.object.data.bones['Bone'].matrix_local
+object.mode_set mode=EDIT
+armature.extrude_move TRANSFORM_OT_translate.value=0,0.5,1
+context.active_bone.name
+context.object.data.edit_bones['Bone.001'].head_radius
+armature.select_all action=SELECT
+armature.subdivide number_cuts=1
+context.selected_bones
+object.mode_set mode=POSE
+pose.select_all action=SELECT
+transform.rotate value=0.3 orient_axis=X
+context.object.pose.bones['Bone'].rotation_quaternion
+context.view_layer.update()
+context.object.pose.bones['Bone.001'].tail
+pose.rotation_mode_set type=XYZ
+context.object.pose.bones['Bone'].rotation_euler
+pose.armature_apply
+context.object.pose.bones['Bone'].rotation_euler
+pose.transforms_clear
+armature.extrude
+object.posemode_toggle
+context.mode

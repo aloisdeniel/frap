@@ -1,5 +1,5 @@
 ---
-source: crates/frap-schema/tests/snapshots.rs
+source: crates/frap-schema/tests/describe_ops.rs
 ---
 {
   "idname": "armature.extrude_move",
@@ -17,8 +17,10 @@ source: crates/frap-schema/tests/snapshots.rs
     "TRANSFORM_OT_translate"
   ],
   "poll": {
-    "requires": null,
-    "text": "Blender 5.2's poll passes in: E (Edit Mode on an armature)",
+    "requires": [
+      "MODE_EDIT_ARMATURE"
+    ],
+    "text": "requires Edit Mode on an armature",
     "matrix": {
       "plain": "NNNNY",
       "view3d": "NNNNY"
@@ -69,15 +71,13 @@ source: crates/frap-schema/tests/snapshots.rs
     }
   ],
   "frap": {
-    "status": "not_implemented",
-    "tier": null,
-    "support": null,
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
     "support_note": null,
-    "headless": null,
+    "headless": "native",
     "planned": "M6",
     "extension": false,
-    "notes": [
-      "armature.extrude_move exists in Blender 5.2; frap implements it in M6 (OP_NOT_IMPLEMENTED until then)"
-    ]
+    "notes": []
   }
 }

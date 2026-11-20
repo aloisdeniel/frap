@@ -1,0 +1,488 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Armature 'Armature' not in edit mode, cannot add an editbone\n"
+    },
+    {
+      "line": 23,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "ArmatureEditBones.remove(): error with argument 1, \"bone\" -  Function.bone expected a EditBone type, not Bone"
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": true
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": true
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 53,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 56,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": true
+    },
+    {
+      "line": 58,
+      "ok": true
+    },
+    {
+      "line": 59,
+      "ok": false,
+      "exception": "KeyError",
+      "message": "bpy_prop_collection[key]: key \"Arm\" not found"
+    },
+    {
+      "line": 60,
+      "ok": true
+    },
+    {
+      "line": 61,
+      "ok": true
+    },
+    {
+      "line": 62,
+      "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 4 out of range, size 4"
+    },
+    {
+      "line": 65,
+      "ok": true
+    },
+    {
+      "line": 66,
+      "ok": true
+    },
+    {
+      "line": 67,
+      "ok": true
+    },
+    {
+      "line": 68,
+      "ok": true
+    },
+    {
+      "line": 69,
+      "ok": true
+    },
+    {
+      "line": 70,
+      "ok": true
+    },
+    {
+      "line": 71,
+      "ok": true
+    },
+    {
+      "line": 72,
+      "ok": true
+    },
+    {
+      "line": 73,
+      "ok": true
+    },
+    {
+      "line": 74,
+      "ok": true
+    },
+    {
+      "line": 75,
+      "ok": true
+    },
+    {
+      "line": 76,
+      "ok": true
+    },
+    {
+      "line": 77,
+      "ok": true
+    },
+    {
+      "line": 78,
+      "ok": true
+    },
+    {
+      "line": 79,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Armature": {
+      "type": "ARMATURE",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C0": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.537603, -0.09983342, 0.83726716, 0.0],
+        [0.053940225, 0.9950042, 0.08400693, 0.0],
+        [-0.84147096, 0.0, 0.5403023, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 1.0, 0.1],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C1": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [-0.0, -0.0, -1.5303453, 0.0],
+        [0.0, 0.0, 0.8478875, 0.0],
+        [0.0, 0.0, -0.96908724, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [-1.0, 2.6832814, 1.3416407],
+      "scale": [0.0, 0.0, 2.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C2": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.8050574, -0.8722643, -0.058956575, 0.0],
+        [1.2538027, 0.38502708, 0.52925426, 0.0],
+        [-0.7279159, -0.30151135, 0.84641236, 2.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 2.0],
+      "rotation_mode": "XYZ",
+      "rotation": [-0.34220767, 0.45442948, 1.0],
+      "scale": [1.6583124, 1.0, 0.99999994],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C3": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.7288611, -0.000000061046244, 0.00000008121679, -0.99999976],
+        [-0.00000003295881, -1.7529194, 0.93571925, 0.00000011920929],
+        [0.00000001515175, -0.87645984, -1.8714383, 0.00000014901161],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [-0.99999976, 0.00000011920929, 0.00000014901161],
+      "rotation_mode": "XYZ",
+      "rotation": [0.46364766, -0.000000020788255, -0.0000000452196],
+      "scale": [0.7288611, -1.9598235, -2.0923316],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C4": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, -2.2376125],
+        [0.0, 0.0, 0.0, -1.5553037],
+        [0.0, 0.0, 2.0, -1.9015558],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [-2.2376125, -1.5553037, -1.9015558],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 2.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "C5": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [-0.006067966, -0.057776358, -1.3880768, 0.0],
+        [-0.000000011573727, 0.4068659, -0.19862908, 0.0],
+        [-0.06915831, 0.0050692423, 0.12179021, 2.000002],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 2.000002],
+      "rotation_mode": "XYZ",
+      "rotation": [2.9999995, 1.6583124, 0.0000019073486],
+      "scale": [0.069424, -0.4109789, 1.4074955],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.68592066, -0.32401347, 0.6515582, 7.3588915],
+        [0.72767633, 0.30542085, -0.6141704, -6.925791],
+        [0.0, 0.89539564, 0.4452714, 4.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.3588915, -6.925791, 4.958309],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086465, -0.7711008, 0.5663932, 4.0762453],
+        [0.95517117, -0.19988336, 0.2183912, 1.005454],
+        [-0.05518906, 0.60452473, 0.79467225, 5.903862],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0762453, 1.005454, 5.903862],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Armature",
+    "selected": ["Armature"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

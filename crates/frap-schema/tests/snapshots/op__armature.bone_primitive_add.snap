@@ -1,0 +1,184 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "armature.bone_primitive_add",
+  "bl_idname": "ARMATURE_OT_bone_primitive_add",
+  "label": "Add Bone",
+  "description": "Add a new bone located at the 3D cursor",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_ARMATURE"
+    ],
+    "text": "requires Edit Mode on an armature",
+    "matrix": {
+      "plain": "NNNNY",
+      "view3d": "NNNNY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "name",
+      "name": "Name",
+      "description": "Name of the newly created bone",
+      "type": "STRING",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "Bone",
+      "length_max": 64,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "NEVER_NULL"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "space",
+      "name": "Space",
+      "description": "Co-ordinate system the new bone will be created in",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "OBJECT",
+      "enum_items": [
+        {
+          "identifier": "OBJECT",
+          "name": "Object",
+          "description": "The newly created bone will use Object Space co-ordinate system",
+          "value": 0
+        },
+        {
+          "identifier": "WORLD",
+          "name": "World",
+          "description": "The newly created bone will use World Space co-ordinate system",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "align",
+      "name": "Align",
+      "description": "Initial orientation of the new bone",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "UP",
+      "enum_items": [
+        {
+          "identifier": "UP",
+          "name": "Up",
+          "description": "Make the bone visually point upwards so the long axis is aligned with the World/Object positive Z axis (depending on the choice above)",
+          "value": 0
+        },
+        {
+          "identifier": "AXES",
+          "name": "Axes",
+          "description": "Align the new bone to match the axes of the World/Object (depending on the choice above)",
+          "value": 1
+        },
+        {
+          "identifier": "3D_CURSOR",
+          "name": "3D Cursor",
+          "description": "Align new bone to match the axes of the 3D cursor",
+          "value": 2
+        },
+        {
+          "identifier": "3D_VIEW",
+          "name": "Viewport",
+          "description": "Align new bone to match the axes of the 3D viewport",
+          "value": 3
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "length",
+      "name": "Length",
+      "description": "Length of the new bone",
+      "type": "FLOAT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 1,
+      "hard_min": 0.001,
+      "hard_max": 340282350000000000000000000000000000000.0,
+      "soft_min": 0.001,
+      "soft_max": 100,
+      "precision": 3,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "use_deform",
+      "name": "Deform",
+      "description": "Enable bone to deform geometry",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M6",
+    "extension": false,
+    "notes": []
+  }
+}

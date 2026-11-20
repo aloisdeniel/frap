@@ -1,0 +1,10 @@
+# WP 6.2: an armature rig in short form (§11.4): object.armature_add, Edit Mode
+# (armature.extrude_move with its nested transform, select_all, subdivide, the bone members of
+# the context), Pose Mode (pose.select_all, a pose-mode rotate turning only the root of the
+# selected chain, pose matrices after view_layer.update(), pose.rotation_mode_set,
+# pose.armature_apply clearing the channels), an armature.* operator failing its poll in Pose
+# Mode, and object.posemode_toggle back to Object Mode. Every value verified on Blender 5.2.4.
+# Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true
