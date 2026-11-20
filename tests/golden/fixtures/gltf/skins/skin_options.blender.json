@@ -1,0 +1,495 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": true
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": true
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 53,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 56,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": true
+    },
+    {
+      "line": 58,
+      "ok": true
+    },
+    {
+      "line": 59,
+      "ok": true
+    },
+    {
+      "line": 60,
+      "ok": true
+    },
+    {
+      "line": 61,
+      "ok": true
+    },
+    {
+      "line": 62,
+      "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": true
+    },
+    {
+      "line": 65,
+      "ok": true
+    },
+    {
+      "line": 66,
+      "ok": true
+    },
+    {
+      "line": 67,
+      "ok": true
+    },
+    {
+      "line": 68,
+      "ok": true
+    },
+    {
+      "line": 69,
+      "ok": true
+    },
+    {
+      "line": 70,
+      "ok": true
+    },
+    {
+      "line": 71,
+      "ok": true
+    },
+    {
+      "line": 72,
+      "ok": true
+    },
+    {
+      "line": 73,
+      "ok": true
+    },
+    {
+      "line": 74,
+      "ok": true
+    },
+    {
+      "line": 75,
+      "ok": true
+    },
+    {
+      "line": 76,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Armature": {
+      "type": "ARMATURE",
+      "parent": null,
+      "matrix_world": [
+        [0.93629336, 0.31299183, 0.15934508, 0.3],
+        [-0.2896295, 0.9447025, -0.15379201, -0.2],
+        [-0.19866933, 0.09784339, 0.9751703, 0.1],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.3, -0.2, 0.1],
+      "rotation_mode": "XYZ",
+      "rotation": [0.1, 0.2, -0.3],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.68592066, -0.32401347, 0.6515582, 7.3588915],
+        [0.72767633, 0.30542085, -0.6141704, -6.925791],
+        [0.0, 0.89539564, 0.4452714, 4.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.3588915, -6.925791, 4.958309],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cone": {
+      "type": "MESH",
+      "parent": "Armature",
+      "matrix_world": [
+        [0.93629336, 0.31299183, 0.15934508, -0.63629335],
+        [-0.2896295, 0.9447025, -0.15379201, 0.089629486],
+        [-0.19866933, 0.09784339, 0.9751703, 0.29866934],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [-1.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Cube.001": {
+      "type": "MESH",
+      "parent": "Armature",
+      "matrix_world": [
+        [0.41633403, 0.8956265, 0.15658523, 1.7508607],
+        [-0.65749353, 0.41552413, -0.6285237, -0.02887243],
+        [-0.6279874, 0.15872198, 0.7618655, 0.86431503],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.2, 0.1, -0.3],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Hat": {
+      "type": "EMPTY",
+      "parent": "Sphere",
+      "matrix_world": [
+        [0.93629336, 0.31299183, 0.15934508, 1.2333313],
+        [-0.2896295, 0.9447025, -0.15379201, -0.35460514],
+        [-0.19866933, 0.09784339, 0.9751703, 3.717318],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.5, 2.5],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086465, -0.7711008, 0.5663932, 4.0762453],
+        [0.95517117, -0.19988336, 0.2183912, 1.005454],
+        [-0.05518906, 0.60452473, 0.79467225, 5.903862],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0762453, 1.005454, 5.903862],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Sphere": {
+      "type": "MESH",
+      "parent": "Armature",
+      "matrix_world": [
+        [0.93629336, 0.31299183, 0.15934508, 0.67847276],
+        [-0.2896295, 0.9447025, -0.15379201, -0.44247633],
+        [-0.19866933, 0.09784339, 0.9751703, 1.2304705],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.2, 0.0, 1.2],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [
+        ["Armature", "ARMATURE"]
+      ],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Armature",
+    "selected": ["Cone"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {
+    "out/all_influences.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "skin_options.out_all_influences.glb"
+      }
+    },
+    "out/def_bones.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "skin_options.out_def_bones.glb"
+      }
+    },
+    "out/default.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "skin_options.out_default.glb"
+      }
+    },
+    "out/flatten_bones.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "skin_options.out_flatten_bones.glb"
+      }
+    },
+    "out/flatten_objs.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "skin_options.out_flatten_objs.glb"
+      }
+    },
+    "out/influence2.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "skin_options.out_influence2.glb"
+      }
+    },
+    "out/leaf.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "skin_options.out_leaf.glb"
+      }
+    },
+    "out/no_skins.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "skin_options.out_no_skins.glb"
+      }
+    },
+    "out/pose.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "skin_options.out_pose.glb"
+      }
+    },
+    "out/remove_refused.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "skin_options.out_remove_refused.glb"
+      }
+    },
+    "out/zup.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "skin_options.out_zup.glb"
+      }
+    }
+  }
+}

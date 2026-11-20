@@ -61,12 +61,21 @@ pub fn gather(g: &mut Gather) -> Result<(), ExportError> {
             win: &win,
             prefs: g.ctx.prefs,
         };
-        let tree = vtree::build(g.main, &cx, g.settings);
+        // `export_armature_object_remove` stays off once a scene's armatures refused it (WP 6.8).
+        let settings = g.settings;
+        let remove = g
+            .state::<crate::export::skins::SkinState>()
+            .armature_object_remove(settings);
+        let tree = vtree::build_ex(g.main, &cx, g.settings, remove);
+        if tree.armature_remove_refused {
+            g.state::<crate::export::skins::SkinState>().remove_refused = true;
+        }
         g.scene = scene;
         let mut roots: Vec<Index> = Vec::with_capacity(tree.roots.len());
         for &r in &tree.roots {
             roots.push(nodes::gather_node(g, &tree, r)?);
         }
+        nodes::finish_scene(g, &tree)?;
         let Some(blender_scene) = g.main.scenes.get(scene) else {
             continue;
         };

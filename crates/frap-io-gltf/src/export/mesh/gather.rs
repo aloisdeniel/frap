@@ -103,12 +103,28 @@ type AppliedKey = (
 #[derive(Default)]
 struct AppliedMeshes(HashMap<AppliedKey, Option<Index>>);
 
+/// glTF meshes of objects with an ARMATURE modifier under `export_skins` (WP 6.8), per
+/// (object, materials): the add-on's cache key holds the object's modifiers, so such an object
+/// never shares its mesh, and a skinned mesh is in world space.
+#[derive(Default)]
+struct SkinnedMeshes(HashMap<(IdRef<ObjectId>, Vec<Option<IdRef<MaterialId>>>), Option<Index>>);
+
 /// The glTF mesh of a MESH object (`None` for other types and meshes without primitives).
 ///
 /// With `export_apply=True` an object with modifiers exports its evaluated mesh as its own glTF
 /// mesh ([`apply::evaluated`]); every other object exports its data, shared by (mesh,
 /// materials).
 pub fn gather_mesh(g: &mut Gather, ob: &Object) -> Result<Option<Index>, ExportError> {
+    gather_mesh_with(g, ob, None)
+}
+
+/// [`gather_mesh`] for an object whose mesh is its own (`per_object`: the object and, when its
+/// mesh is skinned, the skin; WP 6.8, `export/skins.rs`).
+pub fn gather_mesh_with(
+    g: &mut Gather,
+    ob: &Object,
+    per_object: Option<(IdRef<ObjectId>, Option<crate::export::skins::MeshSkin>)>,
+) -> Result<Option<Index>, ExportError> {
     // `--stmt-timeout` cancellation point, once per exported object (§12).
     frap_math::budget::check_now();
     if ob.object_type() != "MESH" {
@@ -134,17 +150,27 @@ pub fn gather_mesh(g: &mut Gather, ob: &Object) -> Result<Option<Index>, ExportE
         if let Some(i) = g.state::<AppliedMeshes>().0.get(&key) {
             return Ok(*i);
         }
-        let (index, _) = build_mesh(g, data, mesh, Some(ob_ref), &key.2, None)?;
+        let skin = per_object.as_ref().and_then(|(_, s)| s.as_ref());
+        let (index, _) = build_mesh(g, data, mesh, Some(ob_ref), &key.2, None, skin)?;
         g.state::<AppliedMeshes>().0.insert(key, index);
         return Ok(index);
     }
     let mats = slot_materials(ob, mesh);
+    if let Some((ob_ref, skin)) = per_object {
+        let key = (ob_ref, mats);
+        if let Some(i) = g.state::<SkinnedMeshes>().0.get(&key) {
+            return Ok(*i);
+        }
+        let (index, _) = build_mesh(g, mesh, mesh, Some(ob_ref), &key.1, None, skin.as_ref())?;
+        g.state::<SkinnedMeshes>().0.insert(key, index);
+        return Ok(index);
+    }
     let key = (me_ref, mats);
     if let Some(i) = g.meshes.get(&key) {
         return Ok(*i);
     }
     let cached = g.primitives.get(&me_ref).cloned();
-    let (index, written) = build_mesh(g, mesh, mesh, None, &key.1, cached)?;
+    let (index, written) = build_mesh(g, mesh, mesh, None, &key.1, cached, None)?;
     if let Some(w) = written {
         g.primitives.insert(me_ref, w);
     }
@@ -166,6 +192,7 @@ fn build_mesh(
     object: Option<IdRef<ObjectId>>,
     mats: &[Option<IdRef<MaterialId>>],
     cached: Option<Vec<WrittenPrimitive>>,
+    skin: Option<&crate::export::skins::MeshSkin>,
 ) -> Result<Built, ExportError> {
     let (main, settings) = (g.main, g.settings);
     // Primitives are extracted and written once per mesh (the add-on's
@@ -177,7 +204,7 @@ fn build_mesh(
     let mut source = match cached {
         Some(w) => Source::Cached(w.into_iter()),
         None => {
-            let cx = MeshExportCx::new(main, data, object, settings);
+            let cx = MeshExportCx::new(main, data, object, settings).with_skin(skin);
             Source::Fresh(primitives::extract(&cx)?.into_iter())
         }
     };
@@ -188,7 +215,7 @@ fn build_mesh(
         let written = match &mut source {
             Source::Fresh(drafts) => {
                 let Some(mut d) = drafts.next() else { break };
-                let cx = MeshExportCx::new(main, data, object, settings);
+                let cx = MeshExportCx::new(main, data, object, settings).with_skin(skin);
                 primitives::post_process(&cx, &mut d, &mut g.buf)?;
                 let w = write_accessors(g, &d)?;
                 written_all.push(w.clone());
@@ -295,9 +322,10 @@ fn write_accessors(g: &mut Gather, d: &PrimitiveDraft) -> Result<WrittenPrimitiv
         for (name, col) in t {
             let data = column_data(col);
             check(name, data.count())?;
-            let i = g
-                .buf
-                .push_accessor(&data, &AccessorOpts::attribute(name == "POSITION"));
+            // Morph targets may be sparse (WP 6.8, `post/morph_targets.rs`).
+            let i = crate::export::mesh::post::morph_targets::push_target_accessor(
+                &mut g.buf, g.settings, name, &data,
+            )?;
             m.insert(name.to_string(), i);
         }
         targets.push(m);
