@@ -340,7 +340,7 @@ pub enum ShadowKind {
 pub struct ShadowBinding {
     /// Kind.
     pub kind: ShadowKind,
-    /// First layer of the shadow array (and first matrix).
+    /// First shadow map (and matrix) of the light: see [`super::shadows::Plan`].
     pub first_layer: u32,
     /// Shadow origin of this sample (cube and spot maps).
     pub origin: Vec3,

@@ -1371,12 +1371,14 @@ pub fn render(
         .map(|l| lights::sync(l, scene.settings.eevee.light_threshold))
         .filter(LightRecord::is_visible)
         .collect();
-    let shadow_size = shadows::map_size(scene.settings.eevee.shadow_resolution_scale, max);
     let plan = shadows::plan(
         &records,
         scene.settings.use_shadows,
+        shadows::map_size(scene.settings.eevee.shadow_resolution_scale, max),
         limits.max_texture_array_layers,
+        max,
     );
+    let shadow_size = plan.size;
     let rerender_shadows = shadows::jittered(&plan, &records);
 
     // Textures and samplers of the materials.
@@ -1431,16 +1433,17 @@ pub fn render(
         mapped_at_creation: false,
     });
     let layers = plan.layers;
+    let maps = plan.maps.max(1);
     let shadow_mat_buf = dev.create_buffer(&wgpu::BufferDescriptor {
         label: Some("frap eevee shadow matrices"),
-        size: u64::from(layers) * 64,
+        size: u64::from(maps) * 64,
         usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST,
         mapped_at_creation: false,
     });
     let layer_stride = align_up(64, align);
     let layer_buf = dev.create_buffer(&wgpu::BufferDescriptor {
         label: Some("frap eevee shadow layers"),
-        size: u64::from(layers) * layer_stride,
+        size: u64::from(maps) * layer_stride,
         usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         mapped_at_creation: false,
     });
@@ -1483,16 +1486,17 @@ pub fn render(
     let refraction_view = refraction
         .as_ref()
         .map(|t| t.create_view(&Default::default()));
+    let layer_size = plan.layer_size();
     let atlas_ok =
-        matches!(&state.shadow_atlas, Some((s, l, _)) if *s == shadow_size && *l == layers);
+        matches!(&state.shadow_atlas, Some((s, l, _)) if *s == layer_size && *l == layers);
     if !atlas_ok {
         state.shadow_atlas = Some((
-            shadow_size,
+            layer_size,
             layers,
             texture_2d(
                 gpu,
                 "frap eevee shadow maps",
-                [shadow_size, shadow_size],
+                [layer_size, layer_size],
                 layers,
                 1,
                 shadows::FORMAT,
@@ -1725,21 +1729,21 @@ pub fn render(
             shadow: [
                 sample.pcf[0],
                 sample.pcf[1],
-                shadow_size as f32,
+                plan.tiles as f32,
                 1.0 / shadow_size as f32,
             ],
             sh,
         };
         gpu.queue
             .write_buffer(&frame_buf, 0, bytemuck::bytes_of(&frame));
-        let draw_shadows = plan.layers > 0
+        let draw_shadows = plan.maps > 0
             && plan
                 .lights
                 .iter()
                 .any(|(k, _)| *k != lights::ShadowKind::None)
             && (i == 0 || rerender_shadows);
         let (bindings, matrices) =
-            shadows::sample_maps(&plan, &records, sample, &scene.camera, &bounds, shadow_size);
+            shadows::sample_maps(&plan, &records, sample, &scene.camera, &bounds);
         let gl: Vec<GpuLight> = records
             .iter()
             .zip(&bindings)
@@ -1761,11 +1765,11 @@ pub fn render(
             label: Some("frap eevee sample"),
         });
         if draw_shadows {
+            let per_layer = plan.tiles * plan.tiles;
             for (l, lv) in layer_views.iter().enumerate() {
-                let used = plan.lights.iter().any(|(k, first)| {
-                    *k != lights::ShadowKind::None
-                        && (*first..*first + shadows::layer_count(*k)).contains(&(l as u32))
-                });
+                let maps_of_layer: Vec<u32> = (l as u32 * per_layer..(l as u32 + 1) * per_layer)
+                    .filter(|m| plan.is_used(*m))
+                    .collect();
                 let mut pass = enc.begin_render_pass(&wgpu::RenderPassDescriptor {
                     label: Some("frap eevee shadow"),
                     color_attachments: &[],
@@ -1781,17 +1785,30 @@ pub fn render(
                     occlusion_query_set: None,
                     multiview_mask: None,
                 });
-                if !used {
+                if maps_of_layer.is_empty() {
                     continue;
                 }
                 pass.set_pipeline(&res.shadow);
-                pass.set_bind_group(0, &layer_bg, &[(l as u64 * layer_stride) as u32]);
-                for (key, draw, count) in &casters {
-                    let gm = cache.get(*key).expect("invariant: uploaded above");
-                    pass.set_bind_group(1, &draw_bg, &[(*draw as u64 * draw_stride) as u32]);
-                    pass.set_vertex_buffer(0, gm.vertices.slice(..));
-                    pass.set_index_buffer(gm.indices.slice(..), wgpu::IndexFormat::Uint32);
-                    pass.draw_indexed(0..*count, 0, 0..1);
+                for m in maps_of_layer {
+                    // Each map renders into its tile (the whole layer without tiling).
+                    let (_, [x, y]) = plan.tile_of(m);
+                    pass.set_viewport(
+                        x as f32,
+                        y as f32,
+                        shadow_size as f32,
+                        shadow_size as f32,
+                        0.0,
+                        1.0,
+                    );
+                    pass.set_scissor_rect(x, y, shadow_size, shadow_size);
+                    pass.set_bind_group(0, &layer_bg, &[(u64::from(m) * layer_stride) as u32]);
+                    for (key, draw, count) in &casters {
+                        let gm = cache.get(*key).expect("invariant: uploaded above");
+                        pass.set_bind_group(1, &draw_bg, &[(*draw as u64 * draw_stride) as u32]);
+                        pass.set_vertex_buffer(0, gm.vertices.slice(..));
+                        pass.set_index_buffer(gm.indices.slice(..), wgpu::IndexFormat::Uint32);
+                        pass.draw_indexed(0..*count, 0, 0..1);
+                    }
                 }
             }
         }

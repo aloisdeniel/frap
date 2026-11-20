@@ -82,7 +82,7 @@ struct Frame {
     clamp: vec4<f32>,
     // HDRI world (WP 5.2): x cos(rotation), y sin(rotation), z strength.
     world_params: vec4<f32>,
-    // xy: PCF rotation random, z: shadow map size, w: 1 / size.
+    // xy: PCF rotation random, z: shadow maps per row of an atlas layer, w: 1 / map size.
     shadow: vec4<f32>,
     // HDRI world irradiance (L2 SH, rgb).
     sh: array<vec4<f32>, 9>,
@@ -108,7 +108,7 @@ struct Light {
     cascade_texel: vec4<f32>,
     // x: shadow_filter_radius.
     shadow_params: vec4<f32>,
-    // type, shadow kind, first shadow layer, unused.
+    // type, shadow kind, first shadow map (eevee/shadows.rs Plan), unused.
     ints: vec4<u32>,
 };
 
@@ -956,15 +956,26 @@ fn light_ltc(l: Light, N: vec3<f32>, V: vec3<f32>, lv: LightVector, ltc_mat: vec
 // ---------------------------------------------------------------------------------------
 // Shadows (eevee/shadows.rs): reverse depth, PCF with the comparison sampler.
 
-fn shadow_pcf(layer: u32, uv: vec2<f32>, ref_depth: f32, radius: f32) -> f32 {
+// Map `map` lives in layer `map / tiles²`, tile `map % tiles²` (row major); taps clamp to the
+// tile's texel centres, as `ClampToEdge` does for a map that fills its layer.
+fn shadow_pcf(map: u32, uv: vec2<f32>, ref_depth: f32, radius: f32) -> f32 {
     let texel = frame.shadow.w;
+    let tiles = max(u32(frame.shadow.z + 0.5), 1u);
+    let per = tiles * tiles;
+    let t = map % per;
+    let layer = i32(map / per);
+    let tile = vec2<f32>(f32(t % tiles), f32(t / tiles));
+    let inv_tiles = 1.0 / f32(tiles);
+    let lo = vec2<f32>(0.5 * texel);
+    let hi = vec2<f32>(1.0 - 0.5 * texel);
     let ang = frame.shadow.x * 2.0 * PI;
     let rot = mat2x2<f32>(cos(ang), sin(ang), -sin(ang), cos(ang));
     var sum = 0.0;
     for (var j = -1; j <= 1; j++) {
         for (var i = -1; i <= 1; i++) {
             let o = rot * vec2<f32>(f32(i), f32(j)) * radius * texel;
-            sum += textureSampleCompareLevel(shadow_tx, shadow_samp, uv + o, i32(layer), ref_depth);
+            let st = (tile + clamp(uv + o, lo, hi)) * inv_tiles;
+            sum += textureSampleCompareLevel(shadow_tx, shadow_samp, st, layer, ref_depth);
         }
     }
     return sum / 9.0;

@@ -372,6 +372,97 @@ fn shadows_off_and_soft_shadows() {
     );
 }
 
+/// `n` point lights (hard shadows) on a ring of radius 3 at height 3 around a 1 m cube on the
+/// plane: each light casts the cube's shadow outwards, on the far side of the ring.
+fn ring_scene(n: usize) -> RenderScene {
+    let mut sc = plane_scene(light(RLightKind::Point, 100.0, Vec3::ZERO));
+    sc.lights.clear();
+    for i in 0..n {
+        let a = i as f32 / n as f32 * std::f32::consts::TAU;
+        let mut l = light(
+            RLightKind::Point,
+            100.0,
+            Vec3::new(3.0 * a.cos(), 3.0 * a.sin(), 3.0),
+        );
+        l.radius = 0.0;
+        sc.lights.push(l);
+    }
+    sc.meshes.insert(MeshKey(2), Arc::new(cube(0.5)));
+    sc.objects.push(object(
+        "Cube",
+        2,
+        Mat4::from_translation(Vec3::new(0.0, 0.0, 0.5)),
+    ));
+    sc.settings.taa_render_samples = 1;
+    sc
+}
+
+/// Sum of the red channel of a film.
+fn total(f: &Film) -> f64 {
+    f.rgba.iter().map(|p| f64::from(p[0])).sum()
+}
+
+/// Every shadowed light casts its shadow, however many there are (no per-render light limit):
+/// turning one light's `use_shadow` off brightens the plane by that light's shadow, the same
+/// amount for every light of the symmetric ring.
+fn check_every_shadow(gpu: &Gpu, n: usize, probe: &[usize]) {
+    let mut e = crate::eevee::Eevee::new();
+    let sc = ring_scene(n);
+    let all = total(&render(gpu, &mut e, &sc));
+    let mut unshadowed = sc.clone();
+    for l in &mut unshadowed.lights {
+        l.use_shadow = false;
+    }
+    let none = total(&render(gpu, &mut e, &unshadowed));
+    // Each light's share of the shadowed light, if all were present.
+    let share = (none - all) / n as f64;
+    assert!(
+        share > 0.0,
+        "{n} lights: no shadow at all ({all} vs {none})"
+    );
+    for &i in probe {
+        let mut one = sc.clone();
+        one.lights[i].use_shadow = false;
+        let gain = total(&render(gpu, &mut e, &one)) - all;
+        eprintln!("{n} lights: light {i} shadow {gain:.3} (mean {share:.3})");
+        assert!(
+            (gain - share).abs() < 0.25 * share,
+            "{n} lights: light {i}'s shadow is missing or wrong: {gain} vs {share}"
+        );
+    }
+}
+
+#[test]
+fn every_light_casts_its_shadow() {
+    let Some(gpu) = gpu() else { return };
+    // 10 point lights: 60 cube faces, past the full-size texel budget (smaller maps).
+    check_every_shadow(&gpu, 10, &(0..10).collect::<Vec<_>>());
+    // 50 point lights: 300 maps, more than the 256 array layers wgpu guarantees (tiled layers).
+    let sc = ring_scene(50);
+    let records: Vec<lights::LightRecord> = sc
+        .lights
+        .iter()
+        .map(|l| lights::sync(l, sc.settings.eevee.light_threshold))
+        .collect();
+    let limits = gpu.device.limits();
+    let plan = shadows::plan(
+        &records,
+        true,
+        1024,
+        limits.max_texture_array_layers,
+        limits.max_texture_dimension_2d,
+    );
+    eprintln!(
+        "50 lights: {} maps of {} in {} layers of {} x {} tiles",
+        plan.maps, plan.size, plan.layers, plan.tiles, plan.tiles
+    );
+    assert_eq!(plan.maps, 300);
+    if limits.max_texture_array_layers < 300 {
+        assert!(plan.tiles > 1);
+    }
+    check_every_shadow(&gpu, 50, &[0, 7, 13, 24, 31, 42, 45, 49]);
+}
+
 #[test]
 fn film_is_rgba32_and_transparent() {
     assert_eq!(film::ACCUM_FORMAT, wgpu::TextureFormat::Rgba32Float);
@@ -394,9 +485,27 @@ fn film_is_rgba32_and_transparent() {
     let f = render(&gpu, &mut e, &sc);
     assert_eq!(px(&f, 1, 1)[3], 0.0);
     assert!((px(&f, 32, 32)[3] - 1.0).abs() < 1e-5);
-    // Anti-aliased plane border: partial coverage, straight colour.
-    let edge = px(&f, 16, 32);
-    assert!(edge[3] > 0.0 && edge[3] < 1.0 || edge[3] == 1.0, "{edge:?}");
+    // Anti-aliased plane border: the 5 m plane spans pixels 16..48 of 64 (borders on pixel
+    // edges); moved a third of a pixel, its border cuts pixel 15, whose coverage is partial.
+    // Lit by the uniform world only, the plane has one colour, which the straight-alpha border
+    // pixel keeps.
+    sc.lights.clear();
+    sc.objects[0].matrix_world = Mat4::from_translation(Vec3::new(-10.0 / 64.0 / 3.0, 0.0, 0.0))
+        * Mat4::from_scale(Vec3::splat(0.5));
+    let f = render(&gpu, &mut e, &sc);
+    let edge = px(&f, 15, 32);
+    let inner = px(&f, 24, 32);
+    assert!((inner[3] - 1.0).abs() < 1e-4, "{inner:?}");
+    assert!(
+        edge[3] > 0.05 && edge[3] < 0.95,
+        "partial coverage: {edge:?}"
+    );
+    for c in 0..3 {
+        assert!(
+            (edge[c] - inner[c]).abs() < 0.01 * inner[c] + 1e-4,
+            "straight colour at the border: {edge:?} vs {inner:?}"
+        );
+    }
 }
 
 #[test]
@@ -435,7 +544,9 @@ fn deterministic_and_cached() {
 
 /// Cold start (new device, pipelines, first render) of the factory-like scene at the M5
 /// golden size, within the CI budget (`FRAP_EEVEE_COLD_BUDGET_S`, default 60 s: lavapipe and
-/// WARP run it in gpu.yml).
+/// WARP run it in gpu.yml). The adapter, cold and warm times are printed and appended to
+/// `FRAP_RENDER_TIMINGS` (gpu.yml's per-adapter timings artifact), as Workbench's
+/// `cold_first_render_time` does.
 #[test]
 fn cold_start_within_budget() {
     let start = std::time::Instant::now();
@@ -451,13 +562,40 @@ fn cold_start_within_budget() {
     ));
     sc.settings.taa_render_samples = 64;
     let _ = render(&gpu, &mut e, &sc);
-    let secs = start.elapsed().as_secs_f64();
+    let cold = start.elapsed().as_secs_f64();
+    let t1 = std::time::Instant::now();
+    let _ = render(&gpu, &mut e, &sc);
+    let warm = t1.elapsed().as_secs_f64();
     let budget: f64 = std::env::var("FRAP_EEVEE_COLD_BUDGET_S")
         .ok()
         .and_then(|v| v.parse().ok())
         .unwrap_or(60.0);
-    eprintln!("EEVEE cold start (device + pipelines + 64 samples, 320x180): {secs:.2} s");
-    assert!(secs < budget, "cold start {secs:.1} s > budget {budget} s");
+    let a = gpu.summary();
+    eprintln!(
+        "FRAP_RENDER_TIMING engine=BLENDER_EEVEE adapter={:?} backend={} cold_first_render_ms={:.1} warm_render_ms={:.1} (device + pipelines + 64 samples, 320x180)",
+        a.name,
+        a.backend,
+        cold * 1e3,
+        warm * 1e3
+    );
+    if let Ok(path) = std::env::var("FRAP_RENDER_TIMINGS") {
+        use std::io::Write;
+        let mut f = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(path)
+            .expect("FRAP_RENDER_TIMINGS file");
+        writeln!(
+            f,
+            "{{\"engine\":\"BLENDER_EEVEE\",\"adapter\":{:?},\"backend\":{:?},\"cold_first_render_ms\":{:.1},\"warm_render_ms\":{:.1}}}",
+            a.name,
+            a.backend,
+            cold * 1e3,
+            warm * 1e3
+        )
+        .expect("FRAP_RENDER_TIMINGS write");
+    }
+    assert!(cold < budget, "cold start {cold:.1} s > budget {budget} s");
 }
 
 // A test-only shading feature: proves the WP 5.5 extension point (flag bit, `pack`, WGSL

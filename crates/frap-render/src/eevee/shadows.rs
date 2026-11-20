@@ -1,8 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! Shadow maps (WP 5.1): cube maps (point and area lights, and spots wider than 150°), one 2D
-//! map (spot lights), four cascades (sun), all layers of one `Depth32Float` 2D array, reverse
-//! depth (1 at the light, 0 far away). The scene's `eevee.use_shadows` and each light's
-//! `use_shadow` gate them.
+//! map (spot lights), four cascades (sun), all in one `Depth32Float` 2D array, reverse depth
+//! (1 at the light, 0 far away). The scene's `eevee.use_shadows` and each light's `use_shadow`
+//! gate them.
+//!
+//! Every shadowed light gets its maps, as in Blender (whose virtual shadow maps have no light
+//! count limit). The atlas has a fixed texel budget ([`BUDGET_MAPS`] full-size maps): past it
+//! the maps shrink so their total stays within the budget, and once there are more maps than
+//! array layers, each layer holds `tiles × tiles` maps (see [`Plan`]).
 //!
 //! Soft shadows: EEVEE 5.2 traces shadow-map rays over the light shape
 //! (`shadow_ray_count`/`shadow_step_count`) or, with `use_shadow_jitter`, moves the shadow
@@ -24,8 +29,11 @@ use super::taa::{Sample, sample_ball, sample_disk, sample_uniform_cone};
 pub const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
 /// Shadow-map size at `shadow_resolution_scale = 1`.
 pub const BASE_SIZE: u32 = 1024;
-/// Upper bound of the layers of one render (later lights render unshadowed).
-pub const MAX_LAYERS: u32 = 48;
+/// Texel budget of the atlas, in maps of [`BASE_SIZE`]² (192 MiB of `Depth32Float`): more
+/// maps than this shrink so their total stays within it.
+pub const BUDGET_MAPS: u32 = 48;
+/// Smallest size a map shrinks to under the budget.
+pub const MIN_MAP_SIZE: u32 = 32;
 /// Spots up to this cone angle (radians) use one 2D map; wider ones a cube.
 pub const SPOT_2D_MAX_ANGLE: f32 = 150.0 * std::f32::consts::PI / 180.0;
 /// Number of sun cascades.
@@ -105,38 +113,103 @@ pub fn layer_count(kind: ShadowKind) -> u32 {
     }
 }
 
-/// Which lights cast shadows, and their layers.
+/// Which lights cast shadows, and where their maps live.
+///
+/// Maps are numbered `0..maps` (the "layer" index of [`ShadowBinding::first_layer`] and of the
+/// shadow matrices); map `m` lives in array layer `m / tiles²`, tile `m % tiles²` of it (row
+/// major, `tiles` per row), each tile `size` texels square.
 #[derive(Clone, Debug, PartialEq)]
 pub struct Plan {
-    /// Per light: kind and first layer (`ShadowKind::None` for unshadowed lights).
+    /// Per light: kind and first map (`ShadowKind::None` for unshadowed lights).
     pub lights: Vec<(ShadowKind, u32)>,
-    /// Total layers (at least 1: the atlas always exists).
+    /// Number of maps.
+    pub maps: u32,
+    /// Size of one map (texels per side).
+    pub size: u32,
+    /// Maps per row of an array layer (1: one map per layer).
+    pub tiles: u32,
+    /// Array layers of the atlas (at least 1: the atlas always exists).
     pub layers: u32,
 }
 
-/// Plans the shadow layers of `lights` (`use_shadows` is `eevee.use_shadows`).
-pub fn plan(lights: &[LightRecord], use_shadows: bool, max_layers: u32) -> Plan {
-    let max_layers = max_layers.min(MAX_LAYERS);
+impl Plan {
+    /// Texels per side of an array layer.
+    pub fn layer_size(&self) -> u32 {
+        self.size * self.tiles
+    }
+    /// Array layer and texel origin of map `m`.
+    pub fn tile_of(&self, m: u32) -> (u32, [u32; 2]) {
+        let per = self.tiles * self.tiles;
+        let t = m % per;
+        (
+            m / per,
+            [t % self.tiles * self.size, t / self.tiles * self.size],
+        )
+    }
+    /// Whether map `m` belongs to a shadowed light.
+    pub fn is_used(&self, m: u32) -> bool {
+        self.lights.iter().any(|(k, first)| {
+            *k != ShadowKind::None && (*first..*first + layer_count(*k)).contains(&m)
+        })
+    }
+}
+
+/// Plans the shadow maps of `lights` (`use_shadows` is `eevee.use_shadows`, `size` the map
+/// size of [`map_size`], `max_layers` and `max_dim` the device's array layer and 2D size
+/// limits).
+pub fn plan(
+    lights: &[LightRecord],
+    use_shadows: bool,
+    size: u32,
+    max_layers: u32,
+    max_dim: u32,
+) -> Plan {
+    let max_layers = max_layers.max(1);
     let mut next = 0u32;
-    let lights = lights
+    let mut lights: Vec<(ShadowKind, u32)> = lights
         .iter()
         .map(|r| {
             if !use_shadows || !r.use_shadow || !r.is_visible() {
                 return (ShadowKind::None, 0);
             }
             let k = kind_of(r);
-            let n = layer_count(k);
-            if next + n > max_layers {
-                return (ShadowKind::None, 0);
-            }
             let first = next;
-            next += n;
+            next += layer_count(k);
             (k, first)
         })
         .collect();
+    let maps = next;
+    // Constant texel budget: past `BUDGET_MAPS` maps, shrink them.
+    let mut size = size.max(1);
+    if maps > BUDGET_MAPS {
+        let fit = (f64::from(BASE_SIZE) * (f64::from(BUDGET_MAPS) / f64::from(maps)).sqrt()) as u32;
+        size = size.min(fit.max(MIN_MAP_SIZE));
+    }
+    // More maps than layers: tile the layers.
+    let mut tiles = 1u32;
+    while u64::from(max_layers) * u64::from(tiles * tiles) < u64::from(maps) {
+        tiles += 1;
+    }
+    if size * tiles > max_dim {
+        size = (max_dim / tiles).max(1);
+    }
+    // Degenerate devices (a layer cannot hold the tiles even at 1 texel): later lights go
+    // unshadowed rather than failing the render.
+    let capacity = u64::from(max_layers) * u64::from(tiles * tiles);
+    if u64::from(maps) > capacity {
+        for l in &mut lights {
+            if l.0 != ShadowKind::None && u64::from(l.1 + layer_count(l.0)) > capacity {
+                *l = (ShadowKind::None, 0);
+            }
+        }
+    }
+    let maps = maps.min(capacity as u32);
     Plan {
         lights,
-        layers: next.max(1),
+        maps,
+        size,
+        tiles,
+        layers: maps.div_ceil(tiles * tiles).max(1),
     }
 }
 
@@ -300,16 +373,16 @@ pub fn cascade_range(camera: &RCamera, scene: &Aabb) -> (f32, f32) {
 }
 
 /// The shadow maps of one sample: each light's binding and the world → clip matrix of every
-/// layer.
+/// map.
 pub fn sample_maps(
     plan: &Plan,
     lights: &[LightRecord],
     sample: &Sample,
     camera: &RCamera,
     scene: &Aabb,
-    size: u32,
 ) -> (Vec<ShadowBinding>, Vec<Mat4>) {
-    let mut matrices = vec![Mat4::IDENTITY; plan.layers as usize];
+    let size = plan.size;
+    let mut matrices = vec![Mat4::IDENTITY; plan.maps.max(1) as usize];
     let bindings = lights
         .iter()
         .zip(&plan.lights)
@@ -472,7 +545,13 @@ mod tests {
             Mat4::IDENTITY,
             0.1,
         );
-        let p = plan(&[point.clone(), sun.clone(), spot.clone()], true, 256);
+        let p = plan(
+            &[point.clone(), sun.clone(), spot.clone()],
+            true,
+            1024,
+            256,
+            8192,
+        );
         assert_eq!(
             p.lights,
             vec![
@@ -481,16 +560,43 @@ mod tests {
                 (ShadowKind::Spot, 10)
             ]
         );
-        assert_eq!(p.layers, 11);
-        // Scene shadows off: no layer, the atlas keeps one.
-        let p = plan(std::slice::from_ref(&point), false, 256);
+        assert_eq!((p.maps, p.layers, p.size, p.tiles), (11, 11, 1024, 1));
+        // Scene shadows off: no map, the atlas keeps one layer.
+        let p = plan(std::slice::from_ref(&point), false, 1024, 256, 8192);
         assert_eq!(p.lights, vec![(ShadowKind::None, 0)]);
-        assert_eq!(p.layers, 1);
-        // Too many layers: later lights are unshadowed.
-        let many = vec![point; 10];
-        let p = plan(&many, true, 256);
-        assert_eq!(p.layers, 48);
-        assert_eq!(p.lights[8], (ShadowKind::None, 0));
+        assert_eq!((p.maps, p.layers), (0, 1));
+        // Past the texel budget every light keeps its maps, smaller.
+        let many = vec![point.clone(); 10];
+        let p = plan(&many, true, 1024, 256, 8192);
+        assert!(
+            p.lights
+                .iter()
+                .enumerate()
+                .all(|(i, l)| *l == (ShadowKind::Cube, 6 * i as u32))
+        );
+        assert_eq!((p.maps, p.layers, p.tiles), (60, 60, 1));
+        assert!(p.size < 1024 && p.size >= 900, "{}", p.size);
+        assert!(
+            u64::from(p.maps) * u64::from(p.size).pow(2)
+                <= u64::from(BUDGET_MAPS) * u64::from(BASE_SIZE).pow(2)
+        );
+        // A lower requested size is kept when it already fits.
+        assert_eq!(plan(&many, true, 512, 256, 8192).size, 512);
+        // More maps than array layers: tiles.
+        let crowd = vec![point.clone(); 50];
+        let p = plan(&crowd, true, 1024, 256, 8192);
+        assert_eq!((p.maps, p.tiles, p.layers), (300, 2, 75));
+        assert!(p.lights.iter().all(|(k, _)| *k == ShadowKind::Cube));
+        assert_eq!(p.layer_size(), 2 * p.size);
+        assert_eq!(p.tile_of(0), (0, [0, 0]));
+        assert_eq!(p.tile_of(5), (1, [p.size, 0]));
+        assert_eq!(p.tile_of(299), (74, [p.size, p.size]));
+        assert!(p.is_used(299) && !p.is_used(300));
+        // A tiny device: the layer size limit caps the tiles.
+        let p = plan(&crowd, true, 1024, 8, 64);
+        assert_eq!(p.tiles, 7);
+        assert!(p.size * p.tiles <= 64);
+        assert!(p.lights.iter().all(|(k, _)| *k == ShadowKind::Cube));
         // A wide spot uses a cube.
         let wide = rec(
             RLightKind::Spot {
@@ -510,8 +616,8 @@ mod tests {
             Mat4::from_translation(Vec3::new(0.0, 0.0, 3.0)),
             0.0,
         );
-        let p = plan(std::slice::from_ref(&r), true, 256);
-        let (b, m) = sample_maps(&p, &[r], &Sample::new(0), &camera(), &scene(), 512);
+        let p = plan(std::slice::from_ref(&r), true, 1024, 256, 8192);
+        let (b, m) = sample_maps(&p, &[r], &Sample::new(0), &camera(), &scene());
         assert_eq!(b[0].origin, Vec3::new(0.0, 0.0, 3.0));
         // A point below the light lands in the -Z face, inside it, in front of the far plane.
         for target in [
@@ -545,8 +651,8 @@ mod tests {
             m_light,
             0.0,
         );
-        let p = plan(std::slice::from_ref(&r), true, 256);
-        let (b, m) = sample_maps(&p, &[r], &Sample::new(0), &camera(), &scene(), 512);
+        let p = plan(std::slice::from_ref(&r), true, 1024, 256, 8192);
+        let (b, m) = sample_maps(&p, &[r], &Sample::new(0), &camera(), &scene());
         assert_eq!(b[0].kind, ShadowKind::Spot);
         // The cone edge on the ground (30° off the axis, 4 below) stays inside the map.
         let edge = Vec3::new(1.0 + 4.0 * 30f32.to_radians().tan(), 0.0, 0.0);
@@ -560,7 +666,7 @@ mod tests {
     fn sun_cascades_cover_the_view() {
         let rot = Mat4::from_rotation_x(0.6);
         let r = rec(RLightKind::Sun { angle: 0.0 }, rot, 0.0);
-        let p = plan(std::slice::from_ref(&r), true, 256);
+        let p = plan(std::slice::from_ref(&r), true, 1024, 256, 8192);
         let cam = camera();
         let (b, m) = sample_maps(
             &p,
@@ -568,7 +674,6 @@ mod tests {
             &Sample::new(0),
             &cam,
             &scene(),
-            1024,
         );
         assert_eq!(b[0].kind, ShadowKind::Cascades);
         assert_eq!(b[0].origin, r.z_axis());
@@ -618,7 +723,7 @@ mod tests {
             assert_eq!(local_origin(&hard, &s), m_light.w_axis.xyz());
         }
         assert!(moved);
-        let p = plan(std::slice::from_ref(&hard), true, 256);
+        let p = plan(std::slice::from_ref(&hard), true, 1024, 256, 8192);
         assert!(!jittered(&p, &[hard]));
         let sun = rec(RLightKind::Sun { angle: 0.2 }, Mat4::IDENTITY, 0.0);
         let d = sun_direction(&sun, &Sample::new(3));
