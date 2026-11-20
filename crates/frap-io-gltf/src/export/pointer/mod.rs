@@ -30,6 +30,7 @@ pub mod sample;
 
 use frap_gltf::ext::khr_animation_pointer::KhrAnimationPointer;
 use frap_gltf::json::{AnimationPath, Extension};
+use frap_material::patterns::ior::GLTF_IOR;
 use frap_spec_ops_io::export_scene::gltf::ExportAnimationMode;
 
 use crate::export::ExportError;
@@ -138,9 +139,15 @@ pub fn animated_extensions(doc: &frap_gltf::Document) -> Vec<String> {
 
 /// `__fix_json` / `__should_include_json_value` and `__check_ior`: an empty
 /// `KHR_materials_*` object the add-on created is kept, in every material (the check is
-/// global), when any pointer channel animates that extension; `KHR_materials_ior` stays only
-/// beside transmission, volume or specular. frap's material exporter never writes the empty
-/// objects, so they are added back here.
+/// global), when any pointer channel animates that extension. frap's material exporter never
+/// writes the empty objects, so they are added back here.
+///
+/// `KHR_materials_ior` is then decided again, as `__check_ior` does after `__fix_json`: the
+/// static exporter dropped it when no transmission, volume or specular object survived, but
+/// `export_ior` had created `{"ior": v}` (the unlinked `IOR` socket's value, `ior` left out
+/// at 1.5) beside the always-created transmission and specular objects. So a material that
+/// now keeps one of those three gets `KHR_materials_ior` back with its static value, or as an
+/// empty object when the IOR is 1.5 and animated.
 pub fn keep_animated_empty_extensions(g: &mut Gather) {
     let animated = animated_extensions(&g.doc);
     if animated.is_empty() {
@@ -150,6 +157,12 @@ pub fn keep_animated_empty_extensions(g: &mut Gather) {
         .state::<crate::export::ext_order::CreatedEmpty>()
         .0
         .clone();
+    let main = g.main;
+    let materials_by_name: std::collections::HashMap<&str, &frap_scene::id::Material> = main
+        .materials
+        .iter()
+        .map(|(_, m)| (m.header.name.as_str(), m))
+        .collect();
     let mut used: Vec<&'static str> = Vec::new();
     for (i, m) in g.doc.materials.iter_mut().enumerate() {
         if m.extensions.contains("KHR_materials_unlit") {
@@ -159,19 +172,32 @@ pub fn keep_animated_empty_extensions(g: &mut Gather) {
         let made = |e: &str| ALWAYS_CREATED.contains(&e) || extra.is_some_and(|c| c.contains(&e));
         let mut add: Vec<&'static str> = MATERIAL_EXTENSIONS
             .into_iter()
-            .filter(|e| !m.extensions.contains(e) && made(e) && animated.iter().any(|a| a == e))
+            .filter(|e| {
+                *e != IOR && !m.extensions.contains(e) && made(e) && animated.iter().any(|a| a == e)
+            })
             .collect();
-        let has = |e: &str, add: &[&str]| m.extensions.contains(e) || add.contains(&e);
-        if add.contains(&"KHR_materials_ior")
-            && ![
-                "KHR_materials_transmission",
-                "KHR_materials_volume",
-                "KHR_materials_specular",
-            ]
-            .iter()
-            .any(|e| has(e, &add))
+        let mut ior_value: Option<serde_json::Value> = None;
+        let needs_ior = [
+            "KHR_materials_transmission",
+            "KHR_materials_volume",
+            "KHR_materials_specular",
+        ]
+        .iter()
+        .any(|e| m.extensions.contains(e) || add.contains(e));
+        if needs_ior
+            && !m.extensions.contains(IOR)
+            && made(IOR)
+            && let Some(mat) = m.name.as_deref().and_then(|n| materials_by_name.get(n))
+            && let Some(v) = material::ior(main, mat)
         {
-            add.retain(|e| *e != "KHR_materials_ior");
+            if v != GLTF_IOR {
+                ior_value = Some(serde_json::json!({ "ior": crate::export::materials::num(v) }));
+            } else if animated.iter().any(|a| a == IOR) {
+                ior_value = Some(serde_json::json!({}));
+            }
+            if ior_value.is_some() {
+                add.push(IOR);
+            }
         }
         if add.is_empty() {
             continue;
@@ -181,6 +207,10 @@ pub fn keep_animated_empty_extensions(g: &mut Gather) {
         for name in MATERIAL_EXTENSIONS {
             if let Some(v) = m.extensions.get_raw(name) {
                 ext.insert_raw(name, v.clone());
+            } else if name == IOR {
+                if let Some(v) = ior_value.take() {
+                    ext.insert_raw(name, v);
+                }
             } else if add.contains(&name) {
                 ext.insert_raw(name, serde_json::json!({}));
             }
@@ -201,6 +231,8 @@ pub fn keep_animated_empty_extensions(g: &mut Gather) {
         g.use_extension(e, false);
     }
 }
+
+const IOR: &str = "KHR_materials_ior";
 
 /// `__traverse_property` with `gltf_trs_w_animation_pointer`: every `translation`, `rotation`,
 /// `scale` and `weights` channel targets `/nodes/{node}/{path}` through a pointer instead.

@@ -388,6 +388,54 @@ fn sampler_data(cx: &Gltf, anim: usize, ch: usize) -> Result<SamplerData, Import
     Ok((keys, values, interp))
 }
 
+/// Why channel `ci` of animation `ai` cannot be imported as the F-curves `curves` (`None` when
+/// it can): an output accessor whose element type does not match the target (`expected`
+/// components), an output count that is not the input count (three times it for
+/// CUBICSPLINE), or a key or converted value that is not finite (`yfov` 0 → infinite lens,
+/// `outerConeAngle` 0 → NaN `spot_blend`). The add-on raises on these and imports nothing for
+/// the file; frap skips the channel with a WARNING instead of keying corrupt values.
+fn invalid_channel(
+    cx: &Gltf,
+    ai: usize,
+    ci: usize,
+    expected: usize,
+    curves: &Curves,
+    keys: &[f32],
+) -> Option<String> {
+    let a = &cx.doc.animations[ai];
+    let s = a.samplers.get(a.channels[ci].sampler as usize)?;
+    let input = cx.doc.accessors.get(s.input as usize)?;
+    let output = cx.doc.accessors.get(s.output as usize)?;
+    let comps = output.type_.components();
+    if comps != expected {
+        return Some(format!(
+            "its output has {comps} component(s), the target needs {expected}"
+        ));
+    }
+    let per_key = if s.interpolation_or_default() == GInterp::CubicSpline {
+        3
+    } else {
+        1
+    };
+    if output.count != input.count * per_key {
+        return Some(format!(
+            "its sampler has {} output(s) for {} input(s)",
+            output.count, input.count
+        ));
+    }
+    let finite = keys.iter().all(|k| k.is_finite())
+        && curves
+            .values
+            .iter()
+            .flat_map(|v| v.iter().take(curves.components))
+            .all(|v| v.is_finite())
+        && curves
+            .alpha
+            .as_ref()
+            .is_none_or(|(_, a)| a.iter().all(|v| v.is_finite()));
+    (!finite).then(|| "a key or converted value is not finite".to_owned())
+}
+
 /// The F-curves one channel becomes.
 struct Curves {
     root: Root,
@@ -834,6 +882,20 @@ pub(crate) fn anim(
         else {
             continue;
         };
+        let pointer = pointer_of(&cx.doc.animations[ai].channels[ci]).unwrap_or_default();
+        // A base colour is RGBA in the file (the alpha goes to its own F-curve).
+        let expected = if pointer.ends_with("/baseColorFactor") {
+            4
+        } else {
+            curves.components
+        };
+        if let Some(why) = invalid_channel(cx, ai, ci, expected, &curves, &keys) {
+            cx.report(
+                ReportType::Warning,
+                format!("glTF import: KHR_animation_pointer channel {pointer} skipped: {why}"),
+            );
+            continue;
+        }
         let (action, slot) = action_and_slot(
             main,
             log,
@@ -1210,7 +1272,9 @@ mod tests {
     /// A light whose `energy` an action animates: exported in SCENE mode with pointers, the
     /// file validates, and importing it gives the light an action with a `LASlot` whose
     /// `energy` curve comes back through `· 683 / 683`, stashed on a muted, locked track named
-    /// after the animation and assigned back (the first animation).
+    /// after the animation and assigned back (the first animation). It goes through
+    /// `import_bytes`, so it also fails when the animation importer (WP 6.7, `IMPLEMENTED`)
+    /// takes over without calling [`anim`], [`simulate_stash`] and [`restore`].
     #[test]
     fn light_energy_round_trips() {
         use frap_anim::{AnimData, Keyframe};
@@ -1316,5 +1380,172 @@ mod tests {
         assert_eq!(t.strips[0].frame_end, 250.0);
         assert_eq!(fc.keyframe_points.len(), 250);
         assert_eq!(t.strips[0].action_slot_handle, adt.action_slot_handle);
+    }
+
+    /// `(pointer, interpolation, input floats, output accessor type, output floats)`.
+    type TestChannel<'a> = (&'a str, &'a str, &'a [f32], &'a str, &'a [f32]);
+
+    /// A GLB with one perspective camera, one point light and the pointer channels.
+    fn pointer_glb(channels: &[TestChannel]) -> Vec<u8> {
+        let mut bin: Vec<u8> = Vec::new();
+        let mut views = Vec::new();
+        let mut accessors = Vec::new();
+        let mut add = |data: &[f32], ty: &str, n: usize| {
+            let off = bin.len();
+            for f in data {
+                bin.extend_from_slice(&f.to_le_bytes());
+            }
+            views.push(
+                serde_json::json!({"buffer": 0, "byteOffset": off, "byteLength": 4 * data.len()}),
+            );
+            let mut a = serde_json::json!({
+                "bufferView": views.len() - 1, "componentType": 5126,
+                "count": data.len() / n, "type": ty,
+            });
+            if ty == "SCALAR" && !data.is_empty() {
+                let min = data.iter().copied().fold(f32::INFINITY, f32::min);
+                let max = data.iter().copied().fold(f32::NEG_INFINITY, f32::max);
+                a["min"] = serde_json::json!([min]);
+                a["max"] = serde_json::json!([max]);
+            }
+            accessors.push(a);
+            accessors.len() - 1
+        };
+        let mut chans = Vec::new();
+        let mut samplers = Vec::new();
+        for (pointer, interp, input, ty, output) in channels {
+            let n = match *ty {
+                "VEC3" => 3,
+                "VEC4" => 4,
+                _ => 1,
+            };
+            let i = add(input, "SCALAR", 1);
+            let o = add(output, ty, n);
+            samplers.push(serde_json::json!({"input": i, "output": o, "interpolation": interp}));
+            chans.push(serde_json::json!({
+                "sampler": samplers.len() - 1,
+                "target": {"path": "pointer", "extensions": {"KHR_animation_pointer": {"pointer": pointer}}},
+            }));
+        }
+        let json = serde_json::json!({
+            "asset": {"version": "2.0"},
+            "scene": 0,
+            "scenes": [{"nodes": [0, 1]}],
+            "nodes": [
+                {"name": "Cam", "camera": 0},
+                {"name": "Lamp", "extensions": {"KHR_lights_punctual": {"light": 0}}},
+            ],
+            "cameras": [{"type": "perspective", "perspective": {"yfov": 0.8, "znear": 0.1, "zfar": 100.0}}],
+            "extensions": {"KHR_lights_punctual": {"lights": [{"type": "point", "intensity": 10.0}]}},
+            "extensionsUsed": ["KHR_lights_punctual", "KHR_animation_pointer"],
+            "animations": [{"name": "A", "channels": chans, "samplers": samplers}],
+            "accessors": accessors,
+            "bufferViews": views,
+            "buffers": [{"byteLength": bin.len()}],
+        });
+        let mut j = serde_json::to_vec(&json).unwrap();
+        while !j.len().is_multiple_of(4) {
+            j.push(b' ');
+        }
+        while !bin.len().is_multiple_of(4) {
+            bin.push(0);
+        }
+        let total = 12 + 8 + j.len() + 8 + bin.len();
+        let mut out = Vec::new();
+        out.extend_from_slice(b"glTF");
+        out.extend_from_slice(&2u32.to_le_bytes());
+        out.extend_from_slice(&(total as u32).to_le_bytes());
+        out.extend_from_slice(&(j.len() as u32).to_le_bytes());
+        out.extend_from_slice(b"JSON");
+        out.extend_from_slice(&j);
+        out.extend_from_slice(&(bin.len() as u32).to_le_bytes());
+        out.extend_from_slice(b"BIN\0");
+        out.extend_from_slice(&bin);
+        out
+    }
+
+    /// Channels the add-on raises on are skipped with a WARNING (no zeroed keys, no padded
+    /// components, no infinite / NaN values in F-curves); the valid one is imported.
+    #[test]
+    fn invalid_channels_are_skipped_with_a_warning() {
+        let keys: &[f32] = &[0.0, 1.0];
+        let glb = pointer_glb(&[
+            // Valid.
+            (
+                "/cameras/0/perspective/zfar",
+                "LINEAR",
+                keys,
+                "SCALAR",
+                &[50.0, 80.0],
+            ),
+            // One output for two inputs.
+            (
+                "/cameras/0/perspective/znear",
+                "LINEAR",
+                keys,
+                "SCALAR",
+                &[0.5],
+            ),
+            // yfov 0 → infinite lens.
+            (
+                "/cameras/0/perspective/yfov",
+                "LINEAR",
+                keys,
+                "SCALAR",
+                &[0.8, 0.0],
+            ),
+            // A SCALAR colour.
+            (
+                "/extensions/KHR_lights_punctual/lights/0/color",
+                "LINEAR",
+                keys,
+                "SCALAR",
+                &[0.5, 1.0],
+            ),
+            // CUBICSPLINE needs three outputs per input.
+            (
+                "/extensions/KHR_lights_punctual/lights/0/intensity",
+                "CUBICSPLINE",
+                keys,
+                "SCALAR",
+                &[0.0, 1.0, 0.0, 0.0, 2.0],
+            ),
+        ]);
+        let (mut main, win) = frap_scene::startup::factory();
+        let mut log = ChangeLog::default();
+        let settings = super::super::ImportSettings::default();
+        let rep = super::super::import_bytes(
+            &mut main,
+            &win,
+            &glb,
+            std::path::Path::new("bad.glb"),
+            &settings,
+            &mut log,
+        )
+        .unwrap();
+        let act = main.actions.find("A").expect("the valid channel's action");
+        let paths: Vec<&str> = main
+            .actions
+            .get(act)
+            .unwrap()
+            .all_fcurves()
+            .map(|f| f.data_path.as_str())
+            .collect();
+        assert_eq!(paths, ["clip_end"]);
+        let skipped: Vec<&str> = rep
+            .reports
+            .iter()
+            .filter(|r| r.level == ReportType::Warning)
+            .map(|r| r.message.as_str())
+            .filter(|m| m.contains("skipped:"))
+            .collect();
+        assert_eq!(skipped.len(), 4, "{skipped:?}");
+        assert!(
+            skipped[0].contains("/cameras/0/perspective/znear")
+                && skipped[0].contains("1 output(s) for 2 input(s)")
+        );
+        assert!(skipped[1].contains("yfov") && skipped[1].contains("not finite"));
+        assert!(skipped[2].contains("/color") && skipped[2].contains("needs 3"));
+        assert!(skipped[3].contains("/intensity") && skipped[3].contains("5 output(s) for 2"));
     }
 }

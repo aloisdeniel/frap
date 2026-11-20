@@ -8,7 +8,7 @@
 # keys), cameras in a second, unnamed animation (track Anim_1: yfov -> lens, znear / zfar,
 # xmag + ymag -> one ortho_scale); the light range and the camera aspect ratio are not
 # imported. The first animation is restored, the camera actions stay stashed.
-# golden: startup=factory tier=T2 tol=1e-4 compare=anim:Main,anim:Anim_1,objects
+# golden: startup=factory tier=T2 compare=anim:Main,anim:Anim_1,objects
 import bpy
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bpy.ops.import_scene.gltf(filepath='pointer.gltf')

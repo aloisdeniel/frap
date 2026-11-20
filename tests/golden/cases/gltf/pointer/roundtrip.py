@@ -10,7 +10,7 @@
 # then the import is exported again (SCENE: only the restored first animation is active; NLA
 # tracks: every stashed track; last, as Blender's NLA bake leaves the baked values in the
 # unanimated datablocks, which frap's export clone does not, D-07).
-# golden: startup=factory tier=T2 tol=1e-4 compare=anim:Material,anim:Light,anim:Camera,anim:Ortho,objects,glb:out/b.glb,glb:out/c.glb
+# golden: startup=factory tier=T2 compare=anim:Material,anim:Light,anim:Camera,anim:Ortho,objects,glb:out/b.glb,glb:out/c.glb
 import bpy
 bpy.context.scene.frame_end = 10
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (1.0, 0.0, 0.0, 1.0)

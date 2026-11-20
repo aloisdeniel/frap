@@ -409,6 +409,22 @@ pub fn paths(main: &Main, mat: &Material) -> IndexMap<String, PathInfo> {
     out
 }
 
+/// `export_ior`'s value: the `IOR` socket's default value when the socket exists and is not
+/// linked (`None` otherwise: the add-on creates no `KHR_materials_ior` object then).
+pub fn ior(main: &Main, mat: &Material) -> Option<f32> {
+    let nav = Nav {
+        cx: LowerCx::new(&mat.node_tree, mat, main),
+    };
+    let s = nav.cx.get_socket("IOR")?;
+    if nav.is_linked(s) {
+        return None;
+    }
+    match s.socket().default_value {
+        SocketValue::Float(f) => Some(f),
+        _ => None,
+    }
+}
+
 type Put<'p> = dyn FnMut(Option<String>, PathInfo) + 'p;
 
 /// `export_emission_factor`.
