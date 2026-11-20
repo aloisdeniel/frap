@@ -12,6 +12,13 @@
 //!   `(x, z, y)`;
 //! - each component within `2e-6` of the identity value snaps to it, and a component equal to
 //!   the identity is omitted. `matrix` is never written.
+//!
+//! Armatures (WP 6.8, `__gather_children`, `gather_skin`): an armature's children are its object
+//! children, then its root bones as joints (`export/skins.rs`); a skinned node has a `skin` and
+//! no TRS, and a child of a skinned node is placed relative to the skinned node's armature (or
+//! in world space when the skinned node is not the armature's child), since glTF ignores a
+//! skinned node's transform. With `export_armature_object_remove` bone children of any node
+//! are joints. An object with an ARMATURE modifier exports a mesh of its own.
 
 use frap_gltf::json::{Index, Node};
 use frap_math::glam::Mat4;
