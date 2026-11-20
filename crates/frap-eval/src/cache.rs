@@ -14,12 +14,15 @@ mod transform;
 
 use std::sync::Arc;
 
-use frap_rna::{IdKey, IdRef, ObjectId, Report, ReportType};
+use frap_rna::{ArmatureId, IdKey, IdRef, ObjectId, Report, ReportType};
+use frap_scene::id::Object;
 use frap_scene::{EvalError, EvalMode, EvaluatedObject, Evaluator, HostRead};
 use rustc_hash::FxHashMap;
 
 pub use bounds::{bound_box, dimensions, scale_for_dimensions};
-pub use transform::{matrix_basis, object_transform, parent_matrix, world_matrix};
+pub use transform::{
+    bone_parent_matrix, matrix_basis, object_transform, parent_matrix, world_matrix,
+};
 
 use fingerprint::{Cycle, FpCx};
 
@@ -49,6 +52,27 @@ fn cycle_report(host: &dyn HostRead, cycle: &Cycle) -> Report {
         msg.push_str(&format!("\n  OB{}/TRANSFORM_FINAL() via 'Parent'", name(m)));
     }
     Report::new(ReportType::Warning, msg)
+}
+
+/// The parent matrix of `o` from its evaluated parent `p` (object `pr`):
+/// [`bone_parent_matrix`] for `parent_type = 'BONE'` (WP 6.5), [`parent_matrix`] otherwise.
+pub(crate) fn parent_matrix_of(
+    host: &dyn HostRead,
+    o: &Object,
+    pr: IdRef<ObjectId>,
+    p: &EvaluatedObject,
+) -> glam::Mat4 {
+    if o.parent_type == "BONE" {
+        let main = host.main();
+        let arm = main
+            .objects
+            .get(pr)
+            .and_then(|po| po.data)
+            .and_then(|d| d.typed::<ArmatureId>())
+            .and_then(|a| main.armatures.get(a));
+        return bone_parent_matrix(o, &p.matrix_world, p.pose.as_deref(), arm);
+    }
+    parent_matrix(o, &p.matrix_world, p.mesh.as_deref())
 }
 
 fn missing(ob: IdRef<ObjectId>) -> EvalError {
@@ -122,8 +146,8 @@ impl EvalCache {
             let o = host.main().objects.get(c).ok_or_else(|| missing(c))?;
             let parent = parent_result.as_deref().filter(|_| node.parent.is_some());
             let matrix_world = match (node.parent, parent) {
-                (Some(_), Some(p)) => {
-                    let pm = parent_matrix(o, &p.matrix_world, p.mesh.as_deref());
+                (Some(pr), Some(p)) => {
+                    let pm = parent_matrix_of(host, o, pr, p);
                     world_matrix(o, Some(&pm))
                 }
                 // The member of a cycle evaluated first: its parent is not evaluated yet.
@@ -132,7 +156,7 @@ impl EvalCache {
                 }
                 _ => world_matrix(o, None),
             };
-            let geo = mesh::evaluate(self, host, c, o, mode);
+            let geo = mesh::evaluate(self, host, c, o, mode, matrix_world);
             let bounds = geo.mesh.as_ref().and_then(|m| m.bounds());
             let mut warnings = geo.warnings;
             if let Some(cycle) = &node.cycle {

@@ -15,7 +15,9 @@ use frap_math::euler::EulerOrder;
 use frap_math::matrix::{ObjectTransform, RotationMode, RotationValues, normalize_v3};
 use frap_math::quat::{mul_qt_qtqt, quat_to_mat3};
 use frap_mesh::Mesh;
-use frap_scene::id::Object;
+use frap_scene::EvaluatedPose;
+use frap_scene::id::transform::bone_parent_offset;
+use frap_scene::id::{Armature, Object};
 use glam::Mat4;
 
 type M4 = [[f32; 4]; 4];
@@ -198,8 +200,9 @@ fn parvert3(ob: &Object, mesh: Option<&Mesh>) -> Mat4 {
 ///
 /// `OBJECT`, `ARMATURE` and `LATTICE` (`PARSKEL`) use the parent's world matrix. `VERTEX` uses
 /// only the world position of the vertex (no parent rotation, as in Blender), `VERTEX_3` the
-/// parent's world matrix times the triangle frame. `BONE` needs poses (M6) and uses the
-/// parent's world matrix, which is Blender's result for a bone that does not exist.
+/// parent's world matrix times the triangle frame. `BONE` reads the parent's pose: the cache
+/// calls [`bone_parent_matrix`] for it (here it gives the parent's world matrix, Blender's
+/// result for a bone that does not exist).
 pub fn parent_matrix(ob: &Object, parent_world: &Mat4, parent_mesh: Option<&Mesh>) -> Mat4 {
     match ob.parent_type.as_str() {
         "VERTEX" => {
@@ -215,6 +218,33 @@ pub fn parent_matrix(ob: &Object, parent_world: &Mat4, parent_mesh: Option<&Mesh
         "VERTEX_3" => mul_m4_m4m4(parent_world, &parvert3(ob, parent_mesh)),
         _ => *parent_world,
     }
+}
+
+/// `BKE_object_get_parent_matrix` for `parent_type = 'BONE'` (`PARBONE`, `ob_parbone`; WP
+/// 6.5): the parent's world matrix times the bone's evaluated pose matrix moved to the bone's
+/// tail, or times the bone's deform matrix (`chan_mat = pose_mat · arm_mat⁻¹`) when the bone
+/// has `use_relative_parent` (`BONE_RELATIVE_PARENTING`). A parent that is not an armature, or
+/// a `parent_bone` the armature does not have, gives the parent's world matrix.
+/// `parent_bone_head_tail_factor` is not stored by frap: its default 1 (the tail) is used.
+pub fn bone_parent_matrix(
+    ob: &Object,
+    parent_world: &Mat4,
+    pose: Option<&EvaluatedPose>,
+    arm: Option<&Armature>,
+) -> Mat4 {
+    let tmat = match arm {
+        Some(arm) => {
+            let pose_mat = pose.and_then(|p| {
+                p.bones
+                    .iter()
+                    .find(|(n, _)| *n == ob.parent_bone)
+                    .map(|(_, m)| *m)
+            });
+            bone_parent_offset(ob, arm, pose_mat)
+        }
+        None => Mat4::IDENTITY,
+    };
+    mul_m4_m4m4(parent_world, &tmat)
 }
 
 /// `matrix_world` (`BKE_object_where_is_calc`): `matrix_basis` without a parent, otherwise

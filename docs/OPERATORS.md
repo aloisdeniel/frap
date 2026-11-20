@@ -223,7 +223,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.convert` | M4 | P1 | apply modifiers to mesh |
 | [x] | `object.join_shapes` | M6 | P2 | WP 6.3 (M5+M6 W0) |
 | [ ] | `object.duplicates_make_real` | M8 | P2 |  |
-| [x] | `object.parent_set` | M1 | P0 | OBJECT/KEEP types M1; ARMATURE_* M6 |
+| [x] | `object.parent_set` | M1 | P0 | OBJECT/KEEP types M1; ARMATURE, ARMATURE_NAME, ARMATURE_ENVELOPE, BONE, BONE_RELATIVE M6 (WP 6.5); ARMATURE_AUTO M8 |
 | [x] | `object.parent_clear` | M1 | P0 |  |
 | [x] | `object.parent_no_inverse_set` | M1 | P1 |  |
 | [ ] | `object.parent_inverse_apply` | M8 | P2 |  |
@@ -684,7 +684,7 @@ All types exist as data from M1 (settings generated from dumps, round-trip in `.
 | [x] | `BUILD` | `BuildModifier` | M4 | P2 |  |
 | [x] | `NORMAL_EDIT` | `NormalEditModifier` | M4 | P2 |  |
 | [x] | `LAPLACIANSMOOTH` | `LaplacianSmoothModifier` | M4 | P2 |  |
-| [ ] | `ARMATURE` | `ArmatureModifier` | M6 | P0 | LBS; dual quaternion P2 |
+| [x] | `ARMATURE` | `ArmatureModifier` | M6 | P0 | LBS, envelopes, mask group, preserve volume (dual quaternions), multi modifier; armature-parent virtual modifier (WP 6.5); B-Bone segments M8 |
 | [ ] | `REMESH` | `RemeshModifier` | M8 | P2 |  |
 | [ ] | `SHRINKWRAP` | `ShrinkwrapModifier` | M8 | P2 |  |
 | [ ] | `UV_PROJECT` | `UVProjectModifier` | M8 | P2 |  |

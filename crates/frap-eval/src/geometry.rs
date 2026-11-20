@@ -35,7 +35,10 @@ pub(crate) struct StackOut {
     pub warnings: Vec<Report>,
 }
 
-/// Evaluates the modifier stack of `ob` on `base`.
+/// Evaluates the modifier stack of `ob` on `base`, after the armature-parent virtual modifier
+/// (`parent_type = 'ARMATURE'`, WP 6.5; not in Edit Mode, where the virtual modifier is not
+/// enabled). `matrix_world` is the object's evaluated world matrix (deform modifiers read it).
+#[allow(clippy::too_many_arguments)]
 pub(crate) fn evaluate(
     ev: &mut EvalCache,
     host: &dyn HostRead,
@@ -44,8 +47,12 @@ pub(crate) fn evaluate(
     base: Arc<Mesh>,
     mode: EvalMode,
     in_edit_mode: bool,
+    matrix_world: Mat4,
 ) -> StackOut {
-    if ob.modifiers.is_empty() {
+    let virtual_arm = (!in_edit_mode)
+        .then(|| frap_modifiers::types::armature::virtual_parent(host.main(), ob))
+        .flatten();
+    if ob.modifiers.is_empty() && virtual_arm.is_none() {
         return StackOut {
             mesh: base,
             modifier_status: Vec::new(),
@@ -59,11 +66,16 @@ pub(crate) fn evaluate(
         ob_ref,
         ob,
         mode,
+        own_world: matrix_world,
         reports: Vec::new(),
     };
     // A modifier may unwind (TIMEOUT, LIMIT_EXCEEDED); the cache outlives the statement, so the
     // cycle guard is cleared before the unwind goes on (else a later read reports a false cycle).
     let r = guarded(&mut cx, |cx| {
+        let base = match virtual_arm {
+            Some(arm) => frap_modifiers::types::armature::evaluate_virtual(base, arm, cx),
+            None => base,
+        };
         frap_modifiers::stack::evaluate(base, in_edit_mode, cx)
     });
     let mut warnings = std::mem::take(&mut cx.reports);
@@ -112,6 +124,9 @@ impl EvalCache {
             .and_then(|me| main.meshes.get(me))
             .cloned()
             .ok_or_else(|| ModError::Error("frap: the object has no mesh".into()))?;
+        let own_world = self
+            .object(host, ob_ref, EvalMode::Viewport)
+            .map_or_else(|_| crate::world_matrix(ob, None), |r| r.matrix_world);
         self.in_progress.push(ob_ref.key());
         let mut cx = GeoCx {
             ev: self,
@@ -119,6 +134,7 @@ impl EvalCache {
             ob_ref,
             ob,
             mode: EvalMode::Viewport,
+            own_world,
             reports: Vec::new(),
         };
         let r = guarded(&mut cx, |cx| {
@@ -149,6 +165,8 @@ struct GeoCx<'e, 'h> {
     ob_ref: IdRef<ObjectId>,
     ob: &'h Object,
     mode: EvalMode,
+    /// The evaluated `matrix_world` of `ob` (computed before its geometry, WP 6.5).
+    own_world: Mat4,
     reports: Vec<Report>,
 }
 
@@ -187,7 +205,10 @@ impl ModEvalCx for GeoCx<'_, '_> {
     }
 
     fn object_matrix_world(&mut self, ob: IdRef<ObjectId>) -> Mat4 {
-        if ob == self.ob_ref || self.cycle(ob) {
+        if ob == self.ob_ref {
+            return self.own_world;
+        }
+        if self.cycle(ob) {
             // The object's own matrix does not depend on its geometry.
             if let Some(o) = self.host.main().objects.get(ob) {
                 return crate::world_matrix(o, None);

@@ -39,6 +39,7 @@ pub(crate) fn evaluate(
     ob_ref: IdRef<ObjectId>,
     ob: &Object,
     mode: EvalMode,
+    matrix_world: glam::Mat4,
 ) -> MeshResult {
     let Some(me) = mesh_of(host, ob) else {
         return MeshResult {
@@ -52,7 +53,8 @@ pub(crate) fn evaluate(
     let base = host.mesh_view(me);
     // Shape keys before the modifiers (`key_eval.rs`, WP 6.3).
     let base = crate::key_eval::apply(host, ob, base);
-    let out = crate::geometry::evaluate(ev, host, ob_ref, ob, base, mode, in_edit_mode);
+    let out =
+        crate::geometry::evaluate(ev, host, ob_ref, ob, base, mode, in_edit_mode, matrix_world);
     MeshResult {
         mesh: Some(out.mesh),
         modifier_status: out.modifier_status,
