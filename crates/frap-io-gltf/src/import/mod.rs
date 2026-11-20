@@ -32,7 +32,7 @@ mod mesh;
 /// Morph targets (WP 6.8; M5+M6 W0 stub).
 mod morph;
 mod nodes;
-/// `KHR_animation_pointer` (WP 6.9; M5+M6 W0 stub).
+/// `KHR_animation_pointer` (WP 6.9).
 mod pointer;
 mod scenes;
 pub mod settings;
@@ -207,6 +207,10 @@ pub fn import_bytes(
     scenes::create(&mut cx, main, log)?;
     if animation::IMPLEMENTED {
         animation::create(&mut cx, main, log)?;
+    } else if pointer::IMPLEMENTED {
+        // `KHR_animation_pointer` on cameras, lights and materials (WP 6.9); the animation
+        // importer (WP 6.7) calls `pointer::anim` itself.
+        pointer::create(&mut cx, main, log)?;
     }
     if settings.import_unused_materials {
         materials::create_unused(&mut cx, main, log)?;
@@ -335,7 +339,19 @@ impl Gltf<'_> {
                 "glTF import: skins are imported from M6; joints become empties and meshes are not skinned".into(),
             ));
         }
-        if !doc.animations.is_empty() && !animation::IMPLEMENTED {
+        // Pointer channels on cameras, lights and materials are imported (WP 6.9) when the file
+        // declares the extension.
+        let pointers = doc
+            .extensions_used
+            .iter()
+            .any(|e| e == "KHR_animation_pointer");
+        if !animation::IMPLEMENTED
+            && doc.animations.iter().any(|a| {
+                a.channels
+                    .iter()
+                    .any(|c| !(pointers && pointer::handles(c)))
+            })
+        {
             w.push((
                 "animations",
                 "glTF import: animations are imported from M6; they were skipped".into(),
