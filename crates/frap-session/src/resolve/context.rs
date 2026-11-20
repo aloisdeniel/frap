@@ -137,7 +137,24 @@ pub fn member(host: &dyn HostRead, prop: &'static PropDef) -> Result<Member, Fra
                 }
             });
         }
-        other => return Err(not_yet(other)),
+        // The bone members (WP 6.2): edit bones need the edit state, so frap-scene answers
+        // them from the host.
+        other => match frap_scene::edit_armature::ctx::bone_member(host, other) {
+            Some(Value::Ptr(p)) => Target::Struct(*p),
+            Some(Value::Id(id)) => id_target(host, id)?,
+            Some(Value::Tuple(items)) => Target::List {
+                what: "list",
+                items: items
+                    .into_iter()
+                    .map(|v| match v {
+                        Value::Ptr(p) => Target::Struct(*p),
+                        _ => Target::None,
+                    })
+                    .collect(),
+            },
+            Some(_) => Target::None,
+            None => return Err(not_yet(other)),
+        },
     };
     Ok(Member::Target(t))
 }

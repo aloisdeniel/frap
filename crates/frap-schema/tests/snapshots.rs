@@ -60,7 +60,7 @@ fn manifest_selected_operators() {
     frap_ops_all::link();
     for idname in [
         "uv.minimize_stretch",
-        "armature.extrude_move",
+        "armature.extrude_forked",
         "object.modifier_apply_as_shapekey",
         "mesh.select_similar",
     ] {

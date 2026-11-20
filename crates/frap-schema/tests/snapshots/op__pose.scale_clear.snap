@@ -1,0 +1,36 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "pose.scale_clear",
+  "bl_idname": "POSE_OT_scale_clear",
+  "label": "Clear Pose Scale",
+  "description": "Reset scaling of selected bones to their default values",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_POSE"
+    ],
+    "text": "requires Pose Mode (bpy.ops.object.mode_set(mode='POSE'))",
+    "matrix": {
+      "plain": "NNNYN",
+      "view3d": "NNNYN"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M6",
+    "extension": false,
+    "notes": []
+  }
+}

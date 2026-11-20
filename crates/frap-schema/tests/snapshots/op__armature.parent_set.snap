@@ -1,0 +1,73 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "armature.parent_set",
+  "bl_idname": "ARMATURE_OT_parent_set",
+  "label": "Make Parent",
+  "description": "Set the active bone as the parent of the selected bones",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "MODE_EDIT_ARMATURE"
+    ],
+    "text": "requires Edit Mode on an armature",
+    "matrix": {
+      "plain": "NNNNY",
+      "view3d": "NNNNY"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "type",
+      "name": "Parent Type",
+      "description": "Type of parenting",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "CONNECTED",
+      "enum_items": [
+        {
+          "identifier": "CONNECTED",
+          "name": "Connected",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "OFFSET",
+          "name": "Keep Offset",
+          "description": "",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": null,
+    "headless": "native",
+    "planned": "M6",
+    "extension": false,
+    "notes": []
+  }
+}

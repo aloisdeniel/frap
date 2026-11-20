@@ -138,9 +138,7 @@ impl Rna for Context<'_> {
             "object" => id(self.object()),
             "active_object" => id(self.active_object()),
             "edit_object" => id(self.edit_object()),
-            "pose_object" => id(self
-                .active_object()
-                .filter(|_| self.mode() == crate::context::ContextMode::Pose)),
+            "pose_object" => id(self.pose_object()),
             "selected_objects" => ids(self.selected_objects()),
             "selected_editable_objects" => ids(self.selected_editable_objects()),
             "visible_objects" => ids(self.visible_objects()),
@@ -148,22 +146,61 @@ impl Rna for Context<'_> {
             "editable_objects" => ids(self.editable_objects()),
             "objects_in_mode" => ids(self.objects_in_mode()),
             "objects_in_mode_unique_data" => ids(self.objects_in_mode_unique_data()),
-            // Bones exist from M6; until then no armature is ever in Edit/Pose Mode.
+            // The bone members (WP 6.2). A `Context` does not borrow the edit state, so the
+            // edit-bone members answer `None` here; the session reads them from the host
+            // (`edit_armature::ctx::bone_member`), which answers the active edit bone too.
+            "active_bone" if self.mode() != crate::context::ContextMode::EditArmature => match self
+                .active_bone()
+            {
+                Some(b) => match self
+                    .main
+                    .objects
+                    .get(b.object)
+                    .and_then(|o| o.data)
+                    .and_then(|d| d.typed::<frap_rna::ArmatureId>())
+                {
+                    Some(arm) => Field::Ptr(crate::edit_armature::paths::bone_ptr(arm, &b.bone)),
+                    None => Field::Value(Value::None),
+                },
+                None => Field::Value(Value::None),
+            },
+            "active_pose_bone" => match self.active_pose_bone() {
+                Some(b) => Field::Ptr(crate::edit_armature::paths::pose_bone_ptr(
+                    b.object, &b.bone,
+                )),
+                None => Field::Value(Value::None),
+            },
+            "selected_pose_bones" | "selected_pose_bones_from_active_object" => {
+                if self.pose_object().is_none() {
+                    Field::Value(Value::None)
+                } else {
+                    Field::Value(Value::Tuple(
+                        self.selected_pose_bones()
+                            .into_iter()
+                            .filter(|b| {
+                                prop.identifier == "selected_pose_bones"
+                                    || Some(b.object) == self.active_object()
+                            })
+                            .map(|b| {
+                                Value::Ptr(Box::new(crate::edit_armature::paths::pose_bone_ptr(
+                                    b.object, &b.bone,
+                                )))
+                            })
+                            .collect(),
+                    ))
+                }
+            }
             "active_bone"
-            | "active_pose_bone"
-            | "active_editable_fcurve"
+            | "selected_bones"
+            | "selected_editable_bones"
+            | "editable_bones"
+            | "visible_bones" => Field::Value(Value::None),
+            // The animation members are WP 6.4's (M56W0-12).
+            "active_editable_fcurve"
             | "active_nla_strip"
             | "active_nla_track"
             | "active_action"
             | "active_operator" => Field::Id(None),
-            "selected_bones" | "selected_editable_bones" | "editable_bones" | "visible_bones" => {
-                Field::Coll(CollRef::Owned(Box::new(IdList::empty(
-                    &frap_spec_rna::EDIT_BONE,
-                ))))
-            }
-            "selected_pose_bones" | "selected_pose_bones_from_active_object" => Field::Coll(
-                CollRef::Owned(Box::new(IdList::empty(&frap_spec_rna::POSE_BONE))),
-            ),
             other => {
                 return Err(if self.srna().find_prop(other).is_some() {
                     not_implemented(other)
