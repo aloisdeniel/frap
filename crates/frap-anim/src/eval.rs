@@ -151,10 +151,23 @@ pub fn evaluate_anim_for(
     frame: f32,
     root: Option<&'static StructDef>,
 ) -> Vec<AnimChannel> {
+    evaluate_anim_refined(adt, actions, frame, root, None)
+}
+
+/// [`evaluate_anim_for`] with the refined structs of collection items and pointers taken from
+/// the data through `refine` (a modifier's settings struct, a node's or socket's type), so
+/// that NLA channels under them get the real defaults and mix modes, as in Blender.
+pub fn evaluate_anim_refined(
+    adt: &AnimData,
+    actions: &dyn ActionLookup,
+    frame: f32,
+    root: Option<&'static StructDef>,
+    refine: Option<props::Refine<'_>>,
+) -> Vec<AnimChannel> {
     // NLA first; the active action is its top strip (`animsys_calculate_nla`).
     if !adt.nla_tracks.is_empty()
         && adt.use_nla
-        && let Some(out) = nla::calculate(adt, actions, frame, root)
+        && let Some(out) = nla::calculate(adt, actions, frame, root, refine)
     {
         return out;
     }

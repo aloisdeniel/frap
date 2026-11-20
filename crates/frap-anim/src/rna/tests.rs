@@ -156,3 +156,71 @@ fn nla_strip_setters_clamp_like_blender() {
     .expect("solo");
     assert!(!adt.nla_tracks[0].is_solo && adt.nla_tracks[1].is_solo);
 }
+
+/// `rna_NlaStrip_transform_update` refits blends and revalidates auto-blends; the raw extents
+/// store any value. Expected values from Blender 5.2.4 (an action keyed over 1..21, strip S
+/// on the first track, strip U on a second one).
+#[test]
+fn nla_strip_transform_update_matches_blender() {
+    let mut adt = AnimData::default();
+    let mut t = NlaTrack::new("NlaTrack");
+    t.strips
+        .push(NlaStrip::new_clip("S", None, 1.0, [1.0, 21.0]));
+    adt.nla_tracks.push(t);
+    let p = |n| prop(&frap_spec_rna::NLA_STRIP, n);
+    let (s, u) = (
+        anim_data::AdtLoc::Strip(0, 0),
+        anim_data::AdtLoc::Strip(1, 0),
+    );
+    let set = |adt: &mut AnimData, loc, n, v: f32| {
+        anim_data::set(adt, loc, p(n), Value::Float(v)).expect(n);
+    };
+    let flag = |adt: &mut AnimData, loc, n, v: bool| {
+        anim_data::set(adt, loc, p(n), Value::Bool(v)).expect(n);
+    };
+    let ext = |adt: &AnimData, loc| {
+        let anim_data::AdtLoc::Strip(t, i) = loc else {
+            unreachable!()
+        };
+        let x = &adt.nla_tracks[t].strips[i];
+        [x.frame_start, x.frame_end, x.blend_in, x.blend_out]
+    };
+    set(&mut adt, s, "blend_in", 8.0);
+    set(&mut adt, s, "blend_out", 8.0);
+    assert_eq!(ext(&adt, s), [1.0, 21.0, 8.0, 8.0], "A");
+    set(&mut adt, s, "scale", 0.25);
+    assert_eq!(ext(&adt, s), [1.0, 6.0, 0.0, 5.0], "B");
+    set(&mut adt, s, "frame_end", 3.0);
+    assert_eq!(ext(&adt, s), [1.0, 3.0, 0.0, 2.0], "C");
+    set(&mut adt, s, "frame_start_raw", 50.0);
+    assert_eq!(ext(&adt, s), [50.0, 3.0, 0.0, -47.0], "D");
+    set(&mut adt, s, "frame_end_raw", -10.0);
+    assert_eq!(ext(&adt, s), [50.0, -10.0, 0.0, 0.0], "E");
+
+    let mut t2 = NlaTrack::new("NlaTrack.001");
+    t2.strips
+        .push(NlaStrip::new_clip("U", None, 10.0, [1.0, 21.0]));
+    adt.nla_tracks.push(t2);
+    assert_eq!(ext(&adt, u), [10.0, 30.0, 0.0, 0.0], "U0");
+    flag(&mut adt, u, "use_auto_blend", true);
+    assert_eq!(ext(&adt, u), [10.0, 30.0, 0.0, 0.0], "U1");
+    set(&mut adt, s, "frame_end_raw", 15.0);
+    set(&mut adt, s, "frame_start_raw", 5.0);
+    flag(&mut adt, s, "use_auto_blend", true);
+    assert_eq!(ext(&adt, s), [5.0, 15.0, 0.0, 5.0], "S1");
+    assert_eq!(ext(&adt, u), [10.0, 30.0, 5.0, 0.0], "U2");
+    set(&mut adt, u, "frame_start_ui", 12.0);
+    assert_eq!(ext(&adt, s), [5.0, 15.0, 0.0, 3.0], "S2");
+    assert_eq!(ext(&adt, u), [12.0, 32.0, 3.0, 0.0], "U3");
+    set(&mut adt, u, "scale", 0.5);
+    assert_eq!(ext(&adt, s), [5.0, 15.0, 0.0, 3.0], "S3");
+    assert_eq!(ext(&adt, u), [12.0, 22.0, 3.0, 0.0], "U4");
+    set(&mut adt, s, "repeat", 3.0);
+    assert_eq!(ext(&adt, s), [5.0, 20.0, 0.0, 8.0], "S4");
+    assert_eq!(ext(&adt, u), [12.0, 22.0, 8.0, 0.0], "U5");
+    set(&mut adt, u, "blend_in", 1.5);
+    set(&mut adt, u, "frame_end", 40.0);
+    assert_eq!(ext(&adt, u), [12.0, 40.0, 8.0, 0.0], "U6");
+    flag(&mut adt, u, "use_animated_time_cyclic", true);
+    assert_eq!(ext(&adt, u), [12.0, 40.0, 8.0, 0.0], "U7");
+}

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `AnimData`, `NlaTrack` and `NlaStrip`, as index proxies over the `AnimData`.
 //!
-//! The NLA strip setters port `rna_NlaStrip_*_set` of
+//! The NLA strip setters port `rna_NlaStrip_*_set` and `rna_NlaStrip_transform_update` of
 //! blender/source/blender/makesrna/intern/rna_nla.cc and `BKE_nlastrip_recalculate_bounds` /
-//! `nlastrip_fix_resize_overlaps` of blenkernel/intern/nla.cc (Blender 5.2.4,
+//! `nlastrip_fix_resize_overlaps` / `BKE_nlastrip_recalculate_blend` / `BKE_nla_validate_state`
+//! (with the auto-blend computation) of blenkernel/intern/nla.cc (Blender 5.2.4,
 //! GPL-2.0-or-later). Strip F-curves (animated influence and time) are not modelled: an
 //! animated influence or strip time is its stored value.
 
@@ -486,9 +487,196 @@ pub fn set(
             if s >= track.strips.len() {
                 return Err(stale());
             }
-            strip_set(track, s, prop, v)
+            let out = strip_set(track, s, prop, v)?;
+            if TRANSFORM_UPDATE.contains(&id) {
+                transform_update(adt, t, s);
+            } else if id == "use_auto_blend" && adt.nla_tracks[t].strips[s].use_auto_blend {
+                validate_state(adt, None);
+            }
+            Ok(out)
         }
     }
+}
+
+/// The `NlaStrip` properties whose RNA update is `rna_NlaStrip_transform_update`.
+const TRANSFORM_UPDATE: &[&str] = &[
+    "frame_start",
+    "frame_end",
+    "frame_start_raw",
+    "frame_end_raw",
+    "frame_start_ui",
+    "frame_end_ui",
+    "action_frame_start",
+    "action_frame_end",
+    "repeat",
+    "scale",
+    "use_animated_time_cyclic",
+];
+
+/// `rna_NlaStrip_transform_update`: auto-blends are revalidated over the whole `AnimData`
+/// when the strip auto-blends, then the strip's blend in/out are fitted to its length.
+/// (`BKE_nlameta_flush_transforms` has nothing to do: meta strips' children are not
+/// modelled.)
+fn transform_update(adt: &mut AnimData, t: usize, s: usize) {
+    let s = if adt.nla_tracks[t].strips[s].use_auto_blend {
+        validate_state(adt, Some((t, s)))
+    } else {
+        Some(s)
+    };
+    if let Some(s) = s {
+        recalculate_blend(&mut adt.nla_tracks[t].strips[s]);
+    }
+}
+
+/// `BKE_nlastrip_recalculate_blend`: blend in and out fitted to the strip length (in double,
+/// as Blender does).
+fn recalculate_blend(x: &mut NlaStrip) {
+    if x.blend_in == 0.0 && x.blend_out == 0.0 {
+        return;
+    }
+    let clamp64 = |v: f64, lo: f64, hi: f64| {
+        if v < lo {
+            lo
+        } else if v > hi {
+            hi
+        } else {
+            v
+        }
+    };
+    let strip_len = f64::from(x.frame_end) - f64::from(x.frame_start);
+    let blend_in_max = (strip_len - f64::from(x.blend_out)).max(0.0);
+    let blend_in = clamp64(f64::from(x.blend_in), 0.0, blend_in_max);
+    let blend_out = clamp64(f64::from(x.blend_out), 0.0, strip_len - blend_in);
+    x.blend_in = blend_in as f32;
+    x.blend_out = blend_out as f32;
+}
+
+/// `BKE_nla_validate_state`: transitions re-glued (or removed when they no longer fit),
+/// auto-blends recomputed and every strip's blends fitted. `track_strip` is a strip the caller
+/// holds; its index after transition removals is returned (`None` when it was removed).
+pub fn validate_state(
+    adt: &mut AnimData,
+    mut track_strip: Option<(usize, usize)>,
+) -> Option<usize> {
+    for t in 0..adt.nla_tracks.len() {
+        let mut i = 0;
+        while i < adt.nla_tracks[t].strips.len() {
+            if !validate_transition_start_end(&mut adt.nla_tracks[t], i) {
+                // The transition is removed; the held strip's index follows.
+                if let Some((ht, hs)) = track_strip
+                    && ht == t
+                {
+                    track_strip = match hs.cmp(&i) {
+                        std::cmp::Ordering::Less => Some((ht, hs)),
+                        std::cmp::Ordering::Equal => None,
+                        std::cmp::Ordering::Greater => Some((ht, hs - 1)),
+                    };
+                }
+                continue;
+            }
+            validate_autoblends(adt, t, i);
+            recalculate_blend(&mut adt.nla_tracks[t].strips[i]);
+            i += 1;
+        }
+    }
+    track_strip.map(|(_, s)| s)
+}
+
+/// `nlastrip_validate_transition_start_end`: a transition spans the gap between its
+/// neighbours; one that has no room or misses a neighbour is removed (false).
+fn validate_transition_start_end(track: &mut NlaTrack, i: usize) -> bool {
+    if track.strips[i].r#type != "TRANSITION" {
+        return true;
+    }
+    let prev_end = i.checked_sub(1).map(|p| track.strips[p].frame_end);
+    let next_start = track.strips.get(i + 1).map(|n| n.frame_start);
+    let x = &mut track.strips[i];
+    if let Some(e) = prev_end {
+        x.frame_start = e;
+    }
+    if let Some(s) = next_start {
+        x.frame_end = s;
+    }
+    if x.frame_start >= x.frame_end || prev_end.is_none() || next_start.is_none() {
+        track.strips.remove(i);
+        return false;
+    }
+    true
+}
+
+/// `nlastrip_get_endpoint_overlaps`: the end of a strip of `track` that falls inside
+/// `[start, end]` and the start of one that does, each only when that strip is not glued to
+/// its neighbour on that side; nothing when a strip covers the whole range.
+fn endpoint_overlaps(start: f32, end: f32, track: &NlaTrack) -> (Option<f32>, Option<f32>) {
+    let (mut ps, mut pe) = (None, None);
+    let st = &track.strips;
+    for (i, nls) in st.iter().enumerate() {
+        if nls.frame_start <= start && nls.frame_end >= end {
+            return (None, None);
+        }
+        if nls.frame_end < start {
+            continue;
+        }
+        if nls.frame_start > end {
+            return (ps, pe);
+        }
+        if st
+            .get(i + 1)
+            .is_none_or(|n| !is_eqf(n.frame_start, nls.frame_end))
+            && nls.frame_end > start
+            && nls.frame_end < end
+        {
+            ps = Some(nls.frame_end);
+        }
+        if (i == 0 || !is_eqf(st[i - 1].frame_end, nls.frame_start))
+            && nls.frame_start < end
+            && nls.frame_start > start
+        {
+            pe = Some(nls.frame_start);
+        }
+    }
+    (ps, pe)
+}
+
+/// `BKE_nlastrip_validate_autoblends`: an auto-blending strip blends in over the overlap with
+/// a strip of the track below or above (that one first, as Blender's condition picks it
+/// whenever it exists), and out likewise, unless that end is glued to a neighbour.
+fn validate_autoblends(adt: &mut AnimData, t: usize, i: usize) {
+    let tracks = &adt.nla_tracks;
+    let has_prev = t > 0;
+    let has_next = t + 1 < tracks.len();
+    if !has_prev && !has_next {
+        return;
+    }
+    let nls = &tracks[t].strips[i];
+    if !nls.use_auto_blend {
+        return;
+    }
+    let (start, end) = (nls.frame_start, nls.frame_end);
+    let (ps, pe) = if has_prev {
+        endpoint_overlaps(start, end, &tracks[t - 1])
+    } else {
+        (None, None)
+    };
+    let (ns, ne) = if has_next {
+        endpoint_overlaps(start, end, &tracks[t + 1])
+    } else {
+        (None, None)
+    };
+    let glued_prev = i > 0 && is_eqf(tracks[t].strips[i - 1].frame_end, start);
+    let glued_next = tracks[t]
+        .strips
+        .get(i + 1)
+        .is_some_and(|n| is_eqf(n.frame_start, end));
+    let x = &mut adt.nla_tracks[t].strips[i];
+    x.blend_in = match ps.or(ns) {
+        Some(v) if !glued_prev => v - start,
+        _ => 0.0,
+    };
+    x.blend_out = match pe.or(ne) {
+        Some(v) if !glued_next => end - v,
+        _ => 0.0,
+    };
 }
 
 fn strip_set(
@@ -502,7 +690,10 @@ fn strip_set(
     let (lp, ln) = (limit_prev(track, s), limit_next(track, s));
     match id {
         "action" | "action_slot" | "action_slot_handle" => return Ok(SetOutcome::NeedsHook),
-        "frame_start" | "frame_start_raw" => {
+        // No setter: any value is stored, even an invalid state.
+        "frame_start_raw" => track.strips[s].frame_start = as_f32(prop, &v)?,
+        "frame_end_raw" => track.strips[s].frame_end = as_f32(prop, &v)?,
+        "frame_start" => {
             // `rna_NlaStrip_start_frame_set`
             let x = &mut track.strips[s];
             x.frame_start = clamp(as_f32(prop, &v)?, lp, ln);
@@ -512,8 +703,9 @@ fn strip_set(
                 x.frame_end = ln;
                 x.frame_start = x.frame_end - NLASTRIP_MIN_LEN_THRESH;
             }
+            glue_transitions(track, s, true, false);
         }
-        "frame_end" | "frame_end_raw" => {
+        "frame_end" => {
             // `rna_NlaStrip_end_frame_set`
             let x = &mut track.strips[s];
             x.frame_end = clamp(as_f32(prop, &v)?, lp, ln);
@@ -523,6 +715,7 @@ fn strip_set(
                 x.frame_start = lp;
                 x.frame_end = x.frame_start + NLASTRIP_MIN_LEN_THRESH;
             }
+            glue_transitions(track, s, false, true);
         }
         "frame_start_ui" => {
             // `rna_NlaStrip_frame_start_ui_set`: moves the strip, keeping its length.
@@ -532,6 +725,7 @@ fn strip_set(
             if x.r#type != "TRANSITION" {
                 x.frame_end = x.frame_start + len;
             }
+            glue_transitions(track, s, true, true);
         }
         "frame_end_ui" => {
             // `rna_NlaStrip_frame_end_ui_set`: changes the action range or the repeats.
@@ -542,6 +736,13 @@ fn strip_set(
                 x.frame_start + NLASTRIP_MIN_LEN_THRESH,
                 ln,
             );
+            let end = x.frame_end;
+            if let Some(n) = track.strips.get_mut(s + 1)
+                && n.r#type == "TRANSITION"
+            {
+                n.frame_start = end;
+            }
+            let x = &mut track.strips[s];
             if x.r#type == "CLIP" || x.r#type == "SOUND" {
                 let actlen = clip_length(x);
                 let delta = (old_end - x.frame_end) / x.scale;
@@ -590,6 +791,8 @@ fn strip_set(
             x.blend_out = value;
         }
         "use_auto_blend" => {
+            // `rna_NlaStrip_use_auto_blend_set`; turning it on revalidates the whole
+            // `AnimData` (`set`, which holds it).
             let x = &mut track.strips[s];
             x.use_auto_blend = as_bool(prop, &v)?;
             if !x.use_auto_blend {
@@ -619,6 +822,24 @@ fn strip_set(
         }
     }
     done
+}
+
+/// Keeps transitions next to strip `s` glued to it: the previous one ends where it starts,
+/// the next one starts where it ends.
+fn glue_transitions(track: &mut NlaTrack, s: usize, prev: bool, next: bool) {
+    let (start, end) = (track.strips[s].frame_start, track.strips[s].frame_end);
+    if prev
+        && let Some(p) = s.checked_sub(1).map(|p| &mut track.strips[p])
+        && p.r#type == "TRANSITION"
+    {
+        p.frame_end = start;
+    }
+    if next
+        && let Some(n) = track.strips.get_mut(s + 1)
+        && n.r#type == "TRANSITION"
+    {
+        n.frame_start = end;
+    }
 }
 
 fn coll_mut<'a>(

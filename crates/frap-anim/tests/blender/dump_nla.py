@@ -7,6 +7,11 @@ on top), evaluates the scene at whole and fractional frames and dumps the animat
 values, with the actions (keys and handles) and the AnimData / track / strip settings Blender
 ended up with. The Rust test rebuilds the same data and compares `evaluate_anim`.
 
+The object's base values differ from the RNA defaults (`base` in each scenario, read back
+after the scenario is built), so a channel Blender writes (or resets to its default) that frap
+leaves out shows up as a mismatch. Muted F-curves and groups are covered, under the NLA and on
+the action alone.
+
     Blender -b --factory-startup --python crates/frap-anim/tests/blender/dump_nla.py -- \
         crates/frap-anim/tests/fixtures/blender_nla.json
 """
@@ -20,28 +25,40 @@ CHANNELS = [("location", 3), ("scale", 3), ("rotation_quaternion", 4),
             ("rotation_axis_angle", 4), ("rotation_euler", 3)]
 
 
-def make_action(name, curves):
-    """curves: {(path, index): [(frame, value, ipo), ...]}"""
+def make_action(name, curves, muted=(), groups=None):
+    """curves: {(path, index): [(frame, value, ipo), ...]}; muted: muted curve keys;
+    groups: {group name: (muted, [curve keys])}"""
     act = bpy.data.actions.new(name)
     slot = act.slots.new('OBJECT', "Cube")
     bag = act.layers.new("Layer").strips.new(type='KEYFRAME').channelbag(slot, ensure=True)
+    fcs = {}
     for (path, index), keys in curves.items():
         fc = bag.fcurves.new(path, index=index)
         for f, v, ipo in keys:
             k = fc.keyframe_points.insert(f, v)
             k.interpolation = ipo
         fc.update()
+        fc.mute = (path, index) in muted
+        fcs[(path, index)] = fc
+    for gname, (gmute, keys) in (groups or {}).items():
+        grp = bag.groups.new(gname)
+        grp.mute = gmute
+        for key in keys:
+            fcs[key].group = grp
     return act
 
 
+BASE = {"location": (0.5, -0.25, 0.75), "scale": (1.25, 0.8, 1.1),
+        "rotation_quaternion": (0.9, 0.1, 0.2, 0.3), "rotation_axis_angle": (0.4, 0.2, 0.3, 0.9),
+        "rotation_euler": (0.1, 0.2, 0.3)}
+
+
 def reset(ob):
+    """Base values that differ from the RNA defaults."""
     ob.animation_data_clear()
     ob.rotation_mode = 'XYZ'
-    ob.location = (0, 0, 0)
-    ob.scale = (1, 1, 1)
-    ob.rotation_euler = (0, 0, 0)
-    ob.rotation_quaternion = (1, 0, 0, 0)
-    ob.rotation_axis_angle = (0, 0, 1, 0)
+    for p, v in BASE.items():
+        setattr(ob, p, v)
 
 
 def dump_action(act):
@@ -51,11 +68,13 @@ def dump_action(act):
     for bag in act.layers[0].strips[0].channelbags:
         bags.append({"slot_handle": bag.slot_handle, "fcurves": [{
             "data_path": fc.data_path, "array_index": fc.array_index,
-            "extrapolation": fc.extrapolation,
+            "extrapolation": fc.extrapolation, "mute": fc.mute,
+            "group": fc.group.name if fc.group else None,
             "keys": [{"co": list(k.co), "handle_left": list(k.handle_left),
                       "handle_right": list(k.handle_right), "interpolation": k.interpolation,
                       "easing": k.easing} for k in fc.keyframe_points],
-        } for fc in bag.fcurves]})
+        } for fc in bag.fcurves], "groups": [{"name": g.name, "mute": g.mute}
+                                              for g in bag.groups]})
     return {"name": act.name, "slots": slots, "channelbags": bags}
 
 
@@ -106,7 +125,9 @@ def scenarios():
         for a in list(bpy.data.actions):
             bpy.data.actions.remove(a)
         build(ob)
-        out.append(evaluate(name, ob))
+        # Read back: a rotation_mode change converts the rotation channels.
+        base = {p: list(getattr(ob, p)) for p, _ in CHANNELS}
+        out.append(evaluate(name, ob, base))
 
     def s1(ob):
         a = one(ob, {"Up": loc_up})
@@ -251,10 +272,32 @@ def scenarios():
         adt.action_blend_type = 'COMBINE'
         adt.action_influence = 0.7
     add("domain_defaults_and_nothing", s10)
+
+    def mute_args(name):
+        curves = dict(loc_up)
+        curves.update(scl)
+        curves[("location", 1)] = [(1, 3.0, 'LINEAR'), (11, -3.0, 'LINEAR')]
+        return make_action(name, curves, muted={("location", 0)},
+                           groups={"G": (True, [("location", 1), ("scale", 0)]),
+                                   "H": (False, [("scale", 2)])})
+
+    def s11(ob):
+        a = mute_args("Muted")
+        adt = ob.animation_data_create()
+        t = adt.nla_tracks.new()
+        s = t.strips.new("M", 3, a)
+        s.extrapolation = 'NOTHING'
+    add("nla_muted_curves_and_groups", s11)
+
+    def s12(ob):
+        a = mute_args("Muted")
+        adt = ob.animation_data_create()
+        adt.action = a
+    add("action_muted_curves_and_groups", s12)
     return out
 
 
-def evaluate(name, ob):
+def evaluate(name, ob, base):
     scene = bpy.context.scene
     samples = []
     for i in range(-4, 100):
@@ -264,6 +307,7 @@ def evaluate(name, ob):
         ev = ob.evaluated_get(bpy.context.evaluated_depsgraph_get())
         samples.append([f, {p: list(getattr(ev, p)) for p, _ in CHANNELS}])
     return {"name": name, "rotation_mode": ob.rotation_mode,
+            "base": base,
             "actions": [dump_action(a) for a in bpy.data.actions],
             "animation_data": dump_adt(ob.animation_data), "samples": samples}
 

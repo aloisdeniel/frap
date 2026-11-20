@@ -15,7 +15,7 @@ use frap_rna::{ActionId, IdRef, StructDef};
 use smol_str::SmolStr;
 
 use super::curve::is_eqf;
-use super::props::{ChannelProp, MixMode, channel_prop};
+use super::props::{ChannelProp, MixMode, Refine, channel_prop_refined};
 use super::{ActionLookup, AnimChannel};
 use crate::action::Action;
 use crate::anim_data::{AnimData, NlaStrip, NlaTrack};
@@ -288,19 +288,20 @@ struct ChanSnap {
 }
 
 /// `NlaEvalData` plus the snapshots.
-struct Nla {
+struct Nla<'r> {
     root: Option<&'static StructDef>,
+    refine: Option<Refine<'r>>,
     channels: Vec<Channel>,
 }
 
 /// `NlaEvalSnapshot` (indexed by channel; `None` falls back to the channel defaults).
 type Snapshot = Vec<Option<ChanSnap>>;
 
-impl Nla {
+impl Nla<'_> {
     /// `nlaevalchan_verify` + `nlaevalchan_validate_index`: the channel and component an
     /// F-curve writes, `None` when it is skipped.
     fn verify(&mut self, path: &str, array_index: i32) -> Option<(usize, usize)> {
-        match channel_prop(self.root, path) {
+        match channel_prop_refined(self.root, path, self.refine) {
             Some(prop) => {
                 if !prop.animatable {
                     return None;
@@ -566,10 +567,12 @@ pub(super) fn calculate(
     actions: &dyn ActionLookup,
     frame: f32,
     root: Option<&'static StructDef>,
+    refine: Option<Refine<'_>>,
 ) -> Option<Vec<AnimChannel>> {
     let solo = adt.nla_tracks.iter().any(|t| t.is_solo);
     let mut nla = Nla {
         root,
+        refine,
         channels: Vec::new(),
     };
     // `animsys_evaluate_nla_for_flush`
