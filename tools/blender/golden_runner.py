@@ -178,6 +178,9 @@ NORMALISE = {
     "D-122": ("comparator", "stacks with these modifiers compare normals at tol=1e-4"),
     "D-123": None,
     "D-124": ("comparator", "the glTF comparator matches triangles of corner tuples, not vertex counts"),
+    "D-125": ("cases", "soft-shadow EEVEE cases set use_shadow_jitter (render_eevee/core/shadows_area_soft); shadows_point_soft has a loose tolerance"),
+    "D-126": ("cases", "cases do not extrude bones with nothing selected"),
+    "D-127": ("cases", "cases stay inside the hard range"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

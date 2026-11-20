@@ -199,7 +199,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T4",
     "support": "partial",
-    "support_note": "BLENDER_EEVEE and CYCLES render with BLENDER_WORKBENCH (WARNING) until M5; animation=True renders every frame of the range but animation is evaluated from M6; scene=/layer= other than the context ones and use_sequencer_scene=True are not supported",
+    "support_note": "CYCLES renders with BLENDER_EEVEE (WARNING); animation=True renders every frame of the range but animation is evaluated from M6 (WP 6.4); scene=/layer= other than the context ones and use_sequencer_scene=True are not supported",
     "headless": "native",
     "planned": "M1",
     "extension": false,

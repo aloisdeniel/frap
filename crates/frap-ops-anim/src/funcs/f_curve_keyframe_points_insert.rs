@@ -15,9 +15,7 @@ use frap_anim::rna::action::Loc;
 use frap_rna::{RnaError, RnaPtr, Value, rna_func};
 use frap_scene::{FuncArgs, Host};
 
-use super::_action_api::{
-    action_of, arg_f32, arg_flags, arg_str, loc_ptr, removed, with_fcurve,
-};
+use super::_action_api::{action_of, arg_f32, arg_flags, arg_str, loc_ptr, removed, with_fcurve};
 
 #[rna_func(srna = "FCurveKeyframePoints", func = "insert")]
 fn f_curve_keyframe_points_insert(

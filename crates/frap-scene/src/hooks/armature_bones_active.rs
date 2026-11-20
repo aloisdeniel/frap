@@ -6,8 +6,8 @@
 
 use frap_rna::{Field, PropDef, RnaError, RnaPtr, Value, rna_hook};
 
-use crate::edit_armature::paths::{armature, armature_of, bone_of, bone_ptr};
 use crate::edit_armature::SEL;
+use crate::edit_armature::paths::{armature, armature_of, bone_of, bone_ptr};
 use crate::{Host, HostRead};
 
 /// `ArmatureBones` is the API struct of `Armature.bones` (no binding of its own), so its hook

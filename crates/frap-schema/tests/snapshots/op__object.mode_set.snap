@@ -158,7 +158,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T0",
     "support": "partial",
-    "support_note": "mode handlers exist for OBJECT and EDIT (meshes); EDIT for armatures and POSE arrive in M6; other modes answer OP_NOT_IMPLEMENTED",
+    "support_note": "mode handlers exist for OBJECT, EDIT (meshes and armatures) and POSE (armatures); other modes answer OP_NOT_IMPLEMENTED",
     "headless": "native",
     "planned": "M1",
     "extension": false,

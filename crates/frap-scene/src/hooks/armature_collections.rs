@@ -7,12 +7,11 @@
 //! Blender 5.2.4, GPL-2.0-or-later. Managing collections (`new`, `remove`, `move`, the
 //! `armature.collection_*` operators) arrives in M8.
 
-use smol_str::SmolStr;
 use frap_rna::traits::index_out_of_range;
 use frap_rna::{
-    CollRef, Field, Item, PropDef, RnaColl, RnaError, RnaPtr, StructDef, StructRef,
-    Value, rna_hook,
+    CollRef, Field, Item, PropDef, RnaColl, RnaError, RnaPtr, StructDef, StructRef, Value, rna_hook,
 };
+use smol_str::SmolStr;
 
 use crate::edit_armature::paths::{armature, armature_of, collection_of, collection_ptr};
 use crate::id::BoneCollection;
@@ -51,7 +50,11 @@ fn get<'h>(
     _prop: &'static PropDef,
 ) -> Result<Field<'h>, RnaError> {
     let a = armature(h.main(), armature_of(this)?)?;
-    let items = a.collections.iter().filter(|c| c.parent.is_none()).collect();
+    let items = a
+        .collections
+        .iter()
+        .filter(|c| c.parent.is_none())
+        .collect();
     Ok(Field::Coll(CollRef::Owned(Box::new(Roots { items }))))
 }
 
@@ -96,10 +99,12 @@ mod active {
     ) -> Result<Field<'h>, RnaError> {
         let arm = armature_of(this)?;
         let a = armature(h.main(), arm)?;
-        Ok(match a.active_collection.and_then(|i| a.collections.get(i)) {
-            Some(c) => Field::Ptr(collection_ptr(arm, &c.name)),
-            None => Field::Value(Value::None),
-        })
+        Ok(
+            match a.active_collection.and_then(|i| a.collections.get(i)) {
+                Some(c) => Field::Ptr(collection_ptr(arm, &c.name)),
+                None => Field::Value(Value::None),
+            },
+        )
     }
 
     pub fn set(

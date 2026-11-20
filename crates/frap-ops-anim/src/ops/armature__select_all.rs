@@ -44,7 +44,10 @@ pub(crate) mod common {
     }
 
     /// A copy of the armature (for visibility) and its edit bones.
-    pub(crate) fn snapshot(cx: &mut OpCtx, arm: IdRef<ArmatureId>) -> Option<(Armature, EditArmature)> {
+    pub(crate) fn snapshot(
+        cx: &mut OpCtx,
+        arm: IdRef<ArmatureId>,
+    ) -> Option<(Armature, EditArmature)> {
         let (c, edit) = cx.split_edit();
         let a = c.main.armatures.get(arm)?.clone();
         let ea = (**edit.armatures.get(&arm.key())?).clone();

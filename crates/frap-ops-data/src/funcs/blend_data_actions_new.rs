@@ -17,5 +17,8 @@ fn blend_data_actions_new(
 ) -> Result<Value, RnaError> {
     let name = arg_str(args, "name").to_owned();
     let (main, log) = h.main_mut();
-    Ok(main.actions.insert(&name, Action::new(name.as_str()), log).into())
+    Ok(main
+        .actions
+        .insert(&name, Action::new(name.as_str()), log)
+        .into())
 }

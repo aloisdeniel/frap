@@ -361,7 +361,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "status": "implemented",
     "tier": "T4",
     "support": "partial",
-    "support_note": "engine='BLENDER_EEVEE' renders its tiles with BLENDER_WORKBENCH (WARNING) until M5",
+    "support_note": "engine='BLENDER_EEVEE' renders its tiles with BLENDER_WORKBENCH (WARNING) when the render service has no EEVEE",
     "headless": "native",
     "planned": "M2",
     "extension": true,

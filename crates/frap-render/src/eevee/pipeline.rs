@@ -1226,16 +1226,14 @@ fn strided<T: Pod>(items: &[T], stride: u64) -> Vec<u8> {
 /// The world as the forward shader lights it: constant radiance, or the HDRI probe.
 enum World {
     Color([f32; 3]),
-    Hdri(super::ibl::WorldLighting, f32, f32),
+    Hdri(Box<super::ibl::WorldLighting>),
 }
 
 fn world(gpu: &Gpu, scene: &RenderScene) -> Result<World, RenderError> {
     match &scene.world {
         RWorld::Color { rgb, strength } => Ok(World::Color(rgb.map(|c| c * strength))),
-        RWorld::Hdri {
-            rotation, strength, ..
-        } => match super::ibl::world_lighting(gpu, scene) {
-            Ok(Some(w)) => Ok(World::Hdri(w, *rotation, *strength)),
+        RWorld::Hdri { .. } => match super::ibl::world_lighting(gpu, scene) {
+            Ok(Some(w)) => Ok(World::Hdri(Box::new(w))),
             // Until the HDRI probe exists (WP 5.2), the factory world colour lights the scene.
             Ok(None) | Err(RenderError::Unsupported(_)) => match RWorld::default() {
                 RWorld::Color { rgb, strength } => Ok(World::Color(rgb.map(|c| c * strength))),
@@ -1365,9 +1363,15 @@ pub fn render(
     blended.sort_by(|a, b| a.depth.total_cmp(&b.depth));
 
     // Lights.
+    // The world sun extracted from the HDRI (WP 5.2) lights the scene like a sun lamp.
+    let world_sun = match &world {
+        World::Hdri(w) => w.sun.as_ref(),
+        World::Color(_) => None,
+    };
     let records: Vec<LightRecord> = scene
         .lights
         .iter()
+        .chain(world_sun)
         .map(|l| lights::sync(l, scene.settings.eevee.light_threshold))
         .filter(LightRecord::is_visible)
         .collect();
@@ -1524,7 +1528,7 @@ pub fn render(
 
     // Bind groups.
     let (spec_view, bg_view, mips) = match &world {
-        World::Hdri(w, _, _) => (&w.specular, &w.background, w.specular_mips),
+        World::Hdri(w) => (&w.specular, &w.background, w.specular_mips),
         World::Color(_) => (&res.black_cube, &res.white, 1),
     };
     let frame_bg = dev.create_bind_group(&wgpu::BindGroupDescriptor {
@@ -1665,9 +1669,11 @@ pub fn render(
     }
     let (world_color, world_params, sh) = match &world {
         World::Color(c) => ([c[0], c[1], c[2], 0.0], [1.0, 0.0, 1.0, 0.0], [[0.0; 4]; 9]),
-        World::Hdri(w, rot, strength) => {
+        World::Hdri(w) => {
             counts_bits |= FRAME_WORLD_HDRI;
-            ([0.0; 4], [rot.cos(), rot.sin(), *strength, 0.0], w.sh9)
+            // `w.strength` is the sanitised Background strength (NaN reads as 0).
+            let rot = w.rotation;
+            ([0.0; 4], [rot.cos(), rot.sin(), w.strength, 0.0], w.sh9)
         }
     };
     let clamp_value = |v: f32| if v > 0.0 { v } else { 0.0 };

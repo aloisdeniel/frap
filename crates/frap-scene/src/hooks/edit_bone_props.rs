@@ -15,10 +15,10 @@
 
 use std::sync::Arc;
 
-use smol_str::SmolStr;
 use frap_rna::traits::{FromRnaValue, ToRnaValue};
 use frap_rna::{ArmatureId, Field, IdRef, MathTag, PropDef, RnaError, RnaPtr, Value, rna_hook};
 use glam::{Mat4, Vec3};
+use smol_str::SmolStr;
 
 use crate::edit_armature::paths::{
     armature, edit_bone_of, edit_bone_ptr, ref_coll, stale_edit_bone,
@@ -28,7 +28,10 @@ use crate::edit_armature::{EditArmature, ROOT, SEL, TIP};
 use crate::{Host, HostRead};
 
 /// The edit armature and the bone index a pointer names.
-fn located<'h>(h: &'h dyn HostRead, this: &RnaPtr) -> Result<(IdRef<ArmatureId>, &'h EditArmature, usize), RnaError> {
+fn located<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+) -> Result<(IdRef<ArmatureId>, &'h EditArmature, usize), RnaError> {
     let (arm, key) = edit_bone_of(this)?;
     let ea = h
         .edit()
@@ -65,11 +68,22 @@ fn with_bone(
 }
 
 /// The plain-field setter shared by the `(set = hook)` bindings.
-fn set_field(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_field(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     let id = prop.identifier;
     let transform = matches!(
         id,
-        "head" | "tail" | "roll" | "head_radius" | "tail_radius" | "envelope_distance" | "bbone_segments"
+        "head"
+            | "tail"
+            | "roll"
+            | "head_radius"
+            | "tail_radius"
+            | "envelope_distance"
+            | "bbone_segments"
     );
     with_bone(h, this, transform, |ea, i| {
         let b = &mut ea.edit_bones[i];
@@ -161,7 +175,12 @@ field_hooks! {
 }
 
 #[rna_hook(srna = "EditBone", prop = "name", krate = crate)]
-fn set_name(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_name(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     let (arm, ea, i) = located(h, this)?;
     let old = ea.edit_bones[i].name.clone();
     let new = SmolStr::from_rna_value(prop, v)?;
@@ -173,16 +192,27 @@ fn set_name(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -
 mod parent {
     use super::*;
 
-    pub fn get<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+    pub fn get<'h>(
+        h: &'h dyn HostRead,
+        this: &RnaPtr,
+        _prop: &'static PropDef,
+    ) -> Result<Field<'h>, RnaError> {
         let (arm, ea, i) = located(h, this)?;
-        Ok(match ea.edit_bones[i].parent.and_then(|p| ea.edit_bones.get(p)) {
-            Some(p) => Field::Ptr(edit_bone_ptr(arm, &p.name)),
-            None => Field::Value(Value::None),
-        })
+        Ok(
+            match ea.edit_bones[i].parent.and_then(|p| ea.edit_bones.get(p)) {
+                Some(p) => Field::Ptr(edit_bone_ptr(arm, &p.name)),
+                None => Field::Value(Value::None),
+            },
+        )
     }
 
     /// `rna_EditBone_parent_set`.
-    pub fn set(h: &mut dyn Host, this: &RnaPtr, _prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+    pub fn set(
+        h: &mut dyn Host,
+        this: &RnaPtr,
+        _prop: &'static PropDef,
+        v: Value,
+    ) -> Result<(), RnaError> {
         let (arm, _, _) = located(h, this)?;
         let target = match &v {
             Value::Ptr(p) => match edit_bone_of(p) {
@@ -222,13 +252,24 @@ mod parent {
 mod length {
     use super::*;
 
-    pub fn get<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+    pub fn get<'h>(
+        h: &'h dyn HostRead,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+    ) -> Result<Field<'h>, RnaError> {
         let (_, ea, i) = located(h, this)?;
-        Ok(Field::Value(ea.edit_bones[i].length().to_rna_value(prop, MathTag::None)))
+        Ok(Field::Value(
+            ea.edit_bones[i].length().to_rna_value(prop, MathTag::None),
+        ))
     }
 
     /// `rna_EditBone_length_set`: a zero-length bone grows along +Z.
-    pub fn set(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+    pub fn set(
+        h: &mut dyn Host,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+        v: Value,
+    ) -> Result<(), RnaError> {
         let length = f32::from_rna_value(prop, v)?;
         with_bone(h, this, true, |ea, i| {
             let b = &mut ea.edit_bones[i];
@@ -247,12 +288,23 @@ mod length {
 mod matrix {
     use super::*;
 
-    pub fn get<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+    pub fn get<'h>(
+        h: &'h dyn HostRead,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+    ) -> Result<Field<'h>, RnaError> {
         let (_, ea, i) = located(h, this)?;
-        Ok(Field::Value(ea.bone_mat4(i).to_rna_value(prop, MathTag::Matrix)))
+        Ok(Field::Value(
+            ea.bone_mat4(i).to_rna_value(prop, MathTag::Matrix),
+        ))
     }
 
-    pub fn set(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+    pub fn set(
+        h: &mut dyn Host,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+        v: Value,
+    ) -> Result<(), RnaError> {
         let m = Mat4::from_rna_value(prop, v)?;
         with_bone(h, this, false, |ea, i| {
             ea.set_bone_mat4(i, &m);
@@ -270,12 +322,23 @@ fn flag_index(prop: &PropDef) -> usize {
     }
 }
 
-fn get_flag<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn get_flag<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let (_, ea, i) = located(h, this)?;
-    Ok(Field::Value(Value::Bool(ea.edit_bones[i].select[flag_index(prop)])))
+    Ok(Field::Value(Value::Bool(
+        ea.edit_bones[i].select[flag_index(prop)],
+    )))
 }
 
-fn set_flag(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_flag(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     let on = bool::from_rna_value(prop, v)?;
     let k = flag_index(prop);
     with_bone(h, this, false, |ea, i| {
@@ -287,10 +350,19 @@ fn set_flag(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -
 #[rna_hook(srna = "EditBone", prop = "select", krate = crate)]
 mod select {
     use super::*;
-    pub fn get<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+    pub fn get<'h>(
+        h: &'h dyn HostRead,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+    ) -> Result<Field<'h>, RnaError> {
         get_flag(h, this, prop)
     }
-    pub fn set(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+    pub fn set(
+        h: &mut dyn Host,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+        v: Value,
+    ) -> Result<(), RnaError> {
         set_flag(h, this, prop, v)
     }
 }
@@ -298,10 +370,19 @@ mod select {
 #[rna_hook(srna = "EditBone", prop = "select_head", krate = crate)]
 mod select_head {
     use super::*;
-    pub fn get<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+    pub fn get<'h>(
+        h: &'h dyn HostRead,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+    ) -> Result<Field<'h>, RnaError> {
         get_flag(h, this, prop)
     }
-    pub fn set(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+    pub fn set(
+        h: &mut dyn Host,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+        v: Value,
+    ) -> Result<(), RnaError> {
         set_flag(h, this, prop, v)
     }
 }
@@ -309,16 +390,29 @@ mod select_head {
 #[rna_hook(srna = "EditBone", prop = "select_tail", krate = crate)]
 mod select_tail {
     use super::*;
-    pub fn get<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+    pub fn get<'h>(
+        h: &'h dyn HostRead,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+    ) -> Result<Field<'h>, RnaError> {
         get_flag(h, this, prop)
     }
-    pub fn set(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+    pub fn set(
+        h: &mut dyn Host,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+        v: Value,
+    ) -> Result<(), RnaError> {
         set_flag(h, this, prop, v)
     }
 }
 
 #[rna_hook(srna = "EditBone", prop = "collections", krate = crate)]
-fn collections<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn collections<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    _prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let (arm, ea, i) = located(h, this)?;
     let a = armature(h.main(), arm)?;
     Ok(ref_coll(

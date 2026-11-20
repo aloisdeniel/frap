@@ -36,7 +36,12 @@ fn exec(cx: &mut OpCtx, p: armature::Symmetrize) -> OpResult {
         let pairs = ea.symmetrize(&a, &mut collections, direction);
         let names: Vec<(String, String)> = pairs
             .iter()
-            .map(|&(s, d, _)| (ea.edit_bones[s].name.to_string(), ea.edit_bones[d].name.to_string()))
+            .map(|&(s, d, _)| {
+                (
+                    ea.edit_bones[s].name.to_string(),
+                    ea.edit_bones[d].name.to_string(),
+                )
+            })
             .collect();
         common::store(cx, arm, ea);
         if collections != a.collections {

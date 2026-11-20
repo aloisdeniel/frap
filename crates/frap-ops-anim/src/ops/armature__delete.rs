@@ -37,7 +37,8 @@ fn exec(cx: &mut OpCtx, _p: armature::ArmatureDelete) -> OpResult {
         if !names.is_empty() && cx.main().objects.get(ob).is_some_and(|o| o.pose.is_some()) {
             let o = cx.object_mut(ob)?;
             if let Some(pose) = o.pose.as_mut() {
-                pose.bones.retain(|pb| !names.iter().any(|n| pb.name == n.as_str()));
+                pose.bones
+                    .retain(|pb| !names.iter().any(|n| pb.name == n.as_str()));
             }
         }
     }

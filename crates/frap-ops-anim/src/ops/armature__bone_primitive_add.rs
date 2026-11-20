@@ -35,7 +35,9 @@ fn cursor_rot_mat3(cur: &frap_scene::generated::plain::View3DCursor) -> Mat3 {
             frap_math::quat::axis_angle_to_mat3([a[1], a[2], a[3]], a[0])
         }
         Some(RotationMode::Quaternion) => frap_math::quat::quat_to_mat3(cur.rotation_quaternion),
-        Some(RotationMode::Euler(order)) => frap_math::euler::eul_o_to_mat3(cur.rotation_euler, order),
+        Some(RotationMode::Euler(order)) => {
+            frap_math::euler::eul_o_to_mat3(cur.rotation_euler, order)
+        }
         None => frap_math::euler::eul_o_to_mat3(cur.rotation_euler, frap_math::EulerOrder::XYZ),
     }
 }
@@ -57,7 +59,11 @@ fn exec(cx: &mut OpCtx, p: armature::BonePrimitiveAdd) -> OpResult {
         let cur = c.cursor();
         let m = cursor_rot_mat3(cur);
         let view = Mat3::from_mat4(c.win.view3d.view_matrix);
-        let vinv = if view.determinant() != 0.0 { view.inverse() } else { Mat3::IDENTITY };
+        let vinv = if view.determinant() != 0.0 {
+            view.inverse()
+        } else {
+            Mat3::IDENTITY
+        };
         (m, Vec3::from_array(cur.location), vinv)
     };
     let align = p.align.value;
@@ -73,10 +79,7 @@ fn exec(cx: &mut OpCtx, p: armature::BonePrimitiveAdd) -> OpResult {
         }
         Align::Axes => match space {
             Space::World => (imat, imat.z_axis),
-            Space::Object => (
-                Mat3::from_cols(Vec3::X, -Vec3::Z, Vec3::Y),
-                Vec3::ZERO,
-            ),
+            Space::Object => (Mat3::from_cols(Vec3::X, -Vec3::Z, Vec3::Y), Vec3::ZERO),
         },
         Align::Up => match space {
             Space::World => (

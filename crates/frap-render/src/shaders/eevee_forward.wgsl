@@ -1041,11 +1041,40 @@ fn shadow_eval(l: Light, P: vec3<f32>, Ng: vec3<f32>, L: vec3<f32>) -> f32 {
 // ---------------------------------------------------------------------------------------
 // World lighting: a constant colour (WP 5.1) or the HDRI probe (WP 5.2's `WorldLighting`).
 
+// The environment's direction a world direction looks up: the Mapping node's Z rotation,
+// `Rz(rotation) · d` (`ibl_world_lookup`, `WorldLighting::rotation`).
 fn world_rotate(d: vec3<f32>) -> vec3<f32> {
-    // The environment is rotated by `rotation` about Z: look it up at the inverse rotation.
     let c = frame.world_params.x;
     let s = frame.world_params.y;
-    return vec3<f32>(c * d.x + s * d.y, -s * d.x + c * d.y, d.z);
+    return vec3<f32>(c * d.x - s * d.y, s * d.x + c * d.y, d.z);
+}
+
+// `sqrt_fast` (gpu_shader_math_fast_lib.glsl): Blender's bit-trick square root.
+fn world_sqrt_fast(v: f32) -> f32 {
+    return bitcast<f32>(0x1fbd1df5i + (bitcast<i32>(v) >> 1u));
+}
+
+// `roughness_to_lod` (SPHERE_PROBE_MIP_MAX_ROUGHNESS 0.7, linear UI roughness → probe mip).
+fn world_roughness_to_lod(roughness: f32, mips: f32) -> f32 {
+    let ratio = saturate(roughness / 0.7);
+    let mip_ratio = mix(ratio, world_sqrt_fast(ratio), 0.4);
+    return mip_ratio * mips;
+}
+
+// `roughness_to_mix_fac` (SPHERE_PROBE_MIX_START_ROUGHNESS 0.7, _END_ROUGHNESS 0.9).
+fn world_roughness_to_mix_fac(roughness: f32) -> f32 {
+    let scale = 1.0 / (0.9 - 0.7);
+    let x = saturate(roughness * scale - scale * 0.7);
+    return x * x;
+}
+
+// `bxdf_ggx_dominant_direction_reflection` (linear UI roughness).
+fn world_dominant_direction(N: vec3<f32>, V: vec3<f32>, roughness: f32) -> vec3<f32> {
+    let m = roughness * roughness;
+    let R = -reflect(V, N);
+    let smoothness = 1.0 - m;
+    let fac = smoothness * (sqrt(smoothness) + m);
+    return normalize(mix(N, R, fac));
 }
 
 // Irradiance E(N) from the L2 SH (Ramamoorthi & Hanrahan); diffuse radiance is albedo E / π.
@@ -1072,12 +1101,17 @@ fn world_diffuse(N: vec3<f32>) -> vec3<f32> {
     return frame.world_color.rgb;
 }
 
-fn world_specular(R: vec3<f32>, roughness: f32) -> vec3<f32> {
+// The world probe of a reflection closure (`LightprobeRenderData::eval`, world probe):
+// `mix(probe(R, roughness_to_lod), evaluate_lambert(R), roughness_to_mix_fac)` at the GGX
+// dominant direction `R` (`ibl_world_radiance`).
+fn world_specular(N: vec3<f32>, V: vec3<f32>, roughness: f32) -> vec3<f32> {
     if ((frame.counts.w & FRAME_WORLD_HDRI) != 0u) {
         let mips = f32(max(frame.counts.z, 1u) - 1u);
-        let d = world_rotate(R);
-        return textureSampleLevel(world_spec_tx, linear_samp, d, roughness * mips).rgb *
-               frame.world_params.z;
+        let R = world_dominant_direction(N, V, roughness);
+        let lod = world_roughness_to_lod(roughness, mips);
+        let probe = textureSampleLevel(world_spec_tx, linear_samp, world_rotate(R), lod).rgb *
+                    frame.world_params.z;
+        return mix(probe, world_sh_irradiance(R) * M_1_PI, world_roughness_to_mix_fac(roughness));
     }
     return frame.world_color.rgb;
 }
@@ -1085,8 +1119,9 @@ fn world_specular(R: vec3<f32>, roughness: f32) -> vec3<f32> {
 fn world_background(dir: vec3<f32>) -> vec3<f32> {
     if ((frame.counts.w & FRAME_WORLD_HDRI) != 0u) {
         let d = world_rotate(normalize(dir));
-        // Equirectangular, as Blender's Environment Texture: u = atan2(y, -x) / 2π + 0.5.
-        let u = atan2(d.y, -d.x) / (2.0 * PI) + 0.5;
+        // Equirectangular, as Blender's Environment Texture (`ibl_equirect_uv`):
+        // u = -atan2(y, x) / 2π + 0.5.
+        let u = -atan2(d.y, d.x) / (2.0 * PI) + 0.5;
         let v = atan2(d.z, length(d.xy)) / PI + 0.5;
         return textureSampleLevel(world_bg_tx, linear_samp, vec2<f32>(u, 1.0 - v), 0.0).rgb *
                frame.world_params.z;
@@ -1242,8 +1277,8 @@ fn shade(vin: VertexOut, front_facing: bool) -> vec4<f32> {
     var radiance_direct = direct.diffuse * c.diffuse_color + direct.reflection * c.reflection_color +
                           direct.coat * c.coat_color;
     var radiance_indirect = world_diffuse(c.diffuse_N) * c.diffuse_color +
-        world_specular(reflect(-V, c.reflection_N), c.reflection_roughness) * c.reflection_color +
-        world_specular(reflect(-V, c.coat_N), c.coat_roughness) * c.coat_color;
+        world_specular(c.reflection_N, V, c.reflection_roughness) * c.reflection_color +
+        world_specular(c.coat_N, V, c.coat_roughness) * c.coat_color;
     if (reduce_max(c.refraction_color) > 0.0) {
         radiance_indirect += refraction_radiance(vin.clip.xy, c.refraction_roughness) * c.refraction_color;
     }

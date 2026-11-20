@@ -81,20 +81,38 @@ pub fn adt_of_mut<'m>(
     }
     match root {
         Root::Id(a) => match a.code {
-            IdCode::OB => main.objects.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
+            IdCode::OB => main
+                .objects
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
             IdCode::MA => main
                 .materials
                 .get_mut(typed(a)?, log)
                 .map(|x| &mut x.animation_data),
-            IdCode::CA => main.cameras.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::LA => main.lights.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::WO => main.worlds.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::IM => main.images.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
+            IdCode::CA => main
+                .cameras
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::LA => main
+                .lights
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::WO => main
+                .worlds
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::IM => main
+                .images
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
             IdCode::AR => main
                 .armatures
                 .get_mut(typed(a)?, log)
                 .map(|x| &mut x.animation_data),
-            IdCode::SC => main.scenes.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
+            IdCode::SC => main
+                .scenes
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
             IdCode::KE => main
                 .shape_keys
                 .get_mut(typed(a)?, log)
@@ -103,7 +121,10 @@ pub fn adt_of_mut<'m>(
                 .node_groups
                 .get_mut(typed(a)?, log)
                 .map(|x| &mut x.animation_data),
-            IdCode::TE => main.textures.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
+            IdCode::TE => main
+                .textures
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
             IdCode::PT => main
                 .pointclouds
                 .get_mut(typed(a)?, log)
@@ -148,7 +169,11 @@ pub fn animated_id(main: &Main, root: Root) -> Result<(&'static str, String), Rn
 
 /// The path of `this` below `animation_data` (`[]` for the `AnimData` itself).
 pub fn below_adt(this: &RnaPtr) -> Result<&[Seg], RnaError> {
-    match this.path.iter().position(|s| *s == Seg::Prop("animation_data")) {
+    match this
+        .path
+        .iter()
+        .position(|s| *s == Seg::Prop("animation_data"))
+    {
         Some(i) => Ok(&this.path[i + 1..]),
         None => Err(internal(format!(
             "{} is not below animation_data",
@@ -185,7 +210,12 @@ pub fn with_adt_mut<R>(
 }
 
 /// The set hook of every plain `AnimData` / `NlaTrack` / `NlaStrip` property.
-pub fn write(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+pub fn write(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     with_adt_mut(h, this, |adt, loc| match adt_rna::set(adt, loc, prop, v)? {
         SetOutcome::Done => Ok(()),
         SetOutcome::NeedsHook => Err(internal(format!(
@@ -196,7 +226,11 @@ pub fn write(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) 
 }
 
 #[rna_hook(srna = "ID", prop = "animation_data", krate = crate)]
-fn get<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn get<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    _prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     Ok(match adt_of(h.main(), this.root) {
         Some(Some(adt)) => Field::Struct(StructRef::Borrowed(adt)),
         _ => Field::Value(Value::None),

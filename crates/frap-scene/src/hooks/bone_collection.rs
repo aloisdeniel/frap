@@ -12,9 +12,9 @@
 
 use std::sync::Arc;
 
-use smol_str::SmolStr;
 use frap_rna::traits::FromRnaValue;
 use frap_rna::{Field, PropDef, RnaError, RnaPtr, Value, rna_hook};
+use smol_str::SmolStr;
 
 use crate::edit_armature::paths::{
     ItemKey, armature, collection_of, collection_ptr, internal_error, ref_coll,
@@ -36,7 +36,12 @@ fn located<'h>(h: &'h dyn HostRead, this: &RnaPtr) -> Result<(&'h Armature, usiz
 }
 
 #[rna_hook(srna = "BoneCollection", prop = "name", krate = crate)]
-fn set_name(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_name(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     let (arm, key) = collection_of(this)?;
     let requested = SmolStr::from_rna_value(prop, v)?;
     let edit_key = arm.key();
@@ -136,11 +141,17 @@ fn get_bones<'h>(
     if h.edit().armatures.contains_key(&arm.key()) {
         // Blender's iterator reports a WARNING and yields nothing; a read hook has no report
         // channel, so frap answers the empty collection only.
-        return Ok(ref_coll::<crate::id::Bone>(Vec::new(), &frap_spec_rna::BONE));
+        return Ok(ref_coll::<crate::id::Bone>(
+            Vec::new(),
+            &frap_spec_rna::BONE,
+        ));
     }
     let name = &a.collections[i].name;
     Ok(ref_coll(
-        a.bones.iter().filter(|b| b.collections.contains(name)).collect(),
+        a.bones
+            .iter()
+            .filter(|b| b.collections.contains(name))
+            .collect(),
         &frap_spec_rna::BONE,
     ))
 }
@@ -155,7 +166,10 @@ fn get_children<'h>(
     let (a, i) = located(h, this)?;
     let _ = arm;
     Ok(ref_coll(
-        a.collections.iter().filter(|c| c.parent == Some(i)).collect(),
+        a.collections
+            .iter()
+            .filter(|c| c.parent == Some(i))
+            .collect(),
         &frap_spec_rna::BONE_COLLECTION,
     ))
 }
@@ -168,10 +182,12 @@ fn get_parent<'h>(
 ) -> Result<Field<'h>, RnaError> {
     let (arm, _) = collection_of(this)?;
     let (a, i) = located(h, this)?;
-    Ok(match a.collections[i].parent.and_then(|p| a.collections.get(p)) {
-        Some(p) => Field::Ptr(collection_ptr(arm, &p.name)),
-        None => Field::Value(Value::None),
-    })
+    Ok(
+        match a.collections[i].parent.and_then(|p| a.collections.get(p)) {
+            Some(p) => Field::Ptr(collection_ptr(arm, &p.name)),
+            None => Field::Value(Value::None),
+        },
+    )
 }
 
 #[rna_hook(srna = "BoneCollection", prop = "index", krate = crate)]
@@ -205,5 +221,7 @@ fn get_is_visible_effectively<'h>(
     _prop: &'static PropDef,
 ) -> Result<Field<'h>, RnaError> {
     let (a, i) = located(h, this)?;
-    Ok(Field::Value(Value::Bool(collection_visible_effectively(a, i))))
+    Ok(Field::Value(Value::Bool(collection_visible_effectively(
+        a, i,
+    ))))
 }

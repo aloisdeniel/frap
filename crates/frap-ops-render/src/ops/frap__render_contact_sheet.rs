@@ -21,7 +21,8 @@
 //! - **Objects**: `VISIBLE` (`context.visible_objects`), `SELECTED`
 //!   (`context.selected_objects`) or `ALL` (everything a render sees); only render-visible
 //!   meshes are drawn; lights and the world still light the scene.
-//! - **Engine**: Workbench; `BLENDER_EEVEE` renders with Workbench and a WARNING until M5.
+//! - **Engine**: Workbench or `BLENDER_EEVEE` (M5); a render service without EEVEE renders
+//!   `BLENDER_EEVEE` tiles with Workbench and a WARNING.
 //! - **Frame**: unset (or `None`) renders the current frame; set, the state is cloned with
 //!   animation applied at that frame, as `render.render` does. The session is never modified
 //!   (not even `Render Result`). The sheet is a still: its path never gets a frame number.
@@ -57,7 +58,7 @@ use smol_str::SmolStr;
 
 use crate::output::{self, OutputRules, TemplateVars, format};
 
-/// The engine every tile renders with until M5.
+/// The Workbench engine (also the fallback of a render service without EEVEE).
 const WORKBENCH: &str = "BLENDER_WORKBENCH";
 
 /// The largest sheet (pixels) frap composites: 4096 × 4096, one tile at the largest
@@ -293,7 +294,7 @@ struct TileJob {
     poll = poll::ALWAYS,
     tier = T4,
     spec = frap::OPSPEC_FRAP_OT_RENDER_CONTACT_SHEET,
-    support = Partial("engine='BLENDER_EEVEE' renders its tiles with BLENDER_WORKBENCH (WARNING) until M5"),
+    support = Partial("engine='BLENDER_EEVEE' renders its tiles with BLENDER_WORKBENCH (WARNING) when the render service has no EEVEE"),
     notes = [
         "frap extension: one orthographic tile per view (FRONT/BACK/RIGHT/LEFT/TOP/BOTTOM: Blender's numpad views; ISO: the factory viewport rotation; CAMERA: scene.camera), framing the drawn objects' bounds",
         "needs a GPU: GPU_UNAVAILABLE without an adapter or in a build without the gpu feature",
@@ -521,7 +522,7 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
     if p.engine.value == rcs::Engine::BlenderEevee && engine == WORKBENCH {
         cx.report(
             ReportType::Warning,
-            format!("Engine 'BLENDER_EEVEE' is not available in frap yet (M5); rendered with {WORKBENCH}"),
+            format!("Engine 'BLENDER_EEVEE' is not available in this build of frap; rendered with {WORKBENCH}"),
         );
     }
     if points.is_empty() {

@@ -24,12 +24,14 @@ fn action_channelbags_remove(
         match target {
             Some(Loc::Bag(bl, bs, b)) if (bl, bs) == (l, s) => {
                 let Some(k) = act.layers[l].strips[s].keyframe_mut() else {
-            return Err(internal("not a keyframe strip"));
-        };
+                    return Err(internal("not a keyframe strip"));
+                };
                 k.channelbags.remove(b);
                 Ok(Value::None)
             }
-            _ => Err(report_error("This channelbag does not belong to this strip")),
+            _ => Err(report_error(
+                "This channelbag does not belong to this strip",
+            )),
         }
     })
 }

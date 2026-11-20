@@ -17,5 +17,8 @@ fn blend_data_armatures_new(
 ) -> Result<Value, RnaError> {
     let name = arg_str(args, "name").to_owned();
     let (main, log) = h.main_mut();
-    Ok(main.armatures.insert(&name, Armature::new(&name), log).into())
+    Ok(main
+        .armatures
+        .insert(&name, Armature::new(&name), log)
+        .into())
 }

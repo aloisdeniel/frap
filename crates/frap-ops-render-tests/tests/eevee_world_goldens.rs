@@ -11,10 +11,8 @@
 //!
 //! The world lighting itself (`frap_render::eevee::ibl`) is gated against the same fixtures by
 //! its own tests (`cargo test -p frap-render --lib ibl`), which light the scenes with an IBL
-//! preview. This test gates the whole engine: while `render.render` still reports that
-//! `BLENDER_EEVEE` falls back to Workbench (the forward engine, WP 5.1, not merged), it prints a
-//! notice and passes. Without an adapter it fails, or passes with a notice under
-//! `FRAP_GPU_OPTIONAL=1`. `FRAP_RENDER_KEEP=<dir>` copies every render there.
+//! preview. This test gates the whole engine (`render.render` with the forward EEVEE engine).
+//! Without an adapter it fails, or passes with a notice under `FRAP_GPU_OPTIONAL=1`. `FRAP_RENDER_KEEP=<dir>` copies every render there.
 
 mod common;
 
@@ -141,18 +139,6 @@ fn hdri_worlds_match_blender_eevee() {
         }
         if let Some(bad) = responses.iter().find(|r| !r.ok()) {
             failures.push(format!("{name}: frap failed: {}", bad.to_json()));
-            continue;
-        }
-        let fallback = responses.iter().any(|r| {
-            r.to_json()
-                .to_string()
-                .contains("is not available in frap yet")
-        });
-        if fallback {
-            eprintln!(
-                "NOTICE {name}: BLENDER_EEVEE still falls back to Workbench (WP 5.1 not merged); \
-                 the world lighting is gated by frap-render's ibl tests"
-            );
             continue;
         }
         let out = work.path().join(&image);

@@ -22,8 +22,8 @@ use frap_anim::Action;
 use frap_anim::rna::action::{Loc, Node};
 use frap_anim::rna::anim_data::{AdtLoc, locate};
 use frap_rna::{
-    ActionId, CollRef, Field, IdRef, Item, PropDef, PyExc, RnaColl, RnaError, RnaErrorKind,
-    RnaPtr, Root, Seg, StructDef, StructRef, Value, rna_hook,
+    ActionId, CollRef, Field, IdRef, Item, PropDef, PyExc, RnaColl, RnaError, RnaErrorKind, RnaPtr,
+    Root, Seg, StructDef, StructRef, Value, rna_hook,
 };
 use smol_str::SmolStr;
 
@@ -32,7 +32,11 @@ use crate::{Host, HostRead, Main};
 
 /// `BKE_report(RPT_ERROR)` reaching Python.
 fn report(msg: impl std::fmt::Display) -> RnaError {
-    RnaError::new(RnaErrorKind::Other, PyExc::RuntimeError, format!("Error: {msg}\n"))
+    RnaError::new(
+        RnaErrorKind::Other,
+        PyExc::RuntimeError,
+        format!("Error: {msg}\n"),
+    )
 }
 
 /// An action use: `(action, slot handle, last slot identifier)` of an `AnimData` or a strip.
@@ -180,9 +184,9 @@ impl Refused {
     fn error(self) -> RnaError {
         match self {
             Refused::MissingAction => report("Cannot set slot without an assigned Action."),
-            Refused::NotFromAction(id) => {
-                report(format!("This slot ({id}) does not belong to the assigned Action"))
-            }
+            Refused::NotFromAction(id) => report(format!(
+                "This slot ({id}) does not belong to the assigned Action"
+            )),
             Refused::NotSuitable(id, code) => report(format!(
                 "This slot ({id}) is not suitable for this data-block type ({code})"
             )),
@@ -315,7 +319,12 @@ fn get_suitable<'h>(h: &'h dyn HostRead, this: &RnaPtr) -> Result<Field<'h>, Rna
     }))))
 }
 
-fn set_action(h: &mut dyn Host, this: &RnaPtr, _p: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_action(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    _p: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     let new = match v {
         Value::Id(Some(a)) => a.typed(),
         _ => None,
@@ -323,7 +332,12 @@ fn set_action(h: &mut dyn Host, this: &RnaPtr, _p: &'static PropDef, v: Value) -
     assign_action(h, this, new)
 }
 
-fn set_slot(h: &mut dyn Host, this: &RnaPtr, _p: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_slot(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    _p: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     let slot = match &v {
         Value::Ptr(p) => Some(slot_of_ptr(h.main(), p).ok_or_else(removed)?),
         _ => None,
@@ -409,7 +423,11 @@ mod adt_suitable {}
 #[rna_hook(srna = "NlaStrip", prop = "action_suitable_slots", get = suitable_get, krate = crate)]
 mod strip_suitable {}
 
-fn slot_get<'h>(h: &'h dyn HostRead, this: &RnaPtr, _p: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn slot_get<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    _p: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     get_slot(h, this)
 }
 

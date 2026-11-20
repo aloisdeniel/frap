@@ -11,12 +11,10 @@
 //! (`BKE_pose_where_is`). In Edit Mode they stay the pose of the stored (pre-edit) bones and
 //! the channels: Blender's pose evaluation skips armatures with edit bones.
 
-use smol_str::SmolStr;
 use frap_rna::traits::{FromRnaValue, IdField, ToRnaValue};
-use frap_rna::{
-    Field, IdRef, MathTag, ObjectId, PropDef, RnaError, RnaPtr, Value, rna_hook,
-};
+use frap_rna::{Field, IdRef, MathTag, ObjectId, PropDef, RnaError, RnaPtr, Value, rna_hook};
 use glam::Mat4;
+use smol_str::SmolStr;
 
 use crate::edit_armature::paths::{
     ItemKey, bone_ptr, internal_error, object_armature, object_of, pose_bone_of, pose_bone_ptr,
@@ -45,13 +43,17 @@ fn located<'h>(h: &'h dyn HostRead, this: &RnaPtr) -> Result<Located<'h>, RnaErr
         .objects
         .get(ob)
         .ok_or_else(|| internal_error("the object was removed"))?;
-    let arm = object_armature(h.main(), ob).ok_or_else(|| internal_error("not an armature object"))?;
+    let arm =
+        object_armature(h.main(), ob).ok_or_else(|| internal_error("not an armature object"))?;
     let armature = h
         .main()
         .armatures
         .get(arm)
         .ok_or_else(|| internal_error("the armature was removed"))?;
-    let pose = object.pose.as_ref().ok_or_else(|| internal_error("the pose was removed"))?;
+    let pose = object
+        .pose
+        .as_ref()
+        .ok_or_else(|| internal_error("the pose was removed"))?;
     let ci = key
         .find(pose.bones.iter().map(|b| b.name.as_str()))
         .ok_or_else(|| internal_error("the pose bone was removed"))?;
@@ -77,7 +79,12 @@ fn rest_position(_h: &dyn HostRead, l: &Located) -> bool {
 /// Rest data and evaluated pose matrices of the whole armature.
 fn evaluate(h: &dyn HostRead, l: &Located) -> (Vec<RestBone>, Vec<PoseMats>) {
     let rest = rest_pose(l.armature);
-    let mats = where_is(l.armature, &rest, l.object.pose.as_ref(), rest_position(h, l));
+    let mats = where_is(
+        l.armature,
+        &rest,
+        l.object.pose.as_ref(),
+        rest_position(h, l),
+    );
     (rest, mats)
 }
 
@@ -107,7 +114,10 @@ fn with_channel(
         .objects
         .get_mut(ob, log)
         .ok_or_else(|| internal_error("the object was removed"))?;
-    let pose = o.pose.as_mut().ok_or_else(|| internal_error("the pose was removed"))?;
+    let pose = o
+        .pose
+        .as_mut()
+        .ok_or_else(|| internal_error("the pose was removed"))?;
     let i = key
         .find(pose.bones.iter().map(|b| b.name.as_str()))
         .ok_or_else(|| internal_error("the pose bone was removed"))?;
@@ -115,7 +125,12 @@ fn with_channel(
 }
 
 /// The plain-field setter shared by the `(set = hook)` bindings.
-fn set_field(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_field(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     let (ob, key) = pose_bone_of(this)?;
     with_channel(h, ob, &key, |pb| {
         match prop.identifier {
@@ -169,7 +184,12 @@ field_hooks! {
 }
 
 #[rna_hook(srna = "PoseBone", prop = "name", krate = crate)]
-fn set_name(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_name(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     let (arm, old) = {
         let l = located(h, this)?;
         (l.arm, l.channel.name.clone())
@@ -180,7 +200,11 @@ fn set_name(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -
 }
 
 #[rna_hook(srna = "PoseBone", prop = "bone", krate = crate)]
-fn bone<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn bone<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    _prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let l = located(h, this)?;
     Ok(match l.bone {
         Some(i) => Field::Ptr(bone_ptr(l.arm, &l.armature.bones[i].name)),
@@ -189,7 +213,11 @@ fn bone<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Resu
 }
 
 #[rna_hook(srna = "PoseBone", prop = "parent", krate = crate)]
-fn parent<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn parent<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    _prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let l = located(h, this)?;
     let parent = l
         .bone
@@ -204,7 +232,11 @@ fn parent<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Re
 
 /// `PoseBone.child`: the last connected child in bone order (`rebuild_pose_from_armature`).
 #[rna_hook(srna = "PoseBone", prop = "child", krate = crate)]
-fn child<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn child<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    _prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let l = located(h, this)?;
     let child = l.bone.and_then(|i| {
         l.armature
@@ -221,25 +253,47 @@ fn child<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Res
 }
 
 #[rna_hook(srna = "PoseBone", prop = "head", krate = crate)]
-fn head<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn head<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let m = mats_of(h, this)?;
-    Ok(Field::Value(m.head.to_array().to_rna_value(prop, MathTag::Vector)))
+    Ok(Field::Value(
+        m.head.to_array().to_rna_value(prop, MathTag::Vector),
+    ))
 }
 
 #[rna_hook(srna = "PoseBone", prop = "tail", krate = crate)]
-fn tail<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn tail<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let m = mats_of(h, this)?;
-    Ok(Field::Value(m.tail.to_array().to_rna_value(prop, MathTag::Vector)))
+    Ok(Field::Value(
+        m.tail.to_array().to_rna_value(prop, MathTag::Vector),
+    ))
 }
 
 #[rna_hook(srna = "PoseBone", prop = "length", krate = crate)]
-fn length<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn length<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let m = mats_of(h, this)?;
-    Ok(Field::Value((m.tail - m.head).length().to_rna_value(prop, MathTag::None)))
+    Ok(Field::Value(
+        (m.tail - m.head).length().to_rna_value(prop, MathTag::None),
+    ))
 }
 
 #[rna_hook(srna = "PoseBone", prop = "matrix_channel", krate = crate)]
-fn matrix_channel<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn matrix_channel<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let m = mats_of(h, this)?;
     Ok(Field::Value(m.chan_mat.to_rna_value(prop, MathTag::Matrix)))
 }
@@ -248,14 +302,23 @@ fn matrix_channel<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef
 mod matrix {
     use super::*;
 
-    pub fn get<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+    pub fn get<'h>(
+        h: &'h dyn HostRead,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+    ) -> Result<Field<'h>, RnaError> {
         let m = mats_of(h, this)?;
         Ok(Field::Value(m.pose_mat.to_rna_value(prop, MathTag::Matrix)))
     }
 
     /// `rna_PoseChannel_matrix_set`: the local channels that give the bone this armature-space
     /// matrix with the parent's current pose (no Euler compatibility).
-    pub fn set(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+    pub fn set(
+        h: &mut dyn Host,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+        v: Value,
+    ) -> Result<(), RnaError> {
         let m = Mat4::from_rna_value(prop, v)?;
         let (ob, key) = pose_bone_of(this)?;
         let local = {
@@ -280,13 +343,27 @@ mod matrix {
 mod matrix_basis {
     use super::*;
 
-    pub fn get<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+    pub fn get<'h>(
+        h: &'h dyn HostRead,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+    ) -> Result<Field<'h>, RnaError> {
         let l = located(h, this)?;
         let connected = l.bone.is_some_and(|i| l.armature.bones[i].use_connect);
-        Ok(Field::Value(l.channel.channels().to_mat4(connected).to_rna_value(prop, MathTag::Matrix)))
+        Ok(Field::Value(
+            l.channel
+                .channels()
+                .to_mat4(connected)
+                .to_rna_value(prop, MathTag::Matrix),
+        ))
     }
 
-    pub fn set(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+    pub fn set(
+        h: &mut dyn Host,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+        v: Value,
+    ) -> Result<(), RnaError> {
         let m = Mat4::from_rna_value(prop, v)?;
         let (ob, key) = pose_bone_of(this)?;
         with_channel(h, ob, &key, |pb| {
@@ -302,17 +379,29 @@ mod matrix_basis {
 mod custom_shape {
     use super::*;
 
-    pub fn get<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+    pub fn get<'h>(
+        h: &'h dyn HostRead,
+        this: &RnaPtr,
+        _prop: &'static PropDef,
+    ) -> Result<Field<'h>, RnaError> {
         let l = located(h, this)?;
         Ok(Field::Id(l.channel.custom_shape.map(|o| o.any())))
     }
 
     /// `rna_Pose_custom_shape_object_poll`: armature objects are refused (silently, as a failed
     /// pointer poll leaves the value).
-    pub fn set(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+    pub fn set(
+        h: &mut dyn Host,
+        this: &RnaPtr,
+        prop: &'static PropDef,
+        v: Value,
+    ) -> Result<(), RnaError> {
         let target: Option<IdRef<ObjectId>> = IdField::set_id(prop, v)?;
         if let Some(t) = target
-            && h.main().objects.get(t).is_some_and(|o| o.object_type() == "ARMATURE")
+            && h.main()
+                .objects
+                .get(t)
+                .is_some_and(|o| o.object_type() == "ARMATURE")
         {
             return Ok(());
         }
@@ -325,7 +414,12 @@ mod custom_shape {
 }
 
 /// The `Pose` flags (`use_mirror_x`, `use_mirror_relative`, `use_auto_ik`).
-fn set_pose_flag(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_pose_flag(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     let ob = object_of(this)?;
     let on = bool::from_rna_value(prop, v)?;
     let (main, log) = h.main_mut();
@@ -345,16 +439,31 @@ fn set_pose_flag(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Val
 }
 
 #[rna_hook(srna = "Pose", prop = "use_mirror_x", krate = crate)]
-fn set_use_mirror_x(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_use_mirror_x(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     set_pose_flag(h, this, prop, v)
 }
 
 #[rna_hook(srna = "Pose", prop = "use_mirror_relative", krate = crate)]
-fn set_use_mirror_relative(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_use_mirror_relative(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     set_pose_flag(h, this, prop, v)
 }
 
 #[rna_hook(srna = "Pose", prop = "use_auto_ik", krate = crate)]
-fn set_use_auto_ik(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_use_auto_ik(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     set_pose_flag(h, this, prop, v)
 }

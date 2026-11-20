@@ -33,7 +33,11 @@ fn exec(cx: &mut OpCtx, p: armature::CalculateRoll) -> OpResult {
     let (view_z, cursor) = {
         let c = cx.ctx();
         let view = Mat3::from_mat4(c.win.view3d.view_matrix);
-        let viewinv = if view.determinant() != 0.0 { view.inverse() } else { Mat3::IDENTITY };
+        let viewinv = if view.determinant() != 0.0 {
+            view.inverse()
+        } else {
+            Mat3::IDENTITY
+        };
         (viewinv.z_axis, Vec3::from_array(c.cursor().location))
     };
     for (ob, arm) in arms {

@@ -12,9 +12,7 @@
 
 use frap_anim::Action;
 use frap_anim::rna::action::{Loc, locate};
-use frap_rna::{
-    ActionId, EmbeddedSlot, IdRef, PropDef, RnaError, RnaPtr, Root, Value, rna_hook,
-};
+use frap_rna::{ActionId, EmbeddedSlot, IdRef, PropDef, RnaError, RnaPtr, Root, Value, rna_hook};
 
 use super::id_animation_data::{adt_of, adt_of_mut, removed};
 use crate::id::paths::internal;
@@ -68,11 +66,7 @@ pub fn propagate(h: &mut dyn Host, a: IdRef<ActionId>, handle: i32) {
     }
 }
 
-fn edit(
-    h: &mut dyn Host,
-    this: &RnaPtr,
-    f: impl FnOnce(&mut Action, i32),
-) -> Result<(), RnaError> {
+fn edit(h: &mut dyn Host, this: &RnaPtr, f: impl FnOnce(&mut Action, i32)) -> Result<(), RnaError> {
     let (a, i) = slot_of(h.main(), this)?;
     let (main, log) = h.main_mut();
     let act = main.actions.get_mut(a, log).ok_or_else(removed)?;
@@ -104,13 +98,20 @@ fn set(h: &mut dyn Host, this: &RnaPtr, _prop: &'static PropDef, v: Value) -> Re
 mod name_display {
     use super::*;
 
-    pub fn set(h: &mut dyn Host, this: &RnaPtr, _prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+    pub fn set(
+        h: &mut dyn Host,
+        this: &RnaPtr,
+        _prop: &'static PropDef,
+        v: Value,
+    ) -> Result<(), RnaError> {
         let name = v.as_str().unwrap_or_default().to_owned();
         if name.is_empty() {
             // "Action slot display names cannot be empty": a global report.
             return Ok(());
         }
-        edit(h, this, |act, handle| act.slot_display_name_define(handle, &name))
+        edit(h, this, |act, handle| {
+            act.slot_display_name_define(handle, &name)
+        })
     }
 }
 

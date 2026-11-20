@@ -22,9 +22,10 @@ fn i_d_animation_data_create(
     match adt_slot_mut(main, log, this.root) {
         Some(adt) => {
             adt.get_or_insert_with(Default::default);
-            Ok(Value::Ptr(Box::new(
-                this.child(Seg::Prop("animation_data"), &frap_spec_rna::ANIM_DATA),
-            )))
+            Ok(Value::Ptr(Box::new(this.child(
+                Seg::Prop("animation_data"),
+                &frap_spec_rna::ANIM_DATA,
+            ))))
         }
         None if matches!(this.root, Root::Id(a) if a.code == IdCode::ME) => Err(RnaError::new(
             RnaErrorKind::NotImplemented,

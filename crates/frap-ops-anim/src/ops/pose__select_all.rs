@@ -43,7 +43,12 @@ pub(crate) mod common {
 
     /// The channels of `ob` that are visible (`!hide`, bone in a visible collection) and,
     /// with `selected`, selected (`FOREACH_PCHAN_*_IN_OBJECT`), by name.
-    pub(crate) fn channels(cx: &OpCtx, ob: IdRef<ObjectId>, arm: IdRef<ArmatureId>, selected: bool) -> Vec<String> {
+    pub(crate) fn channels(
+        cx: &OpCtx,
+        ob: IdRef<ObjectId>,
+        arm: IdRef<ArmatureId>,
+        selected: bool,
+    ) -> Vec<String> {
         let main = cx.main();
         let (Some(o), Some(a)) = (main.objects.get(ob), main.armatures.get(arm)) else {
             return Vec::new();
@@ -54,8 +59,9 @@ pub(crate) mod common {
         pose.bones
             .iter()
             .filter(|pb| {
-                a.bone(&pb.name)
-                    .is_some_and(|b| !pb.hide && a.bone_collections_visible(b) && (!selected || pb.select))
+                a.bone(&pb.name).is_some_and(|b| {
+                    !pb.hide && a.bone_collections_visible(b) && (!selected || pb.select)
+                })
             })
             .map(|pb| pb.name.to_string())
             .collect()
@@ -82,13 +88,23 @@ fn exec(cx: &mut OpCtx, p: pose::PoseSelectAll) -> OpResult {
             .main()
             .armatures
             .get(arm)
-            .map(|a| a.bones.iter().filter(|b| b.hide_select).map(|b| b.name.to_string()).collect())
+            .map(|a| {
+                a.bones
+                    .iter()
+                    .filter(|b| b.hide_select)
+                    .map(|b| b.name.to_string())
+                    .collect()
+            })
             .unwrap_or_default();
         let o = cx.object_mut(ob)?;
         let Some(pose) = o.pose.as_mut() else {
             continue;
         };
-        for pb in pose.bones.iter_mut().filter(|pb| visible.iter().any(|n| pb.name == n.as_str())) {
+        for pb in pose
+            .bones
+            .iter_mut()
+            .filter(|pb| visible.iter().any(|n| pb.name == n.as_str()))
+        {
             let selectable = !unselectable.iter().any(|n| pb.name == n.as_str());
             let set = |pb: &mut frap_scene::id::PoseBone, on: bool| {
                 pb.select = on;

@@ -261,6 +261,12 @@ fn engine_fallback_warns() {
             .map(|w| vec![("WARNING".to_owned(), w.to_owned())])
             .unwrap_or_default();
         assert_eq!(common::reports(&j), want, "{engine}");
+        let used = if engine == "BLENDER_WORKBENCH" {
+            engine
+        } else {
+            "BLENDER_EEVEE"
+        };
+        assert_eq!(j["result"]["engine"], used, "{j}");
         pngs.push(frap_imbuf::load(&e.path(&format!("out/{engine}.png"))).unwrap());
     }
     assert_ne!(pngs[0], pngs[1]);

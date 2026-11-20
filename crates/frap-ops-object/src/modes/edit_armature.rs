@@ -23,9 +23,9 @@ use std::sync::Arc;
 use frap_op::prelude::*;
 use frap_op::{MODE_HANDLERS, ModeHandler};
 use frap_rna::{ArmatureId, IdRef, ObjectId};
+use frap_scene::ObjectMode;
 use frap_scene::edit_armature::EditArmature;
 use frap_scene::id::Pose;
-use frap_scene::ObjectMode;
 
 /// Why an object cannot enter.
 enum Skip {
@@ -144,7 +144,11 @@ pub(crate) fn load(cx: &mut OpCtx, arm: IdRef<ArmatureId>) -> Result<bool, OpErr
 }
 
 /// `flush_bone_selection_to_pose` for one object.
-pub(crate) fn flush_selection_to_pose(cx: &mut OpCtx, ob: IdRef<ObjectId>, arm: IdRef<ArmatureId>) -> Result<(), OpError> {
+pub(crate) fn flush_selection_to_pose(
+    cx: &mut OpCtx,
+    ob: IdRef<ObjectId>,
+    arm: IdRef<ArmatureId>,
+) -> Result<(), OpError> {
     let Some(a) = cx.main().armatures.get(arm).cloned() else {
         return Ok(());
     };

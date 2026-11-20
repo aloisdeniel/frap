@@ -48,10 +48,9 @@ fn exec(cx: &mut OpCtx, _p: object::PosemodeToggle) -> OpResult {
                 .iter()
                 .map(|b| b.object)
                 .filter(|&r| {
-                    c.main
-                        .objects
-                        .get(r)
-                        .is_some_and(|o| o.mode == ObjectMode::Pose && o.object_type() == "ARMATURE")
+                    c.main.objects.get(r).is_some_and(|o| {
+                        o.mode == ObjectMode::Pose && o.object_type() == "ARMATURE"
+                    })
                 })
                 .collect()
         };

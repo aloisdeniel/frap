@@ -21,8 +21,8 @@ use frap_op::prelude::*;
 use frap_rna::ArmatureId;
 use frap_scene::edit_armature::EditArmature;
 use frap_scene::edit_armature::math::{
-    BoneParentTransform, invert_m4, loc, m3, m4_from_m3, mat3_vec_to_roll,
-    mul_mat3_m4_v3, offset_matrix, vec_roll_to_mat3,
+    BoneParentTransform, invert_m4, loc, m3, m4_from_m3, mat3_vec_to_roll, mul_mat3_m4_v3,
+    offset_matrix, vec_roll_to_mat3,
 };
 use frap_scene::edit_armature::posing::{PoseMats, where_is};
 use frap_scene::edit_armature::rest::{RestBone, rest_pose};
@@ -90,7 +90,11 @@ impl Walk<'_> {
         if self.selected[i] {
             let invparent = match b.parent {
                 Some(p) => {
-                    let offs = offset_matrix(&self.rest[i].bone_mat, self.rest[i].head, self.rest[p].length);
+                    let offs = offset_matrix(
+                        &self.rest[i].bone_mat,
+                        self.rest[i].head,
+                        self.rest[p].length,
+                    );
                     let old = BoneParentTransform::from_matrices(
                         flags,
                         &offs,
@@ -107,12 +111,18 @@ impl Walk<'_> {
                 None => BoneParentTransform::IDENTITY,
             };
             new.new_rest_mat = invparent.apply(&self.mats[i].pose_mat);
-            let new_tail = new.new_rest_mat.transform_point3(Vec3::new(0.0, self.rest[i].length, 0.0));
+            let new_tail =
+                new.new_rest_mat
+                    .transform_point3(Vec3::new(0.0, self.rest[i].length, 0.0));
             new.new_arm_mat = set_edit_position(&mut self.ea, ei, &new.new_rest_mat, new_tail);
             reset_channel(&mut self.pose, &b.name);
             next = Some(new);
         } else if let Some(ps) = pstate {
-            let offs = offset_matrix(&self.rest[i].bone_mat, self.rest[i].head, self.rest[ps.bone].length);
+            let offs = offset_matrix(
+                &self.rest[i].bone_mat,
+                self.rest[i].head,
+                self.rest[ps.bone].length,
+            );
             let bpt = BoneParentTransform::from_matrices(
                 flags,
                 &offs,
@@ -174,7 +184,10 @@ fn exec(cx: &mut OpCtx, p: pose::ArmatureApply) -> OpResult {
         let (Some(o), Some(a)) = (main.objects.get(ob), main.armatures.get(arm_ref)) else {
             return Ok(OpStatus::Cancelled);
         };
-        let has_action = o.animation_data.as_ref().is_some_and(|ad| ad.action.is_some());
+        let has_action = o
+            .animation_data
+            .as_ref()
+            .is_some_and(|ad| ad.action.is_some());
         (
             a.clone(),
             o.pose.clone().unwrap_or_default(),
@@ -220,7 +233,12 @@ fn exec(cx: &mut OpCtx, p: pose::ArmatureApply) -> OpResult {
             walk.process(r, None);
         }
     } else {
-        let names: Vec<String> = walk.pose.bones.iter().map(|pb| pb.name.to_string()).collect();
+        let names: Vec<String> = walk
+            .pose
+            .bones
+            .iter()
+            .map(|pb| pb.name.to_string())
+            .collect();
         for n in names {
             let (Some(i), Some(ei)) = (arm.bone_index(&n), walk.ea.find(&n)) else {
                 continue;

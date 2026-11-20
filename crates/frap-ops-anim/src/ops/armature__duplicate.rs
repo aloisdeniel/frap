@@ -29,7 +29,12 @@ fn exec(cx: &mut OpCtx, p: armature::ArmatureDuplicate) -> OpResult {
         let pairs = ea.duplicate_selected(&a, p.do_flip_names.value);
         let names: Vec<(String, String)> = pairs
             .iter()
-            .map(|&(s, d)| (ea.edit_bones[s].name.to_string(), ea.edit_bones[d].name.to_string()))
+            .map(|&(s, d)| {
+                (
+                    ea.edit_bones[s].name.to_string(),
+                    ea.edit_bones[d].name.to_string(),
+                )
+            })
             .collect();
         common::store(cx, arm, ea);
         for (s, d) in names {

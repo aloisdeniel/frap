@@ -17,7 +17,9 @@
 //!    `RenderScene` is built from the clone and rendered through `cx.services().render()` (the
 //!    only way to the GPU: `GPU_UNAVAILABLE` when there is no adapter or no `gpu` feature).
 //!    Nothing of the session changes except the `Render Result` image (D-07).
-//! 3. `BLENDER_EEVEE` and `CYCLES` render with Workbench in M1, with a WARNING.
+//! 3. `BLENDER_EEVEE` renders with frap's EEVEE-like renderer (M5); `CYCLES` renders with
+//!    `BLENDER_EEVEE`, with a WARNING (D-12). A render service without EEVEE falls back to
+//!    Workbench, with a WARNING. EEVEE renders also report what the world graph leaves out.
 //! 4. The film (scene-linear) becomes `bpy.data.images['Render Result']` (created when missing
 //!    with Blender's values: `source='VIEWER'`, `type='RENDER_RESULT'`, `size` `(0, 0)`
 //!    headless); its pixels go to the session's image cache. `write_still` writes
@@ -45,7 +47,7 @@ use frap_spec_ops_render::render;
 
 use crate::output::{self, OutputPath, OutputRules, TemplateVars, format};
 
-/// The engine every M1 render uses.
+/// The Workbench engine.
 const WORKBENCH: &str = "BLENDER_WORKBENCH";
 /// Name of the render result image.
 const RENDER_RESULT: &str = "Render Result";
@@ -70,7 +72,7 @@ pub(crate) fn effective_engine(requested: &str, eevee: bool) -> &'static str {
     }
 }
 
-/// The WARNING for an engine frap renders with another one (deviations.md D-12; §2 until M5).
+/// The WARNING for an engine frap renders with another one (deviations.md D-12).
 fn engine_fallback(engine: &str, eevee: bool) -> Option<String> {
     let used = effective_engine(engine, eevee);
     match engine {
@@ -80,7 +82,7 @@ fn engine_fallback(engine: &str, eevee: bool) -> Option<String> {
             "Engine 'CYCLES' is not available in frap; rendered with {used}"
         )),
         other => Some(format!(
-            "Engine '{other}' is not available in frap yet (M5); rendered with {used}"
+            "Engine '{other}' is not available in this build of frap; rendered with {used}"
         )),
     }
 }
@@ -296,10 +298,9 @@ fn store_render_result(cx: &mut OpCtx, film: Film) {
     tier = T4,
     spec = render::OPSPEC_RENDER_OT_RENDER,
     support = Partial(
-        "BLENDER_EEVEE and CYCLES render with BLENDER_WORKBENCH (WARNING) until M5; \
-         animation=True renders every frame of the range but animation is evaluated from M6; \
-         scene=/layer= other than the context ones and use_sequencer_scene=True are not \
-         supported"
+        "CYCLES renders with BLENDER_EEVEE (WARNING); animation=True renders every frame of \
+         the range but animation is evaluated from M6 (WP 6.4); scene=/layer= other than the \
+         context ones and use_sequencer_scene=True are not supported"
     ),
     notes = [
         "needs a GPU: GPU_UNAVAILABLE without an adapter or in a build without the gpu feature",
@@ -340,12 +341,18 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
     if let Some(w) = warning {
         cx.report(ReportType::Warning, w);
     }
+    if engine == EEVEE {
+        let main = cx.main();
+        let world = cx.ctx().scene().world.and_then(|w| main.worlds.get(w));
+        for w in frap_render_scene::build::world::warnings(world) {
+            cx.report(ReportType::Warning, w);
+        }
+    }
     for w in &plan.cm.warnings {
         cx.report(ReportType::Warning, w.clone());
     }
     // Workbench effects frap does not render yet, as `frap.render_contact_sheet` reports them
-    // (WP 2.3), whenever Workbench renders (also as the fallback of EEVEE and CYCLES until M5;
-    // M2 leftover, M4 W0).
+    // (WP 2.3), whenever Workbench renders (M2 leftover, M4 W0).
     if engine == WORKBENCH {
         let shading = frap_render_scene::build::workbench::shading(cx.ctx().scene());
         for effect in super::frap__render_contact_sheet::workbench_left_out(&shading) {
@@ -362,7 +369,7 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
             cx.report(ReportType::Warning, w);
         }
     }
-    cx.result("engine", Value::Str(WORKBENCH.into()));
+    cx.result("engine", Value::Str(engine.into()));
     cx.result(
         "resolution",
         Value::Tuple(vec![

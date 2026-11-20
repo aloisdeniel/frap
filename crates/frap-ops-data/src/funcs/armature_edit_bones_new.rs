@@ -35,5 +35,8 @@ fn armature_edit_bones_new(
     };
     let ea = Arc::make_mut(ea);
     let i = ea.add_bone(&name);
-    Ok(Value::Ptr(Box::new(edit_bone_ptr(arm, &ea.edit_bones[i].name))))
+    Ok(Value::Ptr(Box::new(edit_bone_ptr(
+        arm,
+        &ea.edit_bones[i].name,
+    ))))
 }

@@ -4,9 +4,7 @@
 //! handle); assigning `None` clears the flag on every slot.
 
 use frap_anim::rna::action::{Loc, locate};
-use frap_rna::{
-    ActionId, Field, IdRef, PropDef, RnaError, RnaPtr, Root, Seg, Value, rna_hook,
-};
+use frap_rna::{ActionId, Field, IdRef, PropDef, RnaError, RnaPtr, Root, Seg, Value, rna_hook};
 
 use super::id_animation_data::removed;
 use crate::id::paths::internal;

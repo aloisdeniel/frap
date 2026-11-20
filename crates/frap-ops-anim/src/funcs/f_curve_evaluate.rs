@@ -16,5 +16,7 @@ fn f_curve_evaluate(
     args: &mut FuncArgs,
 ) -> Result<Value, RnaError> {
     let frame = arg_f32(args, "frame", 1.0);
-    with_fcurve(h, this, |fc, _| Ok(Value::Float(evaluate_fcurve(fc, frame))))
+    with_fcurve(h, this, |fc, _| {
+        Ok(Value::Float(evaluate_fcurve(fc, frame)))
+    })
 }

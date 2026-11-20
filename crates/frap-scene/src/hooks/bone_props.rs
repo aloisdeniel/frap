@@ -5,9 +5,9 @@
 //! `name` setter (`ED_armature_bone_rename`). Values come from `edit_armature::rest`, computed
 //! from the stored armature-space head, tail and roll.
 
-use smol_str::SmolStr;
 use frap_rna::traits::{FromRnaValue, ToRnaValue};
 use frap_rna::{Field, MathTag, PropDef, RnaError, RnaPtr, Value, rna_hook};
+use smol_str::SmolStr;
 
 use crate::edit_armature::paths::{armature, bone_of, bone_ptr, internal_error, ref_coll};
 use crate::edit_armature::rename::rename_bone;
@@ -30,31 +30,55 @@ fn rest_of(h: &dyn HostRead, this: &RnaPtr) -> Result<RestBone, RnaError> {
 }
 
 #[rna_hook(srna = "Bone", prop = "head", krate = crate)]
-fn head<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn head<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let r = rest_of(h, this)?;
-    Ok(Field::Value(r.head.to_array().to_rna_value(prop, MathTag::Vector)))
+    Ok(Field::Value(
+        r.head.to_array().to_rna_value(prop, MathTag::Vector),
+    ))
 }
 
 #[rna_hook(srna = "Bone", prop = "tail", krate = crate)]
-fn tail<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn tail<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let r = rest_of(h, this)?;
-    Ok(Field::Value(r.tail.to_array().to_rna_value(prop, MathTag::Vector)))
+    Ok(Field::Value(
+        r.tail.to_array().to_rna_value(prop, MathTag::Vector),
+    ))
 }
 
 #[rna_hook(srna = "Bone", prop = "matrix", krate = crate)]
-fn matrix<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn matrix<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let r = rest_of(h, this)?;
     Ok(Field::Value(r.bone_mat.to_rna_value(prop, MathTag::Matrix)))
 }
 
 #[rna_hook(srna = "Bone", prop = "length", krate = crate)]
-fn length<'h>(h: &'h dyn HostRead, this: &RnaPtr, prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn length<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let r = rest_of(h, this)?;
     Ok(Field::Value(r.length.to_rna_value(prop, MathTag::None)))
 }
 
 #[rna_hook(srna = "Bone", prop = "parent", krate = crate)]
-fn parent<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn parent<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    _prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let (arm, _) = bone_of(this)?;
     let (a, i) = located(h, this)?;
     Ok(match a.bones[i].parent.and_then(|p| a.bones.get(p)) {
@@ -64,18 +88,29 @@ fn parent<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Re
 }
 
 #[rna_hook(srna = "Bone", prop = "children", krate = crate)]
-fn children<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn children<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    _prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let (arm, _) = bone_of(this)?;
     let (a, i) = located(h, this)?;
     let _ = arm;
     Ok(ref_coll(
-        a.children_of(Some(i)).into_iter().map(|c| &a.bones[c]).collect(),
+        a.children_of(Some(i))
+            .into_iter()
+            .map(|c| &a.bones[c])
+            .collect(),
         &frap_spec_rna::BONE,
     ))
 }
 
 #[rna_hook(srna = "Bone", prop = "collections", krate = crate)]
-fn collections<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) -> Result<Field<'h>, RnaError> {
+fn collections<'h>(
+    h: &'h dyn HostRead,
+    this: &RnaPtr,
+    _prop: &'static PropDef,
+) -> Result<Field<'h>, RnaError> {
     let (arm, _) = bone_of(this)?;
     let (a, i) = located(h, this)?;
     let _ = arm;
@@ -90,7 +125,12 @@ fn collections<'h>(h: &'h dyn HostRead, this: &RnaPtr, _prop: &'static PropDef) 
 }
 
 #[rna_hook(srna = "Bone", prop = "name", krate = crate)]
-fn set_name(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Result<(), RnaError> {
+fn set_name(
+    h: &mut dyn Host,
+    this: &RnaPtr,
+    prop: &'static PropDef,
+    v: Value,
+) -> Result<(), RnaError> {
     let (arm, _) = bone_of(this)?;
     let old = {
         let (a, i) = located(h, this)?;

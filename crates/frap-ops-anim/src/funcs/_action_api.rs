@@ -8,8 +8,8 @@
 //! `frap_anim::rna::action::locate`; [`loc_ptr`] builds the canonical pointer a function
 //! returns.
 
-use frap_anim::{Action, AnimData, FCurve};
 use frap_anim::rna::action::{Loc, bag, locate};
+use frap_anim::{Action, AnimData, FCurve};
 use frap_rna::{
     ActionId, EmbeddedSlot, IdCode, IdRef, PyExc, RnaError, RnaErrorKind, RnaPtr, Root, Seg, Value,
 };
@@ -147,18 +147,54 @@ pub(crate) fn adt_slot_mut<'m>(
     }
     match root {
         Root::Id(a) => match a.code {
-            IdCode::OB => main.objects.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::MA => main.materials.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::CA => main.cameras.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::LA => main.lights.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::WO => main.worlds.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::IM => main.images.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::AR => main.armatures.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::SC => main.scenes.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::KE => main.shape_keys.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::NT => main.node_groups.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::TE => main.textures.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
-            IdCode::PT => main.pointclouds.get_mut(typed(a)?, log).map(|x| &mut x.animation_data),
+            IdCode::OB => main
+                .objects
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::MA => main
+                .materials
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::CA => main
+                .cameras
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::LA => main
+                .lights
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::WO => main
+                .worlds
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::IM => main
+                .images
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::AR => main
+                .armatures
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::SC => main
+                .scenes
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::KE => main
+                .shape_keys
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::NT => main
+                .node_groups
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::TE => main
+                .textures
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
+            IdCode::PT => main
+                .pointclouds
+                .get_mut(typed(a)?, log)
+                .map(|x| &mut x.animation_data),
             _ => None,
         },
         Root::Embedded {
@@ -245,7 +281,12 @@ pub(crate) fn loc_ptr(a: IdRef<ActionId>, act: &Action, loc: Loc) -> Value {
     let root = RnaPtr::id(a.any(), &s::ACTION);
     let layer = |l: usize| {
         root.child(Seg::Prop("layers"), &s::ACTION_LAYER).child(
-            Seg::Key(act.layers.get(l).map(|x| x.name.clone()).unwrap_or_default()),
+            Seg::Key(
+                act.layers
+                    .get(l)
+                    .map(|x| x.name.clone())
+                    .unwrap_or_default(),
+            ),
             &s::ACTION_LAYER,
         )
     };
@@ -267,7 +308,12 @@ pub(crate) fn loc_ptr(a: IdRef<ActionId>, act: &Action, loc: Loc) -> Value {
     let ptr = match loc {
         Loc::Action => root,
         Loc::Slot(i) => root.child(Seg::Prop("slots"), &s::ACTION_SLOT).child(
-            Seg::Key(act.slots.get(i).map(|x| x.identifier.clone()).unwrap_or_default()),
+            Seg::Key(
+                act.slots
+                    .get(i)
+                    .map(|x| x.identifier.clone())
+                    .unwrap_or_default(),
+            ),
             &s::ACTION_SLOT,
         ),
         Loc::Layer(l) => layer(l),

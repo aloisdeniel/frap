@@ -9,11 +9,7 @@ use frap_scene::{FuncArgs, Host};
 use super::_action_api::with_fcurve;
 
 #[rna_func(srna = "FCurve", func = "range")]
-fn f_curve_range(
-    h: &mut dyn Host,
-    this: &RnaPtr,
-    _args: &mut FuncArgs,
-) -> Result<Value, RnaError> {
+fn f_curve_range(h: &mut dyn Host, this: &RnaPtr, _args: &mut FuncArgs) -> Result<Value, RnaError> {
     with_fcurve(h, this, |fc, _| {
         let r = keys::range(fc).unwrap_or([0.0, 0.0]);
         Ok(Value::FloatArray {
