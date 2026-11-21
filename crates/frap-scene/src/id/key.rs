@@ -118,14 +118,24 @@ impl ShapeKey {
         self.value = v.max(self.slider_min).min(self.slider_max);
     }
 
-    /// `rna_ShapeKey_slider_min_set`.
+    /// `rna_ShapeKey_slider_min_set`, then `rna_ShapeKey_update_minmax` (the current value is
+    /// clamped into the new range).
     pub fn set_slider_min(&mut self, v: f32) {
         self.slider_min = v.max(-10.0).min(self.slider_max - SLIDER_TOL);
+        self.clamp_value_to_sliders();
     }
 
-    /// `rna_ShapeKey_slider_max_set`.
+    /// `rna_ShapeKey_slider_max_set`, then `rna_ShapeKey_update_minmax`.
     pub fn set_slider_max(&mut self, v: f32) {
         self.slider_max = v.max(self.slider_min + SLIDER_TOL).min(10.0);
+        self.clamp_value_to_sliders();
+    }
+
+    /// `rna_ShapeKey_update_minmax`: `CLAMP(curval, slidermin, slidermax)`.
+    fn clamp_value_to_sliders(&mut self) {
+        if !(self.slider_min..=self.slider_max).contains(&self.value) {
+            self.value = self.value.max(self.slider_min).min(self.slider_max);
+        }
     }
 
     /// `BKE_keyblock_copy_settings`: everything but the name, data and flags.
@@ -1369,6 +1379,15 @@ mod tests {
         assert!((s.value - 0.001).abs() < 1e-6);
         s.set_slider_min(-20.0);
         assert_eq!(s.slider_min, -10.0);
+        // rna_ShapeKey_update_minmax clamps the current value into the new range.
+        s.set_slider_min(-1.0);
+        s.set_value(-0.5);
+        s.set_slider_min(-0.2);
+        assert_eq!(s.value, -0.2);
+        s.set_slider_max(1.0);
+        s.set_value(0.9);
+        s.set_slider_max(0.5);
+        assert_eq!(s.value, 0.5);
     }
 
     #[test]

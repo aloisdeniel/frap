@@ -235,7 +235,7 @@ pub fn group_of(ns: &str) -> Res<&'static str> {
         "transform" => "transform",
         "mesh" | "geometry" => "mesh",
         "uv" => "uv",
-        "anim" | "screen" | "armature" | "pose" | "nla" => "anim",
+        "anim" | "screen" | "armature" | "pose" | "nla" | "marker" => "anim",
         "material" | "image" | "world" => "data",
         "export_scene" | "import_scene" | "wm" | "ed" => "io",
         "render" => "render",

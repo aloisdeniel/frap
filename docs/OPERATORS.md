@@ -646,6 +646,22 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `ed.undo_redo` | M8 | P2 | WP 8.4 |
 | [ ] | `ed.undo_push` | M8 | P2 | WP 8.4 |
 
+### `marker.* (timeline markers)`
+
+| ✓ | Operator | M | Prio | Notes |
+|---|---|---|---|---|
+| [ ] | `marker.add` | M7 | P2 | timeline markers (`Scene.timeline_markers`, deviations §2); M5+M6 stabilization round 8 dumped the namespace so it answers OP_NOT_IMPLEMENTED, not OP_UNKNOWN |
+| [ ] | `marker.camera_bind` | M7 | P2 | marker camera switching (`BKE_scene_camera_switch_update`) |
+| [ ] | `marker.delete` | M7 | P2 | timeline markers |
+| [ ] | `marker.duplicate` | M7 | P2 | timeline markers |
+| [ ] | `marker.make_links_scene` | M7 | P2 | timeline markers |
+| [ ] | `marker.move` | M7 | P2 | timeline markers |
+| [ ] | `marker.rename` | M7 | P2 | timeline markers |
+| [ ] | `marker.select` | M7 | P2 | timeline markers |
+| [ ] | `marker.select_all` | M7 | P2 | timeline markers |
+| [ ] | `marker.select_box` | M7 | P2 | timeline markers |
+| [ ] | `marker.select_leftright` | M7 | P2 | timeline markers |
+
 ### `frap.*` (frap extensions, namespaced)
 
 | ✓ | Operator | M | Notes |
@@ -859,6 +875,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | M3 | 31 |
 | M4 | 15 |
 | M6 | 54 |
+| M7 | 11 |
 | M8 | 187 |
 | OUT | 61 |
-| total listed | 536 |
+| total listed | 547 |

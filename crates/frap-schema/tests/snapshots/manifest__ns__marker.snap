@@ -1,0 +1,16 @@
+---
+source: crates/frap-schema/tests/snapshots.rs
+---
+[
+  "marker.add | planned M7 | poll NNNNN/NNNNN | ",
+  "marker.camera_bind | planned M7 | poll NNNNN/NNNNN | ",
+  "marker.delete | planned M7 | poll NNNNN/NNNNN | confirm",
+  "marker.duplicate | planned M7 | poll NNNNN/NNNNN | frames",
+  "marker.make_links_scene | planned M7 | poll NNNNN/NNNNN | scene",
+  "marker.move | planned M7 | poll NNNNN/NNNNN | frames,tweak",
+  "marker.rename | planned M7 | poll NNNNN/NNNNN | name",
+  "marker.select | planned M7 | poll NNNNN/NNNNN | wait_to_deselect_others,use_select_on_click,mouse_x,mouse_y,extend,camera",
+  "marker.select_all | planned M7 | poll NNNNN/NNNNN | action",
+  "marker.select_box | planned M7 | poll NNNNN/NNNNN | xmin,xmax,ymin,ymax,wait_for_input,mode,tweak",
+  "marker.select_leftright | planned M7 | poll NNNNN/NNNNN | mode,extend"
+]

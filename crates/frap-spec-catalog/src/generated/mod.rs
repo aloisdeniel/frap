@@ -6,9 +6,9 @@
 /// Deflate-compressed JSON array of the catalog operators (schema: `decode.rs`).
 pub static CATALOG_DEFLATE: &[u8] = include_bytes!("catalog.json.deflate");
 /// Number of operators in the blob.
-pub const CATALOG_LEN: usize = 803;
+pub const CATALOG_LEN: usize = 814;
 /// Their idnames, sorted (membership tests without decoding).
-pub static CATALOG_IDNAMES: [&str; 803] = [
+pub static CATALOG_IDNAMES: [&str; 814] = [
     "anim.change_frame",
     "anim.channel_select_keys",
     "anim.channel_view_pick",
@@ -172,6 +172,17 @@ pub static CATALOG_IDNAMES: [&str; 803] = [
     "image.view_zoom_out",
     "image.view_zoom_ratio",
     "import_scene.fbx",
+    "marker.add",
+    "marker.camera_bind",
+    "marker.delete",
+    "marker.duplicate",
+    "marker.make_links_scene",
+    "marker.move",
+    "marker.rename",
+    "marker.select",
+    "marker.select_all",
+    "marker.select_box",
+    "marker.select_leftright",
     "material.copy",
     "material.paste",
     "mesh.average_normals",

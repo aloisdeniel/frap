@@ -416,6 +416,9 @@ source = "bpy.data.collections names"
 ["OBJECT_OT_make_links_scene.scene"]
 runtime = true
 source = "bpy.data.scenes names"
+["MARKER_OT_make_links_scene.scene"]
+runtime = true
+source = "bpy.data.scenes names (RNA_scene_itemf)"
 ["OBJECT_OT_hook_assign.modifier"]
 runtime = true
 source = "HOOK modifiers of the active object"

@@ -888,6 +888,19 @@ fn step_struct(host: &dyn HostRead, ptr: RnaPtr, seg: &PathSeg) -> Result<Target
                 {
                     return Ok(Target::Func(FuncTarget::Rna { this: ptr, def }));
                 }
+                // `bpy_struct.driver_add/driver_remove` exist on every struct in Blender
+                // (`pyrna_struct_driver_add`); drivers are M8 (deviations §2), so they answer
+                // `RNA_NOT_IMPLEMENTED`, not a misleading `AttributeError`.
+                if matches!(a.as_str(), "driver_add" | "driver_remove") {
+                    return Err(FrapError::new(
+                        PyExc::NotImplementedError,
+                        frap_rna::codes::RNA_NOT_IMPLEMENTED,
+                        format!(
+                            "frap: bpy_struct.{a}() exists in Blender 5.2 but drivers are not \
+                             implemented by frap yet (planned for M8)"
+                        ),
+                    ));
+                }
             }
             Err(no_attr(srna, a))
         }

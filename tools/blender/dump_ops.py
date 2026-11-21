@@ -45,7 +45,7 @@ import dump_rna  # noqa: E402  (shared property serialiser; same JSON schema)
 DEFAULT_NAMESPACES = [
     "object", "mesh", "uv", "transform", "view3d", "anim", "screen", "render", "wm", "material",
     "image", "world", "collection", "scene", "geometry", "armature", "pose", "nla", "export_scene",
-    "import_scene", "ed",
+    "import_scene", "ed", "marker",
 ]
 CONTEXTS = ["A", "B", "C", "D", "E"]
 

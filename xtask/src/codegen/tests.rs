@@ -106,6 +106,7 @@ fn typed_ops_match_operators_md() {
         "export_scene",
         "import_scene",
         "ed",
+        "marker",
     ] {
         assert!(
             s.ops.iter().any(|o| o.ns == ns),

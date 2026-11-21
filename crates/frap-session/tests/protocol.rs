@@ -1043,6 +1043,39 @@ fn unbound_collection_functions_are_not_implemented() {
     }
 }
 
+/// `bpy_struct.driver_add/driver_remove` exist on every struct in Blender; drivers are M8, so
+/// they answer `RNA_NOT_IMPLEMENTED` with the plan, not `AttributeError` (M5+M6 stabilization
+/// round 8).
+#[test]
+fn driver_methods_are_not_implemented() {
+    let mut s = session();
+    for (src, func) in [
+        ("bpy.context.object.driver_add('location', 0)", "driver_add"),
+        (
+            "bpy.context.object.driver_remove('location')",
+            "driver_remove",
+        ),
+        (
+            "bpy.context.scene.render.driver_add('resolution_x')",
+            "driver_add",
+        ),
+    ] {
+        let (exc, code, msg) = err(&mut s, src);
+        assert_eq!(exc, "NotImplementedError", "{src}");
+        assert_eq!(code, "RNA_NOT_IMPLEMENTED", "{src}");
+        assert_eq!(
+            msg,
+            format!(
+                "frap: bpy_struct.{func}() exists in Blender 5.2 but drivers are not \
+                 implemented by frap yet (planned for M8)"
+            )
+        );
+    }
+    // Still an AttributeError for a name no struct has.
+    let (exc, _, _) = err(&mut s, "bpy.context.object.driver_addx('location')");
+    assert_eq!(exc, "AttributeError");
+}
+
 #[test]
 fn collection_methods() {
     let mut s = session();

@@ -271,3 +271,43 @@ fn jpeg_of_an_odd_size_matches_blender_byte_for_byte() {
         assert_eq!(got, strip_com(&read(jpg)), "{jpg}");
     }
 }
+
+/// `--stmt-timeout`: the WebP encoders do not poll the budget, so the statement stops waiting
+/// for them at the deadline (M5+M6 stabilization round 8; a 4000x4000 WebP answered `TIMEOUT`
+/// ~25 s past it in a debug build).
+#[test]
+fn webp_encoding_stops_at_the_deadline() {
+    use std::time::{Duration, Instant};
+    let start = Instant::now();
+    let r = std::panic::catch_unwind(|| {
+        let _scope = frap_math::budget::scope(frap_math::budget::Budget {
+            timeout: Some(Duration::from_millis(50)),
+            ..Default::default()
+        });
+        super::webp::cancellable(|| {
+            std::thread::sleep(Duration::from_secs(5));
+            Ok(Vec::new())
+        })
+    });
+    let payload = r.expect_err("the deadline passes during the encode");
+    assert!(frap_math::budget::interrupted(&*payload).is_some());
+    assert!(
+        start.elapsed() < Duration::from_secs(3),
+        "{:?}",
+        start.elapsed()
+    );
+    // A real encode under a generous deadline completes on the worker.
+    let px: Vec<u8> = (0..64u32 * 64 * 4).map(|i| (i % 251) as u8).collect();
+    let image = DecodedImage::new(64, 64, 4, PixelData::U8(px)).unwrap();
+    let _scope = frap_math::budget::scope(frap_math::budget::Budget {
+        timeout: Some(Duration::from_secs(600)),
+        ..Default::default()
+    });
+    let webp = EncodeFormat::WebP {
+        lossless: true,
+        quality: 100,
+    };
+    let bytes = encode(&image, &webp).unwrap();
+    assert_eq!(&bytes[..4], b"RIFF");
+    assert_eq!(crate::decode(&bytes).unwrap().to_u8(), image.to_u8());
+}
