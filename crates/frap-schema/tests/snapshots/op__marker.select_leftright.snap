@@ -1,0 +1,96 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "marker.select_leftright",
+  "bl_idname": "MARKER_OT_select_leftright",
+  "label": "Select Markers Before/After Current Frame",
+  "description": "Select markers on and left/right of the current frame",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "mode",
+      "name": "Mode",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "LEFT",
+      "enum_items": [
+        {
+          "identifier": "LEFT",
+          "name": "Before Current Frame",
+          "description": "",
+          "value": 0
+        },
+        {
+          "identifier": "RIGHT",
+          "name": "After Current Frame",
+          "description": "",
+          "value": 1
+        },
+        {
+          "identifier": "CLICK_SIDE",
+          "name": "Mouse Click Side",
+          "description": "",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "extend",
+      "name": "Extend Select",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [
+        "ANIMATABLE"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": "headless-extended: runs as in the factory Layout screen's Timeline (Blender needs an animation editor showing markers): on the context scene's timeline_markers, with Blender's marker polls (markers exist or are selected, scene.tool_settings.lock_markers off)",
+    "headless": "extended",
+    "planned": "M7",
+    "extension": false,
+    "notes": []
+  }
+}

@@ -11,6 +11,9 @@ use frap_anim::{
     Extrapolation, FCurve, HandleType, Interpolation, Keyframe, KeyframeStrip, KeyframeType,
     NlaStrip, NlaTrack,
 };
+use frap_mesh::gltf_variants::{
+    GltfVariantDefaultMaterial, GltfVariantPointer, GltfVariantPrimitive, MeshGltfVariants,
+};
 use frap_mesh::{AttrData, Attribute, AttributeSet, DeformVert, Domain, Mesh};
 use frap_nodes::generated::node_type;
 use frap_nodes::{
@@ -19,9 +22,9 @@ use frap_nodes::{
 use frap_rna::{IdAny, IdCode, IdHeader, IdKind, IdRef, IdType, LibraryId, Value};
 use frap_scene::generated::modifier_settings::{ModifierSettings, ModifierType};
 use frap_scene::id::{
-    Armature, Bone, BoneCollection, Camera, Collection, EncodedImage, Image, Key, Library, Light,
-    Material, Modifier, Object, PointCloud, Pose, PoseBone, Scene, ShapeKey, SlotLink,
-    SlotOverride, Texture, World,
+    Armature, Bone, BoneCollection, Camera, Collection, EncodedImage, GltfVariant, Image, Key,
+    Library, Light, Material, Modifier, Object, PointCloud, Pose, PoseBone, Scene, ShapeKey,
+    SlotLink, SlotOverride, Texture, TimelineMarker, World,
 };
 use frap_scene::{
     Base, BaseFlag, ChangeLog, IdMap, LayerCollection, LayerCollectionPath, Main, ObjectMode,
@@ -489,6 +492,9 @@ pub(crate) fn read(
         pointcloud,
     )?;
 
+    // `IMB_colormanagement_check_file_config` (WP 7.6): views and displays the config lacks.
+    let cm = super::color::check_file_config(&mut main);
+    cx.warnings.extend(cm);
     let win = window(root.get("window"), &main, cx)?;
     let prefs = prefs(root.get("preferences"), cx.strict)?;
     main.is_dirty = false;
@@ -611,7 +617,43 @@ fn scene(s: &mut Scene, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
         .enumerate()
         .map(|(i, v)| view_layer(v, &format!("{p}[{i}]"), cx))
         .collect::<Result<_, _>>()?;
-    cx.anim(o, &mut s.animation_data)
+    cx.anim(o, &mut s.animation_data)?;
+    // M7 (WP 7.6): absent in older files.
+    if let Some(v) = o.opt("timeline_markers") {
+        let p = o.sub("timeline_markers");
+        s.timeline_markers = array(v, &p)?
+            .iter()
+            .enumerate()
+            .map(|(i, m)| {
+                let mp = format!("{p}[{i}]");
+                let mut mo = Obj::new(m, &mp, cx.strict)?;
+                let mut t = TimelineMarker::default();
+                mo.smol("name", &mut t.name)?;
+                mo.i32("frame", &mut t.frame)?;
+                mo.bool("select", &mut t.select)?;
+                cx.opt_typed(&mut mo, "camera", &mut t.camera)?;
+                mo.finish()?;
+                Ok(t)
+            })
+            .collect::<Result<_, MapError>>()?;
+    }
+    if let Some(v) = o.opt("gltf2_KHR_materials_variants_variants") {
+        let p = o.sub("gltf2_KHR_materials_variants_variants");
+        s.gltf2_variants.variants = array(v, &p)?
+            .iter()
+            .enumerate()
+            .map(|(i, x)| {
+                let mut xo = Obj::new(x, format!("{p}[{i}]"), cx.strict)?;
+                let mut g = GltfVariant::default();
+                xo.smol("name", &mut g.name)?;
+                xo.i32("variant_idx", &mut g.variant_idx)?;
+                xo.finish()?;
+                Ok(g)
+            })
+            .collect::<Result<_, MapError>>()?;
+    }
+    o.i32("gltf2_active_variant", &mut s.gltf2_variants.active_variant)?;
+    Ok(())
 }
 
 fn view_layer(v: &J, path: &str, cx: &Cx) -> Result<ViewLayer, MapError> {
@@ -1046,8 +1088,65 @@ fn mesh(me: &mut Mesh, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
     o.bool("use_auto_texspace", &mut m.texspace.auto)?;
     o.arr("texspace_location", &mut m.texspace.location)?;
     o.arr("texspace_size", &mut m.texspace.size)?;
+    mesh_gltf_variants(&mut m.gltf2_variants, o, cx)?;
     m.header = me.header.clone();
     *me = m;
+    Ok(())
+}
+
+/// The glTF add-on's per-mesh variant data (M7 W0, persisted by WP 7.6; absent in older
+/// files).
+fn mesh_gltf_variants(gv: &mut MeshGltfVariants, o: &mut Obj, cx: &mut Cx) -> Result<(), MapError> {
+    if let Some(v) = o.opt("gltf2_variant_mesh_data") {
+        let p = o.sub("gltf2_variant_mesh_data");
+        gv.mesh_data = array(v, &p)?
+            .iter()
+            .enumerate()
+            .map(|(i, x)| {
+                let xp = format!("{p}[{i}]");
+                let mut xo = Obj::new(x, &xp, cx.strict)?;
+                let mut d = GltfVariantPrimitive::default();
+                xo.i32("material_slot_index", &mut d.material_slot_index)?;
+                cx.opt_typed(&mut xo, "material", &mut d.material)?;
+                if let Some(vs) = xo.opt("variants") {
+                    let vp = xo.sub("variants");
+                    d.variants = array(vs, &vp)?
+                        .iter()
+                        .enumerate()
+                        .map(|(j, y)| {
+                            let yp = format!("{vp}[{j}]");
+                            let mut yo = Obj::new(y, &yp, cx.strict)?;
+                            let mut vo = yo.obj("variant")?;
+                            let mut ptr = GltfVariantPointer::default();
+                            vo.i32("variant_idx", &mut ptr.variant_idx)?;
+                            vo.finish()?;
+                            yo.finish()?;
+                            Ok(ptr)
+                        })
+                        .collect::<Result<_, MapError>>()?;
+                }
+                xo.i32("active_variant_idx", &mut d.active_variant_idx)?;
+                xo.finish()?;
+                Ok(d)
+            })
+            .collect::<Result<_, MapError>>()?;
+    }
+    if let Some(v) = o.opt("gltf2_variant_default_materials") {
+        let p = o.sub("gltf2_variant_default_materials");
+        gv.default_materials = array(v, &p)?
+            .iter()
+            .enumerate()
+            .map(|(i, x)| {
+                let mut xo = Obj::new(x, format!("{p}[{i}]"), cx.strict)?;
+                let mut d = GltfVariantDefaultMaterial::default();
+                xo.i32("material_slot_index", &mut d.material_slot_index)?;
+                cx.opt_typed(&mut xo, "default_material", &mut d.default_material)?;
+                xo.finish()?;
+                Ok(d)
+            })
+            .collect::<Result<_, MapError>>()?;
+    }
+    o.smol("gltf2_variant_pointer", &mut gv.pointer)?;
     Ok(())
 }
 

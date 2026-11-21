@@ -60,6 +60,14 @@ pub struct Scene {
 }
 
 impl Scene {
+    /// Whether a timeline marker of this scene binds `id` as its camera (a reference that is
+    /// no user, so not in `for_each_ref`, but remapped and cleared like one; WP 7.6).
+    pub fn marker_refs(&self, id: IdAny) -> bool {
+        self.timeline_markers
+            .iter()
+            .any(|m| m.camera.map(|c| c.any()) == Some(id))
+    }
+
     /// `(struct, property)` pairs whose setter applies its own range: a caller coerces these
     /// without the generic hard-range clamp and passes the raw number to the setter
     /// (`Scene.frame_current`: `= 1000000000` reads back 1000000000 in Blender 5.2.4;
@@ -138,6 +146,7 @@ crate::id::id_rna! { Scene as frap_spec_rna::SCENE, "SCENE" {
     cursor => struct(cursor),
     tool_settings => struct(tool_settings),
     unit_settings => struct(unit_settings),
+    timeline_markers => hook_coll,
 }}
 
 impl IdType for Scene {
@@ -161,8 +170,8 @@ impl IdType for Scene {
             f(a.any());
         }
         // Marker cameras are not listed: `BKE_scene_foreach_id` walks them with
-        // `IDWALK_CB_NOP` (no user). `remap_ref` still clears them; WP 7.6 makes `Main::remap`
-        // reach a scene that references an object only through a marker.
+        // `IDWALK_CB_NOP` (no user). `remap_ref` still clears them: `Main::remap` also visits
+        // the scenes whose markers reference the ID (WP 7.6, `Scene::marker_refs`).
     }
     /// Unlink / relink in the master collection, `camera`, `world` and the action; view
     /// layers drop bases of removed objects at the next sync (`Main::remap` resyncs).

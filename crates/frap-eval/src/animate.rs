@@ -442,6 +442,7 @@ fn apply_animation_filtered(
             let channels =
                 evaluate_anim_refined(adt, &MainActions(main), frame, srna, Some(&refine));
             if !channels.is_empty() {
+                let channels = blender_write_order(read, root, adt, main, channels);
                 work.push((root, channels));
             }
         }
@@ -449,8 +450,11 @@ fn apply_animation_filtered(
     let mut applied = AnimationApplied::default();
     for (root, channels) in work {
         for c in channels {
+            // A range callback that reads the data: clamp before the write, with the data as it
+            // is when this channel is written (earlier channels of this frame included).
+            let value = clamp_to_data_range(&*host, root, &c);
             if host
-                .set_path(root, &c.data_path, c.array_index, Value::Float(c.value))
+                .set_path(root, &c.data_path, c.array_index, Value::Float(value))
                 .is_ok()
             {
                 applied.channels += 1;
@@ -458,6 +462,349 @@ fn apply_animation_filtered(
         }
     }
     Ok(applied)
+}
+
+// Ported from blender/source/blender/animrig/intern/evaluation.cc (`evaluate_keyframe_data`,
+// `evaluate_action`, `blend_layer_results`, `apply_evaluation_result`), Blender 5.2.4,
+// GPL-2.0-or-later: a layered action (no NLA) collects its channels in an `EvaluationResult`, a
+// `blender::Map<PropIdentifier, AnimatedProperty>` reserved for the channelbag's F-curve count,
+// and writes them in the **map's slot order**, not in F-curve order. The order matters where one
+// property's range depends on another's value: `ShapeKey.value` is clamped to the sliders in
+// force when it is written (`rna_ShapeKey_value_range`, `rna_ShapeKey_value_set`), so a value
+// above the previous `slider_max` survives only when `slider_max` comes first (verified on
+// 5.2.4 with `value` and `slider_max` keyed together: blocks `K`, `A`, `G`, `Key` keep 2.5,
+// `B`, `F`, `Smile` are cut to the old 1.0, as the map order below predicts; with a third
+// channel `slider_min` the map has 8 slots and `A` is cut). The NLA writes its channels in its
+// own order (`nladata_flush_channels`), which `frap_anim::eval::nla` keeps.
+/// `channels` (the evaluation of `adt`'s active action at one frame) in the order Blender's
+/// `apply_evaluation_result` writes them; unchanged when the NLA evaluates.
+fn blender_write_order(
+    host: &dyn HostRead,
+    root: Root,
+    adt: &AnimData,
+    main: &Main,
+    channels: Vec<frap_anim::eval::AnimChannel>,
+) -> Vec<frap_anim::eval::AnimChannel> {
+    if !adt.nla_tracks.is_empty() && adt.use_nla {
+        return channels;
+    }
+    let Some(action) = adt.action.and_then(|a| main.actions.get(a)) else {
+        return channels;
+    };
+    let resolves = |path: &str, index: i32| {
+        let Some(segs) = parse_path(path) else {
+            return false;
+        };
+        read_path(host, root, &segs).is_some_and(|(_, prop, _)| match prop.array {
+            frap_rna::ArrayShape::Scalar => true,
+            _ => usize::try_from(index).is_ok_and(|i| i < prop.array_len()),
+        })
+    };
+    let mut result: Option<blender_map::Map> = None;
+    for layer in &action.layers {
+        if layer.influence <= 0.0 {
+            continue;
+        }
+        let Some(frap_anim::ActionStrip::Keyframe(strip)) = layer.strips.first() else {
+            continue;
+        };
+        let Some(bag) = strip
+            .channelbags
+            .iter()
+            .find(|c| c.slot_handle == adt.action_slot_handle)
+        else {
+            continue;
+        };
+        // `evaluate_keyframe_data`: reserved for every F-curve, filled with the evaluatable
+        // ones whose path resolves, in F-curve order.
+        let mut layer_map = blender_map::Map::default();
+        layer_map.reserve(bag.fcurves.len());
+        for fc in &bag.fcurves {
+            if fc.data_path.is_empty() || fc.mute || fc.is_empty() {
+                continue;
+            }
+            if resolves(&fc.data_path, fc.array_index) {
+                layer_map.add_overwrite(fc.data_path.clone(), fc.array_index);
+            }
+        }
+        if layer_map.is_empty() {
+            continue;
+        }
+        match result.as_mut() {
+            // The first layer with results is moved in as it is.
+            None => result = Some(layer_map),
+            // `blend_layer_results`: new channels are stored in the layer's map order.
+            Some(r) => {
+                for (path, index) in layer_map.keys() {
+                    r.add_overwrite(path.clone(), *index);
+                }
+            }
+        }
+    }
+    let Some(map) = result else {
+        return channels;
+    };
+    let mut rest = channels;
+    let mut out = Vec::with_capacity(rest.len());
+    for (path, index) in map.keys() {
+        if let Some(i) = rest
+            .iter()
+            .position(|c| c.array_index == *index && c.data_path == *path)
+        {
+            out.push(rest.remove(i));
+        }
+    }
+    // Channels the map does not hold (their path does not resolve) fail at the write anyway.
+    out.extend(rest);
+    out
+}
+
+/// A port of the parts of `blender::Map` (blender/source/blender/blenlib/BLI_map.hh,
+/// BLI_hash.hh, BLI_hash_tables.hh, BLI_probing_strategies.hh; Blender 5.2.4,
+/// GPL-2.0-or-later) that decide its iteration order for `Map<PropIdentifier,
+/// AnimatedProperty>`: `hash_string` (djb2 with `+`, over signed `char`s),
+/// `get_default_hash(rna_path, array_index)` (`hash ^ 19349669 * index`), the
+/// `PythonProbingStrategy` (`perturb >>= 5; hash = 5 * hash + 1 + perturb`), a maximum load
+/// factor of 1/2, no inline slots (the key and value take more than 100 bytes), growth by
+/// `realloc_and_reinsert` (old slots reinserted in slot order) and iteration in slot order.
+mod blender_map {
+    use smol_str::SmolStr;
+
+    /// `hash_string`
+    fn hash_string(s: &str) -> u64 {
+        let mut h: u64 = 5381;
+        for &b in s.as_bytes() {
+            // `char` is signed on the platforms Blender is released for (x86-64, Apple arm64).
+            h = h.wrapping_mul(33).wrapping_add(b as i8 as i64 as u64);
+        }
+        h
+    }
+
+    /// `PropIdentifier::hash`
+    pub(super) fn hash(path: &str, index: i32) -> u64 {
+        hash_string(path) ^ 19_349_669u64.wrapping_mul(index as i64 as u64)
+    }
+
+    /// `power_of_2_max`
+    fn power_of_2_max(n: u64) -> u64 {
+        if n <= 1 { n } else { n.next_power_of_two() }
+    }
+
+    type Key = (SmolStr, i32);
+
+    /// The slots of a map (keys only: the order is all that matters here).
+    #[derive(Default)]
+    pub(super) struct Map {
+        slots: Vec<Option<(u64, Key)>>,
+        usable: usize,
+        occupied: usize,
+    }
+
+    impl Map {
+        fn len(&self) -> usize {
+            self.slots.iter().filter(|s| s.is_some()).count()
+        }
+
+        pub(super) fn is_empty(&self) -> bool {
+            self.len() == 0
+        }
+
+        /// `reserve`
+        pub(super) fn reserve(&mut self, n: usize) {
+            if self.usable < n {
+                self.realloc_and_reinsert(n);
+            }
+        }
+
+        /// `realloc_and_reinsert` with `LoadFactor(1, 2)` and no inline buffer.
+        fn realloc_and_reinsert(&mut self, min_usable: usize) {
+            let min_usable = min_usable.max(self.len() * 2) as u64;
+            let total = power_of_2_max(min_usable * 2).max(1);
+            let old = std::mem::replace(&mut self.slots, vec![None; total as usize]);
+            self.usable = (total / 2) as usize;
+            self.occupied = 0;
+            for (h, k) in old.into_iter().flatten() {
+                self.insert_new(h, k);
+            }
+        }
+
+        fn insert_new(&mut self, h: u64, k: Key) {
+            let mask = self.slots.len() as u64 - 1;
+            let (mut probe, mut perturb) = (h, h);
+            loop {
+                let i = (probe & mask) as usize;
+                if self.slots[i].is_none() {
+                    self.slots[i] = Some((h, k));
+                    self.occupied += 1;
+                    return;
+                }
+                perturb >>= 5;
+                probe = probe.wrapping_mul(5).wrapping_add(1).wrapping_add(perturb);
+            }
+        }
+
+        /// `add_overwrite`: a key already present keeps its slot.
+        pub(super) fn add_overwrite(&mut self, path: SmolStr, index: i32) {
+            if self.occupied >= self.usable {
+                self.realloc_and_reinsert(self.len() + 1);
+            }
+            let h = hash(&path, index);
+            let mask = self.slots.len() as u64 - 1;
+            let (mut probe, mut perturb) = (h, h);
+            loop {
+                let i = (probe & mask) as usize;
+                match &self.slots[i] {
+                    None => {
+                        self.slots[i] = Some((h, (path, index)));
+                        self.occupied += 1;
+                        return;
+                    }
+                    Some((sh, (p, x))) if *sh == h && *p == path && *x == index => return,
+                    Some(_) => {}
+                }
+                perturb >>= 5;
+                probe = probe.wrapping_mul(5).wrapping_add(1).wrapping_add(perturb);
+            }
+        }
+
+        /// The keys in slot order (`items()`).
+        pub(super) fn keys(&self) -> impl Iterator<Item = &Key> {
+            self.slots.iter().flatten().map(|(_, k)| k)
+        }
+    }
+}
+
+// Ported from blender/source/blender/makesrna/intern/{rna_nodetree,rna_fcurve,rna_modifier,
+// rna_constraint,rna_color}.cc (`rna_Node_width_range`, `rna_Node_height_range`,
+// `rna_FModifier_blending_range`, `rna_MultiresModifier_level_range`,
+// `rna_ActionConstraint_minmax_range`, `rna_CurveMapping_clip{min,max}{x,y}_range`; Blender
+// 5.2.4, GPL-2.0-or-later). `BKE_animsys_write_to_rna_path` clamps an animated value to
+// `RNA_property_float_range` / `_int_range`, which is the range callback's answer when the
+// property has one (the static range is then ignored); these callbacks read the struct's own
+// data. `MeshPolygon.material_index` has no callback in 5.2.4 (`rna_MeshPoly_material_index_range`
+// is `#if 0`): it keeps its static `0..INT_MAX` range ([`dynamic_hard`]).
+/// The range a range callback gives `prop` of `owner` from its data, if it has such a callback.
+fn data_range(
+    host: &dyn HostRead,
+    owner: &dyn Rna,
+    ptr: &RnaPtr,
+    prop: &'static PropDef,
+) -> Option<(f64, f64)> {
+    let srna = owner.srna();
+    let read = |name: &str| -> Option<f64> {
+        let p = srna.find_prop(name)?;
+        match get_field(host, owner, ptr, p)? {
+            Field::Value(Value::Float(f)) => Some(f64::from(f)),
+            Field::Value(Value::Double(d)) => Some(d),
+            Field::Value(Value::Int(i)) => Some(i as f64),
+            Field::Value(Value::Enum(e)) => match &p.kind {
+                frap_rna::PropKind::Enum { items, .. } => items
+                    .iter()
+                    .find(|i| i.identifier == e.as_str())
+                    .map(|i| f64::from(i.value)),
+                _ => None,
+            },
+            _ => None,
+        }
+    };
+    range_from_data(srna, prop.identifier, &read)
+}
+
+/// [`data_range`] given the owner's struct, the property and a reader of the owner's other
+/// properties (numbers; enums as their integer value).
+fn range_from_data(
+    srna: &'static StructDef,
+    id: &str,
+    read: &dyn Fn(&str) -> Option<f64>,
+) -> Option<(f64, f64)> {
+    if srna.is_a("Node") {
+        return match id {
+            "width" => Some((read("bl_width_min")?, read("bl_width_max")?)),
+            "height" => Some((read("bl_height_min")?, read("bl_height_max")?)),
+            _ => None,
+        };
+    }
+    if srna.is_a("FModifier") && matches!(id, "blend_in" | "blend_out") {
+        // `*max = fcm->efra - fcm->sfra` (in float).
+        let (start, end) = (read("frame_start")? as f32, read("frame_end")? as f32);
+        return Some((0.0, f64::from(end - start)));
+    }
+    if srna.is_a("MultiresModifier") && matches!(id, "levels" | "sculpt_levels" | "render_levels") {
+        // `max_ii(0, mmd->totlvl)`. frap cannot subdivide a Multires modifier (OUT in
+        // OPERATORS.md) and does not bind `total_levels`: its modifiers have no levels (0).
+        return Some((0.0, read("total_levels").unwrap_or(0.0).max(0.0)));
+    }
+    if srna.is_a("ActionConstraint") && matches!(id, "min" | "max") {
+        return Some(action_constraint_range(read("transform_channel")? as i32));
+    }
+    if srna.is_a("CurveMapping") {
+        return match id {
+            "clip_min_x" => Some((-100.0, read("clip_max_x")?)),
+            "clip_min_y" => Some((-100.0, read("clip_max_y")?)),
+            "clip_max_x" => Some((read("clip_min_x")?, 100.0)),
+            "clip_max_y" => Some((read("clip_min_y")?, 100.0)),
+            _ => None,
+        };
+    }
+    None
+}
+
+/// `rna_ActionConstraint_minmax_range`: `transform_channel` values 0, 1, 2 (`ROTATION_X/Y/Z`)
+/// range over ±180, the others over ±1000.
+fn action_constraint_range(transform_channel: i32) -> (f64, f64) {
+    if matches!(transform_channel, 0..=2) {
+        (-180.0, 180.0)
+    } else {
+        (-1000.0, 1000.0)
+    }
+}
+
+/// The animated `c.value` clamped as `RNA_property_float_clamp` / `RNA_property_int_clamp` does
+/// for a property whose range callback reads the data ([`data_range`]): `value < min` gives
+/// `min`, else `value > max` gives `max` (so `min` wins when the range is empty). Other
+/// properties keep their value (the writer applies the static or [`dynamic_hard`] range).
+fn clamp_to_data_range(host: &dyn HostRead, root: Root, c: &frap_anim::eval::AnimChannel) -> f32 {
+    const RANGED: &[&str] = &[
+        "width",
+        "height",
+        "blend_in",
+        "blend_out",
+        "levels",
+        "sculpt_levels",
+        "render_levels",
+        "min",
+        "max",
+        "clip_min_x",
+        "clip_min_y",
+        "clip_max_x",
+        "clip_max_y",
+    ];
+    let last = c.data_path.rsplit('.').next().unwrap_or_default();
+    if !RANGED.contains(&last) {
+        return c.value;
+    }
+    let Some(segs) = parse_path(&c.data_path) else {
+        return c.value;
+    };
+    let range = with_path(host, root, &segs, &mut |leaf| match leaf {
+        Leaf::Prop {
+            owner, ptr, prop, ..
+        } => data_range(host, owner, ptr, prop),
+        Leaf::Struct { .. } => None,
+    });
+    match range {
+        Some((lo, hi)) => {
+            let v = f64::from(c.value);
+            if v < lo {
+                lo as f32
+            } else if v > hi {
+                hi as f32
+            } else {
+                c.value
+            }
+        }
+        None => c.value,
+    }
 }
 
 /// The refined struct of the datablock at `root` (`SunLight`, `ShaderNodeTree`).
@@ -865,6 +1212,141 @@ mod tests {
         assert!(tags_animation_on_call(s("NlaTracks"), "new"));
         assert!(!tags_animation_on_call(s("ActionSlots"), "new"));
         assert!(!tags_animation_on_call(s("Object"), "keyframe_insert"));
+    }
+
+    /// The `blender::Map` port gives Blender's write order (verified on 5.2.4 through the
+    /// `ShapeKey.value` / `slider_max` clamp: `slider_max` first for `K`, `A`, `G`, `Key`,
+    /// `value` first for `B`, `F`, `Smile`; with `slider_min` as a third channel the map has 8
+    /// slots and `A` writes `value` first).
+    #[test]
+    fn evaluation_result_order_is_blenders_map_order() {
+        let order = |name: &str, props: &[&str]| {
+            let mut m = blender_map::Map::default();
+            m.reserve(props.len());
+            for p in props {
+                m.add_overwrite(format!("key_blocks[\"{name}\"].{p}").into(), 0);
+            }
+            m.keys()
+                .map(|(p, _)| p.rsplit('.').next().unwrap().to_owned())
+                .collect::<Vec<_>>()
+        };
+        for (name, slider_first) in [
+            ("K", true),
+            ("A", true),
+            ("G", true),
+            ("Key", true),
+            ("B", false),
+            ("F", false),
+            ("Smile", false),
+        ] {
+            let o = order(name, &["value", "slider_max"]);
+            assert_eq!(o[0] == "slider_max", slider_first, "{name}: {o:?}");
+        }
+        assert_eq!(
+            order("A", &["value", "slider_max", "slider_min"]),
+            ["value", "slider_min", "slider_max"]
+        );
+        assert_eq!(
+            order("K", &["value", "slider_max", "slider_min"]),
+            ["slider_max", "value", "slider_min"]
+        );
+        // `hash_string` is djb2 with `+`; the array index mixes in with factor 19349669.
+        assert_eq!(blender_map::hash("", 0), 5381);
+        assert_eq!(blender_map::hash("a", 0), 5381 * 33 + 97);
+        assert_eq!(blender_map::hash("a", 1), (5381 * 33 + 97) ^ 19_349_669);
+        // Growth past the reserved size reinserts in slot order and keeps every key once.
+        let mut m = blender_map::Map::default();
+        m.reserve(1);
+        for i in 0..9 {
+            m.add_overwrite("location".into(), i % 3);
+        }
+        assert_eq!(m.keys().count(), 3);
+    }
+
+    /// The range callbacks that read the struct's data (`rna_Node_width_range`,
+    /// `rna_FModifier_blending_range`, `rna_MultiresModifier_level_range`,
+    /// `rna_CurveMapping_clip*_range`), and none for other properties.
+    #[test]
+    fn data_ranges_read_the_owner() {
+        let s = |id: &str| frap_spec_rna::find_struct(id).unwrap();
+        let vals = |pairs: &'static [(&'static str, f64)]| {
+            move |name: &str| pairs.iter().find(|(n, _)| *n == name).map(|(_, v)| *v)
+        };
+        let node = vals(&[
+            ("bl_width_min", 100.0),
+            ("bl_width_max", 700.0),
+            ("bl_height_min", 30.0),
+            ("bl_height_max", 3.0e38),
+        ]);
+        assert_eq!(
+            range_from_data(s("ShaderNodeBsdfPrincipled"), "width", &node),
+            Some((100.0, 700.0))
+        );
+        assert_eq!(
+            range_from_data(s("ShaderNodeBsdfPrincipled"), "height", &node),
+            Some((30.0, 3.0e38))
+        );
+        assert_eq!(
+            range_from_data(s("ShaderNodeBsdfPrincipled"), "location", &node),
+            None
+        );
+        let fm = vals(&[("frame_start", 2.0), ("frame_end", 10.5)]);
+        assert_eq!(
+            range_from_data(s("FModifier"), "blend_in", &fm),
+            Some((0.0, 8.5))
+        );
+        assert_eq!(range_from_data(s("FModifier"), "influence", &fm), None);
+        let none = vals(&[]);
+        assert_eq!(
+            range_from_data(s("MultiresModifier"), "levels", &none),
+            Some((0.0, 0.0)),
+            "frap's Multires modifiers have no levels"
+        );
+        let mr = vals(&[("total_levels", 3.0)]);
+        assert_eq!(
+            range_from_data(s("MultiresModifier"), "render_levels", &mr),
+            Some((0.0, 3.0))
+        );
+        let cm = vals(&[
+            ("clip_min_x", -2.0),
+            ("clip_max_x", 4.0),
+            ("clip_min_y", 0.5),
+            ("clip_max_y", 1.0),
+        ]);
+        assert_eq!(
+            range_from_data(s("CurveMapping"), "clip_min_x", &cm),
+            Some((-100.0, 4.0))
+        );
+        assert_eq!(
+            range_from_data(s("CurveMapping"), "clip_max_y", &cm),
+            Some((0.5, 100.0))
+        );
+        assert_eq!(range_from_data(s("Object"), "location", &cm), None);
+    }
+
+    /// `rna_ActionConstraint_minmax_range`: rotation channels range over ±180.
+    #[test]
+    fn action_constraint_ranges_follow_the_channel() {
+        assert_eq!(action_constraint_range(0), (-180.0, 180.0));
+        assert_eq!(action_constraint_range(2), (-180.0, 180.0));
+        assert_eq!(action_constraint_range(10), (-1000.0, 1000.0));
+        assert_eq!(action_constraint_range(20), (-1000.0, 1000.0));
+    }
+
+    /// `MeshPolygon.material_index` has no range callback in 5.2.4: the static `0..INT_MAX`
+    /// range applies to animated values (negative keys read 0, large ones stay).
+    #[test]
+    fn material_index_keeps_its_static_range() {
+        let s = frap_spec_rna::find_struct("MeshPolygon").unwrap();
+        let p = s.find_prop("material_index").unwrap();
+        assert_eq!(
+            channel_value(p, "MeshPolygon", &Value::Int(1), 0, -3.0),
+            Some(Value::Int(0))
+        );
+        assert_eq!(
+            channel_value(p, "MeshPolygon", &Value::Int(0), 0, 5.7),
+            Some(Value::Int(5))
+        );
     }
 
     #[test]

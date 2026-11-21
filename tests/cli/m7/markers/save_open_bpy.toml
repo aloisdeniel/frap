@@ -1,0 +1,10 @@
+# WP 7.6: timeline markers and colour management through a save and an open, in bpy form:
+# the markers (with their camera) are written to the .frap and read back; wm.open_mainfile
+# checks the file's colour management as Blender's file read does
+# (IMB_colormanagement_check_file_config): the output override's 'Filmic', which its display
+# 'Display P3' lacks, becomes 'Standard' with Blender's log line as a WARNING report
+# (`scene output view "Filmic" not found, setting to "Standard".`), the compatible look stays.
+# Values verified on Blender 5.2.4. Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

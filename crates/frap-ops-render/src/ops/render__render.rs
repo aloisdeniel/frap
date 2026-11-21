@@ -26,7 +26,13 @@
 //!    only way to the GPU: `GPU_UNAVAILABLE` when there is no adapter or no `gpu` feature).
 //!    Nothing of the session changes except the `Render Result` image (D-07: Blender's
 //!    `ED_update_for_newframe` after the render re-applies the animation of `frame_current` to
-//!    the originals, overwriting manual edits of animated channels; frap keeps them).
+//!    the originals, overwriting manual edits of animated channels; frap keeps them) and
+//!    `scene.camera`, which follows the timeline markers as in Blender (WP 7.6): each frame
+//!    renders with the markers' camera of that frame (`BKE_scene_camera_switch_update` in
+//!    `render_update_depsgraph` / `do_render_full_pipeline`, on the original scene), else with
+//!    `scene.camera` (`Cannot render, no camera` when a frame has neither), `{camera_name}`
+//!    in output paths names it, and afterwards the scene camera is the markers' camera of
+//!    `frame_current` (`ED_update_for_newframe`).
 //! 3. `BLENDER_EEVEE` renders with frap's EEVEE-like renderer (M5); `CYCLES` renders with
 //!    `BLENDER_EEVEE`, with a WARNING (D-12). A render service without EEVEE falls back to
 //!    Workbench, with a WARNING. EEVEE renders also report what the world graph leaves out.
@@ -274,10 +280,18 @@ fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
     if resolution[0] < 1 || resolution[1] < 1 {
         return Err(OpError::Runtime("Image too small".into()));
     }
-    let camera = scene
-        .camera
-        .and_then(|r| c.main.objects.get(r))
-        .ok_or_else(|| OpError::Runtime("Cannot render, no camera".into()))?;
+    // The camera of each frame: the timeline markers' camera at that frame
+    // (`BKE_scene_camera_switch_update` before the frame renders, WP 7.6), else `scene.camera`
+    // (verified on 5.2.4: with `scene.camera = None` a marker camera still renders).
+    let frame_camera = |f: Option<i32>| {
+        let at = f.unwrap_or(scene.frame_current);
+        frap_scene::id::timeline_marker::camera_switch_find(c.main, scene, at)
+            .or(scene.camera)
+            .and_then(|r| c.main.objects.get(r))
+    };
+    if frames.iter().any(|f| frame_camera(*f).is_none()) {
+        return Err(OpError::Runtime("Cannot render, no camera".into()));
+    }
 
     let writes = p.animation.value || p.write_still.value;
     let out = frame_output(scene, view_layer, writes)?;
@@ -290,22 +304,23 @@ fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
                 .map(|s| s.to_string_lossy().into_owned())
                 .unwrap_or_default()
         });
-        let vars = TemplateVars::render(
-            blend_name.as_deref(),
-            &scene.header.name,
-            Some(camera.header.name.as_str()),
-            resolution,
-            r.fps,
-            r.fps_base,
-        );
-        let rules = OutputRules {
-            filepath: &r.filepath,
-            vars: &vars,
-            blend_file: c.main.filepath.as_deref(),
-            use_file_extension: r.use_file_extension,
-            file_format: &r.image_settings.file_format,
-        };
         for f in &frames {
+            // `{camera_name}` is the frame's camera (the path is made after the switch).
+            let vars = TemplateVars::render(
+                blend_name.as_deref(),
+                &scene.header.name,
+                frame_camera(*f).map(|o| o.header.name.as_str()),
+                resolution,
+                r.fps,
+                r.fps_base,
+            );
+            let rules = OutputRules {
+                filepath: &r.filepath,
+                vars: &vars,
+                blend_file: c.main.filepath.as_deref(),
+                use_file_extension: r.use_file_extension,
+                file_format: &r.image_settings.file_format,
+            };
             let o = output::output_path(&rules, &cwd, *f).map_err(OpError::Runtime)?;
             outputs.push(Some(o));
         }
@@ -517,7 +532,7 @@ fn store_render_result(cx: &mut OpCtx, film: Film) {
     ),
     notes = [
         "needs a GPU: GPU_UNAVAILABLE without an adapter or in a build without the gpu feature",
-        "the scene is rendered from a copy: nothing changes except bpy.data.images['Render Result']",
+        "the scene is rendered from a copy: nothing changes except bpy.data.images['Render Result'] and scene.camera, which follows the timeline markers as in Blender (each frame renders with the markers' camera of that frame)",
         "animation=True renders frame_start..frame_end by scene.frame_step (frame_step=0: frame_start only), each frame from its own copy with the animation of that frame; frame_current is unchanged afterwards; render.use_overwrite/use_placeholder apply as in Blender",
         "output paths follow Blender 5.2: templates ({scene_name}, {resolution_x:####}, ...), // relative to the saved .frap (else the cwd), relative paths against the cwd, # runs for animation frames, use_file_extension",
         "a path without a directory part ('shot.png') is written to the cwd (Blender 5.2.4 fails to save it)",
@@ -544,6 +559,13 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
                 touch_file(&out.absolute);
             }
         }
+        // `render_update_depsgraph` / `do_render_full_pipeline`: the scene camera follows the
+        // timeline markers at the frame, on the original scene, before the clone is made.
+        {
+            let scene = cx.ctx().win.scene;
+            let (main, log) = cx.main_mut();
+            frap_scene::id::timeline_marker::camera_switch_update_at(main, log, scene, *frame);
+        }
         // One COW clone per frame (`render_frame`), dropped before the next frame.
         let film = match render_and_write(cx, &plan, *frame, out.as_ref(), engine, &mut cm_warnings)
         {
@@ -560,6 +582,15 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
             files.push(Value::Str(out.path.as_str().into()));
         }
         last = Some(film);
+    }
+    // `screen_render_exec` ends with `ED_update_for_newframe` at the restored frame: the scene
+    // camera is the markers' camera of `frame_current` (verified on 5.2.4: after rendering
+    // frames 1..6 with markers binding `Camera.001` at 3 and `Camera` at 5, the scene camera is
+    // `Camera.001`, the left-most marker's, for frame 1).
+    {
+        let scene = cx.ctx().win.scene;
+        let (main, log) = cx.main_mut();
+        frap_scene::id::timeline_marker::camera_switch_update(main, log, scene);
     }
     let resolution = match last {
         Some(film) => {

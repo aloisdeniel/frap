@@ -852,3 +852,123 @@ fn m6_data_round_trips() {
     let again = save(&o.main, &o.win, &Preferences::default(), None).unwrap();
     assert_eq!(again.bytes, saved.bytes);
 }
+
+/// WP 7.6: timeline markers (name, frame, selection, camera) and the glTF add-on's variant data
+/// (M7 W0: the scene's variant list and active variant, a mesh's per-slot mappings, default
+/// materials and UI pointer) round-trip; files without them read as before and get no keys.
+#[test]
+fn m7_markers_and_gltf_variants_round_trip() {
+    use frap_mesh::gltf_variants::{
+        GltfVariantDefaultMaterial, GltfVariantPointer, GltfVariantPrimitive,
+    };
+    use frap_scene::id::{GltfVariant, TimelineMarker};
+
+    let (mut main, win) = frap_scene::startup::factory();
+    let text = to_json(&main, &win, &Preferences::default(), None)
+        .unwrap()
+        .0
+        .to_string();
+    let mut log = ChangeLog::default();
+    let camera = main.objects.find("Camera");
+    let mat = main.materials.find("Material");
+    {
+        let s = main.scenes.get_mut(win.scene, &mut log).unwrap();
+        s.timeline_markers = vec![
+            TimelineMarker {
+                name: "Intro".into(),
+                frame: -3,
+                select: false,
+                camera,
+            },
+            TimelineMarker::new("B", 40),
+            TimelineMarker::new("B", 41),
+        ];
+        s.gltf2_variants.variants = vec![
+            GltfVariant {
+                name: "Red".into(),
+                variant_idx: 0,
+            },
+            GltfVariant {
+                name: "Blue".into(),
+                variant_idx: 1,
+            },
+        ];
+        s.gltf2_variants.active_variant = 1;
+    }
+    {
+        let me = main.meshes.find("Cube").unwrap();
+        let m = main.meshes.get_mut(me, &mut log).unwrap();
+        m.gltf2_variants.mesh_data = vec![GltfVariantPrimitive {
+            material_slot_index: 0,
+            material: mat,
+            variants: vec![
+                GltfVariantPointer { variant_idx: 0 },
+                GltfVariantPointer { variant_idx: 1 },
+            ],
+            active_variant_idx: 1,
+        }];
+        m.gltf2_variants.default_materials = vec![GltfVariantDefaultMaterial {
+            material_slot_index: 0,
+            default_material: mat,
+        }];
+        m.gltf2_variants.pointer = "Red".into();
+    }
+    let full = to_json(&main, &win, &Preferences::default(), None)
+        .unwrap()
+        .0
+        .to_string();
+    for key in [
+        "timeline_markers",
+        "gltf2_KHR_materials_variants_variants",
+        "gltf2_variant_mesh_data",
+    ] {
+        assert!(full.contains(key), "{key} not written");
+    }
+    let saved = save(&main, &win, &Preferences::default(), None).unwrap();
+    let o = open(&saved.bytes, false).unwrap();
+    assert_same(&normalized(&o.main, &o.win), &normalized(&main, &win));
+    let s = o.main.scenes.get(o.win.scene).unwrap();
+    assert_eq!(s.timeline_markers.len(), 3);
+    assert_eq!(s.timeline_markers[0].camera, o.main.objects.find("Camera"));
+    assert!(s.timeline_markers[1].select);
+    // A file without markers or variants has none of the keys (older readers keep reading it).
+    for key in [
+        "timeline_markers",
+        "gltf2_KHR_materials_variants_variants",
+        "gltf2_variant_mesh_data",
+    ] {
+        assert!(
+            !text.contains(key),
+            "{key} written for a plain factory file"
+        );
+    }
+}
+
+/// WP 7.6: loading runs `IMB_colormanagement_check_file_config`: an output override whose
+/// display lacks its view falls back as Blender's file read does, with Blender's log line.
+#[test]
+fn opening_checks_the_colour_management_of_the_file() {
+    let (mut main, win) = frap_scene::startup::factory();
+    let mut log = ChangeLog::default();
+    {
+        let s = main.scenes.get_mut(win.scene, &mut log).unwrap();
+        let ims = &mut s.render.image_settings;
+        ims.color_management = "OVERRIDE".into();
+        ims.view_settings.view_transform = "Filmic".into();
+        ims.view_settings.look = "Medium High Contrast".into();
+        ims.display_settings.display_device = "Display P3".into();
+    }
+    let saved = save(&main, &win, &Preferences::default(), None).unwrap();
+    let o = open(&saved.bytes, false).unwrap();
+    assert_eq!(
+        o.warnings,
+        ["scene output view \"Filmic\" not found, setting to \"Standard\"."]
+    );
+    let s = o.main.scenes.get(o.win.scene).unwrap();
+    let vs = &s.render.image_settings.view_settings;
+    assert_eq!(
+        (vs.view_transform.as_str(), vs.look.as_str()),
+        ("Standard", "Medium High Contrast")
+    );
+    assert_eq!(s.view_settings.view_transform, "AgX");
+}

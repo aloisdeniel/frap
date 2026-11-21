@@ -1,0 +1,225 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "marker.select_box",
+  "bl_idname": "MARKER_OT_select_box",
+  "label": "Marker Box Select",
+  "description": "Select all time markers using box selection",
+  "bl_options": [
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNNNN"
+    }
+  },
+  "properties": [
+    {
+      "identifier": "xmin",
+      "name": "X Min",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "xmax",
+      "name": "X Max",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "ymin",
+      "name": "Y Min",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "ymax",
+      "name": "Y Max",
+      "description": "",
+      "type": "INT",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": 0,
+      "hard_min": -2147483648,
+      "hard_max": 2147483647,
+      "soft_min": -2147483648,
+      "soft_max": 2147483647,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "wait_for_input",
+      "name": "Wait for Input",
+      "description": "",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": true,
+      "hidden": true,
+      "skip_save": true,
+      "flags": [
+        "HIDDEN",
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "mode",
+      "name": "Mode",
+      "description": "",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "SET",
+      "enum_items": [
+        {
+          "identifier": "SET",
+          "name": "Set",
+          "description": "Set a new selection",
+          "value": 3
+        },
+        {
+          "identifier": "ADD",
+          "name": "Extend",
+          "description": "Extend existing selection",
+          "value": 1
+        },
+        {
+          "identifier": "SUB",
+          "name": "Subtract",
+          "description": "Subtract existing selection",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    },
+    {
+      "identifier": "tweak",
+      "name": "Tweak",
+      "description": "Operator has been activated using a click-drag event",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": true,
+      "flags": [
+        "SKIP_SAVE",
+        "ANIMATABLE",
+        "SKIP_PRESET"
+      ],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": false
+    }
+  ],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": "headless-extended: runs as in the factory Layout screen's Timeline (Blender needs an animation editor showing markers): on the context scene's timeline_markers, with Blender's marker polls (markers exist or are selected, scene.tool_settings.lock_markers off)",
+    "headless": "extended",
+    "planned": "M7",
+    "extension": false,
+    "notes": []
+  }
+}

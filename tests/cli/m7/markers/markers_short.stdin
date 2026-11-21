@@ -1,0 +1,43 @@
+marker.select_all
+marker.delete
+marker.add
+context.scene.timeline_markers[0].name
+context.scene.frame_current = 12
+marker.add
+marker.add
+context.scene.timeline_markers.foreach_get('select')
+marker.select_all action=SELECT
+marker.select_leftright mode=LEFT
+context.scene.timeline_markers.foreach_get('select')
+marker.move frames=3
+marker.duplicate frames=10
+context.scene.timeline_markers.keys()
+context.scene.timeline_markers.foreach_get('frame')
+marker.rename name=Hero
+context.scene.timeline_markers['F_01'].frame
+context.scene.timeline_markers[1].name
+object.camera_add location=0,-6,1
+context.scene.frame_current = 22
+marker.camera_bind
+context.scene.camera
+context.scene.frame_current = 2
+context.scene.camera
+context.scene.frame_set(2)
+context.scene.camera
+context.scene.timeline_markers.new('Cut', frame=40)
+context.scene.timeline_markers[5].camera = data.objects['Camera']
+context.scene.frame_set(41)
+context.scene.camera
+data.scenes.new('Shot2')
+marker.make_links_scene scene=Scene
+marker.make_links_scene scene=Shot2
+data.scenes['Shot2'].timeline_markers.keys()
+context.scene.timeline_markers.remove(data.scenes['Shot2'].timeline_markers[0])
+context.scene.tool_settings.lock_markers = True
+marker.move frames=1
+marker.select_all
+context.scene.tool_settings.lock_markers = False
+marker.select_all action=DESELECT
+marker.delete
+context.scene.timeline_markers.clear()
+context.scene.timeline_markers.keys()

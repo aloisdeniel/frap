@@ -117,6 +117,7 @@ fn default_equals_fresh_tool_settings() {
     check("ToolSettings", "use_proportional_edit_objects", |p| v.rna_get(p));
     check("ToolSettings", "use_proportional_projected", |p| v.rna_get(p));
     check("ToolSettings", "use_proportional_connected", |p| v.rna_get(p));
+    check("ToolSettings", "lock_markers", |p| v.rna_get(p));
     check("ToolSettings", "proportional_edit_falloff", |p| v.rna_get(p));
     check("ToolSettings", "proportional_size", |p| v.rna_get(p));
     check("ToolSettings", "double_threshold", |p| v.rna_get(p));

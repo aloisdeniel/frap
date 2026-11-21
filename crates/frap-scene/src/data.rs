@@ -1076,6 +1076,9 @@ impl Main {
             |t| t.remap_ref(a, to),
             log
         ));
+        // Timeline-marker cameras are no users (`IDWALK_CB_NOP`) but are remapped too (WP 7.6).
+        self.scenes
+            .update_where(|s| s.marker_refs(a), |s| s.remap_ref(a, to), log);
         crate::id::layers::sync_all(self, log);
     }
 
