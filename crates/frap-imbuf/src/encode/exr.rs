@@ -96,6 +96,7 @@ pub(crate) fn encode_exr(
         .iter()
         .enumerate()
         .map(|(k, name)| {
+            frap_math::budget::check_now();
             let plane = data.iter().skip(k).step_by(c).copied();
             let samples = if bit_depth == 16 {
                 FlatSamples::F16(plane.map(|v| to_half(v, max)).collect())
@@ -140,9 +141,12 @@ pub(crate) fn encode_exr(
         AnyChannels::sort(list),
     );
     let mut out = Cursor::new(Vec::new());
+    // `--stmt-timeout` (ARCHITECTURE §12): a cancellation point per compressed block (16
+    // scanlines for ZIP), so a 16-megapixel file stops about at the deadline.
     Image::new(image_attributes, layer)
         .write()
         .non_parallel()
+        .on_progress(|_| frap_math::budget::check_now())
         .to_buffered(&mut out)
         .map_err(|e| ImageError::Encode(format!("OpenEXR: {e}")))?;
     Ok(out.into_inner())

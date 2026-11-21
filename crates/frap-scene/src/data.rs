@@ -400,6 +400,10 @@ pub struct Main {
     /// selection of a new base (`object_base_new`, e.g. an object linked into another scene).
     /// Kept by `frap_scene::id::layers` (WP 3.10); not saved, rebuilt from the bases.
     pub base_selected: crate::id::layers::BaseSelectedMemory,
+    /// Runtime: the layer-collection trees Blender's lazy resync still starts from (the trees
+    /// at the last point Blender would have resynced; `frap_scene::id::layers::LazyResync`);
+    /// not saved.
+    pub lazy_resync: crate::id::layers::LazyResync,
     /// Runtime: the depsgraphs (scene, view layer name) the window has shown before its
     /// current one ([`crate::window::ShownDepsgraphs`]); not saved.
     pub shown_depsgraphs: crate::window::ShownDepsgraphs,

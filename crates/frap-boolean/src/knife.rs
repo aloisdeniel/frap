@@ -83,6 +83,7 @@ mod imp {
         let mut out = Vec::with_capacity(tris.len());
         let mut idx = Vec::with_capacity(tris.len());
         for &t in tris {
+            frap_math::budget::check();
             let [a, b, c] = p.tris[t].map(|v| p.positions[v as usize]);
             let (a, b, c) = (v3(a), v3(b), v3(c));
             let n = cross(b - a, c - a);
@@ -124,12 +125,14 @@ mod imp {
             self.any |= g.any_intersections;
             let ids: Vec<u32> = g.verts_f64.iter().map(|&p| self.vert(p)).collect();
             for &(a, b) in &g.isect_edges {
+                frap_math::budget::check();
                 let (a, b) = (ids[a as usize], ids[b as usize]);
                 if a != b {
                     self.isect.insert((a.min(b), a.max(b)));
                 }
             }
             for piece in &g.pieces {
+                frap_math::budget::check();
                 let Some(&(_, op, map, prep)) = keep.iter().find(|k| k.0 == piece.mesh) else {
                     continue;
                 };
@@ -159,6 +162,7 @@ mod imp {
             x
         }
         for t in &p.tris {
+            frap_math::budget::check();
             let a = find(&mut parent, t[0] as usize);
             for &v in &t[1..] {
                 let b = find(&mut parent, v as usize);

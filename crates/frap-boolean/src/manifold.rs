@@ -70,6 +70,7 @@ impl BooleanSolver for ManifoldSolver {
 
 #[cfg(feature = "manifold")]
 pub(crate) mod imp {
+    use manifold_rust::cancel::CancelToken;
     use manifold_rust::csg_tree::CsgNode;
     use manifold_rust::linalg::Vec3;
     use manifold_rust::manifold::Manifold;
@@ -116,6 +117,7 @@ pub(crate) mod imp {
             // `corner_tris` are face by face; recover each triangle's face from its corner.
             let mut f = 0usize;
             for t in m.corner_tris {
+                frap_math::budget::check();
                 while f + 1 < faces_num && t[0] >= m.face_offsets[f + 1] {
                     f += 1;
                 }
@@ -128,6 +130,7 @@ pub(crate) mod imp {
             }
         } else {
             for f in 0..faces_num {
+                frap_math::budget::check();
                 let (s, e) = (m.face_offsets[f] as usize, m.face_offsets[f + 1] as usize);
                 for c in s + 1..e.saturating_sub(1) {
                     tris.push([m.corner_verts[s], m.corner_verts[c], m.corner_verts[c + 1]]);
@@ -212,6 +215,58 @@ pub(crate) mod imp {
         }
     }
 
+    /// Cancels `token` when the statement's deadline passes (`--stmt-timeout`, ARCHITECTURE
+    /// §12): manifold-rust's kernels poll the token, not frap's thread-local budget. Dropping the
+    /// watchdog stops its thread.
+    struct Watchdog {
+        stop: Option<std::sync::mpsc::Sender<()>>,
+        thread: Option<std::thread::JoinHandle<()>>,
+    }
+
+    impl Watchdog {
+        fn new(token: &CancelToken) -> Watchdog {
+            let Some(deadline) = frap_math::budget::deadline() else {
+                return Watchdog {
+                    stop: None,
+                    thread: None,
+                };
+            };
+            let (stop, wait) = std::sync::mpsc::channel::<()>();
+            let token = token.clone();
+            let thread = std::thread::Builder::new()
+                .name("frap-boolean-deadline".into())
+                .spawn(move || {
+                    let left = deadline.saturating_duration_since(std::time::Instant::now());
+                    if let Err(std::sync::mpsc::RecvTimeoutError::Timeout) = wait.recv_timeout(left)
+                    {
+                        token.cancel();
+                    }
+                })
+                .ok();
+            Watchdog {
+                stop: Some(stop),
+                thread,
+            }
+        }
+    }
+
+    impl Drop for Watchdog {
+        fn drop(&mut self) {
+            drop(self.stop.take());
+            if let Some(t) = self.thread.take() {
+                let _ = t.join();
+            }
+        }
+    }
+
+    /// A kernel result cancelled by the [`Watchdog`]: the deadline has passed, so the budget
+    /// check unwinds with `Interrupted` (the statement answers `TIMEOUT`).
+    fn check_cancelled(status: Error) {
+        if status == Error::Cancelled {
+            frap_math::budget::check_now();
+        }
+    }
+
     pub(super) fn run(
         operands: &[BoolMesh<'_>],
         opts: &BoolOptions,
@@ -247,6 +302,8 @@ pub(crate) mod imp {
             })
             .collect();
 
+        let token = CancelToken::new();
+        let _watchdog = Watchdog::new(&token);
         let mut gl_result: MeshGL;
         if manifolds.iter().any(|m| m.status() != Error::NoError) {
             let plane = (operands.len() == 2
@@ -302,7 +359,13 @@ pub(crate) mod imp {
                 // inside-out operand counts as empty space), as a left fold.
                 let mut acc = manifolds[0].clone();
                 for m in &manifolds[1..] {
-                    acc = acc.boolean_with_engine(m, op, BooleanEngine::Robust);
+                    acc = acc.boolean_with_engine_and_token(
+                        m,
+                        op,
+                        BooleanEngine::Robust,
+                        Some(&token),
+                    );
+                    check_cancelled(acc.status());
                 }
                 acc
             } else if manifolds.len() == 1 {
@@ -312,8 +375,9 @@ pub(crate) mod imp {
                     .into_iter()
                     .map(|m| CsgNode::leaf(m.into_impl()))
                     .collect();
-                Manifold::from_impl(CsgNode::op_n(op, children).evaluate())
+                Manifold::from_impl(CsgNode::op_n(op, children).evaluate_with_token(Some(&token)))
             };
+            check_cancelled(result.status());
             gl_result = result.get_mesh_gl(-1);
             if result.status() != Error::NoError {
                 return Err(result_error(result.status()));
@@ -416,6 +480,7 @@ pub(crate) mod imp {
         };
         r.face_offsets.push(0);
         for f in &a.faces {
+            frap_math::budget::check();
             r.corner_verts.extend_from_slice(&f.verts);
             r.face_offsets.push(r.corner_verts.len() as u32);
         }
@@ -436,6 +501,7 @@ pub(crate) mod imp {
         // position, faces and corners in order.
         let mut vert_map: Vec<Option<Src>> = vec![None; r.positions.len()];
         for f in &a.faces {
+            frap_math::budget::check();
             let (m, lf) = local(f.face_id);
             let op = &operands[m];
             let (s, e) = (
@@ -459,6 +525,7 @@ pub(crate) mod imp {
         // `ensure_corner_map`.
         r.corner_src = Vec::with_capacity(r.corner_verts.len());
         for f in &a.faces {
+            frap_math::budget::check();
             let (m, lf) = local(f.face_id);
             let op = &operands[m];
             let s = op.face_offsets[lf as usize] as usize;

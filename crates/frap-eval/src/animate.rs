@@ -641,14 +641,63 @@ pub fn read_path(
 
 pub use frap_anim::eval::props::parse_path;
 
+/// The hard range `RNA_property_float_range` / `RNA_property_int_range` answer for `prop` of
+/// the struct `owner`, which differs from the static (dumped) range for properties with a range
+/// callback: `ShapeKey.value` (`rna_ShapeKey_value_range`: the block's
+/// `slider_min..slider_max`, applied by its setter; the other [`frap_scene::id::Scene::UNCLAMPED`]
+/// setters apply their own range too) and the `default_value` of a standard node socket
+/// (`rna_NodeSocketStandard_float_range` / `_int_range`: unbounded, from 0 for unsigned
+/// subtypes; frap's `coerce` applies the same rule to Python assignments). `None`: no range
+/// clamp before the setter.
+fn dynamic_hard(owner: &str, prop: &PropDef) -> Option<(f64, f64)> {
+    use frap_rna::{PropKind, Subtype};
+    if frap_scene::id::Scene::UNCLAMPED.contains(&(owner, prop.identifier)) {
+        return None;
+    }
+    let socket = owner.starts_with("NodeSocket") && prop.identifier == "default_value";
+    match &prop.kind {
+        PropKind::Float { .. } if socket && prop.subtype == Subtype::Unsigned => {
+            Some((0.0, f64::from(f32::MAX)))
+        }
+        PropKind::Float { .. } if socket => Some((-f64::from(f32::MAX), f64::from(f32::MAX))),
+        PropKind::Int { .. } if socket && prop.subtype == Subtype::Unsigned => {
+            Some((0.0, f64::from(i32::MAX)))
+        }
+        PropKind::Int { .. } if socket => Some((f64::from(i32::MIN), f64::from(i32::MAX))),
+        PropKind::Float { hard, .. } => Some(*hard),
+        PropKind::Int { hard, .. } => Some((hard.0 as f64, hard.1 as f64)),
+        _ => Some((f64::NEG_INFINITY, f64::INFINITY)),
+    }
+}
+
 /// The value `BKE_animsys_write_to_rna_path` writes for an animated `value` into element
-/// `index` of `prop` (whose current value is `current`): booleans are `value > 1 - FLT_EPSILON`,
-/// integers truncate and clamp to the hard range, floats clamp, enums take the item whose
-/// integer value is `int(value)`. `None` when nothing changes (Blender skips the write when the
-/// old value equals the new one) or the value cannot be written.
-pub fn channel_value(prop: &PropDef, current: &Value, index: i32, value: f32) -> Option<Value> {
+/// `index` of `prop` of the struct `owner` (whose current value is `current`): booleans are
+/// `value > 1 - FLT_EPSILON`, integers truncate and clamp to the hard range, floats clamp
+/// (`RNA_property_*_clamp`: the dynamic range where the property has a range callback,
+/// [`dynamic_hard`]), enums take the item whose integer value is `int(value)`. `None` when
+/// nothing changes (Blender skips the write when the old value equals the new one) or the
+/// value cannot be written.
+pub fn channel_value(
+    prop: &PropDef,
+    owner: &str,
+    current: &Value,
+    index: i32,
+    value: f32,
+) -> Option<Value> {
     use frap_rna::PropKind;
     let idx = usize::try_from(index.max(0)).ok()?;
+    let range = dynamic_hard(owner, prop);
+    let int = |v: f32| {
+        let v = v as i32 as i64;
+        match range {
+            Some((lo, hi)) => v.clamp(lo as i64, hi as i64),
+            None => v,
+        }
+    };
+    let float = |v: f32| match range {
+        Some((lo, hi)) => v.clamp(lo as f32, hi as f32),
+        None => v,
+    };
     let new = match (&prop.kind, current) {
         (PropKind::Bool { .. }, Value::Bool(_)) => Value::Bool(value > 1.0 - f32::EPSILON),
         (PropKind::Bool { .. }, Value::BoolArray(a)) => {
@@ -656,23 +705,20 @@ pub fn channel_value(prop: &PropDef, current: &Value, index: i32, value: f32) ->
             *a.get_mut(idx)? = value > 1.0 - f32::EPSILON;
             Value::BoolArray(a)
         }
-        (PropKind::Int { hard, .. }, Value::Int(_)) => {
-            Value::Int((value as i32 as i64).clamp(hard.0, hard.1))
-        }
-        (PropKind::Int { hard, .. }, Value::IntArray(a)) => {
+        (PropKind::Int { .. }, Value::Int(_)) => Value::Int(int(value)),
+        (PropKind::Int { .. }, Value::IntArray(a)) => {
             let mut a = a.clone();
-            *a.get_mut(idx)? = (value as i32 as i64).clamp(hard.0, hard.1);
+            *a.get_mut(idx)? = int(value);
             Value::IntArray(a)
         }
-        (PropKind::Float { hard, .. }, Value::Float(_)) => {
-            Value::Float(value.clamp(hard.0 as f32, hard.1 as f32))
-        }
-        (PropKind::Float { hard, .. }, Value::Double(_)) => {
-            Value::Double(f64::from(value).clamp(hard.0, hard.1))
-        }
-        (PropKind::Float { hard, .. }, Value::FloatArray { data, shape, tag }) => {
+        (PropKind::Float { .. }, Value::Float(_)) => Value::Float(float(value)),
+        (PropKind::Float { .. }, Value::Double(_)) => Value::Double(match range {
+            Some((lo, hi)) => f64::from(value).clamp(lo, hi),
+            None => f64::from(value),
+        }),
+        (PropKind::Float { .. }, Value::FloatArray { data, shape, tag }) => {
             let mut data = data.clone();
-            *data.get_mut(idx)? = value.clamp(hard.0 as f32, hard.1 as f32);
+            *data.get_mut(idx)? = float(value);
             Value::FloatArray {
                 data,
                 shape: *shape,
@@ -719,7 +765,7 @@ mod tests {
             tag: frap_rna::MathTag::Vector,
         };
         assert_eq!(
-            channel_value(loc, &cur, 1, 5.0),
+            channel_value(loc, "Object", &cur, 1, 5.0),
             Some(Value::FloatArray {
                 data: [1.0f32, 5.0, 3.0].into_iter().collect(),
                 shape: loc.array,
@@ -727,42 +773,70 @@ mod tests {
             })
         );
         // Unchanged: no write.
-        assert_eq!(channel_value(loc, &cur, 1, 2.0), None);
+        assert_eq!(channel_value(loc, "Object", &cur, 1, 2.0), None);
         // Out of range index: nothing to write.
-        assert_eq!(channel_value(loc, &cur, 7, 2.0), None);
+        assert_eq!(channel_value(loc, "Object", &cur, 7, 2.0), None);
         // Booleans: value > 1 - FLT_EPSILON.
         let hide = ob.find_prop("hide_render").unwrap();
         assert_eq!(
-            channel_value(hide, &Value::Bool(false), 0, 0.9999),
+            channel_value(hide, "Object", &Value::Bool(false), 0, 0.9999),
             None,
             "0.9999 stays false"
         );
         assert_eq!(
-            channel_value(hide, &Value::Bool(false), 0, 1.0),
+            channel_value(hide, "Object", &Value::Bool(false), 0, 1.0),
             Some(Value::Bool(true))
         );
         // Enums: the item whose value is int(value).
         let mode = ob.find_prop("rotation_mode").unwrap();
         assert_eq!(
-            channel_value(mode, &Value::Enum("QUATERNION".into()), 0, 1.7),
+            channel_value(mode, "Object", &Value::Enum("QUATERNION".into()), 0, 1.7),
             Some(Value::Enum("XYZ".into()))
         );
         assert_eq!(
-            channel_value(mode, &Value::Enum("XYZ".into()), 0, 99.0),
+            channel_value(mode, "Object", &Value::Enum("XYZ".into()), 0, 99.0),
             None,
             "no item with that value"
         );
         // Integers truncate toward zero and clamp to the hard range.
         let pass = ob.find_prop("pass_index").unwrap();
         assert_eq!(
-            channel_value(pass, &Value::Int(0), 0, 2.9),
+            channel_value(pass, "Object", &Value::Int(0), 0, 2.9),
             Some(Value::Int(2))
         );
         assert_eq!(
-            channel_value(pass, &Value::Int(0), 0, -5.0),
+            channel_value(pass, "Object", &Value::Int(0), 0, -5.0),
             None,
             "pass_index is clamped at 0, unchanged"
         );
+    }
+
+    /// Properties with a range callback clamp to the dynamic range (`RNA_property_float_clamp`):
+    /// `ShapeKey.value` is left to its setter (the block's sliders), a standard socket's
+    /// `default_value` is unbounded.
+    #[test]
+    fn channel_values_use_dynamic_ranges() {
+        let s = |id: &str| frap_spec_rna::find_struct(id).unwrap();
+        let value = s("ShapeKey").find_prop("value").unwrap();
+        assert_eq!(
+            channel_value(value, "ShapeKey", &Value::Float(0.0), 0, -0.5),
+            Some(Value::Float(-0.5))
+        );
+        assert_eq!(
+            channel_value(value, "ShapeKey", &Value::Float(0.0), 0, 2.5),
+            Some(Value::Float(2.5))
+        );
+        let dv = s("NodeSocketFloatFactor")
+            .find_prop("default_value")
+            .unwrap();
+        assert_eq!(
+            channel_value(dv, "NodeSocketFloatFactor", &Value::Float(0.0), 0, 2.0),
+            Some(Value::Float(2.0))
+        );
+        // Other structs keep the static range.
+        let ob = frap_anim::eval::props::root_struct("OBJECT").unwrap();
+        let pass = ob.find_prop("pass_index").unwrap();
+        assert_eq!(channel_value(pass, "Object", &Value::Int(0), 0, -5.0), None);
     }
 
     /// The update callbacks that tag animation (verified on 5.2.4 for `co`, `interpolation`,

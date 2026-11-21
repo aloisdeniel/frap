@@ -132,6 +132,7 @@ fn image_save_render(
         ImBufData::Byte(b) => frap_scene::id::ImBuf::flip_rows(b, row)
             .chunks_exact(4)
             .map(|p| {
+                frap_math::budget::check();
                 let mut p = [p[0], p[1], p[2], p[3]];
                 if under_black {
                     alpha_under_black_byte(&mut p);
@@ -161,6 +162,8 @@ fn image_save_render(
         let disp: Vec<[f32; 4]> = linear
             .iter()
             .map(|p| {
+                // `--stmt-timeout` (ARCHITECTURE §12): the display transform is the slow step.
+                frap_math::budget::check();
                 if is_data {
                     *p
                 } else {

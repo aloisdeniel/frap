@@ -347,6 +347,26 @@ impl Session {
         self.eval_segs(p, p.segs.len())
     }
 
+    /// Evaluates a path whose last segment is a call and answers the call's value as it is
+    /// (an already-encoded `Py::Json` stays one).
+    fn eval_path_call(&mut self, p: &PathExpr) -> Result<Py, FrapError> {
+        let n = p.segs.len();
+        let Some(PathSeg::Call(args)) = p.segs.last() else {
+            let t = self.eval_target(p)?;
+            return eval::target_py(&self.host, t);
+        };
+        let t = self.eval_segs(p, n - 1)?;
+        let Target::Func(f) = t else {
+            return Err(FrapError::new(
+                PyExc::TypeError,
+                RNA_TYPE,
+                format!("'{}' object is not callable", resolve::py_type_name(&t)),
+            ));
+        };
+        let args = self.eval_args(args)?;
+        Ok(self.call_func(f, args)?.0)
+    }
+
     /// Resolves the first `n` segments of a path.
     fn eval_segs(&mut self, p: &PathExpr, n: usize) -> Result<Target, FrapError> {
         let mut t = resolve::root(p.root);
@@ -419,6 +439,14 @@ impl Session {
             let mut out = Vec::with_capacity(values.len());
             for e in values {
                 out.push(match e {
+                    // A path ending in a call prints what the call returns, including the
+                    // `$array` of the one-argument `foreach_get(attr)` (D-09).
+                    Expr::Path(p) if matches!(p.segs.last(), Some(PathSeg::Call(_))) => {
+                        match s.eval_path_call(p)? {
+                            Py::Json(j) => j,
+                            v => resolve::encode(&s.host, &super::funcs::py_target(v), caps)?.0,
+                        }
+                    }
                     Expr::Path(p) => {
                         let t = s.eval_target(p)?;
                         resolve::encode(&s.host, &t, caps)?.0

@@ -125,6 +125,12 @@ pub fn timeout() -> Option<Duration> {
     ACTIVE.with(|a| a.get().and_then(|b| b.deadline.map(|(_, t)| t)))
 }
 
+/// The active deadline, if any: for work this thread hands to a library that cancels through
+/// its own token (manifold-rust's `CancelToken`, set by a watchdog at this instant).
+pub fn deadline() -> Option<Instant> {
+    ACTIVE.with(|a| a.get().and_then(|b| b.deadline.map(|(d, _)| d)))
+}
+
 /// Whether the active deadline has passed (reads the clock).
 pub fn expired() -> bool {
     ACTIVE.with(|a| {

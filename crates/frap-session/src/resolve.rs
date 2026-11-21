@@ -1374,6 +1374,14 @@ fn step_coll(host: &dyn HostRead, c: CollPlace, seg: &PathSeg) -> Result<Target,
                     });
                 }
             }
+            // A collection whose API struct frap has not bound (`Scene.timeline_markers`'s
+            // `TimelineMarkers`): its functions exist in Blender, so the call is not an
+            // `AttributeError` but the collection's `RNA_NOT_IMPLEMENTED`, as its read is.
+            if let PropKind::Collection { api: Some(api), .. } = c.prop.kind
+                && frap_spec_rna::find_struct(api).is_none()
+            {
+                return Err(access::not_bound(c.ptr.srna, c.prop));
+            }
             Err(attr_error(format!(
                 "bpy_prop_collection: attribute \"{a}\" not found"
             )))

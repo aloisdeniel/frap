@@ -52,6 +52,7 @@ pub fn clean_tris(verts_num: usize, tri_verts: &mut Vec<u32>, face_ids: &mut Vec
     }
     let mut to = 0;
     for from in 0..numtri {
+        frap_math::budget::check();
         let tri = [
             tri_verts[3 * from],
             tri_verts[3 * from + 1],
@@ -131,6 +132,7 @@ fn get_shared_edges(faces: &[OutFace]) -> Vec<SharedEdge> {
     let mut ans = Vec::new();
     let mut edge_verts_to_tri: FxHashMap<(u32, u32), usize> = FxHashMap::default();
     for (face_index, f) in faces.iter().enumerate() {
+        frap_math::budget::check();
         for i in 0..3 {
             let v1 = f.verts[i];
             let v2 = f.verts[(i + 1) % 3];
@@ -227,6 +229,7 @@ pub fn merge_out_faces_with(faces: &mut Vec<OutFace>, can_dissolve: &dyn Fn(u32,
         f
     };
     for se in &shared_edges {
+        frap_math::budget::check();
         let f1 = final_merged_to(&merged_to, se.e1 / 3);
         let f2 = final_merged_to(&merged_to, se.e2 / 3);
         if f1 == f2 || !can_dissolve(se.v1, se.v2) {
@@ -273,6 +276,7 @@ pub fn dissolve_valence2_verts(a: &mut Assembly) {
     let mut dissolve = vec![false; vnum];
     let mut neighbors: Vec<Option<(u32, u32)>> = vec![None; vnum];
     for face in &a.faces {
+        frap_math::budget::check();
         let fsize = face.verts.len();
         for i in 0..fsize {
             let vprev = face.verts[(i + fsize - 1) % fsize];
@@ -292,6 +296,7 @@ pub fn dissolve_valence2_verts(a: &mut Assembly) {
         }
     }
     for face in &a.faces {
+        frap_math::budget::check();
         let fsize = face.verts.len();
         let n = face.verts.iter().filter(|&&v| dissolve[v as usize]).count();
         if fsize - n < 3 {
@@ -302,6 +307,7 @@ pub fn dissolve_valence2_verts(a: &mut Assembly) {
     }
     let mut any = false;
     for v in 0..vnum {
+        frap_math::budget::check();
         if dissolve[v] {
             let (n0, n1) = neighbors[v].expect("a dissolvable vertex has neighbours");
             if approx_in_line(
@@ -321,6 +327,7 @@ pub fn dissolve_valence2_verts(a: &mut Assembly) {
     let mut old_to_new = vec![u32::MAX; vnum];
     let mut kept = Vec::with_capacity(vnum);
     for v in 0..vnum {
+        frap_math::budget::check();
         if !dissolve[v] {
             old_to_new[v] = kept.len() as u32;
             kept.push(a.positions[v]);
@@ -328,6 +335,7 @@ pub fn dissolve_valence2_verts(a: &mut Assembly) {
     }
     a.positions = kept;
     for face in &mut a.faces {
+        frap_math::budget::check();
         face.verts = face
             .verts
             .iter()
@@ -359,6 +367,7 @@ pub fn reroute_bridges(
     cands.sort_unstable();
     cands.dedup();
     for v in cands {
+        frap_math::budget::check();
         let (a, b) = line[&v];
         for _ in 0..2 * group.len() {
             let mut moved = false;
@@ -480,6 +489,7 @@ fn in_line_vertices(
 ) -> FxHashMap<u32, (u32, u32)> {
     let mut edge_face: FxHashMap<(u32, u32), u32> = FxHashMap::default();
     for f in faces {
+        frap_math::budget::check();
         let k = f.verts.len();
         for i in 0..k {
             edge_face.insert((f.verts[i], f.verts[(i + 1) % k]), f.face_id);
@@ -548,6 +558,7 @@ pub fn assemble_with(
     let tris_num = tri_verts.len() / 3;
     let mut groups: Vec<SmallVec<[u32; 4]>> = vec![SmallVec::new(); input_faces_num];
     for (t, &fid) in face_ids.iter().enumerate().take(tris_num) {
+        frap_math::budget::check();
         if (fid as usize) < input_faces_num {
             groups[fid as usize].push(t as u32);
         }
@@ -555,6 +566,7 @@ pub fn assemble_with(
     let mut faces = Vec::with_capacity(tris_num);
     let mut ranges = Vec::new();
     for (gid, group) in groups.iter().enumerate() {
+        frap_math::budget::check();
         let mut gf: Vec<OutFace> = group
             .iter()
             .map(|&t| {

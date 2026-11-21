@@ -80,47 +80,195 @@ fn coll<'a>(
     }
 }
 
-/// Rebuilds a layer-collection subtree for collection `c`, keeping the flags of `old` and of
-/// its children that still show the same collections.
-fn sync_lc(
-    old: Option<&LayerCollection>,
-    c: Option<IdRef<CollectionId>>,
+/// Runtime: per (scene, view layer name), the layer-collection tree Blender's lazy resync
+/// (`VIEW_LAYER_OUT_OF_SYNC`, `BKE_view_layer_synced_ensure`) still starts from. Blender only
+/// tags a view layer when collections are linked or unlinked; the tree is rebuilt once, at the
+/// next read that ensures the sync, from the tree of the previous sync. frap syncs eagerly, so
+/// it keeps that previous tree here from the first change on and rebuilds every eager sync
+/// from it: a collection unlinked and linked again (or moved: linked under another parent,
+/// then unlinked) keeps its layer collection's flags, as in Blender (verified on 5.2.4).
+/// [`end_lazy_resync`] drops the trees where Blender would have resynced: operators and
+/// evaluation boundaries (`view_layer.update()`, `frame_set`, depsgraph reads) and writes of
+/// layer-collection flags. `Debug` leaves the entries out.
+#[derive(Clone, Default)]
+pub struct LazyResync(pub BTreeMap<(IdRef<SceneId>, smol_str::SmolStr), LayerCollection>);
+
+impl std::fmt::Debug for LazyResync {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("LazyResync(runtime)")
+    }
+}
+
+/// Blender resynced every view layer (see [`LazyResync`]): later syncs start from the current
+/// trees.
+pub fn end_lazy_resync(main: &mut Main) {
+    main.lazy_resync.0.clear();
+}
+
+/// One layer collection of the previous tree, or one created by the sync
+/// (`LayerCollectionResync`).
+struct ResyncNode {
+    collection: Option<IdRef<CollectionId>>,
+    /// The flags (the layer collection without its children).
+    flags: LayerCollection,
+    parent: Option<usize>,
+    children: Vec<usize>,
+    is_used: bool,
+    is_valid_as_child: bool,
+}
+
+/// `layer_collection_resync_create_recurse`.
+fn resync_create(
+    nodes: &mut Vec<ResyncNode>,
+    parent: Option<usize>,
+    lc: &LayerCollection,
     scene: &Scene,
     collections: &IdMap<Collection>,
     depth: usize,
-) -> LayerCollection {
-    let mut lc = match old {
-        Some(o) => LayerCollection {
+) -> usize {
+    let usable = lc.collection.is_none_or(|c| collections.contains(c));
+    let is_valid_as_child = usable
+        && parent.is_none_or(|p| {
+            let pc = nodes[p].collection;
+            let parent_usable = pc.is_none_or(|c| collections.contains(c));
+            parent_usable
+                && lc.collection.is_some_and(|c| {
+                    coll(scene, collections, pc).is_some_and(|col| col.children.contains(&c))
+                })
+        });
+    let is_used = is_valid_as_child && parent.is_none_or(|p| nodes[p].is_used);
+    let i = nodes.len();
+    nodes.push(ResyncNode {
+        collection: lc.collection,
+        flags: LayerCollection {
             children: Vec::new(),
-            ..o.clone()
+            ..lc.clone()
         },
-        None => LayerCollection::new(c),
-    };
-    lc.collection = c;
-    if depth >= MAX_DEPTH {
-        return lc;
+        parent,
+        children: Vec::new(),
+        is_used,
+        is_valid_as_child,
+    });
+    if let Some(p) = parent {
+        nodes[p].children.push(i);
     }
-    let Some(col) = coll(scene, collections, c) else {
-        return lc;
+    if depth < MAX_DEPTH {
+        for child in &lc.children {
+            resync_create(nodes, Some(i), child, scene, collections, depth + 1);
+        }
+    }
+    i
+}
+
+/// `layer_collection_resync_find`: the best unused layer collection of the previous tree for
+/// `child` under the node `start`: a direct child of `start`, else (breadth first through
+/// `start`'s descendants, then its siblings' subtrees, going up) one whose collection moved
+/// away from its parent and that is not used yet.
+fn resync_find(nodes: &[ResyncNode], start: usize, child: IdRef<CollectionId>) -> Option<usize> {
+    let mut queue = std::collections::VecDeque::from([start]);
+    let mut root = start;
+    while let Some(cur) = queue.pop_front() {
+        let n = &nodes[cur];
+        if n.collection == Some(child)
+            && (n.parent == Some(start) || (!n.is_used && !n.is_valid_as_child))
+        {
+            return Some(cur);
+        }
+        queue.extend(n.children.iter().copied());
+        if queue.is_empty()
+            && let Some(p) = nodes[root].parent
+        {
+            queue.extend(nodes[p].children.iter().copied().filter(|&x| x != root));
+            root = p;
+        }
+    }
+    None
+}
+
+/// `layer_collection_sync` (the layer-collection half): the children of the collection of
+/// node `at` reuse the layer collections [`resync_find`] finds, or get new ones with the
+/// parent's flags (`child_layer->flag = parent_layer_flag`: a collection linked under an
+/// excluded one is excluded, verified on 5.2.4).
+fn resync_lc(
+    nodes: &mut Vec<ResyncNode>,
+    known: &std::collections::HashSet<IdRef<CollectionId>>,
+    at: usize,
+    lc: &mut LayerCollection,
+    scene: &Scene,
+    collections: &IdMap<Collection>,
+    depth: usize,
+) {
+    if depth >= MAX_DEPTH {
+        return;
+    }
+    let Some(col) = coll(scene, collections, nodes[at].collection) else {
+        return;
     };
-    let mut used = vec![false; old.map_or(0, |o| o.children.len())];
     for child in &col.children {
         if !collections.contains(*child) {
             continue;
         }
-        let prev = old.and_then(|o| {
-            o.children
-                .iter()
-                .enumerate()
-                .find(|(i, x)| !used[*i] && x.collection == Some(*child))
-                .map(|(i, x)| {
-                    used[i] = true;
-                    x
-                })
-        });
-        lc.children
-            .push(sync_lc(prev, Some(*child), scene, collections, depth + 1));
+        let (node, mut child_lc) = match known
+            .contains(child)
+            .then(|| resync_find(nodes, at, *child))
+            .flatten()
+        {
+            Some(found) => {
+                nodes[found].is_used = true;
+                let mut l = nodes[found].flags.clone();
+                l.collection = Some(*child);
+                (found, l)
+            }
+            None => {
+                let l = LayerCollection {
+                    collection: Some(*child),
+                    children: Vec::new(),
+                    ..lc.clone()
+                };
+                let i = nodes.len();
+                nodes.push(ResyncNode {
+                    collection: Some(*child),
+                    flags: l.clone(),
+                    parent: Some(at),
+                    children: Vec::new(),
+                    is_used: true,
+                    is_valid_as_child: true,
+                });
+                nodes[at].children.push(i);
+                (i, l)
+            }
+        };
+        resync_lc(
+            nodes,
+            known,
+            node,
+            &mut child_lc,
+            scene,
+            collections,
+            depth + 1,
+        );
+        lc.children.push(child_lc);
     }
+}
+
+/// `BKE_layer_collection_sync` of the layer-collection tree: the tree for the scene's current
+/// collection hierarchy, rebuilt from `old` (the tree of the previous sync).
+fn sync_layer_tree(
+    old: &LayerCollection,
+    scene: &Scene,
+    collections: &IdMap<Collection>,
+) -> LayerCollection {
+    let mut nodes = Vec::new();
+    let root = resync_create(&mut nodes, None, old, scene, collections, 0);
+    // Collections without a previous layer collection skip the search (a new one only matches
+    // the node being created).
+    let known = nodes.iter().filter_map(|n| n.collection).collect();
+    let mut lc = LayerCollection {
+        children: Vec::new(),
+        ..old.clone()
+    };
+    lc.collection = None;
+    resync_lc(&mut nodes, &known, root, &mut lc, scene, collections, 0);
     lc
 }
 
@@ -212,7 +360,7 @@ pub fn synced_view_layers(
     scene
         .view_layers
         .iter()
-        .map(|vl| sync_view_layer(scene, vl, collections, objects, base_selected))
+        .map(|vl| sync_view_layer(scene, vl, collections, objects, base_selected, None))
         .collect()
 }
 
@@ -222,12 +370,17 @@ fn sync_view_layer(
     collections: &IdMap<Collection>,
     objects: &IdMap<Object>,
     base_selected: &BaseSelectedMemory,
+    lazy_base: Option<&LayerCollection>,
 ) -> ViewLayer {
     let active_lc = vl
         .layer_collection
         .at(&vl.active_layer_collection)
         .map(|lc| lc.collection);
-    let layer_collection = sync_lc(Some(&vl.layer_collection), None, scene, collections, 0);
+    let layer_collection = sync_layer_tree(
+        lazy_base.unwrap_or(&vl.layer_collection),
+        scene,
+        collections,
+    );
     // Bases in sync order.
     let mut bases: Vec<Base> = Vec::new();
     walk(
@@ -324,12 +477,41 @@ fn sync_scene_only(main: &mut Main, scene: IdRef<SceneId>, log: &mut ChangeLog) 
     let Some(s) = main.scenes.get(scene) else {
         return;
     };
-    let new = synced_view_layers(s, &main.collections, &main.objects, &main.base_selected);
-    if new != s.view_layers
-        && let Some(s) = main.scenes.get_mut(scene, log)
-    {
-        s.view_layers = new;
-        log.context_changed = true;
+    let lazy = &main.lazy_resync.0;
+    let new: Vec<ViewLayer> = s
+        .view_layers
+        .iter()
+        .map(|vl| {
+            let base = lazy.get(&(scene, vl.name.clone()));
+            sync_view_layer(
+                s,
+                vl,
+                &main.collections,
+                &main.objects,
+                &main.base_selected,
+                base,
+            )
+        })
+        .collect();
+    if new != s.view_layers {
+        // The layer trees Blender's next (lazy) sync starts from: the ones before the first
+        // change since it last resynced.
+        for vl in &s.view_layers {
+            let changed = new
+                .iter()
+                .find(|n| n.name == vl.name)
+                .is_none_or(|n| n.layer_collection != vl.layer_collection);
+            if changed {
+                main.lazy_resync
+                    .0
+                    .entry((scene, vl.name.clone()))
+                    .or_insert_with(|| vl.layer_collection.clone());
+            }
+        }
+        if let Some(s) = main.scenes.get_mut(scene, log) {
+            s.view_layers = new;
+            log.context_changed = true;
+        }
     }
 }
 
@@ -458,6 +640,8 @@ pub(crate) fn set_layer_collection_flag(
         return Ok(());
     };
     let (main, log) = h.main_mut();
+    // Reaching a layer collection (`LayerCollection.children`) resynced the view layer.
+    end_lazy_resync(main);
     let changed = main
         .scenes
         .get(scene)
@@ -508,6 +692,8 @@ pub(crate) fn set_layer_collection_exclude(
         return Ok(());
     };
     let (main, log) = h.main_mut();
+    // Reaching a layer collection (`LayerCollection.children`) resynced the view layer.
+    end_lazy_resync(main);
     let Some(old) = main
         .scenes
         .get(scene)
@@ -632,6 +818,7 @@ impl ViewLayer {
             collections,
             objects,
             &BaseSelectedMemory::default(),
+            None,
         )
     }
     /// The base of `ob` in this view layer.

@@ -364,6 +364,9 @@ impl Host for HostImpl {
     fn apply_pending_animation(&mut self) -> Result<(), RnaError> {
         // §7.3 (WP 6.4): the boundary writes the animation of the scene's frame (of every
         // animated datablock when time is dirty, else of those an RNA edit tagged).
+        // An evaluation boundary (operators run one first) resyncs the view layers in
+        // Blender (`BKE_view_layer_synced_ensure`): later syncs start from the current trees.
+        frap_scene::id::layers::end_lazy_resync(&mut self.state.main);
         let dirty = self.state.time_dirty;
         let tagged = std::mem::take(&mut self.state.anim_tagged);
         frap_eval::animate::apply_pending_animation_tagged(self, dirty, &tagged)?;
@@ -400,7 +403,9 @@ impl Host for HostImpl {
             Value::Bool(b) => f32::from(u8::from(b)),
             _ => return Err(not_found()),
         };
-        let Some(new) = frap_eval::animate::channel_value(prop, &current, index, value) else {
+        let Some(new) =
+            frap_eval::animate::channel_value(prop, ptr.srna.identifier, &current, index, value)
+        else {
             return Ok(());
         };
         crate::resolve::set_prop(self, &ptr, prop, new)

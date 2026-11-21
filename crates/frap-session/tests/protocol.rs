@@ -561,6 +561,14 @@ fn bulk_reads_slices_and_truncation() {
         "bpy.data.meshes['Cube'].vertices[0:1].foreach_get('co', [0, 0, 0])",
     );
     assert_eq!(v, json!([1, 1, 1]));
+    // print() of the one-argument form prints the array (M5+M6 stabilization round 7).
+    let r = one(
+        &mut s,
+        "print(bpy.data.meshes['Cube'].vertices.foreach_get('index'), 1)",
+    );
+    assert_eq!(r["kind"], "print");
+    assert_eq!(r["value"][0]["$array"], json!([0, 1, 2, 3, 4, 5, 6, 7]));
+    assert_eq!(r["value"][1], 1);
     // --max-array caps whole items.
     let mut s = session_with(|o| o.max_array = 7);
     let v = val(&mut s, "bpy.data.meshes['Cube'].vertices.foreach_get('co')");
@@ -1011,6 +1019,29 @@ fn assignment_errors_use_blender_wording() {
 }
 
 // ------------------------------------------------------------------ call / print / op_meta
+
+/// A function of a collection whose API struct frap has not bound (`Scene.timeline_markers`,
+/// `TimelineMarkers.new`) is the collection's `RNA_NOT_IMPLEMENTED`, as its read is, not an
+/// `AttributeError` (M5+M6 stabilization round 7).
+#[test]
+fn unbound_collection_functions_are_not_implemented() {
+    let mut s = session();
+    for (src, prop) in [
+        (
+            "bpy.context.scene.timeline_markers.new('F', frame=1)",
+            "Scene.timeline_markers",
+        ),
+        ("bpy.context.scene.keying_sets.new()", "Scene.keying_sets"),
+    ] {
+        let (exc, code, msg) = err(&mut s, src);
+        assert_eq!(exc, "NotImplementedError", "{src}");
+        assert_eq!(code, "RNA_NOT_IMPLEMENTED", "{src}");
+        assert_eq!(
+            msg,
+            format!("frap: {prop} exists in Blender 5.2 but is not bound by frap yet")
+        );
+    }
+}
 
 #[test]
 fn collection_methods() {

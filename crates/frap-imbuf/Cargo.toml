@@ -9,6 +9,7 @@ repository.workspace = true
 publish.workspace = true
 
 [dependencies]
+frap-math.workspace = true
 image.workspace = true
 png.workspace = true
 exr.workspace = true

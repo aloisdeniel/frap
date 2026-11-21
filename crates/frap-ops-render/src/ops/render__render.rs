@@ -118,11 +118,50 @@ struct Plan {
     frames: Vec<Option<i32>>,
     /// Output file per frame (`None`: nothing is written).
     outputs: Vec<Option<OutputPath>>,
+    /// The output settings of the context scene (a still render; an animation render reads
+    /// them again from each frame's scene, [`frame_output`]).
+    out: FrameOutput,
+    view_layer: String,
+    /// `RE_RenderAnim`'s per-frame file options (animation renders only).
+    anim_files: AnimFiles,
+}
+
+/// What a frame is written with: `BKE_image_render_write` reads `scene->r.im_format`,
+/// `scene->view_settings`/`display_settings` and `scene->r.dither_intensity` from the scene
+/// whose animation `RE_RenderAnim` evaluated for that frame, so animated exposure, gamma,
+/// look, dither or quality apply per frame (verified on 5.2.4: an exposure keyed 0 to 2 over
+/// frames 1..4 gives frame means 66.7..131.6).
+struct FrameOutput {
     write: Option<format::WriteSettings>,
     cm: format::ColorManagement,
     dither: f32,
-    /// `RE_RenderAnim`'s per-frame file options (animation renders only).
-    anim_files: AnimFiles,
+}
+
+/// [`FrameOutput`] of `scene` (`writes`: the render writes files).
+fn frame_output(
+    scene: &frap_scene::id::Scene,
+    view_layer: &str,
+    writes: bool,
+) -> Result<FrameOutput, OpError> {
+    let r = &scene.render;
+    let write = if writes {
+        Some(format::render_write_settings(r, view_layer).map_err(OpError::NotImplemented)?)
+    } else {
+        None
+    };
+    let cm = if r.image_settings.color_management == "OVERRIDE" {
+        format::color_management(
+            &r.image_settings.view_settings,
+            &r.image_settings.display_settings,
+        )
+    } else {
+        format::color_management(&scene.view_settings, &scene.display_settings)
+    };
+    Ok(FrameOutput {
+        write,
+        cm,
+        dither: r.dither_intensity,
+    })
 }
 
 /// `render.use_overwrite` / `render.use_placeholder` as `RE_RenderAnim` applies them: only to
@@ -241,19 +280,7 @@ fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
         .ok_or_else(|| OpError::Runtime("Cannot render, no camera".into()))?;
 
     let writes = p.animation.value || p.write_still.value;
-    let write = if writes {
-        Some(format::render_write_settings(r, view_layer).map_err(OpError::NotImplemented)?)
-    } else {
-        None
-    };
-    let cm = if r.image_settings.color_management == "OVERRIDE" {
-        format::color_management(
-            &r.image_settings.view_settings,
-            &r.image_settings.display_settings,
-        )
-    } else {
-        format::color_management(&scene.view_settings, &scene.display_settings)
-    };
+    let out = frame_output(scene, view_layer, writes)?;
 
     let mut outputs = Vec::with_capacity(frames.len());
     if writes {
@@ -299,9 +326,8 @@ fn plan(cx: &mut OpCtx, p: &render::Render) -> Result<Plan, OpError> {
         resolution,
         frames,
         outputs,
-        write,
-        cm,
-        dither: r.dither_intensity,
+        out,
+        view_layer: view_layer.to_string(),
         anim_files,
     })
 }
@@ -343,16 +369,24 @@ fn printed_path_error(msg: String, out: &OutputPath) -> String {
     }
 }
 
-/// Renders one frame and writes its file (when it has one).
+/// Renders one frame and writes its file (when it has one). `warnings` collects the colour
+/// management fallbacks of the frame (once each).
 fn render_and_write(
     cx: &mut OpCtx,
     plan: &Plan,
     frame: Option<i32>,
     out: Option<&OutputPath>,
     engine: &str,
+    warnings: &mut Vec<String>,
 ) -> Result<Film, OpError> {
-    let film = render_frame(cx, frame, engine)?;
-    if let (Some(out), Some(ws)) = (out, &plan.write) {
+    let (film, fo) = render_frame(cx, plan, frame, engine)?;
+    let fo = fo.as_ref().unwrap_or(&plan.out);
+    for w in &fo.cm.warnings {
+        if !warnings.contains(w) {
+            warnings.push(w.clone());
+        }
+    }
+    if let (Some(out), Some(ws)) = (out, &fo.write) {
         // A path without a folder (`filepath='st_'`): `BLI_file_ensure_parent_dir_exists`
         // cannot make the folder `''` and the image writers give up (`ENOENT`); the OpenEXR
         // writer ignores that and opens the file in the working directory (verified on 5.2.4:
@@ -375,17 +409,31 @@ fn render_and_write(
             film.width,
             film.height,
             ws,
-            &plan.cm,
-            plan.dither,
+            &fo.cm,
+            fo.dither,
         )
         .map_err(|e| OpError::Runtime(printed_path_error(e, out)))?;
     }
     Ok(film)
 }
 
-/// Renders one frame on a fresh clone of the state.
-fn render_frame(cx: &mut OpCtx, frame: Option<i32>, engine: &str) -> Result<Film, OpError> {
+/// Renders one frame on a fresh clone of the state; an animation frame also answers its
+/// [`FrameOutput`] (read from the frame's scene).
+fn render_frame(
+    cx: &mut OpCtx,
+    plan: &Plan,
+    frame: Option<i32>,
+    engine: &str,
+) -> Result<(Film, Option<FrameOutput>), OpError> {
     let snap = cx.snapshot_at(frame)?;
+    let fo = match frame {
+        Some(_) => Some(frame_output(
+            snap.host.ctx().scene(),
+            &plan.view_layer,
+            plan.out.write.is_some(),
+        )?),
+        None => None,
+    };
     let req = RenderRequest {
         frame,
         ..RenderRequest::default()
@@ -409,7 +457,7 @@ fn render_frame(cx: &mut OpCtx, frame: Option<i32>, engine: &str) -> Result<Film
             film.height
         )));
     }
-    Ok(film)
+    Ok((film, fo))
 }
 
 /// `BKE_image_ensure_viewer(bmain, IMA_TYPE_R_RESULT, "Render Result")`: the existing render
@@ -485,6 +533,7 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
     let mut skipped: Vec<Value> = Vec::new();
     let mut rendered = 0usize;
     let mut last: Option<Film> = None;
+    let mut cm_warnings: Vec<String> = Vec::new();
     for (frame, out) in plan.frames.iter().zip(&plan.outputs) {
         if let Some(out) = out {
             if plan.anim_files.skip_existing && out.absolute.exists() {
@@ -496,7 +545,8 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
             }
         }
         // One COW clone per frame (`render_frame`), dropped before the next frame.
-        let film = match render_and_write(cx, &plan, *frame, out.as_ref(), engine) {
+        let film = match render_and_write(cx, &plan, *frame, out.as_ref(), engine, &mut cm_warnings)
+        {
             Ok(film) => film,
             Err(e) => {
                 if let Some(out) = out.as_ref().filter(|_| plan.anim_files.placeholder) {
@@ -539,8 +589,11 @@ fn exec(cx: &mut OpCtx, p: render::Render) -> OpResult {
             cx.report(ReportType::Warning, w);
         }
     }
-    for w in &plan.cm.warnings {
-        cx.report(ReportType::Warning, w.clone());
+    if rendered == 0 {
+        cm_warnings.clone_from(&plan.out.cm.warnings);
+    }
+    for w in cm_warnings {
+        cx.report(ReportType::Warning, w);
     }
     // Workbench effects frap does not render yet, as `frap.render_contact_sheet` reports them
     // (WP 2.3), whenever Workbench renders (M2 leftover, M4 W0).

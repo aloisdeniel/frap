@@ -162,6 +162,8 @@ pub(crate) fn encode_jpeg(image: &DecodedImage, quality: u8) -> Result<Vec<u8>, 
     };
     let mut blocks: Vec<[i16; DCTSIZE2]> = Vec::new();
     for mcu_row in 0..mcu_rows {
+        // `--stmt-timeout` (ARCHITECTURE §12): a cancellation point per MCU row.
+        frap_math::budget::check_now();
         for mcu_col in 0..mcus_per_row {
             for (ci, c) in comps.iter().enumerate() {
                 // Non-interleaved scans have one-block MCUs.
