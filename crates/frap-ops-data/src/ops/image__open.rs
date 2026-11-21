@@ -66,7 +66,9 @@ fn join(dir: &str, name: &str) -> String {
 /// unchanged when it is not absolute or there is no saved file.
 fn path_rel(path: &str, blend: Option<&str>) -> String {
     use std::path::{Component, Path};
-    let (Some(blend), true) = (blend, Path::new(path).is_absolute()) else {
+    // A `/`-rooted path counts as absolute on Windows too (paths are platform-neutral).
+    let absolute = path.starts_with('/') || Path::new(path).is_absolute();
+    let (Some(blend), true) = (blend, absolute) else {
         return path.to_owned();
     };
     let Some(base) = Path::new(blend).parent() else {
