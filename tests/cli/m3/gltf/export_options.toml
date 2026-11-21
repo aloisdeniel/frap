@@ -1,5 +1,5 @@
-# WP 3.9: glTF export options an agent tries. Draco compression is accepted and reported as
-# not supported yet (WARNING, exported uncompressed until M7); GLTF_SEPARATE writes a .gltf and
+# WP 3.9: glTF export options an agent tries. Draco compression writes KHR_draco_mesh_compression
+# (WP 7.2; a WARNING, uncompressed, until M7); GLTF_SEPARATE writes a .gltf and
 # its .bin; GLTF_EMBEDDED is a TypeError until the add-on preference `allow_embedded_format`
 # is set, as in Blender; lights, cameras and Z-up export together. A mesh of one loose edge and
 # a loose vertex exported with use_selection while it is not selected leaves it out; selected,

@@ -1,0 +1,12 @@
+# WP 7.2: an agent exports KHR_draco_mesh_compression (the defaults; level 10 with lossless
+# positions, normals and UVs) and imports the file back. The exports report the extension in
+# `extensions_used` and no "not supported" WARNING for the Draco props; `frap_draco_backend`
+# 'SYS' fails with the reason (this build has no Google Draco fallback: the draco-core spike
+# gate passed); the import decodes every primitive (a smooth sphere, a coloured cube, a mesh
+# with two primitives, a grid with a shape key). `draco_bpy.out/out/*.glb` are the expected
+# files byte for byte; `tests/golden/cases/gltf/draco/import_frap.inputs` holds the same two
+# files, which Blender 5.2.4 imports there (the "Blender imports frap Draco" golden).
+# Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

@@ -261,7 +261,8 @@ fn build_mesh(
             attributes: written.attributes,
             indices: written.indices,
             material,
-            mode: (written.mode != 4)
+            // `io/exp/draco.py` sets `primitive.mode = 4` on the primitives it encodes (WP 7.2).
+            mode: (written.mode != 4 || written.extensions.contains("KHR_draco_mesh_compression"))
                 .then(|| Mode::try_from(written.mode).ok())
                 .flatten(),
             targets: written.targets,
@@ -348,12 +349,25 @@ fn write_accessors(g: &mut Gather, d: &PrimitiveDraft) -> Result<WrittenPrimitiv
     let indices = if d.mode == crate::export::mesh::extract::loose_points::MODE_POINTS {
         None
     } else if enc.without_buffer_views {
-        if let Some(bad) = d.indices.iter().find(|i| **i as usize >= n) {
-            return Err(ExportError::Invalid(format!(
-                "index {bad} out of range ({n} vertices)"
-            )));
-        }
-        Some(g.buf.push_indices_without_view(&d.indices))
+        // The add-on's `gather_accessor` cache shares index accessors by content under Draco
+        // too (WP 7.2, verified on 5.2.4: two meshes with the same triangles share one
+        // view-less index accessor). Keyed apart from the accessors with a view (`u32::MAX`
+        // is never an index).
+        let mut key = d.indices.clone();
+        key.push(u32::MAX);
+        Some(match g.index_accessors.get(&key) {
+            Some(i) => *i,
+            None => {
+                if let Some(bad) = d.indices.iter().find(|i| **i as usize >= n) {
+                    return Err(ExportError::Invalid(format!(
+                        "index {bad} out of range ({n} vertices)"
+                    )));
+                }
+                let i = g.buf.push_indices_without_view(&d.indices);
+                g.index_accessors.insert(key, i);
+                i
+            }
+        })
     } else {
         Some(match g.index_accessors.get(&d.indices) {
             Some(i) => *i,
@@ -379,15 +393,12 @@ fn write_accessors(g: &mut Gather, d: &PrimitiveDraft) -> Result<WrittenPrimitiv
                 .and_then(|q| q.get(name))
                 .map_or_else(|| column_data(col), column_data);
             check(name, data.count())?;
-            let i = if enc.without_buffer_views {
-                g.buf
-                    .push_accessor_without_view(&data, &AccessorOpts::attribute(name == "POSITION"))
-            } else {
-                // Morph targets may be sparse (WP 6.8, `post/morph_targets.rs`).
-                crate::export::mesh::post::morph_targets::push_target_accessor(
-                    &mut g.buf, g.settings, name, &data,
-                )?
-            };
+            // Morph targets may be sparse (WP 6.8, `post/morph_targets.rs`). They keep their
+            // buffer views under Draco: `io/exp/draco.py::__cleanup_node` only clears the
+            // attributes' and the indices' (WP 7.2, verified on 5.2.4).
+            let i = crate::export::mesh::post::morph_targets::push_target_accessor(
+                &mut g.buf, g.settings, name, &data,
+            )?;
             m.insert(name.to_string(), i);
         }
         targets.push(m);

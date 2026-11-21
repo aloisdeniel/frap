@@ -70,6 +70,9 @@ const ALWAYS_CREATED: [&str; 6] = [
     "KHR_materials_ior",
 ];
 
+/// Extensions the add-on declares before its traversal, in that order.
+const DECLARED_BEFORE_TRAVERSAL: [&str; 1] = ["KHR_draco_mesh_compression"];
+
 const UNLIT: &str = "KHR_materials_unlit";
 const VOLUME: &str = "KHR_materials_volume";
 const DISPERSION: &str = "KHR_materials_dispersion";
@@ -258,6 +261,14 @@ fn traversal_order(doc: &Document, created: Option<&CreatedEmpty>) -> Vec<String
         materials: HashSet::new(),
         textures: HashSet::new(),
     };
+    // Declared by `export.py::__gather_gltf` before any scene is added
+    // (`exporter.add_draco_extension`; WP 7.2, verified on 5.2.4: a light node first still
+    // gives `["KHR_draco_mesh_compression", "KHR_lights_punctual"]`).
+    for name in DECLARED_BEFORE_TRAVERSAL {
+        if doc.extensions_used.iter().any(|e| e == name) {
+            w.declare(name);
+        }
+    }
     for s in &doc.scenes {
         w.extensions(&s.extensions);
         for &n in &s.nodes {

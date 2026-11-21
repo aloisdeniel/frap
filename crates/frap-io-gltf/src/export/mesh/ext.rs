@@ -240,9 +240,10 @@ pub struct PrimitiveEncoding {
     pub attributes: IndexMap<SmolStr, AttrColumn>,
     /// The same per morph target (index into `targets`).
     pub targets: Vec<IndexMap<SmolStr, AttrColumn>>,
-    /// The attribute, target and index accessors get no `bufferView` (their data lives in a
-    /// compressed stream the post-processor wrote: KHR_draco_mesh_compression, WP 7.2); the
-    /// index accessor is then not shared with other primitives.
+    /// The attribute and index accessors get no `bufferView` (their data lives in a compressed
+    /// stream the post-processor wrote: KHR_draco_mesh_compression, WP 7.2); the morph target
+    /// accessors keep theirs, and the index accessor is shared by content only with other
+    /// view-less ones (the add-on's behaviour, verified on 5.2.4).
     pub without_buffer_views: bool,
     /// Extensions of the glTF primitive (`KHR_draco_mesh_compression`).
     pub extensions: frap_gltf::Extensions,

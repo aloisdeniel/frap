@@ -28,6 +28,9 @@ image-compare.workspace = true
 # WP 1.8: PNG decoding of image fixtures and glTF images (the judge does not use frap-imbuf's codecs).
 png.workspace = true
 automod.workspace = true
+# WP 7.2: the in-process frap side of the `gltf/draco` goldens exports and imports Draco
+# (`cargo test -p frap-golden` resolves only this crate's features; frap-cli's default has it).
+frap-ops-all = { workspace = true, features = ["draco"] }
 
 [dev-dependencies]
 insta.workspace = true

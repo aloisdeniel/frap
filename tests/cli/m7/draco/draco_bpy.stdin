@@ -1,0 +1,25 @@
+bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=1.0, location=(3, 0, 0))
+bpy.ops.object.shade_smooth()
+bpy.data.meshes['Cube'].color_attributes.new('Col', 'BYTE_COLOR', 'CORNER')
+bpy.data.meshes['Cube'].color_attributes['Col'].data[5].color = (0.2, 0.4, 0.6, 0.5)
+bpy.data.meshes.new('Two')
+bpy.data.meshes['Two'].from_pydata([(0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0), (2, 0, 0.5), (2, 1, 0.5), (3, 0, 0), (3, 1, 0.2)], [], [(0, 1, 2, 3), (1, 4, 5, 2), (4, 6, 7, 5)])
+bpy.data.meshes['Two'].materials.append(bpy.data.materials['Material'])
+bpy.data.materials.new('Other')
+bpy.data.meshes['Two'].materials.append(bpy.data.materials['Other'])
+bpy.data.meshes['Two'].polygons[1].material_index = 1
+bpy.data.objects.new('Two', bpy.data.meshes['Two'])
+bpy.context.scene.collection.objects.link(bpy.data.objects['Two'])
+bpy.data.objects['Two'].location = (-4, 0, 0)
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=4, y_subdivisions=3, size=2, location=(0, -4, 0))
+bpy.data.objects['Grid'].shape_key_add(name='Basis')
+bpy.data.objects['Grid'].shape_key_add(name='Bend')
+bpy.data.objects['Grid'].data.shape_keys.key_blocks['Bend'].data[0].co = (-1, -1, 0.5)
+bpy.ops.export_scene.gltf(filepath='out/frap_default.glb', export_draco_mesh_compression_enable=True)
+bpy.ops.export_scene.gltf(filepath='out/frap_lossless.glb', export_draco_mesh_compression_enable=True, export_draco_mesh_compression_level=10, export_draco_position_quantization=0, export_draco_normal_quantization=0, export_draco_texcoord_quantization=0)
+bpy.ops.export_scene.gltf(filepath='out/sys.glb', export_draco_mesh_compression_enable=True, frap_draco_backend='SYS')
+bpy.ops.wm.read_homefile(use_empty=True)
+bpy.ops.import_scene.gltf(filepath='out/frap_default.glb')
+bpy.data.objects
+bpy.data.meshes['Sphere'].vertices
+bpy.data.meshes['Grid'].shape_keys.key_blocks['Bend'].data[0].co
