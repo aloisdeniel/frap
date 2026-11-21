@@ -1,0 +1,14 @@
+bpy.ops.import_scene.gltf(filepath='ktx2_only.gltf')
+bpy.data.images['Grid'].file_format
+bpy.data.images['Grid'].size
+bpy.data.images['Grid'].packed_file.size
+bpy.data.images['Grid'].colorspace_settings.name
+bpy.data.images['Rough'].colorspace_settings.name
+bpy.data.images['Rough'].pixels[0:4]
+bpy.data.materials['Material'].node_tree.nodes['Image Texture'].image.name
+bpy.ops.export_scene.gltf(filepath='again.glb')
+bpy.ops.export_scene.gltf(filepath='same.glb', frap_texture_format='KTX2', frap_basisu_mode='UASTC')
+bpy.data.images.load('Grid.ktx2').size
+bpy.ops.image.new(name='New', width=8, height=8)
+bpy.data.materials['Material'].node_tree.nodes['Image Texture'].image = bpy.data.images['New']
+bpy.ops.export_scene.gltf(filepath='new.glb', frap_texture_format='KTX2')

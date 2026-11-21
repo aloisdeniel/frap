@@ -41,7 +41,9 @@ fn validate(cx: &ExtensionCx, r: &mut Report) {
         cx.wrong_location(r, "a texture");
         return;
     }
-    let _ = cx.decode::<KhrTextureBasisu>(r);
+    if let Some(e) = cx.decode::<KhrTextureBasisu>(r) {
+        super::ext_texture_webp::check_texture_source(cx, r, NAME, e.source, "image/ktx2");
+    }
 }
 
 #[allow(unsafe_code)] // linkme registration (RFC 0001 F-LINK-1)
@@ -62,5 +64,40 @@ mod tests {
         let e: KhrTextureBasisu = serde_json::from_value(v.clone()).unwrap();
         assert_eq!(e.source, Some(3));
         assert_eq!(serde_json::to_value(&e).unwrap(), v);
+    }
+
+    #[test]
+    fn validation_rules() {
+        use crate::json::{Document, Image, Texture};
+        use crate::validate::validate;
+        let doc = |src: Option<Index>, core: Option<Index>, required: bool| {
+            let mut d = Document::default();
+            for mime in ["image/ktx2", "image/png"] {
+                d.images.push(Image {
+                    mime_type: Some(mime.into()),
+                    uri: Some("x".into()),
+                    ..Default::default()
+                });
+            }
+            let mut t = Texture {
+                source: core,
+                ..Default::default()
+            };
+            t.extensions.set(Some(KhrTextureBasisu {
+                source: src,
+                ..Default::default()
+            }));
+            d.textures.push(t);
+            d.use_extension(NAME, required);
+            d
+        };
+        assert!(validate(&doc(Some(0), Some(1), false)).is_ok());
+        assert!(validate(&doc(Some(0), None, true)).is_ok());
+        assert!(
+            validate(&doc(Some(0), None, false)).has("EXTENSION_NOT_REQUIRED_WITHOUT_FALLBACK")
+        );
+        assert!(validate(&doc(Some(1), Some(1), false)).has("IMAGE_MIME_TYPE_INVALID"));
+        assert!(validate(&doc(Some(9), None, true)).has("UNRESOLVED_REFERENCE"));
+        assert!(validate(&doc(None, Some(1), false)).has("UNDEFINED_PROPERTY"));
     }
 }

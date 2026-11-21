@@ -846,7 +846,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [x] | Non-triangle modes: LINES (`use_mesh_edges`), POINTS (`use_mesh_vertices`, point clouds); import of strips, fans, line strips/loops | M3 | M3 | WP 3.7; POINTS from loose vertices are written without `indices`, as the add-on does (M5+M6 stabilization round 3) |
 | [ ] | pbrMetallicRoughness factors + baseColorTexture, doubleSided | M1 | M1 |  |
 | [x] | Multiple UV sets, vertex colours (COLOR_n, fake COLOR_0), TANGENT, extras | M3 | M3 | WP 3.7 (with WP 3.5 for `export_vertex_color='MATERIAL'`); texCoord of an Attribute node not resolved (deviations §2) |
-| [x] | All textures/samplers/images (PNG/JPEG passthrough, ORM packing), alpha modes OPAQUE/MASK/BLEND | M3 | M3 | WP 3.5; WebP written as PNG (EXT_texture_webp pending) |
+| [x] | All textures/samplers/images (PNG/JPEG passthrough, ORM packing), alpha modes OPAQUE/MASK/BLEND | M3 | M3 | WP 3.5; WebP passthrough and EXT_texture_webp since WP 7.3 |
 | [x] | Cameras (perspective/orthographic) | M3 | M3 | export_cameras=False by default |
 | [x] | KHR_lights_punctual | M3 | M3 | export_lights=False by default; AREA warning |
 | [x] | KHR_texture_transform | M3 | M3 | marked required (Blender quirk); WP 3.5 |
@@ -860,8 +860,8 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | KHR_mesh_quantization | M7 | M7 | frap_mesh_quantization or gltfpack path; WP 7.1 |
 | [ ] | EXT_meshopt_compression, KHR_meshopt_compression | M7 | M7 | WP 7.1 |
 | [ ] | KHR_draco_mesh_compression | M7 | M7 | spike gate; WP 7.2 |
-| [ ] | EXT_texture_webp | M7 (lossless and lossy; lossless moved from M3, decision log M34S3-5) | M3 | export writes WebP sources as PNG with a WARNING until then (deviations §2); WP 7.3 |
-| [ ] | KHR_texture_basisu | M7 (feature basisu-encode) | M7 | frap_texture_format='KTX2'; WP 7.3 |
+| [x] | EXT_texture_webp | M7 (lossless and lossy; lossless moved from M3, decision log M34S3-5) | M3 | WP 7.3: `export_image_format='WEBP'` (lossless at quality 100, else lossy; lossless with a WARNING without the `webp-lossy` feature), `export_image_add_webp`, `export_image_webp_fallback`, WebP sources, as texture.py writes them; Blender comparison `tests/golden/cases/gltf/textures/webp_export.py` (`frap-ops-io-tests/tests/gltf_textures.rs`); re-encoded bytes differ (deviations §2) |
+| [x] | KHR_texture_basisu | M7 (feature basisu-encode) | M7 | WP 7.3 (frap extension, D-130): KTX2 read (ETC1S, UASTC, Zstandard; feature `basisu`, on in frap-cli) for textures with no other image, render; `frap_texture_format='KTX2'`, `frap_basisu_mode` (encoder behind `basisu-encode`, off by default; KTX2 images copied without it), with the add-on's images kept as fallbacks |
 | [ ] | KHR_materials_variants | M7 | M7 | not part of M3's "every KHR material extension" (decision log M34S3-5); add-on data model; RNA exists only with `KHR_materials_variants_ui` on (dumped that way); import turns it on; WP 7.5 |
 | [ ] | EXT_mesh_gpu_instancing | M7 (`export_gpu_instances`, Blender prop) | M7 | children of an Empty sharing a mesh (add-on rule); WP 7.5 |
 | [ ] | KHR_node_visibility, KHR_materials_diffuse_transmission | M7 (frap_*) | M7 | not produced by Blender; WP 7.4 |

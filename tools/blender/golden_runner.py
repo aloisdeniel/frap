@@ -183,6 +183,7 @@ NORMALISE = {
     "D-127": ("cases", "cases stay inside the hard range"),
     "D-128": ("cases", "cases do not animate hide_viewport, update non-window view layers, or rename view layers between frame changes"),
     "D-129": ("cases", "cases do not read layer collections, selection or the context object between an unlink and the link"),
+    "D-130": ("cases", "KTX2 cases import files with fallbacks (gltf/textures/ktx2_import); KTX2-only files are frap-only"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

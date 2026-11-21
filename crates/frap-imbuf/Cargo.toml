@@ -39,7 +39,7 @@ optional = true
 [dependencies.basisu_c_sys]
 workspace = true
 optional = true
-features = ["std", "transcode_default", "encoder"]
+features = ["std", "transcode_default", "encoder", "extra"]
 
 [dev-dependencies]
 proptest.workspace = true

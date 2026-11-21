@@ -48,6 +48,9 @@ pub use dpx::{DpxSettings, decode_dpx, is_dpx};
 pub use png::png_zlib_level;
 pub use sgi::{decode_sgi, is_sgi};
 pub use tiff::{TiffCodec, decode_tiff, tiff_extra_samples};
+/// The deadline-bound worker of the WebP encoders, shared with the Basis encoder (WP 7.3).
+#[cfg_attr(not(feature = "basisu-encode"), allow(unused_imports))]
+pub(crate) use webp::cancellable_with;
 
 use crate::codec::{DecodedImage, EncodeFormat, ImageError};
 

@@ -77,14 +77,15 @@ impl Drop for Slot {
     }
 }
 
-/// Waits for a worker slot until `deadline`, then unwinds with `Interrupted`.
-fn acquire_slot(deadline: std::time::Instant) -> Slot {
+/// Waits for a worker slot until `deadline`, then unwinds with `Interrupted` (`busy`: its
+/// reason).
+fn acquire_slot(deadline: std::time::Instant, busy: &'static str) -> Slot {
     let mut n = workers();
     while *n >= MAX_WORKERS {
         let left = deadline.saturating_duration_since(std::time::Instant::now());
         if left.is_zero() {
             drop(n);
-            frap_math::budget::check_now_because(SLOTS_BUSY);
+            frap_math::budget::check_now_because(busy);
             n = workers();
             continue;
         }
@@ -110,21 +111,38 @@ pub(super) fn cancellable<F>(encode: F) -> Result<Vec<u8>, ImageError>
 where
     F: FnOnce() -> Result<Vec<u8>, ImageError> + Send + 'static,
 {
+    cancellable_with(SLOTS_BUSY, "WEBP", encode)
+}
+
+/// [`cancellable`] for another encoder that cannot be stopped from outside (WP 7.3: the Basis
+/// Universal KTX2 encoder): `busy` is the `TIMEOUT` reason of an encode that never got a
+/// worker slot, `what` names the encoder in errors. The slots are shared with the WebP
+/// encoders, so at most [`MAX_WORKERS`] timed-out image encodes of any kind run at once.
+pub(crate) fn cancellable_with<F>(
+    busy: &'static str,
+    what: &str,
+    encode: F,
+) -> Result<Vec<u8>, ImageError>
+where
+    F: FnOnce() -> Result<Vec<u8>, ImageError> + Send + 'static,
+{
     use std::sync::mpsc::RecvTimeoutError;
     let Some(deadline) = frap_math::budget::deadline() else {
         return encode();
     };
     frap_math::budget::check_now();
-    let slot = acquire_slot(deadline);
+    let slot = acquire_slot(deadline, busy);
     let (tx, rx) = std::sync::mpsc::channel();
     let spawned = std::thread::Builder::new()
-        .name("frap-webp-encode".into())
+        .name(format!("frap-{}-encode", what.to_lowercase()))
         .spawn(move || {
             let _slot = slot;
             let _ = tx.send(encode());
         });
     if let Err(e) = spawned {
-        return Err(ImageError::Encode(format!("WEBP: no encoder thread: {e}")));
+        return Err(ImageError::Encode(format!(
+            "{what}: no encoder thread: {e}"
+        )));
     }
     loop {
         let left = deadline.saturating_duration_since(std::time::Instant::now());
@@ -132,7 +150,7 @@ where
             Ok(r) => return r,
             Err(RecvTimeoutError::Timeout) => frap_math::budget::check_now(),
             Err(RecvTimeoutError::Disconnected) => {
-                return Err(ImageError::Encode("WEBP: the encoder panicked".into()));
+                return Err(ImageError::Encode(format!("{what}: the encoder panicked")));
             }
         }
     }

@@ -18,7 +18,8 @@ publish.workspace = true
 [dev-dependencies]
 frap-session = { workspace = true, features = ["gpu"] }
 frap-golden.workspace = true
-frap-imbuf.workspace = true
+# WP 7.3: KTX2 decoding for the KHR_texture_basisu render test (tests/ktx2_render.rs).
+frap-imbuf = { workspace = true, features = ["basisu"] }
 serde_json.workspace = true
 
 [lints]
