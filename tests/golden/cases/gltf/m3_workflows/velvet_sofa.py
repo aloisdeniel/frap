@@ -1,7 +1,7 @@
 # WP 3.9: a velvet sofa. KHR_materials_sheen with a sheen colour texture of distinct pixels on
 # Sheen Tint and a constant Sheen Roughness on the seat; a cushion with a constant tint and
 # weight 0.5; the wooden legs have no sheen (Sheen Weight 0, tint ignored). Round trip (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/sofa.glb,glb:out/sofa_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/sofa.glb,glb:out/sofa_rt.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].name = 'Seat'
 bpy.data.objects['Seat'].scale = (2.0, 1.0, 0.4)

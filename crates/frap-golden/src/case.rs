@@ -14,6 +14,7 @@
 //! | `ssim` | minimum SSIM for `image:` (T4) | `0.995` |
 //! | `check` | T3 invariants, comma list (see [`crate::compare::invariants`]) | none |
 //! | `skip_blender` | flag: frap-only case, never blessed | off |
+//! | `glb_structure` | flag: `glb:` also compares the numbers of accessors and buffer views | off |
 //!
 //! Line outcomes are always compared. Lines prefixed `#@frap` run only in frap, `#@blender`
 //! only in Blender; both keep their line numbers, so the two sides report the same `line` for
@@ -250,6 +251,9 @@ pub struct Case {
     pub checks: Vec<String>,
     /// `skip_blender`.
     pub skip_blender: bool,
+    /// `glb_structure`: `glb:` comparisons keep the canonical `structure` entry (accessor and
+    /// buffer-view counts: data the add-on shares by content must be shared).
+    pub glb_structure: bool,
     /// Every physical line (comments included).
     pub lines: Vec<CaseLine>,
 }
@@ -297,6 +301,7 @@ impl Case {
             ssim: DEFAULT_SSIM,
             checks: Vec::new(),
             skip_blender: false,
+            glb_structure: false,
             lines: Vec::new(),
         };
         let mut seen_header = false;
@@ -348,6 +353,9 @@ impl Case {
             match (k, v) {
                 ("skip_blender", None) | ("skip_blender", Some("1" | "true")) => {
                     self.skip_blender = true
+                }
+                ("glb_structure", None) | ("glb_structure", Some("1" | "true")) => {
+                    self.glb_structure = true
                 }
                 ("startup", Some("factory")) => self.startup = Startup::Factory,
                 ("startup", Some("empty")) => self.startup = Startup::Empty,
@@ -461,6 +469,9 @@ impl Case {
         }
         if self.skip_blender {
             h.push_str(" skip_blender");
+        }
+        if self.glb_structure {
+            h.push_str(" glb_structure");
         }
         h
     }
@@ -649,7 +660,7 @@ bpy.ops.mesh.primitive_cube_add(sizee=2)        # expected TypeError on both sid
         let c = Case::parse(
             Path::new("a.py"),
             "# golden: startup=empty compare=glb:out/a.glb,image:o.png,context,evaluated:Cube\n\
-             # golden: tier=T2 order=exact ssim=0.97 check=manifold,euler:2 skip_blender\nimport bpy\n",
+             # golden: tier=T2 order=exact ssim=0.97 check=manifold,euler:2 skip_blender glb_structure\nimport bpy\n",
         )
         .unwrap();
         assert_eq!(c.startup, Startup::Empty);
@@ -658,6 +669,7 @@ bpy.ops.mesh.primitive_cube_add(sizee=2)        # expected TypeError on both sid
         assert_eq!(c.ssim, 0.97);
         assert_eq!(c.checks, vec!["manifold", "euler:2"]);
         assert!(c.skip_blender);
+        assert!(c.glb_structure);
         assert_eq!(
             c.compare,
             vec![
@@ -672,6 +684,7 @@ bpy.ops.mesh.primitive_cube_add(sizee=2)        # expected TypeError on both sid
         assert_eq!(again.compare, c.compare);
         assert_eq!(again.tier, c.tier);
         assert_eq!(again.skip_blender, c.skip_blender);
+        assert_eq!(again.glb_structure, c.glb_structure);
     }
 
     #[test]

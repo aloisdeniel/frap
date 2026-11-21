@@ -3,7 +3,7 @@
 # use_visible, use_renderable, collection (with its children), use_active_collection with and
 # without nested collections, combined with use_selection; filtered parents hand their kept
 # children up.
-# golden: startup=factory tier=T2 compare=glb:out/all.glb,glb:out/visible.glb,glb:out/renderable.glb,glb:out/collection.glb,glb:out/active.glb,glb:out/active_nested.glb,glb:out/visible_selected.glb
+# golden: startup=factory tier=T2 compare=glb:out/all.glb,glb:out/visible.glb,glb:out/renderable.glb,glb:out/collection.glb,glb:out/active.glb,glb:out/active_nested.glb,glb:out/visible_selected.glb glb_structure
 import bpy
 bpy.data.collections.new('Outer')
 bpy.context.scene.collection.children.link(bpy.data.collections['Outer'])

@@ -4,7 +4,7 @@
 # out. Not sampled: BEZIER keys become CUBICSPLINE (tangents from the handles, first in- and
 # last out-tangent zero), LINEAR stays LINEAR, CONSTANT becomes STEP, a single key is sampled.
 # export_frame_step samples every n frames.
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/sampled.glb,glb:out/curves.glb,glb:out/step3.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/sampled.glb,glb:out/curves.glb,glb:out/step3.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].keyframe_insert('location', frame=1)
 bpy.data.objects['Cube'].location = (2.0, 1.0, 0.5)

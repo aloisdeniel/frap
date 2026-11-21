@@ -5,7 +5,7 @@
 # exported too. Round trip (§17.2) of each file, imported and re-exported in its own lighting
 # mode: the importer converts the intensities back (range is ignored on import, so the spot
 # loses it).
-# golden: startup=factory tier=T2 compare=glb:out/rig.glb,glb:out/rig_compat.glb,glb:out/rig_raw.glb,glb:out/rig_rt.glb,glb:out/rig_compat_rt.glb,glb:out/rig_raw_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/rig.glb,glb:out/rig_compat.glb,glb:out/rig_raw.glb,glb:out/rig_rt.glb,glb:out/rig_compat_rt.glb,glb:out/rig_raw_rt.glb glb_structure
 import bpy
 bpy.ops.object.empty_add(location=(0, 0, 3), rotation=(0, 0, 0.6))
 bpy.data.objects['Empty'].name = 'RigRoot'

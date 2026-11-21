@@ -2,7 +2,7 @@
 # writes its result (sharp edges above the angle split the normals) while the plain export
 # writes the data (every face smooth). Linked duplicates of the cylinder without the modifier
 # keep sharing the data mesh in the applied file.
-# golden: startup=factory tier=T2 compare=glb:out/applied.glb,glb:out/data.glb tol=1e-4
+# golden: startup=factory tier=T2 compare=glb:out/applied.glb,glb:out/data.glb tol=1e-4 glb_structure
 import bpy
 bpy.ops.mesh.primitive_cylinder_add(vertices=8, location=(3, 0, 0))
 bpy.ops.object.shade_auto_smooth(angle=0.6)

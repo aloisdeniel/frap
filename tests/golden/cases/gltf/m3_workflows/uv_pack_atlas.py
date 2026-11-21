@@ -3,7 +3,7 @@
 # average_islands_scale and packed again (pack_islands, AABB shape, rotation off). UV layouts
 # compare at the default tolerance; a 6-sided cone differs (hex_cone_atlas.py, T3). Round trip
 # (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/props.glb,glb:out/props_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/props.glb,glb:out/props_rt.glb glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.5, depth=2)

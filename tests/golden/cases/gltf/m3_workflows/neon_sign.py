@@ -2,7 +2,7 @@
 # KHR_materials_emissive_strength), the backing board is unlit (a Background shader:
 # KHR_materials_unlit) and a lamp uses an Emission shader alone (emissive only, black base
 # colour). Round trip (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/sign.glb,glb:out/sign_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/sign.glb,glb:out/sign_rt.glb glb_structure
 import bpy
 bpy.ops.mesh.primitive_torus_add(major_segments=16, minor_segments=6, major_radius=1.0, minor_radius=0.1, location=(0, 0, 2), rotation=(1.5707963, 0, 0))
 bpy.data.objects['Torus'].name = 'Tube'

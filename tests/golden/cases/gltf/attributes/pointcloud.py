@@ -5,7 +5,7 @@
 # (other points keep 0.01); the point cloud then exports as POINTS without indices, with
 # _RADIUS and positions as stored (no Y-up conversion, as the add-on does); without
 # use_mesh_vertices its node has no mesh.
-# golden: startup=empty tier=T2 compare=objects,mesh:Pts.001,glb:out/pc.glb,glb:out/pc_off.glb
+# golden: startup=empty tier=T2 compare=objects,mesh:Pts.001,glb:out/pc.glb,glb:out/pc_off.glb glb_structure
 import bpy
 bpy.data.meshes.new('Pts')
 bpy.data.meshes['Pts'].from_pydata([(0, 0, 0), (1, 2, 3), (-1, 0.5, 2)], [], [])

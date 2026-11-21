@@ -2,7 +2,7 @@
 # joined (object.join: one mesh, two material slots, transforms baked in); the result exports
 # as one node with two primitives. Then mesh.separate(type='MATERIAL') splits it back into two
 # objects, one per material, exported as two nodes. Round trip (§17.2) of both files.
-# golden: startup=factory tier=T2 compare=glb:out/joined.glb,glb:out/split.glb,glb:out/joined_rt.glb,glb:out/split_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/joined.glb,glb:out/split.glb,glb:out/joined_rt.glb,glb:out/split_rt.glb glb_structure
 import bpy
 bpy.data.materials['Material'].name = 'Red'
 bpy.data.materials['Red'].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0.9, 0.1, 0.1, 1.0)

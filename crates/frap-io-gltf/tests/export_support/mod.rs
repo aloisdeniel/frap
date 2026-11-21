@@ -414,8 +414,11 @@ pub fn validate(out: &ExportOutput, format: ExportFormat) {
                     });
                     if blob.is_some() {
                         let n = r.read_positions().expect("POSITION").count();
-                        let idx: Vec<u32> = r.read_indices().unwrap().into_u32().collect();
-                        assert!(idx.iter().all(|i| (*i as usize) < n));
+                        // POINTS from loose vertices carry no `indices` (as the add-on).
+                        match r.read_indices() {
+                            Some(idx) => assert!(idx.into_u32().all(|i| (i as usize) < n)),
+                            None => assert_eq!(prim.mode(), gltf::mesh::Mode::Points),
+                        }
                     }
                 }
             }

@@ -24,7 +24,10 @@
 //!   different interpolations of the same curve, compare equal;
 //! - `extensionsUsed` / `extensionsRequired` in file order (the add-on's traversal order is
 //!   deterministic); `asset.generator` is ignored
-//!   (GLTF §7.2); `extras` and unknown extensions are kept verbatim.
+//!   (GLTF §7.2); `extras` and unknown extensions are kept verbatim;
+//! - the numbers of accessors and buffer views are kept (`structure`; compared only for cases
+//!   with the `glb_structure` header flag): data the add-on shares by content (`@cached
+//!   gather_accessor`) must be shared.
 //!
 //! This module carries its own minimal glTF reader on purpose: the judge must not share code
 //! with the implementation it judges (`frap-gltf`).
@@ -863,6 +866,16 @@ impl Canon<'_> {
                 .unwrap_or(Json::Null),
         );
         o.insert("scenes".into(), Json::Array(sc));
+        // Data sharing: the add-on's `@cached gather_accessor` shares accessors (and their
+        // buffer views) by content across the whole export, so the counts are compared even
+        // though accessors themselves are inlined (M5+M6 stabilization round 3).
+        o.insert(
+            "structure".into(),
+            json!({
+                "accessors": arr(j, "accessors").len(),
+                "bufferViews": arr(j, "bufferViews").len(),
+            }),
+        );
         let mut anims = arr(j, "animations")
             .iter()
             .map(|a| self.animation(a))

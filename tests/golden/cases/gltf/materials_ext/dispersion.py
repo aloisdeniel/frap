@@ -1,7 +1,7 @@
 # WP 3.6: KHR_materials_dispersion export from the "glTF Material Output" group's Dispersion:
 # kept with a volume and transmission (first material), dropped with the volume when there is no
 # transmission (second material, __check_volume then __check_dispersion).
-# golden: startup=factory tier=T2 compare=glb:out/dispersion.glb
+# golden: startup=factory tier=T2 compare=glb:out/dispersion.glb glb_structure
 import bpy
 bpy.data.node_groups.new('glTF Material Output', 'ShaderNodeTree')
 bpy.data.node_groups['glTF Material Output'].interface.new_socket('Occlusion', socket_type='NodeSocketFloat')

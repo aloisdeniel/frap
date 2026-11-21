@@ -4,7 +4,7 @@
 # the point cloud needs a radius attribute before it can be exported (the add-on's exporter
 # raises KeyError 'radius' without one; frap refuses it too), so one radius is written; it then
 # exports POINTS again with _RADIUS (0.01 for the other points) and the positions as stored.
-# golden: startup=empty tier=T2 compare=glb:out/scan.glb,glb:out/scan_rt.glb,glb:out/scan_cloud_rt.glb
+# golden: startup=empty tier=T2 compare=glb:out/scan.glb,glb:out/scan_rt.glb,glb:out/scan_cloud_rt.glb glb_structure
 import bpy
 bpy.data.meshes.new('Scan')
 bpy.data.meshes['Scan'].from_pydata([(0, 0, 0), (1, 0.5, 0.2), (2, 1, 0.1), (0.5, 2, 1.5), (-1, -1, 0.75), (3, 3, 3)], [], [])

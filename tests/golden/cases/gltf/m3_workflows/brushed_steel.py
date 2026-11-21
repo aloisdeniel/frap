@@ -2,7 +2,7 @@
 # -> anisotropyStrength, Anisotropic Rotation 0.25 -> anisotropyRotation pi/2) on a fully
 # metallic material; the handle has a rotation only (strength 0: no extension). Round trip
 # (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/pan.glb,glb:out/pan_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/pan.glb,glb:out/pan_rt.glb glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=1.0, depth=0.2)

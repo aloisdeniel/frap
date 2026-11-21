@@ -3,7 +3,7 @@
 # without a light, the add-on's AREA warning), a spot and a sun, and a backdrop with an unlit
 # material; exported with export_cameras, export_lights and export_apply (the product's BEVEL
 # modifier applied). Round trip (§17.2) with cameras and lights.
-# golden: startup=factory tier=T2 compare=glb:out/stage.glb,glb:out/stage_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/stage.glb,glb:out/stage_rt.glb glb_structure
 import bpy
 bpy.ops.object.empty_add(location=(0, 0, 0), rotation=(0, 0, 0.4))
 bpy.context.object.name = 'Turntable'

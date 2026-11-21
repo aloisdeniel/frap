@@ -3,7 +3,7 @@
 # through a UV Map node naming the second map 'DecalUV' (texCoord 1). Both maps export
 # (TEXCOORD_0, TEXCOORD_1). Round trip (§17.2): the importer recreates the UV Map node and the
 # re-export keeps texCoord 1.
-# golden: startup=factory tier=T2 compare=glb:out/decal.glb,glb:out/decal_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/decal.glb,glb:out/decal_rt.glb glb_structure
 import bpy
 bpy.data.meshes['Cube'].uv_layers.new(name='DecalUV')
 bpy.data.meshes['Cube'].uv_layers['DecalUV'].data[0].uv = (0.1, 0.1)

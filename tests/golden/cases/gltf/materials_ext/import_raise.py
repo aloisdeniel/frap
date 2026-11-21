@@ -3,7 +3,7 @@
 # BSDF sockets, the "glTF Material Output" settings node, the Volume Absorption node) compare as
 # materials, and the second export canonically. The thin-film maximum comes back as 400: the
 # add-on's importer reads it from the key `iridescenceThickness`.
-# golden: startup=factory tier=T2 compare=materials,glb:out/again.glb
+# golden: startup=factory tier=T2 compare=materials,glb:out/again.glb glb_structure
 import bpy
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Coat Weight'].default_value = 0.8
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Coat Roughness'].default_value = 0.2

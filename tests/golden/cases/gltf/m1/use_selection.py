@@ -1,6 +1,6 @@
 # WP 1.23: `use_selection=True` exports only the selected objects (a selected child of an
 # unselected parent becomes a root).
-# golden: startup=factory tier=T2 compare=glb:out/selected.glb
+# golden: startup=factory tier=T2 compare=glb:out/selected.glb glb_structure
 import bpy
 bpy.ops.mesh.primitive_cone_add(vertices=5, location=(3, 0, 0))
 bpy.ops.mesh.primitive_plane_add(location=(-3, 0, 0))

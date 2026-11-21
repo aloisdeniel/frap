@@ -1,7 +1,7 @@
 # WP 4.7: exporting from Edit Mode with export_apply=True leaves Edit Mode first (the
 # add-on's `export.save`), so the evaluated mesh is built from the edited geometry; the
 # Simple Deform and Displace stack on the cube and a Cast on the sphere are applied in order.
-# golden: startup=factory tier=T2 compare=glb:out/edited.glb,objects,context tol=1e-4
+# golden: startup=factory tier=T2 compare=glb:out/edited.glb,objects,context tol=1e-4 glb_structure
 import bpy
 bpy.ops.mesh.primitive_uv_sphere_add(segments=10, ring_count=6, location=(3, 0, 0))
 bpy.data.objects['Sphere'].modifiers.new(name='Cast', type='CAST')

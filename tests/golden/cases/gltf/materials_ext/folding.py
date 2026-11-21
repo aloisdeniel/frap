@@ -1,7 +1,7 @@
 # Integration (WP 3.5 folding + WP 3.6 extensions): the add-on reads the inlined tree, where
 # Math nodes with constant inputs are folded: Transmission Weight = 0.5 * 0.8 (transmission
 # 0.4), IOR = 1 + 0.2 (ior 1.2, written with transmission), Roughness = 0.1 + 0.2.
-# golden: startup=factory tier=T2 compare=glb:out/f.glb
+# golden: startup=factory tier=T2 compare=glb:out/f.glb glb_structure
 import bpy
 bpy.data.materials['Material'].node_tree.nodes.new('ShaderNodeMath')
 bpy.data.materials['Material'].node_tree.nodes['Math'].operation = 'MULTIPLY'

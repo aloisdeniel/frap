@@ -5,7 +5,7 @@
 # external .bin and images) re-exported as GLB. The harness copies
 # only the .gltf files into the fixtures: Blender's crate.bin, crate_tex.bin, Brick.png and
 # textures/Brick.png are committed next to them (re-copy them when re-blessing).
-# golden: startup=factory tier=T2 compare=glb:out/web/crate.gltf,glb:out/web_tex/crate_tex.gltf,glb:out/embedded.gltf,glb:out/web_rt.glb,glb:out/embedded_rt.glb,glb:out/web_tex_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/web/crate.gltf,glb:out/web_tex/crate_tex.gltf,glb:out/embedded.gltf,glb:out/web_rt.glb,glb:out/embedded_rt.glb,glb:out/web_tex_rt.glb glb_structure
 import bpy
 bpy.data.images.new('Brick', 2, 2)
 bpy.data.images['Brick'].pixels = [0.7, 0.3, 0.2, 1.0, 0.6, 0.25, 0.15, 1.0, 0.8, 0.8, 0.75, 1.0, 0.65, 0.3, 0.2, 1.0]

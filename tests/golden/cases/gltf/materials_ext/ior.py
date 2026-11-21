@@ -2,7 +2,7 @@
 # KHR_materials_volume or KHR_materials_specular [GLTF §4.5] and not at 1.5: the first material
 # (IOR 1.45 alone) has no extension, the second (IOR 1.33 + specular) and the third (IOR 2.0 +
 # transmission) have it, the fourth (transmission, IOR 1.5) only has transmission.
-# golden: startup=factory tier=T2 compare=glb:out/ior.glb
+# golden: startup=factory tier=T2 compare=glb:out/ior.glb glb_structure
 import bpy
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['IOR'].default_value = 1.45
 bpy.data.materials.new('Water')

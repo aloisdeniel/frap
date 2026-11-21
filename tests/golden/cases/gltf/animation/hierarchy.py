@@ -4,7 +4,7 @@
 # is sampled as quaternions; with export_force_sampling=False Euler curves become quaternion
 # CUBICSPLINE keys (the add-on reads them as XYZ), a quaternion object keeps its keys. A
 # filtered-out parent (use_selection) makes the child relative to the root.
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/sampled.glb,glb:out/curves.glb,glb:out/selected.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/sampled.glb,glb:out/curves.glb,glb:out/selected.glb glb_structure
 import bpy
 bpy.ops.object.empty_add(location=(1.0, 1.0, 0.0))
 bpy.data.objects['Empty'].name = 'Parent'

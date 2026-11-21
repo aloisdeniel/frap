@@ -3,7 +3,7 @@
 # (Strength 0.8 -> normalTexture.scale) and a roughness factor; smart_project replaces the
 # factory UVs. Round-trip law (§17.2): each tool imports its own export into an empty file and
 # exports again; both re-exports compare canonically.
-# golden: startup=factory tier=T2 compare=glb:out/crate.glb,glb:out/crate_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/crate.glb,glb:out/crate_rt.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].name = 'Crate'
 bpy.data.materials['Material'].name = 'Wood'

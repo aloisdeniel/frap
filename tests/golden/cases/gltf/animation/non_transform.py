@@ -6,7 +6,7 @@
 # animation keeps a single CUBICSPLINE scale channel (never a second, sampled one on the same
 # node and path). A group that can be exported from its keys (two CONSTANT hide_viewport keys)
 # has no glTF path and is skipped too. Sampled, only the keyed transforms are written.
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/one.glb,glb:out/scaled.glb,glb:out/mixed.glb,glb:out/sampled.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/one.glb,glb:out/scaled.glb,glb:out/mixed.glb,glb:out/sampled.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].keyframe_insert('hide_render', frame=3)
 bpy.ops.export_scene.gltf(filepath='out/one.glb', export_force_sampling=False)

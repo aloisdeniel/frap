@@ -38,6 +38,7 @@ Header (`# golden:` comment lines before the first statement; several are merged
 | `ssim` | minimum SSIM for `image:` | `0.995` (frap-blessed self-goldens) |
 | `check` | T3 invariants: `manifold`, `euler:<n>`, `verts:<a>-<b>`, `edges:…`, `faces:…`, `uv01`, `uv_no_overlap`, `uv_area:<a>-<b>` | none |
 | `skip_blender` | frap-only case: never blessed, only has to run | off |
+| `glb_structure` | `glb:` also compares the numbers of accessors and buffer views (sharing by content) | off |
 
 Rules:
 

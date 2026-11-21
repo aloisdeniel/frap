@@ -5,7 +5,7 @@
 # innerConeAngle), a perspective camera (lens -> yfov, clip_end -> zfar) and an orthographic one
 # (ortho_scale -> xmag / ymag); constant channels are dropped; one animation per light and
 # camera, one for the materials.
-# golden: startup=factory tier=T2 compare=glb:out/scene_split.glb
+# golden: startup=factory tier=T2 compare=glb:out/scene_split.glb glb_structure
 import bpy
 bpy.context.scene.frame_end = 12
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (1.0, 0.0, 0.0, 1.0)

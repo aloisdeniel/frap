@@ -3,7 +3,7 @@
 # assigned action and the stashed strips (muted tracks, unmuted strips) give the same
 # animations; NLA_TRACKS bakes each stash track. A camera's animation carries the add-on's
 # camera rotation correction both ways.
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/first.glb,glb:out/again.glb,glb:out/tracks.glb,anim:Move
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/first.glb,glb:out/again.glb,glb:out/tracks.glb,anim:Move glb_structure
 import bpy
 bpy.data.objects['Cube'].keyframe_insert('location', frame=2)
 bpy.data.objects['Cube'].location = (3.0, 0.0, 1.0)

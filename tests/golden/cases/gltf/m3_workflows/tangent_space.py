@@ -5,7 +5,7 @@
 # re-exported with its own options (the importer drops tangents, the exporter recomputes them;
 # the Z-up file is read as if it were Y-up). tol=1e-4: smart_project puts one UV component of
 # two corners 1.0e-4 from Blender's (listed in docs/deviations.md §2 with the smart_project gap).
-# golden: startup=factory tier=T2 tol=1e-4 compare=glb:out/rock.glb,glb:out/rock_plain.glb,glb:out/rock_zup.glb,glb:out/rock_rt.glb,glb:out/rock_plain_rt.glb,glb:out/rock_zup_rt.glb
+# golden: startup=factory tier=T2 tol=1e-4 compare=glb:out/rock.glb,glb:out/rock_plain.glb,glb:out/rock_zup.glb,glb:out/rock_rt.glb,glb:out/rock_plain_rt.glb,glb:out/rock_zup_rt.glb glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=1.0)

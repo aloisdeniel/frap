@@ -5,7 +5,7 @@
 # first material uses sheen, then transmission, then clearcoat declares
 # [clearcoat, transmission, sheen]; with the transmission object first (renamed), the same.
 # The canonical glTF comparison is order-sensitive for extensionsUsed.
-# golden: startup=empty tier=T2 compare=glb:out/sheen_first.glb,glb:out/clearcoat_first.glb
+# golden: startup=empty tier=T2 compare=glb:out/sheen_first.glb,glb:out/clearcoat_first.glb glb_structure
 import bpy
 bpy.data.materials.new('Velvet')
 bpy.data.materials['Velvet'].node_tree.nodes['Principled BSDF'].inputs['Sheen Weight'].default_value = 0.7

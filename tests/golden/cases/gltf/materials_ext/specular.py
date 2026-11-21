@@ -1,7 +1,7 @@
 # WP 3.6: KHR_materials_specular export. specularFactor = 2 x Specular IOR Level when below 1
 # (first material); above 1 the excess multiplies specularColorFactor (second material, tint
 # times 1.6); a specular colour texture (copied whole) on the third.
-# golden: startup=factory tier=T2 compare=glb:out/specular.glb
+# golden: startup=factory tier=T2 compare=glb:out/specular.glb glb_structure
 import bpy
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Specular IOR Level'].default_value = 0.3
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Specular Tint'].default_value = (0.5, 0.6, 0.7, 1)

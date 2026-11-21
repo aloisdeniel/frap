@@ -1,6 +1,6 @@
 # WP 2.13 workflow (mug, end to end): body from a cylinder (inset + extrude into a cavity),
 # shaded smooth by angle in Object Mode, then exported as GLB; the exported file is compared.
-# golden: startup=empty compare=objects,glb:out/mug.glb tier=T2
+# golden: startup=empty compare=objects,glb:out/mug.glb tier=T2 glb_structure
 import bpy
 bpy.ops.mesh.primitive_cylinder_add(vertices=24, radius=0.5, depth=1, location=(0, 0, 0.5))
 bpy.context.object.name = 'Mug'

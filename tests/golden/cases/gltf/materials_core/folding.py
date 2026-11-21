@@ -4,7 +4,7 @@
 # (3) → normalTexture.scale 3; a Mapping Location from a Combine XYZ (X 0.5) → offset [0.5, 0].
 # A Math cycle on Base Color and a Reroute loop on Alpha (invalid links) export without crashing,
 # the cycle's Image Texture is not exported.
-# golden: startup=factory tier=T2 compare=glb:out/fold.glb
+# golden: startup=factory tier=T2 compare=glb:out/fold.glb glb_structure
 import bpy
 bpy.data.materials['Material'].node_tree.nodes.new('ShaderNodeMix')
 bpy.data.materials['Material'].node_tree.nodes['Mix'].data_type = 'RGBA'

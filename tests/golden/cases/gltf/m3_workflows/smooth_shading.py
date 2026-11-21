@@ -2,7 +2,7 @@
 # smooth with its cap edges marked sharp in Edit Mode (split normals along the rim) and a cube
 # kept flat; corner normals decide the glTF vertex split. Round trip (§17.2): import detects
 # flat and smooth faces from the normals and merges vertices, the re-export matches.
-# golden: startup=factory tier=T2 compare=glb:out/shading.glb,glb:out/shading_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/shading.glb,glb:out/shading_rt.glb glb_structure
 import bpy
 bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, location=(3, 0, 0))
 bpy.ops.object.shade_smooth()

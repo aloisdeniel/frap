@@ -2,7 +2,7 @@
 # star-shaped decagon built with from_pydata, plus a circle filled as an n-gon (fill_type
 # 'NGON'): the exporter triangulates each n-gon with Blender's polyfill (concave shapes too).
 # A second material on the star. Round trip (§17.2): the triangles come back as triangles.
-# golden: startup=empty tier=T2 compare=glb:out/panels.glb,glb:out/panels_rt.glb
+# golden: startup=empty tier=T2 compare=glb:out/panels.glb,glb:out/panels_rt.glb glb_structure
 import bpy
 bpy.data.meshes.new('Panels')
 bpy.data.meshes['Panels'].from_pydata([(0, 0, 0), (2, 0, 0), (2, 1, 0), (1, 1, 0), (1, 2, 0), (0, 2, 0), (3, 0, 0), (4, 0, 0), (4.5, 1, 0), (3.5, 1.8, 0), (2.6, 1, 0), (7, 1, 0), (6.3, 1.3, 0), (6, 2, 0), (5.7, 1.3, 0), (5, 1, 0), (5.6, 0.6, 0), (5.4, 0, 0), (6, 0.4, 0), (6.6, 0, 0), (6.4, 0.6, 0)], [], [(0, 1, 2, 3, 4, 5), (6, 7, 8, 9, 10), (11, 12, 13, 14, 15, 16, 17, 18, 19, 20)])

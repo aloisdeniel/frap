@@ -4,7 +4,7 @@
 # reads none, (d) the second material reads another set than the first (glTF cannot express
 # it: the later set is not exported), (e) the Color Attribute's Alpha also feeds the Principled
 # Alpha (BLEND material: COLOR_0 carries the alpha as a VEC4).
-# golden: startup=factory tier=T2 compare=glb:out/a.glb,glb:out/b.glb,glb:out/c.glb,glb:out/d.glb,glb:out/e.glb
+# golden: startup=factory tier=T2 compare=glb:out/a.glb,glb:out/b.glb,glb:out/c.glb,glb:out/d.glb,glb:out/e.glb glb_structure
 import bpy
 bpy.data.meshes['Cube'].color_attributes.new('Col', 'BYTE_COLOR', 'CORNER')
 bpy.data.meshes['Cube'].color_attributes.new('PCol', 'FLOAT_COLOR', 'POINT')

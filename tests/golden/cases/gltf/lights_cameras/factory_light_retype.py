@@ -1,7 +1,7 @@
 # WP 3.4: re-typing the factory light exposes the values startup.blend stores for the other
 # types (75 degree spot cone, 11.4 degree sun angle, 0.1 x 0.1 rectangle area, cascade
 # distance 1000), here copied into object transforms and exported as a spot and as a sun.
-# golden: startup=factory tier=T2 compare=objects,glb:out/spot.glb,glb:out/sun.glb
+# golden: startup=factory tier=T2 compare=objects,glb:out/spot.glb,glb:out/sun.glb glb_structure
 import bpy
 bpy.data.lights['Light'].type = 'SPOT'
 bpy.data.objects['Cube'].location = (bpy.data.lights['Light'].spot_size, bpy.data.lights['Light'].spot_blend, bpy.data.lights['Light'].shadow_soft_size)

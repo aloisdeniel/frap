@@ -3,7 +3,7 @@
 # full copy (object.duplicate_move: its own mesh). The second tree overrides its material with
 # an OBJECT-linked slot, so its node needs its own glTF mesh with another material. Round trip
 # (§17.2): import shares the mesh between the nodes again.
-# golden: startup=factory tier=T2 compare=glb:out/forest.glb,glb:out/forest_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/forest.glb,glb:out/forest_rt.glb glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.ops.mesh.primitive_cone_add(vertices=8, radius1=1, depth=2, location=(0, 0, 1))

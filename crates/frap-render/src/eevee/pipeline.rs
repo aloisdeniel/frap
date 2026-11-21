@@ -1761,7 +1761,7 @@ pub fn render(
         }
     };
 
-    for (i, sample) in samples.iter().enumerate() {
+    for (i, sample) in samples.enumerate() {
         frap_math::budget::check_now();
         let offset = sample.pixel_offset(filter_radius);
         let proj = taa::jitter_projection(scene.camera.projection, offset, size);
@@ -1805,7 +1805,7 @@ pub fn render(
                 .any(|(k, _)| *k != lights::ShadowKind::None)
             && (i == 0 || rerender_shadows);
         let (bindings, matrices) =
-            shadows::sample_maps(&plan, &records, sample, &scene.camera, &bounds);
+            shadows::sample_maps(&plan, &records, &sample, &scene.camera, &bounds);
         let gl: Vec<GpuLight> = records
             .iter()
             .zip(&bindings)

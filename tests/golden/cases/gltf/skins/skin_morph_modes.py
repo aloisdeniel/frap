@@ -3,7 +3,7 @@
 # NLA track and an active action, a shape key with its own NLA strip, and an animated light;
 # exported with ACTIVE_ACTIONS, NLA_TRACKS, BROADCAST, SCENE, and SCENE without the per-object
 # split at frame_step 3 with forced sampling.
-# golden: startup=factory tier=T2 tol=1e-4 compare=glb:out/active.glb,glb:out/tracks.glb,glb:out/broad.glb,glb:out/scene.glb,glb:out/scene1.glb
+# golden: startup=factory tier=T2 tol=1e-4 compare=glb:out/active.glb,glb:out/tracks.glb,glb:out/broad.glb,glb:out/scene.glb,glb:out/scene1.glb glb_structure
 import bpy
 bpy.ops.object.delete()
 bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, radius=1.0, location=(0, 0, 3))

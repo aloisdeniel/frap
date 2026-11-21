@@ -3,7 +3,7 @@
 # of an image's alpha → MASK 0.3 with an alpha-only base colour image (white RGB, the image's
 # alpha packed into a new PNG); a constant 0 → MASK; an image's Color and Alpha on Base Color
 # and Alpha → BLEND with the image re-encoded RGBA (its pixels were edited, so not passed through).
-# golden: startup=factory tier=T2 compare=glb:out/alpha.glb
+# golden: startup=factory tier=T2 compare=glb:out/alpha.glb glb_structure
 import bpy
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Alpha'].default_value = 0.5
 bpy.data.materials['Material'].blend_method = 'OPAQUE'

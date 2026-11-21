@@ -2,7 +2,7 @@
 # next to it; the `.glb` extension of the path becomes `.gltf`, as the add-on does.
 # The harness copies only the `.gltf` into the fixtures; Blender's `gltf_separate.bin` and
 # `gltf_separate_grid.png` are committed next to it (re-copy them when re-blessing).
-# golden: startup=factory tier=T2 compare=glb:out/sep/gltf_separate.gltf
+# golden: startup=factory tier=T2 compare=glb:out/sep/gltf_separate.gltf glb_structure
 import bpy
 bpy.data.images.new('gltf_separate_grid', 4, 4)
 bpy.data.materials['Material'].node_tree.nodes.new('ShaderNodeTexImage')

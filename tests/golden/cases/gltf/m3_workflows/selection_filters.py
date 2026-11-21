@@ -6,7 +6,7 @@
 # Round trip (§17.2) of all four exports. The first
 # select_all(action='DESELECT') is CANCELLED in both tools: the only selected object (the
 # sketch) is in a collection hidden in the viewport, so nothing changes.
-# golden: startup=factory tier=T2 compare=glb:out/selected.glb,glb:out/visible.glb,glb:out/renderable.glb,glb:out/furniture.glb,glb:out/selected_rt.glb,glb:out/furniture_rt.glb,glb:out/visible_rt.glb,glb:out/renderable_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/selected.glb,glb:out/visible.glb,glb:out/renderable.glb,glb:out/furniture.glb,glb:out/selected_rt.glb,glb:out/furniture_rt.glb,glb:out/visible_rt.glb,glb:out/renderable_rt.glb glb_structure
 import bpy
 bpy.data.collections.new('Furniture')
 bpy.context.scene.collection.children.link(bpy.data.collections['Furniture'])

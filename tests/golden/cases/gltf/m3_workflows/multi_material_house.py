@@ -3,7 +3,7 @@
 # door face, and an empty slot (a primitive without material); one primitive per used slot in
 # slot order. export_materials='NONE' writes one primitive for the whole mesh. Round trip
 # (§17.2) of both exports.
-# golden: startup=factory tier=T2 compare=glb:out/house.glb,glb:out/house_nomat.glb,glb:out/house_rt.glb,glb:out/house_nomat_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/house.glb,glb:out/house_nomat.glb,glb:out/house_rt.glb,glb:out/house_nomat_rt.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].name = 'House'
 bpy.data.materials['Material'].name = 'Plaster'

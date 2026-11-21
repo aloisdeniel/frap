@@ -432,21 +432,14 @@ fn anim_extras(g: &mut Gather, sources: &[Source]) -> Option<Extras> {
 /// Writes `anims` into `g.doc.animations` with their accessors (inputs and outputs shared by
 /// content, as the add-on's `@cached gather_accessor` shares them).
 fn write(g: &mut Gather, anims: Vec<GAnim>) {
-    let mut shared: HashMap<(Vec<u8>, bool), Index> = HashMap::new();
     for a in anims {
         let extras = anim_extras(g, &a.sources);
         let mut channels = Vec::with_capacity(a.channels.len());
         let mut samplers = Vec::with_capacity(a.channels.len());
         for c in a.channels {
             let times: Vec<f32> = c.sampler.times.iter().map(|t| *t as f32).collect();
-            let input = accessor(
-                g,
-                &mut shared,
-                &times,
-                AccessorType::Scalar,
-                Some(&c.sampler.times),
-            );
-            let output = accessor(g, &mut shared, &c.sampler.values, c.sampler.ty, None);
+            let input = accessor(g, &times, AccessorType::Scalar, Some(&c.sampler.times));
+            let output = accessor(g, &c.sampler.values, c.sampler.ty, None);
             samplers.push(AnimationSampler {
                 extensions: Default::default(),
                 extras: None,
@@ -476,11 +469,18 @@ fn write(g: &mut Gather, anims: Vec<GAnim>) {
     }
 }
 
-/// One float accessor without buffer-view target; inputs carry `min`/`max` (the add-on writes
-/// the doubles it computed).
-fn accessor(
+/// The animation accessors written so far, by content: the add-on's `@cached
+/// gather_accessor` is export-wide, so the object, bone and shape-key channels and the
+/// `KHR_animation_pointer` channels ([`crate::export::pointer`]) share one input accessor
+/// when they sample the same times.
+#[derive(Default)]
+struct SharedAccessors(HashMap<(Vec<u8>, bool), Index>);
+
+/// One float accessor without buffer-view target, shared by content with every animation
+/// accessor written before it; inputs carry `min`/`max` (the add-on writes the doubles it
+/// computed).
+pub(crate) fn accessor(
     g: &mut Gather,
-    shared: &mut HashMap<(Vec<u8>, bool), Index>,
     data: &[f32],
     ty: AccessorType,
     min_max: Option<&[f64]>,
@@ -489,7 +489,7 @@ fn accessor(
     let mut bytes: Vec<u8> = data.iter().flat_map(|v| v.to_le_bytes()).collect();
     bytes.extend_from_slice(&(comps as u32).to_le_bytes());
     let k = (bytes, min_max.is_some());
-    if let Some(i) = shared.get(&k) {
+    if let Some(i) = g.state::<SharedAccessors>().0.get(&k) {
         return *i;
     }
     let ad = AccessorData::new(ty, false, Components::F32(data.to_vec()))
@@ -503,6 +503,6 @@ fn accessor(
         acc.min = Some(vec![lo]);
         acc.max = Some(vec![hi]);
     }
-    shared.insert(k, i);
+    g.state::<SharedAccessors>().0.insert(k, i);
     i
 }

@@ -741,8 +741,8 @@ Every dumped `ShaderNode*` type can be created and edited as data from M1 (gener
 | [ ] | `ShaderNodeLightPath` | Light Path | M3 | KHR_materials_unlit pattern |
 | [ ] | `ShaderNodeVolumeAbsorption` | Volume Absorption | M3 | KHR_materials_volume |
 | [ ] | `ShaderNodeGroup` | Group | M3 | "glTF Material Output" (Occlusion, Thickness, …) |
-| [ ] | `ShaderNodeBackground` | Background | M3 | world colour (render M5) |
-| [ ] | `ShaderNodeTexEnvironment` | Environment Texture | M3 | world HDRI (render M5) |
+| [x] | `ShaderNodeBackground` | Background | M3 | world colour (render M5: WP 5.2 world probe, `Color`/`Strength`) |
+| [x] | `ShaderNodeTexEnvironment` | Environment Texture | M3 | world HDRI (render M5: WP 5.2 equirectangular probe, Mapping Z rotation; other projections are a deviations §2 gap) |
 | [ ] | `ShaderNodeOutputWorld` | World Output | M3 | world root |
 
 ## D. RNA structs
@@ -768,10 +768,10 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | ShaderNodeTree, Node, NodeSocket (+ typed sockets), NodeLink, Nodes, NodeLinks | M1 | first-enabled socket lookup; generic for all node types; material/world trees are embedded IDs |
 | [ ] | Camera, CameraDOFSettings | M1 | lens/angle hook; glTF M3 |
 | [ ] | Light, PointLight, SunLight, SpotLight, AreaLight | M1 | type re-typing hook; glTF M3 |
-| [ ] | World | M1 | node tree; HDRI render M5 |
+| [x] | World | M1 | node tree; HDRI render M5 (WP 5.2); unbound world settings are a deviations §2 gap |
 | [ ] | Scene, RenderSettings, ImageFormatSettings, ColorManagedViewSettings, ColorManagedDisplaySettings | M1 | generated plain structs |
 | [ ] | SceneDisplay, View3DShading | M1 | Workbench settings |
-| [ ] | SceneEEVEE | M1 data / M5 render |  |
+| [x] | SceneEEVEE | M1 data / M5 render | read by the EEVEE-like renderer (WPs 5.1–5.5: `taa_render_samples`, `filter_size`, `clamp_surface_*`, shadow and ray-tracing settings); gaps in deviations §2 |
 | [ ] | ToolSettings (mesh_select_mode, transform_pivot_point, proportional_*, double_threshold, use_uv_select_sync, vertex_group_weight) | M1 data / M2 use | subset |
 | [ ] | View3DCursor, UnitSettings | M1 |  |
 | [ ] | ViewLayer, LayerObjects, LayerCollection | M1 | bases, active, selection per view layer |
@@ -827,7 +827,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 |---|---|---|---|---|
 | [ ] | Static meshes, node hierarchy (TRS), multi-material primitives, NORMAL, TEXCOORD_0 | M1 | M1 | Blender-compat rules, looptris |
 | [x] | Multiple scenes (`scenes[]`, default `scene`, `use_active_scene`) | M3 | M3 | WP 3.10 |
-| [x] | Non-triangle modes: LINES (`use_mesh_edges`), POINTS (`use_mesh_vertices`, point clouds); import of strips, fans, line strips/loops | M3 | M3 | WP 3.7; POINTS from loose vertices carry an identity `indices` accessor (deviations §2) |
+| [x] | Non-triangle modes: LINES (`use_mesh_edges`), POINTS (`use_mesh_vertices`, point clouds); import of strips, fans, line strips/loops | M3 | M3 | WP 3.7; POINTS from loose vertices are written without `indices`, as the add-on does (M5+M6 stabilization round 3) |
 | [ ] | pbrMetallicRoughness factors + baseColorTexture, doubleSided | M1 | M1 |  |
 | [x] | Multiple UV sets, vertex colours (COLOR_n, fake COLOR_0), TANGENT, extras | M3 | M3 | WP 3.7 (with WP 3.5 for `export_vertex_color='MATERIAL'`); texCoord of an Attribute node not resolved (deviations §2) |
 | [x] | All textures/samplers/images (PNG/JPEG passthrough, ORM packing), alpha modes OPAQUE/MASK/BLEND | M3 | M3 | WP 3.5; WebP written as PNG (EXT_texture_webp pending) |

@@ -2,7 +2,7 @@
 # is (named after the file); the same file loaded again and then edited (pixels, so is_dirty)
 # is re-encoded with the edits; a generated UV_GRID and a scaled image are encoded from their
 # pixels (Image::acquire); a texture whose image file is missing (size (0, 0)) is not written.
-# golden: startup=factory tier=T2 compare=glb:out/sources.glb
+# golden: startup=factory tier=T2 compare=glb:out/sources.glb glb_structure
 import bpy
 bpy.data.images.new('A', 4, 2, alpha=True)
 bpy.data.images['A'].pixels = [0.0, 0.1, 0.2, 1.0, 0.3, 0.4, 0.5, 0.5, 0.6, 0.7, 0.8, 1.0, 0.9, 1.0, 0.0, 0.25, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.0]

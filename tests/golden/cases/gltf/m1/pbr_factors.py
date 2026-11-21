@@ -1,5 +1,5 @@
 # WP 1.23: Principled BSDF base colour, metallic and roughness factors on two materials.
-# golden: startup=factory tier=T2 compare=glb:out/pbr.glb
+# golden: startup=factory tier=T2 compare=glb:out/pbr.glb glb_structure
 import bpy
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0.2, 0.5, 0.8, 1)
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Metallic'].default_value = 0.75

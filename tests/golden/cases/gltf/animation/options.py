@@ -4,7 +4,7 @@
 # keyed channel; export_optimize_animation_keep_anim_object keeps constant baked channels as two
 # STEP keys; export_sampling_interpolation_fallback='STEP' writes STEP samplers; an action with
 # a manual frame range (use_frame_range) is sampled over that range.
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/shared.glb,glb:out/bake.glb,glb:out/noopt.glb,glb:out/keep.glb,glb:out/step.glb,glb:out/range_curves.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/shared.glb,glb:out/bake.glb,glb:out/noopt.glb,glb:out/keep.glb,glb:out/step.glb,glb:out/range_curves.glb glb_structure
 import bpy
 bpy.ops.object.empty_add(location=(0.0, 3.0, 0.0))
 bpy.ops.mesh.primitive_plane_add(location=(0.0, 0.0, -1.0))

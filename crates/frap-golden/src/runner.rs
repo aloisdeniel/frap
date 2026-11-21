@@ -1569,7 +1569,23 @@ pub fn compare(case: &Case, frap: &GoldenState, blender: &GoldenState) -> Vec<Mi
                 let what = format!("files[{p:?}]");
                 match (frap.files.get(p), blender.files.get(p)) {
                     (Some(GFile::Gltf { canonical: f }), Some(GFile::Gltf { canonical: b })) => {
-                        out.extend(gltf_canonical::compare(&what, f, b, case.tol))
+                        if case.glb_structure {
+                            out.extend(gltf_canonical::compare(&what, f, b, case.tol))
+                        } else {
+                            let strip = |c: &serde_json::Value| {
+                                let mut c = c.clone();
+                                if let Some(o) = c.as_object_mut() {
+                                    o.remove("structure");
+                                }
+                                c
+                            };
+                            out.extend(gltf_canonical::compare(
+                                &what,
+                                &strip(f),
+                                &strip(b),
+                                case.tol,
+                            ))
+                        }
                     }
                     (f, b) => out.push(Mismatch::new(
                         gltf_canonical::NAME,

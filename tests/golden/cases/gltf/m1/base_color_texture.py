@@ -1,6 +1,6 @@
 # WP 1.23: an Image Texture node on Base Color (a generated image written as PNG); UVs as
 # TEXCOORD_0 with the V flip.
-# golden: startup=factory tier=T2 compare=glb:out/textured.glb
+# golden: startup=factory tier=T2 compare=glb:out/textured.glb glb_structure
 import bpy
 bpy.data.images.new('Checker', 8, 8)
 bpy.data.materials['Material'].node_tree.nodes.new('ShaderNodeTexImage')

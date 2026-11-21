@@ -8,7 +8,7 @@
 # (D-118). The #@blender line drops that member from Blender's re-export before comparing.
 # Left out: export_image_format='NONE' (frap reads the factors through the node patterns
 # there, a listed M7 gap).
-# golden: startup=factory tier=T2 compare=glb:out/placeholder.glb,glb:out/no_normals.glb,glb:out/no_uvs.glb,glb:out/zup.glb,glb:out/zup_rt.glb,glb:out/placeholder_rt.glb,glb:out/no_normals_rt.glb,glb:out/no_uvs_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/placeholder.glb,glb:out/no_normals.glb,glb:out/no_uvs.glb,glb:out/zup.glb,glb:out/zup_rt.glb,glb:out/placeholder_rt.glb,glb:out/no_normals_rt.glb,glb:out/no_uvs_rt.glb glb_structure
 import bpy
 bpy.data.images.new('Grid', 2, 2)
 bpy.data.images['Grid'].pixels = [1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0]

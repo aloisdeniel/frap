@@ -1,6 +1,6 @@
 # WP 1.23: flat faces split their corners, smooth faces share vertex normals, and a mix of both
 # in one mesh (Mesh.shade_smooth / shade_flat and per-polygon use_smooth).
-# golden: startup=factory tier=T2 compare=glb:out/shading.glb tol=1e-4
+# golden: startup=factory tier=T2 compare=glb:out/shading.glb tol=1e-4 glb_structure
 import bpy
 bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=5, location=(3, 0, 0))
 bpy.context.object.data.shade_smooth()

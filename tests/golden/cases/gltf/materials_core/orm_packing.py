@@ -6,7 +6,7 @@
 # normalTexture.scale. A second material whose occlusion image has another size writes
 # occlusion and metallic-roughness separately (one image holds metallic B and roughness G, so
 # it is passed on unchanged as a happy-path re-encode).
-# golden: startup=factory tier=T2 compare=glb:out/orm.glb
+# golden: startup=factory tier=T2 compare=glb:out/orm.glb glb_structure
 import bpy
 bpy.data.node_groups.new('glTF Material Output', 'ShaderNodeTree')
 bpy.data.node_groups['glTF Material Output'].interface.new_socket('Occlusion', socket_type='NodeSocketFloat')

@@ -3,7 +3,7 @@
 # keeps the first and last keys of a constant channel (np.ptp < 1e-4) and writes STEP when
 # keyframes[0].value == keyframes[1].value, a mathutils comparison that accepts one ULP per
 # component (EXPP_VectorsAreEqual(..., 1)).
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/sampled.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/sampled.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].keyframe_insert('rotation_euler', frame=1)
 bpy.data.objects['Cube'].rotation_euler = (0.3, 0.2, 1.5)

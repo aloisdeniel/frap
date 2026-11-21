@@ -3,7 +3,7 @@
 # a negative X scale, which flips its winding) and an antenna empty with a cone child. Parents
 # are set through the operator (object.parent_set keeps the world transform with a parent
 # inverse), node TRS are composed by the exporter. Round trip (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/robot.glb,glb:out/robot_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/robot.glb,glb:out/robot_rt.glb glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Camera'])
 bpy.data.objects.remove(bpy.data.objects['Light'])

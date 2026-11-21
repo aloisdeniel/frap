@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! POINTS extractor (`use_mesh_vertices`): one primitive with every vertex that no edge uses,
 //! after the triangle and line primitives, in vertex order and without deduplication; material
-//! slot 0. The add-on writes no `indices` for it; the mesh gatherer writes every primitive
-//! with indices, so this one gets the identity `0..n`, which draws the same points (and which
-//! the canonical comparison treats as absent indices). Loose vertices carry no corner.
+//! slot 0. The add-on writes no `indices` for it: the draft carries the identity `0..n` (the
+//! vertex order of the primitive), which the mesh gatherer does not write for a POINTS
+//! primitive. Loose vertices carry no corner.
 //!
 //! Ported from blender/scripts/addons_core/io_scene_gltf2/blender/exp/primitive_extract.py
 //! (`create_dots_data_structure`: `verts_in_edge`, `blender_idxs_points`;

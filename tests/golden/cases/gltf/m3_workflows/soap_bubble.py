@@ -4,7 +4,7 @@
 # Thin Film Thickness as the maximum; the thin-film IOR 1.33) on a transmissive,
 # rough-free material (KHR_materials_transmission); a beetle shell is iridescent but opaque.
 # Round trip (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/bubble.glb,glb:out/bubble_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/bubble.glb,glb:out/bubble_rt.glb glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.data.node_groups.new('glTF Material Output', 'ShaderNodeTree')

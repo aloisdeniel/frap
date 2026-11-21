@@ -3,7 +3,7 @@
 # negative, as Blender does), non-uniformly scaled and rotated in YXZ Euler order, and one
 # copy has its scale applied (object.transform_apply, so its own mesh with baked positions).
 # Round trip (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/wedges.glb,glb:out/wedges_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/wedges.glb,glb:out/wedges_rt.glb glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.ops.mesh.primitive_cone_add(vertices=3, radius1=1, depth=1.5, location=(0, 0, 0))

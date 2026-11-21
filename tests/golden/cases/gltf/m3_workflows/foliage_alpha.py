@@ -3,7 +3,7 @@
 # constant Alpha of 0.35 (BLEND) and backface culling (single-sided); a hedge card uses the
 # atlas's Color and Alpha directly (BLEND, RGBA PNG). Round trip (§17.2): the importer rebuilds
 # the alpha chains and the re-export matches.
-# golden: startup=factory tier=T2 compare=glb:out/foliage.glb,glb:out/foliage_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/foliage.glb,glb:out/foliage_rt.glb glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.data.images.new('Leaves', 2, 2, alpha=True)

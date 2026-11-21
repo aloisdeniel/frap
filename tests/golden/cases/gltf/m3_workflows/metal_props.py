@@ -4,7 +4,7 @@
 # Occlusion, and an emission texture with Emission Strength 1 gives emissiveTexture. The three
 # images are 2x2, so occlusion and metallic-roughness are packed into one ORM PNG. Round trip
 # (§17.2) of the export.
-# golden: startup=factory tier=T2 compare=glb:out/barrel.glb,glb:out/barrel_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/barrel.glb,glb:out/barrel_rt.glb glb_structure
 import bpy
 bpy.ops.mesh.primitive_cylinder_add(vertices=12, radius=0.8, depth=2, location=(0, 0, 1))
 bpy.data.objects['Cylinder'].name = 'Barrel'

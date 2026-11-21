@@ -2,7 +2,7 @@
 # (constant Thickness 0.8 from the "glTF Material Output" group, no Volume Absorption: infinite
 # attenuation distance is not written), KHR_materials_ior 2.42 and KHR_materials_dispersion
 # (Dispersion 0.4 from the group); the gold band is metallic. Round trip (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/ring.glb,glb:out/ring_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/ring.glb,glb:out/ring_rt.glb glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.data.node_groups.new('glTF Material Output', 'ShaderNodeTree')

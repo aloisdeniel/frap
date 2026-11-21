@@ -4,7 +4,7 @@
 # its inverse) on the emission behind the importer's manual wrapping chain (Separate XYZ → Math
 # WRAP 0..1 and PINGPONG 1 → Combine XYZ: wrapS REPEAT, wrapT MIRRORED_REPEAT); an identity
 # mapping writes no transform.
-# golden: startup=factory tier=T2 compare=glb:out/transform.glb
+# golden: startup=factory tier=T2 compare=glb:out/transform.glb glb_structure
 import bpy
 bpy.data.images.new('Tiles', 4, 4)
 bpy.data.images['Tiles'].generated_color = (0.9, 0.6, 0.3, 1.0)

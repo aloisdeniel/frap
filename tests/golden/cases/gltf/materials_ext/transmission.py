@@ -1,7 +1,7 @@
 # WP 3.6: KHR_materials_transmission export. A constant factor on the first material; on the
 # second, an Image Texture (copied whole) behind a Math MULTIPLY by 0.5 (the factor); a third
 # material with Transmission Weight 0 has no extension.
-# golden: startup=factory tier=T2 compare=glb:out/transmission.glb
+# golden: startup=factory tier=T2 compare=glb:out/transmission.glb glb_structure
 import bpy
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Transmission Weight'].default_value = 0.6
 bpy.data.materials.new('Frosted')

@@ -2,7 +2,7 @@
 # scene without custom properties writes no extras either. Custom properties authored in both
 # tools and exported with export_extras: `extras_authored.py` (ID properties, M3+M4
 # stabilization round 2); collection exports: `export::extras::tests` in frap-io-gltf.
-# golden: startup=factory tier=T2 compare=glb:out/off.glb,glb:out/bare.glb
+# golden: startup=factory tier=T2 compare=glb:out/off.glb,glb:out/bare.glb glb_structure
 import bpy
 bpy.data.objects['Cube']['int'] = 3
 bpy.data.meshes['Cube']['mesh_prop'] = 'm'

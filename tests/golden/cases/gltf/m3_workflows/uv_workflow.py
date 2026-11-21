@@ -2,7 +2,7 @@
 # Mode, unwraps CONFORMAL (LSCM, equal at the default 1e-5), adds a second UV map filled by
 # cube_project and exports both maps (TEXCOORD_0 and TEXCOORD_1) with a checker texture.
 # A cylinder gets cylinder_project and a sphere sphere_project. Round trip (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/atlas.glb,glb:out/atlas_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/atlas.glb,glb:out/atlas_rt.glb glb_structure
 import bpy
 bpy.ops.image.new(name='Checker', width=8, height=8, generated_type='COLOR_GRID')
 bpy.data.materials['Material'].node_tree.nodes.new('ShaderNodeTexImage')

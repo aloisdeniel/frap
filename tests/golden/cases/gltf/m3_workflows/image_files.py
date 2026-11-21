@@ -5,7 +5,7 @@
 # makes that material BLEND); a third material uses image.new through the operator with a
 # generated colour. Round trip (§17.2): the importer creates packed images from the GLB, whose
 # bytes the re-export passes through again.
-# golden: startup=factory tier=T2 compare=glb:out/files.glb,glb:out/files_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/files.glb,glb:out/files_rt.glb glb_structure
 import bpy
 bpy.data.images.new('Paint', 4, 2, alpha=True)
 bpy.data.images['Paint'].pixels = [0.0, 0.1, 0.2, 1.0, 0.3, 0.4, 0.5, 0.5, 0.6, 0.7, 0.8, 1.0, 0.9, 1.0, 0.0, 0.25, 1.0, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.5, 0.5, 0.5, 0.0]

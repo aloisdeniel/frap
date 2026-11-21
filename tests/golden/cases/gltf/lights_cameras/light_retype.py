@@ -1,7 +1,7 @@
 # WP 3.4: `light.type` re-types the RNA struct (PointLight -> SpotLight -> SunLight ->
 # AreaLight) and keeps every value; properties of other types raise AttributeError; the
 # export follows the current type (here SPOT again, with the values set while it was SPOT).
-# golden: startup=factory tier=T2 compare=objects,glb:out/retype.glb
+# golden: startup=factory tier=T2 compare=objects,glb:out/retype.glb glb_structure
 import bpy
 bpy.data.lights['Light'].spot_size = 0.5
 bpy.data.lights['Light'].type = 'SPOT'

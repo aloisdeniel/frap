@@ -3,7 +3,7 @@
 # (SUBSURF level 1); a SOLIDIFY handle torus and a TRIANGULATE coaster. Without export_apply the
 # original meshes export. Round trip (§17.2) of the file without export_apply; the round trip of
 # the evaluated file is modifier_stack_reimport.py (its own tolerance, D-119).
-# golden: startup=factory tier=T2 compare=glb:out/mug_applied.glb,glb:out/mug_raw.glb,glb:out/mug_raw_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/mug_applied.glb,glb:out/mug_raw.glb,glb:out/mug_raw_rt.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].name = 'Body'
 bpy.data.objects['Body'].modifiers.new('Mirror', 'MIRROR')

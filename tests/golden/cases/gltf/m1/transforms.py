@@ -1,6 +1,6 @@
 # WP 1.23: object transforms in several rotation modes, non-uniform and negative scale, delta
 # transforms; Y-up conversion of the node TRS.
-# golden: startup=factory tier=T2 compare=glb:out/transforms.glb tol=1e-5
+# golden: startup=factory tier=T2 compare=glb:out/transforms.glb tol=1e-5 glb_structure
 import bpy
 bpy.data.objects['Cube'].location = (1, -2, 3)
 bpy.data.objects['Cube'].rotation_euler = (0.3, -0.7, 1.2)

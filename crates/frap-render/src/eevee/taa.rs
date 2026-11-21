@@ -67,24 +67,15 @@ pub struct Sample {
 }
 
 impl Sample {
-    /// The dimensions of sample `index` (0-based).
+    /// The dimensions of sample `index` (0-based). Costs O(`index`) (the Halton generators are
+    /// stepped from offset 0, as `BLI_halton_*d` does); a render walks [`samples`] instead,
+    /// which steps them once per sample.
     pub fn new(index: u32) -> Sample {
-        let n = u64::from(index) + 1;
-        let f = halton([2, 3], n);
-        let lens = halton([5, 7, 3], n);
-        let s = halton([2, 3, 5], n);
-        let pcf = halton([2, 3], u64::from(index) * 5 + 1);
-        Sample {
-            index,
-            filter: [fract(f[0] + 0.5), fract(f[1] + 2.0 / 3.0)],
-            shadow: [
-                fract(s[0] + 0.5),
-                fract(s[1] + 2.0 / 3.0),
-                fract(s[2] + 0.8),
-            ],
-            transparency: lens[1] as f32,
-            pcf: [pcf[0] as f32, pcf[1] as f32],
+        let mut it = samples(index.saturating_add(1));
+        if index > 0 {
+            it.skip_to(index);
         }
+        it.next().expect("invariant: index < len")
     }
 
     /// The sub-pixel offset of the sample in render pixels (`Film::pixel_jitter_get`): a
@@ -101,9 +92,106 @@ impl Sample {
 }
 
 /// The samples of a render: `taa_render_samples` (0 means 1, as EEVEE clamps it).
-pub fn samples(taa_render_samples: u32) -> Vec<Sample> {
-    (0..taa_render_samples.max(1)).map(Sample::new).collect()
+///
+/// Lazy and O(1) per sample: `Sampling::step()` computes sample `n` as `BLI_halton_*d(primes,
+/// {0, …}, n + 1)`, i.e. `n + 1` steps of `halton_ex` from offset 0, so keeping the running
+/// offsets and stepping once (five times for the leaped PCF sequence) per sample gives the
+/// bit-identical values in linear total time (an agent may ask for 2^31 − 1 samples).
+pub fn samples(taa_render_samples: u32) -> Samples {
+    Samples {
+        next: 0,
+        len: taa_render_samples.max(1),
+        filter: Halton::new([2, 3]),
+        lens: Halton::new([5, 7, 3]),
+        shadow: Halton::new([2, 3, 5]),
+        pcf: Halton::new([2, 3]),
+    }
 }
+
+/// A running `BLI_halton_*d` generator (`halton_ex` per dimension, persistent offsets).
+#[derive(Clone, Debug)]
+struct Halton<const N: usize> {
+    invprimes: [f64; N],
+    offset: [f64; N],
+    value: [f64; N],
+}
+
+impl<const N: usize> Halton<N> {
+    fn new(primes: [u32; N]) -> Self {
+        Halton {
+            invprimes: primes.map(|p| 1.0 / f64::from(p)),
+            offset: [0.0; N],
+            value: [0.0; N],
+        }
+    }
+
+    /// Steps `n` times; the value is then the point of index (steps taken so far).
+    fn step(&mut self, n: u32) -> [f64; N] {
+        for _ in 0..n {
+            for i in 0..N {
+                self.value[i] = halton_ex(self.invprimes[i], &mut self.offset[i]);
+            }
+        }
+        self.value
+    }
+}
+
+/// The iterator of [`samples`].
+#[derive(Clone, Debug)]
+pub struct Samples {
+    next: u32,
+    len: u32,
+    filter: Halton<2>,
+    lens: Halton<3>,
+    shadow: Halton<3>,
+    pcf: Halton<2>,
+}
+
+impl Samples {
+    /// Advances the generators to sample `index` without building the skipped samples
+    /// (a cancellation point every few thousand steps).
+    fn skip_to(&mut self, index: u32) {
+        while self.next < index.min(self.len) {
+            frap_math::budget::check();
+            self.next();
+        }
+    }
+}
+
+impl Iterator for Samples {
+    type Item = Sample;
+
+    fn next(&mut self) -> Option<Sample> {
+        if self.next >= self.len {
+            return None;
+        }
+        let index = self.next;
+        self.next += 1;
+        let f = self.filter.step(1);
+        let lens = self.lens.step(1);
+        let s = self.shadow.step(1);
+        // Leaped sequence: sample `i` is point `5 i + 1`.
+        let pcf = self.pcf.step(if index == 0 { 1 } else { 5 });
+        Some(Sample {
+            index,
+            filter: [fract(f[0] + 0.5), fract(f[1] + 2.0 / 3.0)],
+            shadow: [
+                fract(s[0] + 0.5),
+                fract(s[1] + 2.0 / 3.0),
+                fract(s[2] + 0.8),
+            ],
+            transparency: lens[1] as f32,
+            pcf: [pcf[0] as f32, pcf[1] as f32],
+        })
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let n = (self.len - self.next) as usize;
+        (n, Some(n))
+    }
+}
+
+impl ExactSizeIterator for Samples {}
 
 /// `Sampling::sample_disk`: uniform disk of radius 1.
 pub fn sample_disk(rand: Vec2) -> Vec2 {
@@ -169,15 +257,52 @@ mod tests {
     fn jitter_is_stratified() {
         // 64 samples cover the pixel evenly: every quadrant gets about a quarter of them (the
         // base-3 dimension is shifted by 2/3, so the split is 17/15).
-        let s = samples(64);
         let mut q = [0; 4];
-        for x in &s {
+        for x in samples(64) {
             let o = x.pixel_offset(1.5);
             q[usize::from(o[0] >= 0.0) + 2 * usize::from(o[1] >= 0.0)] += 1;
         }
         assert!(q.iter().all(|n| (15..=17).contains(n)), "{q:?}");
         let small = Sample::new(5).pixel_offset(0.5);
         assert!(small[0].hypot(small[1]) <= 0.25 + 1e-6);
+    }
+
+    #[test]
+    fn incremental_samples_match_blender_restart() {
+        // `Sampling::step()` restarts `BLI_halton_*d` from offset 0 for every sample; the
+        // incremental generator must give the bit-identical dimensions.
+        for (i, s) in samples(300).enumerate() {
+            let n = i as u64 + 1;
+            let f = halton([2, 3], n);
+            let lens = halton([5, 7, 3], n);
+            let sh = halton([2, 3, 5], n);
+            let pcf = halton([2, 3], i as u64 * 5 + 1);
+            assert_eq!(s.index, i as u32);
+            assert_eq!(s.filter, [fract(f[0] + 0.5), fract(f[1] + 2.0 / 3.0)]);
+            assert_eq!(
+                s.shadow,
+                [
+                    fract(sh[0] + 0.5),
+                    fract(sh[1] + 2.0 / 3.0),
+                    fract(sh[2] + 0.8)
+                ]
+            );
+            assert_eq!(s.transparency, lens[1] as f32);
+            assert_eq!(s.pcf, [pcf[0] as f32, pcf[1] as f32]);
+            assert_eq!(Sample::new(i as u32), s);
+        }
+    }
+
+    #[test]
+    fn huge_sample_counts_are_lazy() {
+        // 2^31 − 1 samples cost nothing until iterated.
+        let mut it = samples(i32::MAX as u32);
+        assert_eq!(it.len(), i32::MAX as usize);
+        assert_eq!(it.next().map(|s| s.index), Some(0));
+        let t = std::time::Instant::now();
+        let s = Sample::new(1_000_000);
+        assert_eq!(s.index, 1_000_000);
+        assert!(t.elapsed().as_secs() < 5);
     }
 
     #[test]

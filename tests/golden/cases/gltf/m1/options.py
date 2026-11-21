@@ -1,6 +1,6 @@
 # WP 1.23: honoured options: no normals and no UVs with materials 'NONE' (one primitive per
 # mesh), Z-up, and materials 'PLACEHOLDER'.
-# golden: startup=factory tier=T2 compare=glb:out/bare.glb,glb:out/zup.glb,glb:out/placeholder.glb
+# golden: startup=factory tier=T2 compare=glb:out/bare.glb,glb:out/zup.glb,glb:out/placeholder.glb glb_structure
 import bpy
 bpy.data.meshes['Cube'].materials.append(bpy.data.materials.new('Second'))
 bpy.data.meshes['Cube'].polygons[0].material_index = 1

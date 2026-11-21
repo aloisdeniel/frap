@@ -6,7 +6,7 @@
 # export_rest_position_armature=False (joints in the current pose); export_influence_nb=2;
 # export_all_influences; export_skins=False; export_yup=False; export_hierarchy_flatten_objs;
 # export_armature_object_remove (refused: two root bones).
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/default.glb,glb:out/def_bones.glb,glb:out/flatten_bones.glb,glb:out/leaf.glb,glb:out/pose.glb,glb:out/influence2.glb,glb:out/all_influences.glb,glb:out/no_skins.glb,glb:out/zup.glb,glb:out/flatten_objs.glb,glb:out/remove_refused.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/default.glb,glb:out/def_bones.glb,glb:out/flatten_bones.glb,glb:out/leaf.glb,glb:out/pose.glb,glb:out/influence2.glb,glb:out/all_influences.glb,glb:out/no_skins.glb,glb:out/zup.glb,glb:out/flatten_objs.glb,glb:out/remove_refused.glb glb_structure
 import bpy
 bpy.ops.object.armature_add(location=(0.3, -0.2, 0.1), rotation=(0.1, 0.2, -0.3))
 bpy.ops.object.mode_set(mode='EDIT')

@@ -5,7 +5,7 @@
 # order, the window's scene as `scene`), then only the active one (use_active_scene=True) from
 # Level2. Round trip (§17.2) of both files: import creates one Blender scene per glTF scene
 # and makes the default scene active.
-# golden: startup=factory tier=T2 compare=glb:out/levels.glb,glb:out/level2.glb,glb:out/levels_rt.glb,glb:out/level2_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/levels.glb,glb:out/level2.glb,glb:out/levels_rt.glb,glb:out/level2_rt.glb glb_structure
 import bpy
 bpy.data.images.new('Ground', 2, 2)
 bpy.data.images['Ground'].pixels = [0.3, 0.5, 0.2, 1.0, 0.35, 0.45, 0.25, 1.0, 0.4, 0.4, 0.3, 1.0, 0.25, 0.55, 0.15, 1.0]

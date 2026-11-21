@@ -7,7 +7,7 @@
 # transmission object comes first: [transmission, sheen, volume, dispersion]. The same order
 # survives an import of the file (the importer's own glTF Material Output group) and a
 # re-export.
-# golden: startup=factory tier=T2 compare=glb:out/volume_first.glb,glb:out/sheen_first.glb,glb:out/reimported.glb
+# golden: startup=factory tier=T2 compare=glb:out/volume_first.glb,glb:out/sheen_first.glb,glb:out/reimported.glb glb_structure
 import bpy
 bpy.data.node_groups.new('glTF Material Output', 'ShaderNodeTree')
 bpy.data.node_groups['glTF Material Output'].interface.new_socket('Occlusion', socket_type='NodeSocketFloat')

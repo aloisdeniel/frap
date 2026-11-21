@@ -2,7 +2,7 @@
 # bottom face is inset and extruded down into a pedestal, the top edges are bevelled; the
 # pedestal faces get a second material (material_slot_assign on the selection). Round trip
 # (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/table.glb,glb:out/table_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/table.glb,glb:out/table_rt.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].name = 'Table'
 bpy.data.materials['Material'].name = 'Walnut'

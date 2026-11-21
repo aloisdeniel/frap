@@ -1,7 +1,7 @@
 # WP 3.4: export_import_convert_lighting_mode: COMPAT (no 683 factor) and RAW (energy as is,
 # times 2 ** exposure); a spot without blend (inner cone = outer cone) and a sun with a
 # non-normalized disk area.
-# golden: startup=factory tier=T2 compare=glb:out/compat.glb,glb:out/raw.glb
+# golden: startup=factory tier=T2 compare=glb:out/compat.glb,glb:out/raw.glb glb_structure
 import bpy
 bpy.ops.object.light_add(type='SPOT', location=(1, 2, 3))
 bpy.data.lights['Spot'].spot_blend = 0

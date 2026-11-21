@@ -1,7 +1,7 @@
 # WP 3.7: export formats. GLB (binary chunk), and GLTF_EMBEDDED (one .gltf with the buffer and
 # the texture as data URIs), which the add-on offers only with its allow_embedded_format
 # preference; the same scene with a packed texture in both.
-# golden: startup=factory tier=T2 compare=glb:out/scene.glb,glb:out/embedded.gltf,glb:out/embedded_noext.gltf
+# golden: startup=factory tier=T2 compare=glb:out/scene.glb,glb:out/embedded.gltf,glb:out/embedded_noext.gltf glb_structure
 import bpy
 bpy.data.images.new('embedded_grid', 4, 4)
 bpy.data.materials['Material'].node_tree.nodes.new('ShaderNodeTexImage')

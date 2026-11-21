@@ -4,7 +4,7 @@
 # (Subdivision) in "Scene" and 'Cylinder' (Subdivision, Build) in "Level2" are both exported
 # with their modifiers applied, from either window scene. `frame_set(0)` only moves the window's
 # scene: the Build of the other scene's cylinder is evaluated at that scene's own frame (1).
-# golden: startup=factory tier=T2 compare=glb:out/from_scene.glb,glb:out/from_level2.glb,context
+# golden: startup=factory tier=T2 compare=glb:out/from_scene.glb,glb:out/from_level2.glb,context glb_structure
 import bpy
 bpy.data.objects['Cube'].modifiers.new(name='Subdivision', type='SUBSURF')
 bpy.data.scenes.new('Level2')

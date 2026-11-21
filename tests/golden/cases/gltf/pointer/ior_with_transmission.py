@@ -4,7 +4,7 @@
 # always-created transmission object) survives too and KHR_materials_ior is declared. The
 # second file also animates the IOR (1.2 at the current frame, 2.0 later): the object carries
 # the value at the current frame, not an empty object.
-# golden: startup=factory tier=T2 compare=glb:out/trans_ior.glb,glb:out/trans_ior_anim.glb
+# golden: startup=factory tier=T2 compare=glb:out/trans_ior.glb,glb:out/trans_ior_anim.glb glb_structure
 import bpy
 bpy.context.scene.frame_end = 8
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['IOR'].default_value = 1.3

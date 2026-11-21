@@ -3,7 +3,7 @@
 # use_custom_distance, colour times the blackbody colour (may exceed 1), exposure, the light
 # area when `normalize` is off, the AREA light kept as a node without a light (WARNING), the
 # camera/light correction rotation, and a light parented under another light.
-# golden: startup=factory tier=T2 compare=glb:out/lights.glb
+# golden: startup=factory tier=T2 compare=glb:out/lights.glb glb_structure
 import bpy
 bpy.ops.object.light_add(type='SPOT', location=(1, 2, 3), rotation=(0.4, 0.1, 0.7))
 bpy.data.lights['Spot'].energy = 500

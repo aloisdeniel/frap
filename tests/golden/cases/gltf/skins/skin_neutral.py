@@ -4,7 +4,7 @@
 # but no vertex groups (no skin on its node, its own glTF mesh). (With
 # export_armature_object_remove the add-on fails here: `add_neutral_bones` appends to the removed
 # armature's node, None; see skin_remove.py.)
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/neutral.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/neutral.glb glb_structure
 import bpy
 bpy.ops.object.armature_add(location=(0, 0, -1), rotation=(0, 0, 0.5))
 bpy.ops.object.mode_set(mode='EDIT')

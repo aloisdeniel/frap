@@ -5,7 +5,7 @@
 # shared by content with its linked duplicate 'Cube.001') with the data's material (its
 # OBJECT-linked 'Blue' slot is not applied). A hidden Boolean operand ('Op', Subdivision) is
 # pulled into the depsgraph by the visible 'Cube.001' and is evaluated.
-# golden: startup=factory tier=T2 compare=glb:out/object.glb,glb:out/collection.glb,glb:out/operand.glb tol=1e-4
+# golden: startup=factory tier=T2 compare=glb:out/object.glb,glb:out/collection.glb,glb:out/operand.glb tol=1e-4 glb_structure
 import bpy
 bpy.ops.object.duplicate_move_linked(TRANSFORM_OT_translate={'value': (3, 0, 0)})
 bpy.data.objects['Cube'].modifiers.new(name='Sub', type='SUBSURF')

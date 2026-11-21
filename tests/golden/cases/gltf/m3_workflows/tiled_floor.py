@@ -3,7 +3,7 @@
 # textureInfos carry KHR_texture_transform (in extensionsUsed and extensionsRequired). The
 # skirting board's texture uses EXTEND (CLAMP_TO_EDGE) without a mapping. Round trip (§17.2):
 # the importer rebuilds the Mapping nodes and the re-export writes the same transforms.
-# golden: startup=factory tier=T2 compare=glb:out/floor.glb,glb:out/floor_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/floor.glb,glb:out/floor_rt.glb glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.ops.mesh.primitive_plane_add(size=8)

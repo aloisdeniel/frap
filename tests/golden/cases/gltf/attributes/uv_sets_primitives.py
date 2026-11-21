@@ -3,7 +3,7 @@
 # an empty slot exports a primitive without material; a material index past the last slot uses
 # the last one), with the NAME colour on every primitive (also the one without material), and
 # one primitive for the whole mesh with export_materials='NONE'.
-# golden: startup=factory tier=T2 compare=glb:out/uvs.glb,glb:out/prims.glb,glb:out/prims_none.glb
+# golden: startup=factory tier=T2 compare=glb:out/uvs.glb,glb:out/prims.glb,glb:out/prims_none.glb glb_structure
 import bpy
 bpy.data.meshes['Cube'].uv_layers.new(name='Second')
 bpy.data.meshes['Cube'].uv_layers.new(name='Third')

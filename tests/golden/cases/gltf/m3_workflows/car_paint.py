@@ -3,7 +3,7 @@
 # channel the Coat Roughness (clearcoatRoughnessTexture), the add-on's channel sharing; a coat
 # normal map (Strength 0.6) gives clearcoatNormalTexture. A chrome trim has a constant coat of
 # 1 with Blender's default coat roughness. Round trip (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/car.glb,glb:out/car_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/car.glb,glb:out/car_rt.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].name = 'Body'
 bpy.data.objects['Body'].scale = (2.0, 1.0, 0.5)

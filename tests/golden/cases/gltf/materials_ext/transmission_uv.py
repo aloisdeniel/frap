@@ -1,7 +1,7 @@
 # WP 3.6: an extension texture's texCoord takes part in the material cache key. The
 # transmission texture reads the 'Second' UV map: index 1 on the Cube (UVMap, Second), index 0
 # on the plane (only 'Second'), so the material is written twice (get_final_material).
-# golden: startup=factory tier=T2 compare=glb:out/transmission_uv.glb
+# golden: startup=factory tier=T2 compare=glb:out/transmission_uv.glb glb_structure
 import bpy
 bpy.data.images.new('Frost', 4, 4)
 bpy.data.materials['Material'].node_tree.nodes.new('ShaderNodeTexImage')

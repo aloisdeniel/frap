@@ -2,7 +2,7 @@
 # group's Iridescence Factor, the maximum thickness and the thin-film IOR from the Principled
 # BSDF (Blender's default 1.33 differs from glTF's 1.3, so it is written). The second material
 # keeps Thin Film Thickness at 0, so the add-on drops its extension (__check_iridescence).
-# golden: startup=factory tier=T2 compare=glb:out/iridescence.glb
+# golden: startup=factory tier=T2 compare=glb:out/iridescence.glb glb_structure
 import bpy
 bpy.data.node_groups.new('glTF Material Output', 'ShaderNodeTree')
 bpy.data.node_groups['glTF Material Output'].interface.new_socket('Occlusion', socket_type='NodeSocketFloat')

@@ -3,7 +3,7 @@
 # MIRROR (LINEAR filters, MIRRORED_REPEAT) and Smart + CLIP (LINEAR, CLAMP_TO_EDGE); four
 # textures, four samplers, and the image is written once. Round trip (§17.2): the
 # importer maps samplers back to interpolation and extension.
-# golden: startup=factory tier=T2 compare=glb:out/samplers.glb,glb:out/samplers_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/samplers.glb,glb:out/samplers_rt.glb glb_structure
 import bpy
 bpy.data.images.new('Pattern', 2, 2)
 bpy.data.images['Pattern'].pixels = [1.0, 0.5, 0.0, 1.0, 0.0, 0.5, 1.0, 1.0, 0.5, 1.0, 0.0, 1.0, 0.25, 0.25, 0.25, 1.0]

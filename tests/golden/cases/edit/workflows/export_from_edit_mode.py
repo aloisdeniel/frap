@@ -2,7 +2,7 @@
 # `object.mode_set(mode='OBJECT')` first (`export.save`), so the edits are written back, the GLB
 # holds the extruded cube and the session ends in Object Mode (compared through `context`).
 # The second object in Edit Mode (multi-object edit) is written back too.
-# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cyl,glb:out/edit.glb tier=T1 order=canonical
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cyl,glb:out/edit.glb tier=T1 order=canonical glb_structure
 import bpy
 bpy.ops.mesh.primitive_cylinder_add(vertices=8, radius=0.5, depth=1, location=(3, 0, 0))
 bpy.context.object.name = 'Cyl'

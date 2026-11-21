@@ -1,6 +1,6 @@
 # WP 1.23: a parent chain built with `Object.parent` (identity matrix_parent_inverse) with an
 # empty in the middle; node TRS and children follow Blender.
-# golden: startup=factory tier=T2 compare=glb:out/hierarchy.glb
+# golden: startup=factory tier=T2 compare=glb:out/hierarchy.glb glb_structure
 import bpy
 bpy.ops.mesh.primitive_uv_sphere_add(segments=8, ring_count=4, location=(2, 0, 1))
 bpy.data.objects.new('Pivot', None)

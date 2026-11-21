@@ -4,7 +4,7 @@
 # flat-shaded subdivided body the float rounding of frap's fan spaces puts some corners one
 # quantisation step away from Blender's (at most 1.0e-4 per component), so this case compares
 # at tol=2e-4 (D-119). The first exports compare at the default tolerance in modifier_stack.py.
-# golden: startup=factory tier=T2 tol=2e-4 compare=glb:out/mug_rt.glb
+# golden: startup=factory tier=T2 tol=2e-4 compare=glb:out/mug_rt.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].name = 'Body'
 bpy.data.objects['Body'].modifiers.new('Mirror', 'MIRROR')

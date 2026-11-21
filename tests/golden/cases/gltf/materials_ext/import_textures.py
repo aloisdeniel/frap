@@ -3,7 +3,7 @@
 # with a 0.5 factor (Math MULTIPLY <- Separate Color R <- "TRANSMISSION"), a clearcoat normal
 # map (Normal Map <- "CLEARCOAT NORMAL"), a specular colour texture and a sheen colour texture
 # with a factor ("Sheen Color Factor" Mix). Node names follow the importer's creation order.
-# golden: startup=factory tier=T2 compare=materials,glb:out/again.glb
+# golden: startup=factory tier=T2 compare=materials,glb:out/again.glb glb_structure
 import bpy
 bpy.data.images.new('Frost', 4, 4)
 bpy.data.images.new('Bumps', 4, 4)

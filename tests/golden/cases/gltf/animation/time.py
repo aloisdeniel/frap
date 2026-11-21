@@ -3,7 +3,7 @@
 # export_frame_range clips to the scene's playback range; export_anim_slide_to_zero starts
 # every animation at 0 s; negative frames slide to 0 (export_negative_frame='SLIDE', the
 # default) or are cropped ('CROP'), in the sampled and the F-curve exports.
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/fps.glb,glb:out/range.glb,glb:out/zero.glb,glb:out/slide.glb,glb:out/crop.glb,glb:out/crop_curves.glb,glb:out/zero_curves.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/fps.glb,glb:out/range.glb,glb:out/zero.glb,glb:out/slide.glb,glb:out/crop.glb,glb:out/crop_curves.glb,glb:out/zero_curves.glb glb_structure
 import bpy
 bpy.context.scene.render.fps = 30
 bpy.context.scene.render.fps_base = 1.001

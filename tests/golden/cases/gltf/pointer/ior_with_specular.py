@@ -2,7 +2,7 @@
 # the static IOR is 1.3 and only the Specular Tint is animated, so the kept empty
 # KHR_materials_specular object brings back export_ior's {"ior": 1.3} and its declaration, in
 # the add-on's extensionsUsed order (specular, ior, animation pointer).
-# golden: startup=factory tier=T2 compare=glb:out/spec_ior.glb
+# golden: startup=factory tier=T2 compare=glb:out/spec_ior.glb glb_structure
 import bpy
 bpy.context.scene.frame_end = 8
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['IOR'].default_value = 1.3

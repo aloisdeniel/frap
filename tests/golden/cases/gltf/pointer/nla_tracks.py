@@ -3,7 +3,7 @@
 # range); the light has a "Glow" track too, so its channels merge into the material's
 # animation, which takes the track's name; its active action is removed while baking; the
 # camera's track keeps the default name (NlaTrack), so its animation is named after the camera.
-# golden: startup=factory tier=T2 compare=glb:out/nla.glb
+# golden: startup=factory tier=T2 compare=glb:out/nla.glb glb_structure
 import bpy
 bpy.data.actions.new('Pulse')
 bpy.data.actions['Pulse'].slots.new(id_type='NODETREE', name='Shader Nodetree')

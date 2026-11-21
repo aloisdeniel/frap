@@ -1,7 +1,7 @@
 # WP 3.10: every Blender scene becomes a glTF scene (named after it) with the window's scene
 # as the default `scene`; `use_active_scene=True` exports the window's scene only. Each
 # scene's nodes come from that scene's objects.
-# golden: startup=factory tier=T2 compare=glb:out/all.glb,glb:out/active.glb,glb:out/second.glb,glb:out/second_active.glb
+# golden: startup=factory tier=T2 compare=glb:out/all.glb,glb:out/active.glb,glb:out/second.glb,glb:out/second_active.glb glb_structure
 import bpy
 bpy.data.scenes.new('S2')
 bpy.context.window.scene = bpy.data.scenes['S2']

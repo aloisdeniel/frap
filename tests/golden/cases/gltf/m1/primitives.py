@@ -1,5 +1,5 @@
 # WP 1.23: every mesh primitive with default options, each at its own location.
-# golden: startup=factory tier=T2 compare=glb:out/primitives.glb tol=1e-4
+# golden: startup=factory tier=T2 compare=glb:out/primitives.glb tol=1e-4 glb_structure
 import bpy
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete()

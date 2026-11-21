@@ -5,7 +5,7 @@
 # gets the attribute itself as COLOR_0 (float VEC3: only Base Color reads it); when the Color
 # Attribute node's Alpha also feeds the Principled Alpha (so the material is BLEND), COLOR_0
 # carries the alpha (normalized unsigned short VEC4; `VertexColorUse::adds_alpha`).
-# golden: startup=factory tier=T2 compare=glb:out/fake.glb,glb:out/used.glb,glb:out/alpha.glb
+# golden: startup=factory tier=T2 compare=glb:out/fake.glb,glb:out/used.glb,glb:out/alpha.glb glb_structure
 import bpy
 bpy.data.meshes['Cube'].color_attributes.new('Col', 'BYTE_COLOR', 'CORNER')
 bpy.ops.export_scene.gltf(filepath='out/fake.glb')

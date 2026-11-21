@@ -4,7 +4,7 @@
 # without a bone, a weight below 0.0001); the rig posed. Default export: joints in the rest
 # pose, inverse bind matrices, JOINTS_0/WEIGHTS_0 normalised to the 4 heaviest influences,
 # the mesh in world space, the skinned node without TRS.
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/skin_basic.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/skin_basic.glb glb_structure
 import bpy
 bpy.ops.object.armature_add(location=(0.3, -0.2, 0.1), rotation=(0.1, 0.2, -0.3))
 bpy.ops.object.mode_set(mode='EDIT')

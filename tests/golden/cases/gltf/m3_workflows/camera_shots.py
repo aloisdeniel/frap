@@ -4,7 +4,7 @@
 # every aspectRatio and yfov in the second file. Round trip (§17.2) of both files with
 # cameras: the importer rebuilds lens and sensor fit; after read_homefile the render is 16:9
 # again, so the square file's cameras re-export with that aspect.
-# golden: startup=factory tier=T2 compare=glb:out/shots.glb,glb:out/shots_square.glb,glb:out/shots_rt.glb,glb:out/shots_square_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/shots.glb,glb:out/shots_square.glb,glb:out/shots_rt.glb,glb:out/shots_square_rt.glb glb_structure
 import bpy
 bpy.ops.object.camera_add(location=(0, -4, 1.5), rotation=(1.4, 0, 0))
 bpy.context.object.name = 'CloseUp'

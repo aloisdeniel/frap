@@ -2,7 +2,7 @@
 # (iridescence factor and minimum on it; thickness 400.00001 and IOR 1.30005 on the BSDF), coat,
 # anisotropy and sheen constants; a second material whose Coat Roughness is a Math ADD of its
 # defaults (folded to 1, clearcoatRoughnessFactor 1) with transmission and IOR 1.2.
-# golden: startup=factory tier=T2 compare=glb:out/m.glb
+# golden: startup=factory tier=T2 compare=glb:out/m.glb glb_structure
 import bpy
 bpy.data.node_groups.new('glTF Material Output', 'ShaderNodeTree')
 bpy.data.node_groups['glTF Material Output'].interface.new_socket('Occlusion', socket_type='NodeSocketFloat')

@@ -5,7 +5,7 @@
 # material exports its render colour first (export_active_vertex_color_when_no_material), or
 # nothing with that option off. export_materials='PLACEHOLDER' counts as no material (render
 # colour first), 'VIEWPORT' as a material that reads no colour (fake COLOR_0).
-# golden: startup=factory tier=T2 compare=glb:out/default.glb,glb:out/active.glb,glb:out/name.glb,glb:out/none.glb,glb:out/noall.glb,glb:out/nomat.glb,glb:out/nomat_off.glb,glb:out/placeholder.glb,glb:out/viewport.glb
+# golden: startup=factory tier=T2 compare=glb:out/default.glb,glb:out/active.glb,glb:out/name.glb,glb:out/none.glb,glb:out/noall.glb,glb:out/nomat.glb,glb:out/nomat_off.glb,glb:out/placeholder.glb,glb:out/viewport.glb glb_structure
 import bpy
 bpy.data.meshes['Cube'].color_attributes.new('Col', 'BYTE_COLOR', 'CORNER')
 bpy.data.meshes['Cube'].color_attributes.new('PCol', 'FLOAT_COLOR', 'POINT')

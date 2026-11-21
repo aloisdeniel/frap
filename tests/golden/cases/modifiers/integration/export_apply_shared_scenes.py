@@ -3,7 +3,7 @@
 # to it, so a shared object with a frame-dependent modifier (Build) is evaluated in each scene's
 # own depsgraph at that scene's frame, and each scene's node gets its own glTF mesh. Exported
 # from each of the three window scenes (`frame_set(0)` only moves the window's scene).
-# golden: startup=factory tier=T2 compare=glb:out/from_scene.glb,glb:out/from_s2.glb,glb:out/from_s3.glb,context
+# golden: startup=factory tier=T2 compare=glb:out/from_scene.glb,glb:out/from_s2.glb,glb:out/from_s3.glb,context glb_structure
 import bpy
 bpy.data.objects['Cube'].modifiers.new(name='Build', type='BUILD')
 bpy.data.objects['Cube'].modifiers['Build'].frame_start = -5

@@ -3,7 +3,7 @@
 # aspectRatio, znear/zfar, orthographic xmag/ymag, a panoramic camera (node without camera),
 # the camera correction rotation, a mesh parented to a camera (expressed relative to the
 # corrected camera matrix), and two objects sharing one camera datablock.
-# golden: startup=factory tier=T2 compare=glb:out/landscape.glb,glb:out/portrait.glb
+# golden: startup=factory tier=T2 compare=glb:out/landscape.glb,glb:out/portrait.glb glb_structure
 import bpy
 bpy.ops.object.camera_add(location=(0, -5, 1), rotation=(1.2, 0, 0.1))
 bpy.data.cameras['Camera.001'].sensor_fit = 'VERTICAL'

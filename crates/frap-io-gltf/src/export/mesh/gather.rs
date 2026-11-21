@@ -35,8 +35,9 @@ use crate::export::{ExportError, ExportMaterials, apply, materials};
 pub struct WrittenPrimitive {
     /// Attribute accessors in write order.
     pub attributes: IndexMap<String, Index>,
-    /// Index accessor.
-    pub indices: Index,
+    /// Index accessor (`None` for the loose-vertex POINTS primitive, which the add-on writes
+    /// without `indices`).
+    pub indices: Option<Index>,
     /// glTF mode.
     pub mode: u32,
     /// Material slot index (`NO_MATERIAL_SLOT` with `export_materials='NONE'`).
@@ -236,7 +237,7 @@ fn build_mesh(
         };
         out.push(Primitive {
             attributes: written.attributes,
-            indices: Some(written.indices),
+            indices: written.indices,
             material,
             mode: (written.mode != 4)
                 .then(|| Mode::try_from(written.mode).ok())
@@ -306,18 +307,23 @@ fn write_accessors(g: &mut Gather, d: &PrimitiveDraft) -> Result<WrittenPrimitiv
         let i = g.buf.push_accessor(&data, &AccessorOpts::attribute(false));
         attributes.insert(name.to_string(), i);
     }
-    let indices = match g.index_accessors.get(&d.indices) {
-        Some(i) => *i,
-        None => {
-            if let Some(bad) = d.indices.iter().find(|i| **i as usize >= n) {
-                return Err(ExportError::Invalid(format!(
-                    "index {bad} out of range ({n} vertices)"
-                )));
+    // `primitive_creation_edges_and_points` gives the POINTS primitive no `indices`.
+    let indices = if d.mode == crate::export::mesh::extract::loose_points::MODE_POINTS {
+        None
+    } else {
+        Some(match g.index_accessors.get(&d.indices) {
+            Some(i) => *i,
+            None => {
+                if let Some(bad) = d.indices.iter().find(|i| **i as usize >= n) {
+                    return Err(ExportError::Invalid(format!(
+                        "index {bad} out of range ({n} vertices)"
+                    )));
+                }
+                let i = g.buf.push_indices(&d.indices);
+                g.index_accessors.insert(d.indices.clone(), i);
+                i
             }
-            let i = g.buf.push_indices(&d.indices);
-            g.index_accessors.insert(d.indices.clone(), i);
-            i
-        }
+        })
     };
     let mut targets = Vec::with_capacity(d.targets.len());
     for t in &d.targets {

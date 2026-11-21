@@ -4,7 +4,7 @@
 # the lines and points, the fake white COLOR_0 too; off by default. A mesh made only of
 # vertices exports a lone POINTS primitive without material. Each file is imported back:
 # LINES become loose edges and POINTS loose vertices, equal to Blender.
-# golden: startup=factory tier=T2 compare=glb:out/default.glb,glb:out/edges.glb,glb:out/points.glb,glb:out/both.glb,glb:out/cloud.glb,mesh:Loose.001,mesh:Loose.002,mesh:Cloud.001 order=canonical tol=1e-5
+# golden: startup=factory tier=T2 compare=glb:out/default.glb,glb:out/edges.glb,glb:out/points.glb,glb:out/both.glb,glb:out/cloud.glb,mesh:Loose.001,mesh:Loose.002,mesh:Cloud.001 order=canonical tol=1e-5 glb_structure
 import bpy
 bpy.data.meshes.new('Loose')
 bpy.data.meshes['Loose'].from_pydata([(0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0), (2, 0, 0), (3, 0, 1), (3, 2, 1), (4, 2, 0), (5, 5, 5), (-1, -2, 0.5), (2, 1, 0)], [(4, 5), (5, 6), (7, 6)], [(0, 1, 2, 3), (1, 4, 10, 2)])

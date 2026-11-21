@@ -3,7 +3,7 @@
 # strings, int and float arrays, bool lists, string lists and nested groups, on the object,
 # its mesh, its material and the scene; read back by subscript and `get()`, then
 # re-assigned.
-# golden: startup=factory tier=T2 compare=glb:out/extras.glb
+# golden: startup=factory tier=T2 compare=glb:out/extras.glb glb_structure
 import bpy
 bpy.data.objects['Cube']['tag'] = 'hero'
 bpy.data.objects['Cube']['count'] = 3

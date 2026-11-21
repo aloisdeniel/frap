@@ -4,7 +4,7 @@
 # the last slot. A mesh whose only slot is empty falls back to the object's material slots
 # (the OBJECT-linked 'Red'). Without export_apply the same objects export their data (one
 # primitive each).
-# golden: startup=factory tier=T2 compare=glb:out/applied.glb,glb:out/data.glb tol=1e-4
+# golden: startup=factory tier=T2 compare=glb:out/applied.glb,glb:out/data.glb tol=1e-4 glb_structure
 import bpy
 bpy.data.materials.new(name='Red')
 bpy.data.materials.new(name='Blue')

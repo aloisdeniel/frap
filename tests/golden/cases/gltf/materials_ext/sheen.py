@@ -1,7 +1,7 @@
 # WP 3.6: KHR_materials_sheen export. Constant tint and roughness on the first material; a
 # sheen colour texture (copied whole) behind a Mix MULTIPLY factor on the second; no extension
 # for a material whose Sheen Weight is 0 (the tint is ignored).
-# golden: startup=factory tier=T2 compare=glb:out/sheen.glb
+# golden: startup=factory tier=T2 compare=glb:out/sheen.glb glb_structure
 import bpy
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Sheen Weight'].default_value = 1.0
 bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Sheen Tint'].default_value = (0.2, 0.3, 0.4, 1)

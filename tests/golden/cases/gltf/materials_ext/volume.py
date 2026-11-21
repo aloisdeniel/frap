@@ -4,7 +4,7 @@
 # transmission the volume is kept and the material becomes single-sided; without transmission
 # (second material) the volume is dropped, but the material still loses doubleSided and its
 # IOR is kept (__check_ior runs before __check_volume).
-# golden: startup=factory tier=T2 compare=glb:out/volume.glb
+# golden: startup=factory tier=T2 compare=glb:out/volume.glb glb_structure
 import bpy
 bpy.data.node_groups.new('glTF Material Output', 'ShaderNodeTree')
 bpy.data.node_groups['glTF Material Output'].interface.new_socket('Occlusion', socket_type='NodeSocketFloat')

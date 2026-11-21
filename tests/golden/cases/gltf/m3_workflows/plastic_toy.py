@@ -2,7 +2,7 @@
 # (specularFactor 0.5), a level of 0.9 whose excess scales specularColorFactor, and a specular
 # tint texture of distinct pixels; KHR_materials_ior 1.4 on the first (written because the
 # specular extension is present). Round trip (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/toys.glb,glb:out/toys_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/toys.glb,glb:out/toys_rt.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].name = 'Block'
 bpy.data.materials['Material'].name = 'Matte'

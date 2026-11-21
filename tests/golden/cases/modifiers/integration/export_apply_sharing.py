@@ -5,7 +5,7 @@
 # a glTF mesh of their own named 'Cube', with the evaluated mesh's materials (the OBJECT-linked
 # slot of 'Cube.002' is not applied) and fresh vertex accessors; index accessors are shared by
 # content.
-# golden: startup=factory tier=T2 compare=glb:out/sharing.glb tol=1e-4
+# golden: startup=factory tier=T2 compare=glb:out/sharing.glb tol=1e-4 glb_structure
 import bpy
 bpy.ops.object.duplicate_move_linked(TRANSFORM_OT_translate={'value': (3, 0, 0)})
 bpy.ops.object.duplicate_move_linked(TRANSFORM_OT_translate={'value': (3, 0, 0)})

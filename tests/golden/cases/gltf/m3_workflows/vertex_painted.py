@@ -4,7 +4,7 @@
 # point colour follows as COLOR_1). export_vertex_color='ACTIVE' writes the render colour first,
 # 'NONE' none. Round trip (§17.2) of the three files: the importer creates colour attributes
 # from COLOR_n and a Color Attribute node.
-# golden: startup=factory tier=T2 compare=glb:out/terrain.glb,glb:out/terrain_active.glb,glb:out/terrain_none.glb,glb:out/terrain_rt.glb,glb:out/terrain_active_rt.glb,glb:out/terrain_none_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/terrain.glb,glb:out/terrain_active.glb,glb:out/terrain_none.glb,glb:out/terrain_rt.glb,glb:out/terrain_active_rt.glb,glb:out/terrain_none_rt.glb glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.ops.mesh.primitive_grid_add(x_subdivisions=3, y_subdivisions=3, size=4)

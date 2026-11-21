@@ -2,7 +2,7 @@
 # rotated object, and a second skinned mesh with a Subdivision modifier. Exports: default (the
 # modifier ignored); export_apply (the ARMATURE modifier is switched off while evaluating, the
 # Subdivision applied and its mesh's shape keys lost, the first mesh keeps its keys).
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/plain.glb,glb:out/applied.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/plain.glb,glb:out/applied.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].hide_render = True
 bpy.ops.object.armature_add(location=(0, 0, 0))

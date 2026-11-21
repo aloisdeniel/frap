@@ -3,7 +3,7 @@
 # image of distinct pixels (thicknessTexture), a Volume Absorption node gives attenuationColor
 # and attenuationDistance (1 / Density); KHR_materials_ior 1.52 accompanies them, and the
 # volume makes the material single-sided. The cork is plain. Round trip (§17.2).
-# golden: startup=factory tier=T2 compare=glb:out/bottle.glb,glb:out/bottle_rt.glb
+# golden: startup=factory tier=T2 compare=glb:out/bottle.glb,glb:out/bottle_rt.glb glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.ops.mesh.primitive_cylinder_add(vertices=16, radius=0.4, depth=1.5, location=(0, 0, 0.75))

@@ -25,8 +25,6 @@
 //!   alpha is animated gets `alphaMode: BLEND`.
 
 use frap_anim::AnimData;
-use frap_gltf::accessor::{AccessorData, Components};
-use frap_gltf::builder::AccessorOpts;
 use frap_gltf::ext::khr_animation_pointer::KhrAnimationPointer;
 use frap_gltf::json::{
     AccessorType, AlphaMode, Animation, AnimationSampler, Channel, Extras, Index, Interpolation,
@@ -419,16 +417,10 @@ fn interpolation(g: &Gather) -> Interpolation {
 /// Writes one channel's accessors, sampler and channel into `anim`.
 fn write_channel(g: &mut Gather, anim: &mut Animation, ch: &PointerChannel, interp: Interpolation) {
     let times: Vec<f32> = ch.times.iter().map(|&t| t as f32).collect();
-    let input_data = AccessorData::new(AccessorType::Scalar, false, Components::F32(times))
-        .expect("a scalar float column is always valid");
-    let input = g.buf.push_accessor(&input_data, &AccessorOpts::default());
-    if let Some(a) = g.buf.accessor_mut(input) {
-        // `gather_accessor(…, tuple([max(times)]), tuple([min(times)]), …)`: Python floats.
-        let max = ch.times.iter().copied().fold(f64::NEG_INFINITY, f64::max);
-        let min = ch.times.iter().copied().fold(f64::INFINITY, f64::min);
-        a.max = Some(vec![max]);
-        a.min = Some(vec![min]);
-    }
+    // `gather_accessor(…, tuple([max(times)]), tuple([min(times)]), …)` is `@cached`: a
+    // pointer channel sampling the object channels' times reuses their input accessor.
+    let input =
+        crate::export::animation::accessor(g, &times, AccessorType::Scalar, Some(&ch.times));
     let n = ch.values.first().map_or(1, Vec::len);
     let ty = match n {
         2 => AccessorType::Vec2,
@@ -441,9 +433,7 @@ fn write_channel(g: &mut Gather, anim: &mut Animation, ch: &PointerChannel, inte
         .iter()
         .flat_map(|v| (0..n).map(move |i| v.get(i).copied().unwrap_or(0.0) as f32))
         .collect();
-    let output_data = AccessorData::new(ty, false, Components::F32(flat))
-        .expect("whole elements by construction");
-    let output = g.buf.push_accessor(&output_data, &AccessorOpts::default());
+    let output = crate::export::animation::accessor(g, &flat, ty, None);
     anim.samplers.push(AnimationSampler {
         extensions: Default::default(),
         extras: None,

@@ -2,7 +2,7 @@
 # parented to a bone): the armature object is dropped, its root bone becomes a scene root with
 # the world transform, the skinned mesh a root too. A second armature with no skinned object
 # gives an unused skin. Compared with the default export.
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/kept.glb,glb:out/removed.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/kept.glb,glb:out/removed.glb glb_structure
 import bpy
 bpy.ops.object.armature_add(location=(0.5, 0, -1), rotation=(0, 0.2, 0.5))
 bpy.ops.object.mode_set(mode='EDIT')

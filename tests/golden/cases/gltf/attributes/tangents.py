@@ -3,7 +3,7 @@
 # are mirrored on half the faces (w = -1 there), Z-up (export_yup=False), and, without normals
 # (export_normals=False), no tangents at all. A mesh with an n-gon cannot get tangents: it
 # exports without TANGENT.
-# golden: startup=factory tier=T2 compare=glb:out/tangents.glb,glb:out/no_normals.glb,glb:out/zup.glb,glb:out/ngon.glb tol=1e-4
+# golden: startup=factory tier=T2 compare=glb:out/tangents.glb,glb:out/no_normals.glb,glb:out/zup.glb,glb:out/ngon.glb tol=1e-4 glb_structure
 import bpy
 bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, location=(3, 0, 0))
 bpy.ops.object.shade_smooth()

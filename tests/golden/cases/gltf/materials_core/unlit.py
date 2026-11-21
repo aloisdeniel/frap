@@ -4,7 +4,7 @@
 # into Surface. Each gives the extension, the unclamped colour as baseColorFactor, metallic 0
 # and roughness 0.9. An Emission shader alone is not unlit: it exports emissive (colour × 5 →
 # KHR_materials_emissive_strength) with the add-on's black base colour.
-# golden: startup=factory tier=T2 compare=glb:out/unlit.glb
+# golden: startup=factory tier=T2 compare=glb:out/unlit.glb glb_structure
 import bpy
 bpy.data.materials['Material'].node_tree.nodes.new('ShaderNodeBackground')
 bpy.data.materials['Material'].node_tree.nodes['Background'].inputs['Color'].default_value = (0.2, 0.4, 0.6, 1.0)

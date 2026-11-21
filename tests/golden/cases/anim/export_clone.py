@@ -4,7 +4,7 @@
 # originals (a manual edit of an animated channel is lost); frap exports a clone and leaves the
 # originals as they are, so this case reads no animated original after an export.
 # export_current_frame=True exports the originals as they are, manual edit included.
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/frame0.glb,glb:out/current.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/frame0.glb,glb:out/current.glb glb_structure
 import bpy
 bpy.data.objects['Cube'].keyframe_insert('location', frame=1)
 bpy.data.objects['Cube'].location = (2.0, 1.0, 0.5)

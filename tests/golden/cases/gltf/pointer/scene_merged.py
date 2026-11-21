@@ -6,7 +6,7 @@
 # KHR_materials_emissive_strength / KHR_materials_clearcoat objects because another material
 # animates those extensions (the add-on's check is global); a material whose node tree has
 # animation data but nothing animated exports no channel.
-# golden: startup=factory tier=T2 compare=glb:out/scene_merged.glb,glb:out/scene_fps.glb
+# golden: startup=factory tier=T2 compare=glb:out/scene_merged.glb,glb:out/scene_fps.glb glb_structure
 import bpy
 bpy.context.scene.frame_start = 3
 bpy.context.scene.frame_end = 11

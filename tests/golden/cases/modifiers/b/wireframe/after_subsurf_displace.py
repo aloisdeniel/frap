@@ -3,7 +3,7 @@
 # wireframe's thin-face normals carry SUBSURF's float rounding (after_subsurf.py) into the
 # displacement, and the displaced thin faces amplify it again: corner normals up to ~1.2e-4
 # from Blender's. Compared at tol=2e-4 (D-122).
-# golden: startup=factory compare=evaluated:Torus,glb:out/t.glb tier=T2 tol=2e-4
+# golden: startup=factory compare=evaluated:Torus,glb:out/t.glb tier=T2 tol=2e-4 glb_structure
 import bpy
 bpy.data.objects.remove(bpy.data.objects['Cube'])
 bpy.ops.mesh.primitive_torus_add(location=(5, 0, 0))

@@ -4,7 +4,7 @@
 # a point colour reaches every primitive. Round trip (§17.2) of all four files, each
 # re-exported with its own options: import turns LINES into loose edges and POINTS into loose
 # vertices.
-# golden: startup=empty tier=T2 compare=glb:out/survey.glb,glb:out/survey_edges.glb,glb:out/survey_points.glb,glb:out/survey_all.glb,glb:out/survey_rt.glb,glb:out/survey_plain_rt.glb,glb:out/survey_edges_rt.glb,glb:out/survey_points_rt.glb
+# golden: startup=empty tier=T2 compare=glb:out/survey.glb,glb:out/survey_edges.glb,glb:out/survey_points.glb,glb:out/survey_all.glb,glb:out/survey_rt.glb,glb:out/survey_plain_rt.glb,glb:out/survey_edges_rt.glb,glb:out/survey_points_rt.glb glb_structure
 import bpy
 bpy.data.meshes.new('Survey')
 bpy.data.meshes['Survey'].from_pydata([(0, 0, 0), (4, 0, 0), (4, 4, 0), (0, 4, 0), (0, 0, 1), (4, 0, 1), (4, 4, 1), (2, 2, 0.5), (1, 3, 0.2), (3, 1, 0.3)], [(0, 4), (1, 5), (2, 6), (4, 5), (5, 6)], [(0, 1, 2, 3)])

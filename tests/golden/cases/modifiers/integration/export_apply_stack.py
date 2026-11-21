@@ -2,7 +2,7 @@
 # per object (Bevel then Subdivision with UV smoothing, Array then Mirror, Solidify,
 # Triangulate, Wireframe), a modifier off in the viewport but on in renders (skipped), and an
 # object without modifiers (its data). Positions, normals and UVs follow Blender's.
-# golden: startup=factory tier=T2 compare=glb:out/stack.glb tol=1e-4
+# golden: startup=factory tier=T2 compare=glb:out/stack.glb tol=1e-4 glb_structure
 import bpy
 bpy.data.objects['Cube'].modifiers.new(name='Bevel', type='BEVEL')
 bpy.data.objects['Cube'].modifiers['Bevel'].width = 0.2

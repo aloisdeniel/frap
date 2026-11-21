@@ -1,7 +1,7 @@
 # M3+M4 stabilization round 2: the exporter evaluates at frame 0 unless export_current_frame
 # (`export.save`: `scene.frame_set(0)`, restored afterwards). BUILD (frame_start=-20,
 # frame_duration=50) after SUBSURF keeps 9 of 24 faces at frame 0 and 10 at frame 1.
-# golden: startup=factory tier=T2 compare=glb:out/frame0.glb,glb:out/current.glb,context
+# golden: startup=factory tier=T2 compare=glb:out/frame0.glb,glb:out/current.glb,context glb_structure
 import bpy
 bpy.data.objects['Cube'].modifiers.new(name='Subdivision', type='SUBSURF')
 bpy.data.objects['Cube'].modifiers.new(name='Build', type='BUILD')

@@ -7,7 +7,7 @@
 # action on every animated object. NLA_TRACKS: one animation per track, baked with only that
 # track playing (an object without tracks exports none). SCENE: the scene range baked, one
 # animation per object, or one named after the scene without export_anim_scene_split_object.
-# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/actions.glb,glb:out/nomerge.glb,glb:out/active.glb,glb:out/broadcast.glb,glb:out/tracks.glb,glb:out/scene.glb,glb:out/scene_one.glb
+# golden: startup=factory tier=T2 tol=1e-5 compare=glb:out/actions.glb,glb:out/nomerge.glb,glb:out/active.glb,glb:out/broadcast.glb,glb:out/tracks.glb,glb:out/scene.glb,glb:out/scene_one.glb glb_structure
 import bpy
 bpy.context.scene.frame_end = 12
 bpy.data.objects['Cube'].rotation_mode = 'QUATERNION'
