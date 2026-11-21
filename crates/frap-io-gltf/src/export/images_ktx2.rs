@@ -11,6 +11,16 @@
 //! function for colour textures (base colour, emission, sheen and specular colour) and linear
 //! for data (normal, metallic-roughness, occlusion, the other extension textures).
 //!
+//! Every KTX2 image written keeps the rules of the extension's specification that the
+//! JSON cannot show: `pixelWidth` and `pixelHeight` are multiples of 4 (an image of another
+//! size is resampled to the next multiple of 4 in each dimension before encoding, so a 5x3
+//! image is written 8x4 and a 1x1 image 4x4; frap does not round to a power of two as
+//! `toktx --resize` or `gltfpack -tp` can, see deviation D-130), colour data has the BT709
+//! primaries and the sRGB transfer function, non-colour data the primaries
+//! `KHR_DF_PRIMARIES_UNSPECIFIED` and the linear transfer function (`frap_imbuf::basis`). A
+//! KTX2 file is copied as it is only when it keeps these rules for the texture's colour
+//! space (`frap_gltf::ext::khr_texture_basisu::ktx2_issues`); another is re-encoded.
+//!
 //! The texture keeps the images `export_image_format` and the WebP options give it, so the
 //! file stays readable by viewers without KTX2 support — Blender among them, which cannot load
 //! KTX2 (deviation D-130) — and the extension is required only when the texture has no core

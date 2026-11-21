@@ -114,7 +114,14 @@ impl Target {
             Target::Png => is_png(bytes),
             Target::Jpeg => is_jpeg(bytes),
             Target::Webp => is_webp(bytes),
-            Target::Ktx2(_) => frap_imbuf::ktx2::is_ktx2(bytes),
+            // A KTX2 file is copied only when it keeps every rule of KHR_texture_basisu for
+            // the texture's colour space; another (an odd size, a wrong transfer function, a
+            // raw format) is re-encoded from its decoded pixels.
+            Target::Ktx2(o) => {
+                use frap_gltf::ext::khr_texture_basisu::{Usage, ktx2_issues};
+                let usage = if o.srgb { Usage::Colour } else { Usage::Data };
+                frap_imbuf::ktx2::is_ktx2(bytes) && ktx2_issues(bytes, Some(usage)).is_empty()
+            }
         }
     }
 }
@@ -610,12 +617,21 @@ fn save_copy(g: &Gather, im: &Image, buf: &ImBuf, target: Target) -> Result<Enco
 /// alpha and keeps the straight colour (verified on 5.2.4: a generated image of colour
 /// (0.7, 0.1, 0.3, 0.2) exports as (0.702, 0.106, 0.306) with `export_image_format='JPEG'`).
 /// WebP and KTX2 are 8-bit: a float buffer is converted as for an 8-bit PNG.
+///
+/// A greyscale buffer (8 planes: a 1-channel PNG or JPEG file) cannot be saved as WebP:
+/// Blender's OpenImageIO writer refuses it ("webp does not support 1-channel images", then
+/// `Image.save` raises "Could not write image: internal error, see console"), so the add-on
+/// logs "Error while saving image" and gets no bytes (verified on 5.2.4: no WebP image, and
+/// with `export_image_format='WEBP'` a texture without `source`).
 fn encode_copy(
     im: &Image,
     buf: &ImBuf,
     target: Target,
     quality: u8,
 ) -> Result<Encoded, ImageError> {
+    if target == Target::Webp && buf.planes == 8 {
+        return Err(ImageError::Encode(WEBP_GREY_ERROR.into()));
+    }
     let mut channels: u8 = match buf.planes {
         8 => 1,
         24 | 0 => 3,
@@ -688,6 +704,11 @@ fn encode_copy(
     encode_pixels(&img, &format)
 }
 
+/// Why a greyscale (8-plane) buffer cannot be saved as WebP (`Image.save`'s error after
+/// OpenImageIO's).
+pub(crate) const WEBP_GREY_ERROR: &str = "Error: Could not write image: internal error, see console (webp does not support \
+     1-channel images)";
+
 /// The NOT_IMPLEMENTED error of `frap_texture_format='KTX2'` in a build without the encoder.
 pub(crate) fn ktx2_encoder_missing() -> ExportError {
     ExportError::NotImplemented(
@@ -717,6 +738,11 @@ fn finish_encode(
         }
         Err(ImageError::Unsupported(_)) if matches!(target, Target::Ktx2(_)) => {
             Err(ktx2_encoder_missing())
+        }
+        Err(ImageError::Encode(m)) if m == WEBP_GREY_ERROR => {
+            // `_encode_temp_image`: "Error while saving image: %s" % e (then b'').
+            g.warn(format!("Error while saving image: image '{name}': {m}"));
+            Ok(None)
         }
         Err(e) => {
             // `_encode_temp_image`: "Error while saving image: %s" (then b'').
@@ -1042,17 +1068,33 @@ fn gather_new_texture(
         .collect();
     let name = images_name(&names);
     // `image.gather_image`. Encode first: an image that cannot be written leaves no sampler
-    // behind.
-    let Some(bytes) = encode(g, &ex, Target::from_mime(mime))? else {
-        g.warn(format!(
-            "image '{name}': Image data is empty, not exporting image"
-        ));
-        return Ok(None);
+    // behind (`gather_texture`: "most viewers can't handle missing source properties")…
+    let webp_format = g.settings.export_image_format == ExportImageFormat::Webp;
+    let source = match encode(g, &ex, Target::from_mime(mime))? {
+        Some(bytes) => Some(make_image(g, bytes, mime, name.clone())),
+        None => {
+            g.warn(format!(
+                "image '{name}': Image data is empty, not exporting image"
+            ));
+            if !webp_format {
+                return Ok(None);
+            }
+            None
+        }
     };
-    let source = make_image(g, bytes, mime, name.clone());
     // `texture.py`: `__gather_source` and `__gather_extensions` (EXT_texture_webp), then frap's
     // KHR_texture_basisu.
-    let (source, webp) = crate::export::images_webp::gather(g, &ex, source)?;
+    let (source, webp) = match source {
+        Some(s) => crate::export::images_webp::gather(g, &ex, s)?,
+        None => (None, None),
+    };
+    // …except with `export_image_format='WEBP'`: `__gather_extensions` sets the extension's
+    // `source` to the missing image (`None`, dropped when written) and removes the texture's,
+    // so the texture is written with its sampler, no image, and EXT_texture_webp used and
+    // required (verified on 5.2.4 with a greyscale PNG: `{"extensions": {}, "sampler": 0}`).
+    if webp_format && webp.is_none() {
+        g.use_extension(frap_gltf::ext::ext_texture_webp::ExtTextureWebp::NAME, true);
+    }
     let basisu = crate::export::images_ktx2::gather(g, &ex, slot, first.tex, name)?;
     // Members in order: sampler, then source.
     let s = sampler(first.tex);
@@ -1422,9 +1464,42 @@ mod tests {
         assert!(Target::Png.accepts(b"\x89PNG\r\n"));
         assert!(Target::Webp.accepts(b"RIFF\0\0\0\0WEBPVP8L"));
         assert!(!Target::Webp.accepts(b"\x89PNG\r\n"));
+        // A KTX2 file is copied only when it keeps the KHR_texture_basisu rules for the
+        // texture's colour space (a UASTC sRGB 32x32 grid).
+        let grid: &[u8] =
+            include_bytes!("../../../../tests/golden/fixtures/gltf/textures/ktx2/grid_uastc.ktx2");
         let k = Target::Ktx2(BasisOptions::new(frap_imbuf::basis::BasisMode::Etc1s));
-        assert!(k.accepts(&frap_imbuf::ktx2::IDENTIFIER));
+        assert!(k.accepts(grid));
+        assert!(!k.accepts(&frap_imbuf::ktx2::IDENTIFIER));
         assert!(!k.accepts(b"\x89PNG"));
+        let linear =
+            Target::Ktx2(BasisOptions::new(frap_imbuf::basis::BasisMode::Etc1s).with_srgb(false));
+        assert!(!linear.accepts(grid), "sRGB data for a non-colour texture");
+        let mut odd = grid.to_vec();
+        odd[20..24].copy_from_slice(&30u32.to_le_bytes());
+        assert!(!k.accepts(&odd), "pixelWidth 30");
+    }
+
+    /// A greyscale (8-plane) buffer cannot be written as WebP (Blender 5.2.4: OpenImageIO
+    /// "webp does not support 1-channel images"); PNG, JPEG and grey-alpha WebP can.
+    #[test]
+    fn grey_buffers_are_not_written_as_webp() {
+        let mut im = Image::new("G", 4, 4);
+        im.generated_color = [0.5, 0.5, 0.5, 1.0];
+        let mut buf = im.generated_buffer().unwrap();
+        buf.planes = 8;
+        let e = encode_copy(&im, &buf, Target::Webp, 75).unwrap_err();
+        assert_eq!(e, ImageError::Encode(WEBP_GREY_ERROR.into()));
+        assert!(is_png(
+            &encode_copy(&im, &buf, Target::Png, 75).unwrap().bytes
+        ));
+        assert!(is_jpeg(
+            &encode_copy(&im, &buf, Target::Jpeg, 75).unwrap().bytes
+        ));
+        buf.planes = 16;
+        assert!(is_webp(
+            &encode_copy(&im, &buf, Target::Webp, 75).unwrap().bytes
+        ));
     }
 
     #[test]

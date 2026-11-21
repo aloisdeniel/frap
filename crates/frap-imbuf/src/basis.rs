@@ -12,6 +12,17 @@
 //! minification and a GPU cannot build mips of a block-compressed texture. Rows go in top
 //! row first, as `KHR_texture_basisu` requires (`KTXorientation` `rd`).
 //!
+//! Two more rules of `KHR_texture_basisu` hold for every file written here:
+//!
+//! - `pixelWidth` and `pixelHeight` MUST be multiples of 4: an image of another size is first
+//!   resampled (bilinear, on the stored 8-bit samples) to the next multiple of 4 in each
+//!   dimension ([`ktx2_size`]; a 5x3 image is written 8x4, a 1x1 image 4x4). frap rounds up
+//!   to a multiple of 4, not to a power of two as `toktx --resize` or `gltfpack -tp` can: the
+//!   smallest change the specification allows, and the aspect ratio stays close;
+//! - non-colour data MUST have the colour primaries `KHR_DF_PRIMARIES_UNSPECIFIED`: the
+//!   encoder writes BT709 whatever the transfer function, so the DFD byte is set to 0 after
+//!   encoding when [`BasisOptions::srgb`] is false (colour keeps BT709 and sRGB).
+//!
 //! `--stmt-timeout`: the encoder does not poll frap's budget, so under a deadline it runs on
 //! a detached worker like the WebP encoders (`encode/webp.rs`, at most two at once).
 
@@ -109,14 +120,87 @@ pub fn encode_ktx2_with(
     if image.width == 0 || image.height == 0 {
         return Err(ImageError::Encode("KTX2: empty image".into()));
     }
-    encoder::encode(image, options)
+    if !CAN_ENCODE {
+        return encoder::encode(Vec::new(), 0, 0, options);
+    }
+    let (w, h) = ktx2_size(image.width, image.height);
+    let mut rgba = image.with_channels(4)?.to_u8();
+    if (w, h) != (image.width, image.height) {
+        frap_math::budget::reserve_buffer("KTX2 image", Some(u64::from(w) * u64::from(h) * 4))
+            .map_err(|e| ImageError::Encode(format!("KTX2: {e}")))?;
+        rgba = resample_rgba8(&rgba, image.width, image.height, w, h);
+    }
+    let mut ktx = encoder::encode(rgba, w, h, options)?;
+    if !options.srgb {
+        set_colour_primaries(&mut ktx, DF_PRIMARIES_UNSPECIFIED);
+    }
+    Ok(ktx)
+}
+
+/// `KHR_DF_PRIMARIES_UNSPECIFIED`.
+pub const DF_PRIMARIES_UNSPECIFIED: u8 = 0;
+
+/// The size a Basis Universal KTX2 file of a `width` x `height` image is written at: each
+/// dimension rounded up to a multiple of 4 (`KHR_texture_basisu`: "pixelWidth and pixelHeight
+/// MUST be multiples of 4").
+pub fn ktx2_size(width: u32, height: u32) -> (u32, u32) {
+    let up = |v: u32| v.max(1).div_ceil(4).saturating_mul(4);
+    (up(width), up(height))
+}
+
+/// Sets the DFD `colorPrimaries` of a KTX2 file (byte 1 of the basic descriptor block's
+/// third word: `dfdByteOffset` + the 4-byte `dfdTotalSize` + the 8-byte block header + 1).
+/// No checksum covers the DFD, so the file stays valid.
+fn set_colour_primaries(ktx: &mut [u8], primaries: u8) {
+    let at = ktx
+        .get(48..52)
+        .map(|b| u32::from_le_bytes([b[0], b[1], b[2], b[3]]) as usize + 13);
+    if let Some(p) = at.and_then(|at| ktx.get_mut(at)) {
+        *p = primaries;
+    }
+}
+
+/// Bilinear resampling of tightly packed RGBA8 rows from `w` x `h` to `nw` x `nh` (sample
+/// centres aligned, edges clamped).
+fn resample_rgba8(src: &[u8], w: u32, h: u32, nw: u32, nh: u32) -> Vec<u8> {
+    let (w, h, nw, nh) = (w as usize, h as usize, nw as usize, nh as usize);
+    // Source index pairs and weights along one axis.
+    let taps = |n: usize, m: usize| -> Vec<(usize, usize, f32)> {
+        (0..m)
+            .map(|i| {
+                let x = ((i as f32 + 0.5) * n as f32 / m as f32 - 0.5).max(0.0);
+                let i0 = (x.floor() as usize).min(n - 1);
+                let i1 = (i0 + 1).min(n - 1);
+                (i0, i1, x - i0 as f32)
+            })
+            .collect()
+    };
+    let (xs, ys) = (taps(w, nw), taps(h, nh));
+    let mut out = Vec::with_capacity(nw * nh * 4);
+    for &(y0, y1, fy) in &ys {
+        for &(x0, x1, fx) in &xs {
+            let px = |x: usize, y: usize, c: usize| f32::from(src[(y * w + x) * 4 + c]);
+            for c in 0..4 {
+                let top = px(x0, y0, c) * (1.0 - fx) + px(x1, y0, c) * fx;
+                let bottom = px(x0, y1, c) * (1.0 - fx) + px(x1, y1, c) * fx;
+                let v = top * (1.0 - fy) + bottom * fy;
+                out.push(v.round().clamp(0.0, 255.0) as u8);
+            }
+        }
+    }
+    out
 }
 
 #[cfg(not(feature = "basisu-encode"))]
 mod encoder {
     use super::*;
 
-    pub(super) fn encode(_: &DecodedImage, _: &BasisOptions) -> Result<Vec<u8>, ImageError> {
+    pub(super) fn encode(
+        _: Vec<u8>,
+        _: u32,
+        _: u32,
+        _: &BasisOptions,
+    ) -> Result<Vec<u8>, ImageError> {
         Err(ImageError::Unsupported(
             "KTX2 encoding needs frap built with the `basisu-encode` feature".into(),
         ))
@@ -139,9 +223,13 @@ mod encoder {
         earlier image encodes that timed out are still running in the background (at most 2 \
         at once per process); retry once they finish";
 
-    pub(super) fn encode(image: &DecodedImage, o: &BasisOptions) -> Result<Vec<u8>, ImageError> {
-        let rgba = image.with_channels(4)?.to_u8();
-        let (w, h) = (image.width, image.height);
+    /// Encodes `w` x `h` RGBA8 rows (top row first).
+    pub(super) fn encode(
+        rgba: Vec<u8>,
+        w: u32,
+        h: u32,
+        o: &BasisOptions,
+    ) -> Result<Vec<u8>, ImageError> {
         let o = *o;
         crate::encode::cancellable_with(SLOTS_BUSY, "KTX2", move || {
             basisu_encoder_init();
@@ -283,6 +371,28 @@ mod tests {
         assert!(e.is_err());
     }
 
+    #[test]
+    fn sizes_round_up_to_multiples_of_4() {
+        assert_eq!(ktx2_size(5, 3), (8, 4));
+        assert_eq!(ktx2_size(1, 1), (4, 4));
+        assert_eq!(ktx2_size(64, 32), (64, 32));
+        assert_eq!(ktx2_size(13, 4), (16, 4));
+        // A constant image stays constant; a horizontal ramp stays monotonic and keeps its ends.
+        let c = resample_rgba8(&[10, 20, 30, 40].repeat(15), 5, 3, 8, 4);
+        assert_eq!(c, [10, 20, 30, 40].repeat(32));
+        let ramp: Vec<u8> = (0..5u8).flat_map(|x| [x * 60, 0, 0, 255]).collect();
+        let r = resample_rgba8(&ramp, 5, 1, 8, 4);
+        let row: Vec<u8> = r[..32].chunks_exact(4).map(|p| p[0]).collect();
+        assert!(row.windows(2).all(|w| w[0] <= w[1]), "{row:?}");
+        assert_eq!((row[0], row[7]), (0, 240));
+        // The DFD at 60: colorPrimaries is byte 60 + 13.
+        let mut k = vec![9u8; 80];
+        k[48..52].copy_from_slice(&60u32.to_le_bytes());
+        set_colour_primaries(&mut k, 0);
+        assert_eq!((k[72], k[73], k[74]), (9, 0, 9));
+        set_colour_primaries(&mut [0u8; 8], 0); // too short: left alone
+    }
+
     #[cfg(not(feature = "basisu-encode"))]
     #[test]
     fn without_the_feature_encoding_is_unsupported() {
@@ -350,6 +460,23 @@ mod tests {
         let r = ktx2::Reader::new(&ktx[..]).unwrap();
         assert_eq!(r.transfer_function(), Some(ktx2::TransferFunction::Linear));
         assert_eq!(r.header().level_count.max(1), 1);
+        // KHR_texture_basisu: non-colour data has the primaries KHR_DF_PRIMARIES_UNSPECIFIED,
+        // colour BT709 (DFD basic block word 2: colorModel, colorPrimaries, transferFunction).
+        let dfd = u32::from_le_bytes(ktx[48..52].try_into().unwrap()) as usize + 12;
+        assert_eq!(ktx[dfd..dfd + 3], [166, 0, 1]);
+        let srgb = encode_ktx2(&gradient(false), BasisMode::Etc1s).unwrap();
+        let dfd = u32::from_le_bytes(srgb[48..52].try_into().unwrap()) as usize + 12;
+        assert_eq!(srgb[dfd..dfd + 3], [163, 1, 2]);
+        // An odd size is written at the next multiple of 4 (pixelWidth / pixelHeight).
+        for (w, h, want) in [(5u32, 3u32, (8, 4)), (1, 1, (4, 4))] {
+            let px: Vec<u8> = (0..w * h * 3).map(|i| (i * 37 % 256) as u8).collect();
+            let img = DecodedImage::new(w, h, 3, PixelData::U8(px)).unwrap();
+            let k = encode_ktx2_with(&img, &o).unwrap();
+            let hdr = ktx2::Reader::new(&k[..]).unwrap().header();
+            assert_eq!((hdr.pixel_width, hdr.pixel_height), want);
+            let d = crate::decode(&k).unwrap();
+            assert_eq!((d.width, d.height), want);
+        }
         // Grey input is replicated.
         let g = DecodedImage::new(4, 4, 1, PixelData::U8(vec![200; 16])).unwrap();
         let d = crate::decode(&encode_ktx2(&g, BasisMode::Uastc).unwrap()).unwrap();

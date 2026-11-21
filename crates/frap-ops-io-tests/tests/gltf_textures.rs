@@ -20,7 +20,8 @@
 //! The golden comparator (`glb:`) hashes non-PNG image bytes, which two WebP encoders never
 //! share, so these cases compare only their line outcomes and materials there and their files
 //! here. Blessing: `FRAP_TEXTURES_BLESS=1 cargo test -p frap-ops-io-tests --test gltf_textures
-//! -- --nocapture` rewrites the Blender outputs when Blender 5.2 is found.
+//! -- --nocapture` rewrites the Blender outputs when Blender 5.2 is found
+//! (`FRAP_TEXTURES_BLESS=<case name>`: that case only).
 
 use std::path::{Path, PathBuf};
 
@@ -202,13 +203,26 @@ fn compare_images(what: &str, f: (&GltfDoc, &Path), b: (&GltfDoc, &Path)) {
     }
 }
 
-/// The canonical form without image bytes (compared by [`compare_images`]).
+/// The canonical form without image bytes (compared by [`compare_images`]) and without empty
+/// texture `extensions` objects: the add-on writes `"extensions": {}` on a texture whose
+/// EXT_texture_webp image could not be written (`export_image_format='WEBP'`), frap leaves the
+/// member out; both mean no extension.
 fn canonical_without_image_bytes(mut doc: GltfDoc) -> serde_json::Value {
     if let Some(images) = doc.json["images"].as_array_mut() {
         for i in images {
             if let Some(o) = i.as_object_mut() {
                 o.remove("bufferView");
                 o.remove("uri");
+            }
+        }
+    }
+    if let Some(textures) = doc.json["textures"].as_array_mut() {
+        for t in textures {
+            if let Some(o) = t.as_object_mut()
+                && o.get("extensions")
+                    .is_some_and(|e| e.as_object().is_some_and(|m| m.is_empty()))
+            {
+                o.remove("extensions");
             }
         }
     }
@@ -350,13 +364,69 @@ fn ktx2_export_structure() {
         );
         let info = frap_imbuf::probe(&kb).unwrap();
         assert_eq!(info.format, frap_imbuf::FileFormat::Ktx2);
-        // DFD transfer function: byte 2 of the basic descriptor block (after the 4-byte DFD
-        // size and the 8-byte block header) is the transfer function (1 linear, 2 sRGB).
+        // DFD basic descriptor block word 2 (after the 4-byte DFD size and the 8-byte block
+        // header): colour primaries (1 BT709, 0 unspecified: KHR_texture_basisu requires
+        // unspecified for non-colour data) and transfer function (1 linear, 2 sRGB).
         let dfd = u32::from_le_bytes(kb[48..52].try_into().unwrap()) as usize;
-        assert_eq!(kb[dfd + 4 + 8 + 2], if srgb { 2 } else { 1 }, "texture {t}");
+        assert_eq!(
+            (kb[dfd + 4 + 8 + 1], kb[dfd + 4 + 8 + 2]),
+            if srgb { (1, 2) } else { (0, 1) },
+            "texture {t}"
+        );
+        let usage = if srgb {
+            frap_gltf::ext::khr_texture_basisu::Usage::Colour
+        } else {
+            frap_gltf::ext::khr_texture_basisu::Usage::Data
+        };
+        assert_eq!(
+            frap_gltf::ext::khr_texture_basisu::ktx2_issues(&kb, Some(usage)),
+            [],
+            "texture {t}"
+        );
     }
-    // Validates as glTF (the extension's rules included).
-    let r = frap_gltf::validate::validate(&frap_gltf::read(&bytes).unwrap().document);
+    // Validates as glTF (the extension's rules included, the embedded KTX2 images too).
+    let r = frap_gltf::validate::validate_file(&bytes).unwrap();
+    assert!(r.is_ok(), "{r}");
+    // KHR_texture_basisu: pixelWidth and pixelHeight MUST be multiples of 4. A 5x3 image is
+    // written 8x4 (and decodes at that size); its PNG fallback keeps 5x3.
+    for line in [
+        "bpy.data.images.new('Odd', 5, 3)",
+        "bpy.data.images['Odd'].generated_color = (0.9, 0.3, 0.1, 1.0)",
+        "bpy.data.materials['Material'].node_tree.nodes['Image Texture'].image = bpy.data.images['Odd']",
+        "bpy.ops.export_scene.gltf(filepath='odd.glb', frap_texture_format='KTX2')",
+    ] {
+        let j = run(&mut s, line);
+        assert_eq!(j["ok"], true, "{line}: {j}");
+    }
+    let odd = std::fs::read(work.path().join("odd.glb")).unwrap();
+    let (oj, od) = (glb_json(&odd), gltf_canonical::load(&odd, None).unwrap());
+    let tex = &oj["textures"][0];
+    let k = tex["extensions"]["KHR_texture_basisu"]["source"]
+        .as_u64()
+        .unwrap() as usize;
+    let p = tex["source"].as_u64().unwrap() as usize;
+    let kb = image_bytes(&od, work.path(), k);
+    assert_eq!(
+        (
+            u32::from_le_bytes(kb[20..24].try_into().unwrap()),
+            u32::from_le_bytes(kb[24..28].try_into().unwrap())
+        ),
+        (8, 4),
+        "KTX2 pixelWidth / pixelHeight"
+    );
+    let d = rgba(&kb);
+    assert_eq!((d.width, d.height), (8, 4));
+    let png = rgba(&image_bytes(&od, work.path(), p));
+    assert_eq!((png.width, png.height), (5, 3));
+    // The resampled image keeps the (uniform) colour.
+    let want = &png.to_u8()[..4];
+    for px in d.to_u8().chunks_exact(4) {
+        assert!(
+            px.iter().zip(want).all(|(a, b)| a.abs_diff(*b) <= 4),
+            "{px:?} vs {want:?}"
+        );
+    }
+    let r = frap_gltf::validate::validate_file(&odd).unwrap();
     assert!(r.is_ok(), "{r}");
     // WEBP: no core source left, so KHR_texture_basisu is required (with EXT_texture_webp).
     let j = run(
@@ -476,9 +546,13 @@ fn texture_outputs_match_blender() {
     let props = Props::load(&repo.props_path()).expect("props.toml");
     let all = cases(&repo);
     assert!(!all.is_empty(), "no texture cases with outputs");
-    let blessing = std::env::var_os("FRAP_TEXTURES_BLESS").is_some();
+    // `FRAP_TEXTURES_BLESS=1` blesses every case, `=<case name>` that case only.
+    let blessing = std::env::var("FRAP_TEXTURES_BLESS").ok();
     for tc in &all {
-        if blessing {
+        if blessing
+            .as_deref()
+            .is_some_and(|b| b == "1" || tc.case.name.ends_with(b))
+        {
             bless(&repo, tc);
         }
         let work = ScratchDir::new(&tc.case.name).unwrap();
