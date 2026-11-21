@@ -101,7 +101,9 @@ fn refuses_what_blender_refuses() {
 #[test]
 fn later_milestone_features_import_their_static_part_with_warnings() {
     // Skins and morph targets are imported since WP 6.8 (goldens `gltf/skins/import_*`) and
-    // animations since WP 6.7 (`import/animation/`): no WARNING any more.
+    // animations since WP 6.7 (`import/animation/`), EXT_mesh_gpu_instancing since WP 7.5
+    // (golden `gltf/instancing/import_sample`: the holder and its 125 instances): no WARNING
+    // any more.
     {
         let (rel, expect) = (
             "SimpleInstancing/glTF-Binary/SimpleInstancing.glb",
@@ -117,9 +119,9 @@ fn later_milestone_features_import_their_static_part_with_warnings() {
             &mut log,
         )
         .unwrap_or_else(|e| panic!("{rel}: {e}"));
-        assert!(!r.objects.is_empty(), "{rel}");
+        assert_eq!(r.objects.len(), 126, "{rel}");
         assert!(
-            r.reports
+            !r.reports
                 .iter()
                 .any(|m| m.level == ReportType::Warning && m.message.contains(expect)),
             "{rel}: {:?}",

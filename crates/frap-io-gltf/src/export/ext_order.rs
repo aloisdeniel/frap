@@ -288,7 +288,14 @@ fn traversal_order(doc: &Document, created: Option<&CreatedEmpty>) -> Vec<String
         w.texture(i as Index);
     }
     w.extensions(&doc.extensions);
-    w.order
+    // `manage_gpu_instancing_nodes` traverses the instance holders' extensions after every
+    // scene and animation (M7 WP 7.5), so `EXT_mesh_gpu_instancing` is declared after them.
+    let mut order = w.order;
+    if let Some(i) = order.iter().position(|n| n == "EXT_mesh_gpu_instancing") {
+        let n = order.remove(i);
+        order.push(n);
+    }
+    order
 }
 
 fn sort_by(names: &mut [String], order: &[String]) {

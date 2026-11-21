@@ -31,6 +31,8 @@ pub(crate) fn create_vnode(
     root: usize,
 ) -> Result<(), ImportError> {
     skins::compute_bones(cx)?;
+    // `manage_gpu_instancing`'s instance TRS (M7 WP 7.5).
+    super::instancing::fill_trs(cx)?;
     let mut stack = vec![root];
     let mut visited = vec![false; cx.vtree.nodes.len()];
     while let Some(id) = stack.pop() {
@@ -38,7 +40,7 @@ pub(crate) fn create_vnode(
         if std::mem::replace(&mut visited[id], true) {
             continue;
         }
-        if cx.vtree.nodes[id].kind == VKind::Object {
+        if matches!(cx.vtree.nodes[id].kind, VKind::Object | VKind::Inst) {
             let (ob, bone_shape) = create_object(cx, main, log, id)?;
             cx.vtree.nodes[id].blender_object = Some(ob);
             cx.objects.push(ob);
@@ -82,6 +84,10 @@ fn create_object(
     let (name, data): (String, Option<IdAny>) = if let Some(node_idx) = v.mesh_node_idx {
         let (name, data, me) = create_mesh_object(cx, main, log, &v.name, node_idx)?;
         mesh_node = me.map(|me| (node_idx, me));
+        (name, data)
+    } else if let (VKind::Inst, Some(mesh_idx)) = (v.kind, v.inst_mesh_idx) {
+        // `VNode.Inst` (M7 WP 7.5): the instanced mesh, without skin or morph weights.
+        let (name, data, _) = create_inst_mesh_object(cx, main, log, &v.name, mesh_idx)?;
         (name, data)
     } else if let Some(node_idx) = v.camera_node_idx {
         let cam_idx = cx.doc.nodes[node_idx].camera.unwrap_or(0) as usize;
@@ -130,7 +136,7 @@ fn create_object(
                 ob.parent_bone = pv.blender_bone_name.clone().unwrap_or_default();
                 ob.location[1] += -(pv.bone_length as f32);
             }
-            VKind::DummyRoot => {}
+            VKind::DummyRoot | VKind::Inst => {}
         }
     }
     let ob = main.objects.insert(&name, ob, log);
@@ -234,6 +240,42 @@ fn create_mesh_object(
             if let Some(k) = key {
                 cx.mesh_cache.insert(k, m);
             }
+            m
+        }
+    };
+    let data_name = mesh::data_name(main, data);
+    Ok((vname.clone().unwrap_or(data_name), Some(data), data.typed()))
+}
+
+/// `create_mesh_object` of a `VNode.Inst` (M7 WP 7.5): the add-on's `DummyPyNode` with
+/// `mesh = vnode.mesh_idx`, no skin and no weights, so every instance of a mesh without morph
+/// targets shares the Blender mesh of cache key `(None,)`. Deviation (deviations.md): with
+/// morph targets the add-on stops with an `AttributeError` (`DummyPyNode` has no
+/// `weight_animation`); frap shares the mesh with the key `(None, ())` and sets no weights.
+fn create_inst_mesh_object(
+    cx: &mut Gltf,
+    main: &mut Main,
+    log: &mut ChangeLog,
+    vname: &Option<String>,
+    mesh_idx: usize,
+) -> Result<MeshObject, ImportError> {
+    if mesh_idx >= cx.doc.meshes.len() {
+        return Ok((
+            vname.clone().unwrap_or_else(|| "Invalid Mesh Index".into()),
+            None,
+            None,
+        ));
+    }
+    let key = MeshKey {
+        mesh: mesh_idx,
+        skin: None,
+        weights: Vec::new(),
+    };
+    let data = match cx.mesh_cache.get(&key) {
+        Some(&m) => m,
+        None => {
+            let m = mesh::create_data(cx, main, log, mesh_idx, None)?;
+            cx.mesh_cache.insert(key, m);
             m
         }
     };

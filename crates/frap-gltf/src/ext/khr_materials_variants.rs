@@ -102,11 +102,80 @@ impl Extension for KhrMaterialsVariantsPrimitive {
     const REQUIRED_BY_DEFAULT: bool = REQUIRED;
 }
 
+/// The root variant list, when the document has one.
+fn root_variants(cx: &ExtensionCx) -> Option<usize> {
+    cx.doc
+        .extensions
+        .get::<KhrMaterialsVariants>()
+        .ok()
+        .flatten()
+        .map(|v| v.variants.len())
+}
+
 fn validate(cx: &ExtensionCx, r: &mut Report) {
     if cx.owner_is_root() {
-        let _ = cx.decode::<KhrMaterialsVariants>(r);
+        let Some(ext) = cx.decode::<KhrMaterialsVariants>(r) else {
+            return;
+        };
+        if ext.variants.is_empty() {
+            r.error(
+                "EMPTY_ENTITY",
+                cx.member("variants"),
+                "KHR_materials_variants needs at least one variant",
+            );
+        }
     } else if cx.owner.contains("/primitives/") {
-        let _ = cx.decode::<KhrMaterialsVariantsPrimitive>(r);
+        let Some(ext) = cx.decode::<KhrMaterialsVariantsPrimitive>(r) else {
+            return;
+        };
+        let n = root_variants(cx);
+        if n.is_none() {
+            r.error(
+                "KHR_MATERIALS_VARIANTS_NO_ROOT",
+                cx.pointer(),
+                "the document has no root KHR_materials_variants variant list",
+            );
+        }
+        // Spec: a variant selects at most one material of a primitive.
+        let mut seen: Vec<Index> = Vec::new();
+        for (m, mapping) in ext.mappings.iter().enumerate() {
+            let p = cx.member(&format!("mappings/{m}"));
+            if let Some(mat) = mapping.material
+                && mat as usize >= cx.doc.materials.len()
+            {
+                r.error(
+                    "UNRESOLVED_REFERENCE",
+                    format!("{p}/material"),
+                    format!("material {mat} does not exist"),
+                );
+            }
+            if mapping.variants.is_empty() {
+                r.error(
+                    "EMPTY_ENTITY",
+                    format!("{p}/variants"),
+                    "a mapping needs at least one variant",
+                );
+            }
+            for (k, &v) in mapping.variants.iter().enumerate() {
+                let vp = format!("{p}/variants/{k}");
+                if n.is_some_and(|n| v as usize >= n) {
+                    r.error(
+                        "UNRESOLVED_REFERENCE",
+                        vp.clone(),
+                        format!("variant {v} does not exist"),
+                    );
+                }
+                if seen.contains(&v) {
+                    r.error(
+                        "KHR_MATERIALS_VARIANTS_NON_UNIQUE_VARIANT",
+                        vp,
+                        format!("variant {v} is mapped more than once in this primitive"),
+                    );
+                } else {
+                    seen.push(v);
+                }
+            }
+        }
     } else {
         cx.wrong_location(r, "the root or a mesh primitive");
     }
@@ -134,5 +203,39 @@ mod tests {
         let e: KhrMaterialsVariantsPrimitive = serde_json::from_value(p.clone()).unwrap();
         assert_eq!(e.mappings[0].variants, vec![0, 1]);
         assert_eq!(serde_json::to_value(&e).unwrap(), p);
+    }
+
+    fn doc(prim: serde_json::Value, root: bool) -> crate::json::Document {
+        let mut j = serde_json::json!({
+            "asset": {"version": "2.0"},
+            "materials": [{"name": "A"}],
+            "meshes": [{"primitives": [{"attributes": {},
+                "extensions": {"KHR_materials_variants": prim}}]}],
+            "extensionsUsed": ["KHR_materials_variants"]
+        });
+        if root {
+            j["extensions"] = serde_json::json!({"KHR_materials_variants":
+                {"variants": [{"name": "Red"}, {"name": "Blue"}]}});
+        }
+        serde_json::from_value(j).unwrap()
+    }
+
+    #[test]
+    fn validation_rules() {
+        let ok = doc(
+            serde_json::json!({"mappings": [{"material": 0, "variants": [0]}, {"variants": [1]}]}),
+            true,
+        );
+        let r = crate::validate::validate(&ok);
+        assert!(r.is_ok(), "{:?}", r.issues);
+        let bad = doc(
+            serde_json::json!({"mappings": [{"material": 3, "variants": [0, 5]}, {"variants": [0]}]}),
+            true,
+        );
+        let r = crate::validate::validate(&bad);
+        assert!(r.has("UNRESOLVED_REFERENCE"));
+        assert!(r.has("KHR_MATERIALS_VARIANTS_NON_UNIQUE_VARIANT"));
+        let no_root = doc(serde_json::json!({"mappings": [{"variants": [0]}]}), false);
+        assert!(crate::validate::validate(&no_root).has("KHR_MATERIALS_VARIANTS_NO_ROOT"));
     }
 }

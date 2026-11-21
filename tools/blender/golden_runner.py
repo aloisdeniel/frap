@@ -187,6 +187,12 @@ NORMALISE = {
     "D-131": None,
     "D-132": ("comparator", "gltf/draco goldens compare axis-aligned or lossless meshes; the rest within 1e-6 in import/decompress/draco.rs"),
     "D-133": ("cases", "KTX2 cases import files with fallbacks (gltf/textures/ktx2_import); KTX2-only files are frap-only"),
+    "D-134": ("cases", "cases do not turn KHR_materials_variants_ui off after using the variant properties"),
+    "D-135": ("cases", "cases set a variant's variant_idx before its name"),
+    "D-136": ("comparator", "gltf_canonical inlines variant mapping materials and variant names"),
+    "D-137": ("cases", "variant reset cases export one scene"),
+    "D-138": ("cases", "cases do not instance a mesh with morph targets"),
+    "D-139": ("cases", "gltf/instancing/animated keeps the quirk (frap_compat='BLENDER')"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

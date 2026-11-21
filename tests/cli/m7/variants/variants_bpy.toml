@@ -1,0 +1,12 @@
+# WP 7.5: KHR_materials_variants and EXT_mesh_gpu_instancing as an agent drives them. The
+# variant RNA is an `AttributeError` until the glTF add-on preference
+# `KHR_materials_variants_ui` is on; then a variant list on `bpy.data.scenes[0]` and the
+# cube's per-slot mapping (`add()` returns the new item, names are made unique), an export
+# (`extensions_used` lists the extension), a factory reset and the import, which turns the
+# preference back on and rebuilds the variant data; then three linked cubes under an empty
+# exported with `export_gpu_instances=True` (one node holds the instances) and imported again
+# (one object per instance). Outcomes verified on Blender 5.2.4
+# (`tests/golden/cases/gltf/{variants,instancing}/`). Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

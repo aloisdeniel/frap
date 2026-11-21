@@ -118,9 +118,42 @@ pub enum CollFunc {
     ForeachGet,
     /// `foreach_set(attr, seq)`
     ForeachSet,
+    /// `bpy_prop_collection_idprop.add()` (M7 WP 7.5)
+    Add,
+    /// `bpy_prop_collection_idprop.remove(index)`
+    Remove,
+    /// `bpy_prop_collection_idprop.clear()`
+    Clear,
+    /// `bpy_prop_collection_idprop.move(src_index, dst_index)`
+    Move,
+}
+
+/// Whether `prop` is an ID-property collection (`bpy_prop_collection_idprop`: a collection of
+/// a Python-registered `PropertyGroup` without an API struct, such as the glTF add-on's
+/// `Scene.gltf2_KHR_materials_variants_variants`), whose items `add()` / `remove()` /
+/// `clear()` / `move()` change (M7 WP 7.5).
+pub fn is_idprop_coll(prop: &PropDef) -> bool {
+    match prop.kind {
+        PropKind::Collection {
+            item_type,
+            api: None,
+        } => frap_spec_rna::find_struct(item_type)
+            .is_some_and(|s| s.identifier != "PropertyGroup" && s.is_a("PropertyGroup")),
+        _ => false,
+    }
 }
 
 impl CollFunc {
+    /// The methods of `bpy_prop_collection_idprop`.
+    fn parse_idprop(s: &str) -> Option<CollFunc> {
+        Some(match s {
+            "add" => CollFunc::Add,
+            "remove" => CollFunc::Remove,
+            "clear" => CollFunc::Clear,
+            "move" => CollFunc::Move,
+            _ => return None,
+        })
+    }
     fn parse(s: &str) -> Option<CollFunc> {
         Some(match s {
             "get" => CollFunc::Get,
@@ -143,6 +176,10 @@ impl CollFunc {
             CollFunc::Items => "items",
             CollFunc::ForeachGet => "foreach_get",
             CollFunc::ForeachSet => "foreach_set",
+            CollFunc::Add => "add",
+            CollFunc::Remove => "remove",
+            CollFunc::Clear => "clear",
+            CollFunc::Move => "move",
         }
     }
 }
@@ -1362,6 +1399,11 @@ fn step_coll(host: &dyn HostRead, c: CollPlace, seg: &PathSeg) -> Result<Target,
             };
             if api_func.is_none()
                 && let Some(which) = CollFunc::parse(a)
+            {
+                return Ok(Target::Func(FuncTarget::Coll { coll: c, which }));
+            }
+            if is_idprop_coll(c.prop)
+                && let Some(which) = CollFunc::parse_idprop(a)
             {
                 return Ok(Target::Func(FuncTarget::Coll { coll: c, which }));
             }
