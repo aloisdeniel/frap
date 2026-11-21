@@ -54,6 +54,13 @@ fn blend_data_scenes_remove(
     let mut win = h.win().clone();
     let (main, log) = h.main_mut();
     frap_scene::scenes::remove_scene(main, &mut win, scene, log).map_err(report_error)?;
+    let switched = win.scene != h.win().scene;
     *h.win_mut() = win;
+    if switched {
+        // The window shows the replacement scene: its depsgraph is evaluated at its frame
+        // (`ED_scene_change_update`, as for `window.scene`; verified on 5.2.4).
+        h.mark_time_dirty();
+        h.apply_pending_animation()?;
+    }
     Ok(Value::None)
 }

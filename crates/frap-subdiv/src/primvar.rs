@@ -77,6 +77,7 @@ pub(crate) fn interp_vertex<const N: usize>(
 ) -> Vec<V<N>> {
     let mut dst = vec![[0.0; N]; child.nverts];
     for f in 0..parent.nfaces() {
+        frap_math::budget::check();
         let fv = parent.face_verts(f);
         let w = 1.0 / fv.len() as f64;
         let d = &mut dst[r.face_child_vert[f] as usize];
@@ -85,6 +86,7 @@ pub(crate) fn interp_vertex<const N: usize>(
         }
     }
     for e in 0..parent.nedges() {
+        frap_math::budget::check();
         let cv = r.edge_child_vert[e] as usize;
         let s = parent.edge_sharpness[e];
         let faces = &parent.edge_faces[e];
@@ -189,6 +191,7 @@ pub(crate) fn limit_vertex<const N: usize>(
 ) {
     let mut m = Mask::default();
     for v in which {
+        frap_math::budget::check();
         let (rule, es) = limit_rule(lvl, v, inf_only);
         if is_smooth_corner(lvl, v, rule) {
             let ends = sdc::sharp_edge_pair(&es);
@@ -242,10 +245,12 @@ pub(crate) fn refine_fvar_topology(
     let mut slots = FVarChildSlots::default();
     let mut n = 0u32;
     for _ in 0..parent.nfaces() {
+        frap_math::budget::check();
         slots.face.push(n);
         n += 1;
     }
     for e in 0..parent.nedges() {
+        frap_math::budget::check();
         slots.edge_offset.push(n);
         n += if pf.edge_tags[e].mismatch {
             parent.edge_faces[e].len() as u32
@@ -254,6 +259,7 @@ pub(crate) fn refine_fvar_topology(
         };
     }
     for v in 0..parent.nverts {
+        frap_math::budget::check();
         slots.vert_offset.push(n);
         n += if pf.vertex_matches(v) {
             1
@@ -264,6 +270,7 @@ pub(crate) fn refine_fvar_topology(
     slots.nslots = n as usize;
     let mut fvals = Vec::with_capacity(parent.face_verts.len() * 4);
     for f in 0..parent.nfaces() {
+        frap_math::budget::check();
         let fv = parent.face_verts(f);
         let fe = parent.face_edges(f);
         let k_n = fv.len();
@@ -324,6 +331,7 @@ pub(crate) fn interp_fvar<const N: usize>(
     let mut dst = vec![[0.0; N]; slots.nslots];
     let linear = pf.is_linear;
     for f in 0..parent.nfaces() {
+        frap_math::budget::check();
         let fvals = pf.face_values(parent, f);
         let w = 1.0 / fvals.len() as f64;
         let d = &mut dst[slots.face[f] as usize];
@@ -332,6 +340,7 @@ pub(crate) fn interp_fvar<const N: usize>(
         }
     }
     for e in 0..parent.nedges() {
+        frap_math::budget::check();
         let off = slots.edge_offset[e] as usize;
         let cv = r.edge_child_vert[e] as usize;
         let matches = !cf.value_tags[off].mismatch;
@@ -370,6 +379,7 @@ pub(crate) fn interp_fvar<const N: usize>(
     }
     let mut m = Mask::default();
     for v in 0..parent.nverts {
+        frap_math::budget::check();
         let off = slots.vert_offset[v] as usize;
         let matches = !cf.value_tags[off].mismatch;
         let pvals = &pf.vert_values[v];
@@ -452,6 +462,7 @@ pub(crate) fn limit_fvar<const N: usize>(
 ) {
     let mut m = Mask::default();
     for v in which {
+        frap_math::budget::check();
         let vals = &fl.vert_values[v];
         if fl.is_linear || lvl.vert_edges[v].is_empty() {
             for &s in vals {

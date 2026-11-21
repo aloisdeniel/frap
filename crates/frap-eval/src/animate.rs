@@ -10,6 +10,10 @@
 //! [`apply_animation_at`] on a COW clone of the state (`Host::snapshot_at`), never on the
 //! session's originals.
 //!
+//! At a session boundary only the datablocks of the window's depsgraph are animated
+//! ([`depsgraph_roots`]), as Blender flushes only the active depsgraph's IDs; render and export
+//! clones animate every datablock ([`apply_animation_at`], D-128).
+//!
 //! Each animated datablock (every ID with `AnimData`, and the embedded node trees of materials
 //! and worlds, addressed through `Root::Embedded`) is evaluated with
 //! `frap_anim::eval::evaluate_anim_refined` (NLA, then the assigned action slot), the NLA's
@@ -25,9 +29,11 @@
 use frap_anim::eval::props::PathSeg;
 use frap_anim::eval::{ActionLookup, evaluate_anim_refined};
 use frap_anim::{Action, AnimData};
+use std::collections::HashSet;
+
 use frap_rna::{
     ActionId, EmbeddedSlot, Field, IdAny, IdCode, IdRef, Item, PropDef, Rna, RnaError,
-    RnaErrorKind, RnaPtr, Root, Seg, StructDef, Value,
+    RnaErrorKind, RnaPtr, Root, SceneId, Seg, StructDef, Value,
 };
 use frap_scene::{Host, HostRead, Main, find_hook};
 
@@ -40,8 +46,10 @@ pub struct AnimationApplied {
 }
 
 /// An evaluation boundary (operator pipeline step 4, `view_layer.update()`,
-/// `scene.frame_set()`, `context.evaluated_depsgraph_get()` / `evaluated_get()`): when time is
-/// dirty, writes the animation of the context scene's `frame_current` into the originals.
+/// `scene.frame_set()`, `context.evaluated_depsgraph_get()` / `evaluated_get()`, a change of
+/// `window.scene`): when time is dirty, writes the animation of the context scene's
+/// `frame_current` into the originals of the datablocks the window's depsgraph evaluates
+/// ([`depsgraph_roots`]; Blender flushes only the active depsgraph's IDs).
 /// The caller clears its time-dirty flag after an `Ok`.
 pub fn apply_pending_animation(
     host: &mut dyn Host,
@@ -69,21 +77,113 @@ pub fn apply_pending_animation_tagged(
         .scenes
         .get(host.win().scene)
         .map_or(0, |s| s.frame_current);
+    let graph = window_depsgraph(host);
     if time_dirty {
-        return apply_animation_at(host, frame as f32);
+        return apply_animation_filtered(host, frame as f32, &|root, _| graph.contains(&root));
     }
     let is_tagged = |root: Root, adt: &AnimData| {
         let action_tagged =
             |a: Option<IdRef<ActionId>>| a.is_some_and(|a| tagged.contains(&Root::Id(a.any())));
-        tagged.contains(&root)
-            || action_tagged(adt.action)
-            || adt
-                .nla_tracks
-                .iter()
-                .flat_map(|t| &t.strips)
-                .any(|s| action_tagged(s.action))
+        graph.contains(&root)
+            && (tagged.contains(&root)
+                || action_tagged(adt.action)
+                || adt
+                    .nla_tracks
+                    .iter()
+                    .flat_map(|t| &t.strips)
+                    .any(|s| action_tagged(s.action)))
     };
     apply_animation_filtered(host, frame as f32, &is_tagged)
+}
+
+/// `scene.frame_set()`'s `BKE_scene_graph_update_for_newframe` for each view layer of
+/// `scene`: writes the animation at `frame` of the datablocks of its **active** depsgraphs
+/// ([`depsgraph_roots`]) into the originals: the window's, and those the window showed before
+/// (`Main::shown_depsgraphs`; Blender keeps a depsgraph active once shown). A scene the window
+/// never showed writes nothing.
+pub fn apply_scene_animation_at(
+    host: &mut dyn Host,
+    scene: IdRef<SceneId>,
+    frame: f32,
+) -> Result<AnimationApplied, RnaError> {
+    let mut graph = HashSet::new();
+    {
+        let main = host.main();
+        let win = host.win();
+        for vl in main.scenes.get(scene).iter().flat_map(|s| &s.view_layers) {
+            let active = (scene == win.scene && vl.name == win.view_layer)
+                || main.shown_depsgraphs.contains(scene, &vl.name);
+            if active {
+                graph.extend(depsgraph_roots(main, scene, &vl.name));
+            }
+        }
+    }
+    if graph.is_empty() {
+        return Ok(AnimationApplied::default());
+    }
+    apply_animation_filtered(host, frame, &|root, _| graph.contains(&root))
+}
+
+/// [`depsgraph_roots`] of the window's scene and view layer.
+fn window_depsgraph(host: &dyn HostRead) -> HashSet<Root> {
+    let win = host.win();
+    depsgraph_roots(host.main(), win.scene, &win.view_layer)
+}
+
+// Ported from blender/source/blender/depsgraph/intern/builder/deg_builder_nodes.cc
+// (`build_view_layer`, `need_pull_base_into_graph`, `build_object`, `build_scene_camera`,
+// `build_world`; Blender 5.2.4, GPL-2.0-or-later). Verified on 5.2.4 with `frame_set`: an
+// animated object that is a modifier operand, a parent or the scene camera is animated though
+// it is in no collection of the scene; one with `hide_viewport` (or in a collection with
+// `hide_viewport`, or an excluded one) is not, while `hide_set` and a layer collection's
+// `hide_viewport` keep it; an orphan object, material, camera or world is not animated; a
+// scene the window does not show is not animated by another scene's `frame_set`.
+/// The datablocks the viewport depsgraph of `scene`'s view layer `view_layer` (its first one
+/// when there is none of that name) evaluates, so animates: the scene, its world and camera,
+/// the objects of the view layer's enabled bases ([`frap_scene::id::layers::BaseVisibility`]'s
+/// `enabled_viewport`), and everything they reference, transitively (object data, shape keys,
+/// materials, parents, modifier operands, armatures, node groups, images, textures), with the
+/// embedded node tree of each material and world. Actions are not roots (they carry no
+/// animation of their own).
+pub fn depsgraph_roots(main: &Main, scene: IdRef<SceneId>, view_layer: &str) -> HashSet<Root> {
+    let mut out = HashSet::new();
+    let Some(sc) = main.scenes.get(scene) else {
+        return out;
+    };
+    let mut queue: Vec<IdAny> = Vec::new();
+    out.insert(Root::Id(scene.any()));
+    queue.extend(sc.world.map(|w| w.any()));
+    queue.extend(sc.camera.map(|c| c.any()));
+    if let Some(vl) = sc
+        .view_layers
+        .iter()
+        .find(|v| v.name == view_layer)
+        .or_else(|| sc.view_layers.first())
+    {
+        let vis = frap_scene::id::layers::visibility(sc, vl, &main.collections, &main.objects);
+        queue.extend(
+            vl.bases
+                .iter()
+                .filter(|b| vis.get(&b.object).is_some_and(|v| v.enabled_viewport))
+                .map(|b| b.object.any()),
+        );
+    }
+    while let Some(id) = queue.pop() {
+        if matches!(id.code, IdCode::AC | IdCode::LI | IdCode::SC)
+            || !out.insert(Root::Id(id))
+            || main.header(id).is_none()
+        {
+            continue;
+        }
+        if matches!(id.code, IdCode::MA | IdCode::WO) {
+            out.insert(Root::Embedded {
+                owner: id,
+                slot: EmbeddedSlot::NodeTree,
+            });
+        }
+        main.for_each_ref_of(id, &mut |x| queue.push(x));
+    }
+    out
 }
 
 // Ported from blender/source/blender/makesrna/intern/{rna_fcurve,rna_animation,rna_nla,
@@ -201,8 +301,9 @@ pub fn anim_data(main: &Main, root: Root) -> Option<&AnimData> {
     adt.as_ref()
 }
 
-/// Writes the animation of every animated ID at `frame` into `host`'s originals (a session
-/// boundary, or a render/export clone).
+/// Writes the animation of every animated ID of `bpy.data` at `frame` into `host`'s originals:
+/// render and export clones (`Host::snapshot_at`). Session boundaries use the window's
+/// depsgraph instead ([`apply_pending_animation_tagged`], [`apply_scene_animation_at`]).
 pub fn apply_animation_at(host: &mut dyn Host, frame: f32) -> Result<AnimationApplied, RnaError> {
     apply_animation_filtered(host, frame, &|_, _| true)
 }

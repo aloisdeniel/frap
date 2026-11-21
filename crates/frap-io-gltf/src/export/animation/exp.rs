@@ -418,8 +418,11 @@ impl<'a> Exp<'a> {
         let step = self.s.frame_step.max(1);
         let mut frame = min;
         while frame <= max {
+            // `--stmt-timeout` cancellation point per sampled frame and object (§12).
+            frap_math::budget::check_now();
             self.world.frame_set(frame);
             for &o in &objs {
+                frap_math::budget::check();
                 self.object_caching(&mut out, o, key, slot, frame);
             }
             frame += step;
@@ -525,6 +528,7 @@ impl<'a> Exp<'a> {
         let interp = interp.unwrap_or(self.s.fallback);
         let mut keys = Vec::new();
         for f in self.frames(ob, key) {
+            frap_math::budget::check();
             let Some(Datum::Mat(m)) = self.get(&CPath::Matrix, ob, key, slot, f) else {
                 continue;
             };
@@ -568,6 +572,7 @@ impl<'a> Exp<'a> {
         let interp = interp.unwrap_or(self.s.fallback);
         let mut keys = Vec::new();
         for f in self.frames(ob, key) {
+            frap_math::budget::check();
             let Some(Datum::Mat(m)) = self.get(&CPath::Bone(bone.clone()), ob, key, slot, f) else {
                 continue;
             };
@@ -647,6 +652,7 @@ impl<'a> Exp<'a> {
         }
         let mut keys = Vec::new();
         for f in self.frames(ob, key) {
+            frap_math::budget::check();
             let Some(Datum::Values(v)) = self.get(&CPath::Sk, ob, key, slot, f) else {
                 continue;
             };

@@ -393,6 +393,7 @@ fn render_frame(cx: &mut OpCtx, frame: Option<i32>, engine: &str) -> Result<Film
     let mut eval = snap.eval;
     let mut scene =
         frap_render_scene::build(&*snap.host, &mut *eval, &req).map_err(render_error)?;
+    crate::report_limit_warnings(cx, &*snap.host, &mut *eval, &req);
     // The engine the service renders with (§19.3; the fallback WARNING is reported once).
     scene.settings.engine = engine.into();
     let film = cx

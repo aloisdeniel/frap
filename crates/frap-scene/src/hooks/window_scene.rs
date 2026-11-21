@@ -4,6 +4,12 @@
 //! layer name when the new scene has one of that name, else it shows the new scene's first
 //! view layer. `None` is refused by `coerce` (`NEVER_NULL`: `Window.scene does not support a
 //! 'None' assignment Scene type`).
+//!
+//! A change of scene evaluates the new scene's depsgraph at once (`ED_scene_change_update`):
+//! its animation at its own `frame_current` is written into the originals (verified on 5.2.4:
+//! a manual `location` of an animated object of the new scene reads its animated value right
+//! after the assignment, also when switching back to a scene shown before; assigning the
+//! current scene, or switching only `window.view_layer`, applies nothing).
 
 use frap_rna::{
     Field, IdRef, PropDef, PyExc, RnaError, RnaErrorKind, RnaPtr, SceneId, Value, rna_hook,
@@ -40,8 +46,15 @@ mod hook {
         crate::window::set_scene(h.main(), &mut win, scene)
             .map_err(|m| RnaError::new(RnaErrorKind::Other, PyExc::RuntimeError, m))?;
         if (win.scene, &win.view_layer) != (before.0, &before.1) {
+            let switched = win.scene != before.0;
+            let old = h.win().clone();
+            h.main_mut().0.shown_depsgraphs.remember(&old);
             *h.win_mut() = win;
             h.main_mut().1.context_changed = true;
+            if switched {
+                h.mark_time_dirty();
+                h.apply_pending_animation()?;
+            }
         }
         Ok(())
     }

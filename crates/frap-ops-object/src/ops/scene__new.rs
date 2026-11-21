@@ -59,7 +59,12 @@ fn exec(cx: &mut OpCtx, p: scene::New) -> OpResult {
     };
     let mut win = cx.ctx().win.clone();
     frap_scene::window::set_scene(cx.main(), &mut win, new).map_err(OpError::Runtime)?;
+    let old = cx.ctx().win.clone();
+    cx.main_mut().0.shown_depsgraphs.remember(&old);
     *cx.win_mut() = win;
+    // The new scene's depsgraph is evaluated at its frame by the closing boundary
+    // (`ED_scene_change_update`; verified on 5.2.4 with `LINK_COPY`).
+    cx.mark_time_dirty();
     cx.result("scene", new.any());
     Ok(OpStatus::Finished)
 }

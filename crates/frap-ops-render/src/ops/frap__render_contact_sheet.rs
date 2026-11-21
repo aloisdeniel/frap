@@ -427,6 +427,7 @@ fn exec(cx: &mut OpCtx, p: frap::RenderContactSheet) -> OpResult {
         objects,
     };
     let mut base = frap_render_scene::build(&*snap.host, &mut *eval, &req).map_err(render_error)?;
+    crate::report_limit_warnings(cx, &*snap.host, &mut *eval, &req);
     let eevee_ok = cx.services().render()?.supports_engine("BLENDER_EEVEE");
     let engine = if p.engine.value == rcs::Engine::BlenderEevee && eevee_ok {
         "BLENDER_EEVEE"

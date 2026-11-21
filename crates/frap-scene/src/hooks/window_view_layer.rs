@@ -48,6 +48,8 @@ mod hook {
             return Ok(());
         };
         if h.win().view_layer != name {
+            let old = h.win().clone();
+            h.main_mut().0.shown_depsgraphs.remember(&old);
             h.win_mut().view_layer = name;
             h.main_mut().1.context_changed = true;
         }

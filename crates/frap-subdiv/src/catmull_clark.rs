@@ -799,6 +799,7 @@ impl Surface {
                     interpolate_position_on_edge(topo, &vert_to_edges, edge, s.is_simple, u)
                 }
                 PosSource::Ptex { ptex, u, v } => {
+                    frap_math::budget::check();
                     let quad = quad_of_ptex[ptex as usize];
                     let (g, x, y) = self.ptex_point(&lay, ptex, u, v, quad);
                     let grid = &self.grids[g];
@@ -830,6 +831,7 @@ impl Surface {
             let lvl = &self.levels[last];
             let mut out = vec![[0.0f32; 2]; nl];
             for face in 0..nl / 4 {
+                frap_math::budget::check();
                 let (ptex, u0, v0) = lay.corner_ptex[4 * face];
                 let quad = quad_of_ptex[ptex as usize];
                 let (g, cx, cy) = self.ptex_point(&lay, ptex, u0, v0, quad);

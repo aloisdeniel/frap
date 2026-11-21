@@ -48,3 +48,15 @@ pub struct EvaluatedObject {
     /// Evaluation warnings (reports).
     pub warnings: Vec<Report>,
 }
+
+impl EvaluatedObject {
+    /// The warnings of modifiers whose result exceeded `--max-elements` (or Blender's index
+    /// range) and passed the mesh through (D-52: `Modifier 'S': frap: limit exceeded
+    /// (max_elements): …`). Every statement that evaluates the object (render, export with
+    /// `export_apply`, `frap.scene_summary`, data reads) reports them as WARNINGs.
+    pub fn limit_warnings(&self) -> impl Iterator<Item = &Report> {
+        self.warnings
+            .iter()
+            .filter(|r| r.message.contains("frap: limit exceeded (max_elements)"))
+    }
+}

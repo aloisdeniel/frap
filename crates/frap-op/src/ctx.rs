@@ -214,11 +214,23 @@ impl<'h> OpCtx<'h> {
         log.context_changed = true;
         ob
     }
-    /// The evaluated object (evaluates if needed).
+    /// The evaluated object (evaluates if needed). A modifier that exceeded `--max-elements`
+    /// is reported as a WARNING of this operator (D-52, [`EvaluatedObject::limit_warnings`]).
     pub fn evaluated(&mut self, ob: IdRef<ObjectId>) -> Result<Arc<EvaluatedObject>, OpError> {
         let (host, eval) = self.host.eval();
-        eval.object(host, ob, EvalMode::Viewport)
-            .map_err(|e| OpError::Runtime(e.message))
+        let eo = eval
+            .object(host, ob, EvalMode::Viewport)
+            .map_err(|e| OpError::Runtime(e.message))?;
+        self.report_limit_warnings(&eo);
+        Ok(eo)
+    }
+    /// Adds the `--max-elements` warnings of an evaluated object (D-52) not reported yet.
+    pub fn report_limit_warnings(&mut self, eo: &EvaluatedObject) {
+        for w in eo.limit_warnings() {
+            if !self.reports.contains(w) {
+                self.reports.push(w.clone());
+            }
+        }
     }
     /// Adds a report.
     pub fn report(&mut self, level: ReportType, msg: impl Into<String>) {

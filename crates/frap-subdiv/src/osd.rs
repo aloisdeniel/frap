@@ -171,6 +171,7 @@ impl Subdivider for OpenSubdiv {
                 fvar_values.push(vals);
             }
             for (l, &(ptex, u, v)) in lay.corner_ptex.iter().enumerate() {
+                frap_math::budget::check();
                 if let Some(p) = map.find_patch(ptex as usize, u, v) {
                     for (ch, vals) in fvar_values.iter().enumerate() {
                         uv_layers[ch][l] = table.evaluate_face_varying(p, u, v, vals, ch).0;
@@ -179,6 +180,7 @@ impl Subdivider for OpenSubdiv {
             }
             let mut cache: Vec<[f32; 3]> = Vec::with_capacity(lay.vert_pos.len());
             for src in &lay.vert_pos {
+                frap_math::budget::check();
                 if let PosSource::Ptex { ptex, u, v } = *src {
                     let p = map
                         .find_patch(ptex as usize, u, v)
@@ -191,6 +193,7 @@ impl Subdivider for OpenSubdiv {
             eval_pos = Box::new(move |i, _, _| cache[i as usize]);
         }
         for (i, src) in lay.vert_pos.iter().enumerate() {
+            frap_math::budget::check();
             positions[i] = match *src {
                 PosSource::Coarse(v) => topo.positions[v as usize],
                 PosSource::LooseEdge { edge, u } => {

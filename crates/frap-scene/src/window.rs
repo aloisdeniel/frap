@@ -17,6 +17,36 @@ use smol_str::SmolStr;
 
 use crate::{Main, WindowState};
 
+/// Runtime memory of the depsgraphs the window has shown (`Main::shown_depsgraphs`): Blender
+/// keeps a depsgraph active once the window showed it (`DEG_make_active`), and
+/// `Scene.frame_set` flushes the animation of every active depsgraph of its scene into the
+/// originals, also when the window shows another scene (verified on 5.2.4: after switching
+/// away from `Scene`, `Scene.frame_set(3)` animates its objects; for a scene the window never
+/// showed it animates nothing). `Debug` leaves the entries out, so a saved and reopened state
+/// prints the same.
+#[derive(Clone, Default)]
+pub struct ShownDepsgraphs(pub Vec<(IdRef<SceneId>, SmolStr)>);
+
+impl std::fmt::Debug for ShownDepsgraphs {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("ShownDepsgraphs(runtime)")
+    }
+}
+
+impl ShownDepsgraphs {
+    /// Remembers the depsgraph `win` shows (called before the window switches away from it).
+    pub fn remember(&mut self, win: &WindowState) {
+        let key = (win.scene, win.view_layer.clone());
+        if !self.0.contains(&key) {
+            self.0.push(key);
+        }
+    }
+    /// Whether the window showed `scene`'s view layer `view_layer` before.
+    pub fn contains(&self, scene: IdRef<SceneId>, view_layer: &str) -> bool {
+        self.0.iter().any(|(s, v)| *s == scene && v == view_layer)
+    }
+}
+
 /// The view layer the window shows in `scene`: its current view layer name when `scene` has
 /// one of that name, else the scene's first view layer.
 pub fn view_layer_for(main: &Main, win: &WindowState, scene: IdRef<SceneId>) -> Option<SmolStr> {

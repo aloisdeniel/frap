@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `Scene.frame_current` (`rna_Scene_frame_current_set`): stores the frame and marks time
-//! dirty only (§7.3: animation is applied at the next evaluation boundary). Blender's setter
+//! `Scene.frame_current` (`rna_Scene_frame_current_set`): stores the frame and, for the
+//! window's scene, marks time dirty only (§7.3: animation is applied at the next evaluation
+//! boundary). Another scene's frame does not dirty the window's depsgraph (verified on 5.2.4:
+//! `Other.frame_current = 2` then `view_layer.update()` keeps a manual `location`). Blender's setter
 //! does not apply the RNA range: with the factory preference "Allow Negative Frames" off,
 //! negative frames become 0 (`FRAMENUMBER_MIN_CLAMP`) and large frames are kept (verified on
 //! 5.2.4: `= 1000000000` reads back 1000000000, `= -1000000000` reads back 0).
@@ -25,6 +27,8 @@ fn set(h: &mut dyn Host, this: &RnaPtr, _prop: &'static PropDef, v: Value) -> Re
     if let Some(s) = main.scenes.get_mut(scene, log) {
         s.frame_current = crate::id::Scene::frame_from_input(i);
     }
-    h.mark_time_dirty();
+    if h.win().scene == scene {
+        h.mark_time_dirty();
+    }
     Ok(())
 }

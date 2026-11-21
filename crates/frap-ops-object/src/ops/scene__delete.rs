@@ -58,5 +58,8 @@ fn exec(cx: &mut OpCtx, _p: scene::SceneDelete) -> OpResult {
         return Ok(OpStatus::Cancelled);
     }
     *cx.win_mut() = win;
+    // The replacement scene's depsgraph is evaluated at its frame by the closing boundary
+    // (`ED_scene_change_update`; verified on 5.2.4).
+    cx.mark_time_dirty();
     Ok(OpStatus::Finished)
 }

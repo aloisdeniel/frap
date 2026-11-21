@@ -130,6 +130,93 @@ fn stmt_timeout_cancels_quadratic_mesh_kernels() {
     }
 }
 
+/// M5+M6 stabilization round 4: a Subdivision Surface evaluation (`levels = 10` on the cube,
+/// 25M corners, OpenSubdiv's limit surface) polls the deadline in its per-corner and
+/// per-vertex loops: `frap.scene_summary` answers `TIMEOUT` within about twice the deadline,
+/// wherever the deadline falls (it used to run unchecked for minutes past ~2.5 s).
+#[test]
+fn stmt_timeout_cancels_subsurf_evaluation() {
+    for ms in [1500u64, 3000] {
+        let mut s = session_with(|o| o.limits.stmt_timeout = Some(Duration::from_millis(ms)));
+        for src in [
+            "bpy.data.objects['Cube'].modifiers.new('S', 'SUBSURF')",
+            "bpy.data.objects['Cube'].modifiers['S'].levels = 10",
+        ] {
+            assert_eq!(one(&mut s, src)["ok"], true, "{src}");
+        }
+        let t = Instant::now();
+        let r = one(&mut s, "bpy.ops.frap.scene_summary()");
+        let took = t.elapsed();
+        assert_eq!(r["error"]["code"], "TIMEOUT", "{ms} ms: {r}");
+        assert!(
+            took < Duration::from_millis(2 * ms + 1000),
+            "{ms} ms: {took:?}"
+        );
+    }
+}
+
+/// M5+M6 stabilization round 4: the glTF exporter's animation sampling (`SCENE` mode over a
+/// million frames) polls the deadline per sampled frame and in its per-frame channel loops.
+#[test]
+fn stmt_timeout_cancels_scene_animation_export() {
+    let dir = std::env::temp_dir().join(format!("frap-anim-timeout-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let mut s = session_with(|o| {
+        o.cwd = dir.clone();
+        o.limits.stmt_timeout = Some(Duration::from_millis(1000));
+    });
+    for src in [
+        "bpy.data.objects['Cube'].keyframe_insert('location', frame=1)",
+        "bpy.data.objects['Cube'].location = (4.0, 0.0, 0.0)",
+        "bpy.data.objects['Cube'].keyframe_insert('location', frame=11)",
+        "bpy.context.scene.frame_end = 1048574",
+    ] {
+        assert_eq!(one(&mut s, src)["ok"], true, "{src}");
+    }
+    let t = Instant::now();
+    let r = one(
+        &mut s,
+        "bpy.ops.export_scene.gltf(filepath='a.glb', export_animation_mode='SCENE')",
+    );
+    let took = t.elapsed();
+    assert_eq!(r["error"]["code"], "TIMEOUT", "{r}");
+    assert!(took < Duration::from_millis(3000), "{took:?}");
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
+/// D-52: a modifier whose result exceeds `--max-elements` passes the mesh through and is a
+/// WARNING of every statement that evaluates it, not only of a data read: `frap.scene_summary`
+/// and `export_scene.gltf(export_apply=True)` report it too.
+#[test]
+fn modifier_limit_is_a_warning_of_evaluating_statements() {
+    let dir = std::env::temp_dir().join(format!("frap-limits-{}", std::process::id()));
+    std::fs::create_dir_all(&dir).unwrap();
+    let mut s = session_with(|o| {
+        o.cwd = dir.clone();
+        o.limits.max_elements = 10_000;
+    });
+    for src in [
+        "bpy.data.objects['Cube'].modifiers.new('S', 'SUBSURF')",
+        "bpy.data.objects['Cube'].modifiers['S'].levels = 6",
+    ] {
+        assert_eq!(one(&mut s, src)["ok"], true, "{src}");
+    }
+    let expected = "Modifier 'S': frap: limit exceeded (max_elements): the statement would create 98304 face corners (limit 10000)";
+    for src in [
+        "bpy.ops.frap.scene_summary()",
+        "bpy.ops.export_scene.gltf(filepath='limit.glb', export_apply=True)",
+    ] {
+        let r = one(&mut s, src);
+        assert_eq!(r["status"], "FINISHED", "{src}: {r}");
+        assert_eq!(
+            r["reports"],
+            serde_json::json!([{"type": "WARNING", "message": expected}]),
+            "{src}"
+        );
+    }
+    let _ = std::fs::remove_dir_all(&dir);
+}
+
 /// M2 stabilization round 3: `--max-elements` in Edit Mode. The multiplicative edit operators
 /// pre-estimate their output, so `subdivide(number_cuts=100)` twice fails at once with the
 /// default flags (it used to grow past 4 GB), and the session can still leave Edit Mode.

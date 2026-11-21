@@ -201,6 +201,7 @@ fn evaluated_meshes(
     host: &dyn HostRead,
     eval: &mut dyn Evaluator,
     settings: &ExportSettings,
+    warnings: &mut Vec<frap_rna::Report>,
 ) -> EvaluatedMeshes {
     let user_win = host.win().clone();
     let scenes =
@@ -263,10 +264,16 @@ fn evaluated_meshes(
                 .collect()
         };
         for ob in obs {
-            if let Ok(ev) = eval.object(&view, ob, EvalMode::Viewport)
-                && let Some(me) = ev.mesh.clone()
-            {
-                out.insert((scene, ob), me);
+            if let Ok(ev) = eval.object(&view, ob, EvalMode::Viewport) {
+                // D-52: a modifier past `--max-elements` is a WARNING of the export.
+                for w in ev.limit_warnings() {
+                    if !warnings.contains(w) {
+                        warnings.push(w.clone());
+                    }
+                }
+                if let Some(me) = ev.mesh.clone() {
+                    out.insert((scene, ob), me);
+                }
             }
         }
     }
@@ -303,13 +310,17 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
         Some(cx.snapshot_at(Some(0))?)
     };
     if p.export_apply.value {
+        let mut warnings = Vec::new();
         let meshes = match &mut snap {
-            Some(s) => evaluated_meshes(&*s.host, &mut *s.eval, &settings),
+            Some(s) => evaluated_meshes(&*s.host, &mut *s.eval, &settings, &mut warnings),
             None => {
                 let (host, eval) = cx.split_eval();
-                evaluated_meshes(host, eval, &settings)
+                evaluated_meshes(host, eval, &settings, &mut warnings)
             }
         };
+        for w in warnings {
+            cx.report(w.level, w.message);
+        }
         settings.evaluated_meshes = Some(std::sync::Arc::new(meshes));
     }
     for prop in unsupported_props(a) {

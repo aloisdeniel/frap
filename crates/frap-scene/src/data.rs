@@ -400,6 +400,9 @@ pub struct Main {
     /// selection of a new base (`object_base_new`, e.g. an object linked into another scene).
     /// Kept by `frap_scene::id::layers` (WP 3.10); not saved, rebuilt from the bases.
     pub base_selected: crate::id::layers::BaseSelectedMemory,
+    /// Runtime: the depsgraphs (scene, view layer name) the window has shown before its
+    /// current one ([`crate::window::ShownDepsgraphs`]); not saved.
+    pub shown_depsgraphs: crate::window::ShownDepsgraphs,
 }
 
 /// Runs `$body` with `$m` bound to the `IdMap` of `$code` (every `IdCode`).
@@ -902,6 +905,14 @@ impl Main {
             with_map!(self, code, |m| out.extend(m.iter().map(|(r, _)| r.any())));
         }
         out
+    }
+
+    /// Calls `f(used)` for every outgoing ID reference of `a` (`IdType::for_each_ref`:
+    /// user-counting references and plain pointers such as `Object.parent` alike).
+    pub fn for_each_ref_of(&self, a: IdAny, f: &mut dyn FnMut(IdAny)) {
+        with_map!(self, a.code, |m| if let Some(t) = id_ref(m, a) {
+            t.for_each_ref(f);
+        })
     }
 
     /// Calls `f(user, used)` for every **user-counting** reference (`IDWALK_CB_USER`):

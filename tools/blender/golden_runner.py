@@ -181,6 +181,7 @@ NORMALISE = {
     "D-125": ("cases", "soft-shadow EEVEE cases set use_shadow_jitter (render_eevee/core/shadows_area_soft); shadows_point_soft has a loose tolerance"),
     "D-126": ("cases", "cases do not extrude bones with nothing selected"),
     "D-127": ("cases", "cases stay inside the hard range"),
+    "D-128": ("cases", "cases do not animate hide_viewport, update non-window view layers, or rename view layers between frame changes"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

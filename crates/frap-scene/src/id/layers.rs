@@ -60,6 +60,12 @@ pub struct BaseVisibility {
     pub selectable: bool,
     /// Rendered (`hide_render` of the object and its collections).
     pub renderable: bool,
+    /// Enabled in the viewport (`BASE_ENABLED_AND_VISIBLE_IN_DEFAULT_VIEWPORT`): neither the
+    /// object's nor every reaching collection's `hide_viewport` is set. A layer collection's
+    /// `hide_viewport` and `hide_set` do not clear it. The viewport depsgraph evaluates exactly
+    /// these bases (`need_pull_base_into_graph`; verified on 5.2.4: `frame_set` animates a
+    /// `hide_set` object but not a `hide_viewport` one).
+    pub enabled_viewport: bool,
 }
 
 /// The collection a layer collection shows (`None` = the scene's master collection).
@@ -175,6 +181,7 @@ pub fn visibility(
             e.visible |= !r.coll_hide_viewport && !r.layer_hide;
             e.selectable |= !r.coll_hide_viewport && !r.coll_hide_select;
             e.renderable |= !r.coll_hide_render;
+            e.enabled_viewport |= !r.coll_hide_viewport;
         },
     );
     for (ob, v) in out.iter_mut() {
@@ -189,6 +196,7 @@ pub fn visibility(
         v.visible &= !o.hide_viewport && !hidden;
         v.selectable &= !o.hide_viewport && !o.hide_select && !hidden;
         v.renderable &= !o.hide_render;
+        v.enabled_viewport &= !o.hide_viewport;
     }
     out
 }
