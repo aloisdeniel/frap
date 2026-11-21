@@ -98,16 +98,33 @@ fn image_save_render(
         ));
         DisplayDevice::Srgb
     });
-    let view_transform = ViewTransform::from_name(&view.view_transform).unwrap_or_else(|| {
+    // A stored view the display does not offer (`render.image_settings` after its own display
+    // changed): Blender reads it as '' and crashes in `create_ocio_display_processor`.
+    let offered = frap_color::views::offered(display_device.name(), &view.view_transform);
+    let view_transform = if !offered {
         warnings.push(format!(
-            "frap: view transform '{}' is not available in frap; saved with Standard",
-            view.view_transform
+            "frap: view transform '{}' is not offered on display '{}' (Blender reads it as '' \
+             and cannot render it); saved with Standard, look None",
+            view.view_transform,
+            display_device.name()
         ));
         ViewTransform::Standard
-    });
+    } else {
+        ViewTransform::from_name(&view.view_transform).unwrap_or_else(|| {
+            warnings.push(format!(
+                "frap: view transform '{}' is not available in frap; saved with Standard",
+                view.view_transform
+            ));
+            ViewTransform::Standard
+        })
+    };
     let vs = ViewSettings {
         view_transform,
-        look: view.look.to_string(),
+        look: if offered {
+            view.look.to_string()
+        } else {
+            "None".into()
+        },
         exposure: view.exposure,
         gamma: view.gamma,
     };

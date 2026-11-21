@@ -23,6 +23,7 @@ pub mod looks;
 pub mod lut;
 pub mod pbr_neutral;
 pub mod spaces;
+pub mod views;
 
 pub use display::{
     ColorError, DisplayDevice, DisplayImage, DisplayProcessor, DisplaySettings, ViewSettings,

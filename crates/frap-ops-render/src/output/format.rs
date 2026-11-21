@@ -241,6 +241,16 @@ pub struct ColorManagement {
     pub warnings: Vec<String>,
 }
 
+/// The WARNING for a stored view the display does not offer (`render.image_settings` after
+/// its own display changed; `frap_color::views::offered`): Blender 5.2.4 reads it as `''` and
+/// crashes in `create_ocio_display_processor`, frap uses Standard, look None.
+pub fn not_offered(view: &str, display: &str, done: &str) -> String {
+    format!(
+        "frap: view transform '{view}' is not offered on display '{display}' (Blender reads \
+         it as '' and cannot render it); {done} with Standard, look None"
+    )
+}
+
 /// `view_settings` + `display_settings` → a processor. A combination frap cannot reproduce
 /// yet falls back to Standard with a WARNING (decision log W1-13); curve mapping and white
 /// balance are not applied (WARNING).
@@ -257,16 +267,30 @@ pub fn color_management(
         DisplayDevice::Srgb
     });
     let display = DisplaySettings { display_device };
-    let view_transform = ViewTransform::from_name(&view.view_transform).unwrap_or_else(|| {
-        warnings.push(format!(
-            "frap: view transform '{}' is not available in frap; rendered with Standard",
-            view.view_transform
+    let offered = frap_color::views::offered(display_device.name(), &view.view_transform);
+    let view_transform = if !offered {
+        warnings.push(not_offered(
+            &view.view_transform,
+            display_device.name(),
+            "rendered",
         ));
         ViewTransform::Standard
-    });
+    } else {
+        ViewTransform::from_name(&view.view_transform).unwrap_or_else(|| {
+            warnings.push(format!(
+                "frap: view transform '{}' is not available in frap; rendered with Standard",
+                view.view_transform
+            ));
+            ViewTransform::Standard
+        })
+    };
     let mut vs = ViewSettings {
         view_transform,
-        look: view.look.to_string(),
+        look: if offered {
+            view.look.to_string()
+        } else {
+            "None".into()
+        },
         exposure: view.exposure,
         gamma: view.gamma,
     };

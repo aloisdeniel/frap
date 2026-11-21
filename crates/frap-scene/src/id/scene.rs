@@ -73,6 +73,7 @@ impl Scene {
     /// the RNA union, so the `TypeError` lists the items Blender lists (M5+M6 stabilization).
     pub const LIVE_ENUMS: &'static [(&'static str, &'static str)] = &[
         ("ColorManagedViewSettings", "look"),
+        ("ColorManagedViewSettings", "view_transform"),
         ("View3DShading", "studio_light"),
         ("ImageFormatSettings", "file_format"),
         ("ImageFormatSettings", "color_mode"),

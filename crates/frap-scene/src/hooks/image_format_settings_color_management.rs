@@ -22,7 +22,6 @@ use crate::generated::plain::{
     ColorManagedDisplaySettings, ColorManagedViewSettings, ImageFormatSettings,
 };
 use crate::id::Scene;
-use crate::id::paths::internal;
 
 /// `ImageFormatSettings` is a hand-written plain binding (`image_format.rs`, no `rna_struct!`),
 /// so its hook binding is declared here.
@@ -38,7 +37,9 @@ static DECL: frap_rna::testing::HookDecl = frap_rna::testing::HookDecl {
 /// The output settings of `scene` at `path` (below the scene).
 fn settings_mut<'a>(scene: &'a mut Scene, path: &[Seg]) -> Option<&'a mut ImageFormatSettings> {
     match path {
-        [Seg::Prop("render"), Seg::Prop("image_settings")] => Some(&mut scene.render.image_settings),
+        [Seg::Prop("render"), Seg::Prop("image_settings")] => {
+            Some(&mut scene.render.image_settings)
+        }
         _ => None,
     }
 }
@@ -51,30 +52,8 @@ pub fn copy_from_scene(
 ) {
     imf.display_settings = display;
     imf.view_settings = view;
-    imf.linear_colorspace_settings.name = SmolStr::new_static(
-        frap_color::spaces::ColorSpace::LinearRec709.name(),
-    );
-}
-
-/// Sets `prop` on the struct at `path` below `cur` (an owner frap has no scene to copy from).
-fn set_at(
-    cur: &mut dyn RnaMut,
-    path: &[Seg],
-    prop: &'static PropDef,
-    v: Value,
-) -> Result<(), RnaError> {
-    let Some((seg, rest)) = path.split_first() else {
-        return cur.set(prop, v).map(|_| ());
-    };
-    let Seg::Prop(name) = seg else {
-        return Err(internal("image settings below a collection"));
-    };
-    let p = cur
-        .srna()
-        .find_prop(name)
-        .ok_or_else(|| internal("the image settings path vanished"))?;
-    let mut g = cur.struct_mut(p)?;
-    set_at(&mut *g, rest, prop, v)
+    imf.linear_colorspace_settings.name =
+        SmolStr::new_static(frap_color::spaces::ColorSpace::LinearRec709.name());
 }
 
 #[rna_hook(srna = "ImageFormatSettings", prop = "color_management", krate = crate)]
@@ -94,24 +73,5 @@ fn set(h: &mut dyn Host, this: &RnaPtr, prop: &'static PropDef, v: Value) -> Res
             return Ok(());
         }
     }
-    match this.root {
-        Root::Id(a) => {
-            let r = main
-                .id_mut(a, log)
-                .ok_or_else(|| internal("the owner of the image settings no longer exists"))?;
-            set_at(r, &this.path, prop, v)
-        }
-        Root::Embedded { owner, slot } => {
-            let o = main
-                .id_mut(owner, log)
-                .ok_or_else(|| internal("the owner of the image settings no longer exists"))?;
-            let p = o
-                .srna()
-                .find_prop(slot.prop_identifier())
-                .ok_or_else(|| internal("embedded slot without a property"))?;
-            let mut g = o.struct_mut(p)?;
-            set_at(&mut *g, &this.path, prop, v)
-        }
-        _ => Err(internal("image settings not rooted at a datablock")),
-    }
+    crate::color_view::set_through(main, log, this, prop, v)
 }

@@ -10,7 +10,12 @@
 //! so under a deadline the encoder runs on a worker thread and the statement's thread waits
 //! for it until the deadline, then unwinds with `Interrupted` (`TIMEOUT`) at once. The worker
 //! is detached: it finishes encoding in the background and its bytes are dropped (no file is
-//! written), costing that CPU time but not the statement's answer.
+//! written), costing that CPU time but not the statement's answer. Neither encoder can be
+//! stopped from outside (WebP cannot be written in strips; `image-webp` has no progress
+//! callback), so at most [`MAX_WORKERS`] encoders run at once per process: a further
+//! deadline-bound encode waits for a slot within its own deadline (then `TIMEOUT`), which
+//! bounds the CPU and memory timed-out encodes keep in a long-lived `serve`/`mcp` session
+//! (deviations §2).
 
 use super::raw8::color_type_8;
 use crate::codec::{DecodedImage, ImageError};
@@ -42,8 +47,59 @@ pub(crate) fn encode_webp(
     })
 }
 
+/// The most deadline-bound WebP encoders running at once (finished or timed out: a detached
+/// worker holds its slot until its encode ends).
+pub(super) const MAX_WORKERS: usize = 2;
+
+static WORKERS: std::sync::Mutex<usize> = std::sync::Mutex::new(0);
+static WORKER_FREED: std::sync::Condvar = std::sync::Condvar::new();
+
+fn workers() -> std::sync::MutexGuard<'static, usize> {
+    WORKERS
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+}
+
+/// A worker slot, released when the worker's encode ends (also by a panic).
+struct Slot;
+
+impl Drop for Slot {
+    fn drop(&mut self) {
+        let mut n = workers();
+        *n = n.saturating_sub(1);
+        WORKER_FREED.notify_all();
+    }
+}
+
+/// Waits for a worker slot until `deadline`, then unwinds with `Interrupted`.
+fn acquire_slot(deadline: std::time::Instant) -> Slot {
+    let mut n = workers();
+    while *n >= MAX_WORKERS {
+        let left = deadline.saturating_duration_since(std::time::Instant::now());
+        if left.is_zero() {
+            drop(n);
+            frap_math::budget::check_now();
+            n = workers();
+            continue;
+        }
+        n = WORKER_FREED
+            .wait_timeout(n, left)
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .0;
+    }
+    *n += 1;
+    Slot
+}
+
+/// The deadline-bound encoders running now (tests).
+#[cfg(test)]
+pub(super) fn running_workers() -> usize {
+    *workers()
+}
+
 /// Runs `encode` so that the statement's deadline is honoured (see the module docs): inline
-/// without a deadline, else on a detached worker the caller waits for until the deadline.
+/// without a deadline, else on a detached worker (one of at most [`MAX_WORKERS`]) the caller
+/// waits for until the deadline.
 pub(super) fn cancellable<F>(encode: F) -> Result<Vec<u8>, ImageError>
 where
     F: FnOnce() -> Result<Vec<u8>, ImageError> + Send + 'static,
@@ -53,10 +109,12 @@ where
         return encode();
     };
     frap_math::budget::check_now();
+    let slot = acquire_slot(deadline);
     let (tx, rx) = std::sync::mpsc::channel();
     let spawned = std::thread::Builder::new()
         .name("frap-webp-encode".into())
         .spawn(move || {
+            let _slot = slot;
             let _ = tx.send(encode());
         });
     if let Err(e) = spawned {

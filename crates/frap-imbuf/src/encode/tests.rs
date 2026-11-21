@@ -296,7 +296,35 @@ fn webp_encoding_stops_at_the_deadline() {
         "{:?}",
         start.elapsed()
     );
-    // A real encode under a generous deadline completes on the worker.
+    // Timed-out workers keep running, but at most `MAX_WORKERS` at once (M5+M6 stabilization
+    // round 9): with every slot taken, a further encode waits for one within its own deadline
+    // and answers TIMEOUT without starting another worker.
+    let timed_out = |sleep: Duration| {
+        std::panic::catch_unwind(|| {
+            let _scope = frap_math::budget::scope(frap_math::budget::Budget {
+                timeout: Some(Duration::from_millis(50)),
+                ..Default::default()
+            });
+            super::webp::cancellable(move || {
+                std::thread::sleep(sleep);
+                Ok(Vec::new())
+            })
+        })
+        .is_err()
+    };
+    for _ in 1..super::webp::MAX_WORKERS {
+        assert!(timed_out(Duration::from_secs(2)));
+    }
+    assert_eq!(super::webp::running_workers(), super::webp::MAX_WORKERS);
+    let waited = Instant::now();
+    assert!(timed_out(Duration::from_secs(10)));
+    assert!(super::webp::running_workers() <= super::webp::MAX_WORKERS);
+    assert!(
+        waited.elapsed() < Duration::from_secs(1),
+        "{:?}",
+        waited.elapsed()
+    );
+    // A real encode under a generous deadline completes on the worker (once a slot is free).
     let px: Vec<u8> = (0..64u32 * 64 * 4).map(|i| (i % 251) as u8).collect();
     let image = DecodedImage::new(64, 64, 4, PixelData::U8(px)).unwrap();
     let _scope = frap_math::budget::scope(frap_math::budget::Budget {

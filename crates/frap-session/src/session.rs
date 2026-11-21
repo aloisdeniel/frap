@@ -408,6 +408,16 @@ impl Host for HostImpl {
         else {
             return Ok(());
         };
+        // `ShapeKey.slider_min`/`slider_max`: animsys calls the setter, not the update
+        // callback that clamps `value` (`rna_ShapeKey_update_minmax`).
+        if let Value::Float(f) = new {
+            let (main, log) = self.main_mut();
+            if let Some(found) =
+                frap_scene::id::Key::animsys_set_slider(main, log, &ptr, prop.identifier, f)
+            {
+                return if found { Ok(()) } else { Err(not_found()) };
+            }
+        }
         crate::resolve::set_prop(self, &ptr, prop, new)
             .map_err(|e| RnaError::new(RnaErrorKind::Other, PyExc::RuntimeError, e.message))
     }

@@ -119,16 +119,28 @@ impl ShapeKey {
     }
 
     /// `rna_ShapeKey_slider_min_set`, then `rna_ShapeKey_update_minmax` (the current value is
-    /// clamped into the new range).
+    /// clamped into the new range): an RNA write.
     pub fn set_slider_min(&mut self, v: f32) {
-        self.slider_min = v.max(-10.0).min(self.slider_max - SLIDER_TOL);
+        self.set_slider_min_no_update(v);
         self.clamp_value_to_sliders();
     }
 
-    /// `rna_ShapeKey_slider_max_set`, then `rna_ShapeKey_update_minmax`.
+    /// `rna_ShapeKey_slider_max_set`, then `rna_ShapeKey_update_minmax`: an RNA write.
     pub fn set_slider_max(&mut self, v: f32) {
-        self.slider_max = v.max(self.slider_min + SLIDER_TOL).min(10.0);
+        self.set_slider_max_no_update(v);
         self.clamp_value_to_sliders();
+    }
+
+    /// `rna_ShapeKey_slider_min_set` alone, as the animation system writes it
+    /// (`BKE_animsys_write_to_rna_path` calls the setter, never the update callback; verified
+    /// on 5.2.4: an animated `slider_min` of 0.5 leaves a `value` of 0.1 unclamped).
+    pub fn set_slider_min_no_update(&mut self, v: f32) {
+        self.slider_min = v.max(-10.0).min(self.slider_max - SLIDER_TOL);
+    }
+
+    /// `rna_ShapeKey_slider_max_set` alone (the animation system's write).
+    pub fn set_slider_max_no_update(&mut self, v: f32) {
+        self.slider_max = v.max(self.slider_min + SLIDER_TOL).min(10.0);
     }
 
     /// `rna_ShapeKey_update_minmax`: `CLAMP(curval, slidermin, slidermax)`.
@@ -683,6 +695,38 @@ impl Key {
             }
             _ => None,
         }
+    }
+
+    /// An animation-system write of `ShapeKey.slider_min` / `slider_max` through `this`
+    /// (the setter without `rna_ShapeKey_update_minmax`, so the block's `value` is not
+    /// clamped). `None` when `this`/`prop` is not one of those; `Some(false)` when the block
+    /// is gone.
+    pub fn animsys_set_slider(
+        main: &mut crate::data::Main,
+        log: &mut crate::ChangeLog,
+        this: &frap_rna::RnaPtr,
+        prop: &str,
+        v: f32,
+    ) -> Option<bool> {
+        if this.srna.identifier != "ShapeKey" || !matches!(prop, "slider_min" | "slider_max") {
+            return None;
+        }
+        let Some((k, i)) = Key::block_of(main, this) else {
+            return Some(false);
+        };
+        let Some(kb) = main
+            .shape_keys
+            .get_mut(k, log)
+            .and_then(|key| key.key_blocks.get_mut(i))
+        else {
+            return Some(false);
+        };
+        if prop == "slider_min" {
+            kb.set_slider_min_no_update(v);
+        } else {
+            kb.set_slider_max_no_update(v);
+        }
+        Some(true)
     }
 
     /// The key and block a `ShapeKey` pointer names (pointers to blocks are rooted at their
@@ -1388,6 +1432,15 @@ mod tests {
         s.set_value(0.9);
         s.set_slider_max(0.5);
         assert_eq!(s.value, 0.5);
+        // The animation system's write calls the setter only (no update callback).
+        s.set_slider_max(1.0);
+        s.set_slider_min(-1.0);
+        s.set_value(0.1);
+        s.set_slider_min_no_update(0.5);
+        assert_eq!((s.slider_min, s.value), (0.5, 0.1));
+        s.set_slider_max_no_update(0.2);
+        assert!((s.slider_max - 0.501).abs() < 1e-6);
+        assert_eq!(s.value, 0.1);
     }
 
     #[test]

@@ -258,7 +258,7 @@ Other workflows in the same directory: a round table on a pedestal (inset + two 
 
 ## 12. Rendering
 
-`bpy.ops.render.render(write_still=True)` renders the scene camera with `scene.render.engine` (`'BLENDER_EEVEE'` in the factory scene; `'BLENDER_WORKBENCH'` also works) and writes `scene.render.filepath` plus the format's extension. Without `write_still=True` nothing is written: the image stays in `bpy.data.images['Render Result']`, which, as in `blender -b`, has no pixels to `save_render`. The response's `result` names the engine, the resolution and every file written. The golden cases under `tests/golden/cases/render_eevee/scenes/` are complete scenes to copy (`tests/cli/m5/render/eevee_product_shot.stdin` is a whole session).
+`bpy.ops.render.render(write_still=True)` renders the scene camera with `scene.render.engine` (`'BLENDER_EEVEE'` in the factory scene; `'BLENDER_WORKBENCH'` also works) and writes `scene.render.filepath` plus the format's extension. Without `write_still=True` nothing is written: the image stays in `bpy.data.images['Render Result']`. Blender can then `save_render` it, but frap cannot yet (`RuntimeError` `does not have any image data`, deviations §2, M8), so render with `write_still=True`. The response's `result` names the engine, the resolution and every file written. The golden cases under `tests/golden/cases/render_eevee/scenes/` are complete scenes to copy (`tests/cli/m5/render/eevee_product_shot.stdin` is a whole session).
 
 ```
 bpy.context.scene.render.resolution_x = 640
