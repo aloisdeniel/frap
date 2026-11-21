@@ -38,7 +38,7 @@ use smol_str::SmolStr;
 use super::convert::{normals_batch, uvs_batch};
 use super::materials::COLOR_0_ATTRIBUTE;
 use super::settings::ImportShading;
-use super::{Gltf, ImportError, extras, materials};
+use super::{Gltf, ImportError, extras, materials, variants};
 
 /// `UV_MAX`, `COLOR_MAX`: TEXCOORD_n / COLOR_n sets imported.
 const UV_MAX: usize = 8;
@@ -822,22 +822,30 @@ fn assign_materials(
     mesh: &mut Mesh,
 ) -> Result<(), ImportError> {
     let prims = &pymesh.primitives;
+    // Primitives with `KHR_materials_variants` need slots too (M7 WP 7.5).
     let has_materials = prims.iter().any(|p| p.material.is_some())
+        || prims.iter().any(variants::has_extension)
         || prims.iter().any(|p| p.attributes.contains_key("COLOR_0"));
     if !has_materials {
         return Ok(());
     }
-    let merge = cx.settings.import_merge_material_slots;
+    let can_merge = cx.settings.import_merge_material_slots;
     let mut slots: Vec<Option<IdRef<MaterialId>>> = Vec::new();
     let mut default_materials: Option<usize> = None;
     let mut empty_slot: Option<usize> = None;
     let mut material_indices = vec![0i32; num_faces];
     let mut f = 0usize;
+    let mut gltf_variants = frap_mesh::gltf_variants::MeshGltfVariants::default();
     for pf in prim_faces {
         let prim = &prims[pf.prim];
         let vertex_color = prim.attributes.contains_key("COLOR_0");
+        // "In case of variant, do not merge slots".
+        let mappings = variants::mappings(prim)?;
+        let merge = can_merge && mappings.is_none();
+        let mut prim_material = None;
         let index = if let Some(m) = prim.material {
             let mat = materials::create(cx, main, log, Some(m as usize), vertex_color)?;
+            prim_material = Some(mat);
             if merge {
                 match slots.iter().position(|s| *s == Some(mat)) {
                     Some(i) => i,
@@ -878,8 +886,21 @@ fn assign_materials(
             *v = index as i32;
         }
         f += pf.num_faces;
+        if let Some(ext) = &mappings {
+            variants::slot_mappings(
+                cx,
+                main,
+                log,
+                ext,
+                index,
+                prim_material,
+                vertex_color,
+                &mut gltf_variants,
+            )?;
+        }
     }
     mesh.materials = slots;
+    mesh.gltf2_variants = gltf_variants;
     mesh.attributes_mut().insert(Attribute {
         name: "material_index".into(),
         domain: Domain::Face,

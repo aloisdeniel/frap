@@ -3,8 +3,13 @@
 //! M7W0-8): the PropertyGroups `io_scene_gltf2` registers on `Mesh` while its preference
 //! `KHR_materials_variants_ui` is on (`blender/com/gltf2_blender_ui.py`; dumped with that
 //! preference on, §4.1). Plain data: WP 7.5 binds the RNA (`Mesh.gltf2_variant_mesh_data`,
-//! `gltf2_variant_default_materials`, `gltf2_variant_pointer`) and implements the import and
-//! export; WP 7.6 persists it in `.frap`.
+//! `gltf2_variant_default_materials`, `gltf2_variant_pointer`; the hooks live in frap-scene,
+//! which sees the preference) and implements the import and export; WP 7.6 persists it in
+//! `.frap`.
+//!
+//! Every add-on group also has the base `PropertyGroup.name` (an ID-property string, the
+//! collection key, `''` after `add()`): WP 7.5 added those fields (`name`, and `variant_name`
+//! for the nested `variant` group of a pointer), additively.
 
 use frap_rna::{IdRef, MaterialId};
 use smol_str::SmolStr;
@@ -15,6 +20,10 @@ use smol_str::SmolStr;
 pub struct GltfVariantPointer {
     /// `variant.variant_idx`
     pub variant_idx: i32,
+    /// `name` (`PropertyGroup.name`; WP 7.5)
+    pub name: SmolStr,
+    /// `variant.name` (the nested `gltf2_KHR_materials_variants_variant` group; WP 7.5)
+    pub variant_name: SmolStr,
 }
 
 /// `gltf2_KHR_materials_variants_primitive`: the material a set of variants selects on one
@@ -29,6 +38,8 @@ pub struct GltfVariantPrimitive {
     pub variants: Vec<GltfVariantPointer>,
     /// `active_variant_idx`
     pub active_variant_idx: i32,
+    /// `name` (`PropertyGroup.name`; WP 7.5)
+    pub name: SmolStr,
 }
 
 /// `gltf2_KHR_materials_variants_default_material`: the material a slot gets back when the
@@ -39,6 +50,8 @@ pub struct GltfVariantDefaultMaterial {
     pub material_slot_index: i32,
     /// `default_material`
     pub default_material: Option<IdRef<MaterialId>>,
+    /// `name` (`PropertyGroup.name`; WP 7.5)
+    pub name: SmolStr,
 }
 
 /// Every variant property of one mesh.
@@ -75,5 +88,40 @@ impl MeshGltfVariants {
                 d.default_material = to;
             }
         }
+    }
+
+    /// The default material recorded for material slot `slot` (the first entry with that
+    /// `material_slot_index`), as `variants_reset_to_original` and the add-on's "Reset to
+    /// Original" read it: `None` when the slot has no entry, `Some(None)` for an entry
+    /// without a material.
+    pub fn default_for_slot(&self, slot: usize) -> Option<Option<IdRef<MaterialId>>> {
+        self.default_materials
+            .iter()
+            .find(|d| usize::try_from(d.material_slot_index).ok() == Some(slot))
+            .map(|d| d.default_material)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default_for_slot_takes_the_first_entry() {
+        let v = MeshGltfVariants {
+            default_materials: vec![
+                GltfVariantDefaultMaterial {
+                    material_slot_index: 1,
+                    ..Default::default()
+                },
+                GltfVariantDefaultMaterial {
+                    material_slot_index: -1,
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+        assert_eq!(v.default_for_slot(1), Some(None));
+        assert_eq!(v.default_for_slot(0), None);
     }
 }

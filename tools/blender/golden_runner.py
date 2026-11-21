@@ -183,6 +183,12 @@ NORMALISE = {
     "D-127": ("cases", "cases stay inside the hard range"),
     "D-128": ("cases", "cases do not animate hide_viewport, update non-window view layers, or rename view layers between frame changes"),
     "D-129": ("cases", "cases do not read layer collections, selection or the context object between an unlink and the link"),
+    "D-130": ("cases", "cases do not turn KHR_materials_variants_ui off after using the variant properties"),
+    "D-131": ("cases", "cases set a variant's variant_idx before its name"),
+    "D-132": ("comparator", "gltf_canonical inlines variant mapping materials and variant names"),
+    "D-133": ("cases", "variant reset cases export one scene"),
+    "D-134": ("cases", "cases do not instance a mesh with morph targets"),
+    "D-135": ("cases", "gltf/instancing/animated keeps the quirk (frap_compat='BLENDER')"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

@@ -1,0 +1,291 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "'Scene' object has no attribute 'gltf2_KHR_materials_variants_variants'"
+    },
+    {
+      "line": 12,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "'Mesh' object has no attribute 'gltf2_variant_mesh_data'"
+    },
+    {
+      "line": 13,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "'Scene' object has no attribute 'gltf2_active_variant'"
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_prop_collection_idprop.add() takes no arguments (1 given)"
+    },
+    {
+      "line": 24,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_prop_collection_idprop.remove() takes exactly one argument (0 given)"
+    },
+    {
+      "line": 25,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_prop_collection.remove(): expected one int argument"
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_prop_collection.move(): expected two ints as arguments"
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_prop_collection_idprop.clear() takes no arguments (1 given)"
+    },
+    {
+      "line": 30,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "bpy_prop_collection: attribute \"foo\" not found"
+    },
+    {
+      "line": 31,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "bpy_struct: attribute \"gltf2_KHR_materials_variants_variants\" from \"Scene\" is read-only"
+    },
+    {
+      "line": 32,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: Scene.gltf2_active_variant expected an int type, not str"
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 37,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": true
+    },
+    {
+      "line": 40,
+      "ok": false,
+      "exception": "TypeError",
+      "message": "bpy_struct: item.attr = val: gltf2_KHR_materials_variants_primitive.material expected a Material type, not Mesh"
+    },
+    {
+      "line": 41,
+      "ok": false,
+      "exception": "ValueError",
+      "message": "bpy_struct: item.attr = val: gltf2_KHR_materials_variants_primitive.material_slot_index value not in 'int' range ((-2147483647 -1), 2147483647)"
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 44,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "bpy_struct: attribute \"variant\" from \"gltf2_KHR_materials_variant_pointer\" is read-only"
+    },
+    {
+      "line": 47,
+      "ok": false,
+      "exception": "AttributeError",
+      "message": "bpy_struct: attribute \"variants\" from \"gltf2_KHR_materials_variants_primitive\" is read-only"
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": true
+    },
+    {
+      "line": 51,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 53,
+      "ok": true
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 56,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Blue|Material|Blue|Material|gltf2_variant_mesh_data[0].variants[0].variant": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [-0.8322937, -0.8268218, -0.37840125, 3.0],
+        [-0.0, 0.41614684, -0.9092974, 3.0],
+        [-1.8185948, 0.37840125, 0.1731782, 2.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [3.0, 3.0, 2.0],
+      "rotation_mode": "XYZ",
+      "rotation": [2.0, 2.0, 0.0],
+      "scale": [2.0, -1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Red.001|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|gltf2_KHR_materials_variants_variants[0]": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "xxx|Red.001": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086465, -0.7711008, 0.5663932, 4.0762453],
+        [0.95517117, -0.19988336, 0.2183912, 1.005454],
+        [-0.05518906, 0.60452473, 0.79467225, 5.903862],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0762453, 1.005454, 5.903862],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Red.001|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|gltf2_KHR_materials_variants_variants[0]",
+    "selected": ["Red.001|xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx|gltf2_KHR_materials_variants_variants[0]"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

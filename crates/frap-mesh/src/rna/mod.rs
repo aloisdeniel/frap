@@ -65,7 +65,7 @@ pub fn attribute_srna(data: &crate::AttrData) -> &'static StructDef {
 }
 
 /// `Mesh` bindings (`ID` base properties first, as WP 1.10 binds them for every datablock).
-static BINDINGS: [BindingDecl; 37] = [
+static BINDINGS: [BindingDecl; 40] = [
     other!("name", SetHook),
     other!("name_full", Hook),
     other!("users", Hook),
@@ -131,6 +131,12 @@ static BINDINGS: [BindingDecl; 37] = [
     readonly!("total_vert_sel", i32),
     readonly!("total_edge_sel", i32),
     readonly!("total_face_sel", i32),
+    // The glTF add-on's variant properties (WP 7.5): registered only while the add-on
+    // preference `KHR_materials_variants_ui` is on, which only the host sees, so the
+    // `frap-scene` hooks (`hooks/mesh_gltf2_*.rs`) serve them (their `HOOK_DECLS` live there).
+    other!("gltf2_variant_mesh_data", HookColl),
+    other!("gltf2_variant_default_materials", HookColl),
+    other!("gltf2_variant_pointer", Hook),
 ];
 
 // `ID.name`, `ID.name_full` and `ID.users` go through the `ID` hooks every datablock shares
@@ -227,6 +233,10 @@ impl Rna for Mesh {
             // Edit-mode selection counts (`em->bm->totvertsel`), 0 outside Edit Mode (verified):
             // the edit BMesh lives in the session, whose hook reads it (WP 2.2).
             "total_vert_sel" | "total_edge_sel" | "total_face_sel" => return Ok(Field::NeedsHook),
+            // The glTF add-on's variant data exists only while its preference is on (WP 7.5).
+            "gltf2_variant_mesh_data"
+            | "gltf2_variant_default_materials"
+            | "gltf2_variant_pointer" => return Ok(Field::NeedsHook),
             _ => return Err(soa::unbound(&MESH, prop.identifier)),
         };
         Ok(Field::Value(v))
@@ -258,6 +268,7 @@ impl RnaMut for Mesh {
             }
             "texspace_location" => self.texspace.location = <[f32; 3]>::from_rna_value(prop, v)?,
             "texspace_size" => self.texspace.size = <[f32; 3]>::from_rna_value(prop, v)?,
+            "gltf2_variant_pointer" => return Ok(SetOutcome::NeedsHook),
             p if BINDINGS.iter().any(|b| b.prop == p) => return Err(read_only(&MESH, p)),
             p => return Err(soa::unbound(&MESH, p)),
         }

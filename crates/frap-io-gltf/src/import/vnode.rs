@@ -10,9 +10,12 @@
 //! `correct_cameras_and_lights`, `local_rotation`, `pick_bind_pose`, `prettify_bones`,
 //! `pick_bone_length`, `pick_bone_rotation`, `temperance`, `rotate_edit_bone`,
 //! `calc_bone_matrices`, `VNode.trs`; `nearby_signed_perm_matrix` from
-//! `blender/com/gltf2_blender_math.py`. EXT_mesh_gpu_instancing (`manage_gpu_instancing`)
-//! arrives in M7. Python's dict of vnodes keyed by mixed ids (`3`, `'root'`, `'3.skinned'`,
-//! `'3.camera'`) is an arena here, in the same insertion order.
+//! `blender/com/gltf2_blender_math.py`. EXT_mesh_gpu_instancing (`manage_gpu_instancing`,
+//! M7 WP 7.5, `import/instancing.rs`) adds `VNode.Inst` children. Python's dict of vnodes
+//! keyed by mixed ids (`3`, `'root'`, `'3.skinned'`, `'3.camera'`) is an arena here, in the
+//! same insertion order, except that the instance vnodes (`'3.0'`, `'3.1'`, …, inserted right
+//! after node 3 in Python) follow the glTF nodes, so glTF node `i` stays vnode `i`; no pass
+//! iterates over them (they have no skin, camera, light or bone).
 
 use std::collections::{HashMap, HashSet};
 
@@ -36,6 +39,8 @@ pub(crate) enum VKind {
     Object,
     /// `VNode.Bone`
     Bone,
+    /// `VNode.Inst`: one instance of an `EXT_mesh_gpu_instancing` node (M7 WP 7.5).
+    Inst,
     /// `VNode.DummyRoot`
     DummyRoot,
 }
@@ -94,6 +99,12 @@ pub(crate) struct VNode {
     pub bind_arma_mat: Mat4,
     /// `editbone_arma_mat`: bone → armature space of the edit bone.
     pub editbone_arma_mat: Mat4,
+    /// `mesh_idx` of an `Inst` vnode: the glTF mesh it instantiates (M7 WP 7.5).
+    pub inst_mesh_idx: Option<usize>,
+    /// The glTF node whose `EXT_mesh_gpu_instancing` made this `Inst` vnode.
+    pub inst_of: Option<usize>,
+    /// The instance's index in that node's instance attributes.
+    pub inst_index: Option<usize>,
 }
 
 impl VNode {
@@ -124,6 +135,9 @@ impl VNode {
             bone_length: 1.0,
             bind_arma_mat: Mat4::IDENTITY,
             editbone_arma_mat: Mat4::IDENTITY,
+            inst_mesh_idx: None,
+            inst_of: None,
+            inst_index: None,
         }
     }
 
@@ -275,15 +289,30 @@ impl VTree {
     /// `scenes.rs`).
     fn init(doc: &Document, units: Units) -> VTree {
         let mut nodes: Vec<VNode> = Vec::with_capacity(doc.nodes.len() + 1);
+        let mut instanced: Vec<(usize, usize, usize)> = Vec::new();
         for (i, n) in doc.nodes.iter().enumerate() {
             let mut v = VNode::new(format!("Node_{i}"));
             // `vnode.name or …` everywhere it is read: "" falls back like a missing name.
             v.name = super::truthy_name(&n.name);
-            v.children = n.children.iter().map(|&c| c as usize).collect();
+            // An invalid child index (Python's `KeyError`) is dropped, so it can never name
+            // one of the instance vnodes appended after the glTF nodes.
+            v.children = n
+                .children
+                .iter()
+                .map(|&c| c as usize)
+                .filter(|&c| c < doc.nodes.len())
+                .collect();
             v.base_trs = node_trs(units, n);
             v.gltf_node = Some(i);
-            if n.mesh.is_some() {
-                v.mesh_node_idx = Some(i);
+            if let Some(m) = n.mesh {
+                // `manage_gpu_instancing` (M7 WP 7.5): the node's mesh goes to its instances.
+                match super::instancing::extension(doc, i) {
+                    Some(ext) => {
+                        let count = super::instancing::instance_count(doc, &ext);
+                        instanced.push((i, m as usize, count));
+                    }
+                    None => v.mesh_node_idx = Some(i),
+                }
             }
             if n.camera.is_some() {
                 v.camera_node_idx = Some(i);
@@ -292,6 +321,19 @@ impl VTree {
                 v.light_node_idx = Some(i);
             }
             nodes.push(v);
+        }
+        // The instance vnodes `'<i>.<k>'` (TRS read later, `instancing::fill_trs`).
+        for (i, mesh, count) in instanced {
+            for k in 0..count {
+                let mut v = VNode::new(format!("Node_{i}.{k}"));
+                v.kind = VKind::Inst;
+                v.inst_mesh_idx = Some(mesh);
+                v.inst_of = Some(i);
+                v.inst_index = Some(k);
+                let id = nodes.len();
+                nodes.push(v);
+                nodes[i].children.push(id);
+            }
         }
         for id in 0..nodes.len() {
             for c in nodes[id].children.clone() {

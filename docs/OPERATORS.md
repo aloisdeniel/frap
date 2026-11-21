@@ -770,7 +770,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | ID (name, users, use_fake_user, rename(), session_uid, library, is_linked_packed, is_embedded_data, custom properties) | M1 | names ≤255 bytes; unique per (name, library); embedded IDs via owner |
 | [ ] | Library | M1 | minimal: name, filepath, parent, is_archive; created by built-in linked groups (M4 use) |
 | [ ] | Window (stub: scene, view_layer) | M1 read / M3 write | `bpy.context.window.scene = …` switches scenes |
-| [ ] | AddonPreferences for `io_scene_gltf2` (`KHR_materials_variants_ui`, …) | M1 data / M7 variants | via `bpy.context.preferences.addons['io_scene_gltf2'].preferences` |
+| [ ] | AddonPreferences for `io_scene_gltf2` (`KHR_materials_variants_ui`, …) | M1 data / M7 variants | via `bpy.context.preferences.addons['io_scene_gltf2'].preferences`; `KHR_materials_variants_ui` registers the variant RNA (M7, WP 7.5) |
 | [ ] | BlendData + BlendData<Coll> (objects, meshes, materials, cameras, lights, collections, worlds, scenes, images, node_groups, libraries, pointclouds) | M1 | new/remove/get/find/[i]/['name']; order rule §5.4; `scenes.new` M3 |
 | [ ] | Context (object, active_object, selected_objects, selected_editable_objects, visible_objects, selectable_objects, editable_objects, scene, view_layer, collection, tool_settings, mode, edit_object, objects_in_mode*, blend_data) | M1 | read-only |
 | [x] | Context (preferences, space_data stub) | M2 | WP 2.3 (`frap-session/src/resolve/context/ui.rs`): `window`, `space_data` (`SpaceView3D` stub: `type`, `shading`, read-only `region_3d`), factory `preferences`; `screen`/`area`/`region` read `None` (deviations D-61, D-62) |
@@ -862,8 +862,8 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | KHR_draco_mesh_compression | M7 | M7 | spike gate; WP 7.2 |
 | [ ] | EXT_texture_webp | M7 (lossless and lossy; lossless moved from M3, decision log M34S3-5) | M3 | export writes WebP sources as PNG with a WARNING until then (deviations §2); WP 7.3 |
 | [ ] | KHR_texture_basisu | M7 (feature basisu-encode) | M7 | frap_texture_format='KTX2'; WP 7.3 |
-| [ ] | KHR_materials_variants | M7 | M7 | not part of M3's "every KHR material extension" (decision log M34S3-5); add-on data model; RNA exists only with `KHR_materials_variants_ui` on (dumped that way); import turns it on; WP 7.5 |
-| [ ] | EXT_mesh_gpu_instancing | M7 (`export_gpu_instances`, Blender prop) | M7 | children of an Empty sharing a mesh (add-on rule); WP 7.5 |
+| [x] | KHR_materials_variants | M7 | M7 | not part of M3's "every KHR material extension" (decision log M34S3-5); add-on data model (`Scene.gltf2_KHR_materials_variants_variants`, `gltf2_active_variant`, `Mesh.gltf2_variant_mesh_data` / `_default_materials` / `_pointer`, ID-property collections with `add/remove/clear/move`); RNA exists only with `KHR_materials_variants_ui` on (D-130); import turns it on; `variants_reset_to_original` on export; goldens `gltf/variants/`; WP 7.5 |
+| [x] | EXT_mesh_gpu_instancing | M7 (`export_gpu_instances`, Blender prop) | M7 | children of a node sharing a mesh (add-on rule, holders `<name>.<k>`), channel quirk D-135; import: one object per instance; goldens `gltf/instancing/`; WP 7.5 |
 | [ ] | KHR_node_visibility, KHR_materials_diffuse_transmission | M7 (frap_*) | M7 | not produced by Blender; WP 7.4 |
 
 ## G. Totals

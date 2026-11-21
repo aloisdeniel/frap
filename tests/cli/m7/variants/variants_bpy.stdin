@@ -1,0 +1,30 @@
+bpy.data.scenes[0].gltf2_KHR_materials_variants_variants.add()
+bpy.context.preferences.addons['io_scene_gltf2'].preferences.KHR_materials_variants_ui = True
+bpy.data.scenes[0].gltf2_KHR_materials_variants_variants.add()
+bpy.data.scenes[0].gltf2_KHR_materials_variants_variants[0].name = 'Red'
+bpy.data.scenes[0].gltf2_KHR_materials_variants_variants.add()
+bpy.data.scenes[0].gltf2_KHR_materials_variants_variants[1].variant_idx = 1
+bpy.data.scenes[0].gltf2_KHR_materials_variants_variants[1].name = 'Red'
+bpy.data.scenes[0].gltf2_KHR_materials_variants_variants.keys()
+bpy.data.materials.new('Blue')
+bpy.data.meshes['Cube'].gltf2_variant_mesh_data.add()
+bpy.data.meshes['Cube'].gltf2_variant_mesh_data[0].material = bpy.data.materials['Blue']
+bpy.data.meshes['Cube'].gltf2_variant_mesh_data[0].variants.add()
+bpy.data.meshes['Cube'].gltf2_variant_mesh_data[0].variants[0].variant.variant_idx = 1
+bpy.ops.export_scene.gltf(filepath='variants.glb')
+bpy.ops.wm.read_factory_settings(use_empty=True)
+bpy.ops.import_scene.gltf(filepath='variants.glb')
+bpy.context.preferences.addons['io_scene_gltf2'].preferences.KHR_materials_variants_ui
+bpy.data.meshes['Cube'].gltf2_variant_mesh_data[0].material
+bpy.data.scenes[0].gltf2_KHR_materials_variants_variants.keys()
+bpy.ops.wm.read_factory_settings()
+bpy.ops.object.empty_add()
+bpy.data.objects['Cube'].parent = bpy.data.objects['Empty']
+bpy.data.objects.new('Cube2', bpy.data.meshes['Cube'])
+bpy.context.scene.collection.objects.link(bpy.data.objects['Cube2'])
+bpy.data.objects['Cube2'].parent = bpy.data.objects['Empty']
+bpy.data.objects['Cube2'].location = (3, 0, 0)
+bpy.ops.export_scene.gltf(filepath='inst.glb', export_gpu_instances=True)
+bpy.ops.wm.read_factory_settings(use_empty=True)
+bpy.ops.import_scene.gltf(filepath='inst.glb')
+bpy.data.objects['Cube.001'].parent

@@ -299,6 +299,15 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
         .unwrap_or_else(|| "scene".into());
     settings.blend_dir = common::blend_dir(cx);
     settings.cwd = Some(cx.services().paths().cwd.clone());
+    // `VExportTree.variants_reset_to_original` (KHR_materials_variants, M7 WP 7.5): with the
+    // add-on preference on, the exported mesh objects get the default material of each slot
+    // back, on the Blender data itself (the add-on leaves them there).
+    {
+        let prefs = cx.ctx().prefs.clone();
+        let win = cx.ctx().win.clone();
+        let (main, log) = cx.main_mut();
+        frap_io_gltf::export::variants::reset_to_original(main, &win, &prefs, &settings, log);
+    }
     // `export.save`: `if not export_current_frame: scene.frame_set(0)`, then
     // `frame_set(original)` after the export: Blender exports the animation of frame 0 and
     // re-applies the current frame's animation to the originals afterwards. frap exports a

@@ -1,0 +1,139 @@
+{
+ "asset": {
+  "version": "2.0"
+ },
+ "extensionsUsed": [
+  "EXT_mesh_gpu_instancing"
+ ],
+ "buffers": [
+  {
+   "byteLength": 84,
+   "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAABAAIAAAAAAAAAAAD/fwAAgloAAIJaAACAPwAAgD8AAIA/AAAAQAAAAD8AAIA/"
+  }
+ ],
+ "bufferViews": [
+  {
+   "buffer": 0,
+   "byteOffset": 0,
+   "byteLength": 36,
+   "target": 34962
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 36,
+   "byteLength": 6,
+   "target": 34963
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 44,
+   "byteLength": 16
+  },
+  {
+   "buffer": 0,
+   "byteOffset": 60,
+   "byteLength": 24
+  }
+ ],
+ "accessors": [
+  {
+   "bufferView": 0,
+   "componentType": 5126,
+   "count": 3,
+   "type": "VEC3",
+   "min": [
+    0,
+    0,
+    0
+   ],
+   "max": [
+    1,
+    1,
+    0
+   ]
+  },
+  {
+   "bufferView": 1,
+   "componentType": 5123,
+   "count": 3,
+   "type": "SCALAR"
+  },
+  {
+   "bufferView": 2,
+   "componentType": 5122,
+   "normalized": true,
+   "count": 2,
+   "type": "VEC4"
+  },
+  {
+   "bufferView": 3,
+   "componentType": 5126,
+   "count": 2,
+   "type": "VEC3"
+  }
+ ],
+ "meshes": [
+  {
+   "name": "Tri",
+   "primitives": [
+    {
+     "attributes": {
+      "POSITION": 0
+     },
+     "indices": 1
+    }
+   ]
+  }
+ ],
+ "nodes": [
+  {
+   "name": "Holder",
+   "mesh": 0,
+   "translation": [
+    0,
+    1,
+    0
+   ],
+   "children": [
+    1
+   ],
+   "extensions": {
+    "EXT_mesh_gpu_instancing": {
+     "attributes": {
+      "ROTATION": 2,
+      "SCALE": 3
+     }
+    }
+   }
+  },
+  {
+   "name": "Child",
+   "mesh": 0,
+   "translation": [
+    2,
+    0,
+    0
+   ]
+  },
+  {
+   "name": "Nothing",
+   "mesh": 0,
+   "extensions": {
+    "EXT_mesh_gpu_instancing": {
+     "attributes": {
+      "_ID": 3
+     }
+    }
+   }
+  }
+ ],
+ "scenes": [
+  {
+   "nodes": [
+    0,
+    2
+   ]
+  }
+ ],
+ "scene": 0
+}

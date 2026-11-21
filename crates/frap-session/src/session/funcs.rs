@@ -554,12 +554,87 @@ impl Session {
         format!("{owner}.{}", c.prop.identifier)
     }
 
+    /// `bpy_prop_collection_idprop.add/remove/clear/move` (`bpy_rna.cc`,
+    /// `pyrna_prop_collection_idprop_*`; messages verified on 5.2.4). The collection's set
+    /// hook receives `("add",)`, `("remove", i)`, `("clear",)` or `("move", a, b)` (the
+    /// owner's hook stores the items: the glTF add-on's variant groups, M7 WP 7.5); `add()`
+    /// returns the appended item.
+    fn call_idprop(
+        &mut self,
+        c: CollPlace,
+        which: CollFunc,
+        args: Vec<CallArg>,
+    ) -> Result<Py, FrapError> {
+        let name = which.name();
+        let qual = format!("bpy_prop_collection_idprop.{name}()");
+        if args.iter().any(|a| a.name.is_some()) {
+            return Err(type_err(format!("{qual} takes no keyword arguments")));
+        }
+        let n = args.len();
+        // `PyLong_AsLong` / `PyArg_ParseTuple("i")`: ints and bools only.
+        let int = |p: &Py| match p {
+            Py::Int(i) => Some(*i),
+            Py::Bool(b) => Some(i64::from(*b)),
+            _ => None,
+        };
+        let mut op = vec![Value::Str(SmolStr::new_static(name))];
+        match which {
+            CollFunc::Add | CollFunc::Clear if n > 0 => {
+                return Err(type_err(format!("{qual} takes no arguments ({n} given)")));
+            }
+            CollFunc::Remove => {
+                if n != 1 {
+                    return Err(type_err(format!(
+                        "{qual} takes exactly one argument ({n} given)"
+                    )));
+                }
+                let k = int(&args[0].value).ok_or_else(|| {
+                    type_err("bpy_prop_collection.remove(): expected one int argument")
+                })?;
+                op.push(Value::Int(k));
+            }
+            CollFunc::Move => {
+                let bad = || type_err("bpy_prop_collection.move(): expected two ints as arguments");
+                if n != 2 {
+                    return Err(bad());
+                }
+                for a in &args {
+                    let k = int(&a.value)
+                        .filter(|k| i32::try_from(*k).is_ok())
+                        .ok_or_else(bad)?;
+                    op.push(Value::Int(k));
+                }
+            }
+            _ => {}
+        }
+        resolve::set_prop(&mut self.host, &c.ptr, c.prop, Value::Tuple(op))?;
+        if which != CollFunc::Add {
+            return Ok(Py::None);
+        }
+        let len = with_coll(&self.host, &c.ptr, c.prop, &mut |v| Ok(v.len()))?;
+        let last = len.checked_sub(1).ok_or_else(|| {
+            type_err("bpy_prop_collection.add(): not supported for this collection")
+        })?;
+        Ok(
+            match resolve::step(&self.host, Target::Coll(c), &PathSeg::Index(last as i64))? {
+                Target::None => Py::None,
+                t => Py::Rna(t),
+            },
+        )
+    }
+
     fn call_coll(
         &mut self,
         c: CollPlace,
         which: CollFunc,
         args: Vec<CallArg>,
     ) -> Result<Py, FrapError> {
+        if matches!(
+            which,
+            CollFunc::Add | CollFunc::Remove | CollFunc::Clear | CollFunc::Move
+        ) {
+            return self.call_idprop(c, which, args);
+        }
         let host = &self.host;
         let (start, end) = match c.range {
             Some(r) => r,
@@ -688,6 +763,9 @@ impl Session {
             }
             CollFunc::ForeachGet | CollFunc::ForeachSet => {
                 self.foreach(c, which, (start, end), args)
+            }
+            CollFunc::Add | CollFunc::Remove | CollFunc::Clear | CollFunc::Move => {
+                unreachable!("handled by call_idprop")
             }
         }
     }

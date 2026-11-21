@@ -645,12 +645,47 @@ impl Canon<'_> {
         o.insert("layout".into(), Json::Array(layout));
         o.insert("material".into(), material);
         o.insert("elements".into(), Json::Array(elements));
-        for k in ["extensions", "extras"] {
-            if let Some(v) = p.get(k) {
-                o.insert(k.into(), v.clone());
-            }
+        if let Some(v) = p.get("extensions") {
+            o.insert("extensions".into(), self.primitive_extensions(v)?);
+        }
+        if let Some(v) = p.get("extras") {
+            o.insert("extras".into(), v.clone());
         }
         Ok(Json::Object(o))
+    }
+
+    /// A primitive's extensions, with `KHR_materials_variants` mappings resolved (M7 WP 7.5):
+    /// each mapping's material inlined and its variant indices replaced by the root list's
+    /// names, so the `materials[]` / variant order does not matter.
+    fn primitive_extensions(&self, ext: &Json) -> Result<Json, String> {
+        let mut ext = ext.clone();
+        let Some(maps) = ext
+            .pointer_mut("/KHR_materials_variants/mappings")
+            .and_then(Json::as_array_mut)
+        else {
+            return Ok(ext);
+        };
+        for m in maps.iter_mut() {
+            let Some(mo) = m.as_object_mut() else {
+                continue;
+            };
+            if let Some(i) = mo.get("material").and_then(Json::as_u64) {
+                mo.insert("material".into(), self.material(i as usize)?);
+            }
+            if let Some(vs) = mo.get_mut("variants").and_then(Json::as_array_mut) {
+                for v in vs.iter_mut() {
+                    if let Some(i) = v.as_u64() {
+                        *v = self
+                            .doc
+                            .json
+                            .pointer(&format!("/extensions/KHR_materials_variants/variants/{i}"))
+                            .cloned()
+                            .unwrap_or(Json::Null);
+                    }
+                }
+            }
+        }
+        Ok(ext)
     }
 
     fn mesh(&self, i: usize) -> Result<Json, String> {
@@ -757,6 +792,22 @@ impl Canon<'_> {
                         .pointer(&format!("/extensions/KHR_lights_punctual/lights/{l}"))
                         .cloned()
                         .unwrap_or(Json::Null);
+                }
+                // `EXT_mesh_gpu_instancing` (M7 WP 7.5): the instance attributes decoded.
+                if k == "EXT_mesh_gpu_instancing"
+                    && let Some(attrs) = v.get_mut("attributes").and_then(Json::as_object_mut)
+                {
+                    for a in attrs.values_mut() {
+                        if let Some(i) = a.as_u64() {
+                            *a = Json::Array(
+                                self.doc
+                                    .accessor(i as usize)?
+                                    .into_iter()
+                                    .map(|e| Json::Array(e.into_iter().map(num).collect()))
+                                    .collect(),
+                            );
+                        }
+                    }
                 }
                 e2.insert(k.clone(), v);
             }

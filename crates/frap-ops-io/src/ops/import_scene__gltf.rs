@@ -57,6 +57,18 @@ fn exec(cx: &mut OpCtx, a: &OpArgs) -> OpResult {
         for r in report.reports {
             cx.report(r.level, r.message);
         }
+        // `BlenderGlTF.manage_material_variants`: a file with `KHR_materials_variants` turns
+        // the add-on preference `KHR_materials_variants_ui` on, which registers the variant
+        // properties (§4.1, M7 WP 7.5).
+        if report.variants_ui
+            && let Some(prefs) = cx.prefs_mut()
+        {
+            prefs
+                .addons
+                .entry("io_scene_gltf2".into())
+                .or_default()
+                .insert("KHR_materials_variants_ui".into(), Value::Bool(true));
+        }
         for ob in report.objects {
             if let Some(n) = cx.main().objects.name_of(ob) {
                 created.push(Value::Str(n.into()));
