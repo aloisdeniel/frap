@@ -1,0 +1,118 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Cam": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, -0.00000013435886, -1.0000001, -5.0],
+        [0.0, 1.0000001, -0.00000013435886, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, -5.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.70710677, 0.70710677, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Tri": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 1.0],
+        [0.0, 1.0, 0.0, -3.0],
+        [0.0, 0.0, 1.0, 2.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, -3.0, 2.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {
+    "Tri": {
+      "positions": [
+        [0.0, -0.0, 0.0],
+        [1.0, -0.0, 0.0],
+        [0.0, -0.0, 1.0]
+      ],
+      "edges": [
+        [0, 2],
+        [0, 1],
+        [1, 2]
+      ],
+      "faces": [
+        [0, 1, 2]
+      ],
+      "corner_normals": [
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0],
+        [0.0, -1.0, 0.0]
+      ],
+      "face_normals": [
+        [-0.0, -1.0, -0.0]
+      ],
+      "uv_layers": {},
+      "attributes": {
+        "sharp_face": {
+          "data": [true],
+          "data_type": "BOOLEAN",
+          "domain": "FACE"
+        }
+      },
+      "selection": null,
+      "active": null,
+      "select_history": null
+    }
+  },
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Tri",
+    "selected": ["Tri", "Cam"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {
+    "out/rt.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "import_unknown.out_rt.glb"
+      }
+    }
+  }
+}

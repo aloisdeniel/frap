@@ -488,6 +488,18 @@ pub fn read_accessor<B: AsRef<[u8]>>(
         index: u64::from(index),
         len: doc.accessors.len(),
     })?;
+    // WP 7.4: an unknown `componentType`/`type` loads with a stand-in (json::unknown); its
+    // data has no layout (io_scene_gltf2 fails on it too: `to_numpy_dtype` raises KeyError).
+    if crate::validate::layout_unknown(doc, index) {
+        let ptr = format!("/accessors/{index}");
+        let what = ["componentType", "type"]
+            .into_iter()
+            .find_map(|k| doc.unknown_value(&ptr, k).map(|v| format!("{k} {v}")))
+            .unwrap_or_else(|| "sparse indices componentType".to_owned());
+        return Err(GltfError::Data(format!(
+            "accessor {index}: {what} is not a glTF value"
+        )));
+    }
     read_accessor_obj(doc, buffers, acc)
 }
 

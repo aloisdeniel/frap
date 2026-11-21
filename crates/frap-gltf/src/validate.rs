@@ -25,7 +25,7 @@ use crate::glb::{Glb, is_glb, split_glb};
 use crate::json::root::{escape_pointer_token, trim_json};
 use crate::json::{
     AccessorType, AnimationPath, CameraType, ComponentType, Document, ExtensionCx, Interpolation,
-    Target, TextureInfo, extensions::extension_def,
+    Target, TextureInfo, UnknownKind, extensions::extension_def,
 };
 
 /// How bad an issue is.
@@ -234,6 +234,7 @@ fn attribute_formats(semantic: &str, quantized: bool, target: bool) -> Option<At
 /// Validates the JSON of `doc` (no binary data needed).
 pub fn validate(doc: &Document) -> Report {
     let mut r = Report::default();
+    check_unknown(&mut r, doc);
     check_asset(&mut r, doc);
     check_extensions(&mut r, doc);
     check_scenes_nodes(&mut r, doc);
@@ -245,6 +246,39 @@ pub fn validate(doc: &Document) -> Report {
     check_skins(&mut r, doc);
     check_animations(&mut r, doc);
     r
+}
+
+/// Whether accessor `i` has an unknown `componentType` or `type` (or an unknown sparse
+/// index type): its data cannot be laid out, so checks that read its format skip it.
+pub(crate) fn layout_unknown(doc: &Document, i: u32) -> bool {
+    !doc.unknown.is_empty() && {
+        let ptr = format!("/accessors/{i}");
+        doc.has_unknown_value(&ptr) || doc.has_unknown_value(&format!("{ptr}/sparse/indices"))
+    }
+}
+
+/// What the reader kept outside the typed model ([`Document::unknown`]): UNEXPECTED_PROPERTY
+/// for unknown members and VALUE_NOT_IN_LIST for unknown enum values, both warnings as in the
+/// Khronos validator (the document loads and is written back with them).
+fn check_unknown(r: &mut Report, doc: &Document) {
+    for u in &doc.unknown.0 {
+        match u.kind {
+            UnknownKind::Member => r.warning(
+                "UNEXPECTED_PROPERTY",
+                u.member_pointer(),
+                format!("unexpected property {:?} (kept)", u.key),
+            ),
+            UnknownKind::EnumValue { allowed } => r.warning(
+                "VALUE_NOT_IN_LIST",
+                u.member_pointer(),
+                format!(
+                    "invalid value {}; valid values are ({})",
+                    u.value,
+                    allowed.join(", ")
+                ),
+            ),
+        }
+    }
 }
 
 fn check_asset(r: &mut Report, doc: &Document) {
@@ -540,7 +574,9 @@ fn check_meshes(r: &mut Report, doc: &Document) {
                         ),
                         _ => {}
                     }
-                    if let Some((types, formats)) = attribute_formats(sem, quantized, is_target) {
+                    if let Some((types, formats)) = attribute_formats(sem, quantized, is_target)
+                        && !layout_unknown(doc, a)
+                    {
                         let fmt = (acc.component_type, acc.normalized_or_default());
                         if !types.contains(&acc.type_) || !formats.contains(&fmt) {
                             r.error(
@@ -611,9 +647,10 @@ fn check_meshes(r: &mut Report, doc: &Document) {
                 let ptr = format!("{pptr}/indices");
                 if check_ref(r, &ptr, i, doc.accessors.len(), "accessor") {
                     let acc = &doc.accessors[i as usize];
-                    if acc.type_ != AccessorType::Scalar
-                        || !acc.component_type.is_unsigned_int()
-                        || acc.normalized_or_default()
+                    if !layout_unknown(doc, i)
+                        && (acc.type_ != AccessorType::Scalar
+                            || !acc.component_type.is_unsigned_int()
+                            || acc.normalized_or_default())
                     {
                         r.error(
                             "MESH_PRIMITIVE_INDICES_FORMAT",
@@ -733,6 +770,11 @@ fn check_buffers(r: &mut Report, doc: &Document) {
 fn check_accessors(r: &mut Report, doc: &Document) {
     for (i, acc) in doc.accessors.iter().enumerate() {
         let ptr = format!("/accessors/{i}");
+        // An unknown `componentType`/`type` (VALUE_NOT_IN_LIST) leaves no layout to check,
+        // as the Khronos validator skips the accessor.
+        if layout_unknown(doc, i as u32) {
+            continue;
+        }
         let ct = acc.component_type;
         let n = acc.type_.components();
         if acc.count == 0 {
@@ -1021,6 +1063,10 @@ fn check_materials_textures(r: &mut Report, doc: &Document) {
 fn check_cameras(r: &mut Report, doc: &Document) {
     for (i, c) in doc.cameras.iter().enumerate() {
         let ptr = format!("/cameras/{i}");
+        // An unknown `type` (VALUE_NOT_IN_LIST): no projection to check.
+        if doc.unknown_value(&ptr, "type").is_some() {
+            continue;
+        }
         match c.type_ {
             CameraType::Perspective => match &c.perspective {
                 None => r.error(
@@ -1129,7 +1175,10 @@ fn check_skins(r: &mut Report, doc: &Document) {
             let ap = format!("{ptr}/inverseBindMatrices");
             if check_ref(r, &ap, a, doc.accessors.len(), "accessor") {
                 let acc = &doc.accessors[a as usize];
-                if acc.type_ != AccessorType::Mat4 || acc.component_type != ComponentType::Float {
+                if !layout_unknown(doc, a)
+                    && (acc.type_ != AccessorType::Mat4
+                        || acc.component_type != ComponentType::Float)
+                {
                     r.error(
                         "SKIN_IBM_INVALID_FORMAT",
                         &ap,
@@ -1175,7 +1224,10 @@ fn check_animations(r: &mut Report, doc: &Document) {
                 "accessor",
             ) {
                 let acc = &doc.accessors[smp.input as usize];
-                if acc.type_ != AccessorType::Scalar || acc.component_type != ComponentType::Float {
+                if !layout_unknown(doc, smp.input)
+                    && (acc.type_ != AccessorType::Scalar
+                        || acc.component_type != ComponentType::Float)
+                {
                     r.error(
                         "ANIMATION_SAMPLER_INPUT_ACCESSOR_INVALID_FORMAT",
                         format!("{sp}/input"),
@@ -1258,6 +1310,9 @@ fn check_animations(r: &mut Report, doc: &Document) {
             ) else {
                 continue;
             };
+            if layout_unknown(doc, smp.input) || layout_unknown(doc, smp.output) {
+                continue;
+            }
             let targets = match path {
                 AnimationPath::Weights => {
                     let n = &doc.nodes[node as usize];
@@ -1337,6 +1392,10 @@ pub fn validate_data<B: AsRef<[u8]>>(doc: &Document, buffers: &[B]) -> Report {
     let mut decoded: Vec<Option<AccessorData>> = Vec::with_capacity(doc.accessors.len());
     for (i, acc) in doc.accessors.iter().enumerate() {
         let ptr = format!("/accessors/{i}");
+        if layout_unknown(doc, i as u32) {
+            decoded.push(None);
+            continue;
+        }
         let d = match read_accessor(doc, buffers, i as u32) {
             Ok(d) => d,
             Err(crate::GltfError::Compressed { .. }) => {
@@ -1561,16 +1620,18 @@ pub fn validate_file(bytes: &[u8]) -> Result<Report, crate::GltfError> {
     Ok(r)
 }
 
-/// Issues visible only in the JSON text `doc` was parsed from: members [`Document`] does not
-/// model (UNEXPECTED_PROPERTY, warning; they are not written back) and integer properties
-/// written with a fraction (INTEGER_WRITTEN_AS_FLOAT, warning). `extensions` and `extras`
-/// values are kept verbatim and not inspected.
+/// Issues visible only in the JSON text `doc` was parsed from: integer properties written
+/// with a fraction (INTEGER_WRITTEN_AS_FLOAT, warning), and members the document lost
+/// (UNEXPECTED_PROPERTY; since WP 7.4 the reader keeps unknown members in
+/// [`Document::unknown`], which [`validate`] reports, so this only fires for a document that
+/// was not parsed from `json`). `extensions` and `extras` values are kept verbatim and not
+/// inspected.
 pub fn json_text_issues(json: &[u8], doc: &Document, r: &mut Report) {
     let Ok(src) = serde_json::from_slice::<serde_json::Value>(trim_json(json)) else {
         return;
     };
     let mut ptr = String::new();
-    compare_json(&src, &doc.to_value(), &mut ptr, r);
+    compare_json(&src, &doc.to_value_with_unknown(), &mut ptr, r);
 }
 
 fn compare_json(
