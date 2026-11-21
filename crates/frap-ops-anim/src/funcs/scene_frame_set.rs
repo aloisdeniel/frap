@@ -16,6 +16,11 @@
 //! verified on 5.2.4: `bpy.data.scenes['Other'].frame_set(5)` of a scene never shown animates
 //! nothing, of a scene shown before animates its objects; switching the window to a scene
 //! applies its frame, see `Window.scene`).
+//!
+//! Then the timeline markers switch the scene camera (`BKE_scene_camera_switch_update`, WP 7.6;
+//! verified on 5.2.4: `frame_current = 7`, `view_layer.update()` and
+//! `evaluated_depsgraph_get()` do not switch it, `frame_set(7)` does; `screen.frame_jump` and
+//! `frame_offset` in a script do not either, as their notifiers are not processed).
 
 use frap_rna::{IdRef, PyExc, RnaError, RnaErrorKind, RnaPtr, Root, SceneId, Value, rna_func};
 use frap_scene::{FuncArgs, Host};
@@ -68,6 +73,12 @@ fn scene_frame_set(
         h.apply_pending_animation()?;
     }
     frap_eval::animate::apply_scene_animation_at(h, scene, cfra as f32)?;
+    // `BKE_scene_camera_switch_update` after the evaluation (WP 7.6): the timeline markers'
+    // camera at `int(ctime)`, which is the stored whole frame.
+    {
+        let (main, log) = h.main_mut();
+        frap_scene::id::timeline_marker::camera_switch_update(main, log, scene);
+    }
     let (host, ev) = h.eval();
     ev.depsgraph_update(host);
     Ok(Value::None)

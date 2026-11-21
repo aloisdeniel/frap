@@ -1,0 +1,1317 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 3 out of range, size 3"
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 3 out of range, size 3"
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": true
+    },
+    {
+      "line": 36,
+      "ok": true
+    },
+    {
+      "line": 38,
+      "ok": true
+    },
+    {
+      "line": 39,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 3 out of range, size 3"
+    },
+    {
+      "line": 40,
+      "ok": true
+    },
+    {
+      "line": 41,
+      "ok": true
+    },
+    {
+      "line": 42,
+      "ok": true
+    },
+    {
+      "line": 43,
+      "ok": true
+    },
+    {
+      "line": 45,
+      "ok": true
+    },
+    {
+      "line": 46,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 3 out of range, size 3"
+    },
+    {
+      "line": 47,
+      "ok": true
+    },
+    {
+      "line": 48,
+      "ok": true
+    },
+    {
+      "line": 49,
+      "ok": true
+    },
+    {
+      "line": 50,
+      "ok": true
+    },
+    {
+      "line": 52,
+      "ok": true
+    },
+    {
+      "line": 53,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 3 out of range, size 3"
+    },
+    {
+      "line": 54,
+      "ok": true
+    },
+    {
+      "line": 55,
+      "ok": true
+    },
+    {
+      "line": 56,
+      "ok": true
+    },
+    {
+      "line": 57,
+      "ok": true
+    },
+    {
+      "line": 59,
+      "ok": true
+    },
+    {
+      "line": 61,
+      "ok": true
+    },
+    {
+      "line": 62,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 3 out of range, size 3"
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": true
+    },
+    {
+      "line": 65,
+      "ok": true
+    },
+    {
+      "line": 66,
+      "ok": true
+    },
+    {
+      "line": 68,
+      "ok": true
+    },
+    {
+      "line": 69,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 6 out of range, size 6"
+    },
+    {
+      "line": 70,
+      "ok": true
+    },
+    {
+      "line": 71,
+      "ok": true
+    },
+    {
+      "line": 72,
+      "ok": true
+    },
+    {
+      "line": 73,
+      "ok": true
+    },
+    {
+      "line": 75,
+      "ok": true
+    },
+    {
+      "line": 77,
+      "ok": true
+    },
+    {
+      "line": 78,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 6 out of range, size 6"
+    },
+    {
+      "line": 79,
+      "ok": true
+    },
+    {
+      "line": 80,
+      "ok": true
+    },
+    {
+      "line": 81,
+      "ok": true
+    },
+    {
+      "line": 82,
+      "ok": true
+    },
+    {
+      "line": 84,
+      "ok": true
+    },
+    {
+      "line": 85,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 6 out of range, size 6"
+    },
+    {
+      "line": 86,
+      "ok": true
+    },
+    {
+      "line": 87,
+      "ok": true
+    },
+    {
+      "line": 88,
+      "ok": true
+    },
+    {
+      "line": 89,
+      "ok": true
+    },
+    {
+      "line": 91,
+      "ok": true
+    },
+    {
+      "line": 92,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 6 out of range, size 6"
+    },
+    {
+      "line": 93,
+      "ok": true
+    },
+    {
+      "line": 94,
+      "ok": true
+    },
+    {
+      "line": 95,
+      "ok": true
+    },
+    {
+      "line": 96,
+      "ok": true
+    },
+    {
+      "line": 98,
+      "ok": true
+    },
+    {
+      "line": 99,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 6 out of range, size 6"
+    },
+    {
+      "line": 100,
+      "ok": true
+    },
+    {
+      "line": 101,
+      "ok": true
+    },
+    {
+      "line": 102,
+      "ok": true
+    },
+    {
+      "line": 103,
+      "ok": true
+    },
+    {
+      "line": 105,
+      "ok": true
+    },
+    {
+      "line": 106,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 6 out of range, size 6"
+    },
+    {
+      "line": 107,
+      "ok": true
+    },
+    {
+      "line": 108,
+      "ok": true
+    },
+    {
+      "line": 109,
+      "ok": true
+    },
+    {
+      "line": 110,
+      "ok": true
+    },
+    {
+      "line": 111,
+      "ok": true
+    },
+    {
+      "line": 113,
+      "ok": true
+    },
+    {
+      "line": 115,
+      "ok": true
+    },
+    {
+      "line": 116,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 7 out of range, size 7"
+    },
+    {
+      "line": 117,
+      "ok": true
+    },
+    {
+      "line": 118,
+      "ok": true
+    },
+    {
+      "line": 119,
+      "ok": true
+    },
+    {
+      "line": 120,
+      "ok": true
+    },
+    {
+      "line": 122,
+      "ok": true
+    },
+    {
+      "line": 123,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 7 out of range, size 7"
+    },
+    {
+      "line": 124,
+      "ok": true
+    },
+    {
+      "line": 125,
+      "ok": true
+    },
+    {
+      "line": 126,
+      "ok": true
+    },
+    {
+      "line": 127,
+      "ok": true
+    },
+    {
+      "line": 129,
+      "ok": true
+    },
+    {
+      "line": 130,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 7 out of range, size 7"
+    },
+    {
+      "line": 131,
+      "ok": true
+    },
+    {
+      "line": 132,
+      "ok": true
+    },
+    {
+      "line": 133,
+      "ok": true
+    },
+    {
+      "line": 134,
+      "ok": true
+    },
+    {
+      "line": 135,
+      "ok": true
+    },
+    {
+      "line": 136,
+      "ok": true
+    },
+    {
+      "line": 138,
+      "ok": true
+    },
+    {
+      "line": 139,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 8 out of range, size 8"
+    },
+    {
+      "line": 140,
+      "ok": true
+    },
+    {
+      "line": 141,
+      "ok": true
+    },
+    {
+      "line": 142,
+      "ok": true
+    },
+    {
+      "line": 143,
+      "ok": true
+    },
+    {
+      "line": 144,
+      "ok": true
+    },
+    {
+      "line": 145,
+      "ok": true
+    },
+    {
+      "line": 146,
+      "ok": true
+    },
+    {
+      "line": 147,
+      "ok": true
+    },
+    {
+      "line": 149,
+      "ok": true
+    },
+    {
+      "line": 150,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 8 out of range, size 8"
+    },
+    {
+      "line": 151,
+      "ok": true
+    },
+    {
+      "line": 152,
+      "ok": true
+    },
+    {
+      "line": 153,
+      "ok": true
+    },
+    {
+      "line": 154,
+      "ok": true
+    },
+    {
+      "line": 155,
+      "ok": true
+    },
+    {
+      "line": 156,
+      "ok": true
+    },
+    {
+      "line": 157,
+      "ok": true
+    },
+    {
+      "line": 159,
+      "ok": true
+    },
+    {
+      "line": 160,
+      "ok": true
+    },
+    {
+      "line": 162,
+      "ok": true
+    },
+    {
+      "line": 163,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 8 out of range, size 8"
+    },
+    {
+      "line": 164,
+      "ok": true
+    },
+    {
+      "line": 165,
+      "ok": true
+    },
+    {
+      "line": 166,
+      "ok": true
+    },
+    {
+      "line": 167,
+      "ok": true
+    },
+    {
+      "line": 168,
+      "ok": true
+    },
+    {
+      "line": 169,
+      "ok": true
+    },
+    {
+      "line": 171,
+      "ok": true
+    },
+    {
+      "line": 172,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 7 out of range, size 7"
+    },
+    {
+      "line": 173,
+      "ok": true
+    },
+    {
+      "line": 174,
+      "ok": true
+    },
+    {
+      "line": 175,
+      "ok": true
+    },
+    {
+      "line": 176,
+      "ok": true
+    },
+    {
+      "line": 177,
+      "ok": true
+    },
+    {
+      "line": 178,
+      "ok": true
+    },
+    {
+      "line": 180,
+      "ok": true
+    },
+    {
+      "line": 181,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 7 out of range, size 7"
+    },
+    {
+      "line": 182,
+      "ok": true
+    },
+    {
+      "line": 183,
+      "ok": true
+    },
+    {
+      "line": 184,
+      "ok": true
+    },
+    {
+      "line": 185,
+      "ok": true
+    },
+    {
+      "line": 186,
+      "ok": true
+    },
+    {
+      "line": 187,
+      "ok": true
+    },
+    {
+      "line": 188,
+      "ok": true
+    },
+    {
+      "line": 189,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 1 out of range, size 1"
+    },
+    {
+      "line": 190,
+      "ok": true
+    },
+    {
+      "line": 192,
+      "ok": true
+    },
+    {
+      "line": 193,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 8 out of range, size 8"
+    },
+    {
+      "line": 194,
+      "ok": true
+    },
+    {
+      "line": 195,
+      "ok": true
+    },
+    {
+      "line": 196,
+      "ok": true
+    },
+    {
+      "line": 197,
+      "ok": true
+    },
+    {
+      "line": 198,
+      "ok": true
+    },
+    {
+      "line": 199,
+      "ok": true
+    },
+    {
+      "line": 201,
+      "ok": true
+    },
+    {
+      "line": 202,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 8 out of range, size 8"
+    },
+    {
+      "line": 203,
+      "ok": true
+    },
+    {
+      "line": 204,
+      "ok": true
+    },
+    {
+      "line": 205,
+      "ok": true
+    },
+    {
+      "line": 206,
+      "ok": true
+    },
+    {
+      "line": 207,
+      "ok": true
+    },
+    {
+      "line": 208,
+      "ok": true
+    },
+    {
+      "line": 209,
+      "ok": true
+    },
+    {
+      "line": 210,
+      "ok": true
+    },
+    {
+      "line": 211,
+      "ok": true
+    },
+    {
+      "line": 212,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "B": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.68592066, -0.32401347, 0.6515582, 7.3588915],
+        [0.72767633, 0.30542085, -0.6141704, -6.925791],
+        [0.0, 0.89539564, 0.4452714, 4.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.3588915, -6.925791, 4.958309],
+      "rotation_mode": "XYZ",
+      "rotation": [1.109319, 0.0, 0.8149282],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Camera.001": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [0.40403032, -0.40777433, 0.81882817, 0.0],
+        [0.91474557, 0.18010834, -0.3616649, -6.0],
+        [-0.0000001241151, 0.89514303, 0.445779, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, -6.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [1.108752, 0.0000001241151, 1.1548778],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "F_31": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.29086465, -0.7711008, 0.5663932, 4.0762453],
+        [0.95517117, -0.19988336, 0.2183912, 1.005454],
+        [-0.05518906, 0.60452473, 0.79467225, 5.903862],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [4.0762453, 1.005454, 5.903862],
+      "rotation_mode": "XYZ",
+      "rotation": [0.650328, 0.055217113, 1.8663908],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Ren": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "c16_bind_new": {
+      "type": "EMPTY",
+      "parent": "Camera",
+      "matrix_world": [
+        [0.68592066, -0.32401347, 0.6515582, 7.3588915],
+        [0.72767633, 0.30542085, -0.6141704, -6.925791],
+        [0.0, 0.89539564, 0.4452714, 4.958309],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "c17_bind_existing": {
+      "type": "EMPTY",
+      "parent": "Camera.001",
+      "matrix_world": [
+        [0.40403032, -0.40777433, 0.81882817, 0.0],
+        [0.91474557, 0.18010834, -0.3616649, -6.0],
+        [-0.0000001241151, 0.89514303, 0.445779, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "c18_move_switch": {
+      "type": "EMPTY",
+      "parent": "Camera.001",
+      "matrix_world": [
+        [0.40403032, -0.40777433, 0.81882817, 0.0],
+        [0.91474557, 0.18010834, -0.3616649, -6.0],
+        [-0.0000001241151, 0.89514303, 0.445779, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "l20": {
+      "type": "EMPTY",
+      "parent": "Camera",
+      "matrix_world": [
+        [0.68592066, -0.32401347, 0.6515582, 27.6125],
+        [0.72767633, 0.30542085, -0.6141704, 15.209919],
+        [0.0, 0.89539564, 0.4452714, 5.853705],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [30.0, 1.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s01_toggle": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 3.0],
+        [0.0, 0.0, 0.0, 10.0],
+        [0.0, 0.0, 0.0, 20.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [3.0, 10.0, 20.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s02_invert": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 3.0],
+        [0.0, 0.0, 0.0, 10.0],
+        [0.0, 0.0, 7.0, 20.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [3.0, 10.0, 20.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 7.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s03_left": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 3.0],
+        [0.0, 0.0, 0.0, 10.0],
+        [0.0, 0.0, 3.0, 20.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [3.0, 10.0, 20.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 3.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s04_right": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 3.0],
+        [0.0, 0.0, 0.0, 10.0],
+        [0.0, 0.0, 7.0, 20.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [3.0, 10.0, 20.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 7.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s05_click_side": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 3.0],
+        [0.0, 0.0, 0.0, 10.0],
+        [0.0, 0.0, 0.0, 20.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [3.0, 10.0, 20.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s06_move": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 5.0],
+        [0.0, 0.0, 0.0, 12.0],
+        [0.0, 0.0, 7.0, 22.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [5.0, 12.0, 22.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 0.0, 7.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s07_duplicate": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 1.1248106, 27.0],
+        [-0.0, -0.0, -6.7027764, 17.0],
+        [0.0, 0.0, 1.6755862, 10.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 10.0],
+      "rotation_mode": "XYZ",
+      "rotation": [5.0, 12.0, 22.0],
+      "scale": [0.0, 0.0, 7.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s08_box": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 9.962607, 27.0],
+        [-0.0, -0.0, -59.36745, 17.0],
+        [0.0, 0.0, 14.840906, 10.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 10.0],
+      "rotation_mode": "XYZ",
+      "rotation": [5.0, 12.0, 22.0],
+      "scale": [0.0, 0.0, 62.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s09_box_sub": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 1.2854978, 27.0],
+        [-0.0, -0.0, -7.660316, 17.0],
+        [0.0, 0.0, 1.9149556, 10.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 10.0],
+      "rotation_mode": "XYZ",
+      "rotation": [5.0, 12.0, 22.0],
+      "scale": [0.0, 0.0, 8.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s10_box_empty": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 1.2854978, 27.0],
+        [-0.0, -0.0, -7.660316, 17.0],
+        [0.0, 0.0, 1.9149556, 10.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 10.0],
+      "rotation_mode": "XYZ",
+      "rotation": [5.0, 12.0, 22.0],
+      "scale": [0.0, 0.0, 8.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s11_box_default": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 27.0],
+        [-0.0, -0.0, -0.0, 17.0],
+        [0.0, 0.0, 0.0, 10.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 10.0],
+      "rotation_mode": "XYZ",
+      "rotation": [5.0, 12.0, 22.0],
+      "scale": [0.0, 0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s12_select_miss": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 27.0],
+        [-0.0, -0.0, -0.0, 17.0],
+        [0.0, 0.0, 0.0, 10.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 10.0],
+      "rotation_mode": "XYZ",
+      "rotation": [5.0, 12.0, 22.0],
+      "scale": [0.0, 0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s13_select_hit": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [7.5943885, 0.0, 10.283982, 27.0],
+        [0.06722291, -0.0, -61.282528, 17.0],
+        [-4.8291564, 0.0, 15.319645, 10.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 10.0],
+      "rotation_mode": "XYZ",
+      "rotation": [5.0, 12.0, 22.0],
+      "scale": [-9.0, 0.0, 64.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s14_select_extend": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [7.5943885, 0.0, 0.0, 27.0],
+        [0.06722291, -0.0, -0.0, 17.0],
+        [-4.8291564, 0.0, 0.0, 10.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 10.0],
+      "rotation_mode": "XYZ",
+      "rotation": [5.0, 12.0, 22.0],
+      "scale": [-9.0, 0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s15_select_extend_miss": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [7.5943885, 0.0, 0.0, 27.0],
+        [0.06722291, -0.0, -0.0, 17.0],
+        [-4.8291564, 0.0, 0.0, 10.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 10.0],
+      "rotation_mode": "XYZ",
+      "rotation": [5.0, 12.0, 22.0],
+      "scale": [-9.0, 0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s16_bind_new": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [7.5943885, -15.360056, 20.567965, 27.0],
+        [0.06722291, -8.646161, -122.565056, 17.0],
+        [-4.8291564, -24.275763, 30.63929, 10.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 10.0],
+      "rotation_mode": "XYZ",
+      "rotation": [5.0, 12.0, 22.0],
+      "scale": [-9.0, 30.0, 128.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s17_bind_existing": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [7.5943885, -15.360056, 20.567965, 27.0],
+        [0.06722291, -8.646161, -122.565056, 17.0],
+        [-4.8291564, -24.275763, 30.63929, 10.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 10.0],
+      "rotation_mode": "XYZ",
+      "rotation": [5.0, 12.0, 22.0],
+      "scale": [-9.0, 30.0, 128.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s18_move_switch": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [7.5943885, -15.360056, 0.6427489, 27.0],
+        [0.06722291, -8.646161, -3.830158, 17.0],
+        [-4.8291564, -24.275763, 0.9574778, 11.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 11.0],
+      "rotation_mode": "XYZ",
+      "rotation": [5.0, 12.0, 22.0],
+      "scale": [-9.0, 30.0, 4.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s19_delete": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [27.332836, 0.0, 0.0, 27.0],
+        [12.3630705, 0.0, 0.0, 17.0],
+        [0.2655393, 0.0, 0.0, 5.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 5.0],
+      "rotation_mode": "XYZ",
+      "rotation": [12.0, 22.0, -9.0],
+      "scale": [30.0, 0.0, 0.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s20_links": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [27.332836, 0.0, 14.587971, 27.0],
+        [12.3630705, 0.0, -31.091816, 17.0],
+        [0.2655393, 0.0, -54.00454, 5.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 5.0],
+      "rotation_mode": "XYZ",
+      "rotation": [12.0, 22.0, -9.0],
+      "scale": [30.0, 0.0, 64.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s21_add": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [27.332836, 10.646656, 29.175941, 27.0],
+        [12.3630705, -23.895363, -62.18363, 17.0],
+        [0.2655393, 16.633108, -108.00908, 5.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 5.0],
+      "rotation_mode": "XYZ",
+      "rotation": [12.0, 22.0, -9.0],
+      "scale": [30.0, 31.0, 128.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "s22_select_camera": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [27.332836, 10.646656, 7.2939854, 27.0],
+        [12.3630705, -23.895363, -15.545908, 17.0],
+        [0.2655393, 16.633108, -27.00227, 5.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [27.0, 17.0, 5.0],
+      "rotation_mode": "XYZ",
+      "rotation": [12.0, 22.0, -9.0],
+      "scale": [30.0, 31.0, 32.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Camera.001",
+    "selected": ["Camera.001"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

@@ -1022,23 +1022,16 @@ fn assignment_errors_use_blender_wording() {
 
 /// A function of a collection whose API struct is not dumped (`Scene.keying_sets`,
 /// `KeyingSets.new`) is the collection's `RNA_NOT_IMPLEMENTED`, as its read is, not an
-/// `AttributeError` (M5+M6 stabilization round 7). Since M7 W0 dumped `TimelineMarkers`, its
-/// unimplemented `new` is a dumped function frap lacks (`NOT_IMPLEMENTED`, until WP 7.6).
+/// `AttributeError` (M5+M6 stabilization round 7). `TimelineMarkers.new`, dumped since M7 W0,
+/// is implemented by WP 7.6.
 #[test]
 fn unbound_collection_functions_are_not_implemented() {
     let mut s = session();
-    let (exc, code, msg) = err(
+    let r = one(
         &mut s,
         "bpy.context.scene.timeline_markers.new('F', frame=1)",
     );
-    assert_eq!(
-        (exc.as_str(), code.as_str()),
-        ("NotImplementedError", "NOT_IMPLEMENTED")
-    );
-    assert_eq!(
-        msg,
-        "frap: TimelineMarkers.new() exists in Blender 5.2 but is not implemented by frap yet"
-    );
+    assert_eq!(r["ok"], json!(true), "{r}");
     let (exc, code, msg) = err(&mut s, "bpy.context.scene.keying_sets.new()");
     assert_eq!(exc, "NotImplementedError");
     assert_eq!(code, "RNA_NOT_IMPLEMENTED");

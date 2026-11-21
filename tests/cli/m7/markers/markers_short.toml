@@ -1,0 +1,13 @@
+# WP 7.6: timeline markers in short form (§11.4), as an agent drives them: the marker.*
+# operators' polls with Blender's messages (no markers: `failed, context is incorrect`; nothing
+# selected: `No markers are selected`; tool_settings.lock_markers: `Markers are locked`),
+# marker.add (`F_<frame>`, selected, others deselected; cancelled on an occupied frame),
+# select_leftright, move and duplicate (copies at the head of the list), rename, camera_bind (the
+# active object bound at the current frame; the scene camera follows), TimelineMarkers.new /
+# remove / clear with keyed and indexed reads, marker camera switching at scene.frame_set() but
+# not at a frame_current assignment, make_links_scene's errors and its copy. Every message and
+# value verified on Blender 5.2.4 (the operators in a Timeline temp_override). Statements on
+# stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

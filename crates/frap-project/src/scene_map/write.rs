@@ -556,6 +556,36 @@ impl<'a> Writer<'a> {
             J::Array(s.view_layers.iter().map(|v| self.view_layer(v)).collect()),
         );
         m.insert("animation_data".into(), self.anim(&s.animation_data));
+        // M7 (WP 7.6): written only when present, so older readers keep reading the files
+        // frap writes without them.
+        if !s.timeline_markers.is_empty() {
+            let markers = s
+                .timeline_markers
+                .iter()
+                .map(|t| {
+                    json!({
+                        "name": t.name.as_str(),
+                        "frame": t.frame,
+                        "select": t.select,
+                        "camera": self.r(t.camera),
+                    })
+                })
+                .collect();
+            m.insert("timeline_markers".into(), J::Array(markers));
+        }
+        let gv = &s.gltf2_variants;
+        if *gv != frap_scene::id::SceneGltfVariants::default() {
+            let variants = gv
+                .variants
+                .iter()
+                .map(|v| json!({"name": v.name.as_str(), "variant_idx": v.variant_idx}))
+                .collect();
+            m.insert(
+                "gltf2_KHR_materials_variants_variants".into(),
+                J::Array(variants),
+            );
+            m.insert("gltf2_active_variant".into(), json!(gv.active_variant));
+        }
         Ok(m)
     }
 
@@ -859,6 +889,39 @@ impl<'a> Writer<'a> {
         m.insert("use_auto_texspace".into(), json!(me.texspace.auto));
         m.insert("texspace_location".into(), f32s(&me.texspace.location));
         m.insert("texspace_size".into(), f32s(&me.texspace.size));
+        // The glTF add-on's variant data (M7 W0, persisted by WP 7.6), only when present.
+        let gv = &me.gltf2_variants;
+        if *gv != frap_mesh::gltf_variants::MeshGltfVariants::default() {
+            let data = gv
+                .mesh_data
+                .iter()
+                .map(|p| {
+                    json!({
+                        "material_slot_index": p.material_slot_index,
+                        "material": self.r(p.material),
+                        "variants": p
+                            .variants
+                            .iter()
+                            .map(|v| json!({"variant": {"variant_idx": v.variant_idx}}))
+                            .collect::<Vec<_>>(),
+                        "active_variant_idx": p.active_variant_idx,
+                    })
+                })
+                .collect();
+            m.insert("gltf2_variant_mesh_data".into(), J::Array(data));
+            let defaults = gv
+                .default_materials
+                .iter()
+                .map(|d| {
+                    json!({
+                        "material_slot_index": d.material_slot_index,
+                        "default_material": self.r(d.default_material),
+                    })
+                })
+                .collect();
+            m.insert("gltf2_variant_default_materials".into(), J::Array(defaults));
+            m.insert("gltf2_variant_pointer".into(), json!(gv.pointer.as_str()));
+        }
         Ok(m)
     }
 

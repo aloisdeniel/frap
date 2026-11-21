@@ -42,6 +42,8 @@
 //!   `[OBJ §1.11]`); [`Saved::dropped`] names them.
 //! - **Unknown fields** fail the load unless it is lenient (`--lenient`).
 
+/// The colour-management check of a loaded file (WP 7.6).
+mod color;
 mod json;
 mod read;
 mod write;

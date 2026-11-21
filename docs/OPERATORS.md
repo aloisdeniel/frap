@@ -650,17 +650,17 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `marker.add` | M7 | P2 | timeline markers (`Scene.timeline_markers`, deviations §2); M5+M6 stabilization round 8 dumped the namespace so it answers OP_NOT_IMPLEMENTED, not OP_UNKNOWN; WP 7.6 (M7 W0, rule 1) |
-| [ ] | `marker.camera_bind` | M7 | P2 | marker camera switching (`BKE_scene_camera_switch_update`); WP 7.6 (M7 W0, rule 1) |
-| [ ] | `marker.delete` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
-| [ ] | `marker.duplicate` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
-| [ ] | `marker.make_links_scene` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
-| [ ] | `marker.move` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
-| [ ] | `marker.rename` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
-| [ ] | `marker.select` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
-| [ ] | `marker.select_all` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
-| [ ] | `marker.select_box` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
-| [ ] | `marker.select_leftright` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
+| [x] | `marker.add` | M7 | P2 | headless-extended: the factory Timeline's markers (the context scene's); `F_<frame>` at the current frame; WP 7.6 (golden `scene/markers/operators`) |
+| [x] | `marker.camera_bind` | M7 | P2 | headless-extended; binds the active object, the scene camera follows (`BKE_scene_camera_switch_update`); WP 7.6 |
+| [x] | `marker.delete` | M7 | P2 | headless-extended; WP 7.6 |
+| [x] | `marker.duplicate` | M7 | P2 | headless-extended; copies at the head of the list, as Blender; WP 7.6 |
+| [x] | `marker.make_links_scene` | M7 | P2 | headless-extended; `scene` lists `bpy.data.scenes`; WP 7.6 |
+| [x] | `marker.move` | M7 | P2 | headless-extended; the scene camera follows; WP 7.6 |
+| [x] | `marker.rename` | M7 | P2 | headless-extended; first selected marker; WP 7.6 |
+| [x] | `marker.select` | M7 | P2 | headless-extended: `mouse_x` in the factory Timeline's region pixels (exact hits only headless); WP 7.6 |
+| [x] | `marker.select_all` | M7 | P2 | headless-extended; WP 7.6 |
+| [x] | `marker.select_box` | M7 | P2 | headless-extended: `xmin`/`xmax` in the factory Timeline's region pixels; WP 7.6 |
+| [x] | `marker.select_leftright` | M7 | P2 | headless-extended; WP 7.6 |
 
 ### `frap.*` (frap extensions, namespaced)
 

@@ -1,0 +1,14 @@
+bpy.context.scene.timeline_markers.new('Start', frame=1)
+bpy.context.scene.timeline_markers.new('Close-up', frame=48)
+bpy.context.scene.timeline_markers[1].camera = bpy.data.objects['Camera']
+bpy.context.scene.render.image_settings.color_management = 'OVERRIDE'
+bpy.context.scene.render.image_settings.view_settings.view_transform = 'Filmic'
+bpy.context.scene.render.image_settings.view_settings.look = 'Medium High Contrast'
+bpy.context.scene.render.image_settings.display_settings.display_device = 'Display P3'
+bpy.ops.wm.save_as_mainfile(filepath='shots.frap')
+bpy.context.scene.timeline_markers.clear()
+bpy.ops.wm.open_mainfile(filepath='shots.frap')
+bpy.context.scene.timeline_markers.keys()
+bpy.context.scene.timeline_markers['Close-up'].camera
+bpy.context.scene.render.image_settings.view_settings.view_transform
+bpy.context.scene.render.image_settings.view_settings.look

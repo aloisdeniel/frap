@@ -117,6 +117,8 @@ const PLAIN: &[PlainSpec] = &[
             "use_mesh_automerge_and_split",
             "use_keyframe_insert_auto",
             "keyframe_type",
+            // M7 (WP 7.6): the `marker.*` operators' polls.
+            "lock_markers",
         ]),
         exclude: &[],
         own_only: false,

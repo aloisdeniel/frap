@@ -24,6 +24,8 @@ pub struct ToolSettings {
     pub use_proportional_projected: bool,
     /// `use_proportional_connected`: Proportional Editing using connected geometry only
     pub use_proportional_connected: bool,
+    /// `lock_markers`: Prevent marker editing
+    pub lock_markers: bool,
     /// `proportional_edit_falloff`: Falloff type for proportional editing mode
     pub proportional_edit_falloff: SmolStr,
     /// `proportional_size`: Display size for proportional editing circle
@@ -79,6 +81,7 @@ impl Default for ToolSettings {
             use_proportional_edit_objects: false,
             use_proportional_projected: false,
             use_proportional_connected: false,
+            lock_markers: false,
             proportional_edit_falloff: SmolStr::new_static("SMOOTH"),
             proportional_size: 1.0,
             double_threshold: 0.001,
@@ -108,7 +111,7 @@ impl Default for ToolSettings {
 
 impl ToolSettings {
     /// Names of the stored RNA properties, in field order.
-    pub const STORED: [&'static str; 21] = ["use_proportional_edit", "use_proportional_edit_objects", "use_proportional_projected", "use_proportional_connected", "proportional_edit_falloff", "proportional_size", "double_threshold", "transform_pivot_point", "use_transform_pivot_point_align", "use_transform_data_origin", "use_transform_skip_children", "use_mesh_automerge", "use_mesh_automerge_and_split", "use_snap", "snap_elements", "snap_target", "use_keyframe_insert_auto", "keyframe_type", "use_uv_select_sync", "mesh_select_mode", "vertex_group_weight"];
+    pub const STORED: [&'static str; 22] = ["use_proportional_edit", "use_proportional_edit_objects", "use_proportional_projected", "use_proportional_connected", "lock_markers", "proportional_edit_falloff", "proportional_size", "double_threshold", "transform_pivot_point", "use_transform_pivot_point_align", "use_transform_data_origin", "use_transform_skip_children", "use_mesh_automerge", "use_mesh_automerge_and_split", "use_snap", "snap_elements", "snap_target", "use_keyframe_insert_auto", "keyframe_type", "use_uv_select_sync", "mesh_select_mode", "vertex_group_weight"];
     /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
     /// `.frap`; serde skips them).
     pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
@@ -130,6 +133,7 @@ impl ToolSettings {
             "use_proportional_edit_objects" => Field::Value(Value::Bool(self.use_proportional_edit_objects)),
             "use_proportional_projected" => Field::Value(Value::Bool(self.use_proportional_projected)),
             "use_proportional_connected" => Field::Value(Value::Bool(self.use_proportional_connected)),
+            "lock_markers" => Field::Value(Value::Bool(self.lock_markers)),
             "proportional_edit_falloff" => Field::Value(Value::Enum(self.proportional_edit_falloff.clone())),
             "proportional_size" => Field::Value(Value::Float(self.proportional_size)),
             "double_threshold" => Field::Value(Value::Float(self.double_threshold)),
@@ -158,6 +162,7 @@ impl ToolSettings {
             "use_proportional_edit_objects" => self.use_proportional_edit_objects = FromValue::from_value(&v),
             "use_proportional_projected" => self.use_proportional_projected = FromValue::from_value(&v),
             "use_proportional_connected" => self.use_proportional_connected = FromValue::from_value(&v),
+            "lock_markers" => self.lock_markers = FromValue::from_value(&v),
             "proportional_edit_falloff" => self.proportional_edit_falloff = FromValue::from_value(&v),
             "proportional_size" => self.proportional_size = FromValue::from_value(&v),
             "double_threshold" => self.double_threshold = FromValue::from_value(&v),
