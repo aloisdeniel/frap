@@ -27,6 +27,20 @@
 //! A primitive the add-on skips half-way keeps the accessors it re-pointed, and the others
 //! read as zeros (no `bufferView`), as in Blender. A Draco primitive without `indices` makes the
 //! add-on fail (`gltf.data.accessors[None]`): the import fails with the same message.
+//!
+//! Shared accessors: the add-on decodes a primitive and reads it at once (`mesh.py`
+//! `do_primitives`), so when Draco primitives share an accessor (Blender's exporter shares the
+//! view-less index accessors of equal content), each reads its own decoded data, and the
+//! accessor is left with the last one's. frap decodes every primitive before reading the
+//! meshes, so a primitive that writes an accessor an earlier one already wrote gets a copy of
+//! it (the state that earlier decode left: count, component type, `normalized`, `min`/`max`)
+//! and its reference points at the copy. Before its decode, a primitive's references point at
+//! the accessor holding the latest decode of each, which is what Blender reads for a primitive
+//! that is skipped or skipped half-way.
+//!
+//! Malformed bitstreams: `draco-core` and Google Draco 1.5.7 do not refuse exactly the same
+//! corrupted streams (a mutated stream one decodes, possibly to out-of-range indices that make
+//! the add-on raise, the other may refuse with `Unable to decode`); valid streams decode alike.
 
 use frap_codec_mesh::draco::{self, DracoBackend, DracoDecoded};
 use frap_codec_mesh::{AttrData, Attribute};
@@ -34,6 +48,7 @@ use frap_gltf::Document;
 use frap_gltf::ext::khr_draco_mesh_compression::KhrDracoMeshCompression;
 use frap_gltf::json::{BufferView, ComponentType, Index};
 use frap_rna::{Report, ReportType};
+use std::collections::HashMap;
 
 use crate::import::ImportError;
 
@@ -74,11 +89,43 @@ pub(super) fn decode_primitives(
     }
     let codec = draco::codec(DracoBackend::Auto)
         .ok_or_else(|| ImportError::NotImplemented(DracoBackend::Auto.unavailable().to_string()))?;
+    let mut written = Written::default();
     for (m, p) in todo {
-        decode_primitive(codec, doc, buffers, reports, m, p)?;
+        decode_primitive(codec, doc, buffers, reports, &mut written, m, p)?;
         doc.meshes[m].primitives[p].extensions.remove(NAME);
     }
     Ok(())
+}
+
+/// The accessors earlier decodes wrote: the file's accessor index → the accessor holding the
+/// latest decode's state of it (see the module docs, shared accessors).
+#[derive(Default)]
+struct Written(HashMap<Index, Index>);
+
+impl Written {
+    /// The accessor holding the latest state of the file's accessor `a`.
+    fn current(&self, a: Index) -> Index {
+        self.0.get(&a).copied().unwrap_or(a)
+    }
+
+    /// The accessor this primitive writes for the file's accessor `a`: `a` itself the first
+    /// time, else a copy of its latest state.
+    fn slot(&mut self, doc: &mut Document, a: Index) -> Result<Index, ImportError> {
+        let cur = self.current(a);
+        let acc = doc
+            .accessors
+            .get(cur as usize)
+            .ok_or_else(|| ImportError::Data(format!("accessor {cur} out of range")))?
+            .clone();
+        let slot = if self.0.contains_key(&a) {
+            doc.accessors.push(acc);
+            (doc.accessors.len() - 1) as Index
+        } else {
+            a
+        };
+        self.0.insert(a, slot);
+        Ok(slot)
+    }
 }
 
 /// Appends `data` as a new buffer with one view over it; returns the view.
@@ -106,10 +153,22 @@ fn decode_primitive(
     doc: &mut Document,
     buffers: &mut Vec<Vec<u8>>,
     reports: &mut Vec<Report>,
+    written: &mut Written,
     m: usize,
     p: usize,
 ) -> Result<(), ImportError> {
+    // The file's accessor indices of this primitive (the references are rewritten below).
     let prim = doc.meshes[m].primitives[p].clone();
+    // What Blender reads for this primitive before (or without) its decode: the latest state.
+    {
+        let target = &mut doc.meshes[m].primitives[p];
+        if let Some(i) = target.indices.as_mut() {
+            *i = written.current(*i);
+        }
+        for a in target.attributes.values_mut() {
+            *a = written.current(*a);
+        }
+    }
     let ext: KhrDracoMeshCompression = prim
         .extensions
         .get()
@@ -146,11 +205,10 @@ fn decode_primitive(
             "list indices must be integers or slices, not NoneType".into(),
         ));
     };
+    let ia = written.slot(doc, ia)?;
+    doc.meshes[m].primitives[p].indices = Some(ia);
     let ia = ia as usize;
-    let acc = doc
-        .accessors
-        .get_mut(ia)
-        .ok_or_else(|| ImportError::Data(format!("accessor {ia} out of range")))?;
+    let acc = &mut doc.accessors[ia];
     let index_count = base.mesh.indices.len() as u64;
     if index_count != acc.count {
         warning(
@@ -184,11 +242,12 @@ fn decode_primitive(
             );
             return Ok(());
         };
+        let ai = written.slot(doc, ai)?;
+        doc.meshes[m].primitives[p]
+            .attributes
+            .insert(attr.clone(), ai);
         let ai = ai as usize;
-        let acc = doc
-            .accessors
-            .get_mut(ai)
-            .ok_or_else(|| ImportError::Data(format!("accessor {ai} out of range")))?;
+        let acc = &mut doc.accessors[ai];
         if u64::from(base.point_count) != acc.count {
             warning(
                 reports,
@@ -495,13 +554,16 @@ mod tests {
 
     const CASES: &str = "tests/golden/cases/gltf/draco";
 
-    /// The inputs of the `import_blender` (Blender's exports) and `import_frap` (frap's)
-    /// goldens, and the dump of Blender's bridge decoding each (`bridge/<name>.json`).
-    const FILES: [(&str, &str); 6] = [
+    /// The inputs of the `import_blender` and `import_shared` (Blender's exports) and
+    /// `import_frap` (frap's) goldens, and the dump of Blender's bridge decoding each
+    /// (`bridge/<name>.json`). `blender_shared.glb`: two primitives share an index accessor
+    /// that decodes differently for each, so each must read its own decode.
+    const FILES: [(&str, &str); 7] = [
         ("import_blender.inputs", "blender_default"),
         ("import_blender.inputs", "blender_attrs"),
         ("import_blender.inputs", "blender_generic8"),
         ("import_blender.inputs", "blender_skin"),
+        ("import_shared.inputs", "blender_shared"),
         ("import_frap.inputs", "frap_default"),
         ("import_frap.inputs", "frap_lossless"),
     ];
@@ -592,6 +654,46 @@ mod tests {
                 serde_json::from_slice(&std::fs::read(&p).unwrap()).unwrap();
             check_against_bridge(&doc, &buffers, &dump, name);
         }
+    }
+
+    #[test]
+    fn a_shared_accessor_is_copied_for_each_later_decode() {
+        let (doc0, _) = load("import_shared.inputs", "blender_shared");
+        let shared = doc0.meshes[0].primitives[0].indices.unwrap();
+        assert_eq!(doc0.meshes[1].primitives[0].indices, Some(shared));
+
+        // Both decode: A writes the file's accessor, B a copy of the state A left.
+        let (mut doc, mut buffers) = load("import_shared.inputs", "blender_shared");
+        assert!(decode(&mut doc, &mut buffers).is_empty());
+        let (a, b) = (
+            doc.meshes[0].primitives[0].indices.unwrap(),
+            doc.meshes[1].primitives[0].indices.unwrap(),
+        );
+        assert_eq!(a, shared);
+        assert_eq!(b as usize, doc0.accessors.len());
+        let (orig, copy) = (&doc0.accessors[shared as usize], &doc.accessors[b as usize]);
+        assert_eq!(
+            (copy.count, copy.component_type, copy.normalized, copy.type_),
+            (orig.count, orig.component_type, orig.normalized, orig.type_)
+        );
+        assert_eq!((&copy.min, &copy.max), (&orig.min, &orig.max));
+        assert_ne!(components(&doc, &buffers, a), components(&doc, &buffers, b));
+
+        // B's bitstream does not decode: B reads what Blender's shared accessor holds then,
+        // A's decode.
+        let (mut doc, mut buffers) = load("import_shared.inputs", "blender_shared");
+        let ext: KhrDracoMeshCompression = doc.meshes[1].primitives[0]
+            .extensions
+            .get()
+            .unwrap()
+            .unwrap();
+        let v = doc.buffer_views[ext.buffer_view as usize].clone();
+        let o = v.byte_offset.unwrap_or(0) as usize;
+        buffers[v.buffer as usize][o..o + 8].copy_from_slice(b"NOTDRACO");
+        let reports = decode(&mut doc, &mut buffers);
+        assert_eq!(reports.len(), 1);
+        assert_eq!(doc.meshes[1].primitives[0].indices, Some(shared));
+        assert_eq!(doc.accessors.len(), doc0.accessors.len());
     }
 
     #[test]
@@ -835,7 +937,7 @@ json.dump(res, open(out, 'w'), separators=(',', ':'))
     }
 
     /// Live (when Blender 5.2 is found; `FRAP_REQUIRE_BLENDER=1` makes a missing Blender a
-    /// failure): Blender's bridge decodes the six files (Blender's and frap's bitstreams) to
+    /// failure): Blender's bridge decodes the seven files (Blender's and frap's bitstreams) to
     /// the committed dumps, so `decodes_like_blenders_bridge` compares with the real decoder.
     #[test]
     fn bridge_dumps_match_live_blender() {
