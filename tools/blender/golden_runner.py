@@ -185,6 +185,7 @@ NORMALISE = {
     "D-129": ("cases", "cases do not read layer collections, selection or the context object between an unlink and the link"),
     "D-130": None,
     "D-131": None,
+    "D-132": ("comparator", "gltf/draco goldens compare axis-aligned or lossless meshes; the rest within 1e-6 in import/decompress/draco.rs"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

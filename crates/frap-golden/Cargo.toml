@@ -12,9 +12,10 @@ publish.workspace = true
 frap-rna.workspace = true
 frap-lang.workspace = true
 frap-session.workspace = true
-# WP 7.1: the frap side of the goldens runs with frap-cli's default meshopt codec (the
-# `gltf/meshopt` cases), also under `cargo test -p frap-golden` (`cargo xtask golden live`).
-frap-ops-all = { workspace = true, features = ["meshopt"] }
+# M7 W1 (WPs 7.1, 7.2, 7.3): the in-process frap side of the goldens runs with frap-cli's default
+# codecs (meshopt, Draco, Basis/KTX2, lossy WebP), also under `cargo test -p frap-golden`
+# (`cargo xtask golden live`), which resolves only this crate's features.
+frap-ops-all = { workspace = true, features = ["meshopt", "draco", "basisu", "webp-lossy"] }
 frap-scene.workspace = true
 frap-mesh.workspace = true
 frap-geom.workspace = true

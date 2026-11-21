@@ -70,6 +70,13 @@ const ALWAYS_CREATED: [&str; 6] = [
     "KHR_materials_ior",
 ];
 
+/// Extensions the add-on declares before its traversal, in that order.
+const DECLARED_BEFORE_TRAVERSAL: [&str; 3] = [
+    "KHR_draco_mesh_compression",
+    "EXT_meshopt_compression",
+    "KHR_meshopt_compression",
+];
+
 const UNLIT: &str = "KHR_materials_unlit";
 const VOLUME: &str = "KHR_materials_volume";
 const DISPERSION: &str = "KHR_materials_dispersion";
@@ -258,13 +265,11 @@ fn traversal_order(doc: &Document, created: Option<&CreatedEmpty>) -> Vec<String
         materials: HashSet::new(),
         textures: HashSet::new(),
     };
-    // `__gather_gltf` declares the compression extensions before it traverses anything
-    // (`add_draco_extension`, then `add_meshopt_extension`; M7, WP 7.1).
-    for name in [
-        "KHR_draco_mesh_compression",
-        "EXT_meshopt_compression",
-        "KHR_meshopt_compression",
-    ] {
+    // Declared by `export.py::__gather_gltf` before any scene is added
+    // (`exporter.add_draco_extension`, then `add_meshopt_extension`; WPs 7.1 and 7.2, verified
+    // on 5.2.4: a light node first still gives `["KHR_draco_mesh_compression",
+    // "KHR_lights_punctual"]`).
+    for name in DECLARED_BEFORE_TRAVERSAL {
         if doc.extensions_used.iter().any(|e| e == name) {
             w.declare(name);
         }
