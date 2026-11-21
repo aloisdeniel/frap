@@ -120,11 +120,36 @@ pub fn gather(
     r: IdRef<MaterialId>,
     mesh: &Mesh,
 ) -> Result<Option<Index>, ExportError> {
+    gather_as(g, r, mesh, g.settings.export_materials)
+}
+
+/// `gather_material` called directly, as for a `KHR_materials_variants` mapping (WP 7.5): it
+/// only reads `export_materials` for `'VIEWPORT'`, so with `'PLACEHOLDER'` (or `'NONE'`) the
+/// material is gathered in full (verified on 5.2.4: a mapping keeps its material under
+/// `'PLACEHOLDER'` while the primitive has none).
+pub fn gather_unconditional(
+    g: &mut Gather,
+    r: IdRef<MaterialId>,
+    mesh: &Mesh,
+) -> Result<Option<Index>, ExportError> {
+    let mode = match g.settings.export_materials {
+        ExportMaterials::Viewport => ExportMaterials::Viewport,
+        _ => ExportMaterials::Export,
+    };
+    gather_as(g, r, mesh, mode)
+}
+
+fn gather_as(
+    g: &mut Gather,
+    r: IdRef<MaterialId>,
+    mesh: &Mesh,
+    mode: ExportMaterials,
+) -> Result<Option<Index>, ExportError> {
     let main = g.main;
     let Some(mat) = main.materials.get(r) else {
         return Ok(None);
     };
-    match g.settings.export_materials {
+    match mode {
         ExportMaterials::Viewport => {
             let key = (r, Vec::new());
             if let Some(i) = g.materials.written.get(&key) {

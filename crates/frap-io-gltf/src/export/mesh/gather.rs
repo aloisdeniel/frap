@@ -167,7 +167,11 @@ pub fn gather_mesh_with(
             return Ok(*i);
         }
         let skin = per_object.as_ref().and_then(|(_, s)| s.as_ref());
-        let (index, _) = build_mesh(g, data, mesh, Some(ob_ref), &key.2, None, skin)?;
+        // The temporary mesh may lack the variant data (WP 7.5, `variants::applied`).
+        let (index, _) =
+            crate::export::variants::applied(g, ob, mesh, evaluated.as_deref(), |g| {
+                build_mesh(g, data, mesh, Some(ob_ref), &key.2, None, skin)
+            })?;
         g.state::<AppliedMeshes>().0.insert(key, index);
         return Ok(index);
     }
