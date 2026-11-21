@@ -81,6 +81,7 @@ pub fn apply_pending_animation_tagged(
     if time_dirty {
         return apply_animation_filtered(host, frame as f32, &|root, _| graph.contains(&root));
     }
+    let tagged: HashSet<Root> = tagged.iter().copied().collect();
     let is_tagged = |root: Root, adt: &AnimData| {
         let action_tagged =
             |a: Option<IdRef<ActionId>>| a.is_some_and(|a| tagged.contains(&Root::Id(a.any())));
@@ -142,9 +143,9 @@ fn window_depsgraph(host: &dyn HostRead) -> HashSet<Root> {
 /// when there is none of that name) evaluates, so animates: the scene, its world and camera,
 /// the objects of the view layer's enabled bases ([`frap_scene::id::layers::BaseVisibility`]'s
 /// `enabled_viewport`), and everything they reference, transitively (object data, shape keys,
-/// materials, parents, modifier operands, armatures, node groups, images, textures), with the
-/// embedded node tree of each material and world. Actions are not roots (they carry no
-/// animation of their own).
+/// materials, parents, object operands of viewport-enabled modifiers, armatures, node groups,
+/// images, textures), with the embedded node tree of each material and world. Actions are not
+/// roots (they carry no animation of their own).
 pub fn depsgraph_roots(main: &Main, scene: IdRef<SceneId>, view_layer: &str) -> HashSet<Root> {
     let mut out = HashSet::new();
     let Some(sc) = main.scenes.get(scene) else {
@@ -181,7 +182,24 @@ pub fn depsgraph_roots(main: &Main, scene: IdRef<SceneId>, view_layer: &str) -> 
                 slot: EmbeddedSlot::NodeTree,
             });
         }
+        let start = queue.len();
         main.for_each_ref_of(id, &mut |x| queue.push(x));
+        // `DepsgraphNodeBuilder::modifier_walk`: an object operand of a modifier disabled for
+        // the viewport (`show_viewport` off) is built invisible, so not animated; its other
+        // IDs (textures, node groups) are built as usual (verified on 5.2.4: a BOOLEAN operand
+        // and a MIRROR `mirror_object` of disabled modifiers keep a manual location after
+        // `frame_set`, a DISPLACE texture of a disabled modifier is animated).
+        if let Some(ob) = id.typed().and_then(|o| main.objects.get(o)) {
+            for m in ob.modifiers.iter().filter(|m| !m.show_viewport) {
+                for x in m.settings.id_refs().into_iter().filter_map(|(_, x)| x) {
+                    if x.code == IdCode::OB
+                        && let Some(i) = queue[start..].iter().position(|q| *q == x)
+                    {
+                        queue.remove(start + i);
+                    }
+                }
+            }
+        }
     }
     out
 }

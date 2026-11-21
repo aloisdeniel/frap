@@ -475,6 +475,28 @@ pub(crate) fn set_layer_collection_flag(
     Ok(())
 }
 
+// Ported from blender/source/blender/makesrna/intern/rna_layer.cc
+// (`rna_LayerCollection_exclude_update`; Blender 5.2.4, GPL-2.0-or-later).
+/// The objects a write of `LayerCollection.exclude` at `this` tags for an animation update
+/// (`ID_RECALC_ANIMATION`): when the layer collection is not excluded after the write, every
+/// object with a base in its view layer, so the next evaluation re-applies their animation at
+/// the current frame (verified on 5.2.4: re-including any collection, even an empty unrelated
+/// one, or writing `exclude = False` on an included one, overwrites a manual `location` of an
+/// animated object at `view_layer.update()`; a parent with no base, and shape keys, are not
+/// re-applied). Empty after `exclude = True`.
+pub fn exclude_update_objects(main: &Main, this: &frap_rna::RnaPtr) -> Vec<IdRef<ObjectId>> {
+    let Ok((scene, i, path)) = crate::id::paths::layer_collection_of(main, this) else {
+        return Vec::new();
+    };
+    let Some(vl) = main.scenes.get(scene).and_then(|s| s.view_layers.get(i)) else {
+        return Vec::new();
+    };
+    if vl.layer_collection.at(&path).is_none_or(|lc| lc.exclude) {
+        return Vec::new();
+    }
+    vl.bases.iter().map(|b| b.object).collect()
+}
+
 /// `LayerCollection.is_visible`: not excluded and not hidden along its layer-collection and
 /// collection chain (`LAYER_COLLECTION_VISIBLE_VIEW_LAYER` after a sync; Blender reports the
 /// value of the last depsgraph sync, frap the current one, D-04).

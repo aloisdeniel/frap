@@ -273,7 +273,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "planned": "M1",
     "extension": false,
     "notes": [
-      "materials are shared, mesh/camera/light data and actions copied (factory Duplicate Data preferences)"
+      "materials are shared, mesh/camera/light/armature data, shape keys and active actions copied (factory Duplicate Data preferences); references between copies (parents, modifier operands, NLA strip actions) remapped"
     ]
   }
 }

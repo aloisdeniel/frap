@@ -24,7 +24,7 @@
 use frap_mesh::Mesh;
 
 use crate::export::ExportError;
-use crate::export::mesh::convert::{axis, round4};
+use crate::export::mesh::convert::{axis, fold_zero, round4};
 use crate::export::mesh::ext::{
     AttrColumn, AttrValues, MeshExportCx, PRIMITIVE_ATTRIBUTE_WRITERS, PrimitiveAttributeWriter,
     PrimitiveDraft, SplitKey,
@@ -45,6 +45,8 @@ pub fn skinned_positions(cx: &MeshExportCx, skin: &MeshSkin) -> Vec<[f32; 3]> {
 
 /// A corner normal of the skinned mesh before the Y-up swizzle: rounded to 4 decimals,
 /// normalised, moved by `normal_transform` (stored as float32), normalised again, zero → +Z.
+/// The written values (and the split key) fold `-0.0` into `0.0` after the swizzle, as the
+/// add-on's values come out of `fast_structured_np_unique`'s dots.
 pub fn skinned_normal(n: [f32; 3], t: &frap_math::glam::Mat3) -> [f32; 3] {
     let r = normalize_f32(n.map(round4));
     let m = apply_mat3_f64(t, r.map(f64::from)).map(|x| x as f32);
@@ -57,7 +59,7 @@ pub fn skinned_normal(n: [f32; 3], t: &frap_math::glam::Mat3) -> [f32; 3] {
 
 /// A corner tangent of the skinned mesh before the Y-up swizzle: rounded, rotated by
 /// `tangent_transform`, normalised and rounded again (numpy keeps float64 here).
-fn skinned_tangent(t: [f32; 3], m: &frap_math::glam::Mat3) -> [f32; 3] {
+pub fn skinned_tangent(t: [f32; 3], m: &frap_math::glam::Mat3) -> [f32; 3] {
     let r = t.map(|x| f64::from(round4(x)));
     let v = normalize_f64(apply_mat3_f64(m, r));
     v.map(|x| ((x * 10000.0).round_ties_even() / 10000.0) as f32)
@@ -177,7 +179,7 @@ fn run(cx: &MeshExportCx, _: &SplitKey, d: &mut PrimitiveDraft) -> Result<(), Ex
             d.normals = d
                 .corners
                 .iter()
-                .map(|&c| axis(skinned_normal(normals[c as usize], &t), yup))
+                .map(|&c| axis(skinned_normal(normals[c as usize], &t), yup).map(fold_zero))
                 .collect();
         }
         if let Some(col) = d.attributes.get_mut("TANGENT")
@@ -187,7 +189,7 @@ fn run(cx: &MeshExportCx, _: &SplitKey, d: &mut PrimitiveDraft) -> Result<(), Ex
             let m = skin.tangent_transform();
             for (v, &c) in values.iter_mut().zip(&d.corners) {
                 let t = tangents[c as usize];
-                let [x, y, z] = axis(skinned_tangent([t[0], t[1], t[2]], &m), yup);
+                let [x, y, z] = axis(skinned_tangent([t[0], t[1], t[2]], &m), yup).map(fold_zero);
                 // The sign flips only for a mirroring transform; a rotation never mirrors.
                 *v = [x, y, z, t[3]];
             }

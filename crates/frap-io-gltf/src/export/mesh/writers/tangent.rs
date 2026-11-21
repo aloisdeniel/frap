@@ -69,8 +69,20 @@ fn key(cx: &MeshExportCx, k: &mut SplitKey) -> Result<(), ExportError> {
         return Ok(());
     };
     let mut words = Vec::with_capacity(4 * tangents.len());
+    // A skinned mesh's dots hold the tangents rotated by `tangent_transform` (`__get_tangents`).
+    let skin = cx.skin.map(|s| s.tangent_transform());
     for t in tangents {
-        words.extend(tangent_value(t, s.export_yup).map(key_word));
+        let v = match &skin {
+            Some(m) => {
+                let [x, y, z] = axis(
+                    crate::export::mesh::writers::skin::skinned_tangent([t[0], t[1], t[2]], m),
+                    s.export_yup,
+                );
+                [x, y, z, t[3]]
+            }
+            None => tangent_value(t, s.export_yup),
+        };
+        words.extend(v.map(key_word));
     }
     k.push(NAME, 4, words);
     Ok(())

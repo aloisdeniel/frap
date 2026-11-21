@@ -353,8 +353,11 @@ impl FilmTargets {
         } else {
             0.0
         };
-        for p in &mut rgba {
-            *p = unpremultiply(p.map(|c| c * inv));
+        for chunk in rgba.chunks_mut(1 << 16) {
+            frap_math::budget::check_now();
+            for p in chunk {
+                *p = unpremultiply(p.map(|c| c * inv));
+            }
         }
         Ok(Film {
             width,

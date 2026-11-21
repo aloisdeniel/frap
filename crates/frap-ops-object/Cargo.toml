@@ -25,6 +25,7 @@ indexmap.workspace = true
 frap-bmesh.workspace = true
 frap-modifiers.workspace = true
 frap-eval.workspace = true
+frap-anim.workspace = true
 frap-nodes.workspace = true
 smallvec.workspace = true
 

@@ -10,11 +10,17 @@
 //!   overrides and display settings, and is linked to every collection of the scene that holds
 //!   the original (master included);
 //! - the factory "Duplicate Data" preferences decide what is copied: mesh, camera, light,
-//!   armature, point cloud data and actions are copied (each datablock once per call, so
-//!   copies of two objects sharing a mesh share the new mesh), materials are **shared**;
-//!   `linked=True` shares the object data too (and copies nothing else);
-//! - a copy whose parent was duplicated in the same call gets the parent's copy
-//!   (`BKE_libblock_relink_to_newid`), otherwise it keeps the original parent;
+//!   armature, point cloud data are copied (each datablock once per call, so copies of two
+//!   objects sharing a mesh share the new mesh) with their shape keys, materials are
+//!   **shared**; `linked=True` shares the object data too (and copies nothing else);
+//! - `USER_DUP_ACT`: the active action of each copied object, object data and shape key is
+//!   replaced by its own copy (two IDs sharing an action get two copies); NLA strip actions are
+//!   not copied but remapped (next point), so a strip shares the copy of an action that was
+//!   also active, and keeps the original otherwise;
+//! - every reference of a copy to a datablock copied in the same call points to the copy
+//!   (`BKE_libblock_relink_to_newid`: parents, modifier operands such as an Armature
+//!   modifier's object, NLA strip actions; an action copied twice maps to its last copy),
+//!   otherwise it keeps the original;
 //! - in the context view layer the originals are deselected and the copies selected; the
 //!   copy of the active object becomes active (an unselected or no active object stays);
 //! - `mode` is only read by the interactive transform that follows (`duplicate_move`).
@@ -23,9 +29,10 @@
 
 use std::collections::HashMap;
 
+use frap_anim::AnimData;
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_rna::{ActionId, IdAny, IdCode, IdRef, IdType, ObjectId};
+use frap_rna::{IdAny, IdCode, IdRef, IdType, MeshId, ObjectId};
 use frap_scene::id::layers;
 use frap_scene::{BaseFlag, ChangeLog, IdMap, Main, ObjectMode};
 use frap_spec_ops_object::object;
@@ -45,107 +52,193 @@ fn copy_in<T: IdType + Clone>(m: &mut IdMap<T>, a: IdAny, log: &mut ChangeLog) -
     Some(m.insert(&name, v, log).any())
 }
 
-/// IDs already copied in this call (`ID.newid`), so shared data is copied once.
+/// The `AnimData` of a datablock duplicate copies (`BKE_animdata_from_id`), bumped.
+fn adt_mut<'m>(main: &'m mut Main, log: &mut ChangeLog, a: IdAny) -> Option<&'m mut AnimData> {
+    let adt = match a.code {
+        IdCode::OB => &mut main.objects.get_mut(a.typed()?, log)?.animation_data,
+        IdCode::CA => &mut main.cameras.get_mut(a.typed()?, log)?.animation_data,
+        IdCode::LA => &mut main.lights.get_mut(a.typed()?, log)?.animation_data,
+        IdCode::AR => &mut main.armatures.get_mut(a.typed()?, log)?.animation_data,
+        IdCode::PT => &mut main.pointclouds.get_mut(a.typed()?, log)?.animation_data,
+        IdCode::KE => &mut main.shape_keys.get_mut(a.typed()?, log)?.animation_data,
+        _ => return None,
+    };
+    adt.as_mut()
+}
+
+/// The datablocks copied in this call and their copies (`ID.newid`, `ID_TAG_NEW`).
 #[derive(Default)]
-struct NewIds(HashMap<IdAny, IdAny>);
+struct NewIds {
+    /// Original -> copy. An action copied more than once maps to its last copy, as
+    /// `ID_NEW_SET` overwrites `newid`.
+    map: HashMap<IdAny, IdAny>,
+    /// Every copy, in creation order (`ID_TAG_NEW`).
+    created: Vec<IdAny>,
+}
 
 impl NewIds {
-    /// The copy of the object data `a` (`USER_DUP_MESH | CAMERA | LAMP | ARM | POINTCLOUD`).
-    fn data(&mut self, main: &mut Main, log: &mut ChangeLog, a: IdAny) -> IdAny {
-        if let Some(n) = self.0.get(&a) {
+    /// `BKE_id_copy_for_duplicate`: the copy of `a` (made once per call: shared object data
+    /// is copied once), with its shape keys (`BKE_key_from_id`), and, when `dup_act`
+    /// (`USER_DUP_ACT`), a copy of the active action of the copy and of its shape keys
+    /// (`BKE_animdata_duplicate_id_action`).
+    fn duplicate(
+        &mut self,
+        main: &mut Main,
+        log: &mut ChangeLog,
+        a: IdAny,
+        dup_act: bool,
+    ) -> IdAny {
+        if let Some(n) = self.map.get(&a) {
             return *n;
         }
         let new = match a.code {
-            IdCode::ME => {
-                let new = copy_in(&mut main.meshes, a, log);
-                // A mesh copy owns a copy of its shape keys.
-                if let Some(n) = new.and_then(|n| n.typed::<frap_rna::MeshId>())
-                    && let Some(k) = main.meshes.get(n).and_then(|m| m.shape_keys)
-                    && let Some(k2) = copy_in(&mut main.shape_keys, k.any(), log)
-                    && let Some(m) = main.meshes.get_mut(n, log)
-                {
-                    m.shape_keys = k2.typed();
-                }
-                new
-            }
-            IdCode::CA => {
-                let new = copy_in(&mut main.cameras, a, log);
-                self.data_action(main, log, new)
-            }
-            IdCode::LA => {
-                let new = copy_in(&mut main.lights, a, log);
-                self.data_action(main, log, new)
-            }
+            IdCode::OB => copy_in(&mut main.objects, a, log),
+            IdCode::ME => copy_in(&mut main.meshes, a, log),
+            IdCode::CA => copy_in(&mut main.cameras, a, log),
+            IdCode::LA => copy_in(&mut main.lights, a, log),
             IdCode::AR => copy_in(&mut main.armatures, a, log),
             IdCode::PT => copy_in(&mut main.pointclouds, a, log),
             _ => None,
         };
-        let new = new.unwrap_or(a);
-        self.0.insert(a, new);
-        new
-    }
-
-    /// `USER_DUP_ACT` on copied camera and light data: their action is copied too.
-    fn data_action(
-        &mut self,
-        main: &mut Main,
-        log: &mut ChangeLog,
-        new: Option<IdAny>,
-    ) -> Option<IdAny> {
-        let n = new?;
-        let action = match n.code {
-            IdCode::CA => main
-                .cameras
-                .get(n.typed()?)
-                .and_then(|c| c.animation_data.as_ref()?.action),
-            IdCode::LA => main
-                .lights
-                .get(n.typed()?)
-                .and_then(|l| l.animation_data.as_ref()?.action),
-            _ => None,
+        let Some(new) = new else {
+            return a;
         };
-        if let Some(act) = action {
-            let copied = self.action(main, log, act);
-            match n.code {
-                IdCode::CA => {
-                    if let Some(ad) = main
-                        .cameras
-                        .get_mut(n.typed()?, log)
-                        .and_then(|c| c.animation_data.as_mut())
-                    {
-                        ad.action = Some(copied);
-                    }
-                }
-                IdCode::LA => {
-                    if let Some(ad) = main
-                        .lights
-                        .get_mut(n.typed()?, log)
-                        .and_then(|l| l.animation_data.as_mut())
-                    {
-                        ad.action = Some(copied);
-                    }
-                }
-                _ => {}
+        self.map.insert(a, new);
+        self.created.push(new);
+        // A mesh copy owns a copy of its shape keys.
+        let mut key_new = None;
+        if let Some(n) = new.typed::<MeshId>()
+            && let Some(k) = main.meshes.get(n).and_then(|m| m.shape_keys)
+            && let Some(k2) = copy_in(&mut main.shape_keys, k.any(), log)
+        {
+            if let Some(m) = main.meshes.get_mut(n, log) {
+                m.shape_keys = k2.typed();
+            }
+            if let Some(key) = k2.typed().and_then(|k| main.shape_keys.get_mut(k, log)) {
+                key.user = Some(n);
+            }
+            self.map.insert(k.any(), k2);
+            self.created.push(k2);
+            key_new = Some(k2);
+        }
+        if dup_act {
+            self.duplicate_action(main, log, new);
+            if let Some(k2) = key_new {
+                self.duplicate_action(main, log, k2);
             }
         }
-        Some(n)
+        new
     }
 
-    /// The copy of an action (`USER_DUP_ACT`).
-    fn action(
-        &mut self,
-        main: &mut Main,
-        log: &mut ChangeLog,
-        a: IdRef<ActionId>,
-    ) -> IdRef<ActionId> {
-        if let Some(n) = self.0.get(&a.any()).and_then(|n| n.typed()) {
-            return n;
+    /// `animdata_copy_id_action`: the active action of `id` is replaced by a fresh copy (one
+    /// per ID, even when IDs share the action: verified on 5.2.4), recorded as the action's
+    /// `newid`. NLA strip actions are not copied here; [`NewIds::relink`] remaps them.
+    fn duplicate_action(&mut self, main: &mut Main, log: &mut ChangeLog, id: IdAny) {
+        let Some(act) = adt_mut(main, log, id).and_then(|ad| ad.action) else {
+            return;
+        };
+        let Some(copied) = copy_in(&mut main.actions, act.any(), log) else {
+            return;
+        };
+        self.map.insert(act.any(), copied);
+        self.created.push(copied);
+        if let Some(ad) = adt_mut(main, log, id) {
+            ad.action = copied.typed();
         }
-        let new = copy_in(&mut main.actions, a.any(), log)
-            .and_then(|n| n.typed())
-            .unwrap_or(a);
-        self.0.insert(a.any(), new.any());
-        new
+    }
+
+    /// `BKE_libblock_relink_to_newid` on every copy (`copy_object_set_idnew`): each reference
+    /// of a copy to a datablock copied in this call points to its (last) copy: parents,
+    /// modifier operands, object data, active and NLA strip actions (verified on 5.2.4: a
+    /// strip of a duplicated object uses the copy of its action when the object's or its
+    /// data's active action was copied, the original otherwise).
+    fn relink(&self, main: &mut Main, log: &mut ChangeLog) {
+        fn go<T: IdType>(
+            m: &mut IdMap<T>,
+            a: IdAny,
+            map: &HashMap<IdAny, IdAny>,
+            log: &mut ChangeLog,
+        ) {
+            let Some(r) = a.typed::<T::Kind>() else {
+                return;
+            };
+            let mut hits: Vec<(IdAny, IdAny)> = Vec::new();
+            if let Some(t) = m.get(r) {
+                t.for_each_ref(&mut |x| {
+                    if let Some(&n) = map.get(&x)
+                        && !hits.contains(&(x, n))
+                    {
+                        hits.push((x, n));
+                    }
+                });
+            }
+            if hits.is_empty() {
+                return;
+            }
+            if let Some(t) = m.get_mut(r, log) {
+                for (from, to) in hits {
+                    t.remap_ref(from, Some(to));
+                }
+            }
+        }
+        for &id in &self.created {
+            match id.code {
+                IdCode::OB => go(&mut main.objects, id, &self.map, log),
+                IdCode::CA => go(&mut main.cameras, id, &self.map, log),
+                IdCode::LA => go(&mut main.lights, id, &self.map, log),
+                IdCode::AR => go(&mut main.armatures, id, &self.map, log),
+                IdCode::PT => go(&mut main.pointclouds, id, &self.map, log),
+                IdCode::KE => go(&mut main.shape_keys, id, &self.map, log),
+                _ => {}
+            }
+            let strips = |main: &Main| {
+                let mut any = false;
+                let read = match id.code {
+                    IdCode::OB => id
+                        .typed()
+                        .and_then(|r| main.objects.get(r))
+                        .and_then(|o| o.animation_data.as_ref()),
+                    IdCode::CA => id
+                        .typed()
+                        .and_then(|r| main.cameras.get(r))
+                        .and_then(|o| o.animation_data.as_ref()),
+                    IdCode::LA => id
+                        .typed()
+                        .and_then(|r| main.lights.get(r))
+                        .and_then(|o| o.animation_data.as_ref()),
+                    IdCode::AR => id
+                        .typed()
+                        .and_then(|r| main.armatures.get(r))
+                        .and_then(|o| o.animation_data.as_ref()),
+                    IdCode::PT => id
+                        .typed()
+                        .and_then(|r| main.pointclouds.get(r))
+                        .and_then(|o| o.animation_data.as_ref()),
+                    IdCode::KE => id
+                        .typed()
+                        .and_then(|r| main.shape_keys.get(r))
+                        .and_then(|o| o.animation_data.as_ref()),
+                    _ => None,
+                };
+                for s in read
+                    .iter()
+                    .flat_map(|a| &a.nla_tracks)
+                    .flat_map(|t| &t.strips)
+                {
+                    any |= s.action.is_some_and(|a| self.map.contains_key(&a.any()));
+                }
+                any
+            };
+            if strips(main)
+                && let Some(ad) = adt_mut(main, log, id)
+            {
+                for s in ad.nla_tracks.iter_mut().flat_map(|t| &mut t.strips) {
+                    if let Some(n) = s.action.and_then(|a| self.map.get(&a.any())) {
+                        s.action = n.typed();
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -172,18 +265,22 @@ fn duplicate(cx: &mut OpCtx, linked: bool) -> OpResult {
         if src.mode == ObjectMode::Pose {
             continue;
         }
-        let (data, action) = (src.data, src.animation_data.as_ref().and_then(|a| a.action));
-        let Some(new) = copy_in(&mut main.objects, ob.any(), log).and_then(|n| n.typed()) else {
+        let data = src.data;
+        // `BKE_object_duplicate`: `linked=True` duplicates with no flags (nothing but the
+        // object is copied, no action either).
+        let Some(new) = ids
+            .duplicate(main, log, ob.any(), !linked)
+            .typed::<ObjectId>()
+        else {
             continue;
         };
-        if !linked {
-            let new_data = data.map(|d| ids.data(main, log, d));
-            let new_action = action.map(|a| ids.action(main, log, a));
+        if new == ob {
+            continue;
+        }
+        if !linked && let Some(d) = data {
+            let new_data = ids.duplicate(main, log, d, true);
             if let Some(o) = main.objects.get_mut(new, log) {
-                o.data = new_data;
-                if let (Some(ad), Some(a)) = (o.animation_data.as_mut(), new_action) {
-                    ad.action = Some(a);
-                }
+                o.data = Some(new_data);
             }
         }
         // `BKE_collection_object_add_from`: every collection of the scene holding the
@@ -207,15 +304,7 @@ fn duplicate(cx: &mut OpCtx, linked: bool) -> OpResult {
         return Ok(OpStatus::Cancelled);
     }
     // `copy_object_set_idnew`: references between the copies point to the copies.
-    for &(_, new) in &pairs {
-        let parent = main.objects.get(new).and_then(|o| o.parent);
-        if let Some(p) = parent
-            && let Some(&(_, np)) = pairs.iter().find(|(old, _)| *old == p)
-            && let Some(o) = main.objects.get_mut(new, log)
-        {
-            o.parent = Some(np);
-        }
-    }
+    ids.relink(main, log);
     layers::sync_all(main, log);
     // Selection in the context view layer.
     let vis = main
@@ -249,7 +338,7 @@ fn duplicate(cx: &mut OpCtx, linked: bool) -> OpResult {
 #[operator(
     poll = poll::OBJECTMODE,
     tier = T0,
-    notes = ["materials are shared, mesh/camera/light data and actions copied (factory Duplicate Data preferences)"]
+    notes = ["materials are shared, mesh/camera/light/armature data, shape keys and active actions copied (factory Duplicate Data preferences); references between copies (parents, modifier operands, NLA strip actions) remapped"]
 )]
 fn exec(cx: &mut OpCtx, p: object::Duplicate) -> OpResult {
     duplicate(cx, p.linked.value)

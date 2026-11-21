@@ -1,0 +1,205 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": false
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    }
+  ],
+  "objects": {
+    "Armature": {
+      "type": "ARMATURE",
+      "parent": "Z_UP",
+      "matrix_world": [
+        [-0.00000013435886, 0.0, 1.0000001, 0.0],
+        [-1.0000002, -0.00000013435886, -0.00000013435887, 0.0],
+        [0.00000013435887, -1.0000001, 0.000000000000018052302, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.70710677, 0.0, 0.70710677, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Armature.001": {
+      "type": "ARMATURE",
+      "parent": "Z_UP.001",
+      "matrix_world": [
+        [-0.00000013435886, 0.0, 1.0000001, 0.0],
+        [-1.0000002, -0.00000013435886, -0.00000013435887, 0.0],
+        [0.00000013435887, -1.0000001, 0.000000000000018052302, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.70710677, 0.0, 0.70710677, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cylinder": {
+      "type": "MESH",
+      "parent": "Armature",
+      "matrix_world": [
+        [-0.00000013435886, 0.0, 1.0000001, 0.0],
+        [-1.0000002, -0.00000013435886, -0.00000013435887, 0.0],
+        [0.00000013435887, -1.0000001, 0.000000000000018052302, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [
+        ["Armature", "ARMATURE"]
+      ],
+      "materials": ["Material_001-effect"],
+      "mode": "OBJECT"
+    },
+    "Cylinder.001": {
+      "type": "MESH",
+      "parent": "Armature.001",
+      "matrix_world": [
+        [-0.00000013435886, 0.0, 1.0000001, 0.0],
+        [-1.0000002, -0.00000013435886, -0.00000013435887, 0.0],
+        [0.00000013435887, -1.0000001, 0.000000000000018052302, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [1.0, 0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [
+        ["Armature", "ARMATURE"]
+      ],
+      "materials": ["Material_001-effect"],
+      "mode": "OBJECT"
+    },
+    "Icosphere": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "P_Anim": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.0, 0.0, 0.0, 2.0],
+        [0.0, 1.0, 0.0, 2.0],
+        [0.0, 0.0, 1.0, 1.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [2.0, 2.0, 1.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Z_UP": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, -0.00000013435886, 1.0000001, 0.0],
+        [0.0, -1.0000001, -0.00000013435886, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.70710677, -0.70710677, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Z_UP.001": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, -0.00000013435886, 1.0000001, 0.0],
+        [0.0, -1.0000001, -0.00000013435886, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.70710677, -0.70710677, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Z_UP.001",
+    "selected": ["Z_UP.001", "Armature.001", "Cylinder.001"],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {
+    "out/dup.glb": {
+      "kind": "gltf",
+      "canonical": {
+        "$file": "duplicate_rig_export.out_dup.glb"
+      }
+    }
+  }
+}

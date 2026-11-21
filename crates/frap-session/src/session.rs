@@ -247,6 +247,18 @@ impl HostImpl {
         if frap_eval::animate::tags_animation_on_write(ptr.srna, prop) {
             self.tag_animation(ptr.root);
         }
+        // `rna_LayerCollection_exclude_update` tags every object of the view layer when the
+        // layer collection ends up included.
+        if prop == "exclude" && ptr.srna.is_a("LayerCollection") {
+            let obs = frap_scene::id::layers::exclude_update_objects(&self.state.main, ptr);
+            let tagged = &mut self.state.anim_tagged;
+            let mut seen: std::collections::HashSet<Root> = tagged.iter().copied().collect();
+            for ob in obs {
+                if seen.insert(Root::Id(ob.any())) {
+                    tagged.push(Root::Id(ob.any()));
+                }
+            }
+        }
     }
 
     /// The same for a call of the RNA function `func` on `ptr`.

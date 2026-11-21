@@ -196,6 +196,9 @@ impl Gpu {
         let mut out = Vec::with_capacity(width as usize * height as usize);
         let mut y0 = 0u32;
         while y0 < height {
+            // `--stmt-timeout` cancellation point (§12) per band: reading back and decoding a
+            // very large target (16000² RGBA32F: 4 GiB in about 60 bands) takes seconds.
+            frap_math::budget::check_now();
             let rows = band_rows.min(height - y0);
             let mut enc = dev.create_command_encoder(&wgpu::CommandEncoderDescriptor {
                 label: Some("frap readback"),

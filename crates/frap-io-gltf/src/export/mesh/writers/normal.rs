@@ -22,9 +22,15 @@ fn key(cx: &MeshExportCx, k: &mut SplitKey) -> Result<(), ExportError> {
     }
     let normals = cx.mesh.corner_normals();
     let mut words = Vec::with_capacity(3 * normals.len());
+    // A skinned mesh's dots hold the normals moved by `normal_transform` (`__get_normals`
+    // transforms before `populate_dots_data`), so they sort and deduplicate by those.
+    let skin = cx.skin.map(|s| s.normal_transform());
     for n in normals.iter() {
-        let n = axis(normal_key(*n), cx.settings.export_yup);
-        words.extend(n.map(key_word));
+        let n = match &skin {
+            Some(t) => crate::export::mesh::writers::skin::skinned_normal(*n, t),
+            None => normal_key(*n),
+        };
+        words.extend(axis(n, cx.settings.export_yup).map(key_word));
     }
     k.push(NAME, 3, words);
     Ok(())
