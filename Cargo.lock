@@ -186,8 +186,10 @@ checksum = "cd84020bf440612079c6ddb372d4c293a91e7f1cbc055f2cbacc1fc943b88667"
 dependencies = [
  "basisu_wasm_libcxx",
  "bindgen",
+ "bitflags",
  "cc",
  "spin",
+ "thiserror 2.0.21",
 ]
 
 [[package]]
@@ -1501,6 +1503,7 @@ version = "0.1.0"
 dependencies = [
  "frap-gltf",
  "frap-golden",
+ "frap-imbuf",
  "frap-io-gltf",
  "frap-nodes",
  "frap-ops-all",

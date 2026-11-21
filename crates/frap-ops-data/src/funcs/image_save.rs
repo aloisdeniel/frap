@@ -57,7 +57,7 @@ pub(crate) fn encoder(file_format: &str, float: bool, quality: u8) -> Result<Enc
         "BMP" => EncodeFormat::Bmp,
         other => {
             return Err(format!(
-                "frap: writing file_format '{other}' is not supported yet"
+                "writing file_format '{other}' is not supported yet"
             ));
         }
     })

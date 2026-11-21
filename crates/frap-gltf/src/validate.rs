@@ -1512,6 +1512,8 @@ pub fn validate_data<B: AsRef<[u8]>>(doc: &Document, buffers: &[B]) -> Report {
             }
         }
     }
+    // WP 7.3: the rules of the KHR_texture_basisu KTX2 images.
+    crate::ext::khr_texture_basisu::validate_images(doc, buffers, &mut r);
     r
 }
 

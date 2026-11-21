@@ -29,21 +29,31 @@
 //!   with `Image.scale`), every channel 1 unless filled, the floats of `Image.pixels` stored
 //!   into a byte image (`unit_float_to_uchar_clamp`), RGBA when alpha is filled. An image
 //!   source of size (0, 0) (a missing file) is dropped with a WARNING.
-//! - MIME type (`__gather_mime_type`): a texture feeding Alpha is PNG; `AUTO` keeps JPEG
-//!   sources (by file name, or packed bytes without one) JPEG and writes everything else
-//!   (packed images included) PNG; `JPEG` writes JPEG. Name (`__gather_name`): the common
-//!   file's base name when every source image has the same `.png`/`.jpg`/`.jpeg` path, else
-//!   the source image names without extension joined by `-` (`Image` when empty).
+//! - MIME type (`__gather_mime_type`): a texture feeding Alpha is PNG (WebP with
+//!   `export_image_format='WEBP'` or when its image is a WebP file); `AUTO` keeps JPEG and WebP
+//!   sources (by file name, or packed bytes without one) as they are and writes everything
+//!   else (packed images included) PNG; `JPEG` writes JPEG, `WEBP` WebP. Name
+//!   (`__gather_name`): the common file's base name when every source image has the same
+//!   `.png`/`.jpg`/`.jpeg` path, else the source image names without extension joined by `-`
+//!   (`Image` when empty).
+//! - WebP (`EXT_texture_webp`, WP 7.3): texture.py's `__gather_source` and
+//!   `__gather_extensions`, see [`crate::export::images_webp`]. An image re-encoded as WebP
+//!   is saved as `Image.save(quality=export_image_quality)` does: lossless at quality 100,
+//!   else lossy (libwebp, method 4). A build without the `webp-lossy` feature writes it
+//!   lossless with a WARNING.
+//! - KTX2 (`KHR_texture_basisu`, frap's `frap_texture_format='KTX2'`, WP 7.3): see
+//!   [`crate::export::images_ktx2`].
 //! - images are shared when bytes, MIME type and name are equal (`__make_image` is cached
 //!   on the buffer view, compared by bytes); `GLB`/`GLTF_EMBEDDED` store the bytes in a
-//!   buffer view, `GLTF_SEPARATE` writes `<texture dir>/<name><ext>`, every texture taking a
-//!   `-N`-suffixed name in turn (io/exp/image_data.py, `set_adjusted_name`; a texture whose
-//!   image is shared consumes a name without writing a file, as the add-on does).
+//!   buffer view, `GLTF_SEPARATE` writes `<texture dir>/<name><ext>`, every image gathered
+//!   taking a `-N`-suffixed name in turn (io/exp/image_data.py, `set_adjusted_name`; an image
+//!   that is shared, or that the WebP rules replace, consumes a name without writing a file,
+//!   as the add-on does). The images of a texture enter `images` in the add-on's traversal
+//!   order: the extensions' sources before the texture's own `source`.
 //!
 //! Image pixels come from `Image::acquire` (WP 3.2): pixel edits, `Image.scale()`, generated
-//! patterns and colour spaces are honoured. Limits: WebP sources and
-//! `export_image_format='WEBP'` are written as PNG with a WARNING (EXT_texture_webp is not
-//! written); JPEG re-encoding uses frap's encoder (not byte-identical to Blender's).
+//! patterns and colour spaces are honoured. Limits: JPEG and WebP re-encoding use frap's
+//! encoders (not byte-identical to Blender's; WebP lossless keeps the samples).
 
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -54,7 +64,8 @@ use frap_gltf::ext::khr_texture_transform::KhrTextureTransform;
 use frap_gltf::json::{
     Image as GImage, Index, MagFilter, MinFilter, Sampler, Texture, TextureInfo, WrapMode,
 };
-use frap_imbuf::{DecodedImage, EncodeFormat, PixelData};
+use frap_imbuf::basis::BasisOptions;
+use frap_imbuf::{DecodedImage, EncodeFormat, ImageError, PixelData};
 use frap_material::{ChannelSel, Filter, TexRef, Wrap};
 use frap_mesh::Mesh;
 use frap_rna::{IdRef, ImageId, MaterialId};
@@ -68,6 +79,63 @@ use crate::export::{ExportError, ExportFormat, ExportImageFormat, ExportSettings
 pub const PNG: &str = "image/png";
 /// JPEG.
 pub const JPEG: &str = "image/jpeg";
+/// WebP (`EXT_texture_webp`).
+pub const WEBP: &str = "image/webp";
+/// KTX2 (`KHR_texture_basisu`).
+pub const KTX2: &str = frap_imbuf::ktx2::MIME;
+
+/// What an exported image is encoded as (`ExportImage.file_format`, plus frap's KTX2).
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+pub(crate) enum Target {
+    /// `PNG`
+    Png,
+    /// `JPEG`
+    Jpeg,
+    /// `WEBP`
+    Webp,
+    /// KTX2 with Basis Universal supercompression.
+    Ktx2(BasisOptions),
+}
+
+impl Target {
+    /// `ExportImage.encode`'s `file_format` of a MIME type (PNG for anything else).
+    pub(crate) fn from_mime(mime: &str) -> Target {
+        match mime {
+            JPEG => Target::Jpeg,
+            WEBP => Target::Webp,
+            _ => Target::Png,
+        }
+    }
+
+    /// Whether `bytes` (an unmodified file's) can be written as they are (`__encode_from_image`'s
+    /// magic-number check).
+    fn accepts(self, bytes: &[u8]) -> bool {
+        match self {
+            Target::Png => is_png(bytes),
+            Target::Jpeg => is_jpeg(bytes),
+            Target::Webp => is_webp(bytes),
+            // A KTX2 file is copied only when it keeps every rule of KHR_texture_basisu for
+            // the texture's colour space; another (an odd size, a wrong transfer function, a
+            // raw format) is re-encoded from its decoded pixels.
+            Target::Ktx2(o) => {
+                use frap_gltf::ext::khr_texture_basisu::{Usage, ktx2_issues};
+                let usage = if o.srgb { Usage::Colour } else { Usage::Data };
+                frap_imbuf::ktx2::is_ktx2(bytes) && ktx2_issues(bytes, Some(usage)).is_empty()
+            }
+        }
+    }
+}
+
+/// An image gathered for a texture but not yet in `images` (`gltf2_io.Image` before the
+/// traversal numbers it): its file name is taken when it is gathered.
+#[derive(Clone, Debug)]
+pub(crate) struct PendingImage {
+    pub bytes: Arc<[u8]>,
+    pub mime: &'static str,
+    pub name: String,
+    /// `GLTF_SEPARATE`: the URI path relative to the glTF file.
+    rel: Option<String>,
+}
 
 /// The material feature a texture is gathered for (the add-on's shader sockets).
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
@@ -130,7 +198,7 @@ enum Fill {
 
 /// `ExportImage`: channel fills in insertion order (a refill keeps the position).
 #[derive(Clone, Debug, Default, PartialEq, Eq, Hash)]
-struct ExportImage {
+pub(crate) struct ExportImage {
     fills: Vec<(u8, Fill)>,
 }
 
@@ -187,8 +255,8 @@ impl ExportImage {
 #[derive(Default)]
 pub struct ImageCache {
     samplers: HashMap<(u32, u32, Option<u32>, Option<u32>), Index>,
-    /// Encoded bytes per image description and MIME type (`None`: cannot be written).
-    encoded: HashMap<(ExportImage, &'static str), Option<Arc<[u8]>>>,
+    /// Encoded bytes per image description and target (`None`: cannot be written).
+    encoded: HashMap<(ExportImage, Target), Option<Arc<[u8]>>>,
     /// glTF images by (bytes, MIME type, name).
     images: HashMap<(Arc<[u8]>, &'static str, String), Index>,
     textures: HashMap<TextureUse, Option<Index>>,
@@ -311,20 +379,25 @@ pub fn mime_type(settings: &ExportSettings, im: &Image, channel: ChannelSel) -> 
     )
 }
 
-/// `__gather_mime_type`: `happy` is the image written as is (`None` for a packed image),
-/// `alpha` whether a socket of the texture is an Alpha socket.
+/// `__gather_mime_type`: `happy` is the image written as is (`export_image.blender_image()`:
+/// `None` when channels are packed), `alpha` whether a socket of the texture is an Alpha
+/// socket.
 fn mime_for(settings: &ExportSettings, happy: Option<&Image>, alpha: bool) -> &'static str {
-    // WebP is written as PNG (no EXT_texture_webp yet, module documentation).
-    if alpha || settings.export_image_format == ExportImageFormat::Webp {
-        return PNG;
+    let webp_format = settings.export_image_format == ExportImageFormat::Webp;
+    if alpha {
+        // "force png or webp if Alpha contained so we can export alpha"
+        return if webp_format || happy.is_some_and(is_webp_image) {
+            WEBP
+        } else {
+            PNG
+        };
     }
-    if settings.wants_jpeg() {
-        return JPEG;
-    }
-    if happy.is_some_and(is_jpeg_image) {
-        JPEG
-    } else {
-        PNG
+    match settings.export_image_format {
+        ExportImageFormat::Webp => WEBP,
+        _ if settings.wants_jpeg() => JPEG,
+        _ if happy.is_some_and(is_jpeg_image) => JPEG,
+        _ if happy.is_some_and(is_webp_image) => WEBP,
+        _ => PNG,
     }
 }
 
@@ -470,21 +543,95 @@ fn under_black_byte(p: &mut [u8]) {
     p[3] = 255;
 }
 
-/// `Image.save()` of a copy of `im` with pixels `buf` as `mime` (`_encode_temp_image` after
+/// How a target is encoded: a `frap_imbuf` format, or the Basis Universal encoder.
+#[derive(Clone, Debug, PartialEq)]
+enum Format {
+    Image(EncodeFormat),
+    Ktx2(BasisOptions),
+}
+
+impl Format {
+    /// `_encode_temp_image`: `save(quality=export_image_quality)` for JPEG and WebP (WebP
+    /// lossless at 100, `format_webp.cc`), 16-bit PNG for a float buffer.
+    fn of(target: Target, float: bool, quality: u8) -> Format {
+        Format::Image(match target {
+            Target::Png => EncodeFormat::Png {
+                bit_depth: if float { 16 } else { 8 },
+                compression: 15,
+            },
+            Target::Jpeg => EncodeFormat::Jpeg { quality },
+            Target::Webp => EncodeFormat::WebP {
+                lossless: quality >= 100,
+                quality,
+            },
+            Target::Ktx2(o) => return Format::Ktx2(o),
+        })
+    }
+}
+
+/// Encoded bytes; `lossless_fallback`: a lossy WebP was written lossless (no `webp-lossy`).
+#[derive(Debug)]
+struct Encoded {
+    bytes: Vec<u8>,
+    lossless_fallback: bool,
+}
+
+/// Encodes `img`; a lossy WebP in a build without the `webp-lossy` feature is written
+/// lossless instead (the caller warns).
+fn encode_pixels(img: &DecodedImage, format: &Format) -> Result<Encoded, ImageError> {
+    let done = |bytes| Encoded {
+        bytes,
+        lossless_fallback: false,
+    };
+    match format {
+        Format::Ktx2(o) => frap_imbuf::basis::encode_ktx2_with(img, o).map(done),
+        Format::Image(f @ EncodeFormat::WebP { quality, .. }) => match frap_imbuf::encode(img, f) {
+            Err(ImageError::Unsupported(m)) if m.contains("webp-lossy") => {
+                let lossless = EncodeFormat::WebP {
+                    lossless: true,
+                    quality: *quality,
+                };
+                Ok(Encoded {
+                    bytes: frap_imbuf::encode(img, &lossless)?,
+                    lossless_fallback: true,
+                })
+            }
+            r => r.map(done),
+        },
+        Format::Image(f) => frap_imbuf::encode(img, f).map(done),
+    }
+}
+
+/// `Image.save()` of a copy of `im` with pixels `buf` as `target` (`_encode_temp_image` after
 /// `make_temp_image_copy`), following `BKE_image_save` as WP 3.2 ports it: the buffer's
 /// colour mode (RGB for 24 planes, and for an RGBA buffer whose alpha is opaque), 8-bit PNG
 /// for a byte buffer and 16-bit for a float one, a float buffer converted from scene linear
 /// to the image's colour space (`sRGB` for a generated image) and unpremultiplied.
-fn save_copy(g: &Gather, im: &Image, buf: &ImBuf, mime: &'static str) -> Option<Vec<u8>> {
-    encode_copy(im, buf, mime, g.settings.export_image_quality)
+fn save_copy(g: &Gather, im: &Image, buf: &ImBuf, target: Target) -> Result<Encoded, ImageError> {
+    encode_copy(im, buf, target, g.settings.export_image_quality)
 }
 
-/// [`save_copy`] with the JPEG quality given. Alpha is composited over black
+/// [`save_copy`] with the JPEG / WebP quality given. Alpha is composited over black
 /// (`IMB_alpha_under_color`) only when the buffer's own colour mode has no alpha (24 planes,
 /// or an RGBA buffer whose alpha is opaque); a JPEG written from an RGBA buffer drops the
 /// alpha and keeps the straight colour (verified on 5.2.4: a generated image of colour
 /// (0.7, 0.1, 0.3, 0.2) exports as (0.702, 0.106, 0.306) with `export_image_format='JPEG'`).
-fn encode_copy(im: &Image, buf: &ImBuf, mime: &'static str, quality: u8) -> Option<Vec<u8>> {
+/// WebP and KTX2 are 8-bit: a float buffer is converted as for an 8-bit PNG.
+///
+/// A greyscale buffer (8 planes: a 1-channel PNG or JPEG file) cannot be saved as WebP:
+/// Blender's OpenImageIO writer refuses it ("webp does not support 1-channel images", then
+/// `Image.save` raises "Could not write image: internal error, see console"), so the add-on
+/// logs "Error while saving image" and gets no bytes (verified on 5.2.4: no WebP image, and
+/// with `export_image_format='WEBP'` a texture without `source`).
+fn encode_copy(
+    im: &Image,
+    buf: &ImBuf,
+    target: Target,
+    quality: u8,
+) -> Result<Encoded, ImageError> {
+    if target == Target::Webp && buf.planes == 8 {
+        return Err(ImageError::Encode(WEBP_GREY_ERROR.into()));
+    }
     let mut channels: u8 = match buf.planes {
         8 => 1,
         24 | 0 => 3,
@@ -503,15 +650,10 @@ fn encode_copy(im: &Image, buf: &ImBuf, mime: &'static str, quality: u8) -> Opti
     let float = buf.is_float();
     // From the buffer's colour mode, before JPEG narrows the output to RGB.
     let under_black = channels != 4;
-    let format = if mime == JPEG {
+    if target == Target::Jpeg {
         channels = channels.min(3);
-        EncodeFormat::Jpeg { quality }
-    } else {
-        EncodeFormat::Png {
-            bit_depth: if float { 16 } else { 8 },
-            compression: 15,
-        }
-    };
+    }
+    let format = Format::of(target, float, quality);
     let row = buf.x as usize * 4;
     let pixels = match &buf.data {
         ImBufData::Byte(b) => {
@@ -528,7 +670,9 @@ fn encode_copy(im: &Image, buf: &ImBuf, mime: &'static str, quality: u8) -> Opti
             // 16-bit PNG: unpremultiplied after the conversion when converted or data;
             // 8-bit output: before it (`IMB_byte_from_float` with `predivide`).
             let (before, after) = match &format {
-                EncodeFormat::Png { bit_depth: 16, .. } => (false, convert || is_data),
+                Format::Image(EncodeFormat::Png { bit_depth: 16, .. }) => {
+                    (false, convert || is_data)
+                }
                 _ => (!packed, false),
             };
             let divide = |p: &mut [f32]| {
@@ -556,16 +700,65 @@ fn encode_copy(im: &Image, buf: &ImBuf, mime: &'static str, quality: u8) -> Opti
             PixelData::F32(v)
         }
     };
-    let img = DecodedImage::new(buf.x, buf.y, 4, pixels)
-        .ok()?
-        .with_channels(channels)
-        .ok()?;
-    frap_imbuf::encode(&img, &format).ok()
+    let img = DecodedImage::new(buf.x, buf.y, 4, pixels)?.with_channels(channels)?;
+    encode_pixels(&img, &format)
+}
+
+/// Why a greyscale (8-plane) buffer cannot be saved as WebP (`Image.save`'s error after
+/// OpenImageIO's).
+pub(crate) const WEBP_GREY_ERROR: &str = "Error: Could not write image: internal error, see console (webp does not support \
+     1-channel images)";
+
+/// The NOT_IMPLEMENTED error of `frap_texture_format='KTX2'` in a build without the encoder.
+pub(crate) fn ktx2_encoder_missing() -> ExportError {
+    ExportError::NotImplemented(
+        "frap_texture_format='KTX2' needs frap built with the `basisu-encode` feature \
+         (the Basis Universal encoder)"
+            .into(),
+    )
+}
+
+/// The outcome of an encode for `name`: the bytes, `None` with a WARNING when the image cannot
+/// be written, the [`ktx2_encoder_missing`] error when KTX2 cannot be encoded at all.
+fn finish_encode(
+    g: &mut Gather,
+    name: &str,
+    target: Target,
+    r: Result<Encoded, ImageError>,
+) -> Result<Option<Vec<u8>>, ExportError> {
+    match r {
+        Ok(e) => {
+            if e.lossless_fallback {
+                g.warn(format!(
+                    "image '{name}': lossy WebP needs frap built with the `webp-lossy` \
+                     feature; written as lossless WebP"
+                ));
+            }
+            Ok(Some(e.bytes))
+        }
+        Err(ImageError::Unsupported(_)) if matches!(target, Target::Ktx2(_)) => {
+            Err(ktx2_encoder_missing())
+        }
+        Err(ImageError::Encode(m)) if m == WEBP_GREY_ERROR => {
+            // `_encode_temp_image`: "Error while saving image: %s" % e (then b'').
+            g.warn(format!("Error while saving image: image '{name}': {m}"));
+            Ok(None)
+        }
+        Err(e) => {
+            // `_encode_temp_image`: "Error while saving image: %s" (then b'').
+            g.warn(format!("Error while saving image: image '{name}': {e}"));
+            Ok(None)
+        }
+    }
 }
 
 /// `__encode_from_image`: the file bytes of an unmodified FILE/SEQUENCE image whose magic
-/// number matches `mime`, else its pixels re-encoded.
-fn encode_happy(g: &mut Gather, im: &Image, mime: &'static str) -> Option<Vec<u8>> {
+/// number matches `target`, else its pixels re-encoded.
+fn encode_happy(
+    g: &mut Gather,
+    im: &Image,
+    target: Target,
+) -> Result<Option<Vec<u8>>, ExportError> {
     let name = im.header.name.clone();
     let mut data = None;
     if is_passthrough_source(im) && !im.is_dirty() {
@@ -575,31 +768,27 @@ fn encode_happy(g: &mut Gather, im: &Image, mime: &'static str) -> Option<Vec<u8
             data = std::fs::read(resolve(g, &im.filepath)).ok();
         }
     }
-    if let Some(b) = &data {
-        if (mime == PNG && is_png(b)) || (mime == JPEG && is_jpeg(b)) {
-            return data;
-        }
-        if is_webp(b) {
-            g.warn(format!(
-                "image '{name}': WebP textures (EXT_texture_webp) are not exported yet; written as PNG"
-            ));
-        }
+    if let Some(b) = &data
+        && target.accepts(b)
+    {
+        return Ok(data);
     }
     let Some(buf) = acquire(g, im) else {
         g.warn(format!(
             "Error while saving image: image '{name}' has no data"
         ));
-        return None;
+        return Ok(None);
     };
-    let out = save_copy(g, im, &buf, mime);
-    if out.is_none() {
-        g.warn(format!("image '{name}' not exported: it cannot be encoded"));
-    }
-    out
+    let r = save_copy(g, im, &buf, target);
+    finish_encode(g, &name, target, r)
 }
 
 /// `__encode_unhappy`: the channels packed into a new image (see the module documentation).
-fn encode_unhappy(g: &mut Gather, ex: &ExportImage, mime: &'static str) -> Option<Vec<u8>> {
+fn encode_unhappy(
+    g: &mut Gather,
+    ex: &ExportImage,
+    target: Target,
+) -> Result<Option<Vec<u8>>, ExportError> {
     let main = g.main;
     let images = ex.images();
     let (w, h, out) = if images.is_empty() {
@@ -617,8 +806,12 @@ fn encode_unhappy(g: &mut Gather, ex: &ExportImage, mime: &'static str) -> Optio
         );
         let mut out = vec![1.0f32; w as usize * h as usize * 4];
         for r in &images {
-            let im = main.images.get(*r)?;
-            let mut buf = acquire(g, im)?;
+            let Some(im) = main.images.get(*r) else {
+                return Ok(None);
+            };
+            let Some(mut buf) = acquire(g, im) else {
+                return Ok(None);
+            };
             if (buf.x, buf.y) != (w, h) {
                 buf.scale(w, h);
             }
@@ -645,25 +838,43 @@ fn encode_unhappy(g: &mut Gather, ex: &ExportImage, mime: &'static str) -> Optio
     if alpha && bytes.chunks_exact(4).all(|p| p[3] == 255) {
         channels = 3;
     }
-    let format = if mime == JPEG {
+    if target == Target::Jpeg {
         channels = 3;
-        EncodeFormat::Jpeg {
-            quality: g.settings.export_image_quality,
-        }
-    } else {
-        EncodeFormat::Png {
-            bit_depth: 8,
-            compression: 15,
-        }
-    };
+    }
+    let format = Format::of(target, false, g.settings.export_image_quality);
     if channels == 3 && alpha {
         bytes.chunks_exact_mut(4).for_each(under_black_byte);
     }
-    let img = DecodedImage::new(w, h, 4, PixelData::U8(bytes))
-        .ok()?
-        .with_channels(channels)
-        .ok()?;
-    frap_imbuf::encode(&img, &format).ok()
+    let img =
+        DecodedImage::new(w, h, 4, PixelData::U8(bytes)).and_then(|i| i.with_channels(channels));
+    let r = img.and_then(|i| encode_pixels(&i, &format));
+    let names: Vec<&Image> = images.iter().filter_map(|r| main.images.get(*r)).collect();
+    let name = images_name(&names);
+    finish_encode(g, &name, target, r)
+}
+
+/// The encoded bytes of `ex` as `target` (cached per description and target; `None` with a
+/// WARNING when the image cannot be written).
+pub(crate) fn encode(
+    g: &mut Gather,
+    ex: &ExportImage,
+    target: Target,
+) -> Result<Option<Arc<[u8]>>, ExportError> {
+    let key = (ex.clone(), target);
+    if let Some(b) = g.images.encoded.get(&key) {
+        return Ok(b.clone());
+    }
+    let main = g.main;
+    let b = match ex.happy() {
+        Some(r) => match main.images.get(r) {
+            Some(im) => encode_happy(g, im, target)?,
+            None => None,
+        },
+        None => encode_unhappy(g, ex, target)?,
+    };
+    let b: Option<Arc<[u8]>> = b.filter(|b| !b.is_empty()).map(Arc::from);
+    g.images.encoded.insert(key, b.clone());
+    Ok(b)
 }
 
 /// `urllib.parse.quote(path)` (safe: `/`, letters, digits, `_.-~`).
@@ -775,7 +986,7 @@ pub fn gather_texture_from(
     if let Some(i) = g.images.textures.get(&usage) {
         return Ok(*i);
     }
-    let i = gather_new_texture(g, inputs)?;
+    let i = gather_new_texture(g, inputs, usage.1)?;
     g.images.textures.insert(usage, i);
     Ok(i)
 }
@@ -828,7 +1039,11 @@ pub fn slot_inputs(slot: TextureSlot, t: &TexRef) -> Vec<TexInput<'_>> {
 pub const SAMPLER_OF_FIRST_NODE: &str = "More than one shader node tex image used for a texture. \
      The resulting glTF sampler will behave like the first shader node tex image.";
 
-fn gather_new_texture(g: &mut Gather, inputs: &[TexInput]) -> Result<Option<Index>, ExportError> {
+fn gather_new_texture(
+    g: &mut Gather,
+    inputs: &[TexInput],
+    slot: TextureSlot,
+) -> Result<Option<Index>, ExportError> {
     let main = g.main;
     let Some(first) = inputs.first() else {
         return Ok(None);
@@ -839,20 +1054,11 @@ fn gather_new_texture(g: &mut Gather, inputs: &[TexInput]) -> Result<Option<Inde
     if inputs.len() > 1 {
         g.warn(SAMPLER_OF_FIRST_NODE);
     }
-    if g.settings.export_image_format == ExportImageFormat::Webp {
-        g.warn("export_image_format='WEBP' is not supported yet (EXT_texture_webp); images are written as PNG");
-    }
     let ex = compose(g, inputs);
     if ex.fills.is_empty() {
         return Ok(None);
     }
     let happy = ex.happy().and_then(|r| main.images.get(r));
-    if let Some(im) = happy.filter(|im| is_webp_image(im)) {
-        g.warn(format!(
-            "image '{}': WebP textures (EXT_texture_webp) are not exported yet; written as PNG",
-            im.header.name
-        ));
-    }
     let alpha = inputs.iter().any(|i| i.role == Role::Alpha);
     let mime = mime_for(g.settings, happy, alpha);
     let names: Vec<&Image> = ex
@@ -861,29 +1067,35 @@ fn gather_new_texture(g: &mut Gather, inputs: &[TexInput]) -> Result<Option<Inde
         .filter_map(|r| main.images.get(*r))
         .collect();
     let name = images_name(&names);
-    // Encode first: an image that cannot be written leaves no sampler behind.
-    let key = (ex.clone(), mime);
-    let bytes = match g.images.encoded.get(&key) {
-        Some(b) => b.clone(),
+    // `image.gather_image`. Encode first: an image that cannot be written leaves no sampler
+    // behind (`gather_texture`: "most viewers can't handle missing source properties")…
+    let webp_format = g.settings.export_image_format == ExportImageFormat::Webp;
+    let source = match encode(g, &ex, Target::from_mime(mime))? {
+        Some(bytes) => Some(make_image(g, bytes, mime, name.clone())),
         None => {
-            let b = match ex.happy() {
-                Some(r) => match main.images.get(r) {
-                    Some(im) => encode_happy(g, im, mime),
-                    None => None,
-                },
-                None => encode_unhappy(g, &ex, mime),
-            };
-            let b: Option<Arc<[u8]>> = b.filter(|b| !b.is_empty()).map(Arc::from);
-            g.images.encoded.insert(key, b.clone());
-            b
+            g.warn(format!(
+                "image '{name}': Image data is empty, not exporting image"
+            ));
+            if !webp_format {
+                return Ok(None);
+            }
+            None
         }
     };
-    let Some(bytes) = bytes else {
-        g.warn(format!(
-            "image '{name}': Image data is empty, not exporting image"
-        ));
-        return Ok(None);
+    // `texture.py`: `__gather_source` and `__gather_extensions` (EXT_texture_webp), then frap's
+    // KHR_texture_basisu.
+    let (source, webp) = match source {
+        Some(s) => crate::export::images_webp::gather(g, &ex, s)?,
+        None => (None, None),
     };
+    // …except with `export_image_format='WEBP'`: `__gather_extensions` sets the extension's
+    // `source` to the missing image (`None`, dropped when written) and removes the texture's,
+    // so the texture is written with its sampler, no image, and EXT_texture_webp used and
+    // required (verified on 5.2.4 with a greyscale PNG: `{"extensions": {}, "sampler": 0}`).
+    if webp_format && webp.is_none() {
+        g.use_extension(frap_gltf::ext::ext_texture_webp::ExtTextureWebp::NAME, true);
+    }
+    let basisu = crate::export::images_ktx2::gather(g, &ex, slot, first.tex, name)?;
     // Members in order: sampler, then source.
     let s = sampler(first.tex);
     let skey = (
@@ -901,21 +1113,61 @@ fn gather_new_texture(g: &mut Gather, inputs: &[TexInput]) -> Result<Option<Inde
             i
         }
     };
-    let image_index = gather_image(g, bytes, mime, name);
-    g.doc.textures.push(Texture {
+    // The traversal numbers the images: the texture's `extensions` before its `source`.
+    let mut texture = Texture {
         sampler: Some(sampler_index),
-        source: Some(image_index),
         ..Texture::default()
-    });
+    };
+    if let Some((img, required)) = webp {
+        let i = push_image(g, img);
+        texture
+            .extensions
+            .set(Some(frap_gltf::ext::ext_texture_webp::ExtTextureWebp {
+                source: Some(i),
+                ..Default::default()
+            }));
+        g.use_extension(
+            frap_gltf::ext::ext_texture_webp::ExtTextureWebp::NAME,
+            required,
+        );
+    }
+    if let Some(img) = basisu {
+        let i = push_image(g, img);
+        texture
+            .extensions
+            .set(Some(frap_gltf::ext::khr_texture_basisu::KhrTextureBasisu {
+                source: Some(i),
+                ..Default::default()
+            }));
+        // Required when the texture has no core `source` to fall back on (the extension's
+        // specification: `source` may be omitted only when it is required).
+        g.use_extension(
+            frap_gltf::ext::khr_texture_basisu::KhrTextureBasisu::NAME,
+            source.is_none(),
+        );
+    }
+    texture.source = source.map(|s| push_image(g, s));
+    g.doc.textures.push(texture);
     Ok(Some((g.doc.textures.len() - 1) as Index))
 }
 
-/// The image index for encoded `bytes` (`__make_image`, shared by bytes, MIME type and name).
-fn gather_image(g: &mut Gather, bytes: Arc<[u8]>, mime: &'static str, name: String) -> Index {
+/// An image gathered from encoded `bytes`: `GLTF_SEPARATE` takes its file name now
+/// (`set_real_uri`: every gathered image takes a name, written or not).
+pub(crate) fn make_image(
+    g: &mut Gather,
+    bytes: Arc<[u8]>,
+    mime: &'static str,
+    name: String,
+) -> PendingImage {
     let separate = g.settings.export_format == ExportFormat::GltfSeparate;
-    // `set_real_uri`: every gathered image takes a file name, used or not.
     let rel = separate.then(|| {
-        let ext = if mime == JPEG { ".jpg" } else { ".png" };
+        // `ImageData.file_extension` (`.ktx2` for frap's KTX2).
+        let ext = match mime {
+            JPEG => ".jpg",
+            WEBP => ".webp",
+            KTX2 => ".ktx2",
+            _ => ".png",
+        };
         let file = adjusted_name(&name, ext, &g.images.file_names);
         g.images.file_names.push(file.clone());
         let dir = g
@@ -929,21 +1181,32 @@ fn gather_image(g: &mut Gather, bytes: Arc<[u8]>, mime: &'static str, name: Stri
             format!("{}/{file}", dir.replace('\\', "/"))
         }
     });
-    let key = (bytes.clone(), mime, name.clone());
+    PendingImage {
+        bytes,
+        mime,
+        name,
+        rel,
+    }
+}
+
+/// The image index of a gathered image (`__make_image`, shared by bytes, MIME type and name;
+/// a shared image keeps the first one's file).
+fn push_image(g: &mut Gather, p: PendingImage) -> Index {
+    let key = (p.bytes.clone(), p.mime, p.name.clone());
     if let Some(i) = g.images.images.get(&key) {
         return *i;
     }
     let mut img = GImage {
-        mime_type: Some(mime.to_owned()),
-        name: Some(name),
+        mime_type: Some(p.mime.to_owned()),
+        name: Some(p.name),
         ..GImage::default()
     };
-    match rel {
+    match p.rel {
         Some(rel) => {
             img.uri = Some(path_to_uri(&rel));
-            g.files.push((rel, bytes.to_vec()));
+            g.files.push((rel, p.bytes.to_vec()));
         }
-        None => img.buffer_view = Some(g.buf.push_view(&bytes, 4, None, None)),
+        None => img.buffer_view = Some(g.buf.push_view(&p.bytes, 4, None, None)),
     }
     g.doc.images.push(img);
     let i = (g.doc.images.len() - 1) as Index;
@@ -1144,16 +1407,21 @@ mod tests {
         im.generated_depth = 32;
         im.generated_color = [0.7, 0.1, 0.3, 0.2];
         let buf = im.generated_buffer().unwrap();
-        let jpeg = encode_copy(&im, &buf, JPEG, 75).unwrap();
+        let enc = |im: &Image, buf: &ImBuf, t| encode_copy(im, buf, t, 75).unwrap().bytes;
+        let jpeg = enc(&im, &buf, Target::Jpeg);
         assert!(is_jpeg(&jpeg));
         let [r, g, b] = first_rgb(&jpeg);
         for (got, want) in [(r, 179u8), (g, 27), (b, 78)] {
             assert!(got.abs_diff(want) <= 3, "({r}, {g}, {b})");
         }
         // PNG keeps the alpha channel and the straight colour.
-        let png = encode_copy(&im, &buf, PNG, 75).unwrap();
+        let png = enc(&im, &buf, Target::Png);
         let d = frap_imbuf::decode(&png).unwrap();
         assert_eq!(d.channels, 4);
+        // So does WebP (lossless at quality 100: the PNG's samples).
+        let webp = encode_copy(&im, &buf, Target::Webp, 100).unwrap().bytes;
+        assert!(is_webp(&webp) && webp.get(12..16) == Some(b"VP8L"));
+        assert_eq!(frap_imbuf::decode(&webp).unwrap(), d);
         // A 24-plane buffer whose pixels carry alpha (`pixels = …` on an image made without
         // alpha) is composited over black, as Blender does (0.7 × 0.2 = 0.14 → 36).
         let mut im = Image::new("N", 4, 4);
@@ -1161,12 +1429,109 @@ mod tests {
         let mut buf = im.generated_buffer().unwrap();
         buf.planes = 24;
         for bytes in [
-            encode_copy(&im, &buf, PNG, 75).unwrap(),
-            encode_copy(&im, &buf, JPEG, 75).unwrap(),
+            enc(&im, &buf, Target::Png),
+            enc(&im, &buf, Target::Jpeg),
+            enc(&im, &buf, Target::Webp),
         ] {
             let [r, _, _] = first_rgb(&bytes);
             assert!(r.abs_diff(36) <= 3, "{r}");
         }
+    }
+
+    #[test]
+    fn webp_quality_selects_lossless_or_lossy() {
+        let mut im = Image::new("Q", 8, 8);
+        im.generated_color = [0.2, 0.4, 0.6, 1.0];
+        let buf = im.generated_buffer().unwrap();
+        let lossless = encode_copy(&im, &buf, Target::Webp, 100).unwrap();
+        assert!(!lossless.lossless_fallback);
+        assert_eq!(lossless.bytes.get(12..16), Some(&b"VP8L"[..]));
+        // Below 100: lossy (libwebp), or lossless with the fallback flag without the feature.
+        let lossy = encode_copy(&im, &buf, Target::Webp, 75).unwrap();
+        let chunk = lossy.bytes.get(12..16).unwrap();
+        if lossy.lossless_fallback {
+            assert_eq!(chunk, b"VP8L");
+        } else {
+            assert_eq!(chunk, b"VP8 ");
+        }
+    }
+
+    #[test]
+    fn targets_accept_their_own_magic_numbers() {
+        assert_eq!(Target::from_mime(PNG), Target::Png);
+        assert_eq!(Target::from_mime(JPEG), Target::Jpeg);
+        assert_eq!(Target::from_mime(WEBP), Target::Webp);
+        assert!(Target::Png.accepts(b"\x89PNG\r\n"));
+        assert!(Target::Webp.accepts(b"RIFF\0\0\0\0WEBPVP8L"));
+        assert!(!Target::Webp.accepts(b"\x89PNG\r\n"));
+        // A KTX2 file is copied only when it keeps the KHR_texture_basisu rules for the
+        // texture's colour space (a UASTC sRGB 32x32 grid).
+        let grid: &[u8] =
+            include_bytes!("../../../../tests/golden/fixtures/gltf/textures/ktx2/grid_uastc.ktx2");
+        let k = Target::Ktx2(BasisOptions::new(frap_imbuf::basis::BasisMode::Etc1s));
+        assert!(k.accepts(grid));
+        assert!(!k.accepts(&frap_imbuf::ktx2::IDENTIFIER));
+        assert!(!k.accepts(b"\x89PNG"));
+        let linear =
+            Target::Ktx2(BasisOptions::new(frap_imbuf::basis::BasisMode::Etc1s).with_srgb(false));
+        assert!(!linear.accepts(grid), "sRGB data for a non-colour texture");
+        let mut odd = grid.to_vec();
+        odd[20..24].copy_from_slice(&30u32.to_le_bytes());
+        assert!(!k.accepts(&odd), "pixelWidth 30");
+    }
+
+    /// A greyscale (8-plane) buffer cannot be written as WebP (Blender 5.2.4: OpenImageIO
+    /// "webp does not support 1-channel images"); PNG, JPEG and grey-alpha WebP can.
+    #[test]
+    fn grey_buffers_are_not_written_as_webp() {
+        let mut im = Image::new("G", 4, 4);
+        im.generated_color = [0.5, 0.5, 0.5, 1.0];
+        let mut buf = im.generated_buffer().unwrap();
+        buf.planes = 8;
+        let e = encode_copy(&im, &buf, Target::Webp, 75).unwrap_err();
+        assert_eq!(e, ImageError::Encode(WEBP_GREY_ERROR.into()));
+        assert!(is_png(
+            &encode_copy(&im, &buf, Target::Png, 75).unwrap().bytes
+        ));
+        assert!(is_jpeg(
+            &encode_copy(&im, &buf, Target::Jpeg, 75).unwrap().bytes
+        ));
+        buf.planes = 16;
+        assert!(is_webp(
+            &encode_copy(&im, &buf, Target::Webp, 75).unwrap().bytes
+        ));
+    }
+
+    #[test]
+    fn webp_mime_rules() {
+        // `__gather_mime_type`: WEBP format writes WebP, alpha included; AUTO keeps WebP files.
+        let webp = ExportSettings {
+            export_image_format: ExportImageFormat::Webp,
+            ..ExportSettings::default()
+        };
+        let png_file = Image::new("P", 1, 1);
+        assert_eq!(mime_type(&webp, &png_file, ChannelSel::Rgb), WEBP);
+        assert_eq!(mime_type(&webp, &png_file, ChannelSel::Rgba), WEBP);
+        let auto = ExportSettings::default();
+        let mut w = Image::new("W", 1, 1);
+        w.source = "FILE".into();
+        w.filepath = "//t/w.WEBP".into();
+        assert_eq!(mime_type(&auto, &w, ChannelSel::Rgb), WEBP);
+        assert_eq!(mime_type(&auto, &w, ChannelSel::Rgba), WEBP);
+        // JPEG format: JPEG even for a WebP file; alpha: the WebP file stays WebP.
+        let jpeg = ExportSettings {
+            export_image_format: ExportImageFormat::Jpeg,
+            ..ExportSettings::default()
+        };
+        assert_eq!(mime_type(&jpeg, &w, ChannelSel::Rgb), JPEG);
+        assert_eq!(mime_type(&jpeg, &w, ChannelSel::Rgba), WEBP);
+        // A packed WebP without a file path, by its magic number.
+        w.filepath.clear();
+        w.packed_file = Some(Arc::new(EncodedImage {
+            bytes: b"RIFF\0\0\0\0WEBPVP8L".to_vec(),
+            mime: "image/webp".into(),
+        }));
+        assert_eq!(mime_type(&auto, &w, ChannelSel::Rgb), WEBP);
     }
 
     #[test]

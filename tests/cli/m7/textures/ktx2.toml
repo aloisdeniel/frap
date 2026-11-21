@@ -1,0 +1,14 @@
+# WP 7.3: KHR_texture_basisu import (a frap extension). `ktx2_only.gltf` (ktx2.in/, written by
+# crates/frap-ops-io-tests `write_ktx2_inputs`) has two textures whose only image is a UASTC
+# KTX2 file and requires the extension, which Blender 5.2.4 refuses ("Extension
+# KHR_texture_basisu is not available on this addon version", deviation D-133). frap imports it:
+# the images are packed KTX2 (`file_format` 'KTX2', 32x32, the file's 622 bytes), the colour
+# spaces follow the material sockets (sRGB base colour, Non-Color roughness), the pixels are
+# the transcoded ones (the metallic-roughness image: R and B white, G the roughness 0.6). A
+# plain re-export writes PNG; `frap_texture_format='KTX2'` copies the unmodified KTX2 files as
+# they are (no encoder needed); `bpy.data.images.load` reads a .ktx2 file (Blender loads it
+# with size (0, 0)); an image that must be encoded needs the `basisu-encode` feature, off in the
+# default build (NOT_IMPLEMENTED). Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--empty", "--verbosity", "minimal"]
+fs.sandbox = true

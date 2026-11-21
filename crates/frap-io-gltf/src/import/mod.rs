@@ -60,9 +60,10 @@ use convert::Units;
 use scenes::CollTarget;
 use vnode::VTree;
 
-/// Extensions the add-on imports (`glTFImporter.extensions_managed`): a file that *requires*
-/// any other extension is refused with Blender's message.
-pub const EXTENSIONS_MANAGED: [&str; 22] = [
+/// Extensions the add-on imports (`glTFImporter.extensions_managed`), plus frap's
+/// `KHR_texture_basisu` (WP 7.3; Blender refuses files that require it, deviation D-133): a
+/// file that *requires* any other extension is refused with Blender's message.
+pub const EXTENSIONS_MANAGED: [&str; 23] = [
     "KHR_materials_pbrSpecularGlossiness",
     "KHR_lights_punctual",
     "KHR_materials_unlit",
@@ -85,6 +86,7 @@ pub const EXTENSIONS_MANAGED: [&str; 22] = [
     "KHR_materials_anisotropy",
     "KHR_materials_dispersion",
     "KHR_materials_iridescence",
+    "KHR_texture_basisu",
 ];
 
 /// Why an import failed. The messages are the add-on's `ImportError` texts where it has one

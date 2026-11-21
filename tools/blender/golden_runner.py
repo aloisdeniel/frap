@@ -186,6 +186,7 @@ NORMALISE = {
     "D-130": None,
     "D-131": None,
     "D-132": ("comparator", "gltf/draco goldens compare axis-aligned or lossless meshes; the rest within 1e-6 in import/decompress/draco.rs"),
+    "D-133": ("cases", "KTX2 cases import files with fallbacks (gltf/textures/ktx2_import); KTX2-only files are frap-only"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

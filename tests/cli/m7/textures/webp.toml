@@ -1,0 +1,11 @@
+# WP 7.3: an agent exports the factory cube with a UV-grid base colour texture as WebP
+# (`export_image_format='WEBP'` at quality 100: lossless, EXT_texture_webp required, no PNG) and
+# with `export_image_add_webp` (a PNG source plus the WebP one), then imports both into an
+# empty file: the WebP-only file loads a WebP image; with both images the add-on's
+# `import_webp_texture` picks the PNG (False, the default) or the WebP (True). Every outcome
+# and value equals Blender 5.2.4's (checked statement by statement; the exported files
+# themselves are compared with Blender's by crates/frap-ops-io-tests/tests/gltf_textures.rs).
+# Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

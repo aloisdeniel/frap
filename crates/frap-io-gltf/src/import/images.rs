@@ -6,6 +6,12 @@
 //! Ported from io_scene_gltf2 5.2.41 `blender/imp/image.py` (`BlenderImage.create`,
 //! `create_from_file`, `create_from_data`, `_placeholder_image`) and `texture.py`
 //! (`get_source`), Apache-2.0, The glTF-Blender-IO authors.
+//!
+//! `KHR_texture_basisu` (WP 7.3, a frap extension: the add-on does not import it, and
+//! Blender refuses a file that requires it): a texture whose only image is the extension's
+//! KTX2 `source` loads it (packed as `image/ktx2`, `file_format` `'KTX2'`, decoded by
+//! `frap_imbuf::ktx2` when rendered or re-exported); a texture with a core or WebP image
+//! keeps the add-on's choice, so a file with a fallback imports as it does in Blender.
 
 use std::path::{Component, Path, PathBuf};
 use std::sync::Arc;
@@ -18,22 +24,28 @@ use smol_str::SmolStr;
 
 use super::{Gltf, ImportError};
 
-/// `get_source`: the image of a texture (the EXT_texture_webp source when preferred or when
-/// the core source is missing).
-pub(crate) fn texture_source(cx: &Gltf, texture: usize) -> Option<usize> {
-    let tex = cx.doc.textures.get(texture)?;
-    let webp = tex
-        .extensions
-        .get_raw("EXT_texture_webp")
+/// The `source` of a texture extension.
+fn ext_source(tex: &frap_gltf::json::Texture, name: &str) -> Option<usize> {
+    tex.extensions
+        .get_raw(name)
         .and_then(|v| v.get("source"))
         .and_then(|v| v.as_u64())
-        .map(|v| v as usize);
+        .map(|v| v as usize)
+}
+
+/// `get_source`: the image of a texture (the EXT_texture_webp source when preferred or when
+/// the core source is missing), then frap's `KHR_texture_basisu` source when the texture has
+/// no other image.
+pub(crate) fn texture_source(cx: &Gltf, texture: usize) -> Option<usize> {
+    let tex = cx.doc.textures.get(texture)?;
+    let webp = ext_source(tex, "EXT_texture_webp");
     let src = tex.source.map(|s| s as usize);
-    if cx.settings.import_webp_texture {
+    let chosen = if cx.settings.import_webp_texture {
         webp.or(src)
     } else {
         src.or(webp)
-    }
+    };
+    chosen.or_else(|| ext_source(tex, "KHR_texture_basisu"))
 }
 
 /// `os.path.abspath`: absolute and lexically normalised (`.` and `..` removed).
@@ -87,6 +99,7 @@ fn mime_of(bytes: &[u8], declared: Option<&str>) -> SmolStr {
         Some(frap_imbuf::FileFormat::Png) => "image/png".into(),
         Some(frap_imbuf::FileFormat::Jpeg) => "image/jpeg".into(),
         Some(frap_imbuf::FileFormat::WebP) => "image/webp".into(),
+        Some(frap_imbuf::FileFormat::Ktx2) => frap_imbuf::ktx2::MIME.into(),
         _ => "application/octet-stream".into(),
     }
 }
