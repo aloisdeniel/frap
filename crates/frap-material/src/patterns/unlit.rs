@@ -119,6 +119,12 @@ fn detect<'a>(cx: &LowerCx<'a>) -> Option<Shadeless<'a>> {
     Some(Shadeless { rgb: socket, alpha })
 }
 
+/// `detect_shadeless_material(...)['rgb_socket']`: the colour socket of an unlit material
+/// (the glTF exporter's `KHR_animation_pointer` reads its factor path, WP 7.7).
+pub fn shadeless_rgb_socket<'a>(cx: &LowerCx<'a>) -> Option<In<'a>> {
+    detect(cx).map(|s| s.rgb)
+}
+
 fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     out.unlit = false;
     let Some(s) = detect(cx) else { return };

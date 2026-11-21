@@ -443,6 +443,9 @@ pub fn key_value(
                 let v = value.first().copied().unwrap_or(0.0);
                 value = vec![if v != 0.0 { 1.0 / v } else { 1e13 }];
             }
+            if info.pointer == "/materials/XXX/occlusionTexture/strength" && info.reverse {
+                value.iter_mut().for_each(|v| *v = 1.0 - *v);
+            }
             if info.pointer == "/materials/XXX/emissiveFactor" {
                 let strength = info
                     .strength_channel

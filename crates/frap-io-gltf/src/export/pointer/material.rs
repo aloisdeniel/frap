@@ -28,12 +28,19 @@
 //!    `roughnessFactor`;
 //! 9. `materials.py`: `alphaCutoff` (an alpha clip whose cutoff is a socket).
 //!
+//! From WP 7.7: `texture_info.py` `__gather_normal_scale` (`normalTexture/scale`, the Normal
+//! Map's `Strength`) and `__gather_occlusion_strength` (`occlusionTexture/strength`, the
+//! Mix's `Factor`, reversed when the white is its `B` input) after the extensions, as
+//! `__gather_normal_texture` / `__gather_occlusion_texture` merge them; `unlit.py`
+//! `gather_base_color_factor` for an unlit material (the colour factor only);
+//! `export_image_format='NONE'` reading the base colour's and emission's own sockets.
+//!
 //! The material is read from its original node tree (an animated tree is never inlined), so
 //! no constant folding applies here. Not registered (no channel is exported for them; recorded
 //! in docs/deviations.md §2): the anisotropy node setup with textures, `KHR_materials_iridescence`,
-//! `KHR_materials_dispersion`, the `KHR_texture_transform` of textures, `normalTexture.scale`,
-//! `occlusionTexture.strength` and unlit materials.
+//! `KHR_materials_dispersion` and the `KHR_texture_transform` of textures.
 
+use frap_gltf::json::Material as GMaterial;
 use frap_material::LowerCx;
 use frap_material::graph::{In, Src};
 use frap_nodes::{Node, SocketType, SocketValue};
@@ -368,9 +375,21 @@ impl<'a> Nav<'a> {
 
 /// `current_paths` of `gather_material` for `mat` (empty when the material has nothing
 /// animatable the exporter reads).
-pub fn paths(main: &Main, mat: &Material) -> IndexMap<String, PathInfo> {
+///
+/// `gm` is the glTF material written for it: an unlit one registers only its colour
+/// (`unlit.py` `gather_base_color_factor`), the normal map's `Strength` and the occlusion
+/// strength are registered only when their texture was written (`__gather_texture_info_helper`
+/// gathers them after its filter). `image_none` is `export_image_format='NONE'`: the base
+/// colour and the emission are read from their sockets' own values
+/// (`get_const_from_default_value_socket`).
+pub fn paths(
+    main: &Main,
+    mat: &Material,
+    gm: &GMaterial,
+    image_none: bool,
+) -> IndexMap<String, PathInfo> {
     let nav = Nav {
-        cx: LowerCx::new(&mat.node_tree, mat, main),
+        cx: LowerCx::new(&mat.node_tree, mat, main).with_original(true),
     };
     let mut out: IndexMap<String, PathInfo> = IndexMap::new();
     let mut put = |key: Option<String>, info: PathInfo| {
@@ -378,7 +397,16 @@ pub fn paths(main: &Main, mat: &Material) -> IndexMap<String, PathInfo> {
             out.insert(k, info);
         }
     };
-    let image_none = false;
+    if gm.extensions.contains("KHR_materials_unlit") {
+        // `__export_unlit`: the colour factor only (its alpha path is not stored).
+        if let Some(rgb) = frap_material::patterns::unlit::shadeless_rgb_socket(&nav.cx) {
+            put(
+                nav.factor_path(rgb),
+                PathInfo::new("/materials/XXX/pbrMetallicRoughness/baseColorFactor", 3),
+            );
+        }
+        return out;
+    }
     emission(&nav, &mut put, image_none);
     clearcoat(&nav, &mut put);
     // transmission
@@ -405,8 +433,100 @@ pub fn paths(main: &Main, mat: &Material) -> IndexMap<String, PathInfo> {
             PathInfo::new("/materials/XXX/extensions/KHR_materials_ior/ior", 1),
         );
     }
-    pbr(&nav, &mut put);
+    if gm.normal_texture.is_some() {
+        normal_scale(&nav, &mut put);
+    }
+    if gm.occlusion_texture.is_some() {
+        occlusion_strength(&nav, &mut put);
+    }
+    pbr(&nav, &mut put, image_none);
     out
+}
+
+/// The first node of type `bl_idname` upstream of `i` (`from_socket` with
+/// `FilterByType`: breadth first through every linked input, each node once).
+fn upstream_of_type<'a>(nav: &Nav<'a>, i: In<'a>, bl_idname: &str) -> Option<&'a Node> {
+    let tree = nav.cx.tree;
+    let mut queue: std::collections::VecDeque<(u32, String)> = std::collections::VecDeque::new();
+    let mut seen = std::collections::HashSet::new();
+    queue.push_back((i.node.uid, i.socket().identifier.to_string()));
+    while let Some((uid, sock)) = queue.pop_front() {
+        for l in tree
+            .links
+            .iter()
+            .filter(|l| l.to_node == uid && l.to_socket == sock)
+        {
+            let Some(n) = tree.node(l.from_node) else {
+                continue;
+            };
+            if n.bl_idname == bl_idname && !n.mute {
+                return Some(n);
+            }
+            if seen.insert(n.uid) {
+                for s in &n.inputs {
+                    queue.push_back((n.uid, s.identifier.to_string()));
+                }
+            }
+        }
+    }
+    None
+}
+
+/// `__gather_normal_scale`: the `Strength` of the Normal Map node behind the `Normal` socket
+/// (registered linked or not, `/materials/XXX/normalTexture/scale`).
+fn normal_scale(nav: &Nav, put: &mut Put) {
+    let Some(normal) = nav
+        .cx
+        .get_socket("Normal")
+        .or_else(|| nav.cx.gltf_output_input("Normal"))
+    else {
+        return;
+    };
+    let Some(n) = upstream_of_type(nav, normal, "ShaderNodeNormalMap") else {
+        return;
+    };
+    let Some(strength) = In::named(n, "Strength") else {
+        return;
+    };
+    put(
+        Some(input_key(n, strength.index)),
+        PathInfo::new("/materials/XXX/normalTexture/scale", 1),
+    );
+}
+
+/// `__gather_occlusion_strength`: the constant `Factor` of a Mix (MIX) node in front of the
+/// glTF Material Output's `Occlusion`, with `reverse` when the white is its `B` input.
+fn occlusion_strength(nav: &Nav, put: &mut Put) {
+    let Some(occlusion) = nav
+        .cx
+        .get_socket("Occlusion")
+        .or_else(|| nav.cx.gltf_output_input("Occlusion"))
+    else {
+        return;
+    };
+    let Some((n, _)) = nav.peek_back(occlusion) else {
+        return;
+    };
+    if n.bl_idname != "ShaderNodeMix" || n.prop_str("blend_type") != "MIX" {
+        return;
+    }
+    let Some(fac) = In::named(n, "Factor").and_then(|f| nav.constant(f)) else {
+        return;
+    };
+    let rgb = |id: &str| {
+        In::by_identifier(n, id)
+            .and_then(|s| nav.constant(s))
+            .and_then(|c| c.rgb)
+    };
+    let (c1, c2) = (rgb("A_Color"), rgb("B_Color"));
+    let reverse = c1.is_none() && c2 == Some([1.0; 3]);
+    put(
+        fac.path,
+        PathInfo {
+            reverse,
+            ..PathInfo::new("/materials/XXX/occlusionTexture/strength", 1)
+        },
+    );
 }
 
 /// `export_ior`'s value: the `IOR` socket's default value when the socket exists and is not
@@ -628,7 +748,7 @@ fn anisotropy(nav: &Nav, put: &mut Put) {
 
 /// `gather_material_pbr_metallic_roughness` (base colour and alpha, metallic, roughness) and
 /// `__gather_alpha_cutoff`.
-fn pbr(nav: &Nav, put: &mut Put) {
+fn pbr(nav: &Nav, put: &mut Put, image_none: bool) {
     let base_color = "/materials/XXX/pbrMetallicRoughness/baseColorFactor";
     let (alpha_path, cutoff_path) = match nav.cx.get_socket("Alpha") {
         Some(a) => nav.alpha_info(a),
@@ -639,7 +759,13 @@ fn pbr(nav: &Nav, put: &mut Put) {
         .get_socket("Base Color")
         .or_else(|| nav.cx.get_socket("BaseColor"))
         .or_else(|| nav.cx.gltf_output_input("BaseColorFactor"));
-    let color_path = color_socket.and_then(|s| nav.factor_path(s));
+    let color_path = color_socket.and_then(|s| {
+        if image_none {
+            (s.socket().ty == SocketType::Rgba).then(|| input_key(s.node, s.index))
+        } else {
+            nav.factor_path(s)
+        }
+    });
     if color_path.is_some() {
         put(
             color_path.clone(),
@@ -681,6 +807,7 @@ fn pbr(nav: &Nav, put: &mut Put) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use frap_rna::Value;
 
     /// The factory "Material" (Principled BSDF, nothing linked): the sockets every gatherer
     /// reads, in `gather_material`'s order (socket indices of Blender 5.2.4's Principled BSDF,
@@ -693,7 +820,7 @@ mod tests {
             .iter()
             .find(|(_, m)| m.header.name == "Material")
             .unwrap();
-        let p = paths(&main, mat);
+        let p = paths(&main, mat, &GMaterial::default(), false);
         let got: Vec<(String, &str)> = p
             .iter()
             .map(|(k, v)| (k.clone(), v.pointer.as_str()))
@@ -747,6 +874,171 @@ mod tests {
         assert_eq!(p[&pb(4)].additional_path, Some(pb(0)));
         assert_eq!(p[&pb(0)].length, 3);
         assert_eq!(p[&pb(4)].length, 1);
+    }
+
+    /// WP 7.7: `__gather_occlusion_strength` behind the glTF Material Output's `Occlusion`
+    /// (a Mix whose white is `B`: reversed), `__gather_normal_scale` (the Normal Map's
+    /// `Strength`), both after the extensions and before the base colour, only when the glTF
+    /// material has the texture; an unlit material registers its colour only.
+    #[test]
+    fn normal_scale_occlusion_strength_and_unlit_paths() {
+        use frap_nodes::Link;
+        let (mut main, _) = frap_scene::startup::factory();
+        let mut log = frap_scene::ChangeLog::default();
+        let ma = main.materials.find("Material").unwrap();
+        let mat = main.materials.get_mut(ma, &mut log).unwrap();
+        let t = &mut mat.node_tree;
+        let (gi, mi, ni, ti) = (
+            t.new_node("ShaderNodeGroup").unwrap(),
+            t.new_node("ShaderNodeMix").unwrap(),
+            t.new_node("ShaderNodeNormalMap").unwrap(),
+            t.new_node("ShaderNodeTexImage").unwrap(),
+        );
+        let g = frap_nodes::builtin_groups::gltf_material_output::new_group();
+        t.nodes[gi].sync_group_sockets(Some(&g.interface));
+        t.nodes[mi].set_prop("data_type", Value::Enum("RGBA".into()));
+        t.nodes[mi].update_availability();
+        let ids = |n: &Node, name: &str| {
+            n.inputs
+                .iter()
+                .find(|s| s.name == name && s.enabled)
+                .unwrap()
+                .identifier
+                .to_string()
+        };
+        let occ = ids(&t.nodes[gi], "Occlusion");
+        let fac = t.nodes[mi].input_index("Factor").unwrap();
+        t.nodes[mi].inputs[fac].default_value = SocketValue::Float(0.7);
+        let b = t.nodes[mi]
+            .inputs
+            .iter()
+            .position(|s| s.identifier == "B_Color")
+            .unwrap();
+        t.nodes[mi].inputs[b].default_value = SocketValue::Color([1.0; 4]);
+        let bsdf = t
+            .nodes
+            .iter()
+            .find(|n| n.bl_idname == "ShaderNodeBsdfPrincipled")
+            .unwrap()
+            .uid;
+        let (gu, mu, nu, tu) = (
+            t.nodes[gi].uid,
+            t.nodes[mi].uid,
+            t.nodes[ni].uid,
+            t.nodes[ti].uid,
+        );
+        for (f, fs, to, ts) in [
+            (tu, "Color".to_owned(), mu, "A_Color".to_owned()),
+            (mu, "Result_Color".to_owned(), gu, occ),
+            (tu, "Color".to_owned(), nu, "Color".to_owned()),
+            (nu, "Normal".to_owned(), bsdf, "Normal".to_owned()),
+        ] {
+            t.links.push(Link {
+                from_node: f,
+                from_socket: fs.into(),
+                to_node: to,
+                to_socket: ts.into(),
+            });
+        }
+        let mat = main.materials.get(ma).unwrap();
+        let gm = GMaterial {
+            normal_texture: Some(frap_gltf::json::NormalTextureInfo::default()),
+            occlusion_texture: Some(frap_gltf::json::OcclusionTextureInfo::default()),
+            ..GMaterial::default()
+        };
+        let p = paths(&main, mat, &gm, false);
+        let keys: Vec<&str> = p.values().map(|v| v.pointer.as_str()).collect();
+        let at = |x: &str| keys.iter().position(|k| *k == x).unwrap();
+        let ior = at("/materials/XXX/extensions/KHR_materials_ior/ior");
+        let normal = at("/materials/XXX/normalTexture/scale");
+        let occlusion = at("/materials/XXX/occlusionTexture/strength");
+        let base = at("/materials/XXX/pbrMetallicRoughness/baseColorFactor");
+        assert!(
+            ior < normal && normal < occlusion && occlusion < base,
+            "{keys:?}"
+        );
+        assert_eq!(
+            p.get_index(normal).unwrap().0,
+            "node_tree.nodes[\"Normal Map\"].inputs[0].default_value"
+        );
+        let (k, info) = p.get_index(occlusion).unwrap();
+        assert_eq!(
+            k,
+            &format!("node_tree.nodes[\"Mix\"].inputs[{fac}].default_value")
+        );
+        assert!(info.reverse);
+        // Without the textures in the glTF material: neither path.
+        let p = paths(&main, mat, &GMaterial::default(), false);
+        assert!(
+            !p.values()
+                .any(|v| v.pointer.contains("normalTexture") || v.pointer.contains("occlusion"))
+        );
+        // An unlit glTF material: the colour only.
+        let mut unlit = GMaterial::default();
+        unlit.extensions.set(Some(
+            frap_gltf::ext::khr_materials_unlit::KhrMaterialsUnlit::default(),
+        ));
+        let (mut main, _) = frap_scene::startup::factory();
+        let ma = main.materials.find("Material").unwrap();
+        let mat = main.materials.get_mut(ma, &mut log).unwrap();
+        let t = &mut mat.node_tree;
+        let bg = t.new_node("ShaderNodeBackground").unwrap();
+        let bgu = t.nodes[bg].uid;
+        let out = t
+            .nodes
+            .iter()
+            .find(|n| n.bl_idname == "ShaderNodeOutputMaterial")
+            .unwrap()
+            .uid;
+        t.links.retain(|l| l.to_node != out);
+        t.links.push(Link {
+            from_node: bgu,
+            from_socket: "Background".into(),
+            to_node: out,
+            to_socket: "Surface".into(),
+        });
+        let mat = main.materials.get(ma).unwrap();
+        let p = paths(&main, mat, &unlit, false);
+        let got: Vec<(&str, &str)> = p
+            .iter()
+            .map(|(k, v)| (k.as_str(), v.pointer.as_str()))
+            .collect();
+        assert_eq!(
+            got,
+            [(
+                "node_tree.nodes[\"Background\"].inputs[0].default_value",
+                "/materials/XXX/pbrMetallicRoughness/baseColorFactor"
+            )]
+        );
+    }
+
+    /// `occlusionTexture/strength` with `reverse` is `1 - Factor` when sampled.
+    #[test]
+    fn reversed_occlusion_strength_is_one_minus_the_factor() {
+        let mut paths = IndexMap::new();
+        paths.insert(
+            "k".to_owned(),
+            PathInfo {
+                reverse: true,
+                ..PathInfo::new("/materials/XXX/occlusionTexture/strength", 1)
+            },
+        );
+        let (main, _) = frap_scene::startup::factory();
+        let asset = super::super::registry::Asset {
+            id: main.materials.find("Material").unwrap().any(),
+            index: 0,
+            paths,
+        };
+        let mut data = super::super::sample::FrameData::new();
+        data.insert("k".to_owned(), vec![0.25]);
+        let v = super::super::sample::key_value(
+            super::super::registry::DataKind::Materials,
+            &asset,
+            "k",
+            &data,
+            false,
+        );
+        assert_eq!(v, Some(vec![0.75]));
     }
 
     #[test]

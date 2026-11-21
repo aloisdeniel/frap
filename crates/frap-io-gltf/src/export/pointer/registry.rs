@@ -57,6 +57,9 @@ pub struct PathInfo {
     pub factor_channel: Option<String>,
     /// `lamp_type` of a light intensity (`POINT`, `SPOT`, `SUN`).
     pub lamp_type: Option<SmolStr>,
+    /// `reverse` of `occlusionTexture/strength`: the Mix's white is its `B` input, so the
+    /// strength is `1 - Factor` (WP 7.7).
+    pub reverse: bool,
 }
 
 impl PathInfo {
@@ -279,7 +282,10 @@ pub fn build(g: &mut Gather) -> Registry {
                 if mat.node_tree.animation_data.is_none() {
                     continue;
                 }
-                let paths = super::material::paths(main, mat);
+                let image_none = g.settings.export_image_format
+                    == crate::export::settings::ExportImageFormat::None;
+                let gm = &doc.materials[mi as usize];
+                let paths = super::material::paths(main, mat, gm, image_none);
                 if paths.is_empty() {
                     continue;
                 }

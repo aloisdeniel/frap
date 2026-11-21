@@ -10,11 +10,14 @@
 //! `get_root_bones_uuid`):
 //!
 //! - Roots are the scene's objects without a parent, in **natural, case-insensitive** name order
-//!   (`_natural_sort_key`: `Object2` < `Object10`), ties in scene order (Python's sort is
-//!   stable).
+//!   (`_natural_sort_key`: `Object2` < `Object10`, every Unicode decimal digit counting),
+//!   ties in the order of `scene_eval.objects` (Python's sort is stable): the evaluated
+//!   scene's objects, which are the scene's (`scene_objects`: the master collection's, then
+//!   each child collection depth first; verified equal on 5.2.4 with nested, shared, excluded
+//!   and hidden collections, objects linked twice and objects added by operators, WP 7.7).
 //! - Children are every object of `bpy.data.objects` whose parent is the node, even objects that
 //!   are not in the exported scene (the add-on builds `blender_children` from `bpy.data.objects`),
-//!   in the same natural order, then (armatures) the root bones by name, (bones) the child bones
+//!   in the same natural order (ties in `bpy.data.objects` order), then (armatures) the root bones by name, (bones) the child bones
 //!   by name and the objects parented to the bone (`parent_type = 'BONE'`) by name. A bone node
 //!   is `armature.matrix_world @ bone.matrix_local` (`export_rest_position_armature`, the
 //!   default) or `@ pose_bone.matrix`, times the Y-up basis change; an object parented to a bone
@@ -140,33 +143,75 @@ pub struct VTree {
     pub armature_remove_refused: bool,
 }
 
-/// `_natural_sort_key` order: names split into text and digit runs (`re.split(r'(\d+)')`),
-/// text compared lower-cased, digit runs compared as integers.
+/// The first code point (digit zero) of every run of ten Unicode decimal digits (general
+/// category `Nd`, which is what Python's `re` matches as `\d` in a `str` pattern), Unicode 15.1
+/// (Blender 5.2.4's Python 3.13, `unicodedata.unidata_version`; every `Nd` character is in one
+/// of these runs, `unicodedata.decimal(zero + k) == k`).
+const ND_ZEROS: [u32; 68] = [
+    0x30, 0x660, 0x6F0, 0x7C0, 0x966, 0x9E6, 0xA66, 0xAE6, 0xB66, 0xBE6, 0xC66, 0xCE6, 0xD66,
+    0xDE6, 0xE50, 0xED0, 0xF20, 0x1040, 0x1090, 0x17E0, 0x1810, 0x1946, 0x19D0, 0x1A80, 0x1A90,
+    0x1B50, 0x1BB0, 0x1C40, 0x1C50, 0xA620, 0xA8D0, 0xA900, 0xA9D0, 0xA9F0, 0xAA50, 0xABF0, 0xFF10,
+    0x104A0, 0x10D30, 0x11066, 0x110F0, 0x11136, 0x111D0, 0x112F0, 0x11450, 0x114D0, 0x11650,
+    0x116C0, 0x11730, 0x118E0, 0x11950, 0x11C50, 0x11D50, 0x11DA0, 0x11F50, 0x16A60, 0x16AC0,
+    0x16B50, 0x1D7CE, 0x1D7D8, 0x1D7E2, 0x1D7EC, 0x1D7F6, 0x1E140, 0x1E2F0, 0x1E4F0, 0x1E950,
+    0x1FBF0,
+];
+
+/// The value of a Unicode decimal digit (`None` for any other character).
+fn decimal_digit(c: char) -> Option<u32> {
+    let c = c as u32;
+    let i = ND_ZEROS.partition_point(|&z| z <= c);
+    let zero = *ND_ZEROS.get(i.checked_sub(1)?)?;
+    (c - zero < 10).then_some(c - zero)
+}
+
+/// `_natural_sort_key` order (`[int(c) if c.isdigit() else c.lower() for c in
+/// re.split(r'(\d+)', name)]`): names split into text and digit runs, text compared lower-cased
+/// (code point order), digit runs compared as integers. Every Unicode decimal digit counts
+/// (`x١٠٠` is `x100`, `x١` sorts before `x2`); equal keys (`a01` / `a1`, `Cube` / `cube`) keep
+/// the order of the list being sorted (Python's sort is stable).
+///
+/// The add-on raises `ValueError` for a name with a text run made only of digits that `\d`
+/// does not match (`a1²`: `'²'.isdigit()` holds and `int('²')` fails), so its export fails;
+/// frap compares such a run as text (docs/deviations.md §1).
 pub fn natural_cmp(a: &str, b: &str) -> Ordering {
-    fn key(s: &str) -> Vec<(bool, String)> {
+    /// A chunk: whether it is a digit run, and its code points (text, lower-cased) or digit
+    /// values without leading zeros (a number).
+    type Chunk = (bool, Vec<u32>);
+    fn key(s: &str) -> Vec<Chunk> {
         // Alternating text / number chunks, starting and ending with (possibly empty) text.
-        let mut out = vec![(false, String::new())];
-        for c in s.chars() {
-            let digit = c.is_ascii_digit();
+        let mut out: Vec<Chunk> = vec![(false, Vec::new())];
+        let mut text = String::new();
+        let flush = |text: &mut String, out: &mut Vec<Chunk>| {
             let last = out.last_mut().expect("never empty");
-            if last.0 == digit {
-                last.1.push(c);
-            } else {
-                out.push((digit, c.to_string()));
+            last.1 = text.to_lowercase().chars().map(u32::from).collect();
+            text.clear();
+        };
+        for c in s.chars() {
+            match decimal_digit(c) {
+                Some(d) => {
+                    if !out.last().is_some_and(|l| l.0) {
+                        flush(&mut text, &mut out);
+                        out.push((true, Vec::new()));
+                    }
+                    let last = out.last_mut().expect("never empty");
+                    if !(d == 0 && last.1.is_empty()) {
+                        last.1.push(d);
+                    }
+                }
+                None => {
+                    if out.last().is_some_and(|l| l.0) {
+                        out.push((false, Vec::new()));
+                    }
+                    text.push(c);
+                }
             }
         }
         if out.last().is_some_and(|l| l.0) {
-            out.push((false, String::new()));
+            out.push((false, Vec::new()));
         }
-        out.into_iter()
-            .map(|(d, t)| {
-                if d {
-                    (d, t.trim_start_matches('0').to_owned())
-                } else {
-                    (d, t.to_lowercase())
-                }
-            })
-            .collect()
+        flush(&mut text, &mut out);
+        out
     }
     let (ka, kb) = (key(a), key(b));
     for ((da, ta), (_, tb)) in ka.iter().zip(&kb) {
@@ -1179,6 +1224,46 @@ mod tests {
         assert_eq!(natural_cmp("10abc", "abc"), Ordering::Less);
         assert_eq!(natural_cmp("x2", "x10"), Ordering::Less);
         assert_eq!(natural_cmp("x", "x0"), Ordering::Less);
+    }
+
+    /// Blender 5.2.4 (`followups/natural_digits`): roots `x10`, `x٣`, `x2`, `x１`, `X𝟗`,
+    /// `x١٠٠` export as `x１ x2 x٣ X𝟗 x10 x١٠٠` (Arabic-Indic, full-width and mathematical
+    /// digits are numbers).
+    #[test]
+    fn natural_order_counts_every_decimal_digit() {
+        let mut v = vec![
+            "x10",
+            "x\u{663}",
+            "x2",
+            "x\u{ff11}",
+            "X\u{1d7d7}",
+            "x\u{661}\u{660}\u{660}",
+        ];
+        v.sort_by(|a, b| natural_cmp(a, b));
+        assert_eq!(
+            v,
+            [
+                "x\u{ff11}",
+                "x2",
+                "x\u{663}",
+                "X\u{1d7d7}",
+                "x10",
+                "x\u{661}\u{660}\u{660}"
+            ]
+        );
+        // Leading zeros of any script are not part of the number.
+        assert_eq!(natural_cmp("a\u{660}\u{661}", "a1"), Ordering::Equal);
+        assert_eq!(natural_cmp("a\u{6f0}", "a0"), Ordering::Equal);
+        // Superscripts are not decimal digits: text.
+        assert_eq!(natural_cmp("a\u{b2}", "a2"), Ordering::Greater);
+        for z in ND_ZEROS {
+            let zero = char::from_u32(z).unwrap();
+            assert_eq!(decimal_digit(zero), Some(0));
+            assert_eq!(decimal_digit(char::from_u32(z + 9).unwrap()), Some(9));
+        }
+        assert_eq!(decimal_digit('a'), None);
+        assert_eq!(decimal_digit('\u{b2}'), None);
+        assert_eq!(decimal_digit('/'), None);
     }
 
     #[test]

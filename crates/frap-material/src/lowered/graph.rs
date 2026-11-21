@@ -338,9 +338,10 @@ impl<'a> LowerCx<'a> {
 
     /// Whether the exporter reads the material through `InlineShaderNodes.from_material`
     /// (`BlenderMaterialIndentifier.__can_use_inline`): yes, unless a "glTF Material Output"
-    /// group node has an `Occlusion` input (then the original tree is read).
+    /// group node has an `Occlusion` input (then the original tree is read), or the exporter
+    /// asked for the original tree ([`LowerCx::original`], WP 7.7).
     pub fn uses_inline_tree(&self) -> bool {
-        self.gltf_output_input_raw("Occlusion").is_none()
+        !self.original && self.gltf_output_input_raw("Occlusion").is_none()
     }
 
     /// `InlineShaderNodes.from_material` gives up (`ShaderNodesInliner::do_inline` returns

@@ -32,6 +32,11 @@ pub enum UvSource {
     ActiveRender,
     /// `TEXCOORD_n` on import.
     Index(u32),
+    /// An Attribute node of type GEOMETRY naming an attribute (WP 7.7, the add-on's
+    /// `uvmap_info['type'] == 'Attribute'`): the UV map of that name when the mesh has one,
+    /// else a generic attribute the exporter writes as an extra `TEXCOORD_n` after the UV maps
+    /// (`get_final_material`'s `attr_indices`); renderers read it as the UV map of that name.
+    Attribute(SmolStr),
 }
 
 /// Which channels of the image feed the socket.
@@ -420,12 +425,28 @@ pub struct LowerCx<'a> {
     pub mat: &'a Material,
     /// Image metadata.
     pub images: &'a dyn ImageLookup,
+    /// Read the original tree even where the exporter would read the inlined one
+    /// (`bmat.used == "ORIGINAL"`, WP 7.7): no constant folding. The glTF exporter sets it for
+    /// a material whose node tree is animated when pointer animation is exported, and with
+    /// `export_unused_textures` (`BlenderMaterialIndentifier.__can_use_inline`).
+    pub original: bool,
 }
 
 impl<'a> LowerCx<'a> {
     /// Context for lowering `mat`.
     pub fn new(tree: &'a NodeTree, mat: &'a Material, images: &'a dyn ImageLookup) -> Self {
-        LowerCx { tree, mat, images }
+        LowerCx {
+            tree,
+            mat,
+            images,
+            original: false,
+        }
+    }
+
+    /// The same context reading the original tree (see [`LowerCx::original`]).
+    pub fn with_original(mut self, original: bool) -> Self {
+        self.original = original;
+        self
     }
 }
 
@@ -500,10 +521,24 @@ pub fn patterns_in_order() -> Vec<&'static MaterialPattern> {
 /// Lowers a material's node tree by running [`MATERIAL_PATTERNS`] in `order`, starting from
 /// [`LoweredMaterial::gltf_default`].
 pub fn lower(tree: &NodeTree, mat: &Material, images: &dyn ImageLookup) -> LoweredMaterial {
-    let cx = LowerCx::new(tree, mat, images);
+    lower_cx(&LowerCx::new(tree, mat, images))
+}
+
+/// [`lower`] from the original tree (`bmat.used == "ORIGINAL"`: no constant folding, see
+/// [`LowerCx::original`]).
+pub fn lower_original(
+    tree: &NodeTree,
+    mat: &Material,
+    images: &dyn ImageLookup,
+) -> LoweredMaterial {
+    lower_cx(&LowerCx::new(tree, mat, images).with_original(true))
+}
+
+/// Runs every pattern over `cx`.
+fn lower_cx(cx: &LowerCx) -> LoweredMaterial {
     let mut out = LoweredMaterial::gltf_default();
     for p in patterns_in_order() {
-        (p.lower)(&cx, &mut out);
+        (p.lower)(cx, &mut out);
     }
     out
 }
