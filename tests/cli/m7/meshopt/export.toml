@@ -1,0 +1,14 @@
+# WP 7.1: compressed glTF exports an agent asks for. The factory cube with a shape key, a UV
+# sphere and a mesh with loose edges are exported with meshopt (EXT_meshopt_compression and
+# KHR_meshopt_compression, GLB and GLTF_SEPARATE: `result.extensions_used` names the
+# extension), with frap's `frap_mesh_quantization` (KHR_mesh_quantization) and with
+# `export_use_gltfpack` (an INFO report: the gltfpack command line frap mapped in-process, the
+# packed copy in `gltfpacked/`), then imported back: the meshopt cube and its shape key decode to
+# the exported values, a quantized cube imports with integer coordinates and the node's
+# dequantization scale (as Blender imports it). Blender 5.2.4 imports each of these files as
+# frap does (golden `gltf/meshopt/import_frap`, whose inputs are this transcript's files);
+# `frap_mesh_quantization` is a frap-only option and Blender's own `export_use_gltfpack` needs an
+# external binary (deviations §1). Statements on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true

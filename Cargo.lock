@@ -1124,6 +1124,7 @@ dependencies = [
  "frap-lang",
  "frap-mesh",
  "frap-nodes",
+ "frap-ops-all",
  "frap-rna",
  "frap-scene",
  "frap-session",

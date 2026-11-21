@@ -1,0 +1,29 @@
+bpy.data.objects['Cube'].shape_key_add(name='Basis', from_mix=False)
+bpy.data.objects['Cube'].shape_key_add(name='Lift', from_mix=False)
+bpy.data.objects['Cube'].data.shape_keys.key_blocks['Lift'].data[0].co = (1.0, 1.0, 1.5)
+bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=6, location=(3.0, 0.0, 0.0))
+bpy.data.objects['Sphere'].rotation_euler = (0.3, 0.0, 0.7)
+bpy.data.meshes.new('Edges')
+bpy.data.meshes['Edges'].from_pydata([(0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0), (2, 2, 2), (3, 2, 1)], [(4, 5), (5, 0)], [(0, 1, 2, 3)])
+bpy.data.objects.new('Edges', bpy.data.meshes['Edges'])
+bpy.context.scene.collection.objects.link(bpy.data.objects['Edges'])
+bpy.data.objects['Edges'].location = (0.0, -3.0, 0.0)
+bpy.ops.export_scene.gltf(filepath='ext.glb', export_meshopt_compression_enable=True, export_tangents=True, use_mesh_edges=True)
+bpy.ops.export_scene.gltf(filepath='khr.glb', export_meshopt_compression_enable=True, export_meshopt_extension='KHR_meshopt_compression', use_mesh_edges=True)
+bpy.ops.export_scene.gltf(filepath='ext_sep.gltf', export_format='GLTF_SEPARATE', export_meshopt_compression_enable=True, use_mesh_edges=True)
+bpy.ops.export_scene.gltf(filepath='khr_sep.gltf', export_format='GLTF_SEPARATE', export_meshopt_compression_enable=True, export_meshopt_extension='KHR_meshopt_compression', export_tangents=True)
+bpy.ops.export_scene.gltf(filepath='quant.glb', frap_mesh_quantization=True, use_mesh_edges=True)
+bpy.ops.export_scene.gltf(filepath='pack.glb', export_use_gltfpack=True, export_gltfpack_noq=False, export_gltfpack_tc=False)
+bpy.ops.wm.read_homefile(use_empty=True)
+bpy.ops.import_scene.gltf(filepath='ext.glb')
+bpy.data.objects['Cube'].data.vertices[0].co
+bpy.data.objects['Cube'].data.shape_keys.key_blocks['Lift'].data[0].co
+bpy.data.objects['Edges'].data.edges[2].vertices
+bpy.ops.import_scene.gltf(filepath='khr_sep.gltf')
+bpy.data.objects['Sphere.001'].data.vertices[7].co
+bpy.ops.import_scene.gltf(filepath='quant.glb')
+bpy.data.objects['Cube.002'].scale
+bpy.data.objects['Cube.002'].location
+bpy.data.objects['Cube.002'].data.vertices[0].co
+bpy.ops.import_scene.gltf(filepath='gltfpacked/pack.glb')
+bpy.data.objects['Cube.003'].scale

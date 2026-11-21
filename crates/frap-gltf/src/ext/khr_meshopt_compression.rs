@@ -1,19 +1,22 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `KHR_meshopt_compression`: typed structs + validation (§17.1). WP 7.1 (M7 W0 stub: the typed model;
-//! the WP adds the spec's validation rules and tests).
+//! `KHR_meshopt_compression`: typed structs + validation (§17.1). WP 7.1.
 //!
 //! On a buffer view: the compressed stream (`buffer`, `byteOffset`, `byteLength`) and the
 //! decoded layout (`byteStride`, `count`, `mode`, `filter`); the view's own `buffer`/
 //! `byteOffset`/`byteLength` address the uncompressed fallback. On a buffer: `fallback: true`
 //! marks a buffer that has no data (the add-on writes it with no `uri`, `exporter.py`
 //! `finalize_buffer`). Required, as the EXT variant; vertex codec version 1 and the `COLOR` filter.
+//! The validation rules are the EXT variant's ([`super::ext_meshopt_compression::validate_view`]),
+//! with `COLOR` allowed.
 
 use serde::{Deserialize, Serialize};
 
+use super::ext_meshopt_compression::{ExtMeshoptCompression, validate_buffer, validate_view};
 use crate::json::{EXTENSIONS, Extension, ExtensionCx, ExtensionDef, Extensions, Extras, Index};
 use crate::validate::Report;
 
-const NAME: &str = "KHR_meshopt_compression";
+/// The extension name.
+pub const NAME: &str = "KHR_meshopt_compression";
 const REQUIRED: bool = true;
 
 /// The extension on a buffer view.
@@ -77,11 +80,47 @@ impl Extension for KhrMeshoptCompressionBuffer {
     const REQUIRED_BY_DEFAULT: bool = REQUIRED;
 }
 
+impl From<KhrMeshoptCompression> for ExtMeshoptCompression {
+    fn from(e: KhrMeshoptCompression) -> Self {
+        ExtMeshoptCompression {
+            buffer: e.buffer,
+            byte_offset: e.byte_offset,
+            byte_length: e.byte_length,
+            byte_stride: e.byte_stride,
+            count: e.count,
+            mode: e.mode,
+            filter: e.filter,
+            extensions: e.extensions,
+            extras: e.extras,
+        }
+    }
+}
+
+impl From<ExtMeshoptCompression> for KhrMeshoptCompression {
+    fn from(e: ExtMeshoptCompression) -> Self {
+        KhrMeshoptCompression {
+            buffer: e.buffer,
+            byte_offset: e.byte_offset,
+            byte_length: e.byte_length,
+            byte_stride: e.byte_stride,
+            count: e.count,
+            mode: e.mode,
+            filter: e.filter,
+            extensions: e.extensions,
+            extras: e.extras,
+        }
+    }
+}
+
 fn validate(cx: &ExtensionCx, r: &mut Report) {
     if cx.owner_index_in("bufferViews").is_some() {
-        let _ = cx.decode::<KhrMeshoptCompression>(r);
+        if let Some(e) = cx.decode::<KhrMeshoptCompression>(r) {
+            validate_view(cx, r, &e.into(), true);
+        }
     } else if cx.owner_index_in("buffers").is_some() {
-        let _ = cx.decode::<KhrMeshoptCompressionBuffer>(r);
+        if let Some(b) = cx.decode::<KhrMeshoptCompressionBuffer>(r) {
+            validate_buffer(cx, r, b.fallback);
+        }
     } else {
         cx.wrong_location(r, "a buffer view or a buffer");
     }
@@ -111,5 +150,27 @@ mod tests {
         let b: KhrMeshoptCompressionBuffer =
             serde_json::from_value(serde_json::json!({"fallback": true})).unwrap();
         assert_eq!(b.fallback, Some(true));
+        let back: KhrMeshoptCompression = ExtMeshoptCompression::from(e.clone()).into();
+        assert_eq!(back, e);
+    }
+
+    #[test]
+    fn colour_filter_is_allowed_here() {
+        let j = serde_json::json!({
+            "asset": {"version": "2.0"},
+            "extensionsUsed": [NAME], "extensionsRequired": [NAME],
+            "buffers": [{"byteLength": 64}],
+            "bufferViews": [{"buffer": 0, "byteLength": 16, "extensions": {NAME: {
+                "buffer": 0, "byteLength": 20, "byteStride": 4, "count": 4,
+                "mode": "ATTRIBUTES", "filter": "COLOR"}}}]
+        });
+        let d = crate::Document::from_slice(&serde_json::to_vec(&j).unwrap()).unwrap();
+        let r = crate::validate::validate(&d);
+        assert!(r.is_ok(), "{r}");
+        let (name, e) =
+            super::super::ext_meshopt_compression::view_compression(&d.buffer_views[0].extensions)
+                .unwrap()
+                .unwrap();
+        assert_eq!((name, e.filter.as_deref()), (NAME, Some("COLOR")));
     }
 }

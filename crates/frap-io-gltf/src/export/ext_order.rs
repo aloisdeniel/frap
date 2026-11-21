@@ -258,6 +258,17 @@ fn traversal_order(doc: &Document, created: Option<&CreatedEmpty>) -> Vec<String
         materials: HashSet::new(),
         textures: HashSet::new(),
     };
+    // `__gather_gltf` declares the compression extensions before it traverses anything
+    // (`add_draco_extension`, then `add_meshopt_extension`; M7, WP 7.1).
+    for name in [
+        "KHR_draco_mesh_compression",
+        "EXT_meshopt_compression",
+        "KHR_meshopt_compression",
+    ] {
+        if doc.extensions_used.iter().any(|e| e == name) {
+            w.declare(name);
+        }
+    }
     for s in &doc.scenes {
         w.extensions(&s.extensions);
         for &n in &s.nodes {

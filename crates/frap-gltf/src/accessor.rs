@@ -704,6 +704,12 @@ pub fn load_buffers(
     for (i, b) in doc.buffers.iter().enumerate() {
         let len = usize_of(b.byte_length, "byteLength")?;
         let mut data = match &b.uri {
+            // A meshopt fallback buffer has no data, also as buffer 0 of a `.gltf` (WP 7.1:
+            // the add-on's GLTF_SEPARATE layout).
+            None if crate::ext::ext_meshopt_compression::is_fallback_buffer(&b.extensions) => {
+                out.push(Vec::new());
+                continue;
+            }
             None if i == 0 => bin
                 .ok_or_else(|| {
                     GltfError::Data("buffer 0 has no uri and there is no GLB BIN chunk".into())
