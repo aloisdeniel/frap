@@ -77,6 +77,7 @@ pub fn gather(g: &mut Gather) -> Result<(), ExportError> {
         pointers |= convert_trs(g) > 0;
     }
     keep_animated_empty_extensions(g);
+    keep_animated_empty_texture_transforms(g);
     if check_iridescence(g) {
         pointers = g.doc.animations.iter().any(|a| {
             a.channels
@@ -332,6 +333,111 @@ pub fn keep_animated_empty_extensions(g: &mut Gather) {
 
 const IOR: &str = "KHR_materials_ior";
 
+/// `__fix_json` for `KHR_texture_transform` (WP 7.7): a texture whose Mapping node gives the
+/// identity has an empty `KHR_texture_transform` object in the add-on
+/// (`get_texture_transform_from_mapping_node` deletes the default members), kept in every
+/// material when any pointer channel animates a texture transform (the check is global).
+/// frap's texture writer leaves the identity out, so the empty objects are added back here.
+pub fn keep_animated_empty_texture_transforms(g: &mut Gather) {
+    const TT: &str = frap_gltf::ext::khr_texture_transform::KhrTextureTransform::NAME;
+    if !animated_extensions(&g.doc).iter().any(|e| e == TT) {
+        return;
+    }
+    let main = g.main;
+    let settings = g.settings;
+    let mut todo: Vec<(usize, Vec<String>)> = Vec::new();
+    for (i, gm) in g.doc.materials.iter().enumerate() {
+        let Some(mat) = gm
+            .name
+            .as_deref()
+            .and_then(|n| main.materials.find(n))
+            .and_then(|r| main.materials.get(r))
+        else {
+            continue;
+        };
+        let lm = crate::export::materials::lower::lowered_for(main, mat, settings);
+        let orm = crate::export::materials::core_occlusion::orm_inputs(g, &lm).is_some();
+        let slots = material::mapped_slots(main, mat, gm, orm);
+        if !slots.is_empty() {
+            todo.push((i, slots));
+        }
+    }
+    let mut added = false;
+    for (i, slots) in todo {
+        let m = &mut g.doc.materials[i];
+        for slot in slots {
+            added |= add_empty_texture_transform(m, &slot);
+        }
+    }
+    if added {
+        g.use_extension(TT, true);
+    }
+}
+
+/// Adds `KHR_texture_transform: {}` to the texture info at `slot` (`emissiveTexture/extensions`,
+/// `extensions/KHR_materials_clearcoat/clearcoatTexture/extensions`, …) when the texture is
+/// written without one. Returns whether it was added.
+fn add_empty_texture_transform(m: &mut frap_gltf::json::Material, slot: &str) -> bool {
+    const TT: &str = frap_gltf::ext::khr_texture_transform::KhrTextureTransform::NAME;
+    let Some(path) = slot.strip_suffix("/extensions") else {
+        return false;
+    };
+    let add = |e: &mut frap_gltf::json::Extensions| {
+        if e.contains(TT) {
+            return false;
+        }
+        e.insert_raw(TT, serde_json::json!({}));
+        true
+    };
+    let pbr = m.pbr_metallic_roughness.as_mut();
+    match path {
+        "emissiveTexture" => m
+            .emissive_texture
+            .as_mut()
+            .is_some_and(|t| add(&mut t.extensions)),
+        "normalTexture" => m
+            .normal_texture
+            .as_mut()
+            .is_some_and(|t| add(&mut t.extensions)),
+        "occlusionTexture" => m
+            .occlusion_texture
+            .as_mut()
+            .is_some_and(|t| add(&mut t.extensions)),
+        "pbrMetallicRoughness/baseColorTexture" => pbr
+            .and_then(|p| p.base_color_texture.as_mut())
+            .is_some_and(|t| add(&mut t.extensions)),
+        "pbrMetallicRoughness/metallicRoughnessTexture" => pbr
+            .and_then(|p| p.metallic_roughness_texture.as_mut())
+            .is_some_and(|t| add(&mut t.extensions)),
+        _ => {
+            let Some((ext, member)) = path
+                .strip_prefix("extensions/")
+                .and_then(|p| p.split_once('/'))
+            else {
+                return false;
+            };
+            let Some(mut v) = m.extensions.get_raw(ext).cloned() else {
+                return false;
+            };
+            let Some(info) = v.get_mut(member).and_then(|t| t.as_object_mut()) else {
+                return false;
+            };
+            let exts = info
+                .entry("extensions")
+                .or_insert_with(|| serde_json::json!({}));
+            let Some(exts) = exts.as_object_mut() else {
+                return false;
+            };
+            if exts.contains_key(TT) {
+                return false;
+            }
+            exts.insert(TT.to_owned(), serde_json::json!({}));
+            m.extensions.insert_raw(ext, v);
+            true
+        }
+    }
+}
+
 /// `__traverse_property` with `gltf_trs_w_animation_pointer`: every `translation`, `rotation`,
 /// `scale` and `weights` channel targets `/nodes/{node}/{path}` through a pointer instead.
 /// Returns the number of channels converted.
@@ -393,6 +499,7 @@ mod tests {
             times: vec![0.0, 1.0],
             values: vec![vec![0.0], vec![1.0]],
             blend_material: None,
+            copy: false,
         }
     }
 

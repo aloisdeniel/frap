@@ -125,6 +125,13 @@ pub fn shadeless_rgb_socket<'a>(cx: &LowerCx<'a>) -> Option<In<'a>> {
     detect(cx).map(|s| s.rgb)
 }
 
+/// `detect_shadeless_material(...)`'s `rgb_socket` and `alpha_socket` (the Mix Shader's
+/// factor in front of a Transparent BSDF; the glTF `KHR_animation_pointer` exporter and
+/// importer read it, WP 7.7).
+pub fn shadeless_sockets<'a>(cx: &LowerCx<'a>) -> Option<(In<'a>, Option<In<'a>>)> {
+    detect(cx).map(|s| (s.rgb, s.alpha))
+}
+
 fn lower(cx: &LowerCx, out: &mut LoweredMaterial) {
     out.unlit = false;
     let Some(s) = detect(cx) else { return };

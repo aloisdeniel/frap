@@ -183,7 +183,7 @@ NORMALISE = {
     "D-127": ("cases", "cases stay inside the hard range"),
     "D-128": ("cases", "cases do not animate hide_viewport, update non-window view layers, or rename view layers between frame changes"),
     "D-129": ("cases", "cases do not read layer collections, selection or the context object between an unlink and the link"),
-    "D-130": ("cases", "cases do not use such names or drop iridescence channels next to other pointer channels; reports are not compared"),
+    "D-130": ("cases", "cases do not use such names, read at most one generic attribute as a UV map, drop iridescence channels next to other pointer channels, or export or import pointer channels Blender fails on; reports are not compared"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

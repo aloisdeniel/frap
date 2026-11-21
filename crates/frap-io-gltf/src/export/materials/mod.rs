@@ -197,13 +197,14 @@ pub fn image_none_factors(
         let strength =
             frap_material::graph::In::named(s.node, strength_name).and_then(|st| {
                 match cx.get_factor(st) {
-                    Some(frap_material::graph::Konst::Value(v)) => Some(f64::from(v)),
+                    Some(frap_material::graph::Konst::Value(v)) => Some(v),
                     _ => None,
                 }
             });
-        let f = c.map(|x| strength.map_or(f64::from(x), |v| f64::from(x) * v) as f32);
-        lm.emissive.factor = f;
-        lm.emissive_strength = 1.0;
+        // Colour and strength stay apart: `core_emissive::factor` multiplies the two in double
+        // precision, as the add-on's `[f * strength for f in factor]` does.
+        lm.emissive.factor = c;
+        lm.emissive_strength = strength.unwrap_or(1.0);
         lm.emissive.texture = None;
     }
 }

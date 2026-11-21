@@ -131,11 +131,20 @@ pub struct SocketRef {
     pub output: bool,
     /// Index in `inputs` / `outputs`.
     pub index: usize,
+    /// One component of the value (`….default_value[2]`, the Mapping's Z rotation).
+    pub component: Option<usize>,
 }
 
-/// The socket `nodes[…].inputs|outputs[…].default_value` names (a key resolves to the first
-/// socket with that name or identifier, as RNA collection lookup does).
+/// The socket `nodes[…].inputs|outputs[…].default_value` names, or one component of it
+/// (`….default_value[i]`); a key resolves to the first socket with that name or identifier,
+/// as RNA collection lookup does.
 fn socket_of(tree: &NodeTree, segs: &[PathSeg]) -> Option<SocketRef> {
+    let (segs, component) = match segs {
+        [rest @ .., PathSeg::Index(c)] if rest.len() == 5 => {
+            (rest, Some(usize::try_from(*c).ok()?))
+        }
+        _ => (segs, None),
+    };
     let [
         PathSeg::Prop(nodes),
         PathSeg::Key(name),
@@ -167,6 +176,7 @@ fn socket_of(tree: &NodeTree, segs: &[PathSeg]) -> Option<SocketRef> {
         node: name.to_string(),
         output,
         index,
+        component,
     })
 }
 
@@ -196,9 +206,14 @@ fn socket_value(v: &SocketValue) -> Vec<f32> {
 /// data, before the keyframe conversions).
 pub type FrameData = IndexMap<String, Vec<f64>>;
 
-/// The material's property at `key` at the evaluated frame.
+/// The material's property at `key` at the evaluated frame (one value for a key naming a
+/// component: `path_resolve` answers a float).
 fn material_value(tree: &NodeTree, ch: &Channels, key: &str) -> Option<Vec<f64>> {
     let s = key_socket(tree, key)?;
+    let base = SocketRef {
+        component: None,
+        ..s.clone()
+    };
     let node = tree.nodes.iter().find(|n| n.name == s.node.as_str())?;
     let sock = if s.output {
         node.outputs.get(s.index)?
@@ -207,9 +222,12 @@ fn material_value(tree: &NodeTree, ch: &Channels, key: &str) -> Option<Vec<f64>>
     };
     let mut v = socket_value(&sock.default_value);
     for (i, c) in v.iter_mut().enumerate() {
-        if let Some(x) = ch.socket(tree, &s, i as i32) {
+        if let Some(x) = ch.socket(tree, &base, i as i32) {
             *c = x;
         }
+    }
+    if let Some(c) = s.component {
+        return Some(vec![f64::from(*v.get(c)?)]);
     }
     Some(v.into_iter().map(f64::from).collect())
 }
@@ -289,11 +307,112 @@ fn material_frame(tree: &NodeTree, ch: &Channels, asset: &Asset) -> FrameData {
                 let c = val(key).unwrap_or_default();
                 data.insert(key.clone(), take(c, info.length));
             }
+        } else if info.pointer.contains("KHR_texture_transform") && info.pointer.ends_with("offset")
+        {
+            texture_transform_frame(asset, key, info, &val, &mut data);
+        } else if info.pointer.contains("KHR_texture_transform") && info.pointer.ends_with("scale")
+        {
+            // Written with the offset; a VECTOR mapping (no offset) gets the converted
+            // rotation of a zero placeholder, as the add-on writes it.
+            if info.vector_type.as_deref() == Some("VECTOR") {
+                data.insert(key.clone(), vec![0.0]);
+            }
         } else if let Some(v) = val(key) {
+            // The classic case, the texture transform's `rotation` included: its raw
+            // `Rotation[2]` replaces the converted value the offset wrote.
             data.insert(key.clone(), take(v, info.length));
         }
     }
     data
+}
+
+/// `inverted_trs_mapping_node` (`blender/com/conversion.py`): the inverse TRS of a TEXTURE
+/// Mapping node, `None` when it is not a TRS. The offset goes through mathutils' float32
+/// `Matrix.Rotation(-rotation, 3, 'Z') @ Vector((-x, -y, 1))`.
+pub fn inverted_trs(offset: [f64; 2], rotation: f64, scale: [f64; 2]) -> Option<TexTrs> {
+    if (rotation.abs() > 1e-5 && (scale[0] - scale[1]).abs() > 1e-5)
+        || scale[0].abs() < 1e-5
+        || scale[1].abs() < 1e-5
+    {
+        return None;
+    }
+    let a = (-rotation) as f32;
+    let (s, c) = (a.sin(), a.cos());
+    let (x, y) = (-(offset[0] as f32), -(offset[1] as f32));
+    let nx = (c * x - s * y) / scale[0] as f32;
+    let ny = (s * x + c * y) / scale[1] as f32;
+    Some(TexTrs {
+        offset: [f64::from(nx), f64::from(ny)],
+        rotation: -rotation,
+        scale: [1.0 / scale[0], 1.0 / scale[1]],
+    })
+}
+
+/// A Mapping node's or a glTF texture transform's offset, rotation and scale (Python floats).
+#[derive(Copy, Clone, Debug, PartialEq)]
+pub struct TexTrs {
+    /// `offset`
+    pub offset: [f64; 2],
+    /// `rotation`
+    pub rotation: f64,
+    /// `scale`
+    pub scale: [f64; 2],
+}
+
+/// `texture_transform_blender_to_gltf`.
+pub fn blender_to_gltf(t: TexTrs) -> TexTrs {
+    TexTrs {
+        offset: [
+            t.offset[0] - t.scale[1] * t.rotation.sin(),
+            1.0 - t.offset[1] - t.scale[1] * t.rotation.cos(),
+        ],
+        ..t
+    }
+}
+
+/// `material_nodetree_caching`'s `KHR_texture_transform` offset case: the offset needs the
+/// rotation and scale of the same texture (the paths sharing its pointer's parent), converted
+/// together (TEXTURE: inverted, the default transform when that fails; VECTOR: no offset); the
+/// offset, rotation and scale of this frame are all written here.
+fn texture_transform_frame(
+    asset: &Asset,
+    key: &str,
+    info: &PathInfo,
+    val: &dyn Fn(&str) -> Option<Vec<f64>>,
+    data: &mut FrameData,
+) {
+    let comp = |v: &Option<Vec<f64>>, i: usize, d: f64| {
+        v.as_ref().and_then(|v| v.get(i).copied()).unwrap_or(d)
+    };
+    let rotation_key = sibling(asset, &info.pointer, "rotation");
+    let scale_key = sibling(asset, &info.pointer, "scale");
+    let offset = val(key);
+    let rotation = rotation_key.and_then(val);
+    let scale = scale_key.and_then(val);
+    let mut t = TexTrs {
+        offset: [comp(&offset, 0, 0.0), comp(&offset, 1, 0.0)],
+        rotation: comp(&rotation, 0, 0.0),
+        scale: [comp(&scale, 0, 1.0), comp(&scale, 1, 1.0)],
+    };
+    match info.vector_type.as_deref() {
+        Some("TEXTURE") => {
+            t = inverted_trs(t.offset, t.rotation, t.scale).unwrap_or(TexTrs {
+                offset: [0.0, 0.0],
+                rotation: 0.0,
+                scale: [1.0, 1.0],
+            });
+        }
+        Some("VECTOR") => t.offset = [0.0, 0.0],
+        _ => {}
+    }
+    let g = blender_to_gltf(t);
+    data.insert(key.to_owned(), g.offset.to_vec());
+    if let Some(k) = rotation_key {
+        data.insert(k.to_owned(), vec![g.rotation]);
+    }
+    if let Some(k) = scale_key {
+        data.insert(k.to_owned(), g.scale.to_vec());
+    }
 }
 
 /// The camera fields the animation writes, with their stored values otherwise.
@@ -532,6 +651,7 @@ mod tests {
             node: "Principled BSDF".into(),
             output: false,
             index: 2,
+            component: None,
         });
         assert_eq!(
             key_socket(
@@ -548,6 +668,61 @@ mod tests {
             key_socket(t, "node_tree.nodes[\"Nope\"].inputs[2].default_value"),
             None
         );
+    }
+
+    /// `inverted_trs_mapping_node` + `texture_transform_blender_to_gltf` of a TEXTURE Mapping
+    /// (Location 0, Rotation Z 0.3, Scale 2): Blender 5.2.4 writes offset (0.14776, 0.52233),
+    /// rotation -0.3, scale 0.5; a non-uniform scale with a rotation is no TRS.
+    #[test]
+    fn texture_mapping_inverts_to_the_add_on_transform() {
+        let r = f64::from(0.3f32);
+        let t = blender_to_gltf(inverted_trs([0.0, 0.0], r, [2.0, 2.0]).unwrap());
+        assert!((t.offset[0] - 0.147_760_109).abs() < 1e-6, "{t:?}");
+        assert!((t.offset[1] - 0.522_331_757).abs() < 1e-6, "{t:?}");
+        assert_eq!(t.rotation, -r);
+        assert_eq!(t.scale, [0.5, 0.5]);
+        assert!(inverted_trs([0.0, 0.0], r, [2.0, 1.0]).is_none());
+        assert!(inverted_trs([0.0, 0.0], 0.0, [0.0, 1.0]).is_none());
+    }
+
+    /// The offset case writes offset, rotation and scale of the texture; a VECTOR mapping's
+    /// scale gets the converted placeholder rotation (0) and its rotation the raw socket.
+    #[test]
+    fn texture_transform_frame_follows_material_nodetree_caching() {
+        let (main, _) = frap_scene::startup::factory();
+        let mut paths = IndexMap::new();
+        let tt =
+            "/materials/XXX/pbrMetallicRoughness/baseColorTexture/extensions/KHR_texture_transform";
+        for (k, m, n) in [("o", "offset", 2), ("s", "scale", 2), ("r", "rotation", 1)] {
+            paths.insert(
+                k.to_owned(),
+                PathInfo {
+                    vector_type: Some("POINT".into()),
+                    ..PathInfo::new(&format!("{tt}/{m}"), n)
+                },
+            );
+        }
+        let asset = Asset {
+            id: main.materials.find("Material").unwrap().any(),
+            index: 0,
+            paths,
+        };
+        let val = |k: &str| match k {
+            "o" => Some(vec![0.5, 0.25, 0.0, 0.0]),
+            "s" => Some(vec![2.0, 2.0, 1.0, 0.0]),
+            "r" => Some(vec![0.3]),
+            _ => None,
+        };
+        let mut data = FrameData::new();
+        texture_transform_frame(&asset, "o", &asset.paths["o"], &val, &mut data);
+        let g = blender_to_gltf(TexTrs {
+            offset: [0.5, 0.25],
+            rotation: 0.3,
+            scale: [2.0, 2.0],
+        });
+        assert_eq!(data["o"], g.offset.to_vec());
+        assert_eq!(data["r"], vec![0.3]);
+        assert_eq!(data["s"], vec![2.0, 2.0]);
     }
 
     #[test]

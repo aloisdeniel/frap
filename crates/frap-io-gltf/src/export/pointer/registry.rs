@@ -60,6 +60,13 @@ pub struct PathInfo {
     /// `reverse` of `occlusionTexture/strength`: the Mix's white is its `B` input, so the
     /// strength is `1 - Factor` (WP 7.7).
     pub reverse: bool,
+    /// `vector_type` of the Mapping node a `KHR_texture_transform` path belongs to (`POINT`,
+    /// `TEXTURE`, `VECTOR`; WP 7.7).
+    pub vector_type: Option<SmolStr>,
+    /// `additional`: further pointers the same property fills (one Mapping node or Normal Map
+    /// feeding several textures). Each becomes a copy of the channel with its own accessors
+    /// (`gather_data_sampled_channels`' deep copies, WP 7.7).
+    pub additional: Vec<String>,
 }
 
 impl PathInfo {
@@ -75,6 +82,14 @@ impl PathInfo {
     /// The pointer with the object's index (`path.replace("XXX", str(index))`).
     pub fn resolved(&self, index: Index) -> String {
         self.pointer.replace("XXX", &index.to_string())
+    }
+
+    /// The [`Self::additional`] pointers with the object's index.
+    pub fn resolved_additional(&self, index: Index) -> Vec<String> {
+        self.additional
+            .iter()
+            .map(|p| p.replace("XXX", &index.to_string()))
+            .collect()
     }
 }
 
@@ -234,6 +249,8 @@ pub fn build(g: &mut Gather) -> Registry {
         .map(|(r, m)| (m.header.name.as_str(), r))
         .collect();
     let mut reg = Registry::default();
+    // Materials the add-on's sampler fails on (a registered property without a path).
+    let mut failing: Vec<(String, String)> = Vec::new();
     let mut seen = std::collections::HashSet::new();
     let mut stack: Vec<(Index, bool)> = Vec::new();
     for s in &doc.scenes {
@@ -285,11 +302,16 @@ pub fn build(g: &mut Gather) -> Registry {
                 let image_none = g.settings.export_image_format
                     == crate::export::settings::ExportImageFormat::None;
                 let gm = &doc.materials[mi as usize];
-                let paths = super::material::paths(main, mat, gm, image_none);
-                if paths.is_empty() {
+                let lm = crate::export::materials::lower::lowered_for(main, mat, g.settings);
+                let orm = crate::export::materials::core_occlusion::orm_inputs(g, &lm).is_some();
+                let found = super::material::paths(main, mat, gm, image_none, orm);
+                if found.paths.is_empty() {
                     continue;
                 }
-                register(&mut reg.materials, r.any(), mi, paths);
+                if !found.none_keys.is_empty() && !failing.iter().any(|(n, _)| *n == name) {
+                    failing.push((name.to_owned(), found.none_keys.join(", ")));
+                }
+                register(&mut reg.materials, r.any(), mi, found.paths);
             }
         }
         if let (Some(ob), Some(ci)) = (ob, node.camera)
@@ -307,6 +329,13 @@ pub fn build(g: &mut Gather) -> Registry {
         for &c in node.children.iter().rev() {
             stack.push((c, false));
         }
+    }
+    for (name, members) in failing {
+        g.warn(format!(
+            "frap: export_scene.gltf: material '{name}': {members} has no animatable source \
+             (Blender's KHR_animation_pointer export fails here: 'NoneType' object has no \
+             attribute 'startswith'); its other channels are exported"
+        ));
     }
     reg
 }
