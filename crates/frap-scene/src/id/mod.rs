@@ -22,8 +22,12 @@ mod object;
 pub mod paths;
 mod pointcloud;
 mod scene;
+/// The glTF add-on's scene-level variant data (M7 W0 contract; WP 7.5).
+pub mod scene_gltf_variants;
 pub mod slots;
 mod texture;
+/// Timeline markers (M7 W0 contract; WP 7.6).
+pub mod timeline_marker;
 pub mod transform;
 mod world;
 
@@ -42,7 +46,9 @@ pub use modifier::{GnInput, GnInputs, GnValue, Modifier, ModifierSettings, objec
 pub use object::{Object, SlotLink, SlotOverride};
 pub use pointcloud::PointCloud;
 pub use scene::Scene;
+pub use scene_gltf_variants::{GltfVariant, SceneGltfVariants};
 pub use texture::Texture;
+pub use timeline_marker::TimelineMarker;
 pub use world::World;
 
 /// Retargets `animation_data.action` (`IdType::remap_ref`).

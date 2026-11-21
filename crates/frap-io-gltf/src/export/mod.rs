@@ -18,12 +18,22 @@
 pub mod animation;
 pub mod apply;
 pub mod cameras;
+/// M7 compression call sites (M7 W0: meshopt buffers, dequantization node transforms).
+pub mod compress;
 pub mod ext_order;
 pub mod extras;
 pub mod filters;
 pub mod formats;
 pub mod gather;
+/// `export_use_gltfpack` (WP 7.1; M7 W0 stub).
+pub mod gltfpack;
 pub mod images;
+/// `KHR_texture_basisu` export (WP 7.3; M7 W0 stub).
+pub mod images_ktx2;
+/// `EXT_texture_webp` export (WP 7.3; M7 W0 stub).
+pub mod images_webp;
+/// `EXT_mesh_gpu_instancing` export (WP 7.5; M7 W0 stub).
+pub mod instancing;
 pub mod lights;
 pub mod materials;
 pub mod mesh;
@@ -35,6 +45,12 @@ pub mod scenes;
 pub mod settings;
 /// Skins (WP 6.8; M5+M6 W0 stub).
 pub mod skins;
+/// `frap_compat='SPEC'` and the other spec-complete options (WP 7.4; M7 W0 stub).
+pub mod spec_complete;
+/// The `texCoord` of a texture reference (moved out of `images.rs` by M7 W0; WP 7.7).
+pub mod tex_coord;
+/// `KHR_materials_variants` export (WP 7.5; M7 W0 stub).
+pub mod variants;
 pub mod vtree;
 pub mod write;
 
@@ -97,8 +113,14 @@ pub fn export(
     pointer::gather(&mut g)?;
     // `traverse_unused_skins`: after the animations.
     skins::write_unused_skins(&mut g)?;
+    // M7 W0 hooks: the root variant list (WP 7.5), then `manage_gpu_instancing_nodes`
+    // (WP 7.5), which the add-on runs after gathering everything.
+    variants::finish(&mut g)?;
+    instancing::apply(&mut g)?;
     if let Some(m) = g.state::<extras::NonFinite>().0.take() {
         return Err(ExportError::Json(m));
     }
-    write::finish(g)
+    let out = write::finish(g)?;
+    // `export_use_gltfpack` post-processes the written file (WP 7.1).
+    gltfpack::apply(settings, out)
 }

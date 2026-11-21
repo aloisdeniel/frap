@@ -37,6 +37,8 @@ pub const LAYERS: &[(&str, u8)] = &[
     ("frap-spec-ops-render", 2),
     ("frap-spec-ops-frap", 2),
     ("frap-spec-catalog", 2),
+    // M7 W0: the optional cc-built Draco fallback, a leaf under frap-codec-mesh (§3.6).
+    ("frap-draco-sys", 2),
     ("frap-anim", 3),
     ("frap-gltf", 3),
     ("frap-imbuf", 3),

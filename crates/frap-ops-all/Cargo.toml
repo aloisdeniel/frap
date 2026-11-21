@@ -19,6 +19,9 @@ frap-ops-io.workspace = true
 frap-ops-render.workspace = true
 frap-ops-frap.workspace = true
 frap-imbuf.workspace = true
+# M7 W0: the codec backends are features of frap-codec-mesh (and frap-imbuf for Basis), forwarded
+# from here so frap-cli's `--no-default-features` reaches them (§3.6).
+frap-codec-mesh.workspace = true
 frap-subdiv.workspace = true
 frap-boolean.workspace = true
 frap-modifiers.workspace = true
@@ -58,12 +61,12 @@ frap-geom.workspace = true
 default = []
 gpu = []
 webp-lossy = ["frap-imbuf/webp-lossy"]
-# Wired by the W0 of the milestone that adds the backend (M7: codecs and basisu, §22.9).
-meshopt = []
-draco = []
-draco-sys = []
-basisu = []
-basisu-encode = []
+# M7 W0 (decision log M7W0-5): the codec backends (§3.6, §22.9).
+meshopt = ["frap-codec-mesh/meshopt"]
+draco = ["frap-codec-mesh/draco"]
+draco-sys = ["frap-codec-mesh/draco-sys"]
+basisu = ["frap-imbuf/basisu"]
+basisu-encode = ["frap-imbuf/basisu-encode"]
 # M4 W0: the OpenSubdiv backend of `Subdivider`. Since the M4 gate (decision log M34S3-1)
 # frap-subdiv enables it by default (its Gregory end caps); the flag stays for §3.6's matrix.
 subdiv-osd = ["frap-subdiv/osd"]

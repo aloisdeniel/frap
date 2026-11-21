@@ -73,11 +73,28 @@ pub static E11: [EnumItem; 3] = [
     EnumItem { identifier: "ACTION", name: "Actions", description: "Merge by Actions", value: 1 },
     EnumItem { identifier: "NONE", name: "No Merge", description: "Do Not Merge Animations", value: 2 },
 ];
+pub static E12: [EnumItem; 2] = [
+    EnumItem { identifier: "BLENDER", name: "Blender", description: "Byte-compatible with io_scene_gltf2 5.2.41, quirks included", value: 0 },
+    EnumItem { identifier: "SPEC", name: "Spec", description: "Strict glTF 2.0: drop add-on quirks (e.g. KHR_texture_transform marked required)", value: 1 },
+];
+pub static E13: [EnumItem; 2] = [
+    EnumItem { identifier: "AUTO", name: "Automatic", description: "Use export_image_format", value: 0 },
+    EnumItem { identifier: "KTX2", name: "KTX2", description: "KTX2 + Basis Universal (KHR_texture_basisu), needs feature basisu-encode", value: 1 },
+];
+pub static E14: [EnumItem; 2] = [
+    EnumItem { identifier: "ETC1S", name: "ETC1S", description: "Smaller files, lower quality", value: 0 },
+    EnumItem { identifier: "UASTC", name: "UASTC", description: "Larger files, higher quality", value: 1 },
+];
+pub static E15: [EnumItem; 3] = [
+    EnumItem { identifier: "AUTO", name: "Automatic", description: "draco-core, or draco-sys when built with that feature", value: 0 },
+    EnumItem { identifier: "CORE", name: "draco-core", description: "Pure-Rust encoder", value: 1 },
+    EnumItem { identifier: "SYS", name: "draco-sys", description: "Google Draco (feature draco-sys)", value: 2 },
+];
 }
 
 // ---------------------------------------------------------------- export_scene.gltf
 /// Props of `export_scene.gltf`, RNA order.
-pub static GLTF_PROPS: [PropDef; 110] = [
+pub static GLTF_PROPS: [PropDef; 118] = [
     PropDef { identifier: "filepath", name: "File Path", description: "Filepath used for exporting the file", kind: PropKind::String { default: "", max_bytes: 1025 }, subtype: Subtype::FilePath, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::NEVER_NULL, deprecated: None },
     PropDef { identifier: "check_existing", name: "Check Existing", description: "Check and warn on overwriting existing files", kind: PropKind::Bool { default: Defaults::Scalar(true) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::SKIP_PRESET), deprecated: None },
     PropDef { identifier: "export_import_convert_lighting_mode", name: "Lighting Mode", description: "Optional backwards compatibility for non-standard render engines. Applies to lights", kind: PropKind::Enum { items: &enums::E0, default: EnumDefault::Item("SPEC"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
@@ -188,6 +205,14 @@ pub static GLTF_PROPS: [PropDef; 110] = [
     PropDef { identifier: "export_extra_animations", name: "Prepare Extra Animations", description: "Export additional animations.\nThis feature is not standard and needs an external extension to be included in the glTF file", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "export_loglevel", name: "Log Level", description: "Log Level", kind: PropKind::Int { default: Defaults::Scalar(-1), hard: (-2147483648, 2147483647), soft: (-2147483648, 2147483647) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::ANIMATABLE, deprecated: None },
     PropDef { identifier: "filter_glob", name: "filter_glob", description: "", kind: PropKind::String { default: "*.glb", max_bytes: 0 }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::HIDDEN.union(PropFlags::NEVER_NULL).union(PropFlags::SKIP_PRESET), deprecated: None },
+    PropDef { identifier: "frap_compat", name: "frap_compat", description: "Output compatibility (frap extension)", kind: PropKind::Enum { items: &enums::E12, default: EnumDefault::Item("BLENDER"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::empty(), deprecated: None },
+    PropDef { identifier: "frap_texture_format", name: "frap_texture_format", description: "Texture container (frap extension)", kind: PropKind::Enum { items: &enums::E13, default: EnumDefault::Item("AUTO"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::empty(), deprecated: None },
+    PropDef { identifier: "frap_basisu_mode", name: "frap_basisu_mode", description: "Basis Universal mode for frap_texture_format='KTX2' (frap extension)", kind: PropKind::Enum { items: &enums::E14, default: EnumDefault::Item("ETC1S"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::empty(), deprecated: None },
+    PropDef { identifier: "frap_mesh_quantization", name: "frap_mesh_quantization", description: "Quantize vertex attributes (KHR_mesh_quantization, frap extension)", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::empty(), deprecated: None },
+    PropDef { identifier: "frap_interleave", name: "frap_interleave", description: "Interleave vertex buffers (frap extension)", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::empty(), deprecated: None },
+    PropDef { identifier: "frap_node_visibility", name: "frap_node_visibility", description: "Export KHR_node_visibility (frap extension)", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::empty(), deprecated: None },
+    PropDef { identifier: "frap_diffuse_transmission", name: "frap_diffuse_transmission", description: "Export KHR_materials_diffuse_transmission (frap extension)", kind: PropKind::Bool { default: Defaults::Scalar(false) }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::empty(), deprecated: None },
+    PropDef { identifier: "frap_draco_backend", name: "frap_draco_backend", description: "Draco encoder implementation (frap extension)", kind: PropKind::Enum { items: &enums::E15, default: EnumDefault::Item("AUTO"), dynamic: None }, subtype: Subtype::None, unit: Unit::None, array: ArrayShape::Scalar, flags: PropFlags::empty(), deprecated: None },
 ];
 /// `EXPORT_SCENE_OT_gltf`
 pub static OPSPEC_EXPORT_SCENE_OT_GLTF: OperatorSpec = OperatorSpec {
@@ -676,6 +701,162 @@ pub mod gltf {
             v.as_str().and_then(Self::from_identifier).unwrap_or_default()
         }
     }
+    /// `FrapCompat`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum FrapCompat {
+        /// "BLENDER"
+        Blender,
+        /// "SPEC"
+        Spec,
+    }
+    impl FrapCompat {
+        /// Every variant, in RNA item order.
+        pub const ALL: [FrapCompat; 2] = [FrapCompat::Blender, FrapCompat::Spec];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                FrapCompat::Blender => "BLENDER",
+                FrapCompat::Spec => "SPEC",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "BLENDER" => Some(FrapCompat::Blender),
+                "SPEC" => Some(FrapCompat::Spec),
+                _ => None,
+            }
+        }
+    }
+    impl Default for FrapCompat {
+        fn default() -> Self {
+            FrapCompat::Blender
+        }
+    }
+    impl frap_rna::FromValue for FrapCompat {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `FrapTextureFormat`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum FrapTextureFormat {
+        /// "AUTO"
+        Auto,
+        /// "KTX2"
+        Ktx2,
+    }
+    impl FrapTextureFormat {
+        /// Every variant, in RNA item order.
+        pub const ALL: [FrapTextureFormat; 2] = [FrapTextureFormat::Auto, FrapTextureFormat::Ktx2];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                FrapTextureFormat::Auto => "AUTO",
+                FrapTextureFormat::Ktx2 => "KTX2",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "AUTO" => Some(FrapTextureFormat::Auto),
+                "KTX2" => Some(FrapTextureFormat::Ktx2),
+                _ => None,
+            }
+        }
+    }
+    impl Default for FrapTextureFormat {
+        fn default() -> Self {
+            FrapTextureFormat::Auto
+        }
+    }
+    impl frap_rna::FromValue for FrapTextureFormat {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `FrapBasisuMode`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum FrapBasisuMode {
+        /// "ETC1S"
+        Etc1s,
+        /// "UASTC"
+        Uastc,
+    }
+    impl FrapBasisuMode {
+        /// Every variant, in RNA item order.
+        pub const ALL: [FrapBasisuMode; 2] = [FrapBasisuMode::Etc1s, FrapBasisuMode::Uastc];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                FrapBasisuMode::Etc1s => "ETC1S",
+                FrapBasisuMode::Uastc => "UASTC",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "ETC1S" => Some(FrapBasisuMode::Etc1s),
+                "UASTC" => Some(FrapBasisuMode::Uastc),
+                _ => None,
+            }
+        }
+    }
+    impl Default for FrapBasisuMode {
+        fn default() -> Self {
+            FrapBasisuMode::Etc1s
+        }
+    }
+    impl frap_rna::FromValue for FrapBasisuMode {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
+    /// `FrapDracoBackend`
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+    pub enum FrapDracoBackend {
+        /// "AUTO"
+        Auto,
+        /// "CORE"
+        Core,
+        /// "SYS"
+        Sys,
+    }
+    impl FrapDracoBackend {
+        /// Every variant, in RNA item order.
+        pub const ALL: [FrapDracoBackend; 3] = [FrapDracoBackend::Auto, FrapDracoBackend::Core, FrapDracoBackend::Sys];
+        /// Blender identifier.
+        pub const fn identifier(self) -> &'static str {
+            match self {
+                FrapDracoBackend::Auto => "AUTO",
+                FrapDracoBackend::Core => "CORE",
+                FrapDracoBackend::Sys => "SYS",
+            }
+        }
+        /// Parses a Blender identifier.
+        pub fn from_identifier(s: &str) -> Option<Self> {
+            match s {
+                "AUTO" => Some(FrapDracoBackend::Auto),
+                "CORE" => Some(FrapDracoBackend::Core),
+                "SYS" => Some(FrapDracoBackend::Sys),
+                _ => None,
+            }
+        }
+    }
+    impl Default for FrapDracoBackend {
+        fn default() -> Self {
+            FrapDracoBackend::Auto
+        }
+    }
+    impl frap_rna::FromValue for FrapDracoBackend {
+        /// Infallible after `coerce`; an unknown identifier (a spec mismatch) yields the default.
+        fn from_value(v: &frap_rna::Value) -> Self {
+            v.as_str().and_then(Self::from_identifier).unwrap_or_default()
+        }
+    }
 }
 /// Typed props of `export_scene.gltf` (Export glTF 2.0).
 #[derive(Debug, Clone)]
@@ -900,6 +1081,22 @@ pub struct ExportSceneGltf {
     pub export_loglevel: Prop<i32>,
     /// default "*.glb" [HIDDEN, NEVER_NULL, SKIP_PRESET]
     pub filter_glob: Prop<SmolStr>,
+    /// Output compatibility (frap extension); default "BLENDER": BLENDER | SPEC
+    pub frap_compat: Prop<gltf::FrapCompat>,
+    /// Texture container (frap extension); default "AUTO": AUTO | KTX2
+    pub frap_texture_format: Prop<gltf::FrapTextureFormat>,
+    /// Basis Universal mode for frap_texture_format='KTX2' (frap extension); default "ETC1S": ETC1S | UASTC
+    pub frap_basisu_mode: Prop<gltf::FrapBasisuMode>,
+    /// Quantize vertex attributes (KHR_mesh_quantization, frap extension); default false
+    pub frap_mesh_quantization: Prop<bool>,
+    /// Interleave vertex buffers (frap extension); default false
+    pub frap_interleave: Prop<bool>,
+    /// Export KHR_node_visibility (frap extension); default false
+    pub frap_node_visibility: Prop<bool>,
+    /// Export KHR_materials_diffuse_transmission (frap extension); default false
+    pub frap_diffuse_transmission: Prop<bool>,
+    /// Draco encoder implementation (frap extension); default "AUTO": AUTO | CORE | SYS
+    pub frap_draco_backend: Prop<gltf::FrapDracoBackend>,
 }
 impl OpProps for ExportSceneGltf {
     const IDNAME: &'static str = "export_scene.gltf";
@@ -1019,6 +1216,14 @@ impl OpProps for ExportSceneGltf {
             export_extra_animations: a.prop(107, "export_extra_animations"),
             export_loglevel: a.prop(108, "export_loglevel"),
             filter_glob: a.prop(109, "filter_glob"),
+            frap_compat: a.prop(110, "frap_compat"),
+            frap_texture_format: a.prop(111, "frap_texture_format"),
+            frap_basisu_mode: a.prop(112, "frap_basisu_mode"),
+            frap_mesh_quantization: a.prop(113, "frap_mesh_quantization"),
+            frap_interleave: a.prop(114, "frap_interleave"),
+            frap_node_visibility: a.prop(115, "frap_node_visibility"),
+            frap_diffuse_transmission: a.prop(116, "frap_diffuse_transmission"),
+            frap_draco_backend: a.prop(117, "frap_draco_backend"),
         }
     }
 }

@@ -2478,6 +2478,216 @@ source: crates/frap-schema/tests/describe_ops.rs
       "unset_semantics": null,
       "frap_note": null,
       "frap_extension": false
+    },
+    {
+      "identifier": "frap_compat",
+      "name": "frap_compat",
+      "description": "Output compatibility (frap extension)",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "BLENDER",
+      "enum_items": [
+        {
+          "identifier": "BLENDER",
+          "name": "Blender",
+          "description": "Byte-compatible with io_scene_gltf2 5.2.41, quirks included",
+          "value": 0
+        },
+        {
+          "identifier": "SPEC",
+          "name": "Spec",
+          "description": "Strict glTF 2.0: drop add-on quirks (e.g. KHR_texture_transform marked required)",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "frap_texture_format",
+      "name": "frap_texture_format",
+      "description": "Texture container (frap extension)",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "AUTO",
+      "enum_items": [
+        {
+          "identifier": "AUTO",
+          "name": "Automatic",
+          "description": "Use export_image_format",
+          "value": 0
+        },
+        {
+          "identifier": "KTX2",
+          "name": "KTX2",
+          "description": "KTX2 + Basis Universal (KHR_texture_basisu), needs feature basisu-encode",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "frap_basisu_mode",
+      "name": "frap_basisu_mode",
+      "description": "Basis Universal mode for frap_texture_format='KTX2' (frap extension)",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "ETC1S",
+      "enum_items": [
+        {
+          "identifier": "ETC1S",
+          "name": "ETC1S",
+          "description": "Smaller files, lower quality",
+          "value": 0
+        },
+        {
+          "identifier": "UASTC",
+          "name": "UASTC",
+          "description": "Larger files, higher quality",
+          "value": 1
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "frap_mesh_quantization",
+      "name": "frap_mesh_quantization",
+      "description": "Quantize vertex attributes (KHR_mesh_quantization, frap extension)",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "frap_interleave",
+      "name": "frap_interleave",
+      "description": "Interleave vertex buffers (frap extension)",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "frap_node_visibility",
+      "name": "frap_node_visibility",
+      "description": "Export KHR_node_visibility (frap extension)",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "frap_diffuse_transmission",
+      "name": "frap_diffuse_transmission",
+      "description": "Export KHR_materials_diffuse_transmission (frap extension)",
+      "type": "BOOLEAN",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": false,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
+    },
+    {
+      "identifier": "frap_draco_backend",
+      "name": "frap_draco_backend",
+      "description": "Draco encoder implementation (frap extension)",
+      "type": "ENUM",
+      "subtype": "NONE",
+      "unit": "NONE",
+      "array": null,
+      "default": "AUTO",
+      "enum_items": [
+        {
+          "identifier": "AUTO",
+          "name": "Automatic",
+          "description": "draco-core, or draco-sys when built with that feature",
+          "value": 0
+        },
+        {
+          "identifier": "CORE",
+          "name": "draco-core",
+          "description": "Pure-Rust encoder",
+          "value": 1
+        },
+        {
+          "identifier": "SYS",
+          "name": "draco-sys",
+          "description": "Google Draco (feature draco-sys)",
+          "value": 2
+        }
+      ],
+      "is_enum_flag": false,
+      "dynamic_enum": null,
+      "context_rule": null,
+      "hidden": false,
+      "skip_save": false,
+      "flags": [],
+      "required": false,
+      "unset_semantics": null,
+      "frap_note": null,
+      "frap_extension": true
     }
   ],
   "frap": {

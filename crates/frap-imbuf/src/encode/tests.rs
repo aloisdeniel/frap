@@ -310,14 +310,18 @@ fn webp_encoding_stops_at_the_deadline() {
                 Ok(Vec::new())
             })
         })
-        .is_err()
+        .err()
+        .and_then(|p| frap_math::budget::interrupted(&*p))
     };
     for _ in 1..super::webp::MAX_WORKERS {
-        assert!(timed_out(Duration::from_secs(2)));
+        let i = timed_out(Duration::from_secs(2)).expect("TIMEOUT");
+        assert_eq!(i.reason, None, "a slot was free: its own work timed out");
     }
     assert_eq!(super::webp::running_workers(), super::webp::MAX_WORKERS);
     let waited = Instant::now();
-    assert!(timed_out(Duration::from_secs(10)));
+    // M7 W0: the TIMEOUT of an encode that never got a slot says so.
+    let i = timed_out(Duration::from_secs(10)).expect("TIMEOUT");
+    assert_eq!(i.reason, Some(super::webp::SLOTS_BUSY));
     assert!(super::webp::running_workers() <= super::webp::MAX_WORKERS);
     assert!(
         waited.elapsed() < Duration::from_secs(1),

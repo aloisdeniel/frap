@@ -36,6 +36,9 @@ members = [
     "crates/frap-gltf",
     "crates/frap-imbuf",
     "crates/frap-codec-mesh",
+    # M7 W0: optional cc-built Google Draco fallback of `DracoCodec` (feature `draco-sys`, off;
+    # WP 7.2 fills it only if the draco-core spike gate fails, §22.9).
+    "crates/frap-draco-sys",
     "crates/frap-uv",
     "crates/frap-subdiv",
     "crates/frap-boolean",
@@ -115,6 +118,7 @@ frap-anim = { path = "crates/frap-anim", version = "0.1.0" }
 frap-gltf = { path = "crates/frap-gltf", version = "0.1.0" }
 frap-imbuf = { path = "crates/frap-imbuf", version = "0.1.0" }
 frap-codec-mesh = { path = "crates/frap-codec-mesh", version = "0.1.0" }
+frap-draco-sys = { path = "crates/frap-draco-sys", version = "0.1.0" }
 frap-uv = { path = "crates/frap-uv", version = "0.1.0" }
 frap-subdiv = { path = "crates/frap-subdiv", version = "0.1.0" }
 frap-boolean = { path = "crates/frap-boolean", version = "0.1.0" }
@@ -149,7 +153,9 @@ frap-ops-render-tests = { path = "crates/frap-ops-render-tests", version = "0.1.
 # ---------------------------------------------------------------- external (§3.5)
 # Exact patch versions are locked in Cargo.lock. Entries for later milestones are declared
 # here already (so the version decision is visible) but no member uses them until that
-# milestone's W0: draco-core, meshopt, ktx2, basisu, basisu_c_sys, spade (M7). M3+M4 W0 put
+# milestone's W0. M7 W0 put draco-core, meshopt (frap-codec-mesh, features `draco`/`meshopt`),
+# ktx2, basisu and basisu_c_sys (frap-imbuf, features `basisu`/`basisu-encode`) in use; spade
+# stays unused. M3+M4 W0 put
 # faer (frap-uv), bevy_mikktspace (frap-geom), manifold-rust (frap-boolean) and opensubdiv-rs
 # (frap-subdiv, default feature `osd` since the M4 gate) in use.
 # `libm`: glam uses libm for its transcendentals too (rule 2.2.12, byte-stable across OSes).
@@ -163,8 +169,11 @@ png = "0.18.1"
 exr = "1.74.3"
 webp = "0.3.1"
 ktx2 = "0.5.0"
-basisu = "0.1.0"
-basisu_c_sys = "0.9.1"
+# M7 W0: without its `zstd` feature, whose ruzstd 0.7 has RUSTSEC-2026-0344 (decompression
+# bomb); KTX2 zstd supercompression goes through ruzstd >= 0.9.1 directly (frap-imbuf `basisu`).
+basisu = { version = "0.1.0", default-features = false, features = ["std"] }
+ruzstd = "0.9.1"
+basisu_c_sys = { version = "0.9.1", default-features = false }
 meshopt = "0.7.0"
 draco-core = "=2.3.3"
 manifold-rust = "=0.19.2"

@@ -39,6 +39,9 @@ pub enum FileFormat {
     Dpx,
     /// `'CINEON'` (render output only, as `Tiff`).
     Cineon,
+    /// KTX2 (`KHR_texture_basisu`, M7 W0): read only, not a Blender `file_format` (Blender
+    /// cannot load KTX2; not in [`FileFormat::ALL`]); decoded by [`crate::ktx2`] (WP 7.3).
+    Ktx2,
 }
 
 impl FileFormat {
@@ -67,6 +70,7 @@ impl FileFormat {
             FileFormat::Iris => "IRIS",
             FileFormat::Dpx => "DPX",
             FileFormat::Cineon => "CINEON",
+            FileFormat::Ktx2 => "KTX2",
         }
     }
 
@@ -90,6 +94,7 @@ impl FileFormat {
             FileFormat::Iris => ".rgb",
             FileFormat::Dpx => ".dpx",
             FileFormat::Cineon => ".cin",
+            FileFormat::Ktx2 => ".ktx2",
         }
     }
 
@@ -108,6 +113,8 @@ impl FileFormat {
             Some(FileFormat::Hdr)
         } else if bytes.starts_with(b"BM") {
             Some(FileFormat::Bmp)
+        } else if crate::ktx2::is_ktx2(bytes) {
+            Some(FileFormat::Ktx2)
         } else if looks_like_tga(bytes) {
             Some(FileFormat::Targa)
         } else {
@@ -166,6 +173,7 @@ pub fn decode(bytes: &[u8]) -> Result<DecodedImage, ImageError> {
     match FileFormat::detect(bytes) {
         Some(FileFormat::Png) => decode_png(bytes),
         Some(FileFormat::OpenExr) => decode_exr(bytes),
+        Some(FileFormat::Ktx2) => crate::ktx2::decode(bytes),
         // 32-bit BMPs carry alpha in OIIO's (and Blender's) reading (WP 5.4).
         Some(FileFormat::Bmp) => crate::encode::decode_bmp_v3_32(bytes)
             .unwrap_or_else(|| decode_with_image(bytes, FileFormat::Bmp)),
@@ -199,6 +207,9 @@ pub fn probe(bytes: &[u8]) -> Result<ImageInfo, ImageError> {
             "unrecognised image data (not PNG, JPEG, WebP, OpenEXR, HDR, BMP or TGA)".into(),
         )
     })?;
+    if format == FileFormat::Ktx2 {
+        return crate::ktx2::probe(bytes);
+    }
     let (width, height, channels, bit_depth) = match format {
         FileFormat::Png => {
             let mut decoder = png::Decoder::new(Cursor::new(bytes));
@@ -483,10 +494,12 @@ fn image_format(f: FileFormat) -> image::ImageFormat {
         FileFormat::Hdr => image::ImageFormat::Hdr,
         FileFormat::Targa => image::ImageFormat::Tga,
         FileFormat::Bmp => image::ImageFormat::Bmp,
-        // Never sniffed (`FileFormat::detect`), so never decoded through `image`.
-        FileFormat::Tiff | FileFormat::Iris | FileFormat::Dpx | FileFormat::Cineon => {
-            image::ImageFormat::Tiff
-        }
+        // Never sniffed (`FileFormat::detect`), or decoded by `ktx2.rs`: never through `image`.
+        FileFormat::Tiff
+        | FileFormat::Iris
+        | FileFormat::Dpx
+        | FileFormat::Cineon
+        | FileFormat::Ktx2 => image::ImageFormat::Tiff,
     }
 }
 

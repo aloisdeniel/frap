@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.types.Scene` (§5.6). The field set is frozen at M1 W0 (decision log W0-21); WP 1.10
-//! owns the bindings and behaviour. The glTF variant list arrives with M7 (its W0).
+//! owns the bindings and behaviour. M7 W0 added the timeline markers (WP 7.6) and the glTF
+//! add-on's variant list (WP 7.5), unbound until those WPs.
 
 use frap_anim::AnimData;
 use frap_rna::*;
@@ -10,7 +11,7 @@ use crate::generated::plain::{
     ColorManagedDisplaySettings, ColorManagedViewSettings, RenderSettings, SceneDisplay,
     SceneEEVEE, ToolSettings, UnitSettings, View3DCursor,
 };
-use crate::id::Collection;
+use crate::id::{Collection, SceneGltfVariants, TimelineMarker};
 
 /// A scene.
 #[derive(Clone, Debug)]
@@ -52,6 +53,10 @@ pub struct Scene {
     pub unit_settings: UnitSettings,
     /// `scene.animation_data`
     pub animation_data: Option<AnimData>,
+    /// `scene.timeline_markers` (M7 W0; WP 7.6).
+    pub timeline_markers: Vec<TimelineMarker>,
+    /// The glTF add-on's variant list and active variant (M7 W0; WP 7.5).
+    pub gltf2_variants: SceneGltfVariants,
 }
 
 impl Scene {
@@ -108,6 +113,8 @@ impl Scene {
             tool_settings: ToolSettings::default(),
             unit_settings: UnitSettings::default(),
             animation_data: None,
+            timeline_markers: Vec::new(),
+            gltf2_variants: SceneGltfVariants::default(),
         }
     }
 }
@@ -153,6 +160,9 @@ impl IdType for Scene {
         if let Some(a) = self.animation_data.as_ref().and_then(|a| a.action) {
             f(a.any());
         }
+        // Marker cameras are not listed: `BKE_scene_foreach_id` walks them with
+        // `IDWALK_CB_NOP` (no user). `remap_ref` still clears them; WP 7.6 makes `Main::remap`
+        // reach a scene that references an object only through a marker.
     }
     /// Unlink / relink in the master collection, `camera`, `world` and the action; view
     /// layers drop bases of removed objects at the next sync (`Main::remap` resyncs).
@@ -178,6 +188,11 @@ impl IdType for Scene {
             }
         }
         crate::id::remap_action(&mut self.animation_data, from, to);
+        for m in &mut self.timeline_markers {
+            if m.camera.map(|c| c.any()) == Some(from) {
+                m.camera = to.and_then(IdRef::from_any);
+            }
+        }
     }
     fn embedded(&self) -> &'static [EmbeddedSlot] {
         &[EmbeddedSlot::MasterCollection]

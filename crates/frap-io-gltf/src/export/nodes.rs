@@ -189,6 +189,10 @@ pub fn gather_node(g: &mut Gather, tree: &VTree, i: usize) -> Result<Index, Expo
         node.scale = scale;
         node.translation = translation;
     }
+    // M7 W0 hook: the dequantization transform of a quantized mesh (WP 7.1).
+    if let Some(m) = node.mesh {
+        crate::export::compress::mesh_node(g, m, &mut node)?;
+    }
     if tree.nodes[i].kind == VType::Armature
         && let Some(n) = skins::take_pending_neutral(g, i)
     {

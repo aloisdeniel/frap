@@ -21,6 +21,26 @@ thiserror.workspace = true
 workspace = true
 optional = true
 
+# M7 W0 (WP 7.3): the KTX2 container, the Basis Universal transcoder and the zstd decoder of KTX2
+# supercompression (all pure Rust) behind `basisu`; the Basis encoder (C++ with bindgen, so
+# libclang) behind `basisu-encode`, off by default (rule 2.2.9, §3.6).
+[dependencies.ktx2]
+workspace = true
+optional = true
+
+[dependencies.basisu]
+workspace = true
+optional = true
+
+[dependencies.ruzstd]
+workspace = true
+optional = true
+
+[dependencies.basisu_c_sys]
+workspace = true
+optional = true
+features = ["std", "transcode_default", "encoder"]
+
 [dev-dependencies]
 proptest.workspace = true
 serde_json.workspace = true
@@ -29,6 +49,10 @@ serde_json.workspace = true
 default = []
 # Lossy WebP encode via libwebp (cc-built, rule 2.2.9). Enabled by frap-cli/frap-ops-all `webp-lossy`.
 webp-lossy = ["dep:webp"]
+# KTX2 read + Basis transcode (KHR_texture_basisu import and rendering, WP 7.3).
+basisu = ["dep:ktx2", "dep:basisu", "dep:ruzstd"]
+# Basis Universal encode (`frap_texture_format='KTX2'`, WP 7.3); needs libclang.
+basisu-encode = ["basisu", "dep:basisu_c_sys"]
 
 [lints]
 workspace = true

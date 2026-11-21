@@ -42,6 +42,11 @@ pub struct MeshExportCx<'a> {
     /// The skin of `object`'s mesh (M6, WP 6.8: joints, vertex groups, armature-space
     /// transforms; `export/skins.rs`), `None` when the mesh is not skinned.
     pub skin: Option<&'a crate::export::skins::MeshSkin>,
+    /// WARNINGs of extractors, writers and post-processors (M7 W0, decision log M7W0-6: the
+    /// add-on's `Could not calculate tangents…` and vertex-colour messages, WP 7.7), drained by
+    /// the mesh gatherer into the export's reports (once per distinct message). Use
+    /// [`MeshExportCx::warn`].
+    pub reports: std::cell::RefCell<Vec<String>>,
 }
 
 impl<'a> MeshExportCx<'a> {
@@ -58,7 +63,18 @@ impl<'a> MeshExportCx<'a> {
             object,
             settings,
             skin: None,
+            reports: std::cell::RefCell::new(Vec::new()),
         }
+    }
+
+    /// Adds a WARNING for this mesh (reported once per distinct message by the gatherer).
+    pub fn warn(&self, message: impl Into<String>) {
+        self.reports.borrow_mut().push(message.into());
+    }
+
+    /// Takes the WARNINGs added so far.
+    pub fn take_reports(&self) -> Vec<String> {
+        std::mem::take(&mut *self.reports.borrow_mut())
     }
 
     /// The same context with the mesh skinned by `skin` (WP 6.8).
@@ -145,6 +161,26 @@ pub enum AttrValues {
     U8x4(Vec<[u8; 4]>),
     /// UNSIGNED_SHORT VEC4
     U16x4(Vec<[u16; 4]>),
+    /// BYTE VEC2 (KHR_mesh_quantization, M7 W0)
+    I8x2(Vec<[i8; 2]>),
+    /// BYTE VEC3 (KHR_mesh_quantization)
+    I8x3(Vec<[i8; 3]>),
+    /// BYTE VEC4 (KHR_mesh_quantization)
+    I8x4(Vec<[i8; 4]>),
+    /// UNSIGNED_BYTE VEC2 (KHR_mesh_quantization)
+    U8x2(Vec<[u8; 2]>),
+    /// UNSIGNED_BYTE VEC3 (KHR_mesh_quantization)
+    U8x3(Vec<[u8; 3]>),
+    /// SHORT VEC2 (KHR_mesh_quantization)
+    I16x2(Vec<[i16; 2]>),
+    /// SHORT VEC3 (KHR_mesh_quantization)
+    I16x3(Vec<[i16; 3]>),
+    /// SHORT VEC4 (KHR_mesh_quantization)
+    I16x4(Vec<[i16; 4]>),
+    /// UNSIGNED_SHORT VEC2 (KHR_mesh_quantization)
+    U16x2(Vec<[u16; 2]>),
+    /// UNSIGNED_SHORT VEC3 (KHR_mesh_quantization)
+    U16x3(Vec<[u16; 3]>),
 }
 
 /// One glTF vertex attribute of a draft primitive.
@@ -187,6 +223,32 @@ pub struct PrimitiveDraft {
     pub attributes: IndexMap<SmolStr, AttrColumn>,
     /// Morph targets (M6): per target, semantic (`POSITION`, `NORMAL`, `TANGENT`) → column.
     pub targets: Vec<IndexMap<SmolStr, AttrColumn>>,
+    /// How the accessors are written (M7 W0, decision log M7W0-6): set by the M7
+    /// post-processors (quantization, Draco); the default writes the data above as it is.
+    pub encoding: PrimitiveEncoding,
+}
+
+/// What M7 post-processors change about how a draft's accessors are written (CONTRACT, M7 W0,
+/// additive). The mesh gatherer (`gather.rs`) applies it; post-processors never write the
+/// primitive's accessors themselves.
+#[derive(Clone, Debug, Default)]
+#[non_exhaustive]
+pub struct PrimitiveEncoding {
+    /// Semantic (`POSITION`, `NORMAL`, `TEXCOORD_0`, `COLOR_0`, `TANGENT`, …) → the column
+    /// written instead of the draft's own data for that attribute (KHR_mesh_quantization's
+    /// integer types, WP 7.1). The attribute keeps its place in the add-on's order.
+    pub attributes: IndexMap<SmolStr, AttrColumn>,
+    /// The same per morph target (index into `targets`).
+    pub targets: Vec<IndexMap<SmolStr, AttrColumn>>,
+    /// The attribute, target and index accessors get no `bufferView` (their data lives in a
+    /// compressed stream the post-processor wrote: KHR_draco_mesh_compression, WP 7.2); the
+    /// index accessor is then not shared with other primitives.
+    pub without_buffer_views: bool,
+    /// Extensions of the glTF primitive (`KHR_draco_mesh_compression`).
+    pub extensions: frap_gltf::Extensions,
+    /// Extensions to list in `extensionsUsed`, with whether each is also required
+    /// (`KHR_draco_mesh_compression` and `KHR_mesh_quantization` are).
+    pub extensions_used: Vec<(&'static str, bool)>,
 }
 
 /// A writer's split-key contribution (`PrimitiveAttributeWriter::key`).

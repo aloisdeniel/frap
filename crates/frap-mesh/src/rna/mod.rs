@@ -302,6 +302,10 @@ impl IdType for Mesh {
         if let Some(k) = self.shape_keys {
             f(k.any());
         }
+        // The glTF add-on's variant materials (M7 W0).
+        for m in self.gltf2_variants.materials() {
+            f(m.any());
+        }
     }
     fn remap_ref(&mut self, from: IdAny, to: Option<IdAny>) {
         for m in self.materials.iter_mut() {
@@ -311,6 +315,10 @@ impl IdType for Mesh {
         }
         if self.shape_keys.map(|r| r.any()) == Some(from) {
             self.shape_keys = to.and_then(IdRef::from_any);
+        }
+        if let Some(m) = IdRef::<MaterialId>::from_any(from) {
+            self.gltf2_variants
+                .remap_material(m, to.and_then(IdRef::from_any));
         }
     }
 }

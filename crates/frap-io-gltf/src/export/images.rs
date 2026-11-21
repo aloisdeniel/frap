@@ -55,7 +55,7 @@ use frap_gltf::json::{
     Image as GImage, Index, MagFilter, MinFilter, Sampler, Texture, TextureInfo, WrapMode,
 };
 use frap_imbuf::{DecodedImage, EncodeFormat, PixelData};
-use frap_material::{ChannelSel, Filter, TexRef, UvSource, Wrap};
+use frap_material::{ChannelSel, Filter, TexRef, Wrap};
 use frap_mesh::Mesh;
 use frap_rna::{IdRef, ImageId, MaterialId};
 use frap_scene::id::{ImBuf, ImBufData, Image, PathBase};
@@ -195,19 +195,9 @@ pub struct ImageCache {
     file_names: Vec<String>,
 }
 
-/// The `TEXCOORD_n` a texture reads on `mesh`: a named UV map's position in the mesh's UV
-/// maps, the active-render map's position, or the given index (0 when the map is missing).
-pub fn tex_coord(t: &TexRef, mesh: &Mesh) -> u32 {
-    let maps = mesh.uv_maps();
-    let pos = |name: &str| maps.iter().position(|(n, _)| *n == name);
-    let render = || mesh.uv_active_render.as_deref().and_then(pos).unwrap_or(0) as u32;
-    match &t.uv {
-        // `get_final_material`: a name that is not a UV map uses the render map.
-        UvSource::Named(n) => pos(n).map_or_else(render, |p| p as u32),
-        UvSource::Index(i) => *i,
-        _ => render(),
-    }
-}
+/// `tex_coord` moved to its own file (M7 W0, decision log M7W0-4: WP 7.7's Attribute-node
+/// texCoord, while WP 7.3 owns this file).
+pub use crate::export::tex_coord::tex_coord;
 
 /// The sampler of a texture (`None` wraps when both are REPEAT).
 pub fn sampler(t: &TexRef) -> Sampler {
@@ -1015,7 +1005,7 @@ pub fn gather_texture_info(
 
 #[cfg(test)]
 mod tests {
-    use frap_material::{Sampler as LSampler, TexTransform};
+    use frap_material::{Sampler as LSampler, TexTransform, UvSource};
     use frap_scene::id::EncodedImage;
 
     use super::*;

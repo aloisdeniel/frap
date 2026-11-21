@@ -1,6 +1,5 @@
 ---
 source: crates/frap-schema/tests/snapshots.rs
-assertion_line: 24
 ---
 [
   "Action < ID | 12 props | 3 funcs",
@@ -353,6 +352,7 @@ assertion_line: 24
   "PoseBoneConstraints < - | 1 props | 4 funcs",
   "Preferences < - | 22 props | 0 funcs",
   "PreferencesEdit < - | 55 props | 0 funcs",
+  "PropertyGroup < - | 1 props | 1 funcs",
   "QuaternionAttribute < Attribute | 1 props | 0 funcs",
   "QuaternionAttributeValue < - | 1 props | 0 funcs",
   "ReadOnlyInteger < - | 1 props | 0 funcs",
@@ -488,6 +488,8 @@ assertion_line: 24
   "SurfaceModifier < Modifier | 0 props | 0 funcs",
   "TexMapping < - | 12 props | 0 funcs",
   "Texture < ID | 14 props | 1 funcs",
+  "TimelineMarker < - | 4 props | 1 funcs",
+  "TimelineMarkers < - | 0 props | 3 funcs",
   "ToolSettings < - | 132 props | 0 funcs",
   "TriangulateModifier < Modifier | 4 props | 0 funcs",
   "UDIMTile < - | 10 props | 0 funcs",
@@ -517,5 +519,9 @@ assertion_line: 24
   "WeldModifier < Modifier | 5 props | 0 funcs",
   "Window < - | 12 props | 6 funcs",
   "WireframeModifier < Modifier | 12 props | 0 funcs",
-  "World < ID | 18 props | 0 funcs"
+  "World < ID | 18 props | 0 funcs",
+  "gltf2_KHR_materials_variant_pointer < PropertyGroup | 1 props | 0 funcs",
+  "gltf2_KHR_materials_variants_default_material < PropertyGroup | 2 props | 0 funcs",
+  "gltf2_KHR_materials_variants_primitive < PropertyGroup | 4 props | 0 funcs",
+  "gltf2_KHR_materials_variants_variant < PropertyGroup | 1 props | 0 funcs"
 ]

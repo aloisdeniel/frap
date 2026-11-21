@@ -184,6 +184,34 @@ impl BufferBuilder {
         self.push_accessor_obj(acc)
     }
 
+    /// Adds an accessor for `data` with no buffer view (`count`, types, `normalized` and, with
+    /// `opts.min_max`, `min`/`max` only): the attributes and indices of a Draco-compressed
+    /// primitive, whose data lives in the Draco bitstream (M7 W0, `KHR_draco_mesh_compression`).
+    pub fn push_accessor_without_view(
+        &mut self,
+        data: &AccessorData,
+        opts: &AccessorOpts,
+    ) -> Index {
+        let acc = Self::accessor_for(data, None, None, opts);
+        self.push_accessor_obj(acc)
+    }
+
+    /// [`BufferBuilder::push_indices`]'s accessor (same component type rule) with no buffer
+    /// view: the indices of a Draco-compressed primitive (M7 W0).
+    pub fn push_indices_without_view(&mut self, indices: &[u32]) -> Index {
+        let max = indices.iter().copied().max().unwrap_or(0);
+        let data = match index_component_type(max) {
+            ComponentType::UnsignedShort => AccessorData::from_elements(
+                &indices
+                    .iter()
+                    .map(|&i| u16::try_from(i).expect("checked by max"))
+                    .collect::<Vec<_>>(),
+            ),
+            _ => AccessorData::from_elements(indices),
+        };
+        self.push_accessor_without_view(&data, &AccessorOpts::default())
+    }
+
     /// Writes primitive indices as io_scene_gltf2 does: UNSIGNED_SHORT when every index is
     /// below 65535, else UNSIGNED_INT, ELEMENT_ARRAY_BUFFER, no min/max.
     pub fn push_indices(&mut self, indices: &[u32]) -> Index {

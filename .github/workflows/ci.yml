@@ -7,6 +7,8 @@
 # - checks:    rustfmt, `cargo xtask check-deps` (layers, dev-dependency cycles), `cargo xtask
 #              codegen --check`, `cargo deny check`, the build without the `gpu` feature, and
 #              the cargo-fuzz targets (`fuzz/`, its own workspace) compile on stable.
+# - optional-codecs: the off-by-default native codecs (`draco-sys`, `basisu-encode`) build and
+#              pass their tests on macOS, Linux and Windows (M7 W0).
 # - cc-only:   a clean container with only cc/c++ (no cmake, no libclang) builds the default
 #              features (rule 2.2.9).
 # - budgets:   clean build time of each frap-spec-* crate vs xtask/budgets.toml (§4.2).
@@ -130,6 +132,35 @@ jobs:
         run: |
           cargo clippy -p frap-cli --no-default-features --locked -- -D warnings
           cargo test -p frap-session --locked
+
+  # M7 W0 (decision log M7W0-5): the off-by-default native codecs build on every OS: the
+  # cc-built Google Draco fallback (`draco-sys`, WP 7.2) and the Basis Universal encoder
+  # (`basisu-encode`, WP 7.3: C++ plus bindgen, so libclang). The cc-only job below keeps the
+  # default features free of them.
+  optional-codecs:
+    name: optional native codecs (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macos-arm64
+            os: macos-15
+          - name: linux-x86_64
+            os: ubuntu-24.04
+          - name: windows-x86_64
+            os: windows-2025
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.97"
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: clippy with draco-sys and basisu-encode
+        run: cargo clippy -p frap-cli --features draco-sys,basisu-encode --locked -- -D warnings
+      - name: codec tests with the optional backends
+        run: cargo test -p frap-codec-mesh -p frap-imbuf --features frap-codec-mesh/draco-sys,frap-imbuf/basisu-encode --locked
 
   cc-only:
     name: clean container with only cc/c++ (default features)

@@ -39,7 +39,9 @@ workspace = true
 
 [features]
 # ARCHITECTURE §3.6.
-default = ["gpu", "webp-lossy", "meshopt", "basisu", "boolean-manifold", "subdiv-osd"]
+# M7 W0: `draco` (draco-core, pure Rust) is on so WP 7.2's goldens run against the binary; if the
+# spike gate fails, the M7 integration switches it to `draco-sys` (decision log M7W0-5).
+default = ["gpu", "webp-lossy", "meshopt", "draco", "basisu", "boolean-manifold", "subdiv-osd"]
 gpu = ["frap-session/gpu", "frap-ops-all/gpu"]
 webp-lossy = ["frap-ops-all/webp-lossy"]
 meshopt = ["frap-ops-all/meshopt"]

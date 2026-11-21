@@ -1408,6 +1408,10 @@ pub static PREFERENCES: StructDef = StructDef { identifier: "Preferences", base:
 pub mod preferences_edit;
 /// `bpy.types.PreferencesEdit`
 pub static PREFERENCES_EDIT: StructDef = StructDef { identifier: "PreferencesEdit", base: None, name: "Edit Methods", description: "Settings for interacting with Blender data", props: &preferences_edit::RNA_PROPS, funcs: &preferences_edit::RNA_FUNCS, name_property: None, is_id: false };
+#[path = "property_group.rs"]
+pub mod property_group;
+/// `bpy.types.PropertyGroup`
+pub static PROPERTY_GROUP: StructDef = StructDef { identifier: "PropertyGroup", base: None, name: "ID Property Group", description: "Group of ID properties", props: &property_group::RNA_PROPS, funcs: &property_group::RNA_FUNCS, name_property: Some("name"), is_id: false };
 #[path = "quaternion_attribute.rs"]
 pub mod quaternion_attribute;
 /// `bpy.types.QuaternionAttribute`
@@ -1948,6 +1952,14 @@ pub static TEX_MAPPING: StructDef = StructDef { identifier: "TexMapping", base: 
 pub mod texture;
 /// `bpy.types.Texture`
 pub static TEXTURE: StructDef = StructDef { identifier: "Texture", base: Some(&ID), name: "Texture", description: "Texture data-block used by materials, lights, worlds and brushes", props: &texture::RNA_PROPS, funcs: &texture::RNA_FUNCS, name_property: Some("name"), is_id: true };
+#[path = "timeline_marker.rs"]
+pub mod timeline_marker;
+/// `bpy.types.TimelineMarker`
+pub static TIMELINE_MARKER: StructDef = StructDef { identifier: "TimelineMarker", base: None, name: "Marker", description: "Marker for noting points in the timeline", props: &timeline_marker::RNA_PROPS, funcs: &timeline_marker::RNA_FUNCS, name_property: Some("name"), is_id: false };
+#[path = "timeline_markers.rs"]
+pub mod timeline_markers;
+/// `bpy.types.TimelineMarkers`
+pub static TIMELINE_MARKERS: StructDef = StructDef { identifier: "TimelineMarkers", base: None, name: "Timeline Markers", description: "Collection of timeline markers", props: &timeline_markers::RNA_PROPS, funcs: &timeline_markers::RNA_FUNCS, name_property: None, is_id: false };
 #[path = "tool_settings.rs"]
 pub mod tool_settings;
 /// `bpy.types.ToolSettings`
@@ -2068,9 +2080,25 @@ pub static WIREFRAME_MODIFIER: StructDef = StructDef { identifier: "WireframeMod
 pub mod world;
 /// `bpy.types.World`
 pub static WORLD: StructDef = StructDef { identifier: "World", base: Some(&ID), name: "World", description: "World data-block describing the environment and ambient lighting of a scene", props: &world::RNA_PROPS, funcs: &world::RNA_FUNCS, name_property: Some("name"), is_id: true };
+#[path = "gltf2_khr_materials_variant_pointer.rs"]
+pub mod gltf2_khr_materials_variant_pointer;
+/// `bpy.types.gltf2_KHR_materials_variant_pointer`
+pub static GLTF2_KHR_MATERIALS_VARIANT_POINTER: StructDef = StructDef { identifier: "gltf2_KHR_materials_variant_pointer", base: Some(&PROPERTY_GROUP), name: "gltf2_KHR_materials_variant_pointer", description: "", props: &gltf2_khr_materials_variant_pointer::RNA_PROPS, funcs: &gltf2_khr_materials_variant_pointer::RNA_FUNCS, name_property: Some("name"), is_id: false };
+#[path = "gltf2_khr_materials_variants_default_material.rs"]
+pub mod gltf2_khr_materials_variants_default_material;
+/// `bpy.types.gltf2_KHR_materials_variants_default_material`
+pub static GLTF2_KHR_MATERIALS_VARIANTS_DEFAULT_MATERIAL: StructDef = StructDef { identifier: "gltf2_KHR_materials_variants_default_material", base: Some(&PROPERTY_GROUP), name: "gltf2_KHR_materials_variants_default_material", description: "", props: &gltf2_khr_materials_variants_default_material::RNA_PROPS, funcs: &gltf2_khr_materials_variants_default_material::RNA_FUNCS, name_property: Some("name"), is_id: false };
+#[path = "gltf2_khr_materials_variants_primitive.rs"]
+pub mod gltf2_khr_materials_variants_primitive;
+/// `bpy.types.gltf2_KHR_materials_variants_primitive`
+pub static GLTF2_KHR_MATERIALS_VARIANTS_PRIMITIVE: StructDef = StructDef { identifier: "gltf2_KHR_materials_variants_primitive", base: Some(&PROPERTY_GROUP), name: "gltf2_KHR_materials_variants_primitive", description: "", props: &gltf2_khr_materials_variants_primitive::RNA_PROPS, funcs: &gltf2_khr_materials_variants_primitive::RNA_FUNCS, name_property: Some("name"), is_id: false };
+#[path = "gltf2_khr_materials_variants_variant.rs"]
+pub mod gltf2_khr_materials_variants_variant;
+/// `bpy.types.gltf2_KHR_materials_variants_variant`
+pub static GLTF2_KHR_MATERIALS_VARIANTS_VARIANT: StructDef = StructDef { identifier: "gltf2_KHR_materials_variants_variant", base: Some(&PROPERTY_GROUP), name: "gltf2_KHR_materials_variants_variant", description: "", props: &gltf2_khr_materials_variants_variant::RNA_PROPS, funcs: &gltf2_khr_materials_variants_variant::RNA_FUNCS, name_property: Some("name"), is_id: false };
 
 /// Every dumped struct, sorted by identifier (`find_struct` binary-searches it).
-pub static ALL_STRUCTS: [&StructDef; 515] = [
+pub static ALL_STRUCTS: [&StructDef; 522] = [
     &ACTION,
     &ACTION_CHANNELBAG,
     &ACTION_CHANNELBAG_F_CURVES,
@@ -2421,6 +2449,7 @@ pub static ALL_STRUCTS: [&StructDef; 515] = [
     &POSE_BONE_CONSTRAINTS,
     &PREFERENCES,
     &PREFERENCES_EDIT,
+    &PROPERTY_GROUP,
     &QUATERNION_ATTRIBUTE,
     &QUATERNION_ATTRIBUTE_VALUE,
     &READ_ONLY_INTEGER,
@@ -2556,6 +2585,8 @@ pub static ALL_STRUCTS: [&StructDef; 515] = [
     &SURFACE_MODIFIER,
     &TEX_MAPPING,
     &TEXTURE,
+    &TIMELINE_MARKER,
+    &TIMELINE_MARKERS,
     &TOOL_SETTINGS,
     &TRIANGULATE_MODIFIER,
     &UDIM_TILE,
@@ -2586,6 +2617,10 @@ pub static ALL_STRUCTS: [&StructDef; 515] = [
     &WINDOW,
     &WIREFRAME_MODIFIER,
     &WORLD,
+    &GLTF2_KHR_MATERIALS_VARIANT_POINTER,
+    &GLTF2_KHR_MATERIALS_VARIANTS_DEFAULT_MATERIAL,
+    &GLTF2_KHR_MATERIALS_VARIANTS_PRIMITIVE,
+    &GLTF2_KHR_MATERIALS_VARIANTS_VARIANT,
 ];
 
 /// Looks a struct up by its Blender identifier (`"Object"`).

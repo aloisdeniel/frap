@@ -1,0 +1,77 @@
+{
+ "identifier": "gltf2_KHR_materials_variants_primitive",
+ "name": "gltf2_KHR_materials_variants_primitive",
+ "description": "",
+ "base": "PropertyGroup",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "material_slot_index",
+   "name": "Material Slot Index",
+   "description": "",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -2147483648,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "material",
+   "name": "material",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "flags": [
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "variants",
+   "name": "variants",
+   "description": "",
+   "type": "COLLECTION",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "gltf2_KHR_materials_variant_pointer",
+   "is_id": false,
+   "api": null,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "active_variant_idx",
+   "name": "active_variant_idx",
+   "description": "",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -2147483648,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE",
+    "RUNTIME"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

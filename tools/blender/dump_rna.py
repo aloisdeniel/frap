@@ -61,7 +61,7 @@ VertexGroup VertexGroups VertexGroupElement Key ShapeKey
 Armature Bone EditBone ArmatureEditBones Pose PoseBone BoneCollection
 Action ActionSlot ActionLayer ActionStrip ActionKeyframeStrip ActionChannelbag FCurve Keyframe
 FCurveKeyframePoints ActionGroup AnimData NlaTrack NlaTracks NlaStrip NlaStrips
-Constraint
+Constraint TimelineMarker
 """.split()
 
 FLAG_ATTRS = [
@@ -333,7 +333,7 @@ PRUNE_PREFIXES = (
     "CollisionSettings", "EffectorWeights", "FieldSettings", "CurvePaintSettings",
     "MeshStatVis", "TransformOrientation", "CurveProfile", "SequencerToolSettings",
     "MaterialGPencilStyle", "MaterialLineArt", "ObjectLineArt", "ObjectShaderFx", "ShaderFx",
-    "DisplaySafeAreas", "TimelineMarker", "ActionPoseMarkers", "LibraryWeakReference",
+    "DisplaySafeAreas", "ActionPoseMarkers", "LibraryWeakReference",
     "PathCompare", "SceneGpencil", "RaytraceEEVEE", "WorldMistSettings", "WorldLighting",
     "BlendFileColorspace", "TexPaintSlot", "NodeInternalSocketTemplate", "Asset",
     "IKParam", "StripModifier",
@@ -371,7 +371,20 @@ def closure(roots):
                     if is_id_struct(t) or pruned(t.identifier):
                         continue
                     if bl_rna_of(t.identifier) is None:
-                        continue
+                        # M7 W0: PropertyGroups an add-on registers under another class name
+                        # (the glTF variant structs) are not in `bpy.types` by identifier;
+                        # re-resolve them through the owning property each time (fresh
+                        # instances reload factory settings, which frees the old struct).
+                        # Only the glTF add-on's (Cycles' and other add-ons' stay out).
+                        if (
+                            not t.identifier.startswith("gltf2_")
+                            or p.identifier not in s.properties
+                            or t != p.fixed_type
+                        ):
+                            continue
+                        _EXTRA_RNA[t.identifier] = (
+                            lambda o=n, q=p.identifier: bl_rna_of(o).properties[q].fixed_type
+                        )
                     seen.add(t.identifier)
                     nxt.append(t.identifier)
         frontier = nxt

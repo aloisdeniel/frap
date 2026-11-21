@@ -7,12 +7,13 @@ use frap_rna::OperatorSpec;
 
 pub mod anim;
 pub mod armature;
+pub mod marker;
 pub mod nla;
 pub mod pose;
 pub mod screen;
 
 /// Every typed operator spec of this group, sorted by idname.
-pub static ALL_OPS: [&OperatorSpec; 32] = [
+pub static ALL_OPS: [&OperatorSpec; 43] = [
     &anim::OPSPEC_ANIM_OT_KEYFRAME_CLEAR_V3D,
     &anim::OPSPEC_ANIM_OT_KEYFRAME_DELETE,
     &anim::OPSPEC_ANIM_OT_KEYFRAME_DELETE_BY_NAME,
@@ -33,6 +34,17 @@ pub static ALL_OPS: [&OperatorSpec; 32] = [
     &armature::OPSPEC_ARMATURE_OT_SUBDIVIDE,
     &armature::OPSPEC_ARMATURE_OT_SWITCH_DIRECTION,
     &armature::OPSPEC_ARMATURE_OT_SYMMETRIZE,
+    &marker::OPSPEC_MARKER_OT_ADD,
+    &marker::OPSPEC_MARKER_OT_CAMERA_BIND,
+    &marker::OPSPEC_MARKER_OT_DELETE,
+    &marker::OPSPEC_MARKER_OT_DUPLICATE,
+    &marker::OPSPEC_MARKER_OT_MAKE_LINKS_SCENE,
+    &marker::OPSPEC_MARKER_OT_MOVE,
+    &marker::OPSPEC_MARKER_OT_RENAME,
+    &marker::OPSPEC_MARKER_OT_SELECT,
+    &marker::OPSPEC_MARKER_OT_SELECT_ALL,
+    &marker::OPSPEC_MARKER_OT_SELECT_BOX,
+    &marker::OPSPEC_MARKER_OT_SELECT_LEFTRIGHT,
     &nla::OPSPEC_NLA_OT_ACTION_PUSHDOWN,
     &nla::OPSPEC_NLA_OT_TRACKS_ADD,
     &pose::OPSPEC_POSE_OT_ARMATURE_APPLY,

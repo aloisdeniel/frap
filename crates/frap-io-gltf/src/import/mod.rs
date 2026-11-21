@@ -19,8 +19,12 @@
 mod animation;
 mod cameras;
 mod convert;
+/// Draco and meshopt decompression before the scene is built (M7 W0; WPs 7.1, 7.2).
+mod decompress;
 mod extras;
 mod images;
+/// `EXT_mesh_gpu_instancing` import (WP 7.5; M7 W0 stub).
+mod instancing;
 mod lights;
 mod materials;
 /// `KHR_materials_*` importers, one file per extension (`materials_ext/<name>.rs`, WP 3.6),
@@ -38,6 +42,8 @@ mod scenes;
 pub mod settings;
 /// Skins (WP 6.8; M5+M6 W0 stub).
 mod skins;
+/// `KHR_materials_variants` import (WP 7.5; M7 W0 stub).
+mod variants;
 mod vnode;
 
 use std::collections::{BTreeSet, HashMap};
@@ -136,6 +142,10 @@ pub struct ImportReport {
     /// Messages for the operator's reports (WARNING per feature not imported yet, ERROR for a
     /// missing image file, …), in emission order.
     pub reports: Vec<Report>,
+    /// The file has `KHR_materials_variants`: the add-on turns its preference
+    /// `KHR_materials_variants_ui` on (`BlenderGlTF.manage_material_variants`); the operator
+    /// applies it (M7 W0; WP 7.5).
+    pub variants_ui: bool,
 }
 
 /// Imports a `.glb`/`.gltf` file into `main`, in the context scene of `win`
@@ -166,16 +176,19 @@ pub fn import_bytes(
     log: &mut ChangeLog,
 ) -> Result<ImportReport, ImportError> {
     let glb = frap_gltf::read(bytes).map_err(ImportError::Parse)?;
-    let doc = glb.document;
+    let mut doc = glb.document;
     check_version(&doc)?;
     checks(&doc)?;
     let dir = path
         .parent()
         .map(Path::to_path_buf)
         .unwrap_or_else(|| PathBuf::from("."));
-    let buffers = load_buffers(&doc, glb.bin.as_deref(), |uri| {
+    let mut buffers = load_buffers(&doc, glb.bin.as_deref(), |uri| {
         std::fs::read(dir.join(uri_to_path(uri))).map_err(|e| e.to_string())
     })?;
+    // meshopt views and Draco primitives become plain data first (M7 W0; WPs 7.1, 7.2), as the
+    // add-on decodes them before creating meshes.
+    let decompress_reports = decompress::run(&mut doc, &mut buffers)?;
     let scene = win.scene;
     let scale_length = main
         .scenes
@@ -203,7 +216,10 @@ pub fn import_bytes(
         active_collection: CollTarget::Master(scene),
         objects: Vec::new(),
     };
+    cx.reports.extend(decompress_reports);
     cx.warn_unsupported();
+    // `BlenderGlTF.manage_material_variants` (end of `prepare_data`, WP 7.5).
+    let variants_ui = variants::create(&mut cx, main, log)?;
     scenes::create(&mut cx, main, log)?;
     if animation::IMPLEMENTED {
         animation::create(&mut cx, main, log)?;
@@ -218,6 +234,7 @@ pub fn import_bytes(
     Ok(ImportReport {
         objects: cx.objects,
         reports: cx.reports,
+        variants_ui,
     })
 }
 
@@ -369,11 +386,11 @@ impl Gltf<'_> {
                     .into(),
             ));
         }
-        for (ext, milestone) in [
-            ("EXT_mesh_gpu_instancing", "M7"),
-            ("KHR_materials_variants", "M7"),
+        for (ext, milestone, implemented) in [
+            ("EXT_mesh_gpu_instancing", "M7", instancing::IMPLEMENTED),
+            ("KHR_materials_variants", "M7", variants::IMPLEMENTED),
         ] {
-            if doc.extensions_used.iter().any(|e| e == ext) {
+            if !implemented && doc.extensions_used.iter().any(|e| e == ext) {
                 w.push((
                     ext,
                     format!("glTF import: {ext} is imported from {milestone}; it was ignored"),

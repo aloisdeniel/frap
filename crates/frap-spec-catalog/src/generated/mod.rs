@@ -6,9 +6,9 @@
 /// Deflate-compressed JSON array of the catalog operators (schema: `decode.rs`).
 pub static CATALOG_DEFLATE: &[u8] = include_bytes!("catalog.json.deflate");
 /// Number of operators in the blob.
-pub const CATALOG_LEN: usize = 814;
+pub const CATALOG_LEN: usize = 803;
 /// Their idnames, sorted (membership tests without decoding).
-pub static CATALOG_IDNAMES: [&str; 814] = [
+pub static CATALOG_IDNAMES: [&str; 803] = [
     "anim.change_frame",
     "anim.channel_select_keys",
     "anim.channel_view_pick",
@@ -172,17 +172,6 @@ pub static CATALOG_IDNAMES: [&str; 814] = [
     "image.view_zoom_out",
     "image.view_zoom_ratio",
     "import_scene.fbx",
-    "marker.add",
-    "marker.camera_bind",
-    "marker.delete",
-    "marker.duplicate",
-    "marker.make_links_scene",
-    "marker.move",
-    "marker.rename",
-    "marker.select",
-    "marker.select_all",
-    "marker.select_box",
-    "marker.select_leftright",
     "material.copy",
     "material.paste",
     "mesh.average_normals",
@@ -824,9 +813,9 @@ pub static CATALOG_IDNAMES: [&str; 814] = [
     "wm.xr_session_toggle",
     "world.convert_volume_to_mesh",
 ];
-/// Operators with a typed props struct in `frap-spec-ops-<group>` (milestone ≤ 6), sorted;
+/// Operators with a typed props struct in `frap-spec-ops-<group>` (milestone ≤ 7), sorted;
 /// their specs are NOT in the blob.
-pub static TYPED_IDNAMES: [&str; 288] = [
+pub static TYPED_IDNAMES: [&str; 299] = [
     "anim.keyframe_clear_v3d",
     "anim.keyframe_delete",
     "anim.keyframe_delete_by_name",
@@ -869,6 +858,17 @@ pub static TYPED_IDNAMES: [&str; 288] = [
     "image.save_as",
     "image.unpack",
     "import_scene.gltf",
+    "marker.add",
+    "marker.camera_bind",
+    "marker.delete",
+    "marker.duplicate",
+    "marker.make_links_scene",
+    "marker.move",
+    "marker.rename",
+    "marker.select",
+    "marker.select_all",
+    "marker.select_box",
+    "marker.select_leftright",
     "material.new",
     "mesh.attribute_set",
     "mesh.beautify_fill",

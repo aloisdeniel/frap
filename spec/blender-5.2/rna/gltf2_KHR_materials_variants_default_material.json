@@ -1,0 +1,44 @@
+{
+ "identifier": "gltf2_KHR_materials_variants_default_material",
+ "name": "gltf2_KHR_materials_variants_default_material",
+ "description": "",
+ "base": "PropertyGroup",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "material_slot_index",
+   "name": "Material Slot Index",
+   "description": "",
+   "type": "INT",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "default": 0,
+   "hard_min": -2147483648,
+   "hard_max": 2147483647,
+   "soft_min": -2147483648,
+   "soft_max": 2147483647,
+   "step": 1,
+   "flags": [
+    "ANIMATABLE",
+    "RUNTIME"
+   ]
+  },
+  {
+   "identifier": "default_material",
+   "name": "default_material",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "Material",
+   "is_id": true,
+   "flags": [
+    "RUNTIME"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

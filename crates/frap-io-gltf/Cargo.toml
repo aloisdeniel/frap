@@ -22,6 +22,9 @@ frap-geom.workspace = true
 frap-nodes.workspace = true
 frap-material.workspace = true
 frap-imbuf.workspace = true
+# M7 W0: Draco and meshopt through the codec traits (WPs 7.1, 7.2); the backends are features of
+# frap-codec-mesh chosen by frap-cli / frap-ops-all (§3.6), enabled for this crate's tests below.
+frap-codec-mesh.workspace = true
 frap-math.workspace = true
 frap-spec-ops-io.workspace = true
 glam.workspace = true
@@ -35,6 +38,8 @@ libm.workspace = true
 smallvec.workspace = true
 
 [dev-dependencies]
+frap-codec-mesh = { workspace = true, features = ["meshopt", "draco"] }
+frap-imbuf = { workspace = true, features = ["basisu"] }
 gltf.workspace = true
 insta.workspace = true
 proptest.workspace = true

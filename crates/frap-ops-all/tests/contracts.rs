@@ -1777,3 +1777,113 @@ fn m5_m6_contract_delta_cheap_parts_run() {
         m6_gltf as fn(),
     );
 }
+
+// ---------------------------------------------------------------- M7 W0 (decision log M7W0)
+
+/// Codec traits and backends (`frap-codec-mesh`, `frap-imbuf`).
+fn m7_codecs() {
+    use frap_codec_mesh::{
+        CodecError, DracoBackend, DracoCodec, DracoEncoded, DracoQuantization, MeshData,
+        MeshoptCodec, MeshoptFilter, MeshoptMode, MeshoptVersion,
+    };
+    let _ = |c: &dyn DracoCodec, m: &MeshData| -> Result<DracoEncoded, CodecError> {
+        c.encode(m, &DracoQuantization::default(), 7)
+    };
+    let _ = |c: &dyn DracoCodec, b: &[u8]| -> Result<MeshData, CodecError> { c.decode(b, &[0, 1]) };
+    let _ = |c: &dyn MeshoptCodec, d: &[u8]| -> Result<Vec<u8>, CodecError> {
+        c.encode_vertex(d, 1, 12, MeshoptVersion::Khr)?;
+        c.encode_index(&[0, 1, 2], 3, 2, MeshoptMode::Triangles)?;
+        c.decode(d, 1, 12, MeshoptMode::Attributes, MeshoptFilter::Octahedral)
+    };
+    let _: fn(DracoBackend) -> Option<&'static dyn DracoCodec> = frap_codec_mesh::draco::codec;
+    let _: fn() -> Option<&'static dyn MeshoptCodec> = frap_codec_mesh::meshopt::codec;
+    let _: fn(&[u8]) -> Result<frap_imbuf::DecodedImage, frap_imbuf::ImageError> =
+        frap_imbuf::ktx2::decode;
+    let _: fn(
+        &frap_imbuf::DecodedImage,
+        frap_imbuf::basis::BasisMode,
+    ) -> Result<Vec<u8>, frap_imbuf::ImageError> = frap_imbuf::basis::encode_ktx2;
+}
+
+/// glTF extension points (`frap-io-gltf`) and typed extensions (`frap-gltf`).
+fn m7_gltf() {
+    use frap_gltf::ext::{
+        ext_mesh_gpu_instancing::ExtMeshGpuInstancing,
+        ext_meshopt_compression::ExtMeshoptCompression,
+        ext_texture_webp::ExtTextureWebp,
+        khr_draco_mesh_compression::KhrDracoMeshCompression,
+        khr_materials_diffuse_transmission::KhrMaterialsDiffuseTransmission,
+        khr_materials_variants::{KhrMaterialsVariants, KhrMaterialsVariantsPrimitive},
+        khr_mesh_quantization::KhrMeshQuantization,
+        khr_meshopt_compression::KhrMeshoptCompression,
+        khr_node_visibility::KhrNodeVisibility,
+        khr_texture_basisu::KhrTextureBasisu,
+    };
+    fn named<E: frap_gltf::Extension>() -> &'static str {
+        E::NAME
+    }
+    let _ = [
+        named::<ExtMeshGpuInstancing>(),
+        named::<ExtMeshoptCompression>(),
+        named::<ExtTextureWebp>(),
+        named::<KhrDracoMeshCompression>(),
+        named::<KhrMaterialsDiffuseTransmission>(),
+        named::<KhrMaterialsVariants>(),
+        named::<KhrMaterialsVariantsPrimitive>(),
+        named::<KhrMeshQuantization>(),
+        named::<KhrMeshoptCompression>(),
+        named::<KhrNodeVisibility>(),
+        named::<KhrTextureBasisu>(),
+    ];
+    let d = frap_io_gltf::PrimitiveDraft::default();
+    let e: &frap_io_gltf::export::mesh::ext::PrimitiveEncoding = &d.encoding;
+    let _ = (
+        &e.attributes,
+        &e.targets,
+        e.without_buffer_views,
+        &e.extensions,
+        &e.extensions_used,
+    );
+    let _ = |cx: &frap_io_gltf::MeshExportCx| cx.warn("message");
+    let _ = |b: &mut frap_gltf::BufferBuilder, d: &frap_gltf::AccessorData| {
+        b.push_accessor_without_view(d, &frap_gltf::AccessorOpts::default());
+        b.push_indices_without_view(&[0, 1, 2]);
+    };
+    let _: fn(&frap_io_gltf::ExportSettings, frap_io_gltf::ExportOutput) -> _ =
+        frap_io_gltf::export::gltfpack::apply;
+}
+
+#[test]
+fn m7_contract_delta_cheap_parts_run() {
+    let q = frap_codec_mesh::DracoQuantization::default();
+    assert_eq!(
+        (q.position, q.normal, q.texcoord, q.color, q.generic),
+        (14, 10, 12, 10, 12),
+        "the add-on's export_draco_*_quantization defaults"
+    );
+    assert_eq!(
+        frap_codec_mesh::MeshoptFilter::default().identifier(),
+        "NONE"
+    );
+    assert_eq!(
+        frap_codec_mesh::MeshoptMode::Triangles.identifier(),
+        "TRIANGLES"
+    );
+    assert!(frap_imbuf::ktx2::is_ktx2(&frap_imbuf::ktx2::IDENTIFIER));
+    assert_eq!(
+        frap_imbuf::FileFormat::detect(&frap_imbuf::ktx2::IDENTIFIER),
+        Some(frap_imbuf::FileFormat::Ktx2)
+    );
+    let s = frap_scene::id::Scene::new("Scene", Vec::new());
+    assert!(s.timeline_markers.is_empty() && s.gltf2_variants.variants.is_empty());
+    assert_eq!(
+        frap_scene::id::TimelineMarker::default().frame,
+        0,
+        "TimelineMarkers.new(frame=0)"
+    );
+    let m = frap_mesh::Mesh::new("Mesh");
+    assert_eq!(m.gltf2_variants.materials().count(), 0);
+    let d = frap_io_gltf::PrimitiveDraft::default();
+    assert!(!d.encoding.without_buffer_views && d.encoding.extensions.is_empty());
+    let _ = (m7_codecs as fn(), m7_gltf as fn());
+}

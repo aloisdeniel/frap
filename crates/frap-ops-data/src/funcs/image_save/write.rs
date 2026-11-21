@@ -268,6 +268,7 @@ pub(crate) fn mime_of(bytes: &[u8]) -> &'static str {
         Some(FileFormat::Iris) => "image/sgi",
         Some(FileFormat::Dpx) => "image/x-dpx",
         Some(FileFormat::Cineon) => "image/cineon",
+        Some(FileFormat::Ktx2) => "image/ktx2",
         None => "application/octet-stream",
     }
 }

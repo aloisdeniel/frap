@@ -14,7 +14,8 @@ publish.workspace = true
 
 [dev-dependencies]
 frap-session.workspace = true
-frap-ops-all.workspace = true
+# M7 W0: the codecs the compression and texture-format tests need (WPs 7.1-7.3).
+frap-ops-all = { workspace = true, features = ["meshopt", "draco", "basisu"] }
 frap-scene.workspace = true
 frap-rna.workspace = true
 frap-project.workspace = true

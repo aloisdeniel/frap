@@ -44,6 +44,8 @@ pub struct WrittenPrimitive {
     pub material_slot: usize,
     /// Morph target accessors.
     pub targets: Vec<IndexMap<String, Index>>,
+    /// Extensions of the glTF primitive (M7 W0: `PrimitiveEncoding::extensions`).
+    pub extensions: frap_gltf::Extensions,
 }
 
 /// The object's material per slot (`ob.material_slots[i].material`): the object's own material
@@ -83,6 +85,16 @@ pub fn column_data(c: &AttrColumn) -> AccessorData {
         AttrValues::F32x4(v) => AccessorData::from_elements(v),
         AttrValues::U8x4(v) => AccessorData::from_elements(v),
         AttrValues::U16x4(v) => AccessorData::from_elements(v),
+        AttrValues::I8x2(v) => AccessorData::from_elements(v),
+        AttrValues::I8x3(v) => AccessorData::from_elements(v),
+        AttrValues::I8x4(v) => AccessorData::from_elements(v),
+        AttrValues::U8x2(v) => AccessorData::from_elements(v),
+        AttrValues::U8x3(v) => AccessorData::from_elements(v),
+        AttrValues::I16x2(v) => AccessorData::from_elements(v),
+        AttrValues::I16x3(v) => AccessorData::from_elements(v),
+        AttrValues::I16x4(v) => AccessorData::from_elements(v),
+        AttrValues::U16x2(v) => AccessorData::from_elements(v),
+        AttrValues::U16x3(v) => AccessorData::from_elements(v),
     };
     AccessorData {
         normalized: c.normalized && d.component_type().can_normalize(),
@@ -209,7 +221,11 @@ fn build_mesh(
         Some(w) => Source::Cached(w.into_iter()),
         None => {
             let cx = MeshExportCx::new(main, data, object, settings).with_skin(skin);
-            Source::Fresh(primitives::extract(&cx)?.into_iter())
+            let drafts = primitives::extract(&cx)?;
+            for m in cx.take_reports() {
+                g.warn(m);
+            }
+            Source::Fresh(drafts.into_iter())
         }
     };
     let fresh = matches!(source, Source::Fresh(_));
@@ -221,6 +237,12 @@ fn build_mesh(
                 let Some(mut d) = drafts.next() else { break };
                 let cx = MeshExportCx::new(main, data, object, settings).with_skin(skin);
                 primitives::post_process(&cx, &mut d, &mut g.buf)?;
+                for m in cx.take_reports() {
+                    g.warn(m);
+                }
+                for (name, required) in &d.encoding.extensions_used {
+                    g.use_extension(name, *required);
+                }
                 let w = write_accessors(g, &d)?;
                 written_all.push(w.clone());
                 w
@@ -235,7 +257,7 @@ fn build_mesh(
             Some(m) => materials::gather(g, m, data)?,
             None => None,
         };
-        out.push(Primitive {
+        let mut prim = Primitive {
             attributes: written.attributes,
             indices: written.indices,
             material,
@@ -243,8 +265,12 @@ fn build_mesh(
                 .then(|| Mode::try_from(written.mode).ok())
                 .flatten(),
             targets: written.targets,
+            extensions: written.extensions,
             ..Primitive::default()
-        });
+        };
+        // KHR_materials_variants mappings of this slot (WP 7.5; M7 W0 hook).
+        crate::export::variants::primitive(g, data, written.material_slot, &mut prim)?;
+        out.push(prim);
     }
     let index = if out.is_empty() {
         g.warn(format!(
@@ -279,37 +305,55 @@ fn write_accessors(g: &mut Gather, d: &PrimitiveDraft) -> Result<WrittenPrimitiv
             )))
         }
     };
+    let enc = &d.encoding;
+    // M7 W0: an attribute replaced by `encoding.attributes` (quantized), and accessors without
+    // a buffer view for a compressed primitive (`encoding.without_buffer_views`, Draco).
+    let encoded = |name: &str, own: AccessorData| -> AccessorData {
+        enc.attributes.get(name).map(column_data).unwrap_or(own)
+    };
+    let push = |g: &mut Gather, data: &AccessorData, opts: &AccessorOpts| -> Index {
+        if enc.without_buffer_views {
+            g.buf.push_accessor_without_view(data, opts)
+        } else {
+            g.buf.push_accessor(data, opts)
+        }
+    };
     let mut attributes = IndexMap::new();
-    let pos = g.buf.push_accessor(
-        &AccessorData::from_elements(&d.positions),
-        &AccessorOpts::attribute(true),
-    );
+    let data = encoded("POSITION", AccessorData::from_elements(&d.positions));
+    check("POSITION", data.count())?;
+    let pos = push(g, &data, &AccessorOpts::attribute(true));
     attributes.insert("POSITION".to_owned(), pos);
     if !d.normals.is_empty() {
         check("NORMAL", d.normals.len())?;
-        let i = g.buf.push_accessor(
-            &AccessorData::from_elements(&d.normals),
-            &AccessorOpts::attribute(false),
-        );
+        let data = encoded("NORMAL", AccessorData::from_elements(&d.normals));
+        check("NORMAL", data.count())?;
+        let i = push(g, &data, &AccessorOpts::attribute(false));
         attributes.insert("NORMAL".to_owned(), i);
     }
     for (k, tc) in d.texcoords.iter().enumerate() {
         check("TEXCOORD", tc.len())?;
-        let i = g.buf.push_accessor(
-            &AccessorData::from_elements(tc),
-            &AccessorOpts::attribute(false),
-        );
-        attributes.insert(format!("TEXCOORD_{k}"), i);
+        let name = format!("TEXCOORD_{k}");
+        let data = encoded(&name, AccessorData::from_elements(tc));
+        check(&name, data.count())?;
+        let i = push(g, &data, &AccessorOpts::attribute(false));
+        attributes.insert(name, i);
     }
     for (name, col) in &d.attributes {
-        let data = column_data(col);
+        let data = encoded(name, column_data(col));
         check(name, data.count())?;
-        let i = g.buf.push_accessor(&data, &AccessorOpts::attribute(false));
+        let i = push(g, &data, &AccessorOpts::attribute(false));
         attributes.insert(name.to_string(), i);
     }
     // `primitive_creation_edges_and_points` gives the POINTS primitive no `indices`.
     let indices = if d.mode == crate::export::mesh::extract::loose_points::MODE_POINTS {
         None
+    } else if enc.without_buffer_views {
+        if let Some(bad) = d.indices.iter().find(|i| **i as usize >= n) {
+            return Err(ExportError::Invalid(format!(
+                "index {bad} out of range ({n} vertices)"
+            )));
+        }
+        Some(g.buf.push_indices_without_view(&d.indices))
     } else {
         Some(match g.index_accessors.get(&d.indices) {
             Some(i) => *i,
@@ -326,15 +370,24 @@ fn write_accessors(g: &mut Gather, d: &PrimitiveDraft) -> Result<WrittenPrimitiv
         })
     };
     let mut targets = Vec::with_capacity(d.targets.len());
-    for t in &d.targets {
+    for (ti, t) in d.targets.iter().enumerate() {
         let mut m = IndexMap::new();
         for (name, col) in t {
-            let data = column_data(col);
+            let data = enc
+                .targets
+                .get(ti)
+                .and_then(|q| q.get(name))
+                .map_or_else(|| column_data(col), column_data);
             check(name, data.count())?;
-            // Morph targets may be sparse (WP 6.8, `post/morph_targets.rs`).
-            let i = crate::export::mesh::post::morph_targets::push_target_accessor(
-                &mut g.buf, g.settings, name, &data,
-            )?;
+            let i = if enc.without_buffer_views {
+                g.buf
+                    .push_accessor_without_view(&data, &AccessorOpts::attribute(name == "POSITION"))
+            } else {
+                // Morph targets may be sparse (WP 6.8, `post/morph_targets.rs`).
+                crate::export::mesh::post::morph_targets::push_target_accessor(
+                    &mut g.buf, g.settings, name, &data,
+                )?
+            };
             m.insert(name.to_string(), i);
         }
         targets.push(m);
@@ -345,6 +398,7 @@ fn write_accessors(g: &mut Gather, d: &PrimitiveDraft) -> Result<WrittenPrimitiv
         mode: d.mode,
         material_slot: d.material_slot,
         targets,
+        extensions: enc.extensions.clone(),
     })
 }
 

@@ -15,7 +15,8 @@
 //! callback), so at most [`MAX_WORKERS`] encoders run at once per process: a further
 //! deadline-bound encode waits for a slot within its own deadline (then `TIMEOUT`), which
 //! bounds the CPU and memory timed-out encodes keep in a long-lived `serve`/`mcp` session
-//! (deviations §2).
+//! (deviations §2). That `TIMEOUT` names the cause ([`SLOTS_BUSY`], M7 W0): a small image
+//! written after timed-out large ones did not time out on its own work.
 
 use super::raw8::color_type_8;
 use crate::codec::{DecodedImage, ImageError};
@@ -51,6 +52,11 @@ pub(crate) fn encode_webp(
 /// worker holds its slot until its encode ends).
 pub(super) const MAX_WORKERS: usize = 2;
 
+/// The `TIMEOUT` reason of an encode that never got a worker slot.
+pub(super) const SLOTS_BUSY: &str = "the WebP encode waited for an encoder slot: earlier WebP \
+    encodes that timed out are still running in the background (at most 2 at once per \
+    process); retry once they finish";
+
 static WORKERS: std::sync::Mutex<usize> = std::sync::Mutex::new(0);
 static WORKER_FREED: std::sync::Condvar = std::sync::Condvar::new();
 
@@ -78,7 +84,7 @@ fn acquire_slot(deadline: std::time::Instant) -> Slot {
         let left = deadline.saturating_duration_since(std::time::Instant::now());
         if left.is_zero() {
             drop(n);
-            frap_math::budget::check_now();
+            frap_math::budget::check_now_because(SLOTS_BUSY);
             n = workers();
             continue;
         }

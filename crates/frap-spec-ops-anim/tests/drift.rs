@@ -12,8 +12,9 @@ fn typed_specs_match_dumps() {
     let all = frap_spec_ops_anim::ALL_OPS;
     assert_eq!(
         all.len(),
-        32,
-        "typed operators of the `anim` group in M6 (M5+M6 W0): anim, armature, nla, pose, screen"
+        43,
+        "typed operators of the `anim` group in M7 (M7 W0): anim, armature, nla, pose, screen and \
+         the 11 marker operators"
     );
     for s in all {
         common::check_op(s);

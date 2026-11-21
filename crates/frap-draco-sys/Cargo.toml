@@ -1,0 +1,16 @@
+[package]
+name = "frap-draco-sys"
+description = "frap: optional cc-built Google Draco (no cmake) behind frap-codec-mesh's `draco-sys` feature; filled by WP 7.2 only if the draco-core spike gate fails (ARCHITECTURE §3.6, §22.9)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+# M7 W0 stub (decision log M7W0-5). WP 7.2 owns this whole directory, this manifest included
+# (the one crate manifest a W1 WP may edit: it exists only for the spike gate's fallback).
+[dependencies]
+
+[lints]
+workspace = true

@@ -17,7 +17,8 @@ fn typed_specs_match_dumps() {
     assert!(all.windows(2).all(|w| w[0].idname < w[1].idname));
 }
 
-/// The glTF settings structs carry all 110 / 20 props (ARCHITECTURE §4.2, §17.2) and keep the
+/// The glTF settings structs carry all 110 / 20 props, plus the eight `frap_*` export options
+/// from milestone 7 (ARCHITECTURE §4.2, §17.2; M7 W0), and keep the
 /// M0 field types the exporter uses.
 #[test]
 fn gltf_settings_structs() {
@@ -25,7 +26,7 @@ fn gltf_settings_structs() {
     use frap_spec_ops_io::export_scene::ExportSceneGltf;
     use frap_spec_ops_io::import_scene::ImportSceneGltf;
     use smol_str::SmolStr;
-    assert_eq!(ExportSceneGltf::spec().props.len(), 110);
+    assert_eq!(ExportSceneGltf::spec().props.len(), 118);
     assert_eq!(ImportSceneGltf::spec().props.len(), 20);
     let s = ExportSceneGltf::spec();
     let mut a = OpArgs::default();

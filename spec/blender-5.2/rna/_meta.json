@@ -428,6 +428,7 @@
   "SurfaceDeformModifier",
   "SurfaceModifier",
   "Texture",
+  "TimelineMarker",
   "ToolSettings",
   "TriangulateModifier",
   "UVLoopLayers",
@@ -804,6 +805,7 @@
   "PoseBoneConstraints",
   "Preferences",
   "PreferencesEdit",
+  "PropertyGroup",
   "QuaternionAttribute",
   "QuaternionAttributeValue",
   "ReadOnlyInteger",
@@ -939,6 +941,8 @@
   "SurfaceModifier",
   "TexMapping",
   "Texture",
+  "TimelineMarker",
+  "TimelineMarkers",
   "ToolSettings",
   "TriangulateModifier",
   "UDIMTile",
@@ -968,6 +972,10 @@
   "WeldModifier",
   "Window",
   "WireframeModifier",
-  "World"
+  "World",
+  "gltf2_KHR_materials_variant_pointer",
+  "gltf2_KHR_materials_variants_default_material",
+  "gltf2_KHR_materials_variants_primitive",
+  "gltf2_KHR_materials_variants_variant"
  ]
 }

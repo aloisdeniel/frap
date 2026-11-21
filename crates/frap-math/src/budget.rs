@@ -39,6 +39,9 @@ pub const MAX_MESH_ELEMENTS: u64 = i32::MAX as u64;
 pub struct Interrupted {
     /// The statement's time limit.
     pub limit: Duration,
+    /// Why the statement was still running at the deadline, when the cancellation point knows
+    /// better than "it was slow" (M7 W0: a WebP encode that waited for an encoder slot).
+    pub reason: Option<&'static str>,
 }
 
 /// Limits of one statement.
@@ -173,6 +176,16 @@ pub fn check_n(work: u32) {
 /// Like [`check`], reading the clock every time (between coarse steps: per object, per
 /// render pass, per exported mesh).
 pub fn check_now() {
+    check_now_inner(None);
+}
+
+/// [`check_now`], with `reason` in the [`Interrupted`] payload when the deadline has passed
+/// (the session adds it to the `TIMEOUT` message).
+pub fn check_now_because(reason: &'static str) {
+    check_now_inner(Some(reason));
+}
+
+fn check_now_inner(reason: Option<&'static str>) {
     let hit = ACTIVE.with(|a| {
         a.get()
             .and_then(|b| b.deadline)
@@ -180,7 +193,7 @@ pub fn check_now() {
             .map(|(_, t)| t)
     });
     if let Some(limit) = hit {
-        std::panic::resume_unwind(Box::new(Interrupted { limit }));
+        std::panic::resume_unwind(Box::new(Interrupted { limit, reason }));
     }
 }
 
@@ -361,7 +374,8 @@ mod tests {
         assert_eq!(
             interrupted(&*p),
             Some(Interrupted {
-                limit: Duration::from_millis(1)
+                limit: Duration::from_millis(1),
+                reason: None,
             })
         );
         // The guard was dropped during the unwind.

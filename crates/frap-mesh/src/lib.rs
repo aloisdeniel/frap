@@ -7,6 +7,8 @@
 //! Ownership (M1): WP 1.4 owns everything except `src/rna/**` (WP 1.27) and this file.
 #![deny(unsafe_code)]
 
+/// The glTF add-on's per-mesh variant data (M7 W0 contract; WP 7.5).
+pub mod gltf_variants;
 mod mesh;
 mod normals;
 pub mod primitives;

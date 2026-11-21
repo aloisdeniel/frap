@@ -32,8 +32,9 @@ fn typed_and_catalog_partition_the_dumps() {
     assert!(cat.is_disjoint(&typed));
     assert_eq!(cat.union(&typed).cloned().collect::<BTreeSet<_>>(), all);
     // M1 (63, decision log S1-1), every M2 operator of OPERATORS.md (M2 W0), the 31 M3 and
-    // 15 M4 operators (M3+M4 W0) and the 54 M6 operators (M5+M6 W0; M5 adds none).
-    assert_eq!(typed.len(), 288, "OPERATORS.md: operators with M <= 6");
+    // 15 M4 operators (M3+M4 W0), the 54 M6 operators (M5+M6 W0; M5 adds none) and the 11 M7
+    // `marker.*` operators (M7 W0).
+    assert_eq!(typed.len(), 299, "OPERATORS.md: operators with M <= 7");
     assert!(is_typed("mesh.primitive_cube_add") && !contains("mesh.primitive_cube_add"));
     assert!(contains("mesh.select_nth") && !is_typed("mesh.select_nth"));
     assert!(is_typed("mesh.decimate") && is_typed("uv.unwrap"));

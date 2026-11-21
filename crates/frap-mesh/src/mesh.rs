@@ -379,6 +379,8 @@ pub struct Mesh {
     pub attributes_active: Option<SmolStr>,
     /// Texture space.
     pub texspace: TexSpace,
+    /// The glTF add-on's `KHR_materials_variants` properties (M7 W0; WP 7.5).
+    pub gltf2_variants: crate::gltf_variants::MeshGltfVariants,
     /// `CD_MLOOPTANGENT`: the temporary corner tangent layer `Mesh.calc_tangents()` fills
     /// (tangent xyz, bitangent sign w), tagged with the `session_uid` of the mesh it was
     /// computed on. Never persisted (`CD_FLAG_TEMPORARY`), not part of an ID copy (Blender
@@ -444,6 +446,7 @@ impl Mesh {
             color_default: None,
             attributes_active: None,
             texspace: TexSpace::default(),
+            gltf2_variants: Default::default(),
             tangents: None,
             runtime: MeshRuntime::default(),
         }

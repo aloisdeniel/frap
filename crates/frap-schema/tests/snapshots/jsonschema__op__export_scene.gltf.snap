@@ -765,6 +765,71 @@ source: crates/frap-schema/tests/snapshots.rs
       "title": "filter_glob",
       "description": "filter_glob",
       "default": "*.glb"
+    },
+    "frap_compat": {
+      "type": "string",
+      "enum": [
+        "BLENDER",
+        "SPEC"
+      ],
+      "title": "frap_compat",
+      "description": "Output compatibility (frap extension)",
+      "default": "BLENDER"
+    },
+    "frap_texture_format": {
+      "type": "string",
+      "enum": [
+        "AUTO",
+        "KTX2"
+      ],
+      "title": "frap_texture_format",
+      "description": "Texture container (frap extension)",
+      "default": "AUTO"
+    },
+    "frap_basisu_mode": {
+      "type": "string",
+      "enum": [
+        "ETC1S",
+        "UASTC"
+      ],
+      "title": "frap_basisu_mode",
+      "description": "Basis Universal mode for frap_texture_format='KTX2' (frap extension)",
+      "default": "ETC1S"
+    },
+    "frap_mesh_quantization": {
+      "type": "boolean",
+      "title": "frap_mesh_quantization",
+      "description": "Quantize vertex attributes (KHR_mesh_quantization, frap extension)",
+      "default": false
+    },
+    "frap_interleave": {
+      "type": "boolean",
+      "title": "frap_interleave",
+      "description": "Interleave vertex buffers (frap extension)",
+      "default": false
+    },
+    "frap_node_visibility": {
+      "type": "boolean",
+      "title": "frap_node_visibility",
+      "description": "Export KHR_node_visibility (frap extension)",
+      "default": false
+    },
+    "frap_diffuse_transmission": {
+      "type": "boolean",
+      "title": "frap_diffuse_transmission",
+      "description": "Export KHR_materials_diffuse_transmission (frap extension)",
+      "default": false
+    },
+    "frap_draco_backend": {
+      "type": "string",
+      "enum": [
+        "AUTO",
+        "CORE",
+        "SYS"
+      ],
+      "title": "frap_draco_backend",
+      "description": "Draco encoder implementation (frap extension)",
+      "default": "AUTO"
     }
   },
   "required": []

@@ -1,0 +1,27 @@
+{
+ "identifier": "gltf2_KHR_materials_variant_pointer",
+ "name": "gltf2_KHR_materials_variant_pointer",
+ "description": "",
+ "base": "PropertyGroup",
+ "name_property": "name",
+ "nested": null,
+ "is_id": false,
+ "props": [
+  {
+   "identifier": "variant",
+   "name": "variant",
+   "description": "",
+   "type": "POINTER",
+   "subtype": "NONE",
+   "unit": "NONE",
+   "fixed_type": "gltf2_KHR_materials_variants_variant",
+   "is_id": false,
+   "flags": [
+    "READONLY",
+    "RUNTIME"
+   ]
+  }
+ ],
+ "funcs": [],
+ "root": false
+}

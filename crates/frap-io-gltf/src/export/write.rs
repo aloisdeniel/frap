@@ -21,6 +21,10 @@ use crate::export::{ExportError, ExportFormat, ExportOutput};
 /// Finishes the document (its scenes were gathered by `scenes.rs`) and serializes it.
 pub fn finish(mut g: Gather) -> Result<ExportOutput, ExportError> {
     let s = g.settings;
+    // M7 W0 hooks: the spec-complete rewrite (WP 7.4), then buffer-level meshopt (WP 7.1),
+    // both before the extension order is fixed and the buffer is finished.
+    crate::export::spec_complete::finish(&mut g)?;
+    crate::export::compress::finish_buffers(&mut g)?;
     let created = g.state::<crate::export::ext_order::CreatedEmpty>().clone();
     crate::export::ext_order::reorder_with(&mut g.doc, Some(&created));
     g.doc.asset = Asset {

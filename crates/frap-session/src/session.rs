@@ -986,8 +986,8 @@ impl Session {
     /// The error of a caught unwind: `TIMEOUT` for an expired `--stmt-timeout` (a cooperative
     /// cancellation point unwound), `INTERNAL` for any other panic.
     fn unwind_error(&self, payload: Box<dyn std::any::Any + Send>) -> FrapError {
-        if frap_math::budget::interrupted(&*payload).is_some() {
-            self.timeout_error()
+        if let Some(i) = frap_math::budget::interrupted(&*payload) {
+            self.timeout_error_because(i.reason)
         } else if let Some(e) = frap_math::budget::elements_exceeded(&*payload) {
             // A growing BMesh hit `--max-elements` (`budget::check_corners`), or a buffer was
             // too large (`budget::check_buffer`: image pixels).
@@ -1011,16 +1011,22 @@ impl Session {
 
     /// `RuntimeError` code `TIMEOUT` (§12, §13.4).
     fn timeout_error(&self) -> FrapError {
+        self.timeout_error_because(None)
+    }
+
+    /// [`Self::timeout_error`], naming why the statement was still running when the
+    /// cancellation point knew (`budget::Interrupted::reason`, M7 W0).
+    fn timeout_error_because(&self, reason: Option<&'static str>) -> FrapError {
         let ms = self
             .opts
             .limits
             .stmt_timeout
             .map_or(0, |d| d.as_millis().min(u64::MAX as u128) as u64);
-        FrapError::new(
-            PyExc::RuntimeError,
-            crate::errors::TIMEOUT,
-            "Error: frap: limit exceeded (stmt_timeout)",
-        )
+        let message = match reason {
+            Some(r) => format!("Error: frap: limit exceeded (stmt_timeout): {r}"),
+            None => "Error: frap: limit exceeded (stmt_timeout)".to_owned(),
+        };
+        FrapError::new(PyExc::RuntimeError, crate::errors::TIMEOUT, message)
         .with_detail("stmt_timeout_ms", ms)
         .with_hint(
             "the statement was rolled back; raise --stmt-timeout, or split the work into smaller statements",

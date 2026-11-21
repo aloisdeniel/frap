@@ -650,17 +650,17 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [ ] | `marker.add` | M7 | P2 | timeline markers (`Scene.timeline_markers`, deviations §2); M5+M6 stabilization round 8 dumped the namespace so it answers OP_NOT_IMPLEMENTED, not OP_UNKNOWN |
-| [ ] | `marker.camera_bind` | M7 | P2 | marker camera switching (`BKE_scene_camera_switch_update`) |
-| [ ] | `marker.delete` | M7 | P2 | timeline markers |
-| [ ] | `marker.duplicate` | M7 | P2 | timeline markers |
-| [ ] | `marker.make_links_scene` | M7 | P2 | timeline markers |
-| [ ] | `marker.move` | M7 | P2 | timeline markers |
-| [ ] | `marker.rename` | M7 | P2 | timeline markers |
-| [ ] | `marker.select` | M7 | P2 | timeline markers |
-| [ ] | `marker.select_all` | M7 | P2 | timeline markers |
-| [ ] | `marker.select_box` | M7 | P2 | timeline markers |
-| [ ] | `marker.select_leftright` | M7 | P2 | timeline markers |
+| [ ] | `marker.add` | M7 | P2 | timeline markers (`Scene.timeline_markers`, deviations §2); M5+M6 stabilization round 8 dumped the namespace so it answers OP_NOT_IMPLEMENTED, not OP_UNKNOWN; WP 7.6 (M7 W0, rule 1) |
+| [ ] | `marker.camera_bind` | M7 | P2 | marker camera switching (`BKE_scene_camera_switch_update`); WP 7.6 (M7 W0, rule 1) |
+| [ ] | `marker.delete` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
+| [ ] | `marker.duplicate` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
+| [ ] | `marker.make_links_scene` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
+| [ ] | `marker.move` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
+| [ ] | `marker.rename` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
+| [ ] | `marker.select` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
+| [ ] | `marker.select_all` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
+| [ ] | `marker.select_box` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
+| [ ] | `marker.select_leftright` | M7 | P2 | timeline markers; WP 7.6 (M7 W0, rule 1) |
 
 ### `frap.*` (frap extensions, namespaced)
 
@@ -857,14 +857,14 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [x] | Skins (joints, inverse bind matrices, JOINTS_n/WEIGHTS_n) | M6 | M6 | WP 6.8: every skin option (def bones, flatten, leaf bones, rest/pose, armature removal, influences), neutral bone, unused skins, `export_apply` without ARMATURE modifiers; import with every `bone_heuristic` and `guess_original_bind_pose`; goldens `tests/golden/cases/gltf/skins/` (deviations §2) |
 | [x] | Morph targets (POSITION/NORMAL deltas, sparse, default weights) | M6 | M6 | WP 6.8: POSITION/NORMAL/TANGENT targets, the sparse heuristic, weights and targetNames; import of shape keys and weights (no mesh sharing for animated weights); weights animation channels are WP 6.7's |
 | [x] | KHR_animation_pointer | M6 | M6 | WP 6.9: camera, light and material channels both ways, `export_convert_animation_pointer` for TRS/weights; import of node TRS / weights pointers (M5+M6 W3); goldens `tests/golden/cases/gltf/pointer/` (gaps in deviations §2) |
-| [ ] | KHR_mesh_quantization | M7 | M7 | frap_mesh_quantization or gltfpack path |
-| [ ] | EXT_meshopt_compression, KHR_meshopt_compression | M7 | M7 |  |
-| [ ] | KHR_draco_mesh_compression | M7 | M7 | spike gate |
-| [ ] | EXT_texture_webp | M7 (lossless and lossy; lossless moved from M3, decision log M34S3-5) | M3 | export writes WebP sources as PNG with a WARNING until then (deviations §2) |
-| [ ] | KHR_texture_basisu | M7 (feature basisu-encode) | M7 | frap_texture_format='KTX2' |
-| [ ] | KHR_materials_variants | M7 | M7 | not part of M3's "every KHR material extension" (decision log M34S3-5); add-on data model; RNA exists only with `KHR_materials_variants_ui` on (dumped that way); import turns it on |
-| [ ] | EXT_mesh_gpu_instancing | M7 (`export_gpu_instances`, Blender prop) | M7 | children of an Empty sharing a mesh (add-on rule) |
-| [ ] | KHR_node_visibility, KHR_materials_diffuse_transmission | M7 (frap_*) | M7 | not produced by Blender |
+| [ ] | KHR_mesh_quantization | M7 | M7 | frap_mesh_quantization or gltfpack path; WP 7.1 |
+| [ ] | EXT_meshopt_compression, KHR_meshopt_compression | M7 | M7 | WP 7.1 |
+| [ ] | KHR_draco_mesh_compression | M7 | M7 | spike gate; WP 7.2 |
+| [ ] | EXT_texture_webp | M7 (lossless and lossy; lossless moved from M3, decision log M34S3-5) | M3 | export writes WebP sources as PNG with a WARNING until then (deviations §2); WP 7.3 |
+| [ ] | KHR_texture_basisu | M7 (feature basisu-encode) | M7 | frap_texture_format='KTX2'; WP 7.3 |
+| [ ] | KHR_materials_variants | M7 | M7 | not part of M3's "every KHR material extension" (decision log M34S3-5); add-on data model; RNA exists only with `KHR_materials_variants_ui` on (dumped that way); import turns it on; WP 7.5 |
+| [ ] | EXT_mesh_gpu_instancing | M7 (`export_gpu_instances`, Blender prop) | M7 | children of an Empty sharing a mesh (add-on rule); WP 7.5 |
+| [ ] | KHR_node_visibility, KHR_materials_diffuse_transmission | M7 (frap_*) | M7 | not produced by Blender; WP 7.4 |
 
 ## G. Totals
 
