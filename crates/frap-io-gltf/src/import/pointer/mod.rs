@@ -76,8 +76,10 @@ pub(crate) enum MatPart {
     Occlusion,
     /// `mat.pbr_metallic_roughness.animations`.
     Pbr,
-    /// A texture's `KHR_texture_transform` (not imported).
-    TextureTransform,
+    /// The `KHR_texture_transform` of texture `i` of [`material::TEXTURES`] (`offset` and
+    /// `scale`; `TEXTURES.len()` for a texture the add-on does not import, whose dispatch
+    /// fails).
+    TextureTransform(usize),
     /// `mat.extensions[ext].animations`, by position in [`MATERIAL_EXTENSIONS`].
     Ext(usize),
 }
@@ -176,7 +178,32 @@ pub(crate) fn dispatch(ch: &Channel) -> Option<Target> {
         (5, "pbrMetallicRoughness", "baseColorFactor" | "roughnessFactor" | "metallicFactor") => {
             MatPart::Pbr
         }
-        (7..=9, _, _) if at(n - 2) == "KHR_texture_transform" => MatPart::TextureTransform,
+        // Only `scale` and `offset` are dispatched (a `rotation` channel is never imported).
+        (7, tex, "extensions")
+            if matches!(
+                tex,
+                "emissiveTexture" | "normalTexture" | "occlusionTexture"
+            ) && at(5) == "KHR_texture_transform"
+                && matches!(at(6), "scale" | "offset") =>
+        {
+            MatPart::TextureTransform(texture_index("", tex))
+        }
+        (8, "pbrMetallicRoughness", tex)
+            if matches!(tex, "baseColorTexture" | "metallicRoughnessTexture")
+                && at(5) == "extensions"
+                && at(6) == "KHR_texture_transform"
+                && matches!(at(7), "scale" | "offset") =>
+        {
+            MatPart::TextureTransform(texture_index("pbrMetallicRoughness", tex))
+        }
+        (9, "extensions", ext)
+            if at(6) == "extensions"
+                && at(7) == "KHR_texture_transform"
+                && matches!(at(8), "scale" | "offset") =>
+        {
+            MatPart::TextureTransform(texture_index(ext, at(5)))
+        }
+        (_, _, _) if n >= 7 && at(n - 2) == "KHR_texture_transform" => return None,
         (6 | 7, "extensions", ext) => {
             let member = at(5);
             let ok = match ext {
@@ -220,6 +247,14 @@ pub(crate) fn dispatch(ch: &Channel) -> Option<Target> {
         _ => return None,
     };
     Some(Target::Material(m, part))
+}
+
+/// The index of `(owner, member)` in [`material::TEXTURES`] (`TEXTURES.len()` when absent).
+fn texture_index(owner: &str, member: &str) -> usize {
+    material::TEXTURES
+        .iter()
+        .position(|&(o, m)| o == owner && m == member)
+        .unwrap_or(material::TEXTURES.len())
 }
 
 /// Whether the pointer import handles `ch` (a camera, light or material pointer).
@@ -329,6 +364,10 @@ pub(crate) struct PointerState {
     mag: BTreeMap<usize, BTreeMap<String, (usize, usize)>>,
     /// Spot lights: `(anim, channel)` of their cone channels.
     cones: BTreeMap<usize, BTreeMap<String, (usize, usize)>>,
+    /// Texture transforms (material, texture of [`material::TEXTURES`]): `(anim, channel)` of
+    /// their `offset` / `scale` channels, the last one of each over every animation
+    /// (`texture()`'s `multiple_channels`).
+    tex: BTreeMap<(usize, usize), BTreeMap<String, (usize, usize)>>,
 }
 
 impl PointerState {
@@ -358,6 +397,12 @@ impl PointerState {
                             .entry(l)
                             .or_default()
                             .insert(tab[5].to_owned(), (ai, ci));
+                    }
+                    Some(Target::Material(m, MatPart::TextureTransform(t))) => {
+                        s.tex
+                            .entry((m, t))
+                            .or_default()
+                            .insert(tab[tab.len() - 1].to_owned(), (ai, ci));
                     }
                     _ => {}
                 }
@@ -731,9 +776,19 @@ fn do_channel(
             let Some(mat) = main.materials.get(mat_ref) else {
                 return Ok(None);
             };
-            let gm = &cx.doc.materials[m];
-            let is_unlit = gm.extensions.contains("KHR_materials_unlit");
-            let Some(t) = material::resolve(main, mat, &tab, is_unlit) else {
+            let gm_name = cx.doc.materials[m].name.clone();
+            let is_unlit = cx.doc.materials[m]
+                .extensions
+                .contains("KHR_materials_unlit");
+            let resolved = match *target {
+                Target::Material(_, MatPart::TextureTransform(t)) => {
+                    // `is_unlit` is passed for the core textures only.
+                    let unlit = is_unlit && t < 5;
+                    material::texture_transform(main, mat, t, tab[tab.len() - 1], unlit)
+                }
+                _ => material::resolve(main, mat, &tab, is_unlit),
+            };
+            let Some(t) = resolved else {
                 cx.report(
                     ReportType::Warning,
                     format!("Unsupported animation target: {tab:?}"),
@@ -745,26 +800,51 @@ fn do_channel(
                 material::Convert::Inverse => values.iter().map(|v| vec![1.0 / v[0]]).collect(),
                 material::Convert::Half => values.iter().map(|v| vec![v[0] / 2.0]).collect(),
             };
-            let alpha =
-                (tab.len() == 5 && tab[3] == "pbrMetallicRoughness" && tab[4] == "baseColorFactor")
-                    .then(|| material::alpha_path(main, mat))
-                    .flatten()
-                    .map(|p| {
-                        (
-                            p,
-                            values
-                                .iter()
-                                .map(|v| v.get(3).copied().unwrap_or(0.0))
-                                .collect(),
-                        )
-                    });
+            let values = match *target {
+                Target::Material(m, MatPart::TextureTransform(ti))
+                    if tab[tab.len() - 1] == "offset" =>
+                {
+                    offset_to_location(cx, state, m, ti, &keys, values)?
+                }
+                _ => values,
+            };
+            let is_base_color =
+                tab.len() == 5 && tab[3] == "pbrMetallicRoughness" && tab[4] == "baseColorFactor";
+            let alpha_path = if is_base_color {
+                match material::alpha_path(main, mat, is_unlit) {
+                    Ok(p) => p,
+                    Err(()) => {
+                        // `alpha_socket` is unbound in the add-on (UnboundLocalError): the
+                        // colour F-curves are made, then the import fails.
+                        cx.report(
+                            ReportType::Warning,
+                            format!(
+                                "glTF import: KHR_animation_pointer channel {pointer}: the \
+                                 material has no alpha socket; only the colour is imported"
+                            ),
+                        );
+                        None
+                    }
+                }
+            } else {
+                None
+            };
+            let alpha = alpha_path.map(|p| {
+                (
+                    p,
+                    values
+                        .iter()
+                        .map(|v| v.get(3).copied().unwrap_or(0.0))
+                        .collect(),
+                )
+            });
             Curves {
                 root: Root::Embedded {
                     owner: mat_ref.any(),
                     slot: EmbeddedSlot::NodeTree,
                 },
                 id_type: "NODETREE",
-                slot_name: gm.name.clone(),
+                slot_name: gm_name,
                 path: t.path,
                 components: t.components,
                 group: t.group,
@@ -775,6 +855,67 @@ fn do_channel(
         _ => return Ok(None),
     };
     Ok(Some((curves, keys, interp)))
+}
+
+/// `do_channel`'s offset conversion: `texture_transform_gltf_to_blender` of each key with
+/// the texture's static rotation (no `rotation` channel is ever recorded) and the scale of the
+/// texture's recorded `scale` channel, else its static scale, when the keys are the same
+/// (otherwise the glTF offsets are written as they are). The recorded scale values are read
+/// unsliced, as the add-on reads them.
+fn offset_to_location(
+    cx: &Gltf,
+    state: &PointerState,
+    m: usize,
+    t: usize,
+    keys: &[f32],
+    values: Vec<Vec<f32>>,
+) -> Result<Vec<Vec<f32>>, ImportError> {
+    let tt = material::texture_transform_of(&cx.doc.materials[m], t).unwrap_or_default();
+    let num = |v: &serde_json::Value| v.as_f64();
+    let rotation = tt.get("rotation").and_then(num).unwrap_or(0.0);
+    let static_scale = tt
+        .get("scale")
+        .and_then(|s| s.as_array())
+        .map(|a| a.iter().filter_map(num).collect::<Vec<f64>>())
+        .unwrap_or_else(|| vec![1.0, 1.0]);
+    let (keys_scale, values_scale): (Vec<f32>, Vec<Vec<f64>>) =
+        match state.tex.get(&(m, t)).and_then(|r| r.get("scale")) {
+            Some(&(a, c)) => {
+                let an = &cx.doc.animations[a];
+                let s = &an.samplers[an.channels[c].sampler as usize];
+                let k = cx.accessor(s.input)?.to_f32();
+                let out = cx.accessor(s.output)?;
+                let n = out.type_.components().max(1);
+                let v = out
+                    .to_f32()
+                    .chunks_exact(n)
+                    .map(|c| c.iter().map(|&x| f64::from(x)).collect())
+                    .collect();
+                (k, v)
+            }
+            None => (keys.to_vec(), vec![static_scale; keys.len()]),
+        };
+    if keys != keys_scale.as_slice() {
+        return Ok(values);
+    }
+    Ok(values
+        .iter()
+        .enumerate()
+        .map(|(i, o)| {
+            let s1 = values_scale
+                .get(i)
+                .and_then(|s| s.get(1).copied())
+                .unwrap_or(1.0);
+            let (o0, o1) = (
+                f64::from(o.first().copied().unwrap_or(0.0)),
+                f64::from(o.get(1).copied().unwrap_or(0.0)),
+            );
+            vec![
+                (o0 + s1 * rotation.sin()) as f32,
+                (1.0 - o1 - s1 * rotation.cos()) as f32,
+            ]
+        })
+        .collect())
 }
 
 /// What the pointer import keeps across animations: the created datablocks and the add-on's
@@ -850,22 +991,14 @@ pub(crate) fn anim(
             MatPart::Occlusion => gm.occlusion_texture.is_some(),
             MatPart::Pbr => gm.pbr_metallic_roughness.is_some(),
             MatPart::Ext(i) => gm.extensions.contains(MATERIAL_EXTENSIONS[*i]),
-            MatPart::Material | MatPart::TextureTransform => true,
+            MatPart::TextureTransform(t) => material::texture_transform_of(gm, *t).is_some(),
+            MatPart::Material => true,
         };
         if !present {
             cx.warn_once(
                 "pointer_missing_part",
                 "glTF import: KHR_animation_pointer channels into a material part the file does not define were skipped",
             );
-            continue;
-        }
-        if part == MatPart::TextureTransform {
-            for _ in &chs {
-                cx.warn_once(
-                    "pointer_texture_transform",
-                    "glTF import: KHR_animation_pointer on KHR_texture_transform is not imported",
-                );
-            }
             continue;
         }
         work.extend(
@@ -1233,7 +1366,32 @@ mod tests {
             dispatch(&ch(
                 "/materials/0/emissiveTexture/extensions/KHR_texture_transform/offset"
             )),
-            Some(Target::Material(0, MatPart::TextureTransform))
+            Some(Target::Material(0, MatPart::TextureTransform(0)))
+        );
+        assert_eq!(
+            dispatch(&ch(
+                "/materials/0/pbrMetallicRoughness/baseColorTexture/extensions/KHR_texture_transform/scale"
+            )),
+            Some(Target::Material(0, MatPart::TextureTransform(3)))
+        );
+        assert_eq!(
+            dispatch(&ch(
+                "/materials/1/extensions/KHR_materials_clearcoat/clearcoatNormalTexture/extensions/KHR_texture_transform/offset"
+            )),
+            Some(Target::Material(1, MatPart::TextureTransform(13)))
+        );
+        // Not dispatched: a rotation, a texture the add-on's lists miss (its dispatch fails).
+        assert_eq!(
+            dispatch(&ch(
+                "/materials/0/normalTexture/extensions/KHR_texture_transform/rotation"
+            )),
+            None
+        );
+        assert_eq!(
+            dispatch(&ch(
+                "/materials/0/extensions/KHR_materials_foo/fooTexture/extensions/KHR_texture_transform/offset"
+            )),
+            Some(Target::Material(0, MatPart::TextureTransform(17)))
         );
         assert_eq!(
             dispatch(&ch("/nodes/3/rotation")),
@@ -1415,6 +1573,7 @@ mod tests {
         let mut samplers = Vec::new();
         for (pointer, interp, input, ty, output) in channels {
             let n = match *ty {
+                "VEC2" => 2,
                 "VEC3" => 3,
                 "VEC4" => 4,
                 _ => 1,
@@ -1547,5 +1706,187 @@ mod tests {
         assert!(skipped[1].contains("yfov") && skipped[1].contains("not finite"));
         assert!(skipped[2].contains("/color") && skipped[2].contains("needs 3"));
         assert!(skipped[3].contains("/intensity") && skipped[3].contains("5 output(s) for 2"));
+    }
+
+    /// A GLB with one triangle per material of `materials` (a 1x1 PNG as image 0) and the
+    /// pointer channels of [`pointer_glb`].
+    fn material_glb(materials: serde_json::Value, channels: &[TestChannel]) -> Vec<u8> {
+        let glb = pointer_glb(channels);
+        let jlen = u32::from_le_bytes(glb[12..16].try_into().unwrap()) as usize;
+        let mut json: serde_json::Value = serde_json::from_slice(&glb[20..20 + jlen]).unwrap();
+        let mut bin = glb[20 + jlen + 8..].to_vec();
+        let off = bin.len();
+        for f in [0.0f32, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0] {
+            bin.extend_from_slice(&f.to_le_bytes());
+        }
+        let n = materials.as_array().map_or(0, Vec::len);
+        json["bufferViews"]
+            .as_array_mut()
+            .unwrap()
+            .push(serde_json::json!({"buffer": 0, "byteOffset": off, "byteLength": 36}));
+        let view = json["bufferViews"].as_array().unwrap().len() - 1;
+        json["accessors"]
+            .as_array_mut()
+            .unwrap()
+            .push(serde_json::json!({
+                "bufferView": view, "componentType": 5126, "count": 3, "type": "VEC3",
+                "min": [0.0, 0.0, 0.0], "max": [1.0, 1.0, 0.0],
+            }));
+        let pos = json["accessors"].as_array().unwrap().len() - 1;
+        let prims: Vec<serde_json::Value> = (0..n)
+            .map(|m| serde_json::json!({"attributes": {"POSITION": pos}, "material": m}))
+            .collect();
+        json["meshes"] = serde_json::json!([{"primitives": prims}]);
+        json["nodes"]
+            .as_array_mut()
+            .unwrap()
+            .push(serde_json::json!({"name": "Tri", "mesh": 0}));
+        json["scenes"][0]["nodes"] = serde_json::json!([0, 1, 2]);
+        json["materials"] = materials;
+        json["images"] = serde_json::json!([{"uri": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="}]);
+        json["textures"] = serde_json::json!([{"source": 0}]);
+        json["buffers"][0]["byteLength"] = serde_json::json!(bin.len());
+        json["extensionsUsed"].as_array_mut().unwrap().extend([
+            serde_json::json!("KHR_materials_unlit"),
+            serde_json::json!("KHR_texture_transform"),
+        ]);
+        let mut j = serde_json::to_vec(&json).unwrap();
+        while !j.len().is_multiple_of(4) {
+            j.push(b' ');
+        }
+        let total = 12 + 8 + j.len() + 8 + bin.len();
+        let mut out = Vec::new();
+        out.extend_from_slice(b"glTF");
+        out.extend_from_slice(&2u32.to_le_bytes());
+        out.extend_from_slice(&(total as u32).to_le_bytes());
+        out.extend_from_slice(&(j.len() as u32).to_le_bytes());
+        out.extend_from_slice(b"JSON");
+        out.extend_from_slice(&j);
+        out.extend_from_slice(&(bin.len() as u32).to_le_bytes());
+        out.extend_from_slice(b"BIN\0");
+        out.extend_from_slice(&bin);
+        out
+    }
+
+    /// WP 7.7: `KHR_texture_transform` channels key the importer's Mapping node (offset through
+    /// `texture_transform_gltf_to_blender` with the static rotation and scale, scale as is); a
+    /// rotation channel is never dispatched (silently not imported); a channel into a texture
+    /// without `KHR_texture_transform` is skipped with a WARNING (the add-on's dispatch fails).
+    /// An opaque unlit material's colour keys the Emission's Color; its missing alpha socket
+    /// (the add-on raises) is reported.
+    #[test]
+    fn texture_transform_and_unlit_channels() {
+        let keys: &[f32] = &[0.0, 1.0];
+        let materials = serde_json::json!([
+            {"name": "Tt", "pbrMetallicRoughness": {"baseColorTexture": {"index": 0,
+                "extensions": {"KHR_texture_transform": {"rotation": 0.5, "scale": [2.0, 4.0]}}}},
+             "normalTexture": {"index": 0}},
+            {"name": "Flat", "extensions": {"KHR_materials_unlit": {}},
+             "pbrMetallicRoughness": {"baseColorFactor": [1.0, 0.0, 0.0, 1.0]}},
+        ]);
+        let tt =
+            "/materials/0/pbrMetallicRoughness/baseColorTexture/extensions/KHR_texture_transform";
+        let glb = material_glb(
+            materials,
+            &[
+                (
+                    &format!("{tt}/offset"),
+                    "LINEAR",
+                    keys,
+                    "VEC2",
+                    &[0.0, 0.0, 0.5, 0.25],
+                ),
+                (
+                    &format!("{tt}/scale"),
+                    "LINEAR",
+                    keys,
+                    "VEC2",
+                    &[2.0, 4.0, 3.0, 1.0],
+                ),
+                (
+                    &format!("{tt}/rotation"),
+                    "LINEAR",
+                    keys,
+                    "SCALAR",
+                    &[0.5, 1.0],
+                ),
+                (
+                    "/materials/0/normalTexture/extensions/KHR_texture_transform/offset",
+                    "LINEAR",
+                    keys,
+                    "VEC2",
+                    &[0.0, 0.0, 1.0, 1.0],
+                ),
+                (
+                    "/materials/1/pbrMetallicRoughness/baseColorFactor",
+                    "LINEAR",
+                    keys,
+                    "VEC4",
+                    &[1.0, 0.0, 0.0, 1.0, 0.0, 0.5, 1.0, 1.0],
+                ),
+            ],
+        );
+        let (mut main, win) = frap_scene::startup::factory();
+        let mut log = ChangeLog::default();
+        let settings = super::super::ImportSettings::default();
+        let rep = super::super::import_bytes(
+            &mut main,
+            &win,
+            &glb,
+            std::path::Path::new("tt.glb"),
+            &settings,
+            &mut log,
+        )
+        .unwrap();
+        let act = main.actions.get(main.actions.find("A").unwrap()).unwrap();
+        let curves: Vec<(String, i32, Vec<[f32; 2]>)> = act
+            .all_fcurves()
+            .map(|f| {
+                (
+                    f.data_path.to_string(),
+                    f.array_index,
+                    f.keyframe_points.iter().map(|k| k.co).collect(),
+                )
+            })
+            .collect();
+        let paths: Vec<(&str, i32)> = curves.iter().map(|(p, i, _)| (p.as_str(), *i)).collect();
+        assert_eq!(
+            paths,
+            [
+                ("nodes[\"Mapping\"].inputs[1].default_value", 0),
+                ("nodes[\"Mapping\"].inputs[1].default_value", 1),
+                ("nodes[\"Mapping\"].inputs[3].default_value", 0),
+                ("nodes[\"Mapping\"].inputs[3].default_value", 1),
+                ("nodes[\"Emission\"].inputs[0].default_value", 0),
+                ("nodes[\"Emission\"].inputs[0].default_value", 1),
+                ("nodes[\"Emission\"].inputs[0].default_value", 2),
+            ]
+        );
+        // offset [0.5, 0.25] with rotation 0.5 and the scale channel's [3, 1] at that key.
+        let x = (0.5 + 1.0 * 0.5f64.sin()) as f32;
+        let y = (1.0 - 0.25 - 1.0 * 0.5f64.cos()) as f32;
+        let last = curves[0].2[1];
+        assert!((last[1] - x).abs() < 1e-6, "{last:?}");
+        assert!((curves[1].2[1][1] - y).abs() < 1e-6);
+        // The first key: offset 0 with scale [2, 4].
+        assert!((curves[0].2[0][1] - (4.0 * 0.5f64.sin()) as f32).abs() < 1e-6);
+        let warnings: Vec<&str> = rep
+            .reports
+            .iter()
+            .filter(|r| r.level == ReportType::Warning)
+            .map(|r| r.message.as_str())
+            .collect();
+        assert!(
+            warnings.iter().any(|w| w.contains("does not define")),
+            "{warnings:?}"
+        );
+        assert!(
+            warnings.iter().any(|w| w.contains("no alpha socket")),
+            "{warnings:?}"
+        );
+        assert!(
+            !warnings.iter().any(|w| w.contains("rotation")),
+            "{warnings:?}"
+        );
     }
 }

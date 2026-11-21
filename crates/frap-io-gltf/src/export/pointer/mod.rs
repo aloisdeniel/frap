@@ -77,6 +77,14 @@ pub fn gather(g: &mut Gather) -> Result<(), ExportError> {
         pointers |= convert_trs(g) > 0;
     }
     keep_animated_empty_extensions(g);
+    keep_animated_empty_texture_transforms(g);
+    if check_iridescence(g) {
+        pointers = g.doc.animations.iter().any(|a| {
+            a.channels
+                .iter()
+                .any(|c| c.target.path == AnimationPath::Pointer)
+        });
+    }
     if pointers {
         g.use_extension(
             KhrAnimationPointer::NAME,
@@ -84,6 +92,97 @@ pub fn gather(g: &mut Gather) -> Result<(), ExportError> {
         );
     }
     Ok(())
+}
+
+/// `export.py` `__check_iridescence` with pointer animation (WP 7.7): a material keeps
+/// `KHR_materials_iridescence` only when its factor is animated or not 0 and its maximum
+/// thickness is animated or not 0 (static values from the material, as the gatherer wrote them
+/// before frap's static exporter dropped the extension); otherwise the extension goes and so do
+/// the channels pointing into it, and an animation left without channels. Returns whether
+/// channels were removed. The add-on keeps the removed channels' sampler indices (they point
+/// past the shortened sampler list, an invalid file); frap renumbers them (docs/deviations.md
+/// §1).
+pub fn check_iridescence(g: &mut Gather) -> bool {
+    const NAME: &str = "KHR_materials_iridescence";
+    let main = g.main;
+    let settings = g.settings;
+    let mut drop: Vec<usize> = Vec::new();
+    for (i, m) in g.doc.materials.iter().enumerate() {
+        if !m.extensions.contains(NAME) {
+            continue;
+        }
+        let animated = |member: &str| {
+            let want = format!("/materials/{i}/extensions/{NAME}/{member}");
+            g.doc.animations.iter().any(|a| {
+                a.channels.iter().any(|c| {
+                    c.target.path == AnimationPath::Pointer
+                        && KhrAnimationPointer::of(&c.target).as_deref() == Some(want.as_str())
+                })
+            })
+        };
+        let lowered = m
+            .name
+            .as_deref()
+            .and_then(|n| main.materials.find(n))
+            .and_then(|r| main.materials.get(r))
+            .map(|mat| crate::export::materials::lower::lowered_for(main, mat, settings));
+        let Some(ir) = lowered.as_ref().and_then(|lm| lm.ext.iridescence.as_ref()) else {
+            continue;
+        };
+        if (!animated("iridescenceFactor") && ir.factor.factor == 0.0)
+            || (!animated("iridescenceThicknessMaximum") && ir.thickness_max.factor == 0.0)
+        {
+            drop.push(i);
+        }
+    }
+    if drop.is_empty() {
+        return false;
+    }
+    let mut removed = false;
+    for &i in &drop {
+        g.doc.materials[i].extensions.remove(NAME);
+        if let Some(c) = g
+            .state::<crate::export::ext_order::CreatedEmpty>()
+            .0
+            .get_mut(&(i as frap_gltf::json::Index))
+        {
+            c.retain(|e| *e != NAME);
+        }
+        let prefix = format!("/materials/{i}/extensions/{NAME}/");
+        for a in &mut g.doc.animations {
+            let before = a.channels.len();
+            a.channels.retain(|c| {
+                !(c.target.path == AnimationPath::Pointer
+                    && KhrAnimationPointer::of(&c.target).is_some_and(|p| p.starts_with(&prefix)))
+            });
+            if a.channels.len() == before {
+                continue;
+            }
+            removed = true;
+            // Keep the samplers still used, renumbered.
+            let mut keep: Vec<Option<usize>> = vec![None; a.samplers.len()];
+            let mut samplers = Vec::new();
+            for c in &mut a.channels {
+                let s = c.sampler as usize;
+                let n = match keep.get(s).copied().flatten() {
+                    Some(n) => n,
+                    None => {
+                        samplers.push(a.samplers[s].clone());
+                        keep[s] = Some(samplers.len() - 1);
+                        samplers.len() - 1
+                    }
+                };
+                c.sampler = n as frap_gltf::json::Index;
+            }
+            a.samplers = samplers;
+        }
+    }
+    g.doc.animations.retain(|a| !a.channels.is_empty());
+    if !g.doc.materials.iter().any(|m| m.extensions.contains(NAME)) {
+        g.doc.extensions_used.retain(|e| e != NAME);
+        g.doc.extensions_required.retain(|e| e != NAME);
+    }
+    removed
 }
 
 /// `__gather_extensions`' order of the `KHR_materials_*` extensions.
@@ -234,6 +333,111 @@ pub fn keep_animated_empty_extensions(g: &mut Gather) {
 
 const IOR: &str = "KHR_materials_ior";
 
+/// `__fix_json` for `KHR_texture_transform` (WP 7.7): a texture whose Mapping node gives the
+/// identity has an empty `KHR_texture_transform` object in the add-on
+/// (`get_texture_transform_from_mapping_node` deletes the default members), kept in every
+/// material when any pointer channel animates a texture transform (the check is global).
+/// frap's texture writer leaves the identity out, so the empty objects are added back here.
+pub fn keep_animated_empty_texture_transforms(g: &mut Gather) {
+    const TT: &str = frap_gltf::ext::khr_texture_transform::KhrTextureTransform::NAME;
+    if !animated_extensions(&g.doc).iter().any(|e| e == TT) {
+        return;
+    }
+    let main = g.main;
+    let settings = g.settings;
+    let mut todo: Vec<(usize, Vec<String>)> = Vec::new();
+    for (i, gm) in g.doc.materials.iter().enumerate() {
+        let Some(mat) = gm
+            .name
+            .as_deref()
+            .and_then(|n| main.materials.find(n))
+            .and_then(|r| main.materials.get(r))
+        else {
+            continue;
+        };
+        let lm = crate::export::materials::lower::lowered_for(main, mat, settings);
+        let orm = crate::export::materials::core_occlusion::orm_inputs(g, &lm).is_some();
+        let slots = material::mapped_slots(main, mat, gm, orm);
+        if !slots.is_empty() {
+            todo.push((i, slots));
+        }
+    }
+    let mut added = false;
+    for (i, slots) in todo {
+        let m = &mut g.doc.materials[i];
+        for slot in slots {
+            added |= add_empty_texture_transform(m, &slot);
+        }
+    }
+    if added {
+        g.use_extension(TT, true);
+    }
+}
+
+/// Adds `KHR_texture_transform: {}` to the texture info at `slot` (`emissiveTexture/extensions`,
+/// `extensions/KHR_materials_clearcoat/clearcoatTexture/extensions`, …) when the texture is
+/// written without one. Returns whether it was added.
+fn add_empty_texture_transform(m: &mut frap_gltf::json::Material, slot: &str) -> bool {
+    const TT: &str = frap_gltf::ext::khr_texture_transform::KhrTextureTransform::NAME;
+    let Some(path) = slot.strip_suffix("/extensions") else {
+        return false;
+    };
+    let add = |e: &mut frap_gltf::json::Extensions| {
+        if e.contains(TT) {
+            return false;
+        }
+        e.insert_raw(TT, serde_json::json!({}));
+        true
+    };
+    let pbr = m.pbr_metallic_roughness.as_mut();
+    match path {
+        "emissiveTexture" => m
+            .emissive_texture
+            .as_mut()
+            .is_some_and(|t| add(&mut t.extensions)),
+        "normalTexture" => m
+            .normal_texture
+            .as_mut()
+            .is_some_and(|t| add(&mut t.extensions)),
+        "occlusionTexture" => m
+            .occlusion_texture
+            .as_mut()
+            .is_some_and(|t| add(&mut t.extensions)),
+        "pbrMetallicRoughness/baseColorTexture" => pbr
+            .and_then(|p| p.base_color_texture.as_mut())
+            .is_some_and(|t| add(&mut t.extensions)),
+        "pbrMetallicRoughness/metallicRoughnessTexture" => pbr
+            .and_then(|p| p.metallic_roughness_texture.as_mut())
+            .is_some_and(|t| add(&mut t.extensions)),
+        _ => {
+            let Some((ext, member)) = path
+                .strip_prefix("extensions/")
+                .and_then(|p| p.split_once('/'))
+            else {
+                return false;
+            };
+            let Some(mut v) = m.extensions.get_raw(ext).cloned() else {
+                return false;
+            };
+            let Some(info) = v.get_mut(member).and_then(|t| t.as_object_mut()) else {
+                return false;
+            };
+            let exts = info
+                .entry("extensions")
+                .or_insert_with(|| serde_json::json!({}));
+            let Some(exts) = exts.as_object_mut() else {
+                return false;
+            };
+            if exts.contains_key(TT) {
+                return false;
+            }
+            exts.insert(TT.to_owned(), serde_json::json!({}));
+            m.extensions.insert_raw(ext, v);
+            true
+        }
+    }
+}
+
 /// `__traverse_property` with `gltf_trs_w_animation_pointer`: every `translation`, `rotation`,
 /// `scale` and `weights` channel targets `/nodes/{node}/{path}` through a pointer instead.
 /// Returns the number of channels converted.
@@ -295,6 +499,7 @@ mod tests {
             times: vec![0.0, 1.0],
             values: vec![vec![0.0], vec![1.0]],
             blend_material: None,
+            copy: false,
         }
     }
 

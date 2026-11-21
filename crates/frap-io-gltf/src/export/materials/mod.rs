@@ -90,6 +90,50 @@ pub fn textures(lm: &LoweredMaterial) -> Vec<&TexRef> {
     .collect()
 }
 
+/// Calls `f` on every texture of [`textures`], in the same order.
+pub fn for_each_texture_mut(lm: &mut LoweredMaterial, mut f: impl FnMut(&mut TexRef)) {
+    let mut visit = |t: Option<&mut TexRef>| {
+        if let Some(t) = t {
+            f(t);
+        }
+    };
+    visit(lm.emissive.texture.as_mut());
+    visit(lm.normal.as_mut().map(|n| &mut n.texture));
+    visit(lm.occlusion.as_mut());
+    visit(lm.base_color.texture.as_mut());
+    visit(lm.metallic.texture.as_mut());
+    visit(lm.roughness.texture.as_mut());
+    let e = &mut lm.ext;
+    if let Some(c) = e.clearcoat.as_mut() {
+        visit(c.factor.texture.as_mut());
+        visit(c.roughness.texture.as_mut());
+        visit(c.normal.as_mut().map(|n| &mut n.texture));
+    }
+    visit(
+        e.transmission
+            .as_mut()
+            .and_then(|t| t.factor.texture.as_mut()),
+    );
+    visit(e.volume.as_mut().and_then(|v| v.thickness.texture.as_mut()));
+    if let Some(sp) = e.specular.as_mut() {
+        visit(sp.factor.texture.as_mut());
+        visit(sp.color.texture.as_mut());
+    }
+    if let Some(sh) = e.sheen.as_mut() {
+        visit(sh.color.texture.as_mut());
+        visit(sh.roughness.texture.as_mut());
+    }
+    if let Some(ir) = e.iridescence.as_mut() {
+        visit(ir.factor.texture.as_mut());
+        visit(ir.thickness_max.texture.as_mut());
+    }
+    visit(e.anisotropy.as_mut().and_then(|a| a.texture.as_mut()));
+    if let Some(dt) = e.diffuse_transmission.as_mut() {
+        visit(dt.factor.texture.as_mut());
+        visit(dt.color.texture.as_mut());
+    }
+}
+
 /// The extension objects `__gather_extensions` creates for `lm` beyond the always-created ones,
 /// possibly empty (they declare the extension in the add-on's traversal order even when the
 /// JSON drops them; `ext_order`): iridescence for a Principled material with the glTF Material
@@ -107,6 +151,62 @@ fn created_empty(lm: &LoweredMaterial, m: &GMaterial) -> Vec<&'static str> {
         out.push("KHR_materials_dispersion");
     }
     out
+}
+
+/// `export_image_format='NONE'` (WP 7.7): `__gather_base_color_factor` and
+/// `export_emission_factor` read the RGB of the Base Color and Emissive sockets themselves
+/// (`get_const_from_default_value_socket`, linked or not), not their factor; the base colour's
+/// colour attribute is not gathered (`vc_info['color']` stays unset, see
+/// `mesh/writers/color.rs`), and an emission with a linked colour keeps that value (its
+/// `[1, 1, 1]` for a texture without a factor does not apply).
+pub fn image_none_factors(
+    main: &frap_scene::Main,
+    mat: &Material,
+    settings: &crate::export::ExportSettings,
+    lm: &mut LoweredMaterial,
+) {
+    use frap_nodes::{SocketType, SocketValue};
+    let cx = frap_material::LowerCx::new(&mat.node_tree, mat, main)
+        .with_original(lower::reads_original(settings, mat));
+    let rgb = |i: frap_material::graph::In| match (i.socket().ty, &i.socket().default_value) {
+        (SocketType::Rgba, SocketValue::Color(c)) => Some([c[0], c[1], c[2]]),
+        _ => None,
+    };
+    if lm.unlit {
+        return;
+    }
+    if let Some(s) = cx
+        .get_socket("Base Color")
+        .or_else(|| cx.get_socket("BaseColor"))
+        .or_else(|| cx.gltf_output_input("BaseColorFactor"))
+    {
+        let c = rgb(s).unwrap_or([1.0; 3]);
+        let a = lm.base_color.factor[3];
+        lm.base_color.factor = [c[0], c[1], c[2], a];
+    }
+    if let Some(s) = cx
+        .get_socket("Emissive")
+        .or_else(|| cx.gltf_output_input("EmissiveFactor"))
+        && let Some(c) = rgb(s)
+    {
+        // The strength is still read through `get_factor_from_socket`.
+        let strength_name = match s.node.bl_idname {
+            "ShaderNodeEmission" => "Strength",
+            _ => "Emission Strength",
+        };
+        let strength =
+            frap_material::graph::In::named(s.node, strength_name).and_then(|st| {
+                match cx.get_factor(st) {
+                    Some(frap_material::graph::Konst::Value(v)) => Some(v),
+                    _ => None,
+                }
+            });
+        // Colour and strength stay apart: `core_emissive::factor` multiplies the two in double
+        // precision, as the add-on's `[f * strength for f in factor]` does.
+        lm.emissive.factor = c;
+        lm.emissive_strength = strength.unwrap_or(1.0);
+        lm.emissive.texture = None;
+    }
 }
 
 /// f32 → JSON number as the add-on writes it (the float32 value widened to double).
@@ -161,12 +261,17 @@ fn gather_as(
             Ok(i)
         }
         ExportMaterials::Export => {
-            let lm = g
+            let settings = g.settings;
+            let mut lm = g
                 .materials
                 .lowered
                 .entry(r)
-                .or_insert_with(|| lower::lowered(main, mat))
+                .or_insert_with(|| lower::lowered_for(main, mat, settings))
                 .clone();
+            crate::export::tex_coord::resolve_attributes(&mut lm, mat, mesh, settings);
+            if settings.export_image_format == crate::export::settings::ExportImageFormat::None {
+                image_none_factors(main, mat, settings, &mut lm);
+            }
             let coords: Vec<u32> = textures(&lm).iter().map(|t| tex_coord(t, mesh)).collect();
             let key = (r, coords);
             if let Some(i) = g.materials.written.get(&key) {

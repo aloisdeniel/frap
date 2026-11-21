@@ -13,7 +13,8 @@
 //! `__get_bitangent_signs`). The tangents themselves come from
 //! [`frap_geom::mikktspace::calc_uv_tangent_tris_quads`]; a mesh with n-gons ("Tangent space can
 //! only be computed for tris/quads") exports without TANGENT, as the add-on's caught exception
-//! does.
+//! does, with its WARNING `<mesh>: Could not calculate tangents. Please try to triangulate the
+//! mesh first.` (WP 7.7, through [`MeshExportCx::warn`]).
 
 use frap_mesh::{AttrData, Domain, Mesh};
 
@@ -54,6 +55,15 @@ pub fn mesh_tangents(mesh: &Mesh) -> Option<Vec<[f32; 4]>> {
     .ok()
 }
 
+/// `prepare_data`'s WARNING when `calc_tangents()` fails (`mesh.name` is the exported mesh's,
+/// the evaluated copy keeping the original's name).
+pub fn tangent_warning(mesh: &Mesh) -> String {
+    format!(
+        "{}: Could not calculate tangents. Please try to triangulate the mesh first.",
+        mesh.header.name
+    )
+}
+
 /// The exported value of one tangent: rounded xyz (Y-up when `export_yup`) and the sign.
 pub fn tangent_value(t: [f32; 4], export_yup: bool) -> [f32; 4] {
     let [x, y, z] = axis([round4(t[0]), round4(t[1]), round4(t[2])], export_yup);
@@ -66,6 +76,9 @@ fn key(cx: &MeshExportCx, k: &mut SplitKey) -> Result<(), ExportError> {
         return Ok(());
     }
     let Some(tangents) = mesh_tangents(cx.mesh) else {
+        // `prepare_data`: `calc_tangents()` raised (WP 7.7; a popup, so the operator reports
+        // it).
+        cx.warn(tangent_warning(cx.mesh));
         return Ok(());
     };
     let mut words = Vec::with_capacity(4 * tangents.len());
@@ -171,6 +184,34 @@ mod tests {
             let d = primitives::extract(&cx).unwrap();
             assert!(!d[0].attributes.contains_key("TANGENT"));
         }
+    }
+
+    /// WP 7.7 (Blender 5.2.4, `followups/tangent_warning`): the default cylinder (n-gon caps,
+    /// UVs) with `export_tangents` exports no TANGENT and reports `Cylinder: Could not
+    /// calculate tangents. Please try to triangulate the mesh first.`.
+    #[test]
+    fn ngon_mesh_warns_and_exports_no_tangent() {
+        let mut m = frap_mesh::primitives::cylinder::cylinder(
+            &frap_mesh::primitives::cylinder::Cylinder::default(),
+        );
+        m.header.name = "Cylinder".into();
+        let main = Main::default();
+        let s = settings(true, true);
+        let cx = MeshExportCx::new(&main, &m, None, &s);
+        let d = primitives::extract(&cx).unwrap();
+        assert!(d.iter().all(|p| !p.attributes.contains_key("TANGENT")));
+        let r = cx.take_reports();
+        assert!(
+            r.contains(&
+                "Cylinder: Could not calculate tangents. Please try to triangulate the mesh first."
+                    .to_owned()),
+            "{r:?}"
+        );
+        // A cube triangulates fine: no warning.
+        let m = frap_mesh::primitives::cube(2.0, true, [1.0; 3]);
+        let cx = MeshExportCx::new(&main, &m, None, &s);
+        primitives::extract(&cx).unwrap();
+        assert!(cx.take_reports().is_empty());
     }
 
     #[test]

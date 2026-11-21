@@ -121,7 +121,22 @@ pub struct Plan {
     pub sets: Vec<VcSet>,
     /// Material bucket (`-1` for 'NONE') → indices of the sets it uses.
     pub using: BTreeMap<i64, Vec<usize>>,
+    /// The add-on's `export_settings['log'].warning`s of `manage_material_info`, in order
+    /// (WP 7.7: reported through [`MeshExportCx::warn`]).
+    pub warnings: Vec<&'static str>,
 }
+
+/// `manage_material_info`: two materials of the mesh use different colour sets (once per
+/// mesh, `warning_already_displayed`).
+pub const WARN_DIFFERENT_COLORS: &str =
+    "glTF specification does not allow this case (multiple materials with different Vertex Color)";
+/// `manage_material_info`: with `export_vertex_color='MATERIAL'`, a material reads no colour
+/// attribute while the mesh has an active one (once per mesh).
+pub const WARN_ACTIVE_NOT_USED: &str = "The active Vertex Color will not be exported, as it is not used in the node tree of the material";
+/// `manage_material_info`: a material's alpha reads a colour attribute, its colour none (each
+/// such material).
+pub const WARN_ALPHA_WITHOUT_COLOR: &str =
+    "We are not managing this case for now (Vertex Color alpha without color)";
 
 /// The settings the plan reads (`export_settings['gltf_vertex_color']`, …, after the add-on's
 /// coupling: with NONE neither `all` nor `when_no_material` applies; the name only with NAME).
@@ -184,9 +199,12 @@ pub fn plan(
     s: &VcSettings,
     colors: &[SmolStr],
     render: Option<&SmolStr>,
+    active: Option<&SmolStr>,
     buckets: &[(i64, VcInfo)],
 ) -> Plan {
     let mut p = Plan::default();
+    let mut warned_different = false;
+    let mut warned_active = false;
     let mut next = 0usize;
     let mut materials_use_vc: Option<String> = None;
     let mut no_materials = true;
@@ -207,6 +225,14 @@ pub fn plan(
                     && matches!(s.mode, ExportVertexColor::Active | ExportVertexColor::Name))
                     || (!info.has_material && s.when_no_material);
                 if !forced {
+                    if info.has_material
+                        && s.mode == ExportVertexColor::Material
+                        && !warned_active
+                        && active.is_some()
+                    {
+                        p.warnings.push(WARN_ACTIVE_NOT_USED);
+                        warned_active = true;
+                    }
                     continue;
                 }
                 let n = if (info.has_material && s.mode == ExportVertexColor::Active)
@@ -221,6 +247,7 @@ pub fn plan(
                 (n.clone(), n, true)
             } else if info.color.is_none() {
                 // Alpha without colour: not managed by the add-on.
+                p.warnings.push(WARN_ALPHA_WITHOUT_COLOR);
                 continue;
             } else {
                 let resolve = |r: &Option<VcRef>| match r {
@@ -246,7 +273,13 @@ pub fn plan(
         match &materials_use_vc {
             // glTF cannot express materials with different colour sets: the later set is
             // neither exported nor used (the add-on warns).
-            Some(k) if *k != key => materials_use_vc = Some(key),
+            Some(k) if *k != key => {
+                if !warned_different {
+                    p.warnings.push(WARN_DIFFERENT_COLORS);
+                    warned_different = true;
+                }
+                materials_use_vc = Some(key);
+            }
             None => {
                 materials_use_vc = Some(key);
                 p.sets.push(VcSet {
@@ -344,7 +377,7 @@ fn vc_info(cx: &MeshExportCx, mats: &[Option<IdRef<MaterialId>>], bucket: i64) -
     };
     match s.export_materials {
         ExportMaterials::Export => {
-            let lm = crate::export::materials::lower::lowered(cx.main, mat);
+            let lm = crate::export::materials::lower::lowered_for(cx.main, mat, s);
             match lm.vertex_color {
                 None => VcInfo::none(true),
                 Some(v) => {
@@ -352,9 +385,13 @@ fn vc_info(cx: &MeshExportCx, mats: &[Option<IdRef<MaterialId>>], bucket: i64) -
                         Some(n) if !n.is_empty() => VcRef::Name(n.clone()),
                         _ => VcRef::Active,
                     };
+                    // `export_image_format='NONE'`: `__gather_base_color_factor` skips
+                    // `gather_color_info`, so the colour attribute is not used (WP 7.7).
+                    let image_none =
+                        s.export_image_format == crate::export::settings::ExportImageFormat::None;
                     VcInfo {
                         has_material: true,
-                        color: v.color.then(|| r(&v.attribute)),
+                        color: (v.color && !image_none).then(|| r(&v.attribute)),
                         alpha: v.alpha.then(|| r(&v.alpha_attribute)),
                         alpha_opaque: lm.alpha_mode == frap_material::AlphaMode::Opaque,
                     }
@@ -389,7 +426,8 @@ pub fn mesh_plan(cx: &MeshExportCx) -> Plan {
         .into_iter()
         .map(|b| (b, vc_info(cx, &mats, b)))
         .collect();
-    plan(&s, &colors, render.as_ref(), &buckets)
+    let active = cx.mesh.color_active.as_ref().filter(|n| colors.contains(n));
+    plan(&s, &colors, render.as_ref(), active, &buckets)
 }
 
 /// RNA `color` values of a colour attribute in its own domain (BYTE_COLOR decoded to linear).
@@ -447,6 +485,9 @@ fn written_sets(mesh: &Mesh, plan: &Plan) -> Vec<VcSet> {
 
 fn key(cx: &MeshExportCx, k: &mut SplitKey) -> Result<(), ExportError> {
     let plan = mesh_plan(cx);
+    for w in &plan.warnings {
+        cx.warn(*w);
+    }
     let sets = written_sets(cx.mesh, &plan);
     if sets.is_empty() {
         return Ok(());
@@ -616,6 +657,7 @@ mod tests {
             &vs(ExportVertexColor::Material, "", true, true),
             &cols(),
             Some(&"Col".into()),
+            None,
             &[(0, m)],
         );
         assert_eq!(
@@ -632,6 +674,7 @@ mod tests {
             &vs(ExportVertexColor::Material, "", false, true),
             &cols(),
             Some(&"Col".into()),
+            None,
             &[(0, VcInfo::none(true))],
         );
         assert!(p.sets.is_empty());
@@ -644,6 +687,7 @@ mod tests {
             &vs(ExportVertexColor::Active, "", true, true),
             &cols(),
             Some(&r),
+            None,
             &[(0, VcInfo::none(true))],
         );
         assert_eq!(
@@ -654,6 +698,7 @@ mod tests {
             &vs(ExportVertexColor::Name, "PCol", true, true),
             &cols(),
             Some(&r),
+            None,
             &[(0, VcInfo::none(true))],
         );
         assert_eq!(
@@ -665,6 +710,7 @@ mod tests {
             &vs(ExportVertexColor::Name, "Nope", true, true),
             &cols(),
             Some(&r),
+            None,
             &[(0, VcInfo::none(true))],
         );
         assert_eq!(names(&p)[0], (0, true, "", true));
@@ -673,6 +719,7 @@ mod tests {
             &vs(ExportVertexColor::None, "", false, false),
             &cols(),
             Some(&r),
+            None,
             &[(0, VcInfo::none(true))],
         );
         assert!(p.sets.is_empty());
@@ -690,6 +737,7 @@ mod tests {
             &vs(ExportVertexColor::Material, "", true, true),
             &cols(),
             Some(&"PCol".into()),
+            None,
             &[(0, active)],
         );
         assert_eq!(
@@ -701,6 +749,7 @@ mod tests {
             &vs(ExportVertexColor::Material, "", true, false),
             &cols(),
             Some(&"PCol".into()),
+            None,
             &[(0, VcInfo::none(false))],
         );
         assert!(p.sets.is_empty());
@@ -718,6 +767,7 @@ mod tests {
             &vs(ExportVertexColor::Material, "", true, true),
             &cols(),
             Some(&"Col".into()),
+            None,
             &[(0, uses.clone()), (1, VcInfo::none(true))],
         );
         // PCol without alpha (OPAQUE), used by bucket 0 only; Col added for both.
@@ -736,10 +786,72 @@ mod tests {
             &vs(ExportVertexColor::Material, "", false, true),
             &cols(),
             None,
+            None,
             &[(0, uses), (1, other)],
         );
         assert_eq!(names(&p), [(0, false, "PCol", false)]);
         assert!(p.using[&1].is_empty());
+        assert_eq!(p.warnings, [WARN_DIFFERENT_COLORS]);
+    }
+
+    /// WP 7.7: `manage_material_info`'s warnings (Blender 5.2.4 log, `followups/vc_warnings`).
+    #[test]
+    fn vertex_colour_warnings() {
+        let col: SmolStr = "Col".into();
+        let mat = vs(ExportVertexColor::Material, "", true, true);
+        // A material without colour while the mesh has an active colour: once per mesh.
+        let p = plan(
+            &mat,
+            &cols(),
+            Some(&col),
+            Some(&col),
+            &[(0, VcInfo::none(true)), (1, VcInfo::none(true))],
+        );
+        assert_eq!(p.warnings, [WARN_ACTIVE_NOT_USED]);
+        // No active colour attribute: silent; ACTIVE mode: silent.
+        let p = plan(&mat, &cols(), Some(&col), None, &[(0, VcInfo::none(true))]);
+        assert!(p.warnings.is_empty());
+        let p = plan(
+            &vs(ExportVertexColor::Active, "", true, true),
+            &cols(),
+            Some(&col),
+            Some(&col),
+            &[(0, VcInfo::none(true))],
+        );
+        assert!(p.warnings.is_empty());
+        // Alpha without colour: each such material.
+        let alpha_only = VcInfo {
+            has_material: true,
+            color: None,
+            alpha: Some(VcRef::Name("Col".into())),
+            alpha_opaque: false,
+        };
+        let p = plan(
+            &mat,
+            &cols(),
+            Some(&col),
+            None,
+            &[(0, alpha_only.clone()), (1, alpha_only)],
+        );
+        assert_eq!(
+            p.warnings,
+            [WARN_ALPHA_WITHOUT_COLOR, WARN_ALPHA_WITHOUT_COLOR]
+        );
+        // Three materials with three colours: warned once.
+        let using = |n: &str| VcInfo {
+            has_material: true,
+            color: Some(VcRef::Name(n.into())),
+            alpha: None,
+            alpha_opaque: true,
+        };
+        let p = plan(
+            &mat,
+            &cols(),
+            None,
+            None,
+            &[(0, using("Col")), (1, using("PCol")), (2, using("Col"))],
+        );
+        assert_eq!(p.warnings, [WARN_DIFFERENT_COLORS]);
     }
 
     fn coloured_cube() -> Mesh {

@@ -7,9 +7,10 @@
 //!
 //! Lowering ports the UV part of `__gather_texture_transform_and_tex_coord`
 //! (`exp/material/texture_info.py`, glTF-Blender-IO 5.2.41, Apache-2.0): a UV Map node with a
-//! map name (`Fixed`), an Attribute node of type GEOMETRY with a name (`Attribute`, a UV map
-//! of that name), else the active render UV map (`Render`); the exporter resolves the name
-//! to a `TEXCOORD_n` per mesh (`get_final_material`). frap adds a WARNING when the UVs come
+//! map name (`Fixed`, [`UvSource::Named`]), an Attribute node of type GEOMETRY with a name
+//! (`Attribute`, [`UvSource::Attribute`]: a UV map of that name, or a generic attribute the
+//! exporter writes as an extra `TEXCOORD_n`), else the active render UV map (`Render`); the
+//! exporter resolves the name to a `TEXCOORD_n` per mesh (`get_final_material`). frap adds a WARNING when the UVs come
 //! from a node it does not understand (the add-on silently uses the render map).
 //!
 //! Raising ports the UV Map part of `texture()` (`imp/texture.py`): `TEXCOORD_n` → a UV Map
@@ -37,7 +38,7 @@ pub fn uv_of(tex: &Node, src: Src<'_>, diags: &mut Vec<Report>) -> UvSource {
         {
             match n.prop_str("attribute_name") {
                 "" => UvSource::ActiveRender,
-                name => UvSource::Named(name.into()),
+                name => UvSource::Attribute(name.into()),
             }
         }
         Src::Linked(n, o)

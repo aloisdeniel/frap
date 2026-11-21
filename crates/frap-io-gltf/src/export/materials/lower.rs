@@ -18,6 +18,9 @@ use frap_nodes::{Node, NodeTree, SocketValue};
 use frap_rna::{ImageId, Value};
 use frap_scene::Main;
 use frap_scene::id::Material;
+use frap_spec_ops_io::export_scene::gltf::ExportAnimationMode;
+
+use crate::export::ExportSettings;
 
 /// The lowered material: `frap_material::lower` when patterns are registered, else
 /// [`bootstrap`].
@@ -26,6 +29,37 @@ pub fn lowered(main: &Main, mat: &Material) -> LoweredMaterial {
         bootstrap(main, mat)
     } else {
         frap_material::lower(&mat.node_tree, mat, main)
+    }
+}
+
+/// `BlenderMaterialIndentifier.__can_use_inline` is false for the exporter's settings
+/// (`bmat.used == "ORIGINAL"`, WP 7.7): pointer animation is exported
+/// (`gltf_export_anim_pointer`: `export_animations`, `export_pointer_animation` and a SCENE
+/// or NLA_TRACKS `export_animation_mode`) and the material's node tree has animation data.
+/// The add-on then reads the original tree: no constant folding (and no node-group inlining,
+/// which frap does not do anyway), so a factor fed by a node it cannot read keeps the glTF
+/// default (a Math node computing 0.3 x 2 into Roughness exports `roughnessFactor` 1). Its
+/// other reasons are the glTF Material Output's `Occlusion` (handled by the patterns,
+/// `LowerCx::uses_inline_tree`) and `export_unused_textures` (not supported: frap warns and
+/// exports as if it were off).
+pub fn reads_original(settings: &ExportSettings, mat: &Material) -> bool {
+    let p = &settings.props;
+    let pointer = p.export_animations.value
+        && p.export_pointer_animation.value
+        && matches!(
+            p.export_animation_mode.value,
+            ExportAnimationMode::Scene | ExportAnimationMode::NlaTracks
+        );
+    pointer && mat.node_tree.animation_data.is_some()
+}
+
+/// The lowered material the exporter writes for `mat` with `settings` (the original tree
+/// when [`reads_original`]).
+pub fn lowered_for(main: &Main, mat: &Material, settings: &ExportSettings) -> LoweredMaterial {
+    if !MATERIAL_PATTERNS.is_empty() && reads_original(settings, mat) {
+        frap_material::lower_original(&mat.node_tree, mat, main)
+    } else {
+        lowered(main, mat)
     }
 }
 

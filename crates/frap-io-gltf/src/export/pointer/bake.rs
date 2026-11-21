@@ -25,6 +25,8 @@
 //!   alpha is animated gets `alphaMode: BLEND`.
 
 use frap_anim::AnimData;
+use frap_gltf::accessor::{AccessorData, Components};
+use frap_gltf::builder::AccessorOpts;
 use frap_gltf::ext::khr_animation_pointer::KhrAnimationPointer;
 use frap_gltf::json::{
     AccessorType, AlphaMode, Animation, AnimationSampler, Channel, Extras, Index, Interpolation,
@@ -53,6 +55,9 @@ pub struct PointerChannel {
     /// The glTF material whose base-colour alpha this channel animates (`tmp_alpha_cst is
     /// False`: the material becomes `BLEND`).
     pub blend_material: Option<Index>,
+    /// A copy for an `additional` pointer: `deepcopy` of the sampler's accessors, so it gets
+    /// its own input and output accessors (never shared by content).
+    pub copy: bool,
 }
 
 /// One baked animation, before it is merged into the document.
@@ -150,12 +155,28 @@ pub fn asset_channels(
             && info.pointer == BASE_COLOR
             && !channel_is_constant(&values, 3))
         .then_some(asset.index);
+        let times: Vec<f64> = frames.iter().map(|&f| cx.seconds(f, range.slide)).collect();
+        // `Manage multiple Texture Transform for the same path`: one copy per additional
+        // pointer, right after the channel.
+        let copies: Vec<PointerChannel> = info
+            .resolved_additional(asset.index)
+            .into_iter()
+            .map(|pointer| PointerChannel {
+                pointer,
+                times: times.clone(),
+                values: values.clone(),
+                blend_material: None,
+                copy: true,
+            })
+            .collect();
         out.push(PointerChannel {
             pointer: info.resolved(asset.index),
-            times: frames.iter().map(|&f| cx.seconds(f, range.slide)).collect(),
+            times,
             values,
             blend_material,
+            copy: false,
         });
+        out.extend(copies);
     }
     out
 }
@@ -418,9 +439,13 @@ fn interpolation(g: &Gather) -> Interpolation {
 fn write_channel(g: &mut Gather, anim: &mut Animation, ch: &PointerChannel, interp: Interpolation) {
     let times: Vec<f32> = ch.times.iter().map(|&t| t as f32).collect();
     // `gather_accessor(…, tuple([max(times)]), tuple([min(times)]), …)` is `@cached`: a
-    // pointer channel sampling the object channels' times reuses their input accessor.
-    let input =
-        crate::export::animation::accessor(g, &times, AccessorType::Scalar, Some(&ch.times));
+    // pointer channel sampling the object channels' times reuses their input accessor (a
+    // copy has its own).
+    let input = if ch.copy {
+        own_accessor(g, &times, AccessorType::Scalar, Some(&ch.times))
+    } else {
+        crate::export::animation::accessor(g, &times, AccessorType::Scalar, Some(&ch.times))
+    };
     let n = ch.values.first().map_or(1, Vec::len);
     let ty = match n {
         2 => AccessorType::Vec2,
@@ -433,7 +458,11 @@ fn write_channel(g: &mut Gather, anim: &mut Animation, ch: &PointerChannel, inte
         .iter()
         .flat_map(|v| (0..n).map(move |i| v.get(i).copied().unwrap_or(0.0) as f32))
         .collect();
-    let output = crate::export::animation::accessor(g, &flat, ty, None);
+    let output = if ch.copy {
+        own_accessor(g, &flat, ty, None)
+    } else {
+        crate::export::animation::accessor(g, &flat, ty, None)
+    };
     anim.samplers.push(AnimationSampler {
         extensions: Default::default(),
         extras: None,
@@ -452,6 +481,21 @@ fn write_channel(g: &mut Gather, anim: &mut Animation, ch: &PointerChannel, inte
     {
         mat.alpha_mode = Some(AlphaMode::Blend);
     }
+}
+
+/// A float accessor of its own (the deep copy of an `additional` channel's accessor), with
+/// the input's double-precision `min` / `max`.
+fn own_accessor(g: &mut Gather, data: &[f32], ty: AccessorType, min_max: Option<&[f64]>) -> Index {
+    let ad = AccessorData::new(ty, false, Components::F32(data.to_vec()))
+        .expect("invariant: whole elements");
+    let i = g.buf.push_accessor(&ad, &AccessorOpts::default());
+    if let Some(t) = min_max
+        && let Some(acc) = g.buf.accessor_mut(i)
+    {
+        acc.min = Some(vec![t.iter().copied().fold(f64::INFINITY, f64::min)]);
+        acc.max = Some(vec![t.iter().copied().fold(f64::NEG_INFINITY, f64::max)]);
+    }
+    i
 }
 
 /// Adds the baked animations to the document: an animation merging under a name (the scene's

@@ -193,6 +193,9 @@ NORMALISE = {
     "D-137": ("cases", "variant reset cases export one scene"),
     "D-138": ("cases", "cases do not instance a mesh with morph targets"),
     "D-139": ("cases", "gltf/instancing/animated keeps the quirk (frap_compat='BLENDER')"),
+    "D-140": ("cases", "cases with variants use other modifier types under export_apply"),
+    "D-141": ("cases", "cases do not write unknown attributes"),
+    "D-142": ("cases", "cases do not use such names, read at most one generic attribute as a UV map, drop iridescence channels next to other pointer channels, or export or import pointer channels Blender fails on; reports are not compared"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

@@ -1219,7 +1219,9 @@ impl MeshAttrs {
     fn uv(&self, src: Option<&UvSource>) -> &wgpu::Buffer {
         let idx = match src {
             None | Some(UvSource::ActiveRender) => self.uv_active_render.or(Some(0)),
-            Some(UvSource::Named(n)) => self.uv_names.iter().position(|x| x == n),
+            Some(UvSource::Named(n) | UvSource::Attribute(n)) => {
+                self.uv_names.iter().position(|x| x == n)
+            }
             Some(UvSource::Index(i)) => Some(*i as usize),
             #[allow(unreachable_patterns)]
             Some(_) => None,

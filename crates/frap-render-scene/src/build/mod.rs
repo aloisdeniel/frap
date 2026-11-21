@@ -303,7 +303,7 @@ impl Builder<'_> {
             .as_deref()
             .zip(normal_uv)
             .and_then(|(m, uv)| match uv {
-                UvSource::Named(n) => Some(n),
+                UvSource::Named(n) | UvSource::Attribute(n) => Some(n),
                 UvSource::Index(i) => m.uv_maps().get(i as usize).map(|(n, _)| (*n).into()),
                 _ => m
                     .uv_active_render
