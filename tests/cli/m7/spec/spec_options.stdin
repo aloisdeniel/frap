@@ -1,0 +1,12 @@
+bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Thin Wall'].default_value = True
+bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Subsurface Weight'].default_value = 0.3
+bpy.ops.export_scene.gltf(filepath='spec.glb', frap_compat='SPEC', frap_interleave=True, frap_diffuse_transmission=True)
+bpy.data.objects['Cube'].hide_render = True
+bpy.data.objects['Camera'].parent = bpy.data.objects['Cube']
+bpy.ops.export_scene.gltf(filepath='hidden.glb', export_cameras=True, frap_node_visibility=True)
+bpy.ops.wm.read_homefile(use_empty=True)
+bpy.ops.import_scene.gltf(filepath='unknown.gltf')
+bpy.data.objects['Cam'].data.type
+bpy.ops.import_scene.gltf(filepath='spec.glb')
+bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Thin Wall'].default_value
+bpy.data.materials['Material'].node_tree.nodes['Principled BSDF'].inputs['Subsurface Weight'].default_value

@@ -13,6 +13,7 @@ use super::{
 };
 use crate::error::GltfError;
 use crate::glb::WriteOpts;
+use crate::json::unknown::{Unknowns, take_unknown_values, unknown_members};
 
 /// A glTF 2.0 document.
 ///
@@ -82,6 +83,11 @@ pub struct Document {
     /// Buffers.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub buffers: Vec<Buffer>,
+    /// Members of the file the typed model does not hold (unknown members, unknown enum
+    /// values), written back by [`Document::to_vec`] (WP 7.4; [`crate::json::unknown`]).
+    /// Empty for a document built in memory.
+    #[serde(skip)]
+    pub unknown: Unknowns,
 }
 
 impl Document {
@@ -91,26 +97,38 @@ impl Document {
     /// Integer properties written as integral floats (`"byteLength": 4.0`) are accepted, as
     /// the Khronos validator does (it reports them; so does [`crate::validate::validate_file`]).
     ///
-    /// Limits of the model (documented, not round-tripped): members that are neither glTF
-    /// properties nor `extensions`/`extras` are dropped (reported as UNEXPECTED_PROPERTY by
-    /// [`crate::validate::validate_file`]); integers beyond `u64`/`i64` inside unknown
-    /// extensions are kept as the nearest `f64`; enum values outside the spec's lists
-    /// (`"type": "VEC5"`, `"componentType": 5130`, `"alphaMode": "WEIRD"`, …) make the parse
-    /// fail with an error naming the value.
+    /// What the typed model does not hold is kept in [`Document::unknown`] and written back
+    /// (WP 7.4, [`crate::json::unknown`]): members that are neither glTF properties nor
+    /// `extensions`/`extras` (reported as UNEXPECTED_PROPERTY by
+    /// [`crate::validate::validate`]), and enum values outside the spec's lists
+    /// (`"type": "VEC5"`, `"componentType": 5130`, `"alphaMode": "WEIRD"`, …; reported as
+    /// VALUE_NOT_IN_LIST), which load with the member's default or a stand-in. A value of the
+    /// wrong JSON type (`"componentType": "FLOAT"`) still fails the parse. Integers beyond
+    /// `u64`/`i64` inside unknown extensions are kept as the nearest `f64`.
     pub fn from_slice(json: &[u8]) -> Result<Document, GltfError> {
         let json = trim_json(json);
-        match serde_json::from_slice(json) {
-            Ok(doc) => Ok(doc),
+        let strict = serde_json::from_slice::<Document>(json);
+        let Ok(mut v) = serde_json::from_slice::<Value>(json) else {
+            return strict.map_err(Into::into);
+        };
+        match strict {
+            Ok(mut doc) => {
+                doc.unknown = Unknowns(unknown_members(&v));
+                Ok(doc)
+            }
             Err(strict) => {
-                // Retry with integral floats turned into integers; report the strict error
-                // when that does not help.
-                let Ok(mut v) = serde_json::from_slice::<Value>(json) else {
-                    return Err(strict.into());
-                };
-                if !integralize_floats(&mut v) {
+                // Retry with unknown enum values replaced by stand-ins and integral floats
+                // turned into integers; report the strict error when that does not help.
+                let mut kept = take_unknown_values(&mut v);
+                let integral = integralize_floats(&mut v);
+                if kept.is_empty() && !integral {
                     return Err(strict.into());
                 }
-                serde_json::from_value(v).map_err(|_| strict.into())
+                let mut doc: Document =
+                    serde_json::from_value(v.clone()).map_err(|_| GltfError::from(strict))?;
+                kept.extend(unknown_members(&v));
+                doc.unknown = Unknowns(kept);
+                Ok(doc)
             }
         }
     }
@@ -118,26 +136,15 @@ impl Document {
     /// Serializes to JSON text (compact unless `opts.indent` is set). Integral numbers are
     /// written without a fraction (`1` rather than `1.0`), as io_scene_gltf2's `__fix_json`
     /// does.
+    ///
+    /// [`Document::unknown`] is written back (through a JSON value, see
+    /// [`crate::json::unknown`]).
     pub fn to_vec(&self, opts: &WriteOpts) -> Vec<u8> {
-        let mut out = Vec::new();
-        let res = match &opts.indent {
-            None => {
-                let mut ser = serde_json::Serializer::with_formatter(
-                    &mut out,
-                    GltfFormatter(CompactFormatter),
-                );
-                self.serialize(&mut ser)
-            }
-            Some(indent) => {
-                let mut ser = serde_json::Serializer::with_formatter(
-                    &mut out,
-                    GltfFormatter(PrettyFormatter::with_indent(indent.as_bytes())),
-                );
-                self.serialize(&mut ser)
-            }
-        };
-        res.expect("a glTF document always serializes to JSON");
-        out
+        if self.unknown.is_empty() {
+            write_json(self, opts)
+        } else {
+            write_json(&self.to_value_with_unknown(), opts)
+        }
     }
 
     /// The document as a JSON value.
@@ -175,6 +182,27 @@ impl Document {
         });
         names
     }
+}
+
+/// Serializes `v` with the glTF number formatting, compact or indented.
+fn write_json<T: Serialize>(v: &T, opts: &WriteOpts) -> Vec<u8> {
+    let mut out = Vec::new();
+    let res = match &opts.indent {
+        None => {
+            let mut ser =
+                serde_json::Serializer::with_formatter(&mut out, GltfFormatter(CompactFormatter));
+            v.serialize(&mut ser)
+        }
+        Some(indent) => {
+            let mut ser = serde_json::Serializer::with_formatter(
+                &mut out,
+                GltfFormatter(PrettyFormatter::with_indent(indent.as_bytes())),
+            );
+            v.serialize(&mut ser)
+        }
+    };
+    res.expect("a glTF document always serializes to JSON");
+    out
 }
 
 /// `json` without a leading BOM and trailing whitespace / GLB padding.

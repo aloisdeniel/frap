@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! `KHR_node_visibility` (§17.1). WP 7.4 (M7 W0 stub: the typed model).
+//! `KHR_node_visibility` (§17.1, WP 7.4).
 //!
-//! On a node: `visible` (default true) hides the node and its descendants. Written from
-//! `hide_render` with `frap_node_visibility` (Blender's exporter does not produce it).
+//! On a node: `visible` (default true); `false` hides the node and its descendants. Written
+//! from `hide_render` with `frap_node_visibility` (Blender's exporter does not produce it,
+//! `export/spec_complete/visibility.rs`). Validation: on a node only, `visible` a boolean.
 
 use serde::{Deserialize, Serialize};
 
@@ -62,5 +63,30 @@ mod tests {
         let e: KhrNodeVisibility = serde_json::from_value(v.clone()).unwrap();
         assert_eq!(e.visible, Some(false));
         assert_eq!(serde_json::to_value(&e).unwrap(), v);
+    }
+
+    #[test]
+    fn validation_rules() {
+        use crate::json::{Document, Material, Node};
+        use crate::validate::validate;
+        let mut d = Document::default();
+        let mut n = Node::default();
+        n.extensions.set(Some(KhrNodeVisibility {
+            visible: Some(false),
+            ..Default::default()
+        }));
+        d.nodes.push(n);
+        d.use_extension(NAME, false);
+        assert!(validate(&d).is_ok(), "{}", validate(&d));
+        d.nodes[0]
+            .extensions
+            .insert_raw(NAME, serde_json::json!({"visible": "no"}));
+        assert!(validate(&d).has("EXTENSION_INVALID"));
+        let mut d = Document::default();
+        let mut m = Material::default();
+        m.extensions.set(Some(KhrNodeVisibility::default()));
+        d.materials.push(m);
+        d.use_extension(NAME, false);
+        assert!(validate(&d).has("EXTENSION_INVALID_LOCATION"));
     }
 }

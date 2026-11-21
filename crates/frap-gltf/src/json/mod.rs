@@ -13,10 +13,10 @@
 //! - `extensions` keeps every extension as a JSON value ([`Extensions`]); typed access goes
 //!   through [`Extension`]. `extras` keeps the raw JSON text ([`Extras`]).
 //! - Empty arrays are omitted on write (the spec forbids empty arrays).
-//! - Not kept (see [`Document::from_slice`]): members that are neither glTF properties nor
-//!   `extensions`/`extras` (reported by [`crate::validate::validate_file`] as
-//!   UNEXPECTED_PROPERTY), and the exact digits of integers beyond 64 bits inside extension
-//!   values (read as the nearest `f64`). `"extras": null` is kept.
+//! - Members that are neither glTF properties nor `extensions`/`extras`, and enum values
+//!   outside the spec's lists, are kept in [`Document::unknown`] and written back
+//!   ([`unknown`], WP 7.4). Not kept: the exact digits of integers beyond 64 bits inside
+//!   extension values (read as the nearest `f64`). `"extras": null` is kept.
 
 pub mod accessor;
 pub mod animation;
@@ -33,6 +33,7 @@ pub mod sampler;
 pub mod scene;
 pub mod skin;
 pub mod texture;
+pub mod unknown;
 
 pub use accessor::{Accessor, AccessorType, ComponentType, Sparse, SparseIndices, SparseValues};
 pub use animation::{
@@ -53,6 +54,7 @@ pub use sampler::{MagFilter, MinFilter, Sampler, WrapMode};
 pub use scene::Scene;
 pub use skin::Skin;
 pub use texture::{NormalTextureInfo, OcclusionTextureInfo, Texture, TextureInfo};
+pub use unknown::{UnknownKind, UnknownMember, Unknowns};
 
 /// Index into one of the document's top-level arrays.
 pub type Index = u32;
@@ -66,6 +68,10 @@ macro_rules! gl_enum {
         pub enum $name { $($(#[$vm])* $var = $val),+ }
         impl From<$name> for u32 {
             fn from(v: $name) -> u32 { v as u32 }
+        }
+        impl $name {
+            /// Every value the spec allows, as written in JSON.
+            pub const JSON_VALUES: &'static [u32] = &[$($val),+];
         }
         impl TryFrom<u32> for $name {
             type Error = String;
@@ -87,6 +93,8 @@ macro_rules! str_enum {
         #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
         pub enum $name { $($(#[$vm])* #[serde(rename = $val)] $var),+ }
         impl $name {
+            /// Every value the spec allows, as written in JSON.
+            pub const JSON_VALUES: &'static [&'static str] = &[$($val),+];
             /// The JSON spelling.
             pub fn as_str(self) -> &'static str {
                 match self { $($name::$var => $val),+ }

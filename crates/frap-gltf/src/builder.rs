@@ -241,16 +241,45 @@ impl BufferBuilder {
         &mut self,
         columns: &[(&AccessorData, &AccessorOpts)],
     ) -> Result<Vec<Index>, GltfError> {
-        let Some(count) = columns.first().map(|(d, _)| d.count()) else {
+        if columns.is_empty() {
             return Ok(Vec::new());
+        }
+        let data: Vec<&AccessorData> = columns.iter().map(|(d, _)| *d).collect();
+        let (view, offsets) = self.push_interleaved_view(&data)?;
+        Ok(columns
+            .iter()
+            .zip(&offsets)
+            .map(|((d, o), &off)| {
+                let acc = Self::accessor_for(d, Some(view), Some(off), o);
+                self.push_accessor_obj(acc)
+            })
+            .collect())
+    }
+
+    /// The byte stride [`BufferBuilder::push_interleaved_view`] gives `columns` (each element
+    /// padded to 4 bytes).
+    pub fn interleaved_stride(columns: &[&AccessorData]) -> usize {
+        columns.iter().map(|d| round_up(d.element_size(), 4)).sum()
+    }
+
+    /// The view of [`BufferBuilder::push_interleaved`] without the accessors: the columns'
+    /// elements interleaved in one ARRAY_BUFFER view with a `byteStride`. Returns the view
+    /// index and each column's byte offset in it (WP 7.4: `frap_interleave` re-lays out
+    /// accessors that already exist).
+    pub fn push_interleaved_view(
+        &mut self,
+        columns: &[&AccessorData],
+    ) -> Result<(Index, Vec<u64>), GltfError> {
+        let Some(count) = columns.first().map(|d| d.count()) else {
+            return Err(GltfError::Data("no interleaved columns".into()));
         };
-        if let Some((d, _)) = columns.iter().find(|(d, _)| d.count() != count) {
+        if let Some(d) = columns.iter().find(|d| d.count() != count) {
             return Err(GltfError::Data(format!(
                 "interleaved columns differ in count ({count} vs {})",
                 d.count()
             )));
         }
-        let sizes: Vec<usize> = columns.iter().map(|(d, _)| d.element_size()).collect();
+        let sizes: Vec<usize> = columns.iter().map(|d| d.element_size()).collect();
         let offsets: Vec<usize> = sizes
             .iter()
             .scan(0, |acc, &s| {
@@ -265,7 +294,7 @@ impl BufferBuilder {
                 "interleaved stride {stride} exceeds 252 bytes"
             )));
         }
-        let encoded: Vec<Vec<u8>> = columns.iter().map(|(d, _)| d.encode()).collect();
+        let encoded: Vec<Vec<u8>> = columns.iter().map(|d| d.encode()).collect();
         let mut bytes = vec![0u8; stride * count];
         for (c, enc) in encoded.iter().enumerate() {
             for (e, chunk) in enc.chunks_exact(sizes[c]).enumerate() {
@@ -274,14 +303,41 @@ impl BufferBuilder {
             }
         }
         let view = self.push_view(&bytes, 4, Some(stride as u32), Some(Target::ArrayBuffer));
-        Ok(columns
-            .iter()
-            .zip(&offsets)
-            .map(|((d, o), &off)| {
-                let acc = Self::accessor_for(d, Some(view), Some(off as u64), o);
-                self.push_accessor_obj(acc)
-            })
-            .collect())
+        Ok((view, offsets.into_iter().map(|o| o as u64).collect()))
+    }
+
+    /// Appends a copy of `view` holding `data`: every member kept but `buffer`, `byteOffset`
+    /// and `byteLength`, and the start offset keeps `view`'s phase modulo 4 (as [`repack`]
+    /// does), so the accessors in it stay aligned. Returns the new view's index.
+    pub fn push_view_like(&mut self, view: &BufferView, data: &[u8]) -> Index {
+        let phase = (view.byte_offset_or_default() % 4) as usize;
+        self.align_to(4, phase);
+        let index = self.push_view_at_phase(data, view.byte_stride, view.target);
+        let new = self.views.last_mut().expect("just pushed");
+        *new = BufferView {
+            buffer: new.buffer,
+            byte_offset: new.byte_offset,
+            byte_length: new.byte_length,
+            ..view.clone()
+        };
+        index
+    }
+
+    /// Writes primitive indices as UNSIGNED_BYTE when every index is below 255 (the
+    /// primitive-restart value of the type), else as [`BufferBuilder::push_indices`] does:
+    /// the smallest index type glTF allows (WP 7.4, `frap_compat='SPEC'`; io_scene_gltf2
+    /// never writes UNSIGNED_BYTE indices).
+    pub fn push_indices_smallest(&mut self, indices: &[u32]) -> Index {
+        match smallest_index_data(indices) {
+            Some(data) => self.push_accessor(
+                &data,
+                &AccessorOpts {
+                    target: Some(Target::ElementArrayBuffer),
+                    ..AccessorOpts::default()
+                },
+            ),
+            None => self.push_indices(indices),
+        }
     }
 
     /// Writes `dense` as a sparse accessor: the elements at `indices` (strictly increasing)
@@ -395,6 +451,15 @@ impl BufferBuilder {
         doc.buffers[b].uri = uri;
         self.bytes
     }
+}
+
+/// `indices` as UNSIGNED_BYTE data when every index is below 255, else `None`.
+pub fn smallest_index_data(indices: &[u32]) -> Option<AccessorData> {
+    indices
+        .iter()
+        .map(|&i| u8::try_from(i).ok().filter(|&b| b != u8::MAX))
+        .collect::<Option<Vec<u8>>>()
+        .map(|b| AccessorData::from_elements(&b))
 }
 
 /// Copies every buffer view of `doc` into one new buffer 0 (a GLB BIN chunk) and returns the
@@ -520,6 +585,13 @@ mod tests {
         assert_eq!(read_accessor(&doc, &[&bytes], 1).unwrap(), uv);
         assert_eq!(read_accessor(&doc, &[&bytes], 2).unwrap(), col);
         assert!(crate::validate::validate_data(&doc, &[&bytes]).is_ok());
+        // The view alone (re-layout of existing accessors).
+        let mut b = BufferBuilder::new();
+        assert_eq!(BufferBuilder::interleaved_stride(&[&pos, &uv, &col]), 24);
+        let (v, offsets) = b.push_interleaved_view(&[&pos, &uv, &col]).unwrap();
+        assert_eq!((v, offsets), (0, vec![0, 12, 20]));
+        assert!(b.accessors.is_empty());
+        assert!(b.push_interleaved_view(&[]).is_err());
         // Mismatched counts.
         let short = AccessorData::from_elements(&[[0.0f32, 0.0]]);
         assert!(
@@ -530,6 +602,49 @@ mod tests {
                 ])
                 .is_err()
         );
+    }
+
+    #[test]
+    fn byte_indices_and_view_copies() {
+        let mut b = BufferBuilder::new();
+        let small = b.push_indices_smallest(&[0, 1, 254]);
+        let restart = b.push_indices_smallest(&[0, 255]);
+        let wide = b.push_indices_smallest(&[0, 70000]);
+        assert_eq!(
+            b.accessor(small).unwrap().component_type,
+            ComponentType::UnsignedByte
+        );
+        assert_eq!(
+            b.accessor(restart).unwrap().component_type,
+            ComponentType::UnsignedShort
+        );
+        assert_eq!(
+            b.accessor(wide).unwrap().component_type,
+            ComponentType::UnsignedInt
+        );
+        assert!(smallest_index_data(&[]).is_some());
+        // A copy keeps the phase and the members.
+        let src = BufferView {
+            buffer: 3,
+            byte_offset: Some(6),
+            byte_length: 2,
+            name: Some("v".into()),
+            target: Some(Target::ElementArrayBuffer),
+            ..BufferView::default()
+        };
+        let mut b = BufferBuilder::new();
+        b.push_view(&[1], 1, None, None);
+        let i = b.push_view_like(&src, &[7, 8]);
+        let v = b.view(i).unwrap();
+        assert_eq!(v.byte_offset_or_default() % 4, 2);
+        assert_eq!(
+            (v.buffer, v.byte_length, v.name.as_deref()),
+            (0, 2, Some("v"))
+        );
+        assert_eq!(v.target, Some(Target::ElementArrayBuffer));
+        let (doc, bytes) = finish(b);
+        assert_eq!(&bytes[2..4], &[7, 8]);
+        assert_eq!(doc.buffer_views[1].byte_offset, Some(2));
     }
 
     #[test]

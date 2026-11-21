@@ -864,7 +864,7 @@ A struct is done when its `StructDef` is generated, its bindings pass `check_bin
 | [ ] | KHR_texture_basisu | M7 (feature basisu-encode) | M7 | frap_texture_format='KTX2'; WP 7.3 |
 | [ ] | KHR_materials_variants | M7 | M7 | not part of M3's "every KHR material extension" (decision log M34S3-5); add-on data model; RNA exists only with `KHR_materials_variants_ui` on (dumped that way); import turns it on; WP 7.5 |
 | [ ] | EXT_mesh_gpu_instancing | M7 (`export_gpu_instances`, Blender prop) | M7 | children of an Empty sharing a mesh (add-on rule); WP 7.5 |
-| [ ] | KHR_node_visibility, KHR_materials_diffuse_transmission | M7 (frap_*) | M7 | not produced by Blender; WP 7.4 |
+| [x] | KHR_node_visibility, KHR_materials_diffuse_transmission | M7 (frap_*) | M7 | not produced by Blender: `frap_node_visibility` (`hide_render`), `frap_diffuse_transmission` (thin-walled subsurface; imported back, D-130); with `frap_compat='SPEC'`, `frap_interleave` and UNSIGNED_BYTE indices; WP 7.4 |
 
 ## G. Totals
 

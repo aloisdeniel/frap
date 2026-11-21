@@ -1,0 +1,12 @@
+# WP 7.4: the spec-complete writer as an agent uses it. The frap_* options of
+# export_scene.gltf (frap_compat='SPEC', frap_interleave, frap_node_visibility,
+# frap_diffuse_transmission) are honoured, so the operator reports no "not supported"
+# WARNING; a renderable camera parented to a hidden cube gets the KHR_node_visibility
+# WARNING (the extension hides descendants, hide_render one object). In an empty file, a
+# glTF with unknown members and an unknown camera type (`unknown.gltf`, the input of the
+# `gltf/spec/import_unknown` golden) imports as in Blender 5.2.4: the camera is a perspective
+# one. frap's own SPEC file imports back, the thin-walled subsurface included. Statements on
+# stdin (raw mode, §13.1).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true
