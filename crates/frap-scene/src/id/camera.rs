@@ -120,9 +120,16 @@ impl IdType for Camera {
     fn header_mut(&mut self) -> &mut IdHeader {
         &mut self.header
     }
+    /// `dof.focus_object` is a reference but not a user (`IDWALK_CB_NOP`;
+    /// `Main::for_each_user_ref` skips it): removing the object clears it, and
+    /// `object.duplicate` / a full scene copy relink it to the copied object (verified on
+    /// 5.2.4).
     fn for_each_ref(&self, f: &mut dyn FnMut(IdAny)) {
         if let Some(t) = self.fields.custom_shader {
             f(t);
+        }
+        if let Some(o) = self.fields.dof.focus_object {
+            f(o);
         }
         if let Some(a) = self.animation_data.as_ref().and_then(|a| a.action) {
             f(a.any());
@@ -131,6 +138,9 @@ impl IdType for Camera {
     fn remap_ref(&mut self, from: IdAny, to: Option<IdAny>) {
         if self.fields.custom_shader == Some(from) {
             self.fields.custom_shader = to;
+        }
+        if self.fields.dof.focus_object == Some(from) {
+            self.fields.dof.focus_object = to;
         }
         crate::id::remap_action(&mut self.animation_data, from, to);
     }

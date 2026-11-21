@@ -71,6 +71,16 @@ struct Written {
     neutral: Option<Index>,
 }
 
+/// A gathered skin of an armature without a skinned mesh, written after the animations.
+struct UnusedSkin {
+    scene: IdRef<SceneId>,
+    arm: usize,
+    name: Option<String>,
+    /// The inverse bind matrices, column-major, flattened.
+    ibms: Vec<f32>,
+    joints: Vec<Index>,
+}
+
 /// Skin state of one export (`Gather::state`).
 #[derive(Default)]
 pub struct SkinState {
@@ -86,6 +96,9 @@ pub struct SkinState {
     /// gather_accessor` keys on the `BinaryData` bytes, so skins with equal matrices share
     /// one accessor.
     ibm_accessors: HashMap<Vec<u32>, Index>,
+    /// Skins of armatures no kept object is skinned by, gathered at the end of their scene
+    /// but written by [`write_unused_skins`] after the animations.
+    unused: Vec<UnusedSkin>,
     /// `check_if_we_can_remove_armature` refused once: no armature is removed for the rest of
     /// the export (the add-on sets `gltf_armature_object_remove = False`).
     pub remove_refused: bool,
@@ -568,6 +581,51 @@ pub fn gather_skin(g: &mut Gather, tree: &VTree, arm: usize) -> Result<Option<In
     gather_skin_ex(g, tree, arm, true)
 }
 
+/// The inverse-bind-matrix accessor of `flat` (shared by equal matrices, see
+/// `SkinState::ibm_accessors`).
+fn ibm_accessor(g: &mut Gather, flat: Vec<f32>) -> Result<Index, ExportError> {
+    let key: Vec<u32> = flat.iter().map(|v| v.to_bits()).collect();
+    if let Some(&i) = g.state::<SkinState>().ibm_accessors.get(&key) {
+        return Ok(i);
+    }
+    let data = AccessorData::new(
+        AccessorType::Mat4,
+        false,
+        frap_gltf::accessor::Components::F32(flat),
+    )
+    .map_err(|e| ExportError::Invalid(e.to_string()))?;
+    let i = g.buf.push_accessor(&data, &AccessorOpts::default());
+    g.state::<SkinState>().ibm_accessors.insert(key, i);
+    Ok(i)
+}
+
+/// `glTF2Exporter.traverse_unused_skins`, after the scenes and the animations: the add-on
+/// gathers the skins of armatures without a skinned mesh with their scene
+/// (`get_unused_skins`) but appends them, and so their inverse-bind-matrix accessors, only
+/// after the animations (verified on 5.2.4: two armatures, the second one's pose bone keyed,
+/// write that skin's matrices as the last accessor).
+pub fn write_unused_skins(g: &mut Gather) -> Result<(), ExportError> {
+    let unused = std::mem::take(&mut g.state::<SkinState>().unused);
+    for u in unused {
+        let ibm = ibm_accessor(g, u.ibms)?;
+        g.doc.skins.push(Skin {
+            inverse_bind_matrices: Some(ibm),
+            joints: u.joints,
+            name: u.name,
+            ..Skin::default()
+        });
+        let index = (g.doc.skins.len() - 1) as Index;
+        g.state::<SkinState>().skins.insert(
+            (u.scene, u.arm),
+            Some(Written {
+                index,
+                neutral: None,
+            }),
+        );
+    }
+    Ok(())
+}
+
 fn gather_skin_ex(
     g: &mut Gather,
     tree: &VTree,
@@ -598,21 +656,22 @@ fn gather_skin_ex(
         ibms.push(inverted_safe(&matmul(&abc, &arm_mw)).to_cols_array());
     }
     let flat: Vec<f32> = ibms.into_iter().flatten().collect();
-    let key: Vec<u32> = flat.iter().map(|v| v.to_bits()).collect();
-    let ibm = match g.state::<SkinState>().ibm_accessors.get(&key) {
-        Some(&i) => i,
-        None => {
-            let data = AccessorData::new(
-                AccessorType::Mat4,
-                false,
-                frap_gltf::accessor::Components::F32(flat),
-            )
-            .map_err(|e| ExportError::Invalid(e.to_string()))?;
-            let i = g.buf.push_accessor(&data, &AccessorOpts::default());
-            g.state::<SkinState>().ibm_accessors.insert(key, i);
-            i
+    if !with_neutral {
+        // An unused skin ([`gather_unused_skins`]): written after the animations.
+        let mut joints = Vec::new();
+        for &b in tree.all_bones(arm) {
+            joints.push(gather_joint(g, tree, b)?);
         }
-    };
+        g.state::<SkinState>().unused.push(UnusedSkin {
+            scene,
+            arm,
+            name,
+            ibms: flat,
+            joints,
+        });
+        return Ok(None);
+    }
+    let ibm = ibm_accessor(g, flat)?;
     // Joints, written in `skin.joints` order (each after its child joints).
     let mut joints = Vec::new();
     for &b in tree.all_bones(arm) {

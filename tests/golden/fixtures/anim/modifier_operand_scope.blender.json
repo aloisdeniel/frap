@@ -5,30 +5,6 @@
   },
   "lines": [
     {
-      "line": 10,
-      "ok": true
-    },
-    {
-      "line": 11,
-      "ok": true
-    },
-    {
-      "line": 12,
-      "ok": true
-    },
-    {
-      "line": 13,
-      "ok": true
-    },
-    {
-      "line": 14,
-      "ok": true
-    },
-    {
-      "line": 15,
-      "ok": true
-    },
-    {
       "line": 16,
       "ok": true
     },
@@ -287,6 +263,206 @@
     {
       "line": 80,
       "ok": true
+    },
+    {
+      "line": 81,
+      "ok": true
+    },
+    {
+      "line": 82,
+      "ok": true
+    },
+    {
+      "line": 83,
+      "ok": true
+    },
+    {
+      "line": 84,
+      "ok": true
+    },
+    {
+      "line": 85,
+      "ok": true
+    },
+    {
+      "line": 86,
+      "ok": true
+    },
+    {
+      "line": 87,
+      "ok": true
+    },
+    {
+      "line": 88,
+      "ok": true
+    },
+    {
+      "line": 89,
+      "ok": true
+    },
+    {
+      "line": 90,
+      "ok": true
+    },
+    {
+      "line": 91,
+      "ok": true
+    },
+    {
+      "line": 92,
+      "ok": true
+    },
+    {
+      "line": 93,
+      "ok": true
+    },
+    {
+      "line": 94,
+      "ok": true
+    },
+    {
+      "line": 95,
+      "ok": true
+    },
+    {
+      "line": 96,
+      "ok": true
+    },
+    {
+      "line": 97,
+      "ok": true
+    },
+    {
+      "line": 98,
+      "ok": true
+    },
+    {
+      "line": 99,
+      "ok": true
+    },
+    {
+      "line": 100,
+      "ok": true
+    },
+    {
+      "line": 101,
+      "ok": true
+    },
+    {
+      "line": 102,
+      "ok": true
+    },
+    {
+      "line": 103,
+      "ok": true
+    },
+    {
+      "line": 104,
+      "ok": true
+    },
+    {
+      "line": 105,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 8 out of range, size 8"
+    },
+    {
+      "line": 106,
+      "ok": true
+    },
+    {
+      "line": 107,
+      "ok": true
+    },
+    {
+      "line": 108,
+      "ok": true
+    },
+    {
+      "line": 109,
+      "ok": true
+    },
+    {
+      "line": 110,
+      "ok": true
+    },
+    {
+      "line": 111,
+      "ok": true
+    },
+    {
+      "line": 112,
+      "ok": true
+    },
+    {
+      "line": 113,
+      "ok": false,
+      "exception": "IndexError",
+      "message": "bpy_prop_collection[index]: index 16 out of range, size 16"
+    },
+    {
+      "line": 114,
+      "ok": true
+    },
+    {
+      "line": 115,
+      "ok": true
+    },
+    {
+      "line": 116,
+      "ok": true
+    },
+    {
+      "line": 117,
+      "ok": true
+    },
+    {
+      "line": 118,
+      "ok": true
+    },
+    {
+      "line": 119,
+      "ok": true
+    },
+    {
+      "line": 120,
+      "ok": true
+    },
+    {
+      "line": 121,
+      "ok": true
+    },
+    {
+      "line": 122,
+      "ok": true
+    },
+    {
+      "line": 123,
+      "ok": true
+    },
+    {
+      "line": 124,
+      "ok": true
+    },
+    {
+      "line": 125,
+      "ok": true
+    },
+    {
+      "line": 126,
+      "ok": true
+    },
+    {
+      "line": 127,
+      "ok": true
+    },
+    {
+      "line": 128,
+      "ok": true
+    },
+    {
+      "line": 129,
+      "ok": true
     }
   ],
   "objects": {
@@ -308,6 +484,23 @@
       "mode": "OBJECT"
     },
     "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 0.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [0.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Host": {
       "type": "MESH",
       "parent": null,
       "matrix_world": [
@@ -368,6 +561,57 @@
         [0.0, 0.0, 0.0, 1.0]
       ],
       "location": [2.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "P_BoolReBefore": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [9.0, 0.0, 0.0, 9.0],
+        [0.0, 1.0, 0.0, 9.0],
+        [0.0, 0.0, 1.0, 9.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [9.0, 9.0, 9.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [9.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "P_BoolReEnabled": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [0.2, 0.0, 0.0, 1.0],
+        [0.0, 1.0, 0.0, 0.0],
+        [0.0, 0.0, 1.0, 0.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [1.0, 0.0, 0.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.0, 0.0, 0.0],
+      "scale": [0.2, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "P_BoolReToggled": {
+      "type": "EMPTY",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 7.0],
+        [0.0, 1.0, 0.0, 7.0],
+        [0.0, 0.0, 1.0, 7.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [7.0, 7.0, 7.0],
       "rotation_mode": "XYZ",
       "rotation": [0.0, 0.0, 0.0],
       "scale": [1.0, 1.0, 1.0],

@@ -216,3 +216,50 @@ fn equal_inverse_bind_matrices_share_one_accessor() {
         .count();
     assert_eq!(mat4, 1);
 }
+
+/// The f32 words of accessor `i` of a GLB's BIN chunk (dense accessors only).
+fn accessor_words(doc: &frap_gltf::Document, glb: &[u8], i: usize) -> Vec<u32> {
+    let json_len = u32::from_le_bytes(glb[12..16].try_into().unwrap()) as usize;
+    let bin = &glb[20 + json_len + 8..];
+    let a = &doc.accessors[i];
+    let Some(bv) = a.buffer_view else {
+        return Vec::new();
+    };
+    let v = &doc.buffer_views[bv as usize];
+    let start = (v.byte_offset.unwrap_or(0) + a.byte_offset.unwrap_or(0)) as usize;
+    bin[start..start + 12 * a.count as usize]
+        .chunks_exact(4)
+        .map(|w| u32::from_le_bytes(w.try_into().unwrap()))
+        .collect()
+}
+
+/// M5+M6 stabilization round 6: with morph normals (the default), the base `NORMAL` and the
+/// morph-target `NORMAL` deltas fold `-0.0` into `0.0`, as the add-on's dots do (re-exporting
+/// AnimatedMorphCube gave 20 base and 22 delta components of `-0.0`; the BIN chunk is now
+/// byte-identical with Blender 5.2.4's).
+#[test]
+fn morph_normals_fold_negative_zero() {
+    let (main, win, _) = import("AnimatedMorphCube/glTF-Binary/AnimatedMorphCube.glb");
+    let prefs = Preferences::default();
+    let ctx = Context {
+        main: &main,
+        win: &win,
+        prefs: &prefs,
+    };
+    let out = export(&main, &ctx, &ExportSettings::default()).unwrap();
+    let doc = &out.document;
+    let mut normals = 0;
+    for p in doc.meshes.iter().flat_map(|m| &m.primitives) {
+        let accessors = p
+            .attributes
+            .get("NORMAL")
+            .into_iter()
+            .chain(p.targets.iter().filter_map(|t| t.get("NORMAL")));
+        for &a in accessors {
+            let words = accessor_words(doc, &out.bytes, a as usize);
+            normals += words.len();
+            assert!(!words.contains(&0x8000_0000), "accessor {a} holds -0.0");
+        }
+    }
+    assert!(normals > 0);
+}

@@ -47,6 +47,57 @@ impl ShownDepsgraphs {
     }
 }
 
+/// Runtime memory of the datablocks a depsgraph builds **invisible** that have an animation
+/// update pending (`Main::invisible_pending`): Blender keeps an object reached only through a
+/// viewport-disabled modifier (an operand, its parent, the objects it references) in the
+/// depsgraph as an invisible node; a time change or an `ID_RECALC_ANIMATION` tag while it is
+/// invisible leaves its animation operation tagged, and the boundary that makes it visible
+/// again (the modifier's `show_viewport` back on, the object linked into the scene) applies
+/// its animation at the current frame (verified on 5.2.4: a BOOLEAN operand keyed
+/// (0,0,0)@1 -> (2,0,0)@11 of a disabled modifier reads (1,0,0) at frame 6 after
+/// `show_viewport = True` and `view_layer.update()`, also over a manual value; one that was
+/// visible at the frame change keeps a manual value; one that leaves the depsgraph at a
+/// boundary loses its pending update). Entries are (scene, view layer name, datablock).
+/// `Debug` leaves the entries out, like [`ShownDepsgraphs`].
+#[derive(Clone, Default)]
+pub struct InvisiblePending(pub Vec<(IdRef<SceneId>, SmolStr, frap_rna::Root)>);
+
+impl std::fmt::Debug for InvisiblePending {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("InvisiblePending(runtime)")
+    }
+}
+
+impl InvisiblePending {
+    /// The pending datablocks of `scene`'s view layer `view_layer`.
+    pub fn of(&self, scene: IdRef<SceneId>, view_layer: &str) -> Vec<frap_rna::Root> {
+        self.0
+            .iter()
+            .filter(|(s, v, _)| *s == scene && v == view_layer)
+            .map(|(_, _, r)| *r)
+            .collect()
+    }
+    /// Replaces the pending datablocks of `scene`'s view layer `view_layer` with `roots`.
+    pub fn set(
+        &mut self,
+        scene: IdRef<SceneId>,
+        view_layer: &str,
+        roots: impl IntoIterator<Item = frap_rna::Root>,
+    ) {
+        self.0.retain(|(s, v, _)| !(*s == scene && v == view_layer));
+        let name = SmolStr::new(view_layer);
+        for r in roots {
+            if !self
+                .0
+                .iter()
+                .any(|(s, v, x)| *s == scene && *v == name && *x == r)
+            {
+                self.0.push((scene, name.clone(), r));
+            }
+        }
+    }
+}
+
 /// The view layer the window shows in `scene`: its current view layer name when `scene` has
 /// one of that name, else the scene's first view layer.
 pub fn view_layer_for(main: &Main, win: &WindowState, scene: IdRef<SceneId>) -> Option<SmolStr> {

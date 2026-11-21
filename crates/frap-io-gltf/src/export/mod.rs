@@ -95,6 +95,8 @@ pub fn export(
     // `KHR_animation_pointer` (WP 6.9): after the animations, whose scene / track
     // animations its channels join.
     pointer::gather(&mut g)?;
+    // `traverse_unused_skins`: after the animations.
+    skins::write_unused_skins(&mut g)?;
     if let Some(m) = g.state::<extras::NonFinite>().0.take() {
         return Err(ExportError::Json(m));
     }

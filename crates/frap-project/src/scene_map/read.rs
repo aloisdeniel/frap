@@ -663,6 +663,7 @@ fn layer_collection(v: &J, path: &str, cx: &Cx) -> Result<LayerCollection, MapEr
     let mut lc = LayerCollection::new(None);
     cx.opt_typed(&mut o, "collection", &mut lc.collection)?;
     o.bool("exclude", &mut lc.exclude)?;
+    o.bool("previously_excluded", &mut lc.previously_excluded)?;
     o.bool("hide_viewport", &mut lc.hide_viewport)?;
     o.bool("holdout", &mut lc.holdout)?;
     o.bool("indirect_only", &mut lc.indirect_only)?;

@@ -391,6 +391,12 @@ pub fn write_file(path: &Path, bytes: &[u8]) -> Result<(), String> {
             path.display()
         )
     })?;
+    // `--stmt-timeout` (§12): a statement past its deadline answers `TIMEOUT` without leaving
+    // the file (the temporary one is removed before unwinding).
+    if frap_math::budget::expired() {
+        let _ = std::fs::remove_file(&tmp);
+        frap_math::budget::check_now();
+    }
     std::fs::rename(&tmp, path).map_err(|e| {
         let _ = std::fs::remove_file(&tmp);
         format!(

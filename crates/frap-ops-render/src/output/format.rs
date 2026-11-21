@@ -390,6 +390,7 @@ pub fn file_pixels_premultiplied(
     let buf: Vec<[f32; 4]> = premul
         .iter()
         .map(|&p| {
+            frap_math::budget::check();
             let mut p = p;
             if ws.bw {
                 let l = luminance([p[0], p[1], p[2]]);
@@ -433,6 +434,7 @@ pub fn file_pixels_premultiplied(
     let display: Vec<[f32; 4]> = buf
         .iter()
         .map(|&p| {
+            frap_math::budget::check();
             let a = p[3];
             if a == 0.0 || a == 1.0 {
                 cm.processor.apply_rgba(p)
@@ -453,6 +455,7 @@ pub fn file_pixels_premultiplied(
     let pixels = if sixteen {
         let mut out = Vec::with_capacity(n * c);
         for p in &display {
+            frap_math::budget::check();
             match c {
                 1 => out.push(oiio_float_to_u16(channel_sum(*p))),
                 3 => out.extend(p[..3].iter().map(|&v| oiio_float_to_u16(v))),
@@ -473,6 +476,7 @@ pub fn file_pixels_premultiplied(
         let w = width as usize;
         let mut out = Vec::with_capacity(n * c);
         for (i, p) in display.iter().enumerate() {
+            frap_math::budget::check();
             // `premul_to_straight_v4_v4` / `premul_float_to_straight_uchar`.
             let a = p[3];
             let s = if a == 0.0 || a == 1.0 {
@@ -508,9 +512,14 @@ pub fn file_pixels(
     cm: &ColorManagement,
     dither_intensity: f32,
 ) -> Result<DecodedImage, String> {
+    // `--stmt-timeout` cancellation points (§12) run through the per-pixel loops: converting a
+    // 16-megapixel film takes seconds in a debug build.
     let premul: Vec<[f32; 4]> = rgba
         .iter()
-        .map(|p| [p[0] * p[3], p[1] * p[3], p[2] * p[3], p[3]])
+        .map(|p| {
+            frap_math::budget::check();
+            [p[0] * p[3], p[1] * p[3], p[2] * p[3], p[3]]
+        })
         .collect();
     file_pixels_premultiplied(&premul, width, height, ws, cm, dither_intensity)
 }
@@ -525,7 +534,13 @@ pub fn encode(
     dither_intensity: f32,
 ) -> Result<Vec<u8>, String> {
     let img = file_pixels(rgba, width, height, ws, cm, dither_intensity)?;
-    frap_imbuf::encode::encode_with(&img, &ws.encode, &ws.options).map_err(|e| e.to_string())
+    // `--stmt-timeout` (§12): the conversion above checks per pixel; the encoder (a few
+    // hundred milliseconds for 16 megapixels) is bracketed.
+    frap_math::budget::check_now();
+    let bytes =
+        frap_imbuf::encode::encode_with(&img, &ws.encode, &ws.options).map_err(|e| e.to_string());
+    frap_math::budget::check_now();
+    bytes
 }
 
 /// Blender's report when a render cannot be saved (`BKE_image_render_write`): `strerror(errno)`

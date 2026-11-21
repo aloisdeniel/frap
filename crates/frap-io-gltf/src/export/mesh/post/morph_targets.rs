@@ -39,7 +39,7 @@ use indexmap::IndexMap;
 use smol_str::SmolStr;
 
 use crate::export::gather::Gather;
-use crate::export::mesh::convert::{axis, round4};
+use crate::export::mesh::convert::{axis, fold_zero, round4};
 use crate::export::mesh::ext::{
     AttrColumn, AttrValues, MeshExportCx, PRIMITIVE_POST_PROCESS, PrimitiveDraft,
     PrimitivePostProcess,
@@ -178,13 +178,18 @@ pub fn morph_normals(cx: &MeshExportCx) -> Option<MorphNormals> {
                 .zip(&base)
                 .map(|(n, b)| {
                     let m = finish(n.map(round4));
-                    axis([m[0] - b[0], m[1] - b[1], m[2] - b[2]], yup)
+                    axis([m[0] - b[0], m[1] - b[1], m[2] - b[2]], yup).map(fold_zero)
                 })
                 .collect()
         })
         .collect();
     Some(MorphNormals {
-        base: base.into_iter().map(|n| axis(n, yup)).collect(),
+        // The add-on's values come out of `fast_structured_np_unique`'s dots, where `-0.0`
+        // reads `0.0` (as the base NORMAL writer and the skinned path fold them).
+        base: base
+            .into_iter()
+            .map(|n| axis(n, yup).map(fold_zero))
+            .collect(),
         deltas,
     })
 }

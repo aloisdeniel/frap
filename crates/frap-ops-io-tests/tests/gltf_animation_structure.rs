@@ -205,3 +205,76 @@ fn animation_channels_match_blender_structurally() {
     }
     assert!(checked >= 20, "only {checked} outputs checked");
 }
+
+/// The accessor index of every skin's inverse bind matrices, in file order, and the number
+/// of accessors.
+fn skin_ibms(bytes: &[u8]) -> (Vec<Option<u32>>, usize) {
+    let doc = frap_gltf::read(bytes).expect("readable glTF").document;
+    (
+        doc.skins.iter().map(|s| s.inverse_bind_matrices).collect(),
+        doc.accessors.len(),
+    )
+}
+
+/// M5+M6 stabilization round 6: the skins of the `tests/golden/cases/gltf/skins/` goldens
+/// reference the same inverse-bind-matrix accessors as Blender's (the canonical comparison
+/// does not see accessor indices): a skin without a skinned mesh is written after the
+/// animations (`traverse_unused_skins`).
+#[test]
+fn skins_reference_the_same_accessors_as_blender() {
+    let repo = Repo::locate();
+    let props = Props::load(&repo.props_path()).expect("props.toml");
+    let cases_dir = repo.cases_dir();
+    let dir = cases_dir.join("gltf/skins");
+    let mut files: Vec<_> = std::fs::read_dir(&dir)
+        .expect("skin cases")
+        .filter_map(|e| e.ok().map(|e| e.path()))
+        .filter(|p| p.extension().is_some_and(|x| x == "py"))
+        .collect();
+    files.sort();
+    let mut checked = 0;
+    for path in files {
+        let case = Case::load(&path, &cases_dir).expect("case parses");
+        let outs: Vec<String> = case
+            .compare
+            .iter()
+            .filter_map(|c| match c {
+                CompareSpec::Glb(f) => Some(f.clone()),
+                _ => None,
+            })
+            .collect();
+        if outs.is_empty() {
+            continue;
+        }
+        let work = ScratchDir::new(&case.name).unwrap();
+        run_frap(
+            &case,
+            &props,
+            &RunOptions {
+                workdir: work.path().to_owned(),
+                strict_rna: false,
+            },
+        )
+        .unwrap_or_else(|e| panic!("{}: {e}", case.name));
+        for out in outs {
+            let fixture = repo
+                .fixtures_dir()
+                .join(&case.area)
+                .join(fixture_file_name(&case, &out));
+            let blender =
+                std::fs::read(&fixture).unwrap_or_else(|e| panic!("{}: {e}", fixture.display()));
+            let frap = std::fs::read(work.path().join(Path::new(&out)))
+                .unwrap_or_else(|e| panic!("{} {out}: {e}", case.name));
+            let (f, b) = (skin_ibms(&frap), skin_ibms(&blender));
+            if !b.0.is_empty() {
+                assert_eq!(
+                    f, b,
+                    "{} {out}: skin IBM accessors, accessor count",
+                    case.name
+                );
+                checked += 1;
+            }
+        }
+    }
+    assert!(checked >= 3, "only {checked} outputs checked");
+}

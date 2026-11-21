@@ -64,50 +64,88 @@ pub fn apply_pending_animation(
 /// every user of a tagged action, directly or through an NLA strip) at the current frame and
 /// flushes it to the originals (`ID_RECALC_ANIMATION`, verified on 5.2.4: after
 /// `keyframe_points[1].co.y = 20`, `view_layer.update()` overwrites a manual `location.x`).
+///
+/// The window depsgraph's invisible nodes ([`DepsgraphNodes::invisible`]) are not animated: a
+/// time change or a tag reaching one is remembered (`Main::invisible_pending`), and the first
+/// boundary that finds it visible again applies its animation at the current frame (M5+M6
+/// stabilization round 6; see `frap_scene::window::InvisiblePending`).
 pub fn apply_pending_animation_tagged(
     host: &mut dyn Host,
     time_dirty: bool,
     tagged: &[Root],
 ) -> Result<AnimationApplied, RnaError> {
-    if !time_dirty && tagged.is_empty() {
+    if !time_dirty && tagged.is_empty() && host.main().invisible_pending.0.is_empty() {
         return Ok(AnimationApplied::default());
     }
-    let frame = host
-        .main()
-        .scenes
-        .get(host.win().scene)
-        .map_or(0, |s| s.frame_current);
-    let graph = window_depsgraph(host);
-    if time_dirty {
-        return apply_animation_filtered(host, frame as f32, &|root, _| graph.contains(&root));
-    }
+    let (scene, view_layer) = {
+        let win = host.win();
+        (win.scene, win.view_layer.clone())
+    };
+    let frame = host.main().scenes.get(scene).map_or(0, |s| s.frame_current);
+    let nodes = depsgraph_nodes(host.main(), scene, &view_layer);
     let tagged: HashSet<Root> = tagged.iter().copied().collect();
     let is_tagged = |root: Root, adt: &AnimData| {
         let action_tagged =
             |a: Option<IdRef<ActionId>>| a.is_some_and(|a| tagged.contains(&Root::Id(a.any())));
-        graph.contains(&root)
-            && (tagged.contains(&root)
-                || action_tagged(adt.action)
-                || adt
-                    .nla_tracks
-                    .iter()
-                    .flat_map(|t| &t.strips)
-                    .any(|s| action_tagged(s.action)))
+        tagged.contains(&root)
+            || action_tagged(adt.action)
+            || adt
+                .nla_tracks
+                .iter()
+                .flat_map(|t| &t.strips)
+                .any(|s| action_tagged(s.action))
     };
-    apply_animation_filtered(host, frame as f32, &is_tagged)
+    // The invisible nodes keep (or gain) a pending update; those visible again are animated.
+    let (woken, pending) = {
+        let main = host.main();
+        let mut woken = HashSet::new();
+        let mut pending = Vec::new();
+        for r in main.invisible_pending.of(scene, &view_layer) {
+            if nodes.visible.contains(&r) {
+                woken.insert(r);
+            } else if nodes.invisible.contains(&r) {
+                pending.push(r);
+            }
+        }
+        for &r in &nodes.invisible {
+            if let Some(adt) = anim_data(main, r)
+                && (time_dirty || is_tagged(r, adt))
+                && !pending.contains(&r)
+            {
+                pending.push(r);
+            }
+        }
+        (woken, pending)
+    };
+    host.main_mut()
+        .0
+        .invisible_pending
+        .set(scene, &view_layer, pending);
+    let graph = &nodes.visible;
+    if time_dirty {
+        return apply_animation_filtered(host, frame as f32, &|root, _| graph.contains(&root));
+    }
+    if tagged.is_empty() && woken.is_empty() {
+        return Ok(AnimationApplied::default());
+    }
+    apply_animation_filtered(host, frame as f32, &|root, adt| {
+        graph.contains(&root) && (woken.contains(&root) || is_tagged(root, adt))
+    })
 }
 
 /// `scene.frame_set()`'s `BKE_scene_graph_update_for_newframe` for each view layer of
 /// `scene`: writes the animation at `frame` of the datablocks of its **active** depsgraphs
 /// ([`depsgraph_roots`]) into the originals: the window's, and those the window showed before
 /// (`Main::shown_depsgraphs`; Blender keeps a depsgraph active once shown). A scene the window
-/// never showed writes nothing.
+/// never showed writes nothing. The invisible nodes of those depsgraphs get a pending update
+/// (`Main::invisible_pending`).
 pub fn apply_scene_animation_at(
     host: &mut dyn Host,
     scene: IdRef<SceneId>,
     frame: f32,
 ) -> Result<AnimationApplied, RnaError> {
     let mut graph = HashSet::new();
+    let mut pending = Vec::new();
     {
         let main = host.main();
         let win = host.win();
@@ -115,9 +153,25 @@ pub fn apply_scene_animation_at(
             let active = (scene == win.scene && vl.name == win.view_layer)
                 || main.shown_depsgraphs.contains(scene, &vl.name);
             if active {
-                graph.extend(depsgraph_roots(main, scene, &vl.name));
+                let nodes = depsgraph_nodes(main, scene, &vl.name);
+                let mut p: Vec<Root> = main
+                    .invisible_pending
+                    .of(scene, &vl.name)
+                    .into_iter()
+                    .filter(|r| nodes.invisible.contains(r))
+                    .collect();
+                for &r in &nodes.invisible {
+                    if anim_data(main, r).is_some() && !p.contains(&r) {
+                        p.push(r);
+                    }
+                }
+                pending.push((vl.name.clone(), p));
+                graph.extend(nodes.visible);
             }
         }
+    }
+    for (vl, p) in pending {
+        host.main_mut().0.invisible_pending.set(scene, &vl, p);
     }
     if graph.is_empty() {
         return Ok(AnimationApplied::default());
@@ -125,36 +179,57 @@ pub fn apply_scene_animation_at(
     apply_animation_filtered(host, frame, &|root, _| graph.contains(&root))
 }
 
-/// [`depsgraph_roots`] of the window's scene and view layer.
-fn window_depsgraph(host: &dyn HostRead) -> HashSet<Root> {
-    let win = host.win();
-    depsgraph_roots(host.main(), win.scene, &win.view_layer)
-}
-
 // Ported from blender/source/blender/depsgraph/intern/builder/deg_builder_nodes.cc
 // (`build_view_layer`, `need_pull_base_into_graph`, `build_object`, `build_scene_camera`,
-// `build_world`; Blender 5.2.4, GPL-2.0-or-later). Verified on 5.2.4 with `frame_set`: an
-// animated object that is a modifier operand, a parent or the scene camera is animated though
-// it is in no collection of the scene; one with `hide_viewport` (or in a collection with
-// `hide_viewport`, or an excluded one) is not, while `hide_set` and a layer collection's
-// `hide_viewport` keep it; an orphan object, material, camera or world is not animated; a
-// scene the window does not show is not animated by another scene's `frame_set`.
+// `build_world`, `modifier_walk`; Blender 5.2.4, GPL-2.0-or-later). Verified on 5.2.4 with
+// `frame_set`: an animated object that is a modifier operand, a parent or the scene camera is
+// animated though it is in no collection of the scene; one with `hide_viewport` (or in a
+// collection with `hide_viewport`, or an excluded one) is not, while `hide_set` and a layer
+// collection's `hide_viewport` keep it; an orphan object, material, camera or world is not
+// animated; a scene the window does not show is not animated by another scene's `frame_set`.
 /// The datablocks the viewport depsgraph of `scene`'s view layer `view_layer` (its first one
 /// when there is none of that name) evaluates, so animates: the scene, its world and camera,
 /// the objects of the view layer's enabled bases ([`frap_scene::id::layers::BaseVisibility`]'s
 /// `enabled_viewport`), and everything they reference, transitively (object data, shape keys,
 /// materials, parents, object operands of viewport-enabled modifiers, armatures, node groups,
 /// images, textures), with the embedded node tree of each material and world. Actions are not
-/// roots (they carry no animation of their own).
+/// roots (they carry no animation of their own). The objects the depsgraph builds invisible
+/// are left out ([`depsgraph_nodes`]).
 pub fn depsgraph_roots(main: &Main, scene: IdRef<SceneId>, view_layer: &str) -> HashSet<Root> {
-    let mut out = HashSet::new();
+    depsgraph_nodes(main, scene, view_layer).visible
+}
+
+/// The datablocks of one viewport depsgraph ([`depsgraph_nodes`]).
+#[derive(Clone, Debug, Default)]
+#[non_exhaustive]
+pub struct DepsgraphNodes {
+    /// The datablocks the depsgraph evaluates ([`depsgraph_roots`]).
+    pub visible: HashSet<Root>,
+    /// The objects it holds as invisible nodes: reached only through an object operand of a
+    /// viewport-disabled modifier (`show_viewport` off), or through such an object (its
+    /// parent, the operands of its own modifiers). Not animated; their animation update stays
+    /// pending until they become visible (`frap_scene::window::InvisiblePending`).
+    pub invisible: HashSet<Root>,
+}
+
+/// [`depsgraph_roots`] and the invisible nodes of the same depsgraph.
+/// `DepsgraphNodeBuilder::modifier_walk` builds an object operand of a modifier disabled for
+/// the viewport with `is_visible = false`, and `build_object` passes that flag on to the
+/// objects it references; IDs of other types (object data, shape keys, materials, textures,
+/// node groups) are evaluated as usual (verified on 5.2.4: a BOOLEAN operand and a MIRROR
+/// `mirror_object` of disabled modifiers, and their parents, keep a manual location after
+/// `frame_set`; the operand's shape key and material, and the texture of its own DISPLACE
+/// modifier, are animated).
+pub fn depsgraph_nodes(main: &Main, scene: IdRef<SceneId>, view_layer: &str) -> DepsgraphNodes {
+    let mut out = DepsgraphNodes::default();
     let Some(sc) = main.scenes.get(scene) else {
         return out;
     };
-    let mut queue: Vec<IdAny> = Vec::new();
-    out.insert(Root::Id(scene.any()));
-    queue.extend(sc.world.map(|w| w.any()));
-    queue.extend(sc.camera.map(|c| c.any()));
+    // (id, built visible)
+    let mut queue: Vec<(IdAny, bool)> = Vec::new();
+    out.visible.insert(Root::Id(scene.any()));
+    queue.extend(sc.world.map(|w| (w.any(), true)));
+    queue.extend(sc.camera.map(|c| (c.any(), true)));
     if let Some(vl) = sc
         .view_layers
         .iter()
@@ -166,41 +241,55 @@ pub fn depsgraph_roots(main: &Main, scene: IdRef<SceneId>, view_layer: &str) -> 
             vl.bases
                 .iter()
                 .filter(|b| vis.get(&b.object).is_some_and(|v| v.enabled_viewport))
-                .map(|b| b.object.any()),
+                .map(|b| (b.object.any(), true)),
         );
     }
-    while let Some(id) = queue.pop() {
-        if matches!(id.code, IdCode::AC | IdCode::LI | IdCode::SC)
-            || !out.insert(Root::Id(id))
-            || main.header(id).is_none()
-        {
+    // The IDs traversed visibly, and invisibly (a later visible visit traverses one again).
+    let mut seen_visible: HashSet<IdAny> = HashSet::new();
+    let mut seen_invisible: HashSet<IdAny> = HashSet::new();
+    while let Some((id, visible)) = queue.pop() {
+        if matches!(id.code, IdCode::AC | IdCode::LI | IdCode::SC) || main.header(id).is_none() {
             continue;
         }
-        if matches!(id.code, IdCode::MA | IdCode::WO) {
-            out.insert(Root::Embedded {
-                owner: id,
-                slot: EmbeddedSlot::NodeTree,
-            });
+        let root = Root::Id(id);
+        let first = if visible {
+            seen_visible.insert(id)
+        } else {
+            !seen_visible.contains(&id) && seen_invisible.insert(id)
+        };
+        if !first {
+            continue;
+        }
+        if visible || id.code != IdCode::OB {
+            out.visible.insert(root);
+            if matches!(id.code, IdCode::MA | IdCode::WO) {
+                out.visible.insert(Root::Embedded {
+                    owner: id,
+                    slot: EmbeddedSlot::NodeTree,
+                });
+            }
         }
         let start = queue.len();
-        main.for_each_ref_of(id, &mut |x| queue.push(x));
-        // `DepsgraphNodeBuilder::modifier_walk`: an object operand of a modifier disabled for
-        // the viewport (`show_viewport` off) is built invisible, so not animated; its other
-        // IDs (textures, node groups) are built as usual (verified on 5.2.4: a BOOLEAN operand
-        // and a MIRROR `mirror_object` of disabled modifiers keep a manual location after
-        // `frame_set`, a DISPLACE texture of a disabled modifier is animated).
-        if let Some(ob) = id.typed().and_then(|o| main.objects.get(o)) {
+        main.for_each_ref_of(id, &mut |x| queue.push((x, visible)));
+        if visible && let Some(ob) = id.typed().and_then(|o| main.objects.get(o)) {
             for m in ob.modifiers.iter().filter(|m| !m.show_viewport) {
                 for x in m.settings.id_refs().into_iter().filter_map(|(_, x)| x) {
+                    // One reference per modifier slot: the same object reached otherwise
+                    // (as the parent) stays visible.
                     if x.code == IdCode::OB
-                        && let Some(i) = queue[start..].iter().position(|q| *q == x)
+                        && let Some(q) = queue[start..].iter_mut().find(|q| q.0 == x && q.1)
                     {
-                        queue.remove(start + i);
+                        q.1 = false;
                     }
                 }
             }
         }
     }
+    out.invisible = seen_invisible
+        .into_iter()
+        .filter(|id| id.code == IdCode::OB && !seen_visible.contains(id))
+        .map(Root::Id)
+        .collect();
     out
 }
 

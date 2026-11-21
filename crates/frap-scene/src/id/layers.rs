@@ -476,6 +476,62 @@ pub(crate) fn set_layer_collection_flag(
 }
 
 // Ported from blender/source/blender/makesrna/intern/rna_layer.cc
+// (`rna_LayerCollection_exclude_update`, `rna_LayerCollection_exclude_update_recursive`;
+// Blender 5.2.4, GPL-2.0-or-later).
+/// `LayerCollection.exclude = v`: sets the flag, clears the layer collection's own
+/// `LAYER_COLLECTION_PREVIOUSLY_EXCLUDED`, then, on every write (also one that changes
+/// nothing), sets the whole subtree to the same value: excluding remembers in each descendant
+/// whether it was excluded already, and including re-includes only the descendants that were
+/// not. Verified on 5.2.4: after `Collection.exclude = True`, `children['Sub'].exclude` reads
+/// True and `exclude = False` reads False again; a Sub excluded before stays excluded; a
+/// second `exclude = True` remembers the first one's descendants as excluded; `exclude =
+/// False` on an included collection re-includes its excluded children; a grandchild included
+/// under an excluded child is re-included.
+pub(crate) fn set_layer_collection_exclude(
+    h: &mut dyn crate::Host,
+    this: &frap_rna::RnaPtr,
+    v: &frap_rna::Value,
+) -> Result<(), frap_rna::RnaError> {
+    fn recurse(children: &mut [LayerCollection], exclude: bool) {
+        for lc in children {
+            if exclude {
+                lc.previously_excluded = lc.exclude;
+                lc.exclude = true;
+            } else if !lc.previously_excluded {
+                lc.exclude = false;
+            }
+            recurse(&mut lc.children, exclude);
+        }
+    }
+    let (scene, i, path) = crate::id::paths::layer_collection_of(h.main(), this)?;
+    let Some(b) = v.as_bool() else {
+        return Ok(());
+    };
+    let (main, log) = h.main_mut();
+    let Some(old) = main
+        .scenes
+        .get(scene)
+        .and_then(|s| s.view_layers[i].layer_collection.at(&path))
+    else {
+        return Ok(());
+    };
+    let mut new = old.clone();
+    new.exclude = b;
+    new.previously_excluded = false;
+    recurse(&mut new.children, b);
+    if new == *old {
+        return Ok(());
+    }
+    if let Some(s) = main.scenes.get_mut(scene, log)
+        && let Some(lc) = s.view_layers[i].layer_collection.at_mut(&path)
+    {
+        *lc = new;
+    }
+    sync_scene(main, scene, log);
+    Ok(())
+}
+
+// Ported from blender/source/blender/makesrna/intern/rna_layer.cc
 // (`rna_LayerCollection_exclude_update`; Blender 5.2.4, GPL-2.0-or-later).
 /// The objects a write of `LayerCollection.exclude` at `this` tags for an animation update
 /// (`ID_RECALC_ANIMATION`): when the layer collection is not excluded after the write, every

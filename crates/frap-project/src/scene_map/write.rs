@@ -582,14 +582,22 @@ impl<'a> Writer<'a> {
     }
 
     fn layer_collection(&self, lc: &LayerCollection) -> J {
-        json!({
+        let mut j = json!({
             "collection": self.r(lc.collection),
             "exclude": lc.exclude,
             "hide_viewport": lc.hide_viewport,
             "holdout": lc.holdout,
             "indirect_only": lc.indirect_only,
             "children": lc.children.iter().map(|c| self.layer_collection(c)).collect::<Vec<_>>(),
-        })
+        });
+        // `LAYER_COLLECTION_PREVIOUSLY_EXCLUDED` (saved in .blend files too); written only when
+        // set, so files without it read as before (M5+M6 stabilization round 6).
+        if lc.previously_excluded
+            && let Some(m) = j.as_object_mut()
+        {
+            m.insert("previously_excluded".into(), J::Bool(true));
+        }
+        j
     }
 
     fn collection(&self, c: &Collection) -> Map<String, J> {

@@ -558,7 +558,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [x] | `render.render` | M1 | P0 | still M1 (Workbench); EEVEE M5; animation=True M6; output formats: every image format but JPEG2000 and AVIF, multilayer OpenEXR; video (FFMPEG) M8 (decision log M56S-2) |
+| [x] | `render.render` | M1 | P0 | still M1 (Workbench); EEVEE M5; animation=True M6; output formats: every image format but JPEG2000 and AVIF, multilayer OpenEXR; video (FFMPEG) M8 (decision log M56S-2); `scene=` / `layer=` other than the context ones and `use_sequencer_scene=True`: `OP_NOT_IMPLEMENTED` until M8 (deviations §2) |
 | [ ] | `render.opengl` | M8 | P2 | maps to Workbench from scene camera |
 
 ### `wm.* (files)`

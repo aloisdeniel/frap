@@ -403,6 +403,9 @@ pub struct Main {
     /// Runtime: the depsgraphs (scene, view layer name) the window has shown before its
     /// current one ([`crate::window::ShownDepsgraphs`]); not saved.
     pub shown_depsgraphs: crate::window::ShownDepsgraphs,
+    /// Runtime: the invisible depsgraph nodes with an animation update pending
+    /// ([`crate::window::InvisiblePending`]); not saved.
+    pub invisible_pending: crate::window::InvisiblePending,
 }
 
 /// Runs `$body` with `$m` bound to the `IdMap` of `$code` (every `IdCode`).
@@ -961,7 +964,16 @@ impl Main {
         }
         generic(&self.meshes, f);
         generic(&self.materials, f);
-        generic(&self.cameras, f);
+        // `Camera.dof.focus_object` is not a user (`IDWALK_CB_NOP`); a camera references no
+        // other object.
+        for (r, t) in self.cameras.iter() {
+            let me = r.any();
+            t.for_each_ref(&mut |x| {
+                if x.code != IdCode::OB {
+                    f(me, x);
+                }
+            });
+        }
         generic(&self.lights, f);
         generic(&self.worlds, f);
         generic(&self.images, f);

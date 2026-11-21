@@ -289,40 +289,14 @@ fn relink_layer_collections(
     }
 }
 
-/// `camera.dof.focus_object` is not a user reference (`IDWALK_CB_NOP`, so `Camera::for_each_ref`
-/// leaves it out) but `BKE_libblock_relink_to_newid` relinks it too (verified on 5.2.4: a full
-/// scene copy's camera focuses on the copied object).
-fn relink_camera_focus(
-    main: &mut Main,
-    a: IdAny,
-    map: &HashMap<IdAny, IdAny>,
-    log: &mut ChangeLog,
-) {
-    let Some(r) = a.typed::<frap_rna::CameraId>() else {
-        return;
-    };
-    let Some(to) = main
-        .cameras
-        .get(r)
-        .and_then(|c| c.fields.dof.focus_object)
-        .and_then(|f| map.get(&f).copied())
-    else {
-        return;
-    };
-    if let Some(c) = main.cameras.get_mut(r, log) {
-        c.fields.dof.focus_object = Some(to);
-    }
-}
-
 /// Applies `relink_in` to the ID `a`, whatever its type.
 fn relink_any(main: &mut Main, a: IdAny, map: &HashMap<IdAny, IdAny>, log: &mut ChangeLog) {
     match a.code {
         IdCode::OB => relink_in(&mut main.objects, a, map, log),
         IdCode::ME => relink_in(&mut main.meshes, a, map, log),
-        IdCode::CA => {
-            relink_in(&mut main.cameras, a, map, log);
-            relink_camera_focus(main, a, map, log);
-        }
+        // `dof.focus_object` too (`Camera::for_each_ref`; verified on 5.2.4: a full scene
+        // copy's camera focuses on the copied object).
+        IdCode::CA => relink_in(&mut main.cameras, a, map, log),
         IdCode::LA => relink_in(&mut main.lights, a, map, log),
         IdCode::AR => relink_in(&mut main.armatures, a, map, log),
         IdCode::PT => relink_in(&mut main.pointclouds, a, map, log),

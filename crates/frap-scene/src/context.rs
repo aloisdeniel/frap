@@ -78,6 +78,10 @@ pub struct LayerCollection {
     pub collection: Option<IdRef<CollectionId>>,
     /// `exclude`
     pub exclude: bool,
+    /// `LAYER_COLLECTION_PREVIOUSLY_EXCLUDED`: excluded already when an ancestor's
+    /// `exclude = True` excluded it, so re-including that ancestor keeps it excluded
+    /// ([`crate::id::layers::set_layer_collection_exclude`]). Not an RNA property.
+    pub previously_excluded: bool,
     /// `hide_viewport`
     pub hide_viewport: bool,
     /// `holdout`
@@ -94,6 +98,7 @@ impl LayerCollection {
         LayerCollection {
             collection,
             exclude: false,
+            previously_excluded: false,
             hide_viewport: false,
             holdout: false,
             indirect_only: false,
