@@ -37,8 +37,10 @@
 //!
 //! The material is read from its original node tree (an animated tree is never inlined), so
 //! no constant folding applies here. Not registered (no channel is exported for them; recorded
-//! in docs/deviations.md §2): the anisotropy node setup with textures, `KHR_materials_iridescence`,
-//! `KHR_materials_dispersion` and the `KHR_texture_transform` of textures.
+//! in docs/deviations.md §2): the anisotropy node setup with textures and the
+//! `KHR_texture_transform` of textures. `extensions/iridescence.py` (the glTF Material Output's
+//! `Iridescence Factor`, the `Thin Film` sockets and the thickness texture set-up) and
+//! `extensions/dispersion.py` (with a volume) are registered after the anisotropy (WP 7.7).
 
 use frap_gltf::json::Material as GMaterial;
 use frap_material::LowerCx;
@@ -423,6 +425,10 @@ pub fn paths(
     specular(&nav, &mut put);
     sheen(&nav, &mut put);
     anisotropy(&nav, &mut put);
+    iridescence(&nav, &mut put);
+    if gm.extensions.contains("KHR_materials_volume") {
+        dispersion(&nav, &mut put);
+    }
     // ior: unlinked, and a transmission/specular extension object exists (always for a
     // material with these sockets; `export_transmission` creates one unconditionally).
     if let Some(s) = nav.cx.get_socket("IOR")
@@ -744,6 +750,132 @@ fn anisotropy(nav: &Nav, put: &mut Put) {
             1,
         ),
     );
+}
+
+/// The node of the first link into the first input of `n` named `name` (`inputs[name]`,
+/// enabled or not, `links[0].from_node`: no reroute is skipped).
+fn first_link_from<'a>(nav: &Nav<'a>, n: &Node, name: &str) -> Option<&'a Node> {
+    let s = n.inputs.iter().find(|s| s.name == name)?;
+    let l = nav.cx.tree.link_into(n.uid, &s.identifier)?;
+    nav.cx.tree.node(l.from_node)
+}
+
+/// The number of links from output `o` of `n`.
+fn links_from(nav: &Nav, n: &Node, o: usize) -> usize {
+    let id = &n.outputs[o].identifier;
+    nav.cx
+        .tree
+        .links
+        .iter()
+        .filter(|l| l.from_node == n.uid && l.from_socket == *id)
+        .count()
+}
+
+/// `detect_iridescence_thickness_texure`: the Value nodes holding the minimum and maximum
+/// thickness of the texture set-up (Image Texture → Separate Color → the Factor of a FLOAT
+/// Mix whose A is a Value node also linked into the glTF Material Output's minimum and whose B
+/// is another Value node).
+fn iridescence_texture<'a>(
+    nav: &Nav<'a>,
+    thickness: In<'a>,
+    minimum: Option<In<'a>>,
+) -> Option<(&'a Node, &'a Node)> {
+    let mix = nav
+        .cx
+        .tree
+        .link_into(thickness.node.uid, &thickness.socket().identifier)
+        .and_then(|l| nav.cx.tree.node(l.from_node))?;
+    if mix.bl_idname != "ShaderNodeMix" || mix.prop_str("data_type") != "FLOAT" {
+        return None;
+    }
+    let sep = first_link_from(nav, mix, "Factor")?;
+    if sep.bl_idname != "ShaderNodeSeparateColor" {
+        return None;
+    }
+    let sep_in = sep.inputs.first()?;
+    let tex = nav
+        .cx
+        .tree
+        .link_into(sep.uid, &sep_in.identifier)
+        .and_then(|l| nav.cx.tree.node(l.from_node))?;
+    if tex.bl_idname != "ShaderNodeTexImage" {
+        return None;
+    }
+    let min_node = first_link_from(nav, mix, "A")?;
+    if min_node.bl_idname != "ShaderNodeValue" || links_from(nav, min_node, 0) != 2 {
+        return None;
+    }
+    let minimum = minimum?;
+    let from = nav
+        .cx
+        .tree
+        .link_into(minimum.node.uid, &minimum.socket().identifier)?
+        .from_node;
+    if from != min_node.uid {
+        return None;
+    }
+    let max_node = first_link_from(nav, mix, "B")?;
+    (max_node.bl_idname == "ShaderNodeValue").then_some((min_node, max_node))
+}
+
+/// `export_iridescence` (with the glTF Material Output's `Iridescence Factor`): the
+/// `Thin Film IOR` always, the factor's path, the `Thin Film Thickness` (unlinked, or the
+/// maximum of the texture set-up with its minimum), else the thickness factor's path.
+fn iridescence(nav: &Nav, put: &mut Put) {
+    let Some(thickness) = nav.cx.get_socket("Thin Film Thickness") else {
+        return;
+    };
+    let Some(factor) = nav.cx.gltf_output_input("Iridescence Factor") else {
+        return;
+    };
+    let minimum = nav.cx.gltf_output_input("Iridescence Thickness Minimum");
+    let e = "/materials/XXX/extensions/KHR_materials_iridescence";
+    if let Some(ior) = nav.cx.get_socket("Thin Film IOR") {
+        put(
+            Some(input_key(ior.node, ior.index)),
+            PathInfo::new(&format!("{e}/iridescenceIor"), 1),
+        );
+    }
+    put(
+        nav.factor(factor).and_then(|c| c.path),
+        PathInfo::new(&format!("{e}/iridescenceFactor"), 1),
+    );
+    let maximum = PathInfo::new(&format!("{e}/iridescenceThicknessMaximum"), 1);
+    if !nav.is_linked(thickness) {
+        put(Some(input_key(thickness.node, thickness.index)), maximum);
+        return;
+    }
+    if let Some((min_node, max_node)) = iridescence_texture(nav, thickness, minimum) {
+        put(Some(output_key(max_node, 0)), maximum);
+        put(
+            Some(output_key(min_node, 0)),
+            PathInfo::new(&format!("{e}/iridescenceThicknessMinimum"), 1),
+        );
+        return;
+    }
+    // `fac != 400.0` holds for a linked socket without a constant factor too (None).
+    if let Some(c) = nav.factor(thickness)
+        && c.value != Some(400.0)
+    {
+        put(c.path, maximum);
+    }
+}
+
+/// `export_dispersion` (with `KHR_materials_volume`): the glTF Material Output's
+/// `Dispersion` socket itself (`get_const_from_default_value_socket`).
+fn dispersion(nav: &Nav, put: &mut Put) {
+    let Some(d) = nav.cx.gltf_output_input("Dispersion") else {
+        return;
+    };
+    if d.socket().ty == SocketType::Value {
+        put(
+            Some(input_key(d.node, d.index)),
+            PathInfo::new(
+                "/materials/XXX/extensions/KHR_materials_dispersion/dispersion",
+                1,
+            ),
+        );
+    }
 }
 
 /// `gather_material_pbr_metallic_roughness` (base colour and alpha, metallic, roughness) and

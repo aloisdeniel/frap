@@ -132,8 +132,7 @@ pub const WARN_DIFFERENT_COLORS: &str =
     "glTF specification does not allow this case (multiple materials with different Vertex Color)";
 /// `manage_material_info`: with `export_vertex_color='MATERIAL'`, a material reads no colour
 /// attribute while the mesh has an active one (once per mesh).
-pub const WARN_ACTIVE_NOT_USED: &str =
-    "The active Vertex Color will not be exported, as it is not used in the node tree of the material";
+pub const WARN_ACTIVE_NOT_USED: &str = "The active Vertex Color will not be exported, as it is not used in the node tree of the material";
 /// `manage_material_info`: a material's alpha reads a colour attribute, its colour none (each
 /// such material).
 pub const WARN_ALPHA_WITHOUT_COLOR: &str =
@@ -388,8 +387,8 @@ fn vc_info(cx: &MeshExportCx, mats: &[Option<IdRef<MaterialId>>], bucket: i64) -
                     };
                     // `export_image_format='NONE'`: `__gather_base_color_factor` skips
                     // `gather_color_info`, so the colour attribute is not used (WP 7.7).
-                    let image_none = s.export_image_format
-                        == crate::export::settings::ExportImageFormat::None;
+                    let image_none =
+                        s.export_image_format == crate::export::settings::ExportImageFormat::None;
                     VcInfo {
                         has_material: true,
                         color: (v.color && !image_none).then(|| r(&v.attribute)),
@@ -834,7 +833,10 @@ mod tests {
             None,
             &[(0, alpha_only.clone()), (1, alpha_only)],
         );
-        assert_eq!(p.warnings, [WARN_ALPHA_WITHOUT_COLOR, WARN_ALPHA_WITHOUT_COLOR]);
+        assert_eq!(
+            p.warnings,
+            [WARN_ALPHA_WITHOUT_COLOR, WARN_ALPHA_WITHOUT_COLOR]
+        );
         // Three materials with three colours: warned once.
         let using = |n: &str| VcInfo {
             has_material: true,

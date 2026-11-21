@@ -191,7 +191,9 @@ mod tests {
     /// calculate tangents. Please try to triangulate the mesh first.`.
     #[test]
     fn ngon_mesh_warns_and_exports_no_tangent() {
-        let mut m = frap_mesh::primitives::cylinder::cylinder(&frap_mesh::primitives::cylinder::Cylinder::default());
+        let mut m = frap_mesh::primitives::cylinder::cylinder(
+            &frap_mesh::primitives::cylinder::Cylinder::default(),
+        );
         m.header.name = "Cylinder".into();
         let main = Main::default();
         let s = settings(true, true);

@@ -77,6 +77,13 @@ pub fn gather(g: &mut Gather) -> Result<(), ExportError> {
         pointers |= convert_trs(g) > 0;
     }
     keep_animated_empty_extensions(g);
+    if check_iridescence(g) {
+        pointers = g.doc.animations.iter().any(|a| {
+            a.channels
+                .iter()
+                .any(|c| c.target.path == AnimationPath::Pointer)
+        });
+    }
     if pointers {
         g.use_extension(
             KhrAnimationPointer::NAME,
@@ -84,6 +91,97 @@ pub fn gather(g: &mut Gather) -> Result<(), ExportError> {
         );
     }
     Ok(())
+}
+
+/// `export.py` `__check_iridescence` with pointer animation (WP 7.7): a material keeps
+/// `KHR_materials_iridescence` only when its factor is animated or not 0 and its maximum
+/// thickness is animated or not 0 (static values from the material, as the gatherer wrote them
+/// before frap's static exporter dropped the extension); otherwise the extension goes and so do
+/// the channels pointing into it, and an animation left without channels. Returns whether
+/// channels were removed. The add-on keeps the removed channels' sampler indices (they point
+/// past the shortened sampler list, an invalid file); frap renumbers them (docs/deviations.md
+/// §1).
+pub fn check_iridescence(g: &mut Gather) -> bool {
+    const NAME: &str = "KHR_materials_iridescence";
+    let main = g.main;
+    let settings = g.settings;
+    let mut drop: Vec<usize> = Vec::new();
+    for (i, m) in g.doc.materials.iter().enumerate() {
+        if !m.extensions.contains(NAME) {
+            continue;
+        }
+        let animated = |member: &str| {
+            let want = format!("/materials/{i}/extensions/{NAME}/{member}");
+            g.doc.animations.iter().any(|a| {
+                a.channels.iter().any(|c| {
+                    c.target.path == AnimationPath::Pointer
+                        && KhrAnimationPointer::of(&c.target).as_deref() == Some(want.as_str())
+                })
+            })
+        };
+        let lowered = m
+            .name
+            .as_deref()
+            .and_then(|n| main.materials.find(n))
+            .and_then(|r| main.materials.get(r))
+            .map(|mat| crate::export::materials::lower::lowered_for(main, mat, settings));
+        let Some(ir) = lowered.as_ref().and_then(|lm| lm.ext.iridescence.as_ref()) else {
+            continue;
+        };
+        if (!animated("iridescenceFactor") && ir.factor.factor == 0.0)
+            || (!animated("iridescenceThicknessMaximum") && ir.thickness_max.factor == 0.0)
+        {
+            drop.push(i);
+        }
+    }
+    if drop.is_empty() {
+        return false;
+    }
+    let mut removed = false;
+    for &i in &drop {
+        g.doc.materials[i].extensions.remove(NAME);
+        if let Some(c) = g
+            .state::<crate::export::ext_order::CreatedEmpty>()
+            .0
+            .get_mut(&(i as frap_gltf::json::Index))
+        {
+            c.retain(|e| *e != NAME);
+        }
+        let prefix = format!("/materials/{i}/extensions/{NAME}/");
+        for a in &mut g.doc.animations {
+            let before = a.channels.len();
+            a.channels.retain(|c| {
+                !(c.target.path == AnimationPath::Pointer
+                    && KhrAnimationPointer::of(&c.target).is_some_and(|p| p.starts_with(&prefix)))
+            });
+            if a.channels.len() == before {
+                continue;
+            }
+            removed = true;
+            // Keep the samplers still used, renumbered.
+            let mut keep: Vec<Option<usize>> = vec![None; a.samplers.len()];
+            let mut samplers = Vec::new();
+            for c in &mut a.channels {
+                let s = c.sampler as usize;
+                let n = match keep.get(s).copied().flatten() {
+                    Some(n) => n,
+                    None => {
+                        samplers.push(a.samplers[s].clone());
+                        keep[s] = Some(samplers.len() - 1);
+                        samplers.len() - 1
+                    }
+                };
+                c.sampler = n as frap_gltf::json::Index;
+            }
+            a.samplers = samplers;
+        }
+    }
+    g.doc.animations.retain(|a| !a.channels.is_empty());
+    if !g.doc.materials.iter().any(|m| m.extensions.contains(NAME)) {
+        g.doc.extensions_used.retain(|e| e != NAME);
+        g.doc.extensions_required.retain(|e| e != NAME);
+    }
+    removed
 }
 
 /// `__gather_extensions`' order of the `KHR_materials_*` extensions.
