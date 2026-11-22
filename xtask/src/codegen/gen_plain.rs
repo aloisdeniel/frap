@@ -123,6 +123,8 @@ const PLAIN: &[PlainSpec] = &[
             "uv_select_mode",
             "uv_sticky_select_mode",
             "use_uv_select_island",
+            // M8 (WP 8.3.2): the copy buffer of `mesh.normals_tools` (`ts->normal_vector`).
+            "normal_vector",
         ]),
         exclude: &[],
         own_only: false,

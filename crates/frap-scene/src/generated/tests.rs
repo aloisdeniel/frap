@@ -138,6 +138,7 @@ fn default_equals_fresh_tool_settings() {
     check("ToolSettings", "use_uv_select_island", |p| v.rna_get(p));
     check("ToolSettings", "mesh_select_mode", |p| v.rna_get(p));
     check("ToolSettings", "vertex_group_weight", |p| v.rna_get(p));
+    check("ToolSettings", "normal_vector", |p| v.rna_get(p));
     let _ = ["ToolSettings"];
 }
 

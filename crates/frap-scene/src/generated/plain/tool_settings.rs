@@ -66,6 +66,8 @@ pub struct ToolSettings {
     pub mesh_select_mode: [bool; 3],
     /// `vertex_group_weight`: Weight to assign in vertex groups
     pub vertex_group_weight: f32,
+    /// `normal_vector`: Normal vector used to copy, add or multiply
+    pub normal_vector: [f32; 3],
     /// DNA `unwrapper`: the `uv.unwrap` method a call without `method` uses (no RNA property)
     pub unwrapper: SmolStr,
     /// DNA `uvcalc_flag`: `UVCALC_FILLHOLES` (1), `UVCALC_NO_ASPECT_CORRECT` (2), `UVCALC_USESUBSURF` (8), `UVCALC_UNWRAP_NO_FLIP` (64), `UVCALC_UNWRAP_USE_WEIGHTS` (128) (no RNA property)
@@ -112,6 +114,7 @@ impl Default for ToolSettings {
             use_uv_select_island: false,
             mesh_select_mode: [true, false, false],
             vertex_group_weight: 1.0,
+            normal_vector: [0.0, 0.0, 0.0],
             unwrapper: SmolStr::new_static("ANGLE_BASED"),
             uvcalc_flag: 1,
             uvcalc_margin: 0.001,
@@ -126,7 +129,7 @@ impl Default for ToolSettings {
 
 impl ToolSettings {
     /// Names of the stored RNA properties, in field order.
-    pub const STORED: [&'static str; 25] = ["use_proportional_edit", "use_proportional_edit_objects", "use_proportional_projected", "use_proportional_connected", "lock_markers", "proportional_edit_falloff", "proportional_size", "double_threshold", "transform_pivot_point", "use_transform_pivot_point_align", "use_transform_data_origin", "use_transform_skip_children", "use_mesh_automerge", "use_mesh_automerge_and_split", "use_snap", "snap_elements", "snap_target", "use_keyframe_insert_auto", "keyframe_type", "uv_select_mode", "uv_sticky_select_mode", "use_uv_select_sync", "use_uv_select_island", "mesh_select_mode", "vertex_group_weight"];
+    pub const STORED: [&'static str; 26] = ["use_proportional_edit", "use_proportional_edit_objects", "use_proportional_projected", "use_proportional_connected", "lock_markers", "proportional_edit_falloff", "proportional_size", "double_threshold", "transform_pivot_point", "use_transform_pivot_point_align", "use_transform_data_origin", "use_transform_skip_children", "use_mesh_automerge", "use_mesh_automerge_and_split", "use_snap", "snap_elements", "snap_target", "use_keyframe_insert_auto", "keyframe_type", "uv_select_mode", "uv_sticky_select_mode", "use_uv_select_sync", "use_uv_select_island", "mesh_select_mode", "vertex_group_weight", "normal_vector"];
     /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
     /// `.frap`; serde skips them).
     pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
@@ -169,6 +172,7 @@ impl ToolSettings {
             "use_uv_select_island" => Field::Value(Value::Bool(self.use_uv_select_island)),
             "mesh_select_mode" => Field::Value(Value::BoolArray(SmallVec::from_slice(&self.mesh_select_mode))),
             "vertex_group_weight" => Field::Value(Value::Float(self.vertex_group_weight)),
+            "normal_vector" => Field::Value(Value::FloatArray { data: SmallVec::from_slice(&self.normal_vector), shape: prop.array, tag: MathTag::for_subtype(prop.subtype) }),
             _ => return None,
         })
     }
@@ -201,6 +205,7 @@ impl ToolSettings {
             "use_uv_select_island" => self.use_uv_select_island = FromValue::from_value(&v),
             "mesh_select_mode" => self.mesh_select_mode = FromValue::from_value(&v),
             "vertex_group_weight" => self.vertex_group_weight = FromValue::from_value(&v),
+            "normal_vector" => self.normal_vector = FromValue::from_value(&v),
             _ => return None,
         }
         Some(Ok(SetOutcome::Done))
