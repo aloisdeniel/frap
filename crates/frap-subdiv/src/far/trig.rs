@@ -1,18 +1,28 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! The C library trigonometry Blender's OpenSubdiv build calls in `CatmarkLimits<float>` and
-//! `GregoryConverter<float>`: `cos`, `sin` and `cosf` of the platform libm, and Apple's
-//! `__sincos_stret` where clang merges a `sin`/`cos` pair of one argument
+//! `GregoryConverter<float>`, reproduced portably: `cos`, `sin` and `cosf` of Apple's libm, and
+//! Apple's `__sincos_stret` where clang merges a `sin`/`cos` pair of one argument
 //! (`ComputeBoundaryPointWeights`: `cos(theta)`/`sin(theta)` and the edge angles; verified in
-//! the disassembly of Blender 5.2.4's `libosdCPU.dylib`).
+//! the disassembly of Blender 5.2.4's `libosdCPU.dylib`, the arm64 macOS build that is frap's
+//! reference platform).
 //!
-//! Deliberate exception to rule 2.2.12 (portable `libm::*`): the face-varying stencils must be
-//! bit-identical to Blender's, which uses the platform libm, so this module calls the platform
-//! functions (`f64::cos` / `f64::sin` / `f32::cos` lower to libSystem's `cos`/`sin`/`cosf`;
-//! `black_box` keeps LLVM from merging a pair into `__sincos_stret` in some builds only).
-//! `__sincos_stret` differs from the separate calls by one ulp for a few arguments; those are
-//! tabulated below for every boundary-span angle `(pi / n) * k`, `n <= 256`, `k <= n + 2`
-//! (generated with Blender's platform libm, macOS 26 arm64). `cosf` and the cosine of
-//! `__sincosf_stret` agree on all of `GregoryConverter`'s angles (`pi / n`, `2 pi / n`).
+//! Rule 2.2.12 holds: every value comes from the `libm` crate, so frap's output is the same on
+//! every OS. Where Apple's libm rounds differently, tables correct the `libm` result:
+//! - `cos` and `sin`: one ulp up or down at the arguments listed in `table` (every argument
+//!   `CatmarkLimits` uses up to valence 256; see there);
+//! - `__sincos_stret`: differs from the separate `sin`/`cos` calls by one ulp for a few
+//!   arguments, tabulated below with Apple's values for every boundary-span angle
+//!   `(pi / n) * k`, `n <= 256`, `k <= n + 2`;
+//! - `cosf`: the `libm` crate's `cosf` equals Apple's (and the cosine of `__sincosf_stret`) on
+//!   all of `GregoryConverter`'s angles (`pi / n`, `2 pi / n`), checked for `n` up to 65535.
+//!
+//! Limit: past valence 256 the `libm` values are used as they are. Apple's differ from them at
+//! about 4% of those arguments, by one ulp in `f64`, which the rounding of the weights to `f32`
+//! usually hides; the UVs around such a vertex can then differ from Blender's in the last bit
+//! (deviation D-124's note). The tables were generated with Blender's platform libm (macOS 26,
+//! arm64); `tests::tables_reproduce_the_platform_libm` checks them there.
+
+mod table;
 
 /// `(argument, sin, cos)` bit patterns where `__sincos_stret` differs from `sin`/`cos`.
 const SINCOS_EXCEPTIONS: &[(u64, u64, u64)] = &[
@@ -134,25 +144,34 @@ const SINCOS_EXCEPTIONS: &[(u64, u64, u64)] = &[
     (0x3fe900a522c081c1, 0x3fe688ff8d68dd98, 0x3fe6b824b0eeaf45),
 ];
 
-/// The platform `cos`.
-#[allow(clippy::disallowed_methods)]
+/// Apple's `cos` (the `libm` crate's, corrected by `table`).
 #[inline]
 pub(crate) fn cos(x: f64) -> f64 {
-    std::hint::black_box(x).cos()
+    corrected(libm::cos(x), x, table::COS_UP, table::COS_DOWN)
 }
 
-/// The platform `sin`.
-#[allow(clippy::disallowed_methods)]
+/// Apple's `sin` (the `libm` crate's, corrected by `table`).
 #[inline]
 pub(crate) fn sin(x: f64) -> f64 {
-    std::hint::black_box(x).sin()
+    corrected(libm::sin(x), x, table::SIN_UP, table::SIN_DOWN)
 }
 
-/// The platform `cosf`.
-#[allow(clippy::disallowed_methods)]
+/// Apple's `cosf` (equal to the `libm` crate's on every argument frap passes).
 #[inline]
 pub(crate) fn cosf(x: f32) -> f32 {
-    std::hint::black_box(x).cos()
+    libm::cosf(x)
+}
+
+/// `value` moved one ulp (in bit-pattern order) when `x` is listed in `up` or `down`.
+fn corrected(value: f64, x: f64, up: &[u64], down: &[u64]) -> f64 {
+    let bits = x.to_bits();
+    if up.binary_search(&bits).is_ok() {
+        f64::from_bits(value.to_bits() + 1)
+    } else if down.binary_search(&bits).is_ok() {
+        f64::from_bits(value.to_bits() - 1)
+    } else {
+        value
+    }
 }
 
 /// `__sincos_stret(x)`: `(sin, cos)`.
@@ -171,6 +190,54 @@ pub(crate) fn sincos(x: f64) -> (f64, f64) {
 mod tests {
     use super::*;
 
+    /// The arguments `CatmarkLimits<float>` passes to `cos` and `sin` up to valence `max`.
+    fn arguments(max: usize) -> (Vec<f64>, Vec<f64>) {
+        let pi = std::f64::consts::PI;
+        let (mut c, mut s) = (Vec::new(), Vec::new());
+        for n in 1..=max {
+            let face_angle = 2.0 * pi * (1.0 / n as f64);
+            c.extend((0..n).map(|i| face_angle * i as f64));
+            let theta = pi / n as f64;
+            for k in 0..=n + 2 {
+                c.push(theta * k as f64);
+                s.push(theta * k as f64);
+            }
+        }
+        (c, s)
+    }
+
+    #[test]
+    fn tables_are_sorted_and_disjoint() {
+        for t in [
+            table::COS_UP,
+            table::COS_DOWN,
+            table::SIN_UP,
+            table::SIN_DOWN,
+        ] {
+            assert!(t.windows(2).all(|w| w[0] < w[1]));
+        }
+        for (up, down) in [
+            (table::COS_UP, table::COS_DOWN),
+            (table::SIN_UP, table::SIN_DOWN),
+        ] {
+            assert!(up.iter().all(|x| down.binary_search(x).is_err()));
+        }
+        // Every listed argument is one of `CatmarkLimits`' (the tables hold nothing else).
+        let (c, s) = arguments(256);
+        let mut c: Vec<u64> = c.iter().map(|x| x.to_bits()).collect();
+        let mut s: Vec<u64> = s.iter().map(|x| x.to_bits()).collect();
+        c.sort_unstable();
+        s.sort_unstable();
+        for (t, all) in [
+            (table::COS_UP, &c),
+            (table::COS_DOWN, &c),
+            (table::SIN_UP, &s),
+            (table::SIN_DOWN, &s),
+        ] {
+            assert!(t.iter().all(|x| all.binary_search(x).is_ok()));
+        }
+    }
+
     #[test]
     fn exceptions_are_sorted_and_one_ulp_apart() {
         for w in SINCOS_EXCEPTIONS.windows(2) {
@@ -181,6 +248,35 @@ mod tests {
             let ds = (sin(x).to_bits() as i64 - s as i64).abs();
             let dc = (cos(x).to_bits() as i64 - c as i64).abs();
             assert!(ds <= 1 && dc <= 1, "{x}");
+        }
+    }
+
+    /// On the reference platform the corrected `libm` values are the platform's, bit for bit,
+    /// for every argument up to valence 256 (`cosf` up to 65535).
+    #[cfg(all(target_os = "macos", target_arch = "aarch64"))]
+    #[test]
+    #[allow(clippy::disallowed_methods)]
+    fn tables_reproduce_the_platform_libm() {
+        use std::hint::black_box;
+        let (c, s) = arguments(256);
+        for x in c {
+            assert_eq!(cos(x).to_bits(), black_box(x).cos().to_bits(), "cos({x:e})");
+        }
+        for x in s {
+            assert_eq!(sin(x).to_bits(), black_box(x).sin().to_bits(), "sin({x:e})");
+        }
+        for n in 1..=65535u32 {
+            let nf = n as f32;
+            for x in [
+                std::f32::consts::PI / nf,
+                2.0f32 * std::f32::consts::PI / nf,
+            ] {
+                assert_eq!(
+                    cosf(x).to_bits(),
+                    black_box(x).cos().to_bits(),
+                    "cosf({x:e})"
+                );
+            }
         }
     }
 }

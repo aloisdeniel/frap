@@ -163,15 +163,27 @@ fn data_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/fvar/data")
 }
 
-#[test]
-fn uvs_are_bit_identical_to_blender() {
-    let mut names: Vec<PathBuf> = std::fs::read_dir(data_dir())
+fn dumps_in(dir: &Path) -> Vec<PathBuf> {
+    let mut names: Vec<PathBuf> = std::fs::read_dir(dir)
         .unwrap()
         .map(|e| e.unwrap().path())
         .filter(|p| p.extension().is_some_and(|x| x == "json"))
         .collect();
     names.sort();
+    names
+}
+
+/// The committed dumps, plus those of the directories in `FRAP_FVAR_DUMPS` (separated like
+/// `PATH`; for dumps written by `tests/fvar/dump_fvar.py` that are too large to commit).
+#[test]
+fn uvs_are_bit_identical_to_blender() {
+    let mut names = dumps_in(&data_dir());
     assert!(names.len() >= 50, "{} dumps", names.len());
+    if let Some(extra) = std::env::var_os("FRAP_FVAR_DUMPS") {
+        for dir in std::env::split_paths(&extra) {
+            names.extend(dumps_in(&dir));
+        }
+    }
     let mut failures = Vec::new();
     for p in &names {
         let name = p.file_stem().unwrap().to_string_lossy().to_string();

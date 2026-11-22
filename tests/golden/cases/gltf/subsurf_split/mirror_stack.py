@@ -2,12 +2,12 @@
 # SUBSURF level 2 + SOLIDIFY stack exported with export_apply=True: Blender writes 41666 glTF
 # vertices (frap before WP 8.11: 39144), the UV corners of the subdivided mesh splitting where
 # OpenSubdiv's per-patch face-varying evaluation leaves shared corners an ulp apart. The UV map
-# is Blender's `uv.smart_project()` of Suzanne written literally (shortest f32 decimals), so the
-# case does not depend on the last bits of frap's smart_project. Re-imported so that the vertex
-# count is compared; only the re-imported vertices are dumped (edges and faces deleted in Edit
-# Mode) so the fixture stays small; corner UVs and normals are compared in the exported file,
-# where SOLIDIFY's shell normals are within 2.1e-4 of Blender's (hence the tolerance; the UVs
-# are bit-identical).
+# is Blender's `uv.smart_project()` of Suzanne written literally (shortest f32 decimals): frap's
+# own smart_project differs in the last bit (open deviation D-145: 41654 vertices). Re-imported
+# so that the vertex count is compared; only the re-imported vertices are dumped (edges and
+# faces deleted in Edit Mode) so the fixture stays small; corner UVs and normals are compared in
+# the exported file: the UVs are bit-identical, SOLIDIFY's shell normals within 2.1e-4 of
+# Blender's (deviation D-122, hence the tolerance).
 # golden: startup=empty compare=glb:out/stack.glb,mesh:Suzanne tier=T2 tol=5e-4
 import bpy
 bpy.ops.mesh.primitive_monkey_add()
