@@ -1163,7 +1163,7 @@ fn view_vector(P: vec3<f32>) -> vec3<f32> {
 // guarantee (WGSL bounds it on [-π, π] only) and the 1e4 factor turns its last bits into the
 // threshold, so every adapter (Metal, lavapipe, WARP) drew a different noise pattern. The
 // integer hash is bit-identical everywhere and as uniform; Blender's own pattern depends on
-// its GPU's `sin` (deviations D-130).
+// its GPU's `sin` (deviations D-150).
 fn hashed_transparency_pcg3d(v: vec3<u32>) -> vec3<u32> {
     var u = v * 1664525u + 1013904223u;
     u.x += u.y * u.z;

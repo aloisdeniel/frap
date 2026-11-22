@@ -75,9 +75,6 @@ pub const UTILITY_TX: &[u8] = include_bytes!("pipeline/utility_tx.bin");
 /// Layers of [`UTILITY_TX`].
 pub const UTILITY_LAYERS: u32 = 20;
 /// Depth format of the camera pass.
-/// DIAG (temporary): the shadow slope bias.
-pub(crate) static DIAG_SLOPE: std::sync::atomic::AtomicU32 =
-    std::sync::atomic::AtomicU32::new((-1.5f32).to_bits());
 pub const DEPTH_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
 /// Texture slots per material.
 pub const MAX_TEXTURES: usize = 8;
@@ -925,13 +922,9 @@ fn create_resources(gpu: &Gpu) -> Resources {
             depth_write_enabled: Some(true),
             depth_compare: Some(wgpu::CompareFunction::Greater),
             stencil: wgpu::StencilState::default(),
-            // Reverse depth: push the occluders away from the light (smaller depth).
-            bias: wgpu::DepthBiasState {
-                constant: 0,
-                // DIAG (temporary): FRAP_DIAG_SHADOW_SLOPE overrides the slope bias.
-                slope_scale: f32::from_bits(DIAG_SLOPE.load(std::sync::atomic::Ordering::Relaxed)),
-                clamp: 0.0,
-            },
+            // The slope bias is applied by `fs_shadow`, which writes the depth
+            // (eevee_shadow.wgsl).
+            bias: wgpu::DepthBiasState::default(),
         }),
         multisample: wgpu::MultisampleState::default(),
         // Hashed transparent shadows (WP 5.5): discards by the caster's alpha.

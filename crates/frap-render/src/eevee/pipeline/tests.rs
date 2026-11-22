@@ -761,8 +761,7 @@ fn diag_shadow_faces() {
         return;
     }
     let Some(gpu) = gpu() else { return };
-    for slope in [-1.5f32, 1.5] {
-        DIAG_SLOPE.store(slope.to_bits(), std::sync::atomic::Ordering::Relaxed);
+    for slope in [0.0f32] {
         for (radius, samples, off) in [
             (0.0f32, 1u32, [0.0f32, 0.0]),
             (0.0, 1, [0.1, 0.03]),
@@ -846,4 +845,11 @@ fn diag_shadow_lookup() {
         }
     }
     DIAG_SHADER.store(false, std::sync::atomic::Ordering::Relaxed);
+}
+
+#[test]
+fn diag_dump_forward() {
+    if let Ok(p) = std::env::var("FRAP_DIAG_DUMP") {
+        std::fs::write(p, forward_source()).unwrap();
+    }
 }
