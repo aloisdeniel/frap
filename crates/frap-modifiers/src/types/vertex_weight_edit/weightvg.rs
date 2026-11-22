@@ -56,7 +56,7 @@ impl Falloff {
 pub(crate) fn strhash(s: &str) -> u32 {
     let mut h: u32 = 5381;
     for &c in s.as_bytes() {
-        h = (h << 5).wrapping_add(h).wrapping_add(u32::from(c));
+        h = (h << 5).wrapping_add(h).wrapping_add((c as i8) as u32);
     }
     h
 }
@@ -246,6 +246,19 @@ mod tests {
             }
             h
         });
+    }
+
+    #[test]
+    fn strhash_sign_extends_non_ascii_bytes() {
+        // Blender reads the name as `const signed char *`: UTF-8 bytes >= 0x80 sign-extend.
+        // "É" is 0xC3 0x89.
+        let expected = 5381u32
+            .wrapping_mul(33)
+            .wrapping_add(0xFFFF_FFC3)
+            .wrapping_mul(33)
+            .wrapping_add(0xFFFF_FF89);
+        assert_eq!(strhash("\u{c9}"), expected);
+        assert_ne!(strhash("\u{c9}bauche"), strhash("Ebauche"));
     }
 
     #[test]

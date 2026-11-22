@@ -732,6 +732,8 @@ source: crates/frap-schema/tests/describe_ops.rs
     "headless": "native",
     "planned": "M8",
     "extension": false,
-    "notes": []
+    "notes": [
+      "layers_select_src / layers_select_dst: with use_reverse_transfer the item sets swap (src: ACTIVE, NAME, INDEX; dst: ACTIVE, ALL, BONE_SELECT, BONE_DEFORM)"
+    ]
   }
 }

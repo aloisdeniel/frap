@@ -17,8 +17,11 @@
 //! The transfer's errors (`'Topology' mapping cannot be used in this case`, …) are ERROR
 //! reports. `use_freeze` only reports `Operator is frozen, changes to its settings won't take
 //! effect until you unfreeze it` (INFO). The layer selections are the static items
-//! (`ACTIVE`/`ALL`/`BONE_SELECT`/`BONE_DEFORM` → `ACTIVE`/`NAME`/`INDEX`); the per-layer items
-//! Blender adds at run time (a vertex group or UV map by name) are not offered.
+//! (`ACTIVE`/`ALL`/`BONE_SELECT`/`BONE_DEFORM` → `ACTIVE`/`NAME`/`INDEX`); with
+//! `use_reverse_transfer` the two item sets swap, as `dt_layers_select_itemf` does
+//! (`layers_select_src` takes `ACTIVE`/`NAME`/`INDEX`, `layers_select_dst` the source items),
+//! and exec swaps the two codes back. The per-layer items Blender adds at run time (a vertex
+//! group or UV map by name) are not offered.
 //!
 //! Poll: an active mesh object with data (`data_transfer_poll`).
 
@@ -26,8 +29,11 @@ use frap_modifiers::data_transfer::modes::{self, DT_MULTILAYER_INDEX_MAX};
 use frap_modifiers::data_transfer::{Destination, Source, SpaceTransform, TransferParams, transfer};
 use frap_op::operator;
 use frap_op::prelude::*;
-use frap_op::{Poll, PollFail, PollReq};
-use frap_rna::{IdRef, MeshId, ObjectId};
+use frap_op::{EnumItemOwned, Poll, PollFail, PollReq};
+use frap_rna::{
+    EnumItem, IdRef, MeshId, ObjectId, OperatorSpec, PropKind, PyExc, RnaError, RnaErrorKind,
+};
+use smol_str::SmolStr;
 use frap_scene::Context;
 use frap_scene::EvaluatedObject;
 use frap_spec_ops_object::object;
@@ -174,8 +180,138 @@ pub(crate) fn layer_arrays(
     (src, dst)
 }
 
-#[operator(poll = TRANSFER_POLL, tier = T2)]
-fn exec(cx: &mut OpCtx, p: object::DataTransfer) -> OpResult {
+/// The static items of `prop` in the spec (`rna_enum_dt_layers_select_src_items` /
+/// `_dst_items`).
+fn spec_items(prop: &str) -> &'static [EnumItem] {
+    object::OPSPEC_OBJECT_OT_DATA_TRANSFER
+        .props
+        .iter()
+        .find(|d| d.identifier == prop)
+        .and_then(|d| match &d.kind {
+            PropKind::Enum { items, .. } => Some(*items),
+            _ => None,
+        })
+        .unwrap_or(&[])
+}
+
+/// The source-layer items (`ACTIVE`, `ALL`, `BONE_SELECT`, `BONE_DEFORM`).
+fn src_items() -> &'static [EnumItem] {
+    spec_items("layers_select_src")
+}
+
+/// The destination-layer items (`ACTIVE`, `NAME`, `INDEX`).
+fn dst_items() -> &'static [EnumItem] {
+    spec_items("layers_select_dst")
+}
+
+/// The union of both item sets, `first` first: `dt_layers_select_itemf` gives a property the
+/// source or the destination items depending on `use_reverse_transfer`, which a conversion
+/// item function cannot see, so conversion accepts both and exec checks the direction.
+fn union_items(first: &[EnumItem], second: &[EnumItem]) -> Vec<EnumItemOwned> {
+    let mut out: Vec<EnumItemOwned> = Vec::new();
+    for i in first.iter().chain(second) {
+        if !out.iter().any(|o| o.identifier == i.identifier) {
+            out.push(EnumItemOwned {
+                identifier: i.identifier.into(),
+                name: i.name.into(),
+                description: i.description.into(),
+            });
+        }
+    }
+    out
+}
+
+/// Conversion items of `layers_select_src`: its own items, then the destination items it takes
+/// with `use_reverse_transfer`.
+fn layers_src_conversion_items(_: &Context) -> Vec<EnumItemOwned> {
+    union_items(src_items(), dst_items())
+}
+
+/// Conversion items of `layers_select_dst`: its own items, then the source items it takes
+/// with `use_reverse_transfer`.
+fn layers_dst_conversion_items(_: &Context) -> Vec<EnumItemOwned> {
+    union_items(dst_items(), src_items())
+}
+
+/// `object.data_transfer`'s props with the two layer selections as written (the generated
+/// typed enums would map an item of the other set to their default).
+pub(crate) struct DataTransferArgs {
+    /// Typed props.
+    pub(crate) p: object::DataTransfer,
+    /// `layers_select_src` identifier.
+    pub(crate) layers_src: SmolStr,
+    /// `layers_select_dst` identifier.
+    pub(crate) layers_dst: SmolStr,
+}
+
+impl OpProps for DataTransferArgs {
+    const IDNAME: &'static str = object::DataTransfer::IDNAME;
+    const BL_IDNAME: &'static str = object::DataTransfer::BL_IDNAME;
+    fn spec() -> &'static OperatorSpec {
+        object::DataTransfer::spec()
+    }
+    fn from_args(a: &OpArgs) -> Self {
+        let id = |name: &str| -> SmolStr {
+            match a.get(name) {
+                Value::Enum(s) | Value::Str(s) => s.clone(),
+                _ => SmolStr::new_static("ACTIVE"),
+            }
+        };
+        DataTransferArgs {
+            p: object::DataTransfer::from_args(a),
+            layers_src: id("layers_select_src"),
+            layers_dst: id("layers_select_dst"),
+        }
+    }
+}
+
+/// Checks `id` against the items `dt_layers_select_itemf` gives the property in this direction,
+/// with Blender's conversion `TypeError`.
+fn check_layer_item(id: &str, items: &[EnumItem]) -> Result<(), OpError> {
+    if items.iter().any(|i| i.identifier == id) {
+        return Ok(());
+    }
+    let list = items
+        .iter()
+        .map(|i| format!("'{}'", i.identifier))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let mut e = RnaError::new(
+        RnaErrorKind::Enum,
+        PyExc::TypeError,
+        format!("Converting py args to operator properties: enum \"{id}\" not found in ({list})"),
+    );
+    e.detail.insert(
+        "valid".into(),
+        items.iter().map(|i| i.identifier).collect::<Vec<_>>().into(),
+    );
+    Err(OpError::Rna(e))
+}
+
+#[operator(
+    poll = TRANSFER_POLL,
+    tier = T2,
+    spec = object::OPSPEC_OBJECT_OT_DATA_TRANSFER,
+    dyn_enums = [
+        ("layers_select_src", layers_src_conversion_items),
+        ("layers_select_dst", layers_dst_conversion_items)
+    ],
+    notes = ["layers_select_src / layers_select_dst: with use_reverse_transfer the item sets \
+              swap (src: ACTIVE, NAME, INDEX; dst: ACTIVE, ALL, BONE_SELECT, BONE_DEFORM)"]
+)]
+fn exec(cx: &mut OpCtx, a: DataTransferArgs) -> OpResult {
+    let p = &a.p;
+    let reverse = p.use_reverse_transfer.value;
+    // `dt_layers_select_itemf`: with `use_reverse_transfer`, `layers_select_src` has the
+    // destination items and `layers_select_dst` the source items.
+    let (src_role_items, dst_role_items) = (src_items(), dst_items());
+    if reverse {
+        check_layer_item(&a.layers_src, dst_role_items)?;
+        check_layer_item(&a.layers_dst, src_role_items)?;
+    } else {
+        check_layer_item(&a.layers_src, src_role_items)?;
+        check_layer_item(&a.layers_dst, dst_role_items)?;
+    }
     let Some(ob_src) = cx.ctx().active_object() else {
         return Ok(OpStatus::Cancelled);
     };
@@ -186,15 +322,21 @@ fn exec(cx: &mut OpCtx, p: object::DataTransfer) -> OpResult {
         );
         return Ok(OpStatus::Finished);
     }
-    let reverse = p.use_reverse_transfer.value;
     let data_type = modes::data_type_bits(p.data_type.value.identifier());
-    let mut layers_src = modes::layers_select_src(p.layers_select_src.value.identifier());
-    let mut layers_dst = modes::layers_select_dst(p.layers_select_dst.value.identifier());
-    if reverse {
-        // The two enums swap their values (`std::swap(layers_src, layers_dst)`): the codes of
-        // ACTIVE/ALL/NAME… keep their numbers.
-        std::mem::swap(&mut layers_src, &mut layers_dst);
-    }
+    // `RNA_enum_get` gives each property the code of its item (the destination codes for
+    // `layers_select_src` in reverse, …), then `std::swap(layers_src, layers_dst)` puts the
+    // source code back on the source side.
+    let (layers_src, layers_dst) = if reverse {
+        (
+            modes::layers_select_src(&a.layers_dst),
+            modes::layers_select_dst(&a.layers_src),
+        )
+    } else {
+        (
+            modes::layers_select_src(&a.layers_src),
+            modes::layers_select_dst(&a.layers_dst),
+        )
+    };
     let (fromlayers, tolayers) = layer_arrays(data_type, layers_src, layers_dst);
     let use_auto_transform = p.use_auto_transform.value;
     let use_object_transform = p.use_object_transform.value && !use_auto_transform;
@@ -298,4 +440,40 @@ fn exec(cx: &mut OpCtx, p: object::DataTransfer) -> OpResult {
         cx.report(ReportType::Error, e);
     }
     Ok(OpStatus::Finished)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn ids(items: &[EnumItemOwned]) -> Vec<&str> {
+        items.iter().map(|i| i.identifier.as_str()).collect()
+    }
+
+    #[test]
+    fn conversion_items_are_both_sets() {
+        let src = union_items(src_items(), dst_items());
+        assert_eq!(
+            ids(&src),
+            ["ACTIVE", "ALL", "BONE_SELECT", "BONE_DEFORM", "NAME", "INDEX"]
+        );
+        let dst = union_items(dst_items(), src_items());
+        assert_eq!(
+            ids(&dst),
+            ["ACTIVE", "NAME", "INDEX", "ALL", "BONE_SELECT", "BONE_DEFORM"]
+        );
+    }
+
+    #[test]
+    fn layer_item_check_uses_blenders_message() {
+        assert!(check_layer_item("NAME", dst_items()).is_ok());
+        let Err(OpError::Rna(e)) = check_layer_item("ALL", dst_items()) else {
+            panic!("ALL is not a destination item");
+        };
+        assert_eq!(
+            e.message,
+            "Converting py args to operator properties: enum \"ALL\" not found in \
+             ('ACTIVE', 'NAME', 'INDEX')"
+        );
+    }
 }
