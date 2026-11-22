@@ -347,3 +347,226 @@ fn matches_blender_opensubdiv_oracle() {
     }
     assert!(failures.is_empty(), "{failures:?}");
 }
+
+/// `xorshift64*`
+struct Rng(u64);
+
+impl Rng {
+    fn next(&mut self) -> u64 {
+        self.0 ^= self.0 >> 12;
+        self.0 ^= self.0 << 25;
+        self.0 ^= self.0 >> 27;
+        self.0.wrapping_mul(0x2545_f491_4f6c_dd1d)
+    }
+    fn below(&mut self, n: u64) -> u64 {
+        self.next() % n
+    }
+}
+
+/// A random mesh: a `w` x `h` torus grid (closed, or opened along a seam), some faces removed,
+/// some quads split into triangles, UV islands per face (seams where neighbours differ),
+/// random creases and settings.
+fn random_case(seed: u64) -> Case {
+    let mut r = Rng(seed.wrapping_mul(0x9e37_79b9_7f4a_7c15) | 1);
+    let w = 3 + r.below(5) as u32;
+    let h = 3 + r.below(4) as u32;
+    let open = r.below(3) == 0;
+    let vid = |i: u32, j: u32| (j % h) * w + (i % w);
+    let mut faces: Vec<Vec<u32>> = Vec::new();
+    let jmax = if open { h - 1 } else { h };
+    for j in 0..jmax {
+        let mut i = 0;
+        while i < w {
+            let q = [vid(i, j), vid(i + 1, j), vid(i + 1, j + 1), vid(i, j + 1)];
+            match r.below(14) {
+                0 => {}
+                1 | 2 => {
+                    faces.push(vec![q[0], q[1], q[2]]);
+                    faces.push(vec![q[0], q[2], q[3]]);
+                }
+                3 if i + 2 < w => {
+                    // A hexagon over two cells.
+                    faces.push(vec![
+                        q[0],
+                        q[1],
+                        vid(i + 2, j),
+                        vid(i + 2, j + 1),
+                        q[2],
+                        q[3],
+                    ]);
+                    i += 1;
+                }
+                _ => faces.push(q.to_vec()),
+            }
+            i += 1;
+        }
+    }
+    // Non-manifold fins: an extra quad on an existing edge, with two new vertices.
+    let mut extra: Vec<(u32, u32)> = Vec::new();
+    let fins = if r.below(4) == 0 { 1 + r.below(2) } else { 0 };
+    for _ in 0..fins {
+        if faces.is_empty() {
+            break;
+        }
+        let f = r.below(faces.len() as u64) as usize;
+        let k = r.below(faces[f].len() as u64) as usize;
+        let (a, b) = (faces[f][k], faces[f][(k + 1) % faces[f].len()]);
+        let base = w * h + extra.len() as u32;
+        extra.push((100 + base, 0));
+        extra.push((101 + base, 0));
+        faces.push(vec![a, b, base, base + 1]);
+    }
+    let nv0 = (w * h) as usize + extra.len();
+    let mut used = vec![u32::MAX; nv0];
+    let mut n = 0;
+    for f in &faces {
+        for &v in f {
+            if used[v as usize] == u32::MAX {
+                used[v as usize] = n;
+                n += 1;
+            }
+        }
+    }
+    for f in &mut faces {
+        for v in f.iter_mut() {
+            *v = used[*v as usize];
+        }
+    }
+    let positions = vec![[0.0f32; 3]; n as usize];
+    let mut edges: Vec<[u32; 2]> = Vec::new();
+    let mut emap = std::collections::HashMap::new();
+    let mut face_offsets = vec![0u32];
+    let mut corner_verts = Vec::new();
+    let mut corner_edges = Vec::new();
+    for f in &faces {
+        for k in 0..f.len() {
+            let (a, b) = (f[k], f[(k + 1) % f.len()]);
+            let key = (a.min(b), a.max(b));
+            let e = *emap.entry(key).or_insert_with(|| {
+                edges.push([a, b]);
+                edges.len() as u32 - 1
+            });
+            corner_verts.push(a);
+            corner_edges.push(e);
+        }
+        face_offsets.push(corner_verts.len() as u32);
+    }
+    let mut inv = vec![(0u32, 0u32); n as usize];
+    for (orig, &nw) in used.iter().enumerate() {
+        if nw != u32::MAX {
+            inv[nw as usize] = if orig < (w * h) as usize {
+                (orig as u32 % w, orig as u32 / w)
+            } else {
+                extra[orig - (w * h) as usize]
+            };
+        }
+    }
+    let islands = 1 + r.below(3);
+    let mut uvs = Vec::new();
+    for f in &faces {
+        let isl = r.below(islands) as f32;
+        let (si, sj) = inv[f[0] as usize];
+        for &v in f {
+            let (mut i, mut j) = inv[v as usize];
+            if i + 1 < si {
+                i += w;
+            }
+            if j + 1 < sj {
+                j += h;
+            }
+            uvs.push([0.1 * i as f32 + 3.0 * isl, 0.1 * j as f32]);
+        }
+    }
+    let crease_edge = (r.below(2) == 0).then(|| {
+        (0..edges.len())
+            .map(|_| match r.below(6) {
+                0 => 1.0,
+                1 => 0.3 + 0.1 * r.below(6) as f32,
+                _ => 0.0,
+            })
+            .collect()
+    });
+    let crease_vert = (r.below(3) == 0).then(|| {
+        (0..n)
+            .map(|_| if r.below(8) == 0 { 0.5 } else { 0.0 })
+            .collect()
+    });
+    let modes = [
+        "NONE",
+        "PRESERVE_CORNERS",
+        "PRESERVE_CORNERS_AND_JUNCTIONS",
+        "PRESERVE_CORNERS_JUNCTIONS_AND_CONCAVE",
+        "PRESERVE_BOUNDARIES",
+        "SMOOTH_ALL",
+    ];
+    let settings = SubdivSettings {
+        level: 1 + r.below(3) as u32,
+        quality: 1 + r.below(3) as u32,
+        use_limit_surface: r.below(4) != 0,
+        is_simple: r.below(5) == 0,
+        use_creases: true,
+        vtx_boundary: if r.below(2) == 0 {
+            VtxBoundary::EdgeOnly
+        } else {
+            VtxBoundary::EdgeAndCorner
+        },
+        fvar_linear: FVarLinear::from_uv_smooth(modes[r.below(6) as usize]),
+        ..SubdivSettings::default()
+    };
+    Case {
+        name: format!("random_{seed}"),
+        positions,
+        edges,
+        face_offsets,
+        corner_verts,
+        corner_edges,
+        uvs: vec![uvs],
+        crease_edge,
+        crease_vert,
+        settings,
+    }
+}
+
+/// `FRAP_OSD_ORACLE_FUZZ=<count>`: random meshes through both, stage by stage.
+#[test]
+fn random_meshes_match_blender_opensubdiv_oracle() {
+    let (Ok(oracle), Ok(count)) = (
+        std::env::var("FRAP_OSD_ORACLE"),
+        std::env::var("FRAP_OSD_ORACLE_FUZZ"),
+    ) else {
+        return;
+    };
+    let work =
+        PathBuf::from(std::env::var("FRAP_OSD_ORACLE_DIR").unwrap_or_else(|_| "/tmp".into()));
+    let count: u64 = count.parse().unwrap();
+    let mut failures = Vec::new();
+    for seed in 1..=count {
+        let case = random_case(seed);
+        let Some((desc, port)) = dump(&case) else {
+            continue;
+        };
+        let dp = work.join(format!("{}.desc", case.name));
+        let op = work.join(format!("{}.oracle", case.name));
+        std::fs::write(&dp, desc).unwrap();
+        std::fs::write(work.join(format!("{}.port", case.name)), &port).unwrap();
+        let st = std::process::Command::new(&oracle)
+            .arg(&dp)
+            .arg(&op)
+            .status()
+            .unwrap();
+        if !st.success() {
+            eprintln!("{}: oracle failed", case.name);
+            continue;
+        }
+        let want = std::fs::read_to_string(&op).unwrap();
+        if let Some(d) = first_difference(&want, &port) {
+            eprintln!("{}: {d}", case.name);
+            failures.push(case.name.clone());
+        }
+    }
+    assert!(
+        failures.is_empty(),
+        "{} of {count}: {failures:?}",
+        failures.len()
+    );
+}
