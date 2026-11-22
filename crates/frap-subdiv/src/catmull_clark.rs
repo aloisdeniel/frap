@@ -9,10 +9,12 @@
 //!    infinitely sharp; edge and vertex creases become sharpness `10·c²`; a vertex with two
 //!    incident edges adds their smaller sharpness (Blender's converter quirk); `SIMPLE`
 //!    subdivision is Catmull-Clark with every edge and vertex infinitely sharp
-//!    (`BUGGY_SIMPLE_SCHEME_WORKAROUND`). UV maps become face-varying channels whose values
-//!    are the corners Blender's UV vertex map welds (`BKE_mesh_uv_vert_map_create`, winding
-//!    aware, 1e-4 limit).
-//! 2. The mesh is refined uniformly (`vtr`, `primvar`).
+//!    (`BUGGY_SIMPLE_SCHEME_WORKAROUND`).
+//! 2. The mesh is refined uniformly (`vtr`, `primvar`) for the positions. The UV maps are
+//!    face-varying channels whose values are the corners Blender's UV vertex map welds
+//!    (`BKE_mesh_uv_vert_map_create`, winding aware, 1e-4 limit), evaluated by `crate::far`:
+//!    OpenSubdiv's face-varying pipeline ported bit for bit (WP 8.11), so every corner's UV
+//!    is Blender's `f32` value, inside Gregory end caps too.
 //! 3. With `use_limit_surface` Blender evaluates bicubic patches of an adaptive refinement
 //!    isolated to `quality` levels. At level `L ≤ quality` every output point is a vertex of
 //!    the refined mesh at level `L`, and the patches place it at that vertex's limit position
@@ -31,19 +33,16 @@
 //!    points between isolation-level vertices inside Gregory end caps. With the `osd` feature
 //!    (on by default, the M4 gate's decision) those cases take their points from the
 //!    `opensubdiv-rs` patch table ([`needs_end_caps`]); without it they are the exact limit
-//!    here (up to `5e-2` from Blender on a 6-sided cylinder, `SIMPLE` level 3; deviations.md).
+//!    here (up to `5e-2` from Blender on a 6-sided cylinder, `SIMPLE` level 3).
 //! 4. The output follows Blender's layout ([`crate::layout`]), so indices match (T1).
 
 use smallvec::SmallVec;
 
-use crate::fvar::FVarLevel;
 use crate::layout::{self, Coarse, DataSource, Layout, PosSource};
-use crate::primvar::{self, FVarChildSlots, V};
+use crate::primvar::{self, V};
 use crate::sdc::{self, Rule};
 use crate::vtr::{self, Level, Refinement};
-use crate::{
-    SubdivError, SubdivResult, SubdivSettings, SubdivTopology, Subdivider, VtxBoundary, Weights,
-};
+use crate::{SubdivError, SubdivResult, SubdivSettings, SubdivTopology, Subdivider, Weights};
 
 /// frap's Catmull-Clark subdivider.
 #[derive(Copy, Clone, Debug, Default)]
@@ -70,12 +69,24 @@ impl Subdivider for CatmullClark {
         }
         let resolution = (1u32 << settings.level) + 1;
         let lay = layout::compute(topo.coarse(), resolution);
+        // UV maps: OpenSubdiv's face-varying patches, bit for bit (`crate::far`).
+        let uvs = crate::far::evaluate_uvs(topo, settings, &lay.corner_ptex)?;
+        let mut geom = topo.clone();
+        geom.uv_layers.clear();
         #[cfg(feature = "osd")]
-        if needs_end_caps(settings) {
-            return end_caps::subdivide(topo, settings, lay);
-        }
-        let surf = Surface::new(topo, settings)?;
-        Ok(surf.evaluate(topo, settings, lay))
+        let mut out = if needs_end_caps(settings) {
+            end_caps::subdivide(&geom, settings, lay)?
+        } else {
+            Surface::new(&geom, settings)?.evaluate(&geom, settings, lay)
+        };
+        #[cfg(not(feature = "osd"))]
+        let mut out = Surface::new(&geom, settings)?.evaluate(&geom, settings, lay);
+        out.uv_layers = match uvs {
+            Some(uvs) => uvs,
+            // Meshes without faces keep no UV data; UV maps of faceless meshes are empty.
+            None => vec![vec![[0.0; 2]; out.corner_verts.len()]; topo.uv_layers.len()],
+        };
+        Ok(out)
     }
 }
 
@@ -179,21 +190,11 @@ mod end_caps {
                 _ => false,
             })
             .collect();
-        let own_corner: Vec<bool> = lay
-            .corner_ptex
-            .iter()
-            .map(|&(ptex, u, v)| cf.contains(ptex, u, v))
-            .collect();
         drop(cf);
         let surf = Surface::new(topo, s)?;
         let own = surf.evaluate(topo, s, lay);
         for (i, _) in own_vert.iter().enumerate().filter(|(_, o)| **o) {
             osd.positions[i] = own.positions[i];
-        }
-        for (layer, own_layer) in osd.uv_layers.iter_mut().zip(&own.uv_layers) {
-            for (c, _) in own_corner.iter().enumerate().filter(|(_, o)| **o) {
-                layer[c] = own_layer[c];
-            }
         }
         Ok(osd)
     }
@@ -325,21 +326,13 @@ pub(crate) fn uv_value_indices(topo: &SubdivTopology<'_>, uv: &[[f32; 2]]) -> (V
     (out, (count + 1) as usize)
 }
 
-/// One face-varying channel through the levels.
-struct Channel {
-    levels: Vec<FVarLevel>,
-    data: Vec<Vec<V<2>>>,
-}
-
 /// The refined surface.
 struct Surface {
     levels: Vec<Level>,
     refinements: Vec<Refinement>,
     positions: Vec<Vec<V<3>>>,
-    channels: Vec<Channel>,
     /// Final values (limit or refined) at the last level.
     final_positions: Vec<V<3>>,
-    final_uvs: Vec<Vec<V<2>>>,
     /// Ptex grids at the last level: per ptex face, `(size, vertices, cells)`.
     grids: Vec<Grid>,
     /// `SIMPLE` without the limit surface past level 1 interpolates bilinearly.
@@ -553,9 +546,7 @@ impl Surface {
             levels: Vec::new(),
             refinements: Vec::new(),
             positions: Vec::new(),
-            channels: Vec::new(),
             final_positions: Vec::new(),
-            final_uvs: Vec::new(),
             grids: Vec::new(),
             bilinear: false,
             manifold: Manifold {
@@ -571,7 +562,6 @@ impl Surface {
         }
         let (mut base, reverse) = base_level(topo, s, &m)?;
         base.prepare_base_tags(s.vtx_boundary);
-        let geom_corners_sharp = s.vtx_boundary == VtxBoundary::EdgeAndCorner;
         let p0: Vec<V<3>> = reverse
             .iter()
             .map(|&v| {
@@ -579,18 +569,6 @@ impl Surface {
                 [p[0] as f64, p[1] as f64, p[2] as f64]
             })
             .collect();
-        for uv in &topo.uv_layers {
-            let (idx, n) = uv_value_indices(topo, uv);
-            let mut data = vec![[0.0f64; 2]; n];
-            for (c, &i) in idx.iter().enumerate() {
-                data[i as usize] = [uv[c][0] as f64, uv[c][1] as f64];
-            }
-            let fl = FVarLevel::complete(&base, idx, n, s.fvar_linear, geom_corners_sharp);
-            surf.channels.push(Channel {
-                levels: vec![fl],
-                data: vec![data],
-            });
-        }
         surf.levels.push(base);
         surf.positions.push(p0);
         surf.manifold = m;
@@ -610,7 +588,7 @@ impl Surface {
         };
         surf.bilinear = !s.use_limit_surface && level > patch_level;
         for _ in 0..target {
-            surf.refine_once(s);
+            surf.refine_once();
             if s.use_limit_surface && level > patch_level && surf.levels.len() - 1 == patch_level {
                 surf.sharpen_smooth_corners();
             }
@@ -620,7 +598,7 @@ impl Surface {
                 let l = surf.levels.last().expect("level");
                 has_semi_sharp(l) || has_valence2_smooth(l)
             } {
-                surf.refine_once(s);
+                surf.refine_once();
             }
         }
         let corner_steps = patch_level.saturating_sub(surf.levels.len() - 1);
@@ -650,34 +628,10 @@ impl Surface {
         }
     }
 
-    fn refine_once(&mut self, s: &SubdivSettings) {
+    fn refine_once(&mut self) {
         let parent = self.levels.last().expect("level");
         let (child, r) = vtr::refine(parent);
         let pos = primvar::interp_vertex(parent, &child, &r, self.positions.last().expect("p"));
-        let geom_corners_sharp = s.vtx_boundary == VtxBoundary::EdgeAndCorner;
-        for ch in &mut self.channels {
-            let pf = ch.levels.last().expect("fvar");
-            let (fvals, slots): (Vec<u32>, FVarChildSlots) =
-                primvar::refine_fvar_topology(parent, &r, pf);
-            let cf = FVarLevel::complete(
-                &child,
-                fvals,
-                slots.nslots,
-                s.fvar_linear,
-                geom_corners_sharp,
-            );
-            let data = primvar::interp_fvar(
-                parent,
-                &child,
-                &r,
-                pf,
-                &cf,
-                &slots,
-                ch.data.last().expect("data"),
-            );
-            ch.levels.push(cf);
-            ch.data.push(data);
-        }
         self.positions.push(pos);
         self.levels.push(child);
         self.refinements.push(r);
@@ -695,25 +649,6 @@ impl Surface {
             self.final_positions = dst;
         } else {
             self.final_positions = src.clone();
-        }
-        for ch in &self.channels {
-            let fl = &ch.levels[last];
-            let data = &ch.data[last];
-            if limit {
-                let mut dst = data.clone();
-                primvar::limit_fvar(
-                    lvl,
-                    fl,
-                    data,
-                    0..lvl.nverts,
-                    inf_only,
-                    corner_steps,
-                    &mut dst,
-                );
-                self.final_uvs.push(dst);
-            } else {
-                self.final_uvs.push(data.clone());
-            }
         }
         if last == 0 {
             return;
@@ -789,7 +724,6 @@ impl Surface {
             }
             q
         };
-        let last = self.levels.len().saturating_sub(1);
         let mut positions = vec![[0.0f32; 3]; nv];
         let vert_to_edges = loose_edge_vert_map(topo, &self.manifold);
         for (i, src) in lay.vert_pos.iter().enumerate() {
@@ -817,77 +751,12 @@ impl Surface {
                             bilinear(c(0, 0), c(1, 0), c(1, 1), c(0, 1), s, t)
                         }
                     };
-                    let _ = last;
                     [p[0] as f32, p[1] as f32, p[2] as f32]
                 }
             };
         }
-        // UVs per corner, through the cell of the corner's face.
-        let nl = lay.corner_verts.len();
-        let mut uv_layers = Vec::with_capacity(topo.uv_layers.len());
-        for (ci, ch) in self.channels.iter().enumerate() {
-            let fl = &ch.levels[last];
-            let vals = &self.final_uvs[ci];
-            let lvl = &self.levels[last];
-            let mut out = vec![[0.0f32; 2]; nl];
-            for face in 0..nl / 4 {
-                frap_math::budget::check();
-                let (ptex, u0, v0) = lay.corner_ptex[4 * face];
-                let quad = quad_of_ptex[ptex as usize];
-                let (g, cx, cy) = self.ptex_point(&lay, ptex, u0, v0, quad);
-                let grid = &self.grids[g];
-                let den = if quad {
-                    lay.resolution as usize - 1
-                } else {
-                    lay.resolution as usize >> 1
-                };
-                let gd = grid.size - 1;
-                for (k, &(a, b)) in [(0usize, 0usize), (1, 0), (1, 1), (0, 1)]
-                    .iter()
-                    .enumerate()
-                {
-                    let (x, y) = (cx + a, cy + b);
-                    let value = if gd >= den {
-                        let sc = gd / den;
-                        let vx = grid.vert(x * sc, y * sc);
-                        let cell_i = (cx * sc + a * (sc - 1)).min(gd - 1);
-                        let cell_j = (cy * sc + b * (sc - 1)).min(gd - 1);
-                        let f = grid.cell(cell_i, cell_j) as usize;
-                        let slot = fl.face_values(lvl, f)[local_index(lvl, f, vx)];
-                        vals[slot as usize]
-                    } else {
-                        // Bilinear inside a coarser cell (`SIMPLE` without limit surface).
-                        let fx = x as f64 * gd as f64 / den as f64;
-                        let fy = y as f64 * gd as f64 / den as f64;
-                        let ccx = (cx as f64 * gd as f64 / den as f64).floor() as usize;
-                        let ccy = (cy as f64 * gd as f64 / den as f64).floor() as usize;
-                        let (ci2, cj2) = (ccx.min(gd - 1), ccy.min(gd - 1));
-                        let f = grid.cell(ci2, cj2) as usize;
-                        let fv = fl.face_values(lvl, f);
-                        let corner = |a: usize, b: usize| {
-                            let vx = grid.vert(ci2 + a, cj2 + b);
-                            vals[fv[local_index(lvl, f, vx)] as usize]
-                        };
-                        bilinear(
-                            corner(0, 0),
-                            corner(1, 0),
-                            corner(1, 1),
-                            corner(0, 1),
-                            fx - ci2 as f64,
-                            fy - cj2 as f64,
-                        )
-                    };
-                    out[4 * face + k] = [value[0] as f32, value[1] as f32];
-                }
-            }
-            uv_layers.push(out);
-        }
-        if self.channels.is_empty() {
-            // Meshes without faces keep no UV data; UV maps of faceless meshes are empty.
-            for _ in &topo.uv_layers {
-                uv_layers.push(vec![[0.0; 2]; nl]);
-            }
-        }
+        // The UV maps are evaluated by `crate::far` (bit-exact face-varying patches).
+        let uv_layers = Vec::new();
         build_result(topo, lay, positions, uv_layers)
     }
 }

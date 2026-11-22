@@ -2,7 +2,7 @@
 # surface. Blender isolates SIMPLE to level 1, where the face point of every non-quad is an
 # extraordinary vertex, and evaluates the faces around it as Gregory end caps (frap: through the
 # opensubdiv-rs patch table, decision log M34S3-1). Cone, 6-sided cylinder and 8x4 UV sphere at
-# levels 2 and 3. Without UV maps: UVs inside face-varying Gregory caps differ (D-121).
+# levels 2 and 3. Without UV maps (UVs in the caps: modifiers/subsurf_fvar).
 # golden: startup=empty compare=evaluated:Cone,evaluated:Cone.001,evaluated:Cylinder,evaluated:Cylinder.001,evaluated:Sphere,evaluated:Sphere.001 tier=T2
 import bpy
 bpy.ops.mesh.primitive_cone_add(calc_uvs=False)

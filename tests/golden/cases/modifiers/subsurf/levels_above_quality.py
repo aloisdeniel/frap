@@ -2,8 +2,8 @@
 # evaluates the faces around extraordinary vertices as Gregory end caps between the isolation
 # level's vertices (frap: through the opensubdiv-rs patch table, decision log M34S3-1): level 4
 # at the default quality 3, level 3 at quality 1; a 7-gon and a grid add smooth boundary corners
-# (Blender's legacy sharp-corner patches at the isolation level). Without UV maps (D-121);
-# normals of the small level-4 faces amplify position rounding to ~1e-5 (D-77).
+# (Blender's legacy sharp-corner patches at the isolation level). Without UV maps (UVs:
+# modifiers/subsurf_fvar); small level-4 face normals amplify position rounding to ~1e-5 (D-77).
 # golden: startup=empty compare=evaluated:Cylinder,evaluated:Sphere,evaluated:Cube,evaluated:Circle,evaluated:Grid tier=T2 tol=1e-4
 import bpy
 bpy.ops.mesh.primitive_cylinder_add(vertices=6, calc_uvs=False)

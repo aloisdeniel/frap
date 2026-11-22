@@ -106,35 +106,26 @@ fn data_dir() -> PathBuf {
 }
 
 /// Cases that differ from Blender beyond the tolerance by design, with the largest position
-/// and UV errors accepted. Past the isolation level (`levels > quality`, `SIMPLE` past level 1)
-/// Blender evaluates Gregory end caps: with the `osd` feature (default) positions come from
-/// `opensubdiv-rs`'s patches and match, but its face-varying patches are built over a separate
-/// value mesh, so UVs inside face-varying Gregory caps differ (deviations.md D-121); without it
-/// frap evaluates the exact limit there (`frap_subdiv::catmull_clark`).
+/// and UV errors accepted. UVs always match (`frap_subdiv::far`, bit-exact; the dumps here are
+/// rounded to 7 digits, `tests/fvar_dumps.rs` compares bits). Past the isolation level
+/// (`levels > quality`, `SIMPLE` past level 1) Blender evaluates positions inside Gregory end
+/// caps: with the `osd` feature (default) they come from `opensubdiv-rs`'s patches and match;
+/// without it frap evaluates the exact limit there (`frap_subdiv::catmull_clark`).
 #[cfg(feature = "osd")]
-const APPROXIMATE: &[(&str, f32, f32)] = &[
-    ("cone_l2_simple", 1e-5, 3e-3),
-    ("cone_l3_simple", 1e-5, 3e-3),
-    ("cylinder_l2_simple", 1e-5, 5e-3),
-    ("cylinder_l3_simple", 1e-5, 5e-3),
-    ("cylinder_l4", 1e-5, 1e-4),
-    ("ngon_l4", 1e-5, 2e-4),
-    ("sphere_l2_simple", 1e-5, 1e-3),
-    ("sphere_l3_simple", 1e-5, 1e-3),
-];
+const APPROXIMATE: &[(&str, f32, f32)] = &[];
 #[cfg(not(feature = "osd"))]
 const APPROXIMATE: &[(&str, f32, f32)] = &[
-    ("cube_l2_q1", 2e-2, 3e-3),
-    ("cube_l3_q2", 7e-3, 2e-3),
-    ("cube_l4", 3e-3, 1e-3),
-    ("cone_l2_simple", 3e-2, 7e-3),
-    ("cone_l3_simple", 4e-2, 9e-3),
-    ("cylinder_l2_simple", 5e-2, 1.2e-2),
-    ("cylinder_l3_simple", 7.1e-2, 1.7e-2),
-    ("cylinder_l4", 1.3e-2, 4.1e-3),
-    ("ngon_l4", 2.5e-2, 1.3e-2),
-    ("sphere_l2_simple", 6.1e-3, 2.5e-3),
-    ("sphere_l3_simple", 8.3e-3, 3.3e-3),
+    ("cube_l2_q1", 2e-2, 1e-5),
+    ("cube_l3_q2", 7e-3, 1e-5),
+    ("cube_l4", 3e-3, 1e-5),
+    ("cone_l2_simple", 3e-2, 1e-5),
+    ("cone_l3_simple", 4e-2, 1e-5),
+    ("cylinder_l2_simple", 5e-2, 1e-5),
+    ("cylinder_l3_simple", 7.1e-2, 1e-5),
+    ("cylinder_l4", 1.3e-2, 1e-5),
+    ("ngon_l4", 2.5e-2, 1e-5),
+    ("sphere_l2_simple", 6.1e-3, 1e-5),
+    ("sphere_l3_simple", 8.3e-3, 1e-5),
     ("tris_l3_simple", 1.7e-2, 1e-5),
 ];
 
@@ -251,7 +242,7 @@ fn osd_backend_matches_blender() {
             Ok((pos, worst, uv)) => {
                 eprintln!("{n}: position {pos:e} (vertex {worst}), uv {uv:e}");
                 // Smooth boundary corners: opensubdiv-rs has no legacy sharp corner patches;
-                // UVs inside face-varying Gregory caps (D-121).
+                // its own face-varying patches are built over a separate value mesh.
                 if pos > 6e-3 || uv > 5e-3 {
                     failures.push(format!("{n}: position {pos:e}, uv {uv:e}"));
                 }
