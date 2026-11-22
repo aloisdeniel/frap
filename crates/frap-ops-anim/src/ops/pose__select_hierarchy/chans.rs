@@ -60,11 +60,16 @@ pub(crate) struct Chans {
 
 impl Chans {
     /// Copies the pose channels of `ob` (`None` without a pose or an armature).
-    pub(crate) fn load(cx: &OpCtx, ob: IdRef<ObjectId>, arm_ref: IdRef<ArmatureId>) -> Option<Chans> {
+    pub(crate) fn load(
+        cx: &OpCtx,
+        ob: IdRef<ObjectId>,
+        arm_ref: IdRef<ArmatureId>,
+    ) -> Option<Chans> {
         let main = cx.main();
         let pose = main.objects.get(ob)?.pose.clone()?;
         let arm = main.armatures.get(arm_ref)?.clone();
-        let bone_of: Vec<Option<usize>> = pose.bones.iter().map(|p| arm.bone_index(&p.name)).collect();
+        let bone_of: Vec<Option<usize>> =
+            pose.bones.iter().map(|p| arm.bone_index(&p.name)).collect();
         let mut chan_of = vec![None; arm.bones.len()];
         for (c, b) in bone_of.iter().enumerate() {
             if let Some(b) = *b

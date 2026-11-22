@@ -15,8 +15,8 @@ use frap_op::prelude::*;
 use frap_scene::edit_armature::names::flip_side_name;
 use frap_spec_ops_anim::pose;
 
-use super::pose__select_hierarchy::chans::load_all;
 use super::armature__flip_names::rename_cx;
+use super::pose__select_hierarchy::chans::load_all;
 
 /// The current name of channel `c` of `ob`.
 fn chan_name(cx: &OpCtx, ob: frap_rna::IdRef<frap_rna::ObjectId>, c: usize) -> Option<String> {

@@ -2,7 +2,9 @@
 # in the frap process (D-158), so a fresh process pastes nothing: `Internal clipboard is
 # empty`; after a copy the paste reports Blender's INFO. anim.channels_bake and the NLA
 # operators are headless-extended (D-160, deviations §2): their polls pass without an editor,
-# channels_bake without listed F-curves warns `No channels to operate on` and cancels,
+# channels_bake without listed F-curves warns `No channels to operate on` and cancels, a range
+# whose baked keys exceed `--max-elements` answers LIMIT_EXCEEDED (D-52), the full int range
+# samples nothing and removes the keys (Blender's wrapping int span),
 # nla.actionclip_add without any action fails with `No valid action to add` and names the
 # actions in the enum error otherwise; pose.select_grouped(type='COLOR') without an active pose
 # bone cancels (Blender dereferences the missing bone), KEYINGSET fails (no keying sets).

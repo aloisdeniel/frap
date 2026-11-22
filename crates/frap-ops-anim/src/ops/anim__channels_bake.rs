@@ -28,7 +28,10 @@
 //! range (`bake_fcurve`), the keys in the range are removed (`remove_outside_range`: every
 //! key), the samples merged in as `AUTO_CLAMPED` keys with `interpolation_type`, the key ending
 //! the baked segment keeping the interpolation the curve had there, and the handles
-//! recalculated. frap's F-curves have no F-modifiers, so `bake_modifiers` changes nothing.
+//! recalculated (the sample count is Blender's wrapping `int` arithmetic: `range=(INT_MIN,
+//! INT_MAX)` samples nothing and only removes the keys). The baked keys' memory is checked
+//! against `--max-elements` first (`LIMIT_EXCEEDED`, D-52). frap's F-curves have no
+//! F-modifiers, so `bake_modifiers` changes nothing.
 //! Without any listed F-curve: WARNING `No channels to operate on`, `CANCELLED`. Blender does not
 //! tag the baked actions for the depsgraph (a later `frame_set` evaluates the old curves); frap's
 //! evaluation always sees the baked ones (D-160, D-04).
@@ -142,10 +145,7 @@ fn listed_fcurves(cx: &OpCtx) -> Vec<Listed> {
     if let Some(adt) = &scene.animation_data {
         list_adt(main, adt, None, &mut out);
     }
-    if let Some(adt) = scene
-        .world
-        .and_then(|w| anim_data(main, Root::Id(w.any())))
-    {
+    if let Some(adt) = scene.world.and_then(|w| anim_data(main, Root::Id(w.any()))) {
         list_adt(main, adt, None, &mut out);
     }
     let pose_mode = c
@@ -208,15 +208,34 @@ fn exec(cx: &mut OpCtx, p: anim::ChannelsBake) -> OpResult {
         InterpolationType::Const => Interpolation::Constant,
     };
     let step = p.step.value;
+    // The baked keys' memory against the `--max-elements` budget before sampling (D-52, as
+    // `keyframe_points.add`): a huge range answers `LIMIT_EXCEEDED` instead of exhausting the
+    // process. Blender bakes any range.
+    let baked_curves = listed
+        .iter()
+        .filter(|&&(a, handle, i)| {
+            cx.main()
+                .actions
+                .get(a)
+                .and_then(|act| act.channelbag(handle))
+                .and_then(|bag| bag.fcurves.get(i))
+                .is_some_and(|fc| !fc.keyframe_points.is_empty())
+        })
+        .count() as u64;
+    let samples = bake::sample_count(range, step) as u64;
+    frap_math::budget::check_buffer(
+        "keyframe_points",
+        samples
+            .checked_mul(std::mem::size_of::<frap_anim::Keyframe>() as u64)
+            .and_then(|b| b.checked_mul(baked_curves)),
+    );
     let (main, log) = cx.main_mut();
     for (a, handle, i) in listed {
         let Some(act) = main.actions.get_mut(a, log) else {
             continue;
         };
-        let Some(frap_anim::ActionStrip::Keyframe(strip)) = act
-            .layers
-            .first_mut()
-            .and_then(|l| l.strips.first_mut())
+        let Some(frap_anim::ActionStrip::Keyframe(strip)) =
+            act.layers.first_mut().and_then(|l| l.strips.first_mut())
         else {
             continue;
         };

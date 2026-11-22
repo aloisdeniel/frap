@@ -79,7 +79,12 @@ pub(crate) mod paste {
     }
 
     /// `pose_bone_do_paste(ob, chan, sel_only, flip)` onto `pose`.
-    pub(crate) fn do_paste(pose: &mut Pose, chan: &PoseBone, sel_only: bool, flip: bool) -> Outcome {
+    pub(crate) fn do_paste(
+        pose: &mut Pose,
+        chan: &PoseBone,
+        sel_only: bool,
+        flip: bool,
+    ) -> Outcome {
         let name = if flip {
             flip_side_name(&chan.name, false)
         } else {

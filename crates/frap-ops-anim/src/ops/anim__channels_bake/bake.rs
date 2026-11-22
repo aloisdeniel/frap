@@ -14,6 +14,7 @@ use frap_anim::eval::curve::{BEZT_BINARYSEARCH_THRESH, binarysearch_index};
 use frap_anim::eval::{evaluate_fcurve, recalc_handles};
 use frap_anim::fcurve::keys::{KeyframeSettings, initialize_bezt};
 use frap_anim::{FCurve, Interpolation, Keyframe};
+use frap_math::budget;
 
 /// `BakeCurveRemove`
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
@@ -64,6 +65,7 @@ fn merge(a: Vec<Keyframe>, b: Vec<Keyframe>) -> Vec<Keyframe> {
     let mut out = Vec::with_capacity(a.len() + b.len());
     let (mut ia, mut ib) = (0, 0);
     while ia < a.len() || ib < b.len() {
+        budget::check();
         if ia >= a.len() {
             out.extend_from_slice(&b[ib..]);
             break;
@@ -88,22 +90,36 @@ fn merge(a: Vec<Keyframe>, b: Vec<Keyframe>) -> Vec<Keyframe> {
     out
 }
 
+/// `const int sample_count = (range[1] - range[0]) / step + 1;`: the samples one F-curve gets.
+/// The span is C's `int` subtraction, which wraps (`range=(INT_MIN, INT_MAX)` gives `-1`, so no
+/// samples, and Blender only removes the keys in the range); the float-to-int conversion
+/// saturates, a negative count is no samples.
+pub(crate) fn sample_count(range: [i32; 2], step: f32) -> usize {
+    let span = range[1].wrapping_sub(range[0]);
+    let count = (span as f32 / step + 1.0) as i32;
+    usize::try_from(count).unwrap_or(0)
+}
+
 /// `bake_fcurve(fcu, range, step, remove_existing)`.
 fn bake_fcurve(fc: &mut FCurve, range: [i32; 2], step: f32, remove: Remove) {
-    // `const int sample_count = (range[1] - range[0]) / step + 1;`
-    let sample_count = ((range[1] - range[0]) as f32 / step + 1.0) as i32;
-    let sample_count = usize::try_from(sample_count).unwrap_or(0);
+    let sample_count = sample_count(range, step);
     let sample_rate = 1.0f32 / step;
     let start = range[0] as f32;
     let samples: Vec<f32> = (0..sample_count)
-        .map(|i| evaluate_fcurve(fc, start + (i as f32 / sample_rate)))
+        .map(|i| {
+            budget::check();
+            evaluate_fcurve(fc, start + (i as f32 / sample_rate))
+        })
         .collect();
     remove_range(fc, range, remove);
     let settings = KeyframeSettings::default();
     let baked: Vec<Keyframe> = samples
         .iter()
         .enumerate()
-        .map(|(i, &v)| initialize_bezt([range[0] as f32 + i as f32 * step, v], &settings, fc))
+        .map(|(i, &v)| {
+            budget::check();
+            initialize_bezt([range[0] as f32 + i as f32 * step, v], &settings, fc)
+        })
         .collect();
     let existing = std::mem::take(&mut fc.keyframe_points);
     fc.keyframe_points = merge(baked, existing);
@@ -113,7 +129,13 @@ fn bake_fcurve(fc: &mut FCurve, range: [i32; 2], step: f32, remove: Remove) {
 /// The per-curve body of `channels_bake_exec`: bakes `fc` over `range` and gives the keys in
 /// the range `ipo`, the key that ends the baked segment keeping the interpolation the curve
 /// had there. A curve without keys is left alone.
-pub(crate) fn bake(fc: &mut FCurve, range: [i32; 2], step: f32, remove: Remove, ipo: Interpolation) {
+pub(crate) fn bake(
+    fc: &mut FCurve,
+    range: [i32; 2],
+    step: f32,
+    remove: Remove,
+    ipo: Interpolation,
+) {
     if fc.keyframe_points.is_empty() {
         return;
     }
@@ -173,9 +195,54 @@ mod tests {
     }
 
     #[test]
+    fn full_int_range_wraps_to_no_samples_and_removes_the_keys() {
+        // `range[1] - range[0]` wraps in Blender's `int`: no samples, the keys in the range
+        // are removed (Blender 5.2.4 answers FINISHED with an empty curve).
+        assert_eq!(sample_count([i32::MIN, i32::MAX], 1.0), 0);
+        assert_eq!(sample_count([i32::MIN, i32::MAX], 0.5), 0);
+        assert_eq!(sample_count([0, 0], 1.0), 1);
+        assert_eq!(sample_count([2, 6], 2.0), 3);
+        assert_eq!(sample_count([0, 2_000_000_000], 1.0), 2_000_000_000);
+        let mut fc = curve(&[(1.0, 0.0), (10.0, 9.0), (20.0, 0.0)]);
+        bake(
+            &mut fc,
+            [i32::MIN, i32::MAX],
+            1.0,
+            Remove::InRange,
+            Interpolation::Linear,
+        );
+        assert!(fc.keyframe_points.is_empty());
+    }
+
+    #[test]
+    fn sampling_stops_at_the_deadline() {
+        let _s = budget::scope(budget::Budget {
+            timeout: Some(std::time::Duration::ZERO),
+            ..budget::Budget::default()
+        });
+        let mut fc = curve(&[(1.0, 0.0), (10.0, 9.0)]);
+        let err = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            bake(
+                &mut fc,
+                [0, 1_000_000],
+                1.0,
+                Remove::InRange,
+                Interpolation::Linear,
+            );
+        }))
+        .expect_err("the expired deadline cancels the bake");
+        assert!(budget::interrupted(err.as_ref()).is_some());
+    }
+
+    #[test]
     fn relative_float_compare() {
         assert!(compare_ff_relative(1.0, 1.005, 0.01, 32));
         assert!(!compare_ff_relative(1.0, 1.5, 0.01, 32));
-        assert!(compare_ff_relative(1000.0, 1000.0 + 32.0 * 6.1e-5, 0.01, 32));
+        assert!(compare_ff_relative(
+            1000.0,
+            1000.0 + 32.0 * 6.1e-5,
+            0.01,
+            32
+        ));
     }
 }

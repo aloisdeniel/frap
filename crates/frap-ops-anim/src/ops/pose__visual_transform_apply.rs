@@ -24,7 +24,12 @@ use super::pose__select_hierarchy::chans::load_all;
 fn exec(cx: &mut OpCtx, _p: pose::VisualTransformApply) -> OpResult {
     for mut ch in load_all(cx, false) {
         let rest = rest_pose(&ch.arm);
-        let mats = where_is(&ch.arm, &rest, Some(&ch.pose), ch.arm.pose_position == "REST");
+        let mats = where_is(
+            &ch.arm,
+            &rest,
+            Some(&ch.pose),
+            ch.arm.pose_position == "REST",
+        );
         // `pchan_xform_array`: every matrix first, then the writes.
         let mut xforms = Vec::new();
         for c in 0..ch.len() {

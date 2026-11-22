@@ -10,7 +10,8 @@
 //! `nla.tracks_add` (OPERATORS.md, deviations §2). `action` is one of `bpy.data.actions` by
 //! name (`RNA_action_itemf`); left unset it is the first action, as Blender's enum index 0, and
 //! without any action the operator fails with `No valid action to add`. An AnimData without
-//! tracks first gets one (`nlaedit_add_tracks_empty`). Then each active, unlocked track gets an
+//! tracks first gets one (`nlaedit_add_tracks_empty`; Blender does that only for an AnimData
+//! selected in the NLA editor, which a fresh one is not, deviation D-161). Then each active, unlocked track gets an
 //! action-clip strip of `action` (its slot auto-assigned for the object, the slot's key range or
 //! the action's manual range) moved to start at `scene.frame_current`; a track without room
 //! for it gets the strip on a new track at the top of the stack, which becomes active. The
@@ -84,7 +85,11 @@ fn exec(cx: &mut OpCtx, p: nla::ActionclipAdd) -> OpResult {
         .filter(|&t| adt.nla_tracks[t].active && !adt.nla_tracks[t].lock)
         .collect();
     let id_name = id_code_name(cx.main(), root);
-    let action_name = cx.main().actions.get(act).map(|a| a.header.name.to_string());
+    let action_name = cx
+        .main()
+        .actions
+        .get(act)
+        .map(|a| a.header.name.to_string());
     for t in tracks {
         let mut strip = {
             let (main, log) = cx.main_mut();

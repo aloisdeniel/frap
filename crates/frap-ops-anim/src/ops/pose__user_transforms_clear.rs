@@ -31,8 +31,12 @@ fn write_channel(pose: &mut Pose, path: &str, index: i32, value: f32) {
     let Some(segs) = parse_path(path) else {
         return;
     };
-    let [PathSeg::Prop(p), PathSeg::Prop(b), PathSeg::Key(name), PathSeg::Prop(prop)] =
-        segs.as_slice()
+    let [
+        PathSeg::Prop(p),
+        PathSeg::Prop(b),
+        PathSeg::Key(name),
+        PathSeg::Prop(prop),
+    ] = segs.as_slice()
     else {
         return;
     };

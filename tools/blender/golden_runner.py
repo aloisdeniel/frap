@@ -214,6 +214,7 @@ NORMALISE = {
     "D-158": ("cases", "cases copy before every pose.paste (the copy buffer lives in the frap process)"),
     "D-159": ("cases", "pose selection cases cancel only with extend=True or where the deselect changes nothing"),
     "D-160": ("cases", "Blender runs anim.channels_bake in a #@blender Graph Editor temp_override and update_tag()s the baked actions before evaluating them"),
+    "D-161": ("cases", "cases create the NLA tracks before nla.actionclip_add"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),
