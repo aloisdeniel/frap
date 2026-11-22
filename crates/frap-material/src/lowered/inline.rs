@@ -275,3 +275,53 @@ pub fn expand(
     bypass_muted(&mut t, mat, images);
     Some(t)
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::ChannelSel;
+    use crate::graph::testkit::*;
+
+    /// A muted node on a texture's path is passed through (its internal link), so the texture
+    /// is exported.
+    #[test]
+    fn muted_nodes_on_a_texture_path_are_passed_through() {
+        let mut images = Images::default();
+        let img = images.add("albedo", false);
+        let mut m = mat("Muted");
+        let t = image_node(&mut m, img);
+        let gamma = add(&mut m, "ShaderNodeGamma");
+        link(&mut m, (t, "Color"), (gamma, "Color"));
+        link(&mut m, (gamma, "Color"), (BSDF, "Base Color"));
+        m.node_tree.node_mut(gamma).unwrap().mute = true;
+        let lm = lower_m(&m, &images);
+        let tex = lm
+            .base_color
+            .texture
+            .as_ref()
+            .expect("texture through the muted Gamma");
+        assert_eq!((tex.image, tex.channel), (img, ChannelSel::Rgb));
+    }
+
+    /// A muted node whose internal input is unlinked leaves its consumer with its own value
+    /// (dangling): Metallic keeps 0.3.
+    #[test]
+    fn a_dangling_muted_node_leaves_the_consumer_value() {
+        let images = Images::default();
+        let mut m = mat("Dangling");
+        let math = add(&mut m, "ShaderNodeMath");
+        link(&mut m, (math, "Value"), (BSDF, "Metallic"));
+        set_in(&mut m, BSDF, "Metallic", float(0.3));
+        m.node_tree.node_mut(math).unwrap().mute = true;
+        let t = super::expand(&m.node_tree, &m, &images).expect("a muted node to bypass");
+        assert!(t.links.iter().all(|l| l.from_node != math));
+        assert_eq!(lower_m(&m, &images).metallic.factor, 0.3);
+    }
+
+    /// Nothing to inline or bypass: the tree is read as it is.
+    #[test]
+    fn plain_trees_are_not_copied() {
+        let images = Images::default();
+        let m = mat("Plain");
+        assert!(super::expand(&m.node_tree, &m, &images).is_none());
+    }
+}

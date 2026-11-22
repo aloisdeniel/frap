@@ -558,7 +558,7 @@ fn unsupported_setups_warn() {
         "{:?}",
         lm.diagnostics
     );
-    // A grayscale texture on Anisotropic (the add-on bakes an image): not exported, WARNING.
+    // A grayscale texture on Anisotropic: baked into a new image (WP 8.12), no WARNING.
     let tex = add(&mut m, "ShaderNodeTexImage");
     m.node_tree
         .node_mut(tex)
@@ -566,9 +566,10 @@ fn unsupported_setups_warn() {
         .set_prop("image", Value::Id(Some(img.any())));
     link(&mut m, (tex, "Color"), (BSDF, "Anisotropic"));
     let lm = lower(&m.node_tree, &m, &images);
-    assert!(lm.ext.anisotropy.is_none());
+    assert!(lm.ext.anisotropy.is_some());
+    assert!(lm.ext.anisotropy_grayscale.is_some());
     assert!(
-        lm.diagnostics
+        !lm.diagnostics
             .iter()
             .any(|d| d.message.contains("Anisotropic"))
     );

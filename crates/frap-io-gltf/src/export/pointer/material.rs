@@ -1043,7 +1043,11 @@ fn anisotropy(nav: &Nav, gm: &GMaterial, p: &mut Found) {
         // `export_anisotropy_from_grayscale_textures` (WP 8.12): the primary socket's
         // texture transform, then the factors of `Anisotropic` and `Anisotropic Rotation`.
         if ext_has(gm, EXT, "anisotropyTexture") {
-            let primary = if nav.cx.texture_from(a).is_some() { a } else { r };
+            let primary = if nav.cx.texture_from(a).is_some() {
+                a
+            } else {
+                r
+            };
             texture_transform(
                 nav,
                 Some(primary),

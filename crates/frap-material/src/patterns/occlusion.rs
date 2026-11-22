@@ -180,6 +180,32 @@ mod tests {
         let lm = lower_m(&m, &images);
         assert_eq!(lm.occlusion.as_ref().unwrap().channel, ChannelSel::G);
         assert_eq!(lm.occlusion_strength, 1.0);
+        assert!(!lm.ext.occlusion_strength_set);
         assert_law(&lm, &images);
+    }
+
+    /// WP 8.12: a Mix with white whose factor is 1 still gives the strength (the exporter
+    /// writes `"strength": 1`, as the add-on does); without a Mix there is none.
+    #[test]
+    fn a_strength_of_one_from_a_mix_is_kept() {
+        let mut images = Images::default();
+        let img = images.add("ao", true);
+        let mut m = mat("One");
+        let t = image_node(&mut m, img);
+        let g = settings_node(&mut m);
+        let mix = add(&mut m, "ShaderNodeMix");
+        set_enum(&mut m, mix, "data_type", "RGBA");
+        set_in(&mut m, mix, "Factor", float(1.0));
+        set_in(&mut m, mix, "A", SocketValue::Color([1.0; 4]));
+        link(&mut m, (t, "Color"), (mix, "B"));
+        link(&mut m, (mix, "Result"), (g, "Occlusion"));
+        let lm = lower_m(&m, &images);
+        assert_eq!(lm.occlusion_strength, 1.0);
+        assert!(lm.ext.occlusion_strength_set);
+        let mut m = mat("Plain");
+        let t = image_node(&mut m, img);
+        let g = settings_node(&mut m);
+        link(&mut m, (t, "Color"), (g, "Occlusion"));
+        assert!(!lower_m(&m, &images).ext.occlusion_strength_set);
     }
 }

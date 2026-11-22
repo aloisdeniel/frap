@@ -36,8 +36,8 @@ pub fn lowered(main: &Main, mat: &Material) -> LoweredMaterial {
 /// (`bmat.used == "ORIGINAL"`, WP 7.7): pointer animation is exported
 /// (`gltf_export_anim_pointer`: `export_animations`, `export_pointer_animation` and a SCENE
 /// or NLA_TRACKS `export_animation_mode`) and the material's node tree has animation data.
-/// The add-on then reads the original tree: no constant folding (and no node-group inlining,
-/// which frap does not do anyway), so a factor fed by a node it cannot read keeps the glTF
+/// The add-on then reads the original tree: no constant folding and no node-group inlining
+/// (`frap_material::lower_original`), so a factor fed by a node it cannot read keeps the glTF
 /// default (a Math node computing 0.3 x 2 into Roughness exports `roughnessFactor` 1). Its
 /// other reasons are the glTF Material Output's `Occlusion` (handled by the patterns,
 /// `LowerCx::uses_inline_tree`) and `export_unused_textures` with `export_materials='EXPORT'`

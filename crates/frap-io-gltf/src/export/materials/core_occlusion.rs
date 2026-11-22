@@ -98,3 +98,85 @@ pub fn apply(
     }
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use frap_nodes::SocketValue;
+    use frap_rna::Value;
+    use frap_scene::{ChangeLog, Context, Preferences, startup};
+
+    use crate::export::{ExportSettings, export};
+
+    /// WP 8.12: factors of 1 the add-on writes anyway, in the written JSON: the occlusion
+    /// strength of a Mix with white at factor 1 (`"strength": 1`) and the white factor of a
+    /// Specular Tint behind a Multiply (`specularColorFactor: [1, 1, 1]`).
+    #[test]
+    fn factors_of_one_are_written() {
+        let (mut main, win) = startup::factory();
+        let mut log = ChangeLog::default();
+        let mut g = frap_nodes::builtin_groups::gltf_material_output::new_group();
+        g.header.name = "glTF Material Output".into();
+        let group = main.node_groups.insert("glTF Material Output", g, &mut log);
+        let ao = main
+            .images
+            .insert("AO", frap_scene::id::Image::new("AO", 4, 4), &mut log);
+        let tint = main
+            .images
+            .insert("Tint", frap_scene::id::Image::new("Tint", 4, 4), &mut log);
+        let mr = main.materials.find("Material").unwrap();
+        let m = main.materials.get_mut(mr, &mut log).unwrap();
+        let t = &mut m.node_tree;
+        let add = |t: &mut frap_nodes::NodeTree, ty: &str| {
+            let i = t.new_node(ty).unwrap();
+            t.nodes[i].uid
+        };
+        let gn = add(t, "ShaderNodeGroup");
+        t.node_mut(gn)
+            .unwrap()
+            .set_prop("node_tree", Value::Id(Some(group.any())));
+        let iface = main_iface();
+        t.node_mut(gn).unwrap().sync_group_sockets(Some(&iface));
+        let img = |t: &mut frap_nodes::NodeTree, im: frap_rna::IdRef<frap_rna::ImageId>| {
+            let n = add(t, "ShaderNodeTexImage");
+            t.node_mut(n)
+                .unwrap()
+                .set_prop("image", Value::Id(Some(im.any())));
+            n
+        };
+        let mix = |t: &mut frap_nodes::NodeTree, blend: &str| {
+            let n = add(t, "ShaderNodeMix");
+            let node = t.node_mut(n).unwrap();
+            node.set_prop("data_type", Value::Enum("RGBA".into()));
+            node.set_prop("blend_type", Value::Enum(blend.into()));
+            node.input_mut("Factor").unwrap().default_value = SocketValue::Float(1.0);
+            node.input_mut("A").unwrap().default_value = SocketValue::Color([1.0; 4]);
+            n
+        };
+        let ia = img(t, ao);
+        let ma = mix(t, "MIX");
+        t.link_by_name((ia, "Color"), (ma, "B")).unwrap();
+        t.link_by_name((ma, "Result"), (gn, "Occlusion")).unwrap();
+        let it = img(t, tint);
+        let mt = mix(t, "MULTIPLY");
+        t.link_by_name((it, "Color"), (mt, "B")).unwrap();
+        let bsdf = t.first_of_type("ShaderNodeBsdfPrincipled").unwrap().uid;
+        t.link_by_name((mt, "Result"), (bsdf, "Specular Tint")).unwrap();
+        let prefs = Preferences::default();
+        let ctx = Context {
+            main: &main,
+            win: &win,
+            prefs: &prefs,
+        };
+        let out = export(&main, &ctx, &ExportSettings::default()).unwrap();
+        let gm = &out.document.materials[0];
+        assert_eq!(gm.occlusion_texture.as_ref().unwrap().strength, Some(1.0));
+        let spec: frap_gltf::ext::khr_materials_specular::KhrMaterialsSpecular =
+            gm.extensions.get().unwrap().unwrap();
+        assert_eq!(spec.specular_color_factor, Some([1.0; 3]));
+    }
+
+    /// The interface of the add-on's "glTF Material Output" group.
+    fn main_iface() -> Vec<frap_nodes::InterfaceSocket> {
+        frap_nodes::builtin_groups::gltf_material_output::new_group().interface
+    }
+}

@@ -404,6 +404,31 @@ static LAYOUT: crate::build::LayoutBlock = crate::build::LayoutBlock {
 
 #[cfg(test)]
 mod tests {
+    /// WP 8.12: an Alpha from another image is packed into the base colour image
+    /// (`MaterialExts::base_alpha`), and a colour output on Alpha alone is converted to grey.
+    #[test]
+    fn alpha_from_another_image_is_packed() {
+        let mut images = crate::graph::testkit::Images::default();
+        let col = images.add("col", false);
+        let mask = images.add("mask", false);
+        let mut m = crate::graph::testkit::mat("Packed");
+        let c = crate::graph::testkit::image_node(&mut m, col);
+        let a = crate::graph::testkit::image_node(&mut m, mask);
+        crate::graph::testkit::link(&mut m, (c, "Color"), (crate::graph::testkit::BSDF, "Base Color"));
+        crate::graph::testkit::link(&mut m, (a, "Alpha"), (crate::graph::testkit::BSDF, "Alpha"));
+        let lm = crate::graph::testkit::lower_m(&m, &images);
+        assert_eq!(lm.base_color.texture.as_ref().unwrap().image, col);
+        let pa = lm.ext.base_alpha.as_ref().unwrap();
+        assert_eq!((pa.texture.image, pa.texture.channel, pa.rgb_to_bw), (mask, ChannelSel::A, false));
+        let mut m = crate::graph::testkit::mat("Grey");
+        let a = crate::graph::testkit::image_node(&mut m, mask);
+        crate::graph::testkit::link(&mut m, (a, "Color"), (crate::graph::testkit::BSDF, "Alpha"));
+        let lm = crate::graph::testkit::lower_m(&m, &images);
+        let pa = lm.ext.base_alpha.as_ref().unwrap();
+        assert!(pa.rgb_to_bw);
+        assert_eq!(lm.base_color.texture.as_ref(), Some(&pa.texture));
+    }
+
     use crate::graph::testkit::*;
     use crate::{AlphaMode, ChannelSel, VertexColorUse};
 
@@ -452,7 +477,7 @@ mod tests {
         assert_eq!(lm.base_color.factor, [0.2, 0.6, 0.4, 1.0]);
         assert_eq!(lm.alpha_mode, AlphaMode::Blend);
         assert_law(&lm, &images);
-        // Alpha from another image than the colour: not packed, WARNING.
+        // Alpha from another image than the colour: packed into its alpha (WP 8.12).
         let mut m = mat("TwoImages");
         let ta = image_node(&mut m, a);
         let tb = image_node(&mut m, b);
@@ -463,14 +488,16 @@ mod tests {
             lm.base_color.texture.as_ref().unwrap().channel,
             ChannelSel::Rgb
         );
-        assert_eq!(lm.diagnostics.len(), 1);
-        // A colour output into Alpha (RGB → BW): WARNING, no texture.
+        assert_eq!(lm.ext.base_alpha.as_ref().unwrap().texture.image, b);
+        assert!(lm.diagnostics.is_empty(), "{:?}", lm.diagnostics);
+        // A colour output into Alpha (RGB → BW): its grey value as alpha (WP 8.12).
         let mut m = mat("Gray");
         let ta = image_node(&mut m, a);
         link(&mut m, (ta, "Color"), (BSDF, "Alpha"));
         let lm = lower_m(&m, &images);
-        assert!(lm.base_color.texture.is_none());
-        assert!(lm.diagnostics[0].message.contains("grey"));
+        assert_eq!(lm.base_color.texture.as_ref().unwrap().image, a);
+        assert!(lm.ext.base_alpha.as_ref().unwrap().rgb_to_bw);
+        assert!(lm.diagnostics.is_empty(), "{:?}", lm.diagnostics);
     }
 
     #[test]

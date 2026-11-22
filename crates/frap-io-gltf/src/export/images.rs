@@ -1022,7 +1022,10 @@ fn encode_anisotropy(
                 let a = 2.0 * std::f64::consts::PI;
                 let (c, sn) = (a.cos(), a.sin());
                 let norm = (c * c + sn * sn).sqrt();
-                (((c / norm + 1.0) / 2.0) as f32, ((sn / norm + 1.0) / 2.0) as f32)
+                (
+                    ((c / norm + 1.0) / 2.0) as f32,
+                    ((sn / norm + 1.0) / 2.0) as f32,
+                )
             }
         };
         o[0] = x;

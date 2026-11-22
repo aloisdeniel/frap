@@ -32,8 +32,14 @@
 //! - `matrix_world` is Blender's `parent.matrix_world @ matrix_parent_inverse @ matrix_basis`.
 //!
 //! Cameras and lights are kept with `export_cameras`/`export_lights` and their world matrix
-//! gets the add-on's correction rotation (`cameras.rs`, WP 3.4). Not supported: collection
-//! hierarchies (`export_hierarchy_full_collections`) and instancing (later milestones).
+//! gets the add-on's correction rotation (`cameras.rs`, WP 3.4). With
+//! `export_hierarchy_full_collections` (WP 8.12) the tree starts from the scene's master
+//! collection (or `collection`) and holds a node per collection: its objects whose parent is
+//! not in their first collection, then its child collections, natural name order each; an
+//! object child of another first collection is left to its own collection, and an object
+//! linked into several collections gets a node in each; collections are never filtered, and
+//! `remove_empty_collections` drops the empty ones. Not supported: collection instances
+//! (deviations §2).
 
 use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};

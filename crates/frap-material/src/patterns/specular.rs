@@ -153,3 +153,36 @@ static LAYOUT_COLOR: crate::build::LayoutBlock = crate::build::LayoutBlock {
             .is_some_and(|s| s.color.texture.is_some())
     },
 };
+
+
+#[cfg(test)]
+mod tests {
+    use frap_nodes::SocketValue;
+
+    use crate::graph::testkit::*;
+
+    /// WP 8.12: a Specular Tint linked through a Multiply with white has the factor
+    /// `[1, 1, 1]`, which the add-on writes (`specular_color_set`); an unlinked white tint is
+    /// the default, not written.
+    #[test]
+    fn a_found_white_tint_factor_is_kept() {
+        let mut images = Images::default();
+        let img = images.add("tint", false);
+        let mut m = mat("Tint");
+        let t = image_node(&mut m, img);
+        let mix = add(&mut m, "ShaderNodeMix");
+        set_enum(&mut m, mix, "data_type", "RGBA");
+        set_enum(&mut m, mix, "blend_type", "MULTIPLY");
+        set_in(&mut m, mix, "Factor", float(1.0));
+        set_in(&mut m, mix, "A", SocketValue::Color([1.0; 4]));
+        link(&mut m, (t, "Color"), (mix, "B"));
+        link(&mut m, (mix, "Result"), (BSDF, "Specular Tint"));
+        let lm = lower_m(&m, &images);
+        let s = lm.ext.specular.as_ref().unwrap();
+        assert_eq!(s.color.factor, [1.0; 3]);
+        assert!(s.color.texture.is_some());
+        assert!(lm.ext.specular_color_set);
+        let m = mat("Unlinked");
+        assert!(!lower_m(&m, &images).ext.specular_color_set);
+    }
+}

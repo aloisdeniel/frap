@@ -272,3 +272,33 @@ static LAYOUT: crate::build::LayoutBlock = crate::build::LayoutBlock {
             .is_some_and(|a| a.texture.is_some())
     },
 };
+
+
+#[cfg(test)]
+mod tests {
+    use crate::graph::testkit::*;
+
+    /// WP 8.12: textures outside the importer's set-up are baked from their grey values: the
+    /// strength texture is the primary one, the strength 1 without a factor, the rotation the
+    /// unlinked socket's value × 2π.
+    #[test]
+    fn grayscale_textures_are_baked() {
+        let mut images = Images::default();
+        let img = images.add("strength", true);
+        let mut m = mat("Gray");
+        let t = image_node(&mut m, img);
+        link(&mut m, (t, "Color"), (BSDF, "Anisotropic"));
+        set_in(&mut m, BSDF, "Anisotropic Rotation", float(0.25));
+        let lm = lower_m(&m, &images);
+        let a = lm.ext.anisotropy.as_ref().unwrap();
+        assert_eq!(a.strength, 1.0);
+        assert!((f64::from(a.rotation) - std::f64::consts::FRAC_PI_2).abs() < 1e-6);
+        assert_eq!(a.texture.as_ref().unwrap().image, img);
+        let g = lm.ext.anisotropy_grayscale.as_ref().unwrap();
+        assert_eq!(g.strength.as_ref().unwrap().image, img);
+        assert!(g.rotation.is_none());
+        // Both sockets unlinked: no bake.
+        let m = mat("Plain");
+        assert!(lower_m(&m, &images).ext.anisotropy_grayscale.is_none());
+    }
+}
