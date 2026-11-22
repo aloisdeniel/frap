@@ -1932,13 +1932,25 @@ fn m8_contract_delta_cheap_parts_run() {
         frap_op::planned::operator_milestone("object.voxel_remesh"),
         frap_op::planned::POST_M8
     );
-    for (idname, planned, says) in [
+    // An M8 row that no WP has implemented yet (one per wave, so the pin outlives the WPs
+    // that implement the others; none left once M8 is complete).
+    let m8 = [
+        "mesh.select_similar",
+        "object.select_grouped",
+        "render.opengl",
+        "uv.minimize_stretch",
+    ]
+    .into_iter()
+    .find(|i| frap_op::lookup(i).is_err());
+    if let Some(idname) = m8 {
+        assert_eq!(frap_op::planned::operator_milestone(idname), "M8");
+    }
+    for (idname, planned, says) in m8.map(|i| (i, "M8", "plans it for M8")).into_iter().chain([
         ("object.track_set", "M9", "after M8"),
-        ("ed.undo", "M8", "plans it for M8"),
         ("anim.change_frame", "OUT", "does not list it"),
         ("mesh.knife_project", "OUT", "marks it OUT"),
         ("object.constraint_add", "OUT", "marks it OUT"),
-    ] {
+    ]) {
         let e = frap_op::lookup(idname).unwrap_err();
         assert_eq!(e.code, frap_op::errors::OP_NOT_IMPLEMENTED, "{idname}");
         assert_eq!(e.detail["planned"], planned, "{idname}");
@@ -1955,6 +1967,9 @@ fn m8_contract_delta_cheap_parts_run() {
         message: "step".into(),
     };
     assert_ne!(r, frap_op::UndoRequest::Undo);
+    // The undo status the `ed.*` polls read (WP 8.4).
+    let _: frap_op::UndoStatus = frap_op::undo_status();
+    let _ = frap_op::set_undo_status as fn(frap_op::UndoStatus);
     let _ = (
         m8_bvh as fn(),
         m8_variants as fn(&mut Main, &mut ChangeLog, IdRef<ObjectId>),

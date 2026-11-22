@@ -28,7 +28,9 @@ pub use modes::{
 pub use registry::{
     Lookup, OP_GATES, OpGate, Registry, check_poll, convert_args, gate, lookup, lookup_in, suggest,
 };
-pub use services::{ImageCache, PathResolver, Services, UndoRequest};
+pub use services::{
+    ImageCache, PathResolver, Services, UndoRequest, UndoStatus, set_undo_status, undo_status,
+};
 
 /// Operator-tier proc-macro (WP 1.12).
 pub use frap_macros::operator;

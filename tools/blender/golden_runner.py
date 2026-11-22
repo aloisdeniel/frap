@@ -202,6 +202,7 @@ NORMALISE = {
     "D-146": ("cases", "gltf/subsurf_split/mirror_stack writes Blender's smart_project UVs literally (foreach_set) instead of calling uv.smart_project"),
     "D-147": ("cases", "cases mirror one mesh per run or meshes with different element counts"),
     "D-148": ("cases", "vertex_group_copy_to_selected only fails where Blender changes nothing"),
+    "D-149": ("cases", "undo cases push the steps frap pushes implicitly with #@blender bpy.ops.ed.undo_push(...) lines"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),

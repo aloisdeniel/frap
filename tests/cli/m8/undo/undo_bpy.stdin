@@ -1,0 +1,20 @@
+bpy.ops.ed.undo.poll()
+bpy.ops.ed.redo.poll()
+bpy.ops.ed.undo_redo.poll()
+bpy.ops.ed.undo_push.poll()
+bpy.context.preferences.edit.undo_steps
+bpy.data.materials.new("Paint")
+bpy.data.objects['Cube'].select_get()
+bpy.context.space_data.shading.type = 'WIREFRAME'
+bpy.ops.ed.undo.poll()
+bpy.ops.ed.undo()
+bpy.data.materials.get("Paint")
+bpy.context.space_data.shading.type
+bpy.ops.ed.undo.poll()
+bpy.ops.ed.redo()
+bpy.ops.screen.frame_offset(delta=1)
+bpy.ops.screen.frame_offset(delta=1)
+bpy.context.scene.frame_current
+bpy.ops.ed.undo()
+bpy.context.scene.frame_current
+bpy.data.materials.get("Paint")

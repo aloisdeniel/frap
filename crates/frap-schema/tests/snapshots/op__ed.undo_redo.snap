@@ -1,0 +1,33 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "ed.undo_redo",
+  "bl_idname": "ED_OT_undo_redo",
+  "label": "Undo and Redo",
+  "description": "Undo and redo previous action",
+  "bl_options": [],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [],
+    "text": "always available",
+    "matrix": {
+      "plain": "NNNNN",
+      "view3d": "NNNNN"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "full",
+    "support_note": "headless-extended (deviations D-149): the undo history an interactive Blender keeps, from the session start or the last file load (blender -b keeps none until ed.undo_push()); every operator with the UNDO option, every RNA assignment and every RNA function call that changed data pushes a step (in Edit Mode only those on the edit data), ed.undo_push() pushes a named one; edit.undo_steps (32) steps are kept",
+    "headless": "extended",
+    "planned": "M8",
+    "extension": false,
+    "notes": [
+      "CANCELLED (state unchanged) when the repeated operator does not finish; result.repeated names it"
+    ]
+  }
+}

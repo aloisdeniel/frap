@@ -1,0 +1,8 @@
+# WP 8.4: undo and redo in bpy form with `--verbosity minimal`: the four ed.* polls
+# (`bpy.ops.ed.*.poll()`, the factory edit.undo_steps), RNA calls as steps (a material made with
+# bpy.data.materials.new comes and goes; `select_get()` changes nothing and pushes nothing),
+# context-only writes (the 3D View shading) never undone, and the grouped frame-change steps
+# (`screen.frame_offset` twice is one "Frame Change" step). Statements on stdin (raw mode).
+bin.name = "frap"
+args = ["--verbosity", "minimal"]
+fs.sandbox = true
