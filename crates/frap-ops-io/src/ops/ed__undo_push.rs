@@ -7,8 +7,8 @@
 //! (`WM_file_tag_modified`): `bpy.data.is_dirty` becomes true. In `blender -b` this is the call
 //! that creates the undo stack; frap has one from the start (deviations D-149).
 
-use frap_op::prelude::*;
 use frap_op::UndoRequest;
+use frap_op::prelude::*;
 use frap_spec_ops_io::ed::{OPSPEC_ED_OT_UNDO_PUSH, UndoPush as P};
 
 use super::ed__undo::HEADLESS;

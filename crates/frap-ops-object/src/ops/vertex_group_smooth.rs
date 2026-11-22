@@ -139,12 +139,7 @@ fn exec(cx: &mut OpCtx, p: object::VertexGroupSmooth) -> OpResult {
     for ob in objects {
         let (me, mut validmap, mut subset_count) = {
             let c = cx.ctx();
-            let Some(me) = c
-                .main
-                .objects
-                .get(ob)
-                .and_then(|o| weights::mesh_of(&c, o))
-            else {
+            let Some(me) = c.main.objects.get(ob).and_then(|o| weights::mesh_of(&c, o)) else {
                 continue;
             };
             let (v, k) = weights::subset(&c, ob, mode);

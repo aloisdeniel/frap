@@ -9,7 +9,7 @@
 //! select modes deselect their vertices/edges, in two passes so neighbouring islands keep
 //! their faces) and lose their UV selection. Always finishes.
 
-use frap_bmesh::{ElemFlag, LoopId, SelectMode, VertId, EdgeId};
+use frap_bmesh::{EdgeId, ElemFlag, LoopId, SelectMode, VertId};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_uv::uv;
@@ -101,15 +101,21 @@ fn face_is_any_sel(s: &UvSel, f: frap_bmesh::FaceId, test: bool) -> bool {
 }
 /// `bm_face_is_any_vert_sel`.
 fn face_is_any_vert_sel(s: &UvSel, f: frap_bmesh::FaceId, test: bool) -> bool {
-    s.face_loops(f).into_iter().any(|l| vert_sel_test(s, l, test))
+    s.face_loops(f)
+        .into_iter()
+        .any(|l| vert_sel_test(s, l, test))
 }
 /// `bm_face_is_any_edge_sel`.
 fn face_is_any_edge_sel(s: &UvSel, f: frap_bmesh::FaceId, test: bool) -> bool {
-    s.face_loops(f).into_iter().any(|l| edge_sel_test(s, l, test))
+    s.face_loops(f)
+        .into_iter()
+        .any(|l| edge_sel_test(s, l, test))
 }
 /// `bm_face_is_all_uv_sel`.
 fn face_is_all_uv_sel(s: &UvSel, f: frap_bmesh::FaceId, test: bool) -> bool {
-    s.face_loops(f).into_iter().all(|l| edge_sel_test(s, l, test))
+    s.face_loops(f)
+        .into_iter()
+        .all(|l| edge_sel_test(s, l, test))
 }
 
 /// `bm_vert_deselect_for_pass_fn`.

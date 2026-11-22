@@ -95,7 +95,12 @@ fn exec(cx: &mut OpCtx, p: object::VertexGroupLock) -> OpResult {
             selected[a] = true;
         }
     }
-    lock_all(&mut locks, &selected, p.action.value.identifier(), p.mask.value.identifier());
+    lock_all(
+        &mut locks,
+        &selected,
+        p.action.value.identifier(),
+        p.mask.value.identifier(),
+    );
     let m = cx.mesh_mut(me)?;
     for (i, l) in locks.into_iter().enumerate() {
         m.set_vertex_group_locked(i, l);

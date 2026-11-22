@@ -143,16 +143,16 @@ fn pin(o: &ObData, l: LoopId) -> bool {
 fn vert_needle(kind: Kind, s: &UvSel, o: &ObData, l: LoopId) -> f32 {
     let v = s.lv(l);
     match kind {
-        Kind::Area => s
-            .bm
-            .vert_faces(v)
-            .into_iter()
-            .fold(0.0, |a, f| a + area_uv(s, f)),
-        Kind::Area3d => s
-            .bm
-            .vert_faces(v)
-            .into_iter()
-            .fold(0.0, |a, f| a + area_3d(s.bm, f, &o.m3)),
+        Kind::Area => {
+            s.bm.vert_faces(v)
+                .into_iter()
+                .fold(0.0, |a, f| a + area_uv(s, f))
+        }
+        Kind::Area3d => {
+            s.bm.vert_faces(v)
+                .into_iter()
+                .fold(0.0, |a, f| a + area_3d(s.bm, f, &o.m3))
+        }
         Kind::Sides => s.bm.vert_edges(v).len() as f32,
         Kind::Pin if pin(o, l) => 1.0,
         _ => 0.0,
@@ -164,16 +164,16 @@ fn edge_needle(kind: Kind, s: &UvSel, o: &ObData, l: LoopId) -> f32 {
     let e = s.le(l);
     let lb = s.next(l);
     match kind {
-        Kind::Area => s
-            .bm
-            .edge_faces(e)
-            .into_iter()
-            .fold(0.0, |a, f| a + area_uv(s, f)),
-        Kind::Area3d => s
-            .bm
-            .edge_faces(e)
-            .into_iter()
-            .fold(0.0, |a, f| a + area_3d(s.bm, f, &o.m3)),
+        Kind::Area => {
+            s.bm.edge_faces(e)
+                .into_iter()
+                .fold(0.0, |a, f| a + area_uv(s, f))
+        }
+        Kind::Area3d => {
+            s.bm.edge_faces(e)
+                .into_iter()
+                .fold(0.0, |a, f| a + area_3d(s.bm, f, &o.m3))
+        }
         Kind::Length => {
             let (a, b) = (s.uv(l), s.uv(lb));
             let d = [b[0] - a[0], b[1] - a[1]];
@@ -236,9 +236,7 @@ fn face_needle(kind: Kind, s: &UvSel, o: &ObData, f: FaceId) -> f32 {
 fn island_needle(kind: Kind, s: &UvSel, o: &ObData, faces: &[FaceId]) -> f32 {
     match kind {
         Kind::Area => faces.iter().fold(0.0, |a, &f| a + area_uv(s, f)),
-        Kind::Area3d => faces
-            .iter()
-            .fold(0.0, |a, &f| a + area_3d(s.bm, f, &o.m3)),
+        Kind::Area3d => faces.iter().fold(0.0, |a, &f| a + area_3d(s.bm, f, &o.m3)),
         Kind::Face => faces.len() as f32,
         _ => 0.0,
     }
@@ -350,9 +348,8 @@ fn exec(cx: &mut OpCtx, p: uv::SelectSimilar) -> OpResult {
     let compare = SimilarCmp::of(p.compare.value.identifier());
     let objects = op::objects(cx);
     let data = object_data(cx, &objects, kind);
-    let totvertsel = |cx: &mut OpCtx, me| {
-        uvedit::edit_bm(cx, me).map_or(0, |bm| bm.selected_counts().0)
-    };
+    let totvertsel =
+        |cx: &mut OpCtx, me| uvedit::edit_bm(cx, me).map_or(0, |bm| bm.selected_counts().0);
     let mut tree = KdTree1::new();
     if dom == Domain::Island {
         let face_selected = !ts.sync;

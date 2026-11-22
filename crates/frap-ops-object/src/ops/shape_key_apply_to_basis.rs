@@ -216,7 +216,10 @@ mod tests {
             key.key_blocks.push(kb);
         }
         // K1 -> K0, K2 -> K1 -> K0; K3 is relative to itself.
-        assert_eq!(dependent_keys(&key, 0), Some(vec![false, true, true, false]));
+        assert_eq!(
+            dependent_keys(&key, 0),
+            Some(vec![false, true, true, false])
+        );
         assert_eq!(dependent_keys(&key, 2), None);
         key.use_relative = false;
         assert_eq!(dependent_keys(&key, 0), None);

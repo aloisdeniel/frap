@@ -60,8 +60,7 @@ struct Params {
 
 fn verttag_test(s: &UvSel, l: LoopId) -> bool {
     let luv = s.uv(l);
-    s.bm
-        .vert_loops(s.lv(l))
+    s.bm.vert_loops(s.lv(l))
         .into_iter()
         .all(|li| !(s.face_visible(s.lf(li)) && s.uv(li) == luv) || s.uv_select_test(li))
 }
@@ -76,8 +75,7 @@ fn verttag_set(s: &mut UvSel, l: LoopId, val: bool) {
 }
 
 fn edgetag_test(s: &UvSel, l: LoopId) -> bool {
-    s.bm
-        .edge_loops(s.le(l))
+    s.bm.edge_loops(s.le(l))
         .into_iter()
         .all(|li| !(s.face_visible(s.lf(li)) && s.share_edge(l, li)) || s.edge_select_test(li))
 }

@@ -392,7 +392,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 
 | ✓ | Operator | M | Prio | Notes |
 |---|---|---|---|---|
-| [x] | `uv.unwrap` | M3 | P0 | CONFORMAL (LSCM) T2; ANGLE_BASED via LSCM (hint `UV_ANGLE_BASED_AS_CONFORMAL`), MINIMUM_STRETCH falls back as a no-SLIM build; exact in M8 |
+| [x] | `uv.unwrap` | M3 | P0 | CONFORMAL (LSCM) T2; ANGLE_BASED (ABF++, faer sparse LU for Eigen's) and MINIMUM_STRETCH (SLIM) since M8 (WP 8.1, goldens `uv/abf/*`, `uv/slim/*`; D-108/D-109 closed); one ABF++ island-rotation gap in deviations §2 |
 | [x] | `uv.smart_project` | M3 | P0 |  |
 | [x] | `uv.pack_islands` | M3 | P0 | T3 invariants |
 | [x] | `uv.cube_project` | M3 | P1 |  |
@@ -406,7 +406,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `uv.lightmap_pack` | M3 | P2 | upper-case prop names are real |
 | [x] | `uv.pin` | M3 | P2 |  |
 | [x] | `uv.project_from_view` | M3 | P2 | frap-extended: projects from scene.camera |
-| [ ] | `uv.minimize_stretch` | M8 | P2 | iterations > 0 headless; WP 8.1 |
+| [x] | `uv.minimize_stretch` | M8 | P2 | iterations > 0 headless (`iterations=0` is the modal path, a TypeError hint); WP 8.1 (goldens `uv/minimize_stretch/*`) |
 | [x] | `uv.select_all` | M8 | P2 | meaningful with sync select off; WP 8.3.8 |
 | [x] | `uv.select_mode` | M8 | P2 | headless-extended: runs as in an Image Editor in UV mode (D-111); WP 8.3.8 |
 | [x] | `uv.select_linked` | M8 | P2 | WP 8.3.8 |

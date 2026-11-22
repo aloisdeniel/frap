@@ -161,7 +161,7 @@ NORMALISE = {
     "D-105": None,
     "D-106": None,
     "D-107": None,
-    "D-108": ("cases", "unwrap cases use charts where both methods agree, or CONFORMAL"),
+    "D-108": None,
     "D-109": None,
     "D-110": ("runner", "the Blender side looks through the camera (#@blender view_perspective = 'CAMERA')"),
     "D-111": None,

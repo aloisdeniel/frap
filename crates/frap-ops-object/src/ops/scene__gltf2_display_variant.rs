@@ -18,7 +18,6 @@ use crate::support::gltf_variants as support;
 #[linkme(crate = frap_op::linkme)]
 static GATE: OpGate = support::gate("scene.gltf2_display_variant");
 
-
 const POLL: Poll = Poll {
     requires: &[],
     check: support::has_variants,

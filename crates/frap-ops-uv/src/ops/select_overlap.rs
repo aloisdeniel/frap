@@ -21,9 +21,9 @@
 mod beautify;
 mod heap;
 
-use frap_bmesh::{ElemFlag, FaceId};
 use frap_bmesh::ops::contextual_create::connect_islands::isect_seg_seg_v2_point_ex;
 use frap_bmesh::ops::contextual_create::kdopbvh::BvhTree;
+use frap_bmesh::{ElemFlag, FaceId};
 use frap_op::operator;
 use frap_op::prelude::*;
 use frap_spec_ops_uv::uv;

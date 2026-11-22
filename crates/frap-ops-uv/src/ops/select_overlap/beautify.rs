@@ -7,8 +7,8 @@
 //! GPL-2.0-or-later), copied from `frap-uv`'s port (`param/beautify.rs`, itself from
 //! `frap-bmesh`'s), which keeps it crate-private.
 
-use frap_uv::param::bli::len_v2v2;
 use super::heap::{Heap, NodeId};
+use frap_uv::param::bli::len_v2v2;
 
 /// `cross_tri_v2`.
 #[inline]
