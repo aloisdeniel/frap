@@ -1547,6 +1547,7 @@ dependencies = [
  "frap-scene",
  "frap-spec-ops-mesh",
  "frap-spec-rna",
+ "frap-uv",
  "glam",
  "indexmap",
  "insta",

@@ -1,0 +1,11 @@
+# WP 8.3.3: mesh.rip with the headless-extended frap_location / frap_direction (deviations
+# D-153). The grid's middle row ripped in an orthographic view from below (the factory view
+# sees the grid from above) towards -Y: the copies (25-27) stay selected, the originals not,
+# as interactive Blender 5.2.4 does with that view and the mouse there (recording
+# ortho_grid_edges_below_down); rip_move hands the nested frap_* arguments to the rip (the new
+# vertex 28 is the copy kept selected, moved by the translation); frap_location alone replaces
+# the 3D cursor in the factory view; a face selection still raises Blender's error. Statements
+# on stdin (raw mode, §13.1).
+bin.name = "frap"
+args = []
+fs.sandbox = true

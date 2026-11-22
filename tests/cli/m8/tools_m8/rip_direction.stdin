@@ -1,0 +1,20 @@
+bpy.ops.object.delete()
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=4, y_subdivisions=4, size=2, location=(0, 0, 0))
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.frap.select_elements(type='VERT', indices=[11, 12, 13])
+bpy.ops.mesh.rip(frap_direction=(0, 0, 1), frap_location=(0, -0.6, -1))
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.context.object.data.vertices[12].select
+bpy.context.object.data.vertices[26].select
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.frap.select_elements(type='VERT', indices=[12])
+bpy.ops.mesh.rip_move(MESH_OT_rip={'frap_direction': (0.1, 0.2, 1.0), 'frap_location': (0.1, 0.4, -2)}, TRANSFORM_OT_translate={'value': (0, 0, 0.5)})
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.context.object.data.vertices[28].co
+bpy.context.object.data.vertices[28].select
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.frap.select_elements(type='VERT', indices=[2])
+bpy.context.scene.cursor.location = (5, 5, 5)
+bpy.ops.mesh.rip(frap_location=(0.3, -0.9, 0))
+bpy.ops.frap.select_elements(type='FACE', indices=[0])
+bpy.ops.mesh.rip(frap_direction=(0, 0, -1))

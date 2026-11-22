@@ -29,6 +29,7 @@ smallvec.workspace = true
 bitflags.workspace = true
 frap-boolean.workspace = true
 frap-modifiers.workspace = true
+frap-uv.workspace = true
 
 [dev-dependencies]
 proptest.workspace = true

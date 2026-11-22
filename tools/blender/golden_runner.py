@@ -206,6 +206,7 @@ NORMALISE = {
     "D-150": ("cases", "normals_tools COPY only fails where the state after it is the same in both tools"),
     "D-151": ("cases", "cases do not point normals with nothing selected on a mesh without custom_normal"),
     "D-152": ("cases", "cases do not create __mod_weightednormals_faceweight with another type"),
+    "D-153": ("cases", "rip cases run mesh.rip only in frap (#@frap) and rebuild the interactive Blender result with #@blender bmesh lines (split_edges / vert_separate and the recorded selection)"),
 }
 
 # Evaluation boundaries (§7.3): an operator call, view_layer.update(), frame_set(),
