@@ -62,7 +62,8 @@ struct Extra {
 
 /// Stored fields of generated modifier settings structs that are no RNA property, by struct.
 /// A typed extra whose type holds `IdAny` is not serialized (`#[serde(skip)]`, like the ID
-/// pointer fields: the `.frap` scene map writes ID references).
+/// pointer fields: the `.frap` scene map writes ID references); a fixed array of them
+/// (`[Option<IdAny>; N]`) is in `id_refs`/`set_id_ref` as `{name}[0]`…`{name}[N-1]`.
 const MODIFIER_EXTRAS: &[(&str, &[Extra])] = &[
     (
         "NodesModifier",
@@ -83,6 +84,14 @@ const MODIFIER_EXTRAS: &[(&str, &[Extra])] = &[
         }],
     ),
 ];
+
+/// The length of an extra's fixed array of ID pointers (`[Option<IdAny>; N]`).
+fn id_array_len(ty: &str) -> Option<usize> {
+    ty.strip_prefix("[Option<IdAny>; ")?
+        .strip_suffix(']')?
+        .parse()
+        .ok()
+}
 
 /// RNA properties of generated modifier settings structs that are another name for a stored
 /// field (Blender defines both on one DNA member), as `(struct, &[(alias, target)])`: the alias
@@ -829,8 +838,22 @@ fn emit_struct(
     // M4 W0: the stored ID pointers by name (user counting and remapping in `IdType`, `.frap`
     // pointers), since serde skips them.
     let ids: Vec<&Field> = fields.iter().filter(|f| matches!(f.ty, FTy::Id)).collect();
+    // Extras that are fixed arrays of ID pointers (`UVProjectModifier.projectors`) are ID
+    // pointers too, one per slot, named `{name}[i]`.
+    let id_slots: Vec<(String, String)> = extra
+        .iter()
+        .filter_map(|e| Some((e, id_array_len(e.ty?)?)))
+        .flat_map(|(e, n)| {
+            (0..n).map(move |i| {
+                (
+                    format!("{}[{i}]", e.name),
+                    format!("{}[{i}]", ident(e.name)),
+                )
+            })
+        })
+        .collect();
     out.push_str("    /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,\n    /// `.frap`; serde skips them).\n    pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {\n");
-    if ids.is_empty() {
+    if ids.is_empty() && id_slots.is_empty() {
         out.push_str("        SmallVec::new()\n");
     } else {
         out.push_str("        let mut v = SmallVec::new();\n");
@@ -842,6 +865,9 @@ fn emit_struct(
                 ident(&f.prop.identifier)
             );
         }
+        for (k, field) in &id_slots {
+            let _ = writeln!(out, "        v.push(({}, self.{field}));", lit_str(k));
+        }
         out.push_str("        v\n");
     }
     out.push_str("    }\n    /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).\n    pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {\n        match prop {\n");
@@ -851,6 +877,13 @@ fn emit_struct(
             "            {} => {{\n                self.{} = v;\n                true\n            }}",
             lit_str(&f.prop.identifier),
             ident(&f.prop.identifier)
+        );
+    }
+    for (k, field) in &id_slots {
+        let _ = writeln!(
+            out,
+            "            {} => {{\n                self.{field} = v;\n                true\n            }}",
+            lit_str(k)
         );
     }
     out.push_str("            _ => {\n                let _ = v;\n                false\n            }\n        }\n    }\n");

@@ -1,0 +1,27 @@
+bpy.ops.object.empty_add(location=(0.3, -2, 0.5), rotation=(1.2, 0.1, 0.3))
+bpy.context.object.name = 'P1'
+bpy.ops.object.empty_add(location=(2, 0.2, 0.1), rotation=(0.1, 1.4, 0))
+bpy.context.object.name = 'P2'
+bpy.ops.mesh.primitive_plane_add()
+bpy.data.objects['Plane'].modifiers.new(name='M', type='UV_PROJECT')
+bpy.data.objects['Plane'].modifiers['M'].projector_count = 3
+bpy.data.objects['Plane'].modifiers['M'].projectors[0].object = bpy.data.objects['P1']
+bpy.data.objects['Plane'].modifiers['M'].projectors[2].object = bpy.data.objects['P2']
+bpy.data.objects['Plane'].evaluated_get(bpy.context.evaluated_depsgraph_get()).data.uv_layers[0].data[1].uv
+bpy.ops.wm.save_as_mainfile(filepath='projectors.frap')
+bpy.ops.wm.open_mainfile(filepath='projectors.frap')
+bpy.data.objects['Plane'].modifiers['M'].projectors[0].object
+bpy.data.objects['Plane'].modifiers['M'].projectors[1].object
+bpy.data.objects['Plane'].modifiers['M'].projectors[2].object
+bpy.data.objects['Plane'].evaluated_get(bpy.context.evaluated_depsgraph_get()).data.uv_layers[0].data[1].uv
+bpy.data.objects.remove(bpy.data.objects['P1'])
+bpy.data.objects['Plane'].modifiers['M'].projectors[0].object
+bpy.ops.wm.save_as_mainfile(filepath='projectors.frap')
+bpy.ops.wm.open_mainfile(filepath='projectors.frap')
+bpy.data.objects['Plane'].modifiers['M'].projectors[0].object
+bpy.data.objects['Plane'].modifiers['M'].projectors[2].object
+bpy.data.objects['Plane'].modifiers.new(name='CS', type='CORRECTIVE_SMOOTH')
+bpy.data.objects['Plane'].modifiers['CS'].is_bind
+bpy.data.objects['Plane'].modifiers['CS'].rest_source = 'BIND'
+bpy.data.objects['Plane'].modifiers['CS'].is_bind
+bpy.data.objects['Plane'].modifiers['CS'].is_bind = True

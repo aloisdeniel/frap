@@ -825,11 +825,62 @@ impl UVProjectSettings {
     /// The ID pointers this struct stores, as `(property, value)` (user counting, remapping,
     /// `.frap`; serde skips them).
     pub fn id_refs(&self) -> SmallVec<[(&'static str, Option<IdAny>); 2]> {
-        SmallVec::new()
+        let mut v = SmallVec::new();
+        v.push(("projectors[0]", self.projectors[0]));
+        v.push(("projectors[1]", self.projectors[1]));
+        v.push(("projectors[2]", self.projectors[2]));
+        v.push(("projectors[3]", self.projectors[3]));
+        v.push(("projectors[4]", self.projectors[4]));
+        v.push(("projectors[5]", self.projectors[5]));
+        v.push(("projectors[6]", self.projectors[6]));
+        v.push(("projectors[7]", self.projectors[7]));
+        v.push(("projectors[8]", self.projectors[8]));
+        v.push(("projectors[9]", self.projectors[9]));
+        v
     }
     /// Sets a stored ID pointer by property name (`false`: not one of `id_refs`).
     pub fn set_id_ref(&mut self, prop: &str, v: Option<IdAny>) -> bool {
         match prop {
+            "projectors[0]" => {
+                self.projectors[0] = v;
+                true
+            }
+            "projectors[1]" => {
+                self.projectors[1] = v;
+                true
+            }
+            "projectors[2]" => {
+                self.projectors[2] = v;
+                true
+            }
+            "projectors[3]" => {
+                self.projectors[3] = v;
+                true
+            }
+            "projectors[4]" => {
+                self.projectors[4] = v;
+                true
+            }
+            "projectors[5]" => {
+                self.projectors[5] = v;
+                true
+            }
+            "projectors[6]" => {
+                self.projectors[6] = v;
+                true
+            }
+            "projectors[7]" => {
+                self.projectors[7] = v;
+                true
+            }
+            "projectors[8]" => {
+                self.projectors[8] = v;
+                true
+            }
+            "projectors[9]" => {
+                self.projectors[9] = v;
+                true
+            }
             _ => {
                 let _ = v;
                 false

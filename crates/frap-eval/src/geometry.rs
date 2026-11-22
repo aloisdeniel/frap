@@ -286,6 +286,15 @@ impl ModEvalCx for GeoCx<'_, '_> {
     fn prev_coords_slot(&mut self) -> Option<&mut Option<Vec<[f32; 3]>>> {
         Some(&mut self.prev_coords)
     }
+
+    fn edit_mesh(&self) -> Option<Arc<Mesh>> {
+        let me = self.ob.data?.typed::<frap_rna::MeshId>()?;
+        self.host
+            .edit()
+            .meshes
+            .contains_key(&me.key())
+            .then(|| self.host.mesh_view(me))
+    }
 }
 
 /// Where an image file is read from (`//` relative to the saved file's folder).

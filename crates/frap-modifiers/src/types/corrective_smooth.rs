@@ -9,8 +9,8 @@
 //! shape keys or modifiers). `rest_source='BIND'` needs `object.correctivesmooth_bind`, which
 //! frap does not implement (OUT): such a modifier has no bind data and reports Blender's
 //! "Bind data required" (as an unbound one does in Blender). Blender caches the deltas between
-//! evaluations; frap recomputes them, with the same result. In Edit Mode Blender's rest shape
-//! is the edit mesh's coordinates; frap reads the object's mesh datablock.
+//! evaluations; frap recomputes them, with the same result. In Edit Mode the rest shape is the
+//! edit mesh's coordinates, as in Blender.
 
 use frap_geom::normals::safe_acos_approx;
 use frap_math::matrix::normalize_v3;
@@ -35,11 +35,17 @@ fn eval(md: &Modifier, mut mesh: Mesh, cx: &mut dyn ModEvalCx) -> Result<Mesh, M
         return Ok(mesh);
     };
     let ob = cx.object();
+    // The edit mesh's coordinates in Edit Mode (`BKE_editmesh_vert_coords_alloc_orco`), else
+    // the object's mesh.
     let rest: Option<Vec<V3>> = if s.rest_source == "ORCO" && ob.object_type() == "MESH" {
-        ob.data
-            .and_then(IdRef::<MeshId>::from_any)
-            .and_then(|m| cx.main().meshes.get(m))
-            .map(|m| m.positions().to_vec())
+        match cx.edit_mesh() {
+            Some(em) => Some(em.positions().to_vec()),
+            None => ob
+                .data
+                .and_then(IdRef::<MeshId>::from_any)
+                .and_then(|m| cx.main().meshes.get(m))
+                .map(|m| m.positions().to_vec()),
+        }
     } else {
         None
     };

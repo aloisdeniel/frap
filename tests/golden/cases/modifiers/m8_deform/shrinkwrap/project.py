@@ -1,7 +1,7 @@
 # WP 8.3.12: SHRINKWRAP `PROJECT` (BVH watertight ray casts into a rotated, scaled Suzanne):
 # along the vertex normals, along axes, negative and positive directions, back/front face
-# culling (inverted for the negative rays), a projection limit, an auxiliary target, the limit
-# surface (`subsurf_levels`), `ABOVE_SURFACE` (smooth normals through the space transform) and
+# culling (inverted for the negative rays), a projection limit, an auxiliary target, subdivided
+# ray origins (`subsurf_levels`), `ABOVE_SURFACE` (smooth normals through the space transform) and
 # `OUTSIDE_SURFACE`.
 # golden: startup=empty compare=evaluated:A,evaluated:B,evaluated:C,evaluated:D,evaluated:E,evaluated:F,evaluated:G,evaluated:H,evaluated:I tier=T2
 import bpy

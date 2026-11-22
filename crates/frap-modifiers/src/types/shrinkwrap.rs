@@ -111,7 +111,7 @@ pub(crate) struct ShrinkwrapInput<'a> {
     pub local2target: SpaceTransform,
     /// The evaluated auxiliary target and its transform (`PROJECT` only).
     pub aux: Option<(&'a Mesh, SpaceTransform)>,
-    /// `PROJECT` with `subsurf_levels`: the vertices on the limit surface.
+    /// `PROJECT` with `subsurf_levels`: the vertices refined uniformly to that level.
     pub subdivided: Option<&'a [V3]>,
 }
 
@@ -380,8 +380,11 @@ fn calc_normal_projection(calc: &Calc<'_>, aux: Option<(&Mesh, SpaceTransform)>,
 
 // Ported from blender/source/blender/blenkernel/intern/shrinkwrap.cc
 // (shrinkwrap_calc_subdivided_positions).
-/// The vertices moved to the Catmull-Clark limit surface (`subdiv::deform_coarse_vertices`
-/// with creases, boundary `EDGE_ONLY`, at `level`); loose vertices keep their positions, and a
+/// The vertices where a non-adaptive Catmull-Clark `Subdiv` at `settings.level = level` puts
+/// them (`subdiv::deform_coarse_vertices` with creases, boundary `EDGE_ONLY`): Blender refines
+/// uniformly to `level`, and OpenSubdiv's uniform patch table is made of linear patches, so the
+/// "limit point" at a coarse vertex's corner is its refined position at `level` (it approaches
+/// the limit surface only as `level` rises). Loose vertices keep their positions, and a
 /// topology the subdivider rejects keeps the coarse positions.
 fn subdivided_positions(cx: &mut dyn ModEvalCx, me: &Mesh, level: u32) -> Vec<V3> {
     let mut out = me.positions().to_vec();
@@ -415,16 +418,14 @@ fn subdivided_positions(cx: &mut dyn ModEvalCx, me: &Mesh, level: u32) -> Vec<V3
     );
     topo.edge_creases = float_attr("crease_edge", Domain::Edge);
     topo.vert_creases = float_attr("crease_vert", Domain::Point);
-    // Only the coarse vertices are needed: one level of output with the limit surface at
-    // OpenSubdiv's isolation `level` (Blender refines uniformly to `level`; a coarse vertex's
-    // limit position does not depend on it).
+    // `is_adaptive = false`: the refined vertices themselves (frap's `use_limit_surface`
+    // is Blender's adaptive evaluation).
     let mut settings = SubdivSettings::default();
     settings.is_simple = false;
-    settings.level = 1;
+    settings.level = level;
     settings.use_creases = true;
     settings.vtx_boundary = VtxBoundary::EdgeOnly;
-    settings.use_limit_surface = true;
-    settings.quality = level;
+    settings.use_limit_surface = false;
     let Ok(r) = cx.subdivider().subdivide(&topo, &settings) else {
         return out;
     };
