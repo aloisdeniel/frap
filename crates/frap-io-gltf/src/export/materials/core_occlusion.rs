@@ -160,7 +160,8 @@ mod tests {
         let mt = mix(t, "MULTIPLY");
         t.link_by_name((it, "Color"), (mt, "B")).unwrap();
         let bsdf = t.first_of_type("ShaderNodeBsdfPrincipled").unwrap().uid;
-        t.link_by_name((mt, "Result"), (bsdf, "Specular Tint")).unwrap();
+        t.link_by_name((mt, "Result"), (bsdf, "Specular Tint"))
+            .unwrap();
         let prefs = Preferences::default();
         let ctx = Context {
             main: &main,

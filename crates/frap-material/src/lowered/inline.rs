@@ -113,14 +113,11 @@ fn flatten(tree: &NodeTree, images: &dyn ImageLookup, depth: usize) -> NodeTree 
     if depth == 0 {
         return t;
     }
-    loop {
-        let Some((uid, inner)) = t
-            .nodes
-            .iter()
-            .find_map(|n| group_of(n, images).map(|g| (n.uid, g)))
-        else {
-            break;
-        };
+    while let Some((uid, inner)) = t
+        .nodes
+        .iter()
+        .find_map(|n| group_of(n, images).map(|g| (n.uid, g)))
+    {
         let inner = flatten(inner, images, depth - 1);
         splice(&mut t, uid, &inner);
     }
@@ -217,7 +214,9 @@ fn splice(t: &mut NodeTree, g: u32, inner: &NodeTree) {
 /// Rewires the links leaving muted nodes to what the muted node passes
 /// (`handle_output_socket__internal_links`), until none is left (chains of muted nodes).
 fn bypass_muted(t: &mut NodeTree, mat: &frap_scene::id::Material, images: &dyn ImageLookup) {
-    for _ in 0..t.nodes.len().max(1) {
+    // Each pass rewires one link; a chain of muted nodes needs one pass per node it crosses.
+    let guard = (t.links.len() + 1) * (t.nodes.len() + 1);
+    for _ in 0..guard {
         let Some(k) = t.links.iter().position(|l| {
             t.node(l.from_node)
                 .is_some_and(|n| n.mute && n.bl_idname != "NodeReroute")

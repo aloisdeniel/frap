@@ -222,8 +222,11 @@ pub(crate) struct ExportImage {
     fills: Vec<(u8, Fill)>,
     /// `set_calc(grayscale_anisotropy_calculation)` with the stored images (WP 8.12):
     /// `(anisotropy, anisotropic_rotation)`, `None` for a stored value (an unlinked socket).
-    anisotropy: Option<(Option<IdRef<ImageId>>, Option<IdRef<ImageId>>)>,
+    anisotropy: Option<AnisotropyImages>,
 }
+
+/// The stored images of a grayscale anisotropy bake: `(anisotropy, anisotropic_rotation)`.
+type AnisotropyImages = (Option<IdRef<ImageId>>, Option<IdRef<ImageId>>);
 
 impl ExportImage {
     fn fill(&mut self, dst: u8, f: Fill) {
