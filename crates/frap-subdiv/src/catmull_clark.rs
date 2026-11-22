@@ -9,10 +9,12 @@
 //!    infinitely sharp; edge and vertex creases become sharpness `10·c²`; a vertex with two
 //!    incident edges adds their smaller sharpness (Blender's converter quirk); `SIMPLE`
 //!    subdivision is Catmull-Clark with every edge and vertex infinitely sharp
-//!    (`BUGGY_SIMPLE_SCHEME_WORKAROUND`). UV maps become face-varying channels whose values
-//!    are the corners Blender's UV vertex map welds (`BKE_mesh_uv_vert_map_create`, winding
-//!    aware, 1e-4 limit).
-//! 2. The mesh is refined uniformly (`vtr`, `primvar`).
+//!    (`BUGGY_SIMPLE_SCHEME_WORKAROUND`).
+//! 2. The mesh is refined uniformly (`vtr`, `primvar`) for the positions. The UV maps are
+//!    face-varying channels whose values are the corners Blender's UV vertex map welds
+//!    (`BKE_mesh_uv_vert_map_create`, winding aware, 1e-4 limit), evaluated by `crate::far`:
+//!    OpenSubdiv's face-varying pipeline ported bit for bit (WP 8.11), so every corner's UV
+//!    is Blender's `f32` value, inside Gregory end caps too.
 //! 3. With `use_limit_surface` Blender evaluates bicubic patches of an adaptive refinement
 //!    isolated to `quality` levels. At level `L ≤ quality` every output point is a vertex of
 //!    the refined mesh at level `L`, and the patches place it at that vertex's limit position
@@ -31,7 +33,7 @@
 //!    points between isolation-level vertices inside Gregory end caps. With the `osd` feature
 //!    (on by default, the M4 gate's decision) those cases take their points from the
 //!    `opensubdiv-rs` patch table ([`needs_end_caps`]); without it they are the exact limit
-//!    here (up to `5e-2` from Blender on a 6-sided cylinder, `SIMPLE` level 3; deviations.md).
+//!    here (up to `5e-2` from Blender on a 6-sided cylinder, `SIMPLE` level 3).
 //! 4. The output follows Blender's layout ([`crate::layout`]), so indices match (T1).
 
 use smallvec::SmallVec;

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-//! Development cross-check against Blender's own OpenSubdiv: with `FRAP_OSD_ORACLE` set to a
-//! program linked against Blender 5.2.4's `libosdCPU.dylib` (the WP 8.11 oracle, which builds
-//! the refiner, stencil and patch tables exactly as `evaluator_impl.cc` does and dumps them),
-//! every stage of this port is compared bit for bit on the meshes of `tests/data`. Without the
-//! variable the test returns immediately (the committed Blender dumps in `tests/fvar_dumps`
-//! check the end result).
+//! Development cross-check against Blender's own OpenSubdiv: with `FRAP_OSD_ORACLE` set to the
+//! program of `tests/fvar/oracle.cpp` (linked against Blender 5.2.4's `libosdCPU.dylib`; it
+//! builds the refiner, stencil and patch tables exactly as `evaluator_impl.cc` does and dumps
+//! them), every stage of this port is compared bit for bit on the meshes of `tests/data`.
+//! Without the variable the test returns immediately; `tests/fvar_dumps.rs` checks the end
+//! result against Blender's committed dumps.
 
 use std::fmt::Write as _;
 use std::path::PathBuf;
