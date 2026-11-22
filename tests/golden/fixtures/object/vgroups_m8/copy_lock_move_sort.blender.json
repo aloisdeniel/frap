@@ -5,24 +5,20 @@
   },
   "lines": [
     {
-      "line": 8,
-      "ok": true
-    },
-    {
       "line": 9,
-      "ok": false,
-      "exception": "RuntimeError",
-      "message": "Operator bpy.ops.object.vertex_group_copy.poll() Object has no vertex groups"
+      "ok": true
     },
     {
       "line": 10,
       "ok": false,
       "exception": "RuntimeError",
-      "message": "Operator bpy.ops.object.vertex_group_lock.poll() Object has no vertex groups"
+      "message": "Operator bpy.ops.object.vertex_group_copy.poll() Object has no vertex groups"
     },
     {
       "line": 11,
-      "ok": true
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Operator bpy.ops.object.vertex_group_lock.poll() Object has no vertex groups"
     },
     {
       "line": 12,
@@ -82,13 +78,13 @@
     },
     {
       "line": 26,
-      "ok": false,
-      "exception": "RuntimeError",
-      "message": "Error: Vertex not in group\n"
+      "ok": true
     },
     {
       "line": 27,
-      "ok": true
+      "ok": false,
+      "exception": "RuntimeError",
+      "message": "Error: Vertex not in group\n"
     },
     {
       "line": 28,
@@ -229,6 +225,22 @@
     {
       "line": 62,
       "ok": true
+    },
+    {
+      "line": 63,
+      "ok": true
+    },
+    {
+      "line": 64,
+      "ok": true
+    },
+    {
+      "line": 65,
+      "ok": true
+    },
+    {
+      "line": 66,
+      "ok": true
     }
   ],
   "objects": {
@@ -236,9 +248,9 @@
       "type": "CAMERA",
       "parent": null,
       "matrix_world": [
-        [0.0654382, -0.05817008, 5.7096763, 6.0],
-        [0.016709115, 0.109018914, 3.764964, 6.0],
-        [-0.10518387, -0.018871104, 4.1502576, 7.0],
+        [0.0654382, 0.043641306, 6.2176514, 6.0],
+        [0.016709115, 0.10840486, -3.8369012, 6.0],
+        [-0.10518387, 0.044371422, 3.258681, 7.0],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "location": [5.0, 6.0, 6.0],
@@ -274,9 +286,9 @@
       "type": "LIGHT",
       "parent": null,
       "matrix_world": [
-        [1.1677064, 0.0, 0.0, 1.0],
-        [1.8185948, 0.0, 0.0, 1.0],
-        [-3.3658838, 0.0, 0.0, 2.0],
+        [-2.6931293, 0.0, 0.0, 1.0],
+        [2.4360309, 0.0, 0.0, 1.0],
+        [-1.6771426, 0.0, 0.0, 2.0],
         [0.0, 0.0, 0.0, 1.0]
       ],
       "location": [1.0, 0.0, 0.0],

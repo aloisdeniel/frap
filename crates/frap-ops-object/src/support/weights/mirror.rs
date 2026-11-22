@@ -11,65 +11,153 @@
 //! topology table is rebuilt only when the vertex or edge count or the Edit Mode state
 //! changes); frap builds them for every call (deviations D-145).
 
-use std::collections::HashMap;
-
 /// `KD_THRESH` (`ED_mesh_mirror_spatial_table_lookup`) and `BM_SEARCH_MAXDIST_MIRR`.
 pub const KD_THRESH: f32 = 0.00002;
 
-/// The spatial mirror table of a vertex array (`ED_mesh_mirror_spatial_table_begin`).
+/// `KDTreeNode` (`BLI_kdtree_types.hh`): `kd_node_unset` children are [`KD_UNSET`].
+#[derive(Clone, Copy)]
+struct KdNode {
+    left: u32,
+    right: u32,
+    co: [f32; 3],
+    index: usize,
+    d: usize,
+}
+
+/// `kd_node_unset`.
+const KD_UNSET: u32 = u32::MAX;
+
+/// `detail::kdtree_balance`: the median of `nodes` along `axis` becomes the subtree root
+/// (quick-select around the median), its halves the children, the axis cycling X, Y, Z.
+/// `ofs` is the offset of `nodes` in the whole node array.
+fn kd_balance(nodes: &mut [KdNode], axis: usize, ofs: usize) -> u32 {
+    let n = nodes.len();
+    if n == 0 {
+        return KD_UNSET;
+    }
+    if n == 1 {
+        return ofs as u32;
+    }
+    let (mut left, mut right) = (0usize, n - 1);
+    let median = n / 2;
+    while right > left {
+        let co = nodes[right].co[axis];
+        let mut i = left.wrapping_sub(1);
+        let mut j = right;
+        loop {
+            // `while (nodes[++i].co[axis] < co)`, `while (nodes[--j].co[axis] > co && j > left)`.
+            i = i.wrapping_add(1);
+            while nodes[i].co[axis] < co {
+                i += 1;
+            }
+            j -= 1;
+            while nodes[j].co[axis] > co && j > left {
+                j -= 1;
+            }
+            if i >= j {
+                break;
+            }
+            nodes.swap(i, j);
+        }
+        nodes.swap(i, right);
+        if i >= median {
+            right = i - 1;
+        }
+        if i <= median {
+            left = i + 1;
+        }
+    }
+    let next = (axis + 1) % 3;
+    let (lo, rest) = nodes.split_at_mut(median);
+    let (mid, hi) = rest.split_at_mut(1);
+    mid[0].d = axis;
+    mid[0].left = kd_balance(lo, next, ofs);
+    mid[0].right = kd_balance(hi, next, ofs + median + 1);
+    (median + ofs) as u32
+}
+
+/// The spatial mirror table of a vertex array (`ED_mesh_mirror_spatial_table_begin`): a port
+/// of Blender's KD-tree (`kdtree_insert` in vertex order, `kdtree_balance`), so that among
+/// vertices at the same distance (coincident duplicates) the lookup answers the one Blender's
+/// traversal reaches first.
 ///
-/// Blender queries a KD-tree for the nearest vertex and accepts it within [`KD_THRESH`]; the
-/// vertices are hashed in cubes of that size here, so only the 27 cubes around the query are
-/// searched. The answer is the same (ties: the lowest index).
+/// Ported from blender/source/blender/blenlib/BLI_kdtree.hh (Blender 5.2.4).
 pub struct SpatialTable<'a> {
     positions: &'a [[f32; 3]],
-    cells: HashMap<[i64; 3], Vec<usize>>,
+    nodes: Vec<KdNode>,
+    root: u32,
 }
 
 impl<'a> SpatialTable<'a> {
-    fn cell(p: [f32; 3]) -> [i64; 3] {
-        // Saturating casts: huge or non-finite coordinates land in the outermost cells, where
-        // the distance test still decides.
-        let f = |x: f32| (x / KD_THRESH).floor() as i64;
-        [f(p[0]), f(p[1]), f(p[2])]
-    }
-
     /// The table of `positions`.
     pub fn new(positions: &'a [[f32; 3]]) -> Self {
-        let mut cells: HashMap<[i64; 3], Vec<usize>> = HashMap::with_capacity(positions.len());
-        for (j, q) in positions.iter().enumerate() {
-            cells.entry(Self::cell(*q)).or_default().push(j);
+        let mut nodes: Vec<KdNode> = positions
+            .iter()
+            .enumerate()
+            .map(|(index, &co)| KdNode {
+                left: KD_UNSET,
+                right: KD_UNSET,
+                co,
+                index,
+                d: 0,
+            })
+            .collect();
+        let root = kd_balance(&mut nodes, 0, 0);
+        SpatialTable {
+            positions,
+            nodes,
+            root,
         }
-        SpatialTable { positions, cells }
     }
 
-    /// The vertex nearest to `co` and its distance (`kdtree_find_nearest`), searching the
-    /// cubes around `co` only (a farther vertex is never within the threshold).
+    /// `kdtree_find_nearest`: the vertex nearest to `co` and its distance. A node replaces the
+    /// best one only when strictly closer, in the traversal order of Blender's stack.
     fn nearest(&self, co: [f32; 3]) -> Option<(usize, f32)> {
-        let c = Self::cell(co);
-        let mut best: Option<(usize, f32)> = None;
-        for dx in -1i64..=1 {
-            for dy in -1i64..=1 {
-                for dz in -1i64..=1 {
-                    let key = [
-                        c[0].saturating_add(dx),
-                        c[1].saturating_add(dy),
-                        c[2].saturating_add(dz),
-                    ];
-                    for &j in self.cells.get(&key).into_iter().flatten() {
-                        let q = self.positions[j];
-                        let d = ((q[0] - co[0]).powi(2)
-                            + (q[1] - co[1]).powi(2)
-                            + (q[2] - co[2]).powi(2))
-                        .sqrt();
-                        if best.is_none_or(|(bj, bd)| d < bd || (d == bd && j < bj)) {
-                            best = Some((j, d));
-                        }
+        if self.root == KD_UNSET {
+            return None;
+        }
+        let mut min_dist = f32::MAX;
+        let mut min_node: Option<usize> = None;
+        let mut stack: Vec<u32> = vec![self.root];
+        while let Some(ni) = stack.pop() {
+            let node = &self.nodes[ni as usize];
+            let mut test = |min_dist: &mut f32| {
+                let q = node.co;
+                let (dx, dy, dz) = (q[0] - co[0], q[1] - co[1], q[2] - co[2]);
+                let dist_sq = dx * dx + dy * dy + dz * dz;
+                // `if (dist_sq >= min_dist) return`: a NaN distance is accepted.
+                if matches!(
+                    dist_sq.partial_cmp(min_dist),
+                    Some(std::cmp::Ordering::Less) | None
+                ) {
+                    *min_dist = dist_sq;
+                    min_node = Some(node.index);
+                }
+            };
+            let cur = node.co[node.d] - co[node.d];
+            if cur < 0.0 {
+                if cur * cur < min_dist {
+                    test(&mut min_dist);
+                    if node.left != KD_UNSET {
+                        stack.push(node.left);
                     }
+                }
+                if node.right != KD_UNSET {
+                    stack.push(node.right);
+                }
+            } else {
+                if cur * cur < min_dist {
+                    test(&mut min_dist);
+                    if node.right != KD_UNSET {
+                        stack.push(node.right);
+                    }
+                }
+                if node.left != KD_UNSET {
+                    stack.push(node.left);
                 }
             }
         }
-        best
+        min_node.map(|i| (i, min_dist.sqrt()))
     }
 
     /// `ED_mesh_mirror_spatial_table_lookup(co)`: the vertex within [`KD_THRESH`] of `co`.
@@ -226,6 +314,45 @@ mod tests {
             e.push([x, x + 4]);
         }
         (p, e)
+    }
+
+    /// Blender 5.2.4 `mathutils.kdtree` (the same `kdtree_find_nearest`) on 200 points of a
+    /// 5x3x2 grid, queried at every point mirrored along X: with so many coincident points
+    /// the answer is the one the traversal reaches first, not the lowest index.
+    #[test]
+    fn spatial_table_matches_blender_kdtree_ties() {
+        let mut s: u64 = 12345;
+        let mut rnd = || {
+            s = (s * 1103515245 + 12345) % (1 << 31);
+            s
+        };
+        let pts: Vec<[f32; 3]> = (0..200)
+            .map(|_| {
+                let x = (rnd() % 5) as f32 - 2.0;
+                let y = (rnd() % 3) as f32;
+                let z = (rnd() % 2) as f32;
+                [x, y, z]
+            })
+            .collect();
+        let t = SpatialTable::new(&pts);
+        let got: Vec<usize> = pts
+            .iter()
+            .map(|p| t.nearest([-p[0], p[1], p[2]]).unwrap().0)
+            .collect();
+        let want: [usize; 200] = [
+            72, 107, 122, 121, 134, 13, 48, 85, 48, 43, 158, 111, 8, 103, 138, 69, 118, 139, 122,
+            111, 158, 139, 72, 191, 36, 121, 36, 13, 8, 193, 8, 13, 48, 121, 36, 107, 26, 193, 36,
+            13, 164, 121, 122, 69, 36, 85, 158, 193, 8, 167, 122, 183, 158, 139, 134, 103, 36, 183,
+            36, 69, 184, 13, 72, 167, 26, 85, 164, 193, 138, 43, 72, 191, 0, 65, 116, 69, 118, 69,
+            72, 85, 0, 111, 72, 13, 138, 65, 72, 191, 0, 121, 158, 167, 134, 65, 158, 13, 184, 183,
+            16, 13, 122, 103, 48, 13, 72, 191, 138, 193, 16, 19, 48, 19, 122, 13, 48, 103, 138,
+            183, 16, 139, 184, 121, 122, 103, 164, 167, 164, 191, 138, 85, 138, 183, 72, 69, 134,
+            121, 48, 19, 116, 139, 48, 183, 0, 111, 118, 121, 122, 13, 8, 139, 8, 139, 8, 43, 122,
+            85, 158, 121, 184, 13, 164, 121, 164, 193, 164, 85, 26, 183, 134, 139, 134, 121, 164,
+            103, 16, 191, 36, 43, 36, 13, 0, 69, 138, 167, 158, 85, 134, 139, 116, 139, 164, 191,
+            116, 107, 118, 69, 184, 139, 26, 191,
+        ];
+        assert_eq!(got, want);
     }
 
     #[test]

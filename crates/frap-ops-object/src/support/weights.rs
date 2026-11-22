@@ -559,7 +559,8 @@ pub fn tool_subset(_c: &Context) -> &'static str {
 
 /// `vgroup_do_remap` after the group list of `me` was re-ordered to `new_names` (the same
 /// names): every weight follows its group (`BKE_defvert_remap`, the edit BMesh in Edit Mode)
-/// and the active index follows the active group. An active index past the last group stays
+/// and the active index follows the active group; in Object Mode the weight layer is created
+/// when missing. An active index past the last group stays
 /// as it is (Blender reads past its remap table there).
 pub fn reorder_groups(
     cx: &mut OpCtx,
@@ -570,7 +571,15 @@ pub fn reorder_groups(
     let old = group_names(cx, me);
     let map = groups::remap_from_names(&old, &new_names);
     cx.mesh_mut(me)?.vertex_group_names = new_names;
-    if let Some(mut w) = Weights::load(cx, me) {
+    // Object Mode: `BKE_object_defgroup_array_get` calls `deform_verts_for_write()`, which
+    // creates the weight layer even when no vertex has a weight yet. Edit Mode skips a BMesh
+    // without one (`cd_dvert_offset == -1`).
+    let w = if in_edit(cx, me) {
+        Weights::load(cx, me)
+    } else {
+        Weights::load_or_create(cx, me)
+    };
+    if let Some(mut w) = w {
         for dv in &mut w.dv {
             if !dv.weights.is_empty() {
                 defvert::remap(dv, &map);

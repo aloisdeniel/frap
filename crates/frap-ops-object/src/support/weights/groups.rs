@@ -126,9 +126,10 @@ fn left_number_strcmp(a: &[u8], b: &[u8], tiebreaker: &mut i32) -> i32 {
     0
 }
 
-/// `tolower` on a C `char` (signed on Blender's macOS and Windows builds): ASCII letters only.
-fn lower(c: u8) -> i8 {
-    c.to_ascii_lowercase() as i8
+/// `tolower` on a C `char`, ASCII letters only. The bytes compare as unsigned: Blender 5.2.4
+/// (macOS arm64, verified) sorts UTF-8 names such as `Ärm` after every ASCII name, `~` included.
+fn lower(c: u8) -> u8 {
+    c.to_ascii_lowercase()
 }
 
 /// `BLI_strcasecmp_natural`: case-insensitive, digit runs compared as numbers, `.` sorting
@@ -158,10 +159,10 @@ pub fn strcasecmp_natural(s1: &str, s2: &str) -> Ordering {
         }
         let (c1, c2) = (lower(at(a, d1)), lower(at(b, d2)));
         if c1 != c2 {
-            if c1 == b'.' as i8 {
+            if c1 == b'.' {
                 return Ordering::Less;
             }
-            if c2 == b'.' as i8 {
+            if c2 == b'.' {
                 return Ordering::Greater;
             }
             return c1.cmp(&c2);
@@ -213,6 +214,17 @@ mod tests {
         );
         assert_eq!(strcasecmp_natural("Group", "group"), Ordering::Less);
         assert_eq!(strcasecmp_natural("g", "g.001"), Ordering::Less);
+        // Blender 5.2.4 (macOS arm64): UTF-8 bytes compare above ASCII.
+        let mut v = vec![
+            "あ", "éa", "Ärm", "~a", "x", "Ä2", "ä", "Z", "A", "a.b", "zz", "ÿ",
+        ];
+        v.sort_by(|a, b| strcasecmp_natural(a, b));
+        assert_eq!(
+            v,
+            vec![
+                "A", "a.b", "x", "Z", "zz", "~a", "Ä2", "Ärm", "ä", "éa", "ÿ", "あ"
+            ]
+        );
     }
 
     #[test]
