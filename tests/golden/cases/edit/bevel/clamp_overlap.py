@@ -1,5 +1,5 @@
 # WP 2.11: clamp_overlap limits a too large offset so beveled edges don't overlap.
-# golden: startup=factory compare=objects,context,mesh:Cube tier=T2 order=exact
+# golden: startup=factory compare=objects,context,mesh:Cube tier=T1
 import bpy
 bpy.ops.object.mode_set(mode='EDIT')
 bpy.ops.mesh.select_all(action='SELECT')

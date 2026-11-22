@@ -1,6 +1,6 @@
 # WP 2.11: beveled edges with and without seams and sharp marks: mark_seam and
 # mark_sharp carry the marks across the bevel; the rebuilt faces keep seam continuity.
-# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001 tier=T2 order=exact
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001 tier=T1
 import bpy
 bpy.ops.mesh.primitive_cube_add(location=(3, 0, 0))
 bpy.data.meshes['Cube'].edges[0].use_seam = True

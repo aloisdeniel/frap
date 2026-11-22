@@ -1,5 +1,5 @@
 # WP 2.11: vertex bevel of some Suzanne vertices with two segments.
-# golden: startup=factory compare=mesh:Suzanne tier=T2 order=exact
+# golden: startup=factory compare=mesh:Suzanne tier=T1
 import bpy
 bpy.ops.mesh.primitive_monkey_add()
 bpy.ops.object.mode_set(mode='EDIT')

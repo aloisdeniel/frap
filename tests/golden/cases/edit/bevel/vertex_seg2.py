@@ -1,6 +1,6 @@
 # WP 2.11: vertex bevel with two segments (an ADJ vertex mesh in vertex-only mode) and
 # clamp_overlap with a large vertex offset.
-# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001 tier=T2 order=exact
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001 tier=T1
 import bpy
 bpy.ops.mesh.primitive_cube_add(location=(3, 0, 0))
 bpy.ops.object.mode_set(mode='OBJECT')

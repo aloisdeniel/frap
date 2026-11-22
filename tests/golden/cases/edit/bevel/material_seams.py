@@ -1,6 +1,6 @@
 # WP 2.11: bevel faces take material 1 (clamped to the slots), seams and sharp edges
 # are extended (mark_seam, mark_sharp), face strength is set on all faces.
-# golden: startup=factory compare=objects,context,mesh:Cube tier=T2 order=exact
+# golden: startup=factory compare=objects,context,mesh:Cube tier=T1
 import bpy
 bpy.data.objects['Cube'].data.materials.append(bpy.data.materials.new('Second'))
 bpy.ops.object.mode_set(mode='EDIT')

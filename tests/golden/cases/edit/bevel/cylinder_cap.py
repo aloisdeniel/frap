@@ -1,7 +1,7 @@
 # WP 2.11: the edges of a cylinder's top cap (an 8-gon: two beveled edges and one unbeveled
 # edge at each vertex, loop slide), three segments; then every edge of a second cylinder
 # (valence-3 corners between an n-gon and quads) with four segments.
-# golden: startup=factory compare=objects,context,mesh:Cylinder,mesh:Cylinder.001 tier=T2 order=exact
+# golden: startup=factory compare=objects,context,mesh:Cylinder,mesh:Cylinder.001 tier=T1
 import bpy
 bpy.ops.mesh.primitive_cylinder_add(vertices=8)
 bpy.ops.object.mode_set(mode='EDIT')

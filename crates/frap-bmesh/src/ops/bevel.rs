@@ -17,9 +17,11 @@
 //! iteration order, the `segments` edge faces from the `v1` end. Then, per beveled vertex,
 //! every face around it is rebuilt (a new face per original face, in `BM_FACES_OF_VERT`
 //! order) and wires are reattached. Every new face creates its missing edges in
-//! `(v[n-1], v[0]), (v[0], v[1]), …` order. Finally the original faces are killed in the order
-//! they were rebuilt, then the beveled vertices (with their edges) in iteration order. New
-//! elements take freed slots first (LIFO), then append.
+//! `(v[n-1], v[0]), (v[0], v[1]), …` order. Finally the original faces are killed in the
+//! iteration order of Blender's `Set<BMFace *>` of rebuilt faces (pointer hashes of the modelled
+//! face addresses, `bevel/ptrset.rs`, WP 8.2), then the beveled vertices (with their edges) in
+//! iteration order. New elements take freed slots first (LIFO), then append, so the kill order
+//! is the slot order of the next operator's new faces.
 //!
 //! Outputs: `faces.out` (the new bevel faces, not the rebuilt ones), `edges.out` and
 //! `verts.out` (the new edges/vertices of bevel faces, plus elements that copied a tag), in
@@ -34,6 +36,7 @@ mod build;
 mod construct;
 mod math;
 mod profile;
+mod ptrset;
 mod types;
 mod util;
 mod uv;
@@ -470,9 +473,11 @@ fn mesh_bevel(
             bp.bevel_reattach_wires(bm, v);
         }
     }
-    // Blender kills these in the hash-set order of their pointers; frap in rebuild order.
-    for f in rebuilt {
-        bm.face_kill(f);
+    // `for (BMFace *f : rebuilt_orig_faces) BM_face_kill(bm, f);`: the iteration order of the
+    // pointer set (its freed slots are reused LIFO by the next operator).
+    let keys: Vec<u32> = rebuilt.iter().map(|f| f.0).collect();
+    for slot in ptrset::set_order(&keys, ptrset::FACE_OFLAG_SIZE, bm.faces.pchunk) {
+        bm.face_kill(FaceId(slot));
     }
     for &v in &verts {
         if bm.verts.contains(v.0) && bm.vert(v).flag.contains(ElemFlag::TAG) {
@@ -777,6 +782,116 @@ mod tests {
         // 12 edges x 2 strips + 8 corners x 3 quads.
         assert_eq!(out.faces.len(), 48);
         assert!(bm.validate().is_empty());
+    }
+
+    /// The slots the next allocations take after a bevel (the free lists, most recent first).
+    fn next_slots(free: &[u32], n: usize) -> Vec<u32> {
+        free.iter().rev().take(n).copied().collect()
+    }
+
+    /// The factory startup cube (`spec/blender-5.2/startup.json`), whose edge order differs
+    /// from `primitive_cube_add`'s.
+    fn factory_cube() -> BMesh {
+        let mut m = frap_mesh::Mesh::new("Cube");
+        m.set_positions(vec![
+            [1.0, 1.0, 1.0],
+            [1.0, 1.0, -1.0],
+            [1.0, -1.0, 1.0],
+            [1.0, -1.0, -1.0],
+            [-1.0, 1.0, 1.0],
+            [-1.0, 1.0, -1.0],
+            [-1.0, -1.0, 1.0],
+            [-1.0, -1.0, -1.0],
+        ]);
+        m.set_topology(
+            vec![0, 4, 8, 12, 16, 20, 24],
+            vec![
+                0, 4, 6, 2, 3, 2, 6, 7, 7, 6, 4, 5, 5, 1, 3, 7, 1, 0, 2, 3, 5, 4, 0, 1,
+            ],
+            vec![
+                [5, 7],
+                [1, 5],
+                [0, 1],
+                [7, 6],
+                [2, 3],
+                [4, 5],
+                [2, 6],
+                [0, 2],
+                [7, 3],
+                [6, 4],
+                [4, 0],
+                [3, 1],
+            ],
+        );
+        BMesh::from_mesh(&m, &FromMeshParams::default())
+    }
+
+    #[test]
+    fn freed_slots_follow_blender_kill_order() {
+        // Measured on Blender 5.2.4 (`repr()` addresses of new elements after
+        // `mesh.bevel(offset=0.2, segments=2)` on every edge of a cube in Edit Mode): faces
+        // 4, 3, 2, 1, 5, 0 (the pointer-set order of the rebuilt faces), vertices 7..0, edges
+        // in the disk-cycle order of the killed vertices.
+        let mut bm = cube();
+        let edges = bm.edge_ids();
+        edge_bevel(&mut bm, &edges, 2);
+        assert_eq!(next_slots(&bm.faces.free, 6), vec![4, 3, 2, 1, 5, 0]);
+        assert_eq!(next_slots(&bm.verts.free, 8), vec![7, 6, 5, 4, 3, 2, 1, 0]);
+        assert_eq!(
+            next_slots(&bm.edges.free, 11),
+            vec![6, 8, 9, 7, 5, 4, 3, 11, 2, 10, 1]
+        );
+        let mut bm = factory_cube();
+        let edges = bm.edge_ids();
+        edge_bevel(&mut bm, &edges, 2);
+        assert_eq!(next_slots(&bm.faces.free, 6), vec![4, 3, 2, 1, 5, 0]);
+        assert_eq!(
+            next_slots(&bm.edges.free, 11),
+            vec![3, 0, 9, 5, 8, 6, 4, 11, 1, 10, 7]
+        );
+    }
+
+    #[test]
+    fn rebuilt_faces_die_in_pointer_set_order() {
+        // Measured on Blender 5.2.4: `primitive_grid_add(x_subdivisions=n, y_subdivisions=n)`,
+        // every edge beveled (offset 0.01, one segment) in Edit Mode, then the face slots of
+        // new faces read back from `repr()` addresses (reversed: the kill order). 25 and 36
+        // keys grow the set to 64 and 128 slots (81 keys: `ptrset`'s tests).
+        let kill_order = |n: i32| {
+            let g = frap_mesh::primitives::grid::Grid {
+                x_subdivisions: n,
+                y_subdivisions: n,
+                ..Default::default()
+            };
+            let mut bm = BMesh::from_mesh(
+                &frap_mesh::primitives::grid::grid(&g),
+                &FromMeshParams::default(),
+            );
+            let edges = bm.edge_ids();
+            let i = BevelIn {
+                geom: edges.iter().map(|&e| BMElem::Edge(e)).collect(),
+                offset: 0.01,
+                segments: 1,
+                profile: 0.5,
+                affect: "EDGES",
+                loop_slide: true,
+                material: -1,
+                ..BevelIn::default()
+            };
+            bevel(&mut bm, &i).unwrap();
+            let n = bm.faces.free.len();
+            let mut v = next_slots(&bm.faces.free, n);
+            v.reverse();
+            v
+        };
+        assert_eq!(
+            kill_order(5),
+            vec![
+                18, 0, 19, 1, 20, 2, 21, 3, 22, 4, 23, 5, 24, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                16, 17
+            ]
+        );
+        assert_eq!(kill_order(6), (0..36).collect::<Vec<u32>>());
     }
 
     #[test]

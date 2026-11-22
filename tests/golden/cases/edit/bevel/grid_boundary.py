@@ -1,6 +1,6 @@
 # WP 2.11: grid edges including boundary edges (not manifold, so not beveled) and an
 # interior line ending at the boundary, one segment then two.
-# golden: startup=factory compare=objects,context,mesh:Grid,mesh:Grid.001 tier=T2 order=exact
+# golden: startup=factory compare=objects,context,mesh:Grid,mesh:Grid.001 tier=T1
 import bpy
 bpy.ops.mesh.primitive_grid_add(x_subdivisions=3, y_subdivisions=3)
 bpy.ops.mesh.primitive_grid_add(x_subdivisions=3, y_subdivisions=3, location=(3, 0, 0))

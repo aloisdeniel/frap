@@ -1,6 +1,6 @@
 # WP 2.11: WIDTH, DEPTH and ABSOLUTE offsets on a corner of three edges of a
 # non-uniform box (two segments).
-# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001,mesh:Cube.002 tier=T2 order=exact
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001,mesh:Cube.002 tier=T1
 import bpy
 bpy.ops.mesh.primitive_cube_add(location=(3, 0, 0), scale=(1, 2, 0.5))
 bpy.ops.mesh.primitive_cube_add(location=(6, 0, 0), scale=(1, 2, 0.5))
