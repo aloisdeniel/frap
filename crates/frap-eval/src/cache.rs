@@ -40,6 +40,15 @@ pub struct EvalCache {
     pub(crate) in_progress: crate::geometry::InProgress,
 }
 
+thread_local! {
+    /// The cache of [`EvalCache::evaluated_for_read`].
+    static READ_CACHE: std::cell::RefCell<EvalCache> = std::cell::RefCell::new(EvalCache::new());
+}
+
+/// Bound on [`READ_CACHE`] (results, including the modes): a thread that reads many objects
+/// in turn does not keep removed objects' meshes alive for ever.
+const READ_CACHE_MAX: usize = 64;
+
 /// `Dependency cycle detected` report of a parent cycle, worded like Blender's depsgraph log.
 fn cycle_report(host: &dyn HostRead, cycle: &Cycle) -> Report {
     let objects = &host.main().objects;
@@ -127,6 +136,30 @@ impl EvalCache {
     /// Drops every cached result.
     pub fn clear(&mut self) {
         self.objects.clear();
+    }
+
+    /// The evaluated object for a **read** that only sees `&dyn HostRead` (RNA get hooks such
+    /// as `Object.dimensions` and `Object.bound_box`, the session's path resolver and its
+    /// `--verbosity full` context): served from one cache per thread, keyed like every cache
+    /// by object and generation fingerprint, so repeated reads evaluate the modifier stack once
+    /// per change (§21.7: a read never re-evaluates modifiers; M8 WP 8.8). IDs and generations
+    /// are process-unique, so the states of several sessions and of their snapshots never
+    /// collide. A read made while the cache is busy (a read from inside an evaluation) uses a
+    /// fresh cache.
+    pub fn evaluated_for_read(
+        host: &dyn HostRead,
+        ob: IdRef<ObjectId>,
+        mode: EvalMode,
+    ) -> Result<Arc<EvaluatedObject>, EvalError> {
+        READ_CACHE.with(|c| match c.try_borrow_mut() {
+            Ok(mut c) => {
+                if c.len() > READ_CACHE_MAX {
+                    c.clear();
+                }
+                c.object(host, ob, mode)
+            }
+            Err(_) => EvalCache::new().object(host, ob, mode),
+        })
     }
 
     /// The cached result of `(ob, mode)` when it is still valid.

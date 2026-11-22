@@ -15,7 +15,10 @@
 //! child of it: an armature parented to the mesh it deforms, a SIMPLE_DEFORM origin parented
 //! to the mesh) reads the in-progress matrix ([`InProgress`], `cache.rs`) instead of
 //! evaluating the object again (WP 6.5).
+//! Every stack evaluation is counted per thread ([`EvalCache::stack_evaluations`], M8 WP 8.8):
+//! the §21.7 budget "a property read in Edit Mode never re-evaluates modifiers" is a test on it.
 
+use std::cell::Cell;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
@@ -31,6 +34,15 @@ use glam::Mat4;
 use smol_str::SmolStr;
 
 use crate::EvalCache;
+
+thread_local! {
+    /// Modifier-stack evaluations run on this thread ([`EvalCache::stack_evaluations`]).
+    static STACK_EVALUATIONS: Cell<u64> = const { Cell::new(0) };
+}
+
+fn count_stack_evaluation() {
+    STACK_EVALUATIONS.with(|c| c.set(c.get() + 1));
+}
 
 /// What the stack produced for one object.
 pub(crate) struct StackOut {
@@ -63,6 +75,7 @@ pub(crate) fn evaluate(
             warnings: Vec::new(),
         };
     }
+    count_stack_evaluation();
     ev.in_progress.push(ob_ref.key(), matrix_world);
     let mut cx = GeoCx {
         ev,
@@ -104,6 +117,15 @@ pub struct AppliedModifier {
 }
 
 impl EvalCache {
+    /// How many modifier stacks this thread has evaluated so far: every evaluation of an
+    /// object with modifiers (or an armature parent) that missed the cache, and every
+    /// [`EvalCache::apply_modifier`], whatever cache ran it. A diagnostic for the §21.7 budget
+    /// tests (`frap-perf-tests`), counted per thread so parallel tests do not see each other's
+    /// work.
+    pub fn stack_evaluations() -> u64 {
+        STACK_EVALUATIONS.with(Cell::get)
+    }
+
     /// Evaluates modifier `index` of `ob` **alone on the original mesh**, as
     /// `create_applied_mesh_for_modifier` does for `object.modifier_apply` (the stack before it
     /// is ignored; viewport settings; `show_viewport` does not matter). Operand objects are
@@ -132,6 +154,7 @@ impl EvalCache {
         let own_world = self
             .object(host, ob_ref, EvalMode::Viewport)
             .map_or_else(|_| crate::world_matrix(ob, None), |r| r.matrix_world);
+        count_stack_evaluation();
         self.in_progress.push(ob_ref.key(), own_world);
         let mut cx = GeoCx {
             ev: self,

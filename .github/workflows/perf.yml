@@ -1,0 +1,100 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Performance budgets (ARCHITECTURE §21.7, §22.10 WP 8.8), gating on the CI runner class
+# (ubuntu-24.04, the class `xtask/perf.toml` and `xtask/budgets.toml` are recorded on).
+# - runtime:       `cargo xtask perf`: builds `frap` (release) and runs the release-mode budget
+#                  tests of crates/frap-perf-tests one at a time: cold start < 30 ms, a 100k-face
+#                  edit-mode operator < 200 ms, Edit Mode reads never re-evaluate modifiers (an
+#                  evaluation counter), a 1M-corner GLB export < 2 s, snapshot clone and undo
+#                  push O(#IDs). A test over its budget fails the job.
+# - build-budgets: `cargo xtask perf build-budgets`: the frap-spec-* clean build times against
+#                  xtask/budgets.toml. Gating once `[build_budgets] recorded_on` in
+#                  xtask/perf.toml says "ubuntu-24.04"; a warning while the baselines are the
+#                  provisional M1 Max ones.
+# workflow_dispatch with `record: true` records instead, in the runtime job: `cargo xtask perf
+# --record`, then `cargo xtask perf build-budgets --record` (which runs `cargo xtask budgets
+# --record` and marks the baselines as recorded on ubuntu-24.04). The rewritten xtask/perf.toml
+# and xtask/budgets.toml are uploaded as one artifact, to be committed by hand; once committed,
+# the build-budgets job gates. (ci.yml's non-gating `budgets` job predates this one.)
+
+name: perf
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      record:
+        description: "Record the measurements and the build-time baselines on this runner class"
+        type: boolean
+        default: false
+  schedule:
+    - cron: "41 4 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: perf-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+  FRAP_RUNNER_CLASS: ubuntu-24.04
+
+jobs:
+  runtime:
+    name: §21.7 runtime budgets (release)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.97"
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: perf-release
+      - name: cargo xtask perf
+        if: ${{ !inputs.record }}
+        run: cargo xtask perf
+      # Recording runs both recorders in this job, so one artifact carries one consistent
+      # xtask/perf.toml (runtime values and `[build_budgets] recorded_on`).
+      - name: cargo xtask perf --record, cargo xtask perf build-budgets --record
+        if: ${{ inputs.record }}
+        run: |
+          cargo xtask perf --record
+          cargo xtask perf build-budgets --record
+      - name: upload xtask/perf.toml and xtask/budgets.toml (recorded)
+        if: ${{ inputs.record }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-recorded
+          path: |
+            xtask/perf.toml
+            xtask/budgets.toml
+      - name: upload the measurements
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-measurements
+          path: target/perf/measurements.jsonl
+          if-no-files-found: ignore
+
+  build-budgets:
+    name: frap-spec-* build-time budgets
+    # When recording, the runtime job records the build-time baselines too.
+    if: ${{ !inputs.record }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: "1.97"
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: perf-build-budgets
+      - name: cargo xtask perf build-budgets
+        run: cargo xtask perf build-budgets

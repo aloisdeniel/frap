@@ -332,15 +332,19 @@ pub fn visibility(
             e.enabled_viewport |= !r.coll_hide_viewport;
         },
     );
+    // The first base of each object (a map, not a search per object: every response's context
+    // block reads this, so it must stay O(#bases log #bases); M8 WP 8.8).
+    let mut base_hidden: BTreeMap<IdRef<ObjectId>, bool> = BTreeMap::new();
+    for b in &vl.bases {
+        base_hidden
+            .entry(b.object)
+            .or_insert_with(|| b.flag.contains(BaseFlag::HIDDEN));
+    }
     for (ob, v) in out.iter_mut() {
         let Some(o) = objects.get(*ob) else {
             continue;
         };
-        let hidden = vl
-            .bases
-            .iter()
-            .find(|b| b.object == *ob)
-            .is_some_and(|b| b.flag.contains(BaseFlag::HIDDEN));
+        let hidden = base_hidden.get(ob).copied().unwrap_or(false);
         v.visible &= !o.hide_viewport && !hidden;
         v.selectable &= !o.hide_viewport && !o.hide_select && !hidden;
         v.renderable &= !o.hide_render;
@@ -381,7 +385,14 @@ fn sync_view_layer(
         scene,
         collections,
     );
-    // Bases in sync order.
+    // Bases in sync order. The previous flags and the objects already placed are looked up
+    // in maps (a search per object made every sync O(#objects²): M8 WP 8.8); only an object
+    // met a second time (it is in several collections) searches the list, to move it.
+    let mut old_flags: BTreeMap<IdRef<ObjectId>, BaseFlag> = BTreeMap::new();
+    for b in &vl.bases {
+        old_flags.entry(b.object).or_insert(b.flag);
+    }
+    let mut placed: std::collections::BTreeSet<IdRef<ObjectId>> = Default::default();
     let mut bases: Vec<Base> = Vec::new();
     walk(
         &layer_collection,
@@ -393,23 +404,24 @@ fn sync_view_layer(
             if !objects.contains(ob) {
                 return;
             }
-            if let Some(i) = bases.iter().position(|b| b.object == ob) {
-                if i != 0 && i + 1 != bases.len() {
+            if placed.contains(&ob) {
+                if let Some(i) = bases.iter().position(|b| b.object == ob)
+                    && i != 0
+                    && i + 1 != bases.len()
+                {
                     let b = bases.remove(i);
                     bases.push(b);
                 }
                 return;
             }
-            let flag = vl.bases.iter().find(|b| b.object == ob).map_or_else(
-                || {
-                    if base_selected.0.get(&ob).copied().unwrap_or(false) {
-                        BaseFlag::SELECTED
-                    } else {
-                        BaseFlag::empty()
-                    }
-                },
-                |b| b.flag,
-            );
+            placed.insert(ob);
+            let flag = old_flags.get(&ob).copied().unwrap_or_else(|| {
+                if base_selected.0.get(&ob).copied().unwrap_or(false) {
+                    BaseFlag::SELECTED
+                } else {
+                    BaseFlag::empty()
+                }
+            });
             bases.push(Base { object: ob, flag });
         },
     );

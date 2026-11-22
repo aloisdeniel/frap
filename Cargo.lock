@@ -1690,6 +1690,7 @@ version = "0.1.0"
 dependencies = [
  "assert_cmd",
  "frap-bmesh",
+ "frap-eval",
  "frap-gltf",
  "frap-io-gltf",
  "frap-mesh",
