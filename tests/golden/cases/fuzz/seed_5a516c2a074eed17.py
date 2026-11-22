@@ -1,0 +1,17 @@
+# golden: startup=factory compare=objects,context,mesh:Cube,mesh:Cube.001 tier=T2 tol=0.0001
+# fuzz: seed=0x5a516c2a074eed17 (replay)
+import bpy
+bpy.ops.object.visual_transform_apply()
+bpy.ops.mesh.primitive_cube_add(size=0.91, location=(-0.91, 0.64, -0.13))
+bpy.ops.object.convert(target='MESH', keep_original=False)
+bpy.ops.object.shape_key_remove(apply_mix=True)
+bpy.ops.object.align(bb_quality=False)
+bpy.ops.mesh.customdata_custom_splitnormals_clear()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.face_make_planar()
+bpy.ops.uv.cylinder_project(direction='ALIGN_TO_OBJECT', radius=1.58, correct_aspect=False, clip_to_bounds=True)
+bpy.ops.transform.edge_bevelweight(value=-0.22)
+bpy.ops.transform.vertex_random(uniform=0.47, seed=51)
+bpy.ops.mesh.uvs_rotate(use_ccw=True)
+bpy.ops.transform.edge_crease(value=-0.54)
+bpy.ops.object.material_slot_add()

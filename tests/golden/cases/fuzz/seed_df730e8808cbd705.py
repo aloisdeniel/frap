@@ -1,0 +1,17 @@
+# golden: startup=factory compare=objects,context,mesh:Cube tier=T2 tol=0.0001
+# fuzz: seed=0xdf730e8808cbd705 (replay)
+import bpy
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.select_similar_region()
+bpy.context.object.delta_location = (-0.52, 0.07, 0.2)
+bpy.ops.mesh.face_make_planar(repeat=4)
+bpy.ops.mesh.flip_normals()
+bpy.ops.mesh.customdata_custom_splitnormals_clear()
+bpy.ops.mesh.reorder_vertices_spatial()
+bpy.context.scene.cursor.rotation_euler = (1.86, -2.77, 1.44)
+bpy.ops.uv.lightmap_pack(PREF_PACK_IN_ONE=False)
+bpy.context.object.vertex_groups.new(name='Group')
+bpy.ops.mesh.offset_edge_loops()
+bpy.ops.uv.smart_project()
+bpy.context.scene.cursor.location = (-0.11, -0.3, 0.5)
+bpy.ops.mesh.primitive_circle_add(vertices=14, radius=0.51, location=(-1.15, -1.17, -1.53))

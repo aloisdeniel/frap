@@ -1,0 +1,17 @@
+# golden: startup=factory compare=objects,context,mesh:Circle,mesh:Cube,mesh:Cube.001,evaluated:Cube,evaluated:Cube.001 tier=T2 tol=0.0001
+# fuzz: seed=0xe9b7b8175c25d135 (replay)
+import bpy
+bpy.ops.object.material_slot_remove_unused()
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.mesh.poke(use_relative_offset=True)
+bpy.ops.mesh.select_prev_item()
+bpy.ops.object.mode_set(mode='OBJECT')
+bpy.ops.object.shade_flat()
+bpy.ops.geometry.color_attribute_duplicate()
+bpy.ops.object.vertex_group_move(direction='DOWN')
+bpy.ops.object.rotation_clear(clear_delta=True)
+bpy.ops.mesh.customdata_custom_splitnormals_add()
+bpy.ops.object.vertex_group_add()
+bpy.ops.object.subdivision_set(relative=True)
+bpy.ops.object.duplicate_move(TRANSFORM_OT_translate={'value': (1, 0, 0)})
+bpy.ops.mesh.primitive_circle_add(radius=1.66, location=(1.16, 1.29, 1.07))

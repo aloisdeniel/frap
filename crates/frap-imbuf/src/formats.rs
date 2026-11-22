@@ -340,6 +340,9 @@ pub(crate) fn check(image: &DecodedImage) -> Result<(), ImageError> {
 
 // --- PNG -----------------------------------------------------------------------------------
 
+/// Deflate's largest expansion: 258-byte matches coded in about two bits.
+const DEFLATE_MAX_RATIO: u64 = 1032;
+
 fn decode_png(bytes: &[u8]) -> Result<DecodedImage, ImageError> {
     let mut decoder = png::Decoder::new(Cursor::new(bytes));
     // Palette → RGB(A), low-bit grey → 8 bit, tRNS → alpha; 16-bit is kept.
@@ -350,6 +353,24 @@ fn decode_png(bytes: &[u8]) -> Result<DecodedImage, ImageError> {
     let size = reader
         .output_buffer_size()
         .ok_or_else(|| ImageError::Decode("PNG: image too large".into()))?;
+    // WP 8.7 (fuzzing): the header alone must not size the allocation. The IDAT stream
+    // inflates to `height × (1 + ⌈width × bits per pixel / 8⌉)` bytes (more when interlaced)
+    // and Deflate expands at most 1032:1, so a file of `n` bytes holds at most `1032 × n`
+    // bytes of rows; a header asking for more is truncated or corrupt.
+    {
+        let info = reader.info();
+        let bpp = u64::from(info.color_type.samples() as u8) * u64::from(info.bit_depth as u8);
+        let row = (u64::from(info.width) * bpp).div_ceil(8) + 1;
+        let raw = row.saturating_mul(u64::from(info.height));
+        if raw > (bytes.len() as u64).saturating_mul(DEFLATE_MAX_RATIO) {
+            return Err(ImageError::Decode(format!(
+                "PNG: a {}x{} image cannot come from {} bytes (truncated or corrupt file)",
+                info.width,
+                info.height,
+                bytes.len()
+            )));
+        }
+    }
     let mut buf = vec![0; size];
     let info = reader
         .next_frame(&mut buf)
@@ -386,6 +407,7 @@ pub type ExrChannels = Vec<(String, Vec<f32>)>;
 /// with its samples as floats, and the layer's size: what a multilayer file holds
 /// (`ViewLayer.Combined.R`, …), which [`decode`] does not map to RGBA.
 pub fn decode_exr_channels(bytes: &[u8]) -> Result<(u32, u32, ExrChannels), ImageError> {
+    exr_check_size(bytes)?;
     use exr::prelude::FlatSamples;
     use exr::prelude::traits::*;
     let img = read()
@@ -418,7 +440,97 @@ pub fn decode_exr_channels(bytes: &[u8]) -> Result<(u32, u32, ExrChannels), Imag
     ))
 }
 
+/// WP 8.7 (fuzzing): refuses an OpenEXR whose header declares more sample data than its
+/// bytes can hold, before the `exr` crate allocates it from the header alone. Compressed
+/// chunks expand at most about as much as Deflate (1032:1); below 64 MiB every header is
+/// accepted, so only a corrupt (or extraordinarily compressible) file is refused.
+fn exr_check_size(bytes: &[u8]) -> Result<(), ImageError> {
+    const FLOOR: u64 = 64 << 20;
+    const RATIO: u64 = DEFLATE_MAX_RATIO;
+    let Ok(meta) = exr::meta::MetaData::read_from_buffered(Cursor::new(bytes), false) else {
+        // The reader reports the error itself.
+        return Ok(());
+    };
+    let mut total: u64 = 0;
+    for h in meta.headers.iter().filter(|h| !h.deep) {
+        let (w, hh) = (h.layer_size.width() as u64, h.layer_size.height() as u64);
+        for c in &h.channels.list {
+            let size = match c.sample_type {
+                exr::meta::attribute::SampleType::F16 => 2,
+                _ => 4,
+            };
+            total = total.saturating_add(w.saturating_mul(hh).saturating_mul(size));
+        }
+    }
+    if total > FLOOR.max((bytes.len() as u64).saturating_mul(RATIO)) {
+        return Err(ImageError::Decode(format!(
+            "OpenEXR: {total} bytes of samples cannot come from {} bytes (truncated or corrupt file)",
+            bytes.len()
+        )));
+    }
+    let dwa = |h: &exr::meta::header::Header| {
+        matches!(
+            h.compression,
+            exr::compression::Compression::DWAA(_) | exr::compression::Compression::DWAB(_)
+        )
+    };
+    if meta.headers.iter().any(dwa) {
+        exr_check_dwa(bytes)?;
+    }
+    Ok(())
+}
+
+/// WP 8.7 (fuzzing): `exr` 1.74.3's DWA decoder sizes its zlib output buffers from the
+/// counters at the start of each chunk (`DataSizesSingle`) before inflating, so a corrupt
+/// counter asks for terabytes. Each counter must fit the chunk: at most four times the
+/// 4-byte samples of a chunk of the layer's width and up to 256 lines (DWAB), padded to 8×8
+/// DCT blocks.
+fn exr_check_dwa(bytes: &[u8]) -> Result<(), ImageError> {
+    use exr::block::chunk::CompressedBlock;
+    let corrupt = |what: &str| ImageError::Decode(format!("OpenEXR: corrupt DWA chunk ({what})"));
+    let Ok(reader) = exr::block::read(Cursor::new(bytes), false) else {
+        return Ok(());
+    };
+    let headers = reader.meta_data().headers.clone();
+    let Ok(chunks) = reader.all_chunks(false) else {
+        return Ok(());
+    };
+    for chunk in chunks {
+        let Ok(chunk) = chunk else {
+            return Ok(());
+        };
+        let Some(h) = headers.get(chunk.layer_index) else {
+            continue;
+        };
+        // A scan-line chunk holds at most 256 lines (DWAB); a tile at most the layer.
+        let (data, max_lines) = match &chunk.compressed_block {
+            CompressedBlock::ScanLine(b) => (&b.compressed_pixels_le, 256),
+            CompressedBlock::Tile(b) => (&b.compressed_pixels_le, u64::MAX),
+            _ => continue,
+        };
+        let (w, lines) = (
+            h.layer_size.width() as u64,
+            (h.layer_size.height() as u64).min(max_lines),
+        );
+        let channels = h.channels.list.len() as u64;
+        let limit = 16u64
+            .saturating_mul(w + 8)
+            .saturating_mul(lines + 8)
+            .saturating_mul(channels.max(1));
+        // Counters 1..=9 (sizes and the AC/DC counts, the latter in 2-byte units).
+        for (i, c) in data.chunks_exact(8).skip(1).take(9).enumerate() {
+            let v = u64::from_le_bytes(c.try_into().expect("invariant: 8-byte chunk"));
+            let bytes_needed = if i >= 7 { v.saturating_mul(2) } else { v };
+            if bytes_needed > limit {
+                return Err(corrupt("a size counter exceeds the chunk"));
+            }
+        }
+    }
+    Ok(())
+}
+
 fn decode_exr(bytes: &[u8]) -> Result<DecodedImage, ImageError> {
+    exr_check_size(bytes)?;
     use exr::prelude::traits::*;
     use exr::prelude::{AnyChannel, FlatSamples, Vec2};
     let img = read()
