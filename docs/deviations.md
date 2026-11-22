@@ -239,9 +239,22 @@ what to avoid.
 | `KHR_animation_pointer` (WP 6.9, WP 7.7): no channel is registered for light node trees (frap has none) or for the anisotropy that the add-on bakes from grayscale textures (frap's static exporter does not write that `KHR_materials_anisotropy`); `normalTexture.scale`, `occlusionTexture.strength`, `clearcoatNormalTexture.scale`, unlit colours, `KHR_materials_iridescence` with `__check_iridescence`, `KHR_materials_dispersion`, the `KHR_texture_transform` of every written texture (Mapping nodes, with the add-on's `additional` copies for a Mapping node or Normal Map shared by several textures) and the importer's anisotropy texture set-up are exported, and texture-transform offsets / scales and unlit colours are imported, since WP 7.7 (the import's failures: D-130) | M8 | WP 8.12 |
 | glTF export (WP 3.6): a texture gathered for a `KHR_materials_iridescence` that is then dropped (an `Iridescence Factor` linked to an image through Separate Color without a constant factor, so `iridescenceFactor` is unset) stays in `textures`, `images` and `samplers` with nothing referencing it; Blender 5.2.4 writes none of them (verified with and without `export_pointer_animation`) | M8 | WP 8.12 |
 | `export_gpu_instances` with meshopt compression (WP 7.5, M7 W1 integration): the instance `TRANSLATION` / `ROTATION` / `SCALE` accessors are meshopt-encoded as the add-on does (EXPONENTIAL, and QUATERNION with ROTATION as normalized SHORT whose fallback view keeps the FLOAT length, as `manage_gpu_instancing_nodes`; the decoded length under `frap_compat='SPEC'`); still open: a `TRANSLATION`, `ROTATION` or `SCALE` the add-on would share with an equal mesh vertex accessor (`@cached gather_accessor`) is shared only with other instance accessors | M8 | WP 8.12 |
+| Custom transform orientations (WP 8.3.5): `Scene.transform_orientation_slots`, `TransformOrientationSlot` and `TransformOrientation` are not bound (the structs are not in the RNA dump), so a script cannot read or set the slots or a custom orientation's `name` / `matrix` (`RNA_NO_ATTRIBUTE`); the orientations live on the scene and are created, selected and deleted by `transform.create_orientation`, `select_orientation`, `delete_orientation`, used through `orient_type='<name>'` (every transform with a `dyn_enums` entry for it: `translate`, `rotate`, `resize`, `shear`, `rotate_normal`) and as the scene orientation when `orient_type` is unset; they are not written to `.frap` files (`frap-project` has no field for them) and `transform.transform` / `mirror` / the slide tools take only the built-in orientation names. `create_orientation` in armature Edit or Pose Mode (bone orientations) answers `OP_NOT_IMPLEMENTED` | M9 (post-M8, decision log M8W0-3) | WP 8.3.5 follow-ups |
+| Copy Global Transform add-on (WP 8.3.5): `tool_settings.anim_relative_object` and `anim_mirror_object` / `anim_mirror_bone` are not bound (the relative object is always the scene camera); `object.paste_transform` cannot paste at all, as in `blender -b` (no clipboard, see §3), so its `method`, `use_mirror` and `use_relative` paths are not reachable | M9 (post-M8, decision log M8W0-3) | WP 8.3.5 follow-ups |
 
 ## 3. Protocol notes (frap envelope, not Blender behaviour)
 
+- The clipboard (WP 8.3.5): `blender -b` has no system clipboard (`window_manager.clipboard`
+  always reads `''`, writes are dropped), so `object.copy_global_transform` /
+  `copy_relative_transform` change nothing visible and `object.paste_transform` always fails
+  with `Clipboard does not contain a matrix` — frap answers the same (it has no
+  `window_manager`). As an envelope extra, the copy operators put the text the add-on would
+  have copied (`Matrix((\n    (…),\n …\n))`) in `result.clipboard`, with the hint
+  `HEADLESS_CLIPBOARD`.
+- `transform.bend` (WP 8.3.5): Blender 5.2.4 registers it without an exec, so a script call
+  logs `Invalid operator call 'TRANSFORM_OT_bend'`, changes nothing and returns
+  `{'PASS_THROUGH'}`; frap answers `FINISHED` with a WARNING and the hint `BEND_NO_EXEC`
+  (a SIMPLE_DEFORM modifier with `deform_method='BEND'` bends instead).
 - Response kind `"invalid"`: input that never became a statement (syntax error, invalid UTF-8 on a
   line) gets one `ERROR` response of kind `invalid` (M0). Part of the protocol contract since
   M1 W0 (§13.2; codes `NOT_IMPLEMENTED`, `RNA_NOT_IMPLEMENTED`, `RNA_RUNTIME` are in §13.4).

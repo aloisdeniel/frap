@@ -1,0 +1,31 @@
+# WP 8.3.5 (T1), transform.create_orientation in Edit Mode from the selection (Face, Edge,
+# Vertex, named after the kind and made unique), from the view (Custom View), and its use by
+# translate/rotate/shear; nothing selected fails with 'Unable to create orientation'.
+# golden: startup=factory compare=objects,context,mesh:Cube tier=T1 tol=1e-5
+import bpy
+bpy.data.objects['Cube'].rotation_euler = (0.3, 0.2, 0.1)
+bpy.data.objects['Cube'].scale = (1, 1.5, 0.8)
+bpy.ops.object.mode_set(mode='EDIT')
+bpy.ops.frap.select_elements(type='VERT', indices=[0])
+bpy.ops.transform.translate(value=(0.2, 0.3, 0.4))
+bpy.ops.frap.select_elements(type='FACE', indices=[1])
+bpy.ops.transform.create_orientation(use=True)
+bpy.ops.transform.translate(value=(0, 0, 0.5))
+bpy.ops.frap.select_elements(type='EDGE', indices=[4])
+bpy.ops.transform.create_orientation()
+bpy.ops.transform.rotate(value=0.4, orient_axis='Y', orient_type='Edge')
+bpy.ops.frap.select_elements(type='VERT', indices=[3])
+bpy.ops.transform.create_orientation(use=True)
+bpy.ops.transform.translate(value=(0.1, 0.2, 0.3))
+bpy.ops.frap.select_elements(type='FACE', indices=[2, 3])
+bpy.ops.transform.create_orientation()
+bpy.ops.transform.shear(angle=0.3, orient_type='Face.001')
+bpy.ops.transform.create_orientation(use_view=True)
+bpy.ops.transform.translate(value=(0.3, 0, 0), orient_type='Custom View')
+bpy.ops.frap.select_elements(type='VERT', indices=[0, 1, 2, 4, 6])
+bpy.ops.transform.create_orientation(name='Many', use=True)
+bpy.ops.transform.resize(value=(1, 1, 1.3))
+bpy.ops.frap.select_elements(type='VERT', indices=[])
+bpy.ops.transform.create_orientation(name='None')
+bpy.ops.frap.select_elements(type='VERT', indices=[0, 5])
+bpy.ops.transform.rotate(value=0.3, orient_type='Vertex')

@@ -24,10 +24,14 @@ use super::mathx::{
 
 /// `ORIENTATION_*` results.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
-enum Kind {
+pub enum Kind {
+    /// `ORIENTATION_NONE`: nothing selected.
     None,
+    /// `ORIENTATION_VERT`: a normal only.
     Vert,
+    /// `ORIENTATION_EDGE`: a normal and an edge direction.
     Edge,
+    /// `ORIENTATION_FACE`: a normal and a tangent.
     Face,
 }
 
@@ -269,11 +273,11 @@ fn mesh_normal_plane(bm: &BMesh, active_only: bool) -> (Vec3, Vec3, Kind) {
     (normal, plane, result)
 }
 
-/// `ED_getTransformOrientationMatrix` for a mesh in Edit Mode: the NORMAL orientation (columns
-/// are the axes). `obmat` is the active object's world matrix; `active_only` is pivot
-/// `ACTIVE_ELEMENT`.
-pub fn normal_orientation(bm: &BMesh, obmat: &Mat4, active_only: bool) -> Mat3 {
-    let (mut normal, mut plane, mut kind) = mesh_normal_plane(bm, active_only);
+/// `getTransformOrientation_ex` for a mesh in Edit Mode: the world-space normal and plane
+/// (both normalized) and what they were made from. `obmat` is the edit object's world matrix;
+/// `active_only` is pivot `ACTIVE_ELEMENT`.
+pub fn orientation_vectors(bm: &BMesh, obmat: &Mat4, active_only: bool) -> (Vec3, Vec3, Kind) {
+    let (mut normal, mut plane, kind) = mesh_normal_plane(bm, active_only);
     let obmat3 = Mat3::from_mat4(*obmat);
     if kind == Kind::Edge {
         normal = obmat3 * normal;
@@ -284,9 +288,14 @@ pub fn normal_orientation(bm: &BMesh, obmat: &Mat4, active_only: bool) -> Mat3 {
         normal = mat * normal;
         plane = mat * plane;
     }
-    normal = normalized(normal);
-    plane = normalized(plane);
+    (normalized(normal), normalized(plane), kind)
+}
 
+/// `ED_getTransformOrientationMatrix` for a mesh in Edit Mode: the NORMAL orientation (columns
+/// are the axes). `obmat` is the active object's world matrix; `active_only` is pivot
+/// `ACTIVE_ELEMENT`.
+pub fn normal_orientation(bm: &BMesh, obmat: &Mat4, active_only: bool) -> Mat3 {
+    let (normal, plane, mut kind) = orientation_vectors(bm, obmat, active_only);
     if matches!(kind, Kind::Edge | Kind::Face) && is_zero(plane) {
         kind = Kind::Vert;
     }
@@ -296,6 +305,24 @@ pub fn normal_orientation(bm: &BMesh, obmat: &Mat4, active_only: bool) -> Mat3 {
         Kind::None => None,
     };
     m.unwrap_or(Mat3::IDENTITY)
+}
+
+// Ported from blender/source/blender/editors/transform/transform_orientations.cc
+// (createMeshSpace, getTransformOrientation), Blender 5.2.4, GPL-2.0-or-later.
+/// `createMeshSpace`: the custom orientation `transform.create_orientation` makes from the
+/// selection of the mesh in Edit Mode and its default name (`Vertex`, `Edge`, `Face`); `None`
+/// when nothing is selected or the vectors are degenerate (Blender's "Unable to create
+/// orientation"). Unlike the NORMAL orientation, an edge or face result without a plane is
+/// not demoted to a vertex one.
+pub fn mesh_space(bm: &BMesh, obmat: &Mat4) -> Option<(Mat3, &'static str)> {
+    // `getTransformOrientation` passes `V3D_AROUND_CENTER_BOUNDS`: never the active element.
+    let (normal, plane, kind) = orientation_vectors(bm, obmat, false);
+    match kind {
+        Kind::Vert => create_space_normal(normal).map(|m| (m, "Vertex")),
+        Kind::Edge => create_space_normal_tangent(normal, plane).map(|m| (m, "Edge")),
+        Kind::Face => create_space_normal_tangent(normal, plane).map(|m| (m, "Face")),
+        Kind::None => None,
+    }
 }
 
 #[cfg(test)]

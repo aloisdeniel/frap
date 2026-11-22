@@ -1,0 +1,193 @@
+{
+  "blender": {
+    "version": "5.2.4 LTS",
+    "build_hash": "cd5dc428cce1"
+  },
+  "lines": [
+    {
+      "line": 6,
+      "ok": true
+    },
+    {
+      "line": 7,
+      "ok": true
+    },
+    {
+      "line": 8,
+      "ok": true
+    },
+    {
+      "line": 9,
+      "ok": true
+    },
+    {
+      "line": 10,
+      "ok": true
+    },
+    {
+      "line": 11,
+      "ok": true
+    },
+    {
+      "line": 12,
+      "ok": true
+    },
+    {
+      "line": 13,
+      "ok": true
+    },
+    {
+      "line": 14,
+      "ok": true
+    },
+    {
+      "line": 15,
+      "ok": true
+    },
+    {
+      "line": 16,
+      "ok": true
+    },
+    {
+      "line": 17,
+      "ok": true
+    },
+    {
+      "line": 18,
+      "ok": true
+    },
+    {
+      "line": 19,
+      "ok": true
+    },
+    {
+      "line": 20,
+      "ok": true
+    },
+    {
+      "line": 21,
+      "ok": true
+    },
+    {
+      "line": 22,
+      "ok": true
+    },
+    {
+      "line": 23,
+      "ok": true
+    },
+    {
+      "line": 24,
+      "ok": true
+    },
+    {
+      "line": 25,
+      "ok": true
+    },
+    {
+      "line": 26,
+      "ok": true
+    },
+    {
+      "line": 27,
+      "ok": true
+    },
+    {
+      "line": 28,
+      "ok": true
+    },
+    {
+      "line": 29,
+      "ok": true
+    },
+    {
+      "line": 30,
+      "ok": true
+    },
+    {
+      "line": 31,
+      "ok": true
+    },
+    {
+      "line": 32,
+      "ok": true
+    },
+    {
+      "line": 33,
+      "ok": true
+    },
+    {
+      "line": 34,
+      "ok": true
+    },
+    {
+      "line": 35,
+      "ok": false
+    }
+  ],
+  "objects": {
+    "Camera": {
+      "type": "CAMERA",
+      "parent": null,
+      "matrix_world": [
+        [1.0, 0.0, 0.0, 29.435566],
+        [0.0, 1.0, 0.0, -27.703163],
+        [0.0, 0.0, 1.0, 19.833237],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [14.717783, -13.851582, 9.916618],
+      "rotation_mode": "AXIS_ANGLE",
+      "rotation": [0.0, 1.0, 0.0, 0.0],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    },
+    "Cube": {
+      "type": "MESH",
+      "parent": null,
+      "matrix_world": [
+        [3.2517922, 73.43461, 0.025763143, 4.0],
+        [24.281809, 20.15567, -0.043442577, 8.0],
+        [-26.378393, 27.606308, -0.036813762, 12.0],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [2.0, 4.0, 6.0],
+      "rotation_mode": "XYZ",
+      "rotation": [0.8774529, 0.7993263, 0.20486495],
+      "scale": [6.0, 9.0, 0.25],
+      "modifiers": [],
+      "materials": ["Material"],
+      "mode": "OBJECT"
+    },
+    "Light": {
+      "type": "LIGHT",
+      "parent": null,
+      "matrix_world": [
+        [-0.2572701, 0.599638, 0.7577906, 16.304981],
+        [0.38645616, -0.6549035, 0.6494255, 4.021816],
+        [0.88569975, 0.45993048, -0.06324689, 23.615448],
+        [0.0, 0.0, 0.0, 1.0]
+      ],
+      "location": [8.152491, 2.010908, 11.807724],
+      "rotation_mode": "QUATERNION",
+      "rotation": [0.6788263, 0.44513187, 0.300464, 0.5007734],
+      "scale": [1.0, 1.0, 1.0],
+      "modifiers": [],
+      "materials": [],
+      "mode": "OBJECT"
+    }
+  },
+  "meshes": {},
+  "evaluated": {},
+  "materials": {},
+  "actions": {},
+  "context": {
+    "active": "Cube",
+    "selected": [],
+    "mode": "OBJECT",
+    "select_mode": null,
+    "cursor": [0.0, 0.0, 0.0]
+  },
+  "files": {}
+}

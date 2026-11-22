@@ -140,7 +140,7 @@ source: crates/frap-schema/tests/describe_ops.rs
       ],
       "is_enum_flag": false,
       "dynamic_enum": "TRANSFORM_OT_resize.orient_type",
-      "context_rule": "items come from a Blender callback that depends on the context (TRANSFORM_OT_resize.orient_type); enum_items is frap's verified superset (spec/overlay/dynamic_enums.toml)",
+      "context_rule": "items depend on the context in Blender (TRANSFORM_OT_resize.orient_type); frap narrows them to the live context, enum_items is the superset",
       "hidden": false,
       "skip_save": false,
       "flags": [
@@ -253,7 +253,7 @@ source: crates/frap-schema/tests/describe_ops.rs
       ],
       "is_enum_flag": false,
       "dynamic_enum": "TRANSFORM_OT_resize.orient_matrix_type",
-      "context_rule": "items come from a Blender callback that depends on the context (TRANSFORM_OT_resize.orient_matrix_type); enum_items is frap's verified superset (spec/overlay/dynamic_enums.toml)",
+      "context_rule": "items depend on the context in Blender (TRANSFORM_OT_resize.orient_matrix_type); frap narrows them to the live context, enum_items is the superset",
       "hidden": true,
       "skip_save": false,
       "flags": [

@@ -226,17 +226,17 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.parent_set` | M1 | P0 | OBJECT/KEEP types M1; ARMATURE, ARMATURE_NAME, ARMATURE_ENVELOPE, BONE, BONE_RELATIVE M6 (WP 6.5); ARMATURE_AUTO (bone heat) and SUBSURF limit-surface weights M8 (WP 8.5) |
 | [x] | `object.parent_clear` | M1 | P0 |  |
 | [x] | `object.parent_no_inverse_set` | M1 | P1 |  |
-| [ ] | `object.parent_inverse_apply` | M8 | P2 | WP 8.3.5 |
+| [x] | `object.parent_inverse_apply` | M8 | P2 | WP 8.3.5 |
 | [x] | `object.origin_set` | M1 | P0 | all types |
 | [x] | `object.transform_apply` | M1 | P0 | multi-user error as Blender |
 | [x] | `object.location_clear` | M1 | P0 |  |
 | [x] | `object.rotation_clear` | M1 | P0 |  |
 | [x] | `object.scale_clear` | M1 | P0 |  |
-| [ ] | `object.origin_clear` | M8 | P2 | WP 8.3.5 |
-| [ ] | `object.visual_transform_apply` | M8 | P2 | WP 8.3.5 |
-| [ ] | `object.transforms_to_deltas` | M8 | P2 | WP 8.3.5 |
-| [ ] | `object.randomize_transform` | M8 | P2 | BliRng; WP 8.3.5 |
-| [ ] | `object.align` | M8 | P2 | WP 8.3.5 |
+| [x] | `object.origin_clear` | M8 | P2 | WP 8.3.5 |
+| [x] | `object.visual_transform_apply` | M8 | P2 | WP 8.3.5 |
+| [x] | `object.transforms_to_deltas` | M8 | P2 | WP 8.3.5 |
+| [x] | `object.randomize_transform` | M8 | P2 | CPython `random` per seed; WP 8.3.5 |
+| [x] | `object.align` | M8 | P2 | WP 8.3.5 |
 | [x] | `object.shade_smooth` | M1 | P0 | removes sharp_face |
 | [x] | `object.shade_flat` | M1 | P0 |  |
 | [x] | `object.shade_smooth_by_angle` | M1 | P0 | destructive, writes sharp_edge |
@@ -319,12 +319,12 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `object.datalayout_transfer` | M8 | P2 | WP 8.3.13 |
 | [ ] | `object.join_uvs` | M8 | P2 | WP 8.3.6 |
 | [ ] | `object.make_links_scene` | M8 | P2 | WP 8.3.6 |
-| [ ] | `object.instance_offset_from_cursor` | M8 | P2 | WP 8.3.5 |
-| [ ] | `object.instance_offset_from_object` | M8 | P2 | WP 8.3.5 |
-| [ ] | `object.instance_offset_to_cursor` | M8 | P2 | WP 8.3.5 |
-| [ ] | `object.copy_global_transform` | M8 | P2 | WP 8.3.5 |
-| [ ] | `object.copy_relative_transform` | M8 | P2 | WP 8.3.5 |
-| [ ] | `object.paste_transform` | M8 | P2 | WP 8.3.5 |
+| [x] | `object.instance_offset_from_cursor` | M8 | P2 | WP 8.3.5 |
+| [x] | `object.instance_offset_from_object` | M8 | P2 | WP 8.3.5 |
+| [x] | `object.instance_offset_to_cursor` | M8 | P2 | WP 8.3.5 |
+| [x] | `object.copy_global_transform` | M8 | P2 | WP 8.3.5; headless: no clipboard (as `-b`), the text in `result.clipboard` |
+| [x] | `object.copy_relative_transform` | M8 | P2 | WP 8.3.5; headless: no clipboard (as `-b`), the text in `result.clipboard` |
+| [x] | `object.paste_transform` | M8 | P2 | WP 8.3.5; headless: the clipboard is always empty (as `-b`): `Clipboard does not contain a matrix` |
 | [ ] | `object.unlink_data` | M8 | P2 | WP 8.3.6 |
 | [x] | `object.update_shapes` | M8 | P2 | WP 8.3.7 |
 | [ ] | `object.visual_geometry_to_objects` | M8 | P2 | WP 8.3.6 |
@@ -360,12 +360,12 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `transform.vert_crease` | M2 | P2 |  |
 | [x] | `transform.push_pull` | M2 | P2 | Edit Mode (meshes) only |
 | [x] | `transform.vertex_random` | M2 | P2 | BliRng |
-| [ ] | `transform.shear` | M8 | P2 | WP 8.3.5 |
-| [ ] | `transform.bend` | M8 | P2 | WP 8.3.5 |
-| [ ] | `transform.rotate_normal` | M8 | P2 | WP 8.3.5 |
-| [ ] | `transform.create_orientation` | M8 | P2 | WP 8.3.5 |
-| [ ] | `transform.select_orientation` | M8 | P2 | WP 8.3.5 |
-| [ ] | `transform.delete_orientation` | M8 | P2 | WP 8.3.5 |
+| [x] | `transform.shear` | M8 | P2 | WP 8.3.5 |
+| [x] | `transform.bend` | M8 | P2 | WP 8.3.5; Blender has no exec: a script call changes nothing (PASS_THROUGH) |
+| [x] | `transform.rotate_normal` | M8 | P2 | WP 8.3.5 |
+| [x] | `transform.create_orientation` | M8 | P2 | WP 8.3.5 |
+| [x] | `transform.select_orientation` | M8 | P2 | WP 8.3.5 |
+| [x] | `transform.delete_orientation` | M8 | P2 | WP 8.3.5 |
 | — | `transform.trackball` | OUT | — |  |
 | — | `transform.vertex_warp` | OUT | — |  |
 | — | `transform.skin_resize` | OUT | — |  |

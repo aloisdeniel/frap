@@ -1,0 +1,36 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.visual_transform_apply",
+  "bl_idname": "OBJECT_OT_visual_transform_apply",
+  "label": "Apply Visual Transform",
+  "description": "Apply the object's visual transformation to its data",
+  "bl_options": [
+    "REGISTER",
+    "UNDO"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "SCENE_EDITABLE"
+    ],
+    "text": "requires an editable scene",
+    "matrix": {
+      "plain": "YYYYY",
+      "view3d": "YYYYY"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T1",
+    "support": "partial",
+    "support_note": "object constraints are not implemented in frap (OUT), so the visual transform is the channels' own",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

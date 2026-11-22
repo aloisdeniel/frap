@@ -1,0 +1,36 @@
+---
+source: crates/frap-schema/tests/describe_ops.rs
+---
+{
+  "idname": "object.copy_relative_transform",
+  "bl_idname": "OBJECT_OT_copy_relative_transform",
+  "label": "Copy Relative Transform",
+  "description": "Copies the matrix of the currently active object or pose bone to the clipboard. Uses matrices relative to a specific object or the active scene camera",
+  "bl_options": [
+    "REGISTER"
+  ],
+  "kind": "NORMAL",
+  "macro_steps": [],
+  "poll": {
+    "requires": [
+      "SCENE_HAS_CAMERA",
+      "ACTIVE_OBJECT"
+    ],
+    "text": "requires scene.camera is set, an active object (bpy.context.view_layer.objects.active)",
+    "matrix": {
+      "plain": "YNYYY",
+      "view3d": "YNYYY"
+    }
+  },
+  "properties": [],
+  "frap": {
+    "status": "implemented",
+    "tier": "T0",
+    "support": "partial",
+    "support_note": "headless: nothing reaches a clipboard (as in blender -b); the copied text is in result.clipboard; tool_settings.anim_relative_object is not bound (the scene camera is the relative object)",
+    "headless": "native",
+    "planned": "M8",
+    "extension": false,
+    "notes": []
+  }
+}

@@ -5,6 +5,7 @@
 
 use frap_anim::AnimData;
 use frap_rna::*;
+use smol_str::SmolStr;
 
 use crate::context::ViewLayer;
 use crate::generated::plain::{
@@ -57,9 +58,139 @@ pub struct Scene {
     pub timeline_markers: Vec<TimelineMarker>,
     /// The glTF add-on's variant list and active variant (M7 W0; WP 7.5).
     pub gltf2_variants: SceneGltfVariants,
+    /// `scene->transform_spaces`: the custom transform orientations, in creation order
+    /// (WP 8.3.5; `transform.create_orientation`). Not bound in RNA: the
+    /// `TransformOrientation` struct is not in the RNA dump.
+    pub transform_orientations: Vec<TransformOrientation>,
+    /// `scene->orientation_slots` (`SCE_ORIENT_DEFAULT`, `_TRANSLATE`, `_ROTATE`, `_SCALE`;
+    /// WP 8.3.5). Not bound in RNA (`TransformOrientationSlot` is not in the dump either).
+    pub orientation_slots: [TransformOrientationSlot; 4],
+}
+
+/// `TransformOrientation`: a named custom orientation (`scene.transform_orientation_slots[0]
+/// .custom_orientation`).
+#[derive(Clone, Debug, PartialEq)]
+pub struct TransformOrientation {
+    /// `name` (unique among the scene's orientations, at most 63 bytes).
+    pub name: SmolStr,
+    /// `matrix`: columns are the X, Y and Z axes (`ts->mat[i]` is axis `i`).
+    pub matrix: glam::Mat3,
+}
+
+/// `TransformOrientationSlot`: `type` (a `V3D_ORIENT_*` value) and, for
+/// [`Scene::ORIENT_CUSTOM`], the index of the custom orientation.
+#[derive(Copy, Clone, Debug, PartialEq, Eq)]
+pub struct TransformOrientationSlot {
+    /// `orient_slot->type`: [`Scene::ORIENT_GLOBAL`] … [`Scene::ORIENT_PARENT`] or
+    /// [`Scene::ORIENT_CUSTOM`].
+    pub kind: i32,
+    /// `orient_slot->index_custom` (-1 unless `kind` is custom).
+    pub index_custom: i32,
+}
+
+impl Default for TransformOrientationSlot {
+    fn default() -> Self {
+        TransformOrientationSlot {
+            kind: Scene::ORIENT_GLOBAL,
+            index_custom: -1,
+        }
+    }
 }
 
 impl Scene {
+    /// `V3D_ORIENT_GLOBAL`
+    pub const ORIENT_GLOBAL: i32 = 0;
+    /// `V3D_ORIENT_PARENT` (the last built-in orientation: GLOBAL 0, LOCAL 1, NORMAL 2, VIEW 3,
+    /// GIMBAL 4, CURSOR 5, PARENT 6).
+    pub const ORIENT_PARENT: i32 = 6;
+    /// `V3D_ORIENT_CUSTOM`: custom orientation `i` has the enum value `ORIENT_CUSTOM + i`.
+    pub const ORIENT_CUSTOM: i32 = 1024;
+    /// `SCE_ORIENT_DEFAULT`, the slot transforms and the orientation operators use.
+    pub const ORIENT_SLOT_DEFAULT: usize = 0;
+
+    /// `BKE_scene_orientation_slot_get_index`: the orientation value of a slot (custom
+    /// orientations as `ORIENT_CUSTOM + index`).
+    pub fn orientation_slot_index(&self, slot: usize) -> i32 {
+        let s = &self.orientation_slots[slot];
+        if s.kind == Scene::ORIENT_CUSTOM {
+            s.kind + s.index_custom
+        } else {
+            s.kind
+        }
+    }
+
+    /// `BKE_scene_orientation_slot_set_index`.
+    pub fn orientation_slot_set_index(&mut self, slot: usize, orientation: i32) {
+        let is_custom = orientation >= Scene::ORIENT_CUSTOM;
+        let s = &mut self.orientation_slots[slot];
+        s.kind = if is_custom {
+            Scene::ORIENT_CUSTOM
+        } else {
+            orientation
+        };
+        s.index_custom = if is_custom {
+            orientation - Scene::ORIENT_CUSTOM
+        } else {
+            -1
+        };
+    }
+
+    /// `BKE_scene_transform_orientation_remove`: removes custom orientation `index`; slots that
+    /// used it fall back to GLOBAL, slots using a later one follow it down.
+    pub fn transform_orientation_remove(&mut self, index: usize) {
+        if index >= self.transform_orientations.len() {
+            return;
+        }
+        let index = index as i32;
+        for s in &mut self.orientation_slots {
+            if s.index_custom == index {
+                s.kind = Scene::ORIENT_GLOBAL;
+                s.index_custom = -1;
+            } else if s.index_custom > index {
+                s.index_custom -= 1;
+            }
+        }
+        self.transform_orientations.remove(index as usize);
+    }
+
+    /// `addMatrixSpace` (`transform_orientations.cc`): with `overwrite`, the orientation named
+    /// `name` takes the matrix (created under that name when there is none); otherwise a new
+    /// orientation gets a unique name (`name`, `name.001`, …; `uniqueOrientationName`).
+    /// Returns its index.
+    pub fn transform_orientation_add(
+        &mut self,
+        name: &str,
+        matrix: glam::Mat3,
+        overwrite: bool,
+    ) -> usize {
+        // `sizeof(TransformOrientation::name)` is 64 bytes.
+        const MAX_NAME_BYTES: usize = 63;
+        let found = overwrite
+            .then(|| {
+                self.transform_orientations
+                    .iter()
+                    .position(|t| t.name == name)
+            })
+            .flatten();
+        let index = match found {
+            Some(i) => i,
+            None => {
+                let name = if overwrite {
+                    frap_rna::naming::truncate_utf8(name, MAX_NAME_BYTES).into()
+                } else {
+                    let taken = |n: &str| self.transform_orientations.iter().any(|t| t.name == n);
+                    frap_rna::naming::unique_subname(&taken, name, MAX_NAME_BYTES, "Space")
+                };
+                self.transform_orientations.push(TransformOrientation {
+                    name,
+                    matrix: glam::Mat3::IDENTITY,
+                });
+                self.transform_orientations.len() - 1
+            }
+        };
+        self.transform_orientations[index].matrix = matrix;
+        index
+    }
     /// Whether a timeline marker of this scene binds `id` as its camera (a reference that is
     /// no user, so not in `for_each_ref`, but remapped and cleared like one; WP 7.6).
     pub fn marker_refs(&self, id: IdAny) -> bool {
@@ -123,6 +254,8 @@ impl Scene {
             animation_data: None,
             timeline_markers: Vec::new(),
             gltf2_variants: SceneGltfVariants::default(),
+            transform_orientations: Vec::new(),
+            orientation_slots: [TransformOrientationSlot::default(); 4],
         }
     }
 }
@@ -205,5 +338,41 @@ impl IdType for Scene {
     }
     fn embedded(&self) -> &'static [EmbeddedSlot] {
         &[EmbeddedSlot::MasterCollection]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use glam::Mat3;
+
+    #[test]
+    fn custom_orientations_are_named_selected_and_removed_as_blender() {
+        let mut s = Scene::new("Scene", Vec::new());
+        assert_eq!(
+            s.transform_orientation_add("Cube", Mat3::IDENTITY, false),
+            0
+        );
+        assert_eq!(
+            s.transform_orientation_add("Cube", Mat3::IDENTITY, false),
+            1
+        );
+        assert_eq!(s.transform_orientations[1].name, "Cube.001");
+        // `overwrite` reuses the orientation of that name.
+        let m = Mat3::from_rotation_z(0.5);
+        assert_eq!(s.transform_orientation_add("Cube", m, true), 0);
+        assert_eq!(s.transform_orientations[0].matrix, m);
+        assert_eq!(s.transform_orientation_add("Face", m, true), 2);
+        s.orientation_slot_set_index(Scene::ORIENT_SLOT_DEFAULT, Scene::ORIENT_CUSTOM + 2);
+        assert_eq!(s.orientation_slot_index(0), Scene::ORIENT_CUSTOM + 2);
+        // Removing an earlier orientation shifts the slot; removing its own resets it.
+        s.transform_orientation_remove(0);
+        assert_eq!(s.orientation_slot_index(0), Scene::ORIENT_CUSTOM + 1);
+        s.transform_orientation_remove(1);
+        assert_eq!(s.orientation_slot_index(0), Scene::ORIENT_GLOBAL);
+        assert_eq!(s.transform_orientations.len(), 1);
+        s.orientation_slot_set_index(0, 3);
+        assert_eq!(s.orientation_slots[0].index_custom, -1);
+        assert_eq!(s.orientation_slot_index(0), 3);
     }
 }
