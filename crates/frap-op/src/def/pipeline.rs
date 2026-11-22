@@ -605,6 +605,8 @@ pub const MACRO_STEP_FORCED: &[(&str, &str, &str, bool)] = &[
     ("MESH_OT_extrude_edges_move", "TRANSFORM_OT_translate", "mirror", false),
     ("MESH_OT_extrude_vertices_move", "TRANSFORM_OT_translate", "use_proportional_edit", false),
     ("MESH_OT_extrude_vertices_move", "TRANSFORM_OT_translate", "mirror", false),
+    // `ED_operatormacros_armature` (editors/armature/armature_ops.cc, WP 8.3.10).
+    ("ARMATURE_OT_extrude_forked", "ARMATURE_OT_extrude", "forked", true),
 ];
 
 /// The boolean step properties `macro` forces on `step` ([`MACRO_STEP_FORCED`]).

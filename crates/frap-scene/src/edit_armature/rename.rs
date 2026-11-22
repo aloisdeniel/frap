@@ -15,8 +15,37 @@ use std::sync::Arc;
 use frap_rna::{ArmatureId, IdRef, MeshId, ObjectId, Report, ReportType};
 use smol_str::SmolStr;
 
-use crate::Host;
 use crate::generated::modifier_settings::ModifierSettings;
+use crate::{ChangeLog, EditState, Host, Main};
+
+/// What a bone rename touches: `bpy.data`, the edit state and the report channel. Implemented
+/// for every [`Host`] (the RNA setters) and by the operators' own adapter over their context
+/// (`armature.flip_names`, `armature.autoside_names`, WP 8.3.10).
+pub trait RenameHost {
+    /// `bpy.data`.
+    fn rename_main(&self) -> &Main;
+    /// `bpy.data` and the change log.
+    fn rename_main_mut(&mut self) -> (&mut Main, &mut ChangeLog);
+    /// The edit state (edit bones of armatures in Edit Mode).
+    fn rename_edit_mut(&mut self) -> &mut EditState;
+    /// Adds a report (the vertex-group collision WARNING).
+    fn rename_report(&mut self, r: Report);
+}
+
+impl RenameHost for dyn Host + '_ {
+    fn rename_main(&self) -> &Main {
+        self.main()
+    }
+    fn rename_main_mut(&mut self) -> (&mut Main, &mut ChangeLog) {
+        self.main_mut()
+    }
+    fn rename_edit_mut(&mut self) -> &mut EditState {
+        self.edit_mut()
+    }
+    fn rename_report(&mut self, r: Report) {
+        self.report(r);
+    }
+}
 
 /// An object a bone rename may touch: `(object, uses the armature, bone-parented to the
 /// renamed bone, deformed by the armature, its mesh)`.
@@ -30,19 +59,29 @@ pub fn rename_bone(
     old: &str,
     new: &str,
 ) -> Option<SmolStr> {
+    rename_bone_in(h, arm, old, new)
+}
+
+/// [`rename_bone`] over any [`RenameHost`].
+pub fn rename_bone_in<H: RenameHost + ?Sized>(
+    h: &mut H,
+    arm: IdRef<ArmatureId>,
+    old: &str,
+    new: &str,
+) -> Option<SmolStr> {
     let new = frap_rna::naming::truncate_utf8(new, super::names::MAX_BONE_NAME);
     if old == new {
         return None;
     }
     let key = arm.key();
-    let name: SmolStr = if let Some(ea) = h.edit_mut().armatures.get_mut(&key) {
+    let name: SmolStr = if let Some(ea) = h.rename_edit_mut().armatures.get_mut(&key) {
         let ea = Arc::make_mut(ea);
         let i = ea.find(old)?;
         let unique = ea.unique_name(new, None);
         ea.edit_bones[i].name = unique.clone();
         unique
     } else {
-        let a = h.main().armatures.get(arm)?;
+        let a = h.rename_main().armatures.get(arm)?;
         let i = a.bone_index(old)?;
         let unique = frap_rna::naming::unique_subname(
             &|n| a.bones.iter().any(|b| b.name == n),
@@ -50,12 +89,12 @@ pub fn rename_bone(
             super::names::MAX_BONE_NAME,
             "Bone",
         );
-        let (main, log) = h.main_mut();
+        let (main, log) = h.rename_main_mut();
         main.armatures.get_mut(arm, log)?.bones[i].name = unique.clone();
         unique
     };
     let objects: Vec<Affected> = {
-        let main = h.main();
+        let main = h.rename_main();
         main.objects
             .iter()
             .map(|(r, o)| {
@@ -81,7 +120,7 @@ pub fn rename_bone(
     };
     for (ob, uses, parented, deformed, mesh) in objects {
         if uses || parented {
-            let (main, log) = h.main_mut();
+            let (main, log) = h.rename_main_mut();
             if let Some(o) = main.objects.get_mut(ob, log) {
                 if uses && let Some(pb) = o.pose.as_mut().and_then(|p| p.bone_mut(old)) {
                     pb.name = name.clone();
@@ -93,7 +132,7 @@ pub fn rename_bone(
         }
         if deformed && let Some(me) = mesh {
             let (collides, has_old, ob_name) = {
-                let main = h.main();
+                let main = h.rename_main();
                 let m = main.meshes.get(me);
                 (
                     m.is_some_and(|m| m.vertex_group_names.contains(&name)),
@@ -105,14 +144,14 @@ pub fn rename_bone(
                 )
             };
             if collides {
-                h.report(Report::new(
+                h.rename_report(Report::new(
                     ReportType::Warning,
                     format!(
                         "New bone name collides with an existing vertex group name, vertex group names are unchanged. ({ob_name}::{name})"
                     ),
                 ));
             } else if has_old {
-                let (main, log) = h.main_mut();
+                let (main, log) = h.rename_main_mut();
                 if let Some(m) = main.meshes.get_mut(me, log) {
                     for g in &mut m.vertex_group_names {
                         if g == old {

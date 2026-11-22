@@ -60,7 +60,7 @@ fn manifest_selected_operators() {
     frap_ops_all::link();
     for idname in [
         "object.track_set",
-        "armature.extrude_forked",
+        "anim.keying_set_active_set",
         "object.voxel_remesh",
         "mesh.select_similar",
     ] {
