@@ -15,7 +15,7 @@
 //!   selected;
 //! - nothing to compare (no data, no material in the active slot, no instanced collection; and
 //!   `PARTICLE` always: frap has no particle systems) or nothing newly selected → `CANCELLED`,
-//!   which frap rolls back (Blender keeps the deselect, D-151).
+//!   which frap rolls back (Blender keeps the deselect, D-155).
 
 use frap_op::operator;
 use frap_op::prelude::*;

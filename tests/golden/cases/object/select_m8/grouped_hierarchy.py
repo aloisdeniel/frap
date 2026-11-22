@@ -1,4 +1,4 @@
-# WP 8.3.4: object.select_grouped (headless-extended, D-150: Blender's poll refuses background
+# WP 8.3.4: object.select_grouped (headless-extended, D-154: Blender's poll refuses background
 # mode, so Blender runs a #@blender transcription of object_select.cc) with CHILDREN_RECURSIVE,
 # CHILDREN, PARENT (extend: the parent becomes active) and SIBLINGS, on Cube → (A → (A1 → A11,
 # A2), B). Each step's selection is recorded by a transform clear of the selected objects

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.object.select_grouped(extend=False, type='CHILDREN_RECURSIVE')`, tier T0,
-//! *headless-extended* (deviations D-150; `tests/golden/cases/object/select_m8/grouped_*.py`).
+//! *headless-extended* (deviations D-154; `tests/golden/cases/object/select_m8/grouped_*.py`).
 //! Ported from blender/source/blender/editors/object/object_select.cc
 //! (`object_select_grouped_exec` and the `select_grouped_*` helpers, Blender 5.2.4,
 //! GPL-2.0-or-later).
@@ -27,7 +27,7 @@
 //!   "Keying, frames, NLA" row of deviations §2, WP 6.4), so there is never an active one:
 //!   `RuntimeError: Error: No active Keying Set to use`;
 //! - `FINISHED` when anything changed (the deselect included), else `CANCELLED`. A statement
-//!   that ends in an error or `CANCELLED` is rolled back (Blender keeps the deselect, D-150).
+//!   that ends in an error or `CANCELLED` is rolled back (Blender keeps the deselect, D-155).
 
 use frap_op::operator;
 use frap_op::prelude::*;
@@ -187,7 +187,7 @@ fn same_color(a: &[f32; 4], b: &[f32; 4]) -> bool {
     poll = SELECTABLE,
     tier = T0,
     notes = [
-        "headless-extended (D-150): Blender's poll fails in background mode; frap runs the exec with objects_selectable_poll",
+        "headless-extended (D-154): Blender's poll fails in background mode; frap runs the exec with objects_selectable_poll",
         "COLLECTION with several collections holding the active object only deselects and warns (Blender opens a menu)",
         "KEYINGSET always fails: keying sets are not bound (No active Keying Set to use)",
     ]

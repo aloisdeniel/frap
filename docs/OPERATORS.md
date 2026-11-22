@@ -199,7 +199,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [x] | `object.select_all` | M1 | P0 | prereq (WP 1.19) |
 | [x] | `object.select_by_type` | M1 | P1 |  |
 | [x] | `object.select_pattern` | M1 | P1 |  |
-| [x] | `object.select_grouped` | M8 | P2 | headless-extended (D-150): Blender's poll refuses background mode, frap runs the exec; KEYINGSET always fails (keying sets are not bound); WP 8.3.4 |
+| [x] | `object.select_grouped` | M8 | P2 | headless-extended (D-154): Blender's poll refuses background mode, frap runs the exec; KEYINGSET always fails (keying sets are not bound); WP 8.3.4 |
 | [x] | `object.select_hierarchy` | M8 | P2 | WP 8.3.4 |
 | [x] | `object.select_linked` | M8 | P2 | WP 8.3.4 |
 | [x] | `object.select_random` | M8 | P2 | WP 8.3.4 |
@@ -314,7 +314,7 @@ Rules: (1) an operator assigned to a milestone but not named in a WP file list o
 | [ ] | `object.track_set` | M9 | P2 | post-M8 (M8 W0, M8W0-3): adds a Track To / Damped Track / Locked Track constraint, and constraints are OUT (rule 3) |
 | [ ] | `object.track_clear` | M9 | P2 | post-M8 (M8 W0, M8W0-3): removes tracking constraints (constraints OUT) |
 | [x] | `object.hide_collection` | M8 | P2 | WP 8.3.4 |
-| [x] | `object.collection_objects_select` | M8 | P2 | headless-extended (D-150): runs on the active collection, as from the Outliner; WP 8.3.4 |
+| [x] | `object.collection_objects_select` | M8 | P2 | headless-extended (D-154): runs on the active collection, as from the Outliner; WP 8.3.4 |
 | [ ] | `object.data_transfer` | M8 | P2 | WP 8.3.13 |
 | [ ] | `object.datalayout_transfer` | M8 | P2 | WP 8.3.13 |
 | [ ] | `object.join_uvs` | M8 | P2 | WP 8.3.6 |

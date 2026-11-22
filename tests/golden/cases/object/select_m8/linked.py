@@ -4,7 +4,7 @@
 # visible object, those with data), extend; nothing to compare (PARTICLE, no data, no material,
 # no instanced collection) cancels; no active object is an error. Each step's selection is
 # recorded by a transform clear or a translation of the selected objects. (A cancelled call is
-# only made with nothing selected: Blender keeps its deselect, frap rolls back, D-151.)
+# only made with nothing selected: Blender keeps its deselect, frap rolls back, D-155.)
 # golden: startup=factory compare=objects,context tier=T0
 import bpy
 bpy.ops.object.duplicate(linked=True)

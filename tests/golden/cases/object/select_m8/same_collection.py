@@ -1,7 +1,7 @@
 # WP 8.3.4: object.select_same_collection selects the visible, selectable objects directly in the
 # named collection (not its children), keeping the selection; an unknown name or no visible
 # object passes through (frap: FINISHED, nothing changes). object.collection_objects_select
-# (headless-extended, D-150: Blender needs the Outliner's collection context, given by a
+# (headless-extended, D-154: Blender needs the Outliner's collection context, given by a
 # #@blender temp_override) selects the objects of the active collection and of its children.
 # Each step's selection is recorded by a translation.
 # golden: startup=factory compare=objects,context tier=T0

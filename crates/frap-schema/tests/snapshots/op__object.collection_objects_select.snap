@@ -33,7 +33,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "planned": "M8",
     "extension": false,
     "notes": [
-      "headless-extended (D-150): runs on the active collection, as Blender does from the Outliner (a 3D View has no collection context and cancels)"
+      "headless-extended (D-154): runs on the active collection, as Blender does from the Outliner (a 3D View has no collection context and cancels)"
     ]
   }
 }

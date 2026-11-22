@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 //! `bpy.ops.object.collection_objects_select()`, tier T0, *headless-extended* (deviations
-//! D-150; `tests/golden/cases/object/select_m8/collection_objects*.py`). Ported from
+//! D-154; `tests/golden/cases/object/select_m8/collection_objects*.py`). Ported from
 //! blender/source/blender/editors/object/object_collection.cc (`select_grouped_exec`), Blender
 //! 5.2.4, GPL-2.0-or-later.
 //!
@@ -52,7 +52,7 @@ fn recursive_objects(
 #[operator(
     poll = poll::OBJECTMODE,
     tier = T0,
-    notes = ["headless-extended (D-150): runs on the active collection, as Blender does from the Outliner (a 3D View has no collection context and cancels)"]
+    notes = ["headless-extended (D-154): runs on the active collection, as Blender does from the Outliner (a 3D View has no collection context and cancels)"]
 )]
 fn exec(cx: &mut OpCtx, _p: object::CollectionObjectsSelect) -> OpResult {
     let objects = {

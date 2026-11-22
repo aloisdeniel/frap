@@ -142,7 +142,7 @@ source: crates/frap-schema/tests/describe_ops.rs
     "planned": "M8",
     "extension": false,
     "notes": [
-      "headless-extended (D-150): Blender's poll fails in background mode; frap runs the exec with objects_selectable_poll",
+      "headless-extended (D-154): Blender's poll fails in background mode; frap runs the exec with objects_selectable_poll",
       "COLLECTION with several collections holding the active object only deselects and warns (Blender opens a menu)",
       "KEYINGSET always fails: keying sets are not bound (No active Keying Set to use)"
     ]

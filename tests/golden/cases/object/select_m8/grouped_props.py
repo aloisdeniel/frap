@@ -1,4 +1,4 @@
-# WP 8.3.4: object.select_grouped (headless-extended, D-150; Blender runs a #@blender
+# WP 8.3.4: object.select_grouped (headless-extended, D-154; Blender runs a #@blender
 # transcription of object_select.cc) with LIGHT_TYPE (point lights), PASS (pass_index), COLOR
 # (every RGB channel within 0.005), TYPE (extend), COLLECTION (the one collection holding the
 # active object; none when it is only in the scene collection), HOOK (no Hook modifier: only the

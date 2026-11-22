@@ -1,4 +1,4 @@
-# WP 8.3.4: what frap answers where Blender -b cannot be compared (deviations D-150, D-151):
+# WP 8.3.4: what frap answers where Blender -b cannot be compared (deviations D-154, D-155):
 # object.select_grouped is headless-extended (its poll passes, Blender's fails in background
 # mode); KEYINGSET always fails (no keying sets are bound), LIGHT_TYPE needs a light, a
 # statement without a change cancels with a WARNING; COLLECTION with an active object in two

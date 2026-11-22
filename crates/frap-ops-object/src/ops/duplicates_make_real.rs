@@ -25,7 +25,7 @@
 //!   `matrix_parent_inverse` kept; a parented copy keeps its world matrix;
 //! - the instancer loses `instance_collection` and its instancing (`instance_type` `NONE`)
 //!   and is deselected; the active object does not change; always `FINISHED`;
-//! - Blender does not decrement the collection's user count for the instancer (D-152), frap
+//! - Blender does not decrement the collection's user count for the instancer (D-156), frap
 //!   counts users from the references; instancing on vertices or faces of a mesh with
 //!   children (`instance_type` `VERTS` / `FACES`) answers `NotImplementedError`.
 
